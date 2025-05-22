@@ -1,0 +1,10 @@
+{
+    "exclude": [
+        "venv",
+        "**/venv",
+        "site-packages",
+        "**/site-packages",
+        "pip/_vendor",
+        "**/pip/_vendor"
+    ]
+}

@@ -20,6 +20,11 @@ _MONTH_DAY_RX = re.compile(
 
 _SLASH_RX = re.compile(r"\b(?P<month>\d{1,2})/(?P<day>\d{1,2})(?:/(?P<year>\d{4}))?")
 
+# Accept: "6 Oct 2021", "(6 Oct 2021)", " 10 Sep 2022 "
+_DAY_MONTH_YEAR_RX = re.compile(
+    r"\(?\s*(?P<day>\d{1,2})\s+(?P<month>\w{3,9})\.?,?\s+(?P<year>\d{4})\s*\)?"
+)
+
 # ------------------------------------------------------------------ #
 # Helper to safely build a date                                      #
 # ------------------------------------------------------------------ #
@@ -67,6 +72,16 @@ def parse_thread_date(title: str, year_hint: int) -> Optional[_date]:
         if not (1 <= month_num <= 12 and 1 <= day <= 31):
             return None
         year = int(m.group("year")) if m.group("year") else year_hint
+        return _build_date(day, month_num, year)
+
+    # -------- day month year, parens optional, year required ------------ #
+    if m := _DAY_MONTH_YEAR_RX.search(title_l):
+        day = int(m.group("day"))
+        month_token = m.group("month").lower().rstrip(".")
+        month_num = _MONTH_LOOKUP.get(month_token)
+        if not month_num or not (1 <= day <= 31):
+            return None
+        year = int(m.group("year"))
         return _build_date(day, month_num, year)
 
     return None
