@@ -8,8 +8,9 @@ This specification defines the structure, configuration, and operational behavio
 - Python version: **3.11.8**
 - Type checking: **Pyright** (`typeCheckingMode: "standard"`)
 - Code formatting: **Black**
-- Linting: **Ruff**
+- Linting: **Ruff**v
 - Testing: **Pytest + Pytest-Cov**
+- Credentials: **praw.ini** (section name set via SOTD_REDDIT_SITE, default "sotd_bot")
 
 ### 🌍 Directory Layout
 ```plaintext
@@ -70,10 +71,12 @@ target-version = ["py311"]
 
 [tool.ruff]
 line-length = 100
-select = ["E", "F", "I"]
-exclude = ["data", "tests"]
+exclude = ["data", "tests", ".venv", "venv"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 ```
 
@@ -82,6 +85,7 @@ exclude = ["data", "tests"]
 __pycache__/
 *.pyc
 venv/
+.venv/
 .env/
 .vscode/
 .coverage
@@ -92,14 +96,19 @@ data/
 
 ### 📂 Makefile
 ```makefile
-.PHONY: all lint format typecheck test coverage fetch
+.PHONY: all lint format ruff-format typecheck test coverage fetch
 
 all: lint format typecheck test
 
+# Ruff linting
 lint:
-	ruff .
+	ruff check .
 
-format:
+# Ruff auto‑formatter then Black
+ruff-format:
+	ruff format .
+
+format: ruff-format
 	black .
 
 typecheck:
@@ -112,7 +121,7 @@ coverage:
 	pytest --cov=sotd --cov-report=term-missing tests/
 
 fetch:
-	python sotd/fetch/run.py --month 2025-05
+	python -m sotd.fetch.run --month 2025-05 --debug
 ```
 
 ---
