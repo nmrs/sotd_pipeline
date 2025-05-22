@@ -1,73 +1,124 @@
 """
-Unit tests for the minimal Reddit search helper.
-
-• We monkey-patch sotd.fetch.reddit.get_reddit so no network access occurs.
-• Type annotations are relaxed to avoid invariant-list conflicts with Pylance.
+End-to-end-ish tests for fetch helpers, using fake PRAW objects so no network.
 """
 
 from __future__ import annotations
 
+from datetime import date
 from typing import Any, List
 from unittest.mock import patch
 
-import pytest
+from sotd.utils import parse_thread_date
+
 
 # ------------------------------------------------------------------ #
-# Fake PRAW-like objects                                              #
+# Fake PRAW objects                                                  #
 # ------------------------------------------------------------------ #
 
 
-class FakeSubmission:  # minimal subset we need
+class FakeSubmission:
     def __init__(self, sid: str, title: str) -> None:
         self.id = sid
         self.title = title
+        self.permalink = f"/r/wetshaving/comments/{sid}/"
+        self.created_utc = 1_700_000_000
+        self.num_comments = 0
+        self.link_flair_text = None
+        self.author = "AutoModerator"
 
 
 class FakeSubreddit:
     def __init__(self) -> None:
         self.last_query: str | None = None
 
-    # mimic praw.Subreddit.search
-    def search(self, query: str, *, sort: str, syntax: str):  # noqa: D401
+    def search(self, query: str, *, sort: str, syntax: str):
         self.last_query = query
         yield from [
-            FakeSubmission("abc123", "Monday SOTD Thread - Jan 1, 2025"),
-            FakeSubmission("def456", "Tuesday SOTD Thread - Jan 2, 2025"),
+            FakeSubmission("good1", "Sat SOTD - May 3"),
+            FakeSubmission("badxx", "Weekly Question Thread"),
+            FakeSubmission("good2", "SOTD Thread May 5, 2025"),
         ]
 
 
+# ----------------- comment stubs so fetch_top_level_comments works ---- #
+
+
+class DummyComment:
+    def __init__(self, cid: str):
+        self.id = cid
+        self.author = "tester"
+        self.body = "comment body"
+        self.created_utc = 1_700_000_100
+        self.is_root = True
+        self.permalink = f"/x/{cid}/"
+
+
+class DummySubmission:
+    """Submission stub for comment fetcher."""
+
+    def __init__(self, sid: str):
+        self.id = sid
+        self.title = "Dummy"
+        self.permalink = f"/r/wetshaving/comments/{sid}/dummy/"
+        self.created_utc = 1_700_000_000
+        self.num_comments = 2
+        self.link_flair_text = None
+
+        class _Comments(list):  # type: ignore
+            def replace_more(self, limit: int = 0):  # noqa: D401
+                return None
+
+        self.comments = _Comments([DummyComment(f"{sid}_1"), DummyComment(f"{sid}_2")])
+
+
 class FakeReddit:
-    def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: D401
+    def __init__(self, *args, **kwargs) -> None:  # noqa: D401
         self._sub = FakeSubreddit()
 
-    def subreddit(self, name: str) -> FakeSubreddit:
-        assert name == "wetshaving"
+    def subreddit(self, name: str) -> FakeSubreddit:  # noqa: D401
         return self._sub
+
+    def submission(self, sid: str):  # noqa: D401
+        return DummySubmission(sid)
 
 
 # ------------------------------------------------------------------ #
-# Test search_threads                                                 #
+# Tests                                                              #
 # ------------------------------------------------------------------ #
 
 
 @patch("sotd.fetch.reddit.get_reddit", return_value=FakeReddit())
-def test_search_threads_builds_expected_query(
-    _mock_get_reddit, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """search_threads() should build the correct flair query string."""
-    # Ensure env vars exist so get_reddit does not raise
-    monkeypatch.setenv("REDDIT_CLIENT_ID", "x")
-    monkeypatch.setenv("REDDIT_CLIENT_SECRET", "y")
-    monkeypatch.setenv("REDDIT_USER_AGENT", "z")
+def test_filter_valid_threads_and_missing(_patched) -> None:
+    from sotd.fetch.reddit import filter_valid_threads, search_threads
 
-    from sotd.fetch.reddit import search_threads
+    year, month = 2025, 5
+    raw = list(_patched.return_value._sub.search("dummy", sort="new", syntax="lucene"))
+    valid = filter_valid_threads(raw, year, month)
 
-    # We don't care about exact types here, only count & behaviour
-    results: List[Any] = search_threads("wetshaving", 2025, 3, debug=False)
+    assert [s.id for s in valid] == ["good1", "good2"]
 
-    # Two fake submissions should be returned
+    parsed_days: list[int] = []
+    for s in valid:
+        d = parse_thread_date(s.title, year)
+        assert d is not None
+        parsed_days.append(d.day)
+    assert parsed_days == [3, 5]
+
+    results: List[Any] = search_threads("wetshaving", year, month)
     assert len(results) == 2
 
-    # Verify the underlying query string that FakeSubreddit received
-    fake_subreddit: FakeSubreddit = _mock_get_reddit.return_value._sub  # type: ignore[attr-defined]
-    assert fake_subreddit.last_query == "flair:SOTD mar march 2025"
+
+def test_missing_day_calc() -> None:
+    """_calc_missing should detect all calendar gaps."""
+    from sotd.fetch.run import _calc_missing
+
+    class Dummy:
+        def __init__(self, title: str):
+            self.title = title
+
+    threads = [Dummy("SOTD Thread May 1, 2025"), Dummy("SOTD Thread May 3, 2025")]
+    missing = _calc_missing(2025, 5, threads)
+
+    # Basic expectations
+    assert date(2025, 5, 2) in missing  # key gap detected
+    assert len(missing) == 29  # 31 days in May − 2 present

@@ -1,38 +1,66 @@
 """
-Reddit API helper utilities for the SOTD pipeline.
+Reddit interface utilities for the SOTD pipeline.
 
-Only authentication and basic thread search live here; higher-level
-filtering is implemented elsewhere.
+• Auth uses `praw.ini` default section.
+• Search helpers parse titles → calendar dates.
+• Comment fetcher returns only top-level comments.
 """
 
 from __future__ import annotations
 
 import calendar
-import os
-from typing import List
+from typing import List, Tuple
 
 import praw
-from praw.models import Submission
+from praw.models import Comment, Submission
 
-ENV_VARS = ("REDDIT_CLIENT_ID", "REDDIT_CLIENT_SECRET", "REDDIT_USER_AGENT")
+from sotd.utils import parse_thread_date
 
-
-def _require_env(var: str) -> str:
-    """Return the value of *var* or raise a helpful error."""
-    try:
-        return os.environ[var]
-    except KeyError as exc:  # pragma: no cover
-        missing = ", ".join(ENV_VARS)
-        raise RuntimeError(f"Missing Reddit creds.  Set env vars: {missing}") from exc
+# ------------------------------------------------------------------ #
+# Authentication                                                     #
+# ------------------------------------------------------------------ #
 
 
 def get_reddit() -> praw.Reddit:  # noqa: D401
-    """Return an authenticated :class:`praw.Reddit` instance."""
-    return praw.Reddit(
-        client_id=_require_env("REDDIT_CLIENT_ID"),
-        client_secret=_require_env("REDDIT_CLIENT_SECRET"),
-        user_agent=_require_env("REDDIT_USER_AGENT"),
-    )
+    """Return a PRAW instance (reads default section from praw.ini)."""
+    return praw.Reddit()
+
+
+# ------------------------------------------------------------------ #
+# Search & filter helpers                                            #
+# ------------------------------------------------------------------ #
+
+
+def _build_query(year: int, month: int) -> str:
+    short = calendar.month_abbr[month].lower()
+    long = calendar.month_name[month].lower()
+    return f"flair:SOTD {short} {long} {year}"
+
+
+def filter_valid_threads(
+    threads: List[Submission],
+    year: int,
+    month: int,
+    *,
+    debug: bool = False,
+) -> List[Submission]:
+    """
+    Return only submissions whose title parses to a date in *year*-*month*,
+    sorted by that date ascending.
+    """
+    valid_pairs: list[Tuple] = []
+
+    for sub in threads:
+        dt = parse_thread_date(sub.title, year)
+        if dt and dt.year == year and dt.month == month:
+            valid_pairs.append((dt, sub))
+        elif debug:
+            reason = "no-date" if dt is None else "wrong-month"
+            print(f"[DEBUG] Skip ({reason}) {sub.title}")
+
+    # Sort by parsed date; dt is guaranteed non-None here
+    valid_pairs.sort(key=lambda tup: tup[0])
+    return [sub for _, sub in valid_pairs]
 
 
 def search_threads(
@@ -42,25 +70,29 @@ def search_threads(
     *,
     debug: bool = False,
 ) -> List[Submission]:
-    """
-    Query *subreddit* for SOTD threads in *month* / *year*.
-
-    This is a **loose** search that relies on flair:SOTD plus both the
-    short and long month names. Down-stream filters will refine results.
-    """
-    short = calendar.month_abbr[month].lower()  # e.g. "mar"
-    long = calendar.month_name[month].lower()  # e.g. "march"
-    query = f"flair:SOTD {short} {long} {year}"
-
     reddit = get_reddit()
     sub = reddit.subreddit(subreddit)
-
+    query = _build_query(year, month)
+    raw = list(sub.search(query, sort="new", syntax="lucene"))
     if debug:
-        print(f"[DEBUG] PRAW search query -> '{query}'")
-
-    results: List[Submission] = list(sub.search(query, sort="new", syntax="lucene"))
-
+        print(f"[DEBUG] PRAW raw results: {len(raw)}")
+    valids = filter_valid_threads(raw, year, month, debug=debug)
     if debug:
-        print(f"[DEBUG] PRAW returned {len(results)} results")
+        print(f"[DEBUG] Valid threads:     {len(valids)}")
+    return valids
 
-    return results
+
+# ------------------------------------------------------------------ #
+# Comment fetcher                                                    #
+# ------------------------------------------------------------------ #
+
+
+def fetch_top_level_comments(submission: Submission) -> list[Comment]:
+    """
+    Return a list of top-level comments for *submission*.
+
+    • Skips :class:`praw.models.MoreComments`
+    • Ensures `Comment.is_root` is True
+    """
+    submission.comments.replace_more(limit=0)
+    return [c for c in submission.comments.list() if isinstance(c, Comment) and c.is_root]
