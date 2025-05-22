@@ -1,5 +1,17 @@
 # 🧸 SOTD Pipeline Specification
 
+## 🛠️ Pipeline Structure Overview
+
+The SOTD Fetcher is built as a multi-phase data pipeline designed to extract, normalize, and analyze r/wetshaving content from Reddit. It is structured as follows:
+
+1. **Fetching**: Extract relevant threads and comments from Reddit using PRAW. Cache locally as JSON.
+2. **Extraction**: Parse and extract key product references (e.g. Razor, Blade, Brush, Soap) from the downloaded comment bodies. Save extracted records to local JSON files.
+3. **Matching**: Match extracted product mentions against known item catalogs to normalize names (e.g. "Karve CB" → "Karve Christopher Bradley"). Save match results locally.
+4. **Aggregation**: Aggregate the normalized product data for reporting by brand, model, and other categories. Save aggregation summaries for reporting.
+5. **Report Generation**: Generate final human-readable summaries for publishing on r/wetshaving. Archive reports locally for traceability.
+
+Additional steps may be introduced as the project evolves.
+
 This specification defines the structure, configuration, and operational behavior of the Shave of the Day (SOTD) pipeline for extracting, normalizing, and reporting shaving-related content from Reddit's r/wetshaving community.
 
 ## Phase 0: Project Setup

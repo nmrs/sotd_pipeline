@@ -24,7 +24,7 @@ import praw
 from praw.models import Submission
 from prawcore.exceptions import NotFound
 
-from sotd.fetch.reddit import filter_valid_threads
+from sotd.fetch.reddit import filter_valid_threads, safe_call
 
 OVERRIDE_PATH = Path("overrides/sotd_thread_overrides.json")
 
@@ -83,7 +83,7 @@ def apply_overrides(
         if tid in present_ids:
             continue
         try:
-            kept.append(reddit.submission(id=tid))
+            kept.append(safe_call(reddit.submission, id=tid))
             present_ids.add(tid)
             if debug:
                 print(f"[DEBUG] Override include added {tid}")
