@@ -17,7 +17,7 @@ typecheck:
 	pyright
 
 test:
-	pytest tests/
+	PYTHONPATH=. pytest tests/
 
 coverage:
 	pytest --cov=sotd --cov-report=term-missing tests/

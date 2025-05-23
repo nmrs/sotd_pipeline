@@ -4,11 +4,83 @@
 
 The SOTD Fetcher is built as a multi-phase data pipeline designed to extract, normalize, and analyze r/wetshaving content from Reddit. It is structured as follows:
 
-1. **Fetching**: Extract relevant threads and comments from Reddit using PRAW. Cache locally as JSON.
-2. **Extraction**: Parse and extract key product references (e.g. Razor, Blade, Brush, Soap) from the downloaded comment bodies. Save extracted records to local JSON files.
-3. **Matching**: Match extracted product mentions against known item catalogs to normalize names (e.g. "Karve CB" → "Karve Christopher Bradley"). Save match results locally.
-4. **Aggregation**: Aggregate the normalized product data for reporting by brand, model, and other categories. Save aggregation summaries for reporting.
-5. **Report Generation**: Generate final human-readable summaries for publishing on r/wetshaving. Archive reports locally for traceability.
+This pipeline extracts, processes, and summarizes Shave of the Day (SOTD) content from Reddit. Each step writes its output to disk, allowing easy reruns of individual phases and inspection of intermediate results.
+
+---
+
+## 1. **Fetching**
+Extract relevant threads and top-level comments from Reddit using PRAW. Save raw Reddit data locally:
+
+- `data/threads/YYYY-MM.json`
+- `data/comments/YYYY-MM.json`
+
+Each file includes metadata (e.g., extraction time, thread/comment counts) and raw Reddit content.
+
+---
+
+## 2. **Extraction**
+Parse downloaded comment bodies to identify product mentions:
+
+- `razor`
+- `blade`
+- `brush`
+- `soap`
+
+Convert each comment into a structured "shave" record. Save to:
+
+- `data/extracted/YYYY-MM.json`
+
+Fields include metadata (`id`, `author`, `created_utc`, etc.) and raw extracted values.
+
+---
+
+## 3. **Field Metadata Enrichment**
+Analyze extracted field values to identify structured metadata, such as:
+
+- Blade usage count (e.g., `Astra SP (3)`)
+- Brush fiber type (e.g., `Synthetic`)
+- Knot size (e.g., `24mm`)
+
+Append enriched metadata to shave records. Save to:
+
+- `data/enriched/YYYY-MM.json`
+
+---
+
+## 4. **Matching**
+Match extracted product names to known item catalogs to normalize naming:
+
+- `Karve CB` → `Karve Christopher Bradley`
+- `RR GC .84` → `RazoRock Game Changer 0.84`
+
+Track original values, match results, and confidence levels. Save to:
+
+- `data/matched/YYYY-MM.json`
+
+---
+
+## 5. **Aggregation**
+Summarize matched product data for downstream reporting:
+
+- Usage counts by brand/model
+- Most-used products
+- Trends over time
+
+Save aggregate summaries to:
+
+- `data/aggregated/YYYY-MM.json`
+
+---
+
+## 6. **Report Generation**
+Generate human-readable summaries for publication on r/wetshaving. Include product rankings, trends, and commentary excerpts. Save reports to:
+
+- `reports/YYYY-MM.md`
+- `reports/YYYY-MM-assets/`
+
+---
+
+Each step is isolated and writes its output to disk, enabling traceable processing and modular development.
 
 Additional steps may be introduced as the project evolves.
 
@@ -240,6 +312,19 @@ Fetches SOTD threads and top-level comments from r/wetshaving for a specified mo
   ```
 - Use `--debug` to log skipped threads/comments and reasons
 
+
 ---
 
-Next phase: **Extraction** (parsing Razor, Blade, Soap, etc. from comment body)
+## 📌 Version History
+
+### v1.0 – Initial MVP Extraction Pipeline (2025-05-23)
+This version marks the completion of the minimal viable product for the Extraction phase of the SOTD pipeline.
+
+**Highlights:**
+- Added field extractors for `razor`, `blade`, `brush`, and `soap`, using strict markdown pattern: `* **Field:** Value`
+- Implemented comment-level parsing to generate structured shave records
+- Batched extraction per month from `data/comments/YYYY-MM.json`
+- Generated enriched metadata including field coverage and record counts
+- Saved outputs to `data/extracted/YYYY-MM.json` with meta, data, and skipped sections
+- Built CLI entry point with `--month` and `--debug` options
+- Added full unit test coverage and CLI integration test
