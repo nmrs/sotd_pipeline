@@ -1,6 +1,5 @@
-from typing import Optional
-from re import escape
 import re
+from typing import Optional
 
 
 def extract_razor_line(line: str) -> Optional[str]:

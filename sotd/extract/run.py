@@ -1,6 +1,9 @@
+import argparse
 import json
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
+
 from sotd.extract.comment import parse_comment
 
 
@@ -42,7 +45,6 @@ def run_extraction_for_month(month: str) -> dict[str, Any]:
 
 
 # New function to save extraction result to disk
-from pathlib import Path
 
 
 def save_extraction_result(
@@ -52,9 +54,6 @@ def save_extraction_result(
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w") as f:
         json.dump(result, f, indent=2)
-
-
-import argparse
 
 
 def main():
@@ -68,9 +67,9 @@ def main():
 
     meta = result["meta"]
     print(
-        f"[INFO] Extracted {meta.get('shave_count', 0)} shaves from {meta.get('comment_count', 0)} comments ({meta.get('month')})"
+        f"[INFO] Extracted {meta.get('shave_count', 0)} shaves from "
+        f"{meta.get('comment_count', 0)} comments ({meta.get('month')})"
     )
-
     if args.debug:
         print(f"[DEBUG] Skipped count: {meta.get('skipped_count', 0)}")
 
