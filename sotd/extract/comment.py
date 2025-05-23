@@ -1,8 +1,9 @@
 from typing import Optional
+
 from sotd.extract.fields import (
-    extract_razor_line,
     extract_blade_line,
     extract_brush_line,
+    extract_razor_line,
     extract_soap_line,
 )
 
