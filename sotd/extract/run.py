@@ -1,77 +1,80 @@
 import argparse
-import json
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Sequence, Optional
+from warnings import warn
+import logging
 
-from sotd.extract.comment import parse_comment
+logger = logging.getLogger()
+if not logger.hasHandlers():
+    logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
+from sotd.cli_utils.date_span import _month_span
+
+from .comment import run_extraction_for_month
+from .save import save_month_file
 
 
-def run_extraction_for_month(month: str) -> dict[str, Any]:
-    path = f"data/comments/{month}.json"
-    try:
-        with open(path, "r") as f:
-            comments = json.load(f)["data"]
-    except FileNotFoundError:
-        return {
-            "meta": {"month": month, "error": f"File not found: {path}"},
-            "data": [],
-            "skipped": [],
-        }
+def _process_month(
+    year: int, month: int, base_path: Path, force: bool, debug: bool
+) -> Optional[dict]:
+    ym = f"{year:04d}-{month:02d}"
+    all_comments = run_extraction_for_month(ym, base_path=str(base_path))
+    if all_comments is None:
+        if debug:
+            logging.warning(f"Skipped missing input file: {base_path}/comments/{ym}.json")
+        return None
 
-    data = []
+    extracted = []
+    missing = []
     skipped = []
-    field_counts = {"razor": 0, "blade": 0, "brush": 0, "soap": 0}
 
-    for comment in comments:
-        extracted = parse_comment(comment)
-        if extracted:
-            data.append({**comment, "extracted": extracted})
-            for field in extracted:
-                field_counts[field] += 1
+    for c in all_comments.get("data", []):
+        has_field = any(k in c for k in ("razor", "blade", "brush", "soap"))
+        if has_field:
+            extracted.append(c)
         else:
-            skipped.append(comment)
+            missing.append(c)
 
-    meta = {
-        "month": month,
-        "extracted_at": datetime.now(tz=timezone.utc).isoformat(),
-        "comment_count": len(comments),
-        "shave_count": len(data),
-        "skipped_count": len(skipped),
-        "field_coverage": field_counts,
+    skipped = all_comments.get("skipped", [])
+
+    result = {
+        "meta": {
+            "month": ym,
+            "shave_count": len(extracted),
+            "missing_count": len(missing),
+            "skipped_count": len(skipped),
+        },
+        "data": extracted,
+        "missing": missing,
+        "skipped": skipped,
     }
-
-    return {"meta": meta, "data": data, "skipped": skipped}
-
-
-# New function to save extraction result to disk
-
-
-def save_extraction_result(
-    month: str, result: dict[str, Any], base_path: str = "data/extracted"
-) -> None:
-    out_path = Path(base_path) / f"{month}.json"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "w") as f:
-        json.dump(result, f, indent=2)
+    if debug:
+        logging.debug(f"Saving extraction result to: {base_path}/extracted/{ym}.json")
+    save_month_file(month=ym, result=result, out_dir=base_path / "extracted")
+    return result
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Extract SOTD shaves for a given month")
-    parser.add_argument("--month", required=True, help="Month to extract in YYYY-MM format")
-    parser.add_argument("--debug", action="store_true", help="Print debug output for skipped items")
-    args = parser.parse_args()
+def run(args: argparse.Namespace) -> None:
+    months = _month_span(args)
+    base_path = Path(args.out_dir)
 
-    result = run_extraction_for_month(args.month)
-    save_extraction_result(args.month, result)
+    for year, month in months:
+        _process_month(year, month, base_path, force=args.force, debug=args.debug)
 
-    meta = result["meta"]
-    print(
-        f"[INFO] Extracted {meta.get('shave_count', 0)} shaves from "
-        f"{meta.get('comment_count', 0)} comments ({meta.get('month')})"
-    )
-    if args.debug:
-        print(f"[DEBUG] Skipped count: {meta.get('skipped_count', 0)}")
+
+def main(argv: Sequence[str] | None = None) -> None:
+    p = argparse.ArgumentParser(description="Extract SOTD data")
+    g = p.add_mutually_exclusive_group()
+    g.add_argument("--month")
+    g.add_argument("--year")
+    g.add_argument("--range")
+    p.add_argument("--start")
+    p.add_argument("--end")
+    p.add_argument("--out-dir", default="data")
+    p.add_argument("--debug", action="store_true")
+    p.add_argument("--force", action="store_true")
+    args = p.parse_args(argv)
+
+    run(args)
 
 
 if __name__ == "__main__":

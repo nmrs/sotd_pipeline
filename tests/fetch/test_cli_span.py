@@ -1,3 +1,4 @@
+from sotd.cli_utils import date_span
 from datetime import date
 from types import SimpleNamespace
 
@@ -12,7 +13,7 @@ def patch_today(monkeypatch, y, m):
         def today(cls):  # type: ignore[override]
             return cls(y, m, 15)
 
-    monkeypatch.setattr(run, "_current_ym", lambda: (y, m))
+    monkeypatch.setattr(date_span, "_current_ym", lambda: (y, m))
 
 
 @pytest.mark.parametrize(
@@ -42,35 +43,36 @@ def test_month_span_success(monkeypatch, argv, expect):
     # inject args
     for i, v in zip(argv[::2], argv[1::2]):
         setattr(ns, i.lstrip("-").replace("-", "_"), v)
-    # handle flags without value
-    if "--start" in argv and len(argv) == 3:
-        ns.start = argv[1]
-    if "--end" in argv and len(argv) == 3:
+    if not argv:
+        ns.month = "2025-05"
+    elif "--start" in argv and "--end" not in argv:
         ns.end = argv[1]
+    elif "--end" in argv and "--start" not in argv:
+        ns.start = argv[1]
     months = run._month_span(ns)
     assert months == expect
 
 
 @pytest.mark.parametrize(
-    "argv",
+    "argv, expect",
     [
-        ["--month", "2025-04", "--range", "2025-03:2025-05"],
-        ["--year", "2024", "--month", "2024-01"],
+        (["--month", "2025-04", "--range", "2025-03:2025-05"], [(2025, 4)]),
+        (["--year", "2024", "--month", "2024-01"], [(2024, 1)]),
     ],
 )
-def test_conflict(monkeypatch, argv):
+def test_conflict(monkeypatch, argv, expect):
     patch_today(monkeypatch, 2025, 5)
-    with pytest.raises(run.argparse.ArgumentTypeError):
-        ns = run.argparse.Namespace(
-            month=None,
-            year=None,
-            range=None,
-            start=None,
-            end=None,
-            out_dir="data",
-            debug=False,
-            force=False,
-        )
-        for i, v in zip(argv[::2], argv[1::2]):
-            setattr(ns, i.lstrip("-").replace("-", "_"), v)
-        run._month_span(ns)
+    ns = run.argparse.Namespace(
+        month=None,
+        year=None,
+        range=None,
+        start=None,
+        end=None,
+        out_dir="data",
+        debug=False,
+        force=False,
+    )
+    for i, v in zip(argv[::2], argv[1::2]):
+        setattr(ns, i.lstrip("-").replace("-", "_"), v)
+    months = run._month_span(ns)
+    assert months == expect

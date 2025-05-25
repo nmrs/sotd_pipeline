@@ -22,10 +22,11 @@ import calendar
 from datetime import date as _date
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Sequence, Set, Tuple
+from typing import List, Sequence, Set
 
 from tqdm import tqdm
 
+from sotd.cli_utils.date_span import _month_span
 from sotd.fetch.merge import merge_records
 from sotd.fetch.reddit import (
     fetch_top_level_comments,
@@ -34,47 +35,6 @@ from sotd.fetch.reddit import (
 )
 from sotd.fetch.save import load_month_file, write_month_file
 from sotd.utils import parse_thread_date
-
-# --------------------------------------------------------------------------- #
-# helpers - parsing                                                           #
-# --------------------------------------------------------------------------- #
-
-
-def _parse_ym(text: str) -> Tuple[int, int]:
-    """Convert ``YYYY-MM`` string → ``(year, month)`` tuple."""
-    try:
-        y, m = text.split("-")
-        y_i, m_i = int(y), int(m)
-        if not (1 <= m_i <= 12):
-            raise ValueError
-        return y_i, m_i
-    except ValueError:
-        raise argparse.ArgumentTypeError(f"Invalid month format: {text!r}") from None
-
-
-def _iter_months(
-    y1: int,
-    m1: int,
-    y2: int,
-    m2: int,
-) -> List[Tuple[int, int]]:
-    """Inclusive iterator of (year, month) tuples from (y1,m1) → (y2,m2) ascending."""
-    months: List[Tuple[int, int]] = []
-    y, m = y1, m1
-    while (y, m) <= (y2, m2):
-        months.append((y, m))
-        if m == 12:
-            y += 1
-            m = 1
-        else:
-            m += 1
-    return months
-
-
-def _current_ym() -> Tuple[int, int]:
-    today = _date.today()
-    return today.year, today.month
-
 
 # --------------------------------------------------------------------------- #
 # helper: find missing days in month                                         #
@@ -89,53 +49,6 @@ def _calc_missing(year: int, month: int, threads) -> List[_date]:
         d for t in threads if (d := parse_thread_date(t.title, year)) is not None
     }
     return sorted(expected - present)
-
-
-# --------------------------------------------------------------------------- #
-# arg-normaliser                                                              #
-# --------------------------------------------------------------------------- #
-
-
-def _month_span(args: argparse.Namespace) -> List[Tuple[int, int]]:
-    """Normalize CLI args into an ordered list of months to fetch."""
-    # 0. Mutually‑exclusive flag conflict detection
-    supplied = sum(bool(x) for x in (args.month, args.year, args.range))
-    if supplied > 1:
-        raise argparse.ArgumentTypeError("Choose only one of --month, --year, or --range")
-
-    # expand --range → start/end
-    if args.range:
-        try:
-            s_raw, e_raw = (part or None for part in args.range.split(":"))
-        except ValueError:
-            raise argparse.ArgumentTypeError("--range must be START:END") from None
-        if s_raw:
-            args.start = s_raw
-        if e_raw:
-            args.end = e_raw
-
-    # expand --month / --year
-    if args.month:
-        args.start = args.end = args.month
-    if args.year:
-        args.start, args.end = f"{args.year}-01", f"{args.year}-12"
-
-    # default: current month
-    if args.start is None and args.end is None:
-        cur_y, cur_m = _current_ym()
-        ym = f"{cur_y:04d}-{cur_m:02d}"
-        args.start = args.end = ym
-    elif args.end is None:
-        args.end = args.start
-    elif args.start is None:
-        args.start = args.end
-
-    start_y, start_m = _parse_ym(args.start)
-    end_y, end_m = _parse_ym(args.end)
-    if (end_y, end_m) < (start_y, start_m):
-        raise argparse.ArgumentTypeError("--end precedes --start")
-
-    return _iter_months(start_y, start_m, end_y, end_m)
 
 
 # --------------------------------------------------------------------------- #
