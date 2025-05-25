@@ -30,6 +30,8 @@ def test_cli_extracts_shaves_successfully():
             capture_output=True,
             text=True,
         )
+        print(result.stdout)
+        print(result.stderr)
 
         assert result.returncode == 0
         assert output_path.exists()

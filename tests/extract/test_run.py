@@ -20,6 +20,8 @@ def test_run_extraction_for_month_valid(monkeypatch):
         monkeypatch.chdir(tmpdir)
         result = run_extraction_for_month("2025-04")
 
+        assert result is not None
+
         assert result["meta"]["shave_count"] == 2
         assert result["meta"]["skipped_count"] == 1
         assert result["meta"]["comment_count"] == 3
@@ -31,7 +33,4 @@ def test_run_extraction_for_month_valid(monkeypatch):
 
 def test_run_extraction_for_month_file_not_found():
     result = run_extraction_for_month("1900-01")
-    assert "error" in result["meta"]
-    assert result["meta"]["month"] == "1900-01"
-    assert result["data"] == []
-    assert result["skipped"] == []
+    assert result is None

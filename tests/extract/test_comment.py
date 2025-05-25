@@ -12,7 +12,9 @@ def test_parse_comment_all_fields():
             ]
         )
     }
-    assert parse_comment(comment) == {
+    ss = parse_comment(comment)
+    assert ss == {
+        "body": "* **Razor:** Blackbird\n* **Blade:** Feather\n* **Brush:** Simpson\n* **Soap:** Tabac",
         "razor": "Blackbird",
         "blade": "Feather",
         "brush": "Simpson",
@@ -22,12 +24,16 @@ def test_parse_comment_all_fields():
 
 def test_parse_comment_partial():
     comment = {"body": "\n".join(["* **Brush:** Omega", "* **Soap:** Cella"])}
-    assert parse_comment(comment) == {"brush": "Omega", "soap": "Cella"}
+    assert parse_comment(comment) == {
+        "body": "* **Brush:** Omega\n* **Soap:** Cella",
+        "brush": "Omega",
+        "soap": "Cella",
+    }
 
 
 def test_parse_comment_none():
     comment = {"body": "Great shave today, no product mentioned."}
-    assert parse_comment(comment) is None
+    assert parse_comment(comment) == None
 
 
 def test_parse_comment_mixed_lines():
@@ -42,4 +48,34 @@ def test_parse_comment_mixed_lines():
             ]
         )
     }
-    assert parse_comment(comment) == {"razor": "Game Changer", "blade": "Nacet", "soap": "Arko"}
+    assert parse_comment(comment) == {
+        "body": "* **Razor:** Game Changer\nBlade: Nacet\n* **Blade:** Nacet\n* **Blade:** Feather\n* **Soap:** Arko",
+        "razor": "Game Changer",
+        "blade": "Nacet",
+        "soap": "Arko",
+    }
+
+
+def test_parse_comment_key_order():
+    comment = {
+        "author": "test_user",
+        "body": "* **Razor:** Blackbird\n* **Blade:** Feather\n* **Brush:** Simpson\n* **Soap:** Tabac",
+        "created_utc": "2025-04-01T08:00:00Z",
+        "id": "abc123",
+        "thread_id": "thread456",
+        "thread_title": "Example Title",
+        "url": "https://example.com",
+    }
+    result = parse_comment(comment)
+    assert result is not None, "parse_comment returned None"
+    keys = list(result.keys())
+    assert keys[:7] == [
+        "author",
+        "body",
+        "created_utc",
+        "id",
+        "thread_id",
+        "thread_title",
+        "url",
+    ], "Comment metadata keys missing or out of order"
+    assert keys[7:] == ["razor", "blade", "brush", "soap"], "Extracted keys missing or out of order"

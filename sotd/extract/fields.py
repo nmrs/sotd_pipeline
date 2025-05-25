@@ -1,24 +1,41 @@
 import re
+import unicodedata
 from typing import Optional
+from sotd.utils.aliases import FIELD_ALIASES
 
 
-def extract_razor_line(line: str) -> Optional[str]:
-    return _extract_field_line(line, "razor")
-
-
-def extract_blade_line(line: str) -> Optional[str]:
-    return _extract_field_line(line, "blade")
-
-
-def extract_brush_line(line: str) -> Optional[str]:
-    return _extract_field_line(line, "brush")
-
-
-def extract_soap_line(line: str) -> Optional[str]:
-    return _extract_field_line(line, "soap")
+def extract_field(line: str, field: str) -> Optional[str]:
+    return _extract_field_line(line, field)
 
 
 def _extract_field_line(line: str, field: str) -> Optional[str]:
-    pattern = rf"^\*\s*\*\*{field}:\*\*\s*(.+)$"
-    match = re.match(pattern, line.strip(), flags=re.IGNORECASE)
-    return match.group(1).strip() if match else None
+    aliases = FIELD_ALIASES.get(field, [field])
+
+    patterns = []
+    for alias in aliases:
+        patterns.extend(get_patterns(alias))
+
+    for pattern in patterns:
+        match = re.match(pattern, line, flags=re.IGNORECASE)
+        if match:
+            value = match.group(1).strip()
+            return value
+
+    return None
+
+
+def get_patterns(alias: str) -> list[str]:
+    return [
+        # common more generic cases
+        rf"^(?:[-*]\s*)?\*\*{alias}\*\*\s*[-:]?\s*(.+)$",  # * **alias**: value
+        rf"^(?:[-*]\s*)?\*\*{alias}\s*[-:]?\*\*\s*(.+)$",  # * **alias:** value
+        rf"^(?:[-*]\s*)?\*\*{alias}\s*[-:]\s*(.+)\*\*$",  # * **alias - value**
+        rf"^(?:[-*•‣⁃▪‧·~+]*\s*)?{alias}\s*[-:]\s*(.+)$",  # * alias: value
+        rf"^[^\w\s]?\s*\*{alias}\*\s*[-:]\s*(.+)$",  # emoji-prefixed *alias:* value
+        rf"^(?:[-*•‣⁃▪‧·~+]\s*)?\#\#{alias}\#\#\s*[-:]\s*(.+)$",  # ##alias## - value
+        rf"^(?:[-*]\s*)?__{alias}:\__\s*(.+)$",  # __alias:__ value
+        rf"^(?:[-*]\s*)?\*\*{alias}\s*//\*\*\s*(.+)$",  # **alias //** value
+        # more specific cases
+        rf"^[^\w\s]\s*\*+\s*{alias}[-:]\s*\*+\s*(.*)$",  # emoji-prefixed *alias:* value
+        rf"^[^\w\s]\s*\*+\s*{alias}\s*\*+[-:]\s*(.*)$",  # emoji-prefixed *alias:* value
+    ]
