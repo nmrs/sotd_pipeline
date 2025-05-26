@@ -18,6 +18,7 @@ CLI matrix
 """
 
 import argparse
+import sys
 import calendar
 from datetime import date as _date
 from datetime import datetime, timezone
@@ -216,9 +217,12 @@ def main(argv: Sequence[str] | None = None) -> None:  # easier to test
         from sotd.fetch.audit import list_available_months
 
         months_found = list_available_months(args.out_dir)
-        for month in months_found:
-            print(month)
-        exit(0)
+        if months_found:
+            for month in months_found:
+                print(month)
+            sys.exit(0)
+        else:
+            sys.exit(0)
 
     # compute span
     months = _month_span(args)

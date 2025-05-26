@@ -34,20 +34,7 @@ Fields include metadata (`id`, `author`, `created_utc`, etc.) and raw extracted 
 
 ---
 
-## 3. **Field Metadata Enrichment**
-Analyze extracted field values to identify structured metadata, such as:
-
-- Blade usage count (e.g., `Astra SP (3)`)
-- Brush fiber type (e.g., `Synthetic`)
-- Knot size (e.g., `24mm`)
-
-Append enriched metadata to shave records. Save to:
-
-- `data/enriched/YYYY-MM.json`
-
----
-
-## 4. **Matching**
+## 3. **Matching**
 Match extracted product names to known item catalogs to normalize naming:
 
 - `Karve CB` → `Karve Christopher Bradley`
@@ -59,8 +46,21 @@ Track original values, match results, and confidence levels. Save to:
 
 ---
 
+## 4. **Field Metadata Enrichment**
+Analyze matched field values to identify structured metadata, such as:
+
+- Blade usage count (e.g., `Astra SP (3)`)
+- Brush fiber type (e.g., `Synthetic`)
+- Knot size (e.g., `24mm`)
+
+Append enriched metadata to shave records. Save to:
+
+- `data/enriched/YYYY-MM.json`
+
+---
+
 ## 5. **Aggregation**
-Summarize matched product data for downstream reporting:
+Summarize encriched product data for downstream reporting:
 
 - Usage counts by brand/model
 - Most-used products

@@ -94,8 +94,13 @@ def run_cli_with_list_months(tmp_path, extra_files=None):
         for f in extra_files:
             (out_dir / f).parent.mkdir(parents=True, exist_ok=True)
             (out_dir / f).write_text("{}")
+    print("DEBUG: JSON files written to out_dir:")
+    for file in out_dir.rglob("*.json"):
+        print("  ", file.relative_to(out_dir))
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(Path(__file__).resolve().parent.parent.parent)
     cli = [sys.executable, "-m", "sotd.fetch.run", "--out-dir", str(out_dir), "--list-months"]
-    result = subprocess.run(cli, capture_output=True, text=True)
+    result = subprocess.run(cli, capture_output=True, text=True, env=env)
     return result.stdout, result.returncode
 
 
