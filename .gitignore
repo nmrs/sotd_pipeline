@@ -10,3 +10,9 @@ venv/
 coverage/
 htmlcov/
 data/
+.aider*
+.env
+.env
+.env
+.env
+.env

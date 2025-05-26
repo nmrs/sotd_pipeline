@@ -1,13 +1,13 @@
+import json
 import logging
 from collections import OrderedDict
-
-logger = logging.getLogger(__name__)
-import json
 from pathlib import Path
 from typing import Optional
 
 from sotd.extract.fields import extract_field
 from sotd.utils.text import preprocess_body
+
+logger = logging.getLogger(__name__)
 
 
 def parse_comment(comment: dict) -> Optional[dict]:
