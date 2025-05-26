@@ -54,6 +54,37 @@ def test_extract_field_lines():
             ("- **Soap:** MWF", "MWF"),
             ("* **Soap** : Arko", "Arko"),
             ("* Soap - Arko Stick", "Arko Stick"),
+            # Lather variations
+            ("* **Lather:** B&M Seville", "B&M Seville"),
+            ("* **Lather**: B&M Seville", "B&M Seville"),
+            ("* **lather:** Stirling Bay Rum", "Stirling Bay Rum"),
+            ("* Lather: Tabac", "Tabac"),
+            ("Lather: Cella Red", "Cella Red"),
+            ("* ##Soap## - CBL Inconceivable", "CBL Inconceivable"), # Already covered Lather, making sure Soap also works with this
+            ("- **Lather:** MWF", "MWF"),
+            ("* **Lather** : Arko", "Arko"),
+            ("* Lather - Arko Stick", "Arko Stick"),
+            # Additional patterns from get_patterns for both Soap and Lather
+            ("* **Soap:** Some Soap Co.", "Some Soap Co."), # Basic with colon
+            ("* **Lather**: Another Lather Co.", "Another Lather Co."), # Basic with space after colon
+            ("Soap: Yet Another Soap", "Yet Another Soap"), # No markdown, simple case
+            ("Lather: Yet Another Lather", "Yet Another Lather"), # No markdown, simple case
+            ("* ##Soap## - Special Soap", "Special Soap"), # Double hash
+            ("* ##Lather## - Special Lather", "Special Lather"), # Double hash
+            ("- **Soap:** Hyphen Soap", "Hyphen Soap"), # Hyphen prefix
+            ("- **Lather:** Hyphen Lather", "Hyphen Lather"), # Hyphen prefix
+            ("🧴 *Soap:* Emoji Soap", "Emoji Soap"), # Emoji prefix
+            ("🧴 *Lather:* Emoji Lather", "Emoji Lather"), # Emoji prefix
+            (preprocess_body("\\* \\*\\*Soap:\\*\\* Escaped Soap"), "Escaped Soap"), # Preprocessed/escaped
+            (preprocess_body("\\* \\*\\*Lather:\\*\\* Escaped Lather"), "Escaped Lather"), # Preprocessed/escaped
+            ("* __Soap:__ Underlined Soap", "Underlined Soap"), # Underscore emphasis
+            ("* __Lather:__ Underlined Lather", "Underlined Lather"), # Underscore emphasis
+            ("* **Soap //** Forward Slash Soap", "Forward Slash Soap"), # Forward slash separation
+            ("* **Lather //** Forward Slash Lather", "Forward Slash Lather"), # Forward slash separation
+            ("‣ **Soap**: Bullet Soap", "Bullet Soap"), # Different bullet
+            ("‣ **Lather**: Bullet Lather", "Bullet Lather"), # Different bullet
+            ("* **Soap** - Dash Separated Soap", "Dash Separated Soap"), # Dash separated
+            ("* **Lather** - Dash Separated Lather", "Dash Separated Lather"), # Dash separated
         ],
     }
 
