@@ -16,3 +16,4 @@ data/
 .env
 .env
 .env
+praw.ini
