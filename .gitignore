@@ -11,9 +11,5 @@ coverage/
 htmlcov/
 data/
 .aider*
-.env
-.env
-.env
-.env
-.env
 praw.ini
+.env
