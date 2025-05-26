@@ -7,6 +7,7 @@ import unicodedata
 def preprocess_body(body: str) -> str:
     body = re.sub(r"[\u200B\u200C\u200D\u2060\uFEFF]", "", body)
     body = unicodedata.normalize("NFKC", body)
+    body = unicodedata.normalize("NFC", body)
     body = body.replace("’", "'").replace("‘", "'")
     body = body.replace("“", '"').replace("”", '"')
     body = body.replace("–", "-").replace("—", "-")
