@@ -1,11 +1,9 @@
-import string
 import json
 import re
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 from typing import Iterable
-from datetime import datetime
-from itertools import product
 
 
 def analyze_skipped_patterns(
@@ -109,7 +107,7 @@ def analyze_missing_files(paths: Iterable[Path], *_args) -> None:
     present = set(months)
     missing = sorted(expected - present)
 
-    print(f"\nMissing files in data/extracted/:\n")
+    print("\nMissing files in data/extracted/:\n")
     for ym in missing:
         print(f"  - {ym}.json")
 

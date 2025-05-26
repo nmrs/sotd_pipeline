@@ -1,16 +1,16 @@
 import argparse
-from pathlib import Path
-from typing import Sequence, Optional
-from warnings import warn
 import logging
+from pathlib import Path
+from typing import Optional, Sequence
 
-logger = logging.getLogger()
-if not logger.hasHandlers():
-    logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 from sotd.cli_utils.date_span import _month_span
 
 from .comment import run_extraction_for_month
 from .save import save_month_file
+
+logger = logging.getLogger()
+if not logger.hasHandlers():
+    logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
 
 def _process_month(

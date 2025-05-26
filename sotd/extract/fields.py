@@ -1,6 +1,6 @@
 import re
-import unicodedata
 from typing import Optional
+
 from sotd.utils.aliases import FIELD_ALIASES
 
 

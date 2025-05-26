@@ -1,13 +1,12 @@
 import argparse
-from glob import glob
 from pathlib import Path
 
 from sotd.cli_utils.date_span import _month_span
 from sotd.extract.analyze import (
-    analyze_skipped_patterns,
+    analyze_common_prefixes,
     analyze_garbage_leading_chars,
     analyze_missing_files,
-    analyze_common_prefixes,
+    analyze_skipped_patterns,
 )
 
 
