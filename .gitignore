@@ -4,7 +4,6 @@ __pycache__/
 .ruff_cache/
 venv/
 .venv/
-.env/
 .vscode/
 .coverage
 coverage/
