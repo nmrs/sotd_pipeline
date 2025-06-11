@@ -79,3 +79,23 @@ def test_parse_comment_key_order():
         "url",
     ], "Comment metadata keys missing or out of order"
     assert keys[7:] == ["razor", "blade", "brush", "soap"], "Extracted keys missing or out of order"
+
+
+def test_parse_comment_with_markdown_links():
+    comment = {
+        "body": "\n".join(
+            [
+                "* **Razor:** [Blackland Blackbird](https://example.com/razor)",
+                "* **Blade:** [Feather](https://example.com/blade)",
+                "* **Brush:** [Simpson](https://example.com/brush)",
+                "* **Soap:** [Tabac](https://example.com/soap)",
+            ]
+        )
+    }
+    assert parse_comment(comment) == {
+        "body": "* **Razor:** [Blackland Blackbird](https://example.com/razor)\n* **Blade:** [Feather](https://example.com/blade)\n* **Brush:** [Simpson](https://example.com/brush)\n* **Soap:** [Tabac](https://example.com/soap)",
+        "razor": "Blackland Blackbird",
+        "blade": "Feather",
+        "brush": "Simpson",
+        "soap": "Tabac",
+    }

@@ -1,7 +1,3 @@
-from __future__ import annotations
-
-# ruff: noqa: E402  # keep imports after docstring for clarity
-
 """
 Fetch one or many SOTD months.
 
@@ -17,9 +13,12 @@ CLI matrix
 (conflicting combos)       → error
 """
 
+# ruff: noqa: E402  # keep imports after docstring for clarity
+from __future__ import annotations
+
 import argparse
-import sys
 import calendar
+import sys
 from datetime import date as _date
 from datetime import datetime, timezone
 from pathlib import Path
@@ -28,7 +27,9 @@ from typing import List, Sequence, Set
 from tqdm import tqdm
 
 from sotd.cli_utils.date_span import _month_span
+from sotd.fetch.audit import _audit_months, list_available_months
 from sotd.fetch.merge import merge_records
+from sotd.fetch.overrides import apply_overrides, load_overrides
 from sotd.fetch.reddit import (
     fetch_top_level_comments,
     get_reddit,
@@ -68,8 +69,6 @@ def _process_month(
 ) -> dict:
     """Fetch + merge + save for one calendar month."""
     threads = search_threads("wetshaving", year, month, debug=args.debug)
-
-    from sotd.fetch.overrides import apply_overrides
 
     threads = apply_overrides(
         threads,
@@ -214,8 +213,6 @@ def main(argv: Sequence[str] | None = None) -> None:  # easier to test
 
     # If --list-months is set, list months and exit
     if args.list_months:
-        from sotd.fetch.audit import list_available_months
-
         months_found = list_available_months(args.out_dir)
         if months_found:
             for month in months_found:
@@ -228,8 +225,6 @@ def main(argv: Sequence[str] | None = None) -> None:  # easier to test
     months = _month_span(args)
 
     if args.audit:
-        from sotd.fetch.audit import _audit_months
-
         missing_info = _audit_months(months, args.out_dir)
         any_missing = False
         # Print missing files
@@ -248,7 +243,6 @@ def main(argv: Sequence[str] | None = None) -> None:  # easier to test
             exit(1)
 
     reddit = get_reddit()
-    from sotd.fetch.overrides import load_overrides
 
     inc_over, exc_over = load_overrides()
 

@@ -1,10 +1,19 @@
 {
+    "venvPath": ".",
+    "venv": ".venv",
+    "pythonVersion": "3.11",
+    "typeCheckingMode": "standard",
+    "reportMissingModuleSource": false,
+    "include": [
+        "sotd",
+        "tests"
+    ],
     "exclude": [
+        "**/__pycache__",
+        "**/.pytest_cache",
+        "**/.ruff_cache",
+        ".venv",
         "venv",
-        "**/venv",
-        "site-packages",
-        "**/site-packages",
-        "pip/_vendor",
-        "**/pip/_vendor"
+        "node_modules"
     ]
 }

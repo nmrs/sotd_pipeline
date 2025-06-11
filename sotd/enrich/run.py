@@ -1,16 +1,25 @@
 import argparse
 import json
-import os
 import logging
+import os
 
 from sotd.cli_utils.date_span import _month_span
-from sotd.enrich.enrich import enrich_entry
+from sotd.enrich.brush_enricher import BrushEnricher
 
 log = logging.getLogger(__name__)
 
 
+def enrich_entry(record: dict, brush_enricher: BrushEnricher) -> dict:
+    result = record.copy()
+    brush = result.get("brush")
+    if isinstance(brush, dict) and "original" in brush:
+        enrichment = brush_enricher.enrich(brush["original"], brush.get("matched"))
+        brush["enriched"] = enrichment
+    return result
+
+
 def _process_month(year: int, month: int, out_dir: str, force: bool, debug: bool) -> None:
-    in_path = f"data/extracted/{year:04d}-{month:02d}.json"
+    in_path = f"data/matched/{year:04d}-{month:02d}.json"
     out_path = f"{out_dir}/{year:04d}-{month:02d}.json"
 
     if not os.path.exists(in_path):
@@ -24,18 +33,15 @@ def _process_month(year: int, month: int, out_dir: str, force: bool, debug: bool
         raw = json.load(f)
     records = raw.get("data", [])
 
-    enriched = [enrich_entry(record) for record in records]
+    brush_enricher = BrushEnricher()
+    enriched = [enrich_entry(record, brush_enricher) for record in records]
 
-    metadata = {}
-    metadata["total_records"] = len(enriched)
-    metadata["blade_enriched"] = sum(
-        1 for record in enriched if record.get("blade_use") is not None
-    )
-    metadata["brush_enriched"] = sum(
-        1
-        for record in enriched
-        if record.get("brush_fiber") is not None or record.get("brush_knot_mm") is not None
-    )
+    metadata = {
+        "total_records": len(enriched),
+        "brush_enriched": sum(
+            1 for record in enriched if record.get("brush", {}).get("enriched") is not None
+        ),
+    }
 
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(
@@ -51,8 +57,7 @@ def _process_month(year: int, month: int, out_dir: str, force: bool, debug: bool
 
 
 def main(argv=None) -> None:
-    # Note: Ensure logging is configured appropriately when running this CLI.
-    parser = argparse.ArgumentParser(description="Enrich extracted SOTD records")
+    parser = argparse.ArgumentParser(description="Enrich matched SOTD records")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--month")
     group.add_argument("--year")
@@ -69,7 +74,7 @@ def main(argv=None) -> None:
         format="%(asctime)s [%(levelname)s] %(message)s",
     )
 
-    log.info("Enriching SOTD records...")
+    log.info("Enriching matched records...")
 
     for year, month in _month_span(args):
         _process_month(year, month, args.out_dir, args.force, args.debug)

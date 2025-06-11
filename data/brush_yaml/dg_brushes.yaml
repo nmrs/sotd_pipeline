@@ -1,0 +1,80 @@
+Declaration Grooming:
+  B1:
+    patterns:
+    - B1(\.\s|\.$|\s|$)
+  B10:
+    patterns:
+    - b10
+  B11:
+    patterns:
+    - b11
+  B12:
+    patterns:
+    - b12
+  B13:
+    patterns:
+    - b13
+  B14:
+    patterns:
+    - b14
+  B15:
+    patterns:
+    - b15
+  B16:
+    patterns:
+    - b16
+  B17:
+    patterns:
+    - b17
+  B18:
+    patterns:
+    - b18
+  B2:
+    patterns:
+    - B2(\.\s|\.$|\s|$)
+  B3:
+    patterns:
+    - B3(\.\s|\.$|\s|$)
+  B4:
+    patterns:
+    - B4
+  B5:
+    patterns:
+    - B5
+  B6:
+    patterns:
+    - B6
+  B7:
+    patterns:
+    - B7
+  B8:
+    patterns:
+    - B8
+  B9A:
+    patterns:
+    - B9A
+    - b9.*alpha
+  B9A+:
+    patterns:
+    - B9A\+
+    - b9.*alpha.*plus
+  B9B:
+    patterns:
+    - B9B
+    - b9.*bravo
+Zenith:
+  B16:
+    fiber: Boar
+    knot_size_mm: 24
+    patterns:
+    - zenith.*b16
+  B7:
+    fiber: Boar
+    knot_size_mm: 24
+    patterns:
+    - zenith.*b0?7
+  B8:
+    fiber: Boar
+    knot_size_mm: 28
+    patterns:
+    - zenith.*b8

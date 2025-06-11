@@ -17,6 +17,10 @@ def parse_comment(comment: dict) -> Optional[dict]:
         comment["body"] = None
     lines = comment["body"].splitlines() if comment["body"] else []
 
+    import re
+
+    lines = [re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", line) for line in lines]
+
     result = {}
     seen_fields = set()
 

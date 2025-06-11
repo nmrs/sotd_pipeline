@@ -11,4 +11,4 @@ exclude = ["data", "tests", ".venv", "venv"]
 select = ["E", "F", "I"]
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]
+"__init__.py" = ["F401"] 
