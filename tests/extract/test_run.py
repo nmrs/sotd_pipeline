@@ -14,7 +14,7 @@ def test_run_extraction_for_month_valid(monkeypatch):
     with tempfile.TemporaryDirectory() as tmpdir:
         path = Path(tmpdir) / "data/comments/2025-04.json"
         path.parent.mkdir(parents=True)
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             json.dump({"data": comments}, f)
 
         monkeypatch.chdir(tmpdir)

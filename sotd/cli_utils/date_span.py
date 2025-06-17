@@ -2,15 +2,15 @@ from datetime import datetime
 from typing import Iterator
 
 
-def _parse_ym(s: str) -> tuple[int, int]:
+def parse_ym(s: str) -> tuple[int, int]:
     try:
         dt = datetime.strptime(s.strip(), "%Y-%m")
         return dt.year, dt.month
-    except ValueError:
-        raise ValueError(f"Invalid YYYY-MM format: {s}")
+    except ValueError as exc:
+        raise ValueError(f"Invalid YYYY-MM format: {s}") from exc
 
 
-def _iter_months(start: tuple[int, int], end: tuple[int, int]) -> Iterator[tuple[int, int]]:
+def iter_months(start: tuple[int, int], end: tuple[int, int]) -> Iterator[tuple[int, int]]:
     sy, sm = start
     ey, em = end
     while (sy, sm) <= (ey, em):
@@ -26,9 +26,9 @@ def _current_ym() -> tuple[int, int]:
     return today.year, today.month
 
 
-def _month_span(args) -> list[tuple[int, int]]:
+def month_span(args) -> list[tuple[int, int]]:
     if args.month:
-        return [_parse_ym(args.month)]
+        return [parse_ym(args.month)]
 
     if args.year:
         y = int(args.year)
@@ -37,15 +37,15 @@ def _month_span(args) -> list[tuple[int, int]]:
     if args.range:
         try:
             start_str, end_str = args.range.split(":")
-            start = _parse_ym(start_str)
-            end = _parse_ym(end_str)
-        except ValueError:
-            raise ValueError(f"Invalid range format: {args.range}")
-        return list(_iter_months(start, end))
+            start = parse_ym(start_str)
+            end = parse_ym(end_str)
+        except ValueError as exc:
+            raise ValueError(f"Invalid range format: {args.range}") from exc
+        return list(iter_months(start, end))
 
     if args.start and args.end:
-        start = _parse_ym(args.start)
-        end = _parse_ym(args.end)
-        return list(_iter_months(start, end))
+        start = parse_ym(args.start)
+        end = parse_ym(args.end)
+        return list(iter_months(start, end))
 
     raise ValueError("Must provide --month, --year, --range, or both --start and --end.")

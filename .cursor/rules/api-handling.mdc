@@ -1,0 +1,202 @@
+---
+description: 
+globs: **/test_*.py,**/tests/**/*.py
+alwaysApply: false
+---
+# API and External Service Handling
+
+## Reddit API Best Practices
+- Use PRAW with proper rate limiting and error handling
+- Store API credentials in `praw.ini` (never commit to repo)
+- Implement exponential backoff for API rate limits
+- Gracefully handle missing data (Reddit API failures, missing threads)
+
+```python
+import praw
+import time
+from typing import Optional
+
+class RedditAPI:
+    def __init__(self, config_path: str = "praw.ini"):
+        self.reddit = praw.Reddit(
+            site_name="DEFAULT",  # Uses praw.ini config
+            user_agent="SOTD Pipeline v1.0"
+        )
+        self.rate_limit_delay = 1.0
+    
+    def fetch_with_retry(self, operation, max_retries: int = 3):
+        """Execute Reddit API operation with exponential backoff."""
+        for attempt in range(max_retries):
+            try:
+                return operation()
+            except praw.exceptions.APIException as e:
+                if "RATE_LIMIT" in str(e):
+                    delay = self.rate_limit_delay * (2 ** attempt)
+                    logger.warning(f"Rate limit hit, waiting {delay}s (attempt {attempt + 1})")
+                    time.sleep(delay)
+                    continue
+                else:
+                    logger.error(f"Reddit API error: {e}")
+                    raise
+            except Exception as e:
+                logger.error(f"Unexpected error in Reddit API call: {e}")
+                raise
+        
+        logger.error(f"Max retries ({max_retries}) exceeded for Reddit API call")
+        return None
+```
+
+## Pushshift Integration
+- Implement fallback mechanisms for API failures
+- Use multiple mirror endpoints
+- Handle API deprecation gracefully
+
+```python
+class PushshiftAPI:
+    def __init__(self):
+        self.base_urls = [
+            "https://api.pushshift.io",
+            "https://api.pullpush.io",  # Fallback mirror
+        ]
+        self.current_url_index = 0
+    
+    def search_submissions(self, subreddit: str, after: int, before: int):
+        """Search submissions with automatic fallback to mirrors."""
+        for url_index, base_url in enumerate(self.base_urls):
+            try:
+                response = self._make_request(base_url, subreddit, after, before)
+                if response.status_code == 200:
+                    self.current_url_index = url_index
+                    return response.json()
+            except requests.RequestException as e:
+                logger.warning(f"Pushshift API error with {base_url}: {e}")
+                continue
+        
+        logger.error("All Pushshift mirrors failed")
+        return {"data": []}
+```
+
+## Error Handling Patterns
+```python
+def handle_api_error(func):
+    """Decorator for consistent API error handling."""
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except praw.exceptions.APIException as e:
+            logger.error(f"Reddit API exception in {func.__name__}: {e}")
+            return None
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Network error in {func.__name__}: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error in {func.__name__}: {e}")
+            return None
+    return wrapper
+```
+
+## Rate Limiting Strategy
+```python
+import time
+from functools import wraps
+
+def rate_limit(calls_per_second: float = 1.0):
+    """Rate limiting decorator for API calls."""
+    min_interval = 1.0 / calls_per_second
+    last_called = [0.0]
+    
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            elapsed = time.time() - last_called[0]
+            left_to_wait = min_interval - elapsed
+            if left_to_wait > 0:
+                time.sleep(left_to_wait)
+            ret = func(*args, **kwargs)
+            last_called[0] = time.time()
+            return ret
+        return wrapper
+    return decorator
+
+# Usage
+@rate_limit(calls_per_second=0.5)  # Max 1 call per 2 seconds
+def fetch_reddit_data(thread_id: str):
+    # API call implementation
+    pass
+```
+
+## Configuration Management
+```python
+from pathlib import Path
+import configparser
+
+def load_api_config(config_path: Path = Path("praw.ini")) -> dict:
+    """Load API configuration with validation."""
+    if not config_path.exists():
+        raise FileNotFoundError(f"API configuration not found: {config_path}")
+    
+    config = configparser.ConfigParser()
+    config.read(config_path)
+    
+    # Validate required fields
+    required_fields = ["client_id", "client_secret", "user_agent"]
+    section = config["DEFAULT"]
+    
+    for field in required_fields:
+        if field not in section:
+            raise ValueError(f"Missing required config field: {field}")
+    
+    return dict(section)
+```
+
+## Hybrid Data Fetching
+```python
+def fetch_with_fallback(primary_source, fallback_source, *args, **kwargs):
+    """Try primary source, fallback to secondary if needed."""
+    try:
+        result = primary_source(*args, **kwargs)
+        if result and len(result) > 0:
+            return result, "primary"
+    except Exception as e:
+        logger.warning(f"Primary source failed: {e}")
+    
+    try:
+        result = fallback_source(*args, **kwargs)
+        return result, "fallback"
+    except Exception as e:
+        logger.error(f"Fallback source also failed: {e}")
+        return [], "none"
+```
+
+## API Response Validation
+```python
+def validate_reddit_submission(submission_data: dict) -> bool:
+    """Validate Reddit submission data structure."""
+    required_fields = ["id", "title", "created_utc", "permalink"]
+    return all(field in submission_data for field in required_fields)
+
+def validate_comment_data(comment_data: dict) -> bool:
+    """Validate Reddit comment data structure."""
+    required_fields = ["id", "body", "created_utc", "is_root"]
+    return all(field in comment_data for field in required_fields)
+```
+
+## Logging for API Operations
+```python
+import logging
+
+def setup_api_logging():
+    """Setup logging for API operations."""
+    logger = logging.getLogger("sotd.api")
+    logger.setLevel(logging.INFO)
+    
+    # Add file handler for API logs
+    handler = logging.FileHandler("logs/api.log")
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    
+    return logger
+```

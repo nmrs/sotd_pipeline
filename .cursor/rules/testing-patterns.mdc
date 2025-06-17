@@ -1,0 +1,155 @@
+---
+description: 
+globs: **/test_*.py,**/tests/**/*.py
+alwaysApply: false
+---
+# Testing Patterns for SOTD Pipeline
+
+## Test File Structure and Naming
+- Test files: `test_{module_name}.py`
+- Test functions: `test_{functionality}_when_{condition}_then_{expected}`
+- Mock classes: `Mock{ServiceName}` (e.g., `MockSubmission`, `MockPRAW`)
+- Mirror source structure in `tests/` directory
+
+```python
+# tests/fetch/test_reddit.py
+import pytest
+from unittest.mock import Mock, patch, MagicMock
+
+from sotd.fetch.reddit import RedditAPI
+
+class TestRedditAPI:
+    """Test Reddit API functionality."""
+    
+    def test_fetch_comments_when_valid_thread_then_returns_comments(self):
+        """Test that valid thread returns expected comments."""
+        pass
+    
+    def test_fetch_comments_when_api_error_then_returns_empty_list(self):
+        """Test graceful handling of API errors."""
+        pass
+```
+
+## Mock Object Patterns
+Create realistic mocks that reflect actual Reddit post patterns:
+
+```python
+class MockSubmission:
+    """Mock Reddit submission for testing."""
+    def __init__(self, id: str, title: str, created_utc: int = 1640995200):
+        self.id = id
+        self.title = title
+        self.created_utc = created_utc
+        self.num_comments = 5
+        self.permalink = f"/r/wetshaving/comments/{id}/"
+
+class MockComment:
+    """Mock Reddit comment for testing."""
+    def __init__(self, id: str, body: str = "Test shave", is_root: bool = True):
+        self.id = id
+        self.body = body
+        self.is_root = is_root
+        self.created_utc = 1640995200
+        self.author = Mock()
+        self.author.name = "test_user"
+```
+
+## Fixture Patterns
+```python
+@pytest.fixture
+def sample_sotd_comment():
+    """Sample SOTD comment for testing."""
+    return {
+        "id": "test123",
+        "author": "test_user", 
+        "body": "Razor: Karve CB\nBlade: Feather\nBrush: Stirling\nSoap: Declaration Grooming",
+        "created_utc": 1640995200,
+        "url": "https://reddit.com/r/wetshaving/comments/test123"
+    }
+
+@pytest.fixture
+def mock_yaml_catalog():
+    """Mock product catalog for testing."""
+    return {
+        "Test Brand": {
+            "patterns": ["test.*brand"],
+            "scents": {
+                "Test Scent": {
+                    "patterns": ["test.*scent"]
+                }
+            }
+        }
+    }
+```
+
+## Parameterized Testing for Product Matching
+Test product matchers with comprehensive input variations:
+
+```python
+@pytest.mark.parametrize("input_text,expected_brand,expected_model", [
+    ("Karve Christopher Bradley", "Karve", "Christopher Bradley"),
+    ("Merkur 34C", "Merkur", "34C"),
+    ("Gillette Tech", "Gillette", "Tech"),
+])
+def test_razor_matching(input_text, expected_brand, expected_model):
+    """Test razor pattern matching with various inputs."""
+    matcher = RazorMatcher()
+    result = matcher.match(input_text)
+    
+    assert result["matched"]["brand"] == expected_brand  
+    assert result["matched"]["model"] == expected_model
+```
+
+## Mocking External APIs
+Mock Reddit API with proper error handling:
+
+```python
+@patch('sotd.fetch.reddit.praw.Reddit')
+def test_fetch_with_rate_limit_error(mock_reddit):
+    """Test handling of Reddit API rate limits."""
+    mock_reddit.return_value.subreddit.return_value.submissions.side_effect = \
+        praw.exceptions.APIException("RATE_LIMIT")
+        
+    api = RedditAPI()
+    result = api.fetch_submissions("2025-01")
+    
+    assert result == []  # Should return empty list on API error
+```
+
+## Testing Coverage Requirements
+- **Regex Patterns**: Test all product matching regex patterns
+- **Error Handling**: Test all exception paths
+- **Data Validation**: Test input validation and edge cases
+- **API Integration**: Mock external services extensively
+- **End-to-End**: Include integration tests for complete workflows
+
+## Performance Testing
+```python
+@pytest.mark.performance
+def test_regex_compilation_performance():
+    """Test that regex compilation is efficient."""
+    patterns = ["test"] * 1000  # Large pattern list
+    
+    start_time = time.time()
+    matcher = SoapMatcher(patterns)
+    compilation_time = time.time() - start_time
+    
+    assert compilation_time < 1.0  # Should compile in under 1 second
+```
+
+## Error Case Testing
+Always test invalid input handling:
+
+```python
+def test_match_with_invalid_regex_pattern():
+    """Test handling of invalid regex patterns in catalog."""
+    invalid_catalog = {
+        "Test Brand": {
+            "patterns": ["[invalid regex"]  # Unclosed bracket
+        }
+    }
+    
+    # Should not raise exception, should log warning and continue
+    matcher = SoapMatcher(catalog_data=invalid_catalog)
+    assert len(matcher.patterns) == 0  # Invalid pattern excluded
+```

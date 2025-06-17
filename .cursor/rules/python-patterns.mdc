@@ -1,0 +1,119 @@
+---
+description: 
+globs: *.py,**/*.py
+alwaysApply: false
+---
+# Python-Specific Rules for SOTD Pipeline
+
+## Import Organization
+Always organize imports in this order:
+1. Standard library imports
+2. Third-party imports  
+3. Local application imports
+
+```python
+import re
+from pathlib import Path
+from typing import Optional
+
+import yaml
+import praw
+
+from sotd.match.base_matcher import BaseMatcher
+```
+
+## Type Hints Best Practices
+- Use modern type hints (Python 3.9+): `list[dict]` instead of `List[Dict]`
+- Use Optional for nullable values
+- Use Path for file system operations
+- Always include return type annotations
+
+```python
+def process_comments(comments: list[dict]) -> dict[str, list[str]]:
+    """Process SOTD comments and extract product mentions."""
+    pass
+
+def find_product(text: str) -> Optional[str]:
+    """Find product mention in text."""
+    pass
+
+def load_catalog(catalog_path: Path) -> dict[str, dict]:
+    """Load product catalog from YAML file."""
+    pass
+```
+
+## Error Handling Patterns
+- Use specific exception handling for SOTD pipeline
+- Handle Reddit API errors gracefully  
+- Always include context in error messages
+
+```python
+try:
+    with open(catalog_path, 'r', encoding='utf-8') as f:
+        catalog = yaml.safe_load(f)
+except FileNotFoundError:
+    logger.error(f"Catalog file not found: {catalog_path}")
+    raise
+except yaml.YAMLError as e:
+    logger.error(f"Invalid YAML in catalog {catalog_path}: {e}")
+    raise
+
+try:
+    submission = reddit.submission(thread_id)
+    comments = list(submission.comments)
+except praw.exceptions.APIException as e:
+    logger.warning(f"Reddit API error for thread {thread_id}: {e}")
+    return []
+```
+
+## Regex Pattern Compilation
+Always compile patterns at initialization, not per-match:
+
+```python
+class ProductMatcher:
+    def __init__(self, patterns: list[str]):
+        self.compiled_patterns = []
+        for pattern in sorted(patterns, key=len, reverse=True):
+            try:
+                self.compiled_patterns.append(re.compile(pattern, re.IGNORECASE))
+            except re.error as e:
+                logger.warning(f"Invalid regex pattern '{pattern}': {e}")
+                continue
+```
+
+## CLI Argument Patterns
+Standard CLI argument patterns for phases:
+
+```python
+import argparse
+
+def setup_cli_args():
+    parser = argparse.ArgumentParser(description="SOTD Pipeline Phase")
+    parser.add_argument('--month', required=True, 
+                       help='Month to process (YYYY-MM format)')
+    parser.add_argument('--verbose', action='store_true',
+                       help='Enable verbose logging')
+    parser.add_argument('--dry-run', action='store_true',
+                       help='Show what would be done without executing')
+    return parser
+```
+
+## Logging Setup
+```python
+import logging
+
+def setup_logging(verbose: bool = False):
+    """Setup logging for SOTD pipeline phase."""
+    level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(
+        level=level,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    return logging.getLogger(__name__)
+```
+
+## File I/O Rules
+- Use UTF-8 encoding explicitly for all file operations
+- Use yaml.safe_load() for YAML files
+- Pretty-print JSON output for human readability
+- Use atomic writes for data files to prevent corruption

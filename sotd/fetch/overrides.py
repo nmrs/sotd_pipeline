@@ -1,9 +1,4 @@
-from __future__ import annotations
-
-# ruff: noqa: E402
-
-"""
-Manual include / exclude overrides for SOTD thread discovery.
+"""Manual include / exclude overrides for SOTD thread discovery.
 
 The JSON file ``overrides/sotd_thread_overrides.json`` must follow:
 
@@ -16,15 +11,21 @@ The JSON file ``overrides/sotd_thread_overrides.json`` must follow:
   ]
 }
 """
+
+from __future__ import annotations
+
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Sequence
 
 import praw
 from praw.models import Submission
 from prawcore.exceptions import NotFound
 
 from sotd.fetch.reddit import filter_valid_threads, safe_call
+
+# ruff: noqa: E402
+
 
 OVERRIDE_PATH = Path("overrides/sotd_thread_overrides.json")
 
@@ -58,7 +59,7 @@ def load_overrides(
 # Apply                                                              #
 # ------------------------------------------------------------------ #
 def apply_overrides(
-    threads: List[Submission],
+    threads: Sequence[Submission],
     include: Dict[str, Any],
     exclude: Dict[str, Any],
     *,
@@ -83,10 +84,15 @@ def apply_overrides(
         if tid in present_ids:
             continue
         try:
-            kept.append(safe_call(reddit.submission, id=tid))
-            present_ids.add(tid)
-            if debug:
-                print(f"[DEBUG] Override include added {tid}")
+            sub = safe_call(reddit.submission, submission_id=tid)
+            if sub is not None:
+                kept.append(sub)
+                present_ids.add(tid)
+                if debug:
+                    print(f"[DEBUG] Override include added {tid}")
+            else:
+                if debug:
+                    print(f"[WARN] Override include id {tid} could not be fetched (None)")
         except NotFound:
             if debug:
                 print(f"[WARN] Override include id {tid} not found")

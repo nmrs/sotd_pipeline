@@ -1,7 +1,6 @@
 import json
 import tempfile
 from pathlib import Path
-import pytest
 from sotd.extract.analyze import analyze_skipped_patterns
 from sotd.extract.analyze import analyze_common_prefixes
 from sotd.utils.aliases import FIELD_ALIASES
@@ -22,7 +21,7 @@ def test_analyze_skipped_patterns_outputs_expected(capsys):
 
     with tempfile.TemporaryDirectory() as tmpdir:
         path = Path(tmpdir) / "2025-04.json"
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f)
 
         analyze_skipped_patterns([path], top_n=5, show_examples=1)
@@ -50,7 +49,7 @@ def test_analyze_common_prefixes_outputs_expected(capsys):
 
     with tempfile.TemporaryDirectory() as tmpdir:
         path = Path(tmpdir) / "2025-04.json"
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f)
 
         analyze_common_prefixes([path], show_examples=2)
@@ -64,9 +63,6 @@ def test_analyze_common_prefixes_outputs_expected(capsys):
         # Extract only prefix summary lines for validation
         prefix_lines = [
             line for line in out.splitlines() if line.startswith("Prefix:") and "—" in line
-        ]
-        prefix_lengths = [
-            len(line.split("—")[0].replace("Prefix:", "").strip()) for line in prefix_lines
         ]
         bucket_sizes = []
         for line in prefix_lines:

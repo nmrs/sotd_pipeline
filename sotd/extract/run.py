@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from typing import Optional, Sequence
 
-from sotd.cli_utils.date_span import _month_span
+from sotd.cli_utils.date_span import month_span
 
 from .comment import run_extraction_for_month
 from .save import save_month_file
@@ -13,14 +13,12 @@ if not logger.hasHandlers():
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
 
-def _process_month(
-    year: int, month: int, base_path: Path, force: bool, debug: bool
-) -> Optional[dict]:
+def _process_month(year: int, month: int, base_path: Path, debug: bool) -> Optional[dict]:
     ym = f"{year:04d}-{month:02d}"
     all_comments = run_extraction_for_month(ym, base_path=str(base_path))
     if all_comments is None:
         if debug:
-            logging.warning(f"Skipped missing input file: {base_path}/comments/{ym}.json")
+            logging.warning("Skipped missing input file: %s/comments/%s.json", base_path, ym)
         return None
 
     extracted = []
@@ -48,17 +46,17 @@ def _process_month(
         "skipped": skipped,
     }
     if debug:
-        logging.debug(f"Saving extraction result to: {base_path}/extracted/{ym}.json")
+        logging.debug("Saving extraction result to: %s/extracted/%s.json", base_path, ym)
     save_month_file(month=ym, result=result, out_dir=base_path / "extracted")
     return result
 
 
 def run(args: argparse.Namespace) -> None:
-    months = _month_span(args)
+    months = month_span(args)
     base_path = Path(args.out_dir)
 
     for year, month in months:
-        _process_month(year, month, base_path, force=args.force, debug=args.debug)
+        _process_month(year, month, base_path, debug=args.debug)
 
 
 def main(argv: Sequence[str] | None = None) -> None:

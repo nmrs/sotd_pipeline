@@ -1,8 +1,6 @@
-import time
-from prawcore.exceptions import TooManyRequests  # use correct exception class
-
 """Module for fetching data from Reddit."""
 
+import time
 import pytest
 
 from sotd.fetch.reddit import safe_call, RateLimitExceeded  # type: ignore[attr-defined]
@@ -12,8 +10,19 @@ class DummyRL(RateLimitExceeded):
     """A dummy exception class that mimics rate-limit errors."""
 
     def __init__(self, sleep_time: int):
-        # Initialize dummy without invoking base class __init__
         self.sleep_time = sleep_time
+        self.headers = {"x-ratelimit-reset": str(sleep_time)}  # Required by RateLimitExceeded
+        # Create a mock response object with required attributes
+        mock_response = type(
+            "Response",
+            (),
+            {
+                "headers": self.headers,
+                "text": "Rate limit exceeded",
+                "status_code": 429,
+            },
+        )()
+        super().__init__(response=mock_response)  # type: ignore[arg-type]
 
 
 def test_safe_call_success(monkeypatch, capsys):

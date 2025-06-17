@@ -1,0 +1,139 @@
+---
+description: Regex Patterns
+globs: 
+alwaysApply: false
+---
+# Regex Patterns for SOTD Pipeline
+
+## Pattern Compilation Rules
+- Always compile regex patterns at class initialization, not per-match
+- Sort patterns by length (longest first) for better matching accuracy
+- Use re.IGNORECASE for case-insensitive matching
+- Handle re.error exceptions when compiling dynamic patterns from YAML
+
+```python
+class ProductMatcher:
+    def __init__(self, catalog_path: Path):
+        self.catalog = self._load_catalog(catalog_path)
+        self.patterns = self._compile_patterns()
+
+    def _compile_patterns(self):
+        compiled = []
+        for brand, models in self.catalog.items():
+            for model, entry in models.items():
+                patterns = entry.get("patterns", [])
+                # Sort by length (longest first) for better matching
+                patterns = sorted(patterns, key=len, reverse=True)
+                for pattern in patterns:
+                    try:
+                        compiled.append({
+                            "brand": brand,
+                            "model": model,
+                            "pattern": pattern,
+                            "regex": re.compile(pattern, re.IGNORECASE)
+                        })
+                    except re.error as e:
+                        logger.warning(f"Invalid regex pattern '{pattern}': {e}")
+                        continue
+        return compiled
+```
+
+## Domain-Specific Pattern Examples
+
+### Soap Brand Patterns
+```python
+# Flexible brand matching with optional parts
+declaration_patterns = [
+    r"declaration\s+grooming",
+    r"\bdg\b",
+    r"l&l\s+grooming",
+    r"declaration"
+]
+
+# Case-insensitive with word boundaries
+stirling_patterns = [
+    r"\bst[ie]rl\w*\b"
+]
+```
+
+### Razor Model Patterns
+```python
+# Specific model matching
+karve_patterns = [
+    r"karve.*christopher.*bradley",
+    r"karve.*cb",
+    r"\bcb\b"  # Be careful with short patterns
+]
+
+# Year-specific patterns
+gillette_patterns = [
+    r"gillette.*tech.*\b194[0-9]\b",
+    r"gillette.*super.*speed.*\b195[0-9]\b"
+]
+```
+
+### Brush Fiber Patterns
+```python
+# Fiber type extraction
+fiber_patterns = {
+    "badger": r"\b(?:badger|silvertip|super\s*badger)\b",
+    "boar": r"\b(?:boar|bristle)\b", 
+    "synthetic": r"\b(?:synthetic|synt|plissoft)\b",
+    "horse": r"\b(?:horse|horsehair)\b"
+}
+```
+
+## Pattern Validation
+Always validate patterns before compilation:
+
+```python
+def validate_pattern(pattern: str) -> bool:
+    """Validate regex pattern before compilation."""
+    try:
+        re.compile(pattern)
+        return True
+    except re.error:
+        return False
+
+def compile_safe_patterns(patterns: list[str]) -> list:
+    """Compile patterns with error handling."""
+    compiled = []
+    for pattern in patterns:
+        if validate_pattern(pattern):
+            compiled.append(re.compile(pattern, re.IGNORECASE))
+        else:
+            logger.warning(f"Skipping invalid pattern: {pattern}")
+    return compiled
+```
+
+## Pattern Performance Tips
+- Use non-capturing groups `(?:...)` when you don't need to extract the match
+- Avoid greedy quantifiers when possible
+- Use word boundaries `\b` for whole word matching
+- Be specific rather than overly broad
+
+## Common Pattern Mistakes to Avoid
+- Don't use `.*` at the beginning of patterns unless necessary
+- Avoid nested quantifiers like `(a+)+`
+- Be careful with short patterns that might match unintended text
+- Always test patterns against real SOTD comment data
+
+## Knot Size Extraction Patterns
+```python
+# Extract knot sizes from brush descriptions
+knot_size_patterns = [
+    r"(\d{2}(?:\.\d+)?)\s*mm",      # "24mm", "26.5mm"
+    r"(\d{2}(?:\.\d+)?)\s*-?\s*mm", # "24-mm", "26 mm"
+    r"(\d{2})\s*mil+imeter",        # "24 millimeter"
+]
+```
+
+## Brand Normalization Patterns
+```python
+# Normalize common brand variations
+brand_normalizations = {
+    r"\bwms\b|\bwicked.*maple.*soap": "Wicked Maple Soap",
+    r"\bdg\b|declaration.*grooming": "Declaration Grooming",
+    r"\bsbs\b|summer.*break.*soap": "Summer Break Soap"
+}
+```

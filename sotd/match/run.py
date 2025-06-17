@@ -5,7 +5,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from sotd.cli_utils.date_span import _month_span
+from sotd.cli_utils.date_span import month_span
 from sotd.match.blade_matcher import BladeMatcher
 from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.razor_matcher import RazorMatcher
@@ -70,7 +70,7 @@ def run_match(args):
     soap_matcher = SoapMatcher()
     brush_matcher = BrushMatcher()
 
-    for year, month in tqdm(_month_span(args), desc="Months", unit="month"):
+    for year, month in tqdm(month_span(args), desc="Months", unit="month"):
         in_path = base_path / "extracted" / f"{year:04d}-{month:02d}.json"
         out_path = base_path / "matched" / f"{year:04d}-{month:02d}.json"
 
@@ -126,7 +126,7 @@ def run_match(args):
 
 
 def run_analysis(args):
-    for year, month in _month_span(args):
+    for year, month in month_span(args):
         matched_path = Path(args.out_dir) / "matched" / f"{year:04d}-{month:02d}.json"
         if matched_path.exists():
             subprocess.run(

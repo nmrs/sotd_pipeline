@@ -4,7 +4,7 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-from sotd.cli_utils.date_span import _month_span
+from sotd.cli_utils.date_span import month_span
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -39,7 +39,7 @@ def main(argv: list[str] | None = None) -> None:
         matched_files_exact = set()
         matched_files_other = set()
 
-        for year, month in _month_span(args):
+        for year, month in month_span(args):
             path = Path(args.out_dir) / "matched" / f"{year:04d}-{month:02d}.json"
             if path.exists():
                 if args.debug:
@@ -100,7 +100,7 @@ def main(argv: list[str] | None = None) -> None:
         include_strategy = False
 
         # Determine if match_type or strategy fields are present
-        for year, month in _month_span(args):
+        for year, month in month_span(args):
             path = Path(args.out_dir) / "matched" / f"{year:04d}-{month:02d}.json"
             if path.exists():
                 with path.open("r", encoding="utf-8") as f:
@@ -115,7 +115,7 @@ def main(argv: list[str] | None = None) -> None:
 
         # Print matched table
         seen = set()
-        for year, month in _month_span(args):
+        for year, month in month_span(args):
             path = Path(args.out_dir) / "matched" / f"{year:04d}-{month:02d}.json"
             if path.exists():
                 with path.open("r", encoding="utf-8") as f:

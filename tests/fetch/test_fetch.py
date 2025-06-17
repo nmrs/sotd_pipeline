@@ -1,8 +1,9 @@
 from datetime import date
-from types import SimpleNamespace
 from unittest.mock import patch
 
-import pytest
+from sotd.fetch.reddit import filter_valid_threads
+from sotd.fetch.run import _calc_missing
+import sotd.fetch.run as run_mod
 
 
 # --------------------------------------------------------------------------- #
@@ -48,8 +49,8 @@ class FakeReddit:
     def subreddit(self, _name):
         return self._sub
 
-    def submission(self, id):
-        return FakeSubmission(id, f"Included {id}")
+    def submission(self, submission_id):
+        return FakeSubmission(submission_id, f"Included {submission_id}")
 
 
 # --------------------------------------------------------------------------- #
@@ -58,10 +59,11 @@ class FakeReddit:
 @patch("sotd.fetch.reddit.get_reddit", return_value=FakeReddit())
 def test_filter_valid_threads_and_missing(_patched) -> None:
     """filter_valid_threads should keep only valid titles and sort by date."""
-    from sotd.fetch.reddit import search_threads, filter_valid_threads
 
     year, month = 2025, 5
-    raw = list(_patched.return_value._sub.search("dummy", sort="new", syntax="lucene"))
+    raw = list(
+        _patched.return_value.subreddit("wetshaving").search("dummy", sort="new", syntax="lucene")
+    )
     valid = filter_valid_threads(raw, year, month)
 
     # Only two good submissions (good1, good2)
@@ -70,7 +72,6 @@ def test_filter_valid_threads_and_missing(_patched) -> None:
 
 def test_missing_day_calc() -> None:
     """_calc_missing should detect calendar gaps."""
-    from sotd.fetch.run import _calc_missing
 
     class Dummy:
         def __init__(self, title: str):
@@ -95,13 +96,15 @@ def test_main_multi_month(monkeypatch):
     def fake_process(y, m, *_, **__):
         called.append((y, m))
 
-    monkeypatch.setattr("sotd.fetch.run._process_month", fake_process, raising=True)  # type: ignore[attr-defined]
+    monkeypatch.setattr(
+        "sotd.fetch.run._process_month",
+        fake_process,
+        raising=True,
+    )  # type: ignore[attr-defined]
     monkeypatch.setattr("sotd.fetch.run.get_reddit", lambda: None, raising=True)
     monkeypatch.setattr("sotd.fetch.overrides.load_overrides", lambda: ({}, {}), raising=True)
 
     # run main with a fake argv (year 2024)
-    import sotd.fetch.run as run_mod
-
     run_mod.main(["--year", "2024"])
 
     assert len(called) == 12

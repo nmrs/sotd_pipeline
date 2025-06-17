@@ -29,5 +29,8 @@ def load_month_file(path: Path) -> Tuple[dict[str, Any], List[dict[str, Any]]] |
     """Return (meta, data) if file exists, else ``None``."""
     if not path.is_file():
         return None
-    obj = json.loads(path.read_text(encoding="utf-8"))
-    return obj["meta"], obj["data"]
+    try:
+        obj = json.loads(path.read_text(encoding="utf-8"))
+        return obj["meta"], obj["data"]
+    except (json.JSONDecodeError, KeyError):
+        return None

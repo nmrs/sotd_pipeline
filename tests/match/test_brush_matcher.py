@@ -1,6 +1,10 @@
+# pylint: disable=redefined-outer-name
+
+from pathlib import Path
+
 import pytest
 import yaml
-from pathlib import Path
+
 from sotd.match.brush_matcher import BrushMatcher
 
 
@@ -284,7 +288,8 @@ def test_brush_matcher_consistent_return_structure(matcher):
 
 
 def test_chisel_hound_versioned_vs_non_versioned_matching(matcher):
-    """Test that versioned C&H knots match via ChiselAndHoundStrategy while non-versioned match via OtherBrushStrategy"""
+    """Test that versioned C&H knots match via ChiselAndHoundStrategy while
+    non-versioned match via OtherBrushStrategy"""
 
     # Test versioned knot (V20) - should match via ChiselAndHoundBrushMatchingStrategy
     result = matcher.match("Chisel & Hound V20")

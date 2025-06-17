@@ -3,7 +3,7 @@ import json
 import logging
 import os
 
-from sotd.cli_utils.date_span import _month_span
+from sotd.cli_utils.date_span import month_span
 from sotd.enrich.brush_enricher import BrushEnricher
 
 log = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ def main(argv=None) -> None:
 
     log.info("Enriching matched records...")
 
-    for year, month in _month_span(args):
+    for year, month in month_span(args):
         _process_month(year, month, args.out_dir, args.force, args.debug)
 
 

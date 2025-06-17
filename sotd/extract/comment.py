@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from collections import OrderedDict
 from pathlib import Path
 from typing import Optional
@@ -16,8 +17,6 @@ def parse_comment(comment: dict) -> Optional[dict]:
     else:
         comment["body"] = None
     lines = comment["body"].splitlines() if comment["body"] else []
-
-    import re
 
     lines = [re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", line) for line in lines]
 
@@ -52,10 +51,10 @@ def parse_comment(comment: dict) -> Optional[dict]:
 def run_extraction_for_month(month: str, base_path: str = "data") -> Optional[dict]:
     input_path = Path(base_path) / "comments" / f"{month}.json"
     if not input_path.exists():
-        logger.warning(f"Skipping extraction for missing input file: {input_path}")
+        logger.warning("Skipping extraction for missing input file: %s", input_path)
         return None
 
-    with open(input_path) as f:
+    with open(input_path, encoding="utf-8") as f:
         raw = json.load(f)
         comments = raw.get("data", [])
 

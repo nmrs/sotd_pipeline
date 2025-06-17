@@ -4,7 +4,7 @@ from pathlib import Path
 from sotd.extract.save import save_month_file
 
 
-def test_save_extraction_result_writes_file_correctly(monkeypatch):
+def test_save_extraction_result_writes_file_correctly():
     result = {
         "meta": {"month": "2025-04", "comment_count": 1},
         "data": [
@@ -20,6 +20,6 @@ def test_save_extraction_result_writes_file_correctly(monkeypatch):
 
         save_month_file("2025-04", result, out_dir=out_dir)
 
-        with open(out_file, "r") as f:
+        with open(out_file, "r", encoding="utf-8") as f:
             loaded = json.load(f)
             assert loaded == result

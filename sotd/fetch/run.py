@@ -26,7 +26,7 @@ from typing import List, Sequence, Set
 
 from tqdm import tqdm
 
-from sotd.cli_utils.date_span import _month_span
+from sotd.cli_utils.date_span import month_span
 from sotd.fetch.audit import _audit_months, list_available_months
 from sotd.fetch.merge import merge_records
 from sotd.fetch.overrides import apply_overrides, load_overrides
@@ -222,7 +222,7 @@ def main(argv: Sequence[str] | None = None) -> None:  # easier to test
             sys.exit(0)
 
     # compute span
-    months = _month_span(args)
+    months = month_span(args)
 
     if args.audit:
         missing_info = _audit_months(months, args.out_dir)
@@ -280,8 +280,7 @@ def main(argv: Sequence[str] | None = None) -> None:  # easier to test
         all_missing_days = sorted(
             d
             for res in valid_results
-            for days in ([] if res.get("missing_days") is None else res["missing_days"])
-            for d in days
+            for d in ([] if res.get("missing_days") is None else res["missing_days"])
         )
         for d in all_missing_days:
             print(f"[WARN] Missing day: {d}")

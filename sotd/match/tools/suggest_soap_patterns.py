@@ -3,7 +3,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-from sotd.cli_utils.date_span import _month_span
+from sotd.cli_utils.date_span import month_span
 
 
 def load_matched_data(out_dir: Path, months: list[tuple[int, int]]) -> list[dict]:
@@ -79,7 +79,6 @@ def group_split_fallbacks(records: list[dict]) -> dict:
 
 def print_split_fallbacks(grouped: dict, reverse: bool = False):
     # Reorganize grouped data by brand
-    from collections import defaultdict
 
     class BrandInfo:
         def __init__(self):
@@ -131,7 +130,7 @@ def main():
     )
     args = parser.parse_args()
 
-    months = _month_span(args)
+    months = month_span(args)
     out_dir = Path(args.out_dir)
     records = load_matched_data(out_dir, months)
 

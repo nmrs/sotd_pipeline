@@ -2,7 +2,7 @@ import argparse
 import json
 from pathlib import Path
 
-from sotd.cli_utils.date_span import _month_span
+from sotd.cli_utils.date_span import month_span
 from sotd.match.soap_matcher import analyze_soap_matches
 
 
@@ -46,7 +46,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--debug", action="store_true", help="Print debug output")
     args = parser.parse_args(argv)
 
-    months = [f"{y:04d}-{m:02d}" for y, m in _month_span(args)]
+    months = [f"{y:04d}-{m:02d}" for y, m in month_span(args)]
     matches = collect_soap_matches(args.input_dir, months)
     if args.debug:
         print(f"✅ Loaded {len(matches)} matched soap entries from {len(months)} months.\n")

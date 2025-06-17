@@ -14,7 +14,12 @@ def test_parse_comment_all_fields():
     }
     ss = parse_comment(comment)
     assert ss == {
-        "body": "* **Razor:** Blackbird\n* **Blade:** Feather\n* **Brush:** Simpson\n* **Soap:** Tabac",
+        "body": (
+            "* **Razor:** Blackbird\n"
+            "* **Blade:** Feather\n"
+            "* **Brush:** Simpson\n"
+            "* **Soap:** Tabac"
+        ),
         "razor": "Blackbird",
         "blade": "Feather",
         "brush": "Simpson",
@@ -33,7 +38,7 @@ def test_parse_comment_partial():
 
 def test_parse_comment_none():
     comment = {"body": "Great shave today, no product mentioned."}
-    assert parse_comment(comment) == None
+    assert parse_comment(comment) is None
 
 
 def test_parse_comment_mixed_lines():
@@ -49,7 +54,13 @@ def test_parse_comment_mixed_lines():
         )
     }
     assert parse_comment(comment) == {
-        "body": "* **Razor:** Game Changer\nBlade: Nacet\n* **Blade:** Nacet\n* **Blade:** Feather\n* **Soap:** Arko",
+        "body": (
+            "* **Razor:** Game Changer\n"
+            "Blade: Nacet\n"
+            "* **Blade:** Nacet\n"
+            "* **Blade:** Feather\n"
+            "* **Soap:** Arko"
+        ),
         "razor": "Game Changer",
         "blade": "Nacet",
         "soap": "Arko",
@@ -59,7 +70,12 @@ def test_parse_comment_mixed_lines():
 def test_parse_comment_key_order():
     comment = {
         "author": "test_user",
-        "body": "* **Razor:** Blackbird\n* **Blade:** Feather\n* **Brush:** Simpson\n* **Soap:** Tabac",
+        "body": (
+            "* **Razor:** Blackbird\n"
+            "* **Blade:** Feather\n"
+            "* **Brush:** Simpson\n"
+            "* **Soap:** Tabac"
+        ),
         "created_utc": "2025-04-01T08:00:00Z",
         "id": "abc123",
         "thread_id": "thread456",
@@ -93,7 +109,12 @@ def test_parse_comment_with_markdown_links():
         )
     }
     assert parse_comment(comment) == {
-        "body": "* **Razor:** [Blackland Blackbird](https://example.com/razor)\n* **Blade:** [Feather](https://example.com/blade)\n* **Brush:** [Simpson](https://example.com/brush)\n* **Soap:** [Tabac](https://example.com/soap)",
+        "body": (
+            "* **Razor:** [Blackland Blackbird](https://example.com/razor)\n"
+            "* **Blade:** [Feather](https://example.com/blade)\n"
+            "* **Brush:** [Simpson](https://example.com/brush)\n"
+            "* **Soap:** [Tabac](https://example.com/soap)"
+        ),
         "razor": "Blackland Blackbird",
         "blade": "Feather",
         "brush": "Simpson",

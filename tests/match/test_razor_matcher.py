@@ -1,3 +1,5 @@
+# pylint: disable=redefined-outer-name
+
 import yaml
 import pytest
 from sotd.match.razor_matcher import RazorMatcher

@@ -1,0 +1,61 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# SOTD Pipeline - Core Development Rules
+# Shave of the Day Data Processing Pipeline
+
+## Project Overview
+This is a Python 3.11 data processing pipeline that extracts, processes, and analyzes "Shave of the Day" posts from Reddit's r/wetshaving community. The pipeline consists of 6 sequential phases: fetch, extract, match, enrich, aggregate, and report.
+
+## Development Environment
+- **Python Version**: 3.11 (enforced by pyrightconfig.json)
+- **Virtual Environment**: Use `.venv` directory
+- **Package Manager**: pip with requirements.txt/requirements-dev.txt
+- **Code Style**: Black (100 char line length)
+- **Linting**: Ruff (E, F, I rules)
+- **Type Checking**: Pyright in standard mode
+- **Testing**: pytest with coverage via pytest-cov
+
+## Architecture Patterns
+- **Phase Structure**: Each phase follows the pattern: `run.py` (CLI), core logic modules, `save.py` (I/O)
+- **Matcher Strategy**: Use BaseMatcher as base class for all product matchers
+- **YAML Catalogs**: Store product data in YAML files under `data/` directory
+- **Data Flow**: Each phase reads from previous phase output, writes to `data/{phase}/YYYY-MM.json`
+
+## Code Style Rules
+- Use descriptive variable names that reflect the domain (e.g., `soap_matcher`, `blade_patterns`, `sotd_comment`)
+- Follow existing naming conventions: snake_case for functions/variables, PascalCase for classes
+- Use type hints for all function parameters and return values
+- Line length: 100 characters maximum (Black setting)
+- Use pathlib.Path for file system operations, not os.path
+- Prefer f-strings over .format() or % formatting
+
+## Error Handling
+- Use try/except with specific exception types, not bare except
+- Log errors with context using appropriate log levels
+- Gracefully handle missing data (Reddit API failures, missing threads)
+- Validate manual override files with clear error messages
+
+## Development Workflow Rules
+- **Development Commands**: Use `make all` for complete development workflow
+- **Testing**: Run `make test` before committing
+- **Formatting**: Run `make format` to apply Black and Ruff formatting
+- **Type Checking**: Run `make typecheck` to validate types with Pyright
+- **Individual Phases**: Test individual phases with specific month data
+
+## Domain-Specific Rules
+- **Product Catalogs**: Maintain consistent structure in YAML files
+- **Brand Normalization**: Follow established patterns for product brand/model separation
+- **Brush Matching**: Use strategy pattern for complex brush matching scenarios
+- **Date Ranges**: Support both individual months and date ranges in CLI
+- **Manual Overrides**: Provide clear validation for manual thread includes/excludes
+
+## Common Patterns to Follow
+- Use `Path` objects for file system operations
+- Compile regex patterns once, use many times  
+- Handle missing data gracefully with sensible defaults
+- Include metadata in all output files
+- Use descriptive variable names that reflect the shaving domain
+- Follow the existing error handling patterns for external APIs

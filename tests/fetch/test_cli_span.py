@@ -1,18 +1,10 @@
-from sotd.cli_utils import date_span
-from datetime import date
-from types import SimpleNamespace
-
 import pytest
 
+from sotd.cli_utils import date_span
 from sotd.fetch import run
 
 
 def patch_today(monkeypatch, y, m):
-    class DummyDate(date):  # override today()
-        @classmethod
-        def today(cls):  # type: ignore[override]
-            return cls(y, m, 15)
-
     monkeypatch.setattr(date_span, "_current_ym", lambda: (y, m))
 
 
@@ -49,7 +41,7 @@ def test_month_span_success(monkeypatch, argv, expect):
         ns.end = argv[1]
     elif "--end" in argv and "--start" not in argv:
         ns.start = argv[1]
-    months = run._month_span(ns)
+    months = run.month_span(ns)
     assert months == expect
 
 
@@ -74,5 +66,5 @@ def test_conflict(monkeypatch, argv, expect):
     )
     for i, v in zip(argv[::2], argv[1::2]):
         setattr(ns, i.lstrip("-").replace("-", "_"), v)
-    months = run._month_span(ns)
+    months = run.month_span(ns)
     assert months == expect

@@ -16,7 +16,7 @@ def analyze_skipped_patterns(
 
     for path in paths:
         try:
-            with open(path, "r") as f:
+            with open(path, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except FileNotFoundError:
             print(f"Warning: Skipped missing file: {path}")
@@ -63,7 +63,7 @@ def analyze_garbage_leading_chars(
     fields = ["razor", "blade", "brush", "soap"]
 
     for path in paths:
-        with open(path, "r") as f:
+        with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
             for comment in data.get("data", []):
                 for field in fields:
@@ -120,7 +120,7 @@ def analyze_common_prefixes(
 
     for path in paths:
         try:
-            with open(path, "r") as f:
+            with open(path, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except FileNotFoundError:
             print(f"Warning: Skipped missing file: {path}")

@@ -1,5 +1,5 @@
 """Reddit‐helpers: authentication, searching, comment harvesting – plus
-a small `safe_call` wrapper that handles Reddit’s `RateLimitExceeded`.
+a small `safe_call` wrapper that handles Reddit's `RateLimitExceeded`.
 """
 
 from __future__ import annotations
@@ -8,10 +8,11 @@ import calendar
 import os
 import time
 from datetime import date as _date
-from typing import List, Sequence, TypeVar
+from typing import List, Sequence, TypeVar, cast
 
 import praw
 from praw.models import Comment, Submission
+from prawcore.exceptions import RequestException, NotFound
 
 # PRAW 7.x has RateLimitExceeded; newer prawcore switched to TooManyRequests.
 try:
@@ -35,6 +36,7 @@ def safe_call(fn, *args, **kwargs):  # type: ignore[no-untyped-def]
         [WARN] Reddit rate-limit hit; sleeping 8m 20s…
 
     If the retry also fails, the exception propagates.
+    Returns None if any other exception occurs.
     """
     retry = False
     while True:
@@ -54,6 +56,9 @@ def safe_call(fn, *args, **kwargs):  # type: ignore[no-untyped-def]
             print(f"[WARN] Reddit rate-limit hit; sleeping {mins}m {secs}s…")
             time.sleep(sec + 1)
             retry = True
+        except (ConnectionError, RuntimeError, RequestException, NotFound, ValueError) as exc:
+            print(f"[WARN] Reddit API error: {exc}")
+            return None
 
 
 # --------------------------------------------------------------------------- #
@@ -92,9 +97,10 @@ def search_threads(
     for query in queries:
         if debug:
             print(f"[DEBUG] Search query: {query!r}")
-        raw_results: Sequence[Submission] = list(
-            safe_call(subreddit.search, query, sort="relevance", syntax="lucene")
-        )
+        raw_results = safe_call(subreddit.search, query, sort="relevance", syntax="lucene")
+        if raw_results is None:
+            raw_results = []
+        raw_results = list(raw_results)
         if debug:
             print(f"[DEBUG] PRAW raw results for {query!r}: {len(raw_results)}")
         for sub in raw_results:
@@ -136,7 +142,6 @@ def filter_valid_threads(
 def fetch_top_level_comments(submission: Submission) -> List[Comment]:
     """Return only root comments (shaves)."""
     safe_call(submission.comments.replace_more, limit=None)
-    from typing import cast
 
     return cast(
         List[Comment],

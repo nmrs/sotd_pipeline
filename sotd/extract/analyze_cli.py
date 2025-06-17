@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from sotd.cli_utils.date_span import _month_span
+from sotd.cli_utils.date_span import month_span
 from sotd.extract.analyze import (
     analyze_common_prefixes,
     analyze_garbage_leading_chars,
@@ -36,7 +36,7 @@ def main(argv: list[str] | None = None) -> None:
     )
 
     args = parser.parse_args(argv)
-    months = _month_span(args)
+    months = month_span(args)
     files = [Path(args.out_dir) / f"{y:04d}-{m:02d}.json" for y, m in months]
 
     if not files:

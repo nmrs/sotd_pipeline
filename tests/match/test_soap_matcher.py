@@ -1,5 +1,7 @@
+# pylint: disable=redefined-outer-name
+
 import pytest
-from pathlib import Path
+
 from sotd.match.soap_matcher import SoapMatcher
 
 

@@ -1,0 +1,157 @@
+---
+description: Data flow validation, JSON standards, Pipeline phase structure rules
+globs: 
+alwaysApply: false
+---
+# Data Processing Rules for SOTD Pipeline
+
+## Pipeline Phase Structure
+Each phase follows this consistent pattern:
+- `run.py` - CLI entry point with date range support
+- Core processing logic in dedicated modules
+- `save.py` - File I/O operations  
+- Comprehensive test coverage in `tests/{phase}/`
+
+## Data Flow Validation
+- Each phase reads from previous phase output
+- Writes to `data/{phase}/YYYY-MM.json`
+- Include metadata (retrieval timestamps, missing data) in output files
+- Validate data integrity between phases
+
+## Date Handling Standards
+- Use ISO 8601 format (YYYY-MM) for month specifications
+- Support both individual months and date ranges in CLI
+- Handle missing data gracefully with sensible defaults
+
+```python
+from datetime import datetime
+import dateparser
+
+def validate_month_format(month: str) -> bool:
+    """Validate month is in YYYY-MM format."""
+    try:
+        datetime.strptime(month, "%Y-%m")
+        return True
+    except ValueError:
+        return False
+
+def parse_date_range(start_month: str, end_month: str) -> list[str]:
+    """Generate list of months between start and end."""
+    # Implementation for date range handling
+    pass
+```
+
+## JSON Output Standards
+- Pretty-print JSON output for human readability
+- Include metadata at top level
+- Sort data consistently (by UTC timestamp for comments)
+- Use UTF-8 encoding explicitly
+
+```python
+import json
+from datetime import datetime
+
+def save_phase_output(data: dict, output_path: Path, phase_name: str):
+    """Standard JSON output format for pipeline phases."""
+    output = {
+        "phase": phase_name,
+        "processed_utc": datetime.utcnow().isoformat() + "Z",
+        "metadata": {
+            "total_items": len(data.get("items", [])),
+            "processing_errors": data.get("errors", []),
+            "missing_data": data.get("missing", [])
+        },
+        **data
+    }
+    
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(output, f, indent=2, ensure_ascii=False)
+```
+
+## Product Matching Standards
+- Prioritize longer, more specific patterns over shorter ones
+- Normalize product names consistently across phases
+- Use strategy pattern for complex matching scenarios
+- Cache compiled regex patterns and loaded catalogs
+
+## YAML Catalog Structure
+Maintain consistent structure in product catalogs:
+
+```yaml
+Brand Name:
+  patterns:
+    - brand.*pattern
+  scents:
+    Scent Name:
+      patterns:
+        - scent.*pattern
+      format: Soap  # or Cream, Oil, etc.
+  default_format: Soap
+```
+
+## Error Handling in Data Processing
+```python
+def process_batch(items: list, batch_size: int = 1000):
+    """Process items in batches to manage memory usage."""
+    errors = []
+    processed = []
+    
+    for i in range(0, len(items), batch_size):
+        batch = items[i:i + batch_size]
+        try:
+            batch_result = process_batch_items(batch)
+            processed.extend(batch_result)
+        except Exception as e:
+            logger.error(f"Error processing batch {i}-{i+batch_size}: {e}")
+            errors.append({
+                "batch_start": i,
+                "batch_end": i + batch_size,
+                "error": str(e)
+            })
+    
+    return processed, errors
+```
+
+## Memory Management
+- Process comments in batches to manage memory usage
+- Use generators for processing large datasets
+- Consider parallelization for independent operations
+
+## Data Validation Patterns
+```python
+def validate_sotd_comment(comment: dict) -> bool:
+    """Validate SOTD comment structure."""
+    required_fields = ['id', 'body', 'created_utc', 'author']
+    return all(field in comment for field in required_fields)
+
+def validate_extraction_result(result: dict) -> bool:
+    """Validate product extraction result."""
+    return (
+        'original_comment' in result and
+        'extracted_products' in result and
+        isinstance(result['extracted_products'], dict)
+    )
+```
+
+## Manual Override Handling
+- Provide clear validation for manual thread includes/excludes
+- Store manual overrides in `overrides/` directory
+- Validate override files with clear error messages
+
+```python
+def load_manual_overrides(override_path: Path) -> dict:
+    """Load and validate manual override file."""
+    try:
+        with open(override_path, 'r', encoding='utf-8') as f:
+            overrides = json.load(f)
+        
+        # Validate structure
+        required_keys = ['include', 'exclude']
+        if not all(key in overrides for key in required_keys):
+            raise ValueError(f"Override file missing required keys: {required_keys}")
+            
+        return overrides
+    except (json.JSONDecodeError, FileNotFoundError) as e:
+        logger.error(f"Error loading overrides from {override_path}: {e}")
+        return {"include": [], "exclude": []}
+```
