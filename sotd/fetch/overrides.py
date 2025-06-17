@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Sequence
+from typing import Any, Dict, List, Sequence, Tuple
 
 import praw
 from praw.models import Submission

@@ -12,7 +12,7 @@ from typing import List, Sequence, TypeVar, cast
 
 import praw
 from praw.models import Comment, Submission
-from prawcore.exceptions import RequestException, NotFound
+from prawcore.exceptions import NotFound, RequestException
 
 # PRAW 7.x has RateLimitExceeded; newer prawcore switched to TooManyRequests.
 try:
