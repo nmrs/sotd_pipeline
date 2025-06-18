@@ -32,12 +32,14 @@ The enrich phase performs sophisticated analysis requiring knowledge of matched 
 - [x] **2.4** Validate extraction accuracy against existing data
 
 ### Phase 3: Straight Razor Enricher
-- [ ] **3.1** Implement `StraightRazorEnricher` class
-- [ ] **3.2** Create grind extraction patterns (wedge, quarter hollow, half hollow, full hollow, etc.)
-- [ ] **3.3** Create width extraction patterns (4/8", 5/8", 6/8", 7/8", 8/8")
-- [ ] **3.4** Create point type extraction patterns (round, square, French, Spanish, etc.)
-- [ ] **3.5** Add comprehensive tests with real comment examples
-- [ ] **3.6** Handle multiple specification formats and edge cases
+- [x] **3.1** Implement `StraightRazorEnricher` class
+- [x] **3.2** Create grind extraction patterns (wedge, quarter hollow, half hollow, full hollow, etc.)
+- [x] **3.3** Create width extraction patterns (4/8", 5/8", 6/8", 7/8", 8/8")
+- [x] **3.4** Create point type extraction patterns (round, square, French, Spanish, etc.)
+- [x] **3.5** Add comprehensive tests with real comment examples
+- [x] **3.6** Handle multiple specification formats and edge cases
+- [x] **3.7** Preserve catalog data from match phase (e.g., Koraat Moarteen specifications)
+- [x] **3.8** Merge user comment data with catalog data (user takes precedence)
 
 ### Phase 4: DE Plate Enrichers
 - [ ] **4.1** Implement `GameChangerEnricher` class
@@ -87,7 +89,7 @@ The enrich phase performs sophisticated analysis requiring knowledge of matched 
   - Tests validate extraction accuracy and match original matcher behavior
 
 ### Prompt 3: Straight Razor Enricher Implementation
-- [ ] **P3** Implement StraightRazorEnricher with comprehensive specification extraction
+- [x] **P3** Implement StraightRazorEnricher with comprehensive specification extraction
   - Grind type extraction (wedge, hollow variants)
   - Width extraction (fractional and decimal formats)
   - Point type extraction (multiple naming conventions)
@@ -202,8 +204,8 @@ The enrich phase performs sophisticated analysis requiring knowledge of matched 
 ### New Files
 - [x] `sotd/enrich/enricher.py` - Base enricher interface
 - [x] `sotd/enrich/registry.py` - Enricher registry system
-- [ ] `sotd/enrich/blade_enricher.py` - Blade count enricher
-- [ ] `sotd/enrich/straight_razor_enricher.py` - Straight razor enricher
+- [x] `sotd/enrich/blade_enricher.py` - Blade count enricher
+- [x] `sotd/enrich/straight_razor_enricher.py` - Straight razor enricher
 - [ ] `sotd/enrich/game_changer_enricher.py` - Game Changer enricher
 - [ ] `sotd/enrich/christopher_bradley_enricher.py` - Christopher Bradley enricher
 - [ ] `sotd/enrich/run.py` - CLI interface
@@ -238,6 +240,8 @@ The enrich phase performs sophisticated analysis requiring knowledge of matched 
 
 ---
 
-**Last Updated**: Phase 1 completed
-**Current Phase**: Phase 1 - Foundation Infrastructure ✅ COMPLETED
-**Next Prompt**: P2 - Implement BladeCountEnricher with migration from match phase 
+**Last Updated**: Phase 3 completed with catalog data preservation
+**Current Phase**: Phase 3 - Straight Razor Enricher ✅ COMPLETED
+**Next Prompt**: P4 - Implement GameChangerEnricher for RazoRock Game Changer variants
+
+**Note**: Catalog data preservation enhancement completed - match phase now preserves all YAML catalog specifications (e.g., Koraat Moarteen grind, width, point) and enrich phase merges with user specifications. 

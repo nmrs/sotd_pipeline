@@ -40,7 +40,7 @@ Match extracted product names to known item catalogs to normalize naming:
 - `Karve CB` → `Karve Christopher Bradley`
 - `RR GC .84` → `RazoRock Game Changer 0.84`
 
-Track original values, match results, and confidence levels. Save to:
+Track original values, match results, and confidence levels. **Preserves all catalog specifications** (e.g., straight razor grind, width, point type from YAML catalog). Save to:
 
 - `data/matched/YYYY-MM.json`
 

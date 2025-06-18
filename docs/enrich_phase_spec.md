@@ -82,6 +82,19 @@ def enrich_record(record: dict) -> dict:
         },
         "match_type": "exact",
         "pattern": "feather.*hi"
+    },
+    "razor": {
+        "original": "Koraat Moarteen",
+        "matched": {
+            "brand": "Koraat",
+            "model": "Moarteen (r/Wetshaving exclusive)",
+            "format": "Straight",
+            "grind": "Full Hollow",
+            "point": "Square",
+            "width": "15/16"
+        },
+        "match_type": "exact",
+        "pattern": "koraat.*moarteen"
     }
 }
 ```
@@ -140,21 +153,23 @@ All enrichers must include:
 
 **Purpose**: Extract straight razor specifications when product is identified as a straight razor
 
-**Applies To**: Records where `razor.matched.type == "straight"` or specific straight razor brands
+**Applies To**: Records where `razor.matched.format == "Straight"` or specific straight razor brands
 
 **Extraction Patterns**:
 - **Grind**: `"full hollow"`, `"wedge"`, `"half hollow"`
 - **Width**: `"6/8"`, `"7/8"` (converted to eighths)
 - **Point**: `"round"`, `"square"`, `"barber's notch"`
 
+**Catalog Data Preservation**: Preserves specifications from match phase catalog data (e.g., Koraat Moarteen grind, width, point) and merges with user comment specifications (user takes precedence).
+
 **Example Output**:
 ```python
 "enriched": {
-    "grind": "full hollow",
-    "width_eighths": 6,
-    "point": "round", 
+    "grind": "Full Hollow",  # From catalog
+    "width_eighths": 7,      # From catalog (15/16 converted)
+    "point": "Square",       # From catalog
     "_enriched_by": "StraightRazorEnricher",
-    "_extraction_source": "combined_patterns"
+    "_extraction_source": "catalog_data"
 }
 ```
 
