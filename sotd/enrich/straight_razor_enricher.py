@@ -64,18 +64,18 @@ class StraightRazorEnricher(BaseEnricher):
         return False
 
     def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
-        """Extract straight razor specifications from the original comment text.
+        """Extract straight razor specifications from the user-supplied razor_extracted field.
 
         Args:
             field_data: The matched razor data from the match phase
-            original_comment: The original user comment text for extraction
+            original_comment: The user-supplied razor_extracted field (not the full comment)
 
         Returns:
             Dictionary with grind, width_eighths, and point if found, or None if no specs detected.
             Includes _enriched_by and _extraction_source metadata fields.
             Preserves existing specifications from the match phase catalog data.
         """
-        # Extract specifications from user comment
+        # Extract specifications from the razor_extracted field
         user_grind = self._extract_grind(original_comment)
         user_width_eighths = self._extract_width(original_comment)
         user_point = self._extract_point(original_comment)

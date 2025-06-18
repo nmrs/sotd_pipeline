@@ -31,17 +31,17 @@ class ChristopherBradleyEnricher(BaseEnricher):
         return brand == "Karve" and ("Christopher Bradley" in model or "CB" in model)
 
     def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
-        """Extract Christopher Bradley specifications from the original comment text.
+        """Extract Christopher Bradley specifications from the user-supplied razor_extracted field.
 
         Args:
             field_data: The matched razor data (unused in this enricher)
-            original_comment: The original user comment text for extraction
+            original_comment: The user-supplied razor_extracted field (not the full comment)
 
         Returns:
             Dictionary with plate and material if found, or None if no specifications detected.
             Includes _enriched_by and _extraction_source metadata fields.
         """
-        razor_string = field_data.get("model", "")
+        razor_string = original_comment
         if not razor_string:
             return None
         plate_level = self._extract_plate_level(razor_string)

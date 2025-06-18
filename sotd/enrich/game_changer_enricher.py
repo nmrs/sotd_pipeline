@@ -31,18 +31,17 @@ class GameChangerEnricher(BaseEnricher):
         return brand == "RazoRock" and "Game Changer" in model
 
     def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
-        """Extract Game Changer specifications from the razor field data.
+        """Extract Game Changer specifications from the user-supplied razor_extracted field.
 
         Args:
-            field_data: The matched razor data containing the user's razor string
-            original_comment: The original user comment text (unused)
+            field_data: The matched razor data (unused in this enricher)
+            original_comment: The user-supplied razor_extracted field (not the full comment)
 
         Returns:
             Dictionary with gap and variant if found, or None if no specifications detected.
             Includes _enriched_by and _extraction_source metadata fields.
         """
-        # Extract the user's razor string from the field data
-        razor_string = field_data.get("model", "")
+        razor_string = original_comment
         if not razor_string:
             return None
 

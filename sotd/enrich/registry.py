@@ -55,7 +55,7 @@ class EnricherRegistry:
 
         Args:
             record: A comment record with matched product data
-            original_comment: The original user comment text
+            original_comment: The original user comment text (unused for enrichment)
 
         Returns:
             The enriched record with additional specifications
@@ -72,12 +72,16 @@ class EnricherRegistry:
             if not field_data:
                 continue
 
+            # Use the corresponding *_extracted field for enrichment
+            extracted_field_name = f"{field}_extracted"
+            extracted_value = record.get(extracted_field_name, "")
+
             field_enriched_data = {}
 
             for enricher in enrichers:
                 try:
                     if enricher.applies_to(record):
-                        enrichment_result = enricher.enrich(field_data, original_comment)
+                        enrichment_result = enricher.enrich(field_data, extracted_value)
                         if enrichment_result:
                             field_enriched_data.update(enrichment_result)
                             logger.debug(f"Applied {enricher.get_enricher_name()} to {field}")

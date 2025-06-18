@@ -21,13 +21,26 @@ class BrushEnricher(BaseEnricher):
         )
 
     def enrich(self, field_data: dict, original_comment: str) -> Optional[dict]:
-        """Extract brush specifications from user comment and merge with catalog data."""
+        """Extract brush specifications from the user-supplied brush_extracted field and merge
+        with catalog data.
+
+        Args:
+            field_data: The matched brush data from the match phase
+            original_comment: The user-supplied brush_extracted field (not the full comment)
+
+        Returns:
+            Dictionary with enriched data, or None if no enrichment possible.
+        """
         if not field_data or not isinstance(field_data, dict):
             return None
 
-        # Extract specifications from user comment
-        user_knot_size = self._extract_knot_size(original_comment)
-        user_fiber = self._extract_fiber(original_comment)
+        # All extraction is from the brush_extracted field (passed as original_comment)
+        brush_extracted = original_comment
+        if not brush_extracted:
+            return None
+
+        user_knot_size = self._extract_knot_size(brush_extracted)
+        user_fiber = self._extract_fiber(brush_extracted)
 
         # Start with catalog data (preserved from match phase)
         enriched_data = {

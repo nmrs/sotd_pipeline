@@ -26,11 +26,11 @@ class BladeCountEnricher(BaseEnricher):
         return "blade" in record and record["blade"] is not None
 
     def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
-        """Extract blade use count from the original comment text.
+        """Extract blade use count from the user-supplied blade_extracted field.
 
         Args:
             field_data: The matched blade data (unused in this enricher)
-            original_comment: The original user comment text for extraction
+            original_comment: The user-supplied blade_extracted field (not the full comment)
 
         Returns:
             Dictionary with use_count if found, or None if no count detected.
