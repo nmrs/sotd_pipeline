@@ -1,5 +1,359 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
+# Enrich Phase Architecture Rules for SOTD Pipeline
+
+## Core Philosophy
+The enrich phase performs sophisticated metadata extraction that **requires knowing the matched product first**. This distinguishes it from the match phase, which focuses on product identification.
+
+**Key Principle**: If an extraction can be done without knowing the specific product, it belongs in match phase. If it needs product context, it belongs in enrich phase.
+
+## Base Enricher Interface
+All enrichers must implement this interface for consistency and extensibility:
+
+```python
+class BaseEnricher:
+    """Base class for all product enrichers."""
+    
+    target_field: str  # "blade", "razor", "brush", "soap"
+    
+    def applies_to(self, record: dict) -> bool:
+        """Return True if this enricher should process this record.
+        
+        Self-determination pattern: Each enricher decides its own applicability
+        rather than having complex logic in the main controller.
+        """
+        raise NotImplementedError
+    
+    def enrich(self, field_data: dict) -> dict:
+        """Enrich field data, return updated version with enriched section.
+        
+        Always add enriched section, even if partial extraction.
+        Never modify existing matched data - only add enriched section.
+        """
+        raise NotImplementedError
+```
+
+## Enricher Self-Determination Pattern
+Each enricher must implement its own `applies_to()` logic to keep the main controller clean:
+
+```python
+# GOOD: Enricher handles complex applicability logic
+class GameChangerEnricher(BaseEnricher):
+    target_field = "razor"
+    
+    def applies_to(self, record: dict) -> bool:
+        razor = record.get("razor", {})
+        matched = razor.get("matched", {})
+        return (
+            matched.get("brand") == "RazoRock" and
+            "Game Changer" in matched.get("model", "") and
+            matched.get("format") == "DE"
+        )
+
+# BAD: Don't put complex logic in main controller
+def enrich_record(record: dict) -> dict:
+    if (record.get("razor", {}).get("matched", {}).get("brand") == "RazoRock" and
+        "Game Changer" in record.get("razor", {}).get("matched", {}).get("model", "")):
+        # This gets unmaintainable quickly
+```
+
+## Enriched Section Standards
+All enrichers must follow this data structure pattern:
+
+```python
+# REQUIRED: Always include metadata
+"enriched": {
+    "use_count": 3,                          # Actual extracted data
+    "_enriched_by": "BladeCountEnricher",    # Class name for debugging
+    "_extraction_source": "parenthetical_pattern"  # Method used
+}
+
+# PARTIAL EXTRACTION: Include what you can, null for missing
+"enriched": {
+    "grind": "full hollow",      # Successfully extracted
+    "width_eighths": null,       # Not found in text
+    "point": "round",            # Successfully extracted
+    "_enriched_by": "StraightRazorEnricher",
+    "_extraction_source": "partial_pattern_match"
+}
+```
+
+## Error Handling Philosophy
+- **Fail fast for interactive use**: Pipeline runs interactively, so crash immediately on errors
+- **Prefer partial data**: Extract what you can, mark missing fields as null  
+- **Log context**: Include enough information to debug extraction issues
+- **Let exceptions bubble up**: Developer needs to see and fix issues immediately
+
+```python
+def enrich_record(record: dict) -> dict:
+    result = record.copy()
+    for enricher in enrichers:
+        if enricher.applies_to(result):
+            target_field = enricher.target_field
+            # Let exceptions bubble up - fail fast for interactive development
+            result[target_field] = enricher.enrich(result[target_field])
+    return result
+
+# Individual enrichers should validate input and provide clear error messages
+class BladeCountEnricher(BaseEnricher):
+    def enrich(self, field_data: dict) -> dict:
+        if not isinstance(field_data, dict):
+            raise ValueError(f"Expected dict, got {type(field_data)}: {field_data}")
+        
+        original = field_data.get("original")
+        if not original:
+            raise ValueError(f"Missing 'original' field in blade data: {field_data}")
+        
+        # Clear error messages help with interactive debugging
+        for source, pattern in self.patterns.items():
+            if match := pattern.search(original):
+                return {
+                    **field_data,
+                    "enriched": {
+                        "use_count": int(match.group(1)),
+                        "_enriched_by": self.__class__.__name__,
+                        "_extraction_source": source
+                    }
+                }
+        
+        # No match found - return unchanged (this is not an error)
+        return field_data
+```
+
+## Field-Focused Architecture
+Unlike match phase which processes all products, enrich uses field-focused routing:
+
+```python
+# Each enricher specifies its target field
+class BladeCountEnricher(BaseEnricher):
+    target_field = "blade"  # Only processes blade field
+    
+class StraightRazorEnricher(BaseEnricher):
+    target_field = "razor"  # Only processes razor field
+
+# Main controller routes to correct field
+def enrich_record(record: dict) -> dict:
+    result = record.copy()
+    for enricher in enrichers:
+        if enricher.applies_to(result):
+            target_field = enricher.target_field
+            result[target_field] = enricher.enrich(result[target_field])
+    return result
+```
+
+## Extraction Pattern Standards
+
+### Regex Compilation
+Compile patterns once in constructor for performance:
+
+```python
+class BladeCountEnricher(BaseEnricher):
+    def __init__(self):
+        # Compile once, use many times
+        self.patterns = {
+            "parenthetical": re.compile(r"\((\d+)\)", re.IGNORECASE),
+            "bracketed": re.compile(r"\[(\d+)\]", re.IGNORECASE),
+            "prefixed": re.compile(r"(\d+)x\s", re.IGNORECASE)
+        }
+    
+    def enrich(self, field_data: dict) -> dict:
+        original = field_data.get("original", "")
+        
+        for source, pattern in self.patterns.items():
+            if match := pattern.search(original):
+                return {
+                    **field_data,
+                    "enriched": {
+                        "use_count": int(match.group(1)),
+                        "_enriched_by": self.__class__.__name__,
+                        "_extraction_source": source
+                    }
+                }
+```
+
+### Product-Specific Detection
+Use matched product data to determine applicability:
+
+```python
+class ChristopherBradleyEnricher(BaseEnricher):
+    def applies_to(self, record: dict) -> bool:
+        razor = record.get("razor", {})
+        matched = razor.get("matched", {})
+        return (
+            isinstance(matched, dict) and
+            matched.get("brand") == "Karve" and
+            "Christopher Bradley" in matched.get("model", "")
+        )
+```
+
+## Extensibility Guidelines
+
+### Case-by-Case Enricher Creation
+Decide whether to create separate enrichers or combine based on implementation complexity:
+
+```python
+# SEPARATE: Different extraction logic
+class GameChangerEnricher(BaseEnricher):
+    # Handles .68, .84, 1.05 gap patterns
+    
+class ChristopherBradleyEnricher(BaseEnricher):
+    # Handles A, B, C, D, E, F plate patterns
+
+# COMBINED: Similar extraction logic
+class DEPlateEnricher(BaseEnricher):
+    def __init__(self):
+        self.sub_enrichers = [
+            game_changer_enricher,
+            christopher_bradley_enricher
+        ]
+```
+
+### Future Extension Pattern
+Add new enrichers by implementing the interface:
+
+```python
+class AdjustableRazorEnricher(BaseEnricher):
+    target_field = "razor"
+    
+    def applies_to(self, record: dict) -> bool:
+        # Check for Progress, Slim, etc.
+        pass
+    
+    def enrich(self, field_data: dict) -> dict:
+        # Extract dial settings
+        pass
+
+# Add to main controller
+enrichers = [
+    blade_count_enricher,
+    straight_razor_enricher,
+    adjustable_razor_enricher,  # New enricher
+    # ... existing enrichers
+]
+```
+
+## Data Preservation Rules
+- **Never modify matched section**: Only add enriched section alongside existing data
+- **Preserve original field structure**: Copy input, add enriched section
+- **Maintain field metadata**: Keep match_type, pattern, etc. from match phase
+
+```python
+def enrich(self, field_data: dict) -> dict:
+    # GOOD: Preserve existing structure
+    return {
+        **field_data,  # Keep original, matched, match_type, pattern
+        "enriched": {
+            # Add new enriched section
+        }
+    }
+    
+    # BAD: Don't modify existing data
+    field_data["matched"]["use_count"] = 3  # DON'T DO THIS
+```
+
+## Testing Patterns
+
+### Unit Test Structure
+Each enricher needs comprehensive test coverage:
+
+```python
+def test_blade_count_enricher_parenthetical():
+    enricher = BladeCountEnricher()
+    field_data = {
+        "original": "Feather (3)",
+        "matched": {"brand": "Feather", "model": "Hi-Stainless"}
+    }
+    
+    result = enricher.enrich(field_data)
+    
+    assert result["enriched"]["use_count"] == 3
+    assert result["enriched"]["_enriched_by"] == "BladeCountEnricher"
+    assert result["enriched"]["_extraction_source"] == "parenthetical_pattern"
+    # Ensure original data preserved
+    assert result["matched"] == field_data["matched"]
+
+def test_enricher_applies_to_logic():
+    enricher = GameChangerEnricher()
+    
+    # Should apply
+    record = {"razor": {"matched": {"brand": "RazoRock", "model": "Game Changer 0.84"}}}
+    assert enricher.applies_to(record) is True
+    
+    # Should not apply
+    record = {"razor": {"matched": {"brand": "Karve", "model": "Christopher Bradley"}}}
+    assert enricher.applies_to(record) is False
+```
+
+### Integration Test Pattern
+Test the full enrichment pipeline:
+
+```python
+def test_enrich_record_multiple_enrichers():
+    record = {
+        "blade": {
+            "original": "Feather (3)",
+            "matched": {"brand": "Feather", "model": "Hi-Stainless"}
+        },
+        "razor": {
+            "original": "RazoRock Game Changer 0.84",
+            "matched": {"brand": "RazoRock", "model": "Game Changer 0.84"}
+        }
+    }
+    
+    enriched = enrich_record(record)
+    
+    # Both enrichers should have run
+    assert "enriched" in enriched["blade"]
+    assert "enriched" in enriched["razor"]
+    assert enriched["blade"]["enriched"]["use_count"] == 3
+    assert enriched["razor"]["enriched"]["plate_gap"] == 0.84
+```
+
+## File Organization Standards
+Follow the established phase pattern:
+
+```
+sotd/enrich/
+├── __init__.py
+├── run.py                         # CLI entry point
+├── save.py                        # File I/O operations  
+├── enrich.py                      # Main controller
+├── base_enricher.py               # Base interface
+├── blade_count_enricher.py        # Individual enrichers
+├── straight_razor_enricher.py     # One per feature
+└── game_changer_enricher.py       # Case-by-case decision
+
+tests/enrich/
+├── test_base_enricher.py
+├── test_blade_count_enricher.py   # Mirror source structure
+├── test_straight_razor_enricher.py
+└── test_enrich_integration.py     # Full pipeline tests
+```
+
+## CLI and I/O Standards
+Follow existing phase conventions:
+
+```python
+# CLI interface
+python -m sotd.enrich.run --month 2025-05 [--debug] [--force]
+python -m sotd.enrich.run --range 2024-12:2025-05 [--debug] [--force]
+
+# Output metadata structure
+{
+    "meta": {
+        "month": "2025-05",
+        "processed_at": "2025-05-21T18:40:00Z",
+        "records_input": 1247,
+        "records_enriched": 1198,
+        "enrichers_applied": {
+            "BladeCountEnricher": 891,
+            "StraightRazorEnricher": 23
+        },
+        "processing_errors": []
+    },
+    "data": [/* enriched records */]
+}
+```

@@ -351,6 +351,7 @@ enrich-range:
 - **Edge cases**: Test malformed input, ambiguous data, extraction failures
 - **Pattern validation**: Verify regex patterns work correctly
 - **Metadata consistency**: Ensure all enrichers follow metadata standards
+- **Test Data Realism**: All enrich phase tests **must** use realistic, user-like extracted strings for the `extracted_field` argument (e.g., `"Astra SP (3)", "Simpson Chubby 2 26mm boar"`). In registry and integration tests, all `*_extracted` fields **must** be strings, not booleans. Assertions should be updated to match the expected enrichment output for the new, realistic extracted values.
 
 ### Integration Tests
 - **Full pipeline**: Test complete enrichment process
