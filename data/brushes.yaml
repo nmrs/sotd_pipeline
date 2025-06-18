@@ -875,6 +875,7 @@ other_brushes:
     - chis.*hou
     - chis.*fou
     - \bc(?:\&|and|\+)h\b
+    - \bch\b
     - broomstick
     - season.*witch
   Col. Ichabod Conk:
