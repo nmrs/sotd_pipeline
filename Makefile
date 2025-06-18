@@ -1,4 +1,4 @@
-.PHONY: all lint format typecheck test coverage fetch ruff-format
+.PHONY: all lint format typecheck test coverage fetch enrich
 
 all: lint format typecheck test
 
@@ -6,7 +6,7 @@ all: lint format typecheck test
 lint:
 	ruff check .
 
-# Format code: Black first, then Ruff’s auto-formatter (optional)
+# Format code: Black first, then Ruff's auto-formatter (optional)
 format: ruff-format
 	black .
 
@@ -24,3 +24,6 @@ coverage:
 
 fetch:
 	python sotd/fetch/run.py --month 2025-05
+
+enrich:
+	python sotd/enrich/run.py --month 2025-05
