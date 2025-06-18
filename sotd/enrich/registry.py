@@ -65,22 +65,16 @@ class EnricherRegistry:
 
         # Process each field that has enrichers
         for field, enrichers in self._enrichers_by_field.items():
-            if field not in enriched_record:
-                continue
-
-            field_data = enriched_record[field]
+            field_data = enriched_record.get(field)
             if not field_data:
                 continue
 
             # Use the corresponding *_extracted field for enrichment, else fall back to
             # product['original']
             extracted_field_name = f"{field}_extracted"
-            if extracted_field_name in record:
-                extracted_value = record[extracted_field_name]
-            elif isinstance(field_data, dict) and "original" in field_data:
-                extracted_value = field_data["original"]
-            else:
-                extracted_value = ""
+            extracted_value = record.get(extracted_field_name, "")
+            if not extracted_value and isinstance(field_data, dict):
+                extracted_value = field_data.get("original", "")
 
             field_enriched_data = {}
 

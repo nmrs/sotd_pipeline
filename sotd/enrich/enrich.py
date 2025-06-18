@@ -9,9 +9,16 @@ from .registry import enricher_registry
 from .straight_razor_enricher import StraightRazorEnricher
 from .super_speed_tip_enricher import SuperSpeedTipEnricher
 
+# Track if enrichers have been set up to avoid repeated setup
+_enrichers_setup = False
+
 
 def setup_enrichers():
     """Set up all enrichers in the registry."""
+    global _enrichers_setup
+    if _enrichers_setup:
+        return  # Already set up, skip
+
     # Register all enrichers
     enricher_registry.register(BladeCountEnricher())
     enricher_registry.register(BrushEnricher())
@@ -20,6 +27,8 @@ def setup_enrichers():
     enricher_registry.register(ChristopherBradleyEnricher())
     enricher_registry.register(BlackbirdPlateEnricher())
     enricher_registry.register(SuperSpeedTipEnricher())
+
+    _enrichers_setup = True
 
 
 def enrich_comments(comments: list[dict], original_comments: list[str]) -> list[dict]:
@@ -32,7 +41,7 @@ def enrich_comments(comments: list[dict], original_comments: list[str]) -> list[
     Returns:
         List of enriched comment records
     """
-    # Ensure enrichers are set up
+    # Ensure enrichers are set up (will be skipped if already done)
     setup_enrichers()
 
     # Enrich all comments

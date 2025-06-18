@@ -5,7 +5,7 @@ from typing import Optional, Sequence
 from tqdm import tqdm
 
 from sotd.cli_utils.date_span import month_span
-from sotd.enrich.enrich import enrich_comments
+from sotd.enrich.enrich import enrich_comments, setup_enrichers
 from sotd.enrich.save import calculate_enrichment_stats, load_matched_data, save_enriched_data
 
 
@@ -31,20 +31,18 @@ def _process_month(
 
     original_metadata, comments = matched_result
 
-    # Extract original comment texts for enrichment
+    # Extract original comment texts for enrichment - optimized version
     original_comments = []
     for comment in comments:
         # Get the original comment text from the extracted field if available
         # This is the user's original input that we want to enrich from
-        original_text = ""
-        if "razor_extracted" in comment:
-            original_text = comment["razor_extracted"]
-        elif "blade_extracted" in comment:
-            original_text = comment["blade_extracted"]
-        elif "brush_extracted" in comment:
-            original_text = comment["brush_extracted"]
-        elif "soap_extracted" in comment:
-            original_text = comment["soap_extracted"]
+        original_text = (
+            comment.get("razor_extracted")
+            or comment.get("blade_extracted")
+            or comment.get("brush_extracted")
+            or comment.get("soap_extracted")
+            or ""
+        )
         original_comments.append(original_text)
 
     # Enrich the comments
@@ -76,6 +74,9 @@ def run(args: argparse.Namespace) -> None:
     """Run the enrich phase for the specified date range."""
     months = month_span(args)
     base_path = Path(args.out_dir)
+
+    # Set up enrichers once at the start - this is a major performance optimization
+    setup_enrichers()
 
     results = []
     for year, month in tqdm(months, desc="Enriching months", unit="month"):
