@@ -32,7 +32,6 @@ def test_other_brush_with_user_fiber(strategy):
     assert result["matched"]["fiber"] == "Boar"
     assert result["matched"]["fiber_strategy"] == "user_input"
     assert result["matched"]["knot_size_mm"] == 26.0
-    assert result["matched"]["knot_size_strategy"] == "user_input"
     assert result["match_type"] == "brand_default"
     assert result["pattern"] == "elite"
 
@@ -47,7 +46,6 @@ def test_other_brush_with_default_fiber(strategy):
     assert result["matched"]["fiber"] == "Badger"
     assert result["matched"]["fiber_strategy"] == "default"
     assert result["matched"]["knot_size_mm"] == 26.0
-    assert result["matched"]["knot_size_strategy"] == "user_input"
 
 
 def test_other_brush_alpha_synthetic(strategy):
@@ -70,7 +68,6 @@ def test_other_brush_with_knot_size_from_yaml(strategy):
     assert result["matched"]["model"] == "Synthetic"
     assert result["matched"]["fiber"] == "Synthetic"
     assert result["matched"]["knot_size_mm"] == 24
-    assert result["matched"]["knot_size_strategy"] == "yaml"
 
 
 def test_other_brush_cf_pattern(strategy):

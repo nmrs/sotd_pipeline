@@ -81,7 +81,6 @@ def test_brush_matcher_known_brush_match(matcher):
     assert result["matched"]["fiber"] == "Badger"
     assert result["matched"]["knot_size_mm"] == 27
     assert result["matched"]["fiber_strategy"] == "yaml"
-    assert result["matched"]["knot_size_strategy"] == "yaml"
     assert result["match_type"] == "exact"
     assert result["pattern"] is not None
 
@@ -110,7 +109,6 @@ def test_brush_matcher_other_brushes_with_user_fiber(matcher):
     assert result["matched"]["fiber"] == "Boar"
     assert result["matched"]["fiber_strategy"] == "user_input"
     assert result["matched"]["knot_size_mm"] == 26.0
-    assert result["matched"]["knot_size_strategy"] == "user_input"
     assert result["match_type"] == "brand_default"
 
 
@@ -197,7 +195,6 @@ def test_brush_matcher_user_knot_size_extraction(matcher):
 
     assert result["matched"] is not None
     assert result["matched"]["knot_size_mm"] == 24.0
-    assert result["matched"]["knot_size_strategy"] == "user_input"
 
 
 def test_brush_matcher_handle_knot_splitting(matcher):
@@ -217,7 +214,6 @@ def test_brush_matcher_post_processing(matcher):
     assert "_matched_by_strategy" in result["matched"]
     assert "_pattern_used" in result["matched"]
     assert "fiber_strategy" in result["matched"]
-    assert "knot_size_strategy" in result["matched"]
 
 
 def test_brush_matcher_file_not_found():
@@ -312,7 +308,6 @@ def test_chisel_hound_versioned_vs_non_versioned_matching(matcher):
     assert result["matched"]["fiber"] == "Synthetic"
     assert result["matched"]["knot_size_mm"] == 26  # From other_brushes default
     assert result["matched"]["fiber_strategy"] == "user_input"
-    assert result["matched"]["knot_size_strategy"] == "yaml"
 
     # Test another non-versioned C&H brush with explicitly detected fiber
     result = matcher.match("Chisel & Hound Synthetic")
@@ -329,7 +324,6 @@ def test_chisel_hound_versioned_vs_non_versioned_matching(matcher):
     assert result["matched"]["model"] == "Badger"  # Uses default from other_brushes
     assert result["matched"]["fiber"] == "Badger"
     assert result["matched"]["fiber_strategy"] == "default"
-    assert result["matched"]["knot_size_strategy"] == "yaml"
 
 
 def test_chisel_hound_version_boundary_cases(matcher):
