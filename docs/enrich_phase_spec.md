@@ -213,6 +213,24 @@ All enrichers must include:
 }
 ```
 
+### 5. Blackbird Plate Enricher
+
+**Purpose**: Extract plate information for Blackland Blackbird razors
+
+**Applies To**: Records where `razor.matched.brand == "Blackland"` and `"Blackbird"` in model
+
+**Extraction Patterns**:
+- Plate types: `"Standard"`, `"Lite"`, `"OC"` (with `"Open Comb"` as synonym for `"OC"`)
+
+**Example Output**:
+```python
+"enriched": {
+    "plate": "Standard",
+    "_enriched_by": "BlackbirdPlateEnricher",
+    "_extraction_source": "user_comment"
+}
+```
+
 ## Error Handling Strategy
 
 ### Partial Extraction Success

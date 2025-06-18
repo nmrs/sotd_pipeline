@@ -55,7 +55,10 @@ Analyze matched field values to extract structured metadata that benefits from k
   - Width: string fraction (e.g., "6/8", "15/16", "3/4", "1.0")
   - Point: round, square, french, spanish, barbers_notch, spear, spike (with 'tip' as synonym for 'point')
   - Only applies to razors with format: Straight
-- DE razor plate information (Game Changer gaps, Christopher Bradley plates)
+- DE razor plate information (Game Changer gaps, Christopher Bradley plates, Blackbird plates)
+  - Game Changer: gap (.68, .76, .84, 1.05), variant (OC, JAWS)
+  - Christopher Bradley: plate (A-G), material (brass, copper, stainless)
+  - Blackbird: plate (Standard, Lite, OC/Open Comb)
 
 Uses an extensible enricher strategy pattern for sophisticated analysis. Save to:
 

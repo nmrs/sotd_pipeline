@@ -55,8 +55,10 @@ The enrich phase performs sophisticated analysis requiring knowledge of matched 
 - [x] **4.2** Implement `ChristopherBradleyEnricher` class  
   - Plate level extraction (AA-G)
   - Plate type extraction (SB/OC, SB default)
-- [x] **4.3** Add comprehensive tests for both enrichers
-- [x] **4.4** Validate against known product specifications
+- [x] **4.3** Implement `BlackbirdPlateEnricher` class
+  - Plate type extraction (Standard, Lite, OC/Open Comb)
+- [x] **4.4** Add comprehensive tests for all DE plate enrichers
+- [x] **4.5** Validate against known product specifications
 
 > **Note:** Both GameChangerEnricher and ChristopherBradleyEnricher are finalized. All tests pass. Logic matches current product specs and user requirements. Parsing is from the razor field only. No gap/variant restrictions for Game Changer. Christopher Bradley extracts plate level (AA-G) and plate type (SB/OC, SB default).
 
