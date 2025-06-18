@@ -256,6 +256,9 @@ def enrich(self, field_data: dict) -> dict:
 
 ## Testing Patterns
 
+> **Test Data Realism:**
+> All enrich phase tests **must** use realistic, user-like extracted strings for the `extracted_field` argument (e.g., `"Astra SP (3)", "Simpson Chubby 2 26mm boar"`). In registry and integration tests, all `*_extracted` fields **must** be strings, not booleans. Assertions should be updated to match the expected enrichment output for the new, realistic extracted values.
+
 ### Unit Test Structure
 Each enricher needs comprehensive test coverage:
 
