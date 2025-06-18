@@ -109,8 +109,8 @@ def _has_non_dg_brand_context(self, text: str) -> bool:
 - Omega: Boar fiber default, numeric model patterns
 - Semogue: Boar fiber default, traditional numbering
 
-## Fiber and Knot Size Strategy Detection
-Always track the source of fiber and knot size information:
+## Fiber Strategy Detection
+Always track the source of fiber information:
 
 ```python
 # Fiber strategy detection
@@ -148,37 +148,47 @@ All brush matches must return consistent structure:
         "_original_knot_text": str | None,  # When split occurred
         "_original_handle_text": str | None,  # When split occurred
         "fiber_strategy": "user_input|yaml|default",
-        "knot_size_strategy": "user_input|yaml|default",
-        "fiber_conflict": str | None,  # User input when conflicted
-        "knot_size_conflict": float | None  # User input when conflicted
+        "fiber_conflict": str | None  # User input when conflicted
     } | None,
     "match_type": "exact|alias|brand|fiber|knot|artisan|unmatched" | None,
     "pattern": str | None
 }
 ```
 
+**Note**: Knot size processing and conflict resolution have been moved to the enrich phase for better catalog data preservation and user input handling.
+
 ## Error Handling and Resilience
 
 ### Strategy Execution Safety
-Always handle strategy failures gracefully:
+For interactive development, fail fast on implementation errors:
 
 ```python
 for strategy in self.strategies:
-    try:
-        result = strategy.match(text)
-        if result and (
-            (isinstance(result, dict) and result.get("matched"))
-            or (isinstance(result, dict) and result.get("brand"))
-        ):
-            return self._process_result(result, strategy)
-    except (AttributeError, KeyError, TypeError, re.error):
-        # Log the error but continue to next strategy
-        logger.warning(f"Strategy {strategy.__class__.__name__} failed for input: {text}")
-        continue
+    # Let implementation errors bubble up - fail fast for debugging
+    result = strategy.match(text)
+    if result and (
+        (isinstance(result, dict) and result.get("matched"))
+        or (isinstance(result, dict) and result.get("brand"))
+    ):
+        return self._process_result(result, strategy)
+
+# Only catch and handle specific known issues at startup
+def _compile_patterns(self, patterns: list[str]) -> list[dict]:
+    compiled = []
+    for pattern in sorted(patterns, key=len, reverse=True):
+        try:
+            compiled.append({
+                "pattern": pattern,
+                "regex": re.compile(pattern, re.IGNORECASE)
+            })
+        except re.error as e:
+            # Fail fast on invalid patterns during initialization
+            raise ValueError(f"Invalid regex pattern '{pattern}': {e}")
+    return compiled
 ```
 
 ### Regex Pattern Compilation
-Compile all patterns at initialization to catch errors early:
+Validate all patterns at initialization to catch errors early:
 
 ```python
 def _compile_patterns(self, patterns: list[str]) -> list[dict]:
@@ -190,8 +200,8 @@ def _compile_patterns(self, patterns: list[str]) -> list[dict]:
                 "regex": re.compile(pattern, re.IGNORECASE)
             })
         except re.error as e:
-            logger.warning(f"Invalid regex pattern '{pattern}': {e}")
-            continue
+            # Fail fast on invalid patterns - these are configuration errors
+            raise ValueError(f"Invalid regex pattern '{pattern}': {e}")
     return compiled
 ```
 

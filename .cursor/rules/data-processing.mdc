@@ -73,6 +73,7 @@ def save_phase_output(data: dict, output_path: Path, phase_name: str):
 - Normalize product names consistently across phases
 - Use strategy pattern for complex matching scenarios
 - Cache compiled regex patterns and loaded catalogs
+- **Preserve all catalog specifications**: Matchers must include all fields from YAML catalog entries (e.g., straight razor grind, width, point type) in match output, not just brand/model/format
 
 ## YAML Catalog Structure
 Maintain consistent structure in product catalogs:
@@ -93,23 +94,25 @@ Brand Name:
 ```python
 def process_batch(items: list, batch_size: int = 1000):
     """Process items in batches to manage memory usage."""
-    errors = []
     processed = []
     
     for i in range(0, len(items), batch_size):
         batch = items[i:i + batch_size]
-        try:
-            batch_result = process_batch_items(batch)
-            processed.extend(batch_result)
-        except Exception as e:
-            logger.error(f"Error processing batch {i}-{i+batch_size}: {e}")
-            errors.append({
-                "batch_start": i,
-                "batch_end": i + batch_size,
-                "error": str(e)
-            })
+        # Fail fast for interactive development - let errors bubble up
+        batch_result = process_batch_items(batch)
+        processed.extend(batch_result)
     
-    return processed, errors
+    return processed
+
+# Only handle specific external errors (API failures, network issues)
+def fetch_reddit_data():
+    try:
+        return reddit_api.fetch_comments()
+    except praw.exceptions.APIException as e:
+        # External API failure - this should be handled gracefully
+        logger.error(f"Reddit API failed: {e}")
+        return None
+    # Internal logic errors should crash immediately
 ```
 
 ## Memory Management

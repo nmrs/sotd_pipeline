@@ -33,10 +33,10 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 - Prefer f-strings over .format() or % formatting
 
 ## Error Handling
-- Use try/except with specific exception types, not bare except
-- Log errors with context using appropriate log levels
-- Gracefully handle missing data (Reddit API failures, missing threads)
-- Validate manual override files with clear error messages
+- **Fail fast for internal errors**: Use minimal try/except for interactive development
+- **Handle external failures gracefully**: Reddit API failures, missing files, network issues
+- **Use specific exception types**: Never use bare except clauses
+- **Validate early**: Check configuration and input data at startup, fail immediately on issues
 
 ## Development Workflow Rules
 - **Development Commands**: Use `make all` for complete development workflow
@@ -51,6 +51,7 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 - **Brush Matching**: Use strategy pattern for complex brush matching scenarios with handle/knot splitting
 - **Date Ranges**: Support both individual months and date ranges in CLI
 - **Manual Overrides**: Provide clear validation for manual thread includes/excludes
+- **Catalog Data Preservation**: All matchers must preserve complete catalog specifications (e.g., straight razor grind, width, point) in match output, not just basic brand/model/format fields
 
 ## Brush Matching Specifics
 - **Handle Maker**: Extract from split input (e.g., "Elite handle w/ Declaration knot")
@@ -61,7 +62,7 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 ## Common Patterns to Follow
 - Use `Path` objects for file system operations
 - Compile regex patterns once, use many times  
-- Handle missing data gracefully with sensible defaults
+- Validate data early with clear error messages for malformed input
 - Include metadata in all output files
 - Use descriptive variable names that reflect the shaving domain
 - Follow the existing error handling patterns for external APIs

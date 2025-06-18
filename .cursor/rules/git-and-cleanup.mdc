@@ -5,6 +5,107 @@ alwaysApply: false
 ---
 # Git and Cleanup Rules
 
+## Logical Commit Organization
+
+### **MANDATORY**: Split Changes into Logical Commits
+When making multiple changes, **ALWAYS** organize them into separate, logical commits that can be understood and reviewed independently. Each commit should represent a single, cohesive change.
+
+#### Logical Commit Categories
+1. **Bug Fixes** (`fix:`): Address specific issues or incorrect behavior
+2. **Features** (`feat:`): Add new functionality or capabilities
+3. **Tests** (`test:`): Add, modify, or enhance test coverage
+4. **Refactoring** (`refactor:`): Restructure code without changing behavior
+5. **Documentation** (`docs:`): Update documentation, specs, or comments
+6. **Cleanup** (`cleanup:`): Remove unused code, files, or dependencies
+
+#### Commit Organization Principles
+- **Atomic Changes**: Each commit should be complete and self-contained
+- **Single Responsibility**: One logical change per commit
+- **Reviewable Size**: Commits should be digestible for code review
+- **Dependency Order**: Commit dependencies in logical sequence (tests after code, cleanup after refactoring)
+- **Reversible**: Each commit should be safely revertible without breaking the system
+
+#### Examples of Good Commit Organization
+
+**Scenario: Adding new brush matching strategy with tests and documentation**
+```bash
+git commit -m "feat: add Zenith brush matching strategy with B-series pattern recognition"
+git commit -m "test: add comprehensive unit tests for Zenith brush matching strategy" 
+git commit -m "test: add integration tests for Zenith strategy with real catalog data"
+git commit -m "docs: update brush matching specification with Zenith strategy details"
+```
+
+**Scenario: Fixing bug with multiple affected components**
+```bash
+git commit -m "fix: correct Declaration Grooming strategy false positive matching"
+git commit -m "test: update DG strategy tests to prevent regression"
+git commit -m "test: add integration tests validating DG fix with real data"
+```
+
+**Scenario: Refactoring with consistency improvements**
+```bash
+git commit -m "refactor: unify delimiter handling logic in brush matcher"
+git commit -m "fix: ensure consistent model naming across all brush strategies"
+git commit -m "test: add model naming consistency validation tests"
+```
+
+#### What NOT to Do
+- ❌ **Monolithic commits**: `git commit -m "fix various issues and add tests"`
+- ❌ **Mixed concerns**: Combining bug fixes with new features in one commit
+- ❌ **Incomplete changes**: Committing broken code that requires follow-up commits
+- ❌ **Generic messages**: `git commit -m "updates"` or `git commit -m "changes"`
+
+### Commit Message Standards
+
+#### Format Requirements
+Use conventional commit format with clear, descriptive messages:
+```
+<type>: <short description>
+
+[optional longer description explaining why the change was made]
+
+[optional footer with breaking changes or issue references]
+```
+
+#### Message Quality Guidelines
+- **Imperative mood**: "Add feature" not "Added feature" or "Adding feature"
+- **Specific descriptions**: Explain WHAT changed and WHY
+- **Context for reviewers**: Include enough detail for code review
+- **50/72 rule**: First line ≤50 chars, body lines ≤72 chars
+- **No periods**: Don't end the subject line with a period
+
+#### Enhanced Commit Type Examples
+
+**Bug Fixes (`fix:`):**
+- `fix: prevent Declaration Grooming false positives for Zenith B2 patterns`
+- `fix: resolve handle/knot splitting inconsistency with ambiguous delimiters`
+- `fix: correct fiber strategy detection when user input conflicts with catalog`
+
+**Features (`feat:`):**
+- `feat: implement intelligent handle/knot parsing with content analysis scoring`
+- `feat: add support for Chisel & Hound versioned knot patterns (V10-V27)`
+- `feat: integrate real-time catalog validation in brush matching strategies`
+
+**Tests (`test:`):**
+- `test: add comprehensive integration tests using production YAML catalogs`
+- `test: implement model naming consistency validation across all strategies`
+- `test: enhance brush matcher tests with delimiter unification scenarios`
+
+**Refactoring (`refactor:`):**
+- `refactor: consolidate brush catalog files into unified brushes.yaml structure`
+- `refactor: extract common pattern compilation logic into base matcher class`
+- `refactor: simplify strategy priority handling with unified interface`
+
+**Documentation (`docs:`):**
+- `docs: update brush matching specification with intelligent parsing details`
+- `docs: enhance testing patterns to mandate dual unit/integration coverage`
+- `docs: document delimiter semantics and content analysis scoring algorithms`
+
+**Cleanup (`cleanup:`):**
+- `cleanup: remove deprecated knot_maker field and update all references`
+- `cleanup: eliminate unused brush_yaml directory after consolidation`
+- `cleanup: remove redundant imports and apply ruff formatting fixes`
+
 ## Git Ignore Patterns
 - Use `!data/*.yaml` to include all YAML catalogs without listing each file individually
 - Exclude temporary files, logs, and generated data
