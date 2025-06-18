@@ -20,15 +20,23 @@ class ChristopherBradleyEnricher(BaseEnricher):
         """Determine if this enricher applies to the given record.
 
         Applies to records with Karve Christopher Bradley razors.
+        The catalog should ensure model is always "Christopher Bradley" for Karve brand.
         """
         if "razor" not in record or record["razor"] is None:
             return False
 
         razor = record["razor"]
-        brand = razor.get("brand", "")
-        model = razor.get("model", "")
+        if not isinstance(razor, dict):
+            return False
 
-        return brand == "Karve" and ("Christopher Bradley" in model or "CB" in model)
+        matched_data = razor.get("matched", {})
+        if not matched_data:
+            return False
+
+        brand = matched_data.get("brand", "")
+        model = matched_data.get("model", "")
+
+        return brand == "Karve" and model == "Christopher Bradley"
 
     def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
         """Extract Christopher Bradley specifications from the user-supplied razor_extracted field.

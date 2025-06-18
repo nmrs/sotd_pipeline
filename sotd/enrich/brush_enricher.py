@@ -14,11 +14,15 @@ class BrushEnricher(BaseEnricher):
     def applies_to(self, record: dict) -> bool:
         """Check if this enricher applies to the record."""
         brush_data = record.get("brush", {})
-        return (
-            brush_data is not None
-            and isinstance(brush_data, dict)
-            and brush_data.get("brand") is not None
-        )
+        if not brush_data or not isinstance(brush_data, dict):
+            return False
+
+        # Look for brand in the matched object
+        matched_data = brush_data.get("matched")
+        if not matched_data or not isinstance(matched_data, dict):
+            return False
+
+        return matched_data.get("brand") is not None
 
     def enrich(self, field_data: dict, original_comment: str) -> Optional[dict]:
         """Extract brush specifications from the user-supplied brush_extracted field and merge

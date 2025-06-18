@@ -25,8 +25,15 @@ class GameChangerEnricher(BaseEnricher):
             return False
 
         razor = record["razor"]
-        brand = razor.get("brand", "")
-        model = razor.get("model", "")
+        if not isinstance(razor, dict):
+            return False
+
+        matched_data = razor.get("matched", {})
+        if not matched_data:
+            return False
+
+        brand = matched_data.get("brand", "")
+        model = matched_data.get("model", "")
 
         return brand == "RazoRock" and "Game Changer" in model
 

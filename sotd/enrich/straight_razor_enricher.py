@@ -21,47 +21,23 @@ class StraightRazorEnricher(BaseEnricher):
         """Determine if this enricher applies to the given record.
 
         Applies to records that have a matched razor product that is a straight razor.
+        Only validates on format field - straight razors should have format="Straight".
         """
         if "razor" not in record or record["razor"] is None:
             return False
 
         # Check if the razor is identified as a straight razor
         razor_data = record["razor"]
+        if not isinstance(razor_data, dict):
+            return False
+
+        # Look for matched data
+        matched_data = razor_data.get("matched", {})
+        if not matched_data:
+            return False
 
         # Check for format field indicating straight razor
-        if isinstance(razor_data, dict) and razor_data.get("format") == "Straight":
-            return True
-
-        # Check for brand/model patterns that indicate straight razors
-        if isinstance(razor_data, dict):
-            brand = razor_data.get("brand", "").lower()
-            model = razor_data.get("model", "").lower()
-
-            # Known straight razor brands
-            straight_brands = {
-                "böker",
-                "boker",
-                "dovo",
-                "filarmonica",
-                "henckels",
-                "henkels",
-                "koraat",
-                "portland razor co",
-                "ralf aust",
-                "thiers issard",
-                "wade & butcher",
-                "wade and butcher",
-                "w&b",
-            }
-
-            if brand in straight_brands:
-                return True
-
-            # Check for "straight" in model name
-            if "straight" in model:
-                return True
-
-        return False
+        return matched_data.get("format") == "Straight"
 
     def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
         """Extract straight razor specifications from the user-supplied razor_extracted field.
@@ -71,13 +47,13 @@ class StraightRazorEnricher(BaseEnricher):
             original_comment: The user-supplied razor_extracted field (not the full comment)
 
         Returns:
-            Dictionary with grind, width_eighths, and point if found, or None if no specs detected.
+            Dictionary with grind, width (as string), and point if found, or None if no specs detected.
             Includes _enriched_by and _extraction_source metadata fields.
             Preserves existing specifications from the match phase catalog data.
         """
         # Extract specifications from the razor_extracted field
         user_grind = self._extract_grind(original_comment)
-        user_width_eighths = self._extract_width(original_comment)
+        user_width = self._extract_width_str(original_comment)
         user_point = self._extract_point(original_comment)
 
         # Get existing specifications from match phase catalog data
@@ -85,25 +61,20 @@ class StraightRazorEnricher(BaseEnricher):
         catalog_width = field_data.get("width") if isinstance(field_data, dict) else None
         catalog_point = field_data.get("point") if isinstance(field_data, dict) else None
 
-        # Convert catalog width to eighths if it's in fractional format
-        catalog_width_eighths = None
-        if catalog_width:
-            catalog_width_eighths = self._parse_catalog_width(catalog_width)
-
         # Merge specifications: user comment takes precedence over catalog data
         final_grind = user_grind or catalog_grind
-        final_width_eighths = user_width_eighths or catalog_width_eighths
+        final_width = user_width or catalog_width
         final_point = user_point or catalog_point
 
         # Determine extraction source for metadata
         extraction_sources = []
-        if user_grind or user_width_eighths or user_point:
+        if user_grind or user_width or user_point:
             extraction_sources.append("user_comment")
         if catalog_grind or catalog_width or catalog_point:
             extraction_sources.append("catalog_data")
 
         # Only return enriched data if we have specifications from any source
-        if any([final_grind, final_width_eighths, final_point]):
+        if any([final_grind, final_width, final_point]):
             enriched_data: Dict[str, Any] = {
                 "_enriched_by": self.get_enricher_name(),
                 "_extraction_source": (
@@ -113,13 +84,39 @@ class StraightRazorEnricher(BaseEnricher):
 
             if final_grind:
                 enriched_data["grind"] = final_grind
-            if final_width_eighths:
-                enriched_data["width_eighths"] = final_width_eighths
+            if final_width:
+                enriched_data["width"] = final_width
             if final_point:
                 enriched_data["point"] = final_point
 
             return enriched_data
 
+        return None
+
+    def _extract_width_str(self, text: str) -> Optional[str]:
+        """Extract width as a string fraction from text using regex patterns.
+
+        Args:
+            text: The text to search for width patterns
+
+        Returns:
+            The extracted width as a string (e.g., '15/16', '5/8'), or None if not found
+        """
+        # Look for common fractional patterns
+        match = re.search(r"\b(\d{1,2})/(8|16)\b", text)
+        if match:
+            return f"{match.group(1)}/{match.group(2)}"
+        # Optionally, handle decimal patterns (e.g., 0.75)
+        match = re.search(r"\b(0\.5|0\.625|0\.75|0\.875|1\.0)\b", text)
+        if match:
+            decimal_map = {
+                "0.5": "4/8",
+                "0.625": "5/8",
+                "0.75": "6/8",
+                "0.875": "7/8",
+                "1.0": "8/8",
+            }
+            return decimal_map.get(match.group(1))
         return None
 
     def _parse_catalog_width(self, width_str: str) -> Optional[int]:
@@ -169,15 +166,16 @@ class StraightRazorEnricher(BaseEnricher):
 
         # Grind patterns in order of specificity (most specific first)
         grind_patterns = [
+            (r"\bextra\s*hollow\b", "extra_hollow"),
             (r"\bfull\s*hollow\b", "full_hollow"),
+            (r"\bpretty\s*hollow\b", "pretty_hollow"),
             (r"\bthree\s*quarter\s*hollow\b", "three_quarter_hollow"),
             (r"\bhalf\s*hollow\b", "half_hollow"),
             (r"\bquarter\s*hollow\b", "quarter_hollow"),
-            (r"\b5/8\s*hollow\b", "five_eighth_hollow"),
             (r"\bhollow\b", "hollow"),  # Generic hollow
+            (r"\bnear\s*wedge\b", "near_wedge"),
             (r"\bwedge\b", "wedge"),
             (r"\bframeback\b", "frameback"),
-            (r"\bconcave\b", "concave"),
         ]
 
         for pattern, grind_type in grind_patterns:
@@ -200,11 +198,11 @@ class StraightRazorEnricher(BaseEnricher):
             # Direct eighth patterns (4/8, 5/8, etc.) - most specific first
             (r"\b(4|5|6|7|8)/8\b", lambda m: int(m.group(1))),
             # Direct sixteenth patterns (8/16, 10/16, etc.)
-            (r"\b(8|10|12|14|16)/16\b", lambda m: int(m.group(1)) // 2),
+            (r"\b(8|10|12|14|16)/16\b", lambda m: round(int(m.group(1)) / 2)),
             # Fractional patterns (4/8, 5/8, 6/8, 7/8, 8/8, etc.)
             (
                 r"\b(\d{1,2})/(8|16)\b",
-                lambda m: int(m.group(1)) if m.group(2) == "8" else int(m.group(1)) // 2,
+                lambda m: int(m.group(1)) if m.group(2) == "8" else round(int(m.group(1)) / 2),
             ),
             # Decimal patterns (0.5, 0.625, 0.75, 0.875, 1.0, etc.)
             (
@@ -237,16 +235,16 @@ class StraightRazorEnricher(BaseEnricher):
 
         # Point patterns in order of specificity
         point_patterns = [
-            (r"\bround\s*point\b", "round"),
-            (r"\bsquare\s*point\b", "square"),
-            (r"\bfrench\s*point\b", "french"),
-            (r"\bspanish\s*point\b", "spanish"),
+            (r"\bround\s*(?:point|tip)\b", "round"),
+            (r"\bsquare\s*(?:point|tip)\b", "square"),
+            (r"\bspike\s*(?:point|tip)\b", "spike"),
+            (r"\bfrench\s*(?:point|tip)\b", "french"),
+            (r"\bspanish\s*(?:point|tip)\b", "spanish"),
             (r"\bbarber['']?s\s*notch\b", "barbers_notch"),
-            (r"\bnotch\b", "notch"),
-            (r"\bspear\s*point\b", "spear"),
-            (r"\bcoffin\s*point\b", "coffin"),
+            (r"\bspear\s*(?:point|tip)\b", "spear"),
             (r"\bround\b", "round"),  # Generic round
             (r"\bsquare\b", "square"),  # Generic square
+            (r"\bspike\b", "spike"),  # Generic spike
         ]
 
         for pattern, point_type in point_patterns:
