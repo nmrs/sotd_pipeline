@@ -4,7 +4,7 @@ from sotd.enrich.super_speed_tip_enricher import SuperSpeedTipEnricher
 
 
 class TestSuperSpeedTipEnricher:
-    """Test cases for SuperSpeedTipEnricher."""
+    """Test cases for SuperSpeedTipEnricher (single mutually exclusive tip type)."""
 
     @pytest.fixture
     def enricher(self):
@@ -50,68 +50,36 @@ class TestSuperSpeedTipEnricher:
         record = {"razor": {}}
         assert enricher.applies_to(record) is False
 
-    def test_extract_tip_color_red(self, enricher):
-        """Test extraction of Red tip."""
-        comment = "Gillette Super Speed Red"
-        result = enricher.enrich({}, comment)
-        assert result is not None
-        assert result["tip_color"] == "Red"
-        assert result["_enriched_by"] == "SuperSpeedTipEnricher"
-        assert result["_extraction_source"] == "user_comment"
-
-    def test_extract_tip_color_blue(self, enricher):
-        """Test extraction of Blue tip."""
-        comment = "Gillette Super Speed Blue"
-        result = enricher.enrich({}, comment)
-        assert result is not None
-        assert result["tip_color"] == "Blue"
-
-    def test_extract_tip_color_black(self, enricher):
-        """Test extraction of Black tip."""
-        comment = "Gillette Super Speed Black"
-        result = enricher.enrich({}, comment)
-        assert result is not None
-        assert result["tip_color"] == "Black"
-
-    def test_extract_tip_variant_flare(self, enricher):
-        """Test extraction of Flare tip."""
-        comment = "Gillette Super Speed Flare"
-        result = enricher.enrich({}, comment)
-        assert result is not None
-        assert result["tip_variant"] == "Flare"
-
-    def test_extract_tip_variant_flair(self, enricher):
-        """Test extraction of Flair tip (synonym for Flare)."""
-        comment = "Gillette Super Speed Flair"
-        result = enricher.enrich({}, comment)
-        assert result is not None
-        assert result["tip_variant"] == "Flare"
-
-    def test_extract_both_tip_color_and_variant(self, enricher):
-        """Test extraction of both tip color and variant."""
-        comment = "Gillette Super Speed Red Flare"
-        result = enricher.enrich({}, comment)
-        assert result is not None
-        assert result["tip_color"] == "Red"
-        assert result["tip_variant"] == "Flare"
-
-    def test_case_insensitive_extraction(self, enricher):
-        """Test that extraction works regardless of case."""
-        test_cases = [
-            ("GILLETTE SUPER SPEED RED", "Red"),
-            ("gillette super speed blue", "Blue"),
+    @pytest.mark.parametrize(
+        "comment,expected",
+        [
+            ("Gillette Super Speed Red", "Red"),
+            ("Gillette Super Speed Blue", "Blue"),
             ("Gillette Super Speed Black", "Black"),
             ("Gillette Super Speed Flare", "Flare"),
             ("Gillette Super Speed Flair", "Flare"),
-        ]
+            ("Super Speed Blue", "Blue"),
+            ("Super Speed Flare", "Flare"),
+            ("Super Speed Flair", "Flare"),
+        ],
+    )
+    def test_extract_tip_type(self, enricher, comment, expected):
+        """Test extraction of tip type (Red, Blue, Black, Flare/Flair)."""
+        result = enricher.enrich({}, comment)
+        assert result is not None
+        assert result["super_speed_tip"] == expected
+        assert result["_enriched_by"] == "SuperSpeedTipEnricher"
+        assert result["_extraction_source"] == "user_comment"
 
-        for comment, expected in test_cases:
-            result = enricher.enrich({}, comment)
-            assert result is not None, f"Failed for comment: {comment}"
-            if "Flare" in comment or "Flair" in comment:
-                assert result["tip_variant"] == expected, f"Failed for comment: {comment}"
-            else:
-                assert result["tip_color"] == expected, f"Failed for comment: {comment}"
+    def test_mutual_exclusivity(self, enricher):
+        """Test that only one tip type is set, even if multiple keywords are present (first match wins)."""
+        # If both Red and Flare are present, Red should be returned (first match wins)
+        comment = "Gillette Super Speed Red Flare"
+        result = enricher.enrich({}, comment)
+        assert result is not None
+        assert result["super_speed_tip"] == "Red"
+        # Only _enriched_by, _extraction_source, super_speed_tip
+        assert len(result) == 3
 
     def test_no_tip_found(self, enricher):
         """Test that None is returned when no tip is found."""
@@ -125,32 +93,12 @@ class TestSuperSpeedTipEnricher:
         result = enricher.enrich({}, comment)
         assert result is None
 
-    def test_real_world_examples(self, enricher):
-        """Test with real-world comment examples."""
-        test_cases = [
-            ("Gillette Super Speed Red", "Red"),
-            ("Super Speed Blue", "Blue"),
-            ("Gillette Super Speed Black", "Black"),
-            ("Super Speed Flare", "Flare"),
-            ("Gillette Super Speed Flair", "Flare"),
-        ]
-
-        for comment, expected in test_cases:
-            result = enricher.enrich({}, comment)
-            assert result is not None, f"Failed for comment: {comment}"
-            if "Flare" in comment or "Flair" in comment:
-                assert result["tip_variant"] == expected, f"Failed for comment: {comment}"
-            else:
-                assert result["tip_color"] == expected, f"Failed for comment: {comment}"
-
     def test_enrich_preserves_field_data(self, enricher):
         """Test that field_data is preserved when enriching."""
         field_data = {"brand": "Gillette", "model": "Super Speed"}
         comment = "Gillette Super Speed Red"
-
         result = enricher.enrich(field_data, comment)
-
         assert result is not None
-        assert result["tip_color"] == "Red"
+        assert result["super_speed_tip"] == "Red"
         # Field data should not be modified
         assert field_data == {"brand": "Gillette", "model": "Super Speed"}

@@ -5,11 +5,11 @@ from .enricher import BaseEnricher
 
 
 class SuperSpeedTipEnricher(BaseEnricher):
-    """Enricher for extracting Gillette Super Speed tip colors and variants.
+    """Enricher for extracting Gillette Super Speed tip type (Red, Blue, Black, Flare).
 
-    Extracts tip information from Gillette Super Speed razors:
-    - Tip colors: Red, Blue, Black
-    - Tip variants: Flare (with "flair" as synonym)
+    Extracts tip type from Gillette Super Speed razors:
+    - Tip types: Red, Blue, Black, Flare (with "flair" as synonym)
+    Output field: 'super_speed_tip'
     """
 
     @property
@@ -38,70 +38,43 @@ class SuperSpeedTipEnricher(BaseEnricher):
         return brand == "Gillette" and model == "Super Speed"
 
     def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
-        """Extract Super Speed tip specifications from the user-supplied razor_extracted field.
+        """Extract Super Speed tip type from the user-supplied razor_extracted field.
 
         Args:
             field_data: The matched razor data (unused in this enricher)
             original_comment: The user-supplied razor_extracted field (not the full comment)
 
         Returns:
-            Dictionary with tip color and variant if found, or None if no specifications detected.
+            Dictionary with 'super_speed_tip' if found, or None if not found.
             Includes _enriched_by and _extraction_source metadata fields.
         """
         razor_string = original_comment
         if not razor_string:
             return None
 
-        tip_color = self._extract_tip_color(razor_string)
-        tip_variant = self._extract_tip_variant(razor_string)
-
-        if tip_color is not None or tip_variant is not None:
-            result = {
+        tip_type = self._extract_tip_type(razor_string)
+        if tip_type is not None:
+            return {
                 "_enriched_by": self.get_enricher_name(),
                 "_extraction_source": "user_comment",
+                "super_speed_tip": tip_type,
             }
-
-            if tip_color is not None:
-                result["tip_color"] = tip_color
-            if tip_variant is not None:
-                result["tip_variant"] = tip_variant
-
-            return result
 
         return None
 
-    def _extract_tip_color(self, text: str) -> Optional[str]:
-        """Extract tip color from text using regex patterns.
+    def _extract_tip_type(self, text: str) -> Optional[str]:
+        """Extract tip type from text using regex patterns.
 
         Args:
-            text: The text to search for tip color patterns
+            text: The text to search for tip type patterns
 
         Returns:
-            The extracted tip color as a string (e.g., "Red", "Blue", "Black"), or None if not found
+            The extracted tip type as a string (e.g., "Red", "Blue", "Black", "Flare"), or None if not found
         """
         tips = {
             "Red": ["red"],
             "Blue": ["blue"],
             "Black": ["black"],
-        }
-
-        for tip_name, patterns in tips.items():
-            for pattern in patterns:
-                if re.search(rf"\b{pattern}\b", text, re.IGNORECASE):
-                    return tip_name
-
-        return None
-
-    def _extract_tip_variant(self, text: str) -> Optional[str]:
-        """Extract tip variant from text using regex patterns.
-
-        Args:
-            text: The text to search for tip variant patterns
-
-        Returns:
-            The extracted tip variant as a string (e.g., "Flare"), or None if not found
-        """
-        tips = {
             "Flare": ["flare", "flair"],
         }
 
