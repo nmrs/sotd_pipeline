@@ -27,7 +27,7 @@ def test_other_brush_with_user_fiber(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Elite"
-    assert result["matched"]["model"] == "Elite Boar"
+    assert result["matched"]["model"] == "Boar"
     assert result["matched"]["fiber"] == "Boar"
     assert result["matched"]["fiber_strategy"] == "user_input"
     assert result["matched"]["knot_size_mm"] == 26.0
@@ -42,7 +42,7 @@ def test_other_brush_with_default_fiber(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Elite"
-    assert result["matched"]["model"] == "Elite Badger"  # Uses default
+    assert result["matched"]["model"] == "Badger"  # Uses default
     assert result["matched"]["fiber"] == "Badger"
     assert result["matched"]["fiber_strategy"] == "default"
     assert result["matched"]["knot_size_mm"] == 26.0
@@ -55,7 +55,7 @@ def test_other_brush_alpha_synthetic(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Alpha"
-    assert result["matched"]["model"] == "Alpha Synthetic"
+    assert result["matched"]["model"] == "Synthetic"
     assert result["matched"]["fiber"] == "Synthetic"
     assert result["matched"]["fiber_strategy"] == "default"
 
@@ -66,7 +66,7 @@ def test_other_brush_with_knot_size_from_yaml(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Groomatorium"
-    assert result["matched"]["model"] == "Groomatorium Synthetic"
+    assert result["matched"]["model"] == "Synthetic"
     assert result["matched"]["fiber"] == "Synthetic"
     assert result["matched"]["knot_size_mm"] == 24
     assert result["matched"]["knot_size_strategy"] == "yaml"
@@ -78,7 +78,7 @@ def test_other_brush_cf_pattern(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Groomatorium"
-    assert result["matched"]["model"] == "Groomatorium Synthetic"
+    assert result["matched"]["model"] == "Synthetic"
     assert result["matched"]["knot_size_mm"] == 22.0  # User input overrides YAML
 
 
@@ -88,7 +88,7 @@ def test_other_brush_omega_boar_default(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Omega"
-    assert result["matched"]["model"] == "Omega Boar"
+    assert result["matched"]["model"] == "Boar"
     assert result["matched"]["fiber"] == "Boar"
     assert result["matched"]["fiber_strategy"] == "default"
 
@@ -99,7 +99,7 @@ def test_other_brush_user_fiber_overrides_default(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Omega"
-    assert result["matched"]["model"] == "Omega Synthetic"
+    assert result["matched"]["model"] == "Synthetic"
     assert result["matched"]["fiber"] == "Synthetic"
     assert result["matched"]["fiber_strategy"] == "user_input"
 
@@ -119,7 +119,7 @@ def test_other_brush_case_insensitive(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Elite"
-    assert result["matched"]["model"] == "Elite Synthetic"
+    assert result["matched"]["model"] == "Synthetic"
     assert result["matched"]["fiber"] == "Synthetic"
 
 
@@ -129,7 +129,7 @@ def test_other_brush_multiple_patterns(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Groomatorium"
-    assert result["matched"]["model"] == "Groomatorium Synthetic"
+    assert result["matched"]["model"] == "Synthetic"
 
 
 def test_empty_catalog():

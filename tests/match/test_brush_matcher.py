@@ -106,7 +106,7 @@ def test_brush_matcher_other_brushes_with_user_fiber(matcher):
     assert result["original"] == "Elite 26mm Boar"
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Elite"
-    assert result["matched"]["model"] == "Elite Boar"
+    assert result["matched"]["model"] == "Boar"
     assert result["matched"]["fiber"] == "Boar"
     assert result["matched"]["fiber_strategy"] == "user_input"
     assert result["matched"]["knot_size_mm"] == 26.0
@@ -121,7 +121,7 @@ def test_brush_matcher_other_brushes_default_fiber(matcher):
     assert result["original"] == "Elite 26mm"
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Elite"
-    assert result["matched"]["model"] == "Elite Badger"  # Uses default
+    assert result["matched"]["model"] == "Badger"  # Uses default
     assert result["matched"]["fiber"] == "Badger"
     assert result["matched"]["fiber_strategy"] == "default"
 
@@ -258,7 +258,7 @@ def test_brush_matcher_malformed_yaml(tmp_path):
     [
         ("Simpson Chubby 2", "Simpson", "Chubby 2"),
         ("Declaration B3", "Declaration Grooming", "B3"),
-        ("Elite Badger", "Elite", "Elite Badger"),
+        ("Elite Badger", "Elite", "Badger"),
         ("Chisel & Hound V20", "Chisel & Hound", "V20"),
         ("Omega 12345", "Omega", "Omega 12345"),
         ("Zenith B26", "Zenith", "Zenith B26"),
@@ -308,7 +308,7 @@ def test_chisel_hound_versioned_vs_non_versioned_matching(matcher):
     result = matcher.match("Chisel & Hound Quartermoon")
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Chisel & Hound"
-    assert result["matched"]["model"] == "Chisel & Hound Synthetic"  # Fiber detected from "moon"
+    assert result["matched"]["model"] == "Synthetic"  # Fiber detected from "moon"
     assert result["matched"]["fiber"] == "Synthetic"
     assert result["matched"]["knot_size_mm"] == 26  # From other_brushes default
     assert result["matched"]["fiber_strategy"] == "user_input"
@@ -318,7 +318,7 @@ def test_chisel_hound_versioned_vs_non_versioned_matching(matcher):
     result = matcher.match("Chisel & Hound Synthetic")
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Chisel & Hound"
-    assert result["matched"]["model"] == "Chisel & Hound Synthetic"
+    assert result["matched"]["model"] == "Synthetic"
     assert result["matched"]["fiber"] == "Synthetic"
     assert result["matched"]["fiber_strategy"] == "user_input"
 
@@ -326,7 +326,7 @@ def test_chisel_hound_versioned_vs_non_versioned_matching(matcher):
     result = matcher.match("Chisel & Hound Special Edition")
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Chisel & Hound"
-    assert result["matched"]["model"] == "Chisel & Hound Badger"  # Uses default from other_brushes
+    assert result["matched"]["model"] == "Badger"  # Uses default from other_brushes
     assert result["matched"]["fiber"] == "Badger"
     assert result["matched"]["fiber_strategy"] == "default"
     assert result["matched"]["knot_size_strategy"] == "yaml"
@@ -353,7 +353,7 @@ def test_chisel_hound_version_boundary_cases(matcher):
     result = matcher.match("Chisel & Hound V28")
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Chisel & Hound"
-    assert result["matched"]["model"] == "Chisel & Hound Badger"
+    assert result["matched"]["model"] == "Badger"
     assert result["matched"]["fiber"] == "Badger"
     assert result["matched"]["fiber_strategy"] == "default"
 
@@ -447,7 +447,7 @@ def test_knot_maker_prioritization_over_handle_maker():
 
     # Primary match should be the knot maker (Maggard), not handle maker (Chisel & Hound)
     assert result["matched"]["brand"] == "Maggard"
-    assert result["matched"]["model"] == "Maggard Badger"  # Maggard SHD is badger
+    assert result["matched"]["model"] == "Badger"  # Maggard SHD is badger
     assert result["matched"]["fiber"] == "Badger"
     assert result["matched"]["knot_size_mm"] == 26.0
 
@@ -721,6 +721,60 @@ def test_turn_n_shave_abbreviations():
             result["matched"]["model"] == case["expected_model"]
         ), f"Wrong model for {case['input']}: got {result['matched']['model']}"
         if case.get("expected_handle_maker"):
-            assert (
-                result["matched"].get("handle_maker") == case["expected_handle_maker"]
-            ), f"Wrong handle maker for {case['input']}: got {result['matched'].get('handle_maker')}"
+            assert result["matched"].get("handle_maker") == case["expected_handle_maker"], (
+                f"Wrong handle maker for {case['input']}: "
+                f"got {result['matched'].get('handle_maker')}"
+            )
+
+
+def test_aka_false_positive_prevention():
+    """Test that 'aka' meaning 'also known as' doesn't match AKA Brushworx brand."""
+    matcher = BrushMatcher()
+
+    # Test cases where "aka" should NOT match AKA Brushworx
+    false_positive_cases = [
+        {
+            "input": "Omega - 10048 aka Pro 48 boar",
+            "expected_brand": "Omega",
+            "expected_model": "10048",
+        },
+        {
+            "input": "Semogue 1305 aka the best boar",
+            "expected_brand": "Semogue",
+            "expected_model": "1305",
+        },
+        {
+            "input": "Simpson Chubby 2 aka CH2",
+            "expected_brand": "Simpson",
+            "expected_model": "Chubby 2",
+        },
+    ]
+
+    for case in false_positive_cases:
+        result = matcher.match(case["input"])
+        assert result["matched"] is not None, f"No match for {case['input']}"
+        assert result["matched"]["brand"] == case["expected_brand"], (
+            f"Wrong brand for '{case['input']}': expected {case['expected_brand']}, "
+            f"got {result['matched']['brand']}"
+        )
+        assert result["matched"]["model"] == case["expected_model"], (
+            f"Wrong model for '{case['input']}': expected {case['expected_model']}, "
+            f"got {result['matched']['model']}"
+        )
+        # Ensure it's NOT matching AKA Brushworx
+        assert (
+            result["matched"]["brand"] != "AKA Brushworx"
+        ), f"False positive: '{case['input']}' incorrectly matched AKA Brushworx"
+
+    # Test cases where it SHOULD match AKA Brushworx
+    legitimate_cases = [
+        "AKA Brushworx Blues Stanley Cup",
+        "AKA Brushworx brush with synthetic knot",
+    ]
+
+    for case in legitimate_cases:
+        result = matcher.match(case)
+        assert result["matched"] is not None, f"No match for {case}"
+        assert (
+            result["matched"]["brand"] == "AKA Brushworx"
+        ), f"Should match AKA Brushworx for '{case}', got {result['matched']['brand']}"

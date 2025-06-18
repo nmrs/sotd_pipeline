@@ -62,6 +62,9 @@ known_brushes:
       patterns:
       - \b2\s*bed\b
   Aurora Grooming:
+    default: Synthetic
+    patterns:
+    - aurora\s*grooming
     LG24:
       fiber: Synthetic
       knot_size_mm: 24
@@ -752,7 +755,6 @@ other_brushes:
     default: Synthetic
     patterns:
     - aka.*brush
-    - aka
   AMACK:
     default: Synthetic
     patterns:
@@ -786,10 +788,6 @@ other_brushes:
     default: Badger
     patterns:
     - romera
-  Aurora Grooming:
-    default: Synthetic
-    patterns:
-    - auror.*gr
   B&M:
     default: Synthetic
     patterns:

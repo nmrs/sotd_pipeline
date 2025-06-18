@@ -50,11 +50,11 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                     user_knot_size = parse_knot_size(value)
                     default_knot_size = metadata.get("knot_size_mm")
 
-                    # Construct model from brand + fiber
+                    # Set model to just the fiber type
                     if user_fiber:
-                        model = f"{brand} {user_fiber.title()}"
+                        model = user_fiber.title()
                     else:
-                        model = f"{brand} {default_fiber}"
+                        model = default_fiber
 
                     result = {
                         "brand": brand,
