@@ -72,9 +72,14 @@ class EnricherRegistry:
             if not field_data:
                 continue
 
-            # Use the corresponding *_extracted field for enrichment
+            # Use the corresponding *_extracted field for enrichment, else fall back to product['original']
             extracted_field_name = f"{field}_extracted"
-            extracted_value = record.get(extracted_field_name, "")
+            if extracted_field_name in record:
+                extracted_value = record[extracted_field_name]
+            elif isinstance(field_data, dict) and "original" in field_data:
+                extracted_value = field_data["original"]
+            else:
+                extracted_value = ""
 
             field_enriched_data = {}
 
