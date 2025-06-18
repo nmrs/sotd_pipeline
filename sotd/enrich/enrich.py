@@ -1,12 +1,12 @@
 """Main enrich module that coordinates all enrichers."""
 
+from .blackbird_plate_enricher import BlackbirdPlateEnricher
 from .blade_enricher import BladeCountEnricher
 from .brush_enricher import BrushEnricher
 from .christopher_bradley_enricher import ChristopherBradleyEnricher
 from .game_changer_enricher import GameChangerEnricher
 from .registry import enricher_registry
 from .straight_razor_enricher import StraightRazorEnricher
-from .blackbird_plate_enricher import BlackbirdPlateEnricher
 from .super_speed_tip_enricher import SuperSpeedTipEnricher
 
 

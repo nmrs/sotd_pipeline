@@ -30,13 +30,11 @@ class ChristopherBradleyEnricher(BaseEnricher):
             return False
 
         matched_data = razor.get("matched", {})
-        if not matched_data:
-            return False
-
-        brand = matched_data.get("brand", "")
-        model = matched_data.get("model", "")
-
-        return brand == "Karve" and model == "Christopher Bradley"
+        if matched_data:
+            brand = matched_data.get("brand", "")
+            model = matched_data.get("model", "")
+            return brand == "Karve" and model == "Christopher Bradley"
+        return False
 
     def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
         """Extract Christopher Bradley specifications from the user-supplied razor_extracted field.

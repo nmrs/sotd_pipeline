@@ -72,7 +72,8 @@ class EnricherRegistry:
             if not field_data:
                 continue
 
-            # Use the corresponding *_extracted field for enrichment, else fall back to product['original']
+            # Use the corresponding *_extracted field for enrichment, else fall back to
+            # product['original']
             extracted_field_name = f"{field}_extracted"
             if extracted_field_name in record:
                 extracted_value = record[extracted_field_name]

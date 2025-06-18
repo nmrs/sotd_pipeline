@@ -69,7 +69,8 @@ class SuperSpeedTipEnricher(BaseEnricher):
             text: The text to search for tip type patterns
 
         Returns:
-            The extracted tip type as a string (e.g., "Red", "Blue", "Black", "Flare"), or None if not found
+            The extracted tip type as a string (e.g., "Red", "Blue", "Black", "Flare"),
+            or None if not found
         """
         tips = {
             "Red": ["red"],

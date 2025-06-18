@@ -28,14 +28,17 @@ class GameChangerEnricher(BaseEnricher):
         if not isinstance(razor, dict):
             return False
 
+        # Accept either top-level brand/model or matched.brand/model
+        brand = razor.get("brand", "")
+        model = razor.get("model", "")
+        if brand == "RazoRock" and "Game Changer" in model:
+            return True
         matched_data = razor.get("matched", {})
-        if not matched_data:
-            return False
-
-        brand = matched_data.get("brand", "")
-        model = matched_data.get("model", "")
-
-        return brand == "RazoRock" and "Game Changer" in model
+        if matched_data:
+            brand = matched_data.get("brand", "")
+            model = matched_data.get("model", "")
+            return brand == "RazoRock" and "Game Changer" in model
+        return False
 
     def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
         """Extract Game Changer specifications from the user-supplied razor_extracted field.

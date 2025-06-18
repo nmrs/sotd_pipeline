@@ -31,13 +31,13 @@ class StraightRazorEnricher(BaseEnricher):
         if not isinstance(razor_data, dict):
             return False
 
-        # Look for matched data
+        # Accept either top-level format or matched.format
+        if razor_data.get("format") == "Straight":
+            return True
         matched_data = razor_data.get("matched", {})
-        if not matched_data:
-            return False
-
-        # Check for format field indicating straight razor
-        return matched_data.get("format") == "Straight"
+        if matched_data:
+            return matched_data.get("format") == "Straight"
+        return False
 
     def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
         """Extract straight razor specifications from the user-supplied razor_extracted field.
@@ -47,8 +47,8 @@ class StraightRazorEnricher(BaseEnricher):
             original_comment: The user-supplied razor_extracted field (not the full comment)
 
         Returns:
-            Dictionary with grind, width (as string), and point if found, or None if no specs detected.
-            Includes _enriched_by and _extraction_source metadata fields.
+            Dictionary with grind, width (as string), and point if found, or None if no
+            specs detected. Includes _enriched_by and _extraction_source metadata fields.
             Preserves existing specifications from the match phase catalog data.
         """
         # Extract specifications from the razor_extracted field
