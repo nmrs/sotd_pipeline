@@ -26,10 +26,10 @@ The enrich phase performs sophisticated analysis requiring knowledge of matched 
 - [x] **1.4** Create core enrich module structure in `sotd/enrich/`
 
 ### Phase 2: Blade Count Enricher (Migration from Match)
-- [ ] **2.1** Implement `BladeCountEnricher` class
-- [ ] **2.2** Move blade count extraction regex patterns from `blade_matcher.py`
-- [ ] **2.3** Add comprehensive tests for blade count extraction
-- [ ] **2.4** Validate extraction accuracy against existing data
+- [x] **2.1** Implement `BladeCountEnricher` class
+- [x] **2.2** Move blade count extraction regex patterns from `blade_matcher.py`
+- [x] **2.3** Add comprehensive tests for blade count extraction
+- [x] **2.4** Validate extraction accuracy against existing data
 
 ### Phase 3: Straight Razor Enricher
 - [ ] **3.1** Implement `StraightRazorEnricher` class
@@ -79,11 +79,12 @@ The enrich phase performs sophisticated analysis requiring knowledge of matched 
   - Initial test framework structure
 
 ### Prompt 2: Blade Count Enricher Implementation  
-- [ ] **P2** Implement BladeCountEnricher with migration from match phase
+- [x] **P2** Implement BladeCountEnricher with migration from match phase
   - Move regex patterns from blade_matcher.py
   - Implement extraction logic with comprehensive patterns
   - Add tests covering various count formats (numbers, words, ranges)
   - Ensure no functionality regression
+  - Tests validate extraction accuracy and match original matcher behavior
 
 ### Prompt 3: Straight Razor Enricher Implementation
 - [ ] **P3** Implement StraightRazorEnricher with comprehensive specification extraction
