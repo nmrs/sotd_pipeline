@@ -237,6 +237,8 @@ The enrich phase performs sophisticated analysis requiring knowledge of matched 
 - **Metadata Standards**: Always include `_enriched_by` and `_extraction_source` fields
 - **Partial Extraction**: Include successfully extracted fields, set missing fields to null
 - **Field-Focused Routing**: Each enricher targets specific field types
+- **Fiber Parsing Architecture**: Fiber parsing remains in match phase for product identification and model naming (especially for other_brushes strategy), but fiber conflict resolution moves to enrich phase for better user input handling
+- **Catalog Data Preservation**: Match phase preserves all YAML catalog specifications, enrich phase merges with user specifications
 
 ---
 
