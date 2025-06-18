@@ -143,13 +143,18 @@ class BrushMatcher:
         if not text:
             return None, None, None
 
-        # Try delimiter-based splitting first
+        # Try delimiter-based splitting first (most reliable)
         handle, knot, delimiter_type = self._split_by_delimiters(text)
         if handle and knot:
             return handle, knot, delimiter_type
 
-        # If no delimiters found, try fiber detection as a hint
-        return self._split_by_fiber_hint(text)
+        # Try fiber detection as a hint (next most reliable)
+        handle, knot, delimiter_type = self._split_by_fiber_hint(text)
+        if handle and knot:
+            return handle, knot, delimiter_type
+
+        # Try brand-context splitting as last resort (most speculative)
+        return self._split_by_brand_context(text)
 
     def _split_by_delimiters(self, text: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
         """Split text using known delimiters and return parts and delimiter type."""
@@ -756,3 +761,92 @@ class BrushMatcher:
                     "_source_text": handle_match["_source_text"],
                     "_strategy": "full_string_fallback",
                 }
+
+    def _split_by_brand_context(
+        self, text: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Split text by recognizing brand context patterns when clear handle/knot makers are present.
+
+        This handles cases like 'CH Circus B13' or 'B13 CH Circus' where:
+        - B13 is a Declaration Grooming knot pattern
+        - CH/Circus indicates Chisel & Hound handle
+        - No explicit delimiters are present
+        """
+        # Look for Declaration Grooming knot patterns (B2, B3, B13, etc.)
+        # Be conservative - only B followed by 1-2 digits, optionally followed by a single letter
+        dg_knot_pattern = r"\b(B\d{1,2}[A-Z]?)\b"
+        dg_matches = list(re.finditer(dg_knot_pattern, text, re.IGNORECASE))
+
+        # Look for Chisel & Hound handle indicators
+        ch_handle_patterns = [
+            r"\bCH\b",  # "CH" as standalone word
+            r"\bC&H\b",  # "C&H" abbreviation
+            r"\bChisel\b",  # "Chisel" word
+            r"\bCircus\b",  # "Circus" (known CH handle pattern)
+            r"\bHound\b",  # "Hound" word
+        ]
+
+        # Find all CH pattern matches
+        ch_matches = []
+        for pattern in ch_handle_patterns:
+            ch_matches.extend(re.finditer(pattern, text, re.IGNORECASE))
+
+        # Only proceed if we found both DG knot and CH handle indicators
+        # This is specifically for Chisel & Hound handles with Declaration Grooming knots
+        if not dg_matches or not ch_matches:
+            return None, None, None
+
+        # Additional safety: Don't split if this appears to be a single Declaration Grooming brush
+        # Check if "Declaration" appears in the text (indicating it might be "Declaration B3" not "CH ... B3")
+        declaration_indicators = [r"\bdeclaration\b", r"\bdg\b"]
+        has_declaration_context = any(
+            re.search(pattern, text, re.IGNORECASE) for pattern in declaration_indicators
+        )
+
+        # If we have Declaration context, only split if we also have clear CH context
+        if has_declaration_context:
+            # This looks like "Declaration B3" - treat as single brush, not handle/knot combo
+            return None, None, None
+
+        # Additional safety check: make sure this isn't already covered by delimiter splitting
+        # If we have common delimiters, let the delimiter logic handle it
+        common_delimiters = [" w/ ", " with ", " / ", "/", " - ", " in "]
+        if any(delimiter in text for delimiter in common_delimiters):
+            return None, None, None
+
+        # Take the first DG knot match
+        dg_match = dg_matches[0]
+        knot_text = dg_match.group(1)  # Just the B13 part
+
+        # Build handle text by removing the knot part and cleaning up
+        handle_parts = []
+
+        # Add text before the knot
+        before_knot = text[: dg_match.start()].strip()
+        if before_knot:
+            handle_parts.append(before_knot)
+
+        # Add text after the knot
+        after_knot = text[dg_match.end() :].strip()
+        if after_knot:
+            handle_parts.append(after_knot)
+
+        if not handle_parts:
+            return None, None, None
+
+        handle_text = " ".join(handle_parts).strip()
+
+        # Validate that the handle part actually contains CH indicators
+        has_ch_in_handle = any(
+            re.search(pattern, handle_text, re.IGNORECASE) for pattern in ch_handle_patterns
+        )
+
+        if not has_ch_in_handle:
+            return None, None, None
+
+            # Additional validation: make sure we're not breaking up a legitimate single brush name
+        # If the knot text is very short and the handle text is also very short, skip
+        if len(knot_text) < 2 or len(handle_text.replace(" ", "")) < 2:
+            return None, None, None
+
+        return handle_text, knot_text, "brand_context"

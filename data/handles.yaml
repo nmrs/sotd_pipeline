@@ -50,7 +50,7 @@ artisan_handles:
     patterns:
     - chisel.*hound
     - chis.*fou
-    - \bc(?:\&|and|\+)h\b
+    - \bc(?:\&|and|\+\s)?h\b
   Cool Dog:
     patterns:
     - cool dog
