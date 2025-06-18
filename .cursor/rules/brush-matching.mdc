@@ -33,32 +33,84 @@ class CustomBrushMatchingStrategy(BaseBrushMatchingStrategy):
 
 ## Strategy Priority Order
 Strategies are tried in this specific order (most specific to least specific):
-1. `KnownBrushMatchingStrategy` - Exact catalog matches
-2. `DeclarationGroomingBrushMatchingStrategy` - DG-specific patterns
-3. `ChiselAndHoundBrushMatchingStrategy` - C&H versioned knots (V10-V27)
-4. `OmegaSemogueBrushMatchingStrategy` - Omega/Semogue patterns
-5. `ZenithBrushMatchingStrategy` - Zenith patterns
-6. `OtherBrushMatchingStrategy` - Generic brand patterns
+1. **KnownBrushMatchingStrategy** - Exact catalog matches
+2. **DeclarationGroomingBrushMatchingStrategy** - DG-specific patterns
+3. **ChiselAndHoundBrushMatchingStrategy** - C&H versioned knots (V10-V27)
+4. **OmegaSemogueBrushMatchingStrategy** - Omega/Semogue patterns
+5. **ZenithBrushMatchingStrategy** - Zenith patterns
+6. **OtherBrushMatchingStrategy** - Generic brand patterns
 
-## Handle/Knot Splitting Logic
-When input contains delimiters (`w/`, `with`, `/`), split and match separately:
-- Handle part: Match against `handles.yaml` patterns
-- Knot part: Match against brush strategies
-- Combine results with handle_maker from handle match
+## Intelligent Handle/Knot Splitting
+
+### Delimiter Semantics
+Different delimiters have different semantic meanings:
 
 ```python
-def _split_handle_and_knot(self, text: str) -> tuple[Optional[str], Optional[str]]:
-    delimiters = [" w/ ", " with ", " / ", "/"]
-    for delimiter in delimiters:
-        if delimiter in text:
-            parts = text.split(delimiter, 1)
-            if len(parts) == 2:
-                return parts[0].strip(), parts[1].strip()
-    return None, None
+# Knot-ambiguous delimiters (require content analysis)
+knot_ambiguous_delimiters = [" w/ ", " with "]
+
+# Handle-primary delimiters (handle takes precedence) 
+handle_primary_delimiters = [" in "]
+
+# Neutral delimiters (no semantic preference)
+neutral_delimiters = [" / ", "/", " - "]
 ```
 
+### Content Analysis Scoring
+The `_score_as_handle()` method uses multiple signals:
+
+**Strong Handle Indicators:**
+- Explicit "handle" keyword (+10 points)
+- Matches `handles.yaml` patterns (+6 to +12 based on section priority)
+- Handle-specific terms: "stock", "custom", "artisan", "turned", "wood", "resin" (+2 each)
+
+**Strong Knot Indicators:**
+- Fiber types: "badger", "boar", "synthetic" (-8 points)
+- Size patterns: "26mm", "28 mm" (-6 points)  
+- Versioning: "V20", "B15" (-6 points)
+- Multiple brush strategy matches (-4 to -8 points)
+
+### Advanced Splitting Strategies
+The system tries multiple splitting approaches in order:
+
+1. **Delimiter-based splitting** with semantic analysis
+2. **Fiber-hint splitting** using fiber word positions
+3. **Handle maker splitting** using known handle maker patterns
+4. **Knot maker splitting** using proximity to fiber words
+
+## Brand-Specific Intelligence
+
+### Declaration Grooming Strategy
+**Smart Default Behavior:**
+- Standalone "B2", "B15" patterns default to Declaration Grooming
+- Explicit brand rejection: "Zenith B2" → Zenith (not DG)  
+- Context awareness: "DG B2" → Declaration Grooming
+
+**Implementation Pattern:**
+```python
+def _has_non_dg_brand_context(self, text: str) -> bool:
+    """Check for explicit non-DG brand indicators."""
+    non_dg_patterns = [
+        r"\bzenith\b", r"\bomega\b", r"\bsimpson\b", 
+        r"\bchisel\s*\&\s*hound\b", r"\bc\&h\b"
+    ]
+    return any(re.search(pattern, text, re.IGNORECASE) for pattern in non_dg_patterns)
+```
+
+### Chisel & Hound Strategy
+**Version Boundary Management:**
+- Valid range: V10 through V27
+- Strict boundary checking prevents false positives
+- Multiple abbreviation support: "C&H", "Chisel & Hound", "chis hou"
+
+### Zenith/Omega/Semogue Patterns
+**Brand-Specific Defaults:**
+- Zenith: Boar fiber default, B-series recognition
+- Omega: Boar fiber default, numeric model patterns
+- Semogue: Boar fiber default, traditional numbering
+
 ## Fiber and Knot Size Strategy Detection
-Always detect user input vs catalog data:
+Always track the source of fiber and knot size information:
 
 ```python
 # Fiber strategy detection
@@ -68,11 +120,11 @@ user_fiber_patterns = {
     "Synthetic": r"synthetic|syn|nylon|plissoft|tuxedo|cashmere"
 }
 
-# Set strategy based on source
+# Strategy assignment logic
 if user_provided_fiber == catalog_fiber:
     result["fiber_strategy"] = "user_input"
 elif user_provided_fiber != catalog_fiber:
-    result["fiber_strategy"] = "yaml"
+    result["fiber_strategy"] = "yaml" 
     result["fiber_conflict"] = user_provided_fiber
 else:
     result["fiber_strategy"] = "default" if using_default else "yaml"
@@ -92,55 +144,167 @@ All brush matches must return consistent structure:
         "handle_maker": str | None,
         "_matched_by_strategy": str,
         "_pattern_used": str,
+        "_matched_from": str,  # "knot_part", "handle_part", "full_string"
+        "_original_knot_text": str | None,  # When split occurred
+        "_original_handle_text": str | None,  # When split occurred
         "fiber_strategy": "user_input|yaml|default",
-        "knot_size_strategy": "user_input|yaml|default"
+        "knot_size_strategy": "user_input|yaml|default",
+        "fiber_conflict": str | None,  # User input when conflicted
+        "knot_size_conflict": float | None  # User input when conflicted
     } | None,
     "match_type": "exact|alias|brand|fiber|knot|artisan|unmatched" | None,
     "pattern": str | None
 }
 ```
 
+## Error Handling and Resilience
+
+### Strategy Execution Safety
+Always handle strategy failures gracefully:
+
+```python
+for strategy in self.strategies:
+    try:
+        result = strategy.match(text)
+        if result and (
+            (isinstance(result, dict) and result.get("matched"))
+            or (isinstance(result, dict) and result.get("brand"))
+        ):
+            return self._process_result(result, strategy)
+    except (AttributeError, KeyError, TypeError, re.error):
+        # Log the error but continue to next strategy
+        logger.warning(f"Strategy {strategy.__class__.__name__} failed for input: {text}")
+        continue
+```
+
+### Regex Pattern Compilation
+Compile all patterns at initialization to catch errors early:
+
+```python
+def _compile_patterns(self, patterns: list[str]) -> list[dict]:
+    compiled = []
+    for pattern in sorted(patterns, key=len, reverse=True):  # Longer patterns first
+        try:
+            compiled.append({
+                "pattern": pattern,
+                "regex": re.compile(pattern, re.IGNORECASE)
+            })
+        except re.error as e:
+            logger.warning(f"Invalid regex pattern '{pattern}': {e}")
+            continue
+    return compiled
+```
+
+## Performance Optimization Rules
+
+### Pattern Ordering
+- **Longer patterns first**: More specific matches take precedence
+- **Strategy priority**: Most specific strategies tried first
+- **Early termination**: Stop at first successful match
+
+### Compilation Strategy
+- **Compile once**: All regex patterns compiled at initialization
+- **Fail fast**: Invalid patterns excluded during startup
+- **Cache results**: Consider caching for frequently matched patterns
+
 ## Testing Requirements for Brush Strategies
-- Test all regex patterns with positive and negative cases
-- Test boundary conditions (V10, V27 for C&H)
-- Test handle/knot splitting with various delimiters
-- Test fiber/knot size conflict detection
-- Test strategy priority order with overlapping patterns
+
+### Comprehensive Test Coverage
+- **Positive cases**: All regex patterns with expected matches
+- **Negative cases**: Patterns that should NOT match
+- **Boundary conditions**: V10/V27 for C&H, size ranges, etc.
+- **Delimiter variations**: All supported delimiters and combinations
+- **Conflict scenarios**: User input vs catalog conflicts
+- **Strategy priorities**: Overlapping patterns and correct priority handling
+
+### Integration Testing
+- **Real catalog compatibility**: Test with production YAML files
+- **Regression testing**: Ensure catalog changes don't break existing functionality
+- **Performance testing**: Large pattern sets and complex inputs
 
 ## Catalog Structure Standards
-Brush catalogs must follow this structure:
 
+### Brush Catalog Requirements
 ```yaml
 known_brushes:
   Brand Name:
     Model Name:
-      fiber: "Badger|Boar|Synthetic"
-      knot_size_mm: 26
+      fiber: "Badger|Boar|Synthetic"  # Exact fiber specification
+      knot_size_mm: 26                # Exact knot size
       patterns:
-        - "regex_pattern"
+        - "regex_pattern"             # Multiple patterns supported
+
+declaration_grooming:
+  Declaration Grooming:
+    B15:
+      patterns: ["b15"]               # DG-specific patterns
 
 other_brushes:
   Brand Name:
-    default: "Badger|Boar|Synthetic"
-    knot_size_mm: 26  # optional
+    default: "Badger|Boar|Synthetic"  # Default fiber for unknown models
+    knot_size_mm: 26                  # Optional default knot size
     patterns:
       - "regex_pattern"
 ```
 
-## Handle Catalog Structure
+### Handle Catalog Structure
 ```yaml
-artisan_handles:    # Priority 1
+artisan_handles:      # Priority 1 - Highest priority
   Handle Maker:
     patterns:
       - "regex_pattern"
 
-manufacturer_handles:  # Priority 2
+manufacturer_handles: # Priority 2 - Medium priority  
   Handle Maker:
     patterns:
       - "regex_pattern"
 
-other_handles:      # Priority 3
+other_handles:        # Priority 3 - Lowest priority
   Handle Maker:
     patterns:
       - "regex_pattern"
 ```
+
+## Development Best Practices
+
+### Adding New Strategies
+1. **Inherit from BaseBrushMatchingStrategy**
+2. **Implement consistent return structure**
+3. **Add comprehensive unit tests**
+4. **Update integration tests with real catalog**
+5. **Consider strategy priority placement**
+6. **Document brand-specific logic**
+
+### Modifying Existing Strategies
+1. **Maintain backwards compatibility**
+2. **Update both unit and integration tests**
+3. **Test with real catalog data**
+4. **Consider performance implications**
+5. **Update documentation**
+
+### Catalog Maintenance
+1. **Validate regex patterns before adding**
+2. **Test new patterns with existing data**
+3. **Consider pattern specificity and conflicts**
+4. **Maintain consistent data structure**
+5. **Document any special handling requirements**
+
+## Common Pitfalls to Avoid
+
+### Pattern Design
+- **Overly broad patterns**: Can cause false positives across strategies
+- **Missing anchors**: May match unintended substrings  
+- **Case sensitivity**: Always use re.IGNORECASE flag
+- **Whitespace handling**: Account for flexible whitespace in patterns
+
+### Strategy Implementation
+- **Inconsistent return structure**: Follow the standard format exactly
+- **Missing error handling**: Always handle regex and attribute errors
+- **Priority violations**: Don't let generic strategies override specific ones
+- **Performance issues**: Compile patterns once, not per-match
+
+### Testing Gaps
+- **Missing boundary testing**: Test edge cases and limits
+- **Insufficient integration testing**: Must test with real catalogs
+- **Conflict scenarios**: Test user input vs catalog conflicts
+- **Error conditions**: Test malformed input and catalog data

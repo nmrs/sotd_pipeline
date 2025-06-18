@@ -1,120 +1,208 @@
-
 # Brush Matching Phase Specification
 
 ## Goal
 
-Match and normalize shaving brush metadata from the `brush` field extracted during the extraction phase.
+Match and normalize shaving brush metadata from the `brush` field extracted during the extraction phase using a sophisticated strategy pattern with intelligent handle/knot separation.
 
 ## Input
 
-A single `brush` string provided by the extraction phase. This string may be partial or ambiguous, but has already been cleaned and narrowed to one brush mention.
+A single `brush` string provided by the extraction phase. This string may contain:
+- Simple brush descriptions: `"Simpson Chubby 2"`
+- Complex handle/knot combinations: `"DG B15 w/ C&H Zebra"`
+- Mixed specifications: `"Elite 26mm Boar handle w/ Declaration B10"`
 
-## Matching Fields (in priority order)
+## Architecture
 
-1. `brand`
-2. `model`
-3. `fiber` (e.g., boar, badger, synthetic)
-4. `knot_size` (e.g., 26mm)
-5. `handle_maker`
-6. `knot_maker`
+The system uses a **Strategy Pattern** with multiple specialized matching strategies tried in priority order, combined with intelligent handle/knot splitting and content analysis.
 
-## Matching Rules
+### Strategy Priority Order (Most to Least Specific)
 
-- Matching is **regex-based** using YAML pattern files.
-- Matching stops at the **first successful match** from the prioritized YAML files.
-- Each match must contain:
-  - `source_text`: original matched string
-  - `source_type`: one of `exact`, `alias`, `brand`, `fiber`, `knot`, `artisan`, `unmatched`
+1. **KnownBrushMatchingStrategy** - Exact catalog matches from `known_brushes` section
+2. **DeclarationGroomingBrushMatchingStrategy** - DG-specific patterns with smart brand detection
+3. **ChiselAndHoundBrushMatchingStrategy** - C&H versioned knots (V10-V27)
+4. **OmegaSemogueBrushMatchingStrategy** - Omega/Semogue brand patterns
+5. **ZenithBrushMatchingStrategy** - Zenith brand patterns  
+6. **OtherBrushMatchingStrategy** - Generic brand patterns from `other_brushes` section
+
+## Intelligent Handle/Knot Splitting
+
+### Delimiter Recognition
+The system recognizes various delimiters and applies semantic understanding:
+
+- **`" w/ "`, `" with "`** - Knot-ambiguous delimiters (requires content analysis)
+- **`" in "`** - Handle-primary delimiter  
+- **`" / "`, `"/"`, `" - "`** - Neutral delimiters
+
+### Content Analysis Scoring
+Uses `_score_as_handle()` to determine which part is likely the handle:
+
+**Handle Indicators (+points):**
+- Contains "handle" keyword (+10)
+- Matches `handles.yaml` patterns (+6 to +12 based on section)
+- Handle-related terms: "stock", "custom", "artisan", "turned" (+2 each)
+
+**Knot Indicators (-points):**
+- Fiber types: "badger", "boar", "synthetic" (-8)
+- Size patterns: "26mm" (-6)
+- Versioning patterns: "V20" (-6)
+- Multiple brush strategy matches (-4 to -8)
+
+### Example Processing
+```
+Input: "DG B15 w/ C&H Zebra"
+1. Split on " w/ " → ["DG B15", "C&H Zebra"]  
+2. Score "DG B15" as handle: -4 (brush strategy match)
+3. Score "C&H Zebra" as handle: +8 (handle pattern match)
+4. Result: Handle="C&H Zebra", Knot="DG B15"
+5. Match knot against strategies → Declaration Grooming B15
+6. Match handle against handles.yaml → Chisel & Hound
+```
+
+## Fiber and Knot Size Strategy Tracking
+
+The system tracks the **source** of each attribute:
+
+### Strategy Types
+- **`"user_input"`** - Explicitly specified by user (e.g., "26mm Boar")
+- **`"yaml"`** - From catalog data (authoritative)
+- **`"default"`** - Brand default values
+- **`"conflict"`** - User input conflicts with catalog (both recorded)
+
+### Resolution Priority
+1. **YAML exact fields** (highest priority - authoritative manufacturer data)
+2. **Parsed user input** (if no YAML field present)
+3. **YAML default fields** (fallback only)
+4. **Unset** (if no information available)
+
+### Conflict Handling
+When user input conflicts with catalog data:
+```python
+# User says "Synthetic", catalog says "Badger"
+{
+    "fiber": "Badger",  # YAML wins
+    "fiber_strategy": "yaml",
+    "fiber_conflict": "user_input: Synthetic"  # Conflict recorded
+}
+```
 
 ## Output Schema
 
 ```yaml
-brand: string | null
-model: string | null
-fiber: string | null
-knot_size_mm: float | null
-handle_maker: string | null
-knot_maker: string | null
-source_text: string  # always required
-source_type: string  # exact | alias | brand | fiber | knot | artisan | unmatched
+brand: string | null                    # Brush manufacturer
+model: string | null                    # Brush model/name
+fiber: "Badger" | "Boar" | "Synthetic" | null  # Knot fiber type
+knot_size_mm: float | null             # Knot diameter in millimeters
+handle_maker: string | null            # Handle manufacturer (if different from brush brand)
+_matched_by_strategy: string           # Which strategy produced the match
+_pattern_used: string                  # Regex pattern that matched
+fiber_strategy: "user_input" | "yaml" | "default"    # Source of fiber information
+knot_size_strategy: "user_input" | "yaml" | "default"  # Source of knot size
+fiber_conflict: string | null          # User input if conflicted with catalog
+knot_size_conflict: float | null       # User input if conflicted with catalog
+match_type: "exact" | "alias" | "brand" | "fiber" | "knot" | "artisan" | "unmatched"
+source_text: string                    # Original input text
 ```
 
-## Matching Strategy
+## Brand-Specific Intelligence
 
-2. **Matching Order**
+### Declaration Grooming Strategy
+- **Default matching**: Standalone patterns like `"B2"`, `"B15"` default to Declaration Grooming
+- **Brand rejection**: Explicit other brands prevent false matches: `"Zenith B2"` → Zenith (not DG)
+- **Context awareness**: `"DG B2"` → Declaration Grooming (explicit context)
 
-Matching proceeds through the following ordered matchers:
+### Chisel & Hound Strategy  
+- **Version range**: Handles V10-V27 versioned knots
+- **Abbreviation support**: "C&H", "Chisel & Hound", "chis hou"
+- **Boundary validation**: V9 and V28 rejected (outside known range)
 
-   1. Declaration Grooming Brush Matcher *(algorithm)*
-   2. Chisel and Hound Brush Matcher *(algorithm)*
-   3. Known Brush Matcher *(YAML)*
-   4. Omega and Semogue Brush Matcher *(algorithm)*
-   5. Zenith Brush Matcher *(algorithm)*
-   6. Other Brush Matcher *(YAML)*
+### Zenith/Omega/Semogue Strategies
+- **Brand-specific defaults**: Zenith → Boar default, Omega → Boar default
+- **Series recognition**: B-series patterns, model number patterns
+- **Fiber inference**: Uses brand-typical fiber types when not specified
 
-## Special Handling
+## Data Sources
 
-- If no full match occurs, and a partial match can still infer something useful (e.g., fiber or artisan), output a stub record with `"source_type": "unmatched"`.
-- Example stub:
-  ```yaml
-  brand: null
-  model: null
-  fiber: "boar"
-  knot_size: null
-  handle_maker: null
-  knot_maker: null
-  source_text: "custom boar"
-  source_type: "unmatched"
-  ```
-- **TODO**: In a future iteration, implement partial match extraction (e.g., returning only the matched substring from the regex rather than the entire input). This may help isolate handle makers or knot details more accurately, especially when multiple elements are embedded in a single brush string. For now, we only support exact or full-pattern matches.
+### Primary Catalogs
+- **`data/brushes.yaml`** - Main brush catalog with known_brushes, declaration_grooming, other_brushes sections
+- **`data/handles.yaml`** - Handle maker patterns (artisan_handles, manufacturer_handles, other_handles)
 
-## Assumptions
+### Catalog Structure Requirements
+```yaml
+# brushes.yaml
+known_brushes:
+  Brand Name:
+    Model Name:
+      fiber: "Badger|Boar|Synthetic"
+      knot_size_mm: 26
+      patterns:
+        - "regex_pattern"
 
-- Only one brush will be matched per comment.
-- Matching input is restricted to the structured `brush` field from extraction.
-- Regex normalization (case-insensitive, whitespace-tolerant) is handled within patterns.
+other_brushes:
+  Brand Name:
+    default: "Badger|Boar|Synthetic"    # Default fiber for brand
+    knot_size_mm: 26                    # Optional default knot size  
+    patterns:
+      - "regex_pattern"
 
-## Notes
+# handles.yaml  
+artisan_handles:      # Highest priority
+  Handle Maker:
+    patterns:
+      - "regex_pattern"
+```
 
-- Pattern authors should ensure relevant metadata is embedded in the YAML entry.
-- YAML entries should be self-contained and avoid reliance on merging from other tiers.
+## Error Handling and Resilience
 
-### Field Resolution Priority
+### Graceful Degradation
+- **Missing catalogs**: Empty catalog handling
+- **Invalid regex**: Pattern compilation errors logged and excluded
+- **Strategy failures**: Continue to next strategy on exception
+- **Malformed YAML**: Safe loading with error reporting
 
-Brush metadata fields are resolved according to the following strict hierarchy:
+### Performance Optimizations
+- **Pattern compilation**: Regex patterns compiled once at initialization
+- **Strategy caching**: Results cached where appropriate
+- **Priority ordering**: Most specific strategies tried first
 
-| Priority | Source                  | Applies to         | Rule                                                      |
-|----------|-------------------------|---------------------|-----------------------------------------------------------|
-| 1        | Exact field in YAML     | `fiber`, `knot_size_mm` | Always use — authoritative manufacturer data            |
-| 2        | Parsed from user input  | `fiber`, `knot_size_mm` | Use if no exact YAML field is present                   |
-| 3        | Default field in YAML   | `default fiber`, `default_knot_size_mm` | Use only if nothing else is found        |
-| 4        | Fallback                | —                   | Leave unset                                               |
+## Testing Requirements
 
-- Each field is evaluated independently.
-- A field-specific conflict (e.g., user specifies synthetic, YAML says boar) is resolved in favor of the YAML field and is flagged with a conflict tag (e.g., `fiber_conflict: "user_input: synthetic"`).
+### Unit Test Coverage
+- All regex patterns with positive/negative cases
+- Boundary conditions (version ranges, size limits)
+- Handle/knot splitting with various delimiters
+- Fiber/knot size conflict detection and resolution
+- Strategy priority order with overlapping patterns
+- Error handling and edge cases
 
-### Test Coverage
+### Integration Test Coverage  
+- Real catalog compatibility testing
+- Production data validation
+- Catalog change regression testing
+- End-to-end workflow validation
 
-The following tests should validate the field resolution priority logic:
+## Future Enhancements
 
-- **YAML exact fields override all**:
-  - Input with user-specified fiber: `"Synthetic"`
-  - YAML entry specifies `fiber: "Badger"`
-  - Expect output to be `"fiber": "Badger"` with `fiber_conflict: "user_input: Synthetic"`
+### Planned Improvements
+- **Partial match extraction**: Return matched substrings rather than full input
+- **Enhanced handle detection**: More sophisticated handle maker inference
+- **Synonym expansion**: Handle common abbreviations and variations
+- **Machine learning integration**: Pattern learning from user corrections
 
-- **Parsed values used if YAML field missing**:
-  - Input: `"Generic 26mm Synthetic"`
-  - No YAML match
-  - Expect `fiber: "Synthetic"`, `knot_size_mm: 26.0`, `source_type: "unmatched"`
+### Backwards Compatibility
+- All changes maintain existing API contracts
+- Legacy pattern support preserved
+- Gradual migration strategies for breaking changes
 
-- **YAML default values apply only as fallback**:
-  - YAML entry with `default_knot_size_mm: 24.0`
-  - Input string lacks any knot size
-  - Expect `knot_size_mm: 24.0`
+## Assumptions and Limitations
 
-- **Unset if no match or default**:
-  - Input: `"Unknown Brush"`
-  - No YAML match, no parseable fiber/knot
-  - Expect fields like `fiber`, `knot_size_mm` to be null
+### Current Assumptions
+- Only one brush matched per comment
+- Input restricted to structured `brush` field from extraction
+- Regex-based matching sufficient for current accuracy requirements
 
-> These tests should be included in `test_field_resolution.py` or equivalent to ensure brush field resolution logic behaves predictably across matchers and engines.
+### Known Limitations
+- Complex multi-brush descriptions may not parse perfectly
+- Regional naming variations may require pattern updates
+- New brush releases require catalog maintenance
+
+This specification reflects the current implementation as of the latest codebase review and should be maintained as the system evolves.

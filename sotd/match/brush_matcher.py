@@ -153,13 +153,13 @@ class BrushMatcher:
 
     def _split_by_delimiters(self, text: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
         """Split text using known delimiters and return parts and delimiter type."""
-        knot_primary_delimiters = [" w/ ", " with "]  # Knot takes precedence
+        knot_ambiguous_delimiters = [" w/ ", " with "]  # Ambiguous - need content analysis
         handle_primary_delimiters = [" in "]  # Handle takes precedence
         neutral_delimiters = [" / ", "/", " - "]  # No semantic preference
 
-        for delimiter in knot_primary_delimiters:
+        for delimiter in knot_ambiguous_delimiters:
             if delimiter in text:
-                return self._split_by_delimiter(text, delimiter, "knot_primary", handle_first=True)
+                return self._split_by_delimiter_smart(text, delimiter, "knot_ambiguous")
         for delimiter in handle_primary_delimiters:
             if delimiter in text:
                 return self._split_by_delimiter(
@@ -170,9 +170,35 @@ class BrushMatcher:
                 return self._split_by_delimiter(text, delimiter, "neutral", handle_first=True)
         return None, None, None
 
+    def _split_by_delimiter_smart(
+        self, text: str, delimiter: str, delimiter_type: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Smart splitting for ambiguous delimiters like 'w/' by analyzing content."""
+        parts = text.split(delimiter, 1)
+        if len(parts) != 2:
+            return None, None, None
+
+        part1 = parts[0].strip()
+        part2 = parts[1].strip()
+
+        if not part1 or not part2:
+            return None, None, None
+
+        # Analyze which part is more likely to be the handle
+        part1_handle_score = self._score_as_handle(part1)
+        part2_handle_score = self._score_as_handle(part2)
+
+        if part1_handle_score > part2_handle_score:
+            # Part 1 is more likely the handle
+            return part1, part2, delimiter_type
+        else:
+            # Part 2 is more likely the handle (or they're equal, default to part 2)
+            return part2, part1, delimiter_type
+
     def _split_by_delimiter(
         self, text: str, delimiter: str, delimiter_type: str, handle_first: bool
     ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Basic splitting for delimiters with fixed semantic order."""
         parts = text.split(delimiter, 1)
         if len(parts) == 2:
             if handle_first:
@@ -184,6 +210,76 @@ class BrushMatcher:
             if handle and knot:
                 return handle, knot, delimiter_type
         return None, None, None
+
+    def _score_as_handle(self, text: str) -> int:
+        """Score how likely a text is to be a handle (higher = more likely handle)."""
+        score = 0
+        text_lower = text.lower()
+
+        # Strong handle indicators
+        if "handle" in text_lower:
+            score += 10
+
+        # Test against actual handle patterns from handles.yaml
+        handle_match = self._match_handle_maker(text)
+        if handle_match:
+            # Found a handle pattern match - strong indicator this is a handle
+            section = handle_match.get("_matched_by_section", "")
+            if section == "artisan_handles":
+                score += 12  # Artisan handles are most specific
+            elif section == "manufacturer_handles":
+                score += 10
+            elif section == "other_handles":
+                score += 8
+            else:
+                score += 6
+
+        # Test against brush strategies to see if this looks like a knot
+        knot_strategy_matches = 0
+        for strategy in self.strategies:
+            try:
+                result = strategy.match(text)
+                if result and (
+                    (isinstance(result, dict) and result.get("matched"))
+                    or (isinstance(result, dict) and result.get("brand"))
+                ):
+                    knot_strategy_matches += 1
+            except (AttributeError, KeyError, TypeError, re.error):
+                # Some strategies might fail on certain inputs due to regex errors,
+                # missing attributes, or type issues - skip and continue
+                continue
+
+        # If multiple strategies match this as a knot, reduce handle score
+        if knot_strategy_matches >= 2:
+            score -= 8
+        elif knot_strategy_matches == 1:
+            score -= 4
+
+        # Handle-related terms
+        handle_terms = ["stock", "custom", "artisan", "turned", "wood", "resin", "zebra", "burl"]
+        for term in handle_terms:
+            if term in text_lower:
+                score += 2
+
+        # Knot indicators (negative score for handle likelihood)
+        knot_terms = ["badger", "boar", "synthetic", "syn", "mm", "knot"]
+        for term in knot_terms:
+            if term in text_lower:
+                score -= 5
+
+        # Fiber type patterns (strong knot indicators)
+        if any(fiber in text_lower for fiber in ["badger", "boar", "synthetic"]):
+            score -= 8
+
+        # Size patterns (knot indicators)
+        if re.search(r"\d{2}\s*mm", text_lower):
+            score -= 6
+
+        # Chisel & Hound versioning patterns (knot indicators)
+        if re.search(r"\bv\d{2}\b", text_lower):
+            score -= 6
+
+        return score
 
     def _split_by_fiber_hint(self, text: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
         """Split text using fiber words as hints for knot identification."""
@@ -372,7 +468,7 @@ class BrushMatcher:
     def _process_knot_size(self, value: str, match_dict: dict) -> None:
         """Process knot size information from the input value and update match dictionary."""
         user_knot = None
-        knot_match = re.search(r"(\d{2})(?:\s*)mm", value.lower())
+        knot_match = re.search(r"(\d{2})(\.\d+)?[\s-]*mm", value, re.IGNORECASE)
         if knot_match:
             user_knot = float(knot_match.group(1))
 
@@ -554,7 +650,7 @@ class BrushMatcher:
         # Parse fiber and knot size from user input
         parsed_fiber = match_fiber(value)
         parsed_knot = None
-        knot_match = re.search(r"(\d{2}(\.\d+)?)[\s-]*mm", value, re.IGNORECASE)
+        knot_match = re.search(r"(\d{2})(\.\d+)?[\s-]*mm", value, re.IGNORECASE)
         if knot_match:
             parsed_knot = float(knot_match.group(1))
 
@@ -599,6 +695,34 @@ class BrushMatcher:
 
     def _resolve_handle_maker(self, updated: dict, value: str) -> None:
         if ("handle_maker" not in updated) or (updated["handle_maker"] is None):
+            # Check if we have knot matching information to help exclude knot text
+            handle_text = updated.get("_original_handle_text")
+            matched_from = updated.get("_matched_from")
+
+            # Strategy 1: If we matched from a knot part, try to find handle in handle part first
+            if matched_from == "knot_part" and handle_text:
+                handle_match = self._match_handle_maker(handle_text)
+                if handle_match:
+                    updated["handle_maker"] = handle_match["handle_maker"]
+                    updated["handle_maker_metadata"] = {
+                        "_matched_by_section": handle_match["_matched_by_section"],
+                        "_pattern_used": handle_match["_pattern_used"],
+                        "_source_text": handle_match["_source_text"],
+                        "_strategy": "non_knot_portion",
+                    }
+                    return
+
+                # If no pattern match in handle text, use the handle text as-is
+                updated["handle_maker"] = handle_text
+                updated["handle_maker_metadata"] = {
+                    "_matched_by_section": "split_fallback",
+                    "_pattern_used": None,
+                    "_source_text": handle_text,
+                    "_strategy": "non_knot_portion",
+                }
+                return
+
+            # Strategy 2: Try delimiter-based splitting for general cases
             handle, knot, _ = self._split_handle_and_knot(value)
             if handle:
                 handle_match = self._match_handle_maker(handle)
@@ -608,22 +732,29 @@ class BrushMatcher:
                         "_matched_by_section": handle_match["_matched_by_section"],
                         "_pattern_used": handle_match["_pattern_used"],
                         "_source_text": handle_match["_source_text"],
+                        "_strategy": "delimiter_split",
                     }
+                    return
                 else:
+                    # No pattern match, but we have a handle part from splitting
                     updated["handle_maker"] = handle
                     updated["handle_maker_metadata"] = {
                         "_matched_by_section": "split_fallback",
                         "_pattern_used": None,
                         "_source_text": handle,
+                        "_strategy": "delimiter_split",
                     }
-                if knot:
-                    updated["knot_maker"] = knot
-            if ("handle_maker" not in updated) or (updated["handle_maker"] is None):
-                handle_match = self._match_handle_maker(value)
-                if handle_match:
-                    updated["handle_maker"] = handle_match["handle_maker"]
-                    updated["handle_maker_metadata"] = {
-                        "_matched_by_section": handle_match["_matched_by_section"],
-                        "_pattern_used": handle_match["_pattern_used"],
-                        "_source_text": handle_match["_source_text"],
-                    }
+                    if knot:
+                        updated["knot_maker"] = knot
+                    return
+
+            # Strategy 3: Fallback to full string matching
+            handle_match = self._match_handle_maker(value)
+            if handle_match:
+                updated["handle_maker"] = handle_match["handle_maker"]
+                updated["handle_maker_metadata"] = {
+                    "_matched_by_section": handle_match["_matched_by_section"],
+                    "_pattern_used": handle_match["_pattern_used"],
+                    "_source_text": handle_match["_source_text"],
+                    "_strategy": "full_string_fallback",
+                }
