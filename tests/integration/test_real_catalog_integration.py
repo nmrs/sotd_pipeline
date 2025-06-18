@@ -209,25 +209,48 @@ class TestRealCatalogIntegration:
             assert pattern_info["regex"] is not None  # Should have compiled successfully
 
     def test_declaration_grooming_b2_integration(self):
-        """Integration test for the specific B2 case we fixed."""
-        matcher = BrushMatcher()
+        """Test that the Declaration Grooming B2 bug fix works with real catalogs."""
+        brush_matcher = BrushMatcher()
 
-        # Test the corrected behavior with real catalog
+        # This should match as "Zenith B2", not "Declaration Grooming B2"
+        result = brush_matcher.match("Zenith B2 w/ Elite Handle")
+        assert result["matched"] is not None
+        assert result["matched"]["brand"] == "Zenith"
+        # The Zenith strategy preserves the full model including the brand prefix
+        assert result["matched"]["model"] == "B2"
+
+        # Test standalone B2 - should default to Declaration Grooming
+        result = brush_matcher.match("B2 w/ Elite Handle")
+        assert result["matched"] is not None
+        assert result["matched"]["brand"] == "Declaration Grooming"
+        assert result["matched"]["model"] == "B2"
+
+    def test_delimiter_unification_option1(self):
+        """Test that Option 1 delimiter unification works - all non-handle-primary delimiters use smart analysis."""
+        brush_matcher = BrushMatcher()
+
+        # These should all behave the same now (using smart analysis)
         test_cases = [
-            ("B2", "Declaration Grooming"),  # Should default to DG
-            ("Zenith B2", "Zenith"),  # Should be Zenith when explicit
-            ("DG B2", "Declaration Grooming"),  # Should be DG when explicit
+            "DG B15 w/ C&H Zebra",
+            "DG B15 with C&H Zebra",
+            "DG B15 / C&H Zebra",
+            "DG B15 - C&H Zebra",
         ]
 
-        for input_text, expected_brand in test_cases:
-            result = matcher.match(input_text)
-            if result.get("matched"):
-                assert result["matched"]["brand"] == expected_brand, f"Failed for '{input_text}'"
-            elif expected_brand == "Declaration Grooming":
-                # If we expected DG match but got none, that's a problem
-                pytest.fail(
-                    f"Expected Declaration Grooming match for '{input_text}' but got no match"
-                )
+        for test_case in test_cases:
+            result = brush_matcher.match(test_case)
+
+            # Should match Declaration Grooming B15 as the knot
+            assert result["matched"] is not None, f"No match for: {test_case}"
+            assert (
+                result["matched"]["brand"] == "Declaration Grooming"
+            ), f"Wrong brand for: {test_case}"
+            assert result["matched"]["model"] == "B15", f"Wrong model for: {test_case}"
+
+            # Should detect Chisel & Hound as handle maker
+            assert (
+                result["matched"]["handle_maker"] == "Chisel & Hound"
+            ), f"Wrong handle maker for: {test_case}"
 
     def test_real_catalog_files_exist(self):
         """Test that all expected catalog files exist."""

@@ -5,6 +5,33 @@ alwaysApply: false
 ---
 # Testing Patterns for SOTD Pipeline
 
+## Testing Strategy and Requirements
+
+### **MANDATORY**: Unit and Integration Test Coverage
+When adding or modifying any functionality in the SOTD pipeline, you MUST provide both:
+
+1. **Unit Tests** - Fast, isolated tests with mock dependencies
+   - Use mock catalogs and external services
+   - Test individual functions and methods in isolation
+   - Focus on logic validation and edge cases
+   - Located in `tests/{module}/test_{filename}.py`
+
+2. **Integration Tests** - Tests using real production data
+   - Use actual YAML catalog files (`data/*.yaml`)
+   - Test end-to-end workflows with real data
+   - Validate that catalog changes don't break functionality
+   - Located in `tests/integration/`
+
+### Testing Strategy Examples
+- **New product matcher**: Add unit tests for regex patterns + integration tests with real catalog
+- **API changes**: Add unit tests with mocked APIs + integration tests with real services
+- **Data processing logic**: Add unit tests for edge cases + integration tests with sample data
+- **Configuration changes**: Add unit tests for validation + integration tests for real config files
+
+### Why Both Are Required
+- **Unit tests**: Catch logic bugs, provide fast feedback, enable isolated debugging
+- **Integration tests**: Catch production issues, validate real data compatibility, prevent regressions
+
 ## Test File Structure and Naming
 - Test files: `test_{module_name}.py`
 - Test functions: `test_{functionality}_when_{condition}_then_{expected}`
@@ -237,6 +264,42 @@ def test_consistent_return_structure(matcher):
                 assert field in result["matched"]
 ```
 
+## Integration Test Patterns
+Integration tests validate functionality with real production data:
+
+```python
+# tests/integration/test_real_catalog_integration.py
+class TestRealCatalogIntegration:
+    """Integration tests using actual production YAML catalogs."""
+    
+    def test_real_catalog_loads_successfully(self):
+        """Test that real catalogs load without errors."""
+        matcher = BrushMatcher()  # Uses default paths to real files
+        assert matcher.catalog_data is not None
+        assert len(matcher.strategies) > 0
+    
+    def test_known_patterns_work_with_real_catalog(self):
+        """Test known patterns work with production catalog."""
+        matcher = BrushMatcher()
+        test_cases = [
+            ("Simpson Chubby 2", "Simpson"),
+            ("Declaration B15", "Declaration Grooming"),
+        ]
+        
+        for input_text, expected_brand in test_cases:
+            result = matcher.match(input_text)
+            if result.get("matched"):
+                assert result["matched"]["brand"] == expected_brand
+    
+    def test_catalog_files_exist(self):
+        """Test that all expected catalog files exist."""
+        catalog_files = ["data/brushes.yaml", "data/handles.yaml", "data/soaps.yaml"]
+        for catalog_file in catalog_files:
+            path = Path(catalog_file)
+            assert path.exists(), f"Catalog file {catalog_file} does not exist"
+            assert path.stat().st_size > 0, f"Catalog file {catalog_file} is empty"
+```
+
 ## Test Data Management
 Use temporary files for test catalogs:
 
@@ -257,4 +320,18 @@ def test_with_temp_catalog(temp_catalog):
     matcher = BrushMatcher(catalog_path=temp_catalog)
     result = matcher.match("test input")
     # Test with isolated catalog data
+```
+
+## Development Workflow Integration
+Always run both test types during development:
+
+```bash
+# Unit tests (fast feedback loop)
+make test
+
+# Integration tests (comprehensive validation)
+python -m pytest tests/integration/ -v
+
+# All tests before committing
+python -m pytest tests/ -v
 ```
