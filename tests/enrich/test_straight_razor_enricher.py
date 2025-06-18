@@ -32,12 +32,12 @@ class TestStraightRazorEnricher:
 
     def test_does_not_apply_to_non_straight(self, enricher):
         """Test that enricher does not apply to non-straight razors."""
-        record = {"razor": {"brand": "Gillette", "model": "Super Speed"}}
+        record = {"razor": {"matched": {"brand": "Gillette", "model": "Super Speed"}}}
         assert enricher.applies_to(record) is False
 
     def test_does_not_apply_to_no_razor(self, enricher):
         """Test that enricher does not apply when no razor is present."""
-        record = {"blade": {"brand": "Feather"}}
+        record = {"blade": {"matched": {"brand": "Feather"}}}
         assert enricher.applies_to(record) is False
 
     def test_does_not_apply_to_none_razor(self, enricher):

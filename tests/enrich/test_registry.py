@@ -126,8 +126,8 @@ class TestEnricherRegistry:
         registry.register(blade_enricher)
 
         record = {
-            "blade": {"brand": "Feather", "model": "Hi-Stainless"},
-            "razor": {"brand": "Gillette", "model": "Super Speed"},
+            "blade": {"matched": {"brand": "Feather", "model": "Hi-Stainless"}},
+            "razor": {"matched": {"brand": "Gillette", "model": "Super Speed"}},
             "blade_extracted": "Feather (3)",
             "razor_extracted": "Gillette Super Speed",
         }
@@ -149,14 +149,16 @@ class TestEnricherRegistry:
 
         records = [
             {
-                "blade": {"brand": "Feather", "model": "Hi-Stainless"},
-                "razor": {"brand": "Gillette", "model": "Super Speed"},
+                "blade": {"matched": {"brand": "Feather", "model": "Hi-Stainless"}},
+                "razor": {"matched": {"brand": "Gillette", "model": "Super Speed"}},
                 "blade_extracted": "Feather (3)",
                 "razor_extracted": "Gillette Super Speed",
             },
             {
-                "blade": {"brand": "Astra", "model": "Superior Platinum"},
-                "razor": {"brand": "Dovo", "model": "Best Quality", "format": "Straight"},
+                "blade": {"matched": {"brand": "Astra", "model": "Superior Platinum"}},
+                "razor": {
+                    "matched": {"brand": "Dovo", "model": "Best Quality", "format": "Straight"}
+                },
                 "blade_extracted": "Astra SP [2]",
                 "razor_extracted": "Dovo 6/8 full hollow round point",
             },
@@ -181,14 +183,14 @@ class TestEnricherRegistry:
         assert "razor" in enriched_records[1]["enriched"]
         assert enriched_records[1]["enriched"]["blade"]["use_count"] == 2
         assert enriched_records[1]["enriched"]["razor"]["grind"] == "full_hollow"
-        assert enriched_records[1]["enriched"]["razor"]["width_eighths"] == 6
+        assert enriched_records[1]["enriched"]["razor"]["width"] == "6/8"
         assert enriched_records[1]["enriched"]["razor"]["point"] == "round"
 
     def test_enrich_records_length_mismatch(self):
         """Test that enriching records with mismatched lengths raises an error."""
         registry = EnricherRegistry()
 
-        records = [{"blade": {"brand": "Feather"}}]
+        records = [{"blade": {"matched": {"brand": "Feather"}}}]
         original_comments = ["comment 1", "comment 2"]
 
         with pytest.raises(ValueError):
@@ -214,7 +216,7 @@ class TestEnricherRegistry:
 
         record = {
             "comment_id": "test123",
-            "blade": {"brand": "Astra", "model": "Superior Platinum"},
+            "blade": {"matched": {"brand": "Astra", "model": "Superior Platinum"}},
             "blade_extracted": "Astra SP (3)",
         }
         original_comment = "Using Astra blade"

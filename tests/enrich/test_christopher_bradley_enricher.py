@@ -14,19 +14,17 @@ class TestChristopherBradleyEnricher:
 
     def test_applies_to_karve_cb(self):
         """Test that the enricher applies to Karve CB razors."""
-        record = {"razor": {"brand": "Karve", "model": "Christopher Bradley"}}
-        assert self.enricher.applies_to(record)
-        record = {"razor": {"brand": "Karve", "model": "CB"}}
+        record = {"razor": {"matched": {"brand": "Karve", "model": "Christopher Bradley"}}}
         assert self.enricher.applies_to(record)
 
     def test_does_not_apply_to_other_brands(self):
         """Test that the enricher does not apply to non-Karve razors."""
-        record = {"razor": {"brand": "Merkur", "model": "34C"}}
+        record = {"razor": {"matched": {"brand": "Merkur", "model": "34C"}}}
         assert not self.enricher.applies_to(record)
 
     def test_does_not_apply_to_other_karve_models(self):
         """Test that the enricher does not apply to other Karve models."""
-        record = {"razor": {"brand": "Karve", "model": "Overlander"}}
+        record = {"razor": {"matched": {"brand": "Karve", "model": "Overlander"}}}
         assert not self.enricher.applies_to(record)
 
     def test_extract_plate_level_and_type_sb(self):

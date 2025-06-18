@@ -22,8 +22,8 @@ def test_enrich_comments_basic():
     comments = [
         {
             "comment_id": "test1",
-            "blade": {"brand": "Feather", "model": "Hi-Stainless"},
-            "razor": {"brand": "RazoRock", "model": "Game Changer"},
+            "blade": {"matched": {"brand": "Feather", "model": "Hi-Stainless"}},
+            "razor": {"matched": {"brand": "RazoRock", "model": "Game Changer"}},
             "blade_extracted": "Feather blade (3rd use)",
             "razor_extracted": "RazoRock Game Changer .84",
         }
@@ -71,8 +71,8 @@ def test_process_month_valid_data(tmp_path):
         "data": [
             {
                 "comment_id": "test1",
-                "blade": {"brand": "Feather", "model": "Hi-Stainless"},
-                "razor": {"brand": "RazoRock", "model": "Game Changer"},
+                "blade": {"matched": {"brand": "Feather", "model": "Hi-Stainless"}},
+                "razor": {"matched": {"brand": "RazoRock", "model": "Game Changer"}},
                 "blade_extracted": "Feather blade (3rd use)",
                 "razor_extracted": "RazoRock Game Changer .84",
             }

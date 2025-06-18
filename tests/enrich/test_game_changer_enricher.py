@@ -14,27 +14,27 @@ class TestGameChangerEnricher:
 
     def test_applies_to_razorock_game_changer(self):
         """Test that the enricher applies to RazoRock Game Changer razors."""
-        record = {"razor": {"brand": "RazoRock", "model": "Game Changer"}}
+        record = {"razor": {"matched": {"brand": "RazoRock", "model": "Game Changer"}}}
         assert self.enricher.applies_to(record) is True
 
     def test_applies_to_razorock_game_changer_20(self):
         """Test that the enricher applies to RazoRock Game Changer 2.0 razors."""
-        record = {"razor": {"brand": "RazoRock", "model": "Game Changer 2.0"}}
+        record = {"razor": {"matched": {"brand": "RazoRock", "model": "Game Changer 2.0"}}}
         assert self.enricher.applies_to(record) is True
 
     def test_applies_to_razorock_game_changer_jaws(self):
         """Test that the enricher applies to RazoRock Game Changer Jaws razors."""
-        record = {"razor": {"brand": "RazoRock", "model": "Game Changer Jaws"}}
+        record = {"razor": {"matched": {"brand": "RazoRock", "model": "Game Changer Jaws"}}}
         assert self.enricher.applies_to(record) is True
 
     def test_does_not_apply_to_other_brands(self):
         """Test that the enricher does not apply to non-RazoRock razors."""
-        record = {"razor": {"brand": "Merkur", "model": "34C"}}
+        record = {"razor": {"matched": {"brand": "Merkur", "model": "34C"}}}
         assert self.enricher.applies_to(record) is False
 
     def test_does_not_apply_to_other_razorock_models(self):
         """Test that the enricher does not apply to other RazoRock models."""
-        record = {"razor": {"brand": "RazoRock", "model": "SLOC"}}
+        record = {"razor": {"matched": {"brand": "RazoRock", "model": "SLOC"}}}
         assert self.enricher.applies_to(record) is False
 
     def test_does_not_apply_to_missing_razor(self):

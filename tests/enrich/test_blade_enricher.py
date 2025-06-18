@@ -16,13 +16,13 @@ class TestBladeCountEnricher:
         assert enricher.target_field == "blade"
 
     def test_applies_to_with_blade(self, enricher):
-        """Test applies_to when record has a matched blade."""
-        record = {"blade": {"brand": "Astra", "model": "SP"}}
+        """Test applies_to when record has a blade field."""
+        record = {"blade": {"matched": {"brand": "Astra", "model": "SP"}}}
         assert enricher.applies_to(record) is True
 
     def test_applies_to_without_blade(self, enricher):
         """Test applies_to when record has no blade field."""
-        record = {"razor": {"brand": "Merkur", "model": "34C"}}
+        record = {"razor": {"matched": {"brand": "Merkur", "model": "34C"}}}
         assert enricher.applies_to(record) is False
 
     def test_applies_to_with_none_blade(self, enricher):
