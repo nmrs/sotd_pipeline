@@ -141,37 +141,44 @@ def test_empty_catalog():
 
 
 def test_invalid_catalog_structure():
-    """Test with malformed catalog data"""
-    invalid_catalog = {
+    """Test with malformed catalog data - should raise exceptions during initialization"""
+
+    # Test invalid structure (not a dict)
+    invalid_catalog_1 = {
         "Elite": "invalid_structure",  # Should be dict
+    }
+    with pytest.raises(
+        ValueError, match="Invalid catalog structure for brand 'Elite': must be a dictionary"
+    ):
+        OtherBrushMatchingStrategy(invalid_catalog_1)
+
+    # Test missing patterns
+    invalid_catalog_2 = {
         "Alpha": {
             "default": "Synthetic"
             # Missing patterns
         },
     }
-    strategy = OtherBrushMatchingStrategy(invalid_catalog)
+    with pytest.raises(ValueError, match="Missing 'patterns' field for brand 'Alpha'"):
+        OtherBrushMatchingStrategy(invalid_catalog_2)
 
-    # Should not match Elite (invalid structure)
-    result = strategy.match("Elite brush")
-    assert result["matched"] is None
-
-    # Should not match Alpha (missing patterns)
-    result = strategy.match("Alpha brush")
-    assert result["matched"] is None
+    # Test patterns not a list
+    invalid_catalog_3 = {
+        "Beta": {"default": "Badger", "patterns": "not_a_list"},  # Should be list
+    }
+    with pytest.raises(ValueError, match="'patterns' field must be a list for brand 'Beta'"):
+        OtherBrushMatchingStrategy(invalid_catalog_3)
 
 
 def test_no_default_fiber():
-    """Test brand without default fiber"""
+    """Test brand without default fiber - should raise exception during initialization"""
     catalog = {
         "TestBrand": {
             "patterns": ["testbrand"]
-            # No default fiber
+            # No default fiber - invalid for other_brushes
         }
     }
-    strategy = OtherBrushMatchingStrategy(catalog)
-    result = strategy.match("TestBrand brush")
 
-    assert result["matched"] is not None
-    assert result["matched"]["brand"] == "TestBrand"
-    assert result["matched"]["model"] == "TestBrand"  # No fiber to append
-    assert result["matched"]["fiber"] is None
+    # Should raise ValueError during initialization
+    with pytest.raises(ValueError, match="Missing 'default' fiber field for brand 'TestBrand'"):
+        OtherBrushMatchingStrategy(catalog)

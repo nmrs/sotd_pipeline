@@ -39,3 +39,14 @@ class OmegaSemogueBrushMatchingStrategy:
             }
 
         return {"original": value, "matched": None, "pattern": None, "strategy": "OmegaSemogue"}
+
+    def _get_default_match(self) -> dict:
+        return {
+            "brand": None,
+            "model": None,
+            "fiber": None,
+            "knot_size_mm": None,
+            "handle_maker": None,
+            "source_text": None,
+            "source_type": None,
+        }

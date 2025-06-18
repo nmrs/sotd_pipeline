@@ -46,11 +46,17 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 - **Individual Phases**: Test individual phases with specific month data
 
 ## Domain-Specific Rules
-- **Product Catalogs**: Maintain consistent structure in YAML files
+- **Product Catalogs**: Maintain consistent structure in YAML files (`data/brushes.yaml`, `data/handles.yaml`, `data/razors.yaml`, `data/blades.yaml`, `data/soaps.yaml`)
 - **Brand Normalization**: Follow established patterns for product brand/model separation
-- **Brush Matching**: Use strategy pattern for complex brush matching scenarios
+- **Brush Matching**: Use strategy pattern for complex brush matching scenarios with handle/knot splitting
 - **Date Ranges**: Support both individual months and date ranges in CLI
 - **Manual Overrides**: Provide clear validation for manual thread includes/excludes
+
+## Brush Matching Specifics
+- **Handle Maker**: Extract from split input (e.g., "Elite handle w/ Declaration knot")
+- **Strategy Priority**: Known > Declaration > Chisel&Hound > Omega/Semogue > Zenith > Other
+- **Fiber/Knot Detection**: Distinguish user input vs catalog defaults vs YAML data
+- **No knot_maker field**: Removed as redundant with brand field
 
 ## Common Patterns to Follow
 - Use `Path` objects for file system operations
@@ -59,3 +65,10 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 - Include metadata in all output files
 - Use descriptive variable names that reflect the shaving domain
 - Follow the existing error handling patterns for external APIs
+- Always use underscore naming for internal fields (e.g., `handle_maker`, not `handle maker`)
+
+## File Organization
+- Main YAML catalogs: `data/*.yaml` (brushes, handles, razors, blades, soaps)
+- Test files mirror source structure: `tests/{module}/test_{file}.py`
+- Strategy implementations: `sotd/match/{product}_matching_strategies/`
+- Utilities shared across phases: `sotd/utils/`

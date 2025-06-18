@@ -153,3 +153,108 @@ def test_match_with_invalid_regex_pattern():
     matcher = SoapMatcher(catalog_data=invalid_catalog)
     assert len(matcher.patterns) == 0  # Invalid pattern excluded
 ```
+
+## Brush Matching Test Patterns
+Test brush matching strategies with specific patterns:
+
+```python
+@pytest.fixture
+def brush_test_catalog():
+    """Comprehensive brush test catalog."""
+    return {
+        "known_brushes": {
+            "Simpson": {
+                "Chubby 2": {
+                    "fiber": "Badger",
+                    "knot_size_mm": 27,
+                    "patterns": ["simp.*chubby\\s*2"]
+                }
+            }
+        },
+        "other_brushes": {
+            "Elite": {
+                "default": "Badger",
+                "patterns": ["elite"]
+            }
+        }
+    }
+
+def test_brush_strategy_priority(matcher):
+    """Test that strategies are tried in correct priority order."""
+    # Known brushes should match before other_brushes
+    result = matcher.match("Simpson Chubby 2")
+    assert result["matched"]["_matched_by_strategy"] == "KnownBrushMatchingStrategy"
+
+def test_fiber_strategy_detection(matcher):
+    """Test fiber strategy detection (user_input vs yaml vs default)."""
+    # User input matches catalog
+    result = matcher.match("Elite 26mm Boar")
+    assert result["matched"]["fiber_strategy"] == "user_input"
+    
+    # User input conflicts with catalog
+    result = matcher.match("Simpson Chubby 2 Synthetic")  # Catalog says Badger
+    assert result["matched"]["fiber_strategy"] == "yaml"
+    assert result["matched"]["fiber_conflict"] == "Synthetic"
+
+def test_handle_knot_splitting(matcher):
+    """Test handle/knot splitting with various delimiters."""
+    test_cases = [
+        ("Elite handle w/ Declaration knot", "Elite", "Declaration"),
+        ("WW with 26mm knot", "Wolf Whiskers", None),
+        ("Handle / Knot description", "Handle Maker", "Knot Brand")
+    ]
+    
+    for input_text, expected_handle, expected_brand in test_cases:
+        result = matcher.match(input_text)
+        if expected_handle:
+            assert result["matched"]["handle_maker"] == expected_handle
+        if expected_brand:
+            assert result["matched"]["brand"] == expected_brand
+```
+
+## Return Structure Validation
+Always validate complete return structure:
+
+```python
+def test_consistent_return_structure(matcher):
+    """Test that all matches return consistent structure."""
+    test_cases = ["Simpson Chubby 2", "Unknown brush", "Elite handle"]
+    
+    for test_case in test_cases:
+        result = matcher.match(test_case)
+        
+        # Required top-level keys
+        assert "original" in result
+        assert "matched" in result  # Can be None
+        assert "match_type" in result  # Can be None
+        assert "pattern" in result  # Can be None
+        
+        # If matched, validate structure
+        if result["matched"]:
+            required_fields = ["brand", "model", "fiber", "knot_size_mm", 
+                             "handle_maker", "_matched_by_strategy"]
+            for field in required_fields:
+                assert field in result["matched"]
+```
+
+## Test Data Management
+Use temporary files for test catalogs:
+
+```python
+@pytest.fixture
+def temp_catalog(tmp_path):
+    """Create temporary catalog file for testing."""
+    catalog_data = {"Test Brand": {"patterns": ["test"]}}
+    catalog_file = tmp_path / "test_catalog.yaml"
+    
+    with catalog_file.open("w") as f:
+        yaml.dump(catalog_data, f)
+    
+    return catalog_file
+
+def test_with_temp_catalog(temp_catalog):
+    """Test using temporary catalog file."""
+    matcher = BrushMatcher(catalog_path=temp_catalog)
+    result = matcher.match("test input")
+    # Test with isolated catalog data
+```

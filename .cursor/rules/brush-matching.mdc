@@ -1,0 +1,146 @@
+---
+description: 
+globs: sotd/match/brush_matcher.py,sotd/match/brush_matching_strategies/**/*.py,tests/match/test_brush_matcher.py
+alwaysApply: false
+---
+# Brush Matching Strategy Rules
+
+## Strategy Pattern Implementation
+All brush matching strategies must inherit from `BaseBrushMatchingStrategy` and implement the `match()` method:
+
+```python
+from sotd.match.brush_matching_strategies.base_brush_matching_strategy import BaseBrushMatchingStrategy
+
+class CustomBrushMatchingStrategy(BaseBrushMatchingStrategy):
+    def match(self, value: str) -> Optional[dict]:
+        """Return match result with consistent structure."""
+        if self.pattern_matches(value):
+            return {
+                "matched": {
+                    "brand": "Brand Name",
+                    "model": "Model Name", 
+                    "fiber": "Badger|Boar|Synthetic",
+                    "knot_size_mm": 26.0,
+                    "handle_maker": None,
+                    "source_text": value,
+                    "source_type": "exact|alias|brand|fiber|knot|artisan|unmatched"
+                },
+                "pattern": "regex_pattern_used",
+                "match_type": "exact"
+            }
+        return None
+```
+
+## Strategy Priority Order
+Strategies are tried in this specific order (most specific to least specific):
+1. `KnownBrushMatchingStrategy` - Exact catalog matches
+2. `DeclarationGroomingBrushMatchingStrategy` - DG-specific patterns
+3. `ChiselAndHoundBrushMatchingStrategy` - C&H versioned knots (V10-V27)
+4. `OmegaSemogueBrushMatchingStrategy` - Omega/Semogue patterns
+5. `ZenithBrushMatchingStrategy` - Zenith patterns
+6. `OtherBrushMatchingStrategy` - Generic brand patterns
+
+## Handle/Knot Splitting Logic
+When input contains delimiters (`w/`, `with`, `/`), split and match separately:
+- Handle part: Match against `handles.yaml` patterns
+- Knot part: Match against brush strategies
+- Combine results with handle_maker from handle match
+
+```python
+def _split_handle_and_knot(self, text: str) -> tuple[Optional[str], Optional[str]]:
+    delimiters = [" w/ ", " with ", " / ", "/"]
+    for delimiter in delimiters:
+        if delimiter in text:
+            parts = text.split(delimiter, 1)
+            if len(parts) == 2:
+                return parts[0].strip(), parts[1].strip()
+    return None, None
+```
+
+## Fiber and Knot Size Strategy Detection
+Always detect user input vs catalog data:
+
+```python
+# Fiber strategy detection
+user_fiber_patterns = {
+    "Boar": r"boar", 
+    "Badger": r"badger", 
+    "Synthetic": r"synthetic|syn|nylon|plissoft|tuxedo|cashmere"
+}
+
+# Set strategy based on source
+if user_provided_fiber == catalog_fiber:
+    result["fiber_strategy"] = "user_input"
+elif user_provided_fiber != catalog_fiber:
+    result["fiber_strategy"] = "yaml"
+    result["fiber_conflict"] = user_provided_fiber
+else:
+    result["fiber_strategy"] = "default" if using_default else "yaml"
+```
+
+## Return Structure Standards
+All brush matches must return consistent structure:
+
+```python
+{
+    "original": "input_string",
+    "matched": {
+        "brand": str | None,
+        "model": str | None, 
+        "fiber": str | None,
+        "knot_size_mm": float | None,
+        "handle_maker": str | None,
+        "_matched_by_strategy": str,
+        "_pattern_used": str,
+        "fiber_strategy": "user_input|yaml|default",
+        "knot_size_strategy": "user_input|yaml|default"
+    } | None,
+    "match_type": "exact|alias|brand|fiber|knot|artisan|unmatched" | None,
+    "pattern": str | None
+}
+```
+
+## Testing Requirements for Brush Strategies
+- Test all regex patterns with positive and negative cases
+- Test boundary conditions (V10, V27 for C&H)
+- Test handle/knot splitting with various delimiters
+- Test fiber/knot size conflict detection
+- Test strategy priority order with overlapping patterns
+
+## Catalog Structure Standards
+Brush catalogs must follow this structure:
+
+```yaml
+known_brushes:
+  Brand Name:
+    Model Name:
+      fiber: "Badger|Boar|Synthetic"
+      knot_size_mm: 26
+      patterns:
+        - "regex_pattern"
+
+other_brushes:
+  Brand Name:
+    default: "Badger|Boar|Synthetic"
+    knot_size_mm: 26  # optional
+    patterns:
+      - "regex_pattern"
+```
+
+## Handle Catalog Structure
+```yaml
+artisan_handles:    # Priority 1
+  Handle Maker:
+    patterns:
+      - "regex_pattern"
+
+manufacturer_handles:  # Priority 2
+  Handle Maker:
+    patterns:
+      - "regex_pattern"
+
+other_handles:      # Priority 3
+  Handle Maker:
+    patterns:
+      - "regex_pattern"
+```

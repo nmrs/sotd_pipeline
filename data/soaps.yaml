@@ -91,6 +91,9 @@ Apex Alchemy:
 Acqua Di Parma:
   patterns:
   - 'acqua di parma'
+Adopted Acres:
+  patterns:
+  - adopted acres
 Archaic Alchemy:
   patterns:
   - archaic alchemy
@@ -99,8 +102,8 @@ Areffa Soap:
   - 'areffa( soap)?'
 Ariana & Evans:
   patterns:
-  - '\ba ?(and|&|\+) ?e\b'
-  - 'arian+a?.*evans'
+  - \ba ?(and|&|\+) ?e\b
+  - ad?rian+a?.*evans
   scents:
     60's Cologne:
       patterns:
@@ -123,6 +126,9 @@ Ariana & Evans:
     London Gin Club:
       patterns:
       - arian+a?.*london
+    Maullu:
+      patterns:
+      - \bmaullu\b
     Monte Carlo:
       patterns:
       - ariana.*monte carlo
@@ -132,6 +138,9 @@ Ariana & Evans:
     Pedro Fiasco Pomegranate & Wood:
       patterns:
       - pedro f(ia|ai)sco.*pomegranate
+    Spartacus:
+      patterns:
+      - arian+a?.*spartacus
     St. Barts:
       patterns:
       - ariana.*barts
@@ -446,7 +455,7 @@ Bartigan & Stark:
   - bartigan (and|&) stark
 Baume.be:
   patterns:
-  - 'baume.?be'
+  - baume?.?be
   scents:
     Shaving Cream:
       format: Cream
@@ -536,6 +545,9 @@ CBL Soaps:
     Inconceivable:
       patterns:
       - cbl.*inconceivable
+Campbell's:
+  patterns:
+  - campbell'?s
 Captain Nemo's:
   patterns:
   - '(captain )?nemo(?:''s)?'
@@ -1049,6 +1061,9 @@ Dollar Shave Club:
       format: Cream
       patterns:
       - dollar.*club.*cream
+Dr. Bonner's:
+  patterns:
+  - dr\.? bonner'?s
 Dr. Jon's:
   patterns:
   - 'dr.*joh?n''?s?'
@@ -1449,6 +1464,16 @@ Hoffman's:
     Burn the Ships:
       patterns:
       - burn the ships
+Homemade:
+  patterns:
+  - ^homemade
+  scents:
+    Shea Butter:
+      patterns:
+      - homemade.*shea butter
+    Stearic Acid & Coconut Oil:
+      patterns:
+      - homemade.*stearic.*coconut
 House of Mammoth:
   patterns:
   - hou.*mammoth
@@ -1468,6 +1493,9 @@ House of Mammoth:
     Beloved:
       patterns:
       - (hom|mamm).*beloved
+    DinoS'mores:
+      patterns:
+      - dino.*s'mores
     Embrace:
       patterns:
       - '(m\w+mmoth|\bhom\b).*embrace'
@@ -1540,6 +1568,9 @@ Itakha:
     Malva-Rosa:
       patterns:
       - itakha.*malva.*rosa
+J.M. Fraser's:
+  patterns:
+  - j\.?m\.? fraser'?s?
 JabonMan:
   patterns:
   - 'jabon ?man'
@@ -1647,6 +1678,7 @@ Le Père Lucien:
     Cologne Fougère:
       patterns:
       - le p.re lucien.*cologne foug\w*re
+      - lainess.*elixir
 Lisa's Naturals:
   patterns:
   - 'lisa.*natural(.*herbal creations)?'
@@ -1952,6 +1984,9 @@ Mühle:
 Natural Suds & Body:
   patterns:
   - natural suds.*body
+Nawal's:
+  patterns:
+  - \bnawal'?s?\b
 Night Watch:
   patterns:
   - '^night watch( soap( company|co.?)?)?'
@@ -2300,6 +2335,13 @@ Saponificio Varesino:
 Savonniere du Moulin:
   patterns:
   - savonniere du moulin
+Savonu Du Barba:
+  patterns:
+  - savonu du barba
+  scents:
+    La Savonnerie du Nebbiu Savon a Barbe:
+      patterns:
+      - la savon.*nebbiu
 Schmiere:
   patterns:
   - schmiere
@@ -2554,6 +2596,9 @@ Stirling Soap Co.:
     Haverford:
       patterns:
       - 'stirl.*have\wford'
+    I, Rich Moose:
+      patterns:
+      - (stirling.*)?rich moose
     Intrepid Man:
       patterns:
       - stirling.*intrepid
@@ -2581,6 +2626,9 @@ Stirling Soap Co.:
     Ramblin' Man:
       patterns:
       - ramblin.*man
+    Saguaro Blossom:
+      patterns:
+      - sagua?ro.*blossom
     Sandpiper:
       patterns:
       - 'sand ?piper'
@@ -3057,9 +3105,9 @@ Vicco:
 Viking Revolution:
   patterns:
   - viking revolution
-Viking Shaving Soap:
+Viking:
   patterns:
-  - viking shaving soap
+  - viking( shaving (soap)?)?
 Vitos:
   patterns:
   - '^\W*vitos'

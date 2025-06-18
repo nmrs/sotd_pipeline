@@ -1,17 +1,23 @@
 known_brushes:
+  Alpha:
+    Amber:
+      fiber: Synthetic
+      knot_size_mm: 28
+      patterns:
+      - alpha.*amber
   AP Shave Co:
     Cashmere:
       fiber: Synthetic
       patterns:
-      - cashmere
-    G5C:
+      - \ba[\s.]*p\b.*cashmere
+    Silksmoke:
       fiber: Synthetic
       patterns:
-      - g5c
+      - silksmoke
     Gelousy:
-      fiber: Synthetic
+      fiber: Badger
       patterns:
-      - gelous
+      - gelousy
     MiG:
       fiber: Synthetic
       patterns:
@@ -20,6 +26,41 @@ known_brushes:
       fiber: Synthetic
       patterns:
       - synbad
+    G5A:
+      fiber: Synthetic
+      patterns:
+      - \ba[\s.]*p\b.*g5a
+    G5B:
+      fiber: Synthetic
+      patterns:
+      - \ba[\s.]*p\b.*g5b
+    G5C:
+      fiber: Synthetic
+      patterns:
+      - \ba[\s.]*p\b.*g5c
+    Pure Bliss:
+      fiber: Synthetic
+      patterns:
+      - pure\s*bliss(?!.*shd)
+      - \bpb\b(?!.*shd)
+    Pure Bliss SHD:
+      fiber: Synthetic
+      patterns:
+      - pure\s*bliss.*shd
+      - \bpb\b.*shd
+    Titanium:
+      fiber: Synthetic
+      patterns:
+      - (?:\ba ?p\b.*)?titanium
+    Tuxedo:
+      fiber: Synthetic
+      patterns:
+      - \ba[\s.]*p\b.*tuxedo
+      - apshave.*tuxedo
+    2Bed:
+      fiber: Synthetic
+      patterns:
+      - \b2\s*bed\b
   Aurora Grooming:
     LG24:
       fiber: Synthetic
@@ -31,8 +72,8 @@ known_brushes:
   Badger & Blade:
     Essential:
       fiber: Boar
-      handle maker: Omega
-      knot maker: Omega
+      handle_maker: Omega
+      knot_maker: Omega
       knot_size_mm: 22
       patterns:
       - badger.*blade.*essential
@@ -158,7 +199,7 @@ known_brushes:
       - omega.*syn
     Proraso Professional:
       fiber: Boar
-      knot maker: Omega
+      knot_maker: Omega
       knot_size_mm: 28
       patterns:
       - proraso.*(pro)?
@@ -170,6 +211,11 @@ known_brushes:
       patterns:
       - omega.*evo.*e1860
       - e1860
+  Oumo:
+    Rorschach:
+      fiber: Badger
+      patterns:
+      - (oumo.*)?rorschach
   Parker:
     Arctic Storm:
       fiber: Synthetic
@@ -333,8 +379,8 @@ known_brushes:
       fiber: Badger
       knot_size_mm: 27
       patterns:
-      - simp.*chubby\s*2
-      - simp.*ch2
+      - simp.*chubby\s*2\b
+      - simp.*ch2\b
     Chubby 3:
       fiber: Badger
       knot_size_mm: 29
@@ -355,7 +401,8 @@ known_brushes:
       fiber: Synthetic
       knot_size_mm: 24
       patterns:
-      - simp(?:.*traf)?.*t?2
+      - simp.*traf.*t2
+      - trafalgar.*t2
     Trafalgar T3:
       fiber: Synthetic
       knot_size_mm: 28
@@ -394,34 +441,24 @@ known_brushes:
   Stirling/Zenith:
     28mmx50mm Boar (510SE):
       fiber: Boar
-      knot maker: Zenith
+      knot_maker: Zenith
       knot_size_mm: 28
       patterns:
       - (510(\s*|-*)se|jhdsajkghjkdhagkgkjgkhagdkjagdassd)
       - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*28).*
     31mmx50mm Boar (510SE-XL):
       fiber: Boar
-      knot maker: Zenith
+      knot_maker: Zenith
       knot_size_mm: 31
       patterns:
       - (510(\s*|-*)se(\s*|-*)xl|jhdsajkghjkdhagkgkjgkhagdkjagdassd)
       - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*31).*
     Boar:
       fiber: Boar
-      handle maker: Stirling
-      knot maker: Zenith
+      handle_maker: Stirling
+      knot_maker: Zenith
       patterns:
       - ^(?=.*zenith)(?=.*st(i|e)rling).*
-    r/wetshaving MOAR BOAR:
-      fiber: Boar
-      knot maker: Zenith
-      knot_size_mm: 31
-      name: r/wetshaving MOAR BOAR
-      patterns:
-      - moar(.*boar)?
-      - 508\s*xl
-      - wetshaving.*exc
-      - maor boar
   Tatara:
     Masamune Finest Badger:
       fiber: Badger
@@ -544,7 +581,17 @@ known_brushes:
       fiber: Boar
       knot_size_mm: 27
       patterns:
-      - 506U
+      - 506u
+    506U N:
+      fiber: Horse
+      knot_size_mm: 27
+      patterns:
+      - 506.*u.*nthi
+    506N XS:
+      fiber: Horse
+      knot_size_mm: 27
+      patterns:
+      - 506\s?n.*xs
     507U:
       fiber: Boar
       knot_size_mm: 27
@@ -602,6 +649,16 @@ known_brushes:
       - zen.*B34
       - zen.*butter.*chub
       - zen.*chub.*butter
+    r/wetshaving MOAR BOAR:
+      fiber: Boar
+      knot_maker: Zenith
+      knot_size_mm: 31
+      name: r/wetshaving MOAR BOAR
+      patterns:
+      - moar(.*boar)?
+      - 508\s*xl
+      - wetshaving.*exc
+      - maor boar
 
 declaration_grooming:
   Declaration Grooming:
@@ -951,6 +1008,11 @@ other_brushes:
     default: Badger
     patterns:
     - haircut.*shave
+  Hendrix Classics & Co.:
+    default: Synthetic
+    patterns:
+    - hendrix.*classics
+    - hc&c
   Heritage Collection:
     default: Badger
     patterns:
@@ -999,6 +1061,7 @@ other_brushes:
     default: Badger
     patterns:
     - long\s*shaving
+    - long reserve
   Lutin Brushworks:
     default: Synthetic
     patterns:

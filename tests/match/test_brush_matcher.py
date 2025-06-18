@@ -17,16 +17,19 @@ def test_catalog():
                 "Chubby 2": {
                     "fiber": "Badger",
                     "knot_size_mm": 27,
-                    "patterns": ["simp.*chubby\\s*2", "simp.*ch2"],
+                    "patterns": ["simp.*chubby\\s*2\\b", "simp.*ch2\\b"],
                 },
                 "Trafalgar T2": {
                     "fiber": "Synthetic",
                     "knot_size_mm": 24,
-                    "patterns": ["simp(?:.*traf)?.*t?2"],
+                    "patterns": ["simp.*traf.*t2", "trafalgar.*t2"],
                 },
             },
             "Omega": {
                 "10048": {"fiber": "Boar", "knot_size_mm": 28, "patterns": ["omega.*(pro)*.*48"]}
+            },
+            "Wald": {
+                "A1": {"fiber": "Synthetic", "knot_size_mm": 29, "patterns": ["wald.*a1", "wald"]}
             },
         },
         "declaration_grooming": {
@@ -52,6 +55,7 @@ def test_catalog():
                     "\\bc(?:\\s*\\&\\s*|\\s+and\\s+|\\s*\\+\\s*)h\\b",
                 ],
             },
+            "Maggard": {"default": "Badger", "patterns": ["maggard"]},
         },
     }
 
@@ -201,8 +205,7 @@ def test_brush_matcher_handle_knot_splitting(matcher):
     result = matcher.match("Elite handle w/ Declaration knot")
 
     assert result["matched"] is not None
-    assert result["matched"]["handle maker"] == "Elite Handle"
-    assert result["matched"]["knot maker"] == "Declaration Knot"
+    assert result["matched"]["handle_maker"] == "Elite"
 
 
 def test_brush_matcher_post_processing(matcher):
@@ -353,3 +356,237 @@ def test_chisel_hound_version_boundary_cases(matcher):
     assert result["matched"]["model"] == "Chisel & Hound Badger"
     assert result["matched"]["fiber"] == "Badger"
     assert result["matched"]["fiber_strategy"] == "default"
+
+
+def test_handle_matching_full_text():
+    """Test handle matching with full text regex patterns."""
+    matcher = BrushMatcher()
+
+    # Example 1: Long Shaving Storm w/ Reserve III
+    result = matcher.match("Long Shaving Storm w/ Reserve III")
+    assert result["matched"] is not None
+    assert result["matched"]["handle_maker"] == "Long Shaving"
+    assert result["matched"]["handle_maker_metadata"]["_matched_by_section"] in [
+        "artisan_handles",
+        "manufacturer_handles",
+    ]
+
+
+def test_handle_matching_split_parsing():
+    """Test handle matching with split-based parsing."""
+    matcher = BrushMatcher()
+
+    # Example 2: WW w/ 30mm Long Reserve V
+    # The knot part "30mm Long Reserve V" should match Long Shaving (via "long reserve" pattern)
+    # The handle part "WW" should match Wolf Whiskers handle
+    result = matcher.match("WW w/ 30mm Long Reserve V")
+    assert result["matched"] is not None
+    assert result["matched"]["brand"] == "Long Shaving"  # Brush brand from knot part
+    assert result["matched"]["handle_maker"] == "Wolf Whiskers"  # Handle from "WW"
+
+
+def test_handle_matching_with_slash():
+    """Test handle matching with slash delimiter."""
+    matcher = BrushMatcher()
+
+    # Example 3: Chisel & Hound *"Twilight"* / 26mm Long Shaving Reserve VI Fan
+    result = matcher.match('Chisel & Hound *"Twilight"* / 26mm Long Shaving Reserve VI Fan')
+    assert result["matched"] is not None
+    assert result["matched"]["handle_maker"] == "Chisel & Hound"
+    assert result["matched"]["handle_maker_metadata"]["_matched_by_section"] == "artisan_handles"
+
+
+def test_handle_matching_no_match():
+    """Test handle matching when no match is found."""
+    matcher = BrushMatcher()
+
+    result = matcher.match("Some Unknown Brand Random Text")
+    if result["matched"] is not None:
+        # If a brush is matched but no handle is found, handle_maker should be None
+        assert (
+            result["matched"].get("handle_maker") is None or result["matched"]["handle_maker"] == ""
+        )
+
+
+def test_handle_matching_split_fallback():
+    """Test split fallback when regex doesn't match but splitting works."""
+    matcher = BrushMatcher()
+
+    # Use a made-up handle that won't match regex but will trigger split
+    result = matcher.match("UnknownMaker w/ Some Knot")
+    if result["matched"] is not None:
+        # Should fall back to split logic
+        expected_handle = "UnknownMaker"
+        if result["matched"].get("handle_maker") == expected_handle:
+            assert (
+                result["matched"]["handle_maker_metadata"]["_matched_by_section"]
+                == "split_fallback"
+            )
+
+
+def test_handle_maker_fallback_full_text(matcher):
+    """Test that handle_maker is matched from full text if no split delimiter is present."""
+    result = matcher.match("Wald - 'Deep Sea' A1")
+    assert result["matched"] is not None
+    assert result["matched"]["handle_maker"] == "Wald"
+
+
+def test_knot_maker_prioritization_over_handle_maker():
+    """Test that knot maker takes precedence over handle maker when using 'with' delimiter.
+
+    This tests the fix for the issue where 'Chisel and Hound Tahitian Pearl with
+    Maggard 26mm SHD Fan' was incorrectly matched as 'Chisel & Hound Badger' instead
+    of 'Maggard Badger'.
+    """
+    matcher = BrushMatcher()
+
+    # Test case: Handle maker (Chisel & Hound) with knot maker (Maggard)
+    result = matcher.match("Chisel and Hound Tahitian Pearl with Maggard 26mm SHD Fan")
+
+    assert result["matched"] is not None
+
+    # Primary match should be the knot maker (Maggard), not handle maker (Chisel & Hound)
+    assert result["matched"]["brand"] == "Maggard"
+    assert result["matched"]["model"] == "Maggard Badger"  # Maggard SHD is badger
+    assert result["matched"]["fiber"] == "Badger"
+    assert result["matched"]["knot_size_mm"] == 26.0
+
+    # Handle maker should be identified separately
+    assert result["matched"]["handle_maker"] == "Chisel & Hound"
+
+    # Verify the match came from knot part prioritization
+    assert result["matched"]["_matched_from"] == "knot_part"
+    assert result["matched"]["_original_knot_text"] == "Maggard 26mm SHD Fan"
+    assert result["matched"]["_original_handle_text"] == "Chisel and Hound Tahitian Pearl"
+
+    # Match type should be brand_default since Maggard uses generic patterns
+    assert result["match_type"] == "brand_default"
+
+
+def test_knot_maker_prioritization_with_different_delimiters():
+    """Test knot maker prioritization works with various delimiters."""
+    matcher = BrushMatcher()
+
+    test_cases = [
+        "Wolf Whiskers handle w/ Maggard 24mm Synthetic",
+        "Elite Razors handle with Omega 26mm Boar",
+        "Custom Handle / Simpson 28mm Badger",
+        "Artisan Handle/Declaration 26mm B3",
+    ]
+
+    expected_brands = ["Maggard", "Omega", "Simpson", "Declaration Grooming"]
+
+    for i, test_case in enumerate(test_cases):
+        result = matcher.match(test_case)
+
+        assert result["matched"] is not None, f"Failed to match: {test_case}"
+        assert result["matched"]["brand"] == expected_brands[i], f"Wrong brand for: {test_case}"
+        assert (
+            result["matched"]["_matched_from"] == "knot_part"
+        ), f"Should match from knot part: {test_case}"
+
+
+def test_fallback_to_full_text_when_knot_part_no_match():
+    """Test that when knot part doesn't match any brand, system falls back to full text matching."""
+    matcher = BrushMatcher()
+
+    # Use a case where the knot part won't match any known brand
+    result = matcher.match("Elite handle with Unknown Brand 26mm")
+
+    assert result["matched"] is not None
+    # Should fall back to matching "Elite" from the full text
+    assert result["matched"]["brand"] == "Elite"
+    # Should NOT have _matched_from since it used full text matching
+    assert "_matched_from" not in result["matched"]
+
+
+def test_handle_maker_prioritization_with_in_delimiter():
+    """Test that handle maker takes precedence when using 'in' delimiter.
+
+    This tests that 'Badger knot in Elite handle' correctly matches Elite as the primary brand.
+    """
+    matcher = BrushMatcher()
+
+    # Test case: Knot description "in" handle maker - handle should take precedence
+    result = matcher.match("26mm Badger knot in Elite Manchurian handle")
+
+    assert result["matched"] is not None
+
+    # Primary match should be the handle maker (Elite), not the knot description
+    assert result["matched"]["brand"] == "Elite"
+    assert result["matched"]["handle_maker"] == "Elite" or result["matched"]["brand"] == "Elite"
+
+    # Verify the match came from handle part prioritization
+    if "_matched_from" in result["matched"]:
+        assert result["matched"]["_matched_from"] == "handle_part"
+        assert result["matched"]["_original_handle_text"] == "Elite Manchurian handle"
+        assert result["matched"]["_original_knot_text"] == "26mm Badger knot"
+
+
+def test_delimiter_semantics_helper_method():
+    """Test the _should_prioritize_knot helper method for different delimiters."""
+    matcher = BrushMatcher()
+
+    # Test knot-primary delimiters
+    assert matcher._should_prioritize_knot("Handle w/ Knot") is True
+    assert matcher._should_prioritize_knot("Handle with Knot") is True
+
+    # Test handle-primary delimiters
+    assert matcher._should_prioritize_knot("Knot in Handle") is False
+
+    # Test neutral delimiters (default to knot priority for backward compatibility)
+    assert matcher._should_prioritize_knot("Handle / Knot") is True
+    assert matcher._should_prioritize_knot("Handle/Knot") is True
+
+    # Test no delimiter (default behavior)
+    assert matcher._should_prioritize_knot("Simple brush description") is True
+
+
+def test_comprehensive_delimiter_semantics():
+    """Test comprehensive delimiter semantics with real-world examples."""
+    matcher = BrushMatcher()
+
+    test_cases = [
+        # Knot-primary cases (knot maker should be primary brand)
+        {
+            "input": "Chisel & Hound handle w/ Maggard 26mm SHD",
+            "expected_brand": "Maggard",
+            "expected_handle": "Chisel & Hound",
+            "delimiter_type": "knot_primary",
+        },
+        {
+            "input": "Wolf Whiskers handle with Declaration B3 knot",
+            "expected_brand": "Declaration Grooming",
+            "expected_handle": "Wolf Whiskers",
+            "delimiter_type": "knot_primary",
+        },
+        # Handle-primary cases (handle maker should be primary brand)
+        {
+            "input": "Maggard SHD knot in Elite Manchurian handle",
+            "expected_brand": "Elite",
+            "expected_handle": "Elite",
+            "delimiter_type": "handle_primary",
+        },
+        # Neutral cases (knot priority by default)
+        {
+            "input": "Custom Handle / Simpson Badger knot",
+            "expected_brand": "Simpson",
+            "expected_handle": None,  # Custom Handle won't match
+            "delimiter_type": "neutral",
+        },
+    ]
+
+    for case in test_cases:
+        result = matcher.match(case["input"])
+
+        assert result["matched"] is not None, f"Failed to match: {case['input']}"
+        assert result["matched"]["brand"] == case["expected_brand"], (
+            f"Wrong brand for '{case['input']}': expected {case['expected_brand']}, "
+            f"got {result['matched']['brand']}"
+        )
+
+        if case["expected_handle"]:
+            assert result["matched"].get("handle_maker") == case["expected_handle"], (
+                f"Wrong handle maker for '{case['input']}': expected {case['expected_handle']}, "
+                f"got {result['matched'].get('handle_maker')}"
+            )

@@ -24,7 +24,6 @@ class ZenithBrushMatchingStrategy:
                 "fiber": fiber,
                 "knot_size_mm": None,
                 "handle_maker": None,
-                "knot_maker": None,
                 "source_text": res.group(0),
                 "source_type": "exact",
             }
@@ -37,3 +36,14 @@ class ZenithBrushMatchingStrategy:
             }
 
         return {"original": value, "matched": None, "pattern": None, "strategy": "Zenith"}
+
+    def _get_default_match(self) -> dict:
+        return {
+            "brand": "Zenith",
+            "model": None,
+            "fiber": None,
+            "knot_size_mm": None,
+            "handle_maker": None,
+            "source_text": None,
+            "source_type": None,
+        }

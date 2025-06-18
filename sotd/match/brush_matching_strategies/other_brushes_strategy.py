@@ -8,17 +8,42 @@ from sotd.match.brush_matching_strategies.yaml_backed_strategy import (
 
 
 class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
+    def __init__(self, catalog: dict):
+        super().__init__(catalog)
+        self._validate_catalog()
+
+    def _validate_catalog(self):
+        """Validate that all other_brushes entries have required fields."""
+        for brand, metadata in self.catalog.items():
+            if not isinstance(metadata, dict):
+                raise ValueError(
+                    f"Invalid catalog structure for brand '{brand}': must be a dictionary"
+                )
+
+            if "patterns" not in metadata:
+                raise ValueError(
+                    f"Missing 'patterns' field for brand '{brand}' in other_brushes catalog"
+                )
+
+            if "default" not in metadata:
+                raise ValueError(
+                    f"Missing 'default' fiber field for brand '{brand}' in other_brushes catalog"
+                )
+
+            if not isinstance(metadata["patterns"], list):
+                raise ValueError(
+                    f"'patterns' field must be a list for brand '{brand}' in other_brushes catalog"
+                )
+
     def match(self, value: str) -> dict:
         # Handle other_brushes format: brand -> {default: fiber, patterns: []}
         for brand, metadata in self.catalog.items():
-            if not isinstance(metadata, dict) or "patterns" not in metadata:
-                continue
-
-            for pattern in metadata.get("patterns", []):
+            patterns = sorted(metadata["patterns"], key=len, reverse=True)
+            for pattern in patterns:
                 if re.search(pattern, value, re.IGNORECASE):
                     # Extract fiber from user input or use default
                     user_fiber = match_fiber(value)
-                    default_fiber = metadata.get("default")
+                    default_fiber = metadata["default"]
                     final_fiber = user_fiber or default_fiber
 
                     # Extract knot size from user input or use default
@@ -29,7 +54,7 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                     if user_fiber:
                         model = f"{brand} {user_fiber.title()}"
                     else:
-                        model = f"{brand} {default_fiber.title()}" if default_fiber else brand
+                        model = f"{brand} {default_fiber}"
 
                     result = {
                         "brand": brand,

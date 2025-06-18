@@ -26,11 +26,22 @@ class DeclarationGroomingBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                             "knot_size_mm": entry.get("knot_size_mm"),
                         }
                     )
-        return compiled
+        return sorted(compiled, key=lambda x: len(x["pattern"]), reverse=True)
 
     def _extract_knot_size(self, text: str) -> Optional[float]:
         match = re.search(r"(\d{2}(\.\d+)?)\s*-?\s*mm", text, re.IGNORECASE)
         return float(match.group(1)) if match else None
+
+    def _get_default_match(self) -> dict:
+        return {
+            "brand": "Declaration Grooming",
+            "model": None,
+            "fiber": None,
+            "knot_size_mm": None,
+            "handle_maker": None,
+            "source_text": None,
+            "source_type": None,
+        }
 
     def match(self, value: str) -> dict:
         if not isinstance(value, str):

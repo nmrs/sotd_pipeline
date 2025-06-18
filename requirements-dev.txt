@@ -6,4 +6,4 @@ pytest-cov
 pyright
 tqdm
 pyyaml
-rich
+richPIPI

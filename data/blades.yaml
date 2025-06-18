@@ -481,7 +481,7 @@ Parker:
     patterns:
     - parker.*premium.*plat
 Personna:
-  74:
+  "74":
     patterns:
       - 'p(?:ersonn*a)?\s*74'
       - pseventy-four

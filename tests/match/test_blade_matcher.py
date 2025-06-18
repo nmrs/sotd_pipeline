@@ -45,6 +45,38 @@ def test_match_with_use_count_brackets(matcher):
     assert result["original"] == "Astra SP [5]"
 
 
+def test_match_with_use_count_curly_braces(matcher):
+    result = matcher.match("Derby Extra {7}")
+    assert result["matched"]["brand"] == "Derby"
+    assert result["matched"]["model"] == "Extra"
+    assert result["matched"]["use"] == 7
+    assert result["original"] == "Derby Extra {7}"
+
+
+def test_match_with_use_count_x_prefix(matcher):
+    result = matcher.match("Feather (x3)")
+    assert result["matched"]["brand"] == "Feather"
+    assert result["matched"]["model"] == "DE"
+    assert result["matched"]["use"] == 3
+    assert result["original"] == "Feather (x3)"
+
+
+def test_match_with_use_count_x_suffix(matcher):
+    result = matcher.match("Astra SP [5x]")
+    assert result["matched"]["brand"] == "Astra"
+    assert result["matched"]["model"] == "SP"
+    assert result["matched"]["use"] == 5
+    assert result["original"] == "Astra SP [5x]"
+
+
+def test_match_with_use_count_uppercase_x(matcher):
+    result = matcher.match("Derby Extra (2X)")
+    assert result["matched"]["brand"] == "Derby"
+    assert result["matched"]["model"] == "Extra"
+    assert result["matched"]["use"] == 2
+    assert result["original"] == "Derby Extra (2X)"
+
+
 def test_match_without_use_count(matcher):
     result = matcher.match("Derby Extra")
     assert result["matched"]["brand"] == "Derby"

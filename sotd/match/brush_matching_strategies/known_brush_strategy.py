@@ -25,37 +25,33 @@ class KnownBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                     "model": model if model else None,
                     "fiber": details.get("fiber"),
                     "knot_size_mm": details.get("knot_size_mm"),
-                    "handle maker": details.get("handle maker"),
-                    "knot maker": details.get("knot maker"),
+                    "handle_maker": details.get("handle_maker"),
                 }
                 patterns = details["patterns"]
                 patterns = sorted(patterns, key=len, reverse=True)
                 for pattern in patterns:
                     compiled = re.compile(pattern, re.IGNORECASE)
                     all_patterns.append({"compiled": compiled, "pattern": pattern, **entry})
-        return all_patterns
+        return sorted(all_patterns, key=lambda x: len(x["pattern"]), reverse=True)
 
     def match(self, value: str) -> dict:
         if not isinstance(value, str):
             return {"original": value, "matched": None, "pattern": None, "strategy": "KnownBrush"}
 
-        lowered = value.strip().lower()
-
+        text = value.strip()
         for entry in self.patterns:
-            if entry["compiled"].search(lowered):
+            if entry["compiled"].search(text):
+                entry_result = {
+                    "brand": entry.get("brand"),
+                    "model": entry.get("model"),
+                    "fiber": entry.get("fiber"),
+                    "knot_size_mm": entry.get("knot_size_mm"),
+                    "handle_maker": entry.get("handle_maker"),
+                    "source_text": value,
+                }
                 return {
                     "original": value,
-                    "matched": {
-                        "brand": entry["brand"],
-                        "model": entry["model"],
-                        "fiber": entry.get("fiber"),
-                        "knot_size_mm": (
-                            float(entry["knot_size_mm"]) if entry.get("knot_size_mm") else None
-                        ),
-                        "handle maker": entry.get("handle maker"),
-                        "knot maker": entry.get("knot maker"),
-                        "source_text": value,
-                    },
+                    "matched": entry_result,
                     "match_type": "exact",
                     "pattern": entry["pattern"],
                     "strategy": "KnownBrush",

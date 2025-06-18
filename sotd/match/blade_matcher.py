@@ -24,7 +24,7 @@ class BladeMatcher(BaseMatcher):
         return sorted(compiled, key=lambda x: len(x[3]), reverse=True)
 
     def extract_use_count(self, text: str) -> tuple[str, int | None]:
-        match = re.match(r"^(.*?)(?:\s*[\(\[\{](?:x)?(\d+)[\)\]\}])?$", text)
+        match = re.match(r"^(.*?)(?:\s*[\(\[\{](?:x)?(\d+)(?:x)?[\)\]\}])?$", text, re.IGNORECASE)
         if match:
             return match.group(1), int(match.group(2)) if match.group(2) else None
         return text, None
@@ -46,7 +46,7 @@ class BladeMatcher(BaseMatcher):
             if compiled.search(blade_text):
                 matched = {
                     "brand": brand,
-                    "model": model,
+                    "model": str(model),  # Ensure model is always a string
                     "format": fmt,
                     "use": use_count,
                 }

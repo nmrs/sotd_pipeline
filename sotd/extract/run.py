@@ -13,7 +13,9 @@ if not logger.hasHandlers():
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
 
-def _process_month(year: int, month: int, base_path: Path, debug: bool) -> Optional[dict]:
+def _process_month(
+    year: int, month: int, base_path: Path, debug: bool, force: bool
+) -> Optional[dict]:
     ym = f"{year:04d}-{month:02d}"
     all_comments = run_extraction_for_month(ym, base_path=str(base_path))
     if all_comments is None:
@@ -45,8 +47,11 @@ def _process_month(year: int, month: int, base_path: Path, debug: bool) -> Optio
         "missing": missing,
         "skipped": skipped,
     }
+    out_path = base_path / "extracted" / f"{year:04d}-{month:02d}.json"
     if debug:
-        logging.debug("Saving extraction result to: %s/extracted/%s.json", base_path, ym)
+        logging.debug("Saving extraction result to: %s", out_path)
+    if force and out_path.exists():
+        out_path.unlink()
     save_month_file(month=ym, result=result, out_dir=base_path / "extracted")
     return result
 
@@ -56,7 +61,7 @@ def run(args: argparse.Namespace) -> None:
     base_path = Path(args.out_dir)
 
     for year, month in months:
-        _process_month(year, month, base_path, debug=args.debug)
+        _process_month(year, month, base_path, debug=args.debug, force=args.force)
 
 
 def main(argv: Sequence[str] | None = None) -> None:

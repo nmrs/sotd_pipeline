@@ -26,7 +26,7 @@ class ChiselAndHoundBrushMatchingStrategy(BaseBrushMatchingStrategy):
                         "knot_size_mm": 26.0,
                     }
                 )
-        return patterns
+        return sorted(patterns, key=lambda x: len(x["pattern"]), reverse=True)
 
     def match(self, value: str) -> dict | None:
         if not isinstance(value, str):
@@ -45,3 +45,14 @@ class ChiselAndHoundBrushMatchingStrategy(BaseBrushMatchingStrategy):
                     "source_type": "exact",
                 }
         return None
+
+    def _get_default_match(self) -> dict:
+        return {
+            "brand": "Chisel & Hound",
+            "model": None,
+            "fiber": None,
+            "knot_size_mm": None,
+            "handle_maker": None,
+            "source_text": None,
+            "source_type": None,
+        }

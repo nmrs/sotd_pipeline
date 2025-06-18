@@ -26,9 +26,9 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--pattern", help="Regex pattern to match against field values")
     parser.add_argument(
         "--field",
-        choices=["razor", "blade", "brush", "soap"],
+        choices=["razor", "blade", "brush", "soap", "handle"],
         default="razor",
-        help="Field to analyze (default: razor)",
+        help="Field to analyze (default: razor; can also be 'handle')",
     )
     args = parser.parse_args(argv)
 
@@ -91,52 +91,115 @@ def main(argv: list[str] | None = None) -> None:
         from rich.table import Table
 
         console = Console()
-        table = Table(title=f"Matched {args.field} Records")
-        table.add_column(args.field.capitalize())
-        table.add_column("Original")
-        table.add_column("Match Type")
-        table.add_column("Strategy")
-        include_match_type = False
-        include_strategy = False
+        if args.field == "handle":
+            table = Table(title="Matched Handle Records")
+            table.add_column("Handle Maker")
+            table.add_column("Original Brush")
+            table.add_column("Match Type")
+            table.add_column("Strategy")
+            table.add_column("Handle Metadata")
+            seen = set()
+            for year, month in month_span(args):
+                path = Path(args.out_dir) / "matched" / f"{year:04d}-{month:02d}.json"
+                if path.exists():
+                    with path.open("r", encoding="utf-8") as f:
+                        content = json.load(f)
+                    for record in content.get("data", []):
+                        brush = record.get("brush")
+                        if (
+                            isinstance(brush, dict)
+                            and isinstance(brush.get("matched"), dict)
+                            and brush["matched"].get("handle_maker")
+                        ):
+                            matched = brush["matched"]
+                            handle_maker = matched.get("handle_maker", "")
+                            original = brush.get("original", "")
+                            match_type = brush.get("match_type", "")
+                            strategy = matched.get("_matched_by_strategy", "")
+                            handle_metadata = matched.get("handle_maker_metadata", {})
+                            row = [
+                                str(handle_maker),
+                                str(original),
+                                str(match_type),
+                                str(strategy),
+                                json.dumps(handle_metadata) if handle_metadata else "",
+                            ]
+                            row_key = tuple(row)
+                            if row_key not in seen:
+                                seen.add(row_key)
+            for row_key in sorted(seen, key=lambda x: (x[0] == "", x[0].lower(), x[1].lower())):
+                table.add_row(*row_key)
+            console.print(table)
+        else:
+            table = Table(title=f"Matched {args.field} Records")
+            table.add_column(args.field.capitalize())
+            table.add_column("Original")
+            table.add_column("Match Type")
+            table.add_column("Strategy")
+            include_match_type = False
+            include_strategy = False
 
-        # Determine if match_type or strategy fields are present
-        for year, month in month_span(args):
-            path = Path(args.out_dir) / "matched" / f"{year:04d}-{month:02d}.json"
-            if path.exists():
-                with path.open("r", encoding="utf-8") as f:
-                    content = json.load(f)
-                for record in content.get("data", []):
-                    field_data = record.get(args.field)
-                    if isinstance(field_data, dict) and "matched" in field_data:
-                        if "match_type" in field_data:
-                            include_match_type = True
-                        if "strategy" in field_data:
-                            include_strategy = True
+            # Determine if match_type or strategy fields are present
+            for year, month in month_span(args):
+                path = Path(args.out_dir) / "matched" / f"{year:04d}-{month:02d}.json"
+                if path.exists():
+                    with path.open("r", encoding="utf-8") as f:
+                        content = json.load(f)
+                    for record in content.get("data", []):
+                        field_data = record.get(args.field)
+                        if isinstance(field_data, dict) and "matched" in field_data:
+                            if "match_type" in field_data:
+                                include_match_type = True
+                            if "strategy" in field_data:
+                                include_strategy = True
 
-        # Print matched table
-        seen = set()
-        for year, month in month_span(args):
-            path = Path(args.out_dir) / "matched" / f"{year:04d}-{month:02d}.json"
-            if path.exists():
-                with path.open("r", encoding="utf-8") as f:
-                    content = json.load(f)
-                for record in content.get("data", []):
-                    field_data = record.get(args.field)
-                    if isinstance(field_data, dict) and isinstance(field_data.get("matched"), dict):
-                        matched = field_data["matched"]
-                        row = [
-                            f"{matched.get('brand', '')} {matched.get('model', '')}".strip(),
-                            field_data.get("original", ""),
-                            field_data.get("match_type", "") if include_match_type else "",
-                            field_data.get("strategy", "") if include_strategy else "",
-                        ]
+            # Print matched table
+            seen = set()
+            for year, month in month_span(args):
+                path = Path(args.out_dir) / "matched" / f"{year:04d}-{month:02d}.json"
+                if path.exists():
+                    with path.open("r", encoding="utf-8") as f:
+                        content = json.load(f)
+                    for record in content.get("data", []):
+                        field_data = record.get(args.field)
+                        if isinstance(field_data, dict) and isinstance(
+                            field_data.get("matched"), dict
+                        ):
+                            matched = field_data["matched"]
+                            if args.field == "soap":
+                                maker = matched.get("maker", "")
+                                scent = matched.get("scent", "")
+                                if maker and scent:
+                                    main_name = f"{maker} - {scent}"
+                                else:
+                                    main_name = maker or scent
+                            elif args.field == "razor":
+                                manufacturer = matched.get("manufacturer", "")
+                                model = matched.get("model", "")
+                                main_name = f"{manufacturer} {model}".strip()
+                            elif args.field == "blade":
+                                main_name = (
+                                    f"{matched.get('brand', '')} {matched.get('model', '')}".strip()
+                                )
+                            elif args.field == "brush":
+                                main_name = (
+                                    f"{matched.get('brand', '')} {matched.get('model', '')}".strip()
+                                )
+                            else:
+                                main_name = ""
+                            row = [
+                                main_name,
+                                field_data.get("original", ""),
+                                field_data.get("match_type", "") if include_match_type else "",
+                                field_data.get("strategy", "") if include_strategy else "",
+                            ]
 
-                        row_key = tuple(str(x) if x is not None else "" for x in row)
-                        if row_key not in seen:
-                            seen.add(row_key)
-        for row_key in sorted(seen, key=lambda x: (x[0] == "", x[0].lower(), x[1].lower())):
-            table.add_row(*row_key)
-        console.print(table)
+                            row_key = tuple(str(x) if x is not None else "" for x in row)
+                            if row_key not in seen:
+                                seen.add(row_key)
+            for row_key in sorted(seen, key=lambda x: (x[0] == "", x[0].lower(), x[1].lower())):
+                table.add_row(*row_key)
+            console.print(table)
 
 
 if __name__ == "__main__":

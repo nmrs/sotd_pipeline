@@ -107,6 +107,8 @@ def run_match(args):
         )
 
         out_path.parent.mkdir(parents=True, exist_ok=True)
+        if args.force and out_path.exists():
+            out_path.unlink()
         with out_path.open("w", encoding="utf-8") as f:
             output = {
                 "data": processed,

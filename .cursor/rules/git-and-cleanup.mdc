@@ -1,0 +1,130 @@
+---
+description: Git and Cleanup Rules
+globs: 
+alwaysApply: false
+---
+# Git and Cleanup Rules
+
+## Git Ignore Patterns
+- Use `!data/*.yaml` to include all YAML catalogs without listing each file individually
+- Exclude temporary files, logs, and generated data
+- Keep override files and configuration templates
+
+```gitignore
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
+
+# Data files (but keep YAML catalogs)
+data/*
+!data/*.yaml
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and temporary files
+*.log
+.aider*
+praw.ini  # API credentials
+```
+
+## File Cleanup Guidelines
+- Remove redundant files when consolidating data structures
+- Update imports when moving or removing modules
+- Clean up unused test fixtures and mock data
+- Remove deprecated code paths after refactoring
+
+## Refactoring Cleanup Checklist
+When removing or consolidating code:
+
+1. **Search for all references** using grep/ripgrep
+2. **Update imports** in affected modules
+3. **Remove unused test files** and fixtures
+4. **Update .gitignore** if file patterns change
+5. **Check for broken imports** with `make typecheck`
+6. **Run full test suite** to catch integration issues
+7. **Update documentation** if APIs change
+
+## Temporary File Management
+- Use `tmp_path` fixture in tests for temporary files
+- Clean up generated test data in teardown
+- Don't commit temporary debugging files
+- Use descriptive names for temporary variables (avoid `temp`, `tmp`)
+
+## Code Removal Best Practices
+```python
+# Before removing a function/class, check usage:
+# grep -r "function_name" . --include="*.py"
+
+# When removing fields from data structures:
+# 1. Update all tests that reference the field
+# 2. Update documentation/specs
+# 3. Check for serialization/deserialization code
+# 4. Verify no downstream consumers depend on the field
+
+# Example: Removing knot_maker field
+# ✓ Remove from strategy return values
+# ✓ Remove from test assertions  
+# ✓ Update documentation
+# ✓ Check for any enrichment code using the field
+```
+
+## Dependency Cleanup
+- Remove unused imports at the top of files
+- Use `ruff --fix` to automatically remove unused imports
+- Check for unused dependencies in requirements.txt
+- Remove commented-out code blocks
+
+## Data Migration Patterns
+When consolidating data files:
+
+```python
+# Pattern for migrating from multiple files to single file
+def migrate_brush_data():
+    """Example: Consolidating brush_yaml/* into brushes.yaml"""
+    old_files = [
+        "data/brush_yaml/known_brushes.yaml",
+        "data/brush_yaml/other_brushes.yaml",
+        "data/brush_yaml/dg_brushes.yaml"
+    ]
+    
+    consolidated = {}
+    for file_path in old_files:
+        if Path(file_path).exists():
+            with open(file_path) as f:
+                data = yaml.safe_load(f)
+                consolidated.update(data)
+    
+    # Write consolidated file
+    with open("data/brushes.yaml", "w") as f:
+        yaml.dump(consolidated, f, default_flow_style=False)
+```
+
+## Commit Message Patterns
+- `feat:` for new features
+- `fix:` for bug fixes  
+- `refactor:` for code restructuring
+- `test:` for test changes
+- `docs:` for documentation
+- `cleanup:` for removing unused code/files
+
+Examples:
+- `cleanup: remove redundant brush_yaml folder and consolidate into brushes.yaml`
+- `refactor: remove knot_maker field as redundant with brand`
+- `fix: correct handle_maker key naming in brush matcher tests`

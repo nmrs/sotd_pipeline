@@ -86,6 +86,12 @@ def _process_month(
     threads_path = out / "threads" / f"{year:04d}-{month:02d}.json"
     comments_path = out / "comments" / f"{year:04d}-{month:02d}.json"
 
+    if args.force:
+        if threads_path.exists():
+            threads_path.unlink()
+        if comments_path.exists():
+            comments_path.unlink()
+
     # thread records
     new_thread_records = [
         {

@@ -1,0 +1,837 @@
+artisan_handles:
+  AKA Brushworx:
+    patterns:
+    - aka.*brush
+    - aka
+  Alpha:
+    patterns:
+    - alpha
+  Artesania Romera:
+    patterns:
+    - romera
+  Aurora Grooming:
+    patterns:
+    - aurora\s*grooming
+  Billy Goat Brushworks:
+    patterns:
+    - billy.*goat
+  Black Anvil:
+    patterns:
+    - black.*anv
+  Black Eagle:
+    patterns:
+    - black.*eag
+  Brad Sears:
+    patterns:
+    - brad.*sears
+  Bristle Brushwerks:
+    patterns:
+    - huck
+    - bristle.*brush
+  Brushcraft:
+    patterns:
+    - brushcraft
+  Bullseye Brushworks:
+    patterns:
+    - bullseye
+  C-Mon:
+    patterns:
+    - c-mon
+  Carnavis & Richardson:
+    patterns:
+    - carn.*rich
+  Catalin:
+    patterns:
+    - catalin
+  Century:
+    patterns:
+    - century
+  Chisel & Hound:
+    patterns:
+    - chisel.*hound
+    - chis.*fou
+    - \bc(?:\&|and|\+)h\b
+  Cool Dog:
+    patterns:
+    - cool dog
+  Craving Shaving:
+    patterns:
+    - crav.*shav
+  Crescent City Craftsman:
+    patterns:
+    - cres.*city
+  Declaration Grooming:
+    patterns:
+    - ^(?!.*dogwood)declaration
+    - ^(?!.*dogwood)\bdg\b
+  DISCARD:
+    patterns:
+    - had forever.*mark rubbed off
+  Dogwood Handcrafts:
+    patterns:
+    - dogwoo
+    - dogwood.*handcrafts+
+    - dogc*l
+    - ^voa
+    - \bdw\b
+  Doug Korn:
+    patterns:
+    - doug\s*korn
+  Dubl Duck:
+    patterns:
+    - dubl.*duck
+  El Druida:
+    patterns:
+    - druidi*a
+  Elite:
+    patterns:
+    - elite
+  Envy Shave:
+    patterns:
+    - envy.*shave
+  Erskine:
+    patterns:
+    - erskine
+  Ever Ready:
+    patterns:
+    - ever.*read
+  Farvour Turn Craft:
+    patterns:
+    - farvour.*(?:turn).*(?:craft)
+  Firehouse Potter:
+    patterns:
+    - fireh.*pott
+  Frank Shaving:
+    patterns:
+    - frank.*sha
+  Fuller:
+    patterns:
+    - fuller
+  Grizzly Bay:
+    patterns:
+    - grizzly.*bay
+  Heritage Collection:
+    patterns:
+    - heritage
+    - heritage collection
+  Lancaster Brushworks:
+    patterns:
+    - lancaster
+  Lentfer Custom Woodworks:
+    patterns:
+    - lentfer
+  Leonidam:
+    patterns:
+    - leonidam
+    - leo.*nem
+  Long Shaving:
+    patterns:
+    - long\s*shaving
+  Lutin Brushworks:
+    patterns:
+    - lutin
+  MRed:
+    patterns:
+    - mred
+  Mistic:
+    patterns:
+    - mistic
+  Mojo:
+    patterns:
+    - mojo
+  Morris & Forndran:
+    patterns:
+    - morris
+    - m\s*&\s*f
+  Mozingo:
+    patterns:
+    - mozingo
+  Muninn Woodworks:
+    patterns:
+    - mun*in.*(?:woodworks+)+
+  Мужской Материк:
+    patterns:
+    - Мужской
+    - Материк
+  Paladin:
+    patterns:
+    - paladin
+  Paragon:
+    patterns:
+    - paragon
+  Prometheus Handcrafts:
+    patterns:
+    - prometheus.*(?:handcraft)+
+  Rick Montalvo:
+    patterns:
+    - montalv
+  Rooney:
+    patterns:
+    - rooney
+  Rubberset:
+    patterns:
+    - rubberset
+  Rudy Vey:
+    patterns:
+    - rudy.*vey
+  SHAVEDANDY:
+    patterns:
+    - shavedandy
+  Sawdust Creation Studios:
+    patterns:
+    - sawdust
+    - sawdust creation
+  Shave Forge:
+    patterns:
+    - shave.*forge
+  Shavemac:
+    patterns:
+    - shavemac
+  Shore Shaving:
+    patterns:
+    - shore.*shav
+  Some Making Required:
+    patterns:
+    - some.*maki
+  SmilezforMilez:
+    patterns:
+    - smile\w*mile
+  Strike Gold Shave:
+    patterns:
+    - strike.*gold
+  Summer Break:
+    patterns:
+    - summer.*break
+  Surrey:
+    patterns:
+    - surrey
+  TanZ:
+    patterns:
+    - tobs
+    - tanz
+  Teton Shaves:
+    patterns:
+    - teton
+  That Darn Rob:
+    patterns:
+    - darn.*rob
+    - tdr
+  Thater:
+    patterns:
+    - thater
+  The Golden Nib:
+    patterns:
+    - tgn
+    - golden.*nib
+  The Varlet:
+    patterns:
+    - varlet
+  Tony Forsyth:
+    patterns:
+    - tony.*fors
+  Trotter Handcrafts:
+    patterns:
+    - trotter.*(?:handcraft)*
+  Turn-N-Shave:
+    patterns:
+    - ^(?!.*chis)turn.{1,5}shave
+    - ^(?!.*chis)\btns\b
+  Virginia Cheng:
+    patterns:
+    - virginia.*cheng
+  Voigt & Cop:
+    patterns:
+    - v&c
+    - voigt
+  Vulfix:
+    patterns:
+    - vulfix
+  Wald:
+    patterns:
+    - wald
+  Whipped Dog:
+    patterns:
+    - whipped.*dog
+  Wild West Brushworks:
+    patterns:
+    - wild.*west
+    - wwb
+    - ww.*brushw
+  Wolf Whiskers:
+    patterns:
+    - wolf.*whisker
+    - \bww\b
+  Wolfman:
+    patterns:
+    - wolfman.*(?:wrb\d)+
+
+manufacturer_handles:
+  AKA Brushworx:
+    patterns:
+    - aka.*brush
+    - aka
+  AMACK:
+    patterns:
+    - amack
+  Alpha:
+    patterns:
+    - alpha
+  Anbbas:
+    patterns:
+    - an?bbas
+  AP Shave Co:
+    patterns:
+    - ^A.? ?P.? ?\s*shave
+    - ^\bap\b
+  Arno:
+    patterns:
+    - arno\b
+  Art of Shaving:
+    patterns:
+    - ^\s*aos
+    - art.*of.*sha
+  Artesania Romera:
+    patterns:
+    - romera
+  Aylsworth Razors:
+    patterns:
+    - aylsworth
+  Aurora Grooming:
+    patterns:
+    - auroro?a\s*grooming
+  B&M:
+    patterns:
+    - b&m
+    - \bbam\b
+    - b & m
+    - barrister
+  Badlands Shaving Co.:
+    patterns:
+    - badlands
+  Balea Men:
+    patterns:
+    - balea
+  Bass:
+    patterns:
+    - \bbass\b
+  Beaumont:
+    patterns:
+    - bea.{1,3}mont
+  Billy Goat Brushworks:
+    patterns:
+    - billy.*goat
+  Black Anvil:
+    patterns:
+    - black.*anv
+  Black Eagle:
+    patterns:
+    - black.*eag
+  Blackland:
+    patterns:
+    - blackland
+  Boker:
+    patterns:
+    - boker
+  Boti:
+    patterns:
+    - boti
+    - boti.*brush
+  Brad Sears:
+    patterns:
+    - brad.*sears
+  Bristle Brushwerks:
+    patterns:
+    - huck
+    - bristle.*brush
+  Brushcraft:
+    patterns:
+    - brushcraft
+  Bullseye Brushworks:
+    patterns:
+    - bullseye
+  Bundubeard:
+    patterns:
+    - bund\wbeard
+    - boendoebaard
+  C-Mon:
+    patterns:
+    - c-mon
+  CaYuen:
+    patterns:
+    - ca\s?yuen
+  Carnavis & Richardson:
+    patterns:
+    - carn.*rich
+  Catalin:
+    patterns:
+    - catalin
+  Century:
+    patterns:
+    - century
+  Chisel & Hound:
+    patterns:
+    - chisel.*hound
+    - chis.*fou
+    - \bc(?:\&|and|\+)h\b
+    - broomstick
+  Cool Dog:
+    patterns:
+    - cool dog
+  Craving Shaving:
+    patterns:
+    - crav.*shav
+  Cremo:
+    patterns:
+    - cremo
+  Crescent City Craftsman:
+    patterns:
+    - cres.*city
+  Cumberbatch:
+    patterns:
+    - cumberbatch
+  DS Cosmetics:
+    patterns:
+    - DSC?\s*Cosmetic
+    - \bDSC\b
+  Declaration Grooming:
+    patterns:
+    - ^(?!.*dogwood)declaration
+    - ^(?!.*dogwood)\bdg\b
+    - \bdg\b
+  Den of Man:
+    patterns:
+    - den.*of.*man
+  DISCARD:
+    patterns:
+    - had forever.*mark rubbed off
+  Dogwood Handcrafts:
+    patterns:
+    - dogwoo
+    - dogwood.*handcrafts+
+    - dogc*l
+    - ^voa
+    - \bdw\b
+  Doug Korn:
+    patterns:
+    - doug\s*korn
+  Dubl Duck:
+    patterns:
+    - dubl.*duck
+  Edwin Jagger:
+    patterns:
+    - edwin.*jag
+  El Druida:
+    patterns:
+    - druidi*a
+  Elite:
+    patterns:
+    - elite
+  Envy Shave:
+    patterns:
+    - envy.*(?:shave)?
+  Erskine:
+    patterns:
+    - erskine
+  Ever Ready:
+    patterns:
+    - ever.*read
+  Executive Shaving:
+    patterns:
+    - execut.*shav
+  Farvour Turn Craft:
+    patterns:
+    - farvour.*(?:turn).*(?:craft)
+    - farvour
+  Fendrihan:
+    patterns:
+    - fendri
+  Fine:
+    patterns:
+    - fine\b
+  Firehouse Potter:
+    patterns:
+    - fireh.*pott
+  Frank Shaving:
+    patterns:
+    - frank.*sha
+  Fuller:
+    patterns:
+    - fuller
+  Geo F. Trumper:
+    patterns:
+    - geo.*trumper
+  Goodfellas Smile:
+    patterns:
+    - goodfellas'? smile
+  Grizzly Bay:
+    patterns:
+    - grizzly.*bay
+  Haircut & Shave Co:
+    patterns:
+    - haircut.*shave
+  Hendrix Classics & Co.:
+    patterns:
+    - hendrix.*classics
+    - h\s*c\s*&\s*c
+  Heritage Collection:
+    patterns:
+    - heritage
+    - heritage collection
+  Highlander Brushes:
+    patterns:
+    - highlander brushes
+  Holzleute:
+    patterns:
+    - holzleute
+  Imperial:
+    patterns:
+    - imperial
+  Jayaruh:
+    patterns:
+    - jayaruh
+  L&L Grooming:
+    patterns:
+    - l&l grooming
+  L'Occitane en Provence:
+    patterns:
+    - oc*citane
+  Lancaster Brushworks:
+    patterns:
+    - lancaster
+  Leavitt & Pierce:
+    patterns:
+    - leav.*pie
+  Lentfer Custom Woodworks:
+    patterns:
+    - lentfer
+  Leonidam:
+    patterns:
+    - leonidam
+    - leo.*nem
+  Liojuny Shaving:
+    patterns:
+    - liojuny
+  Long Shaving:
+    patterns:
+    - long\s*shaving
+  Lowborn Supply:
+    patterns:
+    - lowborn\s?supply
+  Lutin Brushworks:
+    patterns:
+    - lutin
+  MRed:
+    patterns:
+    - mred
+  Made Rite:
+    patterns:
+    - made.*rite
+  Maggard:
+    patterns:
+    - ^.*mag(g?ard)?s?
+  Maritime Brush Co.:
+    patterns:
+    - maritime\sbrush
+  Maseto:
+    patterns:
+    - maseto
+  Mistic:
+    patterns:
+    - mistic
+  Mojo:
+    patterns:
+    - mojo
+  Mondial:
+    patterns:
+    - mondial
+  Morris & Forndran:
+    patterns:
+    - morris
+    - m\s*&\s*f
+  Mountain Hare Shaving:
+    patterns:
+    - mountain.*hare
+  Mozingo:
+    patterns:
+    - mozingo
+  Muhle:
+    patterns:
+    - \bm[uü]hle\b
+  Muninn Woodworks:
+    patterns:
+    - mun*in.*(?:woodworks+)+
+  Mutiny:
+    patterns:
+    - mutiny
+  NY Shave Co:
+    patterns:
+    - ny\s.*shave.*co
+  New England Shaving Company:
+    patterns:
+    - new.*england
+  Noble Otter:
+    patterns:
+    - noble
+    - no\s*\d{2}mm
+  Nom:
+    patterns:
+    - \bnom\b
+  Old Spice:
+    patterns:
+    - old spice
+  Omega:
+    patterns:
+    - omega
+  Oumo:
+    patterns:
+    - \bo(o|u)+mo\b
+    - rorschach
+    - st-2
+  Oz Shaving:
+    patterns:
+    - oz.*sha
+  PAA:
+    patterns:
+    - paa
+    - phoenix.*art
+  Paladin:
+    patterns:
+    - paladin
+  Paragon:
+    patterns:
+    - paragon(?:aldkjgajklk)*
+  Parker:
+    patterns:
+    - parker
+  Pearl:
+    patterns:
+    - ^pearl\b
+  Perfecto:
+    patterns:
+    - perfecto
+  Plisson:
+    patterns:
+    - plisson
+  Prometheus Handcrafts:
+    patterns:
+    - promethe
+  Rad Dinosaur Creations:
+    patterns:
+    - rad dino(saur)?
+    - priusaurus
+    - rdc
+  Razorock:
+    patterns:
+    - Razorr*ock
+    - (^|\s)rr\s
+    - plissoft
+    - razor rock
+  Rex Supply Co.:
+    patterns:
+    - rex.*(?:supply)+
+  Rick Montalvo:
+    patterns:
+    - montalv
+  Rockwell:
+    patterns:
+    - rockwell
+  Rooney:
+    patterns:
+    - rooney
+  Rubberset:
+    patterns:
+    - rubberset
+  Rudy Vey:
+    patterns:
+    - rudy.*vey
+  Runeman Nordic Shave Design:
+    patterns:
+    - runeman
+  SHAVEDANDY:
+    patterns:
+    - shavedandy
+  Sawdust Creation Studios:
+    patterns:
+    - sawdust
+    - sawdust creation
+  Semogue:
+    patterns:
+    - semogue
+    - owner.*club
+    - \bsoc\b
+  Shave Forge:
+    patterns:
+    - shave.*forge
+  Shave Nation:
+    patterns:
+    - shave.*nation
+  Shavemac:
+    patterns:
+    - shavemac
+  Shore Shaving:
+    patterns:
+    - shore.*shav
+  Simpson:
+    patterns:
+    - simpson
+    - duke
+    - chubby.*(1|2|3)
+    - trafalgar
+  Some Making Required:
+    patterns:
+    - some.*maki
+  SmilezforMilez:
+    patterns:
+    - smilez?.*milez?
+  Spiffo:
+    patterns:
+    - spiffo
+  Stirling:
+    patterns:
+    - ^(?!.*zeni).*st[ie]rl
+  Strike Gold Shave:
+    patterns:
+    - strike.*gold
+  Summer Break:
+    patterns:
+    - summer.*break
+    - sbs
+  Supply:
+    patterns:
+    - supply
+  Surrey:
+    patterns:
+    - surrey
+  Terra Firma Soapery:
+    patterns:
+    - terra ?firma
+  TOBS:
+    patterns:
+    - tobs
+    - taylor.*bond
+  TanZ:
+    patterns:
+    - tobs
+    - tanz
+  Tatara:
+    patterns:
+    - tatara
+    - masamune
+  Teton Shaves:
+    patterns:
+    - teton
+  Timeless:
+    patterns:
+    - timeless
+    - \btrbr\b
+  Truefitt & Hill:
+    patterns:
+    - truefitt.*hill
+  That Darn Rob:
+    patterns:
+    - darn.*rob
+    - tdr
+  Thater:
+    patterns:
+    - thater
+  The Bluebeard's Revenge:
+    patterns:
+    - bluebeard.*rev
+  The Golden Nib:
+    patterns:
+    - tgn
+    - golden.*nib
+  The Razor Company:
+    patterns:
+    - razor.*co
+    - trc
+  The Varlet:
+    patterns:
+    - varlet
+  Tony Forsyth:
+    patterns:
+    - tony.*fors
+  Trotter Handcrafts:
+    patterns:
+    - trotter.*(?:handcraft)*
+  Turn-N-Shave:
+    patterns:
+    - ^(?!.*chis)turn.{1,5}shave
+    - ^(?!.*chis)\btns\b
+  Van der Hagen:
+    patterns:
+    - van.*hag.*
+  Vie Long:
+    patterns:
+    - vie.*long
+  Viking:
+    patterns:
+    - viking
+  Vintage Blades:
+    patterns:
+    - vintage.*blades
+  Virginia Cheng:
+    patterns:
+    - virginia.*cheng
+  Voigt & Cop:
+    patterns:
+    - v&c
+    - voigt
+  Vulfix:
+    patterns:
+    - \bvulfix\b
+  WCS:
+    patterns:
+    - wcs
+    - west.*coast
+  Wald:
+    patterns:
+    - wald
+  Wallygator Manufacturing Co.:
+    patterns:
+    - wallygator
+  Whipped Dog:
+    patterns:
+    - whipped.*dog
+  Wild West Brushworks:
+    patterns:
+    - wild.*west
+    - wwb
+    - ww.*brushw
+  Wilkinson Sword:
+    patterns:
+    - wilkinson
+  Wolf Whiskers:
+    patterns:
+    - wolf.*whisker
+    - \bww\b
+  Wolfman:
+    patterns:
+    - wolfman.*(?:wrb\d)+
+  WSP:
+    patterns:
+    - wsp
+    - wet.*shav.*prod
+  Yaqi:
+    patterns:
+    - yaqu*i\b
+  Zenith:
+    patterns:
+    - zen\w+
+    - moar
+
+other_handles:
+  AP Shave Co:
+    patterns:
+    - ^A.? ?P.? ?\s*shave
+    - ^\bap\b
+  Oumo:
+    patterns:
+    - o[ou]mo
+  Supply:
+    patterns:
+    - supply
+  The Holy Black:
+    patterns:
+    - tgn
+    - golden.*nib 

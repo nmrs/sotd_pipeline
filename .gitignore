@@ -8,9 +8,14 @@ venv/
 .coverage
 coverage/
 htmlcov/
-data/*
+# Keep data files
 !data/*.yaml
-!data/brush_yaml/
+# Ignore JSON files in data subdirectories
+data/comments/*.json
+data/enriched/*.json
+data/extracted/*.json
+data/matched/*.json
+data/threads/*.json
 .aider*
 praw.ini
 .env
