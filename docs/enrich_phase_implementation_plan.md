@@ -40,9 +40,9 @@ The enrich phase performs sophisticated analysis requiring knowledge of matched 
 
 ### Phase 3: Straight Razor Enricher
 - [x] **3.1** Implement `StraightRazorEnricher` class
-- [x] **3.2** Create grind extraction patterns (wedge, quarter hollow, half hollow, full hollow, etc.)
-- [x] **3.3** Create width extraction patterns (4/8", 5/8", 6/8", 7/8", 8/8")
-- [x] **3.4** Create point type extraction patterns (round, square, French, Spanish, etc.)
+- [x] **3.2** Create grind extraction patterns (wedge, quarter hollow, half hollow, full hollow, extra hollow, pretty hollow, near wedge, three quarter hollow, frameback)
+- [x] **3.3** Create width extraction patterns (4/8", 5/8", 6/8", 7/8", 8/8", 15/16, 3/4, 1.0) (store as string fraction, e.g., "15/16")
+- [x] **3.4** Create point type extraction patterns (round, square, French, Spanish, barbers_notch, spear, spike; 'tip' as synonym for 'point')
 - [x] **3.5** Add comprehensive tests with real comment examples
 - [x] **3.6** Handle multiple specification formats and edge cases
 - [x] **3.7** Preserve catalog data from match phase (e.g., Koraat Moarteen specifications)

@@ -153,12 +153,12 @@ All enrichers must include:
 
 **Purpose**: Extract straight razor specifications when product is identified as a straight razor
 
-**Applies To**: Records where `razor.matched.format == "Straight"` or specific straight razor brands
+**Applies To**: Records where `razor.matched.format == "Straight"`
 
 **Extraction Patterns**:
-- **Grind**: `"full hollow"`, `"wedge"`, `"half hollow"`
-- **Width**: `"6/8"`, `"7/8"` (converted to eighths)
-- **Point**: `"round"`, `"square"`, `"barber's notch"`
+- **Grind**: `"full hollow"`, `"extra hollow"`, `"pretty hollow"`, `"half hollow"`, `"quarter hollow"`, `"three quarter hollow"`, `"wedge"`, `"near wedge"`, `"frameback"`
+- **Width**: `"6/8"`, `"7/8"`, `"15/16"`, `"3/4"`, `"1.0"` (stored as string fraction, e.g., "15/16")
+- **Point**: `"round"`, `"square"`, `"french"`, `"spanish"`, `"barbers_notch"`, `"spear"`, `"spike"` (with 'tip' as a synonym for 'point')
 
 **Catalog Data Preservation**: Preserves specifications from match phase catalog data (e.g., Koraat Moarteen grind, width, point) and merges with user comment specifications (user takes precedence).
 
@@ -166,7 +166,7 @@ All enrichers must include:
 ```python
 "enriched": {
     "grind": "Full Hollow",  # From catalog
-    "width_eighths": 7,      # From catalog (15/16 converted)
+    "width": "15/16",        # From catalog (string fraction)
     "point": "Square",       # From catalog
     "_enriched_by": "StraightRazorEnricher",
     "_extraction_source": "catalog_data"

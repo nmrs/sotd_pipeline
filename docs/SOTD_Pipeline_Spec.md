@@ -50,7 +50,11 @@ Track original values, match results, and confidence levels. **Preserves all cat
 Analyze matched field values to extract structured metadata that benefits from knowing the identified product first, such as:
 
 - Blade usage count (e.g., `Astra SP (3)`)
-- Straight razor specifications (grind, width, point type)
+- Straight razor specifications (grind, width as string fraction, point type; e.g., grind: "full hollow", width: "15/16", point: "barbers_notch").
+  - Grind types: full hollow, extra hollow, pretty hollow, half hollow, quarter hollow, three quarter hollow, wedge, near wedge, frameback
+  - Width: string fraction (e.g., "6/8", "15/16", "3/4", "1.0")
+  - Point: round, square, french, spanish, barbers_notch, spear, spike (with 'tip' as synonym for 'point')
+  - Only applies to razors with format: Straight
 - DE razor plate information (Game Changer gaps, Christopher Bradley plates)
 
 Uses an extensible enricher strategy pattern for sophisticated analysis. Save to:
