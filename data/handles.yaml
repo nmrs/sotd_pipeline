@@ -11,7 +11,7 @@ artisan_handles:
     - romera
   Aurora Grooming:
     patterns:
-    - aurora\s*grooming
+    - auroro?a\s*grooming
   Billy Goat Brushworks:
     patterns:
     - billy.*goat
@@ -151,8 +151,8 @@ artisan_handles:
     - mun*in.*(?:woodworks+)+
   Мужской Материк:
     patterns:
-    - Мужской
-    - Материк
+    - мужской
+    - материк
   Paladin:
     patterns:
     - paladin
@@ -202,6 +202,7 @@ artisan_handles:
   Summer Break:
     patterns:
     - summer.*break
+    - \bsbs\b
   Surrey:
     patterns:
     - surrey
@@ -266,16 +267,9 @@ artisan_handles:
     - wolfman.*(?:wrb\d)+
 
 manufacturer_handles:
-  AKA Brushworx:
-    patterns:
-    - aka.*brush
-    - aka
   AMACK:
     patterns:
     - amack
-  Alpha:
-    patterns:
-    - alpha
   Anbbas:
     patterns:
     - an?bbas
@@ -290,15 +284,9 @@ manufacturer_handles:
     patterns:
     - ^\s*aos
     - art.*of.*sha
-  Artesania Romera:
-    patterns:
-    - romera
   Aylsworth Razors:
     patterns:
     - aylsworth
-  Aurora Grooming:
-    patterns:
-    - auroro?a\s*grooming
   B&M:
     patterns:
     - b&m
@@ -317,15 +305,6 @@ manufacturer_handles:
   Beaumont:
     patterns:
     - bea.{1,3}mont
-  Billy Goat Brushworks:
-    patterns:
-    - billy.*goat
-  Black Anvil:
-    patterns:
-    - black.*anv
-  Black Eagle:
-    patterns:
-    - black.*eag
   Blackland:
     patterns:
     - blackland
@@ -336,56 +315,22 @@ manufacturer_handles:
     patterns:
     - boti
     - boti.*brush
-  Brad Sears:
-    patterns:
-    - brad.*sears
-  Bristle Brushwerks:
-    patterns:
-    - huck
-    - bristle.*brush
-  Brushcraft:
-    patterns:
-    - brushcraft
-  Bullseye Brushworks:
-    patterns:
-    - bullseye
   Bundubeard:
     patterns:
     - bund\wbeard
     - boendoebaard
-  C-Mon:
-    patterns:
-    - c-mon
   CaYuen:
     patterns:
     - ca\s?yuen
-  Carnavis & Richardson:
-    patterns:
-    - carn.*rich
-  Catalin:
-    patterns:
-    - catalin
-  Century:
-    patterns:
-    - century
   Chisel & Hound:
     patterns:
     - chisel.*hound
     - chis.*fou
     - \bc(?:\&|and|\+)h\b
     - broomstick
-  Cool Dog:
-    patterns:
-    - cool dog
-  Craving Shaving:
-    patterns:
-    - crav.*shav
   Cremo:
     patterns:
     - cremo
-  Crescent City Craftsman:
-    patterns:
-    - cres.*city
   Cumberbatch:
     patterns:
     - cumberbatch
@@ -401,40 +346,12 @@ manufacturer_handles:
   Den of Man:
     patterns:
     - den.*of.*man
-  DISCARD:
-    patterns:
-    - had forever.*mark rubbed off
-  Dogwood Handcrafts:
-    patterns:
-    - dogwoo
-    - dogwood.*handcrafts+
-    - dogc*l
-    - ^voa
-    - \bdw\b
-  Doug Korn:
-    patterns:
-    - doug\s*korn
-  Dubl Duck:
-    patterns:
-    - dubl.*duck
   Edwin Jagger:
     patterns:
     - edwin.*jag
-  El Druida:
-    patterns:
-    - druidi*a
-  Elite:
-    patterns:
-    - elite
   Envy Shave:
     patterns:
     - envy.*(?:shave)?
-  Erskine:
-    patterns:
-    - erskine
-  Ever Ready:
-    patterns:
-    - ever.*read
   Executive Shaving:
     patterns:
     - execut.*shav
@@ -448,24 +365,12 @@ manufacturer_handles:
   Fine:
     patterns:
     - fine\b
-  Firehouse Potter:
-    patterns:
-    - fireh.*pott
-  Frank Shaving:
-    patterns:
-    - frank.*sha
-  Fuller:
-    patterns:
-    - fuller
   Geo F. Trumper:
     patterns:
     - geo.*trumper
   Goodfellas Smile:
     patterns:
     - goodfellas'? smile
-  Grizzly Bay:
-    patterns:
-    - grizzly.*bay
   Haircut & Shave Co:
     patterns:
     - haircut.*shave
@@ -473,10 +378,6 @@ manufacturer_handles:
     patterns:
     - hendrix.*classics
     - h\s*c\s*&\s*c
-  Heritage Collection:
-    patterns:
-    - heritage
-    - heritage collection
   Highlander Brushes:
     patterns:
     - highlander brushes
@@ -495,34 +396,15 @@ manufacturer_handles:
   L'Occitane en Provence:
     patterns:
     - oc*citane
-  Lancaster Brushworks:
-    patterns:
-    - lancaster
   Leavitt & Pierce:
     patterns:
     - leav.*pie
-  Lentfer Custom Woodworks:
-    patterns:
-    - lentfer
-  Leonidam:
-    patterns:
-    - leonidam
-    - leo.*nem
   Liojuny Shaving:
     patterns:
     - liojuny
-  Long Shaving:
-    patterns:
-    - long\s*shaving
   Lowborn Supply:
     patterns:
     - lowborn\s?supply
-  Lutin Brushworks:
-    patterns:
-    - lutin
-  MRed:
-    patterns:
-    - mred
   Made Rite:
     patterns:
     - made.*rite
@@ -535,31 +417,15 @@ manufacturer_handles:
   Maseto:
     patterns:
     - maseto
-  Mistic:
-    patterns:
-    - mistic
-  Mojo:
-    patterns:
-    - mojo
   Mondial:
     patterns:
     - mondial
-  Morris & Forndran:
-    patterns:
-    - morris
-    - m\s*&\s*f
   Mountain Hare Shaving:
     patterns:
     - mountain.*hare
-  Mozingo:
-    patterns:
-    - mozingo
   Muhle:
     patterns:
-    - \bm[uü]hle\b
-  Muninn Woodworks:
-    patterns:
-    - mun*in.*(?:woodworks+)+
+    - "\\bm[u\xFC]hle\\b"
   Mutiny:
     patterns:
     - mutiny
@@ -594,9 +460,6 @@ manufacturer_handles:
     patterns:
     - paa
     - phoenix.*art
-  Paladin:
-    patterns:
-    - paladin
   Paragon:
     patterns:
     - paragon(?:aldkjgajklk)*
@@ -629,79 +492,35 @@ manufacturer_handles:
   Rex Supply Co.:
     patterns:
     - rex.*(?:supply)+
-  Rick Montalvo:
-    patterns:
-    - montalv
   Rockwell:
     patterns:
     - rockwell
-  Rooney:
-    patterns:
-    - rooney
-  Rubberset:
-    patterns:
-    - rubberset
-  Rudy Vey:
-    patterns:
-    - rudy.*vey
   Runeman Nordic Shave Design:
     patterns:
     - runeman
-  SHAVEDANDY:
-    patterns:
-    - shavedandy
-  Sawdust Creation Studios:
-    patterns:
-    - sawdust
-    - sawdust creation
   Semogue:
     patterns:
     - semogue
     - owner.*club
     - \bsoc\b
-  Shave Forge:
-    patterns:
-    - shave.*forge
   Shave Nation:
     patterns:
     - shave.*nation
-  Shavemac:
-    patterns:
-    - shavemac
-  Shore Shaving:
-    patterns:
-    - shore.*shav
   Simpson:
     patterns:
     - simpson
     - duke
     - chubby.*(1|2|3)
     - trafalgar
-  Some Making Required:
-    patterns:
-    - some.*maki
-  SmilezforMilez:
-    patterns:
-    - smilez?.*milez?
   Spiffo:
     patterns:
     - spiffo
   Stirling:
     patterns:
     - ^(?!.*zeni).*st[ie]rl
-  Strike Gold Shave:
-    patterns:
-    - strike.*gold
-  Summer Break:
-    patterns:
-    - summer.*break
-    - sbs
   Supply:
     patterns:
     - supply
-  Surrey:
-    patterns:
-    - surrey
   Terra Firma Soapery:
     patterns:
     - terra ?firma
@@ -709,17 +528,10 @@ manufacturer_handles:
     patterns:
     - tobs
     - taylor.*bond
-  TanZ:
-    patterns:
-    - tobs
-    - tanz
   Tatara:
     patterns:
     - tatara
     - masamune
-  Teton Shaves:
-    patterns:
-    - teton
   Timeless:
     patterns:
     - timeless
@@ -727,37 +539,13 @@ manufacturer_handles:
   Truefitt & Hill:
     patterns:
     - truefitt.*hill
-  That Darn Rob:
-    patterns:
-    - darn.*rob
-    - tdr
-  Thater:
-    patterns:
-    - thater
   The Bluebeard's Revenge:
     patterns:
     - bluebeard.*rev
-  The Golden Nib:
-    patterns:
-    - tgn
-    - golden.*nib
   The Razor Company:
     patterns:
     - razor.*co
     - trc
-  The Varlet:
-    patterns:
-    - varlet
-  Tony Forsyth:
-    patterns:
-    - tony.*fors
-  Trotter Handcrafts:
-    patterns:
-    - trotter.*(?:handcraft)*
-  Turn-N-Shave:
-    patterns:
-    - ^(?!.*chis)turn.{1,5}shave
-    - ^(?!.*chis)\btns\b
   Van der Hagen:
     patterns:
     - van.*hag.*
@@ -770,44 +558,16 @@ manufacturer_handles:
   Vintage Blades:
     patterns:
     - vintage.*blades
-  Virginia Cheng:
-    patterns:
-    - virginia.*cheng
-  Voigt & Cop:
-    patterns:
-    - v&c
-    - voigt
-  Vulfix:
-    patterns:
-    - \bvulfix\b
   WCS:
     patterns:
     - wcs
     - west.*coast
-  Wald:
-    patterns:
-    - wald
   Wallygator Manufacturing Co.:
     patterns:
     - wallygator
-  Whipped Dog:
-    patterns:
-    - whipped.*dog
-  Wild West Brushworks:
-    patterns:
-    - wild.*west
-    - wwb
-    - ww.*brushw
   Wilkinson Sword:
     patterns:
     - wilkinson
-  Wolf Whiskers:
-    patterns:
-    - wolf.*whisker
-    - \bww\b
-  Wolfman:
-    patterns:
-    - wolfman.*(?:wrb\d)+
   WSP:
     patterns:
     - wsp
@@ -821,17 +581,7 @@ manufacturer_handles:
     - moar
 
 other_handles:
-  AP Shave Co:
-    patterns:
-    - ^A.? ?P.? ?\s*shave
-    - ^\bap\b
-  Oumo:
-    patterns:
-    - o[ou]mo
-  Supply:
-    patterns:
-    - supply
   The Holy Black:
     patterns:
     - tgn
-    - golden.*nib 
+    - golden.*nib
