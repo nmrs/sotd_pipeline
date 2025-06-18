@@ -153,21 +153,17 @@ class BrushMatcher:
 
     def _split_by_delimiters(self, text: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
         """Split text using known delimiters and return parts and delimiter type."""
-        knot_ambiguous_delimiters = [" w/ ", " with "]  # Ambiguous - need content analysis
         handle_primary_delimiters = [" in "]  # Handle takes precedence
-        neutral_delimiters = [" / ", "/", " - "]  # No semantic preference
+        other_delimiters = [" w/ ", " with ", " / ", "/", " - "]  # All use smart analysis
 
-        for delimiter in knot_ambiguous_delimiters:
-            if delimiter in text:
-                return self._split_by_delimiter_smart(text, delimiter, "knot_ambiguous")
         for delimiter in handle_primary_delimiters:
             if delimiter in text:
                 return self._split_by_delimiter(
                     text, delimiter, "handle_primary", handle_first=False
                 )
-        for delimiter in neutral_delimiters:
+        for delimiter in other_delimiters:
             if delimiter in text:
-                return self._split_by_delimiter(text, delimiter, "neutral", handle_first=True)
+                return self._split_by_delimiter_smart(text, delimiter, "smart_analysis")
         return None, None, None
 
     def _split_by_delimiter_smart(
@@ -376,20 +372,22 @@ class BrushMatcher:
 
     def _should_prioritize_knot(self, text: str) -> bool:
         """Determine if knot maker should take precedence based on delimiter semantics."""
-        knot_primary_delimiters = [" w/ ", " with "]
-        handle_primary_delimiters = [" in "]
-
-        # Check for knot-primary delimiters
-        for delimiter in knot_primary_delimiters:
-            if delimiter in text:
-                return True
+        handle_primary_delimiters = [" in "]  # Handle takes precedence
 
         # Check for handle-primary delimiters
         for delimiter in handle_primary_delimiters:
             if delimiter in text:
                 return False
 
-        # Default behavior for neutral delimiters (/, etc.)
+        # For all other delimiters, let the smart analysis determine priority
+        # by checking if we successfully split and which part scored higher as handle
+        handle, knot, delimiter_type = self._split_handle_and_knot(text)
+        if handle and knot and delimiter_type == "smart_analysis":
+            # If smart analysis was used, trust its determination
+            # The smart analysis already put the handle first and knot second
+            return True  # Process knot part first since it's usually more distinctive
+
+        # Default behavior when no delimiters found
         return True  # Default to knot priority for backward compatibility
 
     def _is_known_handle_maker(self, brand: str) -> bool:
