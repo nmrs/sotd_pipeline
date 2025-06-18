@@ -14,6 +14,13 @@ The enrich phase performs sophisticated analysis requiring knowledge of matched 
 - Fail-fast error handling for internal/logic errors
 - Graceful handling for external/API errors
 
+## Enrichment Extraction Source Clarification
+
+**IMPORTANT:**
+- All enrichers that extract user-supplied details (e.g., fiber, knot size, plate, gap, variant, etc.) must extract from the relevant extracted field (e.g., `brush_extracted`, `razor_extracted`, `blade_extracted`, `soap_extracted`).
+- Do **NOT** extract from the full comment (may contain unrelated info) or from the matched/canonical field (catalog only, loses user details).
+- The extract phase is responsible for parsing the original SOTD comment and extracting each product field as entered by the user. These extracted fields are the correct source for user-supplied enrichment.
+
 ## Implementation Chunks
 
 ### Phase 1: Foundation Infrastructure
@@ -241,6 +248,13 @@ The enrich phase performs sophisticated analysis requiring knowledge of matched 
 - **Field-Focused Routing**: Each enricher targets specific field types
 - **Fiber Parsing Architecture**: Fiber parsing remains in match phase for product identification and model naming (especially for other_brushes strategy), but fiber conflict resolution moves to enrich phase for better user input handling
 - **Catalog Data Preservation**: Match phase preserves all YAML catalog specifications, enrich phase merges with user specifications
+
+## Architecture Patterns
+- **Phase Structure**: Each phase follows the pattern: `run.py` (CLI), core logic modules, `save.py` (I/O)
+- **Matcher Strategy**: Use BaseMatcher as base class for all product matchers
+- **YAML Catalogs**: Store product data in YAML files under `data/` directory
+- **Data Flow**: Each phase reads from previous phase output, writes to `data/{phase}/YYYY-MM.json`
+- **Enrichment Extraction Source**: All user-supplied enrichment must extract from the relevant extracted field (e.g., `brush_extracted`), not the full comment or matched field.
 
 ---
 
