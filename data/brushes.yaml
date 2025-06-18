@@ -83,6 +83,11 @@ known_brushes:
       knot_size_mm: 23
       patterns:
       - clubman pinaud
+  Cornfed Viking:
+    Odin's Beard:
+      fiber: Badger
+      patterns:
+      - odin'?s.*beard
   Hand Lather:
     '':
       # fiber: Hand
@@ -477,39 +482,39 @@ known_brushes:
       fiber: Badger
       patterns:
       - turn.{1,5}shave
-      - tns
+      - t[&n]s
       - \btip\b v[1-9]
     BoBa (50/50 Boar Badger):
       fiber: Mixed Badger/Boar
       patterns:
       - turn.{1,5}shave.*boba
-      - tns.*mix
-      - tns.*boba
+      - t[&n]s.*mix
+      - t[&n]s.*boba
     High Density Badger (H*):
       fiber: Badger
       patterns:
       - turn.{1,5}shave.*h\d
-      - tns.*h\d
+      - t[&n]s.*h\d
     Low Density Badger (L*):
       fiber: Badger
       patterns:
       - turn.{1,5}shave.*l\d
-      - tns.*l\d
+      - t[&n]s.*l\d
     Medium Density Badger (M*):
       fiber: Badger
       patterns:
       - turn.{1,5}shave.*m\d
-      - tns.*m\d
+      - t[&n]s.*m\d
     Quartermoon:
       fiber: Synthetic
       patterns:
       - turn.{1,5}shave.*quarter
-      - tns.*quarter
+      - t[&n]s.*quarter
     Shoat:
       fiber: Boar
       patterns:
       - turn.{1,5}shave.*shoat
-      - tns.*shoat
+      - t[&n]s.*shoat
   Truefitt & Hill:
     Wellington:
       fiber: Badger

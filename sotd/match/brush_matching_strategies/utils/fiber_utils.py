@@ -6,7 +6,7 @@ _FIBER_PATTERNS = {
         r"(acrylic|timber|tux|mew|silk|synt|synbad|2bed|captain|cashmere|"
         r"faux.*horse|black.*(magic|wolf)|g4|boss|st-?(1|2)|trafalgar\s*t[23]|"
         r"\bt[23]\b|kong|hi\s*brush|ak47|g5[abc]|stf|quartermoon|fibre|"
-        r"\bmig\b|synthetic badger)"
+        r"\bmig\b|synthetic badger|motherlode)"
     ),
     "Mixed Badger/Boar": r"(mix|mixed|mi[sx]tura?|badg.*boar|boar.*badg|hybrid|fusion)",
     "Boar": r"\b(boar|shoat)\b",

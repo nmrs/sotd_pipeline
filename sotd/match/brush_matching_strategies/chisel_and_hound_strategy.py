@@ -14,7 +14,7 @@ class ChiselAndHoundBrushMatchingStrategy(BaseBrushMatchingStrategy):
                 r"chis.*[fh]ou",
                 r"\bc(?:\s*\&\s*|\s+and\s+|\s*\+\s*)h\b",
             ]:
-                regex = rf"{pattern}.*\bv{v}\b"
+                regex = rf"{pattern}.*\bv\s*{v}\b"
                 compiled = re.compile(regex, re.IGNORECASE)
                 patterns.append(
                     {

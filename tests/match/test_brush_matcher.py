@@ -574,6 +574,13 @@ def test_comprehensive_delimiter_semantics():
             "expected_handle": None,  # Custom Handle won't match
             "delimiter_type": "neutral",
         },
+        # Dash delimiter (neutral - knot priority by default)
+        {
+            "input": "Chisel and Hound Tahitian Pearl - 26mm Maggard SHD",
+            "expected_brand": "Maggard",
+            "expected_handle": "Chisel & Hound",
+            "delimiter_type": "neutral",
+        },
     ]
 
     for case in test_cases:
@@ -590,3 +597,130 @@ def test_comprehensive_delimiter_semantics():
                 f"Wrong handle maker for '{case['input']}': expected {case['expected_handle']}, "
                 f"got {result['matched'].get('handle_maker')}"
             )
+
+
+def test_fiber_hint_splitting():
+    """Test that fiber detection can split handle and knot when no delimiters are present."""
+    matcher = BrushMatcher()
+
+    # Test case: "Chisel & Hound Hive 28mm Maggard Silver Tip Badger"
+    # Should split into handle="Chisel & Hound" and knot="Hive 28mm Maggard Silver Tip Badger"
+    test_case = "Chisel & Hound Hive 28mm Maggard Silver Tip Badger"
+    result = matcher.match(test_case)
+
+    assert result["matched"] is not None
+    assert result["matched"]["brand"] == "Maggard"
+    assert result["matched"]["handle_maker"] == "Chisel & Hound"
+    assert result["matched"]["_matched_from"] == "knot_part"
+    assert result["matched"]["_original_handle_text"] == "Chisel & Hound"
+    assert result["matched"]["_original_knot_text"] == "Hive 28mm Maggard Silver Tip Badger"
+
+    # Test the splitting method directly
+    handle, knot, delimiter_type = matcher._split_handle_and_knot(test_case)
+    assert handle == "Chisel & Hound"
+    assert knot == "Hive 28mm Maggard Silver Tip Badger"
+    assert delimiter_type == "fiber_hint"
+
+
+def test_fiber_hint_splitting_with_different_makers():
+    """Test fiber detection with different handle/knot maker combinations."""
+    matcher = BrushMatcher()
+
+    # Only test cases that actually contain fiber words
+    test_cases = [
+        {
+            "input": "Declaration Grooming 26mm Maggard SHD",
+            "expected_handle": "Declaration Grooming",
+            "expected_knot": "26mm Maggard SHD",
+            "expected_brand": "Maggard",
+            "expected_handle_maker": "Declaration Grooming",
+        },
+        {
+            "input": "Elite 28mm Oumo Badger",
+            "expected_handle": "Elite",
+            "expected_knot": "28mm Oumo Badger",
+            "expected_brand": "Oumo",
+            "expected_handle_maker": "Elite",
+        },
+    ]
+
+    for case in test_cases:
+        result = matcher.match(case["input"])
+        assert result["matched"] is not None, f"No match for {case['input']}"
+        assert (
+            result["matched"]["brand"] == case["expected_brand"]
+        ), f"Wrong brand for {case['input']}"
+        assert (
+            result["matched"]["handle_maker"] == case["expected_handle_maker"]
+        ), f"Wrong handle maker for {case['input']}"
+
+        # Test splitting directly
+        handle, knot, delimiter_type = matcher._split_handle_and_knot(case["input"])
+        assert handle == case["expected_handle"], f"Wrong handle split for {case['input']}"
+        assert knot == case["expected_knot"], f"Wrong knot split for {case['input']}"
+        assert delimiter_type == "fiber_hint", f"Wrong delimiter type for {case['input']}"
+
+
+def test_fiber_hint_no_false_positives():
+    """Test that fiber detection doesn't incorrectly split when no fiber words are present."""
+    matcher = BrushMatcher()
+
+    # Test cases without fiber words - should not split
+    test_cases = [
+        "Chisel & Hound Hive 28mm Oumo Rorschach",  # No fiber words
+        "Wolf Whiskers Elite Handle",  # No fiber words
+        "Declaration Grooming B3",  # No fiber words
+    ]
+
+    for case in test_cases:
+        handle, knot, delimiter_type = matcher._split_handle_and_knot(case)
+        # Should return None for all since no fiber words and no delimiters
+        assert handle is None, f"Unexpected handle split for {case}"
+        assert knot is None, f"Unexpected knot split for {case}"
+        assert delimiter_type is None, f"Unexpected delimiter type for {case}"
+
+
+def test_turn_n_shave_abbreviations():
+    """Test that T&S and TNS abbreviations correctly match Turn-N-Shave products."""
+    matcher = BrushMatcher()
+
+    test_cases = [
+        {
+            "input": "Chisel & Hound T&S Quartermoon",
+            "expected_brand": "Turn-N-Shave",
+            "expected_model": "Quartermoon",
+            "expected_handle_maker": "Chisel & Hound",
+        },
+        {
+            "input": "Elite TNS Quartermoon",
+            "expected_brand": "Turn-N-Shave",
+            "expected_model": "Quartermoon",
+            "expected_handle_maker": "Elite",
+        },
+        {
+            "input": "Wolf Whiskers TnS H3",
+            "expected_brand": "Turn-N-Shave",
+            "expected_model": "High Density Badger (H*)",
+            "expected_handle_maker": "Wolf Whiskers",
+        },
+        {
+            "input": "Declaration T&S Badger",
+            "expected_brand": "Turn-N-Shave",
+            "expected_model": "Badger",
+            "expected_handle_maker": "Declaration Grooming",
+        },
+    ]
+
+    for case in test_cases:
+        result = matcher.match(case["input"])
+        assert result["matched"] is not None, f"No match for {case['input']}"
+        assert (
+            result["matched"]["brand"] == case["expected_brand"]
+        ), f"Wrong brand for {case['input']}: got {result['matched']['brand']}"
+        assert (
+            result["matched"]["model"] == case["expected_model"]
+        ), f"Wrong model for {case['input']}: got {result['matched']['model']}"
+        if case.get("expected_handle_maker"):
+            assert (
+                result["matched"].get("handle_maker") == case["expected_handle_maker"]
+            ), f"Wrong handle maker for {case['input']}: got {result['matched'].get('handle_maker')}"

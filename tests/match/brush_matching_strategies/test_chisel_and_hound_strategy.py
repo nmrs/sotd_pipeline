@@ -112,6 +112,26 @@ def test_chisel_and_hound_c_plus_h_pattern(strategy):
     assert result["model"] == "V18"
 
 
+def test_chisel_and_hound_space_between_v_and_number(strategy):
+    """Test space between 'v' and version number"""
+    result = strategy.match("Chisel & Hound V 26")
+
+    assert result is not None
+    assert result["brand"] == "Chisel & Hound"
+    assert result["model"] == "V26"
+    assert result["fiber"] == "badger"
+    assert result["knot_size_mm"] == 26.0
+
+
+def test_chisel_and_hound_abbreviated_with_space(strategy):
+    """Test C&H with space between v and number"""
+    result = strategy.match("C&H V 15")
+
+    assert result is not None
+    assert result["brand"] == "Chisel & Hound"
+    assert result["model"] == "V15"
+
+
 def test_invalid_input_types(strategy):
     """Test with invalid input types"""
     assert strategy.match(None) is None

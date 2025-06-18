@@ -136,12 +136,12 @@ class BrushMatcher:
     def _split_handle_and_knot(
         self, text: str
     ) -> tuple[Optional[str], Optional[str], Optional[str]]:
-        """Split handle and knot using various delimiters.
+        """Split handle and knot using various delimiters and fiber detection.
 
         Returns:
             tuple: (handle_part, knot_part, delimiter_type)
             delimiter_type: "knot_primary" for "with"/"w/", "handle_primary" for "in",
-                           "neutral" for "/"
+                           "neutral" for "/", "fiber_hint" for fiber-based detection
         """
         if not text:
             return None, None, None
@@ -149,7 +149,7 @@ class BrushMatcher:
         # Define delimiters with their semantic meaning
         knot_primary_delimiters = [" w/ ", " with "]  # Knot takes precedence
         handle_primary_delimiters = [" in "]  # Handle takes precedence
-        neutral_delimiters = [" / ", "/"]  # No semantic preference
+        neutral_delimiters = [" / ", "/", " - "]  # No semantic preference
 
         # Check knot-primary delimiters first
         for delimiter in knot_primary_delimiters:
@@ -173,7 +173,7 @@ class BrushMatcher:
                     if handle and knot:
                         return handle, knot, "handle_primary"
 
-        # Check neutral delimiters last
+        # Check neutral delimiters
         for delimiter in neutral_delimiters:
             if delimiter in text:
                 parts = text.split(delimiter, 1)
@@ -182,6 +182,112 @@ class BrushMatcher:
                     knot = parts[1].strip()
                     if handle and knot:
                         return handle, knot, "neutral"
+
+        # If no delimiters found, try fiber detection as a hint
+        # Look for fiber words (badger, boar, synthetic, etc.) to identify knot part
+        return self._split_by_fiber_hint(text)
+
+    def _split_by_fiber_hint(self, text: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Split text using fiber words as hints for knot identification."""
+        from sotd.match.brush_matching_strategies.utils.fiber_utils import _FIBER_PATTERNS
+
+        # Build a comprehensive fiber pattern from all fiber types
+        all_fiber_patterns = []
+        for fiber_type, pattern in _FIBER_PATTERNS.items():
+            # Remove outer parentheses if present
+            clean_pattern = pattern.strip("()")
+            all_fiber_patterns.append(clean_pattern)
+
+        # Combine all fiber patterns
+        combined_fiber_pattern = "|".join(all_fiber_patterns)
+
+        # Find fiber words in the text
+        import re
+
+        fiber_matches = list(re.finditer(f"({combined_fiber_pattern})", text, re.IGNORECASE))
+
+        if not fiber_matches:
+            return None, None, None
+
+        # Find the last fiber match (often the most specific)
+        last_fiber_match = fiber_matches[-1]
+        fiber_start = last_fiber_match.start()
+        fiber_end = last_fiber_match.end()
+
+        # Try to identify a reasonable split point around the fiber
+        # Look for brand/maker boundaries before the fiber
+        words = text.split()
+        fiber_word_indices = []
+
+        # Find which word indices contain the fiber
+        current_pos = 0
+        for i, word in enumerate(words):
+            word_start = current_pos
+            word_end = current_pos + len(word)
+
+            # Check if this word overlaps with the fiber match
+            if (word_start <= fiber_start < word_end) or (word_start < fiber_end <= word_end):
+                fiber_word_indices.append(i)
+
+            current_pos = word_end + 1  # +1 for space
+
+        if not fiber_word_indices:
+            return None, None, None
+
+        # Try different split strategies
+        first_fiber_word = fiber_word_indices[0]
+
+        # Strategy 1: Look for known handle makers before the fiber
+        handle_maker_brands = [
+            "Chisel & Hound",
+            "Chisel and Hound",
+            "Wolf Whiskers",
+            "Elite",
+            "Dogwood",
+            "Declaration Grooming",
+            "Grizzly Bay",
+            "Paladin",
+        ]
+
+        # Check if any handle maker appears before the fiber
+        text_before_fiber = " ".join(words[:first_fiber_word])
+        for handle_maker in handle_maker_brands:
+            if re.search(re.escape(handle_maker), text_before_fiber, re.IGNORECASE):
+                # Found a handle maker before fiber - split after the handle maker
+                handle_pattern = re.escape(handle_maker)
+                match = re.search(handle_pattern, text, re.IGNORECASE)
+                if match:
+                    split_point = match.end()
+                    handle_part = text[:split_point].strip()
+                    knot_part = text[split_point:].strip()
+                    if handle_part and knot_part:
+                        return handle_part, knot_part, "fiber_hint"
+
+        # Strategy 2: Look for brand names that might be knot makers near the fiber
+        # This is more heuristic - split before a potential knot maker brand
+        knot_maker_patterns = [
+            r"\b(Maggard|Oumo|Declaration|Zenith|Omega|Semogue|Simpson|Shavemac)\b"
+        ]
+
+        for pattern in knot_maker_patterns:
+            matches = list(re.finditer(pattern, text, re.IGNORECASE))
+            for match in matches:
+                # If the knot maker is reasonably close to the fiber, try splitting before it
+                if abs(match.start() - fiber_start) <= 50:  # Within 50 characters
+                    split_point = match.start()
+                    handle_part = text[:split_point].strip()
+                    knot_part = text[split_point:].strip()
+                    if handle_part and knot_part and len(handle_part) > 3:
+                        return handle_part, knot_part, "fiber_hint"
+
+        # Strategy 3: If we have multiple words, try splitting before the fiber word
+        # This is a fallback for cases where we can't identify specific brands
+        if first_fiber_word > 0 and len(words) > 2:
+            # Split before the word containing the fiber
+            handle_part = " ".join(words[:first_fiber_word])
+            knot_part = " ".join(words[first_fiber_word:])
+            if handle_part and knot_part:
+                return handle_part, knot_part, "fiber_hint"
 
         return None, None, None
 
@@ -202,6 +308,53 @@ class BrushMatcher:
 
         # Default behavior for neutral delimiters (/, etc.)
         return True  # Default to knot priority for backward compatibility
+
+    def _is_known_handle_maker(self, brand: str) -> bool:
+        """Check if a brand is primarily known as a handle maker."""
+        # These brands are primarily handle makers
+        handle_maker_brands = {
+            "Chisel & Hound",
+            "Wolf Whiskers",
+            "Elite",
+            "Dogwood",
+            "Declaration Grooming",
+            "Grizzly Bay",
+            "Paladin",
+        }
+        return brand in handle_maker_brands
+
+    def _try_knot_maker_fallback(self, value: str, handle_result: dict) -> dict | None:
+        """Try to find a knot maker when full-text matching found a handle maker."""
+        if not self._is_known_handle_maker(handle_result.get("brand", "")):
+            return None
+
+        # Try to find knot maker brands in the text
+        for strategy in self.strategies:
+            # Skip the strategy that already matched the handle
+            if strategy.__class__.__name__ == handle_result.get("_matched_by_strategy"):
+                continue
+
+            if result := strategy.match(value):
+                if isinstance(result, dict):
+                    if "matched" in result and result.get("matched"):
+                        knot_match = result["matched"]
+                        # If we found a different brand, prioritize it as the knot maker
+                        if knot_match.get("brand") != handle_result.get("brand"):
+                            knot_match["_matched_by_strategy"] = strategy.__class__.__name__
+                            knot_match["_pattern_used"] = result.get("pattern")
+                            knot_match["_matched_from"] = "knot_fallback"
+                            knot_match["handle_maker"] = handle_result.get("brand")
+                            return knot_match
+                    elif "brand" in result:
+                        knot_match = result
+                        # If we found a different brand, prioritize it as the knot maker
+                        if knot_match.get("brand") != handle_result.get("brand"):
+                            knot_match["_matched_by_strategy"] = strategy.__class__.__name__
+                            knot_match["_pattern_used"] = result.get("_pattern_used", "unknown")
+                            knot_match["_matched_from"] = "knot_fallback"
+                            knot_match["handle_maker"] = handle_result.get("brand")
+                            return knot_match
+        return None
 
     def match(self, value: str) -> dict:
         """Match brush string to known patterns."""
