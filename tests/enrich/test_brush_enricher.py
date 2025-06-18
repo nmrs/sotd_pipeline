@@ -47,9 +47,9 @@ class TestBrushEnricher:
             "fiber": "Badger",
             "knot_size_mm": 27.0,
         }
-        original_comment = "Great shave with my Simpson brush"
+        brush_extracted = "Simpson Chubby 2"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 27.0
@@ -63,9 +63,9 @@ class TestBrushEnricher:
             "model": "Chubby 2",
             "fiber": "Badger",
         }
-        original_comment = "Great shave with my 26mm brush"
+        brush_extracted = "Simpson Chubby 2 26mm"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 26.0
@@ -80,9 +80,9 @@ class TestBrushEnricher:
             "fiber": "Badger",
             "knot_size_mm": 27.0,
         }
-        original_comment = "Great shave with my 27mm brush"
+        brush_extracted = "Simpson Chubby 2 27mm"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 27.0
@@ -97,9 +97,9 @@ class TestBrushEnricher:
             "fiber": "Badger",
             "knot_size_mm": 27.0,
         }
-        original_comment = "Great shave with my 24mm brush"
+        brush_extracted = "Simpson Chubby 2 24mm"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 24.0  # User takes precedence
@@ -114,9 +114,9 @@ class TestBrushEnricher:
             "model": "Chubby 2",
             "fiber": "Badger",
         }
-        original_comment = "Great shave with my brush"
+        brush_extracted = "Simpson Chubby 2"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] is None
@@ -139,12 +139,9 @@ class TestBrushEnricher:
             "fiber": "Badger",
             "knot_size_mm": 27.0,
         }
-
-        result = enricher.enrich(field_data, "")
-
-        assert result is not None
-        assert result["knot_size_mm"] == 27.0
-        assert result["_extraction_source"] == "catalog"
+        brush_extracted = ""
+        result = enricher.enrich(field_data, brush_extracted)
+        assert result is None
 
 
 class TestKnotSizeExtraction:
@@ -199,9 +196,9 @@ class TestRealWorldExamples:
             "fiber": "Badger",
             "knot_size_mm": 27.0,  # From catalog
         }
-        original_comment = "Simpson Chubby 2 26mm badger brush"
+        brush_extracted = "Simpson Chubby 2 26mm"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 26.0  # User override
@@ -216,9 +213,9 @@ class TestRealWorldExamples:
             "fiber": "Boar",
             "knot_size_mm": 28.0,  # From catalog
         }
-        original_comment = "Omega 10048 28mm boar brush"
+        brush_extracted = "Omega 10048 28mm"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 28.0  # User confirms catalog
@@ -232,9 +229,9 @@ class TestRealWorldExamples:
             "fiber": "Badger",
             # No catalog knot size
         }
-        original_comment = "Elite handle w/ Declaration B3 26mm knot"
+        brush_extracted = "Declaration Grooming B3 26mm"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 26.0
@@ -286,9 +283,9 @@ class TestFiberConflictResolution:
             "model": "Chubby 2",
             "fiber": "Badger",  # From catalog
         }
-        original_comment = "Simpson Chubby 2 badger brush"
+        brush_extracted = "Simpson Chubby 2 badger"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["fiber"] == "Badger"
@@ -301,9 +298,9 @@ class TestFiberConflictResolution:
             "model": "Chubby 2",
             "fiber": "Badger",  # From catalog
         }
-        original_comment = "Simpson Chubby 2 synthetic brush"
+        brush_extracted = "Simpson Chubby 2 synthetic"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["fiber"] == "Synthetic"  # User takes precedence
@@ -317,9 +314,9 @@ class TestFiberConflictResolution:
             "model": "Badger",
             # No catalog fiber
         }
-        original_comment = "Elite synthetic brush"
+        brush_extracted = "Elite Badger synthetic"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["fiber"] == "Synthetic"
@@ -332,13 +329,13 @@ class TestFiberConflictResolution:
             "model": "Chubby 2",
             "fiber": "Badger",  # From catalog
         }
-        original_comment = "Great shave with my brush"
+        brush_extracted = "Simpson Chubby 2"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["fiber"] == "Badger"
-        # No fiber extraction source since no user input
+        # No _fiber_extraction_source since no user fiber was extracted
 
 
 class TestCombinedKnotSizeAndFiber:
@@ -350,9 +347,9 @@ class TestCombinedKnotSizeAndFiber:
             "fiber": "Badger",  # From catalog
             "knot_size_mm": 27.0,  # From catalog
         }
-        original_comment = "Simpson Chubby 2 24mm synthetic brush"
+        brush_extracted = "Simpson Chubby 2 24mm synthetic"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         # Knot size conflict

@@ -32,7 +32,7 @@ class TestChristopherBradleyEnricher:
     def test_extract_plate_level_and_type_sb(self):
         """Test plate extraction for SB series."""
         field_data = {"model": "Karve Christopher Bradley B"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["plate_level"] == "B"
         assert result["plate_type"] == "SB"
@@ -40,7 +40,7 @@ class TestChristopherBradleyEnricher:
     def test_extract_plate_level_and_type_oc(self):
         """Test plate extraction for OC series."""
         field_data = {"model": "Karve CB D OC"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["plate_level"] == "D"
         assert result["plate_type"] == "OC"
@@ -48,7 +48,7 @@ class TestChristopherBradleyEnricher:
     def test_extract_plate_level_and_type_open_comb(self):
         """Test plate extraction for open comb series."""
         field_data = {"model": "Karve CB F open comb"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["plate_level"] == "F"
         assert result["plate_type"] == "OC"
@@ -56,7 +56,7 @@ class TestChristopherBradleyEnricher:
     def test_extract_plate_level_and_type_sb_explicit(self):
         """Test plate extraction for SB series with explicit designation."""
         field_data = {"model": "Karve CB AA SB"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["plate_level"] == "AA"
         assert result["plate_type"] == "SB"
@@ -64,7 +64,7 @@ class TestChristopherBradleyEnricher:
     def test_extract_plate_level_case_insensitive(self):
         """Test plate extraction with case insensitive level."""
         field_data = {"model": "karve cb g oc"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["plate_level"] == "G"
         assert result["plate_type"] == "OC"
@@ -72,7 +72,7 @@ class TestChristopherBradleyEnricher:
     def test_extract_plate_level_and_type_default_sb(self):
         """Test plate extraction for default SB series."""
         field_data = {"model": "Karve CB E"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["plate_level"] == "E"
         assert result["plate_type"] == "SB"
@@ -80,22 +80,22 @@ class TestChristopherBradleyEnricher:
     def test_invalid_plate_level(self):
         """Test that invalid plate level is rejected."""
         field_data = {"model": "Karve CB Z OC"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is None
         field_data = {"model": "Karve CB H"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is None
 
     def test_no_plate_level(self):
         """Test that no plate level is found."""
         field_data = {"model": "Karve CB"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is None
 
     def test_metadata_fields(self):
         """Test that metadata fields are correctly set."""
         field_data = {"model": "Karve CB C OC"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["_enriched_by"] == "ChristopherBradleyEnricher"
         assert result["_extraction_source"] == "user_comment"

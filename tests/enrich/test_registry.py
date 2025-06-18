@@ -128,6 +128,8 @@ class TestEnricherRegistry:
         record = {
             "blade": {"brand": "Feather", "model": "Hi-Stainless"},
             "razor": {"brand": "Gillette", "model": "Super Speed"},
+            "blade_extracted": "Feather (3)",
+            "razor_extracted": "Gillette Super Speed",
         }
         original_comment = "Feather (3) - great blade!"
 
@@ -149,10 +151,14 @@ class TestEnricherRegistry:
             {
                 "blade": {"brand": "Feather", "model": "Hi-Stainless"},
                 "razor": {"brand": "Gillette", "model": "Super Speed"},
+                "blade_extracted": "Feather (3)",
+                "razor_extracted": "Gillette Super Speed",
             },
             {
                 "blade": {"brand": "Astra", "model": "Superior Platinum"},
                 "razor": {"brand": "Dovo", "model": "Best Quality", "format": "Straight"},
+                "blade_extracted": "Astra SP [2]",
+                "razor_extracted": "Dovo 6/8 full hollow round point",
             },
         ]
         original_comments = [
@@ -209,6 +215,7 @@ class TestEnricherRegistry:
         record = {
             "comment_id": "test123",
             "blade": {"brand": "Astra", "model": "Superior Platinum"},
+            "blade_extracted": "Astra SP (3)",
         }
         original_comment = "Using Astra blade"
 

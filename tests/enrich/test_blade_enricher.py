@@ -33,9 +33,9 @@ class TestBladeCountEnricher:
     def test_enrich_with_parentheses_count(self, enricher):
         """Test extraction of use count in parentheses format."""
         field_data = {"brand": "Astra", "model": "SP"}
-        original_comment = "Astra SP (3)"
+        blade_extracted = "Astra SP (3)"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 3
@@ -45,9 +45,9 @@ class TestBladeCountEnricher:
     def test_enrich_with_brackets_count(self, enricher):
         """Test extraction of use count in brackets format."""
         field_data = {"brand": "Feather", "model": "Hi-Stainless"}
-        original_comment = "Feather [5]"
+        blade_extracted = "Feather [5]"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 5
@@ -57,9 +57,9 @@ class TestBladeCountEnricher:
     def test_enrich_with_braces_count(self, enricher):
         """Test extraction of use count in braces format."""
         field_data = {"brand": "Gillette", "model": "Platinum"}
-        original_comment = "Gillette Platinum {2}"
+        blade_extracted = "Gillette Platinum {2}"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 2
@@ -69,9 +69,9 @@ class TestBladeCountEnricher:
     def test_enrich_with_x_prefix(self, enricher):
         """Test extraction of use count with x prefix."""
         field_data = {"brand": "Personna", "model": "Platinum"}
-        original_comment = "Personna x4"
+        blade_extracted = "Personna x4"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 4
@@ -81,9 +81,9 @@ class TestBladeCountEnricher:
     def test_enrich_with_x_suffix(self, enricher):
         """Test extraction of use count with x suffix."""
         field_data = {"brand": "Voskhod", "model": "Teflon Coated"}
-        original_comment = "Voskhod 2x"
+        blade_extracted = "Voskhod 2x"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 2
@@ -93,9 +93,9 @@ class TestBladeCountEnricher:
     def test_enrich_with_parentheses_and_x(self, enricher):
         """Test extraction of use count with parentheses and x."""
         field_data = {"brand": "Derby", "model": "Extra"}
-        original_comment = "Derby (x2)"
+        blade_extracted = "Derby (x2)"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 2
@@ -105,18 +105,18 @@ class TestBladeCountEnricher:
     def test_enrich_with_no_count(self, enricher):
         """Test enrichment when no use count is found."""
         field_data = {"brand": "Astra", "model": "SP"}
-        original_comment = "Astra SP"
+        blade_extracted = "Astra SP"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is None
 
     def test_enrich_with_multiple_numbers(self, enricher):
         """Test extraction when multiple numbers are present (should get first match)."""
         field_data = {"brand": "Feather", "model": "Hi-Stainless"}
-        original_comment = "Feather (3) shave #5"
+        blade_extracted = "Feather (3) shave #5"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 3
@@ -124,9 +124,9 @@ class TestBladeCountEnricher:
     def test_enrich_with_large_number(self, enricher):
         """Test extraction with large use count numbers."""
         field_data = {"brand": "Astra", "model": "SP"}
-        original_comment = "Astra SP (15)"
+        blade_extracted = "Astra SP (15)"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 15
@@ -134,9 +134,9 @@ class TestBladeCountEnricher:
     def test_enrich_with_single_digit(self, enricher):
         """Test extraction with single digit use count."""
         field_data = {"brand": "Gillette", "model": "Silver Blue"}
-        original_comment = "Gillette Silver Blue (1)"
+        blade_extracted = "Gillette Silver Blue (1)"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 1
@@ -144,9 +144,9 @@ class TestBladeCountEnricher:
     def test_enrich_case_insensitive(self, enricher):
         """Test that extraction is case insensitive."""
         field_data = {"brand": "Astra", "model": "SP"}
-        original_comment = "Astra SP (X3)"
+        blade_extracted = "Astra SP (X3)"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 3
@@ -154,9 +154,9 @@ class TestBladeCountEnricher:
     def test_enrich_with_extra_text(self, enricher):
         """Test extraction when count is embedded in longer text."""
         field_data = {"brand": "Feather", "model": "Hi-Stainless"}
-        original_comment = "Great shave today with Feather [5] blades, really smooth"
+        blade_extracted = "Great shave today with Feather [5] blades, really smooth"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 5
@@ -192,9 +192,9 @@ class TestBladeCountEnricher:
     def test_original_blade_matcher_compatibility_parentheses(self, enricher):
         """Test compatibility with original blade matcher parentheses format."""
         field_data = {"brand": "Feather", "model": "DE"}
-        original_comment = "Feather (3)"
+        blade_extracted = "Feather (3)"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 3
@@ -202,9 +202,9 @@ class TestBladeCountEnricher:
     def test_original_blade_matcher_compatibility_brackets(self, enricher):
         """Test compatibility with original blade matcher brackets format."""
         field_data = {"brand": "Astra", "model": "SP"}
-        original_comment = "Astra SP [5]"
+        blade_extracted = "Astra SP [5]"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 5
@@ -212,9 +212,9 @@ class TestBladeCountEnricher:
     def test_original_blade_matcher_compatibility_curly_braces(self, enricher):
         """Test compatibility with original blade matcher curly braces format."""
         field_data = {"brand": "Derby", "model": "Extra"}
-        original_comment = "Derby Extra {7}"
+        blade_extracted = "Derby Extra {7}"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 7
@@ -222,9 +222,9 @@ class TestBladeCountEnricher:
     def test_original_blade_matcher_compatibility_x_prefix(self, enricher):
         """Test compatibility with original blade matcher x prefix format."""
         field_data = {"brand": "Feather", "model": "DE"}
-        original_comment = "Feather (x3)"
+        blade_extracted = "Feather (x3)"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 3
@@ -232,9 +232,9 @@ class TestBladeCountEnricher:
     def test_original_blade_matcher_compatibility_x_suffix(self, enricher):
         """Test compatibility with original blade matcher x suffix format."""
         field_data = {"brand": "Astra", "model": "SP"}
-        original_comment = "Astra SP [5x]"
+        blade_extracted = "Astra SP [5x]"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 5
@@ -242,9 +242,9 @@ class TestBladeCountEnricher:
     def test_original_blade_matcher_compatibility_uppercase_x(self, enricher):
         """Test compatibility with original blade matcher uppercase X format."""
         field_data = {"brand": "Derby", "model": "Extra"}
-        original_comment = "Derby Extra (2X)"
+        blade_extracted = "Derby Extra (2X)"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
         assert result["use_count"] == 2
@@ -252,9 +252,9 @@ class TestBladeCountEnricher:
     def test_original_blade_matcher_compatibility_no_count(self, enricher):
         """Test compatibility with original blade matcher no count format."""
         field_data = {"brand": "Derby", "model": "Extra"}
-        original_comment = "Derby Extra"
+        blade_extracted = "Derby Extra"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, blade_extracted)
 
         assert result is None
 
@@ -276,7 +276,8 @@ class TestBladeCountEnricher:
 
         for comment, expected_count in test_cases:
             field_data = {"brand": "Test", "model": "Blade"}
-            result = enricher.enrich(field_data, comment)
+            blade_extracted = comment
+            result = enricher.enrich(field_data, blade_extracted)
 
             assert result is not None, f"Failed to extract count from: {comment}"
             assert (

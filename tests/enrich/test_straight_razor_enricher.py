@@ -323,9 +323,9 @@ class TestStraightRazorEnricher:
             "point": "Square",
             "width": "15/16",
         }
-        original_comment = "Razor: Koraat Moarteen"
+        razor_extracted = field_data["model"]
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, razor_extracted)
 
         assert result is not None
         assert result["grind"] == "Full Hollow"
@@ -343,14 +343,14 @@ class TestStraightRazorEnricher:
             "point": "Square",
             "width": "15/16",
         }
-        original_comment = "Razor: Koraat Moarteen - half hollow 6/8 round point"
+        razor_extracted = "Koraat Moarteen - half hollow 6/8 round point"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, razor_extracted)
 
         assert result is not None
         assert result["grind"] == "half_hollow"  # User comment takes precedence
-        assert result["point"] == "round"  # User comment takes precedence
         assert result["width_eighths"] == 6  # User comment takes precedence
+        assert result["point"] == "round"  # User comment takes precedence
         assert result["_extraction_source"] == "user_comment + catalog_data"
 
     def test_enrich_partial_user_data_merges_with_catalog(self, enricher):
@@ -363,9 +363,9 @@ class TestStraightRazorEnricher:
             "point": "Square",
             "width": "15/16",
         }
-        original_comment = "Razor: Koraat Moarteen - 7/8"  # Only width specified
+        razor_extracted = "Koraat Moarteen - 7/8"  # Only width specified
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, razor_extracted)
 
         assert result is not None
         assert result["grind"] == "Full Hollow"  # From catalog
@@ -400,9 +400,9 @@ class TestStraightRazorEnricher:
     def test_enrich_no_specifications_anywhere(self, enricher):
         """Test that no enriched data is returned when no specifications are found."""
         field_data = {"brand": "Generic", "model": "Straight Razor", "format": "Straight"}
-        original_comment = "Razor: Generic straight razor"
+        razor_extracted = field_data["model"]
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, razor_extracted)
 
         assert result is None
 
@@ -415,9 +415,9 @@ class TestStraightRazorEnricher:
             "grind": "Full Hollow",
             "width": "6/8",
         }
-        original_comment = "Razor: Dovo straight"
+        razor_extracted = field_data["model"]
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, razor_extracted)
 
         assert result is not None
         assert result["grind"] == "Full Hollow"
@@ -428,9 +428,9 @@ class TestStraightRazorEnricher:
     def test_enrich_user_data_only(self, enricher):
         """Test enrichment with only user data (no catalog specifications)."""
         field_data = {"brand": "Generic", "model": "Straight Razor", "format": "Straight"}
-        original_comment = "Razor: Generic straight - wedge 7/8 square point"
+        razor_extracted = "Generic straight - wedge 7/8 square point"
 
-        result = enricher.enrich(field_data, original_comment)
+        result = enricher.enrich(field_data, razor_extracted)
 
         assert result is not None
         assert result["grind"] == "wedge"

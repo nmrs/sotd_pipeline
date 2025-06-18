@@ -50,7 +50,7 @@ class TestGameChangerEnricher:
     def test_extract_gap_decimal_format(self):
         """Test gap extraction with decimal format."""
         field_data = {"model": "RazoRock Game Changer .68"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["gap"] == ".68"
         assert result["_enriched_by"] == "GameChangerEnricher"
@@ -59,63 +59,63 @@ class TestGameChangerEnricher:
     def test_extract_gap_zero_decimal_format(self):
         """Test gap extraction with 0.xx format."""
         field_data = {"model": "RazoRock Game Changer 0.84"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["gap"] == ".84"
 
     def test_extract_gap_two_digit_format(self):
         """Test gap extraction with two-digit format."""
         field_data = {"model": "RazoRock Game Changer 68"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["gap"] == ".68"
 
     def test_extract_gap_three_digit_format(self):
         """Test gap extraction with three-digit format."""
         field_data = {"model": "RazoRock Game Changer 105"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["gap"] == "1.05"
 
     def test_extract_gap_with_gc_abbreviation(self):
         """Test gap extraction with GC abbreviation."""
         field_data = {"model": "GC .84"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["gap"] == ".84"
 
     def test_extract_gap_with_game_changer_spaces(self):
         """Test gap extraction with Game Changer and spaces."""
         field_data = {"model": "Game Changer .68"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["gap"] == ".68"
 
     def test_extract_variant_jaws(self):
         """Test variant extraction for JAWS."""
         field_data = {"model": "RazoRock Game Changer Jaws"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["variant"] == "JAWS"
 
     def test_extract_variant_oc(self):
         """Test variant extraction for OC."""
         field_data = {"model": "RazoRock Game Changer OC"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["variant"] == "OC"
 
     def test_extract_variant_open_comb(self):
         """Test variant extraction for open comb."""
         field_data = {"model": "RazoRock Game Changer open comb"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["variant"] == "OC"
 
     def test_extract_both_gap_and_variant_jaws(self):
         """Test extraction of both gap and JAWS variant."""
         field_data = {"model": "RazoRock Game Changer .84 Jaws"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["gap"] == ".84"
         assert result["variant"] == "JAWS"
@@ -123,7 +123,7 @@ class TestGameChangerEnricher:
     def test_extract_both_gap_and_variant_oc(self):
         """Test extraction of both gap and OC variant."""
         field_data = {"model": "RazoRock Game Changer .68 OC"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["gap"] == ".68"
         assert result["variant"] == "OC"
@@ -131,7 +131,7 @@ class TestGameChangerEnricher:
     def test_no_extraction_when_no_specifications(self):
         """Test that no extraction occurs when no specifications are found."""
         field_data = {"model": "RazoRock Game Changer"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is None
 
     def test_no_extraction_when_no_model(self):
@@ -143,33 +143,33 @@ class TestGameChangerEnricher:
     def test_gap_extraction_case_insensitive(self):
         """Test that gap extraction is case insensitive."""
         field_data = {"model": "RAZOROCK GAME CHANGER .68"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["gap"] == ".68"
 
     def test_variant_extraction_case_insensitive(self):
         """Test that variant extraction is case insensitive."""
         field_data = {"model": "RazorRock Game Changer JAWS"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["variant"] == "JAWS"
 
     def test_no_false_positive_gap_extraction(self):
         """Test that gap extraction doesn't match unrelated numbers."""
         field_data = {"model": "RazoRock Game Changer with 100 shaves"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is None
 
     def test_no_false_positive_variant_extraction(self):
         """Test that variant extraction doesn't match unrelated text."""
         field_data = {"model": "RazoRock Game Changer with 2.0 shaves"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is None
 
     def test_extraction_with_mixed_content(self):
         """Test extraction with mixed content in model."""
         field_data = {"model": "Great shave with RazoRock Game Changer .84 Jaws and Feather blade"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["gap"] == ".84"
         assert result["variant"] == "JAWS"
@@ -177,14 +177,14 @@ class TestGameChangerEnricher:
     def test_special_case_mapping_85_to_84(self):
         """Test that .85 is mapped to .84 (special case from old parser)."""
         field_data = {"model": "RazoRock Game Changer .85"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["gap"] == ".84"
 
     def test_special_case_mapping_94_to_84(self):
         """Test that .94 is mapped to .84 (special case from old parser)."""
         field_data = {"model": "RazoRock Game Changer .94"}
-        result = self.enricher.enrich(field_data, "")
+        result = self.enricher.enrich(field_data, field_data["model"])
         assert result is not None
         assert result["gap"] == ".84"
 
@@ -199,7 +199,7 @@ class TestGameChangerEnricher:
 
         for model in test_cases:
             field_data = {"model": model}
-            result = self.enricher.enrich(field_data, "")
+            result = self.enricher.enrich(field_data, model)
             assert result is not None
             assert result["gap"] == ".68"
 
@@ -209,7 +209,7 @@ class TestGameChangerEnricher:
         valid_gaps = [".68", ".76", ".84", "1.05"]
         for gap in valid_gaps:
             field_data = {"model": f"RazoRock Game Changer {gap} Jaws"}
-            result = self.enricher.enrich(field_data, "")
+            result = self.enricher.enrich(field_data, field_data["model"])
             assert result is not None
             assert result["gap"] == gap
             assert result["variant"] == "JAWS"
