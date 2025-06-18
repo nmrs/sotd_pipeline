@@ -7,6 +7,7 @@ from .game_changer_enricher import GameChangerEnricher
 from .registry import enricher_registry
 from .straight_razor_enricher import StraightRazorEnricher
 from .blackbird_plate_enricher import BlackbirdPlateEnricher
+from .super_speed_tip_enricher import SuperSpeedTipEnricher
 
 
 def setup_enrichers():
@@ -18,6 +19,7 @@ def setup_enrichers():
     enricher_registry.register(GameChangerEnricher())
     enricher_registry.register(ChristopherBradleyEnricher())
     enricher_registry.register(BlackbirdPlateEnricher())
+    enricher_registry.register(SuperSpeedTipEnricher())
 
 
 def enrich_comments(comments: list[dict], original_comments: list[str]) -> list[dict]:
