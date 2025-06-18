@@ -15,7 +15,7 @@ def test_omega_with_model_number(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Omega"
-    assert result["matched"]["model"] == "Omega 10049"
+    assert result["matched"]["model"] == "10049"
     assert result["matched"]["fiber"] == "boar"
     assert result["matched"]["source_type"] == "exact"
     assert result["strategy"] == "OmegaSemogue"
@@ -27,7 +27,7 @@ def test_omega_with_longer_model(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Omega"
-    assert result["matched"]["model"] == "Omega 456789"
+    assert result["matched"]["model"] == "456789"
 
 
 def test_semogue_with_c_model(strategy):
@@ -36,7 +36,7 @@ def test_semogue_with_c_model(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Semogue"
-    assert result["matched"]["model"] == "Semogue c3"  # Preserves case from regex
+    assert result["matched"]["model"] == "c3"  # Preserves case from regex
     assert result["matched"]["fiber"] == "boar"
 
 
@@ -46,7 +46,7 @@ def test_semogue_with_numeric_model(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Semogue"
-    assert result["matched"]["model"] == "Semogue 1800"
+    assert result["matched"]["model"] == "1800"
 
 
 def test_case_insensitive_matching(strategy):
@@ -55,7 +55,7 @@ def test_case_insensitive_matching(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Omega"
-    assert result["matched"]["model"] == "Omega 10048"
+    assert result["matched"]["model"] == "10048"
 
 
 def test_semogue_typo_correction(strategy):
@@ -64,7 +64,7 @@ def test_semogue_typo_correction(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Semogue"
-    assert result["matched"]["model"] == "Semogue 1800"
+    assert result["matched"]["model"] == "1800"
 
 
 def test_with_extra_text(strategy):
@@ -73,7 +73,7 @@ def test_with_extra_text(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Omega"
-    assert result["matched"]["model"] == "Omega 10049"
+    assert result["matched"]["model"] == "10049"
 
 
 def test_omega_only_no_model(strategy):
@@ -118,9 +118,9 @@ def test_short_model_numbers(strategy):
 def test_semogue_c_series_variations(strategy):
     """Test various C-series model formats"""
     test_cases = [
-        ("Semogue C5", "Semogue c5"),
-        ("Semogue C10", "Semogue c10"),
-        ("Semogue C12", "Semogue c12"),  # Changed from C123 to avoid numeric capture
+        ("Semogue C5", "c5"),
+        ("Semogue C10", "c10"),
+        ("Semogue C12", "c12"),  # Changed from C123 to avoid numeric capture
     ]
 
     for input_str, expected_model in test_cases:

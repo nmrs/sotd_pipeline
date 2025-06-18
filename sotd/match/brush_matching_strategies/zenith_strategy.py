@@ -14,13 +14,10 @@ class ZenithBrushMatchingStrategy:
         if res:
             fiber = match_fiber(value) or "Boar"
             model = res.group(1).upper()
-            name = f"Zenith {model}"
-            if fiber != "Boar":
-                name = f"{name}"
 
             matched = {
                 "brand": "Zenith",
-                "model": name,
+                "model": model,
                 "fiber": fiber,
                 "knot_size_mm": None,
                 "handle_maker": None,

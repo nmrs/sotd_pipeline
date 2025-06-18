@@ -18,11 +18,10 @@ class OmegaSemogueBrushMatchingStrategy:
         if brand_match and model_match:
             brand = brand_match.group(1).title()
             model_num = model_match.group(2)
-            model = f"{brand} {model_num}"
 
             matched = {
                 "brand": brand,
-                "model": model,
+                "model": model_num,
                 "fiber": "boar",
                 "knot_size_mm": None,
                 "handle_maker": None,

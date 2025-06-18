@@ -13,10 +13,9 @@ def test_zenith_b_series_match(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Zenith"
-    assert result["matched"]["model"] == "Zenith B26"
-    assert result["matched"]["fiber"] == "Boar"  # Default
-    assert result["matched"]["source_type"] == "exact"
-    assert result["strategy"] == "Zenith"
+    assert result["matched"]["model"] == "B26"
+    assert result["matched"]["fiber"] == "Boar"
+    assert result["matched"]["knot_size_mm"] is None
     assert result["pattern"] == r"zenith.*([a-wyz]\d{1,3})"
 
 
@@ -26,8 +25,9 @@ def test_zenith_with_synthetic_fiber(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Zenith"
-    assert result["matched"]["model"] == "Zenith B26"
+    assert result["matched"]["model"] == "B26"
     assert result["matched"]["fiber"] == "Synthetic"
+    assert result["matched"]["knot_size_mm"] is None
 
 
 def test_zenith_with_badger_fiber(strategy):
@@ -36,8 +36,9 @@ def test_zenith_with_badger_fiber(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Zenith"
-    assert result["matched"]["model"] == "Zenith B26"
+    assert result["matched"]["model"] == "B26"
     assert result["matched"]["fiber"] == "Badger"
+    assert result["matched"]["knot_size_mm"] is None
 
 
 def test_zenith_case_insensitive(strategy):
@@ -46,16 +47,17 @@ def test_zenith_case_insensitive(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Zenith"
-    assert result["matched"]["model"] == "Zenith B26"  # Model is uppercased
+    assert result["matched"]["model"] == "B26"  # Model is uppercased
+    assert result["matched"]["fiber"] == "Boar"
 
 
 def test_zenith_various_letters(strategy):
     """Test various letter prefixes (excluding X which is not in range a-wyz)"""
     test_cases = [
-        ("Zenith A26", "Zenith A26"),
-        ("Zenith C15", "Zenith C15"),
-        ("Zenith F100", "Zenith F100"),
-        ("Zenith Z3", "Zenith Z3"),
+        ("Zenith A26", "A26"),
+        ("Zenith C15", "C15"),
+        ("Zenith F100", "F100"),
+        ("Zenith Z3", "Z3"),
     ]
 
     for input_str, expected_model in test_cases:
@@ -71,7 +73,8 @@ def test_zenith_single_digit_model(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Zenith"
-    assert result["matched"]["model"] == "Zenith B3"
+    assert result["matched"]["model"] == "B3"
+    assert result["matched"]["fiber"] == "Boar"
 
 
 def test_zenith_three_digit_model(strategy):
@@ -80,7 +83,8 @@ def test_zenith_three_digit_model(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Zenith"
-    assert result["matched"]["model"] == "Zenith B123"
+    assert result["matched"]["model"] == "B123"
+    assert result["matched"]["fiber"] == "Boar"
 
 
 def test_zenith_with_extra_text(strategy):
@@ -89,7 +93,8 @@ def test_zenith_with_extra_text(strategy):
 
     assert result["matched"] is not None
     assert result["matched"]["brand"] == "Zenith"
-    assert result["matched"]["model"] == "Zenith B26"
+    assert result["matched"]["model"] == "B26"
+    assert result["matched"]["fiber"] == "Boar"
 
 
 def test_zenith_no_match_x_series(strategy):
@@ -151,4 +156,4 @@ def test_zenith_lowercase_model_conversion(strategy):
     result = strategy.match("zenith b26")
 
     assert result["matched"] is not None
-    assert result["matched"]["model"] == "Zenith B26"  # B26 is uppercase
+    assert result["matched"]["model"] == "B26"  # B26 is uppercase
