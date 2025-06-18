@@ -58,9 +58,9 @@ Input: "DG B15 w/ C&H Zebra"
 6. Match handle against handles.yaml → Chisel & Hound
 ```
 
-## Fiber and Knot Size Strategy Tracking
+## Fiber Strategy Tracking
 
-The system tracks the **source** of each attribute:
+The system tracks the **source** of fiber information:
 
 ### Strategy Types
 - **`"user_input"`** - Explicitly specified by user (e.g., "26mm Boar")
@@ -85,6 +85,8 @@ When user input conflicts with catalog data:
 }
 ```
 
+**Note**: Knot size processing has been moved to the enrich phase for better conflict resolution and catalog data preservation.
+
 ## Output Schema
 
 ```yaml
@@ -96,9 +98,6 @@ handle_maker: string | null            # Handle manufacturer (if different from 
 _matched_by_strategy: string           # Which strategy produced the match
 _pattern_used: string                  # Regex pattern that matched
 fiber_strategy: "user_input" | "yaml" | "default"    # Source of fiber information
-knot_size_strategy: "user_input" | "yaml" | "default"  # Source of knot size
-fiber_conflict: string | null          # User input if conflicted with catalog
-knot_size_conflict: float | null       # User input if conflicted with catalog
 match_type: "exact" | "alias" | "brand" | "fiber" | "knot" | "artisan" | "unmatched"
 source_text: string                    # Original input text
 ```
