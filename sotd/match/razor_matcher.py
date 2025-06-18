@@ -17,7 +17,7 @@ class RazorMatcher(BaseMatcher):
                 fmt = entry.get("format", "DE")
                 for pattern in patterns:
                     compiled.append(
-                        (brand, model, fmt, pattern, re.compile(pattern, re.IGNORECASE))
+                        (brand, model, fmt, pattern, re.compile(pattern, re.IGNORECASE), entry)
                     )
         return sorted(compiled, key=lambda x: len(x[3]), reverse=True)
 
@@ -33,15 +33,24 @@ class RazorMatcher(BaseMatcher):
 
         normalized = value.strip()
 
-        for brand, model, fmt, raw_pattern, compiled in self.patterns:
+        for brand, model, fmt, raw_pattern, compiled, entry in self.patterns:
             if compiled.search(normalized):
+                # Start with basic match data
+                matched_data = {
+                    "brand": brand,
+                    "model": model,
+                    "format": fmt,
+                }
+
+                # Preserve all additional specifications from the catalog entry
+                # (excluding patterns and format which are already handled)
+                for key, value in entry.items():
+                    if key not in ["patterns", "format"]:
+                        matched_data[key] = value
+
                 return {
                     "original": original,
-                    "matched": {
-                        "brand": brand,
-                        "model": model,
-                        "format": fmt,
-                    },
+                    "matched": matched_data,
                     "pattern": raw_pattern,
                     "match_type": "exact",
                 }
