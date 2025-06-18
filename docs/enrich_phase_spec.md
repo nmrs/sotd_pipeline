@@ -231,6 +231,26 @@ All enrichers must include:
 }
 ```
 
+### 6. Super Speed Tip Enricher
+
+**Purpose**: Extract tip colors and variants from Gillette Super Speed razors
+
+**Applies To**: Records where `razor.matched.brand == "Gillette"` and `razor.matched.model == "Super Speed"`
+
+**Extraction Patterns**:
+- Tip colors: `"Red"`, `"Blue"`, `"Black"`
+- Tip variants: `"Flare"` (with `"flair"` as synonym)
+
+**Example Output**:
+```python
+"enriched": {
+    "tip_color": "Red",
+    "tip_variant": "Flare",
+    "_enriched_by": "SuperSpeedTipEnricher",
+    "_extraction_source": "user_comment"
+}
+```
+
 ## Error Handling Strategy
 
 ### Partial Extraction Success
