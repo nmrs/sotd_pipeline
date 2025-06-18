@@ -65,13 +65,11 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                         "_matched_by_strategy": self.__class__.__name__,
                     }
 
-                    # Add knot size - user input takes precedence over YAML
+                    # Add knot size - preserve catalog data for enrich phase
                     if user_knot_size is not None:
                         result["knot_size_mm"] = user_knot_size
-                        result["knot_size_strategy"] = "user_input"
                     elif default_knot_size is not None:
                         result["knot_size_mm"] = default_knot_size
-                        result["knot_size_strategy"] = "yaml"
 
                     return {"matched": result, "match_type": "brand_default", "pattern": pattern}
 

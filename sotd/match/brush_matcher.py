@@ -468,31 +468,6 @@ class BrushMatcher:
             if match_dict.get("fiber_strategy") is None:
                 match_dict["fiber_strategy"] = "default" if "default" in value.lower() else "yaml"
 
-    def _process_knot_size(self, value: str, match_dict: dict) -> None:
-        """Process knot size information from the input value and update match dictionary."""
-        user_knot = None
-        knot_match = re.search(r"(\d{2})(\.\d+)?[\s-]*mm", value, re.IGNORECASE)
-        if knot_match:
-            user_knot = float(knot_match.group(1))
-
-        if user_knot:
-            if match_dict.get("knot_size_mm") and abs(match_dict["knot_size_mm"] - user_knot) < 0.1:
-                match_dict["knot_size_strategy"] = "user_input"
-            elif (
-                match_dict.get("knot_size_mm")
-                and abs(match_dict["knot_size_mm"] - user_knot) >= 0.1
-            ):
-                match_dict["knot_size_conflict"] = user_knot
-                match_dict["knot_size_strategy"] = "yaml"
-            else:
-                match_dict["knot_size_mm"] = user_knot
-                match_dict["knot_size_strategy"] = "user_input"
-        else:
-            if match_dict.get("knot_size_strategy") is None:
-                match_dict["knot_size_strategy"] = (
-                    "default" if "default" in value.lower() else "yaml"
-                )
-
     def _process_handle_info(self, value: str, match_dict: dict) -> None:
         """Process handle information from the input value and update match dictionary."""
         handle, _knot, _ = self._split_handle_and_knot(value)
@@ -508,7 +483,6 @@ class BrushMatcher:
     def _enrich_match_result(self, value: str, match_dict: dict) -> None:
         """Enrich match dictionary with additional information from the input value."""
         self._process_fiber_info(value, match_dict)
-        self._process_knot_size(value, match_dict)
         self._process_handle_info(value, match_dict)
 
     def match(self, value: str) -> dict:
@@ -650,15 +624,10 @@ class BrushMatcher:
 
         updated = result["matched"].copy()
 
-        # Parse fiber and knot size from user input
+        # Parse fiber from user input
         parsed_fiber = match_fiber(value)
-        parsed_knot = None
-        knot_match = re.search(r"(\d{2})(\.\d+)?[\s-]*mm", value, re.IGNORECASE)
-        if knot_match:
-            parsed_knot = float(knot_match.group(1))
 
         self._resolve_fiber(updated, parsed_fiber)
-        self._resolve_knot_size(updated, parsed_knot)
         self._resolve_handle_maker(updated, value)
 
         result["matched"] = updated
@@ -680,21 +649,6 @@ class BrushMatcher:
                 updated["fiber_strategy"] = "default"
             else:
                 updated["fiber_strategy"] = "unset"
-
-    def _resolve_knot_size(self, updated: dict, parsed_knot: float | None) -> None:
-        if "knot_size_strategy" not in updated:
-            knot_size = updated.get("knot_size_mm")
-            default_knot_size = updated.get("default_knot_size_mm")
-            if knot_size is not None:
-                updated["knot_size_strategy"] = "yaml"
-            elif parsed_knot is not None:
-                updated["knot_size_mm"] = parsed_knot
-                updated["knot_size_strategy"] = "user_input"
-            elif default_knot_size is not None:
-                updated["knot_size_mm"] = default_knot_size
-                updated["knot_size_strategy"] = "default"
-            else:
-                updated["knot_size_strategy"] = "unset"
 
     def _resolve_handle_maker(self, updated: dict, value: str) -> None:
         if ("handle_maker" not in updated) or (updated["handle_maker"] is None):
