@@ -47,15 +47,17 @@ Track original values, match results, and confidence levels. Save to:
 ---
 
 ## 4. **Field Metadata Enrichment**
-Analyze matched field values to identify structured metadata, such as:
+Analyze matched field values to extract structured metadata that benefits from knowing the identified product first, such as:
 
 - Blade usage count (e.g., `Astra SP (3)`)
-- Brush fiber type (e.g., `Synthetic`)
-- Knot size (e.g., `24mm`)
+- Straight razor specifications (grind, width, point type)
+- DE razor plate information (Game Changer gaps, Christopher Bradley plates)
 
-Append enriched metadata to shave records. Save to:
+Uses an extensible enricher strategy pattern for sophisticated analysis. Save to:
 
 - `data/enriched/YYYY-MM.json`
+
+**Detailed specification**: See [Enrich Phase Specification](enrich_phase_spec.md)
 
 ---
 
@@ -111,6 +113,15 @@ sotd_fetcher/
 │   │   ├── overrides.py
 │   │   ├── merge.py
 │   │   └── save.py
+│   ├── extract/
+│   │   └── ...
+│   ├── match/
+│   │   └── ...
+│   ├── enrich/
+│   │   ├── run.py
+│   │   ├── enrich.py
+│   │   ├── base_enricher.py
+│   │   └── ...
 │   └── ...
 ├── tests/
 │   ├── test_fetch.py
