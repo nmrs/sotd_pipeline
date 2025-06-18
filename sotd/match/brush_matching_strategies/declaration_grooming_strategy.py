@@ -57,6 +57,28 @@ class DeclarationGroomingBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
         default_fiber = "Badger"
         default_knot_size_mm = 28.0
 
+        # Check for explicit non-DG brand context that should prevent DG matching
+        non_dg_brand_patterns = [
+            r"\bzenith\b",
+            r"\bomega\b",
+            r"\bsimpson\b",
+            r"\bwald\b",
+            r"\bmaggard\b",
+            r"\bchisel\s*&?\s*hound\b",
+            r"\bc&h\b",
+        ]
+
+        has_non_dg_context = any(re.search(pattern, lowered) for pattern in non_dg_brand_patterns)
+
+        if has_non_dg_context:
+            return {
+                "original": value,
+                "matched": None,
+                "pattern": None,
+                "strategy": "DeclarationGrooming",
+            }
+
+        # Now check model patterns if we have DG context
         for entry in self.patterns:
             if entry["compiled"].search(lowered):
                 knot_size = (

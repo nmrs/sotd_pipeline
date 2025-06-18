@@ -8,6 +8,7 @@ from sotd.match.brush_matching_strategies.declaration_grooming_strategy import (
 def test_catalog():
     return {
         "Declaration Grooming": {
+            "B2": {"patterns": ["B2(\\.\\s|\\.$|\\s|$)"]},
             "B3": {"patterns": ["B3(\\.\\s|\\.$|\\s|$)"]},
             "B10": {"patterns": ["b10"]},
             "B9A": {"patterns": ["B9A", "b9.*alpha"]},
@@ -60,24 +61,30 @@ def test_declaration_grooming_b9a_alpha(strategy):
     assert result["matched"]["model"] == "B9A"
 
 
-def test_zenith_b16_match(strategy):
+def test_zenith_b16_no_match(strategy):
+    """Test that DG strategy correctly rejects Zenith brushes (explicit Zenith brand context)"""
     result = strategy.match("Zenith B16")
 
-    assert result["matched"] is not None
-    assert result["matched"]["brand"] == "Zenith"
-    assert result["matched"]["model"] == "B16"
-    assert result["matched"]["fiber"] == "Boar"
-    assert result["matched"]["knot_size_mm"] == 24
+    assert result["matched"] is None
+    assert result["strategy"] == "DeclarationGrooming"
 
 
-def test_zenith_b8_match(strategy):
+def test_zenith_b8_no_match(strategy):
+    """Test that DG strategy correctly rejects Zenith brushes (explicit Zenith brand context)"""
     result = strategy.match("Zenith B8")
 
+    assert result["matched"] is None
+    assert result["strategy"] == "DeclarationGrooming"
+
+
+def test_standalone_model_matches_dg(strategy):
+    """Test that standalone model numbers default to Declaration Grooming"""
+    result = strategy.match("B2")
+
     assert result["matched"] is not None
-    assert result["matched"]["brand"] == "Zenith"
-    assert result["matched"]["model"] == "B8"
-    assert result["matched"]["fiber"] == "Boar"
-    assert result["matched"]["knot_size_mm"] == 28
+    assert result["matched"]["brand"] == "Declaration Grooming"
+    assert result["matched"]["model"] == "B2"
+    assert result["strategy"] == "DeclarationGrooming"
 
 
 def test_no_match(strategy):
