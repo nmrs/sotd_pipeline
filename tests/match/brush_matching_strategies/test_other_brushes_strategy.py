@@ -1,3 +1,4 @@
+# pylint: disable=redefined-outer-name
 import pytest
 from sotd.match.brush_matching_strategies.other_brushes_strategy import OtherBrushMatchingStrategy
 

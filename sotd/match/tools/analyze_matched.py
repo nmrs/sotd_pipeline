@@ -4,6 +4,9 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
+from rich.console import Console
+from rich.table import Table
+
 from sotd.cli_utils.date_span import month_span
 
 
@@ -87,9 +90,6 @@ def main(argv: list[str] | None = None) -> None:
             for f in sorted(set(files)):
                 print(f"    ↳ {f}")
     else:
-        from rich.console import Console
-        from rich.table import Table
-
         console = Console()
         if args.field == "handle":
             table = Table(title="Matched Handle Records")
