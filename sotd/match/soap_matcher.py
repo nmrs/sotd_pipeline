@@ -96,15 +96,23 @@ class SoapMatcher(BaseMatcher):
         normalized = re.sub(r"^[*_~]+|[*_~]+$", "", value.strip()) if isinstance(value, str) else ""
 
         if not isinstance(value, str):
-            return {
-                "original": original,
-                "matched": None,
-                "pattern": None,
-                "match_type": None,
-                "is_sample": False,
-            }
+            return self._no_match_result(original)
 
-        # Phase 1: Try to match a scent pattern first
+        result = self._match_scent_pattern(original, normalized)
+        if result:
+            return result
+
+        result = self._match_brand_pattern(original, normalized)
+        if result:
+            return result
+
+        result = self._match_dash_split(original, normalized)
+        if result:
+            return result
+
+        return self._no_match_result(original)
+
+    def _match_scent_pattern(self, original: str, normalized: str) -> Optional[dict]:
         for pattern_info in self.scent_patterns:
             if pattern_info["regex"].search(normalized):
                 return {
@@ -114,8 +122,9 @@ class SoapMatcher(BaseMatcher):
                     "match_type": "exact",
                     "is_sample": self._is_sample(original),
                 }
+        return None
 
-        # Phase 2: Match by brand only, then clean and extract scent from remainder
+    def _match_brand_pattern(self, original: str, normalized: str) -> Optional[dict]:
         for pattern_info in self.brand_patterns:
             match = pattern_info["regex"].search(normalized)
             if match:
@@ -124,9 +133,7 @@ class SoapMatcher(BaseMatcher):
                 remainder = re.sub(r"^[\s\-:*/_,~`\\]+", "", remainder).strip()
                 remainder = self._normalize_scent_text(remainder)
                 if self._is_sample(original):
-                    remainder = re.sub(
-                        r"\(\s*sample\s*\)", "", remainder, flags=re.IGNORECASE
-                    ).strip()
+                    remainder = self._remove_sample_marker(remainder)
                 return {
                     "original": original,
                     "matched": {"maker": pattern_info["maker"], "scent": remainder},
@@ -134,16 +141,15 @@ class SoapMatcher(BaseMatcher):
                     "match_type": "brand_fallback",
                     "is_sample": self._is_sample(original),
                 }
+        return None
 
-        # Phase 3: Fallback by splitting on dash
+    def _match_dash_split(self, original: str, normalized: str) -> Optional[dict]:
         if "-" in normalized:
             parts = normalized.split("-", 1)
             brand_guess = self._normalize_common_text(parts[0].strip())
             scent_guess = self._normalize_scent_text(parts[1].strip())
             if self._is_sample(original):
-                scent_guess = re.sub(
-                    r"\(\s*sample\s*\)", "", scent_guess, flags=re.IGNORECASE
-                ).strip()
+                scent_guess = self._remove_sample_marker(scent_guess)
             if brand_guess and scent_guess:
                 return {
                     "original": original,
@@ -152,7 +158,12 @@ class SoapMatcher(BaseMatcher):
                     "match_type": "split_fallback",
                     "is_sample": self._is_sample(original),
                 }
+        return None
 
+    def _remove_sample_marker(self, text: str) -> str:
+        return re.sub(r"\(\s*sample\s*\)", "", text, flags=re.IGNORECASE).strip()
+
+    def _no_match_result(self, original: str) -> dict:
         return {
             "original": original,
             "matched": None,

@@ -19,7 +19,10 @@ from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
 from sotd.match.brush_matching_strategies.other_brushes_strategy import (
     OtherBrushMatchingStrategy,
 )
-from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
+from sotd.match.brush_matching_strategies.utils.fiber_utils import (
+    _FIBER_PATTERNS,
+    match_fiber,
+)
 from sotd.match.brush_matching_strategies.zenith_strategy import (
     ZenithBrushMatchingStrategy,
 )
@@ -136,108 +139,95 @@ class BrushMatcher:
     def _split_handle_and_knot(
         self, text: str
     ) -> tuple[Optional[str], Optional[str], Optional[str]]:
-        """Split handle and knot using various delimiters and fiber detection.
-
-        Returns:
-            tuple: (handle_part, knot_part, delimiter_type)
-            delimiter_type: "knot_primary" for "with"/"w/", "handle_primary" for "in",
-                           "neutral" for "/", "fiber_hint" for fiber-based detection
-        """
+        """Split handle and knot using various delimiters and fiber detection."""
         if not text:
             return None, None, None
 
-        # Define delimiters with their semantic meaning
+        # Try delimiter-based splitting first
+        handle, knot, delimiter_type = self._split_by_delimiters(text)
+        if handle and knot:
+            return handle, knot, delimiter_type
+
+        # If no delimiters found, try fiber detection as a hint
+        return self._split_by_fiber_hint(text)
+
+    def _split_by_delimiters(self, text: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Split text using known delimiters and return parts and delimiter type."""
         knot_primary_delimiters = [" w/ ", " with "]  # Knot takes precedence
         handle_primary_delimiters = [" in "]  # Handle takes precedence
         neutral_delimiters = [" / ", "/", " - "]  # No semantic preference
 
-        # Check knot-primary delimiters first
         for delimiter in knot_primary_delimiters:
             if delimiter in text:
-                parts = text.split(delimiter, 1)
-                if len(parts) == 2:
-                    handle = parts[0].strip()
-                    knot = parts[1].strip()
-                    if handle and knot:
-                        return handle, knot, "knot_primary"
-
-        # Check handle-primary delimiters
+                return self._split_by_delimiter(text, delimiter, "knot_primary", handle_first=True)
         for delimiter in handle_primary_delimiters:
             if delimiter in text:
-                parts = text.split(delimiter, 1)
-                if len(parts) == 2:
-                    # For "in" delimiter: "knot_description in handle_description"
-                    # So parts[0] is knot, parts[1] is handle
-                    knot = parts[0].strip()
-                    handle = parts[1].strip()
-                    if handle and knot:
-                        return handle, knot, "handle_primary"
-
-        # Check neutral delimiters
+                return self._split_by_delimiter(
+                    text, delimiter, "handle_primary", handle_first=False
+                )
         for delimiter in neutral_delimiters:
             if delimiter in text:
-                parts = text.split(delimiter, 1)
-                if len(parts) == 2:
-                    handle = parts[0].strip()
-                    knot = parts[1].strip()
-                    if handle and knot:
-                        return handle, knot, "neutral"
+                return self._split_by_delimiter(text, delimiter, "neutral", handle_first=True)
+        return None, None, None
 
-        # If no delimiters found, try fiber detection as a hint
-        # Look for fiber words (badger, boar, synthetic, etc.) to identify knot part
-        return self._split_by_fiber_hint(text)
+    def _split_by_delimiter(
+        self, text: str, delimiter: str, delimiter_type: str, handle_first: bool
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        parts = text.split(delimiter, 1)
+        if len(parts) == 2:
+            if handle_first:
+                handle = parts[0].strip()
+                knot = parts[1].strip()
+            else:
+                knot = parts[0].strip()
+                handle = parts[1].strip()
+            if handle and knot:
+                return handle, knot, delimiter_type
+        return None, None, None
 
     def _split_by_fiber_hint(self, text: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
         """Split text using fiber words as hints for knot identification."""
-        from sotd.match.brush_matching_strategies.utils.fiber_utils import _FIBER_PATTERNS
-
-        # Build a comprehensive fiber pattern from all fiber types
-        all_fiber_patterns = []
-        for fiber_type, pattern in _FIBER_PATTERNS.items():
-            # Remove outer parentheses if present
-            clean_pattern = pattern.strip("()")
-            all_fiber_patterns.append(clean_pattern)
-
-        # Combine all fiber patterns
+        all_fiber_patterns = [pattern.strip("()") for pattern in _FIBER_PATTERNS.values()]
         combined_fiber_pattern = "|".join(all_fiber_patterns)
-
-        # Find fiber words in the text
-        import re
-
         fiber_matches = list(re.finditer(f"({combined_fiber_pattern})", text, re.IGNORECASE))
-
         if not fiber_matches:
             return None, None, None
-
-        # Find the last fiber match (often the most specific)
         last_fiber_match = fiber_matches[-1]
         fiber_start = last_fiber_match.start()
         fiber_end = last_fiber_match.end()
-
-        # Try to identify a reasonable split point around the fiber
-        # Look for brand/maker boundaries before the fiber
         words = text.split()
-        fiber_word_indices = []
+        fiber_word_indices = self._find_fiber_word_indices(words, fiber_start, fiber_end)
+        if not fiber_word_indices:
+            return None, None, None
+        first_fiber_word = fiber_word_indices[0]
+        # Try each fiber-based splitting strategy in order
+        handle, knot = self._fiber_handle_maker_split(words, first_fiber_word, text)
+        if handle and knot:
+            return handle, knot, "fiber_hint"
+        handle, knot = self._fiber_knot_maker_split(text, fiber_start)
+        if handle and knot:
+            return handle, knot, "fiber_hint"
+        handle, knot = self._fiber_word_split(words, first_fiber_word)
+        if handle and knot:
+            return handle, knot, "fiber_hint"
+        return None, None, None
 
-        # Find which word indices contain the fiber
+    def _find_fiber_word_indices(
+        self, words: list[str], fiber_start: int, fiber_end: int
+    ) -> list[int]:
+        fiber_word_indices = []
         current_pos = 0
         for i, word in enumerate(words):
             word_start = current_pos
             word_end = current_pos + len(word)
-
-            # Check if this word overlaps with the fiber match
             if (word_start <= fiber_start < word_end) or (word_start < fiber_end <= word_end):
                 fiber_word_indices.append(i)
-
             current_pos = word_end + 1  # +1 for space
+        return fiber_word_indices
 
-        if not fiber_word_indices:
-            return None, None, None
-
-        # Try different split strategies
-        first_fiber_word = fiber_word_indices[0]
-
-        # Strategy 1: Look for known handle makers before the fiber
+    def _fiber_handle_maker_split(
+        self, words: list[str], first_fiber_word: int, text: str
+    ) -> tuple[Optional[str], Optional[str]]:
         handle_maker_brands = [
             "Chisel & Hound",
             "Chisel and Hound",
@@ -248,12 +238,9 @@ class BrushMatcher:
             "Grizzly Bay",
             "Paladin",
         ]
-
-        # Check if any handle maker appears before the fiber
         text_before_fiber = " ".join(words[:first_fiber_word])
         for handle_maker in handle_maker_brands:
             if re.search(re.escape(handle_maker), text_before_fiber, re.IGNORECASE):
-                # Found a handle maker before fiber - split after the handle maker
                 handle_pattern = re.escape(handle_maker)
                 match = re.search(handle_pattern, text, re.IGNORECASE)
                 if match:
@@ -261,35 +248,35 @@ class BrushMatcher:
                     handle_part = text[:split_point].strip()
                     knot_part = text[split_point:].strip()
                     if handle_part and knot_part:
-                        return handle_part, knot_part, "fiber_hint"
+                        return handle_part, knot_part
+        return None, None
 
-        # Strategy 2: Look for brand names that might be knot makers near the fiber
-        # This is more heuristic - split before a potential knot maker brand
+    def _fiber_knot_maker_split(
+        self, text: str, fiber_start: int
+    ) -> tuple[Optional[str], Optional[str]]:
         knot_maker_patterns = [
             r"\b(Maggard|Oumo|Declaration|Zenith|Omega|Semogue|Simpson|Shavemac)\b"
         ]
-
         for pattern in knot_maker_patterns:
             matches = list(re.finditer(pattern, text, re.IGNORECASE))
             for match in matches:
-                # If the knot maker is reasonably close to the fiber, try splitting before it
-                if abs(match.start() - fiber_start) <= 50:  # Within 50 characters
+                if abs(match.start() - fiber_start) <= 50:
                     split_point = match.start()
                     handle_part = text[:split_point].strip()
                     knot_part = text[split_point:].strip()
                     if handle_part and knot_part and len(handle_part) > 3:
-                        return handle_part, knot_part, "fiber_hint"
+                        return handle_part, knot_part
+        return None, None
 
-        # Strategy 3: If we have multiple words, try splitting before the fiber word
-        # This is a fallback for cases where we can't identify specific brands
+    def _fiber_word_split(
+        self, words: list[str], first_fiber_word: int
+    ) -> tuple[Optional[str], Optional[str]]:
         if first_fiber_word > 0 and len(words) > 2:
-            # Split before the word containing the fiber
             handle_part = " ".join(words[:first_fiber_word])
             knot_part = " ".join(words[first_fiber_word:])
             if handle_part and knot_part:
-                return handle_part, knot_part, "fiber_hint"
-
-        return None, None, None
+                return handle_part, knot_part
+        return None, None
 
     def _should_prioritize_knot(self, text: str) -> bool:
         """Determine if knot maker should take precedence based on delimiter semantics."""
@@ -356,267 +343,207 @@ class BrushMatcher:
                             return knot_match
         return None
 
+    def _process_fiber_info(self, value: str, match_dict: dict) -> None:
+        """Process fiber information from the input value and update match dictionary."""
+        user_fiber = None
+        fiber_patterns = {
+            "Boar": r"boar",
+            "Badger": r"badger",
+            "Synthetic": r"synthetic|syn|nylon|plissoft|tuxedo|cashmere",
+        }
+        for fiber, pat in fiber_patterns.items():
+            if re.search(pat, value, re.IGNORECASE):
+                user_fiber = fiber
+                break
+
+        if user_fiber:
+            if match_dict.get("fiber") and match_dict["fiber"].lower() == user_fiber.lower():
+                match_dict["fiber_strategy"] = "user_input"
+            elif match_dict.get("fiber") and match_dict["fiber"].lower() != user_fiber.lower():
+                match_dict["fiber_conflict"] = user_fiber
+                match_dict["fiber_strategy"] = "yaml"
+            else:
+                match_dict["fiber"] = user_fiber
+                match_dict["fiber_strategy"] = "user_input"
+        else:
+            if match_dict.get("fiber_strategy") is None:
+                match_dict["fiber_strategy"] = "default" if "default" in value.lower() else "yaml"
+
+    def _process_knot_size(self, value: str, match_dict: dict) -> None:
+        """Process knot size information from the input value and update match dictionary."""
+        user_knot = None
+        knot_match = re.search(r"(\d{2})(?:\s*)mm", value.lower())
+        if knot_match:
+            user_knot = float(knot_match.group(1))
+
+        if user_knot:
+            if match_dict.get("knot_size_mm") and abs(match_dict["knot_size_mm"] - user_knot) < 0.1:
+                match_dict["knot_size_strategy"] = "user_input"
+            elif (
+                match_dict.get("knot_size_mm")
+                and abs(match_dict["knot_size_mm"] - user_knot) >= 0.1
+            ):
+                match_dict["knot_size_conflict"] = user_knot
+                match_dict["knot_size_strategy"] = "yaml"
+            else:
+                match_dict["knot_size_mm"] = user_knot
+                match_dict["knot_size_strategy"] = "user_input"
+        else:
+            if match_dict.get("knot_size_strategy") is None:
+                match_dict["knot_size_strategy"] = (
+                    "default" if "default" in value.lower() else "yaml"
+                )
+
+    def _process_handle_info(self, value: str, match_dict: dict) -> None:
+        """Process handle information from the input value and update match dictionary."""
+        handle, _knot, _ = self._split_handle_and_knot(value)
+        if handle and not match_dict.get("handle_maker"):
+            handle_match = self._match_handle_maker(handle)
+            if handle_match:
+                match_dict["handle_maker"] = handle_match["handle_maker"]
+                match_dict["handle_maker_metadata"] = {
+                    "_matched_by_section": handle_match["_matched_by_section"],
+                    "_pattern_used": handle_match["_pattern_used"],
+                }
+
+    def _enrich_match_result(self, value: str, match_dict: dict) -> None:
+        """Enrich match dictionary with additional information from the input value."""
+        self._process_fiber_info(value, match_dict)
+        self._process_knot_size(value, match_dict)
+        self._process_handle_info(value, match_dict)
+
     def match(self, value: str) -> dict:
         """Match brush string to known patterns."""
         if not value:
             return {"original": value, "matched": None, "match_type": None, "pattern": None}
 
-        # Check if we can split into handle and knot parts
         handle, knot, _ = self._split_handle_and_knot(value)
 
-        # If we have a knot part and knot should take precedence, try matching it first
         if knot and self._should_prioritize_knot(value):
-            for strategy in self.strategies:
-                if result := strategy.match(knot):
-                    # Found a match for the knot part - this takes precedence
-                    if isinstance(result, dict):
-                        if "matched" in result and result.get("matched"):
-                            m = result["matched"]
-                            m["_matched_by_strategy"] = strategy.__class__.__name__
-                            m["_pattern_used"] = result.get("pattern")
-                            m["_matched_from"] = "knot_part"
-                            m["_original_knot_text"] = knot
-                            m["_original_handle_text"] = handle
-
-                            # Add handle maker if we can identify it
-                            if handle:
-                                handle_match = self._match_handle_maker(handle)
-                                if handle_match:
-                                    m["handle_maker"] = handle_match["handle_maker"]
-                                    m["handle_maker_metadata"] = {
-                                        "_matched_by_section": handle_match["_matched_by_section"],
-                                        "_pattern_used": handle_match["_pattern_used"],
-                                    }
-
-                            return self._post_process_match(
-                                {
-                                    "original": value,
-                                    "matched": m,
-                                    "match_type": result.get("match_type", "exact"),
-                                    "pattern": result.get("pattern"),
-                                },
-                                value,
-                            )
-                        elif "brand" in result:
-                            m = result
-                            m["_matched_by_strategy"] = strategy.__class__.__name__
-                            m["_pattern_used"] = result.get("_pattern_used", "unknown")
-                            m["_matched_from"] = "knot_part"
-                            m["_original_knot_text"] = knot
-                            m["_original_handle_text"] = handle
-
-                            # Add handle maker if we can identify it
-                            if handle:
-                                handle_match = self._match_handle_maker(handle)
-                                if handle_match:
-                                    m["handle_maker"] = handle_match["handle_maker"]
-                                    m["handle_maker_metadata"] = {
-                                        "_matched_by_section": handle_match["_matched_by_section"],
-                                        "_pattern_used": handle_match["_pattern_used"],
-                                    }
-
-                            return self._post_process_match(
-                                {
-                                    "original": value,
-                                    "matched": m,
-                                    "match_type": m.get("source_type", "exact"),
-                                    "pattern": m.get("_pattern_used", "unknown"),
-                                },
-                                value,
-                            )
-
-        # If we have handle and knot parts but handle should take precedence (e.g., "in" delimiter)
+            result = self._match_knot_priority(value, handle, knot)
+            if result:
+                return result
         elif handle and knot and not self._should_prioritize_knot(value):
-            for strategy in self.strategies:
-                if result := strategy.match(handle):
-                    # Found a match for the handle part - this takes precedence
-                    if isinstance(result, dict):
-                        if "matched" in result and result.get("matched"):
-                            m = result["matched"]
-                            m["_matched_by_strategy"] = strategy.__class__.__name__
-                            m["_pattern_used"] = result.get("pattern")
-                            m["_matched_from"] = "handle_part"
-                            m["_original_handle_text"] = handle
-                            m["_original_knot_text"] = knot
+            result = self._match_handle_priority(value, handle, knot)
+            if result:
+                return result
 
-                            return self._post_process_match(
-                                {
-                                    "original": value,
-                                    "matched": m,
-                                    "match_type": result.get("match_type", "exact"),
-                                    "pattern": result.get("pattern"),
-                                },
-                                value,
-                            )
-                        elif "brand" in result:
-                            m = result
-                            m["_matched_by_strategy"] = strategy.__class__.__name__
-                            m["_pattern_used"] = result.get("_pattern_used", "unknown")
-                            m["_matched_from"] = "handle_part"
-                            m["_original_handle_text"] = handle
-                            m["_original_knot_text"] = knot
+        result = self._match_main_strategies(value)
+        if result:
+            return result
 
-                            return self._post_process_match(
-                                {
-                                    "original": value,
-                                    "matched": m,
-                                    "match_type": m.get("source_type", "exact"),
-                                    "pattern": m.get("_pattern_used", "unknown"),
-                                },
-                                value,
-                            )
+        return {
+            "original": value,
+            "matched": None,
+            "match_type": None,
+            "pattern": None,
+        }
 
-        # No knot/handle match found, proceed with normal full-text matching
-        # Try each strategy in order
+    def _match_knot_priority(
+        self, value: str, handle: Optional[str], knot: Optional[str]
+    ) -> Optional[dict]:
+        for strategy in self.strategies:
+            if result := strategy.match(knot):
+                m = self._extract_match_dict(result, strategy, "knot_part", handle, knot)
+                if m:
+                    return self._post_process_match(
+                        {
+                            "original": value,
+                            "matched": m,
+                            "match_type": (
+                                result.get("match_type", "exact")
+                                if isinstance(result, dict)
+                                else m.get("source_type", "exact")
+                            ),
+                            "pattern": (
+                                result.get("pattern")
+                                if isinstance(result, dict)
+                                else m.get("_pattern_used", "unknown")
+                            ),
+                        },
+                        value,
+                    )
+        return None
+
+    def _match_handle_priority(
+        self, value: str, handle: Optional[str], knot: Optional[str]
+    ) -> Optional[dict]:
+        for strategy in self.strategies:
+            if result := strategy.match(handle):
+                m = self._extract_match_dict(result, strategy, "handle_part", handle, knot)
+                if m:
+                    return self._post_process_match(
+                        {
+                            "original": value,
+                            "matched": m,
+                            "match_type": (
+                                result.get("match_type", "exact")
+                                if isinstance(result, dict)
+                                else m.get("source_type", "exact")
+                            ),
+                            "pattern": (
+                                result.get("pattern")
+                                if isinstance(result, dict)
+                                else m.get("_pattern_used", "unknown")
+                            ),
+                        },
+                        value,
+                    )
+        return None
+
+    def _match_main_strategies(self, value: str) -> Optional[dict]:
         for strategy in self.strategies:
             if result := strategy.match(value):
-                # Handle different return formats from strategies
-                if isinstance(result, dict):
-                    # Check if it's already wrapped (new format)
-                    if "matched" in result and result.get("matched"):
-                        m = result["matched"]
-                        m["_matched_by_strategy"] = strategy.__class__.__name__
-                        m["_pattern_used"] = result.get("pattern")
-                        # Fiber strategy
-                        user_fiber = None
-                        fiber_patterns = {
-                            "Boar": r"boar",
-                            "Badger": r"badger",
-                            "Synthetic": r"synthetic|syn|nylon|plissoft|tuxedo|cashmere",
-                        }
-                        for fiber, pat in fiber_patterns.items():
-                            if re.search(pat, value, re.IGNORECASE):
-                                user_fiber = fiber
-                                break
-                        if user_fiber:
-                            if m.get("fiber") and m["fiber"].lower() == user_fiber.lower():
-                                m["fiber_strategy"] = "user_input"
-                            elif m.get("fiber") and m["fiber"].lower() != user_fiber.lower():
-                                m["fiber_conflict"] = user_fiber
-                                m["fiber_strategy"] = "yaml"
-                            else:
-                                m["fiber"] = user_fiber
-                                m["fiber_strategy"] = "user_input"
-                        else:
-                            if m.get("fiber_strategy") is None:
-                                m["fiber_strategy"] = (
-                                    "default" if "default" in value.lower() else "yaml"
-                                )
-                        # Knot size strategy
-                        user_knot = None
-                        knot_match = re.search(r"(\d{2})(?:\s*)mm", value.lower())
-                        if knot_match:
-                            user_knot = float(knot_match.group(1))
-                        if user_knot:
-                            if m.get("knot_size_mm") and abs(m["knot_size_mm"] - user_knot) < 0.1:
-                                m["knot_size_strategy"] = "user_input"
-                            elif (
-                                m.get("knot_size_mm") and abs(m["knot_size_mm"] - user_knot) >= 0.1
-                            ):
-                                m["knot_size_conflict"] = user_knot
-                                m["knot_size_strategy"] = "yaml"
-                            else:
-                                m["knot_size_mm"] = user_knot
-                                m["knot_size_strategy"] = "user_input"
-                        else:
-                            if m.get("knot_size_strategy") is None:
-                                m["knot_size_strategy"] = (
-                                    "default" if "default" in value.lower() else "yaml"
-                                )
-                        # Handle/knot splitting
-                        handle, _knot, _ = self._split_handle_and_knot(value)
-                        if handle and not m.get("handle_maker"):
-                            handle_match = self._match_handle_maker(handle)
-                            if handle_match:
-                                m["handle_maker"] = handle_match["handle_maker"]
-                                m["handle_maker_metadata"] = {
-                                    "_matched_by_section": handle_match["_matched_by_section"],
-                                    "_pattern_used": handle_match["_pattern_used"],
-                                }
-                        enriched_result = self._post_process_match(
-                            {
-                                "original": value,
-                                "matched": m,
-                                "match_type": result.get("match_type", "exact"),
-                                "pattern": result.get("pattern"),
-                            },
-                            value,
-                        )
-                        return enriched_result
-                    # Handle direct result format (ChiselAndHound, OmegaSemogue, Zenith)
-                    elif "brand" in result:
-                        m = result
-                        m["_matched_by_strategy"] = strategy.__class__.__name__
-                        m["_pattern_used"] = result.get("_pattern_used", "unknown")
-                        # Fiber strategy
-                        user_fiber = None
-                        fiber_patterns = {
-                            "Boar": r"boar",
-                            "Badger": r"badger",
-                            "Synthetic": r"synthetic|syn|nylon|plissoft|tuxedo|cashmere",
-                        }
-                        for fiber, pat in fiber_patterns.items():
-                            if re.search(pat, value, re.IGNORECASE):
-                                user_fiber = fiber
-                                break
-                        if user_fiber:
-                            if m.get("fiber") and m["fiber"].lower() == user_fiber.lower():
-                                m["fiber_strategy"] = "user_input"
-                            elif m.get("fiber") and m["fiber"].lower() != user_fiber.lower():
-                                m["fiber_conflict"] = user_fiber
-                                m["fiber_strategy"] = "yaml"
-                            else:
-                                m["fiber"] = user_fiber
-                                m["fiber_strategy"] = "user_input"
-                        else:
-                            if m.get("fiber_strategy") is None:
-                                m["fiber_strategy"] = (
-                                    "default" if "default" in value.lower() else "yaml"
-                                )
-                        # Knot size strategy
-                        user_knot = None
-                        knot_match = re.search(r"(\d{2})(?:\s*)mm", value.lower())
-                        if knot_match:
-                            user_knot = float(knot_match.group(1))
-                        if user_knot:
-                            if m.get("knot_size_mm") and abs(m["knot_size_mm"] - user_knot) < 0.1:
-                                m["knot_size_strategy"] = "user_input"
-                            elif (
-                                m.get("knot_size_mm") and abs(m["knot_size_mm"] - user_knot) >= 0.1
-                            ):
-                                m["knot_size_conflict"] = user_knot
-                                m["knot_size_strategy"] = "yaml"
-                            else:
-                                m["knot_size_mm"] = user_knot
-                                m["knot_size_strategy"] = "user_input"
-                        else:
-                            if m.get("knot_size_strategy") is None:
-                                m["knot_size_strategy"] = (
-                                    "default" if "default" in value.lower() else "yaml"
-                                )
-                        # Handle/knot splitting
-                        handle, _knot, _ = self._split_handle_and_knot(value)
-                        if handle and not m.get("handle_maker"):
-                            handle_match = self._match_handle_maker(handle)
-                            if handle_match:
-                                m["handle_maker"] = handle_match["handle_maker"]
-                                m["handle_maker_metadata"] = {
-                                    "_matched_by_section": handle_match["_matched_by_section"],
-                                    "_pattern_used": handle_match["_pattern_used"],
-                                }
-                        enriched_result = self._post_process_match(
-                            {
-                                "original": value,
-                                "matched": m,
-                                "match_type": m.get("source_type", "exact"),
-                                "pattern": m.get("_pattern_used", "unknown"),
-                            },
-                            value,
-                        )
-                        return enriched_result
+                m = self._extract_match_dict(result, strategy)
+                if m:
+                    self._enrich_match_result(value, m)
+                    return self._post_process_match(
+                        {
+                            "original": value,
+                            "matched": m,
+                            "match_type": (
+                                result.get("match_type", "exact")
+                                if isinstance(result, dict)
+                                else m.get("source_type", "exact")
+                            ),
+                            "pattern": (
+                                result.get("pattern")
+                                if isinstance(result, dict)
+                                else m.get("_pattern_used", "unknown")
+                            ),
+                        },
+                        value,
+                    )
+        return None
 
-        # No match found
-        return {"original": value, "matched": None, "match_type": None, "pattern": None}
+    def _extract_match_dict(
+        self,
+        result,
+        strategy,
+        matched_from: Optional[str] = None,
+        handle: Optional[str] = None,
+        knot: Optional[str] = None,
+    ):
+        if isinstance(result, dict):
+            if "matched" in result and result.get("matched"):
+                m = result["matched"]
+                m["_matched_by_strategy"] = strategy.__class__.__name__
+                m["_pattern_used"] = result.get("pattern")
+                if matched_from:
+                    m["_matched_from"] = matched_from
+                    m["_original_knot_text"] = knot
+                    m["_original_handle_text"] = handle
+                return m
+            if "brand" in result:
+                m = result
+                m["_matched_by_strategy"] = strategy.__class__.__name__
+                m["_pattern_used"] = result.get("_pattern_used", "unknown")
+                if matched_from:
+                    m["_matched_from"] = matched_from
+                    m["_original_knot_text"] = knot
+                    m["_original_handle_text"] = handle
+                return m
+        return None
 
     def _post_process_match(self, result: dict, value: str) -> dict:
         if not result.get("matched"):
@@ -624,14 +551,21 @@ class BrushMatcher:
 
         updated = result["matched"].copy()
 
-        # Try to parse fiber and knot size from user input
+        # Parse fiber and knot size from user input
         parsed_fiber = match_fiber(value)
         parsed_knot = None
         knot_match = re.search(r"(\d{2}(\.\d+)?)[\s-]*mm", value, re.IGNORECASE)
         if knot_match:
             parsed_knot = float(knot_match.group(1))
 
-        # Handle fiber resolution priority (only if not already set by strategy)
+        self._resolve_fiber(updated, parsed_fiber)
+        self._resolve_knot_size(updated, parsed_knot)
+        self._resolve_handle_maker(updated, value)
+
+        result["matched"] = updated
+        return result
+
+    def _resolve_fiber(self, updated: dict, parsed_fiber: str | None) -> None:
         if "fiber_strategy" not in updated:
             fiber = updated.get("fiber")
             default_fiber = updated.get("default fiber")
@@ -648,7 +582,7 @@ class BrushMatcher:
             else:
                 updated["fiber_strategy"] = "unset"
 
-        # Handle knot_size_mm resolution priority (only if not already set by strategy)
+    def _resolve_knot_size(self, updated: dict, parsed_knot: float | None) -> None:
         if "knot_size_strategy" not in updated:
             knot_size = updated.get("knot_size_mm")
             default_knot_size = updated.get("default_knot_size_mm")
@@ -663,12 +597,10 @@ class BrushMatcher:
             else:
                 updated["knot_size_strategy"] = "unset"
 
-        # Extract handle_maker if not already set or is None
+    def _resolve_handle_maker(self, updated: dict, value: str) -> None:
         if ("handle_maker" not in updated) or (updated["handle_maker"] is None):
-            # Strategy 1: Try split-based parsing first (higher priority)
             handle, knot, _ = self._split_handle_and_knot(value)
             if handle:
-                # Try to match the parsed handle part
                 handle_match = self._match_handle_maker(handle)
                 if handle_match:
                     updated["handle_maker"] = handle_match["handle_maker"]
@@ -686,7 +618,6 @@ class BrushMatcher:
                     }
                 if knot:
                     updated["knot_maker"] = knot
-            # Strategy 2: Fallback to full text matching (always try if handle_maker is still None)
             if ("handle_maker" not in updated) or (updated["handle_maker"] is None):
                 handle_match = self._match_handle_maker(value)
                 if handle_match:
@@ -696,6 +627,3 @@ class BrushMatcher:
                         "_pattern_used": handle_match["_pattern_used"],
                         "_source_text": handle_match["_source_text"],
                     }
-
-        result["matched"] = updated
-        return result
