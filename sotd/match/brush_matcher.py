@@ -765,7 +765,8 @@ class BrushMatcher:
     def _split_by_brand_context(
         self, text: str
     ) -> tuple[Optional[str], Optional[str], Optional[str]]:
-        """Split text by recognizing brand context patterns when clear handle/knot makers are present.
+        """Split text by recognizing brand context patterns when clear handle/knot makers
+        are present.
 
         This handles cases like 'CH Circus B13' or 'B13 CH Circus' where:
         - B13 is a Declaration Grooming knot pattern
@@ -797,7 +798,8 @@ class BrushMatcher:
             return None, None, None
 
         # Additional safety: Don't split if this appears to be a single Declaration Grooming brush
-        # Check if "Declaration" appears in the text (indicating it might be "Declaration B3" not "CH ... B3")
+        # Check if "Declaration" appears in the text (indicating it might be "Declaration B3" not
+        # "CH ... B3")
         declaration_indicators = [r"\bdeclaration\b", r"\bdg\b"]
         has_declaration_context = any(
             re.search(pattern, text, re.IGNORECASE) for pattern in declaration_indicators
@@ -844,7 +846,7 @@ class BrushMatcher:
         if not has_ch_in_handle:
             return None, None, None
 
-            # Additional validation: make sure we're not breaking up a legitimate single brush name
+        # Additional validation: make sure we're not breaking up a legitimate single brush name
         # If the knot text is very short and the handle text is also very short, skip
         if len(knot_text) < 2 or len(handle_text.replace(" ", "")) < 2:
             return None, None, None

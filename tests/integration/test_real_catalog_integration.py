@@ -62,9 +62,9 @@ class TestRealCatalogIntegration:
 
         for input_text, expected_brand in test_cases:
             result = matcher.match(input_text)
-            if result.get("matched"):  # Only assert if we get a match
-                matched = result["matched"]
-                assert matched["brand"] == expected_brand, f"Failed for {input_text}"
+            matched = result.get("matched")
+            if isinstance(matched, dict):
+                assert matched.get("brand") == expected_brand, f"Failed for {input_text}"
                 # Model matching may be flexible, so just check it's not None
                 assert matched.get("model") is not None, f"No model for {input_text}"
 
@@ -102,8 +102,8 @@ class TestRealCatalogIntegration:
 
         for input_text, expected_handle_maker in test_cases:
             result = matcher.match(input_text)
-            if result.get("matched") and result["matched"].get("handle_maker"):
-                matched = result["matched"]
+            matched = result.get("matched")
+            if isinstance(matched, dict) and matched.get("handle_maker"):
                 actual_handle_maker = matched.get("handle_maker")
                 assert actual_handle_maker == expected_handle_maker, (
                     f"Handle maker failed for '{input_text}' - got '{actual_handle_maker}', "
@@ -124,9 +124,9 @@ class TestRealCatalogIntegration:
 
         for input_text, expected_brand in test_cases:
             result = matcher.match(input_text)
-            if result.get("matched"):  # Only assert if we get a match
-                matched = result["matched"]
-                assert matched["maker"] == expected_brand, f"Failed for {input_text}"
+            matched = result.get("matched")
+            if isinstance(matched, dict):
+                assert matched.get("maker") == expected_brand, f"Failed for {input_text}"
 
     def test_known_real_soap_scents_work(self):
         """Test that known soap scent patterns from real catalog work correctly."""
@@ -143,9 +143,9 @@ class TestRealCatalogIntegration:
 
         for input_text, expected_maker, expected_scent in test_cases:
             result = matcher.match(input_text)
-            if result.get("matched"):  # Only assert if we get a match
-                matched = result["matched"]
-                assert matched["maker"] == expected_maker, f"Maker failed for {input_text}"
+            matched = result.get("matched")
+            if isinstance(matched, dict):
+                assert matched.get("maker") == expected_maker, f"Maker failed for {input_text}"
                 # Scent matching should be specific
                 if matched.get("scent"):
                     assert (
@@ -166,9 +166,9 @@ class TestRealCatalogIntegration:
 
         for input_text, expected_brand in test_cases:
             result = matcher.match(input_text)
-            if result.get("matched"):  # Only assert if we get a match
-                matched = result["matched"]
-                assert matched["brand"] == expected_brand, f"Failed for {input_text}"
+            matched = result.get("matched")
+            if isinstance(matched, dict):
+                assert matched.get("brand") == expected_brand, f"Failed for {input_text}"
                 assert matched.get("model") is not None, f"No model for {input_text}"
 
     def test_known_real_blade_patterns_work(self):
@@ -185,9 +185,9 @@ class TestRealCatalogIntegration:
 
         for input_text, expected_brand in test_cases:
             result = matcher.match(input_text)
-            if result.get("matched"):  # Only assert if we get a match
-                matched = result["matched"]
-                assert matched["brand"] == expected_brand, f"Failed for {input_text}"
+            matched = result.get("matched")
+            if isinstance(matched, dict):
+                assert matched.get("brand") == expected_brand, f"Failed for {input_text}"
 
     def test_real_catalog_regex_patterns_compile(self):
         """Test that all regex patterns in real catalogs compile successfully."""
