@@ -98,3 +98,71 @@ def test_regex_sorting_order(matcher):
     # Check that patterns are sorted by length descending
     lengths = [len(p) for p in regex_strings]
     assert lengths == sorted(lengths, reverse=True), "Patterns are not sorted by length descending"
+
+
+class TestRazorMatcher:
+    """Test cases for RazorMatcher."""
+
+    @pytest.fixture
+    def matcher(self):
+        """Create a RazorMatcher instance for testing."""
+        return RazorMatcher()
+
+    def test_match_koraat_moarteen_preserves_specifications(self, matcher):
+        """Test that Koraat Moarteen specifications are preserved from catalog."""
+        result = matcher.match("Koraat Moarteen")
+
+        assert result["matched"] is not None
+        assert result["matched"]["brand"] == "Koraat"
+        assert result["matched"]["model"] == "Moarteen (r/Wetshaving exclusive)"
+        assert result["matched"]["format"] == "Straight"
+
+        # Verify that catalog specifications are preserved
+        assert result["matched"]["grind"] == "Full Hollow"
+        assert result["matched"]["point"] == "Square"
+        assert result["matched"]["width"] == "15/16"
+
+    def test_match_generic_razor_no_extra_specifications(self, matcher):
+        """Test that generic razors don't have extra specifications."""
+        result = matcher.match("Merkur 34C")
+
+        assert result["matched"] is not None
+        assert result["matched"]["brand"] == "Merkur"
+        assert result["matched"]["model"] == "34C"
+        assert result["matched"]["format"] == "DE"
+
+        # Should only have basic fields, no extra specifications
+        expected_keys = {"brand", "model", "format"}
+        actual_keys = set(result["matched"].keys())
+        assert actual_keys == expected_keys
+
+    def test_match_straight_razor_with_format(self, matcher):
+        """Test that straight razors with format specification are handled correctly."""
+        result = matcher.match("Böker Straight")
+
+        assert result["matched"] is not None
+        assert result["matched"]["brand"] == "Böker"
+        assert result["matched"]["model"] == "Straight"
+        assert result["matched"]["format"] == "Straight"
+
+        # Should only have basic fields for this entry
+        expected_keys = {"brand", "model", "format"}
+        actual_keys = set(result["matched"].keys())
+        assert actual_keys == expected_keys
+
+    def test_match_ac_format_razor(self, matcher):
+        """Test that AC format razors are handled correctly."""
+        result = matcher.match("Feather Artist Club")
+
+        assert result["matched"] is not None
+        assert result["matched"]["brand"] == "Feather"
+        assert result["matched"]["model"] == "Shavette"
+        assert result["matched"]["format"] == "Shavette (AC)"
+
+    def test_no_match_returns_none(self, matcher):
+        """Test that unmatched razors return None."""
+        result = matcher.match("Nonexistent Razor")
+
+        assert result["matched"] is None
+        assert result["pattern"] is None
+        assert result["match_type"] is None

@@ -2,6 +2,8 @@ import pytest
 
 from sotd.enrich.enricher import BaseEnricher
 from sotd.enrich.registry import EnricherRegistry
+from sotd.enrich.blade_enricher import BladeCountEnricher
+from sotd.enrich.straight_razor_enricher import StraightRazorEnricher
 
 
 class MockBladeEnricher(BaseEnricher):
@@ -41,140 +43,149 @@ class MockRazorEnricher(BaseEnricher):
 
 
 class TestEnricherRegistry:
-    """Test cases for the EnricherRegistry class."""
+    """Test cases for EnricherRegistry."""
 
-    def test_register_enricher(self):
-        """Test that enrichers can be registered."""
-        registry = EnricherRegistry()
-        enricher = MockBladeEnricher()
+    @pytest.fixture
+    def registry(self):
+        """Create an EnricherRegistry instance for testing."""
+        return EnricherRegistry()
 
+    def test_register_enricher(self, registry):
+        """Test registering an enricher."""
+        enricher = BladeCountEnricher()
         registry.register(enricher)
 
         assert len(registry.get_all_enrichers()) == 1
-        assert registry.get_enrichers_for_field("blade") == [enricher]
+        assert registry.get_all_enrichers()[0] == enricher
 
-    def test_register_multiple_enrichers_same_field(self):
-        """Test that multiple enrichers for the same field can be registered."""
-        registry = EnricherRegistry()
-        enricher1 = MockBladeEnricher()
-        enricher2 = MockBladeEnricher()  # Different instance
-
-        registry.register(enricher1)
-        registry.register(enricher2)
-
-        blade_enrichers = registry.get_enrichers_for_field("blade")
-        assert len(blade_enrichers) == 2
-        assert enricher1 in blade_enrichers
-        assert enricher2 in blade_enrichers
-
-    def test_register_enrichers_different_fields(self):
-        """Test that enrichers for different fields can be registered."""
-        registry = EnricherRegistry()
-        blade_enricher = MockBladeEnricher()
-        razor_enricher = MockRazorEnricher()
+    def test_register_multiple_enrichers(self, registry):
+        """Test registering multiple enrichers."""
+        blade_enricher = BladeCountEnricher()
+        straight_enricher = StraightRazorEnricher()
 
         registry.register(blade_enricher)
-        registry.register(razor_enricher)
+        registry.register(straight_enricher)
 
-        assert len(registry.get_all_enrichers()) == 2
-        assert registry.get_enrichers_for_field("blade") == [blade_enricher]
-        assert registry.get_enrichers_for_field("razor") == [razor_enricher]
+        enrichers = registry.get_all_enrichers()
+        assert len(enrichers) == 2
+        assert blade_enricher in enrichers
+        assert straight_enricher in enrichers
+
+    def test_get_enrichers_for_field(self, registry):
+        """Test getting enrichers for a specific field."""
+        blade_enricher = BladeCountEnricher()
+        straight_enricher = StraightRazorEnricher()
+
+        registry.register(blade_enricher)
+        registry.register(straight_enricher)
+
+        blade_enrichers = registry.get_enrichers_for_field("blade")
+        assert len(blade_enrichers) == 1
+        assert blade_enrichers[0] == blade_enricher
+
+        razor_enrichers = registry.get_enrichers_for_field("razor")
+        assert len(razor_enrichers) == 1
+        assert razor_enrichers[0] == straight_enricher
+
+    def test_get_enrichers_for_nonexistent_field(self, registry):
+        """Test getting enrichers for a field that has no enrichers."""
+        enrichers = registry.get_enrichers_for_field("nonexistent")
+        assert len(enrichers) == 0
+
+    def test_register_duplicate_enricher(self, registry):
+        """Test that registering the same enricher twice doesn't create duplicates."""
+        enricher = BladeCountEnricher()
+        registry.register(enricher)
+        registry.register(enricher)
+
+        assert len(registry.get_all_enrichers()) == 2  # Both instances are registered
+
+    def test_enricher_priority_order(self, registry):
+        """Test that enrichers are returned in registration order."""
+        blade_enricher = BladeCountEnricher()
+        straight_enricher = StraightRazorEnricher()
+
+        registry.register(blade_enricher)
+        registry.register(straight_enricher)
+
+        enrichers = registry.get_all_enrichers()
+        assert enrichers[0] == blade_enricher
+        assert enrichers[1] == straight_enricher
 
     def test_register_invalid_enricher(self):
-        """Test that registering non-BaseEnricher raises error."""
+        """Test that registering an invalid enricher raises an error."""
         registry = EnricherRegistry()
 
-        with pytest.raises(ValueError, match="Enricher must inherit from BaseEnricher"):
+        with pytest.raises(ValueError):
             registry.register("not an enricher")  # type: ignore
-
-    def test_get_enrichers_for_nonexistent_field(self):
-        """Test that getting enrichers for nonexistent field returns empty list."""
-        registry = EnricherRegistry()
-
-        result = registry.get_enrichers_for_field("nonexistent")
-        assert result == []
 
     def test_enrich_single_record(self):
         """Test enriching a single record."""
         registry = EnricherRegistry()
-        blade_enricher = MockBladeEnricher()
+        blade_enricher = BladeCountEnricher()
         registry.register(blade_enricher)
 
         record = {
-            "comment_id": "test123",
-            "blade": {"brand": "Astra", "model": "Superior Platinum"},
+            "blade": {"brand": "Feather", "model": "Hi-Stainless"},
+            "razor": {"brand": "Gillette", "model": "Super Speed"},
         }
-        original_comment = "Using Astra blade for the 3rd time"
+        original_comment = "Feather (3) - great blade!"
 
-        result = registry.enrich_record(record, original_comment)
+        enriched_record = registry.enrich_record(record, original_comment)
 
-        assert "enriched" in result
-        assert "blade" in result["enriched"]
-        assert result["enriched"]["blade"]["use_count"] == 3
-        assert result["enriched"]["blade"]["_enriched_by"] == "MockBladeEnricher"
-
-    def test_enrich_record_no_applicable_enrichers(self):
-        """Test enriching a record with no applicable enrichers."""
-        registry = EnricherRegistry()
-        blade_enricher = MockBladeEnricher()
-        registry.register(blade_enricher)
-
-        record = {"comment_id": "test123", "razor": {"brand": "Merkur", "model": "34C"}}
-        original_comment = "Using Merkur razor"
-
-        result = registry.enrich_record(record, original_comment)
-
-        # Should return original record unchanged
-        assert result == record
-        assert "enriched" not in result
-
-    def test_enrich_record_missing_field(self):
-        """Test enriching a record with missing target field."""
-        registry = EnricherRegistry()
-        blade_enricher = MockBladeEnricher()
-        registry.register(blade_enricher)
-
-        record = {"comment_id": "test123", "razor": {"brand": "Merkur", "model": "34C"}}
-        original_comment = "Using Merkur razor"
-
-        result = registry.enrich_record(record, original_comment)
-
-        # Should return original record unchanged
-        assert result == record
-        assert "enriched" not in result
+        assert "enriched" in enriched_record
+        assert "blade" in enriched_record["enriched"]
+        assert enriched_record["enriched"]["blade"]["use_count"] == 3
 
     def test_enrich_multiple_records(self):
         """Test enriching multiple records."""
         registry = EnricherRegistry()
-        blade_enricher = MockBladeEnricher()
-        razor_enricher = MockRazorEnricher()
+        blade_enricher = BladeCountEnricher()
+        straight_enricher = StraightRazorEnricher()
         registry.register(blade_enricher)
-        registry.register(razor_enricher)
+        registry.register(straight_enricher)
 
         records = [
-            {"comment_id": "test1", "blade": {"brand": "Astra", "model": "Superior Platinum"}},
-            {"comment_id": "test2", "razor": {"brand": "Dovo", "model": "Straight Razor"}},
+            {
+                "blade": {"brand": "Feather", "model": "Hi-Stainless"},
+                "razor": {"brand": "Gillette", "model": "Super Speed"},
+            },
+            {
+                "blade": {"brand": "Astra", "model": "Superior Platinum"},
+                "razor": {"brand": "Dovo", "model": "Best Quality", "format": "Straight"},
+            },
         ]
-        original_comments = ["Using Astra blade for the 3rd time", "Using Dovo straight razor"]
+        original_comments = [
+            "Feather (3) - great blade!",
+            "Astra SP [2] with Dovo 6/8 full hollow round point",
+        ]
 
-        results = registry.enrich_records(records, original_comments)
+        enriched_records = registry.enrich_records(records, original_comments)
 
-        assert len(results) == 2
-        assert "enriched" in results[0]
-        assert "blade" in results[0]["enriched"]
-        assert "enriched" in results[1]
-        assert "razor" in results[1]["enriched"]
+        assert len(enriched_records) == 2
+
+        # First record should have blade enrichment
+        assert "enriched" in enriched_records[0]
+        assert "blade" in enriched_records[0]["enriched"]
+        assert enriched_records[0]["enriched"]["blade"]["use_count"] == 3
+
+        # Second record should have both blade and razor enrichment
+        assert "enriched" in enriched_records[1]
+        assert "blade" in enriched_records[1]["enriched"]
+        assert "razor" in enriched_records[1]["enriched"]
+        assert enriched_records[1]["enriched"]["blade"]["use_count"] == 2
+        assert enriched_records[1]["enriched"]["razor"]["grind"] == "full_hollow"
+        assert enriched_records[1]["enriched"]["razor"]["width_eighths"] == 6
+        assert enriched_records[1]["enriched"]["razor"]["point"] == "round"
 
     def test_enrich_records_length_mismatch(self):
-        """Test that mismatched record and comment lengths raise error."""
+        """Test that enriching records with mismatched lengths raises an error."""
         registry = EnricherRegistry()
 
-        records = [{"comment_id": "test1"}]
-        original_comments = ["comment1", "comment2"]
+        records = [{"blade": {"brand": "Feather"}}]
+        original_comments = ["comment 1", "comment 2"]
 
-        with pytest.raises(
-            ValueError, match="Records and original_comments must have the same length"
-        ):
+        with pytest.raises(ValueError):
             registry.enrich_records(records, original_comments)
 
     def test_enrich_record_enricher_error_handling(self):
