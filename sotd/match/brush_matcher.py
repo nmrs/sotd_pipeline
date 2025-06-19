@@ -263,15 +263,17 @@ class BrushMatcher:
 
     def _try_handle_from_model(self, updated: dict, value: str) -> bool:
         """Try to extract handle maker from model field."""
-        model = updated.get("model", "").strip()
-        if model:
-            model_handle_match = self.handle_matcher.match_handle_maker(model)
-            if model_handle_match:
-                updated["handle_maker"] = model_handle_match["handle_maker"]
-                updated["handle_maker_metadata"] = {
-                    "_matched_by_section": model_handle_match["_matched_by_section"],
-                    "_pattern_used": model_handle_match["_pattern_used"],
-                    "_source_text": model_handle_match["_source_text"],
-                }
-                return True
+        model = updated.get("model")
+        if model and isinstance(model, str):
+            model = model.strip()
+            if model:
+                model_handle_match = self.handle_matcher.match_handle_maker(model)
+                if model_handle_match:
+                    updated["handle_maker"] = model_handle_match["handle_maker"]
+                    updated["handle_maker_metadata"] = {
+                        "_matched_by_section": model_handle_match["_matched_by_section"],
+                        "_pattern_used": model_handle_match["_pattern_used"],
+                        "_source_text": model_handle_match["_source_text"],
+                    }
+                    return True
         return False
