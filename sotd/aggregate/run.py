@@ -22,9 +22,16 @@ from typing import Sequence
 from tqdm import tqdm
 
 from sotd.aggregate.engine import (
+    aggregate_blade_manufacturers,
     aggregate_blades,
+    aggregate_brush_handle_makers,
+    aggregate_brush_knot_makers,
+    aggregate_brush_fibers,
+    aggregate_brush_knot_sizes,
     aggregate_brushes,
+    aggregate_razor_manufacturers,
     aggregate_razors,
+    aggregate_soap_makers,
     aggregate_soaps,
     aggregate_users,
     calculate_basic_metrics,
@@ -126,6 +133,55 @@ def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
                 print(f"[DEBUG] Error aggregating users: {e}")
             users = []
 
+        try:
+            razor_manufacturers = aggregate_razor_manufacturers(matched_records, debug=args.debug)
+        except Exception as e:
+            if args.debug:
+                print(f"[DEBUG] Error aggregating razor manufacturers: {e}")
+            razor_manufacturers = []
+
+        try:
+            blade_manufacturers = aggregate_blade_manufacturers(matched_records, debug=args.debug)
+        except Exception as e:
+            if args.debug:
+                print(f"[DEBUG] Error aggregating blade manufacturers: {e}")
+            blade_manufacturers = []
+
+        try:
+            soap_makers = aggregate_soap_makers(matched_records, debug=args.debug)
+        except Exception as e:
+            if args.debug:
+                print(f"[DEBUG] Error aggregating soap makers: {e}")
+            soap_makers = []
+
+        try:
+            brush_knot_makers = aggregate_brush_knot_makers(matched_records, debug=args.debug)
+        except Exception as e:
+            if args.debug:
+                print(f"[DEBUG] Error aggregating brush knot makers: {e}")
+            brush_knot_makers = []
+
+        try:
+            brush_handle_makers = aggregate_brush_handle_makers(matched_records, debug=args.debug)
+        except Exception as e:
+            if args.debug:
+                print(f"[DEBUG] Error aggregating brush handle makers: {e}")
+            brush_handle_makers = []
+
+        try:
+            brush_fibers = aggregate_brush_fibers(matched_records, debug=args.debug)
+        except Exception as e:
+            if args.debug:
+                print(f"[DEBUG] Error aggregating brush fibers: {e}")
+            brush_fibers = []
+
+        try:
+            brush_knot_sizes = aggregate_brush_knot_sizes(matched_records, debug=args.debug)
+        except Exception as e:
+            if args.debug:
+                print(f"[DEBUG] Error aggregating brush knot sizes: {e}")
+            brush_knot_sizes = []
+
         # Prepare results
         results = {
             "year": year,
@@ -134,18 +190,32 @@ def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
             "basic_metrics": basic_metrics,
             "aggregations": {
                 "razors": razors,
+                "razor_manufacturers": razor_manufacturers,
                 "blades": blades,
+                "blade_manufacturers": blade_manufacturers,
                 "soaps": soaps,
+                "soap_makers": soap_makers,
                 "brushes": brushes,
+                "brush_knot_makers": brush_knot_makers,
+                "brush_handle_makers": brush_handle_makers,
+                "brush_fibers": brush_fibers,
+                "brush_knot_sizes": brush_knot_sizes,
                 "users": users,
             },
             "summary": {
                 "total_records": len(data),
                 "matched_records": len(matched_records),
                 "razor_count": len(razors),
+                "razor_manufacturer_count": len(razor_manufacturers),
                 "blade_count": len(blades),
+                "blade_manufacturer_count": len(blade_manufacturers),
                 "soap_count": len(soaps),
+                "soap_maker_count": len(soap_makers),
                 "brush_count": len(brushes),
+                "brush_knot_maker_count": len(brush_knot_makers),
+                "brush_handle_maker_count": len(brush_handle_makers),
+                "brush_fiber_count": len(brush_fibers),
+                "brush_knot_size_count": len(brush_knot_sizes),
                 "user_count": len(users),
             },
         }

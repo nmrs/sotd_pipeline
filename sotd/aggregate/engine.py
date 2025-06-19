@@ -227,7 +227,7 @@ def aggregate_razors(records: List[Dict[str, Any]], debug: bool = False) -> List
 
                     razor_data.append(
                         {
-                            "razor_name": razor_name,
+                            "name": razor_name,
                             "brand": brand,
                             "model": model,
                             "format": format_type,
@@ -248,12 +248,12 @@ def aggregate_razors(records: List[Dict[str, Any]], debug: bool = False) -> List
 
     # Group by razor name and calculate metrics
     try:
-        grouped = df.groupby("razor_name").agg({"user": ["count", "nunique"]}).reset_index()
+        grouped = df.groupby("name").agg({"user": ["count", "nunique"]}).reset_index()
     except Exception as e:
         raise ValueError(f"Failed to group razor data: {e}")
 
     # Flatten column names
-    grouped.columns = ["razor_name", "shaves", "unique_users"]
+    grouped.columns = ["name", "shaves", "unique_users"]
 
     # Calculate average shaves per user
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
@@ -315,10 +315,24 @@ def aggregate_blades(records: List[Dict[str, Any]], debug: bool = False) -> List
                             invalid_records += 1
                             continue
 
-                    blade_name = matched.get("brand", "Unknown Blade")
+                    # Extract blade name from matched data
+                    brand = matched.get("brand", "")
+                    model = matched.get("model", "")
+
+                    # Create a descriptive blade name (brand + model)
+                    blade_name_parts = []
+                    if brand:
+                        blade_name_parts.append(brand)
+                    if model:
+                        blade_name_parts.append(model)
+
+                    blade_name = " ".join(blade_name_parts) if blade_name_parts else "Unknown Blade"
+
                     blade_data.append(
                         {
-                            "blade_name": blade_name,
+                            "name": blade_name,
+                            "brand": brand,
+                            "model": model,
                             "user": record.get("author", "Unknown"),
                         }
                     )
@@ -336,12 +350,12 @@ def aggregate_blades(records: List[Dict[str, Any]], debug: bool = False) -> List
 
     # Group by blade name and calculate metrics
     try:
-        grouped = df.groupby("blade_name").agg({"user": ["count", "nunique"]}).reset_index()
+        grouped = df.groupby("name").agg({"user": ["count", "nunique"]}).reset_index()
     except Exception as e:
         raise ValueError(f"Failed to group blade data: {e}")
 
     # Flatten column names
-    grouped.columns = ["blade_name", "shaves", "unique_users"]
+    grouped.columns = ["name", "shaves", "unique_users"]
 
     # Calculate average shaves per user
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
@@ -417,7 +431,7 @@ def aggregate_soaps(records: List[Dict[str, Any]], debug: bool = False) -> List[
 
                     soap_data.append(
                         {
-                            "soap_name": soap_name,
+                            "name": soap_name,
                             "maker": maker,
                             "scent": scent,
                             "user": record.get("author", "Unknown"),
@@ -437,12 +451,12 @@ def aggregate_soaps(records: List[Dict[str, Any]], debug: bool = False) -> List[
 
     # Group by soap name and calculate metrics
     try:
-        grouped = df.groupby("soap_name").agg({"user": ["count", "nunique"]}).reset_index()
+        grouped = df.groupby("name").agg({"user": ["count", "nunique"]}).reset_index()
     except Exception as e:
         raise ValueError(f"Failed to group soap data: {e}")
 
     # Flatten column names
-    grouped.columns = ["soap_name", "shaves", "unique_users"]
+    grouped.columns = ["name", "shaves", "unique_users"]
 
     # Calculate average shaves per user
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
@@ -505,30 +519,21 @@ def aggregate_brushes(records: List[Dict[str, Any]], debug: bool = False) -> Lis
                             continue
 
                     brand = matched.get("brand", "")
-                    handle_maker = matched.get("handle_maker", "")
-                    fiber = matched.get("fiber", "")
-                    knot_size = matched.get("knot_size_mm", "")
+                    model = matched.get("model", "")
 
-                    # Create brush name
-                    brush_name_parts = []
-                    if handle_maker:
-                        brush_name_parts.append(handle_maker)
-                    if brand:
-                        brush_name_parts.append(brand)
-                    if fiber:
-                        brush_name_parts.append(fiber)
-                    if knot_size:
-                        brush_name_parts.append(f"{knot_size}mm")
-
-                    brush_name = " ".join(brush_name_parts) if brush_name_parts else "Unknown Brush"
+                    # Create brush name from brand and model only
+                    if brand and model:
+                        brush_name = f"{brand} {model}"
+                    elif brand:
+                        brush_name = brand
+                    else:
+                        brush_name = "Unknown Brush"
 
                     brush_data.append(
                         {
-                            "brush_name": brush_name,
+                            "name": brush_name,
                             "brand": brand,
-                            "handle_maker": handle_maker,
-                            "fiber": fiber,
-                            "knot_size_mm": knot_size,
+                            "model": model,
                             "user": record.get("author", "Unknown"),
                         }
                     )
@@ -546,12 +551,12 @@ def aggregate_brushes(records: List[Dict[str, Any]], debug: bool = False) -> Lis
 
     # Group by brush name and calculate metrics
     try:
-        grouped = df.groupby("brush_name").agg({"user": ["count", "nunique"]}).reset_index()
+        grouped = df.groupby("name").agg({"user": ["count", "nunique"]}).reset_index()
     except Exception as e:
         raise ValueError(f"Failed to group brush data: {e}")
 
     # Flatten column names
-    grouped.columns = ["brush_name", "shaves", "unique_users"]
+    grouped.columns = ["name", "shaves", "unique_users"]
 
     # Calculate average shaves per user
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
@@ -639,6 +644,7 @@ def aggregate_users(records: List[Dict[str, Any]], debug: bool = False) -> List[
         raise ValueError(f"Failed to group user data: {e}")
 
     grouped.columns = ["user", "shaves"]
+    grouped["avg_shaves_per_user"] = 1.0  # Each user's avg is always 1.0 (all their own shaves)
 
     # Sort by shaves (descending)
     grouped = grouped.sort_values("shaves", ascending=False)
@@ -648,5 +654,298 @@ def aggregate_users(records: List[Dict[str, Any]], debug: bool = False) -> List[
 
     if debug:
         print(f"[DEBUG] Aggregated {len(results)} users ({invalid_records} invalid records)")
+
+    return results  # type: ignore
+
+
+def aggregate_razor_manufacturers(
+    records: List[Dict[str, Any]], debug: bool = False
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate razor usage statistics by manufacturer (brand).
+    """
+    if not isinstance(records, list):
+        raise ValueError(f"Expected list of records, got {type(records)}")
+    if not records:
+        return []
+    data = []
+    for record in records:
+        razor = record.get("razor", {})
+        matched = razor.get("matched", {}) if isinstance(razor, dict) else {}
+        brand = matched.get("brand")
+        if brand:
+            data.append({"brand": brand, "user": record.get("author", "Unknown")})
+    if not data:
+        return []
+    import pandas as pd
+
+    df = pd.DataFrame(data)
+    grouped = df.groupby("brand").agg({"user": ["count", "nunique"]}).reset_index()
+    grouped.columns = ["brand", "shaves", "unique_users"]
+    grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
+    grouped = grouped.sort_values("shaves", ascending=False)
+    return list(grouped.to_dict("records"))  # type: ignore
+
+
+def aggregate_blade_manufacturers(
+    records: List[Dict[str, Any]], debug: bool = False
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate blade usage statistics by manufacturer (brand).
+    """
+    if not isinstance(records, list):
+        raise ValueError(f"Expected list of records, got {type(records)}")
+    if not records:
+        return []
+    data = []
+    for record in records:
+        blade = record.get("blade", {})
+        matched = blade.get("matched", {}) if isinstance(blade, dict) else {}
+        brand = matched.get("brand")
+        if brand:
+            data.append({"brand": brand, "user": record.get("author", "Unknown")})
+    if not data:
+        return []
+    import pandas as pd
+
+    df = pd.DataFrame(data)
+    grouped = df.groupby("brand").agg({"user": ["count", "nunique"]}).reset_index()
+    grouped.columns = ["brand", "shaves", "unique_users"]
+    grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
+    grouped = grouped.sort_values("shaves", ascending=False)
+    return list(grouped.to_dict("records"))  # type: ignore
+
+
+def aggregate_soap_makers(
+    records: List[Dict[str, Any]], debug: bool = False
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate soap usage statistics by maker (manufacturer).
+    """
+    if not isinstance(records, list):
+        raise ValueError(f"Expected list of records, got {type(records)}")
+    if not records:
+        return []
+    data = []
+    for record in records:
+        soap = record.get("soap", {})
+        matched = soap.get("matched", {}) if isinstance(soap, dict) else {}
+        maker = matched.get("maker")
+        if maker:
+            data.append({"maker": maker, "user": record.get("author", "Unknown")})
+    if not data:
+        return []
+    import pandas as pd
+
+    df = pd.DataFrame(data)
+    grouped = df.groupby("maker").agg({"user": ["count", "nunique"]}).reset_index()
+    grouped.columns = ["maker", "shaves", "unique_users"]
+    grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
+    grouped = grouped.sort_values("shaves", ascending=False)
+    return list(grouped.to_dict("records"))  # type: ignore
+
+
+def aggregate_brush_knot_makers(
+    records: List[Dict[str, Any]], debug: bool = False
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate brush usage statistics by knot maker (brand).
+    """
+    if not isinstance(records, list):
+        raise ValueError(f"Expected list of records, got {type(records)}")
+    if not records:
+        return []
+    data = []
+    for record in records:
+        brush = record.get("brush", {})
+        matched = brush.get("matched", {}) if isinstance(brush, dict) else {}
+        brand = matched.get("brand")
+        if brand:
+            data.append({"brand": brand, "user": record.get("author", "Unknown")})
+    if not data:
+        return []
+    import pandas as pd
+
+    df = pd.DataFrame(data)
+    grouped = df.groupby("brand").agg({"user": ["count", "nunique"]}).reset_index()
+    grouped.columns = ["brand", "shaves", "unique_users"]
+    grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
+    grouped = grouped.sort_values("shaves", ascending=False)
+    return list(grouped.to_dict("records"))  # type: ignore
+
+
+def aggregate_brush_handle_makers(
+    records: List[Dict[str, Any]], debug: bool = False
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate brush usage statistics by handle maker.
+    """
+    if not isinstance(records, list):
+        raise ValueError(f"Expected list of records, got {type(records)}")
+    if not records:
+        return []
+    data = []
+    for record in records:
+        brush = record.get("brush", {})
+        matched = brush.get("matched", {}) if isinstance(brush, dict) else {}
+        handle_maker = matched.get("handle_maker")
+        if handle_maker:
+            data.append({"handle_maker": handle_maker, "user": record.get("author", "Unknown")})
+    if not data:
+        return []
+    import pandas as pd
+
+    df = pd.DataFrame(data)
+    grouped = df.groupby("handle_maker").agg({"user": ["count", "nunique"]}).reset_index()
+    grouped.columns = ["handle_maker", "shaves", "unique_users"]
+    grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
+    grouped = grouped.sort_values("shaves", ascending=False)
+    return list(grouped.to_dict("records"))  # type: ignore
+
+
+def aggregate_brush_fibers(
+    records: List[Dict[str, Any]], debug: bool = False
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate brush usage statistics by fiber type.
+    """
+    if not isinstance(records, list):
+        raise ValueError(f"Expected list of records, got {type(records)}")
+
+    if not records:
+        return []
+
+    fiber_data = []
+    invalid_records = 0
+
+    for i, record in enumerate(records):
+        if not isinstance(record, dict):
+            if debug:
+                print(f"[DEBUG] Record {i}: Expected dict, got {type(record)}")
+            invalid_records += 1
+            continue
+
+        if "brush" in record:
+            brush_info = record["brush"]
+            if isinstance(brush_info, dict) and "matched" in brush_info:
+                matched = brush_info["matched"]
+                if isinstance(matched, dict) and matched.get("brand"):
+                    # Validate match_type if present
+                    if "match_type" in matched:
+                        match_type = matched["match_type"]
+                        valid_match_types = ["exact", "fuzzy", "manual", "unmatched"]
+                        if not isinstance(match_type, str) or match_type not in valid_match_types:
+                            if debug:
+                                print(f"[DEBUG] Record {i}: brush.match_type invalid: {match_type}")
+                            invalid_records += 1
+                            continue
+
+                    fiber = matched.get("fiber", None)
+                    if fiber:
+                        fiber_data.append(
+                            {
+                                "fiber": fiber,
+                                "user": record.get("author", "Unknown"),
+                            }
+                        )
+
+    if not fiber_data:
+        if debug:
+            print("[DEBUG] No valid brush fiber data found")
+        return []
+
+    try:
+        df = pd.DataFrame(fiber_data)
+    except Exception as e:
+        raise ValueError(f"Failed to create DataFrame for brush fiber aggregation: {e}")
+
+    try:
+        grouped = df.groupby("fiber").agg({"user": ["count", "nunique"]}).reset_index()
+    except Exception as e:
+        raise ValueError(f"Failed to group brush fiber data: {e}")
+
+    grouped.columns = ["fiber", "shaves", "unique_users"]
+    grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
+    grouped = grouped.sort_values("shaves", ascending=False)
+    results = grouped.to_dict("records")
+
+    if debug:
+        print(f"[DEBUG] Aggregated {len(results)} brush fibers ({invalid_records} invalid records)")
+
+    return results  # type: ignore
+
+
+def aggregate_brush_knot_sizes(
+    records: List[Dict[str, Any]], debug: bool = False
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate brush usage statistics by knot size (mm).
+    """
+    if not isinstance(records, list):
+        raise ValueError(f"Expected list of records, got {type(records)}")
+
+    if not records:
+        return []
+
+    knot_size_data = []
+    invalid_records = 0
+
+    for i, record in enumerate(records):
+        if not isinstance(record, dict):
+            if debug:
+                print(f"[DEBUG] Record {i}: Expected dict, got {type(record)}")
+            invalid_records += 1
+            continue
+
+        if "brush" in record:
+            brush_info = record["brush"]
+            if isinstance(brush_info, dict) and "matched" in brush_info:
+                matched = brush_info["matched"]
+                if isinstance(matched, dict) and matched.get("brand"):
+                    # Validate match_type if present
+                    if "match_type" in matched:
+                        match_type = matched["match_type"]
+                        valid_match_types = ["exact", "fuzzy", "manual", "unmatched"]
+                        if not isinstance(match_type, str) or match_type not in valid_match_types:
+                            if debug:
+                                print(f"[DEBUG] Record {i}: brush.match_type invalid: {match_type}")
+                            invalid_records += 1
+                            continue
+
+                    knot_size = matched.get("knot_size_mm", None)
+                    if knot_size:
+                        knot_size_str = str(knot_size)
+                        knot_size_data.append(
+                            {
+                                "knot_size_mm": knot_size_str,
+                                "user": record.get("author", "Unknown"),
+                            }
+                        )
+
+    if not knot_size_data:
+        if debug:
+            print("[DEBUG] No valid brush knot size data found")
+        return []
+
+    try:
+        df = pd.DataFrame(knot_size_data)
+    except Exception as e:
+        raise ValueError(f"Failed to create DataFrame for brush knot size aggregation: {e}")
+
+    try:
+        grouped = df.groupby("knot_size_mm").agg({"user": ["count", "nunique"]}).reset_index()
+    except Exception as e:
+        raise ValueError(f"Failed to group brush knot size data: {e}")
+
+    grouped.columns = ["knot_size_mm", "shaves", "unique_users"]
+    grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
+    grouped = grouped.sort_values("shaves", ascending=False)
+    results = grouped.to_dict("records")
+
+    if debug:
+        print(
+            f"[DEBUG] Aggregated {len(results)} brush knot sizes "
+            f"({invalid_records} invalid records)"
+        )
 
     return results  # type: ignore

@@ -26,8 +26,8 @@ The Aggregate phase processes enriched SOTD data to generate statistical summari
 - **Brushes**: Specific brush models (e.g., "AP Shave Co G5C")
 - **Brush Handle Makers**: Handle manufacturer aggregation
 - **Brush Knot Makers**: Knot manufacturer aggregation  
-- **Knot Fibers**: Synthetic, Badger, Boar, Mixed Badger/Boar, Horse
-- **Knot Sizes**: 20mm, 22mm, 24mm, 26mm, 28mm, etc.
+- **Brush Fibers**: Synthetic, Badger, Boar, Mixed Badger/Boar, Horse
+- **Brush Knot Sizes**: 20mm, 22mm, 24mm, 26mm, 28mm, etc.
 
 ### Software Categories
 - **Soap Makers**: Brand-level aggregation (e.g., "Barrister and Mann")
@@ -83,8 +83,8 @@ For each category, the following metrics are calculated:
     "soaps": [...],
     "brush_handle_makers": [...],
     "brush_knot_makers": [...],
-    "knot_fibers": [...],
-    "knot_sizes": [...],
+    "brush_fibers": [...],
+    "brush_knot_sizes": [...],
     "soap_makers": [...],
     "brand_diversity": [...],
     "top_shavers": [...]
@@ -201,3 +201,6 @@ Follow the same pattern as other phases:
 - Verify shaves >= unique_users
 - Check for reasonable avg_shaves_per_user values
 - Validate category names are consistent
+
+# Note: The output keys for brush fiber and knot size aggregations are 'brush_fibers' and 'brush_knot_sizes'.
+# These are grouped by fiber type and knot size (mm) respectively, matching the code and output structure.

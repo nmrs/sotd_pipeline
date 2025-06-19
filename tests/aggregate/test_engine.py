@@ -10,6 +10,8 @@ from sotd.aggregate.engine import (
     aggregate_users,
     calculate_basic_metrics,
     filter_matched_records,
+    aggregate_brush_fibers,
+    aggregate_brush_knot_sizes,
 )
 
 
@@ -117,7 +119,10 @@ class TestFilterMatchedRecords:
                 "brush": {
                     "matched": {
                         "brand": "Test Brush",
+                        "model": "Test Model",
                         "handle_maker": "Test Handle",
+                        "fiber": "Badger",
+                        "knot_size_mm": "24",
                         "match_type": "exact",
                     }
                 },
@@ -334,7 +339,7 @@ class TestAggregateRazors:
         ]
         result = aggregate_razors(records)
         assert len(result) == 1
-        assert result[0]["razor_name"] == "Test Brand Test Model DE"
+        assert result[0]["name"] == "Test Brand Test Model DE"
         assert result[0]["shaves"] == 1
         assert result[0]["unique_users"] == 1
         assert result[0]["avg_shaves_per_user"] == 1.0
@@ -371,7 +376,7 @@ class TestAggregateRazors:
         ]
         result = aggregate_razors(records)
         assert len(result) == 1
-        assert result[0]["razor_name"] == "Test Brand Test Model"
+        assert result[0]["name"] == "Test Brand Test Model"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 2
         assert result[0]["avg_shaves_per_user"] == 1.0
@@ -409,8 +414,8 @@ class TestAggregateRazors:
         result = aggregate_razors(records)
         assert len(result) == 2
         # Should be sorted by shaves (descending)
-        assert result[0]["razor_name"] == "Brand A Model A"
-        assert result[1]["razor_name"] == "Brand B Model B"
+        assert result[0]["name"] == "Brand A Model A"
+        assert result[1]["name"] == "Brand B Model B"
 
     def test_invalid_match_type_filtered_out(self):
         """Test that records with invalid match_type are filtered out."""
@@ -478,7 +483,7 @@ class TestAggregateBlades:
         ]
         result = aggregate_blades(records)
         assert len(result) == 1
-        assert result[0]["blade_name"] == "Test Blade"
+        assert result[0]["name"] == "Test Blade"
         assert result[0]["shaves"] == 1
         assert result[0]["unique_users"] == 1
         assert result[0]["avg_shaves_per_user"] == 1.0
@@ -513,8 +518,8 @@ class TestAggregateBlades:
         ]
         result = aggregate_blades(records)
         assert len(result) == 2
-        assert result[0]["blade_name"] == "Blade A"
-        assert result[1]["blade_name"] == "Blade B"
+        assert result[0]["name"] == "Blade A"
+        assert result[1]["name"] == "Blade B"
 
 
 class TestAggregateSoaps:
@@ -563,7 +568,7 @@ class TestAggregateSoaps:
         ]
         result = aggregate_soaps(records)
         assert len(result) == 1
-        assert result[0]["soap_name"] == "Test Maker Test Scent"
+        assert result[0]["name"] == "Test Maker Test Scent"
         assert result[0]["shaves"] == 1
         assert result[0]["unique_users"] == 1
         assert result[0]["avg_shaves_per_user"] == 1.0
@@ -600,8 +605,8 @@ class TestAggregateSoaps:
         ]
         result = aggregate_soaps(records)
         assert len(result) == 2
-        assert result[0]["soap_name"] == "Maker A Scent A"
-        assert result[1]["soap_name"] == "Maker B Scent B"
+        assert result[0]["name"] == "Maker A Scent A"
+        assert result[1]["name"] == "Maker B Scent B"
 
 
 class TestAggregateBrushes:
@@ -642,6 +647,7 @@ class TestAggregateBrushes:
                 "brush": {
                     "matched": {
                         "brand": "Test Brush",
+                        "model": "Test Model",
                         "handle_maker": "Test Handle",
                         "fiber": "Badger",
                         "knot_size_mm": "24",
@@ -652,7 +658,7 @@ class TestAggregateBrushes:
         ]
         result = aggregate_brushes(records)
         assert len(result) == 1
-        assert result[0]["brush_name"] == "Test Handle Test Brush Badger 24mm"
+        assert result[0]["name"] == "Test Brush Test Model"
         assert result[0]["shaves"] == 1
         assert result[0]["unique_users"] == 1
         assert result[0]["avg_shaves_per_user"] == 1.0
@@ -668,6 +674,7 @@ class TestAggregateBrushes:
                 "brush": {
                     "matched": {
                         "brand": "Brush A",
+                        "model": "Model A",
                         "handle_maker": "Handle A",
                         "match_type": "exact",
                     }
@@ -681,6 +688,7 @@ class TestAggregateBrushes:
                 "brush": {
                     "matched": {
                         "brand": "Brush B",
+                        "model": "Model B",
                         "handle_maker": "Handle B",
                         "match_type": "exact",
                     }
@@ -689,8 +697,8 @@ class TestAggregateBrushes:
         ]
         result = aggregate_brushes(records)
         assert len(result) == 2
-        assert result[0]["brush_name"] == "Handle A Brush A"
-        assert result[1]["brush_name"] == "Handle B Brush B"
+        assert result[0]["name"] == "Brush A Model A"
+        assert result[1]["name"] == "Brush B Model B"
 
 
 class TestAggregateUsers:
@@ -798,3 +806,157 @@ class TestAggregateUsers:
         assert len(result) == 1
         assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 1
+
+
+class TestAggregateBrushFibers:
+    """Test the aggregate_brush_fibers function."""
+
+    def test_empty_records(self):
+        result = aggregate_brush_fibers([])
+        assert result == []
+
+    def test_single_fiber_single_user(self):
+        records = [
+            {
+                "id": "test1",
+                "author": "user1",
+                "brush": {
+                    "matched": {
+                        "brand": "Simpson",
+                        "model": "Chubby 2",
+                        "fiber": "Badger",
+                        "match_type": "exact",
+                    }
+                },
+            }
+        ]
+        result = aggregate_brush_fibers(records)
+        assert len(result) == 1
+        assert result[0]["fiber"] == "Badger"
+        assert result[0]["shaves"] == 1
+        assert result[0]["unique_users"] == 1
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_multiple_fibers_multiple_users(self):
+        records = [
+            {
+                "id": "test1",
+                "author": "user1",
+                "brush": {
+                    "matched": {
+                        "brand": "Simpson",
+                        "model": "Chubby 2",
+                        "fiber": "Badger",
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "test2",
+                "author": "user2",
+                "brush": {
+                    "matched": {
+                        "brand": "Omega",
+                        "model": "10048",
+                        "fiber": "Boar",
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "test3",
+                "author": "user1",
+                "brush": {
+                    "matched": {
+                        "brand": "Simpson",
+                        "model": "Chubby 2",
+                        "fiber": "Badger",
+                        "match_type": "exact",
+                    }
+                },
+            },
+        ]
+        result = aggregate_brush_fibers(records)
+        assert len(result) == 2
+        fibers = {r["fiber"]: r for r in result}
+        assert fibers["Badger"]["shaves"] == 2
+        assert fibers["Badger"]["unique_users"] == 1
+        assert fibers["Boar"]["shaves"] == 1
+        assert fibers["Boar"]["unique_users"] == 1
+
+
+class TestAggregateBrushKnotSizes:
+    """Test the aggregate_brush_knot_sizes function."""
+
+    def test_empty_records(self):
+        result = aggregate_brush_knot_sizes([])
+        assert result == []
+
+    def test_single_knot_size_single_user(self):
+        records = [
+            {
+                "id": "test1",
+                "author": "user1",
+                "brush": {
+                    "matched": {
+                        "brand": "Simpson",
+                        "model": "Chubby 2",
+                        "knot_size_mm": 28,
+                        "match_type": "exact",
+                    }
+                },
+            }
+        ]
+        result = aggregate_brush_knot_sizes(records)
+        assert len(result) == 1
+        assert result[0]["knot_size_mm"] == "28"
+        assert result[0]["shaves"] == 1
+        assert result[0]["unique_users"] == 1
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_multiple_knot_sizes_multiple_users(self):
+        records = [
+            {
+                "id": "test1",
+                "author": "user1",
+                "brush": {
+                    "matched": {
+                        "brand": "Simpson",
+                        "model": "Chubby 2",
+                        "knot_size_mm": 28,
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "test2",
+                "author": "user2",
+                "brush": {
+                    "matched": {
+                        "brand": "Omega",
+                        "model": "10048",
+                        "knot_size_mm": 27,
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "test3",
+                "author": "user1",
+                "brush": {
+                    "matched": {
+                        "brand": "Simpson",
+                        "model": "Chubby 2",
+                        "knot_size_mm": 28,
+                        "match_type": "exact",
+                    }
+                },
+            },
+        ]
+        result = aggregate_brush_knot_sizes(records)
+        assert len(result) == 2
+        sizes = {r["knot_size_mm"]: r for r in result}
+        assert sizes["28"]["shaves"] == 2
+        assert sizes["28"]["unique_users"] == 1
+        assert sizes["27"]["shaves"] == 1
+        assert sizes["27"]["unique_users"] == 1

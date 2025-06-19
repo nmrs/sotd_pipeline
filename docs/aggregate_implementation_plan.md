@@ -76,8 +76,11 @@ Build the aggregate phase of the SOTD pipeline that processes enriched data to g
   - [x] Brushes (from brush.matched)
   - [x] Brush handle makers (from brush.matched.handle_maker)
   - [x] Brush knot makers (from brush.matched.brand)
-  - [x] Knot fibers (from brush.matched.fiber)
-  - [x] Knot sizes (from brush.matched.knot_size_mm)
+  - [x] Brush fibers (from brush.matched.fiber, output as 'brush_fibers')
+  - [x] Brush knot sizes (from brush.matched.knot_size_mm, output as 'brush_knot_sizes')
+
+  # Note: The output keys for brush fiber and knot size aggregations are 'brush_fibers' and 'brush_knot_sizes'.
+  # These are grouped by fiber type and knot size (mm) respectively, matching the code and output structure.
 
 - [x] **Step 7: Software Categories**
   - [x] Add aggregation logic for soap-related categories
@@ -288,8 +291,8 @@ Categories to implement:
 - Brushes (from brush.matched)
 - Brush handle makers (from brush.matched.handle_maker)
 - Brush knot makers (from brush.matched.brand)
-- Knot fibers (from brush.matched.fiber)
-- Knot sizes (from brush.matched.knot_size_mm)
+- Brush fibers (from brush.matched.fiber, output as 'brush_fibers')
+- Brush knot sizes (from brush.matched.knot_size_mm, output as 'brush_knot_sizes')
 
 Each category should follow the same pattern: extract data, group by name, calculate metrics, return results.
 
