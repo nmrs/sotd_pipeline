@@ -17,6 +17,11 @@ from sotd.aggregate.game_changer_plate_aggregator import aggregate_game_changer_
 from sotd.aggregate.handle_maker_aggregator import aggregate_brush_handle_makers
 from sotd.aggregate.knot_maker_aggregator import aggregate_brush_knot_makers
 from sotd.aggregate.knot_size_aggregator import aggregate_brush_knot_sizes
+from sotd.aggregate.engine_specialized import (
+    aggregate_straight_widths,
+    aggregate_straight_grinds,
+    aggregate_straight_points,
+)
 
 # Re-export for test patching
 from sotd.aggregate.load import get_enriched_file_path, load_enriched_data
@@ -99,6 +104,9 @@ def _perform_specialized_aggregations(
         ("game_changer_plates", aggregate_game_changer_plates),
         ("super_speed_tips", aggregate_super_speed_tips),
         ("straight_razor_specs", aggregate_straight_razor_specs),
+        ("straight_widths", aggregate_straight_widths),
+        ("straight_grinds", aggregate_straight_grinds),
+        ("straight_points", aggregate_straight_points),
     ]:
         try:
             results[name] = func(matched_records, debug=debug)
@@ -156,6 +164,7 @@ def _prepare_final_results(
         "month": month,
         "status": "success",
         "basic_metrics": basic_metrics,
+        "data": dict(aggregations),
         "aggregations": aggregations,
         "summary": {
             "total_records": len(data),
@@ -176,6 +185,9 @@ def _prepare_final_results(
             "game_changer_plate_count": len(aggregations["game_changer_plates"]),
             "super_speed_tip_count": len(aggregations["super_speed_tips"]),
             "straight_razor_spec_count": len(aggregations["straight_razor_specs"]),
+            "straight_width_count": len(aggregations.get("straight_widths", [])),
+            "straight_grind_count": len(aggregations.get("straight_grinds", [])),
+            "straight_point_count": len(aggregations.get("straight_points", [])),
             "razor_blade_combination_count": len(aggregations["razor_blade_combinations"]),
         },
     }
@@ -232,6 +244,9 @@ def process_data(
                     "game_changer_plates",
                     "super_speed_tips",
                     "straight_razor_specs",
+                    "straight_widths",
+                    "straight_grinds",
+                    "straight_points",
                 ]
             },
             [],
