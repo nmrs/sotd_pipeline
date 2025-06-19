@@ -77,25 +77,43 @@ class SoftwareReportGenerator(BaseReportGenerator):
         tables = []
         tables.append("## Tables\n\n")
 
-        # Soap Makers Table
-        soap_makers_table = SoapMakersTableGenerator(self.data, self.debug).generate_table()
-        if soap_makers_table.strip():
-            tables.append(soap_makers_table)
-        else:
-            tables.append("### Soap Makers\n\n*No data available*\n\n")
-
-        # Soaps Table
-        soaps_table = SoapsTableGenerator(self.data, self.debug).generate_table()
-        if soaps_table.strip():
-            tables.append(soaps_table)
-        else:
-            tables.append("### Soaps\n\n*No data available*\n\n")
-
-        # Brand Diversity Table
-        brand_diversity_table = BrandDiversityTableGenerator(self.data, self.debug).generate_table()
-        if brand_diversity_table.strip():
-            tables.append(brand_diversity_table)
-        else:
-            tables.append("### Brand Diversity\n\n*No data available*\n\n")
+        # Core software tables
+        tables.append(self._generate_table("Soap Makers", SoapMakersTableGenerator))
+        tables.append(self._generate_table("Soaps", SoapsTableGenerator))
+        tables.append(self._generate_table("Brand Diversity", BrandDiversityTableGenerator))
 
         return tables
+
+    def _generate_table(self, title: str, generator_class) -> str:
+        """Generate a single table using the specified generator."""
+        generator = generator_class(self.data, self.debug)
+
+        # Check if we have comparison data for delta calculations
+        include_delta = bool(self.comparison_data)
+        comparison_period = "previous month"  # Default comparison period
+
+        # If we have comparison data, use the first available period
+        if self.comparison_data:
+            # Get the first available comparison period
+            available_periods = list(self.comparison_data.keys())
+            if available_periods:
+                comparison_period = available_periods[0]
+                comparison_data = self.comparison_data[comparison_period][
+                    1
+                ]  # Get the data, not metadata
+            else:
+                comparison_data = None
+        else:
+            comparison_data = None
+
+        table_content = generator.generate_table(
+            include_delta=include_delta,
+            comparison_data=comparison_data,
+            comparison_period=comparison_period,
+        )
+
+        # If the table is empty, provide a "No data available" message
+        if not table_content:
+            return f"### {title}\n\n*No data available*\n\n"
+
+        return table_content
