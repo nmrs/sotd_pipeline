@@ -9,7 +9,7 @@ The Aggregate phase processes enriched SOTD data to generate statistical summari
 ### Input
 - **Source**: `data/enriched/YYYY-MM.json`
 - **Format**: JSON with enriched comment records
-- **Structure**: Each record contains matched product data with metadata
+- **Structure**: Each record contains matched product data with metadata and enriched fields
 
 ### Output  
 - **Destination**: `data/aggregated/YYYY-MM.json`
@@ -20,77 +20,244 @@ The Aggregate phase processes enriched SOTD data to generate statistical summari
 
 ### Hardware Categories
 - **Razor Formats**: DE, Straight, GEM, AC, Injector, etc.
-- **Razors**: Specific razor models (e.g., "RazoRock Game Changer")
-- **Razor Manufacturers**: Brand-level aggregation (e.g., "Gillette", "Blackland")
-- **Blades**: Specific blade models (e.g., "Astra Superior Platinum (Green)")
-- **Brushes**: Specific brush models (e.g., "AP Shave Co G5C")
-- **Brush Handle Makers**: Handle manufacturer aggregation
-- **Brush Knot Makers**: Knot manufacturer aggregation  
-- **Brush Fibers**: Synthetic, Badger, Boar, Mixed Badger/Boar, Horse
-- **Brush Knot Sizes**: 20mm, 22mm, 24mm, 26mm, 28mm, etc.
+- **Razors**: Individual razor models with brand/model/format
+- **Razor Manufacturers**: Brand-level aggregation from `razor.matched.brand`
+- **Blades**: Individual blade models with brand/model/format  
+- **Blade Manufacturers**: Brand-level aggregation from `blade.matched.brand`
+- **Brushes**: Individual brush models with brand/model/fiber
+- **Brush Handle Makers**: Handle maker aggregation from `brush.matched.handle_maker`
+- **Brush Knot Makers**: Knot maker aggregation from `brush.matched.knot_maker`
+- **Brush Fibers**: Fiber type aggregation from `brush.matched.fiber` or `brush.enriched.fiber`
+- **Brush Knot Sizes**: Knot size aggregation from `brush.matched.knot_size_mm` or `brush.enriched.knot_size_mm`
 
 ### Software Categories
-- **Soap Makers**: Brand-level aggregation (e.g., "Barrister and Mann")
-- **Soaps**: Specific soap scents (e.g., "Stirling Soap Co. - Executive Man")
-- **Brand Diversity**: Count of unique scents per brand
+- **Soaps**: Individual soap scents with maker/scent
+- **Soap Makers**: Maker-level aggregation from `soap.matched.maker`
+
+### Specialized Categories
+- **Blackbird Plates**: Plate type aggregation from `razor.enriched.plate`
+- **Christopher Bradley Plates**: Plate type/level aggregation from `razor.enriched.plate_type` and `razor.enriched.plate_level`
+- **Game Changer Plates**: Gap aggregation from `razor.enriched.gap`
+- **Super Speed Tips**: Tip type aggregation from `razor.enriched.super_speed_tip`
+- **Straight Razor Widths**: Width aggregation from `razor.enriched.width`
+- **Straight Razor Grinds**: Grind type aggregation from `razor.enriched.grind`
+- **Straight Razor Points**: Point type aggregation from `razor.enriched.point`
 
 ### User Categories
-- **Top Shavers**: Users with highest shave counts
+- **Users**: Individual user aggregation from `author`
 
-## Metrics Calculated
+## Data Structure
 
-For each category, the following metrics are calculated:
-
-- **shaves**: Total number of shaves using this item
-- **unique_users**: Number of distinct users who used this item
-- **avg_shaves_per_user**: shaves / unique_users
-
-## Data Processing Rules
-
-### Filtering
-- **Only process successfully matched products**: Records that contain matched product data with appropriate fields (brand, maker, etc.)
-- **Skip unmatched records**: Records with no matched data or empty matched fields
-- **Presence implies success**: If matched data exists with required fields, it represents a successful match regardless of match strategy
-- **Rely on match step**: Business rules like GEM → Personna GEM PTFE mapping are handled in match phase
-
-### Aggregation Logic
-- **Group by product name**: Use the matched product name as the grouping key
-- **Count occurrences**: Track total usage and unique users
-- **Calculate averages**: Pre-calculate avg_shaves_per_user for report efficiency
-
-## Output Structure
-
+### Input Record Structure
 ```json
 {
-  "meta": {
-    "month": "2025-05",
-    "aggregated_at": "2025-05-21T18:40:00Z", 
-    "total_shaves": 1609,
-    "unique_shavers": 109,
-    "categories": ["razor_formats", "razors", "blades", "soaps", ...]
+  "author": "username",
+  "razor": {
+    "original": "Blackland Blackbird Ti",
+    "matched": {
+      "brand": "Blackland",
+      "model": "Blackbird", 
+      "format": "DE"
+    },
+    "enriched": {
+      "plate": "Lite",
+      "_enriched_by": "BlackbirdPlateEnricher"
+    }
   },
-  "data": {
-    "razor_formats": [
-      {
-        "name": "DE",
-        "shaves": 1097,
-        "unique_users": 99,
-        "avg_shaves_per_user": 11.08
-      }
-    ],
-    "razors": [...],
-    "blades": [...],
-    "soaps": [...],
-    "brush_handle_makers": [...],
-    "brush_knot_makers": [...],
-    "brush_fibers": [...],
-    "brush_knot_sizes": [...],
-    "soap_makers": [...],
-    "brand_diversity": [...],
-    "top_shavers": [...]
+  "blade": {
+    "original": "Gillette Minora Platinum",
+    "matched": {
+      "brand": "Gillette",
+      "model": "Minora",
+      "format": "DE"
+    }
+  },
+  "brush": {
+    "original": "Semogue 610 21mm Boar",
+    "matched": {
+      "brand": "Semogue",
+      "model": "610",
+      "fiber": "Boar",
+      "knot_size_mm": 21,
+      "handle_maker": "Semogue",
+      "knot_maker": null
+    },
+    "enriched": {
+      "knot_size_mm": 21.0,
+      "fiber": "Boar"
+    }
+  },
+  "soap": {
+    "original": "Grooming Dept - Laundry II",
+    "matched": {
+      "maker": "Grooming Dept",
+      "scent": "Laundry II"
+    }
   }
 }
 ```
+
+### Output Structure
+```json
+{
+  "meta": {
+    "month": "2025-01",
+    "total_shaves": 1499,
+    "unique_shavers": 114,
+    "avg_shaves_per_user": 13.15
+  },
+  "data": {
+    "razor_formats": [
+      {"format": "DE", "shaves": 1200},
+      {"format": "Straight", "shaves": 150}
+    ],
+    "razors": [
+      {"name": "Fatip Grande", "shaves": 50},
+      {"name": "Gillette Tech", "shaves": 45}
+    ],
+    "razor_manufacturers": [
+      {"brand": "Gillette", "shaves": 300},
+      {"brand": "Fatip", "shaves": 100}
+    ],
+    "blades": [
+      {"name": "Gillette Minora", "shaves": 80},
+      {"name": "Personna Lab Blue", "shaves": 60}
+    ],
+    "blade_manufacturers": [
+      {"brand": "Gillette", "shaves": 400},
+      {"brand": "Personna", "shaves": 200}
+    ],
+    "brushes": [
+      {"name": "Semogue 610", "shaves": 30},
+      {"name": "AP Shave Co MiG", "shaves": 25}
+    ],
+    "brush_handle_makers": [
+      {"handle_maker": "Semogue", "shaves": 150},
+      {"handle_maker": "AP Shave Co", "shaves": 100}
+    ],
+    "brush_knot_makers": [
+      {"brand": "Declaration Grooming", "shaves": 80},
+      {"brand": "Semogue", "shaves": 150}
+    ],
+    "brush_fibers": [
+      {"fiber": "Synthetic", "shaves": 400},
+      {"fiber": "Boar", "shaves": 300}
+    ],
+    "brush_knot_sizes": [
+      {"knot_size_mm": 24, "shaves": 200},
+      {"knot_size_mm": 26, "shaves": 180}
+    ],
+    "blackbird_plates": [
+      {"plate": "Ti", "shaves": 40},
+      {"plate": "Lite", "shaves": 25}
+    ],
+    "christopher_bradley_plates": [
+      {"plate_type": "SB", "plate_level": "C", "shaves": 30},
+      {"plate_type": "SB", "plate_level": "D", "shaves": 20}
+    ],
+    "game_changer_plates": [
+      {"gap": "1.05", "shaves": 35},
+      {"gap": ".84", "shaves": 25}
+    ],
+    "super_speed_tips": [
+      {"super_speed_tip": "Flare", "shaves": 45},
+      {"super_speed_tip": "Black", "shaves": 30}
+    ],
+    "straight_widths": [
+      {"width": "6/8", "shaves": 80},
+      {"width": "5/8", "shaves": 40}
+    ],
+    "straight_grinds": [
+      {"grind": "Full Hollow", "shaves": 60},
+      {"grind": "Hollow", "shaves": 30}
+    ],
+    "straight_points": [
+      {"point": "Round", "shaves": 50},
+      {"point": "Barber's Notch", "shaves": 20}
+    ],
+    "soaps": [
+      {"name": "Grooming Dept - Laundry II", "shaves": 40},
+      {"name": "Declaration Grooming - Persephone", "shaves": 35}
+    ],
+    "soap_makers": [
+      {"maker": "Grooming Dept", "shaves": 200},
+      {"maker": "Declaration Grooming", "shaves": 180}
+    ],
+    "users": [
+      {"name": "user1", "shaves": 25},
+      {"name": "user2", "shaves": 20}
+    ]
+  }
+}
+```
+
+## Field Mapping
+
+### Core Product Fields
+- **Razors**: `razor.matched.brand`, `razor.matched.model`, `razor.matched.format`
+- **Blades**: `blade.matched.brand`, `blade.matched.model`, `blade.matched.format`
+- **Brushes**: `brush.matched.brand`, `brush.matched.model`, `brush.matched.fiber`
+- **Soaps**: `soap.matched.maker`, `soap.matched.scent`
+
+### Specialized Fields
+- **Blackbird Plates**: `razor.enriched.plate`
+- **Christopher Bradley Plates**: `razor.enriched.plate_type`, `razor.enriched.plate_level`
+- **Game Changer Plates**: `razor.enriched.gap`
+- **Super Speed Tips**: `razor.enriched.super_speed_tip`
+- **Straight Razor Specs**: `razor.enriched.width`, `razor.enriched.grind`, `razor.enriched.point`
+
+### Brush Specialized Fields
+- **Handle Makers**: `brush.matched.handle_maker`
+- **Knot Makers**: `brush.matched.knot_maker`
+- **Fibers**: `brush.matched.fiber` (fallback to `brush.enriched.fiber`)
+- **Knot Sizes**: `brush.matched.knot_size_mm` (fallback to `brush.enriched.knot_size_mm`)
+
+### User Fields
+- **Users**: `author`
+
+## Aggregation Logic
+
+### Basic Aggregation
+- Count occurrences of each unique value in the specified field
+- Sort by count descending
+- Include total count as "shaves" field
+
+### Specialized Aggregation
+- For composite fields (e.g., Christopher Bradley plates), combine multiple fields
+- For numeric fields (e.g., knot sizes), group by value ranges if needed
+- Handle null/missing values appropriately
+
+### Data Quality
+- Filter out records with missing required fields
+- Normalize field values (case, whitespace, etc.)
+- Handle edge cases (empty strings, null values)
+
+## Required Field Names by Category
+
+| Category | Primary Field | Required Fields |
+|----------|---------------|-----------------|
+| razor_formats | `format` | format, shaves, unique_users |
+| razors | `name` | name, shaves, unique_users |
+| razor_manufacturers | `brand` | brand, shaves, unique_users |
+| blades | `name` | name, shaves, unique_users |
+| blade_manufacturers | `brand` | brand, shaves, unique_users |
+| brushes | `name` | name, shaves, unique_users |
+| brush_handle_makers | `handle_maker` | handle_maker, shaves, unique_users |
+| brush_knot_makers | `brand` | brand, shaves, unique_users |
+| brush_fibers | `fiber` | fiber, shaves, unique_users |
+| brush_knot_sizes | `knot_size_mm` | knot_size_mm, shaves, unique_users |
+| blackbird_plates | `plate` | plate, uses, users |
+| christopher_bradley_plates | `plate` | plate, uses, users |
+| game_changer_plates | `plate` | plate, uses, users |
+| super_speed_tips | `tip` | tip, uses, users |
+| straight_razor_specs | `specs` | specs, uses, users |
+| straight_widths | `width` | width, shaves, unique_users |
+| straight_grinds | `grind` | grind, shaves, unique_users |
+| straight_points | `point` | point, shaves, unique_users |
+| soaps | `name` | name, shaves, unique_users |
+| soap_makers | `maker` | maker, shaves, unique_users |
+| brand_diversity | `maker` | maker, unique_scents, total_shaves |
+| users | `username` | username, shaves, unique_users |
 
 ## CLI Interface
 
@@ -149,12 +316,6 @@ Follow the same pattern as other phases:
 - Error conditions
 
 ## Future Enhancements (TODO)
-
-### Specialized Categories
-- **Blackbird Plates**: Only for Blackland Blackbird razors
-- **Christopher Bradley Plates**: Only for Karve Christopher Bradley razors
-- **Game Changer Plates**: Only for RazoRock Game Changer razors
-- **Straight Widths/Grinds/Points**: Only for razors with format: "Straight"
 
 ### Cross-Product Analysis
 - **Most Used Blades in Most Used Razors**: Top razor+blade combinations
