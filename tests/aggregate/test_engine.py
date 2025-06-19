@@ -924,33 +924,68 @@ class TestAggregateUsers:
                 "author": "testuser",
                 "created_utc": 1640995200,
                 "body": "Test comment",
+                "thread_title": "Monday SOTD Thread - May 20, 2025",
             }
         ]
         result = aggregate_users(records)
         assert len(result) == 1
         assert result[0]["user"] == "testuser"
         assert result[0]["shaves"] == 1
+        assert result[0]["unique_days"] == 1
+        assert result[0]["missed_days"] == 30  # May has 31 days, so 31-1=30 missed
+        assert result[0]["avg_shaves_per_user"] == 1.0
 
-    def test_single_user_multiple_shaves(self):
-        """Test with single user and multiple shaves."""
+    def test_single_user_multiple_shaves_same_day(self):
+        """Test with single user and multiple shaves on same day."""
         records = [
             {
                 "id": "test123",
                 "author": "testuser",
                 "created_utc": 1640995200,
                 "body": "Test comment 1",
+                "thread_title": "Monday SOTD Thread - May 20, 2025",
             },
             {
                 "id": "test456",
                 "author": "testuser",
                 "created_utc": 1640995201,
                 "body": "Test comment 2",
+                "thread_title": "Monday SOTD Thread - May 20, 2025",
             },
         ]
         result = aggregate_users(records)
         assert len(result) == 1
         assert result[0]["user"] == "testuser"
         assert result[0]["shaves"] == 2
+        assert result[0]["unique_days"] == 1  # Same day, so only 1 unique day
+        assert result[0]["missed_days"] == 30  # May has 31 days, so 31-1=30 missed
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_single_user_multiple_shaves_different_days(self):
+        """Test with single user and multiple shaves on different days."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "created_utc": 1640995200,
+                "body": "Test comment 1",
+                "thread_title": "Monday SOTD Thread - May 20, 2025",
+            },
+            {
+                "id": "test456",
+                "author": "testuser",
+                "created_utc": 1640995201,
+                "body": "Test comment 2",
+                "thread_title": "Tuesday SOTD Thread - May 21, 2025",
+            },
+        ]
+        result = aggregate_users(records)
+        assert len(result) == 1
+        assert result[0]["user"] == "testuser"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_days"] == 2  # Different days, so 2 unique days
+        assert result[0]["missed_days"] == 29  # May has 31 days, so 31-2=29 missed
+        assert result[0]["avg_shaves_per_user"] == 1.0
 
     def test_multiple_users(self):
         """Test with multiple users."""
@@ -960,27 +995,78 @@ class TestAggregateUsers:
                 "author": "user1",
                 "created_utc": 1640995200,
                 "body": "Test comment 1",
+                "thread_title": "Monday SOTD Thread - May 20, 2025",
             },
             {
                 "id": "test456",
                 "author": "user2",
                 "created_utc": 1640995201,
                 "body": "Test comment 2",
+                "thread_title": "Tuesday SOTD Thread - May 21, 2025",
             },
             {
                 "id": "test789",
                 "author": "user1",
                 "created_utc": 1640995202,
                 "body": "Test comment 3",
+                "thread_title": "Wednesday SOTD Thread - May 22, 2025",
             },
         ]
         result = aggregate_users(records)
         assert len(result) == 2
-        # Should be sorted by shaves (descending)
+        # Should be sorted by shaves (descending), then by missed days (ascending)
         assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 2
+        assert result[0]["unique_days"] == 2
+        assert result[0]["missed_days"] == 29
         assert result[1]["user"] == "user2"
         assert result[1]["shaves"] == 1
+        assert result[1]["unique_days"] == 1
+        assert result[1]["missed_days"] == 30
+
+    def test_sorting_by_shaves_then_missed_days(self):
+        """Test that sorting works correctly: shaves (descending), then missed days (ascending)."""
+        records = [
+            # User A: 2 shaves, 2 unique days (29 missed)
+            {
+                "id": "test1",
+                "author": "userA",
+                "created_utc": 1640995200,
+                "body": "Test comment 1",
+                "thread_title": "Monday SOTD Thread - May 20, 2025",
+            },
+            {
+                "id": "test2",
+                "author": "userA",
+                "created_utc": 1640995201,
+                "body": "Test comment 2",
+                "thread_title": "Tuesday SOTD Thread - May 21, 2025",
+            },
+            # User B: 2 shaves, 1 unique day (30 missed) - should rank lower
+            {
+                "id": "test3",
+                "author": "userB",
+                "created_utc": 1640995202,
+                "body": "Test comment 3",
+                "thread_title": "Monday SOTD Thread - May 20, 2025",
+            },
+            {
+                "id": "test4",
+                "author": "userB",
+                "created_utc": 1640995203,
+                "body": "Test comment 4",
+                "thread_title": "Monday SOTD Thread - May 20, 2025",
+            },
+        ]
+        result = aggregate_users(records)
+        assert len(result) == 2
+        # User A should rank higher (same shaves, fewer missed days)
+        assert result[0]["user"] == "userA"
+        assert result[0]["shaves"] == 2
+        assert result[0]["missed_days"] == 29
+        assert result[1]["user"] == "userB"
+        assert result[1]["shaves"] == 2
+        assert result[1]["missed_days"] == 30
 
     def test_invalid_records_filtered_out(self):
         """Test that invalid records are filtered out."""
@@ -990,24 +1076,65 @@ class TestAggregateUsers:
                 "author": "user1",
                 "created_utc": 1640995200,
                 "body": "Test comment 1",
+                "thread_title": "Monday SOTD Thread - May 20, 2025",
             },
             {
                 "id": "test456",
                 # Missing author
                 "created_utc": 1640995201,
                 "body": "Test comment 2",
+                "thread_title": "Tuesday SOTD Thread - May 21, 2025",
             },
             {
                 "id": "test789",
                 "author": 123,  # Invalid type
                 "created_utc": 1640995202,
                 "body": "Test comment 3",
+                "thread_title": "Wednesday SOTD Thread - May 22, 2025",
             },
         ]
         result = aggregate_users(records)
         assert len(result) == 1
         assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 1
+        assert result[0]["unique_days"] == 1
+        assert result[0]["missed_days"] == 30
+
+    def test_no_thread_title_fallback(self):
+        """Test behavior when thread_title is missing or invalid."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "created_utc": 1640995200,
+                "body": "Test comment",
+                # No thread_title
+            }
+        ]
+        result = aggregate_users(records)
+        assert len(result) == 1
+        assert result[0]["user"] == "testuser"
+        assert result[0]["shaves"] == 1
+        assert result[0]["unique_days"] == 0  # No valid thread title to parse
+        # Missed days will depend on current month when test runs
+
+    def test_invalid_thread_title_fallback(self):
+        """Test behavior when thread_title cannot be parsed."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "created_utc": 1640995200,
+                "body": "Test comment",
+                "thread_title": "Invalid thread title without date",
+            }
+        ]
+        result = aggregate_users(records)
+        assert len(result) == 1
+        assert result[0]["user"] == "testuser"
+        assert result[0]["shaves"] == 1
+        assert result[0]["unique_days"] == 0  # Invalid thread title, no date parsed
+        # Missed days will depend on current month when test runs
 
 
 class TestAggregateBrushFibers:

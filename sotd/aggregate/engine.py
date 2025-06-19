@@ -2,11 +2,11 @@
 
 import os
 import time
+from datetime import date
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
 import psutil
-from datetime import date
 
 
 class PerformanceMonitor:
@@ -868,7 +868,7 @@ def aggregate_users(records: List[Dict[str, Any]], debug: bool = False) -> List[
     total_days_in_month = calendar.monthrange(year, month)[1]
 
     if debug:
-        print(f"[DEBUG] Processing month {year}-{month:02d} " f"with {total_days_in_month} days")
+        print(f"[DEBUG] Processing month {year}-{month:02d} with {total_days_in_month} days")
 
     # Process records to extract user, shaves, and unique days
     user_data = {}
