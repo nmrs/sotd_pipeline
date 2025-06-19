@@ -23,11 +23,11 @@ from .table_generators.specialized_tables import (
     BlackbirdPlatesTableGenerator,
     ChristopherBradleyPlatesTableGenerator,
     GameChangerPlatesTableGenerator,
-    StraightRazorSpecsTableGenerator,
-    SuperSpeedTipsTableGenerator,
-    StraightWidthsTableGenerator,
     StraightGrindsTableGenerator,
     StraightPointsTableGenerator,
+    StraightRazorSpecsTableGenerator,
+    StraightWidthsTableGenerator,
+    SuperSpeedTipsTableGenerator,
 )
 
 

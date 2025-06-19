@@ -1,292 +1,346 @@
 # Aggregate Phase Implementation Plan
 
-## Project Overview
-Build the aggregate phase of the SOTD pipeline that processes enriched data to generate statistical summaries for downstream reporting. The phase will calculate metrics for core categories (razors, blades, brushes, soaps, etc.) and output structured JSON data.
+## Overview
 
-## Proposed File Organization
+This document outlines the implementation plan for rebuilding the Aggregate phase from scratch. The phase will process enriched SOTD data to generate statistical summaries for downstream reporting.
 
+## File Organization
+
+### Core Structure
 ```
 sotd/aggregate/
-├── __init__.py                    # Package initialization
-├── run.py                         # Main CLI entry point (Step 1)
-├── load.py                        # Data loading module (Step 2)
-├── engine.py                      # Core aggregation engine (Step 3)
-├── processor.py                   # Orchestration pipeline (Step 8)
-├── save.py                        # Output generation (Step 9)
-├── aggregators/                   # Category-specific aggregators
-│   ├── __init__.py
-│   ├── base.py                    # Base aggregator class
-│   ├── core/                      # Core product aggregators (Step 4)
-│   │   ├── __init__.py
-│   │   ├── razor_aggregator.py
-│   │   ├── blade_aggregator.py
-│   │   ├── brush_aggregator.py
-│   │   └── soap_aggregator.py
-│   ├── manufacturers/             # Manufacturer aggregators (Step 4)
-│   │   ├── __init__.py
-│   │   ├── razor_manufacturer_aggregator.py
-│   │   ├── blade_manufacturer_aggregator.py
-│   │   └── soap_maker_aggregator.py
-│   ├── formats/                   # Format aggregators (Step 4)
-│   │   ├── __init__.py
-│   │   └── razor_format_aggregator.py
-│   ├── brush/                     # Brush specialized aggregators (Step 5)
-│   │   ├── __init__.py
-│   │   ├── brush_handle_maker_aggregator.py
-│   │   ├── brush_knot_maker_aggregator.py
-│   │   ├── brush_fiber_aggregator.py
-│   │   └── brush_knot_size_aggregator.py
-│   ├── razor_specialized/         # Razor specialized aggregators (Step 6)
-│   │   ├── __init__.py
-│   │   ├── blackbird_plate_aggregator.py
-│   │   ├── christopher_bradley_plate_aggregator.py
-│   │   ├── game_changer_plate_aggregator.py
-│   │   ├── super_speed_tip_aggregator.py
-│   │   └── straight_razor/        # Straight razor specs
-│   │       ├── __init__.py
-│   │       ├── straight_width_aggregator.py
-│   │       ├── straight_grind_aggregator.py
-│   │       └── straight_point_aggregator.py
-│   └── users/                     # User aggregators (Step 7)
-│       ├── __init__.py
-│       └── user_aggregator.py
-└── utils/                         # Shared utilities
+├── __init__.py
+├── cli.py              # CLI interface and argument parsing
+├── run.py              # Main execution logic
+├── load.py             # Data loading from enriched phase
+├── engine.py           # Core aggregation engine
+├── processor.py        # Data processing and validation
+├── save.py             # Output saving and formatting
+└── utils/
     ├── __init__.py
-    ├── field_extractor.py         # Nested field access utilities
-    ├── data_validator.py          # Data validation utilities
-    └── normalizer.py              # Field normalization utilities
+    ├── metrics.py      # Metric calculation functions
+    └── validation.py   # Data validation functions
 ```
 
-### Key Organizational Principles
+### Aggregator Categories
+```
+sotd/aggregate/aggregators/
+├── __init__.py
+├── core/               # Core product aggregations
+│   ├── __init__.py
+│   ├── razor_aggregator.py
+│   ├── blade_aggregator.py
+│   ├── brush_aggregator.py
+│   └── soap_aggregator.py
+├── manufacturers/      # Manufacturer-level aggregations
+│   ├── __init__.py
+│   ├── razor_manufacturer_aggregator.py
+│   ├── blade_manufacturer_aggregator.py
+│   └── soap_maker_aggregator.py
+├── formats/           # Format-level aggregations
+│   ├── __init__.py
+│   └── razor_format_aggregator.py
+├── brush_specialized/ # Brush component aggregations
+│   ├── __init__.py
+│   ├── handle_maker_aggregator.py
+│   ├── knot_maker_aggregator.py
+│   ├── fiber_aggregator.py
+│   └── knot_size_aggregator.py
+├── razor_specialized/ # Specialized razor aggregations
+│   ├── __init__.py
+│   ├── blackbird_plate_aggregator.py
+│   ├── christopher_bradley_plate_aggregator.py
+│   ├── game_changer_plate_aggregator.py
+│   ├── super_speed_tip_aggregator.py
+│   ├── straight_width_aggregator.py
+│   ├── straight_grind_aggregator.py
+│   └── straight_point_aggregator.py
+├── users/             # User aggregations
+│   ├── __init__.py
+│   └── user_aggregator.py
+└── cross_product/     # Cross-product aggregations
+    ├── __init__.py
+    ├── razor_blade_combo_aggregator.py
+    └── highest_use_count_per_blade_aggregator.py
+```
 
-#### 1. Clear Separation of Concerns
-- **CLI Layer**: `run.py` - Entry point and argument handling
-- **Data Layer**: `load.py`, `save.py` - I/O operations
-- **Processing Layer**: `engine.py`, `processor.py` - Core logic
-- **Aggregation Layer**: `aggregators/` - Category-specific logic
+## Implementation Steps
 
-#### 2. Logical Grouping by Category
-- **Core**: Basic product aggregations (razors, blades, brushes, soaps)
-- **Manufacturers**: Brand-level aggregations
-- **Formats**: Format-based aggregations
-- **Brush**: Brush component aggregations
-- **Razor Specialized**: Specialized razor aggregations
-- **Users**: User-based aggregations
+### Phase 1: Core Infrastructure
+- [ ] **1.1 Basic Structure**
+  - [ ] Create directory structure
+  - [ ] Create `__init__.py` files
+  - [ ] Set up basic imports and exports
 
-#### 3. Hierarchical Specialization
-- **Base Class**: `aggregators/base.py` - Common functionality
-- **Category Groups**: Logical groupings (core, manufacturers, etc.)
-- **Specialized Subgroups**: Further specialization (straight_razor under razor_specialized)
+- [ ] **1.2 CLI Interface (`cli.py`)**
+  - [ ] Implement argument parsing (month, year, range)
+  - [ ] Add validation for date formats
+  - [ ] Include debug and force options
+  - [ ] Follow existing CLI patterns from other phases
 
-#### 4. Utility Organization
-- **Field Extraction**: Handle nested field access patterns
-- **Data Validation**: Input validation and quality checks
-- **Normalization**: Field value normalization
-
-### Implementation Benefits
-
-#### Maintainability
-- Clear file organization makes it easy to find specific aggregators
-- Logical grouping helps understand relationships between components
-- Base class reduces code duplication
-
-#### Extensibility
-- Easy to add new aggregators by following the established pattern
-- Clear structure for adding new categories
-- Utility functions can be shared across aggregators
-
-#### Testing
-- Each aggregator can be tested independently
-- Clear separation makes unit testing straightforward
-- Utilities can be tested separately from business logic
-
-#### Performance
-- Can easily implement lazy loading of aggregators
-- Clear structure for optimization opportunities
-- Easy to add caching or parallel processing later
-
-## Implementation Checklist
-
-### Phase 1: Foundation & Core Structure
-
-- [ ] **Step 1: Basic CLI Structure**
-  - [ ] Create `sotd/aggregate/run.py` with main CLI entry point
-  - [ ] Follow same argument pattern as other phases (--month, --year, --range, --start, --end, --out-dir, --debug, --force)
-  - [ ] Add basic argument parsing and validation
-  - [ ] Add placeholder for main processing logic
-  - [ ] Include proper imports and error handling
-
-- [ ] **Step 2: Data Loading Module**
-  - [ ] Create `sotd/aggregate/load.py` for loading enriched data
-  - [ ] Implement JSON loading with error handling
+- [ ] **1.3 Data Loading (`load.py`)**
+  - [ ] Implement enriched data loading from JSON files
   - [ ] Add data validation for required fields
-  - [ ] Add filtering for records with matched data
-  - [ ] Include metadata extraction (total records, valid records, etc.)
+  - [ ] Handle missing files gracefully
+  - [ ] Support for date range processing
 
-- [ ] **Step 3: Core Aggregation Engine**
-  - [ ] Create `sotd/aggregate/engine.py` with main aggregation logic
-  - [ ] Implement base aggregator class with common functionality
-  - [ ] Add field extraction utilities for nested data structures
-  - [ ] Implement basic counting and grouping logic
-  - [ ] Add sorting and limiting capabilities
+- [ ] **1.4 Core Engine (`engine.py`)**
+  - [ ] Implement main aggregation orchestration
+  - [ ] Add progress tracking with tqdm
+  - [ ] Implement sequential month processing
+  - [ ] Add error handling and logging
 
-- [ ] **Step 4: Category-Specific Aggregators**
-  - [ ] Create `sotd/aggregate/aggregators/` directory
-  - [ ] Implement core product aggregators:
-    - [ ] `razor_aggregator.py` - aggregates `razor.matched.brand` + `razor.matched.model`
-    - [ ] `blade_aggregator.py` - aggregates `blade.matched.brand` + `blade.matched.model`
-    - [ ] `brush_aggregator.py` - aggregates `brush.matched.brand` + `brush.matched.model`
-    - [ ] `soap_aggregator.py` - aggregates `soap.matched.maker` + `soap.matched.scent`
-  - [ ] Implement manufacturer aggregators:
-    - [ ] `razor_manufacturer_aggregator.py` - aggregates `razor.matched.brand`
-    - [ ] `blade_manufacturer_aggregator.py` - aggregates `blade.matched.brand`
-    - [ ] `soap_maker_aggregator.py` - aggregates `soap.matched.maker`
-  - [ ] Implement format aggregators:
-    - [ ] `razor_format_aggregator.py` - aggregates `razor.matched.format`
+- [ ] **1.5 Data Processing (`processor.py`)**
+  - [ ] Implement data validation and cleaning
+  - [ ] Add field normalization functions
+  - [ ] Handle null/missing values
+  - [ ] Implement data quality checks
 
-- [ ] **Step 5: Brush Specialized Aggregators**
-  - [ ] Implement brush component aggregators:
-    - [ ] `brush_handle_maker_aggregator.py` - aggregates `brush.matched.handle_maker`
-    - [ ] `brush_knot_maker_aggregator.py` - aggregates `brush.matched.knot_maker`
-    - [ ] `brush_fiber_aggregator.py` - aggregates `brush.matched.fiber` (fallback to `brush.enriched.fiber`)
-    - [ ] `brush_knot_size_aggregator.py` - aggregates `brush.matched.knot_size_mm` (fallback to `brush.enriched.knot_size_mm`)
+- [ ] **1.6 Output Saving (`save.py`)**
+  - [ ] Implement JSON output formatting
+  - [ ] Add metadata generation (total_shaves, unique_shavers, etc.)
+  - [ ] Ensure proper file structure and naming
+  - [ ] Add position field calculation and insertion
 
-- [ ] **Step 6: Razor Specialized Aggregators**
-  - [ ] Implement specialized razor aggregators:
-    - [ ] `blackbird_plate_aggregator.py` - aggregates `razor.enriched.plate` for Blackland Blackbird
-    - [ ] `christopher_bradley_plate_aggregator.py` - aggregates `razor.enriched.plate_type` + `razor.enriched.plate_level` for Karve CB
-    - [ ] `game_changer_plate_aggregator.py` - aggregates `razor.enriched.gap` for RazoRock Game Changer
-    - [ ] `super_speed_tip_aggregator.py` - aggregates `razor.enriched.super_speed_tip` for Gillette Super Speed
-    - [ ] `straight_razor_spec_aggregator.py` - aggregates straight razor specifications:
-      - [ ] `straight_width_aggregator.py` - aggregates `razor.enriched.width`
-      - [ ] `straight_grind_aggregator.py` - aggregates `razor.enriched.grind`
-      - [ ] `straight_point_aggregator.py` - aggregates `razor.enriched.point`
+- [ ] **1.7 Utilities (`utils/`)**
+  - [ ] **metrics.py**: Metric calculation functions (shaves, unique_users, etc.)
+  - [ ] **validation.py**: Data validation and quality check functions
 
-- [ ] **Step 7: User Aggregator**
-  - [ ] Implement `user_aggregator.py` - aggregates `author` field
-  - [ ] Add user statistics (total shaves per user)
+### Phase 2: Core Product Aggregators
+- [ ] **2.1 Razor Aggregator (`aggregators/core/razor_aggregator.py`)**
+  - [ ] Implement razor aggregation logic
+  - [ ] Handle brand/model/format combination
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
 
-### Phase 2: Data Processing & Output
+- [ ] **2.2 Blade Aggregator (`aggregators/core/blade_aggregator.py`)**
+  - [ ] Implement blade aggregation logic
+  - [ ] Handle brand/model/format combination
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
 
-- [ ] **Step 8: Data Processing Pipeline**
-  - [ ] Create `sotd/aggregate/processor.py` to orchestrate aggregation
-  - [ ] Implement sequential processing of all aggregators
-  - [ ] Add progress tracking and logging
-  - [ ] Include error handling for individual aggregators
-  - [ ] Add data validation between steps
+- [ ] **2.3 Brush Aggregator (`aggregators/core/brush_aggregator.py`)**
+  - [ ] Implement brush aggregation logic
+  - [ ] Handle brand/model/fiber combination
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
 
-- [ ] **Step 9: Output Generation**
-  - [ ] Create `sotd/aggregate/save.py` for output handling
-  - [ ] Implement JSON output with proper formatting
-  - [ ] Add metadata generation (timestamp, processing stats)
-  - [ ] Include data validation before saving
-  - [ ] Add backup/overwrite handling
+- [ ] **2.4 Soap Aggregator (`aggregators/core/soap_aggregator.py`)**
+  - [ ] Implement soap aggregation logic
+  - [ ] Handle maker/scent combination
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
 
-- [ ] **Step 10: Integration & Testing**
-  - [ ] Integrate all components in main CLI
-  - [ ] Add comprehensive error handling
-  - [ ] Implement debug logging
-  - [ ] Add performance monitoring
-  - [ ] Create integration tests
+### Phase 3: Manufacturer Aggregators
+- [ ] **3.1 Razor Manufacturer Aggregator (`aggregators/manufacturers/razor_manufacturer_aggregator.py`)**
+  - [ ] Implement razor manufacturer aggregation
+  - [ ] Extract brand from razor.matched.brand
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
 
-### Phase 3: Advanced Features
+- [ ] **3.2 Blade Manufacturer Aggregator (`aggregators/manufacturers/blade_manufacturer_aggregator.py`)**
+  - [ ] Implement blade manufacturer aggregation
+  - [ ] Extract brand from blade.matched.brand
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
 
-- [ ] **Step 11: Data Quality & Validation**
-  - [ ] Add input data validation
-  - [ ] Implement field normalization (case, whitespace)
-  - [ ] Add null/missing value handling
-  - [ ] Include data quality metrics in output
+- [ ] **3.3 Soap Maker Aggregator (`aggregators/manufacturers/soap_maker_aggregator.py`)**
+  - [ ] Implement soap maker aggregation
+  - [ ] Extract maker from soap.matched.maker
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
 
-- [ ] **Step 12: Performance Optimization**
-  - [ ] Optimize aggregation algorithms
-  - [ ] Add memory usage monitoring
-  - [ ] Implement efficient data structures
-  - [ ] Add progress reporting for large datasets
+### Phase 4: Format Aggregators
+- [ ] **4.1 Razor Format Aggregator (`aggregators/formats/razor_format_aggregator.py`)**
+  - [ ] Implement razor format aggregation
+  - [ ] Extract format from razor.matched.format
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
 
-- [ ] **Step 13: Configuration & Flexibility**
-  - [ ] Add configurable aggregation parameters
-  - [ ] Implement custom field mappings
-  - [ ] Add aggregation rule customization
-  - [ ] Include output format options
+### Phase 5: Brush Specialized Aggregators
+- [ ] **5.1 Handle Maker Aggregator (`aggregators/brush_specialized/handle_maker_aggregator.py`)**
+  - [ ] Implement handle maker aggregation
+  - [ ] Extract handle_maker from brush.matched.handle_maker
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
 
-## Technical Requirements
+- [ ] **5.2 Knot Maker Aggregator (`aggregators/brush_specialized/knot_maker_aggregator.py`)**
+  - [ ] Implement knot maker aggregation
+  - [ ] Extract knot_maker from brush.matched.knot_maker
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
 
-### Data Access Patterns
-- **Nested Field Access**: Handle `razor.matched.brand`, `brush.enriched.fiber` patterns
-- **Fallback Logic**: Use `brush.matched.fiber` with fallback to `brush.enriched.fiber`
-- **Conditional Aggregation**: Only aggregate specialized fields when parent conditions are met
-- **Null Handling**: Properly handle null values and missing fields
+- [ ] **5.3 Fiber Aggregator (`aggregators/brush_specialized/fiber_aggregator.py`)**
+  - [ ] Implement fiber aggregation
+  - [ ] Extract fiber from brush.matched.fiber (fallback to brush.enriched.fiber)
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
 
-### Output Requirements
-- **Consistent Structure**: All aggregations follow same output format
-- **Field Names**: Match exactly what report phase expects
-- **Sorting**: Results sorted by count descending
-- **Metadata**: Include processing metadata and statistics
+- [ ] **5.4 Knot Size Aggregator (`aggregators/brush_specialized/knot_size_aggregator.py`)**
+  - [ ] Implement knot size aggregation
+  - [ ] Extract knot_size_mm from brush.matched.knot_size_mm (fallback to brush.enriched.knot_size_mm)
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
+
+### Phase 6: Razor Specialized Aggregators
+- [ ] **6.1 Blackbird Plate Aggregator (`aggregators/razor_specialized/blackbird_plate_aggregator.py`)**
+  - [ ] Implement Blackbird plate aggregation
+  - [ ] Extract plate from razor.enriched.plate
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
+
+- [ ] **6.2 Christopher Bradley Plate Aggregator (`aggregators/razor_specialized/christopher_bradley_plate_aggregator.py`)**
+  - [ ] Implement Christopher Bradley plate aggregation
+  - [ ] Extract plate_type and plate_level from razor.enriched
+  - [ ] Combine into composite key
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
+
+- [ ] **6.3 Game Changer Plate Aggregator (`aggregators/razor_specialized/game_changer_plate_aggregator.py`)**
+  - [ ] Implement Game Changer plate aggregation
+  - [ ] Extract gap from razor.enriched.gap
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
+
+- [ ] **6.4 Super Speed Tip Aggregator (`aggregators/razor_specialized/super_speed_tip_aggregator.py`)**
+  - [ ] Implement Super Speed tip aggregation
+  - [ ] Extract super_speed_tip from razor.enriched.super_speed_tip
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
+
+- [ ] **6.5 Straight Razor Spec Aggregators**
+  - [ ] **Width Aggregator**: Extract width from razor.enriched.width
+  - [ ] **Grind Aggregator**: Extract grind from razor.enriched.grind
+  - [ ] **Point Aggregator**: Extract point from razor.enriched.point
+  - [ ] Each with position field and proper sorting
+
+### Phase 7: User Aggregators
+- [ ] **7.1 User Aggregator (`aggregators/users/user_aggregator.py`)**
+  - [ ] Implement user aggregation
+  - [ ] Extract author from comment data
+  - [ ] Calculate shaves and missed_days
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, missed_days desc
+
+### Phase 8: Cross-Product Aggregators
+- [ ] **8.1 Razor Blade Combo Aggregator (`aggregators/cross_product/razor_blade_combo_aggregator.py`)**
+  - [ ] Implement razor blade combination aggregation
+  - [ ] Combine razor and blade data
+  - [ ] Create composite keys
+  - [ ] Add position field calculation
+  - [ ] Sort by shaves desc, unique_users desc
+
+- [ ] **8.2 Highest Use Count per Blade Aggregator (`aggregators/cross_product/highest_use_count_per_blade_aggregator.py`)**
+  - [ ] Implement highest use count per blade aggregation
+  - [ ] Track per-user blade usage
+  - [ ] Extract use_count from blade.enriched.use_count
+  - [ ] Add position field calculation
+  - [ ] Sort by uses desc
+
+### Phase 9: Integration and Testing
+- [ ] **9.1 Main Runner Integration (`run.py`)**
+  - [ ] Integrate all aggregators into main engine
+  - [ ] Implement proper orchestration
+  - [ ] Add error handling and logging
+  - [ ] Ensure all categories are processed
+
+- [ ] **9.2 Unit Tests**
+  - [ ] Test each aggregator individually
+  - [ ] Test metric calculation functions
+  - [ ] Test position field generation
+  - [ ] Test sorting logic
+  - [ ] Test data validation
+
+- [ ] **9.3 Integration Tests**
+  - [ ] Test end-to-end processing
+  - [ ] Test CLI interface
+  - [ ] Test file I/O with sample data
+  - [ ] Test error handling scenarios
+
+- [ ] **9.4 Data Quality Tests**
+  - [ ] Test with edge cases (empty data, single records)
+  - [ ] Test error conditions
+  - [ ] Validate output structure
+  - [ ] Verify position field correctness
+
+### Phase 10: Documentation and Cleanup
+- [ ] **10.1 Documentation**
+  - [ ] Update docstrings for all functions
+  - [ ] Add type hints throughout
+  - [ ] Document aggregator interfaces
+  - [ ] Update README if needed
+
+- [ ] **10.2 Code Quality**
+  - [ ] Run Black formatting
+  - [ ] Run Ruff linting
+  - [ ] Run Pyright type checking
+  - [ ] Ensure all tests pass
+
+- [ ] **10.3 Performance Optimization**
+  - [ ] Profile memory usage
+  - [ ] Optimize pandas operations
+  - [ ] Add progress tracking
+  - [ ] Consider parallel processing if needed
+
+## Key Requirements
+
+### Position Field
+- Every aggregation output must include a `"position"` field
+- Position is 1-based rank within the sorted list
+- Enables robust delta calculations in report phase
+
+### Sort Orders
+- **Default**: shaves desc, unique_users desc
+- **Users**: shaves desc, missed_days desc  
+- **Highest Use Count per Blade**: uses desc
+
+### Data Structure
+- Follow exact field names specified in aggregate phase spec
+- Include all required fields for each category
+- Ensure consistent output structure
 
 ### Error Handling
-- **Graceful Degradation**: Continue processing if individual aggregators fail
-- **Data Validation**: Validate input data structure and required fields
-- **Logging**: Comprehensive logging for debugging and monitoring
-- **Recovery**: Ability to resume from failures
+- Fail fast for internal errors
+- Handle external failures gracefully
+- Validate data early and clearly
 
-## Field Mapping Reference
+## Dependencies
 
-### Core Product Aggregations
-- **Razors**: `razor.matched.brand` + `razor.matched.model` → `{"name": "Brand Model", "shaves": N}`
-- **Blades**: `blade.matched.brand` + `blade.matched.model` → `{"name": "Brand Model", "shaves": N}`
-- **Brushes**: `brush.matched.brand` + `brush.matched.model` → `{"name": "Brand Model", "shaves": N}`
-- **Soaps**: `soap.matched.maker` + `soap.matched.scent` → `{"name": "Maker - Scent", "shaves": N}`
+### New Dependencies
+- `pandas`: For efficient data aggregation and manipulation
 
-### Manufacturer Aggregations
-- **Razor Manufacturers**: `razor.matched.brand` → `{"brand": "Brand", "shaves": N}`
-- **Blade Manufacturers**: `blade.matched.brand` → `{"brand": "Brand", "shaves": N}`
-- **Soap Makers**: `soap.matched.maker` → `{"maker": "Maker", "shaves": N}`
+### Existing Dependencies
+- `tqdm`: Progress bars
+- `pathlib`: File path handling
+- `json`: JSON I/O operations
+- `argparse`: CLI argument parsing
 
-### Format Aggregations
-- **Razor Formats**: `razor.matched.format` → `{"format": "Format", "shaves": N}`
+## Testing Strategy
 
-### Brush Component Aggregations
-- **Handle Makers**: `brush.matched.handle_maker` → `{"handle_maker": "Maker", "shaves": N}`
-- **Knot Makers**: `brush.matched.knot_maker` → `{"brand": "Brand", "shaves": N}`
-- **Fibers**: `brush.matched.fiber` (fallback: `brush.enriched.fiber`) → `{"fiber": "Fiber", "shaves": N}`
-- **Knot Sizes**: `brush.matched.knot_size_mm` (fallback: `brush.enriched.knot_size_mm`) → `{"knot_size_mm": N, "shaves": N}`
+### Unit Tests
+- Test each aggregator in isolation
+- Test metric calculation functions
+- Test data validation functions
+- Test sorting and position field logic
 
-### Specialized Razor Aggregations
-- **Blackbird Plates**: `razor.enriched.plate` → `{"plate": "Plate", "shaves": N}`
-- **Christopher Bradley Plates**: `razor.enriched.plate_type` + `razor.enriched.plate_level` → `{"plate_type": "Type", "plate_level": "Level", "shaves": N}`
-- **Game Changer Plates**: `razor.enriched.gap` → `{"gap": "Gap", "shaves": N}`
-- **Super Speed Tips**: `razor.enriched.super_speed_tip` → `{"super_speed_tip": "Tip", "shaves": N}`
-- **Straight Widths**: `razor.enriched.width` → `{"width": "Width", "shaves": N}`
-- **Straight Grinds**: `razor.enriched.grind` → `{"grind": "Grind", "shaves": N}`
-- **Straight Points**: `razor.enriched.point` → `{"point": "Point", "shaves": N}`
+### Integration Tests
+- Test complete aggregation pipeline
+- Test CLI interface with various arguments
+- Test file I/O with sample data
+- Test error handling scenarios
 
-### User Aggregations
-- **Users**: `author` → `{"name": "Username", "shaves": N}`
+### Test Data
+- Sample enriched data files
+- Edge cases (empty data, single records)
+- Error conditions (missing fields, malformed data)
 
-## Progress Tracking
+## Success Criteria
 
-### Current Status
-- [ ] Phase 1: Foundation & Core Structure (0/7 steps completed)
-- [ ] Phase 2: Data Processing & Output (0/3 steps completed)
-- [ ] Phase 3: Advanced Features (0/3 steps completed)
-
-### Next Steps
-- Start with Step 1: Basic CLI Structure
-- Follow the plan systematically
-- Test each step before moving to the next
-
-### Notes
-- Each step builds on the previous
-- Test thoroughly before moving to next step
-- Follow existing code patterns and style
-- Maintain proper error handling throughout
-- Document any deviations from the plan
-
-## Future Enhancements (TODO)
-
-### Cross-Product Analysis
-- [ ] Most Used Blades in Most Used Razors: Top razor+blade combinations
-- [ ] Highest Use Count per Blade: Per-user blade usage tracking
-
-### Performance Optimizations
-- [ ] Parallel processing for multiple months (if needed) 
+- [ ] All aggregations produce correct output structure
+- [ ] Position fields are correctly calculated and sequential
+- [ ] Sort orders match specification exactly
+- [ ] All tests pass (unit, integration, data quality)
+- [ ] Code quality checks pass (Black, Ruff, Pyright)
+- [ ] Performance is acceptable for typical datasets
+- [ ] Error handling is robust and informative
+- [ ] Documentation is complete and accurate 

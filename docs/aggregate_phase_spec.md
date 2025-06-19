@@ -46,6 +46,53 @@ The Aggregate phase processes enriched SOTD data to generate statistical summari
 ### User Categories
 - **Users**: Individual user aggregation from `author`
 
+### Cross-Product Categories
+- **Razor Blade Combinations**: Most used blades in most used razors
+- **Highest Use Count per Blade**: Per-user blade usage tracking
+
+## Position Field and Sorting Requirements
+
+### Position Field
+Each aggregation output list must include a `"position"` field for each item, indicating its 1-based rank within the list. This enables robust, explicit delta calculations in the report phase.
+
+### Sort Orders
+All aggregations must be sorted according to the following rules:
+
+#### Default Sort Order (Most Aggregations)
+- **Primary:** `shaves` (descending)
+- **Secondary:** `unique_users` (descending, if present)
+
+#### Special Sort Orders
+- **Users**: `shaves` (descending), `missed_days` (descending)
+- **Highest Use Count per Blade**: `uses` (descending)
+
+### Complete Sort Order Reference
+
+| Aggregation | Primary | Secondary |
+|-------------|---------|-----------|
+| razor_formats | shaves desc | unique_users desc |
+| razors | shaves desc | unique_users desc |
+| razor_manufacturers | shaves desc | unique_users desc |
+| blades | shaves desc | unique_users desc |
+| blade_manufacturers | shaves desc | unique_users desc |
+| brushes | shaves desc | unique_users desc |
+| brush_handle_makers | shaves desc | unique_users desc |
+| brush_knot_makers | shaves desc | unique_users desc |
+| brush_fibers | shaves desc | unique_users desc |
+| brush_knot_sizes | shaves desc | unique_users desc |
+| soaps | shaves desc | unique_users desc |
+| soap_makers | shaves desc | unique_users desc |
+| blackbird_plates | shaves desc | unique_users desc |
+| christopher_bradley_plates | shaves desc | unique_users desc |
+| game_changer_plates | shaves desc | unique_users desc |
+| super_speed_tips | shaves desc | unique_users desc |
+| straight_widths | shaves desc | unique_users desc |
+| straight_grinds | shaves desc | unique_users desc |
+| straight_points | shaves desc | unique_users desc |
+| users | shaves desc | missed_days desc |
+| razor_blade_combinations | shaves desc | unique_users desc |
+| highest_use_count_per_blade | uses desc | - |
+
 ## Data Structure
 
 ### Input Record Structure
@@ -108,84 +155,92 @@ The Aggregate phase processes enriched SOTD data to generate statistical summari
   },
   "data": {
     "razor_formats": [
-      {"format": "DE", "shaves": 1200},
-      {"format": "Straight", "shaves": 150}
+      {"position": 1, "format": "DE", "shaves": 1200, "unique_users": 100},
+      {"position": 2, "format": "Straight", "shaves": 150, "unique_users": 20}
     ],
     "razors": [
-      {"name": "Fatip Grande", "shaves": 50},
-      {"name": "Gillette Tech", "shaves": 45}
+      {"position": 1, "name": "Fatip Grande", "shaves": 50, "unique_users": 15},
+      {"position": 2, "name": "Gillette Tech", "shaves": 45, "unique_users": 12}
     ],
     "razor_manufacturers": [
-      {"brand": "Gillette", "shaves": 300},
-      {"brand": "Fatip", "shaves": 100}
+      {"position": 1, "brand": "Gillette", "shaves": 300, "unique_users": 50},
+      {"position": 2, "brand": "Fatip", "shaves": 100, "unique_users": 25}
     ],
     "blades": [
-      {"name": "Gillette Minora", "shaves": 80},
-      {"name": "Personna Lab Blue", "shaves": 60}
+      {"position": 1, "name": "Gillette Minora", "shaves": 80, "unique_users": 30},
+      {"position": 2, "name": "Personna Lab Blue", "shaves": 60, "unique_users": 25}
     ],
     "blade_manufacturers": [
-      {"brand": "Gillette", "shaves": 400},
-      {"brand": "Personna", "shaves": 200}
+      {"position": 1, "brand": "Gillette", "shaves": 400, "unique_users": 40},
+      {"position": 2, "brand": "Personna", "shaves": 200, "unique_users": 30}
     ],
     "brushes": [
-      {"name": "Semogue 610", "shaves": 30},
-      {"name": "AP Shave Co MiG", "shaves": 25}
+      {"position": 1, "name": "Semogue 610", "shaves": 30, "unique_users": 10},
+      {"position": 2, "name": "AP Shave Co MiG", "shaves": 25, "unique_users": 8}
     ],
     "brush_handle_makers": [
-      {"handle_maker": "Semogue", "shaves": 150},
-      {"handle_maker": "AP Shave Co", "shaves": 100}
+      {"position": 1, "handle_maker": "Semogue", "shaves": 150, "unique_users": 30},
+      {"position": 2, "handle_maker": "AP Shave Co", "shaves": 100, "unique_users": 20}
     ],
     "brush_knot_makers": [
-      {"brand": "Declaration Grooming", "shaves": 80},
-      {"brand": "Semogue", "shaves": 150}
+      {"position": 1, "brand": "Declaration Grooming", "shaves": 80, "unique_users": 15},
+      {"position": 2, "brand": "Semogue", "shaves": 150, "unique_users": 30}
     ],
     "brush_fibers": [
-      {"fiber": "Synthetic", "shaves": 400},
-      {"fiber": "Boar", "shaves": 300}
+      {"position": 1, "fiber": "Synthetic", "shaves": 400, "unique_users": 60},
+      {"position": 2, "fiber": "Boar", "shaves": 300, "unique_users": 45}
     ],
     "brush_knot_sizes": [
-      {"knot_size_mm": 24, "shaves": 200},
-      {"knot_size_mm": 26, "shaves": 180}
+      {"position": 1, "knot_size_mm": 24, "shaves": 200, "unique_users": 35},
+      {"position": 2, "knot_size_mm": 26, "shaves": 180, "unique_users": 30}
     ],
     "blackbird_plates": [
-      {"plate": "Ti", "shaves": 40},
-      {"plate": "Lite", "shaves": 25}
+      {"position": 1, "plate": "Ti", "shaves": 40, "unique_users": 8},
+      {"position": 2, "plate": "Lite", "shaves": 25, "unique_users": 5}
     ],
     "christopher_bradley_plates": [
-      {"plate_type": "SB", "plate_level": "C", "shaves": 30},
-      {"plate_type": "SB", "plate_level": "D", "shaves": 20}
+      {"position": 1, "plate_type": "SB", "plate_level": "C", "shaves": 30, "unique_users": 6},
+      {"position": 2, "plate_type": "SB", "plate_level": "D", "shaves": 20, "unique_users": 4}
     ],
     "game_changer_plates": [
-      {"gap": "1.05", "shaves": 35},
-      {"gap": ".84", "shaves": 25}
+      {"position": 1, "gap": "1.05", "shaves": 35, "unique_users": 7},
+      {"position": 2, "gap": ".84", "shaves": 25, "unique_users": 5}
     ],
     "super_speed_tips": [
-      {"super_speed_tip": "Flare", "shaves": 45},
-      {"super_speed_tip": "Black", "shaves": 30}
+      {"position": 1, "super_speed_tip": "Flare", "shaves": 45, "unique_users": 12},
+      {"position": 2, "super_speed_tip": "Black", "shaves": 30, "unique_users": 8}
     ],
     "straight_widths": [
-      {"width": "6/8", "shaves": 80},
-      {"width": "5/8", "shaves": 40}
+      {"position": 1, "width": "6/8", "shaves": 80, "unique_users": 15},
+      {"position": 2, "width": "5/8", "shaves": 40, "unique_users": 8}
     ],
     "straight_grinds": [
-      {"grind": "Full Hollow", "shaves": 60},
-      {"grind": "Hollow", "shaves": 30}
+      {"position": 1, "grind": "Full Hollow", "shaves": 60, "unique_users": 12},
+      {"position": 2, "grind": "Hollow", "shaves": 30, "unique_users": 6}
     ],
     "straight_points": [
-      {"point": "Round", "shaves": 50},
-      {"point": "Barber's Notch", "shaves": 20}
+      {"position": 1, "point": "Round", "shaves": 50, "unique_users": 10},
+      {"position": 2, "point": "Barber's Notch", "shaves": 20, "unique_users": 4}
     ],
     "soaps": [
-      {"name": "Grooming Dept - Laundry II", "shaves": 40},
-      {"name": "Declaration Grooming - Persephone", "shaves": 35}
+      {"position": 1, "name": "Grooming Dept - Laundry II", "shaves": 40, "unique_users": 12},
+      {"position": 2, "name": "Declaration Grooming - Persephone", "shaves": 35, "unique_users": 10}
     ],
     "soap_makers": [
-      {"maker": "Grooming Dept", "shaves": 200},
-      {"maker": "Declaration Grooming", "shaves": 180}
+      {"position": 1, "maker": "Grooming Dept", "shaves": 200, "unique_users": 30},
+      {"position": 2, "maker": "Declaration Grooming", "shaves": 180, "unique_users": 25}
     ],
     "users": [
-      {"name": "user1", "shaves": 25},
-      {"name": "user2", "shaves": 20}
+      {"position": 1, "name": "user1", "shaves": 31, "missed_days": 0},
+      {"position": 2, "name": "user2", "shaves": 31, "missed_days": 2}
+    ],
+    "razor_blade_combinations": [
+      {"position": 1, "name": "Fatip Grande + Gillette Minora", "shaves": 25, "unique_users": 8},
+      {"position": 2, "name": "Gillette Tech + Personna Lab Blue", "shaves": 20, "unique_users": 6}
+    ],
+    "highest_use_count_per_blade": [
+      {"position": 1, "user": "user1", "blade": "Gillette Minora", "format": "DE", "uses": 15},
+      {"position": 2, "user": "user2", "blade": "Personna Lab Blue", "format": "DE", "uses": 12}
     ]
   }
 }
@@ -215,11 +270,16 @@ The Aggregate phase processes enriched SOTD data to generate statistical summari
 ### User Fields
 - **Users**: `author`
 
+### Cross-Product Fields
+- **Razor Blade Combinations**: `razor.matched.brand` + `razor.matched.model` + `blade.matched.brand` + `blade.matched.model`
+- **Highest Use Count per Blade**: `author` + `blade.matched.brand` + `blade.matched.model` + `blade.enriched.use_count`
+
 ## Aggregation Logic
 
 ### Basic Aggregation
 - Count occurrences of each unique value in the specified field
-- Sort by count descending
+- Sort by the defined sort order for the aggregation
+- Include position field (1-based rank) for delta calculations
 - Include total count as "shaves" field
 
 ### Specialized Aggregation
@@ -234,43 +294,54 @@ The Aggregate phase processes enriched SOTD data to generate statistical summari
 
 ## Required Field Names by Category
 
-| Category | Primary Field | Required Fields |
-|----------|---------------|-----------------|
-| razor_formats | `format` | format, shaves, unique_users |
-| razors | `name` | name, shaves, unique_users |
-| razor_manufacturers | `brand` | brand, shaves, unique_users |
-| blades | `name` | name, shaves, unique_users |
-| blade_manufacturers | `brand` | brand, shaves, unique_users |
-| brushes | `name` | name, shaves, unique_users |
-| brush_handle_makers | `handle_maker` | handle_maker, shaves, unique_users |
-| brush_knot_makers | `brand` | brand, shaves, unique_users |
-| brush_fibers | `fiber` | fiber, shaves, unique_users |
-| brush_knot_sizes | `knot_size_mm` | knot_size_mm, shaves, unique_users |
-| blackbird_plates | `plate` | plate, uses, users |
-| christopher_bradley_plates | `plate` | plate, uses, users |
-| game_changer_plates | `plate` | plate, uses, users |
-| super_speed_tips | `tip` | tip, uses, users |
-| straight_razor_specs | `specs` | specs, uses, users |
-| straight_widths | `width` | width, shaves, unique_users |
-| straight_grinds | `grind` | grind, shaves, unique_users |
-| straight_points | `point` | point, shaves, unique_users |
-| soaps | `name` | name, shaves, unique_users |
-| soap_makers | `maker` | maker, shaves, unique_users |
-| brand_diversity | `maker` | maker, unique_scents, total_shaves |
-| users | `username` | username, shaves, unique_users |
+### Core Product Aggregations
+- **Razors**: `{"position": N, "name": "Brand Model", "shaves": N, "unique_users": N}`
+- **Blades**: `{"position": N, "name": "Brand Model", "shaves": N, "unique_users": N}`
+- **Brushes**: `{"position": N, "name": "Brand Model", "shaves": N, "unique_users": N}`
+- **Soaps**: `{"position": N, "name": "Maker - Scent", "shaves": N, "unique_users": N}`
+
+### Manufacturer Aggregations
+- **Razor Manufacturers**: `{"position": N, "brand": "Brand", "shaves": N, "unique_users": N}`
+- **Blade Manufacturers**: `{"position": N, "brand": "Brand", "shaves": N, "unique_users": N}`
+- **Soap Makers**: `{"position": N, "maker": "Maker", "shaves": N, "unique_users": N}`
+
+### Format Aggregations
+- **Razor Formats**: `{"position": N, "format": "Format", "shaves": N, "unique_users": N}`
+
+### Brush Component Aggregations
+- **Handle Makers**: `{"position": N, "handle_maker": "Maker", "shaves": N, "unique_users": N}`
+- **Knot Makers**: `{"position": N, "brand": "Brand", "shaves": N, "unique_users": N}`
+- **Fibers**: `{"position": N, "fiber": "Fiber", "shaves": N, "unique_users": N}`
+- **Knot Sizes**: `{"position": N, "knot_size_mm": N, "shaves": N, "unique_users": N}`
+
+### Specialized Razor Aggregations
+- **Blackbird Plates**: `{"position": N, "plate": "Plate", "shaves": N, "unique_users": N}`
+- **Christopher Bradley Plates**: `{"position": N, "plate_type": "Type", "plate_level": "Level", "shaves": N, "unique_users": N}`
+- **Game Changer Plates**: `{"position": N, "gap": "Gap", "shaves": N, "unique_users": N}`
+- **Super Speed Tips**: `{"position": N, "super_speed_tip": "Tip", "shaves": N, "unique_users": N}`
+- **Straight Widths**: `{"position": N, "width": "Width", "shaves": N, "unique_users": N}`
+- **Straight Grinds**: `{"position": N, "grind": "Grind", "shaves": N, "unique_users": N}`
+- **Straight Points**: `{"position": N, "point": "Point", "shaves": N, "unique_users": N}`
+
+### User Aggregations
+- **Users**: `{"position": N, "name": "Username", "shaves": N, "missed_days": N}`
+
+### Cross-Product Aggregations
+- **Razor Blade Combinations**: `{"position": N, "name": "Razor + Blade", "shaves": N, "unique_users": N}`
+- **Highest Use Count per Blade**: `{"position": N, "user": "Username", "blade": "Blade Name", "format": "Format", "uses": N}`
 
 ## CLI Interface
 
 Follows the same pattern as other pipeline phases:
 
 ```bash
-python -m sotd.aggregate.run --month 2025-05
-python -m sotd.aggregate.run --year 2025
-python -m sotd.aggregate.run --range 2025-01:2025-05
+python -m sotd.aggregate run --month 2025-01
+python -m sotd.aggregate run --year 2025
+python -m sotd.aggregate run --range 2025-01:2025-05
 ```
 
 ### Options
-- `--month`: Single month (e.g., 2025-05)
+- `--month`: Single month (YYYY-MM format)
 - `--year`: All months in year (e.g., 2025)
 - `--range`: Date range (e.g., 2025-01:2025-05)
 - `--start` / `--end`: Override range boundaries
@@ -357,11 +428,13 @@ Follow the same pattern as other phases:
 - Verify aggregated data structure
 - Check metric calculations
 - Ensure all categories are present
+- Validate position field is present and sequential
 
 ### Data Quality Checks
 - Verify shaves >= unique_users
 - Check for reasonable avg_shaves_per_user values
 - Validate category names are consistent
+- Ensure position fields are 1-based and sequential
 
 # Note: The output keys for brush fiber and knot size aggregations are 'brush_fibers' and 'brush_knot_sizes'.
 # These are grouped by fiber type and knot size (mm) respectively, matching the code and output structure.
