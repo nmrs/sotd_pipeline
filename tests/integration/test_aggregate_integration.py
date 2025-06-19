@@ -6,21 +6,27 @@ from pathlib import Path
 
 import pytest
 
-from sotd.aggregate.engine import (
+from sotd.aggregate.aggregation_functions import (
+    calculate_basic_metrics,
+    filter_matched_records,
+)
+from sotd.aggregate.product_aggregators import (
     aggregate_blades,
     aggregate_brushes,
     aggregate_razors,
     aggregate_soaps,
+)
+from sotd.aggregate.user_aggregators import (
     aggregate_users,
-    calculate_basic_metrics,
-    filter_matched_records,
+    aggregate_user_blade_usage,
+)
+from sotd.aggregate.engine import (
     aggregate_blackbird_plates,
     aggregate_christopher_bradley_plates,
     aggregate_game_changer_plates,
     aggregate_super_speed_tips,
     aggregate_straight_razor_specs,
     aggregate_razor_blade_combinations,
-    aggregate_user_blade_usage,
 )
 from sotd.aggregate.load import load_enriched_data
 

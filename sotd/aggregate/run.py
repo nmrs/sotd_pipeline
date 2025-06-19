@@ -22,32 +22,32 @@ from typing import Any, Dict, List, Sequence
 
 from tqdm import tqdm
 
+from sotd.aggregate.aggregation_functions import calculate_basic_metrics, filter_matched_records
 from sotd.aggregate.benchmarks import run_performance_benchmark
 from sotd.aggregate.engine import (
     aggregate_blackbird_plates,
     aggregate_blade_manufacturers,
-    aggregate_blades,
     aggregate_brush_fibers,
     aggregate_brush_handle_makers,
     aggregate_brush_knot_makers,
     aggregate_brush_knot_sizes,
-    aggregate_brushes,
     aggregate_christopher_bradley_plates,
     aggregate_game_changer_plates,
     aggregate_razor_blade_combinations,
     aggregate_razor_manufacturers,
-    aggregate_razors,
     aggregate_soap_makers,
-    aggregate_soaps,
     aggregate_straight_razor_specs,
     aggregate_super_speed_tips,
-    aggregate_user_blade_usage,
-    aggregate_users,
-    calculate_basic_metrics,
-    filter_matched_records,
 )
 from sotd.aggregate.load import get_enriched_file_path, load_enriched_data
+from sotd.aggregate.product_aggregators import (
+    aggregate_blades,
+    aggregate_brushes,
+    aggregate_razors,
+    aggregate_soaps,
+)
 from sotd.aggregate.save import get_aggregated_file_path, save_aggregated_data
+from sotd.aggregate.user_aggregators import aggregate_user_blade_usage, aggregate_users
 from sotd.cli_utils.date_span import month_span
 
 

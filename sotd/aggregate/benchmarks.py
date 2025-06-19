@@ -199,22 +199,23 @@ def run_performance_benchmark(
     Returns:
         Benchmark summary dictionary
     """
+    from sotd.aggregate.aggregation_functions import calculate_basic_metrics, filter_matched_records
     from sotd.aggregate.engine import (
         aggregate_blade_manufacturers,
-        aggregate_blades,
         aggregate_brush_fibers,
         aggregate_brush_handle_makers,
         aggregate_brush_knot_makers,
         aggregate_brush_knot_sizes,
-        aggregate_brushes,
         aggregate_razor_manufacturers,
-        aggregate_razors,
         aggregate_soap_makers,
-        aggregate_soaps,
-        aggregate_users,
-        calculate_basic_metrics,
-        filter_matched_records,
     )
+    from sotd.aggregate.product_aggregators import (
+        aggregate_blades,
+        aggregate_brushes,
+        aggregate_razors,
+        aggregate_soaps,
+    )
+    from sotd.aggregate.user_aggregators import aggregate_users
 
     benchmark = BenchmarkSuite(debug=debug)
 
