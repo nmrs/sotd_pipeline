@@ -171,6 +171,13 @@ class BaseTableGenerator(ABC):
                         df[col] = (
                             df[col].astype(object).apply(lambda x: _format_decimal(x, decimals))
                         )  # pyright: ignore[reportAttributeAccessIssue]
+                elif config.get("format") == "delta":
+                    # Delta columns are already formatted by the delta calculator
+                    # Just ensure they're properly converted to strings
+                    if col in df:
+                        df[col] = (
+                            df[col].astype(object).apply(lambda x: str(x) if pd.notna(x) else "n/a")
+                        )
 
         # Generate markdown table
         markdown_lines = []

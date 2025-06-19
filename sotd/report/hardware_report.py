@@ -25,6 +25,9 @@ from .table_generators.specialized_tables import (
     GameChangerPlatesTableGenerator,
     StraightRazorSpecsTableGenerator,
     SuperSpeedTipsTableGenerator,
+    StraightWidthsTableGenerator,
+    StraightGrindsTableGenerator,
+    StraightPointsTableGenerator,
 )
 
 
@@ -115,6 +118,9 @@ class HardwareReportGenerator(BaseReportGenerator):
         )
         tables.append(self._generate_table("Game Changer Plates", GameChangerPlatesTableGenerator))
         tables.append(self._generate_table("Super Speed Tips", SuperSpeedTipsTableGenerator))
+        tables.append(self._generate_table("Straight Widths", StraightWidthsTableGenerator))
+        tables.append(self._generate_table("Straight Grinds", StraightGrindsTableGenerator))
+        tables.append(self._generate_table("Straight Points", StraightPointsTableGenerator))
         tables.append(
             self._generate_table("Straight Razor Specifications", StraightRazorSpecsTableGenerator)
         )
@@ -124,7 +130,30 @@ class HardwareReportGenerator(BaseReportGenerator):
     def _generate_table(self, title: str, generator_class) -> str:
         """Generate a single table using the specified generator."""
         generator = generator_class(self.data, self.debug)
-        table_content = generator.generate_table()
+
+        # Check if we have comparison data for delta calculations
+        include_delta = bool(self.comparison_data)
+        comparison_period = "previous month"  # Default comparison period
+
+        # If we have comparison data, use the first available period
+        if self.comparison_data:
+            # Get the first available comparison period
+            available_periods = list(self.comparison_data.keys())
+            if available_periods:
+                comparison_period = available_periods[0]
+                comparison_data = self.comparison_data[comparison_period][
+                    1
+                ]  # Get the data, not metadata
+            else:
+                comparison_data = None
+        else:
+            comparison_data = None
+
+        table_content = generator.generate_table(
+            include_delta=include_delta,
+            comparison_data=comparison_data,
+            comparison_period=comparison_period,
+        )
 
         # If the table is empty, provide a "No data available" message
         if not table_content:
