@@ -17,7 +17,7 @@ def get_report_file_path(base_dir: Path, year: int, month: int, report_type: str
         Path to the output report file
     """
     filename = f"{year:04d}-{month:02d}-{report_type}.md"
-    return base_dir / filename
+    return base_dir / "reports" / filename
 
 
 def save_report(
