@@ -7,126 +7,126 @@ Build the aggregate phase of the SOTD pipeline that processes enriched data to g
 
 ### Phase 1: Foundation & Core Structure
 
-- [ ] **Step 1: Basic CLI Structure**
-  - [ ] Create `sotd/aggregate/run.py` with main CLI entry point
-  - [ ] Follow same argument pattern as other phases (--month, --year, --range, --start, --end, --out-dir, --debug, --force)
-  - [ ] Add basic argument parsing and validation
-  - [ ] Add placeholder for main processing logic
-  - [ ] Include proper imports and type hints
-  - [ ] Follow existing code style (Black formatting, 100 char line length)
-  - [ ] Test basic argument parsing
+- [x] **Step 1: Basic CLI Structure**
+  - [x] Create `sotd/aggregate/run.py` with main CLI entry point
+  - [x] Follow same argument pattern as other phases (--month, --year, --range, --start, --end, --out-dir, --debug, --force)
+  - [x] Add basic argument parsing and validation
+  - [x] Add placeholder for main processing logic
+  - [x] Include proper imports and type hints
+  - [x] Follow existing code style (Black formatting, 100 char line length)
+  - [x] Test basic argument parsing
 
-- [ ] **Step 2: Data Loading Module**
-  - [ ] Create `sotd/aggregate/load.py` module
-  - [ ] Function to load enriched JSON data from `data/enriched/YYYY-MM.json`
-  - [ ] Validate JSON structure matches expected enriched data format
-  - [ ] Extract metadata and data sections
-  - [ ] Handle missing files gracefully with debug logging
-  - [ ] Return structured data for processing
-  - [ ] Include proper error handling and validation
-  - [ ] Add type hints and docstrings
-  - [ ] Test with sample enriched data
+- [x] **Step 2: Data Loading Module**
+  - [x] Create `sotd/aggregate/load.py` module
+  - [x] Function to load enriched JSON data from `data/enriched/YYYY-MM.json`
+  - [x] Validate JSON structure matches expected enriched data format
+  - [x] Extract metadata and data sections
+  - [x] Handle missing files gracefully with debug logging
+  - [x] Return structured data for processing
+  - [x] Include proper error handling and validation
+  - [x] Add type hints and docstrings
+  - [x] Test with sample enriched data
 
-- [ ] **Step 3: Core Aggregation Logic**
-  - [ ] Create `sotd/aggregate/engine.py` module
-  - [ ] Implement pandas-based aggregation logic
-  - [ ] Function to process enriched comment records
-  - [ ] Filter for successfully matched products only (match_type is "exact" or similar)
-  - [ ] Group by product name and calculate metrics
-  - [ ] Calculate: shaves (count), unique_users (nunique), avg_shaves_per_user
-  - [ ] Handle edge cases (empty data, single records)
-  - [ ] Include proper error handling and validation
-  - [ ] Add type hints and docstrings
-  - [ ] Test with sample enriched data
+- [x] **Step 3: Core Aggregation Logic**
+  - [x] Create `sotd/aggregate/engine.py` module
+  - [x] Implement pandas-based aggregation logic
+  - [x] Function to process enriched comment records
+  - [x] Filter for successfully matched products only (match_type is "exact" or similar)
+  - [x] Group by product name and calculate metrics
+  - [x] Calculate: shaves (count), unique_users (nunique), avg_shaves_per_user
+  - [x] Handle edge cases (empty data, single records)
+  - [x] Include proper error handling and validation
+  - [x] Add type hints and docstrings
+  - [x] Test with sample enriched data
 
-- [ ] **Step 4: Razor Category Implementation**
-  - [ ] Extend aggregation engine to handle razor-specific logic
-  - [ ] Extract razor data from enriched records
-  - [ ] Handle nested structure of razor matches
-  - [ ] Group by razor name (from matched data)
-  - [ ] Calculate metrics for razors category
-  - [ ] Handle edge cases (missing razor data, unmatched razors)
-  - [ ] Add proper validation for razor data structure
-  - [ ] Include type hints and docstrings
-  - [ ] Test with sample enriched data containing razor information
+- [x] **Step 4: Razor Category Implementation**
+  - [x] Extend aggregation engine to handle razor-specific logic
+  - [x] Extract razor data from enriched records
+  - [x] Handle nested structure of razor matches
+  - [x] Group by razor name (from matched data)
+  - [x] Calculate metrics for razors category
+  - [x] Handle edge cases (missing razor data, unmatched razors)
+  - [x] Add proper validation for razor data structure
+  - [x] Include type hints and docstrings
+  - [x] Test with sample enriched data containing razor information
 
-- [ ] **Step 5: CLI Integration**
-  - [ ] Wire up command line interface with aggregation logic
-  - [ ] Connect data loading, aggregation, and output modules
-  - [ ] Add proper error handling for CLI operations
-  - [ ] Test end-to-end CLI functionality
-  - [ ] Verify output structure matches specification
+- [x] **Step 5: CLI Integration**
+  - [x] Wire up command line interface with aggregation logic
+  - [x] Connect data loading, aggregation, and output modules
+  - [x] Add proper error handling for CLI operations
+  - [x] Test end-to-end CLI functionality
+  - [x] Verify output structure matches specification
 
 ### Phase 2: Core Categories Implementation
 
-- [ ] **Step 6: Additional Hardware Categories**
-  - [ ] Add aggregation logic for razor formats, manufacturers, blades, brushes
-  - [ ] Handle different data structures for each category
-  - [ ] Extract category-specific information from enriched records
-  - [ ] Implement consistent metric calculation across all categories
-  - [ ] Handle edge cases for each category
-  - [ ] Add proper validation for each category
-  - [ ] Include type hints and docstrings
-  - [ ] Test with sample enriched data containing all hardware categories
+- [x] **Step 6: Additional Hardware Categories**
+  - [x] Add aggregation logic for razor formats, manufacturers, blades, brushes
+  - [x] Handle different data structures for each category
+  - [x] Extract category-specific information from enriched records
+  - [x] Implement consistent metric calculation across all categories
+  - [x] Handle edge cases for each category
+  - [x] Add proper validation for each category
+  - [x] Include type hints and docstrings
+  - [x] Test with sample enriched data containing all hardware categories
 
   **Categories to implement:**
-  - [ ] Razor formats (from razor.matched.format)
-  - [ ] Razor manufacturers (from razor.matched.brand)
-  - [ ] Blades (from blade.matched)
-  - [ ] Brushes (from brush.matched)
-  - [ ] Brush handle makers (from brush.matched.handle_maker)
-  - [ ] Brush knot makers (from brush.matched.brand)
-  - [ ] Knot fibers (from brush.matched.fiber)
-  - [ ] Knot sizes (from brush.matched.knot_size_mm)
+  - [x] Razor formats (from razor.matched.format)
+  - [x] Razor manufacturers (from razor.matched.brand)
+  - [x] Blades (from blade.matched)
+  - [x] Brushes (from brush.matched)
+  - [x] Brush handle makers (from brush.matched.handle_maker)
+  - [x] Brush knot makers (from brush.matched.brand)
+  - [x] Knot fibers (from brush.matched.fiber)
+  - [x] Knot sizes (from brush.matched.knot_size_mm)
 
-- [ ] **Step 7: Software Categories**
-  - [ ] Add aggregation logic for soap-related categories
-  - [ ] Handle soap data extraction from enriched records
-  - [ ] Implement brand diversity calculation (unique scents per brand)
-  - [ ] Extract soap maker information from soap.matched.maker
-  - [ ] Extract soap scent information from soap.matched
-  - [ ] Handle edge cases for soap data
-  - [ ] Add proper validation for soap categories
-  - [ ] Include type hints and docstrings
-  - [ ] Test with sample enriched data containing soap information
+- [x] **Step 7: Software Categories**
+  - [x] Add aggregation logic for soap-related categories
+  - [x] Handle soap data extraction from enriched records
+  - [x] Implement brand diversity calculation (unique scents per brand)
+  - [x] Extract soap maker information from soap.matched.maker
+  - [x] Extract soap scent information from soap.matched
+  - [x] Handle edge cases for soap data
+  - [x] Add proper validation for soap categories
+  - [x] Include type hints and docstrings
+  - [x] Test with sample enriched data containing soap information
 
   **Categories to implement:**
-  - [ ] Soap makers (from soap.matched.maker)
-  - [ ] Soaps (from soap.matched - combine maker and scent)
-  - [ ] Brand diversity (count unique scents per soap maker)
+  - [x] Soap makers (from soap.matched.maker)
+  - [x] Soaps (from soap.matched - combine maker and scent)
+  - [x] Brand diversity (count unique scents per soap maker)
 
-- [ ] **Step 8: User Categories**
-  - [ ] Add aggregation logic for user-based categories
-  - [ ] Group by user (author) and calculate shave counts
-  - [ ] Extract user information from enriched records
-  - [ ] Calculate metrics for top shavers
-  - [ ] Handle edge cases for user data
-  - [ ] Add proper validation for user categories
-  - [ ] Include type hints and docstrings
-  - [ ] Test with sample enriched data containing user information
+- [x] **Step 8: User Categories**
+  - [x] Add aggregation logic for user-based categories
+  - [x] Group by user (author) and calculate shave counts
+  - [x] Extract user information from enriched records
+  - [x] Calculate metrics for top shavers
+  - [x] Handle edge cases for user data
+  - [x] Add proper validation for user categories
+  - [x] Include type hints and docstrings
+  - [x] Test with sample enriched data containing user information
 
-- [ ] **Step 9: Output Structure & File I/O**
-  - [ ] Create `sotd/aggregate/save.py` module
-  - [ ] Implement JSON output with proper structure
-  - [ ] Generate metadata section with aggregation info
-  - [ ] Structure data section with all categories
-  - [ ] Handle file writing with proper formatting
-  - [ ] Add force overwrite functionality
-  - [ ] Include proper error handling
-  - [ ] Add type hints and docstrings
-  - [ ] Test with sample aggregated data to ensure proper JSON output
+- [x] **Step 9: Output Structure & File I/O**
+  - [x] Create `sotd/aggregate/save.py` module
+  - [x] Implement JSON output with proper structure
+  - [x] Generate metadata section with aggregation info
+  - [x] Structure data section with all categories
+  - [x] Handle file writing with proper formatting
+  - [x] Add force overwrite functionality
+  - [x] Include proper error handling
+  - [x] Add type hints and docstrings
+  - [x] Test with sample aggregated data to ensure proper JSON output
 
 ### Phase 3: Multi-Month Processing & Testing
 
-- [ ] **Step 10: Multi-Month Processing**
-  - [ ] Extend main run function to handle multiple months
-  - [ ] Use tqdm for progress bars during processing
-  - [ ] Process months sequentially (load, aggregate, save, repeat)
-  - [ ] Handle date range processing
-  - [ ] Add proper error handling for multi-month processing
-  - [ ] Include debug logging for multi-month operations
-  - [ ] Add type hints and docstrings
-  - [ ] Test with multiple months of enriched data
+- [x] **Step 10: Multi-Month Processing**
+  - [x] Extend main run function to handle multiple months
+  - [x] Use tqdm for progress bars during processing
+  - [x] Process months sequentially (load, aggregate, save, repeat)
+  - [x] Handle date range processing
+  - [x] Add proper error handling for multi-month processing
+  - [x] Include debug logging for multi-month operations
+  - [x] Add type hints and docstrings
+  - [x] Test with multiple months of enriched data
 
 - [ ] **Step 11: Error Handling & Validation**
   - [ ] Validate enriched data structure before processing
@@ -501,12 +501,12 @@ Test this with large datasets and ensure good performance.
 ## Progress Tracking
 
 ### Current Status
-- [ ] Phase 1: Foundation & Core Structure (0/5 steps completed)
-- [ ] Phase 2: Core Categories Implementation (0/4 steps completed)
-- [ ] Phase 3: Multi-Month Processing & Testing (0/4 steps completed)
+- [x] Phase 1: Foundation & Core Structure (5/5 steps completed)
+- [x] Phase 2: Core Categories Implementation (4/4 steps completed)
+- [ ] Phase 3: Multi-Month Processing & Testing (1/4 steps completed)
 
 ### Next Steps
-1. Start with **Step 1: Basic CLI Structure**
+1. Start with **Step 11: Error Handling & Validation**
 2. Follow the prompts in order
 3. Test each step before moving to the next
 4. Check off completed items as you go
