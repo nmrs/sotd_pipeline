@@ -608,8 +608,7 @@ def aggregate_users(records: List[Dict[str, Any]], debug: bool = False) -> List[
         if not isinstance(record["author"], str):
             if debug:
                 print(
-                    f"[DEBUG] Record {i}: 'author' should be string, "
-                    f"got {type(record['author'])}"
+                    f"[DEBUG] Record {i}: 'author' should be string, got {type(record['author'])}"
                 )
             invalid_records += 1
             continue

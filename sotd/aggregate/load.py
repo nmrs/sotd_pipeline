@@ -182,10 +182,7 @@ def validate_enriched_record(
     # Validate field types
     if not isinstance(record["id"], str):
         if debug:
-            print(
-                f"[DEBUG] Record {record_index}: 'id' should be string, "
-                f"got {type(record['id'])}"
-            )
+            print(f"[DEBUG] Record {record_index}: 'id' should be string, got {type(record['id'])}")
         return False
 
     if not isinstance(record["author"], str):

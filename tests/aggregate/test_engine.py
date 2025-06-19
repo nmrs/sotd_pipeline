@@ -24,7 +24,7 @@ class TestFilterMatchedRecords:
     def test_invalid_records_type(self):
         """Test with invalid records type."""
         with pytest.raises(ValueError, match="Expected list of records"):
-            filter_matched_records("invalid")
+            filter_matched_records("invalid")  # type: ignore
 
     def test_no_matched_products(self):
         """Test with records that have no matched products."""
@@ -194,7 +194,7 @@ class TestCalculateBasicMetrics:
     def test_invalid_records_type(self):
         """Test with invalid records type."""
         with pytest.raises(ValueError, match="Expected list of records"):
-            calculate_basic_metrics("invalid")
+            calculate_basic_metrics("invalid")  # type: ignore
 
     def test_single_user_single_shave(self):
         """Test with single user and single shave."""
@@ -298,7 +298,7 @@ class TestAggregateRazors:
     def test_invalid_records_type(self):
         """Test with invalid records type."""
         with pytest.raises(ValueError, match="Expected list of records"):
-            aggregate_razors("invalid")
+            aggregate_razors("invalid")  # type: ignore
 
     def test_no_razor_data(self):
         """Test with no razor data."""
@@ -444,7 +444,7 @@ class TestAggregateBlades:
     def test_invalid_records_type(self):
         """Test with invalid records type."""
         with pytest.raises(ValueError, match="Expected list of records"):
-            aggregate_blades("invalid")
+            aggregate_blades("invalid")  # type: ignore
 
     def test_no_blade_data(self):
         """Test with no blade data."""
@@ -528,7 +528,7 @@ class TestAggregateSoaps:
     def test_invalid_records_type(self):
         """Test with invalid records type."""
         with pytest.raises(ValueError, match="Expected list of records"):
-            aggregate_soaps("invalid")
+            aggregate_soaps("invalid")  # type: ignore
 
     def test_no_soap_data(self):
         """Test with no soap data."""
@@ -615,7 +615,7 @@ class TestAggregateBrushes:
     def test_invalid_records_type(self):
         """Test with invalid records type."""
         with pytest.raises(ValueError, match="Expected list of records"):
-            aggregate_brushes("invalid")
+            aggregate_brushes("invalid")  # type: ignore
 
     def test_no_brush_data(self):
         """Test with no brush data."""
@@ -704,7 +704,7 @@ class TestAggregateUsers:
     def test_invalid_records_type(self):
         """Test with invalid records type."""
         with pytest.raises(ValueError, match="Expected list of records"):
-            aggregate_users("invalid")
+            aggregate_users("invalid")  # type: ignore
 
     def test_single_user_single_shave(self):
         """Test with single user and single shave."""
