@@ -153,11 +153,11 @@ sotd/aggregate/aggregators/
   - [x] Sort by shaves desc, unique_users desc
 
 ### Phase 4: Format Aggregators
-- [ ] **4.1 Razor Format Aggregator (`aggregators/formats/razor_format_aggregator.py`)**
-  - [ ] Implement razor format aggregation
-  - [ ] Extract format from razor.matched.format
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **4.1 Razor Format Aggregator (`aggregators/formats/razor_format_aggregator.py`)**
+  - [x] Implement razor format aggregation
+  - [x] Extract format from razor.matched.format
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
 ### Phase 5: Brush Specialized Aggregators
 - [ ] **5.1 Handle Maker Aggregator (`aggregators/brush_specialized/handle_maker_aggregator.py`)**

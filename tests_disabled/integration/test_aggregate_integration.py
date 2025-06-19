@@ -10,6 +10,15 @@ from sotd.aggregate.aggregation_functions import (
     calculate_basic_metrics,
     filter_matched_records,
 )
+from sotd.aggregate.engine import (
+    aggregate_blackbird_plates,
+    aggregate_christopher_bradley_plates,
+    aggregate_game_changer_plates,
+    aggregate_razor_blade_combinations,
+    aggregate_straight_razor_specs,
+    aggregate_super_speed_tips,
+)
+from sotd.aggregate.load import load_enriched_data
 from sotd.aggregate.product_aggregators import (
     aggregate_blades,
     aggregate_brushes,
@@ -17,18 +26,9 @@ from sotd.aggregate.product_aggregators import (
     aggregate_soaps,
 )
 from sotd.aggregate.user_aggregators import (
-    aggregate_users,
     aggregate_user_blade_usage,
+    aggregate_users,
 )
-from sotd.aggregate.engine import (
-    aggregate_blackbird_plates,
-    aggregate_christopher_bradley_plates,
-    aggregate_game_changer_plates,
-    aggregate_super_speed_tips,
-    aggregate_straight_razor_specs,
-    aggregate_razor_blade_combinations,
-)
-from sotd.aggregate.load import load_enriched_data
 
 
 class TestAggregateIntegration:
@@ -310,9 +310,7 @@ class TestAggregateIntegration:
                     "id": "test7",
                     "author": "user6",
                     "created_utc": 1640995206,
-                    "body": (
-                        "Razor: Dovo Straight Razor\nBlade: N/A\n" "Brush: Semogue\nSoap: Tabac"
-                    ),
+                    "body": ("Razor: Dovo Straight Razor\nBlade: N/A\nBrush: Semogue\nSoap: Tabac"),
                     "razor": {
                         "matched": {
                             "brand": "Dovo",
@@ -462,8 +460,9 @@ class TestAggregateIntegration:
             assert len(matched_records) == 7
 
             # Use the real process_month function to ensure output structure consistency
-            from sotd.aggregate.run import process_month
             import argparse
+
+            from sotd.aggregate.run import process_month
 
             # Create mock args for process_month
             mock_args = argparse.Namespace(out_dir=str(temp_dir), force=False, debug=True)

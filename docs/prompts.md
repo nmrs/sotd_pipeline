@@ -51,3 +51,9 @@ Purpose: These are instructions to proceed carefully through an implementation p
 4. Check off tasks: Mark each completed task in the implementation plan document with [x] and save the file
 5. Update session notes: Add notes after each work session
 6. Commit regularly: Commit changes with clear messages after each chunk. Commits should include updates to implementation plan.
+7. Proceed *until context limit is reached*
+
+
+Use the Tracked Implementation Development Process in @prompts.md to implement the @aggregate_implementation_plan.md using @aggregate_phase_spec.md and @sotd-pipeline-core.mdc  for reference. 
+*mandatory* Proceed without user input *until context limit is reached,*
+

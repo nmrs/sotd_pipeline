@@ -2,6 +2,9 @@ import argparse
 import re
 from pathlib import Path
 
+from ..cli_utils.date_span import month_span
+from .engine import process_months
+
 
 def validate_month(value: str) -> str:
     if not re.match(r"^\d{4}-\d{2}$", value):
@@ -44,8 +47,13 @@ def get_parser() -> argparse.ArgumentParser:
 def main():
     parser = get_parser()
     args = parser.parse_args()
-    # Placeholder: print parsed args for now
-    print(f"Parsed arguments: {args}")
+
+    # Get months to process
+    month_tuples = month_span(args)
+    months = [f"{year:04d}-{month:02d}" for year, month in month_tuples]
+
+    # Process the months
+    process_months(months, args.out_dir, debug=args.debug)
 
 
 if __name__ == "__main__":
