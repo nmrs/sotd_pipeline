@@ -17,6 +17,7 @@ from sotd.aggregate.engine import (
     aggregate_game_changer_plates,
     aggregate_super_speed_tips,
     aggregate_straight_razor_specs,
+    aggregate_razor_blade_combinations,
 )
 
 
@@ -2966,5 +2967,297 @@ class TestAggregateStraightRazorSpecs:
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 1
         assert result[1]["specs"] == "Grind: half_hollow | Width: 5/8"
+        assert result[1]["shaves"] == 1
+        assert result[1]["unique_users"] == 1
+
+
+class TestAggregateRazorBladeCombinations:
+    """Test the aggregate_razor_blade_combinations function."""
+
+    def test_empty_records(self):
+        """Test with empty records."""
+        result = aggregate_razor_blade_combinations([])
+        assert result == []
+
+    def test_invalid_records_type(self):
+        """Test with invalid records type."""
+        with pytest.raises(ValueError, match="Expected list of records"):
+            aggregate_razor_blade_combinations("invalid")  # type: ignore
+
+    def test_no_razor_blade_data(self):
+        """Test with records that have no razor or blade data."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "created_utc": 1640995200,
+                "body": "Test comment",
+            }
+        ]
+        result = aggregate_razor_blade_combinations(records)
+        assert result == []
+
+    def test_missing_razor_data(self):
+        """Test with records that have blade but no razor data."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "created_utc": 1640995200,
+                "body": "Test comment",
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    }
+                },
+            }
+        ]
+        result = aggregate_razor_blade_combinations(records)
+        assert result == []
+
+    def test_missing_blade_data(self):
+        """Test with records that have razor but no blade data."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "created_utc": 1640995200,
+                "body": "Test comment",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    }
+                },
+            }
+        ]
+        result = aggregate_razor_blade_combinations(records)
+        assert result == []
+
+    def test_single_combination_single_user(self):
+        """Test with single razor-blade combination and single user."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    }
+                },
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    }
+                },
+            }
+        ]
+        result = aggregate_razor_blade_combinations(records)
+        assert len(result) == 1
+        assert result[0]["combination"] == "Blackland Blackbird + Feather Hi-Stainless"
+        assert result[0]["shaves"] == 1
+        assert result[0]["unique_users"] == 1
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_single_combination_multiple_users(self):
+        """Test with single razor-blade combination and multiple users."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    }
+                },
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    }
+                },
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    }
+                },
+            },
+        ]
+        result = aggregate_razor_blade_combinations(records)
+        assert len(result) == 1
+        assert result[0]["combination"] == "Blackland Blackbird + Feather Hi-Stainless"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_users"] == 2
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_multiple_combinations(self):
+        """Test with multiple razor-blade combinations."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    }
+                },
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Karve",
+                        "model": "Christopher Bradley",
+                        "match_type": "exact",
+                    }
+                },
+                "blade": {
+                    "matched": {
+                        "brand": "Astra",
+                        "model": "Superior Platinum",
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "test789",
+                "author": "user3",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    }
+                },
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    }
+                },
+            },
+        ]
+        result = aggregate_razor_blade_combinations(records)
+        assert len(result) == 2
+
+        # Check that results are sorted by shaves (descending)
+        assert result[0]["shaves"] >= result[1]["shaves"]
+
+        # Check all combinations are present
+        combinations_list = [r["combination"] for r in result]
+        assert "Blackland Blackbird + Feather Hi-Stainless" in combinations_list
+        assert "Karve Christopher Bradley + Astra Superior Platinum" in combinations_list
+
+        # Blackland + Feather should be first (2 shaves)
+        assert result[0]["combination"] == "Blackland Blackbird + Feather Hi-Stainless"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_users"] == 2
+
+        # Karve + Astra should be second (1 shave)
+        assert result[1]["combination"] == "Karve Christopher Bradley + Astra Superior Platinum"
+        assert result[1]["shaves"] == 1
+        assert result[1]["unique_users"] == 1
+
+    def test_tiebreaker_unique_users(self):
+        """Test tiebreaker when shaves are equal."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    }
+                },
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Karve",
+                        "model": "Christopher Bradley",
+                        "match_type": "exact",
+                    }
+                },
+                "blade": {
+                    "matched": {
+                        "brand": "Astra",
+                        "model": "Superior Platinum",
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "test789",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    }
+                },
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    }
+                },
+            },
+        ]
+        result = aggregate_razor_blade_combinations(records)
+        assert len(result) == 2
+
+        # Blackland + Feather should be first (2 shaves, 1 unique user)
+        # Karve + Astra should be second (1 shave, 1 unique user)
+        assert result[0]["combination"] == "Blackland Blackbird + Feather Hi-Stainless"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_users"] == 1
+        assert result[1]["combination"] == "Karve Christopher Bradley + Astra Superior Platinum"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1

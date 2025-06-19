@@ -1796,3 +1796,127 @@ def aggregate_straight_razor_specs(
 
     monitor.end("aggregate_straight_razor_specs", len(spec_data))
     return results  # type: ignore
+
+
+def aggregate_razor_blade_combinations(
+    records: List[Dict[str, Any]], debug: bool = False
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate razor-blade combination usage statistics.
+
+    Args:
+        records: List of enriched comment records
+        debug: Enable debug logging
+
+    Returns:
+        List of razor-blade combination aggregation results
+
+    Raises:
+        ValueError: If records list is invalid or contains invalid data
+    """
+    monitor = PerformanceMonitor(debug)
+    monitor.start("aggregate_razor_blade_combinations")
+
+    if not isinstance(records, list):
+        raise ValueError(f"Expected list of records, got {type(records)}")
+
+    if not records:
+        if debug:
+            print("[DEBUG] No records to process for razor-blade combinations")
+        monitor.end("aggregate_razor_blade_combinations", 0)
+        return []
+
+    combination_data = []
+    invalid_records = 0
+
+    for i, record in enumerate(records):
+        if not isinstance(record, dict):
+            if debug:
+                print(f"[DEBUG] Record {i}: Expected dict, got {type(record)}")
+            invalid_records += 1
+            continue
+
+        # Extract razor and blade information
+        razor_name = None
+        blade_name = None
+
+        # Get razor name from matched data
+        if "razor" in record:
+            razor_info = record["razor"]
+            if isinstance(razor_info, dict) and "matched" in razor_info:
+                matched = razor_info["matched"]
+                if isinstance(matched, dict):
+                    brand = matched.get("brand", "")
+                    model = matched.get("model", "")
+                    if brand and model:
+                        razor_name = f"{brand} {model}".strip()
+
+        # Get blade name from matched data
+        if "blade" in record:
+            blade_info = record["blade"]
+            if isinstance(blade_info, dict) and "matched" in blade_info:
+                matched = blade_info["matched"]
+                if isinstance(matched, dict):
+                    brand = matched.get("brand", "")
+                    model = matched.get("model", "")
+                    if brand and model:
+                        blade_name = f"{brand} {model}".strip()
+
+        # Only include records where both razor and blade are matched
+        if razor_name and blade_name:
+            combination_data.append(
+                {
+                    "razor": razor_name,
+                    "blade": blade_name,
+                    "combination": f"{razor_name} + {blade_name}",
+                    "user": record.get("author", "Unknown"),
+                }
+            )
+
+    if not combination_data:
+        if debug:
+            print("[DEBUG] No valid razor-blade combination data found")
+        monitor.end("aggregate_razor_blade_combinations", 0)
+        return []
+
+    # Convert to DataFrame for aggregation
+    try:
+        df = pd.DataFrame(combination_data)
+        df = optimize_dataframe_operations(df, debug)
+    except (ValueError, TypeError, KeyError) as e:
+        # These are data structure issues that should fail fast
+        raise ValueError(f"Failed to create DataFrame for razor-blade combination aggregation: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during razor-blade combination aggregation: {e}")
+
+    # Group by combination and calculate metrics
+    try:
+        grouped = optimized_groupby_agg(df, "combination", "user", ["count", "nunique"], debug)
+    except (KeyError, ValueError) as e:
+        # These are data structure issues that should fail fast
+        raise ValueError(f"Failed to group razor-blade combination data: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during razor-blade combination grouping: {e}")
+
+    # Rename columns to match expected output
+    grouped.columns = ["combination", "shaves", "unique_users"]
+
+    # Calculate average shaves per user
+    grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
+
+    # Sort by shaves (descending), then by unique_users (descending) as tie breaker
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
+
+    # Convert back to list of dictionaries
+    results = grouped.to_dict("records")
+
+    if debug:
+        print(
+            f"[DEBUG] Aggregated {len(results)} razor-blade combinations "
+            f"({invalid_records} invalid records)"
+        )
+
+    monitor.end("aggregate_razor_blade_combinations", len(combination_data))
+    return results  # type: ignore
