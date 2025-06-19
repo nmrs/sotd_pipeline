@@ -24,6 +24,7 @@ from tqdm import tqdm
 
 from sotd.aggregate.benchmarks import run_performance_benchmark
 from sotd.aggregate.engine import (
+    aggregate_blackbird_plates,
     aggregate_blade_manufacturers,
     aggregate_blades,
     aggregate_brush_fibers,
@@ -31,10 +32,16 @@ from sotd.aggregate.engine import (
     aggregate_brush_knot_makers,
     aggregate_brush_knot_sizes,
     aggregate_brushes,
+    aggregate_christopher_bradley_plates,
+    aggregate_game_changer_plates,
+    aggregate_razor_blade_combinations,
     aggregate_razor_manufacturers,
     aggregate_razors,
     aggregate_soap_makers,
     aggregate_soaps,
+    aggregate_straight_razor_specs,
+    aggregate_super_speed_tips,
+    aggregate_user_blade_usage,
     aggregate_users,
     calculate_basic_metrics,
     filter_matched_records,
@@ -185,6 +192,19 @@ def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
         brush_fibers = aggregate_brush_fibers(matched_records, debug=args.debug)
         brush_knot_sizes = aggregate_brush_knot_sizes(matched_records, debug=args.debug)
 
+        # Perform specialized aggregations
+        blackbird_plates = aggregate_blackbird_plates(matched_records, debug=args.debug)
+        christopher_bradley_plates = aggregate_christopher_bradley_plates(
+            matched_records, debug=args.debug
+        )
+        game_changer_plates = aggregate_game_changer_plates(matched_records, debug=args.debug)
+        super_speed_tips = aggregate_super_speed_tips(matched_records, debug=args.debug)
+        straight_razor_specs = aggregate_straight_razor_specs(matched_records, debug=args.debug)
+        razor_blade_combinations = aggregate_razor_blade_combinations(
+            matched_records, debug=args.debug
+        )
+        user_blade_usage = aggregate_user_blade_usage(matched_records, debug=args.debug)
+
         # Prepare results
         results = {
             "year": year,
@@ -204,6 +224,13 @@ def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
                 "brush_fibers": brush_fibers,
                 "brush_knot_sizes": brush_knot_sizes,
                 "users": users,
+                "blackbird_plates": blackbird_plates,
+                "christopher_bradley_plates": christopher_bradley_plates,
+                "game_changer_plates": game_changer_plates,
+                "super_speed_tips": super_speed_tips,
+                "straight_razor_specs": straight_razor_specs,
+                "razor_blade_combinations": razor_blade_combinations,
+                "user_blade_usage": user_blade_usage,
             },
             "summary": {
                 "total_records": len(data),
@@ -220,6 +247,13 @@ def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
                 "brush_fiber_count": len(brush_fibers),
                 "brush_knot_size_count": len(brush_knot_sizes),
                 "user_count": len(users),
+                "blackbird_plate_count": len(blackbird_plates),
+                "christopher_bradley_plate_count": len(christopher_bradley_plates),
+                "game_changer_plate_count": len(game_changer_plates),
+                "super_speed_tip_count": len(super_speed_tips),
+                "straight_razor_spec_count": len(straight_razor_specs),
+                "razor_blade_combination_count": len(razor_blade_combinations),
+                "user_blade_usage_count": len(user_blade_usage),
             },
         }
 

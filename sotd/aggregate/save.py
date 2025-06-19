@@ -75,6 +75,13 @@ def save_aggregated_data(
                     "brush_fibers",
                     "brush_knot_sizes",
                     "users",
+                    "blackbird_plates",
+                    "christopher_bradley_plates",
+                    "game_changer_plates",
+                    "super_speed_tips",
+                    "straight_razor_specs",
+                    "razor_blade_combinations",
+                    "user_blade_usage",
                 ],
                 "summary": results["summary"],
             },
@@ -91,6 +98,13 @@ def save_aggregated_data(
                 "brush_fibers": aggregations["brush_fibers"],
                 "brush_knot_sizes": aggregations["brush_knot_sizes"],
                 "users": aggregations["users"],
+                "blackbird_plates": aggregations["blackbird_plates"],
+                "christopher_bradley_plates": aggregations["christopher_bradley_plates"],
+                "game_changer_plates": aggregations["game_changer_plates"],
+                "super_speed_tips": aggregations["super_speed_tips"],
+                "straight_razor_specs": aggregations["straight_razor_specs"],
+                "razor_blade_combinations": aggregations["razor_blade_combinations"],
+                "user_blade_usage": aggregations["user_blade_usage"],
             },
         }
     else:
@@ -243,6 +257,13 @@ def validate_aggregated_data(data: Dict[str, Any], debug: bool = False) -> bool:
         "brush_fibers",
         "brush_knot_sizes",
         "users",
+        "blackbird_plates",
+        "christopher_bradley_plates",
+        "game_changer_plates",
+        "super_speed_tips",
+        "straight_razor_specs",
+        "razor_blade_combinations",
+        "user_blade_usage",
     ]
     for category in expected_categories:
         if category in content_data:
