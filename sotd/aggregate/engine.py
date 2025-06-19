@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional
 
 import pandas as pd
 import psutil
+from datetime import date
 
 
 class PerformanceMonitor:
@@ -777,14 +778,14 @@ def aggregate_brushes(records: List[Dict[str, Any]], debug: bool = False) -> Lis
 
 def aggregate_users(records: List[Dict[str, Any]], debug: bool = False) -> List[Dict[str, Any]]:
     """
-    Aggregate user statistics (top shavers).
+    Aggregate user statistics (top shavers) with missed days calculation.
 
     Args:
         records: List of enriched comment records
         debug: Enable debug logging
 
     Returns:
-        List of user aggregation results
+        List of user aggregation results with shaves and missed days
 
     Raises:
         ValueError: If records list is invalid or contains invalid data
@@ -838,41 +839,91 @@ def aggregate_users(records: List[Dict[str, Any]], debug: bool = False) -> List[
         monitor.end("aggregate_users", 0)
         return []
 
-    # Convert to DataFrame for aggregation
-    try:
-        df = pd.DataFrame(valid_records)
-        df = optimize_dataframe_operations(df, debug)
-    except (ValueError, TypeError, KeyError) as e:
-        # These are data structure issues that should fail fast
-        raise ValueError(f"Failed to create DataFrame for user aggregation: {e}")
-    except ImportError as e:
-        # Pandas import issues - external dependency failure
-        raise RuntimeError(f"Pandas import error during user aggregation: {e}")
+    # Extract month from first record's thread_title to determine total days
+    month_info = None
+    for record in valid_records:
+        if "thread_title" in record and record["thread_title"]:
+            from sotd.utils.date_utils import parse_thread_date
 
-    # Group by user and calculate metrics
-    try:
-        grouped = optimized_groupby_agg(df, "author", "id", ["count"], debug)
-    except (KeyError, ValueError) as e:
-        # These are data structure issues that should fail fast
-        raise ValueError(f"Failed to group user data: {e}")
-    except ImportError as e:
-        # Pandas import issues - external dependency failure
-        raise RuntimeError(f"Pandas import error during user grouping: {e}")
+            # Try to parse the date from thread title
+            parsed_date = parse_thread_date(record["thread_title"], 2025)  # year hint
+            if parsed_date:
+                month_info = {"year": parsed_date.year, "month": parsed_date.month}
+                break
 
-    grouped.columns = ["user", "shaves"]
-    grouped["avg_shaves_per_user"] = 1.0  # Each user's avg is always 1.0 (all their own shaves)
+    if not month_info:
+        if debug:
+            print("[DEBUG] Could not determine month from thread titles, using fallback")
+        # Fallback: try to extract from metadata or use current month
+        import datetime
 
-    # Sort by shaves (descending)
-    grouped = grouped.sort_values("shaves", ascending=False)
+        now = datetime.datetime.now()
+        month_info = {"year": now.year, "month": now.month}
 
-    # Convert back to list of dictionaries
-    results = grouped.to_dict("records")
+    # Calculate total days in the month
+    import calendar
+
+    year = month_info["year"]
+    month = month_info["month"]
+    total_days_in_month = calendar.monthrange(year, month)[1]
+
+    if debug:
+        print(f"[DEBUG] Processing month {year}-{month:02d} " f"with {total_days_in_month} days")
+
+    # Process records to extract user, shaves, and unique days
+    user_data = {}
+
+    for record in valid_records:
+        author = record["author"]
+        thread_title = record.get("thread_title", "")
+
+        # Initialize user data if not exists
+        if author not in user_data:
+            user_data[author] = {"shaves": 0, "unique_days": set(), "thread_titles": set()}
+
+        # Count shaves
+        user_data[author]["shaves"] += 1
+
+        # Extract date from thread title
+        if thread_title:
+            from sotd.utils.date_utils import parse_thread_date
+
+            parsed_date = parse_thread_date(thread_title, year)
+            if parsed_date:
+                user_data[author]["unique_days"].add(parsed_date.day)
+            user_data[author]["thread_titles"].add(thread_title)
+
+    # Convert to list and calculate missed days
+    results = []
+    for author, data in user_data.items():
+        unique_days_count = len(data["unique_days"])
+        missed_days = total_days_in_month - unique_days_count
+
+        # Calculate which specific days were missed, as full YYYY-MM-DD strings
+        all_days_in_month = set(range(1, total_days_in_month + 1))
+        missed_days_set = all_days_in_month - data["unique_days"]
+        missed_day_list = [date(year, month, d).isoformat() for d in sorted(missed_days_set)]
+
+        results.append(
+            {
+                "user": author,  # No 'u/' prefix for compatibility
+                "shaves": data["shaves"],
+                "unique_days": unique_days_count,
+                "missed_days": missed_days,
+                "missed_day_list": missed_day_list,  # List of actual missed days as YYYY-MM-DD
+                "avg_shaves_per_user": 1.0,  # Each user's avg is always 1.0 (all their own shaves)
+            }
+        )
+
+    # Sort by shaves (descending), then by missed days (ascending)
+    results.sort(key=lambda x: (-x["shaves"], x["missed_days"]))
 
     if debug:
         print(f"[DEBUG] Aggregated {len(results)} users ({invalid_records} invalid records)")
+        print(f"[DEBUG] Total days in month: {total_days_in_month}")
 
     monitor.end("aggregate_users", len(valid_records))
-    return results  # type: ignore
+    return results
 
 
 def aggregate_razor_manufacturers(
