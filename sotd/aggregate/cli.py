@@ -68,13 +68,24 @@ CLI matrix
     args = parser.parse_args(argv)
 
     # Validate date arguments
-    date_args = [args.month, args.year, args.start, args.end, args.range]
-    if not any(date_args):
+    date_args = [args.month, args.year, args.range]
+    # Count non-None date arguments, but --start and --end can be used together
+    non_none_args = [arg for arg in date_args if arg is not None]
+
+    # Special handling for --start and --end combination
+    if args.start is not None and args.end is not None:
+        # --start and --end together is valid, but shouldn't be combined with other date args
+        if non_none_args:
+            print("[ERROR] --start and --end cannot be combined with --month, --year, or --range")
+            exit(1)
+    elif args.start is not None or args.end is not None:
+        # Single --start or --end should not be combined with other date args
+        if non_none_args:
+            print("[ERROR] --start or --end cannot be combined with --month, --year, or --range")
+            exit(1)
+    elif not non_none_args:
         # Default to current month
         now = datetime.datetime.now()
         args.month = f"{now.year:04d}-{now.month:02d}"
-    elif sum(1 for arg in date_args if arg is not None) > 1:
-        print("[ERROR] Only one date argument allowed")
-        exit(1)
 
     return args
