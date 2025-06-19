@@ -201,13 +201,15 @@ def run_performance_benchmark(
     """
     from sotd.aggregate.aggregation_functions import calculate_basic_metrics, filter_matched_records
     from sotd.aggregate.engine import (
-        aggregate_blade_manufacturers,
         aggregate_brush_fibers,
         aggregate_brush_handle_makers,
         aggregate_brush_knot_makers,
         aggregate_brush_knot_sizes,
-        aggregate_razor_manufacturers,
         aggregate_soap_makers,
+    )
+    from sotd.aggregate.engine_specialized import (
+        aggregate_blade_manufacturers,
+        aggregate_razor_manufacturers,
     )
     from sotd.aggregate.product_aggregators import (
         aggregate_blades,
