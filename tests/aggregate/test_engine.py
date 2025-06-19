@@ -12,6 +12,7 @@ from sotd.aggregate.engine import (
     filter_matched_records,
     aggregate_brush_fibers,
     aggregate_brush_knot_sizes,
+    aggregate_blackbird_plates,
 )
 
 
@@ -1325,3 +1326,312 @@ class TestAggregateBrushKnotSizes:
         result = aggregate_brush_knot_sizes(records)
         assert result[0]["knot_size_mm"] == "26"
         assert result[1]["knot_size_mm"] == "24"
+
+
+class TestAggregateBlackbirdPlates:
+    """Test the aggregate_blackbird_plates function."""
+
+    def test_empty_records(self):
+        """Test with empty records."""
+        result = aggregate_blackbird_plates([])
+        assert result == []
+
+    def test_invalid_records_type(self):
+        """Test with invalid records type."""
+        with pytest.raises(ValueError, match="Expected list of records"):
+            aggregate_blackbird_plates("invalid")  # type: ignore
+
+    def test_no_blackbird_data(self):
+        """Test with records that have no Blackland Blackbird razors."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    }
+                },
+            }
+        ]
+        result = aggregate_blackbird_plates(records)
+        assert result == []
+
+    def test_blackbird_without_plate_data(self):
+        """Test with Blackland Blackbird razors but no enriched plate data."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    }
+                },
+            }
+        ]
+        result = aggregate_blackbird_plates(records)
+        assert result == []
+
+    def test_single_plate_single_user(self):
+        """Test with single Blackbird plate and single user."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate": "Standard",
+                        "_enriched_by": "BlackbirdPlateEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            }
+        ]
+        result = aggregate_blackbird_plates(records)
+        assert len(result) == 1
+        assert result[0]["plate"] == "Standard"
+        assert result[0]["shaves"] == 1
+        assert result[0]["unique_users"] == 1
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_single_plate_multiple_users(self):
+        """Test with single Blackbird plate and multiple users."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate": "Standard",
+                        "_enriched_by": "BlackbirdPlateEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate": "Standard",
+                        "_enriched_by": "BlackbirdPlateEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_blackbird_plates(records)
+        assert len(result) == 1
+        assert result[0]["plate"] == "Standard"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_users"] == 2
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_multiple_plates(self):
+        """Test with multiple Blackbird plates."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate": "Standard",
+                        "_enriched_by": "BlackbirdPlateEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate": "Lite",
+                        "_enriched_by": "BlackbirdPlateEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test789",
+                "author": "user3",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate": "OC",
+                        "_enriched_by": "BlackbirdPlateEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_blackbird_plates(records)
+        assert len(result) == 3
+
+        # Check that results are sorted by shaves (descending)
+        assert result[0]["shaves"] >= result[1]["shaves"]
+        assert result[1]["shaves"] >= result[2]["shaves"]
+
+        # Check all plates are present
+        plates = [r["plate"] for r in result]
+        assert "Standard" in plates
+        assert "Lite" in plates
+        assert "OC" in plates
+
+    def test_blackbird_ti_model(self):
+        """Test with Blackland Blackbird Ti model."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird Ti",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate": "Standard",
+                        "_enriched_by": "BlackbirdPlateEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            }
+        ]
+        result = aggregate_blackbird_plates(records)
+        assert len(result) == 1
+        assert result[0]["plate"] == "Standard"
+
+    def test_mixed_razor_types(self):
+        """Test with mix of Blackbird and other razors."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate": "Standard",
+                        "_enriched_by": "BlackbirdPlateEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    },
+                },
+            },
+        ]
+        result = aggregate_blackbird_plates(records)
+        assert len(result) == 1
+        assert result[0]["plate"] == "Standard"
+        assert result[0]["shaves"] == 1
+
+    def test_tiebreaker_unique_users(self):
+        """Test tiebreaker when shaves are equal."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate": "Standard",
+                        "_enriched_by": "BlackbirdPlateEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate": "Lite",
+                        "_enriched_by": "BlackbirdPlateEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test789",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate": "Standard",
+                        "_enriched_by": "BlackbirdPlateEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_blackbird_plates(records)
+        assert len(result) == 2
+
+        # Standard should be first (2 shaves, 1 unique user)
+        # Lite should be second (1 shave, 1 unique user)
+        assert result[0]["plate"] == "Standard"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_users"] == 1
+        assert result[1]["plate"] == "Lite"
+        assert result[1]["shaves"] == 1
+        assert result[1]["unique_users"] == 1
