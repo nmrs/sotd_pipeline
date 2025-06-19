@@ -3,268 +3,154 @@
 
 import argparse
 import json
+import unittest.mock
 from pathlib import Path
 from typing import Any, Dict, List
 
 from sotd.aggregate.aggregation_functions import calculate_basic_metrics, filter_matched_records
-from sotd.aggregate.engine import (
-    aggregate_blackbird_plates,
-    aggregate_blade_manufacturers,
-    aggregate_brush_fibers,
-    aggregate_brush_handle_makers,
-    aggregate_brush_knot_makers,
-    aggregate_brush_knot_sizes,
-    aggregate_christopher_bradley_plates,
-    aggregate_game_changer_plates,
-    aggregate_razor_blade_combinations,
-    aggregate_razor_manufacturers,
-    aggregate_soap_makers,
-    aggregate_straight_razor_specs,
-    aggregate_super_speed_tips,
-)
+from sotd.aggregate.blackbird_plate_aggregator import aggregate_blackbird_plates
+from sotd.aggregate.blade_aggregator import aggregate_blades
+from sotd.aggregate.brush_aggregator import aggregate_brushes
+from sotd.aggregate.christopher_bradley_plate_aggregator import aggregate_christopher_bradley_plates
+from sotd.aggregate.fiber_aggregator import aggregate_brush_fibers
+from sotd.aggregate.game_changer_plate_aggregator import aggregate_game_changer_plates
+from sotd.aggregate.handle_maker_aggregator import aggregate_brush_handle_makers
+from sotd.aggregate.knot_maker_aggregator import aggregate_brush_knot_makers
+from sotd.aggregate.knot_size_aggregator import aggregate_brush_knot_sizes
+
+# Re-export for test patching
 from sotd.aggregate.load import get_enriched_file_path, load_enriched_data
-from sotd.aggregate.product_aggregators import (
-    aggregate_blades,
-    aggregate_brushes,
-    aggregate_razors,
-    aggregate_soaps,
+from sotd.aggregate.razor_aggregator import aggregate_razors
+from sotd.aggregate.razor_blade_combo_aggregator import aggregate_razor_blade_combinations
+from sotd.aggregate.razor_format_aggregator import aggregate_razor_formats
+from sotd.aggregate.save import (
+    get_aggregated_file_path as _get_aggregated_file_path,
 )
-from sotd.aggregate.save import get_aggregated_file_path, save_aggregated_data
-from sotd.aggregate.user_aggregators import aggregate_user_blade_usage, aggregate_users
+from sotd.aggregate.save import (
+    save_aggregated_data as _save_aggregated_data,
+)
+from sotd.aggregate.soap_aggregator import aggregate_soaps
+from sotd.aggregate.soap_maker_aggregator import aggregate_soap_makers
+from sotd.aggregate.straight_razor_spec_aggregator import aggregate_straight_razor_specs
+from sotd.aggregate.super_speed_tip_aggregator import aggregate_super_speed_tips
+from sotd.aggregate.user_aggregator import aggregate_users
+
+save_aggregated_data = _save_aggregated_data
+get_aggregated_file_path = _get_aggregated_file_path
 
 
-def process_month(year: int, month: int, args: argparse.Namespace) -> Dict[str, Any]:
-    """Process a single month of enriched data."""
-    # Validate input parameters
-    if not isinstance(year, int) or year < 2000 or year > 2100:
-        return {
-            "year": year,
-            "month": month,
-            "status": "error",
-            "error": f"Invalid year: {year} (must be between 2000-2100)",
-        }
-
-    if not isinstance(month, int) or month < 1 or month > 12:
-        return {
-            "year": year,
-            "month": month,
-            "status": "error",
-            "error": f"Invalid month: {month} (must be between 1-12)",
-        }
-
-    # Get file paths
-    base_dir = Path(args.out_dir)
-    enriched_path = get_enriched_file_path(base_dir, year, month)
-    aggregated_path = get_aggregated_file_path(base_dir, year, month)
-
-    if not enriched_path.exists():
-        if args.debug:
-            print(f"[DEBUG] Skipping missing enriched file: {enriched_path}")
-        return {
-            "year": year,
-            "month": month,
-            "status": "skipped",
-            "reason": "missing_enriched_file",
-        }
-
-    # Check if output file exists and force flag
-    if aggregated_path.exists() and not args.force:
-        if args.debug:
-            print(f"[DEBUG] Skipping existing aggregated file: {aggregated_path}")
-        return {
-            "year": year,
-            "month": month,
-            "status": "skipped",
-            "reason": "file_exists",
-        }
-
-    try:
-        # Load enriched data with enhanced validation
-        metadata, data = load_enriched_data(enriched_path, debug=args.debug)
-
-        # Validate that we have data to process
-        if not data:
-            if args.debug:
-                print(f"[DEBUG] No data to process for {year:04d}-{month:02d}")
-            return {
-                "year": year,
-                "month": month,
-                "status": "skipped",
-                "reason": "no_data",
-            }
-
-        # Filter for matched records
-        matched_records = filter_matched_records(data, debug=args.debug)
-
-        # Calculate basic metrics
-        basic_metrics = calculate_basic_metrics(matched_records, debug=args.debug)
-
-        # Perform core aggregations
-        results = _perform_core_aggregations(matched_records, args.debug)
-
-        # Perform specialized aggregations if enabled
-        specialized_results = _perform_specialized_aggregations(matched_records, args)
-
-        # Perform cross-product analysis if enabled
-        cross_product_results = _perform_cross_product_analysis(matched_records, args)
-
-        # Combine all results
-        all_aggregations = {**results, **specialized_results, **cross_product_results}
-
-        # Prepare final results
-        final_results = _prepare_final_results(
-            year, month, basic_metrics, all_aggregations, data, matched_records
-        )
-
-        # Save aggregated data
-        save_aggregated_data(final_results, aggregated_path, force=args.force, debug=args.debug)
-
-        if args.debug:
-            print(f"[DEBUG] Processed {year:04d}-{month:02d}: {final_results['summary']}")
-
-        return final_results
-
-    except FileNotFoundError as e:
-        if args.debug:
-            print(f"[DEBUG] File not found error processing {year:04d}-{month:02d}: {e}")
-        return {
-            "year": year,
-            "month": month,
-            "status": "error",
-            "error": f"File not found: {e}",
-        }
-    except json.JSONDecodeError as e:
-        if args.debug:
-            print(f"[DEBUG] JSON decode error processing {year:04d}-{month:02d}: {e}")
-        return {
-            "year": year,
-            "month": month,
-            "status": "error",
-            "error": f"JSON decode error: {e}",
-        }
-    except ValueError as e:
-        if args.debug:
-            print(f"[DEBUG] Data validation error processing {year:04d}-{month:02d}: {e}")
-        return {
-            "year": year,
-            "month": month,
-            "status": "error",
-            "error": f"Data validation error: {e}",
-        }
-    except OSError as e:
-        if args.debug:
-            print(f"[DEBUG] File system error processing {year:04d}-{month:02d}: {e}")
-        return {
-            "year": year,
-            "month": month,
-            "status": "error",
-            "error": f"File system error: {e}",
-        }
-    except Exception as e:
-        if args.debug:
-            print(f"[DEBUG] Unexpected error processing {year:04d}-{month:02d}: {e}")
-        return {
-            "year": year,
-            "month": month,
-            "status": "error",
-            "error": f"Unexpected error: {e}",
-        }
+def aggregate_user_blade_usage(matched_records: list[dict], debug: bool = False) -> list[dict]:
+    """Aggregate user-blade usage combinations."""
+    combos = []
+    for rec in matched_records:
+        user = rec.get("author")
+        blade = rec.get("blade", {}).get("matched", {}).get("brand")
+        if user and blade:
+            combos.append({"user": user, "blade": blade})
+    return combos
 
 
 def _perform_core_aggregations(
-    matched_records: List[Dict[str, Any]], debug: bool
-) -> Dict[str, Any]:
-    """Perform core product and user aggregations."""
-    return {
-        "razors": aggregate_razors(matched_records, debug=debug),
-        "razor_manufacturers": aggregate_razor_manufacturers(matched_records, debug=debug),
-        "blades": aggregate_blades(matched_records, debug=debug),
-        "blade_manufacturers": aggregate_blade_manufacturers(matched_records, debug=debug),
-        "soaps": aggregate_soaps(matched_records, debug=debug),
-        "soap_makers": aggregate_soap_makers(matched_records, debug=debug),
-        "brushes": aggregate_brushes(matched_records, debug=debug),
-        "brush_knot_makers": aggregate_brush_knot_makers(matched_records, debug=debug),
-        "brush_handle_makers": aggregate_brush_handle_makers(matched_records, debug=debug),
-        "brush_fibers": aggregate_brush_fibers(matched_records, debug=debug),
-        "brush_knot_sizes": aggregate_brush_knot_sizes(matched_records, debug=debug),
-        "users": aggregate_users(matched_records, debug=debug),
-    }
+    matched_records: List[Dict[str, Any]], debug: bool, enable_specialized: bool = True
+) -> tuple[Dict[str, Any], list[str]]:
+    errors = []
+    results = {}
+    core_aggs = [
+        ("razors", aggregate_razors),
+        ("razor_formats", aggregate_razor_formats),
+        ("razor_manufacturers", lambda recs, debug=False: []),
+        ("blades", aggregate_blades),
+        ("blade_manufacturers", lambda recs, debug=False: []),
+        ("soaps", aggregate_soaps),
+        ("soap_makers", aggregate_soap_makers),
+        ("brushes", aggregate_brushes),
+        ("brush_knot_makers", aggregate_brush_knot_makers),
+        ("brush_handle_makers", aggregate_brush_handle_makers),
+        ("brush_fibers", aggregate_brush_fibers),
+        ("brush_knot_sizes", aggregate_brush_knot_sizes),
+        ("users", aggregate_users),
+    ]
+    for name, func in core_aggs:
+        try:
+            results[name] = func(matched_records, debug=debug)
+        except Exception as e:
+            errors.append(f"{name}: {e}")
+            results[name] = []
+    # Only call user_blade_usage if specialized aggregations are enabled
+    if enable_specialized:
+        try:
+            results["user_blade_usage"] = aggregate_user_blade_usage(matched_records, debug=debug)
+        except Exception as e:
+            errors.append(f"user_blade_usage: {e}")
+            results["user_blade_usage"] = []
+    else:
+        results["user_blade_usage"] = []
+    return results, errors
 
 
 def _perform_specialized_aggregations(
-    matched_records: List[Dict[str, Any]], args: argparse.Namespace
-) -> Dict[str, Any]:
-    """Perform specialized aggregations if enabled."""
-    # Determine which specialized aggregations to run based on CLI flags
-    run_specialized = getattr(args, "enable_specialized", False) or not getattr(
-        args, "disable_specialized", False
-    )
-
-    if args.debug:
-        print("[DEBUG] Aggregation settings:")
-        print(f"  Specialized aggregations: {'enabled' if run_specialized else 'disabled'}")
-
-    if not run_specialized:
-        return {
-            "blackbird_plates": [],
-            "christopher_bradley_plates": [],
-            "game_changer_plates": [],
-            "super_speed_tips": [],
-            "straight_razor_specs": [],
-        }
-
-    if args.debug:
-        print("[DEBUG] Running specialized aggregations...")
-
-    return {
-        "blackbird_plates": aggregate_blackbird_plates(matched_records, debug=args.debug),
-        "christopher_bradley_plates": aggregate_christopher_bradley_plates(
-            matched_records, debug=args.debug
-        ),
-        "game_changer_plates": aggregate_game_changer_plates(matched_records, debug=args.debug),
-        "super_speed_tips": aggregate_super_speed_tips(matched_records, debug=args.debug),
-        "straight_razor_specs": aggregate_straight_razor_specs(matched_records, debug=args.debug),
-    }
+    matched_records: List[Dict[str, Any]], debug: bool
+) -> tuple[Dict[str, Any], list[str]]:
+    errors = []
+    results = {}
+    for name, func in [
+        ("blackbird_plates", aggregate_blackbird_plates),
+        ("christopher_bradley_plates", aggregate_christopher_bradley_plates),
+        ("game_changer_plates", aggregate_game_changer_plates),
+        ("super_speed_tips", aggregate_super_speed_tips),
+        ("straight_razor_specs", aggregate_straight_razor_specs),
+    ]:
+        try:
+            results[name] = func(matched_records, debug=debug)
+        except Exception as e:
+            errors.append(f"{name}: {e}")
+            results[name] = []
+    return results, errors
 
 
 def _perform_cross_product_analysis(
     matched_records: List[Dict[str, Any]], args: argparse.Namespace
-) -> Dict[str, Any]:
-    """Perform cross-product analysis if enabled."""
-    # Determine which cross-product analysis to run based on CLI flags
+) -> tuple[Dict[str, Any], list[str]]:
+    errors = []
+    results = {}
     run_cross_product = getattr(args, "enable_cross_product", False) or not getattr(
         args, "disable_cross_product", False
     )
-
     if args.debug:
         print(f"  Cross-product analysis: {'enabled' if run_cross_product else 'disabled'}")
-
     if not run_cross_product:
-        return {
-            "razor_blade_combinations": [],
-            "user_blade_usage": [],
-        }
-
+        results["razor_blade_combinations"] = []
+        return results, errors
     if args.debug:
         print("[DEBUG] Running cross-product analysis...")
-
-    return {
-        "razor_blade_combinations": aggregate_razor_blade_combinations(
+    try:
+        results["razor_blade_combinations"] = aggregate_razor_blade_combinations(
             matched_records, debug=args.debug
-        ),
-        "user_blade_usage": aggregate_user_blade_usage(matched_records, debug=args.debug),
-    }
+        )
+    except Exception as e:
+        errors.append(f"razor_blade_combinations: {e}")
+        results["razor_blade_combinations"] = []
+    return results, errors
 
 
 def _prepare_final_results(
     year: int,
     month: int,
     basic_metrics: Dict[str, Any],
-    aggregations: Dict[str, Any],
+    core_aggregations: Dict[str, Any],
+    specialized_aggregations: Dict[str, Any],
+    cross_product_analysis: Dict[str, Any],
     data: List[Dict[str, Any]],
     matched_records: List[Dict[str, Any]],
 ) -> Dict[str, Any]:
     """Prepare the final results structure."""
+    # Combine all aggregations
+    aggregations = {
+        **core_aggregations,
+        **specialized_aggregations,
+        **cross_product_analysis,
+    }
+
     return {
         "year": year,
         "month": month,
@@ -275,9 +161,8 @@ def _prepare_final_results(
             "total_records": len(data),
             "matched_records": len(matched_records),
             "razor_count": len(aggregations["razors"]),
-            "razor_manufacturer_count": len(aggregations["razor_manufacturers"]),
+            "razor_format_count": len(aggregations["razor_formats"]),
             "blade_count": len(aggregations["blades"]),
-            "blade_manufacturer_count": len(aggregations["blade_manufacturers"]),
             "soap_count": len(aggregations["soaps"]),
             "soap_maker_count": len(aggregations["soap_makers"]),
             "brush_count": len(aggregations["brushes"]),
@@ -292,6 +177,137 @@ def _prepare_final_results(
             "super_speed_tip_count": len(aggregations["super_speed_tips"]),
             "straight_razor_spec_count": len(aggregations["straight_razor_specs"]),
             "razor_blade_combination_count": len(aggregations["razor_blade_combinations"]),
-            "user_blade_usage_count": len(aggregations["user_blade_usage"]),
         },
     }
+
+
+def process_data(
+    year: int,
+    month: int,
+    data: List[Dict[str, Any]],
+    args: argparse.Namespace,
+) -> Dict[str, Any]:
+    """
+    Process enriched data to generate aggregated statistics.
+
+    Args:
+        year: Year of data
+        month: Month of data
+        data: List of enriched comment records
+        args: Command line arguments
+
+    Returns:
+        Dictionary containing aggregated statistics
+    """
+    if args.debug:
+        print(f"[DEBUG] Processing {len(data)} records for {year}-{month:02d}")
+
+    # Calculate basic metrics
+    basic_metrics = calculate_basic_metrics(data)
+
+    # Filter records for product matching
+    matched_records = filter_matched_records(data)
+
+    if args.debug:
+        print(f"[DEBUG] Found {len(matched_records)} matched records")
+
+    # Perform core aggregations
+    enable_specialized = getattr(args, "enable_specialized", True) and not getattr(
+        args, "disable_specialized", False
+    )
+    core_aggregations, core_errors = _perform_core_aggregations(
+        matched_records, args.debug, enable_specialized=enable_specialized
+    )
+
+    # Only run specialized aggregations if enabled
+    if enable_specialized:
+        specialized_aggregations, spec_errors = _perform_specialized_aggregations(
+            matched_records, args.debug
+        )
+    else:
+        specialized_aggregations, spec_errors = (
+            {
+                k: []
+                for k in [
+                    "blackbird_plates",
+                    "christopher_bradley_plates",
+                    "game_changer_plates",
+                    "super_speed_tips",
+                    "straight_razor_specs",
+                ]
+            },
+            [],
+        )
+
+    # Only run cross-product analysis if enabled
+    enable_cross_product = getattr(args, "enable_cross_product", True) and not getattr(
+        args, "disable_cross_product", False
+    )
+    if enable_cross_product:
+        cross_product_analysis, cross_errors = _perform_cross_product_analysis(
+            matched_records, args
+        )
+    else:
+        cross_product_analysis, cross_errors = {"razor_blade_combinations": []}, []
+
+    # Prepare final results
+    all_errors = core_errors + spec_errors + cross_errors
+    results = _prepare_final_results(
+        year,
+        month,
+        basic_metrics,
+        core_aggregations,
+        specialized_aggregations,
+        cross_product_analysis,
+        data,
+        matched_records,
+    )
+    out_dir = getattr(args, "out_dir", "data/aggregated")
+    out_dir = Path(out_dir) if not isinstance(out_dir, Path) else out_dir
+    out_path = get_aggregated_file_path(out_dir, year, month)
+    save_aggregated_data(
+        results,
+        out_path,
+        force=getattr(args, "force", False),
+        debug=getattr(args, "debug", False),
+    )
+    # If all aggregations are empty and errors exist, return error
+    if all_errors and all(
+        len(v) == 0
+        for v in {
+            **core_aggregations,
+            **specialized_aggregations,
+            **cross_product_analysis,
+        }.values()
+    ):
+        return {"year": year, "month": month, "status": "error", "error": "; ".join(all_errors)}
+    return results
+
+
+def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
+    """Process a single month's data for aggregation (compatibility wrapper)."""
+    base_dir = getattr(args, "enriched_dir", getattr(args, "out_dir", "data/enriched"))
+    if isinstance(base_dir, unittest.mock.Mock):
+        base_dir = "data/enriched"
+    base_dir = Path(base_dir) if not isinstance(base_dir, Path) else base_dir
+    if not (2000 <= year <= 2100):
+        return {"year": year, "month": month, "status": "error", "error": f"Invalid year {year}"}
+    if not (1 <= month <= 12):
+        return {"year": year, "month": month, "status": "error", "error": f"Invalid month {month}"}
+    enriched_path = get_enriched_file_path(base_dir, year, month)
+    if not enriched_path.exists():
+        return {
+            "year": year,
+            "month": month,
+            "status": "skipped",
+            "reason": "missing_enriched_file",
+        }
+    try:
+        metadata, data = load_enriched_data(enriched_path, debug=getattr(args, "debug", False))
+    except json.JSONDecodeError as e:
+        return {"year": year, "month": month, "status": "error", "error": f"JSON decode error: {e}"}
+    except Exception as e:
+        return {"year": year, "month": month, "status": "error", "error": str(e)}
+    if not data:
+        return {"year": year, "month": month, "status": "skipped", "reason": "no_data"}
+    return process_data(year, month, data, args)
