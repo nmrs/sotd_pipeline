@@ -7,48 +7,48 @@ Build the report phase of the SOTD pipeline that generates statistical analysis 
 
 ### Phase 1: Foundation & Core Structure
 
-- [ ] **Step 1: Basic CLI Structure**
-  - [ ] Create `sotd/report/run.py` with main CLI entry point
-  - [ ] Follow same argument pattern as other phases (--month, --type, --out-dir, --debug, --force)
-  - [ ] Add basic argument parsing and validation
-  - [ ] Add placeholder for main processing logic
-  - [ ] Include proper imports and type hints
-  - [ ] Follow existing code style (Black formatting, 100 char line length)
-  - [ ] Test basic argument parsing
+- [x] **Step 1: Basic CLI Structure**
+  - [x] Create `sotd/report/run.py` with main CLI entry point
+  - [x] Follow same argument pattern as other phases (--month, --type, --out-dir, --debug, --force)
+  - [x] Add basic argument parsing and validation
+  - [x] Add placeholder for main processing logic
+  - [x] Include proper imports and type hints
+  - [x] Follow existing code style (Black formatting, 100 char line length)
+  - [x] Test basic argument parsing
 
-- [ ] **Step 2: Data Loading Module**
-  - [ ] Create `sotd/report/load.py` module
-  - [ ] Function to load aggregated JSON data from `data/aggregated/YYYY-MM.json`
-  - [ ] Function to load historical data for delta calculations
-  - [ ] Validate JSON structure matches expected aggregated data format
-  - [ ] Extract metadata and data sections
-  - [ ] Handle missing files gracefully with clear error messages
-  - [ ] Return structured data for processing
-  - [ ] Include proper error handling and validation
-  - [ ] Add type hints and docstrings
-  - [ ] Test with sample aggregated data
+- [x] **Step 2: Data Loading Module**
+  - [x] Create `sotd/report/load.py` module
+  - [x] Function to load aggregated JSON data from `data/aggregated/YYYY-MM.json`
+  - [x] Function to load historical data for delta calculations
+  - [x] Validate JSON structure matches expected aggregated data format
+  - [x] Extract metadata and data sections
+  - [x] Handle missing files gracefully with clear error messages
+  - [x] Return structured data for processing
+  - [x] Include proper error handling and validation
+  - [x] Add type hints and docstrings
+  - [x] Test with sample aggregated data
 
-- [ ] **Step 3: Core Report Generation Logic**
-  - [ ] Create `sotd/report/process.py` module
-  - [ ] Implement base report generator class
-  - [ ] Function to generate report header with dynamic content
-  - [ ] Function to generate observations placeholder
-  - [ ] Function to generate notes & caveats section
-  - [ ] Handle report type selection (hardware vs software)
-  - [ ] Include proper error handling and validation
-  - [ ] Add type hints and docstrings
-  - [ ] Test with sample aggregated data
+- [x] **Step 3: Core Report Generation Logic**
+  - [x] Create `sotd/report/process.py` module
+  - [x] Implement base report generator class
+  - [x] Function to generate report header with dynamic content
+  - [x] Function to generate observations placeholder
+  - [x] Function to generate notes & caveats section
+  - [x] Handle report type selection (hardware vs software)
+  - [x] Include proper error handling and validation
+  - [x] Add type hints and docstrings
+  - [x] Test with sample aggregated data
 
-- [ ] **Step 4: Basic Table Generator**
-  - [ ] Create `sotd/report/table_generators/` directory
-  - [ ] Create `sotd/report/table_generators/base.py` with base table generator
-  - [ ] Implement generic table generation logic using pandas
-  - [ ] Function to create markdown tables with proper formatting
-  - [ ] Handle column alignment and data types
-  - [ ] Implement configurable row limits with tie-breaking
-  - [ ] Include proper error handling and validation
-  - [ ] Add type hints and docstrings
-  - [ ] Test with sample aggregated data
+- [x] **Step 4: Basic Table Generator**
+  - [x] Create `sotd/report/table_generators/` directory
+  - [x] Create `sotd/report/table_generators/base.py` with base table generator
+  - [x] Implement generic table generation logic using pandas
+  - [x] Function to create markdown tables with proper formatting
+  - [x] Handle column alignment and data types
+  - [x] Implement configurable row limits with tie-breaking
+  - [x] Include proper error handling and validation
+  - [x] Add type hints and docstrings
+  - [x] Test with sample aggregated data
 
 - [ ] **Step 5: CLI Integration**
   - [ ] Wire up command line interface with report generation logic
