@@ -73,7 +73,7 @@ def save_phase_output(data: dict, output_path: Path, phase_name: str):
 - Normalize product names consistently across phases
 - Use strategy pattern for complex matching scenarios
 - Cache compiled regex patterns and loaded catalogs
-- **Preserve all catalog specifications**: Matchers must include all fields from YAML catalog entries (e.g., straight razor grind, width, point type) in match output, not just brand/model/format
+- **Preserve all catalog specifications**: Matchers must include all fields from YAML catalog entries (e.g., straight razor grind, width, point type) in match output, not just basic brand/model/format fields
 
 ## YAML Catalog Structure
 Maintain consistent structure in product catalogs:
@@ -90,7 +90,7 @@ Brand Name:
   default_format: Soap
 ```
 
-## Error Handling in Data Processing
+## Batch Processing Patterns
 ```python
 def process_batch(items: list, batch_size: int = 1000):
     """Process items in batches to manage memory usage."""
