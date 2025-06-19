@@ -122,6 +122,10 @@ def aggregate_razors(records: List[Dict[str, Any]], debug: bool = False) -> List
     # Convert back to list of dictionaries
     results = grouped.to_dict("records")
 
+    # Add position information (1-based indexing)
+    for i, item in enumerate(results):
+        item["position"] = i + 1
+
     if debug:
         print(f"[DEBUG] Aggregated {len(results)} razors ({invalid_records} invalid records)")
 
@@ -238,6 +242,10 @@ def aggregate_blades(records: List[Dict[str, Any]], debug: bool = False) -> List
     # Convert back to list of dictionaries
     results = grouped.to_dict("records")
 
+    # Add position information (1-based indexing)
+    for i, item in enumerate(results):
+        item["position"] = i + 1
+
     if debug:
         print(f"[DEBUG] Aggregated {len(results)} blades ({invalid_records} invalid records)")
 
@@ -353,6 +361,10 @@ def aggregate_soaps(records: List[Dict[str, Any]], debug: bool = False) -> List[
     # Convert back to list of dictionaries
     results = grouped.to_dict("records")
 
+    # Add position information (1-based indexing)
+    for i, item in enumerate(results):
+        item["position"] = i + 1
+
     if debug:
         print(f"[DEBUG] Aggregated {len(results)} soaps ({invalid_records} invalid records)")
 
@@ -466,6 +478,10 @@ def aggregate_brushes(records: List[Dict[str, Any]], debug: bool = False) -> Lis
 
     # Convert back to list of dictionaries
     results = grouped.to_dict("records")
+
+    # Add position information (1-based indexing)
+    for i, item in enumerate(results):
+        item["position"] = i + 1
 
     if debug:
         print(f"[DEBUG] Aggregated {len(results)} brushes ({invalid_records} invalid records)")

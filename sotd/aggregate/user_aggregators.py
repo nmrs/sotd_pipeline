@@ -146,6 +146,10 @@ def aggregate_users(records: List[Dict[str, Any]], debug: bool = False) -> List[
     # Sort by shaves (descending), then by missed days (ascending)
     results.sort(key=lambda x: (-x["shaves"], x["missed_days"]))
 
+    # Add position information (1-based indexing)
+    for i, item in enumerate(results):
+        item["position"] = i + 1
+
     if debug:
         print(f"[DEBUG] Aggregated {len(results)} users ({invalid_records} invalid records)")
         print(f"[DEBUG] Total days in month: {total_days_in_month}")
@@ -274,6 +278,10 @@ def aggregate_user_blade_usage(
 
     # Convert back to list of dictionaries
     results = grouped.to_dict("records")
+
+    # Add position information (1-based indexing)
+    for i, item in enumerate(results):
+        item["position"] = i + 1
 
     if debug:
         print(

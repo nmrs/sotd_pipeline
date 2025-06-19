@@ -79,7 +79,14 @@ class UserAggregator(BaseAggregator):
         if "products_used" in grouped:
             grouped = grouped.drop(columns=["products_used"])
 
-        return list(grouped.to_dict("records"))  # type: ignore
+        # Convert to list of dictionaries
+        results = list(grouped.to_dict("records"))  # type: ignore
+
+        # Add position information (1-based indexing)
+        for i, item in enumerate(results):
+            item["position"] = i + 1
+
+        return results  # type: ignore
 
 
 def aggregate_users(records: list[dict[str, Any]], debug: bool = False) -> list[dict[str, Any]]:

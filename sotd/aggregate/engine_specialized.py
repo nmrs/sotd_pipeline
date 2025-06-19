@@ -47,7 +47,15 @@ def aggregate_razor_manufacturers(
     grouped.columns = ["brand", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
-    return list(grouped.to_dict("records"))  # type: ignore
+
+    # Convert to list and add position information
+    results = list(grouped.to_dict("records"))  # type: ignore
+
+    # Add position information (1-based indexing)
+    for i, item in enumerate(results):
+        item["position"] = i + 1
+
+    return results  # type: ignore
 
 
 def aggregate_blade_manufacturers(
@@ -90,7 +98,15 @@ def aggregate_blade_manufacturers(
     grouped.columns = ["brand", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
-    return list(grouped.to_dict("records"))  # type: ignore
+
+    # Convert to list and add position information
+    results = list(grouped.to_dict("records"))  # type: ignore
+
+    # Add position information (1-based indexing)
+    for i, item in enumerate(results):
+        item["position"] = i + 1
+
+    return results  # type: ignore
 
 
 def aggregate_soap_makers(
@@ -133,7 +149,15 @@ def aggregate_soap_makers(
     grouped.columns = ["maker", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
-    return list(grouped.to_dict("records"))  # type: ignore
+
+    # Convert to list and add position information
+    results = list(grouped.to_dict("records"))  # type: ignore
+
+    # Add position information (1-based indexing)
+    for i, item in enumerate(results):
+        item["position"] = i + 1
+
+    return results  # type: ignore
 
 
 def aggregate_brush_knot_makers(
@@ -176,7 +200,15 @@ def aggregate_brush_knot_makers(
     grouped.columns = ["brand", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
-    return list(grouped.to_dict("records"))  # type: ignore
+
+    # Convert to list and add position information
+    results = list(grouped.to_dict("records"))  # type: ignore
+
+    # Add position information (1-based indexing)
+    for i, item in enumerate(results):
+        item["position"] = i + 1
+
+    return results  # type: ignore
 
 
 def aggregate_brush_handle_makers(
@@ -219,7 +251,15 @@ def aggregate_brush_handle_makers(
     grouped.columns = ["handle_maker", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
-    return list(grouped.to_dict("records"))  # type: ignore
+
+    # Convert to list and add position information
+    results = list(grouped.to_dict("records"))  # type: ignore
+
+    # Add position information (1-based indexing)
+    for i, item in enumerate(results):
+        item["position"] = i + 1
+
+    return results  # type: ignore
 
 
 def aggregate_brush_fibers(
@@ -262,7 +302,15 @@ def aggregate_brush_fibers(
     grouped.columns = ["fiber", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
-    return list(grouped.to_dict("records"))  # type: ignore
+
+    # Convert to list and add position information
+    results = list(grouped.to_dict("records"))  # type: ignore
+
+    # Add position information (1-based indexing)
+    for i, item in enumerate(results):
+        item["position"] = i + 1
+
+    return results  # type: ignore
 
 
 def aggregate_brush_knot_sizes(

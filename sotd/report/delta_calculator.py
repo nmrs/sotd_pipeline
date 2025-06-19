@@ -1,0 +1,250 @@
+#!/usr/bin/env python3
+"""Delta calculation functionality for trend analysis in reports."""
+
+from typing import Any, Dict, List, Optional, Tuple
+
+
+class DeltaCalculator:
+    """Calculate position-based deltas between current and historical data."""
+
+    def __init__(self, debug: bool = False):
+        """Initialize the delta calculator.
+
+        Args:
+            debug: Enable debug logging
+        """
+        self.debug = debug
+
+    def calculate_deltas(
+        self,
+        current_data: List[Dict[str, Any]],
+        historical_data: List[Dict[str, Any]],
+        name_key: str = "name",
+        max_items: int = 20,
+    ) -> List[Dict[str, Any]]:
+        """Calculate position deltas between current and historical data.
+
+        Args:
+            current_data: Current period data (with position field)
+            historical_data: Historical period data (with position field)
+            name_key: Key to use for matching items between datasets
+            max_items: Maximum number of items to process from current data
+
+        Returns:
+            List of current data items with delta information added
+        """
+        if not isinstance(current_data, list):
+            raise ValueError(f"Expected list for current_data, got {type(current_data)}")
+
+        if not isinstance(historical_data, list):
+            raise ValueError(f"Expected list for historical_data, got {type(historical_data)}")
+
+        if not current_data:
+            return []
+
+        # Create lookup for historical positions
+        historical_positions = {}
+        for item in historical_data:
+            if not isinstance(item, dict):
+                if self.debug:
+                    print("[DEBUG] Skipping invalid historical item")
+                continue
+
+            name = item.get(name_key)
+            position = item.get("position")
+            if not name or position is None:
+                if self.debug:
+                    print(f"[DEBUG] Historical item missing {name_key} or position")
+                continue
+
+            historical_positions[name] = position
+
+        if self.debug:
+            print(
+                f"[DEBUG] Created historical position lookup with {len(historical_positions)} items"
+            )
+
+        # Calculate deltas for current data
+        results = []
+        for item in current_data[:max_items]:
+            if not isinstance(item, dict):
+                if self.debug:
+                    print("[DEBUG] Skipping invalid current item")
+                continue
+
+            name = item.get(name_key)
+            current_position = item.get("position")
+            if not name or current_position is None:
+                if self.debug:
+                    print(f"[DEBUG] Current item missing {name_key} or position")
+                continue
+
+            historical_position = historical_positions.get(name)
+
+            # Calculate delta
+            if historical_position is not None:
+                delta = historical_position - current_position
+                delta_symbol = self._get_delta_symbol(delta)
+                delta_text = f"{delta:+d}" if delta != 0 else "0"
+            else:
+                delta = None
+                delta_symbol = "↔"
+                delta_text = "n/a"
+
+            # Create result item with delta information
+            result_item = item.copy()
+            result_item["delta"] = delta
+            result_item["delta_symbol"] = delta_symbol
+            result_item["delta_text"] = delta_text
+
+            results.append(result_item)
+
+            if self.debug:
+                print(
+                    f"[DEBUG] {name}: position {current_position}, "
+                    f"historical {historical_position}, delta {delta_text} {delta_symbol}"
+                )
+
+        return results
+
+    def _get_delta_symbol(self, delta: Optional[int]) -> str:
+        """Get Unicode arrow symbol for delta value.
+
+        Args:
+            delta: Position delta (positive = moved up, negative = moved down)
+
+        Returns:
+            Unicode arrow symbol
+        """
+        if delta is None:
+            return "↔"  # No change or new item
+        elif delta > 0:
+            return "↑"  # Moved up (better position)
+        elif delta < 0:
+            return "↓"  # Moved down (worse position)
+        else:
+            return "↔"  # No change
+
+    def calculate_category_deltas(
+        self,
+        current_data: Dict[str, Any],
+        historical_data: Dict[str, Any],
+        categories: List[str],
+        max_items: int = 20,
+    ) -> Dict[str, List[Dict[str, Any]]]:
+        """Calculate deltas for multiple categories.
+
+        Args:
+            current_data: Current period data dictionary
+            historical_data: Historical period data dictionary
+            categories: List of category names to process
+            max_items: Maximum number of items per category
+
+        Returns:
+            Dictionary mapping category names to lists with delta information
+        """
+        if not isinstance(current_data, dict):
+            raise ValueError(f"Expected dict for current_data, got {type(current_data)}")
+
+        if not isinstance(historical_data, dict):
+            raise ValueError(f"Expected dict for historical_data, got {type(historical_data)}")
+
+        results = {}
+
+        for category in categories:
+            current_category_data = current_data.get(category, [])
+            historical_category_data = historical_data.get(category, [])
+
+            if not isinstance(current_category_data, list):
+                if self.debug:
+                    print(f"[DEBUG] Skipping invalid category {category} in current data")
+                continue
+
+            if not isinstance(historical_category_data, list):
+                if self.debug:
+                    print(f"[DEBUG] Skipping invalid category {category} in historical data")
+                continue
+
+            try:
+                category_deltas = self.calculate_deltas(
+                    current_category_data, historical_category_data, max_items=max_items
+                )
+                results[category] = category_deltas
+
+                if self.debug:
+                    print(f"[DEBUG] Calculated deltas for {category}: {len(category_deltas)} items")
+
+            except Exception as e:
+                if self.debug:
+                    print(f"[DEBUG] Error calculating deltas for {category}: {e}")
+                results[category] = current_category_data[:max_items]
+
+        return results
+
+    def format_delta_column(
+        self, items: List[Dict[str, Any]], delta_key: str = "delta_text"
+    ) -> List[str]:
+        """Format delta values for table display.
+
+        Args:
+            items: List of items with delta information
+            delta_key: Key containing the delta text
+
+        Returns:
+            List of formatted delta strings
+        """
+        formatted_deltas = []
+
+        for item in items:
+            if not isinstance(item, dict):
+                formatted_deltas.append("n/a")
+                continue
+
+            delta_text = item.get(delta_key, "n/a")
+            delta_symbol = item.get("delta_symbol", "↔")
+
+            if delta_text == "n/a":
+                formatted_deltas.append("n/a")
+            else:
+                formatted_deltas.append(f"{delta_text} {delta_symbol}")
+
+        return formatted_deltas
+
+
+def calculate_deltas_for_period(
+    current_data: Dict[str, Any],
+    comparison_data: Dict[str, Tuple[Dict[str, Any], Dict[str, Any]]],
+    period: str,
+    categories: List[str],
+    max_items: int = 20,
+    debug: bool = False,
+) -> Optional[Dict[str, List[Dict[str, Any]]]]:
+    """Calculate deltas for a specific comparison period.
+
+    Args:
+        current_data: Current period data
+        comparison_data: Dictionary of comparison period data
+        period: Period description (e.g., "previous month", "previous year")
+        categories: List of categories to process
+        max_items: Maximum items per category
+        debug: Enable debug logging
+
+    Returns:
+        Dictionary of category deltas or None if period not found
+    """
+    if period not in comparison_data:
+        if debug:
+            print(f"[DEBUG] Comparison period '{period}' not found in available data")
+        return None
+
+    historical_metadata, historical_data = comparison_data[period]
+
+    if not isinstance(historical_data, dict):
+        if debug:
+            print(f"[DEBUG] Invalid historical data structure for period '{period}'")
+        return None
+
+    calculator = DeltaCalculator(debug=debug)
+    return calculator.calculate_category_deltas(
+        current_data, historical_data, categories, max_items=max_items
+    )

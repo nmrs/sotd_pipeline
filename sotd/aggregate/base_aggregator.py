@@ -147,7 +147,7 @@ class BaseAggregator(ABC):
             grouped: Grouped DataFrame from pandas aggregation
 
         Returns:
-            List of processed results
+            List of processed results with position information
         """
         # Rename columns to standard format
         grouped.columns = [self.get_group_column(), "shaves", "unique_users"]
@@ -158,7 +158,15 @@ class BaseAggregator(ABC):
         # Sort by shaves (descending), then by unique_users (descending)
         grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
 
-        return list(grouped.to_dict("records"))  # type: ignore
+        # Convert to list of dictionaries
+        results = list(grouped.to_dict("records"))  # type: ignore
+
+        # Add position information (1-based indexing)
+        for i, item in enumerate(results):
+            item["position"] = i + 1
+
+        # Cast to proper type for type checker
+        return [dict(item) for item in results]  # type: ignore
 
     @abstractmethod
     def get_operation_name(self) -> str:
