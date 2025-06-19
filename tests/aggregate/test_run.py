@@ -633,7 +633,7 @@ class TestMain:
         import datetime as real_datetime
 
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            with patch("sotd.aggregate.run.datetime") as mock_datetime:
+            with patch("sotd.aggregate.cli.datetime") as mock_datetime:
                 mock_datetime.datetime.now.return_value = real_datetime.datetime(2025, 4, 1)
 
                 main(["--out-dir", "data"])
