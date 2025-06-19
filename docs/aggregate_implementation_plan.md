@@ -187,36 +187,38 @@ sotd/aggregate/aggregators/
 **✅ Phase 5: Brush Specialized Aggregators - COMPLETE**
 
 ### Phase 6: Razor Specialized Aggregators
-- [ ] **6.1 Blackbird Plate Aggregator (`aggregators/razor_specialized/blackbird_plate_aggregator.py`)**
-  - [ ] Implement Blackbird plate aggregation
-  - [ ] Extract plate from razor.enriched.plate
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **6.1 Blackbird Plate Aggregator (`aggregators/razor_specialized/blackbird_plate_aggregator.py`)**
+  - [x] Implement Blackbird plate aggregation
+  - [x] Extract plate from razor.enriched.plate
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
-- [ ] **6.2 Christopher Bradley Plate Aggregator (`aggregators/razor_specialized/christopher_bradley_plate_aggregator.py`)**
-  - [ ] Implement Christopher Bradley plate aggregation
-  - [ ] Extract plate_type and plate_level from razor.enriched
-  - [ ] Combine into composite key
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **6.2 Christopher Bradley Plate Aggregator (`aggregators/razor_specialized/christopher_bradley_plate_aggregator.py`)**
+  - [x] Implement Christopher Bradley plate aggregation
+  - [x] Extract plate_type and plate_level from razor.enriched
+  - [x] Combine into composite key
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
-- [ ] **6.3 Game Changer Plate Aggregator (`aggregators/razor_specialized/game_changer_plate_aggregator.py`)**
-  - [ ] Implement Game Changer plate aggregation
-  - [ ] Extract gap from razor.enriched.gap
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **6.3 Game Changer Plate Aggregator (`aggregators/razor_specialized/game_changer_plate_aggregator.py`)**
+  - [x] Implement Game Changer plate aggregation
+  - [x] Extract gap from razor.enriched.gap
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
-- [ ] **6.4 Super Speed Tip Aggregator (`aggregators/razor_specialized/super_speed_tip_aggregator.py`)**
-  - [ ] Implement Super Speed tip aggregation
-  - [ ] Extract super_speed_tip from razor.enriched.super_speed_tip
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **6.4 Super Speed Tip Aggregator (`aggregators/razor_specialized/super_speed_tip_aggregator.py`)**
+  - [x] Implement Super Speed tip aggregation
+  - [x] Extract super_speed_tip from razor.enriched.super_speed_tip
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
-- [ ] **6.5 Straight Razor Spec Aggregators**
-  - [ ] **Width Aggregator**: Extract width from razor.enriched.width
-  - [ ] **Grind Aggregator**: Extract grind from razor.enriched.grind
-  - [ ] **Point Aggregator**: Extract point from razor.enriched.point
-  - [ ] Each with position field and proper sorting
+- [x] **6.5 Straight Razor Spec Aggregators**
+  - [x] **Width Aggregator**: Extract width from razor.enriched.width
+  - [x] **Grind Aggregator**: Extract grind from razor.enriched.grind
+  - [x] **Point Aggregator**: Extract point from razor.enriched.point
+  - [x] Each with position field and proper sorting
+
+**✅ Phase 6: Razor Specialized Aggregators - COMPLETE**
 
 ### Phase 7: User Aggregators
 - [ ] **7.1 User Aggregator (`aggregators/users/user_aggregator.py`)**
