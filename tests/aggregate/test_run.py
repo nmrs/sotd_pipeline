@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 import pytest
 
-from sotd.aggregate.run import main, process_month, run_aggregate
+from sotd.aggregate.run import main, process_month, run_aggregate, run_benchmark
 
 
 class TestProcessMonth:
@@ -44,22 +44,22 @@ class TestProcessMonth:
         assert result["status"] == "skipped"
         assert result["reason"] == "missing_enriched_file"
 
-    @patch("sotd.aggregate.run.load_enriched_data")
-    @patch("sotd.aggregate.run.filter_matched_records")
-    @patch("sotd.aggregate.run.calculate_basic_metrics")
-    @patch("sotd.aggregate.run.aggregate_razors")
-    @patch("sotd.aggregate.run.aggregate_blades")
-    @patch("sotd.aggregate.run.aggregate_soaps")
-    @patch("sotd.aggregate.run.aggregate_brushes")
-    @patch("sotd.aggregate.run.aggregate_users")
-    @patch("sotd.aggregate.run.aggregate_blackbird_plates")
-    @patch("sotd.aggregate.run.aggregate_christopher_bradley_plates")
-    @patch("sotd.aggregate.run.aggregate_game_changer_plates")
-    @patch("sotd.aggregate.run.aggregate_super_speed_tips")
-    @patch("sotd.aggregate.run.aggregate_straight_razor_specs")
-    @patch("sotd.aggregate.run.aggregate_razor_blade_combinations")
-    @patch("sotd.aggregate.run.aggregate_user_blade_usage")
-    @patch("sotd.aggregate.run.save_aggregated_data")
+    @patch("sotd.aggregate.processor.load_enriched_data")
+    @patch("sotd.aggregate.processor.filter_matched_records")
+    @patch("sotd.aggregate.processor.calculate_basic_metrics")
+    @patch("sotd.aggregate.processor.aggregate_razors")
+    @patch("sotd.aggregate.processor.aggregate_blades")
+    @patch("sotd.aggregate.processor.aggregate_soaps")
+    @patch("sotd.aggregate.processor.aggregate_brushes")
+    @patch("sotd.aggregate.processor.aggregate_users")
+    @patch("sotd.aggregate.processor.aggregate_blackbird_plates")
+    @patch("sotd.aggregate.processor.aggregate_christopher_bradley_plates")
+    @patch("sotd.aggregate.processor.aggregate_game_changer_plates")
+    @patch("sotd.aggregate.processor.aggregate_super_speed_tips")
+    @patch("sotd.aggregate.processor.aggregate_straight_razor_specs")
+    @patch("sotd.aggregate.processor.aggregate_razor_blade_combinations")
+    @patch("sotd.aggregate.processor.aggregate_user_blade_usage")
+    @patch("sotd.aggregate.processor.save_aggregated_data")
     def test_specialized_aggregation_flags_handling(
         self,
         mock_save,
@@ -126,8 +126,8 @@ class TestProcessMonth:
             enriched_file.write_text('{"meta": {}, "data": []}')
 
             with (
-                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
-                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+                patch("sotd.aggregate.processor.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.processor.get_aggregated_file_path") as mock_aggregated_path,
             ):
                 mock_enriched_path.return_value = enriched_file
                 # Mock aggregated file to not exist (so it won't be skipped)
@@ -173,15 +173,15 @@ class TestProcessMonth:
 
                 assert result["status"] == "success"
 
-    @patch("sotd.aggregate.run.load_enriched_data")
-    @patch("sotd.aggregate.run.filter_matched_records")
-    @patch("sotd.aggregate.run.calculate_basic_metrics")
-    @patch("sotd.aggregate.run.aggregate_razors")
-    @patch("sotd.aggregate.run.aggregate_blades")
-    @patch("sotd.aggregate.run.aggregate_soaps")
-    @patch("sotd.aggregate.run.aggregate_brushes")
-    @patch("sotd.aggregate.run.aggregate_users")
-    @patch("sotd.aggregate.run.save_aggregated_data")
+    @patch("sotd.aggregate.processor.load_enriched_data")
+    @patch("sotd.aggregate.processor.filter_matched_records")
+    @patch("sotd.aggregate.processor.calculate_basic_metrics")
+    @patch("sotd.aggregate.processor.aggregate_razors")
+    @patch("sotd.aggregate.processor.aggregate_blades")
+    @patch("sotd.aggregate.processor.aggregate_soaps")
+    @patch("sotd.aggregate.processor.aggregate_brushes")
+    @patch("sotd.aggregate.processor.aggregate_users")
+    @patch("sotd.aggregate.processor.save_aggregated_data")
     def test_successful_processing(
         self,
         mock_save,
@@ -239,8 +239,8 @@ class TestProcessMonth:
             enriched_file.write_text('{"meta": {}, "data": []}')
 
             with (
-                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
-                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+                patch("sotd.aggregate.processor.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.processor.get_aggregated_file_path") as mock_aggregated_path,
             ):
                 mock_enriched_path.return_value = enriched_file
                 # Mock aggregated file to not exist (so it won't be skipped)
@@ -254,7 +254,7 @@ class TestProcessMonth:
         assert "aggregations" in result
         assert "summary" in result
 
-    @patch("sotd.aggregate.run.load_enriched_data")
+    @patch("sotd.aggregate.processor.load_enriched_data")
     def test_no_data_to_process(self, mock_load):
         """Test when there's no data to process."""
         mock_load.return_value = (
@@ -274,8 +274,8 @@ class TestProcessMonth:
             enriched_file.write_text('{"meta": {}, "data": []}')
 
             with (
-                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
-                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+                patch("sotd.aggregate.processor.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.processor.get_aggregated_file_path") as mock_aggregated_path,
             ):
                 mock_enriched_path.return_value = enriched_file
                 # Mock aggregated file to not exist
@@ -285,7 +285,7 @@ class TestProcessMonth:
         assert result["status"] == "skipped"
         assert result["reason"] == "no_data"
 
-    @patch("sotd.aggregate.run.load_enriched_data")
+    @patch("sotd.aggregate.processor.load_enriched_data")
     def test_file_not_found_error(self, mock_load):
         """Test handling of FileNotFoundError."""
         mock_load.side_effect = FileNotFoundError("File not found")
@@ -302,8 +302,8 @@ class TestProcessMonth:
             enriched_file.write_text('{"meta": {}, "data": []}')
 
             with (
-                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
-                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+                patch("sotd.aggregate.processor.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.processor.get_aggregated_file_path") as mock_aggregated_path,
             ):
                 mock_enriched_path.return_value = enriched_file
                 # Mock aggregated file to not exist
@@ -313,7 +313,7 @@ class TestProcessMonth:
         assert result["status"] == "error"
         assert "File not found" in result["error"]
 
-    @patch("sotd.aggregate.run.load_enriched_data")
+    @patch("sotd.aggregate.processor.load_enriched_data")
     def test_value_error(self, mock_load):
         """Test handling of ValueError."""
         mock_load.side_effect = ValueError("Data validation error")
@@ -330,8 +330,8 @@ class TestProcessMonth:
             enriched_file.write_text('{"meta": {}, "data": []}')
 
             with (
-                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
-                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+                patch("sotd.aggregate.processor.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.processor.get_aggregated_file_path") as mock_aggregated_path,
             ):
                 mock_enriched_path.return_value = enriched_file
                 # Mock aggregated file to not exist
@@ -341,7 +341,7 @@ class TestProcessMonth:
         assert result["status"] == "error"
         assert "Data validation error" in result["error"]
 
-    @patch("sotd.aggregate.run.load_enriched_data")
+    @patch("sotd.aggregate.processor.load_enriched_data")
     def test_json_decode_error(self, mock_load):
         """Test handling of JSONDecodeError."""
         import json
@@ -360,8 +360,8 @@ class TestProcessMonth:
             enriched_file.write_text('{"meta": {}, "data": []}')
 
             with (
-                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
-                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+                patch("sotd.aggregate.processor.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.processor.get_aggregated_file_path") as mock_aggregated_path,
             ):
                 mock_enriched_path.return_value = enriched_file
                 # Mock aggregated file to not exist
@@ -371,7 +371,7 @@ class TestProcessMonth:
         assert result["status"] == "error"
         assert "JSON decode error" in result["error"]
 
-    @patch("sotd.aggregate.run.load_enriched_data")
+    @patch("sotd.aggregate.processor.load_enriched_data")
     def test_os_error(self, mock_load):
         """Test handling of OSError."""
         mock_load.side_effect = OSError("File system error")
@@ -388,8 +388,8 @@ class TestProcessMonth:
             enriched_file.write_text('{"meta": {}, "data": []}')
 
             with (
-                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
-                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+                patch("sotd.aggregate.processor.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.processor.get_aggregated_file_path") as mock_aggregated_path,
             ):
                 mock_enriched_path.return_value = enriched_file
                 # Mock aggregated file to not exist
@@ -399,7 +399,7 @@ class TestProcessMonth:
         assert result["status"] == "error"
         assert "File system error" in result["error"]
 
-    @patch("sotd.aggregate.run.load_enriched_data")
+    @patch("sotd.aggregate.processor.load_enriched_data")
     def test_unexpected_error(self, mock_load):
         """Test handling of unexpected errors."""
         mock_load.side_effect = Exception("Unexpected error")
@@ -416,8 +416,8 @@ class TestProcessMonth:
             enriched_file.write_text('{"meta": {}, "data": []}')
 
             with (
-                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
-                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+                patch("sotd.aggregate.processor.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.processor.get_aggregated_file_path") as mock_aggregated_path,
             ):
                 mock_enriched_path.return_value = enriched_file
                 # Mock aggregated file to not exist
@@ -427,15 +427,15 @@ class TestProcessMonth:
         assert result["status"] == "error"
         assert "Unexpected error" in result["error"]
 
-    @patch("sotd.aggregate.run.load_enriched_data")
-    @patch("sotd.aggregate.run.filter_matched_records")
-    @patch("sotd.aggregate.run.calculate_basic_metrics")
-    @patch("sotd.aggregate.run.aggregate_razors")
-    @patch("sotd.aggregate.run.aggregate_blades")
-    @patch("sotd.aggregate.run.aggregate_soaps")
-    @patch("sotd.aggregate.run.aggregate_brushes")
-    @patch("sotd.aggregate.run.aggregate_users")
-    @patch("sotd.aggregate.run.save_aggregated_data")
+    @patch("sotd.aggregate.processor.load_enriched_data")
+    @patch("sotd.aggregate.processor.filter_matched_records")
+    @patch("sotd.aggregate.processor.calculate_basic_metrics")
+    @patch("sotd.aggregate.processor.aggregate_razors")
+    @patch("sotd.aggregate.processor.aggregate_blades")
+    @patch("sotd.aggregate.processor.aggregate_soaps")
+    @patch("sotd.aggregate.processor.aggregate_brushes")
+    @patch("sotd.aggregate.processor.aggregate_users")
+    @patch("sotd.aggregate.processor.save_aggregated_data")
     def test_aggregation_errors_handled(
         self,
         mock_save,
@@ -494,8 +494,8 @@ class TestProcessMonth:
             enriched_file.write_text('{"meta": {}, "data": []}')
 
             with (
-                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
-                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+                patch("sotd.aggregate.processor.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.processor.get_aggregated_file_path") as mock_aggregated_path,
             ):
                 mock_enriched_path.return_value = enriched_file
                 # Mock aggregated file to not exist
