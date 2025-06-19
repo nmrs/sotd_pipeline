@@ -82,7 +82,59 @@ def optimize_dataframe_operations(df: pd.DataFrame, debug: bool = False) -> pd.D
                     print(f"[DEBUG] Could not optimize column '{col}': {e}")
                 continue
 
+    # Optimize memory usage by downcasting numeric types
+    for col in df.columns:
+        if df[col].dtype in ["int64", "float64"]:
+            try:
+                if df[col].dtype == "int64":
+                    # Downcast integers
+                    df[col] = pd.to_numeric(df[col], downcast="integer")
+                elif df[col].dtype == "float64":
+                    # Downcast floats
+                    df[col] = pd.to_numeric(df[col], downcast="float")
+                if debug:
+                    print(f"[DEBUG] Downcasted column '{col}' to {df[col].dtype}")
+            except (TypeError, ValueError) as e:
+                if debug:
+                    print(f"[DEBUG] Could not downcast column '{col}': {e}")
+                continue
+
     return df
+
+
+def optimized_groupby_agg(
+    df: pd.DataFrame, group_col: str, agg_col: str, agg_funcs: list, debug: bool = False
+) -> pd.DataFrame:
+    """
+    Perform optimized groupby aggregation with explicit observed=False to avoid
+    deprecation warnings.
+
+    Args:
+        df: Input DataFrame
+        group_col: Column to group by
+        agg_col: Column to aggregate
+        agg_funcs: List of aggregation functions
+        debug: Enable debug logging
+
+    Returns:
+        Grouped DataFrame with flattened column names
+    """
+    if debug:
+        print(f"[DEBUG] Grouping by '{group_col}' with aggregation on '{agg_col}'")
+
+    # Perform groupby with explicit observed=False to avoid deprecation warning
+    if len(agg_funcs) == 1:
+        # Single aggregation function
+        grouped = df.groupby(group_col, observed=False).agg({agg_col: agg_funcs[0]}).reset_index()
+        # Flatten column names for single aggregation
+        grouped.columns = [group_col, agg_col]
+    else:
+        # Multiple aggregation functions
+        grouped = df.groupby(group_col, observed=False).agg({agg_col: agg_funcs}).reset_index()
+        # Flatten column names
+        grouped.columns = [group_col] + [f"{agg_col}_{func}" for func in agg_funcs]
+
+    return grouped
 
 
 def filter_matched_records(
@@ -331,7 +383,7 @@ def aggregate_razors(records: List[Dict[str, Any]], debug: bool = False) -> List
 
     # Group by razor name and calculate metrics
     try:
-        grouped = df.groupby("name").agg({"user": ["count", "nunique"]}).reset_index()
+        grouped = optimized_groupby_agg(df, "name", "user", ["count", "nunique"], debug)
     except (KeyError, ValueError) as e:
         # These are data structure issues that should fail fast
         raise ValueError(f"Failed to group razor data: {e}")
@@ -339,7 +391,7 @@ def aggregate_razors(records: List[Dict[str, Any]], debug: bool = False) -> List
         # Pandas import issues - external dependency failure
         raise RuntimeError(f"Pandas import error during razor grouping: {e}")
 
-    # Flatten column names
+    # Rename columns to match expected output
     grouped.columns = ["name", "shaves", "unique_users"]
 
     # Calculate average shaves per user
@@ -433,6 +485,7 @@ def aggregate_blades(records: List[Dict[str, Any]], debug: bool = False) -> List
     # Convert to DataFrame for aggregation
     try:
         df = pd.DataFrame(blade_data)
+        df = optimize_dataframe_operations(df, debug)
     except (ValueError, TypeError, KeyError) as e:
         # These are data structure issues that should fail fast
         raise ValueError(f"Failed to create DataFrame for blade aggregation: {e}")
@@ -442,7 +495,7 @@ def aggregate_blades(records: List[Dict[str, Any]], debug: bool = False) -> List
 
     # Group by blade name and calculate metrics
     try:
-        grouped = df.groupby("name").agg({"user": ["count", "nunique"]}).reset_index()
+        grouped = optimized_groupby_agg(df, "name", "user", ["count", "nunique"], debug)
     except (KeyError, ValueError) as e:
         # These are data structure issues that should fail fast
         raise ValueError(f"Failed to group blade data: {e}")
@@ -450,7 +503,7 @@ def aggregate_blades(records: List[Dict[str, Any]], debug: bool = False) -> List
         # Pandas import issues - external dependency failure
         raise RuntimeError(f"Pandas import error during blade grouping: {e}")
 
-    # Flatten column names
+    # Rename columns to match expected output
     grouped.columns = ["name", "shaves", "unique_users"]
 
     # Calculate average shaves per user
@@ -542,6 +595,7 @@ def aggregate_soaps(records: List[Dict[str, Any]], debug: bool = False) -> List[
     # Convert to DataFrame for aggregation
     try:
         df = pd.DataFrame(soap_data)
+        df = optimize_dataframe_operations(df, debug)
     except (ValueError, TypeError, KeyError) as e:
         # These are data structure issues that should fail fast
         raise ValueError(f"Failed to create DataFrame for soap aggregation: {e}")
@@ -551,7 +605,7 @@ def aggregate_soaps(records: List[Dict[str, Any]], debug: bool = False) -> List[
 
     # Group by soap name and calculate metrics
     try:
-        grouped = df.groupby("name").agg({"user": ["count", "nunique"]}).reset_index()
+        grouped = optimized_groupby_agg(df, "name", "user", ["count", "nunique"], debug)
     except (KeyError, ValueError) as e:
         # These are data structure issues that should fail fast
         raise ValueError(f"Failed to group soap data: {e}")
@@ -559,7 +613,7 @@ def aggregate_soaps(records: List[Dict[str, Any]], debug: bool = False) -> List[
         # Pandas import issues - external dependency failure
         raise RuntimeError(f"Pandas import error during soap grouping: {e}")
 
-    # Flatten column names
+    # Rename columns to match expected output
     grouped.columns = ["name", "shaves", "unique_users"]
 
     # Calculate average shaves per user
@@ -650,6 +704,7 @@ def aggregate_brushes(records: List[Dict[str, Any]], debug: bool = False) -> Lis
     # Convert to DataFrame for aggregation
     try:
         df = pd.DataFrame(brush_data)
+        df = optimize_dataframe_operations(df, debug)
     except (ValueError, TypeError, KeyError) as e:
         # These are data structure issues that should fail fast
         raise ValueError(f"Failed to create DataFrame for brush aggregation: {e}")
@@ -659,7 +714,7 @@ def aggregate_brushes(records: List[Dict[str, Any]], debug: bool = False) -> Lis
 
     # Group by brush name and calculate metrics
     try:
-        grouped = df.groupby("name").agg({"user": ["count", "nunique"]}).reset_index()
+        grouped = optimized_groupby_agg(df, "name", "user", ["count", "nunique"], debug)
     except (KeyError, ValueError) as e:
         # These are data structure issues that should fail fast
         raise ValueError(f"Failed to group brush data: {e}")
@@ -667,7 +722,7 @@ def aggregate_brushes(records: List[Dict[str, Any]], debug: bool = False) -> Lis
         # Pandas import issues - external dependency failure
         raise RuntimeError(f"Pandas import error during brush grouping: {e}")
 
-    # Flatten column names
+    # Rename columns to match expected output
     grouped.columns = ["name", "shaves", "unique_users"]
 
     # Calculate average shaves per user
@@ -746,6 +801,7 @@ def aggregate_users(records: List[Dict[str, Any]], debug: bool = False) -> List[
     # Convert to DataFrame for aggregation
     try:
         df = pd.DataFrame(valid_records)
+        df = optimize_dataframe_operations(df, debug)
     except (ValueError, TypeError, KeyError) as e:
         # These are data structure issues that should fail fast
         raise ValueError(f"Failed to create DataFrame for user aggregation: {e}")
@@ -755,7 +811,7 @@ def aggregate_users(records: List[Dict[str, Any]], debug: bool = False) -> List[
 
     # Group by user and calculate metrics
     try:
-        grouped = df.groupby("author").agg({"id": "count"}).reset_index()
+        grouped = optimized_groupby_agg(df, "author", "id", ["count"], debug)
     except (KeyError, ValueError) as e:
         # These are data structure issues that should fail fast
         raise ValueError(f"Failed to group user data: {e}")
@@ -797,10 +853,24 @@ def aggregate_razor_manufacturers(
             data.append({"brand": brand, "user": record.get("author", "Unknown")})
     if not data:
         return []
-    import pandas as pd
 
-    df = pd.DataFrame(data)
-    grouped = df.groupby("brand").agg({"user": ["count", "nunique"]}).reset_index()
+    # Convert to DataFrame for aggregation
+    try:
+        df = pd.DataFrame(data)
+        df = optimize_dataframe_operations(df, debug)
+    except (ValueError, TypeError, KeyError) as e:
+        raise ValueError(f"Failed to create DataFrame for razor manufacturer aggregation: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during razor manufacturer aggregation: {e}")
+
+    # Group by brand and calculate metrics
+    try:
+        grouped = optimized_groupby_agg(df, "brand", "user", ["count", "nunique"], debug)
+    except (KeyError, ValueError) as e:
+        raise ValueError(f"Failed to group razor manufacturer data: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during razor manufacturer grouping: {e}")
+
     grouped.columns = ["brand", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
@@ -826,10 +896,24 @@ def aggregate_blade_manufacturers(
             data.append({"brand": brand, "user": record.get("author", "Unknown")})
     if not data:
         return []
-    import pandas as pd
 
-    df = pd.DataFrame(data)
-    grouped = df.groupby("brand").agg({"user": ["count", "nunique"]}).reset_index()
+    # Convert to DataFrame for aggregation
+    try:
+        df = pd.DataFrame(data)
+        df = optimize_dataframe_operations(df, debug)
+    except (ValueError, TypeError, KeyError) as e:
+        raise ValueError(f"Failed to create DataFrame for blade manufacturer aggregation: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during blade manufacturer aggregation: {e}")
+
+    # Group by brand and calculate metrics
+    try:
+        grouped = optimized_groupby_agg(df, "brand", "user", ["count", "nunique"], debug)
+    except (KeyError, ValueError) as e:
+        raise ValueError(f"Failed to group blade manufacturer data: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during blade manufacturer grouping: {e}")
+
     grouped.columns = ["brand", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
@@ -855,10 +939,24 @@ def aggregate_soap_makers(
             data.append({"maker": maker, "user": record.get("author", "Unknown")})
     if not data:
         return []
-    import pandas as pd
 
-    df = pd.DataFrame(data)
-    grouped = df.groupby("maker").agg({"user": ["count", "nunique"]}).reset_index()
+    # Convert to DataFrame for aggregation
+    try:
+        df = pd.DataFrame(data)
+        df = optimize_dataframe_operations(df, debug)
+    except (ValueError, TypeError, KeyError) as e:
+        raise ValueError(f"Failed to create DataFrame for soap maker aggregation: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during soap maker aggregation: {e}")
+
+    # Group by maker and calculate metrics
+    try:
+        grouped = optimized_groupby_agg(df, "maker", "user", ["count", "nunique"], debug)
+    except (KeyError, ValueError) as e:
+        raise ValueError(f"Failed to group soap maker data: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during soap maker grouping: {e}")
+
     grouped.columns = ["maker", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
@@ -884,10 +982,24 @@ def aggregate_brush_knot_makers(
             data.append({"brand": brand, "user": record.get("author", "Unknown")})
     if not data:
         return []
-    import pandas as pd
 
-    df = pd.DataFrame(data)
-    grouped = df.groupby("brand").agg({"user": ["count", "nunique"]}).reset_index()
+    # Convert to DataFrame for aggregation
+    try:
+        df = pd.DataFrame(data)
+        df = optimize_dataframe_operations(df, debug)
+    except (ValueError, TypeError, KeyError) as e:
+        raise ValueError(f"Failed to create DataFrame for brush knot maker aggregation: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during brush knot maker aggregation: {e}")
+
+    # Group by brand and calculate metrics
+    try:
+        grouped = optimized_groupby_agg(df, "brand", "user", ["count", "nunique"], debug)
+    except (KeyError, ValueError) as e:
+        raise ValueError(f"Failed to group brush knot maker data: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during brush knot maker grouping: {e}")
+
     grouped.columns = ["brand", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
@@ -913,10 +1025,24 @@ def aggregate_brush_handle_makers(
             data.append({"handle_maker": handle_maker, "user": record.get("author", "Unknown")})
     if not data:
         return []
-    import pandas as pd
 
-    df = pd.DataFrame(data)
-    grouped = df.groupby("handle_maker").agg({"user": ["count", "nunique"]}).reset_index()
+    # Convert to DataFrame for aggregation
+    try:
+        df = pd.DataFrame(data)
+        df = optimize_dataframe_operations(df, debug)
+    except (ValueError, TypeError, KeyError) as e:
+        raise ValueError(f"Failed to create DataFrame for brush handle maker aggregation: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during brush handle maker aggregation: {e}")
+
+    # Group by handle_maker and calculate metrics
+    try:
+        grouped = optimized_groupby_agg(df, "handle_maker", "user", ["count", "nunique"], debug)
+    except (KeyError, ValueError) as e:
+        raise ValueError(f"Failed to group brush handle maker data: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during brush handle maker grouping: {e}")
+
     grouped.columns = ["handle_maker", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
@@ -976,11 +1102,12 @@ def aggregate_brush_fibers(
 
     try:
         df = pd.DataFrame(fiber_data)
+        df = optimize_dataframe_operations(df, debug)
     except Exception as e:
         raise ValueError(f"Failed to create DataFrame for brush fiber aggregation: {e}")
 
     try:
-        grouped = df.groupby("fiber").agg({"user": ["count", "nunique"]}).reset_index()
+        grouped = optimized_groupby_agg(df, "fiber", "user", ["count", "nunique"], debug)
     except Exception as e:
         raise ValueError(f"Failed to group brush fiber data: {e}")
 
@@ -1049,11 +1176,12 @@ def aggregate_brush_knot_sizes(
 
     try:
         df = pd.DataFrame(knot_size_data)
+        df = optimize_dataframe_operations(df, debug)
     except Exception as e:
         raise ValueError(f"Failed to create DataFrame for brush knot size aggregation: {e}")
 
     try:
-        grouped = df.groupby("knot_size_mm").agg({"user": ["count", "nunique"]}).reset_index()
+        grouped = optimized_groupby_agg(df, "knot_size_mm", "user", ["count", "nunique"], debug)
     except Exception as e:
         raise ValueError(f"Failed to group brush knot size data: {e}")
 
