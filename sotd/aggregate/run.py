@@ -14,10 +14,10 @@ CLI matrix
 """
 
 import argparse
+import datetime
 import json
 from pathlib import Path
 from typing import Sequence
-import datetime
 
 from tqdm import tqdm
 
