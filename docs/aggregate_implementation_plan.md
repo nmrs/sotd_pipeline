@@ -109,36 +109,36 @@ sotd/aggregate/aggregators/
 **✅ Phase 1: Core Infrastructure - COMPLETE**
 
 ### Phase 2: Core Product Aggregators
-- [ ] **2.1 Razor Aggregator (`aggregators/core/razor_aggregator.py`)**
-  - [ ] Implement razor aggregation logic
-  - [ ] Handle brand/model/format combination
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **2.1 Razor Aggregator (`aggregators/core/razor_aggregator.py`)**
+  - [x] Implement razor aggregation logic
+  - [x] Handle brand/model/format combination
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
-- [ ] **2.2 Blade Aggregator (`aggregators/core/blade_aggregator.py`)**
-  - [ ] Implement blade aggregation logic
-  - [ ] Handle brand/model/format combination
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **2.2 Blade Aggregator (`aggregators/core/blade_aggregator.py`)**
+  - [x] Implement blade aggregation logic
+  - [x] Handle brand/model/format combination
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
-- [ ] **2.3 Brush Aggregator (`aggregators/core/brush_aggregator.py`)**
-  - [ ] Implement brush aggregation logic
-  - [ ] Handle brand/model/fiber combination
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **2.3 Brush Aggregator (`aggregators/core/brush_aggregator.py`)**
+  - [x] Implement brush aggregation logic
+  - [x] Handle brand/model/fiber combination
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
-- [ ] **2.4 Soap Aggregator (`aggregators/core/soap_aggregator.py`)**
-  - [ ] Implement soap aggregation logic
-  - [ ] Handle maker/scent combination
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **2.4 Soap Aggregator (`aggregators/core/soap_aggregator.py`)**
+  - [x] Implement soap aggregation logic
+  - [x] Handle maker/scent combination
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
 ### Phase 3: Manufacturer Aggregators
-- [ ] **3.1 Razor Manufacturer Aggregator (`aggregators/manufacturers/razor_manufacturer_aggregator.py`)**
-  - [ ] Implement razor manufacturer aggregation
-  - [ ] Extract brand from razor.matched.brand
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **3.1 Razor Manufacturer Aggregator (`aggregators/manufacturers/razor_manufacturer_aggregator.py`)**
+  - [x] Implement razor manufacturer aggregation
+  - [x] Extract brand from razor.matched.brand
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
 - [ ] **3.2 Blade Manufacturer Aggregator (`aggregators/manufacturers/blade_manufacturer_aggregator.py`)**
   - [ ] Implement blade manufacturer aggregation
@@ -287,7 +287,7 @@ sotd/aggregate/aggregators/
 ## Key Requirements
 
 ### Position Field
-- Every aggregation output must include a `"position"` field
+- Every aggregation output must include a "position" field
 - Position is 1-based rank within the sorted list
 - Enables robust delta calculations in report phase
 
