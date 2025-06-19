@@ -1,6 +1,8 @@
 """Core aggregation engine using pandas for efficient data processing."""
 
 import time
+import psutil
+import os
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
@@ -12,24 +14,32 @@ class PerformanceMonitor:
     def __init__(self, debug: bool = False):
         self.debug = debug
         self.start_time = None
+        self.start_memory = None
         self.metrics = {}
 
     def start(self, operation: str):
         """Start timing an operation."""
         if self.debug:
             self.start_time = time.time()
+            self.start_memory = self._get_memory_usage()
             print(f"[DEBUG] Starting {operation}")
 
     def end(self, operation: str, record_count: Optional[int] = None):
         """End timing an operation and record metrics."""
         if self.debug and self.start_time:
             elapsed = time.time() - self.start_time
+            end_memory = self._get_memory_usage()
+            memory_delta = end_memory - self.start_memory if self.start_memory else 0
+
             self.metrics[operation] = {
                 "elapsed_seconds": elapsed,
                 "record_count": record_count,
                 "records_per_second": (
                     record_count / elapsed if record_count and elapsed > 0 else 0
                 ),
+                "memory_start_mb": self.start_memory,
+                "memory_end_mb": end_memory,
+                "memory_delta_mb": memory_delta,
             }
             print(f"[DEBUG] {operation} completed in {elapsed:.3f}s")
             if record_count:
@@ -38,6 +48,16 @@ class PerformanceMonitor:
                     f"[DEBUG] {operation} processed {record_count} records "
                     f"at {rate:.1f} records/sec"
                 )
+            print(f"[DEBUG] {operation} memory: {end_memory:.1f}MB (delta: {memory_delta:+.1f}MB)")
+
+    def _get_memory_usage(self) -> float:
+        """Get current memory usage in MB."""
+        try:
+            process = psutil.Process(os.getpid())
+            return process.memory_info().rss / 1024 / 1024  # Convert to MB
+        except (ImportError, AttributeError):
+            # Fallback if psutil is not available
+            return 0.0
 
     def get_summary(self) -> Dict[str, Any]:
         """Get performance summary."""
@@ -424,10 +444,14 @@ def aggregate_blades(records: List[Dict[str, Any]], debug: bool = False) -> List
     Raises:
         ValueError: If records list is invalid or contains invalid data
     """
+    monitor = PerformanceMonitor(debug)
+    monitor.start("aggregate_blades")
+
     if not isinstance(records, list):
         raise ValueError(f"Expected list of records, got {type(records)}")
 
     if not records:
+        monitor.end("aggregate_blades", 0)
         return []
 
     blade_data = []
@@ -518,6 +542,7 @@ def aggregate_blades(records: List[Dict[str, Any]], debug: bool = False) -> List
     if debug:
         print(f"[DEBUG] Aggregated {len(results)} blades ({invalid_records} invalid records)")
 
+    monitor.end("aggregate_blades", len(blade_data))
     return results  # type: ignore
 
 
@@ -535,10 +560,14 @@ def aggregate_soaps(records: List[Dict[str, Any]], debug: bool = False) -> List[
     Raises:
         ValueError: If records list is invalid or contains invalid data
     """
+    monitor = PerformanceMonitor(debug)
+    monitor.start("aggregate_soaps")
+
     if not isinstance(records, list):
         raise ValueError(f"Expected list of records, got {type(records)}")
 
     if not records:
+        monitor.end("aggregate_soaps", 0)
         return []
 
     soap_data = []
@@ -628,6 +657,7 @@ def aggregate_soaps(records: List[Dict[str, Any]], debug: bool = False) -> List[
     if debug:
         print(f"[DEBUG] Aggregated {len(results)} soaps ({invalid_records} invalid records)")
 
+    monitor.end("aggregate_soaps", len(soap_data))
     return results  # type: ignore
 
 
@@ -645,10 +675,14 @@ def aggregate_brushes(records: List[Dict[str, Any]], debug: bool = False) -> Lis
     Raises:
         ValueError: If records list is invalid or contains invalid data
     """
+    monitor = PerformanceMonitor(debug)
+    monitor.start("aggregate_brushes")
+
     if not isinstance(records, list):
         raise ValueError(f"Expected list of records, got {type(records)}")
 
     if not records:
+        monitor.end("aggregate_brushes", 0)
         return []
 
     brush_data = []
@@ -737,6 +771,7 @@ def aggregate_brushes(records: List[Dict[str, Any]], debug: bool = False) -> Lis
     if debug:
         print(f"[DEBUG] Aggregated {len(results)} brushes ({invalid_records} invalid records)")
 
+    monitor.end("aggregate_brushes", len(brush_data))
     return results  # type: ignore
 
 
@@ -754,10 +789,14 @@ def aggregate_users(records: List[Dict[str, Any]], debug: bool = False) -> List[
     Raises:
         ValueError: If records list is invalid or contains invalid data
     """
+    monitor = PerformanceMonitor(debug)
+    monitor.start("aggregate_users")
+
     if not isinstance(records, list):
         raise ValueError(f"Expected list of records, got {type(records)}")
 
     if not records:
+        monitor.end("aggregate_users", 0)
         return []
 
     # Validate records before processing
@@ -796,6 +835,7 @@ def aggregate_users(records: List[Dict[str, Any]], debug: bool = False) -> List[
     if not valid_records:
         if debug:
             print("[DEBUG] No valid records for user aggregation")
+        monitor.end("aggregate_users", 0)
         return []
 
     # Convert to DataFrame for aggregation
@@ -831,6 +871,7 @@ def aggregate_users(records: List[Dict[str, Any]], debug: bool = False) -> List[
     if debug:
         print(f"[DEBUG] Aggregated {len(results)} users ({invalid_records} invalid records)")
 
+    monitor.end("aggregate_users", len(valid_records))
     return results  # type: ignore
 
 
