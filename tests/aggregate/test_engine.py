@@ -16,6 +16,7 @@ from sotd.aggregate.engine import (
     aggregate_christopher_bradley_plates,
     aggregate_game_changer_plates,
     aggregate_super_speed_tips,
+    aggregate_straight_razor_specs,
 )
 
 
@@ -2605,5 +2606,365 @@ class TestAggregateSuperSpeedTips:
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 1
         assert result[1]["tip"] == "Black"
+        assert result[1]["shaves"] == 1
+        assert result[1]["unique_users"] == 1
+
+
+class TestAggregateStraightRazorSpecs:
+    """Test the aggregate_straight_razor_specs function."""
+
+    def test_empty_records(self):
+        """Test with empty records."""
+        result = aggregate_straight_razor_specs([])
+        assert result == []
+
+    def test_invalid_records_type(self):
+        """Test with invalid records type."""
+        with pytest.raises(ValueError, match="Expected list of records"):
+            aggregate_straight_razor_specs("invalid")  # type: ignore
+
+    def test_no_straight_razor_data(self):
+        """Test with records that don't contain straight razors."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "format": "DE",
+                        "match_type": "exact",
+                    },
+                },
+            }
+        ]
+        result = aggregate_straight_razor_specs(records)
+        assert result == []
+
+    def test_straight_razor_without_spec_data(self):
+        """Test with straight razors that don't have specification data."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "Dovo",
+                        "model": "Classic",
+                        "format": "Straight",
+                        "match_type": "exact",
+                    },
+                    "enriched": {},
+                },
+            }
+        ]
+        result = aggregate_straight_razor_specs(records)
+        assert result == []
+
+    def test_single_spec_single_user(self):
+        """Test with single specification and single user."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "Dovo",
+                        "model": "Classic",
+                        "format": "Straight",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "grind": "full_hollow",
+                        "width": "6/8",
+                        "point": "round",
+                        "_enriched_by": "StraightRazorEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            }
+        ]
+        result = aggregate_straight_razor_specs(records)
+        assert len(result) == 1
+        assert result[0]["specs"] == "Grind: full_hollow | Width: 6/8 | Point: round"
+        assert result[0]["shaves"] == 1
+        assert result[0]["unique_users"] == 1
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_single_spec_multiple_users(self):
+        """Test with single specification and multiple users."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Dovo",
+                        "model": "Classic",
+                        "format": "Straight",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "grind": "wedge",
+                        "width": "7/8",
+                        "_enriched_by": "StraightRazorEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Thiers-Issard",
+                        "model": "Classic",
+                        "format": "Straight",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "grind": "wedge",
+                        "width": "7/8",
+                        "_enriched_by": "StraightRazorEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_straight_razor_specs(records)
+        assert len(result) == 1
+        assert result[0]["specs"] == "Grind: wedge | Width: 7/8"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_users"] == 2
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_multiple_specs(self):
+        """Test with multiple specifications."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Dovo",
+                        "model": "Classic",
+                        "format": "Straight",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "grind": "full_hollow",
+                        "width": "6/8",
+                        "point": "round",
+                        "_enriched_by": "StraightRazorEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Thiers-Issard",
+                        "model": "Classic",
+                        "format": "Straight",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "grind": "half_hollow",
+                        "width": "5/8",
+                        "point": "square",
+                        "_enriched_by": "StraightRazorEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test789",
+                "author": "user3",
+                "razor": {
+                    "matched": {
+                        "brand": "Boker",
+                        "model": "Classic",
+                        "format": "Straight",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "grind": "wedge",
+                        "width": "8/8",
+                        "_enriched_by": "StraightRazorEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_straight_razor_specs(records)
+        assert len(result) == 3
+
+        # Check that results are sorted by shaves (descending)
+        assert result[0]["shaves"] >= result[1]["shaves"]
+        assert result[1]["shaves"] >= result[2]["shaves"]
+
+        # Check all specs are present
+        specs_list = [r["specs"] for r in result]
+        assert "Grind: full_hollow | Width: 6/8 | Point: round" in specs_list
+        assert "Grind: half_hollow | Width: 5/8 | Point: square" in specs_list
+        assert "Grind: wedge | Width: 8/8" in specs_list
+
+    def test_partial_specs(self):
+        """Test with partial specifications (only some fields present)."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Dovo",
+                        "model": "Classic",
+                        "format": "Straight",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "grind": "full_hollow",
+                        "_enriched_by": "StraightRazorEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Thiers-Issard",
+                        "model": "Classic",
+                        "format": "Straight",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "width": "6/8",
+                        "point": "round",
+                        "_enriched_by": "StraightRazorEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_straight_razor_specs(records)
+        assert len(result) == 2
+
+        # Check partial specs are handled correctly
+        specs_list = [r["specs"] for r in result]
+        assert "Grind: full_hollow" in specs_list
+        assert "Width: 6/8 | Point: round" in specs_list
+
+    def test_mixed_razor_types(self):
+        """Test with mix of straight razors and other razors."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Dovo",
+                        "model": "Classic",
+                        "format": "Straight",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "grind": "full_hollow",
+                        "width": "6/8",
+                        "point": "round",
+                        "_enriched_by": "StraightRazorEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "format": "DE",
+                        "match_type": "exact",
+                    },
+                },
+            },
+        ]
+        result = aggregate_straight_razor_specs(records)
+        assert len(result) == 1
+        assert result[0]["specs"] == "Grind: full_hollow | Width: 6/8 | Point: round"
+        assert result[0]["shaves"] == 1
+
+    def test_tiebreaker_unique_users(self):
+        """Test tiebreaker when shaves are equal."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Dovo",
+                        "model": "Classic",
+                        "format": "Straight",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "grind": "full_hollow",
+                        "width": "6/8",
+                        "_enriched_by": "StraightRazorEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Thiers-Issard",
+                        "model": "Classic",
+                        "format": "Straight",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "grind": "half_hollow",
+                        "width": "5/8",
+                        "_enriched_by": "StraightRazorEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test789",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Boker",
+                        "model": "Classic",
+                        "format": "Straight",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "grind": "full_hollow",
+                        "width": "6/8",
+                        "_enriched_by": "StraightRazorEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_straight_razor_specs(records)
+        assert len(result) == 2
+
+        # Full hollow 6/8 should be first (2 shaves, 1 unique user)
+        # Half hollow 5/8 should be second (1 shave, 1 unique user)
+        assert result[0]["specs"] == "Grind: full_hollow | Width: 6/8"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_users"] == 1
+        assert result[1]["specs"] == "Grind: half_hollow | Width: 5/8"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
