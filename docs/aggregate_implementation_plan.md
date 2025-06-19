@@ -160,29 +160,31 @@ sotd/aggregate/aggregators/
   - [x] Sort by shaves desc, unique_users desc
 
 ### Phase 5: Brush Specialized Aggregators
-- [ ] **5.1 Handle Maker Aggregator (`aggregators/brush_specialized/handle_maker_aggregator.py`)**
-  - [ ] Implement handle maker aggregation
-  - [ ] Extract handle_maker from brush.matched.handle_maker
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **5.1 Handle Maker Aggregator (`aggregators/brush_specialized/handle_maker_aggregator.py`)**
+  - [x] Implement handle maker aggregation
+  - [x] Extract handle_maker from brush.matched.handle_maker
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
-- [ ] **5.2 Knot Maker Aggregator (`aggregators/brush_specialized/knot_maker_aggregator.py`)**
-  - [ ] Implement knot maker aggregation
-  - [ ] Extract knot_maker from brush.matched.knot_maker
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **5.2 Knot Maker Aggregator (`aggregators/brush_specialized/knot_maker_aggregator.py`)**
+  - [x] Implement knot maker aggregation
+  - [x] Extract knot_maker from brush.matched.knot_maker
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
-- [ ] **5.3 Fiber Aggregator (`aggregators/brush_specialized/fiber_aggregator.py`)**
-  - [ ] Implement fiber aggregation
-  - [ ] Extract fiber from brush.matched.fiber (fallback to brush.enriched.fiber)
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **5.3 Fiber Aggregator (`aggregators/brush_specialized/fiber_aggregator.py`)**
+  - [x] Implement fiber aggregation
+  - [x] Extract fiber from brush.matched.fiber (fallback to brush.enriched.fiber)
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
-- [ ] **5.4 Knot Size Aggregator (`aggregators/brush_specialized/knot_size_aggregator.py`)**
-  - [ ] Implement knot size aggregation
-  - [ ] Extract knot_size_mm from brush.matched.knot_size_mm (fallback to brush.enriched.knot_size_mm)
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **5.4 Knot Size Aggregator (`aggregators/brush_specialized/knot_size_aggregator.py`)**
+  - [x] Implement knot size aggregation
+  - [x] Extract knot_size_mm from brush.matched.knot_size_mm (fallback to brush.enriched.knot_size_mm)
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
+
+**✅ Phase 5: Brush Specialized Aggregators - COMPLETE**
 
 ### Phase 6: Razor Specialized Aggregators
 - [ ] **6.1 Blackbird Plate Aggregator (`aggregators/razor_specialized/blackbird_plate_aggregator.py`)**
