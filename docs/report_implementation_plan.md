@@ -116,25 +116,25 @@ Build the report phase of the SOTD pipeline that generates statistical analysis 
 
 ### Phase 3: Software Report Implementation
 
-- [ ] **Step 10: Software Report Structure**
-  - [ ] Create `sotd/report/software_report.py` module
-  - [ ] Implement software report generator class
-  - [ ] Generate software-specific header and notes
-  - [ ] Implement software table order and structure
-  - [ ] Handle software-specific data categories
-  - [ ] Include proper error handling and validation
-  - [ ] Add type hints and docstrings
-  - [ ] Test with sample aggregated data
+- [x] **Step 10: Software Report Structure**
+  - [x] Create `sotd/report/software_report.py` module
+  - [x] Implement software report generator class
+  - [x] Generate software-specific header and notes
+  - [x] Implement software table order and structure
+  - [x] Handle software-specific data categories
+  - [x] Include proper error handling and validation
+  - [x] Add type hints and docstrings
+  - [x] Test with sample aggregated data
 
-- [ ] **Step 11: Software Tables**
-  - [ ] Create `sotd/report/table_generators/soap_tables.py`
-  - [ ] Implement soap makers table generator
-  - [ ] Implement soaps table generator
-  - [ ] Implement brand diversity table generator
-  - [ ] Handle data extraction and formatting for each table
-  - [ ] Include proper error handling and validation
-  - [ ] Add type hints and docstrings
-  - [ ] Test with sample aggregated data
+- [x] **Step 11: Software Tables**
+  - [x] Create `sotd/report/table_generators/soap_tables.py`
+  - [x] Implement soap makers table generator
+  - [x] Implement soaps table generator
+  - [x] Implement brand diversity table generator
+  - [x] Handle data extraction and formatting for each table
+  - [x] Include proper error handling and validation
+  - [x] Add type hints and docstrings
+  - [x] Test with sample aggregated data
 
 ### Phase 4: Delta Calculations & Trend Analysis
 
