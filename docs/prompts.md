@@ -46,5 +46,5 @@ Start with first unchecked item
 2. Update session notes: Add notes after each work session
 3. Follow the workflow: Complete each chunk before moving to the next
 4. Run quality checks: Use make format lint typecheck test after each chunk
-5. Commit regularly: Commit changes with clear messages after each chunk
+5. Commit regularly: Commit changes with clear messages after each chunk. Commits should include updates to implementation plan.
 The plan is designed to be self-contained and will help you track progress across multiple development sessions without losing your place. You can start with the first chunk and work through the plan systematically, checking off tasks as you complete them.
