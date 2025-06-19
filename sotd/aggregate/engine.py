@@ -1920,3 +1920,126 @@ def aggregate_razor_blade_combinations(
 
     monitor.end("aggregate_razor_blade_combinations", len(combination_data))
     return results  # type: ignore
+
+
+def aggregate_user_blade_usage(
+    records: List[Dict[str, Any]], debug: bool = False
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate per-user blade usage statistics.
+
+    Args:
+        records: List of enriched comment records
+        debug: Enable debug logging
+
+    Returns:
+        List of per-user blade usage aggregation results
+
+    Raises:
+        ValueError: If records list is invalid or contains invalid data
+    """
+    monitor = PerformanceMonitor(debug)
+    monitor.start("aggregate_user_blade_usage")
+
+    if not isinstance(records, list):
+        raise ValueError(f"Expected list of records, got {type(records)}")
+
+    if not records:
+        if debug:
+            print("[DEBUG] No records to process for per-user blade usage")
+        monitor.end("aggregate_user_blade_usage", 0)
+        return []
+
+    usage_data = []
+    invalid_records = 0
+
+    for i, record in enumerate(records):
+        if not isinstance(record, dict):
+            if debug:
+                print(f"[DEBUG] Record {i}: Expected dict, got {type(record)}")
+            invalid_records += 1
+            continue
+
+        # Extract blade information and use count
+        blade_name = None
+        use_count = None
+
+        # Get blade name from matched data
+        if "blade" in record:
+            blade_info = record["blade"]
+            if isinstance(blade_info, dict) and "matched" in blade_info:
+                matched = blade_info["matched"]
+                if isinstance(matched, dict):
+                    brand = matched.get("brand", "")
+                    model = matched.get("model", "")
+                    if brand and model:
+                        blade_name = f"{brand} {model}".strip()
+
+        # Get use count from enriched data
+        if "blade" in record:
+            blade_info = record["blade"]
+            if isinstance(blade_info, dict) and "enriched" in blade_info:
+                enriched = blade_info["enriched"]
+                if isinstance(enriched, dict):
+                    use_count = enriched.get("use_count")
+
+        # Only include records where blade is matched and use count is available
+        if blade_name and use_count is not None:
+            usage_data.append(
+                {
+                    "blade": blade_name,
+                    "user": record.get("author", "Unknown"),
+                    "use_count": use_count,
+                }
+            )
+
+    if not usage_data:
+        if debug:
+            print("[DEBUG] No valid per-user blade usage data found")
+        monitor.end("aggregate_user_blade_usage", 0)
+        return []
+
+    # Convert to DataFrame for aggregation
+    try:
+        df = pd.DataFrame(usage_data)
+        df = optimize_dataframe_operations(df, debug)
+    except (ValueError, TypeError, KeyError) as e:
+        # These are data structure issues that should fail fast
+        raise ValueError(f"Failed to create DataFrame for per-user blade usage aggregation: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during per-user blade usage aggregation: {e}")
+
+    # Group by user and blade, calculate average use count
+    try:
+        grouped = (
+            df.groupby(["user", "blade"], observed=False)
+            .agg({"use_count": ["mean", "count", "max"]})
+            .reset_index()
+        )
+        # Flatten column names
+        grouped.columns = ["user", "blade", "avg_use_count", "shaves", "max_use_count"]
+    except (KeyError, ValueError) as e:
+        # These are data structure issues that should fail fast
+        raise ValueError(f"Failed to group per-user blade usage data: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during per-user blade usage grouping: {e}")
+
+    # Round average use count to 2 decimal places
+    grouped["avg_use_count"] = grouped["avg_use_count"].round(2)
+
+    # Sort by average use count (descending), then by shaves (descending) as tie breaker
+    grouped = grouped.sort_values(["avg_use_count", "shaves"], ascending=[False, False])
+
+    # Convert back to list of dictionaries
+    results = grouped.to_dict("records")
+
+    if debug:
+        print(
+            f"[DEBUG] Aggregated {len(results)} per-user blade usage records "
+            f"({invalid_records} invalid records)"
+        )
+
+    monitor.end("aggregate_user_blade_usage", len(usage_data))
+    return results  # type: ignore

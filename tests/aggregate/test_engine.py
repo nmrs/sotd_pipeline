@@ -18,6 +18,7 @@ from sotd.aggregate.engine import (
     aggregate_super_speed_tips,
     aggregate_straight_razor_specs,
     aggregate_razor_blade_combinations,
+    aggregate_user_blade_usage,
 )
 
 
@@ -3261,3 +3262,300 @@ class TestAggregateRazorBladeCombinations:
         assert result[1]["combination"] == "Karve Christopher Bradley + Astra Superior Platinum"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
+
+
+class TestAggregateUserBladeUsage:
+    """Test the aggregate_user_blade_usage function."""
+
+    def test_empty_records(self):
+        """Test with empty records."""
+        result = aggregate_user_blade_usage([])
+        assert result == []
+
+    def test_invalid_records_type(self):
+        """Test with invalid records type."""
+        with pytest.raises(ValueError, match="Expected list of records"):
+            aggregate_user_blade_usage("invalid")  # type: ignore
+
+    def test_no_blade_data(self):
+        """Test with records that have no blade data."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "created_utc": 1640995200,
+                "body": "Test comment",
+            }
+        ]
+        result = aggregate_user_blade_usage(records)
+        assert result == []
+
+    def test_blade_without_use_count(self):
+        """Test with records that have blade but no use count data."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "created_utc": 1640995200,
+                "body": "Test comment",
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    }
+                },
+            }
+        ]
+        result = aggregate_user_blade_usage(records)
+        assert result == []
+
+    def test_single_user_single_blade(self):
+        """Test with single user and single blade usage."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "use_count": 3,
+                        "_enriched_by": "BladeEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            }
+        ]
+        result = aggregate_user_blade_usage(records)
+        assert len(result) == 1
+        assert result[0]["user"] == "user1"
+        assert result[0]["blade"] == "Feather Hi-Stainless"
+        assert result[0]["avg_use_count"] == 3.0
+        assert result[0]["shaves"] == 1
+        assert result[0]["max_use_count"] == 3
+
+    def test_single_user_multiple_blades(self):
+        """Test with single user and multiple blade usages."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "use_count": 3,
+                        "_enriched_by": "BladeEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user1",
+                "blade": {
+                    "matched": {
+                        "brand": "Astra",
+                        "model": "Superior Platinum",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "use_count": 5,
+                        "_enriched_by": "BladeEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_user_blade_usage(records)
+        assert len(result) == 2
+
+        # Check that results are sorted by avg_use_count (descending)
+        assert result[0]["avg_use_count"] >= result[1]["avg_use_count"]
+
+        # Astra should be first (5 uses)
+        assert result[0]["blade"] == "Astra Superior Platinum"
+        assert result[0]["avg_use_count"] == 5.0
+        assert result[0]["shaves"] == 1
+        assert result[0]["max_use_count"] == 5
+
+        # Feather should be second (3 uses)
+        assert result[1]["blade"] == "Feather Hi-Stainless"
+        assert result[1]["avg_use_count"] == 3.0
+        assert result[1]["shaves"] == 1
+        assert result[1]["max_use_count"] == 3
+
+    def test_multiple_users_same_blade(self):
+        """Test with multiple users using the same blade."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "use_count": 3,
+                        "_enriched_by": "BladeEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "use_count": 7,
+                        "_enriched_by": "BladeEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_user_blade_usage(records)
+        assert len(result) == 2
+
+        # Check that results are sorted by avg_use_count (descending)
+        assert result[0]["avg_use_count"] >= result[1]["avg_use_count"]
+
+        # user2 should be first (7 uses)
+        assert result[0]["user"] == "user2"
+        assert result[0]["blade"] == "Feather Hi-Stainless"
+        assert result[0]["avg_use_count"] == 7.0
+        assert result[0]["shaves"] == 1
+        assert result[0]["max_use_count"] == 7
+
+        # user1 should be second (3 uses)
+        assert result[1]["user"] == "user1"
+        assert result[1]["blade"] == "Feather Hi-Stainless"
+        assert result[1]["avg_use_count"] == 3.0
+        assert result[1]["shaves"] == 1
+        assert result[1]["max_use_count"] == 3
+
+    def test_user_multiple_shaves_same_blade(self):
+        """Test with user having multiple shaves with same blade and use count."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "use_count": 3,
+                        "_enriched_by": "BladeEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user1",
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "use_count": 5,
+                        "_enriched_by": "BladeEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_user_blade_usage(records)
+        assert len(result) == 1
+
+        # Average should be (3 + 5) / 2 = 4.0
+        assert result[0]["user"] == "user1"
+        assert result[0]["blade"] == "Feather Hi-Stainless"
+        assert result[0]["avg_use_count"] == 4.0
+        assert result[0]["shaves"] == 2
+        assert result[0]["max_use_count"] == 5
+
+    def test_tiebreaker_shaves(self):
+        """Test tiebreaker when avg_use_count is equal."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "use_count": 5,
+                        "_enriched_by": "BladeEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "blade": {
+                    "matched": {
+                        "brand": "Astra",
+                        "model": "Superior Platinum",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "use_count": 5,
+                        "_enriched_by": "BladeEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test789",
+                "author": "user1",
+                "blade": {
+                    "matched": {
+                        "brand": "Feather",
+                        "model": "Hi-Stainless",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "use_count": 5,
+                        "_enriched_by": "BladeEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_user_blade_usage(records)
+        assert len(result) == 2
+
+        # user1 + Feather should be first (avg 5.0, 2 shaves)
+        # user2 + Astra should be second (avg 5.0, 1 shave)
+        assert result[0]["user"] == "user1"
+        assert result[0]["blade"] == "Feather Hi-Stainless"
+        assert result[0]["avg_use_count"] == 5.0
+        assert result[0]["shaves"] == 2
+        assert result[1]["user"] == "user2"
+        assert result[1]["blade"] == "Astra Superior Platinum"
+        assert result[1]["avg_use_count"] == 5.0
+        assert result[1]["shaves"] == 1
