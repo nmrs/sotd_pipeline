@@ -34,11 +34,11 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 **Goal**: Extract knot matching logic into a focused, testable class.
 
 **Tasks**:
-- [ ] Create `sotd/match/knot_matcher_enhanced.py` (target: 150-200 lines)
-- [ ] Move knot-related methods from BrushMatcher
-- [ ] Update BrushMatcher to use new KnotMatcher
-- [ ] Run quality checks: `make format lint typecheck test`
-- [ ] Only add or update tests if coverage is missing or logic changes
+- [x] Create `sotd/match/knot_matcher_enhanced.py` (target: 150-200 lines)
+- [x] Move knot-related methods from BrushMatcher
+- [x] Update BrushMatcher to use new KnotMatcher
+- [x] Run quality checks: `make format lint typecheck test`
+- [x] Only add or update tests if coverage is missing or logic changes
 
 **Test Cases**:
 - Rely on existing knot matcher and integration tests unless new logic is introduced.
@@ -255,7 +255,7 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 
 ### Phase 1 Progress
 - [x] Chunk 1.1: Enhanced HandleMatcher (5/5 tasks)
-- [ ] Chunk 1.2: Enhanced KnotMatcher (0/5 tasks)
+- [x] Chunk 1.2: Enhanced KnotMatcher (5/5 tasks)
 - [ ] Chunk 1.3: Enhanced BrushSplitter (0/5 tasks)
 - [ ] Chunk 1.4: Enhanced FiberProcessor (0/5 tasks)
 - [ ] Chunk 1.5: BrushMatcher Orchestrator (0/5 tasks)
