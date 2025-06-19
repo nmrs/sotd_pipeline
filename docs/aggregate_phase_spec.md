@@ -48,8 +48,9 @@ For each category, the following metrics are calculated:
 ## Data Processing Rules
 
 ### Filtering
-- **Only process successfully matched products**: Records where `match_type` is "exact" or similar
-- **Skip unmatched records**: Records with no match or `match_type` of "none"
+- **Only process successfully matched products**: Records that contain matched product data with appropriate fields (brand, maker, etc.)
+- **Skip unmatched records**: Records with no matched data or empty matched fields
+- **Presence implies success**: If matched data exists with required fields, it represents a successful match regardless of match strategy
 - **Rely on match step**: Business rules like GEM → Personna GEM PTFE mapping are handled in match phase
 
 ### Aggregation Logic
@@ -183,16 +184,13 @@ Follow the same pattern as other phases:
 - Output feeds into report generation phase
 
 ### Data Flow
-```
-enriched/YYYY-MM.json → aggregate → aggregated/YYYY-MM.json → report
-```
 
 ## Validation
 
 ### Input Validation
 - Verify enriched data structure
-- Check for required fields
-- Validate match_type values
+- Check for required fields in enriched records
+- Validate presence of matched data where expected
 
 ### Output Validation  
 - Verify aggregated data structure
@@ -202,4 +200,4 @@ enriched/YYYY-MM.json → aggregate → aggregated/YYYY-MM.json → report
 ### Data Quality Checks
 - Verify shaves >= unique_users
 - Check for reasonable avg_shaves_per_user values
-- Validate category names are consistent 
+- Validate category names are consistent
