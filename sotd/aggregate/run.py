@@ -16,6 +16,7 @@ CLI matrix
 import argparse
 from pathlib import Path
 from typing import Sequence
+import json
 
 from tqdm import tqdm
 
@@ -35,6 +36,23 @@ from sotd.cli_utils.date_span import month_span
 
 def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
     """Process a single month of enriched data."""
+    # Validate input parameters
+    if not isinstance(year, int) or year < 2000 or year > 2100:
+        return {
+            "year": year,
+            "month": month,
+            "status": "error",
+            "error": f"Invalid year: {year} (must be between 2000-2100)",
+        }
+
+    if not isinstance(month, int) or month < 1 or month > 12:
+        return {
+            "year": year,
+            "month": month,
+            "status": "error",
+            "error": f"Invalid month: {month} (must be between 1-12)",
+        }
+
     # Get file paths
     base_dir = Path(args.out_dir)
     enriched_path = get_enriched_file_path(base_dir, year, month)
@@ -51,8 +69,19 @@ def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
         }
 
     try:
-        # Load enriched data
+        # Load enriched data with enhanced validation
         metadata, data = load_enriched_data(enriched_path, debug=args.debug)
+
+        # Validate that we have data to process
+        if not data:
+            if args.debug:
+                print(f"[DEBUG] No data to process for {year:04d}-{month:02d}")
+            return {
+                "year": year,
+                "month": month,
+                "status": "skipped",
+                "reason": "no_data",
+            }
 
         # Filter for matched records
         matched_records = filter_matched_records(data, debug=args.debug)
@@ -60,12 +89,41 @@ def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
         # Calculate basic metrics
         basic_metrics = calculate_basic_metrics(matched_records, debug=args.debug)
 
-        # Perform aggregations
-        razors = aggregate_razors(matched_records, debug=args.debug)
-        blades = aggregate_blades(matched_records, debug=args.debug)
-        soaps = aggregate_soaps(matched_records, debug=args.debug)
-        brushes = aggregate_brushes(matched_records, debug=args.debug)
-        users = aggregate_users(matched_records, debug=args.debug)
+        # Perform aggregations with error handling for each
+        try:
+            razors = aggregate_razors(matched_records, debug=args.debug)
+        except Exception as e:
+            if args.debug:
+                print(f"[DEBUG] Error aggregating razors: {e}")
+            razors = []
+
+        try:
+            blades = aggregate_blades(matched_records, debug=args.debug)
+        except Exception as e:
+            if args.debug:
+                print(f"[DEBUG] Error aggregating blades: {e}")
+            blades = []
+
+        try:
+            soaps = aggregate_soaps(matched_records, debug=args.debug)
+        except Exception as e:
+            if args.debug:
+                print(f"[DEBUG] Error aggregating soaps: {e}")
+            soaps = []
+
+        try:
+            brushes = aggregate_brushes(matched_records, debug=args.debug)
+        except Exception as e:
+            if args.debug:
+                print(f"[DEBUG] Error aggregating brushes: {e}")
+            brushes = []
+
+        try:
+            users = aggregate_users(matched_records, debug=args.debug)
+        except Exception as e:
+            if args.debug:
+                print(f"[DEBUG] Error aggregating users: {e}")
+            users = []
 
         # Prepare results
         results = {
@@ -99,20 +157,71 @@ def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
 
         return results
 
-    except Exception as e:
+    except FileNotFoundError as e:
         if args.debug:
-            print(f"[DEBUG] Error processing {year:04d}-{month:02d}: {e}")
+            print(f"[DEBUG] File not found error processing {year:04d}-{month:02d}: {e}")
         return {
             "year": year,
             "month": month,
             "status": "error",
-            "error": str(e),
+            "error": f"File not found: {e}",
+        }
+    except json.JSONDecodeError as e:
+        if args.debug:
+            print(f"[DEBUG] JSON decode error processing {year:04d}-{month:02d}: {e}")
+        return {
+            "year": year,
+            "month": month,
+            "status": "error",
+            "error": f"JSON decode error: {e}",
+        }
+    except ValueError as e:
+        if args.debug:
+            print(f"[DEBUG] Data validation error processing {year:04d}-{month:02d}: {e}")
+        return {
+            "year": year,
+            "month": month,
+            "status": "error",
+            "error": f"Data validation error: {e}",
+        }
+    except OSError as e:
+        if args.debug:
+            print(f"[DEBUG] File system error processing {year:04d}-{month:02d}: {e}")
+        return {
+            "year": year,
+            "month": month,
+            "status": "error",
+            "error": f"File system error: {e}",
+        }
+    except Exception as e:
+        if args.debug:
+            print(f"[DEBUG] Unexpected error processing {year:04d}-{month:02d}: {e}")
+        return {
+            "year": year,
+            "month": month,
+            "status": "error",
+            "error": f"Unexpected error: {e}",
         }
 
 
 def run_aggregate(args: argparse.Namespace) -> None:
     """Main aggregation logic."""
+    # Validate output directory
+    out_dir = Path(args.out_dir)
+    if not out_dir.exists():
+        try:
+            out_dir.mkdir(parents=True, exist_ok=True)
+            if args.debug:
+                print(f"[DEBUG] Created output directory: {out_dir}")
+        except OSError as e:
+            print(f"[ERROR] Failed to create output directory {out_dir}: {e}")
+            return
+
     months = list(month_span(args))
+
+    if not months:
+        print("[ERROR] No months to process")
+        return
 
     if args.debug:
         print(f"[DEBUG] Processing {len(months)} month(s)")
@@ -146,6 +255,9 @@ def run_aggregate(args: argparse.Namespace) -> None:
         print("\n[DEBUG] Errors:")
         for error in errors:
             print(f"  {error['year']:04d}-{error['month']:02d}: {error['error']}")
+
+    if errors and not args.debug:
+        print(f"\n[INFO] {len(errors)} month(s) had errors. Use --debug for details.")
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -182,7 +294,11 @@ def main(argv: Sequence[str] | None = None) -> None:
     if not out_dir.exists():
         if args.debug:
             print(f"[DEBUG] Creating output directory: {out_dir}")
-        out_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            out_dir.mkdir(parents=True, exist_ok=True)
+        except OSError as e:
+            print(f"[ERROR] Failed to create output directory {out_dir}: {e}")
+            return
 
     # Run aggregation
     run_aggregate(args)
