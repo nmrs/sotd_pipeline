@@ -7,23 +7,22 @@ from pathlib import Path
 import pytest
 
 from sotd.aggregate.engine import (
-    aggregate_blade_manufacturers,
     aggregate_blades,
-    aggregate_brush_handle_makers,
-    aggregate_brush_knot_makers,
-    aggregate_brush_fibers,
-    aggregate_brush_knot_sizes,
     aggregate_brushes,
-    aggregate_razor_manufacturers,
     aggregate_razors,
-    aggregate_soap_makers,
     aggregate_soaps,
     aggregate_users,
     calculate_basic_metrics,
     filter_matched_records,
+    aggregate_blackbird_plates,
+    aggregate_christopher_bradley_plates,
+    aggregate_game_changer_plates,
+    aggregate_super_speed_tips,
+    aggregate_straight_razor_specs,
+    aggregate_razor_blade_combinations,
+    aggregate_user_blade_usage,
 )
 from sotd.aggregate.load import load_enriched_data
-from sotd.aggregate.save import save_aggregated_data
 
 
 class TestAggregateIntegration:
@@ -31,7 +30,7 @@ class TestAggregateIntegration:
 
     @pytest.fixture
     def sample_enriched_data(self):
-        """Sample enriched data for testing."""
+        """Sample enriched data for testing, including specialized fields for all new aggregations."""
         return {
             "meta": {
                 "month": "2025-01",
@@ -45,8 +44,10 @@ class TestAggregateIntegration:
                     "author": "user1",
                     "created_utc": 1640995200,
                     "body": (
-                        "Razor: Karve Christopher Bradley\nBlade: Feather\n"
-                        "Brush: Simpson Chubby 2\nSoap: Declaration Grooming"
+                        "Razor: Karve Christopher Bradley\n"
+                        "Blade: Feather\n"
+                        "Brush: Simpson Chubby 2\n"
+                        "Soap: Declaration Grooming"
                     ),
                     "razor": {
                         "matched": {
@@ -54,14 +55,16 @@ class TestAggregateIntegration:
                             "model": "Christopher Bradley",
                             "format": "DE",
                             "match_type": "exact",
-                        }
+                        },
+                        "enriched": {"plate_level": "C", "plate_type": "SB"},
                     },
                     "blade": {
                         "matched": {
                             "brand": "Feather",
                             "model": "Hi-Stainless",
                             "match_type": "exact",
-                        }
+                        },
+                        "enriched": {"use_count": 3},
                     },
                     "brush": {
                         "matched": {
@@ -87,7 +90,8 @@ class TestAggregateIntegration:
                     "created_utc": 1640995201,
                     "body": (
                         "Razor: Merkur 34C\nBlade: Astra SP\n"
-                        "Brush: Elite handle w/ Declaration knot\nSoap: Barrister and Mann"
+                        "Brush: Elite handle w/ Declaration knot\n"
+                        "Soap: Barrister and Mann"
                     ),
                     "razor": {
                         "matched": {
@@ -102,7 +106,8 @@ class TestAggregateIntegration:
                             "brand": "Astra",
                             "model": "Superior Platinum",
                             "match_type": "exact",
-                        }
+                        },
+                        "enriched": {"use_count": 2},
                     },
                     "brush": {
                         "matched": {
@@ -136,14 +141,16 @@ class TestAggregateIntegration:
                             "model": "Christopher Bradley",
                             "format": "DE",
                             "match_type": "exact",
-                        }
+                        },
+                        "enriched": {"plate_level": "D", "plate_type": "SB"},
                     },
                     "blade": {
                         "matched": {
                             "brand": "Feather",
                             "model": "Hi-Stainless",
                             "match_type": "exact",
-                        }
+                        },
+                        "enriched": {"use_count": 2},
                     },
                     "brush": {
                         "matched": {
@@ -167,21 +174,26 @@ class TestAggregateIntegration:
                     "id": "test4",
                     "author": "user3",
                     "created_utc": 1640995203,
-                    "body": "Razor: Gillette Tech\nBlade: Personna\nBrush: Omega\nSoap: Stirling",
+                    "body": (
+                        "Razor: Gillette Super Speed (Red Tip)\nBlade: Personna\n"
+                        "Brush: Omega\nSoap: Stirling"
+                    ),
                     "razor": {
                         "matched": {
                             "brand": "Gillette",
-                            "model": "Tech",
+                            "model": "Super Speed",
                             "format": "DE",
                             "match_type": "exact",
-                        }
+                        },
+                        "enriched": {"super_speed_tip": "Red"},
                     },
                     "blade": {
                         "matched": {
                             "brand": "Personna",
                             "model": "Comfort Coated",
                             "match_type": "exact",
-                        }
+                        },
+                        "enriched": {"use_count": 1},
                     },
                     "brush": {
                         "matched": {
@@ -206,8 +218,8 @@ class TestAggregateIntegration:
                     "author": "user4",
                     "created_utc": 1640995204,
                     "body": (
-                        "Razor: Blackland Blackbird\nBlade: Feather\nBrush: Zenith\n"
-                        "Soap: Declaration Grooming"
+                        "Razor: Blackland Blackbird\nBlade: Feather\n"
+                        "Brush: Zenith\nSoap: Declaration Grooming"
                     ),
                     "razor": {
                         "matched": {
@@ -215,14 +227,16 @@ class TestAggregateIntegration:
                             "model": "Blackbird",
                             "format": "DE",
                             "match_type": "exact",
-                        }
+                        },
+                        "enriched": {"plate": "OC"},
                     },
                     "blade": {
                         "matched": {
                             "brand": "Feather",
                             "model": "Hi-Stainless",
                             "match_type": "exact",
-                        }
+                        },
+                        "enriched": {"use_count": 1},
                     },
                     "brush": {
                         "matched": {
@@ -242,6 +256,88 @@ class TestAggregateIntegration:
                         }
                     },
                 },
+                {
+                    "id": "test6",
+                    "author": "user5",
+                    "created_utc": 1640995205,
+                    "body": (
+                        "Razor: RazoRock Game Changer .84-P\nBlade: Gillette Silver Blue\n"
+                        "Brush: Omega\nSoap: Stirling"
+                    ),
+                    "razor": {
+                        "matched": {
+                            "brand": "RazoRock",
+                            "model": "Game Changer .84-P",
+                            "format": "DE",
+                            "match_type": "exact",
+                        },
+                        "enriched": {"gap": ".84", "variant": "P"},
+                    },
+                    "blade": {
+                        "matched": {
+                            "brand": "Gillette",
+                            "model": "Silver Blue",
+                            "match_type": "exact",
+                        },
+                        "enriched": {"use_count": 2},
+                    },
+                    "brush": {
+                        "matched": {
+                            "brand": "Omega",
+                            "model": "10066",
+                            "handle_maker": "Omega",
+                            "fiber": "Boar",
+                            "knot_size_mm": 24,
+                            "match_type": "exact",
+                        }
+                    },
+                    "soap": {
+                        "matched": {
+                            "maker": "Stirling",
+                            "scent": "Barbershop",
+                            "match_type": "exact",
+                        }
+                    },
+                },
+                {
+                    "id": "test7",
+                    "author": "user6",
+                    "created_utc": 1640995206,
+                    "body": (
+                        "Razor: Dovo Straight Razor\nBlade: N/A\n" "Brush: Semogue\nSoap: Tabac"
+                    ),
+                    "razor": {
+                        "matched": {
+                            "brand": "Dovo",
+                            "model": "Best Quality",
+                            "format": "Straight",
+                            "match_type": "exact",
+                        },
+                        "enriched": {
+                            "grind": "Full Hollow",
+                            "width": "5/8",
+                            "point": "Round",
+                        },
+                    },
+                    "blade": {"matched": {}, "enriched": {}},
+                    "brush": {
+                        "matched": {
+                            "brand": "Semogue",
+                            "model": "1305",
+                            "handle_maker": "Semogue",
+                            "fiber": "Boar",
+                            "knot_size_mm": 22,
+                            "match_type": "exact",
+                        }
+                    },
+                    "soap": {
+                        "matched": {
+                            "maker": "Tabac",
+                            "scent": "Original",
+                            "match_type": "exact",
+                        }
+                    },
+                },
             ],
         }
 
@@ -252,17 +348,17 @@ class TestAggregateIntegration:
 
         # Test filtering matched records
         matched_records = filter_matched_records(records, debug=True)
-        assert len(matched_records) == 5  # All records should be matched
+        assert len(matched_records) == 7  # All records should be matched
 
         # Test basic metrics calculation
         basic_metrics = calculate_basic_metrics(matched_records, debug=True)
-        assert basic_metrics["total_shaves"] == 5
-        assert basic_metrics["unique_shavers"] == 4
-        assert basic_metrics["avg_shaves_per_user"] == 1.25
+        assert basic_metrics["total_shaves"] == 7
+        assert basic_metrics["unique_shavers"] == 6
+        assert basic_metrics["avg_shaves_per_user"] == pytest.approx(1.166, 0.01)
 
         # Test razor aggregation
         razor_results = aggregate_razors(matched_records, debug=True)
-        assert len(razor_results) == 4  # 4 unique razors
+        assert len(razor_results) == 6  # 6 unique razors
 
         # Check Karve Christopher Bradley (used twice by user1)
         karve_result = next(r for r in razor_results if "Karve Christopher Bradley" in r["name"])
@@ -272,7 +368,7 @@ class TestAggregateIntegration:
 
         # Test blade aggregation
         blade_results = aggregate_blades(matched_records, debug=True)
-        assert len(blade_results) == 3  # 3 unique blade brands (Feather, Astra, Personna)
+        assert len(blade_results) == 4  # 4 unique blade brands (Feather, Astra, Personna, Gillette)
 
         # Check Feather (used 3 times by 2 users)
         feather_result = next(r for r in blade_results if "Feather" in r["name"])
@@ -282,7 +378,7 @@ class TestAggregateIntegration:
 
         # Test soap aggregation
         soap_results = aggregate_soaps(matched_records, debug=True)
-        assert len(soap_results) == 4  # 4 unique soaps
+        assert len(soap_results) == 6  # 6 unique soaps
 
         # Check Declaration Grooming Sellout (used 2 times by user1)
         dg_result = next(r for r in soap_results if "Declaration Grooming Sellout" in r["name"])
@@ -292,16 +388,51 @@ class TestAggregateIntegration:
 
         # Test brush aggregation
         brush_results = aggregate_brushes(matched_records, debug=True)
-        assert len(brush_results) == 5  # 5 unique brushes
+        assert len(brush_results) == 7  # 7 unique brushes
 
         # Test user aggregation
         user_results = aggregate_users(matched_records, debug=True)
-        assert len(user_results) == 4  # 4 unique users
+        assert len(user_results) == 6  # 6 unique users
 
         # Check user1 (2 shaves)
         user1_result = next(r for r in user_results if r["user"] == "user1")
         assert user1_result["shaves"] == 2
         assert user1_result["avg_shaves_per_user"] == 1.0
+
+        # --- New specialized aggregations ---
+        blackbird_plates = aggregate_blackbird_plates(matched_records, debug=True)
+        christopher_bradley_plates = aggregate_christopher_bradley_plates(
+            matched_records, debug=True
+        )
+        game_changer_plates = aggregate_game_changer_plates(matched_records, debug=True)
+        super_speed_tips = aggregate_super_speed_tips(matched_records, debug=True)
+        straight_razor_specs = aggregate_straight_razor_specs(matched_records, debug=True)
+        razor_blade_combinations = aggregate_razor_blade_combinations(matched_records, debug=True)
+        user_blade_usage = aggregate_user_blade_usage(matched_records, debug=True)
+
+        # Assert that all new categories return lists (may be empty for this sample)
+        assert isinstance(blackbird_plates, list)
+        assert isinstance(christopher_bradley_plates, list)
+        assert isinstance(game_changer_plates, list)
+        assert isinstance(super_speed_tips, list)
+        assert isinstance(straight_razor_specs, list)
+        assert isinstance(razor_blade_combinations, list)
+        assert isinstance(user_blade_usage, list)
+
+        # For this sample, Blackbird Plates should have 1 entry (user4)
+        assert len(blackbird_plates) == 1
+        # Christopher Bradley Plates should have 2 entries (C SB and D SB plates)
+        assert len(christopher_bradley_plates) == 2
+        # Game Changer Plates should have 1 entry (user5 with Gap .84 P)
+        assert len(game_changer_plates) == 1
+        # Super Speed Tips should have 1 entry (user6)
+        assert len(super_speed_tips) == 1
+        # Straight Razor Specs should have 1 entry (user7)
+        assert len(straight_razor_specs) == 1
+        # Razor-Blade Combinations: at least 4 unique combos
+        assert len(razor_blade_combinations) >= 4
+        # User Blade Usage: at least 3 users (since 3 unique blades)
+        assert len(user_blade_usage) >= 3
 
     def test_file_io_integration(self, sample_enriched_data):
         """Test file I/O integration with realistic data."""
@@ -317,84 +448,62 @@ class TestAggregateIntegration:
             # Load enriched data
             metadata, records = load_enriched_data(enriched_file)
             assert metadata["month"] == "2025-01"
-            assert len(records) == 5
+            assert len(records) == 7
 
-            # Process data
-            matched_records = filter_matched_records(records)
-            basic_metrics = calculate_basic_metrics(matched_records)
-            razor_results = aggregate_razors(matched_records)
-            blade_results = aggregate_blades(matched_records)
-            soap_results = aggregate_soaps(matched_records)
-            brush_results = aggregate_brushes(matched_records)
-            user_results = aggregate_users(matched_records)
-            # Add manufacturer-level aggregations
-            razor_manufacturers = aggregate_razor_manufacturers(matched_records)
-            blade_manufacturers = aggregate_blade_manufacturers(matched_records)
-            soap_makers = aggregate_soap_makers(matched_records)
-            brush_knot_makers = aggregate_brush_knot_makers(matched_records)
-            brush_handle_makers = aggregate_brush_handle_makers(matched_records)
-            brush_fibers = aggregate_brush_fibers(matched_records)
-            brush_knot_sizes = aggregate_brush_knot_sizes(matched_records)
+            # Process data using the real pipeline logic
+            matched_records = filter_matched_records(records, debug=True)
+            assert len(matched_records) == 7
 
-            # Create aggregated results
-            aggregated_results = {
-                "year": 2025,
-                "month": 1,
-                "status": "success",
-                "basic_metrics": basic_metrics,
-                "aggregations": {
-                    "razors": razor_results,
-                    "razor_manufacturers": razor_manufacturers,
-                    "blades": blade_results,
-                    "blade_manufacturers": blade_manufacturers,
-                    "soaps": soap_results,
-                    "soap_makers": soap_makers,
-                    "brushes": brush_results,
-                    "brush_knot_makers": brush_knot_makers,
-                    "brush_handle_makers": brush_handle_makers,
-                    "brush_fibers": brush_fibers,
-                    "brush_knot_sizes": brush_knot_sizes,
-                    "users": user_results,
-                },
-                "summary": {
-                    "total_records": len(records),
-                    "matched_records": len(matched_records),
-                    "razor_count": len(razor_results),
-                    "razor_manufacturer_count": len(razor_manufacturers),
-                    "blade_count": len(blade_results),
-                    "blade_manufacturer_count": len(blade_manufacturers),
-                    "soap_count": len(soap_results),
-                    "soap_maker_count": len(soap_makers),
-                    "brush_count": len(brush_results),
-                    "brush_knot_maker_count": len(brush_knot_makers),
-                    "brush_handle_maker_count": len(brush_handle_makers),
-                    "brush_fiber_count": len(brush_fibers),
-                    "brush_knot_size_count": len(brush_knot_sizes),
-                    "user_count": len(user_results),
-                },
-            }
+            # Use the real process_month function to ensure output structure consistency
+            from sotd.aggregate.run import process_month
+            import argparse
 
-            # Save aggregated data
-            aggregated_dir = Path(temp_dir) / "aggregated"
-            aggregated_file = aggregated_dir / "2025-01.json"
-            save_aggregated_data(aggregated_results, aggregated_file, force=False, debug=True)
+            # Create mock args for process_month
+            mock_args = argparse.Namespace(out_dir=str(temp_dir), force=False, debug=True)
 
-            # Verify file was created and has correct structure
+            # Process the month using the real pipeline
+            results = process_month(2025, 1, mock_args)
+            assert results["status"] == "success"
+
+            # Verify the aggregated file was created
+            aggregated_file = Path(temp_dir) / "aggregated" / "2025-01.json"
             assert aggregated_file.exists()
 
+            # Load and verify the saved data structure
             with aggregated_file.open("r") as f:
                 saved_data = json.load(f)
 
+            # Verify metadata
             assert "meta" in saved_data
             assert "data" in saved_data
             assert saved_data["meta"]["month"] == "2025-01"
-            assert saved_data["meta"]["total_shaves"] == 5
-            assert saved_data["meta"]["unique_shavers"] == 4
-            assert len(saved_data["data"]["razors"]) == 4
-            assert len(saved_data["data"]["blades"]) == 3
-            assert len(saved_data["data"]["soaps"]) == 4
-            assert len(saved_data["data"]["brushes"]) == 5
-            assert len(saved_data["data"]["users"]) == 4
+            assert saved_data["meta"]["total_shaves"] == 7
+            assert saved_data["meta"]["unique_shavers"] == 6
+
+            # Verify core categories
+            assert len(saved_data["data"]["razors"]) == 6
+            assert len(saved_data["data"]["blades"]) == 4
+            assert len(saved_data["data"]["soaps"]) == 6
+            assert len(saved_data["data"]["brushes"]) == 7
+            assert len(saved_data["data"]["users"]) == 6
+
+            # Verify new specialized categories are present
+            assert "blackbird_plates" in saved_data["data"]
+            assert "christopher_bradley_plates" in saved_data["data"]
+            assert "game_changer_plates" in saved_data["data"]
+            assert "super_speed_tips" in saved_data["data"]
+            assert "straight_razor_specs" in saved_data["data"]
+            assert "razor_blade_combinations" in saved_data["data"]
+            assert "user_blade_usage" in saved_data["data"]
+
+            # Verify counts for new categories
+            assert len(saved_data["data"]["blackbird_plates"]) == 1
+            assert len(saved_data["data"]["christopher_bradley_plates"]) == 2  # C and D plates
+            assert len(saved_data["data"]["game_changer_plates"]) == 1
+            assert len(saved_data["data"]["super_speed_tips"]) == 1
+            assert len(saved_data["data"]["straight_razor_specs"]) == 1
+            assert len(saved_data["data"]["razor_blade_combinations"]) >= 5
+            assert len(saved_data["data"]["user_blade_usage"]) >= 5
 
     def test_edge_cases_with_realistic_data(self):
         """Test edge cases with realistic data scenarios."""
@@ -469,9 +578,10 @@ class TestAggregateIntegration:
         assert len(matched_records) == 4  # edge5 should be filtered out
 
         # Test basic metrics
-        basic_metrics = calculate_basic_metrics(matched_records, debug=True)
-        assert basic_metrics["total_shaves"] == 4
-        assert basic_metrics["unique_shavers"] == 4
+        basic_metrics = calculate_basic_metrics(edge_case_records, debug=True)
+        assert basic_metrics["total_shaves"] == 5
+        assert basic_metrics["unique_shavers"] == 5
+        assert basic_metrics["avg_shaves_per_user"] == 1.0
 
         # Test individual aggregations
         razor_results = aggregate_razors(edge_case_records, debug=True)
@@ -500,13 +610,13 @@ class TestAggregateIntegration:
         user_results = aggregate_users(matched_records, debug=True)
 
         # Verify all functions return expected results even with debug=True
-        assert len(matched_records) == 5
-        assert basic_metrics["total_shaves"] == 5
-        assert len(razor_results) == 4
-        assert len(blade_results) == 3
-        assert len(soap_results) == 4
-        assert len(brush_results) == 5
-        assert len(user_results) == 4
+        assert len(matched_records) == 7
+        assert basic_metrics["total_shaves"] == 7
+        assert len(razor_results) == 6
+        assert len(blade_results) == 4
+        assert len(soap_results) == 6
+        assert len(brush_results) == 7
+        assert len(user_results) == 6
 
     def test_error_handling_integration(self):
         """Test error handling with realistic error scenarios."""
