@@ -61,11 +61,11 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 **Goal**: Extract fiber processing logic into a focused, testable class.
 
 **Tasks**:
-- [ ] Create `sotd/match/fiber_processor_enhanced.py` (target: 150-200 lines)
-- [ ] Move fiber-related methods from BrushMatcher
-- [ ] Update BrushMatcher to use new FiberProcessor
-- [ ] Run quality checks: `make format lint typecheck test`
-- [ ] Only add or update tests if coverage is missing or logic changes
+- [x] Create `sotd/match/fiber_processor_enhanced.py` (target: 150-200 lines)
+- [x] Move fiber-related methods from BrushMatcher
+- [x] Update BrushMatcher to use new FiberProcessor
+- [x] Run quality checks: `make format lint typecheck test`
+- [x] Only add or update tests if coverage is missing or logic changes
 
 **Test Cases**:
 - Rely on existing fiber processor and integration tests unless new logic is introduced.
@@ -257,7 +257,7 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 - [x] Chunk 1.1: Enhanced HandleMatcher (5/5 tasks)
 - [x] Chunk 1.2: Enhanced KnotMatcher (5/5 tasks)
 - [x] Chunk 1.3: Enhanced BrushSplitter (5/5 tasks)
-- [ ] Chunk 1.4: Enhanced FiberProcessor (0/5 tasks)
+- [x] Chunk 1.4: Enhanced FiberProcessor (5/5 tasks)
 - [ ] Chunk 1.5: BrushMatcher Orchestrator (0/5 tasks)
 - [ ] Chunk 2.1: Analysis Tools Split (0/4 tasks)
 
