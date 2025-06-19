@@ -4,6 +4,4 @@ ruff
 pytest
 pytest-cov
 pyright
-tqdm
-pyyaml
-richPIPI
+rich
