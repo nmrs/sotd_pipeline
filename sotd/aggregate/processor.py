@@ -212,9 +212,7 @@ def process_data(
         print(f"[DEBUG] Found {len(matched_records)} matched records")
 
     # Perform core aggregations
-    enable_specialized = getattr(args, "enable_specialized", True) and not getattr(
-        args, "disable_specialized", False
-    )
+    enable_specialized = not getattr(args, "disable_specialized", False)
     core_aggregations, core_errors = _perform_core_aggregations(
         matched_records, args.debug, enable_specialized=enable_specialized
     )
@@ -240,9 +238,7 @@ def process_data(
         )
 
     # Only run cross-product analysis if enabled
-    enable_cross_product = getattr(args, "enable_cross_product", True) and not getattr(
-        args, "disable_cross_product", False
-    )
+    enable_cross_product = not getattr(args, "disable_cross_product", False)
     if enable_cross_product:
         cross_product_analysis, cross_errors = _perform_cross_product_analysis(
             matched_records, args

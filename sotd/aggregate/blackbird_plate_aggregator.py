@@ -37,32 +37,57 @@ class BlackbirdPlateAggregator(BaseAggregator):
         # Extract razor info
         razor = record.get("razor", {})
         if not isinstance(razor, dict):
+            if self.debug:
+                print(f"[DEBUG] Record {record_index}: razor is not a dict")
             return None
 
         # Check for matched data
         matched = razor.get("matched", {})
         if not isinstance(matched, dict):
+            if self.debug:
+                print(f"[DEBUG] Record {record_index}: matched is not a dict")
             return None
 
         # Validate match_type if present
         if not self._validate_match_type(matched, record_index):
+            if self.debug:
+                print(f"[DEBUG] Record {record_index}: match_type invalid or missing")
             return None
 
         # Check if it's a Blackbird razor
         brand = (matched.get("brand") or "").lower()
         model = (matched.get("model") or "").lower()
         if brand != "blackland" or "blackbird" not in model:
+            if self.debug:
+                print(
+                    f"[DEBUG] Record {record_index}: not a Blackland Blackbird "
+                    f"(brand={brand}, model={model})"
+                )
             return None
 
         # Extract enriched data
-        enriched = razor.get("enriched", {})
+        enriched = record.get("enriched", {})
         if not isinstance(enriched, dict):
+            if self.debug:
+                print(f"[DEBUG] Record {record_index}: enriched is not a dict")
+            return None
+
+        # Extract razor enriched data
+        razor_enriched = enriched.get("razor", {})
+        if not isinstance(razor_enriched, dict):
+            if self.debug:
+                print(f"[DEBUG] Record {record_index}: razor_enriched is not a dict")
             return None
 
         # Extract plate info
-        plate = enriched.get("plate")
+        plate = razor_enriched.get("plate")
         if not plate:
+            if self.debug:
+                print(f"[DEBUG] Record {record_index}: plate missing in enriched")
             return None
+
+        if self.debug:
+            print(f"[DEBUG] Record {record_index}: Found Blackbird plate: {plate}")
 
         return {
             "plate": plate,

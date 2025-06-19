@@ -1,6 +1,5 @@
 """Hardware report generator for the SOTD pipeline report phase."""
 
-from datetime import datetime
 from typing import List
 
 from .base import BaseReportGenerator
@@ -20,143 +19,98 @@ from .table_generators.razor_tables import (
     RazorManufacturersTableGenerator,
     RazorsTableGenerator,
 )
+from .table_generators.specialized_tables import (
+    BlackbirdPlatesTableGenerator,
+    ChristopherBradleyPlatesTableGenerator,
+    GameChangerPlatesTableGenerator,
+    StraightRazorSpecsTableGenerator,
+    SuperSpeedTipsTableGenerator,
+)
 
 
 class HardwareReportGenerator(BaseReportGenerator):
     """Hardware report generator."""
 
     def generate_header(self) -> str:
-        """Generate hardware report header."""
-        month = self.metadata["month"]
-        total_shaves = self.metadata["total_shaves"]
-        unique_shavers = self.metadata["unique_shavers"]
+        """Generate the report header."""
+        month = self.metadata.get("month", "Unknown")
+        total_shaves = self.metadata.get("total_shaves", 0)
+        unique_shavers = self.metadata.get("unique_shavers", 0)
 
         # Parse month for display
         try:
+            from datetime import datetime
+
             date_obj = datetime.strptime(month, "%Y-%m")
             month_display = date_obj.strftime("%B %Y")
-        except ValueError:
+        except (ValueError, TypeError):
             month_display = month
 
-        header_lines = [
-            f"# Hardware Report - {month_display}",
-            "",
-            f"**Total Shaves:** {total_shaves:,}",
-            f"**Unique Shavers:** {unique_shavers:,}",
-            "",
-        ]
-
-        return "\n".join(header_lines)
+        return (
+            f"# Hardware Report - {month_display}\n\n"
+            f"**Total Shaves:** {total_shaves:,}\n"
+            f"**Unique Shavers:** {unique_shavers:,}\n\n"
+        )
 
     def generate_observations(self) -> str:
-        """Generate hardware observations section."""
+        """Generate the observations section."""
         return (
             "## Observations\n\n"
-            "*(This section will be populated with automated observations "
-            "about trends and patterns in the hardware data.)*"
+            "*(This section will be populated with automated observations about trends "
+            "and patterns in the hardware data.)*\n\n"
         )
 
     def generate_notes_and_caveats(self) -> str:
-        """Generate hardware notes and caveats section."""
-        return (
-            "## Notes & Caveats\n\n"
-            "- This data is collected from the r/wetshaving community's "
-            "Shave of the Day (SOTD) posts\n"
-            "- Only posts that include product information are included in the analysis\n"
-            "- Product matching is performed automatically and may contain errors\n"
-            "- Users may post multiple SOTDs per day, which are all counted\n"
-            "- The data represents community participation, not necessarily "
-            "market share or sales figures"
-        )
+        """Generate the notes and caveats section."""
+        return """## Notes & Caveats
+
+- This data is collected from the r/wetshaving community's Shave of the Day (SOTD) posts
+- Only posts that include product information are included in the analysis
+- Product matching is performed automatically and may contain errors
+- Users may post multiple SOTDs per day, which are all counted
+- The data represents community participation, not necessarily market share or sales figures
+
+"""
 
     def generate_tables(self) -> List[str]:
-        """Generate hardware tables."""
-        if self.debug:
-            print("[DEBUG] Generating hardware tables")
-
+        """Generate all tables for the hardware report."""
         tables = []
         tables.append("## Tables\n\n")
 
-        # Generate razor format table
-        if "razor_formats" in self.data:
-            formats_generator = RazorFormatsTableGenerator(self.data, debug=self.debug)
-            formats_table = formats_generator.generate_table()
-            if formats_table:
-                tables.append(formats_table)
-                tables.append("")  # Empty line
+        # Core product tables
+        tables.append(self._generate_table("Razors", RazorsTableGenerator))
+        tables.append(self._generate_table("Razor Manufacturers", RazorManufacturersTableGenerator))
+        tables.append(self._generate_table("Razor Formats", RazorFormatsTableGenerator))
+        tables.append(self._generate_table("Blades", BladesTableGenerator))
+        tables.append(self._generate_table("Blade Manufacturers", BladeManufacturersTableGenerator))
+        tables.append(self._generate_table("Brushes", BrushesTableGenerator))
+        tables.append(self._generate_table("Brush Handle Makers", BrushHandleMakersTableGenerator))
+        tables.append(self._generate_table("Brush Knot Makers", BrushKnotMakersTableGenerator))
+        tables.append(self._generate_table("Brush Fibers", BrushFibersTableGenerator))
+        tables.append(self._generate_table("Brush Knot Sizes", BrushKnotSizesTableGenerator))
 
-        # Generate razors table
-        if "razors" in self.data:
-            razors_generator = RazorsTableGenerator(self.data, debug=self.debug)
-            razors_table = razors_generator.generate_table()
-            if razors_table:
-                tables.append(razors_table)
-                tables.append("")  # Empty line
-
-        # Generate razor manufacturers table
-        if "razor_manufacturers" in self.data:
-            manufacturers_generator = RazorManufacturersTableGenerator(self.data, debug=self.debug)
-            manufacturers_table = manufacturers_generator.generate_table()
-            if manufacturers_table:
-                tables.append(manufacturers_table)
-                tables.append("")  # Empty line
-
-        # Generate blades table
-        if "blades" in self.data:
-            blades_generator = BladesTableGenerator(self.data, debug=self.debug)
-            blades_table = blades_generator.generate_table()
-            if blades_table:
-                tables.append(blades_table)
-                tables.append("")  # Empty line
-
-        # Generate blade manufacturers table
-        if "blade_manufacturers" in self.data:
-            blade_manufacturers_generator = BladeManufacturersTableGenerator(
-                self.data, debug=self.debug
+        # Specialized tables
+        tables.append(self._generate_table("Blackbird Plates", BlackbirdPlatesTableGenerator))
+        tables.append(
+            self._generate_table(
+                "Christopher Bradley Plates", ChristopherBradleyPlatesTableGenerator
             )
-            blade_manufacturers_table = blade_manufacturers_generator.generate_table()
-            if blade_manufacturers_table:
-                tables.append(blade_manufacturers_table)
-                tables.append("")  # Empty line
-
-        # Generate brushes table
-        if "brushes" in self.data:
-            brushes_generator = BrushesTableGenerator(self.data, debug=self.debug)
-            brushes_table = brushes_generator.generate_table()
-            if brushes_table:
-                tables.append(brushes_table)
-                tables.append("")  # Empty line
-
-        # Generate brush handle makers table
-        if "brush_handle_makers" in self.data:
-            handle_makers_generator = BrushHandleMakersTableGenerator(self.data, debug=self.debug)
-            handle_makers_table = handle_makers_generator.generate_table()
-            if handle_makers_table:
-                tables.append(handle_makers_table)
-                tables.append("")  # Empty line
-
-        # Generate brush knot makers table
-        if "brush_knot_makers" in self.data:
-            knot_makers_generator = BrushKnotMakersTableGenerator(self.data, debug=self.debug)
-            knot_makers_table = knot_makers_generator.generate_table()
-            if knot_makers_table:
-                tables.append(knot_makers_table)
-                tables.append("")  # Empty line
-
-        # Generate brush fibers table
-        if "brush_fibers" in self.data:
-            fibers_generator = BrushFibersTableGenerator(self.data, debug=self.debug)
-            fibers_table = fibers_generator.generate_table()
-            if fibers_table:
-                tables.append(fibers_table)
-                tables.append("")  # Empty line
-
-        # Generate brush knot sizes table
-        if "brush_knot_sizes" in self.data:
-            knot_sizes_generator = BrushKnotSizesTableGenerator(self.data, debug=self.debug)
-            knot_sizes_table = knot_sizes_generator.generate_table()
-            if knot_sizes_table:
-                tables.append(knot_sizes_table)
-                tables.append("")  # Empty line
+        )
+        tables.append(self._generate_table("Game Changer Plates", GameChangerPlatesTableGenerator))
+        tables.append(self._generate_table("Super Speed Tips", SuperSpeedTipsTableGenerator))
+        tables.append(
+            self._generate_table("Straight Razor Specifications", StraightRazorSpecsTableGenerator)
+        )
 
         return tables
+
+    def _generate_table(self, title: str, generator_class) -> str:
+        """Generate a single table using the specified generator."""
+        generator = generator_class(self.data, self.debug)
+        table_content = generator.generate_table()
+
+        # If the table is empty, provide a "No data available" message
+        if not table_content:
+            return f"### {title}\n\n*No data available*\n\n"
+
+        return table_content

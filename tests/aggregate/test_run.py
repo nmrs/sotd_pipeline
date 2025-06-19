@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 import pytest
 
-from sotd.aggregate.run import main, process_month, run_aggregate, run_benchmark
+from sotd.aggregate.run import main, process_month, run_aggregate
 
 
 class TestProcessMonth:
@@ -138,9 +138,7 @@ class TestProcessMonth:
                 args.out_dir = "data"
                 args.debug = False
                 args.force = False
-                args.enable_specialized = False
                 args.disable_specialized = True
-                args.enable_cross_product = False
                 args.disable_cross_product = True
 
                 result = process_month(2025, 1, args)
@@ -155,9 +153,7 @@ class TestProcessMonth:
                 mock_user_blade_usage.assert_not_called()
 
                 # Test with specialized aggregations enabled
-                args.enable_specialized = True
                 args.disable_specialized = False
-                args.enable_cross_product = True
                 args.disable_cross_product = False
 
                 result = process_month(2025, 1, args)
@@ -747,32 +743,13 @@ class TestMain:
 
     def test_specialized_aggregation_flags(self):
         """Test specialized aggregation CLI flags."""
-        # Test enable-specialized flag
-        with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["--enable-specialized", "--out-dir", "data"])
-
-        mock_run.assert_called_once()
-        args = mock_run.call_args[0][0]
-        assert args.enable_specialized is True
-        assert args.disable_specialized is False
-
         # Test disable-specialized flag
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
             main(["--disable-specialized", "--out-dir", "data"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
-        assert args.enable_specialized is False
         assert args.disable_specialized is True
-
-        # Test enable-cross-product flag
-        with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["--enable-cross-product", "--out-dir", "data"])
-
-        mock_run.assert_called_once()
-        args = mock_run.call_args[0][0]
-        assert args.enable_cross_product is True
-        assert args.disable_cross_product is False
 
         # Test disable-cross-product flag
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
@@ -780,14 +757,13 @@ class TestMain:
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
-        assert args.enable_cross_product is False
         assert args.disable_cross_product is True
 
         # Test both flags together
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
             main(
                 [
-                    "--enable-specialized",
+                    "--disable-specialized",
                     "--disable-cross-product",
                     "--out-dir",
                     "data",
@@ -796,7 +772,7 @@ class TestMain:
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
-        assert args.enable_specialized is True
+        assert args.disable_specialized is True
         assert args.disable_cross_product is True
 
     def test_specialized_aggregation_defaults(self):
@@ -807,7 +783,5 @@ class TestMain:
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
-        assert args.enable_specialized is False  # Not explicitly set
         assert args.disable_specialized is False  # Not explicitly set
-        assert args.enable_cross_product is False  # Not explicitly set
         assert args.disable_cross_product is False  # Not explicitly set

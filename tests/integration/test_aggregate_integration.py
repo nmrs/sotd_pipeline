@@ -36,7 +36,8 @@ class TestAggregateIntegration:
 
     @pytest.fixture
     def sample_enriched_data(self):
-        """Sample enriched data for testing, including specialized fields for all new aggregations."""
+        """Sample enriched data for testing,
+        including specialized fields for all new aggregations."""
         return {
             "meta": {
                 "month": "2025-01",
@@ -62,7 +63,6 @@ class TestAggregateIntegration:
                             "format": "DE",
                             "match_type": "exact",
                         },
-                        "enriched": {"plate_level": "C", "plate_type": "SB"},
                     },
                     "blade": {
                         "matched": {
@@ -70,7 +70,6 @@ class TestAggregateIntegration:
                             "model": "Hi-Stainless",
                             "match_type": "exact",
                         },
-                        "enriched": {"use_count": 3},
                     },
                     "brush": {
                         "matched": {
@@ -88,6 +87,10 @@ class TestAggregateIntegration:
                             "scent": "Sellout",
                             "match_type": "exact",
                         }
+                    },
+                    "enriched": {
+                        "razor": {"plate_level": "C", "plate_type": "SB"},
+                        "blade": {"use_count": 3},
                     },
                 },
                 {
@@ -113,7 +116,6 @@ class TestAggregateIntegration:
                             "model": "Superior Platinum",
                             "match_type": "exact",
                         },
-                        "enriched": {"use_count": 2},
                     },
                     "brush": {
                         "matched": {
@@ -132,6 +134,9 @@ class TestAggregateIntegration:
                             "match_type": "exact",
                         }
                     },
+                    "enriched": {
+                        "blade": {"use_count": 2},
+                    },
                 },
                 {
                     "id": "test3",
@@ -148,7 +153,6 @@ class TestAggregateIntegration:
                             "format": "DE",
                             "match_type": "exact",
                         },
-                        "enriched": {"plate_level": "D", "plate_type": "SB"},
                     },
                     "blade": {
                         "matched": {
@@ -156,7 +160,6 @@ class TestAggregateIntegration:
                             "model": "Hi-Stainless",
                             "match_type": "exact",
                         },
-                        "enriched": {"use_count": 2},
                     },
                     "brush": {
                         "matched": {
@@ -175,6 +178,10 @@ class TestAggregateIntegration:
                             "match_type": "exact",
                         }
                     },
+                    "enriched": {
+                        "razor": {"plate_level": "D", "plate_type": "SB"},
+                        "blade": {"use_count": 2},
+                    },
                 },
                 {
                     "id": "test4",
@@ -191,7 +198,6 @@ class TestAggregateIntegration:
                             "format": "DE",
                             "match_type": "exact",
                         },
-                        "enriched": {"super_speed_tip": "Red"},
                     },
                     "blade": {
                         "matched": {
@@ -199,7 +205,6 @@ class TestAggregateIntegration:
                             "model": "Comfort Coated",
                             "match_type": "exact",
                         },
-                        "enriched": {"use_count": 1},
                     },
                     "brush": {
                         "matched": {
@@ -218,6 +223,10 @@ class TestAggregateIntegration:
                             "match_type": "exact",
                         }
                     },
+                    "enriched": {
+                        "razor": {"super_speed_tip": "Red"},
+                        "blade": {"use_count": 1},
+                    },
                 },
                 {
                     "id": "test5",
@@ -234,7 +243,6 @@ class TestAggregateIntegration:
                             "format": "DE",
                             "match_type": "exact",
                         },
-                        "enriched": {"plate": "OC"},
                     },
                     "blade": {
                         "matched": {
@@ -242,7 +250,6 @@ class TestAggregateIntegration:
                             "model": "Hi-Stainless",
                             "match_type": "exact",
                         },
-                        "enriched": {"use_count": 1},
                     },
                     "brush": {
                         "matched": {
@@ -261,6 +268,10 @@ class TestAggregateIntegration:
                             "match_type": "exact",
                         }
                     },
+                    "enriched": {
+                        "razor": {"plate": "OC"},
+                        "blade": {"use_count": 1},
+                    },
                 },
                 {
                     "id": "test6",
@@ -277,7 +288,6 @@ class TestAggregateIntegration:
                             "format": "DE",
                             "match_type": "exact",
                         },
-                        "enriched": {"gap": ".84", "variant": "P"},
                     },
                     "blade": {
                         "matched": {
@@ -285,7 +295,6 @@ class TestAggregateIntegration:
                             "model": "Silver Blue",
                             "match_type": "exact",
                         },
-                        "enriched": {"use_count": 2},
                     },
                     "brush": {
                         "matched": {
@@ -304,6 +313,10 @@ class TestAggregateIntegration:
                             "match_type": "exact",
                         }
                     },
+                    "enriched": {
+                        "razor": {"gap": ".84", "variant": "P"},
+                        "blade": {"use_count": 2},
+                    },
                 },
                 {
                     "id": "test7",
@@ -318,11 +331,6 @@ class TestAggregateIntegration:
                             "model": "Best Quality",
                             "format": "Straight",
                             "match_type": "exact",
-                        },
-                        "enriched": {
-                            "grind": "Full Hollow",
-                            "width": "5/8",
-                            "point": "Round",
                         },
                     },
                     "blade": {"matched": {}, "enriched": {}},
@@ -342,6 +350,13 @@ class TestAggregateIntegration:
                             "scent": "Original",
                             "match_type": "exact",
                         }
+                    },
+                    "enriched": {
+                        "razor": {
+                            "grind": "Full Hollow",
+                            "width": "5/8",
+                            "point": "Round",
+                        },
                     },
                 },
             ],

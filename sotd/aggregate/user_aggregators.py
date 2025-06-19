@@ -195,6 +195,7 @@ def aggregate_user_blade_usage(
         # Extract blade information and use count
         blade_name = None
         use_count = None
+        blade_info = None
 
         # Get blade name from matched data
         if "blade" in record:
@@ -207,13 +208,20 @@ def aggregate_user_blade_usage(
                     if brand and model:
                         blade_name = f"{brand} {model}".strip()
 
-        # Get use count from enriched data
-        if "blade" in record:
-            blade_info = record["blade"]
-            if isinstance(blade_info, dict) and "enriched" in blade_info:
-                enriched = blade_info["enriched"]
-                if isinstance(enriched, dict):
-                    use_count = enriched.get("use_count")
+        # Get use count from enriched data (try both structures)
+        use_count = None
+
+        # New structure: record.enriched.blade
+        if isinstance(record.get("enriched"), dict) and isinstance(
+            record["enriched"].get("blade"), dict
+        ):
+            use_count = record["enriched"]["blade"].get("use_count")
+
+        # Old structure: blade.enriched
+        if use_count is None and isinstance(blade_info, dict) and "enriched" in blade_info:
+            enriched = blade_info["enriched"]
+            if isinstance(enriched, dict):
+                use_count = enriched.get("use_count")
 
         # Only include records where blade is matched and use count is available
         if blade_name and use_count is not None:

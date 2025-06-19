@@ -48,19 +48,9 @@ CLI matrix
 
     # Specialized aggregation control arguments (only for aggregate mode)
     parser.add_argument(
-        "--enable-specialized",
-        action="store_true",
-        help="Enable specialized aggregations (Blackbird plates, Christopher Bradley plates, etc.)",
-    )
-    parser.add_argument(
         "--disable-specialized",
         action="store_true",
         help="Disable specialized aggregations (use only core aggregations)",
-    )
-    parser.add_argument(
-        "--enable-cross-product",
-        action="store_true",
-        help="Enable cross-product analysis (razor-blade combinations, user blade usage)",
     )
     parser.add_argument(
         "--disable-cross-product",
