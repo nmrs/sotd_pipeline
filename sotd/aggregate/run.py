@@ -545,128 +545,75 @@ def main(argv: Sequence[str] | None = None) -> None:
         epilog=__doc__,
     )
 
-    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+    # Date range arguments
+    g = parser.add_mutually_exclusive_group()
+    g.add_argument("--month", help="Process specific month (YYYY-MM format)")
+    g.add_argument("--year", type=int, help="Process entire year (YYYY format)")
+    g.add_argument("--range", help="Month range (YYYY-MM:YYYY-MM format)")
+    parser.add_argument("--start", help="Start month for range (YYYY-MM format)")
+    parser.add_argument("--end", help="End month for range (YYYY-MM format)")
 
-    # Aggregate command
-    aggregate_parser = subparsers.add_parser(
-        "aggregate",
-        help="Run aggregation on enriched data",
-        description="Process enriched SOTD data and generate statistical summaries",
-    )
+    # Output and control arguments
+    parser.add_argument("--out-dir", default="data", help="Output directory (default: data)")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--force", action="store_true", help="Force overwrite existing files")
 
-    # Benchmark command
-    benchmark_parser = subparsers.add_parser(
-        "benchmark",
-        help="Run performance benchmarks",
-        description="Run comprehensive performance benchmarks on aggregate operations",
-    )
-
-    # Date range arguments for aggregate
-    aggregate_parser.add_argument(
-        "--month",
-        help="Process specific month (YYYY-MM format)",
-    )
-    aggregate_parser.add_argument(
-        "--year",
-        type=int,
-        help="Process entire year (YYYY format)",
-    )
-    aggregate_parser.add_argument(
-        "--start",
-        help="Start month for range (YYYY-MM format)",
-    )
-    aggregate_parser.add_argument(
-        "--end",
-        help="End month for range (YYYY-MM format)",
-    )
-    aggregate_parser.add_argument(
-        "--range",
-        help="Month range (YYYY-MM:YYYY-MM format)",
+    # Mode selection
+    parser.add_argument(
+        "--mode",
+        choices=["aggregate", "benchmark"],
+        default="aggregate",
+        help="Operation mode (default: aggregate)",
     )
 
-    # Output and control arguments for aggregate
-    aggregate_parser.add_argument(
-        "--out-dir",
-        default="data",
-        help="Output directory (default: data)",
-    )
-    aggregate_parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug logging",
-    )
-    aggregate_parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Force overwrite existing files",
-    )
-
-    # Specialized aggregation control arguments
-    aggregate_parser.add_argument(
+    # Specialized aggregation control arguments (only for aggregate mode)
+    parser.add_argument(
         "--enable-specialized",
         action="store_true",
         help="Enable specialized aggregations (Blackbird plates, Christopher Bradley plates, etc.)",
     )
-    aggregate_parser.add_argument(
+    parser.add_argument(
         "--disable-specialized",
         action="store_true",
         help="Disable specialized aggregations (use only core aggregations)",
     )
-    aggregate_parser.add_argument(
+    parser.add_argument(
         "--enable-cross-product",
         action="store_true",
         help="Enable cross-product analysis (razor-blade combinations, user blade usage)",
     )
-    aggregate_parser.add_argument(
+    parser.add_argument(
         "--disable-cross-product",
         action="store_true",
         help="Disable cross-product analysis",
     )
 
-    # Benchmark arguments
-    benchmark_parser.add_argument(
-        "--month",
-        help="Use existing enriched data from specific month (YYYY-MM format)",
-    )
-    benchmark_parser.add_argument(
-        "--out-dir",
-        default="data",
-        help="Output directory (default: data)",
-    )
-    benchmark_parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug logging",
-    )
-    benchmark_parser.add_argument(
+    # Benchmark-specific arguments
+    parser.add_argument(
         "--save-results",
         action="store_true",
-        help="Save benchmark results to file",
+        help="Save benchmark results to file (only for benchmark mode)",
     )
 
     args = parser.parse_args(argv)
 
-    if not args.command:
-        # Default to aggregate command for backward compatibility
-        args.command = "aggregate"
-
-        # Validate date arguments for aggregate
-        date_args = [args.month, args.year, args.start, args.end, args.range]
-        if not any(date_args):
-            # Default to current month
-            now = datetime.datetime.now()
-            args.month = f"{now.year:04d}-{now.month:02d}"
-        elif sum(1 for arg in date_args if arg is not None) > 1:
-            print("[ERROR] Only one date argument allowed")
-            return
+    # Validate date arguments
+    date_args = [args.month, args.year, args.start, args.end, args.range]
+    if not any(date_args):
+        # Default to current month
+        now = datetime.datetime.now()
+        args.month = f"{now.year:04d}-{now.month:02d}"
+    elif sum(1 for arg in date_args if arg is not None) > 1:
+        print("[ERROR] Only one date argument allowed")
+        return
 
     try:
-        if args.command == "aggregate":
+        if args.mode == "aggregate":
             run_aggregate(args)
-        elif args.command == "benchmark":
+        elif args.mode == "benchmark":
             run_benchmark(args)
         else:
-            print(f"[ERROR] Unknown command: {args.command}")
+            print(f"[ERROR] Unknown mode: {args.mode}")
     except KeyboardInterrupt:
         print("\n[INFO] Interrupted by user")
     except Exception as e:
