@@ -23,24 +23,6 @@ Each phase follows this consistent pattern:
 - Support both individual months and date ranges in CLI
 - Handle missing data gracefully with sensible defaults
 
-```python
-from datetime import datetime
-import dateparser
-
-def validate_month_format(month: str) -> bool:
-    """Validate month is in YYYY-MM format."""
-    try:
-        datetime.strptime(month, "%Y-%m")
-        return True
-    except ValueError:
-        return False
-
-def parse_date_range(start_month: str, end_month: str) -> list[str]:
-    """Generate list of months between start and end."""
-    # Implementation for date range handling
-    pass
-```
-
 ## JSON Output Standards
 - Pretty-print JSON output for human readability
 - Include metadata at top level
