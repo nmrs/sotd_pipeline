@@ -106,12 +106,12 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 **Goal**: Extract CLI logic from aggregate run.py into focused module.
 
 **Tasks**:
-- [ ] Create `sotd/aggregate/cli.py` (target: 150-200 lines)
-- [ ] Move all CLI argument parsing logic
-- [ ] Move CLI validation logic
-- [ ] Update run.py to use new CLI module
-- [ ] Run quality checks: `make format lint typecheck test`
-- [ ] Only add or update tests if coverage is missing or logic changes
+- [x] Create `sotd/aggregate/cli.py` (target: 150-200 lines)
+- [x] Move all CLI argument parsing logic
+- [x] Move CLI validation logic
+- [x] Update run.py to use new CLI module
+- [x] Run quality checks: `make format lint typecheck test`
+- [x] Only add or update tests if coverage is missing or logic changes
 
 **Test Cases**:
 - Rely on existing CLI and integration tests unless new logic is introduced.
@@ -262,7 +262,7 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 - [ ] Chunk 2.1: Analysis Tools Split (0/4 tasks)
 
 ### Phase 2 Progress
-- [ ] Chunk 3.1: CLI Module (0/5 tasks)
+- [x] Chunk 3.1: CLI Module (5/5 tasks)
 - [ ] Chunk 3.2: Performance Module (0/5 tasks)
 - [ ] Chunk 3.3: Data Processing Module (0/5 tasks)
 - [ ] Chunk 4.1: Base Aggregation Class (0/5 tasks)
@@ -293,6 +293,8 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 - Maintain comprehensive test coverage
 - Use feature flags if needed for complex changes
 - Regular integration testing with real data
+
+### Phase 2, Chunk 3.1: Extracted all CLI argument parsing and validation from aggregate/run.py to aggregate/cli.py. Updated tests to patch datetime in the new module. All tests and quality checks pass.
 
 ## Timeline Estimate
 
