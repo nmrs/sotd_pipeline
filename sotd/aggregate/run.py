@@ -14,7 +14,6 @@ CLI matrix
 """
 
 import argparse
-import datetime
 import json
 import time
 from pathlib import Path
@@ -48,6 +47,7 @@ from sotd.aggregate.product_aggregators import (
 )
 from sotd.aggregate.save import get_aggregated_file_path, save_aggregated_data
 from sotd.aggregate.user_aggregators import aggregate_user_blade_usage, aggregate_users
+from sotd.aggregate.cli import parse_aggregate_args
 from sotd.cli_utils.date_span import month_span
 
 
@@ -539,74 +539,7 @@ def _create_synthetic_test_data() -> List[Dict[str, Any]]:
 
 def main(argv: Sequence[str] | None = None) -> None:
     """Main entry point for the aggregate phase."""
-    parser = argparse.ArgumentParser(
-        description="Aggregate enriched SOTD data into statistical summaries",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__,
-    )
-
-    # Date range arguments
-    g = parser.add_mutually_exclusive_group()
-    g.add_argument("--month", help="Process specific month (YYYY-MM format)")
-    g.add_argument("--year", type=int, help="Process entire year (YYYY format)")
-    g.add_argument("--range", help="Month range (YYYY-MM:YYYY-MM format)")
-    parser.add_argument("--start", help="Start month for range (YYYY-MM format)")
-    parser.add_argument("--end", help="End month for range (YYYY-MM format)")
-
-    # Output and control arguments
-    parser.add_argument("--out-dir", default="data", help="Output directory (default: data)")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument("--force", action="store_true", help="Force overwrite existing files")
-
-    # Mode selection
-    parser.add_argument(
-        "--mode",
-        choices=["aggregate", "benchmark"],
-        default="aggregate",
-        help="Operation mode (default: aggregate)",
-    )
-
-    # Specialized aggregation control arguments (only for aggregate mode)
-    parser.add_argument(
-        "--enable-specialized",
-        action="store_true",
-        help="Enable specialized aggregations (Blackbird plates, Christopher Bradley plates, etc.)",
-    )
-    parser.add_argument(
-        "--disable-specialized",
-        action="store_true",
-        help="Disable specialized aggregations (use only core aggregations)",
-    )
-    parser.add_argument(
-        "--enable-cross-product",
-        action="store_true",
-        help="Enable cross-product analysis (razor-blade combinations, user blade usage)",
-    )
-    parser.add_argument(
-        "--disable-cross-product",
-        action="store_true",
-        help="Disable cross-product analysis",
-    )
-
-    # Benchmark-specific arguments
-    parser.add_argument(
-        "--save-results",
-        action="store_true",
-        help="Save benchmark results to file (only for benchmark mode)",
-    )
-
-    args = parser.parse_args(argv)
-
-    # Validate date arguments
-    date_args = [args.month, args.year, args.start, args.end, args.range]
-    if not any(date_args):
-        # Default to current month
-        now = datetime.datetime.now()
-        args.month = f"{now.year:04d}-{now.month:02d}"
-    elif sum(1 for arg in date_args if arg is not None) > 1:
-        print("[ERROR] Only one date argument allowed")
-        return
-
+    args = parse_aggregate_args(argv)
     try:
         if args.mode == "aggregate":
             run_aggregate(args)
