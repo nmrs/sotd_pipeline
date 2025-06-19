@@ -62,20 +62,12 @@ class SuperSpeedTipAggregator(BaseAggregator):
                 print(f"[DEBUG] Record {record_index}: not a Gillette Super Speed")
             return None
 
-        # Try to extract enriched data from both possible locations
-        enriched = record.get("enriched", {}).get("razor", {})
-        if isinstance(enriched, dict) and enriched:
+        # Extract enriched data from unified structure
+        enriched = razor.get("enriched", {})
+        if not isinstance(enriched, dict) or not enriched:
             if self.debug:
-                print(f"[DEBUG] Record {record_index}: using record.enriched.razor")
-        else:
-            enriched = razor.get("enriched", {})
-            if isinstance(enriched, dict) and enriched:
-                if self.debug:
-                    print(f"[DEBUG] Record {record_index}: using razor.enriched")
-            else:
-                if self.debug:
-                    print(f"[DEBUG] Record {record_index}: no enriched data found")
-                return None
+                print(f"[DEBUG] Record {record_index}: no enriched data found")
+            return None
 
         # Extract tip info
         tip = enriched.get("super_speed_tip")

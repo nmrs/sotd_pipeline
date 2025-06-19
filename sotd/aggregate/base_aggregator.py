@@ -213,3 +213,21 @@ class BaseAggregator(ABC):
                     )
                 return False
         return True
+
+    def _extract_enriched_data(
+        self, record: Dict[str, Any], product_field: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Extract enriched data from unified product structure.
+
+        Args:
+            record: Single enriched comment record
+            product_field: The product field name (e.g., 'razor', 'blade', 'brush', 'soap')
+
+        Returns:
+            Enriched data dictionary or None if not found
+        """
+        product_data = record.get(product_field, {})
+        if isinstance(product_data, dict) and "enriched" in product_data:
+            return product_data["enriched"]
+        return None

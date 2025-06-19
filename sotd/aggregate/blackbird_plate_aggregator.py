@@ -65,22 +65,15 @@ class BlackbirdPlateAggregator(BaseAggregator):
                 )
             return None
 
-        # Extract enriched data
-        enriched = record.get("enriched", {})
+        # Extract enriched data from unified structure
+        enriched = razor.get("enriched", {})
         if not isinstance(enriched, dict):
             if self.debug:
-                print(f"[DEBUG] Record {record_index}: enriched is not a dict")
-            return None
-
-        # Extract razor enriched data
-        razor_enriched = enriched.get("razor", {})
-        if not isinstance(razor_enriched, dict):
-            if self.debug:
-                print(f"[DEBUG] Record {record_index}: razor_enriched is not a dict")
+                print(f"[DEBUG] Record {record_index}: razor.enriched is not a dict")
             return None
 
         # Extract plate info
-        plate = razor_enriched.get("plate")
+        plate = enriched.get("plate")
         if not plate:
             if self.debug:
                 print(f"[DEBUG] Record {record_index}: plate missing in enriched")

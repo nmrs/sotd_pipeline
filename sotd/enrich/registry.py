@@ -58,10 +58,9 @@ class EnricherRegistry:
             original_comment: The original user comment text (unused for enrichment)
 
         Returns:
-            The enriched record with additional specifications
+            The enriched record with additional specifications written directly to product fields
         """
         enriched_record = record.copy()
-        enriched_data = {}
 
         # Process each field that has enrichers
         for field, enrichers in self._enrichers_by_field.items():
@@ -91,11 +90,15 @@ class EnricherRegistry:
                     )
                     # Continue with other enrichers even if one fails
 
+            # Write enriched data directly to product field
             if field_enriched_data:
-                enriched_data[field] = field_enriched_data
+                # Ensure field_data is a dict with proper structure
+                if not isinstance(field_data, dict):
+                    field_data = {"original": field_data}
 
-        if enriched_data:
-            enriched_record["enriched"] = enriched_data
+                # Add enriched data to the product field
+                field_data["enriched"] = field_enriched_data
+                enriched_record[field] = field_data
 
         return enriched_record
 

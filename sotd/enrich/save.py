@@ -125,16 +125,13 @@ def calculate_enrichment_stats(enriched_data: List[Dict[str, Any]]) -> Dict[str,
     }
 
     for comment in enriched_data:
-        if "enriched" in comment:
-            enriched = comment["enriched"]
-            if "blade" in enriched:
-                stats["blade_enriched"] += 1
-            if "razor" in enriched:
-                stats["razor_enriched"] += 1
-            if "brush" in enriched:
-                stats["brush_enriched"] += 1
-            if "soap" in enriched:
-                stats["soap_enriched"] += 1
+        enriched_any = False
+        for field in ("blade", "razor", "brush", "soap"):
+            product = comment.get(field)
+            if isinstance(product, dict) and "enriched" in product and product["enriched"]:
+                stats[f"{field}_enriched"] += 1
+                enriched_any = True
+        if enriched_any:
             stats["total_enriched"] += 1
 
     return stats
