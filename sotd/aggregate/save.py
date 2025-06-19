@@ -202,6 +202,13 @@ def validate_aggregated_data(data: Dict[str, Any], debug: bool = False) -> bool:
                 print(f"[DEBUG] Missing required metadata field: {field}")
             return False
 
+    # Validate month format (YYYY-MM)
+    month = metadata.get("month")
+    if not isinstance(month, str) or len(month) != 7 or month[4] != "-":
+        if debug:
+            print(f"[DEBUG] Invalid month format in metadata: {month} (expected YYYY-MM)")
+        return False
+
     # Check for expected data categories
     expected_categories = ["razors", "blades", "soaps", "brushes", "users"]
     for category in expected_categories:
