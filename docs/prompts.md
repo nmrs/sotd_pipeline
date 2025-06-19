@@ -31,3 +31,10 @@ Can you make a `todo.md` that I can use as a checklist? Be thorough.
 You are the ChatGPT code editor. Review the error below. Read the file open in Work with Code and determine the best plan to resolve the issue. Generate a diff and apply it directly to the file open in Work with Code.
 
 [error]
+
+Task Driven TDD Loop
+Proceed through the remaining tasks in the current step one at a time. After completing each task:
+	1.	Update the implementation plan to reflect the completed work.
+	2.	Run make format lint typecheck test.
+	3.	If any errors or failures occur, fix them immediately.
+	4.	Commit the changes with a clear message summarizing the task completed.

@@ -3,6 +3,7 @@
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
+import pytest
 
 from sotd.aggregate.run import main, process_month, run_aggregate
 
@@ -506,73 +507,114 @@ class TestMain:
             with patch("sotd.aggregate.run.datetime") as mock_datetime:
                 mock_datetime.datetime.now.return_value = real_datetime.datetime(2025, 4, 1)
 
-                main(["--out-dir", "data"])
+                main(["aggregate", "--out-dir", "data"])
 
-                # Verify run_aggregate was called
-                mock_run.assert_called_once()
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        # The default month logic is now handled inside run_aggregate, not in main
+        assert args.out_dir == "data"
 
     def test_month_argument(self):
         """Test with --month argument."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["--month", "2025-04", "--out-dir", "data"])
+            main(["aggregate", "--month", "2025-04", "--out-dir", "data"])
 
-            # Verify run_aggregate was called
-            mock_run.assert_called_once()
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.month == "2025-04"
+        assert args.out_dir == "data"
 
     def test_year_argument(self):
         """Test with --year argument."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["--year", "2025", "--out-dir", "data"])
+            main(["aggregate", "--year", "2025", "--out-dir", "data"])
 
-            # Verify run_aggregate was called
-            mock_run.assert_called_once()
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.year == 2025
+        assert args.out_dir == "data"
 
     def test_range_argument(self):
         """Test with --range argument."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["--range", "2025-01:2025-03", "--out-dir", "data"])
+            main(["aggregate", "--range", "2025-01:2025-03", "--out-dir", "data"])
 
-            # Verify run_aggregate was called
-            mock_run.assert_called_once()
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.range == "2025-01:2025-03"
+        assert args.out_dir == "data"
 
     def test_start_end_arguments(self):
         """Test with --start and --end arguments."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
             # Test with just --start (single month)
-            main(["--start", "2025-01", "--out-dir", "data"])
+            main(["aggregate", "--start", "2025-01", "--out-dir", "data"])
 
-            # Verify run_aggregate was called
-            mock_run.assert_called_once()
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.start == "2025-01"
+        assert args.out_dir == "data"
 
     def test_debug_argument(self):
         """Test with --debug argument."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["--debug", "--out-dir", "data"])
+            main(["aggregate", "--debug", "--out-dir", "data"])
 
-            # Verify run_aggregate was called
-            mock_run.assert_called_once()
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.debug is True
+        assert args.out_dir == "data"
 
     def test_force_argument(self):
         """Test with --force argument."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["--force", "--out-dir", "data"])
+            main(["aggregate", "--force", "--out-dir", "data"])
 
-            # Verify run_aggregate was called
-            mock_run.assert_called_once()
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.force is True
+        assert args.out_dir == "data"
 
     def test_output_directory_creation_in_main(self):
         """Test output directory creation in main function."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
             with tempfile.TemporaryDirectory() as temp_dir:
-                main(["--out-dir", temp_dir])
+                main(["aggregate", "--out-dir", temp_dir])
 
-                # Verify run_aggregate was called
-                mock_run.assert_called_once()
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.out_dir == temp_dir
 
     def test_output_directory_creation_error_in_main(self):
         """Test output directory creation error in main function."""
         # Try to create a directory in a location that should fail
-        main(["--out-dir", "/root/nonexistent"])
+        main(["aggregate", "--out-dir", "/root/nonexistent"])
 
         # Should handle the error gracefully
-        # run_aggregate might not be called due to the error
+
+    def test_benchmark_command(self):
+        """Test benchmark command."""
+        with patch("sotd.aggregate.run.run_benchmark") as mock_run:
+            main(["benchmark", "--debug"])
+
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.debug is True
+
+    def test_benchmark_command_with_month(self):
+        """Test benchmark command with month argument."""
+        with patch("sotd.aggregate.run.run_benchmark") as mock_run:
+            main(["benchmark", "--month", "2025-04", "--save-results"])
+
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.month == "2025-04"
+        assert args.save_results is True
+
+    def test_unknown_command(self):
+        """Test unknown command."""
+        with pytest.raises(SystemExit):
+            main(["unknown"])
+
+        # The error message is printed to stderr by argparse, not captured by our mock
+        # The SystemExit exception confirms that the unknown command was handled correctly

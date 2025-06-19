@@ -18,10 +18,11 @@ import datetime
 import json
 import time
 from pathlib import Path
-from typing import Sequence
+from typing import Any, Dict, List, Sequence
 
 from tqdm import tqdm
 
+from sotd.aggregate.benchmarks import run_performance_benchmark
 from sotd.aggregate.engine import (
     aggregate_blade_manufacturers,
     aggregate_blades,
@@ -383,6 +384,95 @@ def run_aggregate(args: argparse.Namespace) -> None:
             )
 
 
+def run_benchmark(args: argparse.Namespace) -> None:
+    """Run performance benchmarks on aggregate operations."""
+    print("[INFO] Running performance benchmarks...")
+
+    # Check if we have sample data to benchmark against
+    sample_data_path = None
+    if args.month:
+        # Use existing enriched data if available
+        year, month = map(int, args.month.split("-"))
+        base_dir = Path(args.out_dir)
+        sample_data_path = get_enriched_file_path(base_dir, year, month)
+
+    if sample_data_path and sample_data_path.exists():
+        print(f"[INFO] Using existing enriched data: {sample_data_path}")
+        try:
+            metadata, data = load_enriched_data(sample_data_path, debug=args.debug)
+            if not data:
+                print("[ERROR] No data found in enriched file")
+                return
+        except Exception as e:
+            print(f"[ERROR] Failed to load enriched data: {e}")
+            return
+    else:
+        print("[INFO] No existing data found, creating synthetic test data...")
+        # Create synthetic test data for benchmarking
+        data = _create_synthetic_test_data()
+
+    # Run benchmarks
+    results_dir = Path(args.out_dir) / "benchmarks" if args.save_results else None
+    run_performance_benchmark(
+        test_data=data, debug=args.debug, save_results=args.save_results, results_dir=results_dir
+    )
+
+    print("[INFO] Benchmark completed successfully!")
+
+
+def _create_synthetic_test_data() -> List[Dict[str, Any]]:
+    """Create synthetic test data for benchmarking."""
+    import random
+
+    # Generate realistic test data
+    test_data = []
+    users = [f"user_{i}" for i in range(1, 101)]
+    razors = ["Merkur 34C", "Rockwell 6C", "Gillette Tech", "Blackland Blackbird"]
+    blades = ["Astra SP", "Feather", "Gillette Silver Blue", "Personna"]
+    soaps = ["Barrister and Mann Seville", "Declaration Grooming Original", "Noble Otter Barrbarr"]
+    brushes = ["Simpson Chubby 2", "Declaration Grooming B8", "Omega 10049"]
+
+    for i in range(1000):  # 1000 test records
+        record = {
+            "id": f"test_{i}",
+            "author": random.choice(users),
+            "razor": {
+                "matched": {
+                    "brand": random.choice(razors).split()[0],
+                    "model": " ".join(random.choice(razors).split()[1:]),
+                    "format": "DE",
+                    "match_type": "exact",
+                }
+            },
+            "blade": {
+                "matched": {
+                    "brand": random.choice(blades).split()[0],
+                    "model": " ".join(random.choice(blades).split()[1:]),
+                    "match_type": "exact",
+                }
+            },
+            "soap": {
+                "matched": {
+                    "maker": random.choice(soaps).split()[0],
+                    "scent": " ".join(random.choice(soaps).split()[1:]),
+                    "match_type": "exact",
+                }
+            },
+            "brush": {
+                "matched": {
+                    "brand": random.choice(brushes).split()[0],
+                    "model": " ".join(random.choice(brushes).split()[1:]),
+                    "fiber": "synthetic",
+                    "knot_size_mm": random.choice([24, 26, 28, 30]),
+                    "match_type": "exact",
+                }
+            },
+        }
+        test_data.append(record)
+
+    return test_data
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     """Main entry point for the aggregate phase."""
     parser = argparse.ArgumentParser(
@@ -391,60 +481,106 @@ def main(argv: Sequence[str] | None = None) -> None:
         epilog=__doc__,
     )
 
-    # Date range arguments
-    parser.add_argument(
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+
+    # Aggregate command
+    aggregate_parser = subparsers.add_parser(
+        "aggregate",
+        help="Run aggregation on enriched data",
+        description="Process enriched SOTD data and generate statistical summaries",
+    )
+
+    # Benchmark command
+    benchmark_parser = subparsers.add_parser(
+        "benchmark",
+        help="Run performance benchmarks",
+        description="Run comprehensive performance benchmarks on aggregate operations",
+    )
+
+    # Date range arguments for aggregate
+    aggregate_parser.add_argument(
         "--month",
         help="Process specific month (YYYY-MM format)",
     )
-    parser.add_argument(
+    aggregate_parser.add_argument(
         "--year",
         type=int,
         help="Process entire year (YYYY format)",
     )
-    parser.add_argument(
+    aggregate_parser.add_argument(
         "--start",
         help="Start month for range (YYYY-MM format)",
     )
-    parser.add_argument(
+    aggregate_parser.add_argument(
         "--end",
         help="End month for range (YYYY-MM format)",
     )
-    parser.add_argument(
+    aggregate_parser.add_argument(
         "--range",
         help="Month range (YYYY-MM:YYYY-MM format)",
     )
 
-    # Output and control arguments
-    parser.add_argument(
+    # Output and control arguments for aggregate
+    aggregate_parser.add_argument(
         "--out-dir",
         default="data",
         help="Output directory (default: data)",
     )
-    parser.add_argument(
+    aggregate_parser.add_argument(
         "--debug",
         action="store_true",
         help="Enable debug logging",
     )
-    parser.add_argument(
+    aggregate_parser.add_argument(
         "--force",
         action="store_true",
         help="Force overwrite existing files",
     )
 
+    # Benchmark arguments
+    benchmark_parser.add_argument(
+        "--month",
+        help="Use existing enriched data from specific month (YYYY-MM format)",
+    )
+    benchmark_parser.add_argument(
+        "--out-dir",
+        default="data",
+        help="Output directory (default: data)",
+    )
+    benchmark_parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable debug logging",
+    )
+    benchmark_parser.add_argument(
+        "--save-results",
+        action="store_true",
+        help="Save benchmark results to file",
+    )
+
     args = parser.parse_args(argv)
 
-    # Validate date arguments
-    date_args = [args.month, args.year, args.start, args.end, args.range]
-    if not any(date_args):
-        # Default to current month
-        now = datetime.datetime.now()
-        args.month = f"{now.year:04d}-{now.month:02d}"
-    elif sum(1 for arg in date_args if arg is not None) > 1:
-        print("[ERROR] Only one date argument allowed")
-        return
+    if not args.command:
+        # Default to aggregate command for backward compatibility
+        args.command = "aggregate"
+
+        # Validate date arguments for aggregate
+        date_args = [args.month, args.year, args.start, args.end, args.range]
+        if not any(date_args):
+            # Default to current month
+            now = datetime.datetime.now()
+            args.month = f"{now.year:04d}-{now.month:02d}"
+        elif sum(1 for arg in date_args if arg is not None) > 1:
+            print("[ERROR] Only one date argument allowed")
+            return
 
     try:
-        run_aggregate(args)
+        if args.command == "aggregate":
+            run_aggregate(args)
+        elif args.command == "benchmark":
+            run_benchmark(args)
+        else:
+            print(f"[ERROR] Unknown command: {args.command}")
     except KeyboardInterrupt:
         print("\n[INFO] Interrupted by user")
     except Exception as e:
