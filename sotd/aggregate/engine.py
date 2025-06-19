@@ -345,8 +345,8 @@ def aggregate_razors(records: List[Dict[str, Any]], debug: bool = False) -> List
     # Calculate average shaves per user
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
 
-    # Sort by shaves (descending)
-    grouped = grouped.sort_values("shaves", ascending=False)
+    # Sort by shaves (descending), then by unique_users (descending) as tie breaker
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
 
     # Convert back to list of dictionaries
     results = grouped.to_dict("records")
@@ -456,8 +456,8 @@ def aggregate_blades(records: List[Dict[str, Any]], debug: bool = False) -> List
     # Calculate average shaves per user
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
 
-    # Sort by shaves (descending)
-    grouped = grouped.sort_values("shaves", ascending=False)
+    # Sort by shaves (descending), then by unique_users (descending) as tie breaker
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
 
     # Convert back to list of dictionaries
     results = grouped.to_dict("records")
@@ -565,8 +565,8 @@ def aggregate_soaps(records: List[Dict[str, Any]], debug: bool = False) -> List[
     # Calculate average shaves per user
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
 
-    # Sort by shaves (descending)
-    grouped = grouped.sort_values("shaves", ascending=False)
+    # Sort by shaves (descending), then by unique_users (descending) as tie breaker
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
 
     # Convert back to list of dictionaries
     results = grouped.to_dict("records")
@@ -673,8 +673,8 @@ def aggregate_brushes(records: List[Dict[str, Any]], debug: bool = False) -> Lis
     # Calculate average shaves per user
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
 
-    # Sort by shaves (descending)
-    grouped = grouped.sort_values("shaves", ascending=False)
+    # Sort by shaves (descending), then by unique_users (descending) as tie breaker
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
 
     # Convert back to list of dictionaries
     results = grouped.to_dict("records")
@@ -803,7 +803,7 @@ def aggregate_razor_manufacturers(
     grouped = df.groupby("brand").agg({"user": ["count", "nunique"]}).reset_index()
     grouped.columns = ["brand", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
-    grouped = grouped.sort_values("shaves", ascending=False)
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
     return list(grouped.to_dict("records"))  # type: ignore
 
 
@@ -832,7 +832,7 @@ def aggregate_blade_manufacturers(
     grouped = df.groupby("brand").agg({"user": ["count", "nunique"]}).reset_index()
     grouped.columns = ["brand", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
-    grouped = grouped.sort_values("shaves", ascending=False)
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
     return list(grouped.to_dict("records"))  # type: ignore
 
 
@@ -861,7 +861,7 @@ def aggregate_soap_makers(
     grouped = df.groupby("maker").agg({"user": ["count", "nunique"]}).reset_index()
     grouped.columns = ["maker", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
-    grouped = grouped.sort_values("shaves", ascending=False)
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
     return list(grouped.to_dict("records"))  # type: ignore
 
 
@@ -890,7 +890,7 @@ def aggregate_brush_knot_makers(
     grouped = df.groupby("brand").agg({"user": ["count", "nunique"]}).reset_index()
     grouped.columns = ["brand", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
-    grouped = grouped.sort_values("shaves", ascending=False)
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
     return list(grouped.to_dict("records"))  # type: ignore
 
 
@@ -919,7 +919,7 @@ def aggregate_brush_handle_makers(
     grouped = df.groupby("handle_maker").agg({"user": ["count", "nunique"]}).reset_index()
     grouped.columns = ["handle_maker", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
-    grouped = grouped.sort_values("shaves", ascending=False)
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
     return list(grouped.to_dict("records"))  # type: ignore
 
 
@@ -986,7 +986,7 @@ def aggregate_brush_fibers(
 
     grouped.columns = ["fiber", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
-    grouped = grouped.sort_values("shaves", ascending=False)
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
     results = grouped.to_dict("records")
 
     if debug:
@@ -1059,7 +1059,7 @@ def aggregate_brush_knot_sizes(
 
     grouped.columns = ["knot_size_mm", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
-    grouped = grouped.sort_values("shaves", ascending=False)
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
     results = grouped.to_dict("records")
 
     if debug:

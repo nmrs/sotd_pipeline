@@ -435,6 +435,56 @@ class TestAggregateRazors:
         result = aggregate_razors(records)
         assert result == []
 
+    def test_tiebreaker_unique_users(self):
+        """Test that unique_users is used as a tie breaker when shaves are equal."""
+        records = [
+            # Razor A: 2 users, 4 shaves
+            {
+                "id": "1",
+                "author": "user1",
+                "razor": {"matched": {"brand": "A", "model": "X", "match_type": "exact"}},
+            },
+            {
+                "id": "2",
+                "author": "user1",
+                "razor": {"matched": {"brand": "A", "model": "X", "match_type": "exact"}},
+            },
+            {
+                "id": "3",
+                "author": "user2",
+                "razor": {"matched": {"brand": "A", "model": "X", "match_type": "exact"}},
+            },
+            {
+                "id": "4",
+                "author": "user2",
+                "razor": {"matched": {"brand": "A", "model": "X", "match_type": "exact"}},
+            },
+            # Razor B: 4 users, 4 shaves
+            {
+                "id": "5",
+                "author": "user3",
+                "razor": {"matched": {"brand": "B", "model": "Y", "match_type": "exact"}},
+            },
+            {
+                "id": "6",
+                "author": "user4",
+                "razor": {"matched": {"brand": "B", "model": "Y", "match_type": "exact"}},
+            },
+            {
+                "id": "7",
+                "author": "user5",
+                "razor": {"matched": {"brand": "B", "model": "Y", "match_type": "exact"}},
+            },
+            {
+                "id": "8",
+                "author": "user6",
+                "razor": {"matched": {"brand": "B", "model": "Y", "match_type": "exact"}},
+            },
+        ]
+        result = aggregate_razors(records)
+        assert result[0]["name"] == "B Y"  # More unique users
+        assert result[1]["name"] == "A X"
+
 
 class TestAggregateBlades:
     """Test the aggregate_blades function."""
@@ -518,6 +568,55 @@ class TestAggregateBlades:
         assert len(result) == 2
         assert result[0]["name"] == "Blade A"
         assert result[1]["name"] == "Blade B"
+
+    def test_tiebreaker_unique_users(self):
+        records = [
+            # Blade A: 2 users, 4 shaves
+            {
+                "id": "1",
+                "author": "user1",
+                "blade": {"matched": {"brand": "A", "match_type": "exact"}},
+            },
+            {
+                "id": "2",
+                "author": "user1",
+                "blade": {"matched": {"brand": "A", "match_type": "exact"}},
+            },
+            {
+                "id": "3",
+                "author": "user2",
+                "blade": {"matched": {"brand": "A", "match_type": "exact"}},
+            },
+            {
+                "id": "4",
+                "author": "user2",
+                "blade": {"matched": {"brand": "A", "match_type": "exact"}},
+            },
+            # Blade B: 4 users, 4 shaves
+            {
+                "id": "5",
+                "author": "user3",
+                "blade": {"matched": {"brand": "B", "match_type": "exact"}},
+            },
+            {
+                "id": "6",
+                "author": "user4",
+                "blade": {"matched": {"brand": "B", "match_type": "exact"}},
+            },
+            {
+                "id": "7",
+                "author": "user5",
+                "blade": {"matched": {"brand": "B", "match_type": "exact"}},
+            },
+            {
+                "id": "8",
+                "author": "user6",
+                "blade": {"matched": {"brand": "B", "match_type": "exact"}},
+            },
+        ]
+        result = aggregate_blades(records)
+        assert result[0]["name"] == "B"
+        assert result[1]["name"] == "A"
 
 
 class TestAggregateSoaps:
@@ -605,6 +704,55 @@ class TestAggregateSoaps:
         assert len(result) == 2
         assert result[0]["name"] == "Maker A Scent A"
         assert result[1]["name"] == "Maker B Scent B"
+
+    def test_tiebreaker_unique_users(self):
+        records = [
+            # Soap A: 2 users, 4 shaves
+            {
+                "id": "1",
+                "author": "user1",
+                "soap": {"matched": {"maker": "A", "scent": "X", "match_type": "exact"}},
+            },
+            {
+                "id": "2",
+                "author": "user1",
+                "soap": {"matched": {"maker": "A", "scent": "X", "match_type": "exact"}},
+            },
+            {
+                "id": "3",
+                "author": "user2",
+                "soap": {"matched": {"maker": "A", "scent": "X", "match_type": "exact"}},
+            },
+            {
+                "id": "4",
+                "author": "user2",
+                "soap": {"matched": {"maker": "A", "scent": "X", "match_type": "exact"}},
+            },
+            # Soap B: 4 users, 4 shaves
+            {
+                "id": "5",
+                "author": "user3",
+                "soap": {"matched": {"maker": "B", "scent": "Y", "match_type": "exact"}},
+            },
+            {
+                "id": "6",
+                "author": "user4",
+                "soap": {"matched": {"maker": "B", "scent": "Y", "match_type": "exact"}},
+            },
+            {
+                "id": "7",
+                "author": "user5",
+                "soap": {"matched": {"maker": "B", "scent": "Y", "match_type": "exact"}},
+            },
+            {
+                "id": "8",
+                "author": "user6",
+                "soap": {"matched": {"maker": "B", "scent": "Y", "match_type": "exact"}},
+            },
+        ]
+        result = aggregate_soaps(records)
+        assert result[0]["name"] == "B Y"
+        assert result[1]["name"] == "A X"
 
 
 class TestAggregateBrushes:
@@ -697,6 +845,55 @@ class TestAggregateBrushes:
         assert len(result) == 2
         assert result[0]["name"] == "Brush A Model A"
         assert result[1]["name"] == "Brush B Model B"
+
+    def test_tiebreaker_unique_users(self):
+        records = [
+            # Brush A: 2 users, 4 shaves
+            {
+                "id": "1",
+                "author": "user1",
+                "brush": {"matched": {"brand": "A", "model": "X", "match_type": "exact"}},
+            },
+            {
+                "id": "2",
+                "author": "user1",
+                "brush": {"matched": {"brand": "A", "model": "X", "match_type": "exact"}},
+            },
+            {
+                "id": "3",
+                "author": "user2",
+                "brush": {"matched": {"brand": "A", "model": "X", "match_type": "exact"}},
+            },
+            {
+                "id": "4",
+                "author": "user2",
+                "brush": {"matched": {"brand": "A", "model": "X", "match_type": "exact"}},
+            },
+            # Brush B: 4 users, 4 shaves
+            {
+                "id": "5",
+                "author": "user3",
+                "brush": {"matched": {"brand": "B", "model": "Y", "match_type": "exact"}},
+            },
+            {
+                "id": "6",
+                "author": "user4",
+                "brush": {"matched": {"brand": "B", "model": "Y", "match_type": "exact"}},
+            },
+            {
+                "id": "7",
+                "author": "user5",
+                "brush": {"matched": {"brand": "B", "model": "Y", "match_type": "exact"}},
+            },
+            {
+                "id": "8",
+                "author": "user6",
+                "brush": {"matched": {"brand": "B", "model": "Y", "match_type": "exact"}},
+            },
+        ]
+        result = aggregate_brushes(records)
+        assert result[0]["name"] == "B Y"
+        assert result[1]["name"] == "A X"
 
 
 class TestAggregateUsers:
@@ -882,6 +1079,71 @@ class TestAggregateBrushFibers:
         assert fibers["Boar"]["shaves"] == 1
         assert fibers["Boar"]["unique_users"] == 1
 
+    def test_tiebreaker_unique_users(self):
+        records = [
+            # Fiber A: 2 users, 4 shaves
+            {
+                "id": "1",
+                "author": "user1",
+                "brush": {
+                    "matched": {"brand": "A", "model": "X", "fiber": "F1", "match_type": "exact"}
+                },
+            },
+            {
+                "id": "2",
+                "author": "user1",
+                "brush": {
+                    "matched": {"brand": "A", "model": "X", "fiber": "F1", "match_type": "exact"}
+                },
+            },
+            {
+                "id": "3",
+                "author": "user2",
+                "brush": {
+                    "matched": {"brand": "A", "model": "X", "fiber": "F1", "match_type": "exact"}
+                },
+            },
+            {
+                "id": "4",
+                "author": "user2",
+                "brush": {
+                    "matched": {"brand": "A", "model": "X", "fiber": "F1", "match_type": "exact"}
+                },
+            },
+            # Fiber B: 4 users, 4 shaves
+            {
+                "id": "5",
+                "author": "user3",
+                "brush": {
+                    "matched": {"brand": "B", "model": "Y", "fiber": "F2", "match_type": "exact"}
+                },
+            },
+            {
+                "id": "6",
+                "author": "user4",
+                "brush": {
+                    "matched": {"brand": "B", "model": "Y", "fiber": "F2", "match_type": "exact"}
+                },
+            },
+            {
+                "id": "7",
+                "author": "user5",
+                "brush": {
+                    "matched": {"brand": "B", "model": "Y", "fiber": "F2", "match_type": "exact"}
+                },
+            },
+            {
+                "id": "8",
+                "author": "user6",
+                "brush": {
+                    "matched": {"brand": "B", "model": "Y", "fiber": "F2", "match_type": "exact"}
+                },
+            },
+        ]
+        result = aggregate_brush_fibers(records)
+        assert result[0]["fiber"] == "F2"
+        assert result[1]["fiber"] == "F1"
+
 
 class TestAggregateBrushKnotSizes:
     """Test the aggregate_brush_knot_sizes function."""
@@ -958,3 +1220,108 @@ class TestAggregateBrushKnotSizes:
         assert sizes["28"]["unique_users"] == 1
         assert sizes["27"]["shaves"] == 1
         assert sizes["27"]["unique_users"] == 1
+
+    def test_tiebreaker_unique_users(self):
+        records = [
+            # Knot A: 2 users, 4 shaves
+            {
+                "id": "1",
+                "author": "user1",
+                "brush": {
+                    "matched": {
+                        "brand": "A",
+                        "model": "X",
+                        "knot_size_mm": 24,
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "2",
+                "author": "user1",
+                "brush": {
+                    "matched": {
+                        "brand": "A",
+                        "model": "X",
+                        "knot_size_mm": 24,
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "3",
+                "author": "user2",
+                "brush": {
+                    "matched": {
+                        "brand": "A",
+                        "model": "X",
+                        "knot_size_mm": 24,
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "4",
+                "author": "user2",
+                "brush": {
+                    "matched": {
+                        "brand": "A",
+                        "model": "X",
+                        "knot_size_mm": 24,
+                        "match_type": "exact",
+                    }
+                },
+            },
+            # Knot B: 4 users, 4 shaves
+            {
+                "id": "5",
+                "author": "user3",
+                "brush": {
+                    "matched": {
+                        "brand": "B",
+                        "model": "Y",
+                        "knot_size_mm": 26,
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "6",
+                "author": "user4",
+                "brush": {
+                    "matched": {
+                        "brand": "B",
+                        "model": "Y",
+                        "knot_size_mm": 26,
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "7",
+                "author": "user5",
+                "brush": {
+                    "matched": {
+                        "brand": "B",
+                        "model": "Y",
+                        "knot_size_mm": 26,
+                        "match_type": "exact",
+                    }
+                },
+            },
+            {
+                "id": "8",
+                "author": "user6",
+                "brush": {
+                    "matched": {
+                        "brand": "B",
+                        "model": "Y",
+                        "knot_size_mm": 26,
+                        "match_type": "exact",
+                    }
+                },
+            },
+        ]
+        result = aggregate_brush_knot_sizes(records)
+        assert result[0]["knot_size_mm"] == "26"
+        assert result[1]["knot_size_mm"] == "24"

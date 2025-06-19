@@ -372,10 +372,9 @@ class TestProcessMonth:
                 mock_aggregated_path.return_value = Path(temp_dir) / "aggregated" / "2025-01.json"
                 result = process_month(2025, 1, args)
 
-        # Should still succeed but with empty razors list
-        assert result["status"] == "success"
-        assert result["aggregations"]["razors"] == []
-        assert result["aggregations"]["blades"] == []
+        # Should now fail fast and return error status
+        assert result["status"] == "error"
+        assert "Razor aggregation error" in result["error"]
 
 
 class TestRunAggregate:
