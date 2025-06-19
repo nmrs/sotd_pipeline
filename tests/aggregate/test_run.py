@@ -636,7 +636,7 @@ class TestMain:
             with patch("sotd.aggregate.run.datetime") as mock_datetime:
                 mock_datetime.datetime.now.return_value = real_datetime.datetime(2025, 4, 1)
 
-                main(["aggregate", "--out-dir", "data"])
+                main(["--out-dir", "data"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
@@ -646,7 +646,7 @@ class TestMain:
     def test_month_argument(self):
         """Test with --month argument."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["aggregate", "--month", "2025-04", "--out-dir", "data"])
+            main(["--month", "2025-04", "--out-dir", "data"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
@@ -656,7 +656,7 @@ class TestMain:
     def test_year_argument(self):
         """Test with --year argument."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["aggregate", "--year", "2025", "--out-dir", "data"])
+            main(["--year", "2025", "--out-dir", "data"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
@@ -666,7 +666,7 @@ class TestMain:
     def test_range_argument(self):
         """Test with --range argument."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["aggregate", "--range", "2025-01:2025-03", "--out-dir", "data"])
+            main(["--range", "2025-01:2025-03", "--out-dir", "data"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
@@ -677,7 +677,7 @@ class TestMain:
         """Test with --start and --end arguments."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
             # Test with just --start (single month)
-            main(["aggregate", "--start", "2025-01", "--out-dir", "data"])
+            main(["--start", "2025-01", "--out-dir", "data"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
@@ -687,7 +687,7 @@ class TestMain:
     def test_debug_argument(self):
         """Test with --debug argument."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["aggregate", "--debug", "--out-dir", "data"])
+            main(["--debug", "--out-dir", "data"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
@@ -697,7 +697,7 @@ class TestMain:
     def test_force_argument(self):
         """Test with --force argument."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["aggregate", "--force", "--out-dir", "data"])
+            main(["--force", "--out-dir", "data"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
@@ -708,7 +708,7 @@ class TestMain:
         """Test output directory creation in main function."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
             with tempfile.TemporaryDirectory() as temp_dir:
-                main(["aggregate", "--out-dir", temp_dir])
+                main(["--out-dir", temp_dir])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
@@ -717,14 +717,14 @@ class TestMain:
     def test_output_directory_creation_error_in_main(self):
         """Test output directory creation error in main function."""
         # Try to create a directory in a location that should fail
-        main(["aggregate", "--out-dir", "/root/nonexistent"])
+        main(["--out-dir", "/root/nonexistent"])
 
         # Should handle the error gracefully
 
     def test_benchmark_command(self):
         """Test benchmark command."""
         with patch("sotd.aggregate.run.run_benchmark") as mock_run:
-            main(["benchmark", "--debug"])
+            main(["--mode", "benchmark", "--debug"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
@@ -733,7 +733,7 @@ class TestMain:
     def test_benchmark_command_with_month(self):
         """Test benchmark command with month argument."""
         with patch("sotd.aggregate.run.run_benchmark") as mock_run:
-            main(["benchmark", "--month", "2025-04", "--save-results"])
+            main(["--mode", "benchmark", "--month", "2025-04", "--save-results"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
@@ -743,13 +743,13 @@ class TestMain:
     def test_unknown_command(self):
         """Test handling of unknown command."""
         with pytest.raises(SystemExit):
-            main(["unknown"])
+            main(["--mode", "unknown"])
 
     def test_specialized_aggregation_flags(self):
         """Test specialized aggregation CLI flags."""
         # Test enable-specialized flag
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["aggregate", "--enable-specialized", "--out-dir", "data"])
+            main(["--enable-specialized", "--out-dir", "data"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
@@ -758,7 +758,7 @@ class TestMain:
 
         # Test disable-specialized flag
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["aggregate", "--disable-specialized", "--out-dir", "data"])
+            main(["--disable-specialized", "--out-dir", "data"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
@@ -767,7 +767,7 @@ class TestMain:
 
         # Test enable-cross-product flag
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["aggregate", "--enable-cross-product", "--out-dir", "data"])
+            main(["--enable-cross-product", "--out-dir", "data"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
@@ -776,7 +776,7 @@ class TestMain:
 
         # Test disable-cross-product flag
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["aggregate", "--disable-cross-product", "--out-dir", "data"])
+            main(["--disable-cross-product", "--out-dir", "data"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
@@ -787,7 +787,6 @@ class TestMain:
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
             main(
                 [
-                    "aggregate",
                     "--enable-specialized",
                     "--disable-cross-product",
                     "--out-dir",
@@ -804,7 +803,7 @@ class TestMain:
         """Test default values for specialized aggregation flags."""
         # Test defaults (both should be enabled by default)
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["aggregate", "--out-dir", "data"])
+            main(["--out-dir", "data"])
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
