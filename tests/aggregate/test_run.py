@@ -52,6 +52,135 @@ class TestProcessMonth:
     @patch("sotd.aggregate.run.aggregate_soaps")
     @patch("sotd.aggregate.run.aggregate_brushes")
     @patch("sotd.aggregate.run.aggregate_users")
+    @patch("sotd.aggregate.run.aggregate_blackbird_plates")
+    @patch("sotd.aggregate.run.aggregate_christopher_bradley_plates")
+    @patch("sotd.aggregate.run.aggregate_game_changer_plates")
+    @patch("sotd.aggregate.run.aggregate_super_speed_tips")
+    @patch("sotd.aggregate.run.aggregate_straight_razor_specs")
+    @patch("sotd.aggregate.run.aggregate_razor_blade_combinations")
+    @patch("sotd.aggregate.run.aggregate_user_blade_usage")
+    @patch("sotd.aggregate.run.save_aggregated_data")
+    def test_specialized_aggregation_flags_handling(
+        self,
+        mock_save,
+        mock_user_blade_usage,
+        mock_razor_blade_combinations,
+        mock_straight_razor_specs,
+        mock_super_speed_tips,
+        mock_game_changer_plates,
+        mock_christopher_bradley_plates,
+        mock_blackbird_plates,
+        mock_users,
+        mock_brushes,
+        mock_soaps,
+        mock_blades,
+        mock_razors,
+        mock_metrics,
+        mock_filter,
+        mock_load,
+    ):
+        """Test that specialized aggregation flags are properly handled."""
+        # Mock return values
+        mock_load.return_value = (
+            {"month": "2025-01", "extracted_at": "2025-01-01T00:00:00Z"},
+            [
+                {
+                    "id": "test123",
+                    "author": "testuser",
+                    "created_utc": 1640995200,
+                    "body": "Test comment",
+                }
+            ],
+        )
+        mock_filter.return_value = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "created_utc": 1640995200,
+                "body": "Test comment",
+            }
+        ]
+        mock_metrics.return_value = {
+            "total_shaves": 1,
+            "unique_shavers": 1,
+            "avg_shaves_per_user": 1.0,
+        }
+        mock_razors.return_value = []
+        mock_blades.return_value = []
+        mock_soaps.return_value = []
+        mock_brushes.return_value = []
+        mock_users.return_value = []
+        mock_blackbird_plates.return_value = []
+        mock_christopher_bradley_plates.return_value = []
+        mock_game_changer_plates.return_value = []
+        mock_super_speed_tips.return_value = []
+        mock_straight_razor_specs.return_value = []
+        mock_razor_blade_combinations.return_value = []
+        mock_user_blade_usage.return_value = []
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create the enriched file
+            enriched_dir = Path(temp_dir) / "enriched"
+            enriched_dir.mkdir()
+            enriched_file = enriched_dir / "2025-01.json"
+            enriched_file.write_text('{"meta": {}, "data": []}')
+
+            with (
+                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+            ):
+                mock_enriched_path.return_value = enriched_file
+                # Mock aggregated file to not exist (so it won't be skipped)
+                mock_aggregated_path.return_value = Path(temp_dir) / "aggregated" / "2025-01.json"
+
+                # Test with specialized aggregations disabled
+                args = Mock()
+                args.out_dir = "data"
+                args.debug = False
+                args.force = False
+                args.enable_specialized = False
+                args.disable_specialized = True
+                args.enable_cross_product = False
+                args.disable_cross_product = True
+
+                result = process_month(2025, 1, args)
+
+                # Verify specialized aggregations were not called
+                mock_blackbird_plates.assert_not_called()
+                mock_christopher_bradley_plates.assert_not_called()
+                mock_game_changer_plates.assert_not_called()
+                mock_super_speed_tips.assert_not_called()
+                mock_straight_razor_specs.assert_not_called()
+                mock_razor_blade_combinations.assert_not_called()
+                mock_user_blade_usage.assert_not_called()
+
+                # Test with specialized aggregations enabled
+                args.enable_specialized = True
+                args.disable_specialized = False
+                args.enable_cross_product = True
+                args.disable_cross_product = False
+
+                result = process_month(2025, 1, args)
+
+                # Verify specialized aggregations were called
+                mock_blackbird_plates.assert_called()
+                mock_christopher_bradley_plates.assert_called()
+                mock_game_changer_plates.assert_called()
+                mock_super_speed_tips.assert_called()
+                mock_straight_razor_specs.assert_called()
+                mock_razor_blade_combinations.assert_called()
+                mock_user_blade_usage.assert_called()
+
+                assert result["status"] == "success"
+
+    @patch("sotd.aggregate.run.load_enriched_data")
+    @patch("sotd.aggregate.run.filter_matched_records")
+    @patch("sotd.aggregate.run.calculate_basic_metrics")
+    @patch("sotd.aggregate.run.aggregate_razors")
+    @patch("sotd.aggregate.run.aggregate_blades")
+    @patch("sotd.aggregate.run.aggregate_soaps")
+    @patch("sotd.aggregate.run.aggregate_brushes")
+    @patch("sotd.aggregate.run.aggregate_users")
     @patch("sotd.aggregate.run.save_aggregated_data")
     def test_successful_processing(
         self,
@@ -612,9 +741,74 @@ class TestMain:
         assert args.save_results is True
 
     def test_unknown_command(self):
-        """Test unknown command."""
+        """Test handling of unknown command."""
         with pytest.raises(SystemExit):
             main(["unknown"])
 
-        # The error message is printed to stderr by argparse, not captured by our mock
-        # The SystemExit exception confirms that the unknown command was handled correctly
+    def test_specialized_aggregation_flags(self):
+        """Test specialized aggregation CLI flags."""
+        # Test enable-specialized flag
+        with patch("sotd.aggregate.run.run_aggregate") as mock_run:
+            main(["aggregate", "--enable-specialized", "--out-dir", "data"])
+
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.enable_specialized is True
+        assert args.disable_specialized is False
+
+        # Test disable-specialized flag
+        with patch("sotd.aggregate.run.run_aggregate") as mock_run:
+            main(["aggregate", "--disable-specialized", "--out-dir", "data"])
+
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.enable_specialized is False
+        assert args.disable_specialized is True
+
+        # Test enable-cross-product flag
+        with patch("sotd.aggregate.run.run_aggregate") as mock_run:
+            main(["aggregate", "--enable-cross-product", "--out-dir", "data"])
+
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.enable_cross_product is True
+        assert args.disable_cross_product is False
+
+        # Test disable-cross-product flag
+        with patch("sotd.aggregate.run.run_aggregate") as mock_run:
+            main(["aggregate", "--disable-cross-product", "--out-dir", "data"])
+
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.enable_cross_product is False
+        assert args.disable_cross_product is True
+
+        # Test both flags together
+        with patch("sotd.aggregate.run.run_aggregate") as mock_run:
+            main(
+                [
+                    "aggregate",
+                    "--enable-specialized",
+                    "--disable-cross-product",
+                    "--out-dir",
+                    "data",
+                ]
+            )
+
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.enable_specialized is True
+        assert args.disable_cross_product is True
+
+    def test_specialized_aggregation_defaults(self):
+        """Test default values for specialized aggregation flags."""
+        # Test defaults (both should be enabled by default)
+        with patch("sotd.aggregate.run.run_aggregate") as mock_run:
+            main(["aggregate", "--out-dir", "data"])
+
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.enable_specialized is False  # Not explicitly set
+        assert args.disable_specialized is False  # Not explicitly set
+        assert args.enable_cross_product is False  # Not explicitly set
+        assert args.disable_cross_product is False  # Not explicitly set

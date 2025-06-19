@@ -192,18 +192,48 @@ def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
         brush_fibers = aggregate_brush_fibers(matched_records, debug=args.debug)
         brush_knot_sizes = aggregate_brush_knot_sizes(matched_records, debug=args.debug)
 
-        # Perform specialized aggregations
-        blackbird_plates = aggregate_blackbird_plates(matched_records, debug=args.debug)
-        christopher_bradley_plates = aggregate_christopher_bradley_plates(
-            matched_records, debug=args.debug
+        # Determine which specialized aggregations to run based on CLI flags
+        run_specialized = getattr(args, "enable_specialized", False) or not getattr(
+            args, "disable_specialized", False
         )
-        game_changer_plates = aggregate_game_changer_plates(matched_records, debug=args.debug)
-        super_speed_tips = aggregate_super_speed_tips(matched_records, debug=args.debug)
-        straight_razor_specs = aggregate_straight_razor_specs(matched_records, debug=args.debug)
-        razor_blade_combinations = aggregate_razor_blade_combinations(
-            matched_records, debug=args.debug
+        run_cross_product = getattr(args, "enable_cross_product", False) or not getattr(
+            args, "disable_cross_product", False
         )
-        user_blade_usage = aggregate_user_blade_usage(matched_records, debug=args.debug)
+
+        if args.debug:
+            print("[DEBUG] Aggregation settings:")
+            print(f"  Specialized aggregations: {'enabled' if run_specialized else 'disabled'}")
+            print(f"  Cross-product analysis: {'enabled' if run_cross_product else 'disabled'}")
+
+        # Initialize specialized aggregation results
+        blackbird_plates = []
+        christopher_bradley_plates = []
+        game_changer_plates = []
+        super_speed_tips = []
+        straight_razor_specs = []
+        razor_blade_combinations = []
+        user_blade_usage = []
+
+        # Perform specialized aggregations if enabled
+        if run_specialized:
+            if args.debug:
+                print("[DEBUG] Running specialized aggregations...")
+            blackbird_plates = aggregate_blackbird_plates(matched_records, debug=args.debug)
+            christopher_bradley_plates = aggregate_christopher_bradley_plates(
+                matched_records, debug=args.debug
+            )
+            game_changer_plates = aggregate_game_changer_plates(matched_records, debug=args.debug)
+            super_speed_tips = aggregate_super_speed_tips(matched_records, debug=args.debug)
+            straight_razor_specs = aggregate_straight_razor_specs(matched_records, debug=args.debug)
+
+        # Perform cross-product analysis if enabled
+        if run_cross_product:
+            if args.debug:
+                print("[DEBUG] Running cross-product analysis...")
+            razor_blade_combinations = aggregate_razor_blade_combinations(
+                matched_records, debug=args.debug
+            )
+            user_blade_usage = aggregate_user_blade_usage(matched_records, debug=args.debug)
 
         # Prepare results
         results = {
@@ -569,6 +599,28 @@ def main(argv: Sequence[str] | None = None) -> None:
         "--force",
         action="store_true",
         help="Force overwrite existing files",
+    )
+
+    # Specialized aggregation control arguments
+    aggregate_parser.add_argument(
+        "--enable-specialized",
+        action="store_true",
+        help="Enable specialized aggregations (Blackbird plates, Christopher Bradley plates, etc.)",
+    )
+    aggregate_parser.add_argument(
+        "--disable-specialized",
+        action="store_true",
+        help="Disable specialized aggregations (use only core aggregations)",
+    )
+    aggregate_parser.add_argument(
+        "--enable-cross-product",
+        action="store_true",
+        help="Enable cross-product analysis (razor-blade combinations, user blade usage)",
+    )
+    aggregate_parser.add_argument(
+        "--disable-cross-product",
+        action="store_true",
+        help="Disable cross-product analysis",
     )
 
     # Benchmark arguments
