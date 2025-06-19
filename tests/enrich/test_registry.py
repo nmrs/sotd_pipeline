@@ -182,9 +182,9 @@ class TestEnricherRegistry:
         assert "blade" in enriched_records[1]["enriched"]
         assert "razor" in enriched_records[1]["enriched"]
         assert enriched_records[1]["enriched"]["blade"]["use_count"] == 2
-        assert enriched_records[1]["enriched"]["razor"]["grind"] == "full_hollow"
+        assert enriched_records[1]["enriched"]["razor"]["grind"] == "Full Hollow"
         assert enriched_records[1]["enriched"]["razor"]["width"] == "6/8"
-        assert enriched_records[1]["enriched"]["razor"]["point"] == "round"
+        assert enriched_records[1]["enriched"]["razor"]["point"] == "Round"
 
     def test_enrich_records_length_mismatch(self):
         """Test that enriching records with mismatched lengths raises an error."""

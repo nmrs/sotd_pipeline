@@ -50,7 +50,7 @@ class TestStraightRazorEnricher:
         comment = "Using my full hollow straight razor today"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["grind"] == "full_hollow"
+        assert result["grind"] == "Full Hollow"
         assert result["_enriched_by"] == "StraightRazorEnricher"
         assert result["_extraction_source"] == "user_comment"
 
@@ -59,63 +59,63 @@ class TestStraightRazorEnricher:
         comment = "Half hollow grind provides great feedback"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["grind"] == "half_hollow"
+        assert result["grind"] == "Half Hollow"
 
     def test_extract_grind_quarter_hollow(self, enricher):
         """Test extraction of quarter hollow grind."""
         comment = "Quarter hollow grind is perfect for beginners"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["grind"] == "quarter_hollow"
+        assert result["grind"] == "Quarter Hollow"
 
     def test_extract_grind_three_quarter_hollow(self, enricher):
         """Test extraction of three quarter hollow grind."""
         comment = "Three quarter hollow grind offers good balance"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["grind"] == "three_quarter_hollow"
+        assert result["grind"] == "Three Quarter Hollow"
 
     def test_extract_grind_generic_hollow(self, enricher):
         """Test extraction of generic hollow grind."""
         comment = "Hollow grind razors are very common"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["grind"] == "hollow"
+        assert result["grind"] == "Hollow"
 
     def test_extract_grind_wedge(self, enricher):
         """Test extraction of wedge grind."""
         comment = "Wedge grind provides excellent stability"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["grind"] == "wedge"
+        assert result["grind"] == "Wedge"
 
     def test_extract_grind_frameback(self, enricher):
         """Test extraction of frameback grind."""
         comment = "Frameback grind is a unique design"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["grind"] == "frameback"
+        assert result["grind"] == "Frameback"
 
     def test_extract_grind_extra_hollow(self, enricher):
         """Test extraction of extra hollow grind."""
         comment = "Extra hollow grind provides excellent flexibility"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["grind"] == "extra_hollow"
+        assert result["grind"] == "Extra Hollow"
 
     def test_extract_grind_pretty_hollow(self, enricher):
         """Test extraction of pretty hollow grind."""
         comment = "Pretty hollow grind is a nice middle ground"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["grind"] == "pretty_hollow"
+        assert result["grind"] == "Pretty Hollow"
 
     def test_extract_grind_near_wedge(self, enricher):
         """Test extraction of near wedge grind."""
         comment = "Near wedge grind offers good stability"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["grind"] == "near_wedge"
+        assert result["grind"] == "Near Wedge"
 
     def test_extract_width_fractional_eighths(self, enricher):
         """Test extraction of width in fractional eighths."""
@@ -167,42 +167,42 @@ class TestStraightRazorEnricher:
         comment = "Round point is very forgiving"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["point"] == "round"
+        assert result["point"] == "Round"
 
     def test_extract_point_round_point(self, enricher):
         """Test extraction of round point with explicit 'point'."""
         comment = "Round point blade is great for beginners"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["point"] == "round"
+        assert result["point"] == "Round"
 
     def test_extract_point_square(self, enricher):
         """Test extraction of square point."""
         comment = "Square point offers precise control"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["point"] == "square"
+        assert result["point"] == "Square"
 
     def test_extract_point_square_point(self, enricher):
         """Test extraction of square point with explicit 'point'."""
         comment = "Square point blade requires careful handling"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["point"] == "square"
+        assert result["point"] == "Square"
 
     def test_extract_point_french(self, enricher):
         """Test extraction of French point."""
         comment = "French point is very elegant"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["point"] == "french"
+        assert result["point"] == "French"
 
     def test_extract_point_spanish(self, enricher):
         """Test extraction of Spanish point."""
-        comment = "Spanish point is quite popular"
+        comment = "Spanish point is very stylish"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["point"] == "spanish"
+        assert result["point"] == "Spanish"
 
     def test_extract_point_barbers_notch(self, enricher):
         """Test extraction of barber's notch."""
@@ -214,30 +214,30 @@ class TestStraightRazorEnricher:
         for comment in test_cases:
             result = enricher.enrich({}, comment)
             assert result is not None, f"Failed for comment: {comment}"
-            assert result["point"] == "barbers_notch", f"Failed for comment: {comment}"
+            assert result["point"] == "Barber's Notch", f"Failed for comment: {comment}"
 
     def test_extract_point_spear(self, enricher):
         """Test extraction of spear point."""
         comment = "Spear point is very sharp"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["point"] == "spear"
+        assert result["point"] == "Spear"
 
     def test_extract_combined_specifications(self, enricher):
         """Test extraction of multiple specifications in one comment."""
         comment = "Full hollow 6/8 round point straight razor"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["grind"] == "full_hollow"
+        assert result["grind"] == "Full Hollow"
         assert result["width"] == "6/8"
-        assert result["point"] == "round"
+        assert result["point"] == "Round"
 
     def test_extract_partial_specifications(self, enricher):
         """Test extraction when only some specifications are present."""
         comment = "Half hollow 7/8 straight razor"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["grind"] == "half_hollow"
+        assert result["grind"] == "Half Hollow"
         assert result["width"] == "7/8"
         assert "point" not in result
 
@@ -250,9 +250,9 @@ class TestStraightRazorEnricher:
     def test_case_insensitive_extraction(self, enricher):
         """Test that extraction works regardless of case."""
         test_cases = [
-            ("FULL HOLLOW 6/8 ROUND POINT", "full_hollow", "6/8", "round"),
-            ("Half Hollow 7/8 Square", "half_hollow", "7/8", "square"),
-            ("wedge 5/8", "wedge", "5/8", None),
+            ("FULL HOLLOW 6/8 ROUND POINT", "Full Hollow", "6/8", "Round"),
+            ("Half Hollow 7/8 Square", "Half Hollow", "7/8", "Square"),
+            ("wedge 5/8", "Wedge", "5/8", None),
         ]
 
         for comment, expected_grind, expected_width, expected_point in test_cases:
@@ -270,16 +270,16 @@ class TestStraightRazorEnricher:
         test_cases = [
             (
                 "Dovo Best Quality 6/8 full hollow round point",
-                {"grind": "full_hollow", "width": "6/8", "point": "round"},
+                {"grind": "Full Hollow", "width": "6/8", "point": "Round"},
             ),
             (
                 "Böker King Cutter 7/8 wedge square point",
-                {"grind": "wedge", "width": "7/8", "point": "square"},
+                {"grind": "Wedge", "width": "7/8", "point": "Square"},
             ),
-            ("Filarmonica 5/8 half hollow", {"grind": "half_hollow", "width": "5/8"}),
+            ("Filarmonica 5/8 half hollow", {"grind": "Half Hollow", "width": "5/8"}),
             (
                 "Wade & Butcher 8/8 quarter hollow round",
-                {"grind": "quarter_hollow", "width": "8/8", "point": "round"},
+                {"grind": "Quarter Hollow", "width": "8/8", "point": "Round"},
             ),
         ]
 
@@ -324,9 +324,9 @@ class TestStraightRazorEnricher:
         result = enricher.enrich(field_data, razor_extracted)
 
         assert result is not None
-        assert result["grind"] == "half_hollow"  # User comment takes precedence
+        assert result["grind"] == "Half Hollow"  # User comment takes precedence
         assert result["width"] == "6/8"  # User comment takes precedence
-        assert result["point"] == "round"  # User comment takes precedence
+        assert result["point"] == "Round"  # User comment takes precedence
         assert result["_extraction_source"] == "user_comment + catalog_data"
 
     def test_enrich_partial_user_data_merges_with_catalog(self, enricher):
@@ -409,9 +409,9 @@ class TestStraightRazorEnricher:
         result = enricher.enrich(field_data, razor_extracted)
 
         assert result is not None
-        assert result["grind"] == "wedge"
+        assert result["grind"] == "Wedge"
         assert result["width"] == "7/8"
-        assert result["point"] == "square"
+        assert result["point"] == "Square"
         assert result["_extraction_source"] == "user_comment"
 
     def test_extract_point_spike(self, enricher):
@@ -419,32 +419,32 @@ class TestStraightRazorEnricher:
         comment = "Spike point offers precise control"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["point"] == "spike"
+        assert result["point"] == "Spike"
 
     def test_extract_point_spike_point(self, enricher):
         """Test extraction of spike point with explicit 'point'."""
         comment = "Spike point blade requires careful handling"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["point"] == "spike"
+        assert result["point"] == "Spike"
 
     def test_extract_point_round_tip(self, enricher):
-        """Test extraction of round tip (synonym for round point)."""
+        """Test extraction of round point with 'tip' instead of 'point'."""
         comment = "Round tip is very forgiving"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["point"] == "round"
+        assert result["point"] == "Round"
 
     def test_extract_point_square_tip(self, enricher):
-        """Test extraction of square tip (synonym for square point)."""
+        """Test extraction of square point with 'tip' instead of 'point'."""
         comment = "Square tip offers precise control"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["point"] == "square"
+        assert result["point"] == "Square"
 
     def test_extract_point_spanish_tip(self, enricher):
-        """Test extraction of spanish tip (synonym for spanish point)."""
-        comment = "Spanish tip blade is elegant"
+        """Test extraction of Spanish point with 'tip' instead of 'point'."""
+        comment = "Spanish tip is very stylish"
         result = enricher.enrich({}, comment)
         assert result is not None
-        assert result["point"] == "spanish"
+        assert result["point"] == "Spanish"

@@ -159,23 +159,24 @@ class StraightRazorEnricher(BaseEnricher):
             text: The text to search for grind patterns
 
         Returns:
-            The extracted grind type as a string, or None if not found
+            The extracted grind type as a string in Title Case, or None if not found
         """
         # Normalize text for case-insensitive matching
         text_lower = text.lower()
 
         # Grind patterns in order of specificity (most specific first)
+        # Return Title Case values for better readability in reports
         grind_patterns = [
-            (r"\bextra\s*hollow\b", "extra_hollow"),
-            (r"\bfull\s*hollow\b", "full_hollow"),
-            (r"\bpretty\s*hollow\b", "pretty_hollow"),
-            (r"\bthree\s*quarter\s*hollow\b", "three_quarter_hollow"),
-            (r"\bhalf\s*hollow\b", "half_hollow"),
-            (r"\bquarter\s*hollow\b", "quarter_hollow"),
-            (r"\bhollow\b", "hollow"),  # Generic hollow
-            (r"\bnear\s*wedge\b", "near_wedge"),
-            (r"\bwedge\b", "wedge"),
-            (r"\bframeback\b", "frameback"),
+            (r"\bextra\s*hollow\b", "Extra Hollow"),
+            (r"\bfull\s*hollow\b", "Full Hollow"),
+            (r"\bpretty\s*hollow\b", "Pretty Hollow"),
+            (r"\bthree\s*quarter\s*hollow\b", "Three Quarter Hollow"),
+            (r"\bhalf\s*hollow\b", "Half Hollow"),
+            (r"\bquarter\s*hollow\b", "Quarter Hollow"),
+            (r"\bhollow\b", "Hollow"),  # Generic hollow
+            (r"\bnear\s*wedge\b", "Near Wedge"),
+            (r"\bwedge\b", "Wedge"),
+            (r"\bframeback\b", "Frameback"),
         ]
 
         for pattern, grind_type in grind_patterns:
@@ -228,23 +229,24 @@ class StraightRazorEnricher(BaseEnricher):
             text: The text to search for point patterns
 
         Returns:
-            The extracted point type as a string, or None if not found
+            The extracted point type as a string in Title Case, or None if not found
         """
         # Normalize text for case-insensitive matching
         text_lower = text.lower()
 
         # Point patterns in order of specificity
+        # Return Title Case values for better readability in reports
         point_patterns = [
-            (r"\bround\s*(?:point|tip)\b", "round"),
-            (r"\bsquare\s*(?:point|tip)\b", "square"),
-            (r"\bspike\s*(?:point|tip)\b", "spike"),
-            (r"\bfrench\s*(?:point|tip)\b", "french"),
-            (r"\bspanish\s*(?:point|tip)\b", "spanish"),
-            (r"\bbarber['']?s\s*notch\b", "barbers_notch"),
-            (r"\bspear\s*(?:point|tip)\b", "spear"),
-            (r"\bround\b", "round"),  # Generic round
-            (r"\bsquare\b", "square"),  # Generic square
-            (r"\bspike\b", "spike"),  # Generic spike
+            (r"\bround\s*(?:point|tip)\b", "Round"),
+            (r"\bsquare\s*(?:point|tip)\b", "Square"),
+            (r"\bspike\s*(?:point|tip)\b", "Spike"),
+            (r"\bfrench\s*(?:point|tip)\b", "French"),
+            (r"\bspanish\s*(?:point|tip)\b", "Spanish"),
+            (r"\bbarber['']?s\s*notch\b", "Barber's Notch"),
+            (r"\bspear\s*(?:point|tip)\b", "Spear"),
+            (r"\bround\b", "Round"),  # Generic round
+            (r"\bsquare\b", "Square"),  # Generic square
+            (r"\bspike\b", "Spike"),  # Generic spike
         ]
 
         for pattern, point_type in point_patterns:
