@@ -4,6 +4,17 @@ from datetime import datetime
 from typing import List
 
 from .base import BaseReportGenerator
+from .table_generators.blade_tables import (
+    BladeManufacturersTableGenerator,
+    BladesTableGenerator,
+)
+from .table_generators.brush_tables import (
+    BrushesTableGenerator,
+    BrushFibersTableGenerator,
+    BrushHandleMakersTableGenerator,
+    BrushKnotMakersTableGenerator,
+    BrushKnotSizesTableGenerator,
+)
 from .table_generators.razor_tables import (
     RazorFormatsTableGenerator,
     RazorManufacturersTableGenerator,
@@ -88,6 +99,64 @@ class HardwareReportGenerator(BaseReportGenerator):
             manufacturers_table = manufacturers_generator.generate_table()
             if manufacturers_table:
                 tables.append(manufacturers_table)
+                tables.append("")  # Empty line
+
+        # Generate blades table
+        if "blades" in self.data:
+            blades_generator = BladesTableGenerator(self.data, debug=self.debug)
+            blades_table = blades_generator.generate_table()
+            if blades_table:
+                tables.append(blades_table)
+                tables.append("")  # Empty line
+
+        # Generate blade manufacturers table
+        if "blade_manufacturers" in self.data:
+            blade_manufacturers_generator = BladeManufacturersTableGenerator(
+                self.data, debug=self.debug
+            )
+            blade_manufacturers_table = blade_manufacturers_generator.generate_table()
+            if blade_manufacturers_table:
+                tables.append(blade_manufacturers_table)
+                tables.append("")  # Empty line
+
+        # Generate brushes table
+        if "brushes" in self.data:
+            brushes_generator = BrushesTableGenerator(self.data, debug=self.debug)
+            brushes_table = brushes_generator.generate_table()
+            if brushes_table:
+                tables.append(brushes_table)
+                tables.append("")  # Empty line
+
+        # Generate brush handle makers table
+        if "brush_handle_makers" in self.data:
+            handle_makers_generator = BrushHandleMakersTableGenerator(self.data, debug=self.debug)
+            handle_makers_table = handle_makers_generator.generate_table()
+            if handle_makers_table:
+                tables.append(handle_makers_table)
+                tables.append("")  # Empty line
+
+        # Generate brush knot makers table
+        if "brush_knot_makers" in self.data:
+            knot_makers_generator = BrushKnotMakersTableGenerator(self.data, debug=self.debug)
+            knot_makers_table = knot_makers_generator.generate_table()
+            if knot_makers_table:
+                tables.append(knot_makers_table)
+                tables.append("")  # Empty line
+
+        # Generate brush fibers table
+        if "brush_fibers" in self.data:
+            fibers_generator = BrushFibersTableGenerator(self.data, debug=self.debug)
+            fibers_table = fibers_generator.generate_table()
+            if fibers_table:
+                tables.append(fibers_table)
+                tables.append("")  # Empty line
+
+        # Generate brush knot sizes table
+        if "brush_knot_sizes" in self.data:
+            knot_sizes_generator = BrushKnotSizesTableGenerator(self.data, debug=self.debug)
+            knot_sizes_table = knot_sizes_generator.generate_table()
+            if knot_sizes_table:
+                tables.append(knot_sizes_table)
                 tables.append("")  # Empty line
 
         return tables

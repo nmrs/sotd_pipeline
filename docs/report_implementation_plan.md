@@ -86,18 +86,20 @@ Build the report phase of the SOTD pipeline that generates statistical analysis 
 
   _Step 7 completed. All three razor table generators implemented with comprehensive error handling, data validation, and defensive programming. Added extensive test coverage with 16 test cases covering edge cases, invalid data, and proper functionality. Fixed circular import issues by moving BaseReportGenerator to base.py. Updated table generators to work with real aggregated data structure (name, shaves, unique_users fields). Successfully tested with live data from 2025-01.json - generated proper markdown tables with 22 razors showing real usage statistics. All quality checks are passing._
 
-- [ ] **Step 8: Blade and Brush Tables**
-  - [ ] Create `sotd/report/table_generators/blade_tables.py`
-  - [ ] Create `sotd/report/table_generators/brush_tables.py`
-  - [ ] Implement blades table generator
-  - [ ] Implement brush handle makers table generator
-  - [ ] Implement brush knot makers table generator
-  - [ ] Implement brush fibers table generator
-  - [ ] Implement brush knot sizes table generator
-  - [ ] Handle data extraction and formatting for each table
-  - [ ] Include proper error handling and validation
-  - [ ] Add type hints and docstrings
-  - [ ] Test with sample aggregated data
+- [x] **Step 8: Blade and Brush Tables**
+  - [x] Create `sotd/report/table_generators/blade_tables.py`
+  - [x] Create `sotd/report/table_generators/brush_tables.py`
+  - [x] Implement blades table generator
+  - [x] Implement brush handle makers table generator
+  - [x] Implement brush knot makers table generator
+  - [x] Implement brush fibers table generator
+  - [x] Implement brush knot sizes table generator
+  - [x] Handle data extraction and formatting for each table
+  - [x] Include proper error handling and validation
+  - [x] Add type hints and docstrings
+  - [x] Test with sample aggregated data
+
+  _Step 8 completed. Created comprehensive blade and brush table generators with defensive programming, data validation, and error handling. Implemented 5 table generators: BladesTableGenerator, BladeManufacturersTableGenerator, BrushesTableGenerator, BrushHandleMakersTableGenerator, BrushKnotMakersTableGenerator, BrushFibersTableGenerator, and BrushKnotSizesTableGenerator. Updated hardware_report.py to include all new table generators. Successfully tested with live data from 2025-01.json - generated proper markdown tables showing real usage statistics for blades, brush handle makers, brush fibers, and brush knot sizes. All quality checks are passing._
 
 - [ ] **Step 9: Specialized Hardware Tables**
   - [ ] Create `sotd/report/table_generators/specialized_tables.py`
