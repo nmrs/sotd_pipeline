@@ -17,6 +17,8 @@ data/extracted/*.json
 data/matched/*.json
 data/threads/*.json
 data/aggregated/*.json
+# Ignore generated report files
+data/reports/*.md
 .aider*
 praw.ini
 .env
