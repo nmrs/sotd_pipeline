@@ -39,42 +39,19 @@ def filter_matched_records(
             invalid_records += 1
             continue
 
-        # Check if any product has a successful match
+        # Check if any product has a non-empty 'matched' field
         has_match = False
-
         for product_field in ["razor", "blade", "soap", "brush"]:
             if product_field in record:
                 product_data = record[product_field]
-                if isinstance(product_data, dict) and "matched" in product_data:
-                    matched_data = product_data["matched"]
-                    if isinstance(matched_data, dict):
-                        # Validate match_type if present
-                        if "match_type" in matched_data:
-                            match_type = matched_data["match_type"]
-                            valid_match_types = ["exact", "fuzzy", "manual", "unmatched"]
-                            if (
-                                not isinstance(match_type, str)
-                                or match_type not in valid_match_types
-                            ):
-                                if debug:
-                                    print(
-                                        f"[DEBUG] Record {i}: {product_field}.match_type invalid: "
-                                        f"{match_type}"
-                                    )
-                                invalid_records += 1
-                                break
-
-                        # Check if this product has a successful match
-                        # Different products have different success indicators
-                        if product_field == "razor" and matched_data.get("brand"):
-                            has_match = True
-                        elif product_field == "blade" and matched_data.get("brand"):
-                            has_match = True
-                        elif product_field == "soap" and matched_data.get("maker"):
-                            has_match = True
-                        elif product_field == "brush" and matched_data.get("brand"):
-                            has_match = True
-
+                if (
+                    isinstance(product_data, dict)
+                    and "matched" in product_data
+                    and isinstance(product_data["matched"], dict)
+                    and len(product_data["matched"]) > 0
+                ):
+                    has_match = True
+                    break
         if has_match:
             matched_records.append(record)
 

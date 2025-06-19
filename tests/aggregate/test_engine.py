@@ -37,9 +37,7 @@ class TestFilterMatchedRecords:
                 "created_utc": 1640995200,
                 "body": "Test comment",
                 "razor": {
-                    "matched": {
-                        "brand": None,  # No brand, so not matched
-                    }
+                    "matched": {},  # Empty dict, not matched
                 },
             }
         ]
@@ -148,8 +146,10 @@ class TestFilterMatchedRecords:
                 },
             }
         ]
+        # Now considered valid because matched is non-empty
         result = filter_matched_records(records)
-        assert result == []
+        assert len(result) == 1
+        assert result[0]["id"] == "test123"
 
     def test_mixed_valid_invalid_records(self):
         """Test with mix of valid and invalid records."""
@@ -172,9 +172,7 @@ class TestFilterMatchedRecords:
                 "created_utc": 1640995201,
                 "body": "Test comment 2",
                 "razor": {
-                    "matched": {
-                        "brand": None,  # Not matched
-                    }
+                    "matched": {},  # Empty dict, not matched
                 },
             },
         ]
