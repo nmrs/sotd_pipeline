@@ -263,8 +263,8 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 
 ### Phase 2 Progress
 - [x] Chunk 3.1: CLI Module (5/5 tasks)
-- [ ] Chunk 3.2: Performance Module (0/5 tasks)
-- [ ] Chunk 3.3: Data Processing Module (0/5 tasks)
+- [x] Chunk 3.2: Performance Module (5/5 tasks)
+- [x] Chunk 3.3: Data Processing Module (5/5 tasks)
 - [ ] Chunk 4.1: Base Aggregation Class (0/5 tasks)
 - [ ] Chunk 4.2: Grouped Aggregations (0/4 tasks)
 
@@ -295,6 +295,8 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 - Regular integration testing with real data
 
 ### Phase 2, Chunk 3.1: Extracted all CLI argument parsing and validation from aggregate/run.py to aggregate/cli.py. Updated tests to patch datetime in the new module. All tests and quality checks pass.
+- Phase 2, Chunk 3.2: Extracted performance monitoring utilities (get_memory_usage, log_performance_metrics) from aggregate/run.py to aggregate/performance.py. All tests and quality checks pass.
+- Phase 2, Chunk 3.3: Extracted data processing logic (process_month and related functions) from aggregate/run.py to aggregate/processor.py. Broke down the large process_month function into smaller, focused helper functions. Updated tests to patch functions in the new processor module. All tests and quality checks pass.
 
 ## Timeline Estimate
 
