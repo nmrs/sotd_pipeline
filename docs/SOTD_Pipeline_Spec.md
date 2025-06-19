@@ -70,15 +70,18 @@ Uses an extensible enricher strategy pattern for sophisticated analysis. Save to
 ---
 
 ## 5. **Aggregation**
-Summarize encriched product data for downstream reporting:
+Summarize enriched product data for downstream reporting:
 
 - Usage counts by brand/model
 - Most-used products
-- Trends over time
+- User statistics
+- Product category summaries
 
 Save aggregate summaries to:
 
 - `data/aggregated/YYYY-MM.json`
+
+**Detailed specification**: See [Aggregate Phase Specification](aggregate_phase_spec.md)
 
 ---
 
