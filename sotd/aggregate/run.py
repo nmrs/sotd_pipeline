@@ -23,6 +23,7 @@ from tqdm import tqdm
 
 from sotd.aggregate.aggregation_functions import calculate_basic_metrics, filter_matched_records
 from sotd.aggregate.benchmarks import run_performance_benchmark
+from sotd.aggregate.cli import parse_aggregate_args
 from sotd.aggregate.engine import (
     aggregate_blackbird_plates,
     aggregate_blade_manufacturers,
@@ -47,7 +48,6 @@ from sotd.aggregate.product_aggregators import (
 )
 from sotd.aggregate.save import get_aggregated_file_path, save_aggregated_data
 from sotd.aggregate.user_aggregators import aggregate_user_blade_usage, aggregate_users
-from sotd.aggregate.cli import parse_aggregate_args
 from sotd.cli_utils.date_span import month_span
 
 
