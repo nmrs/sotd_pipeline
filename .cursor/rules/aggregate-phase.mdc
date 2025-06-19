@@ -1,5 +1,116 @@
 ---
-description:
-globs:
+description: 
+globs: sotd/aggregate/*.py,sotd/aggregate/**/*.py,tests/aggregate/*.py
 alwaysApply: false
 ---
+# Aggregate Phase Development Rules
+
+## Overview
+The aggregate phase processes enriched SOTD data to generate statistical summaries for downstream reporting. It calculates metrics for core product categories and outputs structured JSON data.
+
+## Phase Structure
+Follow the standard pipeline phase pattern:
+- `sotd/aggregate/run.py` - CLI entry point with date range support
+- `sotd/aggregate/engine.py` - Core aggregation logic using pandas
+- `sotd/aggregate/load.py` - Data loading and validation
+- `sotd/aggregate/save.py` - File I/O operations
+- `tests/aggregate/` - Comprehensive test coverage
+
+## Data Processing Rules
+
+### Input Data
+- Read from `data/enriched/YYYY-MM.json`
+- Expect enriched comment records with matched product data
+- Validate JSON structure matches expected enriched data format
+- Filter for successfully matched products only (match_type is "exact" or similar)
+
+### Output Data
+- Write to `data/aggregated/YYYY-MM.json`
+- Include metadata section with aggregation info
+- Structure data section with all categories
+- Follow JSON output standards from data-processing.mdc
+
+### Core Categories
+Implement aggregation for these categories:
+
+**Hardware Categories:**
+- Razor formats (from razor.matched.format)
+- Razors (from razor.matched)
+- Razor manufacturers (from razor.matched.brand)
+- Blades (from blade.matched)
+- Brushes (from brush.matched)
+- Brush handle makers (from brush.matched.handle_maker)
+- Brush knot makers (from brush.matched.brand)
+- Knot fibers (from brush.matched.fiber)
+- Knot sizes (from brush.matched.knot_size_mm)
+
+**Software Categories:**
+- Soap makers (from soap.matched.maker)
+- Soaps (from soap.matched - combine maker and scent)
+- Brand diversity (count unique scents per soap maker)
+
+**User Categories:**
+- Top shavers (group by author, count shaves)
+
+### Metrics Calculation
+For each category, calculate:
+- `shaves`: Total usage count
+- `unique_users`: Number of distinct users
+- `avg_shaves_per_user`: Calculated average
+
+```python
+def calculate_category_metrics(records: list[dict], category_field: str) -> list[dict]:
+    """Calculate metrics for a product category."""
+    # Filter for successfully matched products
+    matched_records = [r for r in records if r.get('match_type') in ['exact', 'similar']]
+    
+    # Group by product name and calculate metrics
+    # Implementation using pandas for efficiency
+    pass
+```
+
+## Pandas Usage Guidelines
+- Use pandas for efficient data processing
+- Process months sequentially to manage memory
+- Use tqdm for progress bars during multi-month processing
+- Handle large datasets efficiently with proper memory management
+
+## Error Handling
+- Fail fast on data structure issues
+- Validate enriched data before processing
+- Handle missing files gracefully with debug logging
+- Provide clear error messages for data quality issues
+
+## Testing Requirements
+- Unit tests for each aggregation function
+- Integration tests with sample enriched data
+- CLI tests for argument parsing
+- Error handling tests for various scenarios
+- Performance tests for large datasets
+
+## CLI Interface
+Follow the same pattern as other phases:
+```python
+def main():
+    parser = argparse.ArgumentParser(description="Aggregate enriched SOTD data")
+    parser.add_argument("--month", help="Process specific month (YYYY-MM)")
+    parser.add_argument("--year", help="Process all months in year (YYYY)")
+    parser.add_argument("--range", help="Process date range (YYYY-MM:YYYY-MM)")
+    parser.add_argument("--start", help="Start month for range (YYYY-MM)")
+    parser.add_argument("--end", help="End month for range (YYYY-MM)")
+    parser.add_argument("--out-dir", help="Output directory")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--force", action="store_true", help="Overwrite existing files")
+```
+
+## Performance Considerations
+- Process months sequentially (load → aggregate → save → repeat)
+- Use pandas for efficient aggregation operations
+- Monitor memory usage with large datasets
+- Consider batching for very large files if needed
+
+## Future Enhancements (TODO)
+- Specialized categories (Blackbird Plates, Christopher Bradley Plates, etc.)
+- Cross-product analysis (razor+blade combinations)
+- Parallel processing for multiple months (if needed)
+- Streaming/batching for very large datasets
