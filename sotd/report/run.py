@@ -99,12 +99,29 @@ def run_report(args: argparse.Namespace) -> None:
     except Exception as e:
         raise RuntimeError(f"Failed to load aggregated data: {e}") from e
 
+    # Load historical data for delta calculations
+    if args.debug:
+        print("[DEBUG] Loading historical data for delta calculations")
+
+    try:
+        comparison_data = load.load_comparison_data(base_dir, year, month, args.debug)
+        if args.debug:
+            print(f"[DEBUG] Loaded {len(comparison_data)} comparison periods")
+            for period, (period_meta, _) in comparison_data.items():
+                print(f"[DEBUG] {period}: {period_meta['month']}")
+    except Exception as e:
+        if args.debug:
+            print(f"[DEBUG] Warning: Failed to load historical data: {e}")
+        comparison_data = {}
+
     # Generate report content
     if args.debug:
         print(f"[DEBUG] Generating {args.type} report content")
 
     try:
-        report_content = process.generate_report_content(args.type, metadata, data, args.debug)
+        report_content = process.generate_report_content(
+            args.type, metadata, data, comparison_data, args.debug
+        )
     except Exception as e:
         raise RuntimeError(f"Failed to generate report content: {e}") from e
 

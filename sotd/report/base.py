@@ -1,22 +1,30 @@
 """Base classes for the report phase."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 class BaseReportGenerator(ABC):
     """Base class for report generators."""
 
-    def __init__(self, metadata: Dict[str, Any], data: Dict[str, Any], debug: bool = False):
+    def __init__(
+        self,
+        metadata: Dict[str, Any],
+        data: Dict[str, Any],
+        comparison_data: Optional[Dict[str, Any]] = None,
+        debug: bool = False,
+    ):
         """Initialize the report generator.
 
         Args:
             metadata: Metadata from aggregated data
             data: Data from aggregated data
+            comparison_data: Historical data for delta calculations
             debug: Enable debug logging
         """
         self.metadata = metadata
         self.data = data
+        self.comparison_data = comparison_data or {}
         self.debug = debug
 
     @abstractmethod

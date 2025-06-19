@@ -1,6 +1,6 @@
 """Software report generator for the SOTD pipeline report phase."""
 
-from typing import List
+from typing import Any, Dict, List, Optional
 
 from .base import BaseReportGenerator
 from .table_generators.soap_tables import (
@@ -12,6 +12,23 @@ from .table_generators.soap_tables import (
 
 class SoftwareReportGenerator(BaseReportGenerator):
     """Software report generator."""
+
+    def __init__(
+        self,
+        metadata: Dict[str, Any],
+        data: Dict[str, Any],
+        comparison_data: Optional[Dict[str, Any]] = None,
+        debug: bool = False,
+    ):
+        """Initialize the software report generator.
+
+        Args:
+            metadata: Metadata from aggregated data
+            data: Data from aggregated data
+            comparison_data: Historical data for delta calculations
+            debug: Enable debug logging
+        """
+        super().__init__(metadata, data, comparison_data, debug)
 
     def generate_header(self) -> str:
         """Generate the report header."""
