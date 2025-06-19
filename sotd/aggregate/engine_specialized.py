@@ -1,6 +1,6 @@
 """Specialized aggregation functions for specific product types and combinations."""
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, cast
 
 import pandas as pd
 
@@ -55,7 +55,7 @@ def aggregate_razor_manufacturers(
     for i, item in enumerate(results):
         item["position"] = i + 1
 
-    return results  # type: ignore
+    return cast(List[Dict[str, Any]], results)
 
 
 def aggregate_blade_manufacturers(
@@ -106,7 +106,7 @@ def aggregate_blade_manufacturers(
     for i, item in enumerate(results):
         item["position"] = i + 1
 
-    return results  # type: ignore
+    return cast(List[Dict[str, Any]], results)
 
 
 def aggregate_soap_makers(
@@ -157,7 +157,7 @@ def aggregate_soap_makers(
     for i, item in enumerate(results):
         item["position"] = i + 1
 
-    return results  # type: ignore
+    return cast(List[Dict[str, Any]], results)
 
 
 def aggregate_brush_knot_makers(
@@ -208,7 +208,7 @@ def aggregate_brush_knot_makers(
     for i, item in enumerate(results):
         item["position"] = i + 1
 
-    return results  # type: ignore
+    return cast(List[Dict[str, Any]], results)
 
 
 def aggregate_brush_handle_makers(
@@ -259,7 +259,7 @@ def aggregate_brush_handle_makers(
     for i, item in enumerate(results):
         item["position"] = i + 1
 
-    return results  # type: ignore
+    return cast(List[Dict[str, Any]], results)
 
 
 def aggregate_brush_fibers(
@@ -310,7 +310,7 @@ def aggregate_brush_fibers(
     for i, item in enumerate(results):
         item["position"] = i + 1
 
-    return results  # type: ignore
+    return cast(List[Dict[str, Any]], results)
 
 
 def aggregate_brush_knot_sizes(
@@ -355,7 +355,7 @@ def aggregate_brush_knot_sizes(
     grouped.columns = ["knot_size_mm", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
-    return list(grouped.to_dict("records"))  # type: ignore
+    return cast(List[Dict[str, Any]], list(grouped.to_dict("records")))
 
 
 def aggregate_blackbird_plates(
@@ -402,7 +402,7 @@ def aggregate_blackbird_plates(
     grouped.columns = ["plate", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
-    return list(grouped.to_dict("records"))  # type: ignore
+    return cast(List[Dict[str, Any]], list(grouped.to_dict("records")))
 
 
 def aggregate_christopher_bradley_plates(
@@ -454,7 +454,7 @@ def aggregate_christopher_bradley_plates(
     grouped.columns = ["plate", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
-    return list(grouped.to_dict("records"))  # type: ignore
+    return cast(List[Dict[str, Any]], list(grouped.to_dict("records")))
 
 
 def aggregate_game_changer_plates(
@@ -581,17 +581,16 @@ def aggregate_straight_razor_specs(
         grind = enriched.get("grind")
         width = enriched.get("width")
         point = enriched.get("point")
-        spec_parts = []
-        if grind:
-            spec_parts.append(f"Grind: {grind}")
-        if width:
-            spec_parts.append(f"Width: {width}")
-        if point:
-            spec_parts.append(f"Point: {point}")
-        if not spec_parts:
+        if not any([grind, width, point]):
             continue
-        specs = " | ".join(spec_parts)
-        data.append({"specs": specs, "user": record.get("author", "Unknown")})
+        data.append(
+            {
+                "grind": grind,
+                "width": width,
+                "point": point,
+                "user": record.get("author", "Unknown"),
+            }
+        )
     if not data:
         return []
 
@@ -604,18 +603,26 @@ def aggregate_straight_razor_specs(
     except ImportError as e:
         raise RuntimeError(f"Pandas import error during straight razor spec aggregation: {e}")
 
-    # Group by specs and calculate metrics
+    # Group by grind, width, point and calculate metrics
+    group_cols = ["grind", "width", "point"]
     try:
-        grouped = optimized_groupby_agg(df, "specs", "user", ["count", "nunique"], debug)
+        grouped = (
+            df.groupby(group_cols, dropna=False)
+            .agg(shaves=("user", "count"), unique_users=("user", "nunique"))
+            .reset_index()
+        )
     except (KeyError, ValueError) as e:
         raise ValueError(f"Failed to group straight razor spec data: {e}")
     except ImportError as e:
         raise RuntimeError(f"Pandas import error during straight razor spec grouping: {e}")
 
-    grouped.columns = ["specs", "shaves", "unique_users"]
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
-    return list(grouped.to_dict("records"))  # type: ignore
+    results = list(grouped.to_dict("records"))
+    # Add position information (1-based indexing)
+    for i, item in enumerate(results):
+        item["position"] = i + 1
+    return results  # type: ignore
 
 
 def aggregate_razor_blade_combinations(
@@ -666,3 +673,141 @@ def aggregate_razor_blade_combinations(
     grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
     return list(grouped.to_dict("records"))  # type: ignore
+
+
+def aggregate_straight_widths(
+    records: List[Dict[str, Any]], debug: bool = False
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate straight razor usage statistics by width only.
+    """
+    if not isinstance(records, list):
+        raise ValueError(f"Expected list of records, got {type(records)}")
+    if not records:
+        return []
+    data = []
+    for record in records:
+        razor = record.get("razor", {})
+        matched = razor.get("matched", {}) if isinstance(razor, dict) else {}
+        enriched = razor.get("enriched", {}) if isinstance(razor, dict) else {}
+        fmt = (matched.get("format") or "").lower()
+        if fmt != "straight":
+            continue
+        width = enriched.get("width")
+        if not width:
+            continue
+        data.append({"width": width, "user": record.get("author", "Unknown")})
+    if not data:
+        return []
+    try:
+        df = pd.DataFrame(data)
+        df = optimize_dataframe_operations(df, debug)
+    except (ValueError, TypeError, KeyError) as e:
+        raise ValueError(f"Failed to create DataFrame for straight razor width aggregation: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during straight razor width aggregation: {e}")
+    try:
+        grouped = optimized_groupby_agg(df, "width", "user", ["count", "nunique"], debug)
+    except (KeyError, ValueError) as e:
+        raise ValueError(f"Failed to group straight razor width data: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during straight razor width grouping: {e}")
+    grouped.columns = ["width", "shaves", "unique_users"]
+    grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
+    results = list(grouped.to_dict("records"))
+    for i, item in enumerate(results):
+        item["position"] = i + 1
+    return results  # type: ignore
+
+
+def aggregate_straight_grinds(
+    records: List[Dict[str, Any]], debug: bool = False
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate straight razor usage statistics by grind only.
+    """
+    if not isinstance(records, list):
+        raise ValueError(f"Expected list of records, got {type(records)}")
+    if not records:
+        return []
+    data = []
+    for record in records:
+        razor = record.get("razor", {})
+        matched = razor.get("matched", {}) if isinstance(razor, dict) else {}
+        enriched = razor.get("enriched", {}) if isinstance(razor, dict) else {}
+        fmt = (matched.get("format") or "").lower()
+        if fmt != "straight":
+            continue
+        grind = enriched.get("grind")
+        if not grind:
+            continue
+        data.append({"grind": grind, "user": record.get("author", "Unknown")})
+    if not data:
+        return []
+    try:
+        df = pd.DataFrame(data)
+        df = optimize_dataframe_operations(df, debug)
+    except (ValueError, TypeError, KeyError) as e:
+        raise ValueError(f"Failed to create DataFrame for straight razor grind aggregation: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during straight razor grind aggregation: {e}")
+    try:
+        grouped = optimized_groupby_agg(df, "grind", "user", ["count", "nunique"], debug)
+    except (KeyError, ValueError) as e:
+        raise ValueError(f"Failed to group straight razor grind data: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during straight razor grind grouping: {e}")
+    grouped.columns = ["grind", "shaves", "unique_users"]
+    grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
+    results = list(grouped.to_dict("records"))
+    for i, item in enumerate(results):
+        item["position"] = i + 1
+    return results  # type: ignore
+
+
+def aggregate_straight_points(
+    records: List[Dict[str, Any]], debug: bool = False
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate straight razor usage statistics by point only.
+    """
+    if not isinstance(records, list):
+        raise ValueError(f"Expected list of records, got {type(records)}")
+    if not records:
+        return []
+    data = []
+    for record in records:
+        razor = record.get("razor", {})
+        matched = razor.get("matched", {}) if isinstance(razor, dict) else {}
+        enriched = razor.get("enriched", {}) if isinstance(razor, dict) else {}
+        fmt = (matched.get("format") or "").lower()
+        if fmt != "straight":
+            continue
+        point = enriched.get("point")
+        if not point:
+            continue
+        data.append({"point": point, "user": record.get("author", "Unknown")})
+    if not data:
+        return []
+    try:
+        df = pd.DataFrame(data)
+        df = optimize_dataframe_operations(df, debug)
+    except (ValueError, TypeError, KeyError) as e:
+        raise ValueError(f"Failed to create DataFrame for straight razor point aggregation: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during straight razor point aggregation: {e}")
+    try:
+        grouped = optimized_groupby_agg(df, "point", "user", ["count", "nunique"], debug)
+    except (KeyError, ValueError) as e:
+        raise ValueError(f"Failed to group straight razor point data: {e}")
+    except ImportError as e:
+        raise RuntimeError(f"Pandas import error during straight razor point grouping: {e}")
+    grouped.columns = ["point", "shaves", "unique_users"]
+    grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
+    results = list(grouped.to_dict("records"))
+    for i, item in enumerate(results):
+        item["position"] = i + 1
+    return results  # type: ignore
