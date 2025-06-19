@@ -61,26 +61,30 @@ Build the report phase of the SOTD pipeline that generates statistical analysis 
 
 ### Phase 2: Hardware Report Implementation
 
-- [ ] **Step 6: Hardware Report Structure**
-  - [ ] Create `sotd/report/hardware_report.py` module
-  - [ ] Implement hardware report generator class
-  - [ ] Generate hardware-specific header and notes
-  - [ ] Implement hardware table order and structure
-  - [ ] Handle hardware-specific data categories
-  - [ ] Include proper error handling and validation
-  - [ ] Add type hints and docstrings
-  - [ ] Test with sample aggregated data
+- [x] **Step 6: Hardware Report Structure**
+  - [x] Create `sotd/report/hardware_report.py` module
+  - [x] Implement hardware report generator class
+  - [x] Generate hardware-specific header and notes
+  - [x] Implement hardware table order and structure
+  - [x] Handle hardware-specific data categories
+  - [x] Include proper error handling and validation
+  - [x] Add type hints and docstrings
+  - [x] Test with sample aggregated data
 
-- [ ] **Step 7: Core Hardware Tables**
-  - [ ] Implement table generators for core hardware categories
-  - [ ] Create `sotd/report/table_generators/razor_tables.py`
-  - [ ] Implement razor formats table generator
-  - [ ] Implement razors table generator
-  - [ ] Implement razor manufacturers table generator
-  - [ ] Handle data extraction and formatting for each table
-  - [ ] Include proper error handling and validation
-  - [ ] Add type hints and docstrings
-  - [ ] Test with sample aggregated data
+  _Step 6 completed. hardware_report.py created, logic moved from process.py, and all quality checks are passing._
+
+- [x] **Step 7: Core Hardware Tables**
+  - [x] Implement table generators for core hardware categories (RazorFormatsTableGenerator implemented)
+  - [x] Create `sotd/report/table_generators/razor_tables.py`
+  - [x] Implement razor formats table generator (RazorFormatsTableGenerator implemented)
+  - [x] Implement razors table generator (RazorsTableGenerator implemented)
+  - [x] Implement razor manufacturers table generator (RazorManufacturersTableGenerator implemented)
+  - [x] Handle data extraction and formatting for each table
+  - [x] Include proper error handling and validation
+  - [x] Add type hints and docstrings
+  - [x] Test with sample aggregated data
+
+  _Step 7 completed. All three razor table generators implemented with comprehensive error handling, data validation, and defensive programming. Added extensive test coverage with 16 test cases covering edge cases, invalid data, and proper functionality. Fixed circular import issues by moving BaseReportGenerator to base.py. Updated table generators to work with real aggregated data structure (name, shaves, unique_users fields). Successfully tested with live data from 2025-01.json - generated proper markdown tables with 22 razors showing real usage statistics. All quality checks are passing._
 
 - [ ] **Step 8: Blade and Brush Tables**
   - [ ] Create `sotd/report/table_generators/blade_tables.py`
