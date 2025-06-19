@@ -1344,3 +1344,115 @@ def aggregate_blackbird_plates(
 
     monitor.end("aggregate_blackbird_plates", len(plate_data))
     return results  # type: ignore
+
+
+def aggregate_christopher_bradley_plates(
+    records: List[Dict[str, Any]], debug: bool = False
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate Karve Christopher Bradley plate usage statistics.
+
+    Args:
+        records: List of enriched comment records
+        debug: Enable debug logging
+
+    Returns:
+        List of Christopher Bradley plate aggregation results
+
+    Raises:
+        ValueError: If records list is invalid or contains invalid data
+    """
+    monitor = PerformanceMonitor(debug)
+    monitor.start("aggregate_christopher_bradley_plates")
+
+    if not isinstance(records, list):
+        raise ValueError(f"Expected list of records, got {type(records)}")
+
+    if not records:
+        if debug:
+            print("[DEBUG] No records to process for Christopher Bradley plates")
+        monitor.end("aggregate_christopher_bradley_plates", 0)
+        return []
+
+    plate_data = []
+    invalid_records = 0
+
+    for i, record in enumerate(records):
+        if not isinstance(record, dict):
+            if debug:
+                print(f"[DEBUG] Record {i}: Expected dict, got {type(record)}")
+            invalid_records += 1
+            continue
+
+        if "razor" in record:
+            razor_info = record["razor"]
+            if isinstance(razor_info, dict) and "matched" in razor_info:
+                matched = razor_info["matched"]
+                if isinstance(matched, dict) and matched.get("brand") == "Karve":
+                    model = matched.get("model", "")
+                    if model == "Christopher Bradley":
+                        # Check for enriched plate information
+                        enriched = razor_info.get("enriched", {})
+                        if isinstance(enriched, dict):
+                            plate_level = enriched.get("plate_level")
+                            plate_type = enriched.get("plate_type", "SB")  # Default to SB
+
+                            if plate_level:
+                                # Combine plate level and type for aggregation
+                                plate_identifier = f"{plate_level} {plate_type}"
+                                plate_data.append(
+                                    {
+                                        "plate": plate_identifier,
+                                        "user": record.get("author", "Unknown"),
+                                    }
+                                )
+
+    if not plate_data:
+        if debug:
+            print("[DEBUG] No valid Christopher Bradley plate data found")
+        monitor.end("aggregate_christopher_bradley_plates", 0)
+        return []
+
+    # Convert to DataFrame for aggregation
+    try:
+        df = pd.DataFrame(plate_data)
+        df = optimize_dataframe_operations(df, debug)
+    except (ValueError, TypeError, KeyError) as e:
+        # These are data structure issues that should fail fast
+        raise ValueError(
+            f"Failed to create DataFrame for Christopher Bradley plate aggregation: {e}"
+        )
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during Christopher Bradley plate aggregation: {e}")
+
+    # Group by plate and calculate metrics
+    try:
+        grouped = optimized_groupby_agg(df, "plate", "user", ["count", "nunique"], debug)
+    except (KeyError, ValueError) as e:
+        # These are data structure issues that should fail fast
+        raise ValueError(f"Failed to group Christopher Bradley plate data: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during Christopher Bradley plate grouping: {e}")
+
+    # Rename columns to match expected output
+    grouped.columns = ["plate", "shaves", "unique_users"]
+
+    # Calculate average shaves per user
+    grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
+
+    # Sort by shaves (descending), then by unique_users (descending) as tie breaker
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
+
+    # Convert back to list of dictionaries
+    results = grouped.to_dict("records")
+
+    if debug:
+        print(
+            f"[DEBUG] Aggregated {len(results)} Christopher Bradley plates "
+            f"({invalid_records} invalid records)"
+        )
+
+    monitor.end("aggregate_christopher_bradley_plates", len(plate_data))
+    return results  # type: ignore

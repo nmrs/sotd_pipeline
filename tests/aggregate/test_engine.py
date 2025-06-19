@@ -13,6 +13,7 @@ from sotd.aggregate.engine import (
     aggregate_brush_fibers,
     aggregate_brush_knot_sizes,
     aggregate_blackbird_plates,
+    aggregate_christopher_bradley_plates,
 )
 
 
@@ -1633,5 +1634,324 @@ class TestAggregateBlackbirdPlates:
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 1
         assert result[1]["plate"] == "Lite"
+        assert result[1]["shaves"] == 1
+        assert result[1]["unique_users"] == 1
+
+
+class TestAggregateChristopherBradleyPlates:
+    """Test the aggregate_christopher_bradley_plates function."""
+
+    def test_empty_records(self):
+        """Test with empty records."""
+        result = aggregate_christopher_bradley_plates([])
+        assert result == []
+
+    def test_invalid_records_type(self):
+        """Test with invalid records type."""
+        with pytest.raises(ValueError, match="Expected list of records"):
+            aggregate_christopher_bradley_plates("invalid")  # type: ignore
+
+    def test_no_christopher_bradley_data(self):
+        """Test with records that have no Karve Christopher Bradley razors."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    }
+                },
+            }
+        ]
+        result = aggregate_christopher_bradley_plates(records)
+        assert result == []
+
+    def test_christopher_bradley_without_plate_data(self):
+        """Test with Karve Christopher Bradley razors but no enriched plate data."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "Karve",
+                        "model": "Christopher Bradley",
+                        "match_type": "exact",
+                    }
+                },
+            }
+        ]
+        result = aggregate_christopher_bradley_plates(records)
+        assert result == []
+
+    def test_single_plate_single_user(self):
+        """Test with single Christopher Bradley plate and single user."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "Karve",
+                        "model": "Christopher Bradley",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate_level": "C",
+                        "plate_type": "SB",
+                        "_enriched_by": "ChristopherBradleyEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            }
+        ]
+        result = aggregate_christopher_bradley_plates(records)
+        assert len(result) == 1
+        assert result[0]["plate"] == "C SB"
+        assert result[0]["shaves"] == 1
+        assert result[0]["unique_users"] == 1
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_single_plate_multiple_users(self):
+        """Test with single Christopher Bradley plate and multiple users."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Karve",
+                        "model": "Christopher Bradley",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate_level": "D",
+                        "plate_type": "OC",
+                        "_enriched_by": "ChristopherBradleyEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Karve",
+                        "model": "Christopher Bradley",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate_level": "D",
+                        "plate_type": "OC",
+                        "_enriched_by": "ChristopherBradleyEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_christopher_bradley_plates(records)
+        assert len(result) == 1
+        assert result[0]["plate"] == "D OC"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_users"] == 2
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_multiple_plates(self):
+        """Test with multiple Christopher Bradley plates."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Karve",
+                        "model": "Christopher Bradley",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate_level": "AA",
+                        "plate_type": "SB",
+                        "_enriched_by": "ChristopherBradleyEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Karve",
+                        "model": "Christopher Bradley",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate_level": "B",
+                        "plate_type": "SB",
+                        "_enriched_by": "ChristopherBradleyEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test789",
+                "author": "user3",
+                "razor": {
+                    "matched": {
+                        "brand": "Karve",
+                        "model": "Christopher Bradley",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate_level": "F",
+                        "plate_type": "OC",
+                        "_enriched_by": "ChristopherBradleyEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_christopher_bradley_plates(records)
+        assert len(result) == 3
+
+        # Check that results are sorted by shaves (descending)
+        assert result[0]["shaves"] >= result[1]["shaves"]
+        assert result[1]["shaves"] >= result[2]["shaves"]
+
+        # Check all plates are present
+        plates = [r["plate"] for r in result]
+        assert "AA SB" in plates
+        assert "B SB" in plates
+        assert "F OC" in plates
+
+    def test_default_plate_type(self):
+        """Test that plate type defaults to SB when not specified."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "Karve",
+                        "model": "Christopher Bradley",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate_level": "E",
+                        "_enriched_by": "ChristopherBradleyEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            }
+        ]
+        result = aggregate_christopher_bradley_plates(records)
+        assert len(result) == 1
+        assert result[0]["plate"] == "E SB"
+
+    def test_mixed_razor_types(self):
+        """Test with mix of Christopher Bradley and other razors."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Karve",
+                        "model": "Christopher Bradley",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate_level": "G",
+                        "plate_type": "SB",
+                        "_enriched_by": "ChristopherBradleyEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    },
+                },
+            },
+        ]
+        result = aggregate_christopher_bradley_plates(records)
+        assert len(result) == 1
+        assert result[0]["plate"] == "G SB"
+        assert result[0]["shaves"] == 1
+
+    def test_tiebreaker_unique_users(self):
+        """Test tiebreaker when shaves are equal."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Karve",
+                        "model": "Christopher Bradley",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate_level": "A",
+                        "plate_type": "SB",
+                        "_enriched_by": "ChristopherBradleyEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Karve",
+                        "model": "Christopher Bradley",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate_level": "C",
+                        "plate_type": "OC",
+                        "_enriched_by": "ChristopherBradleyEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test789",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Karve",
+                        "model": "Christopher Bradley",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "plate_level": "A",
+                        "plate_type": "SB",
+                        "_enriched_by": "ChristopherBradleyEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_christopher_bradley_plates(records)
+        assert len(result) == 2
+
+        # A SB should be first (2 shaves, 1 unique user)
+        # C OC should be second (1 shave, 1 unique user)
+        assert result[0]["plate"] == "A SB"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_users"] == 1
+        assert result[1]["plate"] == "C OC"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
