@@ -106,13 +106,23 @@ Build the report phase of the SOTD pipeline that generates statistical analysis 
   - [x] Implement Blackbird plates table generator
   - [x] Implement Christopher Bradley plates table generator
   - [x] Implement Game Changer plates table generator
-  - [x] Implement straight razor specs tables (widths, grinds, points)
+  - [x] Implement straight razor specs table generator
+  - [x] **NEW: Split straight razor specifications into separate tables**
+    - [x] Add specialized aggregators for straight razor widths, grinds, and points
+    - [x] Implement `aggregate_straight_widths`, `aggregate_straight_grinds`, `aggregate_straight_points`
+    - [x] Create table generators for separate straight razor specification tables
+    - [x] Integrate new tables into hardware report (widths, grinds, points, then specs)
+    - [x] Update aggregation pipeline to include new specialized aggregators
+    - [x] Update save logic to include new aggregation keys in output
+    - [x] Match attached report format with separate tables for each specification type
   - [x] Handle conditional table generation based on data availability
   - [x] Include proper error handling and validation
   - [x] Add type hints and docstrings
   - [x] Test with sample aggregated data
 
-  _Step 9 completed. All specialized hardware table generators and their corresponding aggregators are now robust to both old and new enriched data structures, with comprehensive debug output and full test coverage. All quality checks are passing._
+  _Step 9 completed. All specialized hardware table generators implemented, including the new straight razor specification splitting feature. The hardware report now shows separate tables for straight razor widths, grinds, and points, matching the target report format. Each table includes position data for delta calculations between months. All quality checks are passing._
+
+**Phase 2 completed. All hardware report functionality implemented including core tables, blade/brush tables, and specialized tables with straight razor specification splitting. Hardware reports now generate complete markdown output with all required tables and proper formatting.**
 
 ### Phase 3: Software Report Implementation
 
