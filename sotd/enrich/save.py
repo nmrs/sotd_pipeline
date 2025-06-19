@@ -69,6 +69,7 @@ def save_enriched_data(
     # Generate enrichment metadata
     enrichment_metadata = {
         "month": original_metadata.get("month", ""),
+        "extracted_at": original_metadata.get("extracted_at", ""),
         "enriched_at": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
         "records_input": len(enriched_data),
         "record_count": len(enriched_data),

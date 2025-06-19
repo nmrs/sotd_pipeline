@@ -193,13 +193,24 @@ def validate_enriched_record(
             )
         return False
 
-    if not isinstance(record["created_utc"], (int, float)):
+    if not isinstance(record["created_utc"], (int, float, str)):
         if debug:
             print(
-                f"[DEBUG] Record {record_index}: 'created_utc' should be numeric, "
-                f"got {type(record['created_utc'])}"
+                f"[DEBUG] Record {record_index}: 'created_utc' should be numeric or "
+                f"string timestamp, got {type(record['created_utc'])}"
             )
         return False
+
+    # If created_utc is a string, validate it's a reasonable timestamp format
+    if isinstance(record["created_utc"], str):
+        created_utc_str = record["created_utc"]
+        if not (len(created_utc_str) >= 10 and created_utc_str.count("-") >= 2):
+            if debug:
+                print(
+                    f"[DEBUG] Record {record_index}: 'created_utc' string doesn't "
+                    f"look like a timestamp: {created_utc_str}"
+                )
+            return False
 
     if not isinstance(record["body"], str):
         if debug:
