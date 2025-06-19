@@ -90,10 +90,10 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 **Goal**: Break down the large analysis tool into smaller, focused modules.
 
 **Tasks**:
-- [ ] Create new analysis modules as needed
-- [ ] Refactor main analysis tool to use new modules
-- [ ] Run quality checks: `make format lint typecheck test`
-- [ ] Only add or update tests if coverage is missing or logic changes
+- [x] Create new analysis modules as needed
+- [x] Refactor main analysis tool to use new modules
+- [x] Run quality checks: `make format lint typecheck test`
+- [x] Only add or update tests if coverage is missing or logic changes
 
 **Test Cases**:
 - Rely on existing analysis tool tests unless new logic is introduced.
@@ -120,12 +120,12 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 **Goal**: Extract performance monitoring logic into focused module.
 
 **Tasks**:
-- [ ] Create `sotd/aggregate/performance.py` (target: 150-200 lines)
-- [ ] Move memory usage tracking logic
-- [ ] Move performance metrics logging
-- [ ] Update run.py to use new performance module
-- [ ] Run quality checks: `make format lint typecheck test`
-- [ ] Only add or update tests if coverage is missing or logic changes
+- [x] Create `sotd/aggregate/performance.py` (target: 150-200 lines)
+- [x] Move memory usage tracking logic
+- [x] Move performance metrics logging
+- [x] Update run.py to use new performance module
+- [x] Run quality checks: `make format lint typecheck test`
+- [x] Only add or update tests if coverage is missing or logic changes
 
 **Test Cases**:
 - Rely on existing performance and integration tests unless new logic is introduced.
@@ -134,12 +134,12 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 **Goal**: Extract data processing logic into focused module.
 
 **Tasks**:
-- [ ] Create `sotd/aggregate/processor.py` (target: 200-250 lines)
-- [ ] Move `process_month()` function logic
-- [ ] Break down into smaller, focused functions
-- [ ] Update run.py to use new processor module
-- [ ] Run quality checks: `make format lint typecheck test`
-- [ ] Only add or update tests if coverage is missing or logic changes
+- [x] Create `sotd/aggregate/processor.py` (target: 200-250 lines)
+- [x] Move `process_month()` function logic
+- [x] Break down into smaller, focused functions
+- [x] Update run.py to use new processor module
+- [x] Run quality checks: `make format lint typecheck test`
+- [x] Only add or update tests if coverage is missing or logic changes
 
 **Test Cases**:
 - Rely on existing processing and integration tests unless new logic is introduced.
@@ -150,12 +150,12 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 **Goal**: Create base class to reduce code duplication in specialized aggregations.
 
 **Tasks**:
-- [ ] Create `sotd/aggregate/base_aggregator.py` (target: 100-150 lines)
-- [ ] Extract common aggregation patterns
-- [ ] Implement template method pattern
-- [ ] Refactor specialized aggregations to inherit from base
-- [ ] Run quality checks: `make format lint typecheck test`
-- [ ] Only add or update tests if coverage is missing or logic changes
+- [x] Create `sotd/aggregate/base_aggregator.py` (target: 100-150 lines)
+- [x] Extract common aggregation patterns
+- [x] Implement template method pattern
+- [x] Refactor specialized aggregations to inherit from base
+- [x] Run quality checks: `make format lint typecheck test`
+- [x] Only add or update tests if coverage is missing or logic changes
 
 **Test Cases**:
 - Rely on existing aggregation tests unless new logic is introduced.
@@ -164,11 +164,11 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 **Goal**: Organize specialized aggregations into logical groups.
 
 **Tasks**:
-- [ ] Create new aggregator modules as needed
-- [ ] Move related aggregation functions to appropriate modules
-- [ ] Update imports and references
-- [ ] Run quality checks: `make format lint typecheck test`
-- [ ] Only add or update tests if coverage is missing or logic changes
+- [x] Create new aggregator modules as needed
+- [x] Move related aggregation functions to appropriate modules
+- [x] Update imports and references
+- [x] Run quality checks: `make format lint typecheck test`
+- [x] Only add or update tests if coverage is missing or logic changes
 
 **Test Cases**:
 - Rely on existing aggregation tests unless new logic is introduced.
@@ -259,14 +259,14 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 - [x] Chunk 1.3: Enhanced BrushSplitter (5/5 tasks)
 - [x] Chunk 1.4: Enhanced FiberProcessor (5/5 tasks)
 - [x] Chunk 1.5: BrushMatcher Orchestrator (5/5 tasks)
-- [ ] Chunk 2.1: Analysis Tools Split (0/4 tasks)
+- [x] Chunk 2.1: Analysis Tools Split (4/4 tasks)
 
 ### Phase 2 Progress
 - [x] Chunk 3.1: CLI Module (5/5 tasks)
 - [x] Chunk 3.2: Performance Module (5/5 tasks)
 - [x] Chunk 3.3: Data Processing Module (5/5 tasks)
-- [ ] Chunk 4.1: Base Aggregation Class (0/5 tasks)
-- [ ] Chunk 4.2: Grouped Aggregations (0/4 tasks)
+- [x] Chunk 4.1: Base Aggregation Class (5/5 tasks)
+- [x] Chunk 4.2: Grouped Aggregations (4/4 tasks)
 
 ### Phase 3 Progress
 - [ ] Chunk 5.1: Method Complexity Reduction (0/4 tasks)
@@ -297,6 +297,10 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 ### Phase 2, Chunk 3.1: Extracted all CLI argument parsing and validation from aggregate/run.py to aggregate/cli.py. Updated tests to patch datetime in the new module. All tests and quality checks pass.
 - Phase 2, Chunk 3.2: Extracted performance monitoring utilities (get_memory_usage, log_performance_metrics) from aggregate/run.py to aggregate/performance.py. All tests and quality checks pass.
 - Phase 2, Chunk 3.3: Extracted data processing logic (process_month and related functions) from aggregate/run.py to aggregate/processor.py. Broke down the large process_month function into smaller, focused helper functions. Updated tests to patch functions in the new processor module. All tests and quality checks pass.
+- Phase 2, Chunk 4.1: Created base_aggregator.py, refactored all specialized aggregators to inherit from it, and implemented the template method pattern. All quality checks pass.
+- Phase 2, Chunk 4.2: Grouped all specialized aggregators into logical modules/files and updated all imports and references. All quality checks pass.
+- Phase 1, Chunk 2.1: Split analysis tools into focused modules, refactored main analysis tool, and validated with existing tests. All quality checks pass.
+- fix: Corrected --force handling in aggregate phase to allow overwriting existing files when specified. Added test and validated with CLI runs.
 
 ## Timeline Estimate
 
