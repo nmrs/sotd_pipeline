@@ -31,15 +31,6 @@ class CustomBrushMatchingStrategy(BaseBrushMatchingStrategy):
         return None
 ```
 
-## Strategy Priority Order
-Strategies are tried in this specific order (most specific to least specific):
-1. **KnownBrushMatchingStrategy** - Exact catalog matches
-2. **DeclarationGroomingBrushMatchingStrategy** - DG-specific patterns
-3. **ChiselAndHoundBrushMatchingStrategy** - C&H versioned knots (V10-V27)
-4. **OmegaSemogueBrushMatchingStrategy** - Omega/Semogue patterns
-5. **ZenithBrushMatchingStrategy** - Zenith patterns
-6. **OtherBrushMatchingStrategy** - Generic brand patterns
-
 ## Intelligent Handle/Knot Splitting
 
 ### Delimiter Semantics
@@ -157,9 +148,7 @@ All brush matches must return consistent structure:
 
 **Note**: Knot size processing and conflict resolution have been moved to the enrich phase for better catalog data preservation and user input handling.
 
-## Error Handling and Resilience
-
-### Strategy Execution Safety
+## Strategy Execution Safety
 For interactive development, fail fast on implementation errors:
 
 ```python
@@ -186,135 +175,3 @@ def _compile_patterns(self, patterns: list[str]) -> list[dict]:
             raise ValueError(f"Invalid regex pattern '{pattern}': {e}")
     return compiled
 ```
-
-### Regex Pattern Compilation
-Validate all patterns at initialization to catch errors early:
-
-```python
-def _compile_patterns(self, patterns: list[str]) -> list[dict]:
-    compiled = []
-    for pattern in sorted(patterns, key=len, reverse=True):  # Longer patterns first
-        try:
-            compiled.append({
-                "pattern": pattern,
-                "regex": re.compile(pattern, re.IGNORECASE)
-            })
-        except re.error as e:
-            # Fail fast on invalid patterns - these are configuration errors
-            raise ValueError(f"Invalid regex pattern '{pattern}': {e}")
-    return compiled
-```
-
-## Performance Optimization Rules
-
-### Pattern Ordering
-- **Longer patterns first**: More specific matches take precedence
-- **Strategy priority**: Most specific strategies tried first
-- **Early termination**: Stop at first successful match
-
-### Compilation Strategy
-- **Compile once**: All regex patterns compiled at initialization
-- **Fail fast**: Invalid patterns excluded during startup
-- **Cache results**: Consider caching for frequently matched patterns
-
-## Testing Requirements for Brush Strategies
-
-### Comprehensive Test Coverage
-- **Positive cases**: All regex patterns with expected matches
-- **Negative cases**: Patterns that should NOT match
-- **Boundary conditions**: V10/V27 for C&H, size ranges, etc.
-- **Delimiter variations**: All supported delimiters and combinations
-- **Conflict scenarios**: User input vs catalog conflicts
-- **Strategy priorities**: Overlapping patterns and correct priority handling
-
-### Integration Testing
-- **Real catalog compatibility**: Test with production YAML files
-- **Regression testing**: Ensure catalog changes don't break existing functionality
-- **Performance testing**: Large pattern sets and complex inputs
-
-## Catalog Structure Standards
-
-### Brush Catalog Requirements
-```yaml
-known_brushes:
-  Brand Name:
-    Model Name:
-      fiber: "Badger|Boar|Synthetic"  # Exact fiber specification
-      knot_size_mm: 26                # Exact knot size
-      patterns:
-        - "regex_pattern"             # Multiple patterns supported
-
-declaration_grooming:
-  Declaration Grooming:
-    B15:
-      patterns: ["b15"]               # DG-specific patterns
-
-other_brushes:
-  Brand Name:
-    default: "Badger|Boar|Synthetic"  # Default fiber for unknown models
-    knot_size_mm: 26                  # Optional default knot size
-    patterns:
-      - "regex_pattern"
-```
-
-### Handle Catalog Structure
-```yaml
-artisan_handles:      # Priority 1 - Highest priority
-  Handle Maker:
-    patterns:
-      - "regex_pattern"
-
-manufacturer_handles: # Priority 2 - Medium priority  
-  Handle Maker:
-    patterns:
-      - "regex_pattern"
-
-other_handles:        # Priority 3 - Lowest priority
-  Handle Maker:
-    patterns:
-      - "regex_pattern"
-```
-
-## Development Best Practices
-
-### Adding New Strategies
-1. **Inherit from BaseBrushMatchingStrategy**
-2. **Implement consistent return structure**
-3. **Add comprehensive unit tests**
-4. **Update integration tests with real catalog**
-5. **Consider strategy priority placement**
-6. **Document brand-specific logic**
-
-### Modifying Existing Strategies
-1. **Maintain backwards compatibility**
-2. **Update both unit and integration tests**
-3. **Test with real catalog data**
-4. **Consider performance implications**
-5. **Update documentation**
-
-### Catalog Maintenance
-1. **Validate regex patterns before adding**
-2. **Test new patterns with existing data**
-3. **Consider pattern specificity and conflicts**
-4. **Maintain consistent data structure**
-5. **Document any special handling requirements**
-
-## Common Pitfalls to Avoid
-
-### Pattern Design
-- **Overly broad patterns**: Can cause false positives across strategies
-- **Missing anchors**: May match unintended substrings  
-- **Case sensitivity**: Always use re.IGNORECASE flag
-- **Whitespace handling**: Account for flexible whitespace in patterns
-
-### Strategy Implementation
-- **Inconsistent return structure**: Follow the standard format exactly
-- **Missing error handling**: Always handle regex and attribute errors
-- **Priority violations**: Don't let generic strategies override specific ones
-- **Performance issues**: Compile patterns once, not per-match
-
-### Testing Gaps
-- **Missing boundary testing**: Test edge cases and limits
-- **Insufficient integration testing**: Must test with real catalogs
-- **Conflict scenarios**: Test user input vs catalog conflicts
-- **Error conditions**: Test malformed input and catalog data

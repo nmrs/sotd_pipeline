@@ -42,45 +42,6 @@ def load_catalog(catalog_path: Path) -> dict[str, dict]:
     pass
 ```
 
-## Error Handling Patterns
-- Use specific exception handling for SOTD pipeline
-- Handle Reddit API errors gracefully  
-- Always include context in error messages
-
-```python
-try:
-    with open(catalog_path, 'r', encoding='utf-8') as f:
-        catalog = yaml.safe_load(f)
-except FileNotFoundError:
-    logger.error(f"Catalog file not found: {catalog_path}")
-    raise
-except yaml.YAMLError as e:
-    logger.error(f"Invalid YAML in catalog {catalog_path}: {e}")
-    raise
-
-try:
-    submission = reddit.submission(thread_id)
-    comments = list(submission.comments)
-except praw.exceptions.APIException as e:
-    logger.warning(f"Reddit API error for thread {thread_id}: {e}")
-    return []
-```
-
-## Regex Pattern Compilation
-Always compile patterns at initialization, not per-match:
-
-```python
-class ProductMatcher:
-    def __init__(self, patterns: list[str]):
-        self.compiled_patterns = []
-        for pattern in sorted(patterns, key=len, reverse=True):
-            try:
-                self.compiled_patterns.append(re.compile(pattern, re.IGNORECASE))
-            except re.error as e:
-                logger.warning(f"Invalid regex pattern '{pattern}': {e}")
-                continue
-```
-
 ## CLI Argument Patterns
 Standard CLI argument patterns for phases:
 

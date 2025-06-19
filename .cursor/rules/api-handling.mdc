@@ -76,25 +76,6 @@ class PushshiftAPI:
         return {"data": []}
 ```
 
-## Error Handling Patterns
-```python
-def handle_api_error(func):
-    """Decorator for consistent API error handling."""
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except praw.exceptions.APIException as e:
-            logger.error(f"Reddit API exception in {func.__name__}: {e}")
-            return None
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Network error in {func.__name__}: {e}")
-            return None
-        except Exception as e:
-            logger.error(f"Unexpected error in {func.__name__}: {e}")
-            return None
-    return wrapper
-```
-
 ## Rate Limiting Strategy
 ```python
 import time

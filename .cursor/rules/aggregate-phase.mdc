@@ -8,14 +8,6 @@ alwaysApply: false
 ## Overview
 The aggregate phase processes enriched SOTD data to generate statistical summaries for downstream reporting. It calculates metrics for core product categories and outputs structured JSON data.
 
-## Phase Structure
-Follow the standard pipeline phase pattern:
-- `sotd/aggregate/run.py` - CLI entry point with date range support
-- `sotd/aggregate/engine.py` - Core aggregation logic using pandas
-- `sotd/aggregate/load.py` - Data loading and validation
-- `sotd/aggregate/save.py` - File I/O operations
-- `tests/aggregate/` - Comprehensive test coverage
-
 ## Data Processing Rules
 
 ### Input Data

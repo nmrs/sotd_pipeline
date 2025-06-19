@@ -81,48 +81,6 @@ All enrichers must follow this data structure pattern:
 }
 ```
 
-## Error Handling Philosophy
-- **Fail fast for interactive use**: Pipeline runs interactively, so crash immediately on errors
-- **Prefer partial data**: Extract what you can, mark missing fields as null  
-- **Log context**: Include enough information to debug extraction issues
-- **Let exceptions bubble up**: Developer needs to see and fix issues immediately
-
-```python
-def enrich_record(record: dict) -> dict:
-    result = record.copy()
-    for enricher in enrichers:
-        if enricher.applies_to(result):
-            target_field = enricher.target_field
-            # Let exceptions bubble up - fail fast for interactive development
-            result[target_field] = enricher.enrich(result[target_field])
-    return result
-
-# Individual enrichers should validate input and provide clear error messages
-class BladeCountEnricher(BaseEnricher):
-    def enrich(self, field_data: dict) -> dict:
-        if not isinstance(field_data, dict):
-            raise ValueError(f"Expected dict, got {type(field_data)}: {field_data}")
-        
-        original = field_data.get("original")
-        if not original:
-            raise ValueError(f"Missing 'original' field in blade data: {field_data}")
-        
-        # Clear error messages help with interactive debugging
-        for source, pattern in self.patterns.items():
-            if match := pattern.search(original):
-                return {
-                    **field_data,
-                    "enriched": {
-                        "use_count": int(match.group(1)),
-                        "_enriched_by": self.__class__.__name__,
-                        "_extraction_source": source
-                    }
-                }
-        
-        # No match found - return unchanged (this is not an error)
-        return field_data
-```
-
 ## Field-Focused Architecture
 Unlike match phase which processes all products, enrich uses field-focused routing:
 
@@ -313,27 +271,6 @@ def test_enrich_record_multiple_enrichers():
     assert "enriched" in enriched["razor"]
     assert enriched["blade"]["enriched"]["use_count"] == 3
     assert enriched["razor"]["enriched"]["plate_gap"] == 0.84
-```
-
-## File Organization Standards
-Follow the established phase pattern:
-
-```
-sotd/enrich/
-├── __init__.py
-├── run.py                         # CLI entry point
-├── save.py                        # File I/O operations  
-├── enrich.py                      # Main controller
-├── base_enricher.py               # Base interface
-├── blade_count_enricher.py        # Individual enrichers
-├── straight_razor_enricher.py     # One per feature
-└── game_changer_enricher.py       # Case-by-case decision
-
-tests/enrich/
-├── test_base_enricher.py
-├── test_blade_count_enricher.py   # Mirror source structure
-├── test_straight_razor_enricher.py
-└── test_enrich_integration.py     # Full pipeline tests
 ```
 
 ## CLI and I/O Standards
