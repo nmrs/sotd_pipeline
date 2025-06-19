@@ -37,31 +37,51 @@ class SuperSpeedTipAggregator(BaseAggregator):
         # Extract razor info
         razor = record.get("razor", {})
         if not isinstance(razor, dict):
+            if self.debug:
+                print(f"[DEBUG] Record {record_index}: razor is not a dict")
             return None
 
         # Check for matched data
         matched = razor.get("matched", {})
         if not isinstance(matched, dict):
+            if self.debug:
+                print(f"[DEBUG] Record {record_index}: matched is not a dict")
             return None
 
         # Validate match_type if present
         if not self._validate_match_type(matched, record_index):
+            if self.debug:
+                print(f"[DEBUG] Record {record_index}: match_type invalid")
             return None
 
         # Check if it's a Super Speed razor
         brand = (matched.get("brand") or "").lower()
         model = (matched.get("model") or "").lower()
         if brand != "gillette" or "super speed" not in model:
+            if self.debug:
+                print(f"[DEBUG] Record {record_index}: not a Gillette Super Speed")
             return None
 
-        # Extract enriched data
-        enriched = razor.get("enriched", {})
-        if not isinstance(enriched, dict):
-            return None
+        # Try to extract enriched data from both possible locations
+        enriched = record.get("enriched", {}).get("razor", {})
+        if isinstance(enriched, dict) and enriched:
+            if self.debug:
+                print(f"[DEBUG] Record {record_index}: using record.enriched.razor")
+        else:
+            enriched = razor.get("enriched", {})
+            if isinstance(enriched, dict) and enriched:
+                if self.debug:
+                    print(f"[DEBUG] Record {record_index}: using razor.enriched")
+            else:
+                if self.debug:
+                    print(f"[DEBUG] Record {record_index}: no enriched data found")
+                return None
 
         # Extract tip info
         tip = enriched.get("super_speed_tip")
         if not tip:
+            if self.debug:
+                print(f"[DEBUG] Record {record_index}: no super_speed_tip found in enriched")
             return None
 
         return {
