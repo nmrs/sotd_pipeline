@@ -14,7 +14,10 @@ CLI matrix
 
 import argparse
 import datetime
+from pathlib import Path
 from typing import Sequence
+
+from . import load, process, save
 
 
 def parse_report_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -70,9 +73,57 @@ def run_report(args: argparse.Namespace) -> None:
         print(f"[DEBUG] Output directory: {args.out_dir}")
         print(f"[DEBUG] Force overwrite: {args.force}")
 
-    # TODO: Implement report generation logic
-    print(f"[INFO] Generating {args.type} report for {args.month}")
-    print("[INFO] Report generation not yet implemented")
+    # Parse month to get year and month
+    try:
+        year_str, month_str = args.month.split("-")
+        year = int(year_str)
+        month = int(month_str)
+    except ValueError:
+        raise ValueError(f"Invalid month format: {args.month}. Expected YYYY-MM format.")
+
+    # Convert output directory to Path
+    base_dir = Path(args.out_dir)
+
+    # Load aggregated data
+    if args.debug:
+        print(f"[DEBUG] Loading aggregated data for {args.month}")
+
+    try:
+        aggregated_file_path = load.get_aggregated_file_path(base_dir, year, month)
+        metadata, data = load.load_aggregated_data(aggregated_file_path, args.debug)
+    except FileNotFoundError as e:
+        raise FileNotFoundError(
+            f"Aggregated data not found for {args.month}. "
+            f"Run the aggregate phase first to generate the required data."
+        ) from e
+    except Exception as e:
+        raise RuntimeError(f"Failed to load aggregated data: {e}") from e
+
+    # Generate report content
+    if args.debug:
+        print(f"[DEBUG] Generating {args.type} report content")
+
+    try:
+        report_content = process.generate_report_content(args.type, metadata, data, args.debug)
+    except Exception as e:
+        raise RuntimeError(f"Failed to generate report content: {e}") from e
+
+    # Save report to file
+    if args.debug:
+        print("[DEBUG] Saving report to file")
+
+    try:
+        output_path = save.generate_and_save_report(
+            report_content, base_dir, year, month, args.type, args.force, args.debug
+        )
+    except FileExistsError as e:
+        raise FileExistsError(f"Report file already exists. Use --force to overwrite: {e}") from e
+    except Exception as e:
+        raise RuntimeError(f"Failed to save report: {e}") from e
+
+    # Success message
+    print(f"[INFO] Successfully generated {args.type} report for {args.month}")
+    print(f"[INFO] Report saved to: {output_path}")
 
 
 def main(argv: Sequence[str] | None = None) -> None:
