@@ -14,6 +14,7 @@ from sotd.aggregate.engine import (
     aggregate_brush_knot_sizes,
     aggregate_blackbird_plates,
     aggregate_christopher_bradley_plates,
+    aggregate_game_changer_plates,
 )
 
 
@@ -1953,5 +1954,369 @@ class TestAggregateChristopherBradleyPlates:
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 1
         assert result[1]["plate"] == "C OC"
+        assert result[1]["shaves"] == 1
+        assert result[1]["unique_users"] == 1
+
+
+class TestAggregateGameChangerPlates:
+    """Test the aggregate_game_changer_plates function."""
+
+    def test_empty_records(self):
+        """Test with empty records."""
+        result = aggregate_game_changer_plates([])
+        assert result == []
+
+    def test_invalid_records_type(self):
+        """Test with invalid records type."""
+        with pytest.raises(ValueError, match="Expected list of records"):
+            aggregate_game_changer_plates("invalid")  # type: ignore
+
+    def test_no_game_changer_data(self):
+        """Test with records that have no RazoRock Game Changer razors."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    }
+                },
+            }
+        ]
+        result = aggregate_game_changer_plates(records)
+        assert result == []
+
+    def test_game_changer_without_plate_data(self):
+        """Test with RazoRock Game Changer razors but no enriched plate data."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    }
+                },
+            }
+        ]
+        result = aggregate_game_changer_plates(records)
+        assert result == []
+
+    def test_single_gap_single_user(self):
+        """Test with single Game Changer gap and single user."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "gap": ".68",
+                        "_enriched_by": "GameChangerEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            }
+        ]
+        result = aggregate_game_changer_plates(records)
+        assert len(result) == 1
+        assert result[0]["plate"] == "Gap .68"
+        assert result[0]["shaves"] == 1
+        assert result[0]["unique_users"] == 1
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_single_variant_single_user(self):
+        """Test with single Game Changer variant and single user."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "variant": "OC",
+                        "_enriched_by": "GameChangerEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            }
+        ]
+        result = aggregate_game_changer_plates(records)
+        assert len(result) == 1
+        assert result[0]["plate"] == "OC"
+        assert result[0]["shaves"] == 1
+        assert result[0]["unique_users"] == 1
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_gap_and_variant_single_user(self):
+        """Test with both gap and variant for single user."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "gap": ".84",
+                        "variant": "JAWS",
+                        "_enriched_by": "GameChangerEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            }
+        ]
+        result = aggregate_game_changer_plates(records)
+        assert len(result) == 1
+        assert result[0]["plate"] == "Gap .84 JAWS"
+        assert result[0]["shaves"] == 1
+        assert result[0]["unique_users"] == 1
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_single_plate_multiple_users(self):
+        """Test with single Game Changer plate and multiple users."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "gap": ".76",
+                        "_enriched_by": "GameChangerEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "gap": ".76",
+                        "_enriched_by": "GameChangerEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_game_changer_plates(records)
+        assert len(result) == 1
+        assert result[0]["plate"] == "Gap .76"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_users"] == 2
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_multiple_plates(self):
+        """Test with multiple Game Changer plates."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "gap": ".68",
+                        "_enriched_by": "GameChangerEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "gap": ".84",
+                        "_enriched_by": "GameChangerEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test789",
+                "author": "user3",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "variant": "OC",
+                        "_enriched_by": "GameChangerEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_game_changer_plates(records)
+        assert len(result) == 3
+
+        # Check that results are sorted by shaves (descending)
+        assert result[0]["shaves"] >= result[1]["shaves"]
+        assert result[1]["shaves"] >= result[2]["shaves"]
+
+        # Check all plates are present
+        plates = [r["plate"] for r in result]
+        assert "Gap .68" in plates
+        assert "Gap .84" in plates
+        assert "OC" in plates
+
+    def test_game_changer_68_model(self):
+        """Test with RazoRock Game Changer .68 model."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer .68",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "gap": ".68",
+                        "_enriched_by": "GameChangerEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            }
+        ]
+        result = aggregate_game_changer_plates(records)
+        assert len(result) == 1
+        assert result[0]["plate"] == "Gap .68"
+
+    def test_mixed_razor_types(self):
+        """Test with mix of Game Changer and other razors."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "gap": "1.05",
+                        "_enriched_by": "GameChangerEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    },
+                },
+            },
+        ]
+        result = aggregate_game_changer_plates(records)
+        assert len(result) == 1
+        assert result[0]["plate"] == "Gap 1.05"
+        assert result[0]["shaves"] == 1
+
+    def test_tiebreaker_unique_users(self):
+        """Test tiebreaker when shaves are equal."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "gap": ".76",
+                        "_enriched_by": "GameChangerEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "variant": "JAWS",
+                        "_enriched_by": "GameChangerEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test789",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "RazoRock",
+                        "model": "Game Changer",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "gap": ".76",
+                        "_enriched_by": "GameChangerEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_game_changer_plates(records)
+        assert len(result) == 2
+
+        # Gap .76 should be first (2 shaves, 1 unique user)
+        # JAWS should be second (1 shave, 1 unique user)
+        assert result[0]["plate"] == "Gap .76"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_users"] == 1
+        assert result[1]["plate"] == "JAWS"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1

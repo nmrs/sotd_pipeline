@@ -1456,3 +1456,119 @@ def aggregate_christopher_bradley_plates(
 
     monitor.end("aggregate_christopher_bradley_plates", len(plate_data))
     return results  # type: ignore
+
+
+def aggregate_game_changer_plates(
+    records: List[Dict[str, Any]], debug: bool = False
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate RazoRock Game Changer plate usage statistics.
+
+    Args:
+        records: List of enriched comment records
+        debug: Enable debug logging
+
+    Returns:
+        List of Game Changer plate aggregation results
+
+    Raises:
+        ValueError: If records list is invalid or contains invalid data
+    """
+    monitor = PerformanceMonitor(debug)
+    monitor.start("aggregate_game_changer_plates")
+
+    if not isinstance(records, list):
+        raise ValueError(f"Expected list of records, got {type(records)}")
+
+    if not records:
+        if debug:
+            print("[DEBUG] No records to process for Game Changer plates")
+        monitor.end("aggregate_game_changer_plates", 0)
+        return []
+
+    plate_data = []
+    invalid_records = 0
+
+    for i, record in enumerate(records):
+        if not isinstance(record, dict):
+            if debug:
+                print(f"[DEBUG] Record {i}: Expected dict, got {type(record)}")
+            invalid_records += 1
+            continue
+
+        if "razor" in record:
+            razor_info = record["razor"]
+            if isinstance(razor_info, dict) and "matched" in razor_info:
+                matched = razor_info["matched"]
+                if isinstance(matched, dict) and matched.get("brand") == "RazoRock":
+                    model = matched.get("model", "")
+                    if "Game Changer" in model:
+                        # Check for enriched gap and variant information
+                        enriched = razor_info.get("enriched", {})
+                        if isinstance(enriched, dict):
+                            gap = enriched.get("gap")
+                            variant = enriched.get("variant")
+
+                            if gap or variant:
+                                # Create plate identifier combining gap and variant
+                                plate_parts = []
+                                if gap:
+                                    plate_parts.append(f"Gap {gap}")
+                                if variant:
+                                    plate_parts.append(variant)
+
+                                plate_identifier = " ".join(plate_parts)
+                                plate_data.append(
+                                    {
+                                        "plate": plate_identifier,
+                                        "user": record.get("author", "Unknown"),
+                                    }
+                                )
+
+    if not plate_data:
+        if debug:
+            print("[DEBUG] No valid Game Changer plate data found")
+        monitor.end("aggregate_game_changer_plates", 0)
+        return []
+
+    # Convert to DataFrame for aggregation
+    try:
+        df = pd.DataFrame(plate_data)
+        df = optimize_dataframe_operations(df, debug)
+    except (ValueError, TypeError, KeyError) as e:
+        # These are data structure issues that should fail fast
+        raise ValueError(f"Failed to create DataFrame for Game Changer plate aggregation: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during Game Changer plate aggregation: {e}")
+
+    # Group by plate and calculate metrics
+    try:
+        grouped = optimized_groupby_agg(df, "plate", "user", ["count", "nunique"], debug)
+    except (KeyError, ValueError) as e:
+        # These are data structure issues that should fail fast
+        raise ValueError(f"Failed to group Game Changer plate data: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during Game Changer plate grouping: {e}")
+
+    # Rename columns to match expected output
+    grouped.columns = ["plate", "shaves", "unique_users"]
+
+    # Calculate average shaves per user
+    grouped["avg_shaves_per_user"] = (grouped["shaves"] / grouped["unique_users"]).round(2)
+
+    # Sort by shaves (descending), then by unique_users (descending) as tie breaker
+    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
+
+    # Convert back to list of dictionaries
+    results = grouped.to_dict("records")
+
+    if debug:
+        print(
+            f"[DEBUG] Aggregated {len(results)} Game Changer plates "
+            f"({invalid_records} invalid records)"
+        )
+
+    monitor.end("aggregate_game_changer_plates", len(plate_data))
+    return results  # type: ignore
