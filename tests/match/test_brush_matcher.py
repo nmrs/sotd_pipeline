@@ -518,22 +518,52 @@ def test_handle_maker_prioritization_with_in_delimiter():
 
 
 def test_delimiter_semantics_helper_method():
-    """Test the _should_prioritize_knot helper method for different delimiters."""
+    """Test the knot matcher's should_prioritize_knot method for different delimiters."""
     matcher = BrushMatcher()
 
     # Test knot-primary delimiters
-    assert matcher._should_prioritize_knot("Handle w/ Knot") is True
-    assert matcher._should_prioritize_knot("Handle with Knot") is True
+    assert (
+        matcher.knot_matcher.should_prioritize_knot(
+            "Handle w/ Knot", matcher.brush_splitter.split_handle_and_knot
+        )
+        is True
+    )
+    assert (
+        matcher.knot_matcher.should_prioritize_knot(
+            "Handle with Knot", matcher.brush_splitter.split_handle_and_knot
+        )
+        is True
+    )
 
     # Test handle-primary delimiters
-    assert matcher._should_prioritize_knot("Knot in Handle") is False
+    assert (
+        matcher.knot_matcher.should_prioritize_knot(
+            "Knot in Handle", matcher.brush_splitter.split_handle_and_knot
+        )
+        is False
+    )
 
     # Test neutral delimiters (default to knot priority for backward compatibility)
-    assert matcher._should_prioritize_knot("Handle / Knot") is True
-    assert matcher._should_prioritize_knot("Handle/Knot") is True
+    assert (
+        matcher.knot_matcher.should_prioritize_knot(
+            "Handle / Knot", matcher.brush_splitter.split_handle_and_knot
+        )
+        is True
+    )
+    assert (
+        matcher.knot_matcher.should_prioritize_knot(
+            "Handle/Knot", matcher.brush_splitter.split_handle_and_knot
+        )
+        is True
+    )
 
     # Test no delimiter (default behavior)
-    assert matcher._should_prioritize_knot("Simple brush description") is True
+    assert (
+        matcher.knot_matcher.should_prioritize_knot(
+            "Simple brush description", matcher.brush_splitter.split_handle_and_knot
+        )
+        is True
+    )
 
 
 def test_comprehensive_delimiter_semantics():
@@ -610,7 +640,7 @@ def test_fiber_hint_splitting():
     assert result["matched"]["_original_knot_text"] == "Hive 28mm Maggard Silver Tip Badger"
 
     # Test the splitting method directly
-    handle, knot, delimiter_type = matcher._split_handle_and_knot(test_case)
+    handle, knot, delimiter_type = matcher.brush_splitter.split_handle_and_knot(test_case)
     assert handle == "Chisel & Hound"
     assert knot == "Hive 28mm Maggard Silver Tip Badger"
     assert delimiter_type == "fiber_hint"
@@ -649,7 +679,7 @@ def test_fiber_hint_splitting_with_different_makers():
         ), f"Wrong handle maker for {case['input']}"
 
         # Test splitting directly
-        handle, knot, delimiter_type = matcher._split_handle_and_knot(case["input"])
+        handle, knot, delimiter_type = matcher.brush_splitter.split_handle_and_knot(case["input"])
         assert handle == case["expected_handle"], f"Wrong handle split for {case['input']}"
         assert knot == case["expected_knot"], f"Wrong knot split for {case['input']}"
         assert delimiter_type == "fiber_hint", f"Wrong delimiter type for {case['input']}"
@@ -667,7 +697,7 @@ def test_fiber_hint_no_false_positives():
     ]
 
     for case in test_cases:
-        handle, knot, delimiter_type = matcher._split_handle_and_knot(case)
+        handle, knot, delimiter_type = matcher.brush_splitter.split_handle_and_knot(case)
         # Should return None for all since no fiber words and no delimiters
         assert handle is None, f"Unexpected handle split for {case}"
         assert knot is None, f"Unexpected knot split for {case}"
@@ -887,18 +917,20 @@ def test_brand_context_splitting_priority_order():
     # Direct test of the splitting method to verify order
 
     # 1. Delimiter should take precedence over brand-context
-    handle, knot, delimiter_type = matcher._split_handle_and_knot("CH Circus w/ B13")
+    handle, knot, delimiter_type = matcher.brush_splitter.split_handle_and_knot("CH Circus w/ B13")
     assert handle == "CH Circus"
     assert knot == "B13"
     assert delimiter_type == "smart_analysis"  # From delimiter splitting
 
     # 2. Fiber-hint should take precedence over brand-context
-    handle, knot, delimiter_type = matcher._split_handle_and_knot("CH 28mm Maggard Badger")
+    handle, knot, delimiter_type = matcher.brush_splitter.split_handle_and_knot(
+        "CH 28mm Maggard Badger"
+    )
     if handle and knot:  # If fiber-hint splitting works
         assert delimiter_type == "fiber_hint"
 
     # 3. Brand-context should work when others don't
-    handle, knot, delimiter_type = matcher._split_handle_and_knot("CH Circus B13")
+    handle, knot, delimiter_type = matcher.brush_splitter.split_handle_and_knot("CH Circus B13")
     assert handle == "CH Circus"
     assert knot == "B13"
     assert delimiter_type == "brand_context"

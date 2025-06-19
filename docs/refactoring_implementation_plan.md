@@ -74,12 +74,12 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 **Goal**: Transform BrushMatcher into a lightweight orchestrator.
 
 **Tasks**:
-- [ ] Refactor BrushMatcher to use all enhanced components (target: 200-250 lines)
-- [ ] Remove duplicated logic now handled by specialized classes
-- [ ] Implement orchestrator pattern for coordinating matches
-- [ ] Ensure backward compatibility with existing API
-- [ ] Run quality checks: `make format lint typecheck test`
-- [ ] Only add or update tests if coverage is missing or logic changes
+- [x] Refactor BrushMatcher to use all enhanced components (target: 200-250 lines)
+- [x] Remove duplicated logic now handled by specialized classes
+- [x] Implement orchestrator pattern for coordinating matches
+- [x] Ensure backward compatibility with existing API
+- [x] Run quality checks: `make format lint typecheck test`
+- [x] Only add or update tests if coverage is missing or logic changes
 
 **Test Cases**:
 - Rely on existing integration and end-to-end tests unless new logic is introduced.
@@ -258,7 +258,7 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 - [x] Chunk 1.2: Enhanced KnotMatcher (5/5 tasks)
 - [x] Chunk 1.3: Enhanced BrushSplitter (5/5 tasks)
 - [x] Chunk 1.4: Enhanced FiberProcessor (5/5 tasks)
-- [ ] Chunk 1.5: BrushMatcher Orchestrator (0/5 tasks)
+- [x] Chunk 1.5: BrushMatcher Orchestrator (5/5 tasks)
 - [ ] Chunk 2.1: Analysis Tools Split (0/4 tasks)
 
 ### Phase 2 Progress
