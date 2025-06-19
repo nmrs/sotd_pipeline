@@ -16,6 +16,7 @@ data/enriched/*.json
 data/extracted/*.json
 data/matched/*.json
 data/threads/*.json
+data/aggregated/*.json
 .aider*
 praw.ini
 .env
