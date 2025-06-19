@@ -15,6 +15,7 @@ from sotd.aggregate.engine import (
     aggregate_blackbird_plates,
     aggregate_christopher_bradley_plates,
     aggregate_game_changer_plates,
+    aggregate_super_speed_tips,
 )
 
 
@@ -2318,5 +2319,291 @@ class TestAggregateGameChangerPlates:
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 1
         assert result[1]["plate"] == "JAWS"
+        assert result[1]["shaves"] == 1
+        assert result[1]["unique_users"] == 1
+
+
+class TestAggregateSuperSpeedTips:
+    """Test the aggregate_super_speed_tips function."""
+
+    def test_empty_records(self):
+        """Test with empty records."""
+        result = aggregate_super_speed_tips([])
+        assert result == []
+
+    def test_invalid_records_type(self):
+        """Test with invalid records type."""
+        with pytest.raises(ValueError, match="Expected list of records"):
+            aggregate_super_speed_tips("invalid")  # type: ignore
+
+    def test_no_super_speed_data(self):
+        """Test with records that don't contain Super Speed razors."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    },
+                },
+            }
+        ]
+        result = aggregate_super_speed_tips(records)
+        assert result == []
+
+    def test_super_speed_without_tip_data(self):
+        """Test with Super Speed razors that don't have tip data."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "Gillette",
+                        "model": "Super Speed",
+                        "match_type": "exact",
+                    },
+                    "enriched": {},
+                },
+            }
+        ]
+        result = aggregate_super_speed_tips(records)
+        assert result == []
+
+    def test_single_tip_single_user(self):
+        """Test with single tip type and single user."""
+        records = [
+            {
+                "id": "test123",
+                "author": "testuser",
+                "razor": {
+                    "matched": {
+                        "brand": "Gillette",
+                        "model": "Super Speed",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "super_speed_tip": "Red",
+                        "_enriched_by": "SuperSpeedTipEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            }
+        ]
+        result = aggregate_super_speed_tips(records)
+        assert len(result) == 1
+        assert result[0]["tip"] == "Red"
+        assert result[0]["shaves"] == 1
+        assert result[0]["unique_users"] == 1
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_single_tip_multiple_users(self):
+        """Test with single tip type and multiple users."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Gillette",
+                        "model": "Super Speed",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "super_speed_tip": "Blue",
+                        "_enriched_by": "SuperSpeedTipEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Gillette",
+                        "model": "Super Speed",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "super_speed_tip": "Blue",
+                        "_enriched_by": "SuperSpeedTipEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_super_speed_tips(records)
+        assert len(result) == 1
+        assert result[0]["tip"] == "Blue"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_users"] == 2
+        assert result[0]["avg_shaves_per_user"] == 1.0
+
+    def test_multiple_tips(self):
+        """Test with multiple tip types."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Gillette",
+                        "model": "Super Speed",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "super_speed_tip": "Red",
+                        "_enriched_by": "SuperSpeedTipEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Gillette",
+                        "model": "Super Speed",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "super_speed_tip": "Black",
+                        "_enriched_by": "SuperSpeedTipEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test789",
+                "author": "user3",
+                "razor": {
+                    "matched": {
+                        "brand": "Gillette",
+                        "model": "Super Speed",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "super_speed_tip": "Flare",
+                        "_enriched_by": "SuperSpeedTipEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_super_speed_tips(records)
+        assert len(result) == 3
+
+        # Check that results are sorted by shaves (descending)
+        assert result[0]["shaves"] >= result[1]["shaves"]
+        assert result[1]["shaves"] >= result[2]["shaves"]
+
+        # Check all tips are present
+        tips = [r["tip"] for r in result]
+        assert "Red" in tips
+        assert "Black" in tips
+        assert "Flare" in tips
+
+    def test_mixed_razor_types(self):
+        """Test with mix of Super Speed and other razors."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Gillette",
+                        "model": "Super Speed",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "super_speed_tip": "Red",
+                        "_enriched_by": "SuperSpeedTipEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Blackland",
+                        "model": "Blackbird",
+                        "match_type": "exact",
+                    },
+                },
+            },
+        ]
+        result = aggregate_super_speed_tips(records)
+        assert len(result) == 1
+        assert result[0]["tip"] == "Red"
+        assert result[0]["shaves"] == 1
+
+    def test_tiebreaker_unique_users(self):
+        """Test tiebreaker when shaves are equal."""
+        records = [
+            {
+                "id": "test123",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Gillette",
+                        "model": "Super Speed",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "super_speed_tip": "Blue",
+                        "_enriched_by": "SuperSpeedTipEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test456",
+                "author": "user2",
+                "razor": {
+                    "matched": {
+                        "brand": "Gillette",
+                        "model": "Super Speed",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "super_speed_tip": "Black",
+                        "_enriched_by": "SuperSpeedTipEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+            {
+                "id": "test789",
+                "author": "user1",
+                "razor": {
+                    "matched": {
+                        "brand": "Gillette",
+                        "model": "Super Speed",
+                        "match_type": "exact",
+                    },
+                    "enriched": {
+                        "super_speed_tip": "Blue",
+                        "_enriched_by": "SuperSpeedTipEnricher",
+                        "_extraction_source": "user_comment",
+                    },
+                },
+            },
+        ]
+        result = aggregate_super_speed_tips(records)
+        assert len(result) == 2
+
+        # Blue should be first (2 shaves, 1 unique user)
+        # Black should be second (1 shave, 1 unique user)
+        assert result[0]["tip"] == "Blue"
+        assert result[0]["shaves"] == 2
+        assert result[0]["unique_users"] == 1
+        assert result[1]["tip"] == "Black"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
