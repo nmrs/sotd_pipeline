@@ -31,6 +31,7 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 - Line length: 100 characters maximum (Black setting)
 - Use pathlib.Path for file system operations, not os.path
 - Prefer f-strings over .format() or % formatting
+- **File Size Preference**: Prefer smaller, focused files with clear responsibilities over large monolithic files. Aim for files under 300-400 lines when possible. Split large files into logical modules with single responsibilities. This improves readability, maintainability, and makes testing easier.
 
 ## Error Handling
 - **Fail fast for internal errors**: Use minimal try/except for interactive development
