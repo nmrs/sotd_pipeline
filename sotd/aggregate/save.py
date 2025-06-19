@@ -62,14 +62,34 @@ def save_aggregated_data(
                 "total_shaves": basic_metrics["total_shaves"],
                 "unique_shavers": basic_metrics["unique_shavers"],
                 "avg_shaves_per_user": basic_metrics["avg_shaves_per_user"],
-                "categories": ["razors", "blades", "soaps", "brushes", "users"],
+                "categories": [
+                    "razors",
+                    "razor_manufacturers",
+                    "blades",
+                    "blade_manufacturers",
+                    "soaps",
+                    "soap_makers",
+                    "brushes",
+                    "brush_knot_makers",
+                    "brush_handle_makers",
+                    "brush_fibers",
+                    "brush_knot_sizes",
+                    "users",
+                ],
                 "summary": results["summary"],
             },
             "data": {
                 "razors": aggregations["razors"],
+                "razor_manufacturers": aggregations["razor_manufacturers"],
                 "blades": aggregations["blades"],
+                "blade_manufacturers": aggregations["blade_manufacturers"],
                 "soaps": aggregations["soaps"],
+                "soap_makers": aggregations["soap_makers"],
                 "brushes": aggregations["brushes"],
+                "brush_knot_makers": aggregations["brush_knot_makers"],
+                "brush_handle_makers": aggregations["brush_handle_makers"],
+                "brush_fibers": aggregations["brush_fibers"],
+                "brush_knot_sizes": aggregations["brush_knot_sizes"],
                 "users": aggregations["users"],
             },
         }
@@ -210,7 +230,20 @@ def validate_aggregated_data(data: Dict[str, Any], debug: bool = False) -> bool:
         return False
 
     # Check for expected data categories
-    expected_categories = ["razors", "blades", "soaps", "brushes", "users"]
+    expected_categories = [
+        "razors",
+        "razor_manufacturers",
+        "blades",
+        "blade_manufacturers",
+        "soaps",
+        "soap_makers",
+        "brushes",
+        "brush_knot_makers",
+        "brush_handle_makers",
+        "brush_fibers",
+        "brush_knot_sizes",
+        "users",
+    ]
     for category in expected_categories:
         if category in content_data:
             category_data = content_data[category]
