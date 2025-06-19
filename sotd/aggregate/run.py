@@ -169,90 +169,20 @@ def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
         # Calculate basic metrics
         basic_metrics = calculate_basic_metrics(matched_records, debug=args.debug)
 
-        # Perform aggregations with error handling for each
-        try:
-            razors = aggregate_razors(matched_records, debug=args.debug)
-        except Exception as e:
-            if args.debug:
-                print(f"[DEBUG] Error aggregating razors: {e}")
-            razors = []
-
-        try:
-            blades = aggregate_blades(matched_records, debug=args.debug)
-        except Exception as e:
-            if args.debug:
-                print(f"[DEBUG] Error aggregating blades: {e}")
-            blades = []
-
-        try:
-            soaps = aggregate_soaps(matched_records, debug=args.debug)
-        except Exception as e:
-            if args.debug:
-                print(f"[DEBUG] Error aggregating soaps: {e}")
-            soaps = []
-
-        try:
-            brushes = aggregate_brushes(matched_records, debug=args.debug)
-        except Exception as e:
-            if args.debug:
-                print(f"[DEBUG] Error aggregating brushes: {e}")
-            brushes = []
-
-        try:
-            users = aggregate_users(matched_records, debug=args.debug)
-        except Exception as e:
-            if args.debug:
-                print(f"[DEBUG] Error aggregating users: {e}")
-            users = []
-
-        try:
-            razor_manufacturers = aggregate_razor_manufacturers(matched_records, debug=args.debug)
-        except Exception as e:
-            if args.debug:
-                print(f"[DEBUG] Error aggregating razor manufacturers: {e}")
-            razor_manufacturers = []
-
-        try:
-            blade_manufacturers = aggregate_blade_manufacturers(matched_records, debug=args.debug)
-        except Exception as e:
-            if args.debug:
-                print(f"[DEBUG] Error aggregating blade manufacturers: {e}")
-            blade_manufacturers = []
-
-        try:
-            soap_makers = aggregate_soap_makers(matched_records, debug=args.debug)
-        except Exception as e:
-            if args.debug:
-                print(f"[DEBUG] Error aggregating soap makers: {e}")
-            soap_makers = []
-
-        try:
-            brush_knot_makers = aggregate_brush_knot_makers(matched_records, debug=args.debug)
-        except Exception as e:
-            if args.debug:
-                print(f"[DEBUG] Error aggregating brush knot makers: {e}")
-            brush_knot_makers = []
-
-        try:
-            brush_handle_makers = aggregate_brush_handle_makers(matched_records, debug=args.debug)
-        except Exception as e:
-            if args.debug:
-                print(f"[DEBUG] Error aggregating brush handle makers: {e}")
-            brush_handle_makers = []
-
-        try:
-            brush_fibers = aggregate_brush_fibers(matched_records, debug=args.debug)
-        except Exception as e:
-            if args.debug:
-                print(f"[DEBUG] Error aggregating brush fibers: {e}")
-            brush_fibers = []
-
-        try:
-            brush_knot_sizes = aggregate_brush_knot_sizes(matched_records, debug=args.debug)
-        except Exception as e:
-            if args.debug:
-                print(f"[DEBUG] Error aggregating brush knot sizes: {e}")
-            brush_knot_sizes = []
+        # Perform aggregations - let internal errors bubble up for fail-fast behavior
+        # Only handle specific external failures that should be handled gracefully
+        razors = aggregate_razors(matched_records, debug=args.debug)
+        blades = aggregate_blades(matched_records, debug=args.debug)
+        soaps = aggregate_soaps(matched_records, debug=args.debug)
+        brushes = aggregate_brushes(matched_records, debug=args.debug)
+        users = aggregate_users(matched_records, debug=args.debug)
+        razor_manufacturers = aggregate_razor_manufacturers(matched_records, debug=args.debug)
+        blade_manufacturers = aggregate_blade_manufacturers(matched_records, debug=args.debug)
+        soap_makers = aggregate_soap_makers(matched_records, debug=args.debug)
+        brush_knot_makers = aggregate_brush_knot_makers(matched_records, debug=args.debug)
+        brush_handle_makers = aggregate_brush_handle_makers(matched_records, debug=args.debug)
+        brush_fibers = aggregate_brush_fibers(matched_records, debug=args.debug)
+        brush_knot_sizes = aggregate_brush_knot_sizes(matched_records, debug=args.debug)
 
         # Prepare results
         results = {

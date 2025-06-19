@@ -213,8 +213,12 @@ def calculate_basic_metrics(records: List[Dict[str, Any]], debug: bool = False) 
     try:
         df = pd.DataFrame(valid_records)
         df = optimize_dataframe_operations(df, debug)
-    except Exception as e:
+    except (ValueError, TypeError, KeyError) as e:
+        # These are data structure issues that should fail fast
         raise ValueError(f"Failed to create DataFrame from records: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during basic metrics calculation: {e}")
 
     total_shaves = len(valid_records)
     unique_shavers = df["author"].nunique()
@@ -318,14 +322,22 @@ def aggregate_razors(records: List[Dict[str, Any]], debug: bool = False) -> List
     try:
         df = pd.DataFrame(razor_data)
         df = optimize_dataframe_operations(df, debug)
-    except Exception as e:
+    except (ValueError, TypeError, KeyError) as e:
+        # These are data structure issues that should fail fast
         raise ValueError(f"Failed to create DataFrame for razor aggregation: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during razor aggregation: {e}")
 
     # Group by razor name and calculate metrics
     try:
         grouped = df.groupby("name").agg({"user": ["count", "nunique"]}).reset_index()
-    except Exception as e:
+    except (KeyError, ValueError) as e:
+        # These are data structure issues that should fail fast
         raise ValueError(f"Failed to group razor data: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during razor grouping: {e}")
 
     # Flatten column names
     grouped.columns = ["name", "shaves", "unique_users"]
@@ -421,14 +433,22 @@ def aggregate_blades(records: List[Dict[str, Any]], debug: bool = False) -> List
     # Convert to DataFrame for aggregation
     try:
         df = pd.DataFrame(blade_data)
-    except Exception as e:
+    except (ValueError, TypeError, KeyError) as e:
+        # These are data structure issues that should fail fast
         raise ValueError(f"Failed to create DataFrame for blade aggregation: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during blade aggregation: {e}")
 
     # Group by blade name and calculate metrics
     try:
         grouped = df.groupby("name").agg({"user": ["count", "nunique"]}).reset_index()
-    except Exception as e:
+    except (KeyError, ValueError) as e:
+        # These are data structure issues that should fail fast
         raise ValueError(f"Failed to group blade data: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during blade grouping: {e}")
 
     # Flatten column names
     grouped.columns = ["name", "shaves", "unique_users"]
@@ -522,14 +542,22 @@ def aggregate_soaps(records: List[Dict[str, Any]], debug: bool = False) -> List[
     # Convert to DataFrame for aggregation
     try:
         df = pd.DataFrame(soap_data)
-    except Exception as e:
+    except (ValueError, TypeError, KeyError) as e:
+        # These are data structure issues that should fail fast
         raise ValueError(f"Failed to create DataFrame for soap aggregation: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during soap aggregation: {e}")
 
     # Group by soap name and calculate metrics
     try:
         grouped = df.groupby("name").agg({"user": ["count", "nunique"]}).reset_index()
-    except Exception as e:
+    except (KeyError, ValueError) as e:
+        # These are data structure issues that should fail fast
         raise ValueError(f"Failed to group soap data: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during soap grouping: {e}")
 
     # Flatten column names
     grouped.columns = ["name", "shaves", "unique_users"]
@@ -622,14 +650,22 @@ def aggregate_brushes(records: List[Dict[str, Any]], debug: bool = False) -> Lis
     # Convert to DataFrame for aggregation
     try:
         df = pd.DataFrame(brush_data)
-    except Exception as e:
+    except (ValueError, TypeError, KeyError) as e:
+        # These are data structure issues that should fail fast
         raise ValueError(f"Failed to create DataFrame for brush aggregation: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during brush aggregation: {e}")
 
     # Group by brush name and calculate metrics
     try:
         grouped = df.groupby("name").agg({"user": ["count", "nunique"]}).reset_index()
-    except Exception as e:
+    except (KeyError, ValueError) as e:
+        # These are data structure issues that should fail fast
         raise ValueError(f"Failed to group brush data: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during brush grouping: {e}")
 
     # Flatten column names
     grouped.columns = ["name", "shaves", "unique_users"]
@@ -710,14 +746,22 @@ def aggregate_users(records: List[Dict[str, Any]], debug: bool = False) -> List[
     # Convert to DataFrame for aggregation
     try:
         df = pd.DataFrame(valid_records)
-    except Exception as e:
+    except (ValueError, TypeError, KeyError) as e:
+        # These are data structure issues that should fail fast
         raise ValueError(f"Failed to create DataFrame for user aggregation: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during user aggregation: {e}")
 
     # Group by user and calculate metrics
     try:
-        grouped = df.groupby("author").agg({"id": "count"}).reset_index()  # Count shaves per user
-    except Exception as e:
+        grouped = df.groupby("author").agg({"id": "count"}).reset_index()
+    except (KeyError, ValueError) as e:
+        # These are data structure issues that should fail fast
         raise ValueError(f"Failed to group user data: {e}")
+    except ImportError as e:
+        # Pandas import issues - external dependency failure
+        raise RuntimeError(f"Pandas import error during user grouping: {e}")
 
     grouped.columns = ["user", "shaves"]
     grouped["avg_shaves_per_user"] = 1.0  # Each user's avg is always 1.0 (all their own shaves)
