@@ -146,11 +146,11 @@ sotd/aggregate/aggregators/
   - [x] Add position field calculation
   - [x] Sort by shaves desc, unique_users desc
 
-- [ ] **3.3 Soap Maker Aggregator (`aggregators/manufacturers/soap_maker_aggregator.py`)**
-  - [ ] Implement soap maker aggregation
-  - [ ] Extract maker from soap.matched.maker
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **3.3 Soap Maker Aggregator (`aggregators/manufacturers/soap_maker_aggregator.py`)**
+  - [x] Implement soap maker aggregation
+  - [x] Extract maker from soap.matched.maker
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
 ### Phase 4: Format Aggregators
 - [ ] **4.1 Razor Format Aggregator (`aggregators/formats/razor_format_aggregator.py`)**
