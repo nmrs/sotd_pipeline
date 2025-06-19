@@ -26,6 +26,7 @@ from sotd.match.brush_matching_strategies.utils.fiber_utils import (
 from sotd.match.brush_matching_strategies.zenith_strategy import (
     ZenithBrushMatchingStrategy,
 )
+from sotd.match.handle_matcher_enhanced import EnhancedHandleMatcher
 
 
 class BrushMatcher:
@@ -37,8 +38,7 @@ class BrushMatcher:
         self.catalog_path = catalog_path
         self.handles_path = handles_path
         self.catalog_data = self._load_catalog(catalog_path)
-        self.handles_data = self._load_catalog(handles_path)
-        self.handle_patterns = self._compile_handle_patterns()
+        self.handle_matcher = EnhancedHandleMatcher(handles_path)
         self.strategies = [
             KnownBrushMatchingStrategy(self.catalog_data.get("known_brushes", {})),
             DeclarationGroomingBrushMatchingStrategy(
@@ -57,84 +57,6 @@ class BrushMatcher:
                 return yaml.safe_load(f) or {}
         except (FileNotFoundError, yaml.YAMLError):
             return {}
-
-    def _compile_handle_patterns(self) -> list[dict]:
-        """Compile handle patterns from the handles catalog in priority order."""
-        patterns = []
-
-        # Priority 1: artisan_handles
-        artisan_handles = self.handles_data.get("artisan_handles", {})
-        for handle_maker, data in artisan_handles.items():
-            for pattern in data.get("patterns", []):
-                try:
-                    patterns.append(
-                        {
-                            "maker": handle_maker,
-                            "pattern": pattern,
-                            "regex": re.compile(pattern, re.IGNORECASE),
-                            "section": "artisan_handles",
-                            "priority": 1,
-                        }
-                    )
-                except re.error:
-                    continue
-
-        # Priority 2: manufacturer_handles
-        manufacturer_handles = self.handles_data.get("manufacturer_handles", {})
-        for handle_maker, data in manufacturer_handles.items():
-            for pattern in data.get("patterns", []):
-                try:
-                    patterns.append(
-                        {
-                            "maker": handle_maker,
-                            "pattern": pattern,
-                            "regex": re.compile(pattern, re.IGNORECASE),
-                            "section": "manufacturer_handles",
-                            "priority": 2,
-                        }
-                    )
-                except re.error:
-                    continue
-
-        # Priority 3: other_handles
-        other_handles = self.handles_data.get("other_handles", {})
-        for handle_maker, data in other_handles.items():
-            for pattern in data.get("patterns", []):
-                try:
-                    patterns.append(
-                        {
-                            "maker": handle_maker,
-                            "pattern": pattern,
-                            "regex": re.compile(pattern, re.IGNORECASE),
-                            "section": "other_handles",
-                            "priority": 3,
-                        }
-                    )
-                except re.error:
-                    continue
-
-        # Sort by priority (lower = higher), then by pattern length (longer = more specific)
-        patterns.sort(key=lambda x: (x["priority"], -len(x["pattern"])))
-        return patterns
-
-    def _match_handle_maker(self, text: str) -> Optional[dict]:
-        """
-        Match handle maker from text using the handle patterns.
-        Returns dict with maker and metadata or None if no match.
-        """
-        if not text:
-            return None
-
-        for pattern_info in self.handle_patterns:
-            if pattern_info["regex"].search(text):
-                return {
-                    "handle_maker": pattern_info["maker"],
-                    "_matched_by_section": pattern_info["section"],
-                    "_pattern_used": pattern_info["pattern"],
-                    "_source_text": text,
-                }
-
-        return None
 
     def _split_handle_and_knot(
         self, text: str
@@ -186,8 +108,8 @@ class BrushMatcher:
             return None, None, None
 
         # Analyze which part is more likely to be the handle
-        part1_handle_score = self._score_as_handle(part1)
-        part2_handle_score = self._score_as_handle(part2)
+        part1_handle_score = self.handle_matcher.score_as_handle(part1)
+        part2_handle_score = self.handle_matcher.score_as_handle(part2)
 
         if part1_handle_score > part2_handle_score:
             # Part 1 is more likely the handle
@@ -211,76 +133,6 @@ class BrushMatcher:
             if handle and knot:
                 return handle, knot, delimiter_type
         return None, None, None
-
-    def _score_as_handle(self, text: str) -> int:
-        """Score how likely a text is to be a handle (higher = more likely handle)."""
-        score = 0
-        text_lower = text.lower()
-
-        # Strong handle indicators
-        if "handle" in text_lower:
-            score += 10
-
-        # Test against actual handle patterns from handles.yaml
-        handle_match = self._match_handle_maker(text)
-        if handle_match:
-            # Found a handle pattern match - strong indicator this is a handle
-            section = handle_match.get("_matched_by_section", "")
-            if section == "artisan_handles":
-                score += 12  # Artisan handles are most specific
-            elif section == "manufacturer_handles":
-                score += 10
-            elif section == "other_handles":
-                score += 8
-            else:
-                score += 6
-
-        # Test against brush strategies to see if this looks like a knot
-        knot_strategy_matches = 0
-        for strategy in self.strategies:
-            try:
-                result = strategy.match(text)
-                if result and (
-                    (isinstance(result, dict) and result.get("matched"))
-                    or (isinstance(result, dict) and result.get("brand"))
-                ):
-                    knot_strategy_matches += 1
-            except (AttributeError, KeyError, TypeError, re.error):
-                # Some strategies might fail on certain inputs due to regex errors,
-                # missing attributes, or type issues - skip and continue
-                continue
-
-        # If multiple strategies match this as a knot, reduce handle score
-        if knot_strategy_matches >= 2:
-            score -= 8
-        elif knot_strategy_matches == 1:
-            score -= 4
-
-        # Handle-related terms
-        handle_terms = ["stock", "custom", "artisan", "turned", "wood", "resin", "zebra", "burl"]
-        for term in handle_terms:
-            if term in text_lower:
-                score += 2
-
-        # Knot indicators (negative score for handle likelihood)
-        knot_terms = ["badger", "boar", "synthetic", "syn", "mm", "knot"]
-        for term in knot_terms:
-            if term in text_lower:
-                score -= 5
-
-        # Fiber type patterns (strong knot indicators)
-        if any(fiber in text_lower for fiber in ["badger", "boar", "synthetic"]):
-            score -= 8
-
-        # Size patterns (knot indicators)
-        if re.search(r"\d{2}\s*mm", text_lower):
-            score -= 6
-
-        # Chisel & Hound versioning patterns (knot indicators)
-        if re.search(r"\bv\d{2}\b", text_lower):
-            score -= 6
-
-        return score
 
     def _split_by_fiber_hint(self, text: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
         """Split text using fiber words as hints for knot identification."""
@@ -472,7 +324,7 @@ class BrushMatcher:
         """Process handle information from the input value and update match dictionary."""
         handle, _knot, _ = self._split_handle_and_knot(value)
         if handle and not match_dict.get("handle_maker"):
-            handle_match = self._match_handle_maker(handle)
+            handle_match = self.handle_matcher.match_handle_maker(handle)
             if handle_match:
                 match_dict["handle_maker"] = handle_match["handle_maker"]
                 match_dict["handle_maker_metadata"] = {
@@ -658,63 +510,57 @@ class BrushMatcher:
 
             # Strategy 1: If we matched from a knot part, try to find handle in handle part first
             if matched_from == "knot_part" and handle_text:
-                handle_match = self._match_handle_maker(handle_text)
+                handle_match = self.handle_matcher.match_handle_maker(handle_text)
                 if handle_match:
                     updated["handle_maker"] = handle_match["handle_maker"]
                     updated["handle_maker_metadata"] = {
                         "_matched_by_section": handle_match["_matched_by_section"],
                         "_pattern_used": handle_match["_pattern_used"],
                         "_source_text": handle_match["_source_text"],
-                        "_strategy": "non_knot_portion",
                     }
                     return
 
-                # If no pattern match in handle text, use the handle text as-is
-                updated["handle_maker"] = handle_text
-                updated["handle_maker_metadata"] = {
-                    "_matched_by_section": "split_fallback",
-                    "_pattern_used": None,
-                    "_source_text": handle_text,
-                    "_strategy": "non_knot_portion",
-                }
-                return
-
-            # Strategy 2: Try delimiter-based splitting for general cases
-            handle, knot, _ = self._split_handle_and_knot(value)
-            if handle:
-                handle_match = self._match_handle_maker(handle)
+            # Strategy 2: If we matched from a handle part, try to find handle in handle part
+            if matched_from == "handle_part" and handle_text:
+                handle_match = self.handle_matcher.match_handle_maker(handle_text)
                 if handle_match:
                     updated["handle_maker"] = handle_match["handle_maker"]
                     updated["handle_maker_metadata"] = {
                         "_matched_by_section": handle_match["_matched_by_section"],
                         "_pattern_used": handle_match["_pattern_used"],
                         "_source_text": handle_match["_source_text"],
-                        "_strategy": "delimiter_split",
                     }
-                    return
-                else:
-                    # No pattern match, but we have a handle part from splitting
-                    updated["handle_maker"] = handle
-                    updated["handle_maker_metadata"] = {
-                        "_matched_by_section": "split_fallback",
-                        "_pattern_used": None,
-                        "_source_text": handle,
-                        "_strategy": "delimiter_split",
-                    }
-                    if knot:
-                        updated["knot_maker"] = knot
                     return
 
-            # Strategy 3: Fallback to full string matching
-            handle_match = self._match_handle_maker(value)
+            # Strategy 3: Try to find handle in the full value
+            handle_match = self.handle_matcher.match_handle_maker(value)
             if handle_match:
                 updated["handle_maker"] = handle_match["handle_maker"]
                 updated["handle_maker_metadata"] = {
                     "_matched_by_section": handle_match["_matched_by_section"],
                     "_pattern_used": handle_match["_pattern_used"],
                     "_source_text": handle_match["_source_text"],
-                    "_strategy": "full_string_fallback",
                 }
+                return
+
+            # Strategy 4: Check if brand is a known handle maker
+            brand = updated.get("brand", "").strip()
+            if brand and self.handle_matcher.is_known_handle_maker(brand):
+                updated["handle_maker"] = brand
+                return
+
+            # Strategy 5: Try to extract handle from model field
+            model = updated.get("model", "").strip()
+            if model:
+                model_handle_match = self.handle_matcher.match_handle_maker(model)
+                if model_handle_match:
+                    updated["handle_maker"] = model_handle_match["handle_maker"]
+                    updated["handle_maker_metadata"] = {
+                        "_matched_by_section": model_handle_match["_matched_by_section"],
+                        "_pattern_used": model_handle_match["_pattern_used"],
+                        "_source_text": model_handle_match["_source_text"],
+                    }
+                    return
 
     def _split_by_brand_context(
         self, text: str

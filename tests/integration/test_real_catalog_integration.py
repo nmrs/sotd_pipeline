@@ -5,7 +5,6 @@ Integration tests using real YAML catalog files.
 These tests validate that changes to production YAML files don't break parsing.
 """
 
-import pytest
 from pathlib import Path
 
 from sotd.match.brush_matcher import BrushMatcher
@@ -23,7 +22,7 @@ class TestRealCatalogIntegration:
 
         # Should not raise exceptions during initialization
         assert matcher.catalog_data is not None
-        assert matcher.handles_data is not None
+        assert matcher.handle_matcher is not None
         assert len(matcher.strategies) > 0
 
     def test_real_soap_catalog_loads_successfully(self):
@@ -198,14 +197,15 @@ class TestRealCatalogIntegration:
         assert len(brush_matcher.strategies) > 0
 
         # Handle patterns
-        assert len(brush_matcher.handle_patterns) > 0
-        for pattern_info in brush_matcher.handle_patterns:
+        assert len(brush_matcher.handle_matcher.handle_patterns) > 0
+        for pattern_info in brush_matcher.handle_matcher.handle_patterns:
             assert pattern_info["regex"] is not None  # Should have compiled successfully
 
         # Soap patterns
         soap_matcher = SoapMatcher()
-        assert len(soap_matcher.scent_patterns) + len(soap_matcher.brand_patterns) > 0
-        for pattern_info in soap_matcher.scent_patterns + soap_matcher.brand_patterns:
+        scent_and_brand_patterns = soap_matcher.scent_patterns + soap_matcher.brand_patterns
+        assert len(scent_and_brand_patterns) > 0
+        for pattern_info in scent_and_brand_patterns:
             assert pattern_info["regex"] is not None  # Should have compiled successfully
 
     def test_declaration_grooming_b2_integration(self):
