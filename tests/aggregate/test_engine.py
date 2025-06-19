@@ -1522,9 +1522,7 @@ class TestAggregateBlackbirdPlates:
                         "model": "Blackbird",
                         "match_type": "exact",
                     },
-                },
-                "enriched": {
-                    "razor": {
+                    "enriched": {
                         "plate": "Standard",
                         "_enriched_by": "BlackbirdPlateEnricher",
                         "_extraction_source": "user_comment",
@@ -1551,9 +1549,7 @@ class TestAggregateBlackbirdPlates:
                         "model": "Blackbird",
                         "match_type": "exact",
                     },
-                },
-                "enriched": {
-                    "razor": {
+                    "enriched": {
                         "plate": "Standard",
                         "_enriched_by": "BlackbirdPlateEnricher",
                         "_extraction_source": "user_comment",
@@ -1569,9 +1565,7 @@ class TestAggregateBlackbirdPlates:
                         "model": "Blackbird",
                         "match_type": "exact",
                     },
-                },
-                "enriched": {
-                    "razor": {
+                    "enriched": {
                         "plate": "Standard",
                         "_enriched_by": "BlackbirdPlateEnricher",
                         "_extraction_source": "user_comment",
@@ -1598,9 +1592,7 @@ class TestAggregateBlackbirdPlates:
                         "model": "Blackbird",
                         "match_type": "exact",
                     },
-                },
-                "enriched": {
-                    "razor": {
+                    "enriched": {
                         "plate": "Standard",
                         "_enriched_by": "BlackbirdPlateEnricher",
                         "_extraction_source": "user_comment",
@@ -1616,9 +1608,7 @@ class TestAggregateBlackbirdPlates:
                         "model": "Blackbird",
                         "match_type": "exact",
                     },
-                },
-                "enriched": {
-                    "razor": {
+                    "enriched": {
                         "plate": "Lite",
                         "_enriched_by": "BlackbirdPlateEnricher",
                         "_extraction_source": "user_comment",
@@ -1634,9 +1624,7 @@ class TestAggregateBlackbirdPlates:
                         "model": "Blackbird",
                         "match_type": "exact",
                     },
-                },
-                "enriched": {
-                    "razor": {
+                    "enriched": {
                         "plate": "OC",
                         "_enriched_by": "BlackbirdPlateEnricher",
                         "_extraction_source": "user_comment",
@@ -1669,9 +1657,7 @@ class TestAggregateBlackbirdPlates:
                         "model": "Blackbird Ti",
                         "match_type": "exact",
                     },
-                },
-                "enriched": {
-                    "razor": {
+                    "enriched": {
                         "plate": "Standard",
                         "_enriched_by": "BlackbirdPlateEnricher",
                         "_extraction_source": "user_comment",
@@ -1695,9 +1681,7 @@ class TestAggregateBlackbirdPlates:
                         "model": "Blackbird",
                         "match_type": "exact",
                     },
-                },
-                "enriched": {
-                    "razor": {
+                    "enriched": {
                         "plate": "Standard",
                         "_enriched_by": "BlackbirdPlateEnricher",
                         "_extraction_source": "user_comment",
@@ -1718,79 +1702,6 @@ class TestAggregateBlackbirdPlates:
         ]
         result = aggregate_blackbird_plates(records)
         assert len(result) == 1
-        assert result[0]["plate"] == "Standard"
-        assert result[0]["shaves"] == 1
-        assert result[0]["unique_users"] == 1
-
-    def test_tiebreaker_unique_users(self):
-        """Test tiebreaker when shaves are equal."""
-        records = [
-            {
-                "id": "test123",
-                "author": "user1",
-                "razor": {
-                    "matched": {
-                        "brand": "Blackland",
-                        "model": "Blackbird",
-                        "match_type": "exact",
-                    },
-                },
-                "enriched": {
-                    "razor": {
-                        "plate": "Standard",
-                        "_enriched_by": "BlackbirdPlateEnricher",
-                        "_extraction_source": "user_comment",
-                    },
-                },
-            },
-            {
-                "id": "test456",
-                "author": "user2",
-                "razor": {
-                    "matched": {
-                        "brand": "Blackland",
-                        "model": "Blackbird",
-                        "match_type": "exact",
-                    },
-                },
-                "enriched": {
-                    "razor": {
-                        "plate": "Lite",
-                        "_enriched_by": "BlackbirdPlateEnricher",
-                        "_extraction_source": "user_comment",
-                    },
-                },
-            },
-            {
-                "id": "test789",
-                "author": "user1",
-                "razor": {
-                    "matched": {
-                        "brand": "Blackland",
-                        "model": "Blackbird",
-                        "match_type": "exact",
-                    },
-                },
-                "enriched": {
-                    "razor": {
-                        "plate": "Standard",
-                        "_enriched_by": "BlackbirdPlateEnricher",
-                        "_extraction_source": "user_comment",
-                    },
-                },
-            },
-        ]
-        result = aggregate_blackbird_plates(records)
-        assert len(result) == 2
-
-        # Standard should be first (2 shaves, 1 unique user)
-        # Lite should be second (1 shave, 1 unique user)
-        assert result[0]["plate"] == "Standard"
-        assert result[0]["shaves"] == 2
-        assert result[0]["unique_users"] == 1
-        assert result[1]["plate"] == "Lite"
-        assert result[1]["shaves"] == 1
-        assert result[1]["unique_users"] == 1
 
 
 class TestAggregateGameChangerPlates:

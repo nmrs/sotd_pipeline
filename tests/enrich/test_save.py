@@ -278,28 +278,22 @@ class TestCalculateEnrichmentStats:
                 "id": "1",
                 "author": "user1",
                 "body": "test",
-                "enriched": {
-                    "razor": {"_enriched_by": "RazorEnricher"},
-                    "blade": {"_enriched_by": "BladeEnricher"},
-                },
+                "razor": {"enriched": {"_enriched_by": "RazorEnricher"}},
+                "blade": {"enriched": {"_enriched_by": "BladeEnricher"}},
             },
             {
                 "id": "2",
                 "author": "user2",
                 "body": "test2",
-                "enriched": {
-                    "brush": {"_enriched_by": "BrushEnricher"},
-                    "soap": {"_enriched_by": "SoapEnricher"},
-                },
+                "brush": {"enriched": {"_enriched_by": "BrushEnricher"}},
+                "soap": {"enriched": {"_enriched_by": "SoapEnricher"}},
             },
             {
                 "id": "3",
                 "author": "user3",
                 "body": "test3",
-                "enriched": {
-                    "razor": {"_enriched_by": "RazorEnricher"},
-                    "soap": {"_enriched_by": "SoapEnricher"},
-                },
+                "razor": {"enriched": {"_enriched_by": "RazorEnricher"}},
+                "soap": {"enriched": {"_enriched_by": "SoapEnricher"}},
             },
         ]
         stats = calculate_enrichment_stats(data)
@@ -316,14 +310,14 @@ class TestCalculateEnrichmentStats:
                 "id": "1",
                 "author": "user1",
                 "body": "test",
-                "enriched": {"razor": {"_enriched_by": "RazorEnricher"}},
+                "razor": {"enriched": {"_enriched_by": "RazorEnricher"}},
             },
             {"id": "2", "author": "user2", "body": "test2"},  # No enriched data
             {
                 "id": "3",
                 "author": "user3",
                 "body": "test3",
-                "enriched": {"blade": {"_enriched_by": "BladeEnricher"}},
+                "blade": {"enriched": {"_enriched_by": "BladeEnricher"}},
             },
         ]
         stats = calculate_enrichment_stats(data)

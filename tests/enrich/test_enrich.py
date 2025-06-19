@@ -33,9 +33,10 @@ def test_enrich_comments_basic():
     enriched = enrich_comments(comments, original_comments)
 
     assert len(enriched) == 1
-    assert "enriched" in enriched[0]
+    # Check for unified structure: enriched data under product fields
+    assert "enriched" in enriched[0]["blade"]
     # Should have blade enrichment (use count)
-    assert "blade" in enriched[0]["enriched"]
+    assert "use_count" in enriched[0]["blade"]["enriched"]
 
 
 def test_process_month_missing_file(tmp_path):

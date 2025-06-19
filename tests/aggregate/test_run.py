@@ -680,6 +680,18 @@ class TestMain:
         assert args.start == "2025-01"
         assert args.out_dir == "data"
 
+    def test_start_end_arguments_together(self):
+        """Test with --start and --end arguments together."""
+        with patch("sotd.aggregate.run.run_aggregate") as mock_run:
+            # Test with both --start and --end (date range)
+            main(["--start", "2025-01", "--end", "2025-03", "--out-dir", "data"])
+
+        mock_run.assert_called_once()
+        args = mock_run.call_args[0][0]
+        assert args.start == "2025-01"
+        assert args.end == "2025-03"
+        assert args.out_dir == "data"
+
     def test_debug_argument(self):
         """Test with --debug argument."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:

@@ -135,9 +135,9 @@ class TestEnricherRegistry:
 
         enriched_record = registry.enrich_record(record, original_comment)
 
-        assert "enriched" in enriched_record
-        assert "blade" in enriched_record["enriched"]
-        assert enriched_record["enriched"]["blade"]["use_count"] == 3
+        # Check for unified structure: enriched data under product fields
+        assert "enriched" in enriched_record["blade"]
+        assert enriched_record["blade"]["enriched"]["use_count"] == 3
 
     def test_enrich_multiple_records(self):
         """Test enriching multiple records."""
@@ -173,18 +173,16 @@ class TestEnricherRegistry:
         assert len(enriched_records) == 2
 
         # First record should have blade enrichment
-        assert "enriched" in enriched_records[0]
-        assert "blade" in enriched_records[0]["enriched"]
-        assert enriched_records[0]["enriched"]["blade"]["use_count"] == 3
+        assert "enriched" in enriched_records[0]["blade"]
+        assert enriched_records[0]["blade"]["enriched"]["use_count"] == 3
 
         # Second record should have both blade and razor enrichment
-        assert "enriched" in enriched_records[1]
-        assert "blade" in enriched_records[1]["enriched"]
-        assert "razor" in enriched_records[1]["enriched"]
-        assert enriched_records[1]["enriched"]["blade"]["use_count"] == 2
-        assert enriched_records[1]["enriched"]["razor"]["grind"] == "Full Hollow"
-        assert enriched_records[1]["enriched"]["razor"]["width"] == "6/8"
-        assert enriched_records[1]["enriched"]["razor"]["point"] == "Round"
+        assert "enriched" in enriched_records[1]["blade"]
+        assert "enriched" in enriched_records[1]["razor"]
+        assert enriched_records[1]["blade"]["enriched"]["use_count"] == 2
+        assert enriched_records[1]["razor"]["enriched"]["grind"] == "Full Hollow"
+        assert enriched_records[1]["razor"]["enriched"]["width"] == "6/8"
+        assert enriched_records[1]["razor"]["enriched"]["point"] == "Round"
 
     def test_enrich_records_length_mismatch(self):
         """Test that enriching records with mismatched lengths raises an error."""
