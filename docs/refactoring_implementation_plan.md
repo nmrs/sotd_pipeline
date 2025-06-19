@@ -47,12 +47,12 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 **Goal**: Extract brush splitting logic into a focused, testable class.
 
 **Tasks**:
-- [ ] Create `sotd/match/brush_splitter_enhanced.py` (target: 200-250 lines)
-- [ ] Move all splitting methods from BrushMatcher
-- [ ] Consolidate delimiter-based, fiber-based, and context-based splitting
-- [ ] Update BrushMatcher to use new BrushSplitter
-- [ ] Run quality checks: `make format lint typecheck test`
-- [ ] Only add or update tests if coverage is missing or logic changes
+- [x] Create `sotd/match/brush_splitter_enhanced.py` (target: 200-250 lines)
+- [x] Move all splitting methods from BrushMatcher
+- [x] Consolidate delimiter-based, fiber-based, and context-based splitting
+- [x] Update BrushMatcher to use new BrushSplitter
+- [x] Run quality checks: `make format lint typecheck test`
+- [x] Only add or update tests if coverage is missing or logic changes
 
 **Test Cases**:
 - Rely on existing brush splitter and integration tests unless new logic is introduced.
@@ -256,7 +256,7 @@ This plan addresses the codebase complexity issues identified in the comprehensi
 ### Phase 1 Progress
 - [x] Chunk 1.1: Enhanced HandleMatcher (5/5 tasks)
 - [x] Chunk 1.2: Enhanced KnotMatcher (5/5 tasks)
-- [ ] Chunk 1.3: Enhanced BrushSplitter (0/5 tasks)
+- [x] Chunk 1.3: Enhanced BrushSplitter (5/5 tasks)
 - [ ] Chunk 1.4: Enhanced FiberProcessor (0/5 tasks)
 - [ ] Chunk 1.5: BrushMatcher Orchestrator (0/5 tasks)
 - [ ] Chunk 2.1: Analysis Tools Split (0/4 tasks)
