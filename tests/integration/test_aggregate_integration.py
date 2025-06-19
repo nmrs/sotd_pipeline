@@ -7,18 +7,20 @@ from pathlib import Path
 import pytest
 
 from sotd.aggregate.engine import (
+    aggregate_blade_manufacturers,
     aggregate_blades,
+    aggregate_brush_handle_makers,
+    aggregate_brush_knot_makers,
+    aggregate_brush_fibers,
+    aggregate_brush_knot_sizes,
     aggregate_brushes,
+    aggregate_razor_manufacturers,
     aggregate_razors,
+    aggregate_soap_makers,
     aggregate_soaps,
     aggregate_users,
     calculate_basic_metrics,
     filter_matched_records,
-    aggregate_razor_manufacturers,
-    aggregate_blade_manufacturers,
-    aggregate_soap_makers,
-    aggregate_brush_knot_makers,
-    aggregate_brush_handle_makers,
 )
 from sotd.aggregate.load import load_enriched_data
 from sotd.aggregate.save import save_aggregated_data
@@ -203,7 +205,10 @@ class TestAggregateIntegration:
                     "id": "test5",
                     "author": "user4",
                     "created_utc": 1640995204,
-                    "body": "Razor: Blackland Blackbird\nBlade: Feather\nBrush: Zenith\nSoap: Declaration Grooming",
+                    "body": (
+                        "Razor: Blackland Blackbird\nBlade: Feather\nBrush: Zenith\n"
+                        "Soap: Declaration Grooming"
+                    ),
                     "razor": {
                         "matched": {
                             "brand": "Blackland",
@@ -328,6 +333,8 @@ class TestAggregateIntegration:
             soap_makers = aggregate_soap_makers(matched_records)
             brush_knot_makers = aggregate_brush_knot_makers(matched_records)
             brush_handle_makers = aggregate_brush_handle_makers(matched_records)
+            brush_fibers = aggregate_brush_fibers(matched_records)
+            brush_knot_sizes = aggregate_brush_knot_sizes(matched_records)
 
             # Create aggregated results
             aggregated_results = {
@@ -345,6 +352,8 @@ class TestAggregateIntegration:
                     "brushes": brush_results,
                     "brush_knot_makers": brush_knot_makers,
                     "brush_handle_makers": brush_handle_makers,
+                    "brush_fibers": brush_fibers,
+                    "brush_knot_sizes": brush_knot_sizes,
                     "users": user_results,
                 },
                 "summary": {
@@ -359,6 +368,8 @@ class TestAggregateIntegration:
                     "brush_count": len(brush_results),
                     "brush_knot_maker_count": len(brush_knot_makers),
                     "brush_handle_maker_count": len(brush_handle_makers),
+                    "brush_fiber_count": len(brush_fibers),
+                    "brush_knot_size_count": len(brush_knot_sizes),
                     "user_count": len(user_results),
                 },
             }
