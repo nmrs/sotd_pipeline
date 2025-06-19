@@ -41,10 +41,13 @@ Proceed through the remaining tasks in the current step one at a time. After com
 
 
 Tracked Implementation Development Process
-Start with first unchecked item
-1. Check off tasks: Mark each completed task with [x]
-2. Update session notes: Add notes after each work session
-3. Follow the workflow: Complete each chunk before moving to the next
-4. Run quality checks: Use make format lint typecheck test after each chunk
-5. Commit regularly: Commit changes with clear messages after each chunk. Commits should include updates to implementation plan.
-The plan is designed to be self-contained and will help you track progress across multiple development sessions without losing your place. You can start with the first chunk and work through the plan systematically, checking off tasks as you complete them.
+
+Purpose: These are instructions to proceed carefully through an implementation plan without causing major errors and ensuring that incremental progress is tracked. The plan is designed to be self-contained and will help you track progress across multiple development sessions without losing your place. You can start with the first chunk and work through the plan systematically, checking off tasks as you complete them.
+
+* Process *
+1. Start with first unchecked item
+2. Follow the workflow: Complete each chunk before moving to the next
+3. Run quality checks: Use "make format lint typecheck test" after each chunk, fixing any errors that result
+4. Check off tasks: Mark each completed task in the implementation plan document with [x] and save the file
+5. Update session notes: Add notes after each work session
+6. Commit regularly: Commit changes with clear messages after each chunk. Commits should include updates to implementation plan.
