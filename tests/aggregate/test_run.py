@@ -1,11 +1,8 @@
 """Unit tests for the aggregate run module."""
 
-import argparse
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
-
-import pytest
 
 from sotd.aggregate.run import main, process_month, run_aggregate
 
@@ -464,9 +461,11 @@ class TestMain:
 
     def test_no_date_arguments(self):
         """Test with no date arguments (should use current month)."""
+        import datetime as real_datetime
+
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
             with patch("sotd.aggregate.run.datetime") as mock_datetime:
-                mock_datetime.now.return_value = Mock(year=2025, month=4)
+                mock_datetime.datetime.now.return_value = real_datetime.datetime(2025, 4, 1)
 
                 main(["--out-dir", "data"])
 

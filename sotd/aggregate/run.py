@@ -14,9 +14,10 @@ CLI matrix
 """
 
 import argparse
+import json
 from pathlib import Path
 from typing import Sequence
-import json
+import datetime
 
 from tqdm import tqdm
 
@@ -284,9 +285,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     # Validate arguments
     if not args.month and not args.year and not args.range and not args.start and not args.end:
         # No date specified - use current month
-        from datetime import datetime
-
-        now = datetime.now()
+        now = datetime.datetime.now()
         args.month = f"{now.year:04d}-{now.month:02d}"
 
     # Validate output directory

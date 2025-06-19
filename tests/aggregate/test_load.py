@@ -419,7 +419,7 @@ class TestLoadEnrichedData:
         """Test with file access error."""
         mock_stat.side_effect = OSError("Permission denied")
 
-        with pytest.raises(OSError, match="Cannot access file"):
+        with pytest.raises(OSError, match="Permission denied"):
             load_enriched_data(Path("/tmp/test.json"))
 
     def test_unicode_decode_error(self):
