@@ -40,6 +40,7 @@ from sotd.aggregate.engine import (
     aggregate_super_speed_tips,
 )
 from sotd.aggregate.load import get_enriched_file_path, load_enriched_data
+from sotd.aggregate.performance import get_memory_usage
 from sotd.aggregate.product_aggregators import (
     aggregate_blades,
     aggregate_brushes,
@@ -49,7 +50,6 @@ from sotd.aggregate.product_aggregators import (
 from sotd.aggregate.save import get_aggregated_file_path, save_aggregated_data
 from sotd.aggregate.user_aggregators import aggregate_user_blade_usage, aggregate_users
 from sotd.cli_utils.date_span import month_span
-from sotd.aggregate.performance import get_memory_usage
 
 
 def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
