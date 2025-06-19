@@ -7,6 +7,8 @@ from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
+from ..delta_calculator import DeltaCalculator
+
 
 class BaseTableGenerator(ABC):
     """Base class for table generators."""
@@ -20,6 +22,7 @@ class BaseTableGenerator(ABC):
         """
         self.data = data
         self.debug = debug
+        self.delta_calculator = DeltaCalculator(debug=debug)
 
     @abstractmethod
     def get_table_data(self) -> List[Dict[str, Any]]:
@@ -36,11 +39,24 @@ class BaseTableGenerator(ABC):
         """Get the column configuration for the table."""
         pass
 
+    def get_category_name(self) -> str:
+        """Get the category name for this table generator.
+
+        This is used to match data between current and historical datasets.
+        Override in subclasses if the category name differs from the table title.
+
+        Returns:
+            Category name for data matching
+        """
+        # Default implementation - subclasses can override
+        return self.get_table_title().lower().replace(" ", "_")
+
     def generate_table(
         self,
         max_rows: int = 20,
         include_delta: bool = False,
         comparison_data: Optional[Dict[str, Any]] = None,
+        comparison_period: str = "previous month",
     ) -> str:
         """Generate a markdown table.
 
@@ -48,6 +64,7 @@ class BaseTableGenerator(ABC):
             max_rows: Maximum number of rows to include
             include_delta: Whether to include delta columns
             comparison_data: Historical data for delta calculations
+            comparison_period: Which comparison period to use
 
         Returns:
             Markdown table as a string
@@ -63,6 +80,14 @@ class BaseTableGenerator(ABC):
                 print(f"[DEBUG] No data available for table: {self.get_table_title()}")
             return ""
 
+        # Add position information for delta calculations
+        if include_delta:
+            table_data = self._add_positions(table_data)
+
+        # Calculate deltas if requested
+        if include_delta and comparison_data:
+            table_data = self._calculate_deltas(table_data, comparison_data, comparison_period)
+
         # Convert to DataFrame
         df = pd.DataFrame(table_data)
 
@@ -73,6 +98,10 @@ class BaseTableGenerator(ABC):
 
         # Get column configuration
         column_config = self.get_column_config()
+
+        # Add delta column configuration if deltas are included
+        if include_delta and comparison_data:
+            column_config = self._add_delta_column_config(column_config, comparison_period)
 
         # Select and rename columns
         columns = list(column_config.keys())
@@ -167,6 +196,114 @@ class BaseTableGenerator(ABC):
 
         return "\n".join(markdown_lines)
 
+    def _add_positions(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Add position information to data for delta calculations.
+
+        Args:
+            data: List of data items
+
+        Returns:
+            Data with position information added
+        """
+        if not data:
+            return data
+
+        # Sort by the first numeric field (usually count/usage)
+        numeric_fields = []
+        for key in data[0].keys():
+            if isinstance(data[0][key], (int, float)):
+                numeric_fields.append(key)
+
+        if not numeric_fields:
+            if self.debug:
+                print("[DEBUG] No numeric fields found for positioning")
+            return data
+
+        # Sort by the first numeric field in descending order
+        sort_field = numeric_fields[0]
+        sorted_data = sorted(data, key=lambda x: x.get(sort_field, 0), reverse=True)
+
+        # Add position information
+        for i, item in enumerate(sorted_data):
+            item["position"] = i + 1
+
+        if self.debug:
+            print(f"[DEBUG] Added positions to {len(sorted_data)} items using {sort_field}")
+
+        return sorted_data
+
+    def _calculate_deltas(
+        self,
+        current_data: List[Dict[str, Any]],
+        comparison_data: Dict[str, Any],
+        comparison_period: str,
+    ) -> List[Dict[str, Any]]:
+        """Calculate deltas for the current data.
+
+        Args:
+            current_data: Current period data with positions
+            comparison_data: Historical data for comparison
+            comparison_period: Which comparison period to use
+
+        Returns:
+            Current data with delta information added
+        """
+        if not comparison_data:
+            if self.debug:
+                print("[DEBUG] No comparison data provided for delta calculation")
+            return current_data
+
+        # Get the historical data for this category
+        category_name = self.get_category_name()
+        historical_data = comparison_data.get(category_name, [])
+
+        if not historical_data:
+            if self.debug:
+                print(f"[DEBUG] No historical data found for category: {category_name}")
+            return current_data
+
+        # Add positions to historical data if not present
+        if not any("position" in item for item in historical_data):
+            historical_data = self._add_positions(historical_data)
+
+        # Calculate deltas
+        try:
+            result = self.delta_calculator.calculate_deltas(
+                current_data, historical_data, max_items=len(current_data)
+            )
+
+            if self.debug:
+                print(f"[DEBUG] Calculated deltas for {len(result)} items")
+
+            return result
+        except Exception as e:
+            if self.debug:
+                print(f"[DEBUG] Error calculating deltas: {e}")
+            return current_data
+
+    def _add_delta_column_config(
+        self, column_config: Dict[str, Dict[str, Any]], comparison_period: str
+    ) -> Dict[str, Dict[str, Any]]:
+        """Add delta column configuration to the existing config.
+
+        Args:
+            column_config: Existing column configuration
+            comparison_period: Which comparison period to use
+
+        Returns:
+            Updated column configuration with delta column
+        """
+        # Create a copy to avoid modifying the original
+        updated_config = column_config.copy()
+
+        # Add delta column configuration
+        updated_config["delta_text"] = {
+            "display_name": f"vs {comparison_period.title()}",
+            "format": "delta",
+        }
+
+        return updated_config
+
 
 class SimpleTableGenerator(BaseTableGenerator):
     """Simple table generator for basic data."""
@@ -202,9 +339,19 @@ class SimpleTableGenerator(BaseTableGenerator):
         return self._title
 
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
-        """Get the column configuration for the table."""
+        """Get the column configuration."""
         return self._column_config
+
+    def get_category_name(self) -> str:
+        """Get the category name for data matching."""
+        return self.category
 
 
 def _format_decimal(x: Any, decimals: int) -> str:
-    return f"{x:.{decimals}f}" if pd.notna(x) else "0.00"
+    """Format a decimal value with the specified number of decimal places."""
+    if pd.isna(x):
+        return "0.0"
+    try:
+        return f"{float(x):.{decimals}f}"
+    except (ValueError, TypeError):
+        return "0.0"
