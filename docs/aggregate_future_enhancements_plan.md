@@ -101,42 +101,42 @@ Implement specialized aggregation categories and cross-product analysis for the 
 ### Phase 2: Cross-Product Analysis
 
 #### Chunk 6: Razor-Blade Combinations Aggregation
-- [ ] **Step 6.1: Create Razor-Blade Combinations Function**
-  - [ ] Create `aggregate_razor_blade_combinations()` function in `sotd/aggregate/engine.py`
-  - [ ] Group by both razor name and blade name from matched data
-  - [ ] Calculate metrics for most popular combinations
-  - [ ] Handle edge cases (missing either razor or blade data)
-  - [ ] Sort by usage frequency
-  - [ ] Implement pandas-based aggregation with standard metrics
-  - [ ] Add proper error handling and validation
-  - [ ] Include type hints and docstrings
-  - [ ] Follow existing code patterns
+- [x] **Step 6.1: Create Razor-Blade Combinations Function**
+  - [x] Create `aggregate_razor_blade_combinations()` function in `sotd/aggregate/engine.py`
+  - [x] Group by both razor name and blade name from matched data
+  - [x] Calculate metrics for most popular combinations
+  - [x] Handle edge cases (missing either razor or blade data)
+  - [x] Sort by usage frequency
+  - [x] Implement pandas-based aggregation with standard metrics
+  - [x] Add proper error handling and validation
+  - [x] Include type hints and docstrings
+  - [x] Follow existing code patterns
 
-- [ ] **Step 6.2: Test Razor-Blade Combinations**
-  - [ ] Create unit tests in `tests/aggregate/test_engine.py`
-  - [ ] Test with sample enriched data containing razor and blade combinations
-  - [ ] Test edge cases (missing data)
-  - [ ] Test pandas aggregation operations
-  - [ ] Verify output structure matches existing patterns
+- [x] **Step 6.2: Test Razor-Blade Combinations**
+  - [x] Create unit tests in `tests/aggregate/test_engine.py`
+  - [x] Test with sample enriched data containing razor and blade combinations
+  - [x] Test edge cases (missing data)
+  - [x] Test pandas aggregation operations
+  - [x] Verify output structure matches existing patterns
 
 #### Chunk 7: Per-User Blade Usage Aggregation
-- [ ] **Step 7.1: Create Per-User Blade Usage Function**
-  - [ ] Create `aggregate_user_blade_usage()` function in `sotd/aggregate/engine.py`
-  - [ ] Extract blade use count from `blade.enriched.use_count`
-  - [ ] Group by user and blade, calculate average use count
-  - [ ] Identify users who maximize blade usage
-  - [ ] Handle missing use count data gracefully
-  - [ ] Implement pandas-based aggregation with standard metrics
-  - [ ] Add proper error handling and validation
-  - [ ] Include type hints and docstrings
-  - [ ] Follow existing code patterns
+- [x] **Step 7.1: Create Per-User Blade Usage Function**
+  - [x] Create `aggregate_user_blade_usage()` function in `sotd/aggregate/engine.py`
+  - [x] Extract blade use count from `blade.enriched.use_count`
+  - [x] Group by user and blade, calculate average use count
+  - [x] Identify users who maximize blade usage
+  - [x] Handle missing use count data gracefully
+  - [x] Implement pandas-based aggregation with standard metrics
+  - [x] Add proper error handling and validation
+  - [x] Include type hints and docstrings
+  - [x] Follow existing code patterns
 
-- [ ] **Step 7.2: Test Per-User Blade Usage**
-  - [ ] Create unit tests in `tests/aggregate/test_engine.py`
-  - [ ] Test with sample enriched data containing blade use count information
-  - [ ] Test edge cases and missing data
-  - [ ] Test pandas aggregation operations
-  - [ ] Verify output structure matches existing patterns
+- [x] **Step 7.2: Test Per-User Blade Usage**
+  - [x] Create unit tests in `tests/aggregate/test_engine.py`
+  - [x] Test with sample enriched data containing blade use count information
+  - [x] Test edge cases and missing data
+  - [x] Test pandas aggregation operations
+  - [x] Verify output structure matches existing patterns
 
 ### Phase 3: Integration & Testing
 
@@ -229,7 +229,7 @@ Implement specialized aggregation categories and cross-product analysis for the 
 
 ### Current Status
 - [x] Phase 1: Specialized Razor Categories Foundation (5/5 chunks completed)
-- [ ] Phase 2: Cross-Product Analysis (0/2 chunks completed)
+- [x] Phase 2: Cross-Product Analysis (2/2 chunks completed)
 - [ ] Phase 3: Integration & Testing (0/4 chunks completed)
 
 ### Session Notes
@@ -268,7 +268,22 @@ Implement specialized aggregation categories and cross-product analysis for the 
   - Added comprehensive unit tests in `tests/aggregate/test_engine.py` for all edge cases and scenarios (single specs, multiple specs, partial specs, mixed razor types, tiebreaker scenarios)
   - All quality checks pass: format, lint, typecheck, test (743/743 tests pass)
   - Committed changes with clear conventional commit message
-- **Session 6**: [Date] - [Notes on what was completed]
+- **Session 6**: [2024-12-22] - Completed Chunk 6: Razor-Blade Combinations Aggregation
+  - Implemented `aggregate_razor_blade_combinations()` in `sotd/aggregate/engine.py` following the established aggregation pattern
+  - Added comprehensive filtering logic for razor-blade combinations (both razor and blade must be matched)
+  - Implemented combination extraction from `razor.matched` and `blade.matched` (brand + model for both)
+  - Created pandas-based aggregation with standard metrics (shaves, unique_users, avg_shaves_per_user)
+  - Added comprehensive unit tests in `tests/aggregate/test_engine.py` for all edge cases and scenarios (single combination, multiple combinations, missing data, tiebreaker scenarios)
+  - All quality checks pass: format, lint, typecheck, test (752/752 tests pass)
+  - Committed changes with clear conventional commit message
+- **Session 7**: [2024-12-22] - Completed Chunk 7: Per-User Blade Usage Aggregation
+  - Implemented `aggregate_user_blade_usage()` in `sotd/aggregate/engine.py` following the established aggregation pattern
+  - Added comprehensive filtering logic for per-user blade usage (blade must be matched and use_count must be available)
+  - Implemented use count extraction from `blade.enriched.use_count`
+  - Created pandas-based aggregation with metrics (avg_use_count, shaves, max_use_count)
+  - Added comprehensive unit tests in `tests/aggregate/test_engine.py` for all edge cases and scenarios (single user, multiple users, multiple shaves, tiebreaker scenarios)
+  - All quality checks pass: format, lint, typecheck, test (761/761 tests pass)
+  - Committed changes with clear conventional commit message
 
 ### Next Steps
 - [x] Start with Chunk 1: Blackbird Plates Aggregation
