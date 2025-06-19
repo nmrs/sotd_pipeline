@@ -140,11 +140,11 @@ sotd/aggregate/aggregators/
   - [x] Add position field calculation
   - [x] Sort by shaves desc, unique_users desc
 
-- [ ] **3.2 Blade Manufacturer Aggregator (`aggregators/manufacturers/blade_manufacturer_aggregator.py`)**
-  - [ ] Implement blade manufacturer aggregation
-  - [ ] Extract brand from blade.matched.brand
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **3.2 Blade Manufacturer Aggregator (`aggregators/manufacturers/blade_manufacturer_aggregator.py`)**
+  - [x] Implement blade manufacturer aggregation
+  - [x] Extract brand from blade.matched.brand
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
 - [ ] **3.3 Soap Maker Aggregator (`aggregators/manufacturers/soap_maker_aggregator.py`)**
   - [ ] Implement soap maker aggregation
