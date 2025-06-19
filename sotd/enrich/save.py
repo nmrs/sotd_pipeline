@@ -7,10 +7,10 @@ Handles reading matched data and writing enriched data with comprehensive metada
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 
-def load_matched_data(file_path: Path) -> Optional[Tuple[Dict[str, Any], List[Dict[str, Any]]]]:
+def load_matched_data(file_path: Path) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     """
     Load matched data from a JSON file.
 
@@ -18,28 +18,46 @@ def load_matched_data(file_path: Path) -> Optional[Tuple[Dict[str, Any], List[Di
         file_path: Path to the matched data file
 
     Returns:
-        Tuple of (metadata, data) if file exists and is valid, None otherwise
+        Tuple of (metadata, data)
+
+    Raises:
+        FileNotFoundError: If the file doesn't exist
+        ValueError: If the JSON structure is invalid or data quality issues found
+        json.JSONDecodeError: If the file is not valid JSON
+        OSError: If there are file system issues
     """
     if not file_path.exists():
-        return None
+        # Fail fast on missing required files - this is a configuration error
+        raise FileNotFoundError(f"Matched data file not found: {file_path}")
 
     try:
         with file_path.open("r", encoding="utf-8") as f:
             content = json.load(f)
+    except json.JSONDecodeError as e:
+        # Fail fast on malformed JSON - this is a data quality error
+        raise ValueError(f"Invalid JSON in matched data file {file_path}: {e}")
+    except OSError as e:
+        # Fail fast on file system errors
+        raise OSError(f"File system error reading {file_path}: {e}")
 
-        if not isinstance(content, dict) or "data" not in content:
-            return None
+    # Fail fast on invalid data structure
+    if not isinstance(content, dict):
+        raise ValueError(f"Expected dict at root level in {file_path}, got {type(content)}")
 
-        metadata = content.get("meta", {})
-        data = content.get("data", [])
+    if "data" not in content:
+        raise ValueError(f"Missing 'data' section in {file_path}")
 
-        if not isinstance(data, list):
-            return None
+    metadata = content.get("meta", {})
+    data = content.get("data", [])
 
-        return metadata, data
+    # Fail fast on invalid data types
+    if not isinstance(data, list):
+        raise ValueError(f"Expected list for 'data' in {file_path}, got {type(data)}")
 
-    except (json.JSONDecodeError, IOError):
-        return None
+    if not isinstance(metadata, dict):
+        raise ValueError(f"Expected dict for 'meta' in {file_path}, got {type(metadata)}")
+
+    return metadata, data
 
 
 def save_enriched_data(

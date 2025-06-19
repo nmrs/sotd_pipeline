@@ -16,6 +16,7 @@ CLI matrix
 import argparse
 import datetime
 import json
+import time
 from pathlib import Path
 from typing import Sequence
 
@@ -24,9 +25,9 @@ from tqdm import tqdm
 from sotd.aggregate.engine import (
     aggregate_blade_manufacturers,
     aggregate_blades,
+    aggregate_brush_fibers,
     aggregate_brush_handle_makers,
     aggregate_brush_knot_makers,
-    aggregate_brush_fibers,
     aggregate_brush_knot_sizes,
     aggregate_brushes,
     aggregate_razor_manufacturers,
@@ -40,6 +41,66 @@ from sotd.aggregate.engine import (
 from sotd.aggregate.load import get_enriched_file_path, load_enriched_data
 from sotd.aggregate.save import get_aggregated_file_path, save_aggregated_data
 from sotd.cli_utils.date_span import month_span
+
+
+def get_memory_usage() -> dict:
+    """
+    Get current memory usage information.
+
+    Returns:
+        Dictionary with memory usage information
+    """
+    try:
+        import psutil
+
+        memory = psutil.virtual_memory()
+        return {
+            "total_gb": round(memory.total / (1024**3), 2),
+            "available_gb": round(memory.available / (1024**3), 2),
+            "used_gb": round(memory.used / (1024**3), 2),
+            "percent_used": memory.percent,
+        }
+    except ImportError:
+        return {"error": "psutil not available"}
+
+
+def log_performance_metrics(metrics: dict, debug: bool = False) -> None:
+    """
+    Log performance metrics in a structured way.
+
+    Args:
+        metrics: Performance metrics dictionary
+        debug: Enable debug logging
+    """
+    if not debug:
+        return
+
+    print("\n[DEBUG] Performance Summary:")
+    print("=" * 50)
+
+    total_time = sum(op.get("elapsed_seconds", 0) for op in metrics.values())
+    total_records = sum(op.get("record_count", 0) for op in metrics.values())
+
+    print(f"Total processing time: {total_time:.3f}s")
+    print(f"Total records processed: {total_records}")
+    if total_time > 0:
+        print(f"Overall throughput: {total_records / total_time:.1f} records/sec")
+
+    print("\nOperation breakdown:")
+    for operation, data in metrics.items():
+        elapsed = data.get("elapsed_seconds", 0)
+        records = data.get("record_count", 0)
+        rate = data.get("records_per_second", 0)
+        print(f"  {operation}: {elapsed:.3f}s, {records} records, {rate:.1f} records/sec")
+
+    # Memory usage
+    memory_info = get_memory_usage()
+    if "error" not in memory_info:
+        print(
+            f"\nMemory usage: {memory_info['used_gb']}GB / {memory_info['total_gb']}GB "
+            f"({memory_info['percent_used']}%)"
+        )
+    print("=" * 50)
 
 
 def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
@@ -74,6 +135,17 @@ def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
             "month": month,
             "status": "skipped",
             "reason": "missing_enriched_file",
+        }
+
+    # Check if output file exists and force flag
+    if aggregated_path.exists() and not args.force:
+        if args.debug:
+            print(f"[DEBUG] Skipping existing aggregated file: {aggregated_path}")
+        return {
+            "year": year,
+            "month": month,
+            "status": "skipped",
+            "reason": "file_exists",
         }
 
     try:
@@ -277,6 +349,9 @@ def process_month(year: int, month: int, args: argparse.Namespace) -> dict:
 
 def run_aggregate(args: argparse.Namespace) -> None:
     """Main aggregation logic."""
+    # Start overall performance monitoring
+    overall_start = time.time()
+
     # Validate output directory
     out_dir = Path(args.out_dir)
     if not out_dir.exists():
@@ -299,12 +374,53 @@ def run_aggregate(args: argparse.Namespace) -> None:
         print(f"[DEBUG] Output directory: {args.out_dir}")
         print(f"[DEBUG] Force overwrite: {args.force}")
 
+        # Initial memory usage
+        memory_info = get_memory_usage()
+        if "error" not in memory_info:
+            print(
+                f"[DEBUG] Initial memory usage: {memory_info['used_gb']}GB / "
+                f"{memory_info['total_gb']}GB ({memory_info['percent_used']}%)"
+            )
+
     results = []
+    performance_metrics = {}
 
     # Process each month with progress bar
     for year, month in tqdm(months, desc="Aggregating", unit="month"):
+        month_start = time.time()
         result = process_month(year, month, args)
+        month_elapsed = time.time() - month_start
+
+        # Record performance metrics for this month
+        if result["status"] == "success":
+            performance_metrics[f"{year:04d}-{month:02d}"] = {
+                "elapsed_seconds": month_elapsed,
+                "record_count": result.get("summary", {}).get("total_records", 0),
+                "matched_records": result.get("summary", {}).get("matched_records", 0),
+            }
+
         results.append(result)
+
+    # Calculate overall performance
+    overall_elapsed = time.time() - overall_start
+    total_records = sum(
+        r.get("summary", {}).get("total_records", 0) for r in results if r["status"] == "success"
+    )
+
+    if args.debug:
+        print("\n[DEBUG] Overall performance:")
+        print(f"  Total time: {overall_elapsed:.3f}s")
+        print(f"  Total records: {total_records}")
+        if overall_elapsed > 0:
+            print(f"  Overall throughput: {total_records / overall_elapsed:.1f} records/sec")
+
+        # Final memory usage
+        memory_info = get_memory_usage()
+        if "error" not in memory_info:
+            print(
+                f"  Final memory usage: {memory_info['used_gb']}GB / "
+                f"{memory_info['total_gb']}GB ({memory_info['percent_used']}%)"
+            )
 
     # Print summary
     successful = [r for r in results if r["status"] == "success"]
@@ -325,52 +441,88 @@ def run_aggregate(args: argparse.Namespace) -> None:
     if errors and args.debug:
         print("\n[DEBUG] Errors:")
         for error in errors:
-            print(f"  {error['year']:04d}-{error['month']:02d}: {error['error']}")
+            print(
+                f"  {error['year']:04d}-{error['month']:02d}: {error.get('error', 'Unknown error')}"
+            )
 
-    if errors and not args.debug:
-        print(f"\n[INFO] {len(errors)} month(s) had errors. Use --debug for details.")
+    if skipped and args.debug:
+        print("\n[DEBUG] Skipped:")
+        for skip in skipped:
+            print(
+                f"  {skip['year']:04d}-{skip['month']:02d}: {skip.get('reason', 'Unknown reason')}"
+            )
 
 
 def main(argv: Sequence[str] | None = None) -> None:
-    """Main CLI entry point for aggregate phase."""
-    p = argparse.ArgumentParser(
-        description="Aggregate enriched SOTD data into statistical summaries"
+    """Main entry point for the aggregate phase."""
+    parser = argparse.ArgumentParser(
+        description="Aggregate enriched SOTD data into statistical summaries",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__,
     )
 
-    # Date range arguments (same pattern as other phases)
-    g = p.add_mutually_exclusive_group()
-    g.add_argument("--month", type=str, help="e.g., 2025-04")
-    g.add_argument("--year", type=int, help="e.g., 2025 (runs all months in that year)")
-    g.add_argument("--range", type=str, help="Format: YYYY-MM:YYYY-MM (inclusive)")
-    p.add_argument("--start", type=str, help="Optional: overrides start date (YYYY-MM)")
-    p.add_argument("--end", type=str, help="Optional: overrides end date (YYYY-MM)")
+    # Date range arguments
+    parser.add_argument(
+        "--month",
+        help="Process specific month (YYYY-MM format)",
+    )
+    parser.add_argument(
+        "--year",
+        type=int,
+        help="Process entire year (YYYY format)",
+    )
+    parser.add_argument(
+        "--start",
+        help="Start month for range (YYYY-MM format)",
+    )
+    parser.add_argument(
+        "--end",
+        help="End month for range (YYYY-MM format)",
+    )
+    parser.add_argument(
+        "--range",
+        help="Month range (YYYY-MM:YYYY-MM format)",
+    )
 
-    # Standard pipeline arguments
-    p.add_argument("--out-dir", default="data", help="Output directory for aggregated data")
-    p.add_argument("--debug", action="store_true", help="Enable debug logging")
-    p.add_argument("--force", action="store_true", help="Force overwrite existing files")
+    # Output and control arguments
+    parser.add_argument(
+        "--out-dir",
+        default="data",
+        help="Output directory (default: data)",
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable debug logging",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Force overwrite existing files",
+    )
 
-    args = p.parse_args(argv)
+    args = parser.parse_args(argv)
 
-    # Validate arguments
-    if not args.month and not args.year and not args.range and not args.start and not args.end:
-        # No date specified - use current month
+    # Validate date arguments
+    date_args = [args.month, args.year, args.start, args.end, args.range]
+    if not any(date_args):
+        # Default to current month
         now = datetime.datetime.now()
         args.month = f"{now.year:04d}-{now.month:02d}"
+    elif sum(1 for arg in date_args if arg is not None) > 1:
+        print("[ERROR] Only one date argument allowed")
+        return
 
-    # Validate output directory
-    out_dir = Path(args.out_dir)
-    if not out_dir.exists():
+    try:
+        run_aggregate(args)
+    except KeyboardInterrupt:
+        print("\n[INFO] Interrupted by user")
+    except Exception as e:
+        print(f"[ERROR] Unexpected error: {e}")
         if args.debug:
-            print(f"[DEBUG] Creating output directory: {out_dir}")
-        try:
-            out_dir.mkdir(parents=True, exist_ok=True)
-        except OSError as e:
-            print(f"[ERROR] Failed to create output directory {out_dir}: {e}")
-            return
+            import traceback
 
-    # Run aggregation
-    run_aggregate(args)
+            traceback.print_exc()
 
 
 if __name__ == "__main__":

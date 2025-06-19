@@ -1,4 +1,5 @@
 import argparse
+import json
 from pathlib import Path
 from typing import Optional, Sequence
 
@@ -22,14 +23,13 @@ def _process_month(
             print(f"Skipping missing input file: {in_path}")
         return None
 
-    # Load matched data
-    matched_result = load_matched_data(in_path)
-    if matched_result is None:
+    # Load matched data with fail-fast error handling
+    try:
+        original_metadata, comments = load_matched_data(in_path)
+    except (FileNotFoundError, ValueError, json.JSONDecodeError, OSError) as e:
         if debug:
-            print(f"Failed to load matched data from: {in_path}")
+            print(f"Failed to load matched data from {in_path}: {e}")
         return None
-
-    original_metadata, comments = matched_result
 
     # Extract original comment texts for enrichment - optimized version
     original_comments = []

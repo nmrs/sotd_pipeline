@@ -1,8 +1,88 @@
 """Core aggregation engine using pandas for efficient data processing."""
 
-from typing import Any, Dict, List
+import time
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
+
+
+class PerformanceMonitor:
+    """Monitor performance metrics during aggregation."""
+
+    def __init__(self, debug: bool = False):
+        self.debug = debug
+        self.start_time = None
+        self.metrics = {}
+
+    def start(self, operation: str):
+        """Start timing an operation."""
+        if self.debug:
+            self.start_time = time.time()
+            print(f"[DEBUG] Starting {operation}")
+
+    def end(self, operation: str, record_count: Optional[int] = None):
+        """End timing an operation and record metrics."""
+        if self.debug and self.start_time:
+            elapsed = time.time() - self.start_time
+            self.metrics[operation] = {
+                "elapsed_seconds": elapsed,
+                "record_count": record_count,
+                "records_per_second": (
+                    record_count / elapsed if record_count and elapsed > 0 else 0
+                ),
+            }
+            print(f"[DEBUG] {operation} completed in {elapsed:.3f}s")
+            if record_count:
+                rate = record_count / elapsed
+                print(
+                    f"[DEBUG] {operation} processed {record_count} records "
+                    f"at {rate:.1f} records/sec"
+                )
+
+    def get_summary(self) -> Dict[str, Any]:
+        """Get performance summary."""
+        return self.metrics
+
+
+def optimize_dataframe_operations(df: pd.DataFrame, debug: bool = False) -> pd.DataFrame:
+    """
+    Optimize DataFrame for better performance.
+
+    Args:
+        df: Input DataFrame
+        debug: Enable debug logging
+
+    Returns:
+        Optimized DataFrame
+    """
+    if debug:
+        print(f"[DEBUG] DataFrame optimization: {len(df)} rows, {len(df.columns)} columns")
+
+    # Use more efficient dtypes where possible
+    for col in df.columns:
+        if df[col].dtype == "object":
+            # Skip dictionary columns (they can't be converted to category)
+            if bool(df[col].apply(lambda x: isinstance(x, dict)).any()):
+                if debug:
+                    print(f"[DEBUG] Skipping dictionary column '{col}'")
+                continue
+
+            # Convert object columns to category if they have limited unique values
+            try:
+                unique_ratio = df[col].nunique() / len(df)
+                if unique_ratio < 0.5:  # Less than 50% unique values
+                    df[col] = df[col].astype("category")
+                    if debug:
+                        print(
+                            f"[DEBUG] Converted column '{col}' to category "
+                            f"(unique ratio: {unique_ratio:.2f})"
+                        )
+            except (TypeError, ValueError) as e:
+                if debug:
+                    print(f"[DEBUG] Could not optimize column '{col}': {e}")
+                continue
+
+    return df
 
 
 def filter_matched_records(
@@ -21,12 +101,16 @@ def filter_matched_records(
     Raises:
         ValueError: If records list is invalid or contains invalid data
     """
+    monitor = PerformanceMonitor(debug)
+    monitor.start("filter_matched_records")
+
     if not isinstance(records, list):
         raise ValueError(f"Expected list of records, got {type(records)}")
 
     if not records:
         if debug:
             print("[DEBUG] No records to filter")
+        monitor.end("filter_matched_records", 0)
         return []
 
     matched_records = []
@@ -61,6 +145,7 @@ def filter_matched_records(
             f"({invalid_records} invalid records)"
         )
 
+    monitor.end("filter_matched_records", len(matched_records))
     return matched_records
 
 
@@ -78,10 +163,14 @@ def calculate_basic_metrics(records: List[Dict[str, Any]], debug: bool = False) 
     Raises:
         ValueError: If records list is invalid or contains invalid data
     """
+    monitor = PerformanceMonitor(debug)
+    monitor.start("calculate_basic_metrics")
+
     if not isinstance(records, list):
         raise ValueError(f"Expected list of records, got {type(records)}")
 
     if not records:
+        monitor.end("calculate_basic_metrics", 0)
         return {
             "total_shaves": 0,
             "unique_shavers": 0,
@@ -113,6 +202,7 @@ def calculate_basic_metrics(records: List[Dict[str, Any]], debug: bool = False) 
     if not valid_records:
         if debug:
             print("[DEBUG] No valid records for basic metrics calculation")
+        monitor.end("calculate_basic_metrics", 0)
         return {
             "total_shaves": 0,
             "unique_shavers": 0,
@@ -122,6 +212,7 @@ def calculate_basic_metrics(records: List[Dict[str, Any]], debug: bool = False) 
     # Convert to pandas DataFrame for efficient calculations
     try:
         df = pd.DataFrame(valid_records)
+        df = optimize_dataframe_operations(df, debug)
     except Exception as e:
         raise ValueError(f"Failed to create DataFrame from records: {e}")
 
@@ -138,6 +229,7 @@ def calculate_basic_metrics(records: List[Dict[str, Any]], debug: bool = False) 
     if debug:
         print(f"[DEBUG] Basic metrics: {metrics}")
 
+    monitor.end("calculate_basic_metrics", len(valid_records))
     return metrics
 
 
@@ -155,10 +247,14 @@ def aggregate_razors(records: List[Dict[str, Any]], debug: bool = False) -> List
     Raises:
         ValueError: If records list is invalid or contains invalid data
     """
+    monitor = PerformanceMonitor(debug)
+    monitor.start("aggregate_razors")
+
     if not isinstance(records, list):
         raise ValueError(f"Expected list of records, got {type(records)}")
 
     if not records:
+        monitor.end("aggregate_razors", 0)
         return []
 
     razor_data = []
@@ -215,11 +311,13 @@ def aggregate_razors(records: List[Dict[str, Any]], debug: bool = False) -> List
     if not razor_data:
         if debug:
             print("[DEBUG] No valid razor data found")
+        monitor.end("aggregate_razors", 0)
         return []
 
     # Convert to DataFrame for aggregation
     try:
         df = pd.DataFrame(razor_data)
+        df = optimize_dataframe_operations(df, debug)
     except Exception as e:
         raise ValueError(f"Failed to create DataFrame for razor aggregation: {e}")
 
@@ -244,6 +342,7 @@ def aggregate_razors(records: List[Dict[str, Any]], debug: bool = False) -> List
     if debug:
         print(f"[DEBUG] Aggregated {len(results)} razors ({invalid_records} invalid records)")
 
+    monitor.end("aggregate_razors", len(razor_data))
     return results  # type: ignore
 
 

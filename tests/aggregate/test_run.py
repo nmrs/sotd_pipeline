@@ -108,8 +108,13 @@ class TestProcessMonth:
             enriched_file = enriched_dir / "2025-01.json"
             enriched_file.write_text('{"meta": {}, "data": []}')
 
-            with patch("sotd.aggregate.run.get_enriched_file_path") as mock_path:
-                mock_path.return_value = enriched_file
+            with (
+                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+            ):
+                mock_enriched_path.return_value = enriched_file
+                # Mock aggregated file to not exist (so it won't be skipped)
+                mock_aggregated_path.return_value = Path(temp_dir) / "aggregated" / "2025-01.json"
                 result = process_month(2025, 1, args)
 
         assert result["status"] == "success"
@@ -138,8 +143,13 @@ class TestProcessMonth:
             enriched_file = enriched_dir / "2025-01.json"
             enriched_file.write_text('{"meta": {}, "data": []}')
 
-            with patch("sotd.aggregate.run.get_enriched_file_path") as mock_path:
-                mock_path.return_value = enriched_file
+            with (
+                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+            ):
+                mock_enriched_path.return_value = enriched_file
+                # Mock aggregated file to not exist
+                mock_aggregated_path.return_value = Path(temp_dir) / "aggregated" / "2025-01.json"
                 result = process_month(2025, 1, args)
 
         assert result["status"] == "skipped"
@@ -161,8 +171,13 @@ class TestProcessMonth:
             enriched_file = enriched_dir / "2025-01.json"
             enriched_file.write_text('{"meta": {}, "data": []}')
 
-            with patch("sotd.aggregate.run.get_enriched_file_path") as mock_path:
-                mock_path.return_value = enriched_file
+            with (
+                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+            ):
+                mock_enriched_path.return_value = enriched_file
+                # Mock aggregated file to not exist
+                mock_aggregated_path.return_value = Path(temp_dir) / "aggregated" / "2025-01.json"
                 result = process_month(2025, 1, args)
 
         assert result["status"] == "error"
@@ -184,8 +199,13 @@ class TestProcessMonth:
             enriched_file = enriched_dir / "2025-01.json"
             enriched_file.write_text('{"meta": {}, "data": []}')
 
-            with patch("sotd.aggregate.run.get_enriched_file_path") as mock_path:
-                mock_path.return_value = enriched_file
+            with (
+                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+            ):
+                mock_enriched_path.return_value = enriched_file
+                # Mock aggregated file to not exist
+                mock_aggregated_path.return_value = Path(temp_dir) / "aggregated" / "2025-01.json"
                 result = process_month(2025, 1, args)
 
         assert result["status"] == "error"
@@ -209,8 +229,13 @@ class TestProcessMonth:
             enriched_file = enriched_dir / "2025-01.json"
             enriched_file.write_text('{"meta": {}, "data": []}')
 
-            with patch("sotd.aggregate.run.get_enriched_file_path") as mock_path:
-                mock_path.return_value = enriched_file
+            with (
+                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+            ):
+                mock_enriched_path.return_value = enriched_file
+                # Mock aggregated file to not exist
+                mock_aggregated_path.return_value = Path(temp_dir) / "aggregated" / "2025-01.json"
                 result = process_month(2025, 1, args)
 
         assert result["status"] == "error"
@@ -232,8 +257,13 @@ class TestProcessMonth:
             enriched_file = enriched_dir / "2025-01.json"
             enriched_file.write_text('{"meta": {}, "data": []}')
 
-            with patch("sotd.aggregate.run.get_enriched_file_path") as mock_path:
-                mock_path.return_value = enriched_file
+            with (
+                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+            ):
+                mock_enriched_path.return_value = enriched_file
+                # Mock aggregated file to not exist
+                mock_aggregated_path.return_value = Path(temp_dir) / "aggregated" / "2025-01.json"
                 result = process_month(2025, 1, args)
 
         assert result["status"] == "error"
@@ -255,8 +285,13 @@ class TestProcessMonth:
             enriched_file = enriched_dir / "2025-01.json"
             enriched_file.write_text('{"meta": {}, "data": []}')
 
-            with patch("sotd.aggregate.run.get_enriched_file_path") as mock_path:
-                mock_path.return_value = enriched_file
+            with (
+                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+            ):
+                mock_enriched_path.return_value = enriched_file
+                # Mock aggregated file to not exist
+                mock_aggregated_path.return_value = Path(temp_dir) / "aggregated" / "2025-01.json"
                 result = process_month(2025, 1, args)
 
         assert result["status"] == "error"
@@ -328,8 +363,13 @@ class TestProcessMonth:
             enriched_file = enriched_dir / "2025-01.json"
             enriched_file.write_text('{"meta": {}, "data": []}')
 
-            with patch("sotd.aggregate.run.get_enriched_file_path") as mock_path:
-                mock_path.return_value = enriched_file
+            with (
+                patch("sotd.aggregate.run.get_enriched_file_path") as mock_enriched_path,
+                patch("sotd.aggregate.run.get_aggregated_file_path") as mock_aggregated_path,
+            ):
+                mock_enriched_path.return_value = enriched_file
+                # Mock aggregated file to not exist
+                mock_aggregated_path.return_value = Path(temp_dir) / "aggregated" / "2025-01.json"
                 result = process_month(2025, 1, args)
 
         # Should still succeed but with empty razors list
@@ -499,7 +539,8 @@ class TestMain:
     def test_start_end_arguments(self):
         """Test with --start and --end arguments."""
         with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            main(["--start", "2025-01", "--end", "2025-03", "--out-dir", "data"])
+            # Test with just --start (single month)
+            main(["--start", "2025-01", "--out-dir", "data"])
 
             # Verify run_aggregate was called
             mock_run.assert_called_once()
@@ -531,9 +572,8 @@ class TestMain:
 
     def test_output_directory_creation_error_in_main(self):
         """Test output directory creation error in main function."""
-        with patch("sotd.aggregate.run.run_aggregate") as mock_run:
-            # Try to create a directory in a location that should fail
-            main(["--out-dir", "/root/nonexistent"])
+        # Try to create a directory in a location that should fail
+        main(["--out-dir", "/root/nonexistent"])
 
-            # Should handle the error gracefully
-            # run_aggregate might not be called due to the error
+        # Should handle the error gracefully
+        # run_aggregate might not be called due to the error

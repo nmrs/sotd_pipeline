@@ -3,6 +3,7 @@
 import json
 import tempfile
 from pathlib import Path
+import pytest
 
 from sotd.enrich.save import (
     calculate_enrichment_stats,
@@ -44,8 +45,8 @@ class TestLoadMatchedData:
 
     def test_load_nonexistent_file(self):
         """Test loading a file that doesn't exist."""
-        result = load_matched_data(Path("/nonexistent/file.json"))
-        assert result is None
+        with pytest.raises(FileNotFoundError, match="Matched data file not found"):
+            load_matched_data(Path("/nonexistent/file.json"))
 
     def test_load_invalid_json(self):
         """Test loading invalid JSON."""
@@ -53,8 +54,8 @@ class TestLoadMatchedData:
             f.write("invalid json content")
 
         try:
-            result = load_matched_data(Path(f.name))
-            assert result is None
+            with pytest.raises(ValueError, match="Invalid JSON in matched data file"):
+                load_matched_data(Path(f.name))
         finally:
             Path(f.name).unlink()
 
@@ -65,8 +66,8 @@ class TestLoadMatchedData:
             json.dump(test_data, f)
 
         try:
-            result = load_matched_data(Path(f.name))
-            assert result is None
+            with pytest.raises(ValueError, match="Missing 'data' section"):
+                load_matched_data(Path(f.name))
         finally:
             Path(f.name).unlink()
 
@@ -77,8 +78,8 @@ class TestLoadMatchedData:
             json.dump(test_data, f)
 
         try:
-            result = load_matched_data(Path(f.name))
-            assert result is None
+            with pytest.raises(ValueError, match="Expected list for 'data'"):
+                load_matched_data(Path(f.name))
         finally:
             Path(f.name).unlink()
 
