@@ -7,7 +7,8 @@ CLI matrix
 (no flags)                 → current month, hardware report
 --month YYYY-MM            → that single month
 --type hardware|software   → report type (default: hardware)
---out-dir DIR              → output directory (default: data)
+--data-root DIR            → root directory for all input data (default: data)
+--out-dir DIR              → output directory for report file (default: data)
 --debug                    → enable debug logging
 --force                    → force overwrite existing files
 """
@@ -31,7 +32,8 @@ CLI matrix
 (no flags)                 → current month, hardware report
 --month YYYY-MM            → that single month
 --type hardware|software   → report type (default: hardware)
---out-dir DIR              → output directory (default: data)
+--data-root DIR            → root directory for all input data (default: data)
+--out-dir DIR              → output directory for report file (default: data)
 --debug                    → enable debug logging
 --force                    → force overwrite existing files
 """,
@@ -48,8 +50,19 @@ CLI matrix
         help="Report type (default: hardware)",
     )
 
-    # Output and control arguments
-    parser.add_argument("--out-dir", default="data", help="Output directory (default: data)")
+    # Data root for all input data
+    parser.add_argument(
+        "--data-root",
+        default="data",
+        help="Root directory for all input data (default: data)",
+    )
+
+    # Output directory for report file
+    parser.add_argument(
+        "--out-dir",
+        default="data",
+        help="Output directory for report file (default: data)",
+    )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument("--force", action="store_true", help="Force overwrite existing files")
 
@@ -70,6 +83,7 @@ def run_report(args: argparse.Namespace) -> None:
         print("[DEBUG] Report phase started")
         print(f"[DEBUG] Month: {args.month}")
         print(f"[DEBUG] Report type: {args.type}")
+        print(f"[DEBUG] Data root: {args.data_root}")
         print(f"[DEBUG] Output directory: {args.out_dir}")
         print(f"[DEBUG] Force overwrite: {args.force}")
 
@@ -81,15 +95,16 @@ def run_report(args: argparse.Namespace) -> None:
     except ValueError:
         raise ValueError(f"Invalid month format: {args.month}. Expected YYYY-MM format.")
 
-    # Convert output directory to Path
-    base_dir = Path(args.out_dir)
+    # Convert data root and output directory to Path
+    data_root = Path(args.data_root)
+    out_dir = Path(args.out_dir)
 
-    # Load aggregated data
+    # Load aggregated data (always from data_root/aggregated)
     if args.debug:
         print(f"[DEBUG] Loading aggregated data for {args.month}")
 
     try:
-        aggregated_file_path = load.get_aggregated_file_path(base_dir, year, month)
+        aggregated_file_path = load.get_aggregated_file_path(data_root, year, month)
         metadata, data = load.load_aggregated_data(aggregated_file_path, args.debug)
     except FileNotFoundError as e:
         raise FileNotFoundError(
@@ -99,12 +114,12 @@ def run_report(args: argparse.Namespace) -> None:
     except Exception as e:
         raise RuntimeError(f"Failed to load aggregated data: {e}") from e
 
-    # Load historical data for delta calculations
+    # Load historical data for delta calculations (always from data_root/aggregated)
     if args.debug:
         print("[DEBUG] Loading historical data for delta calculations")
 
     try:
-        comparison_data = load.load_comparison_data(base_dir, year, month, args.debug)
+        comparison_data = load.load_comparison_data(data_root, year, month, args.debug)
         if args.debug:
             print(f"[DEBUG] Loaded {len(comparison_data)} comparison periods")
             for period, (period_meta, _) in comparison_data.items():
@@ -125,13 +140,13 @@ def run_report(args: argparse.Namespace) -> None:
     except Exception as e:
         raise RuntimeError(f"Failed to generate report content: {e}") from e
 
-    # Save report to file
+    # Save report to file (output always goes to out_dir)
     if args.debug:
         print("[DEBUG] Saving report to file")
 
     try:
         output_path = save.generate_and_save_report(
-            report_content, base_dir, year, month, args.type, args.force, args.debug
+            report_content, out_dir, year, month, args.type, args.force, args.debug
         )
     except FileExistsError as e:
         raise FileExistsError(f"Report file already exists. Use --force to overwrite: {e}") from e
