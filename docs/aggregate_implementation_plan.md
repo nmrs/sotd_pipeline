@@ -231,19 +231,21 @@ sotd/aggregate/aggregators/
 **✅ Phase 7: User Aggregators - COMPLETE**
 
 ### Phase 8: Cross-Product Aggregators
-- [ ] **8.1 Razor Blade Combo Aggregator (`aggregators/cross_product/razor_blade_combo_aggregator.py`)**
-  - [ ] Implement razor blade combination aggregation
-  - [ ] Combine razor and blade data
-  - [ ] Create composite keys
-  - [ ] Add position field calculation
-  - [ ] Sort by shaves desc, unique_users desc
+- [x] **8.1 Razor Blade Combo Aggregator (`aggregators/cross_product/razor_blade_combo_aggregator.py`)**
+  - [x] Implement razor blade combination aggregation
+  - [x] Combine razor and blade data
+  - [x] Create composite keys
+  - [x] Add position field calculation
+  - [x] Sort by shaves desc, unique_users desc
 
-- [ ] **8.2 Highest Use Count per Blade Aggregator (`aggregators/cross_product/highest_use_count_per_blade_aggregator.py`)**
-  - [ ] Implement highest use count per blade aggregation
-  - [ ] Track per-user blade usage
-  - [ ] Extract use_count from blade.enriched.use_count
-  - [ ] Add position field calculation
-  - [ ] Sort by uses desc
+- [x] **8.2 Highest Use Count per Blade Aggregator (`aggregators/cross_product/highest_use_count_per_blade_aggregator.py`)**
+  - [x] Implement highest use count per blade aggregation
+  - [x] Track per-user blade usage
+  - [x] Extract use_count from blade.enriched.use_count
+  - [x] Add position field calculation
+  - [x] Sort by uses desc
+
+**✅ Phase 8: Cross-Product Aggregators - COMPLETE**
 
 ### Phase 9: Integration and Testing
 - [ ] **9.1 Main Runner Integration (`run.py`)**
