@@ -1,5 +1,241 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
+# Report Phase Rules
+
+## Overview
+The Report phase generates statistical analysis reports from aggregated SOTD data using a flexible template system. It produces hardware and software reports that mimic the community's monthly reports.
+
+## Template System Architecture
+
+### Template Structure
+- **Location**: `data/report_templates.yaml`
+- **Format**: YAML with variable replacement and table placeholders
+- **Structure**: Each report type has a single `template` section
+
+```yaml
+hardware:
+  template: |
+    ## Notes & Caveats
+    - **{{total_shaves}} shaves** from **{{unique_shavers}} unique users**
+    
+    ## Tables
+    {{tables.razors}}
+    {{tables.blades}}
+
+software:
+  template: |
+    ## Notes & Caveats
+    - Custom content here
+    
+    ## Tables
+    {{tables.soaps}}
+```
+
+### Template Variables
+- Use `{{variable_name}}` syntax for dynamic content
+- Hardware variables: `total_shaves`, `unique_shavers`, `avg_shaves_per_user`
+- Software variables: (none currently, but extensible)
+
+### Table Placeholders
+- Use `{{tables.table-name}}` syntax for table insertion
+- Available tables: `razors`, `blades`, `brushes`, `soaps`, `top-shavers`, etc.
+- Table names use hyphens, not underscores
+
+## Report Generator Patterns
+
+### Base Report Generator
+All report generators inherit from `BaseReportGenerator`:
+
+```python
+class BaseReportGenerator(ABC):
+    def __init__(self, metadata, data, comparison_data=None, debug=False, template_path=None):
+        self.metadata = metadata
+        self.data = data
+        self.comparison_data = comparison_data or {}
+        self.debug = debug
+        self.template_path = template_path  # For testing support
+```
+
+### Template Processing
+Use `TemplateProcessor` for rendering templates:
+
+```python
+def generate_notes_and_caveats(self) -> str:
+    # Prepare variables
+    variables = {
+        "total_shaves": f"{total_shaves:,}",
+        "unique_shavers": str(unique_shavers),
+        "avg_shaves_per_user": f"{avg_shaves_per_user:.1f}",
+    }
+    
+    # Create table generator
+    table_generator = TableGenerator(self.data, self.comparison_data, self.debug)
+    
+    # Create template processor with custom path if provided
+    if self.template_path:
+        processor = TemplateProcessor(Path(self.template_path))
+    else:
+        processor = TemplateProcessor()
+    
+    # Render template
+    return processor.render_template("hardware", "template", variables, table_generator)
+```
+
+### Testing Support
+Always support custom template paths for testing:
+
+```python
+def __init__(self, metadata, data, comparison_data=None, debug=False, template_path=None):
+    super().__init__(metadata, data, comparison_data, debug, template_path)
+```
+
+## Table Generation Patterns
+
+### Table Generator Structure
+- Use `TableGenerator` for generating table content
+- Support delta calculations with historical data
+- Generate tables by name: `generate_table_by_name(table_name)`
+
+### Table Formatting
+- Use pandas for data manipulation and formatting
+- Right-align numeric columns, left-align text
+- Format numbers with commas and decimal places
+- Handle missing data with "n/a"
+
+### Delta Calculations
+- Use Unicode arrows (↑↓) for position changes
+- Support multiple comparison periods
+- Handle missing data gracefully
+
+## Testing Patterns
+
+### Template Testing
+- Store test templates in `tests/fixtures/report_template.yaml`
+- Use shared fixtures to avoid code duplication
+- Test both unit and integration scenarios
+
+### Test Fixtures
+```python
+@pytest.fixture(scope="session")
+def report_template():
+    """Load the shared report template YAML for testing."""
+    template_path = Path(__file__).parent.parent / "fixtures" / "report_template.yaml"
+    with open(template_path) as f:
+        return yaml.safe_load(f)
+
+@pytest.fixture
+def template_file(tmp_path, report_template):
+    """Create a temporary template file with the shared template content."""
+    template_file = tmp_path / "report_templates.yaml"
+    with open(template_file, "w") as f:
+        yaml.dump(report_template, f)
+    return template_file
+```
+
+### Unit Tests
+Test template variable replacement and content generation:
+
+```python
+def test_hardware_report_with_template(self, template_file):
+    """Test hardware report uses template processor correctly."""
+    metadata = {"total_shaves": 1234, "unique_shavers": 567}
+    data = {}
+    
+    generator = HardwareReportGenerator(metadata, data, template_path=str(template_file))
+    result = generator.generate_notes_and_caveats()
+    
+    # Check that template variables were replaced
+    assert "**1,234 shaves**" in result
+    assert "**567 unique users**" in result
+```
+
+### Integration Tests
+Test complete report generation with sample data:
+
+```python
+def test_hardware_report_generation(self, template_file):
+    """Test complete hardware report generation with sample data."""
+    metadata = {"month": "2025-01", "total_shaves": 1000, "unique_shavers": 50}
+    data = {"razors": [...], "blades": [...], "brushes": [...]}
+    
+    report_content = generate_report_content(
+        "hardware", metadata, data, template_path=str(template_file), debug=False
+    )
+    
+    # Verify report structure and content
+    assert "# Hardware Report - January 2025" in report_content
+    assert "Custom template content for testing" in result
+```
+
+## Error Handling
+
+### Template Errors
+- Fail fast for missing or invalid templates
+- Provide clear error messages for template issues
+- Validate template structure before processing
+
+### Data Validation
+- Validate aggregated data structure before processing
+- Check for required categories and fields
+- Handle missing data gracefully
+
+## Performance Considerations
+
+### Template Loading
+- Load templates once and cache for reuse
+- Use session-scoped fixtures for test templates
+- Minimize file I/O operations
+
+### Table Generation
+- Generate tables sequentially to manage memory
+- Use pandas for efficient data manipulation
+- Load historical data only for delta calculations
+
+## Best Practices
+
+### Template Design
+1. **Keep templates simple**: Use single template sections per report type
+2. **Use descriptive variable names**: Make variables clear and meaningful
+3. **Organize logically**: Group related tables with descriptive headers
+4. **Maintain formatting**: Preserve markdown formatting for proper rendering
+5. **Test changes**: Validate template changes with comprehensive tests
+
+### Code Organization
+1. **Follow existing patterns**: Use the same structure as other phases
+2. **Support testing**: Always include template_path parameter for testing
+3. **Use type hints**: Include proper type annotations for all functions
+4. **Document templates**: Keep template documentation up to date
+5. **Validate early**: Check template structure at startup
+
+### Testing Strategy
+1. **Use shared fixtures**: Avoid duplicating template content in tests
+2. **Test both scenarios**: Include both unit and integration tests
+3. **Validate output**: Check that generated content matches expectations
+4. **Test edge cases**: Handle empty data, missing templates, etc.
+5. **Keep tests fast**: Use session-scoped fixtures where appropriate
+
+## Common Patterns
+
+### Adding New Report Types
+1. Add template section to `data/report_templates.yaml`
+2. Create report generator class inheriting from `BaseReportGenerator`
+3. Implement required abstract methods
+4. Add to `create_report_generator()` function in `process.py`
+5. Add comprehensive tests
+
+### Adding New Table Types
+1. Add table placeholder to template
+2. Implement table generation in `TableGenerator`
+3. Add table name to available placeholders list
+4. Update documentation with new table description
+5. Add tests for new table functionality
+
+### Customizing Templates
+1. Edit `data/report_templates.yaml`
+2. Use variables for dynamic content: `{{variable_name}}`
+3. Use table placeholders for data tables: `{{tables.table-name}}`
+4. Test changes with existing test suite
+5. Update documentation if adding new variables or tables

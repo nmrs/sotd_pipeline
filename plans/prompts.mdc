@@ -49,7 +49,7 @@ Draft a detailed, step-by-step blueprint for building this project. Then, once y
 
 From here you should have the foundation to provide a series of prompts for a code-generation LLM that will implement each step in a test-driven manner. Prioritize best practices, incremental progress, and early testing, ensuring no big jumps in complexity at any stage. Make sure that each prompt builds on the previous prompts, and ends with wiring things together. There should be no hanging or orphaned code that isn't integrated into a previous step.
 
-Make sure and separate each prompt section. Use markdown. Each prompt should be tagged as text using code tags. The goal is to output prompts, but context, etc is important as well.
+Make sure and separate each prompt section. Use mdc markdown. Each prompt should be tagged as text using code tags. The goal is to save an mdc document in /plans that includes all prompts, but context, etc is important as well.
 ```
 
 ### Non-TDD Project Planning
