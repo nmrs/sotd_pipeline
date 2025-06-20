@@ -1,5 +1,110 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
+# Missing Months Analysis - SOTD Pipeline Data Review
+
+## Summary
+- **Actual Data Start**: May 4, 2016 (not May 1, 2016 as previously assumed)
+- **Total Expected Months**: 114 (2016-05 to 2025-12)
+- **Thread Files Present**: 104
+- **Comment Files Present**: 97
+- **Missing Threads**: 10 months
+- **Missing Comments**: 17 months
+- **Missing Both**: 10 months
+
+## Data Availability Discovery
+**May 2016 Confirmed**: Manual verification shows May 2016 has SOTD threads starting from May 4:
+- 28 threads total (May 4-31, 2016)
+- May 1-3, 2016: Confirmed do not exist after exhaustive search
+- All created by AutoModerator
+- Consistent naming: `{Day} SOTD Thread - May {DD}, 2016`
+- Thread IDs: 4htj81 through 4lu5sx (May 4-31 only)
+
+## Critical Missing Data (Both Threads and Comments)
+
+These months are completely missing from the pipeline and need immediate attention:
+
+### 2016 (Historical Data)
+- **2016-05**: May 2016 (CONFIRMED EXISTS - needs to be fetched)
+
+### 2017-2019 (Historical Data)
+- **2017-05**: May 2017  
+- **2017-08**: August 2017
+- **2018-05**: May 2018
+- **2018-08**: August 2018
+- **2019-05**: May 2019
+- **2019-08**: August 2019
+
+### 2020-2022 (Recent Data)
+- **2020-02**: February 2020
+- **2020-08**: August 2020
+- **2021-05**: May 2021
+- **2022-05**: May 2022
+
+## Missing Only Comments (Threads Present)
+
+These months have thread data but are missing comment data:
+
+### 2025 (Future Data - Expected)
+- **2025-06**: June 2025
+- **2025-07**: July 2025
+- **2025-08**: August 2025
+- **2025-09**: September 2025
+- **2025-10**: October 2025
+- **2025-11**: November 2025
+- **2025-12**: December 2025
+
+## Analysis
+
+### Pattern Recognition
+1. **August Months**: Multiple August months are missing (2017, 2018, 2019, 2020)
+2. **May Months**: Several May months are missing (2017, 2018, 2019, 2021, 2022)
+3. **February 2020**: Only February missing from 2020
+4. **May 2016**: Confirmed exists but missing from pipeline
+5. **Future Data**: 2025 comments missing (threads exist but comments don't)
+
+### Potential Causes
+1. **Seasonal Patterns**: August and May might have different posting patterns
+2. **Reddit API Issues**: Historical data might have been affected by API changes
+3. **Fetch Failures**: Some months might have failed during fetch operations
+4. **Data Processing Issues**: Comments might have been lost during processing
+5. **Date Range Assumptions**: Pipeline might have assumed June 2016 start
+
+## Recommendations
+
+### Priority 1: Critical Missing Data
+1. **Fetch May 2016**: Highest priority - confirmed data exists
+2. **Investigate Historical Gaps**: Check if August and May months have different thread patterns
+3. **Manual Verification**: Use curl/Reddit search to verify if threads exist for missing months
+4. **Fetch Missing Months**: Attempt to fetch the 10 completely missing months
+5. **Document Patterns**: Create patterns for handling seasonal variations
+
+### Priority 2: Comment Data Recovery
+1. **Re-fetch Comments**: For months with threads but missing comments
+2. **Investigate Processing**: Check if comment processing failed for these months
+3. **Future Data**: Set up monitoring for 2025 comment fetching
+
+### Priority 3: Prevention
+1. **Monitoring**: Set up alerts for missing months
+2. **Validation**: Add checks to ensure both threads and comments are present
+3. **Documentation**: Update fetch procedures to handle edge cases
+4. **Date Range**: Update pipeline to start from May 2016, not June 2016
+
+## Next Steps
+1. **Immediate**: Fetch May 2016 (confirmed data exists)
+2. Test fetch for one missing month (e.g., 2020-02) to see if it's a systematic issue
+3. Investigate the August/May pattern to understand if it's a Reddit posting pattern
+4. Create a comprehensive fetch plan for all missing months
+5. Set up automated monitoring for future data completeness
+
+## Files Affected
+- `data/threads/` - Missing 10 files (including confirmed 2016-05)
+- `data/comments/` - Missing 17 files
+- Pipeline phases: extract, match, enrich, aggregate, report (all affected by missing data)
+
+---
+*Analysis Date: December 2024*
+*Status: Updated with May 2016 discovery*
+*Priority: High - May 2016 confirmed exists*
