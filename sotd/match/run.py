@@ -87,12 +87,12 @@ def process_month(
         # Load extracted data
         extracted_path = base_path / "extracted" / f"{month}.json"
         if not extracted_path.exists():
-            return {"status": "skipped", "reason": "missing input file"}
+            return {"status": "skipped", "month": month, "reason": "missing input file"}
 
         # Check if output already exists and force is not set
         matched_path = base_path / "matched" / f"{month}.json"
         if matched_path.exists() and not force:
-            return {"status": "skipped", "reason": "output exists"}
+            return {"status": "skipped", "month": month, "reason": "output exists"}
 
         # Load data
         monitor.start_file_io_timing()
