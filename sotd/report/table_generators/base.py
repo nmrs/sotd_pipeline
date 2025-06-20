@@ -92,6 +92,9 @@ class BaseTableGenerator(ABC):
                 print(f"[DEBUG] No data available for table: {self.get_table_title()}")
             return ""
 
+        # Add avg shaves per user calculation
+        table_data = self._add_avg_shaves_per_user(table_data)
+
         # Add position information for delta calculations
         if include_delta:
             table_data = self._add_positions(table_data)
@@ -198,12 +201,29 @@ class BaseTableGenerator(ABC):
         markdown_lines.append(f"### {self.get_table_title()}")
         markdown_lines.append("")
 
-        # Table header
+        # Table header with proper alignment
         header = "| " + " | ".join(df.columns) + " |"
         markdown_lines.append(header)
 
-        # Table separator
-        separator = "| " + " | ".join(["---"] * len(df.columns)) + " |"
+        # Table separator with proper alignment (right-aligned for numbers, center for deltas)
+        separator_parts = []
+        for col in df.columns:
+            orig_col = None
+            for k, v in column_renames.items():
+                if v == col:
+                    orig_col = k
+                    break
+
+            if orig_col and orig_col in column_config:
+                config = column_config[orig_col]
+                if config.get("format") == "delta":
+                    separator_parts.append(":---:")  # Center-aligned for deltas
+                else:
+                    separator_parts.append("---:")  # Right-aligned for numbers
+            else:
+                separator_parts.append("---")  # Left-aligned for text
+
+        separator = "| " + " | ".join(separator_parts) + " |"
         markdown_lines.append(separator)
 
         # Table rows
@@ -329,6 +349,31 @@ class BaseTableGenerator(ABC):
         }
 
         return updated_config
+
+    def _add_avg_shaves_per_user(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Add avg shaves per user calculation to data.
+
+        Args:
+            data: List of data items
+
+        Returns:
+            Data with avg shaves per user added
+        """
+        if not data:
+            return data
+
+        for item in data:
+            if "shaves" in item and "unique_users" in item:
+                shaves = item.get("shaves", 0)
+                unique_users = item.get("unique_users", 0)
+
+                if unique_users > 0:
+                    avg_shaves = shaves / unique_users
+                    item["avg_shaves_per_user"] = round(avg_shaves, 2)
+                else:
+                    item["avg_shaves_per_user"] = 0.0
+
+        return data
 
 
 class SimpleTableGenerator(BaseTableGenerator):

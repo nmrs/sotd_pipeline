@@ -52,8 +52,13 @@ class BladesTableGenerator(BaseTableGenerator):
         """Return column configuration for the blades table."""
         return {
             "name": {"display_name": "Blade"},
-            "shaves": {"display_name": "Uses", "format": "number"},
-            "unique_users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }
 
 
@@ -108,6 +113,11 @@ class BladeManufacturersTableGenerator(BaseTableGenerator):
         """Return column configuration for the blade manufacturers table."""
         return {
             "brand": {"display_name": "Brand"},
-            "shaves": {"display_name": "Uses", "format": "number"},
-            "unique_users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }

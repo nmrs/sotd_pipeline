@@ -15,7 +15,7 @@ def run_phase(phase: str, args: List[str]) -> int:
     Run a specific pipeline phase.
 
     Args:
-        phase: Phase name (fetch, extract, match, enrich, aggregate)
+        phase: Phase name (fetch, extract, match, enrich, aggregate, report)
         args: Command line arguments to pass to the phase
 
     Returns:
@@ -27,6 +27,7 @@ def run_phase(phase: str, args: List[str]) -> int:
         "match": "sotd.match.run",
         "enrich": "sotd.enrich.run",
         "aggregate": "sotd.aggregate.run",
+        "report": "sotd.report.run",
     }
 
     if phase not in phase_modules:
@@ -107,6 +108,7 @@ Pipeline Phases:
   match      - Match products to catalog data
   enrich     - Enrich matched data with additional information
   aggregate  - Generate statistical summaries
+  report     - Generate hardware and software reports
 
 Examples:
   # Run individual phases
@@ -115,6 +117,7 @@ Examples:
   python run.py match --month 2025-01
   python run.py enrich --month 2025-01
   python run.py aggregate --month 2025-01
+  python run.py report --month 2025-01 --type hardware
   
   # Run complete pipeline
   python run.py pipeline --month 2025-01
@@ -130,7 +133,7 @@ Examples:
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Individual phase commands
-    for phase in ["fetch", "extract", "match", "enrich", "aggregate"]:
+    for phase in ["fetch", "extract", "match", "enrich", "aggregate", "report"]:
         phase_parser = subparsers.add_parser(
             phase,
             help=f"Run {phase} phase",
@@ -150,7 +153,7 @@ Examples:
     # Pipeline arguments
     pipeline_parser.add_argument(
         "--phases",
-        default="fetch,extract,match,enrich,aggregate",
+        default="fetch,extract,match,enrich,aggregate,report",
         help="Comma-separated list of phases to run (default: all phases)",
     )
 
@@ -178,7 +181,7 @@ Examples:
         if args.command == "pipeline":
             # Parse phases
             phases = [p.strip() for p in args.phases.split(",")]
-            valid_phases = {"fetch", "extract", "match", "enrich", "aggregate"}
+            valid_phases = {"fetch", "extract", "match", "enrich", "aggregate", "report"}
 
             invalid_phases = set(phases) - valid_phases
             if invalid_phases:

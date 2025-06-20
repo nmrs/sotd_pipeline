@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Cross-product table generators for the report phase."""
 
-from typing import Any
+from typing import Any, Optional, Dict
 
 from .base import BaseTableGenerator
 
@@ -58,9 +58,35 @@ class RazorBladeCombinationsTableGenerator(BaseTableGenerator):
         """Return column configuration for the razor-blade combinations table."""
         return {
             "name": {"display_name": "Razor + Blade"},
-            "shaves": {"display_name": "Uses", "format": "number"},
-            "unique_users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }
+
+    def generate_table(
+        self,
+        max_rows: int = 20,
+        include_delta: bool = False,
+        comparison_data: Optional[Dict[str, Any]] = None,
+        comparison_period: str = "previous month",
+    ) -> str:
+        """Generate a markdown table without delta columns for cross-product data.
+
+        Args:
+            max_rows: Maximum number of rows to include
+            include_delta: Whether to include delta columns (ignored for this table)
+            comparison_data: Historical data for delta calculations (ignored for this table)
+            comparison_period: Which comparison period to use (ignored for this table)
+
+        Returns:
+            Markdown table as a string
+        """
+        # Override to never include deltas for cross-product tables
+        return super().generate_table(max_rows=max_rows, include_delta=False)
 
 
 class HighestUseCountPerBladeTableGenerator(BaseTableGenerator):
@@ -123,3 +149,24 @@ class HighestUseCountPerBladeTableGenerator(BaseTableGenerator):
             "format": {"display_name": "Format"},
             "uses": {"display_name": "Uses", "format": "number"},
         }
+
+    def generate_table(
+        self,
+        max_rows: int = 20,
+        include_delta: bool = False,
+        comparison_data: Optional[Dict[str, Any]] = None,
+        comparison_period: str = "previous month",
+    ) -> str:
+        """Generate a markdown table without delta columns for cross-product data.
+
+        Args:
+            max_rows: Maximum number of rows to include
+            include_delta: Whether to include delta columns (ignored for this table)
+            comparison_data: Historical data for delta calculations (ignored for this table)
+            comparison_period: Which comparison period to use (ignored for this table)
+
+        Returns:
+            Markdown table as a string
+        """
+        # Override to never include deltas for cross-product tables
+        return super().generate_table(max_rows=max_rows, include_delta=False)

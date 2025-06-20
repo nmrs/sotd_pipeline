@@ -57,15 +57,15 @@ class TopShaversTableGenerator(BaseTableGenerator):
         """
         return {
             "user": {
-                "display_name": "User",
+                "display_name": "user",
                 "format": "text",
             },
             "shaves": {
-                "display_name": "Shaves",
+                "display_name": "shaves",
                 "format": "number",
             },
             "missed_days": {
-                "display_name": "Missed Days",
+                "display_name": "missed days",
                 "format": "number",
             },
         }

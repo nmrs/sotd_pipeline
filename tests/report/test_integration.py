@@ -38,9 +38,7 @@ class TestReportIntegration:
         report_content = generate_report_content("hardware", metadata, data, debug=False)
 
         # Verify report structure
-        assert "# Hardware Report - January 2025" in report_content
-        assert "**Total Shaves:** 1,000" in report_content
-        assert "**Unique Shavers:** 50" in report_content
+        assert "Welcome to your SOTD Hardware Report for January 2025" in report_content
         assert "## Observations" in report_content
         assert "## Notes & Caveats" in report_content
         assert "## Tables" in report_content
@@ -106,9 +104,7 @@ class TestReportIntegration:
         report_content = generate_report_content("hardware", metadata, data, debug=False)
 
         # Should still have basic structure
-        assert "# Hardware Report - January 2025" in report_content
-        assert "**Total Shaves:** 0" in report_content
-        assert "**Unique Shavers:** 0" in report_content
+        assert "Welcome to your SOTD Hardware Report for January 2025" in report_content
 
     def test_report_with_delta_calculations(self):
         """Test report generation with historical data for delta calculations."""

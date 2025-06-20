@@ -59,8 +59,6 @@ class HardwareReportGenerator(BaseReportGenerator):
     def generate_header(self) -> str:
         """Generate the report header."""
         month = self.metadata.get("month", "Unknown")
-        total_shaves = self.metadata.get("total_shaves", 0)
-        unique_shavers = self.metadata.get("unique_shavers", 0)
 
         # Parse month for display
         try:
@@ -71,29 +69,62 @@ class HardwareReportGenerator(BaseReportGenerator):
         except (ValueError, TypeError):
             month_display = month
 
-        return (
-            f"# Hardware Report - {month_display}\n\n"
-            f"**Total Shaves:** {total_shaves:,}\n"
-            f"**Unique Shavers:** {unique_shavers:,}\n\n"
-        )
+        return f"Welcome to your SOTD Hardware Report for {month_display}\n\n"
 
     def generate_observations(self) -> str:
         """Generate the observations section."""
+        # TODO: Add automated trend analysis based on data patterns
         return (
             "## Observations\n\n"
             "*(This section will be populated with automated observations about trends "
-            "and patterns in the hardware data.)*\n\n"
+            "and patterns in the hardware data, including notable changes and insights.)*\n\n"
         )
 
     def generate_notes_and_caveats(self) -> str:
         """Generate the notes and caveats section."""
         return """## Notes & Caveats
 
+### Data Collection
 - This data is collected from the r/wetshaving community's Shave of the Day (SOTD) posts
 - Only posts that include product information are included in the analysis
-- Product matching is performed automatically and may contain errors
 - Users may post multiple SOTDs per day, which are all counted
 - The data represents community participation, not necessarily market share or sales figures
+
+### Product Matching
+- Product matching is performed automatically and may contain errors
+- Product names are normalized for consistency across reports
+- Some products may be grouped under generic categories (e.g., "Other Straight Razor")
+
+### Brush Data
+- Brush handle makers and knot makers are attributed based on user input
+- Fiber types are normalized to title case to prevent duplicates
+- Knot sizes are filtered to reasonable ranges (15-50mm) to exclude invalid data
+- Mixed fiber brushes are categorized separately from single-fiber types
+
+### Razor Data
+- Razor formats are categorized based on blade type (DE, GEM, Injector, etc.)
+- Straight razors include specifications for grind, width, and point types
+- Plate-specific data is tracked for razors with interchangeable plates
+
+### Blade Data
+- Blade formats are differentiated (DE, GEM, Injector, AC, etc.)
+- Use counts represent individual blade usage, not package counts
+
+### Delta Calculations
+- Position-based deltas show movement in rankings between periods
+- ↑ indicates improved position, ↓ indicates declined position, ↔ indicates no change
+- "n/a" indicates the item was not present in the comparison period
+- Delta calculations are based on position rankings, not absolute values
+
+### User Statistics
+- "avg shaves per user" represents the average number of shaves per unique user for each product
+- Cross-product tables show combinations and highest individual usage patterns
+- User data is anonymized and aggregated for privacy
+
+### Data Quality
+- Invalid or missing data is filtered out during processing
+- Debug logging is available to identify data quality issues
+- Historical comparisons require data from previous periods to be available
 
 """
 
@@ -111,8 +142,8 @@ class HardwareReportGenerator(BaseReportGenerator):
         tables.append(self._generate_table("Brushes", BrushesTableGenerator))
         tables.append(self._generate_table("Brush Handle Makers", BrushHandleMakersTableGenerator))
         tables.append(self._generate_table("Brush Knot Makers", BrushKnotMakersTableGenerator))
-        tables.append(self._generate_table("Brush Fibers", BrushFibersTableGenerator))
-        tables.append(self._generate_table("Brush Knot Sizes", BrushKnotSizesTableGenerator))
+        tables.append(self._generate_table("Knot Fibers", BrushFibersTableGenerator))
+        tables.append(self._generate_table("Knot Sizes", BrushKnotSizesTableGenerator))
 
         # Specialized tables
         tables.append(self._generate_table("Blackbird Plates", BlackbirdPlatesTableGenerator))

@@ -26,29 +26,32 @@ class TestRazorFormatsTableGenerator:
         """Test with valid data."""
         sample_data = {
             "razor_formats": [
-                {"format": "DE", "count": 100, "percent": 50.0},
-                {"format": "Straight", "count": 50, "percent": 25.0},
+                {"format": "DE", "shaves": 100, "unique_users": 50},
+                {"format": "Straight", "shaves": 50, "unique_users": 25},
             ]
         }
         generator = RazorFormatsTableGenerator(sample_data, debug=False)
         data = generator.get_table_data()
         assert len(data) == 2
         assert data[0]["format"] == "DE"
-        assert data[0]["count"] == 100
+        assert data[0]["shaves"] == 100
+        assert data[1]["format"] == "Straight"
+        assert data[1]["shaves"] == 50
 
     def test_missing_required_fields(self):
         """Test with missing required fields."""
         sample_data = {
             "razor_formats": [
-                {"format": "DE"},  # Missing count
-                {"count": 100},  # Missing format
-                {"format": "Straight", "count": 50, "percent": 25.0},  # Valid
+                {"format": "DE"},  # Missing shaves
+                {"shaves": 100},  # Missing format
+                {"format": "Straight", "shaves": 50, "unique_users": 25},  # Valid
             ]
         }
         generator = RazorFormatsTableGenerator(sample_data, debug=False)
         data = generator.get_table_data()
         assert len(data) == 1  # Only the valid record should be included
         assert data[0]["format"] == "Straight"
+        assert data[0]["shaves"] == 50
 
     def test_table_title(self):
         """Test table title."""
@@ -60,8 +63,9 @@ class TestRazorFormatsTableGenerator:
         generator = RazorFormatsTableGenerator({}, debug=False)
         config = generator.get_column_config()
         assert "format" in config
-        assert "count" in config
-        assert "percent" in config
+        assert "shaves" in config
+        assert "unique_users" in config
+        assert "avg_shaves_per_user" in config
 
 
 class TestRazorsTableGenerator:

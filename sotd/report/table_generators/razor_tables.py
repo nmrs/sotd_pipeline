@@ -24,16 +24,18 @@ class RazorFormatsTableGenerator(BaseTableGenerator):
                     print(f"[DEBUG] razor_formats record {i} is not a dict")
                 continue
 
-            # Check for required fields
-            if "format" not in record or "count" not in record:
+            # Check for required fields - real data has 'format', 'shaves', 'unique_users'
+            if "format" not in record or "shaves" not in record:
                 if self.debug:
                     print(f"[DEBUG] razor_formats record {i} missing required fields")
                 continue
 
-            # Ensure count is numeric
-            if not isinstance(record["count"], (int, float)) or record["count"] <= 0:
+            # Ensure shaves is numeric and positive
+            if not isinstance(record["shaves"], (int, float)) or record["shaves"] <= 0:
                 if self.debug:
-                    print(f"[DEBUG] razor_formats record {i} has invalid count: {record['count']}")
+                    print(
+                        f"[DEBUG] razor_formats record {i} has invalid shaves: {record['shaves']}"
+                    )
                 continue
 
             valid_data.append(record)
@@ -44,12 +46,21 @@ class RazorFormatsTableGenerator(BaseTableGenerator):
         """Return the table title."""
         return "Razor Formats"
 
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "format"
+
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the razor formats table."""
         return {
             "format": {"display_name": "Format"},
-            "count": {"display_name": "Uses", "format": "number"},
-            "percent": {"display_name": "% of Shaves", "format": "decimal", "decimals": 1},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }
 
 
@@ -99,8 +110,13 @@ class RazorsTableGenerator(BaseTableGenerator):
         """Return column configuration for the razors table."""
         return {
             "name": {"display_name": "Razor"},
-            "shaves": {"display_name": "Uses", "format": "number"},
-            "unique_users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }
 
 
@@ -155,6 +171,11 @@ class RazorManufacturersTableGenerator(BaseTableGenerator):
         """Return column configuration for the razor manufacturers table."""
         return {
             "brand": {"display_name": "Brand"},
-            "shaves": {"display_name": "Uses", "format": "number"},
-            "unique_users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }

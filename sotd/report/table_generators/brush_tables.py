@@ -52,8 +52,13 @@ class BrushesTableGenerator(BaseTableGenerator):
         """Return column configuration for the brushes table."""
         return {
             "name": {"display_name": "Brush"},
-            "shaves": {"display_name": "Uses", "format": "number"},
-            "unique_users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }
 
 
@@ -108,8 +113,13 @@ class BrushHandleMakersTableGenerator(BaseTableGenerator):
         """Return column configuration for the brush handle makers table."""
         return {
             "handle_maker": {"display_name": "Handle Maker"},
-            "shaves": {"display_name": "Uses", "format": "number"},
-            "unique_users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }
 
 
@@ -164,8 +174,13 @@ class BrushKnotMakersTableGenerator(BaseTableGenerator):
         """Return column configuration for the brush knot makers table."""
         return {
             "brand": {"display_name": "Knot Maker"},
-            "shaves": {"display_name": "Uses", "format": "number"},
-            "unique_users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }
 
 
@@ -181,8 +196,10 @@ class BrushFibersTableGenerator(BaseTableGenerator):
                 print("[DEBUG] brush_fibers data is not a list")
             return []
 
-        # Validate each record has required fields
+        # Validate each record has required fields and normalize fiber names
         valid_data = []
+        fiber_counts = {}  # Track normalized fiber names and their counts
+
         for i, record in enumerate(data):
             if not isinstance(record, dict):
                 if self.debug:
@@ -201,13 +218,37 @@ class BrushFibersTableGenerator(BaseTableGenerator):
                     print(f"[DEBUG] brush_fibers record {i} has invalid shaves: {record['shaves']}")
                 continue
 
-            valid_data.append(record)
+            # Normalize fiber name to title case
+            normalized_fiber = record["fiber"].title()
+
+            # Merge duplicate entries with same normalized name
+            if normalized_fiber in fiber_counts:
+                # Add to existing entry
+                fiber_counts[normalized_fiber]["shaves"] += record["shaves"]
+                fiber_counts[normalized_fiber]["unique_users"] += record.get("unique_users", 0)
+                if self.debug:
+                    print(
+                        f"[DEBUG] Merged duplicate fiber: {record['fiber']} -> {normalized_fiber}"
+                    )
+            else:
+                # Create new entry with normalized name
+                new_record = record.copy()
+                new_record["fiber"] = normalized_fiber
+                fiber_counts[normalized_fiber] = new_record
+
+        # Convert back to list
+        valid_data = list(fiber_counts.values())
+
+        if self.debug:
+            print(
+                f"[DEBUG] Normalized {len(data)} fiber records to {len(valid_data)} unique fibers"
+            )
 
         return valid_data
 
     def get_table_title(self) -> str:
         """Return the table title."""
-        return "Brush Fibers"
+        return "Knot Fibers"
 
     def get_name_key(self) -> str:
         """Return the key to use for matching items in delta calculations."""
@@ -217,8 +258,13 @@ class BrushFibersTableGenerator(BaseTableGenerator):
         """Return column configuration for the brush fibers table."""
         return {
             "fiber": {"display_name": "Fiber"},
-            "shaves": {"display_name": "Uses", "format": "number"},
-            "unique_users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }
 
 
@@ -234,7 +280,7 @@ class BrushKnotSizesTableGenerator(BaseTableGenerator):
                 print("[DEBUG] brush_knot_sizes data is not a list")
             return []
 
-        # Validate each record has required fields
+        # Validate each record has required fields and filter invalid sizes
         valid_data = []
         for i, record in enumerate(data):
             if not isinstance(record, dict):
@@ -257,7 +303,30 @@ class BrushKnotSizesTableGenerator(BaseTableGenerator):
                     )
                 continue
 
+            # Validate knot size is reasonable (15-50mm range)
+            knot_size = record["knot_size_mm"]
+            if not isinstance(knot_size, (int, float)):
+                if self.debug:
+                    print(
+                        f"[DEBUG] brush_knot_sizes record {i} has non-numeric knot size: "
+                        f"{knot_size}"
+                    )
+                continue
+
+            if knot_size < 15 or knot_size > 50:
+                if self.debug:
+                    print(
+                        f"[DEBUG] brush_knot_sizes record {i} has invalid knot size: "
+                        f"{knot_size}mm (outside 15-50mm range)"
+                    )
+                continue
+
             valid_data.append(record)
+
+        if self.debug:
+            print(
+                f"[DEBUG] Filtered {len(data)} knot size records to {len(valid_data)} valid sizes"
+            )
 
         return valid_data
 
@@ -273,6 +342,11 @@ class BrushKnotSizesTableGenerator(BaseTableGenerator):
         """Return column configuration for the brush knot sizes table."""
         return {
             "knot_size_mm": {"display_name": "Knot Size (mm)"},
-            "shaves": {"display_name": "Uses", "format": "number"},
-            "unique_users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }

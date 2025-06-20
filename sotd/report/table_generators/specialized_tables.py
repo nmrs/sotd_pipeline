@@ -38,8 +38,8 @@ class BlackbirdPlatesTableGenerator(BaseTableGenerator):
             valid_data.append(
                 {
                     "plate": plate,
-                    "uses": shaves,
-                    "users": unique_users,
+                    "shaves": shaves,
+                    "unique_users": unique_users,
                 }
             )
 
@@ -60,8 +60,13 @@ class BlackbirdPlatesTableGenerator(BaseTableGenerator):
         """Get the column configuration for the table."""
         return {
             "plate": {"display_name": "Plate", "format": "text"},
-            "uses": {"display_name": "Uses", "format": "number"},
-            "users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }
 
 
@@ -104,8 +109,8 @@ class ChristopherBradleyPlatesTableGenerator(BaseTableGenerator):
             valid_data.append(
                 {
                     "plate": plate,
-                    "uses": shaves,
-                    "users": unique_users,
+                    "shaves": shaves,
+                    "unique_users": unique_users,
                 }
             )
 
@@ -126,8 +131,13 @@ class ChristopherBradleyPlatesTableGenerator(BaseTableGenerator):
         """Get the column configuration for the table."""
         return {
             "plate": {"display_name": "Plate", "format": "text"},
-            "uses": {"display_name": "Uses", "format": "number"},
-            "users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }
 
 
@@ -163,8 +173,8 @@ class GameChangerPlatesTableGenerator(BaseTableGenerator):
             valid_data.append(
                 {
                     "plate": gap,
-                    "uses": shaves,
-                    "users": unique_users,
+                    "shaves": shaves,
+                    "unique_users": unique_users,
                 }
             )
 
@@ -185,8 +195,13 @@ class GameChangerPlatesTableGenerator(BaseTableGenerator):
         """Get the column configuration for the table."""
         return {
             "plate": {"display_name": "Plate", "format": "text"},
-            "uses": {"display_name": "Uses", "format": "number"},
-            "users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }
 
 
@@ -222,8 +237,8 @@ class SuperSpeedTipsTableGenerator(BaseTableGenerator):
             valid_data.append(
                 {
                     "tip": super_speed_tip,
-                    "uses": shaves,
-                    "users": unique_users,
+                    "shaves": shaves,
+                    "unique_users": unique_users,
                 }
             )
 
@@ -244,8 +259,13 @@ class SuperSpeedTipsTableGenerator(BaseTableGenerator):
         """Get the column configuration for the table."""
         return {
             "tip": {"display_name": "Tip", "format": "text"},
-            "uses": {"display_name": "Uses", "format": "number"},
-            "users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }
 
 
@@ -293,8 +313,8 @@ class StraightRazorSpecsTableGenerator(BaseTableGenerator):
             valid_data.append(
                 {
                     "specs": specs,
-                    "uses": shaves,
-                    "users": unique_users,
+                    "shaves": shaves,
+                    "unique_users": unique_users,
                 }
             )
 
@@ -315,8 +335,13 @@ class StraightRazorSpecsTableGenerator(BaseTableGenerator):
         """Get the column configuration for the table."""
         return {
             "specs": {"display_name": "Specifications", "format": "text"},
-            "uses": {"display_name": "Uses", "format": "number"},
-            "users": {"display_name": "Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
         }
 
 
@@ -338,7 +363,6 @@ class StraightWidthsTableGenerator(BaseTableGenerator):
             width = record.get("width")
             shaves = record.get("shaves", 0)
             unique_users = record.get("unique_users", 0)
-            avg = record.get("avg_shaves_per_user", 0)
             if not width:
                 if self.debug:
                     print(f"[DEBUG] straight_widths record {i} missing width field")
@@ -348,7 +372,6 @@ class StraightWidthsTableGenerator(BaseTableGenerator):
                     "name": width,
                     "shaves": shaves,
                     "unique_users": unique_users,
-                    "avg_shaves_per_user": avg,
                 }
             )
         return valid_data
@@ -363,10 +386,10 @@ class StraightWidthsTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         return {
             "name": {"display_name": "Width", "format": "text"},
-            "shaves": {"display_name": "Shaves", "format": "number"},
-            "unique_users": {"display_name": "Unique Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "Avg Shaves per User",
+                "display_name": "avg shaves per user",
                 "format": "decimal",
                 "decimals": 2,
             },
@@ -391,7 +414,6 @@ class StraightGrindsTableGenerator(BaseTableGenerator):
             grind = record.get("grind")
             shaves = record.get("shaves", 0)
             unique_users = record.get("unique_users", 0)
-            avg = record.get("avg_shaves_per_user", 0)
             if not grind:
                 if self.debug:
                     print(f"[DEBUG] straight_grinds record {i} missing grind field")
@@ -401,7 +423,6 @@ class StraightGrindsTableGenerator(BaseTableGenerator):
                     "name": grind,
                     "shaves": shaves,
                     "unique_users": unique_users,
-                    "avg_shaves_per_user": avg,
                 }
             )
         return valid_data
@@ -416,10 +437,10 @@ class StraightGrindsTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         return {
             "name": {"display_name": "Grind", "format": "text"},
-            "shaves": {"display_name": "Shaves", "format": "number"},
-            "unique_users": {"display_name": "Unique Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "Avg Shaves per User",
+                "display_name": "avg shaves per user",
                 "format": "decimal",
                 "decimals": 2,
             },
@@ -444,7 +465,6 @@ class StraightPointsTableGenerator(BaseTableGenerator):
             point = record.get("point")
             shaves = record.get("shaves", 0)
             unique_users = record.get("unique_users", 0)
-            avg = record.get("avg_shaves_per_user", 0)
             if not point:
                 if self.debug:
                     print(f"[DEBUG] straight_points record {i} missing point field")
@@ -454,7 +474,6 @@ class StraightPointsTableGenerator(BaseTableGenerator):
                     "name": point,
                     "shaves": shaves,
                     "unique_users": unique_users,
-                    "avg_shaves_per_user": avg,
                 }
             )
         return valid_data
@@ -469,10 +488,10 @@ class StraightPointsTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         return {
             "name": {"display_name": "Point", "format": "text"},
-            "shaves": {"display_name": "Shaves", "format": "number"},
-            "unique_users": {"display_name": "Unique Users", "format": "number"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "Avg Shaves per User",
+                "display_name": "avg shaves per user",
                 "format": "decimal",
                 "decimals": 2,
             },
