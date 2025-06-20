@@ -112,16 +112,18 @@ class TableGenerator:
         # Check if we have comparison data for delta calculations
         include_delta = bool(self.comparison_data)
 
-        # Generate the table
+        # Generate the table (without header since template provides section headers)
         if self.comparison_data:
             table_content = generator.generate_table(
                 include_delta=include_delta,
                 comparison_data=self.comparison_data,
+                include_header=False,
             )
         else:
             table_content = generator.generate_table(
                 include_delta=include_delta,
                 comparison_data=None,
+                include_header=False,
             )
 
         # If the table is empty, return a "No data available" message

@@ -68,6 +68,7 @@ class BaseTableGenerator(ABC):
         max_rows: int = 20,
         include_delta: bool = False,
         comparison_data: Optional[Dict[str, Any]] = None,
+        include_header: bool = True,
     ) -> str:
         """Generate a markdown table.
 
@@ -76,6 +77,7 @@ class BaseTableGenerator(ABC):
             include_delta: Whether to include delta columns
             comparison_data: Historical data for delta calculations
                            (dict mapping period to (metadata, data))
+            include_header: Whether to include the table header (default: True)
 
         Returns:
             Markdown table as a string
@@ -198,9 +200,10 @@ class BaseTableGenerator(ABC):
         # Generate markdown table
         markdown_lines = []
 
-        # Title
-        markdown_lines.append(f"### {self.get_table_title()}")
-        markdown_lines.append("")
+        # Title (only if include_header is True)
+        if include_header:
+            markdown_lines.append(f"### {self.get_table_title()}")
+            markdown_lines.append("")
 
         # Table header with proper alignment
         header = "| " + " | ".join(df.columns) + " |"

@@ -72,7 +72,7 @@ class RazorBladeCombinationsTableGenerator(BaseTableGenerator):
         max_rows: int = 20,
         include_delta: bool = False,
         comparison_data: Optional[Dict[str, Any]] = None,
-        comparison_period: str = "previous month",
+        include_header: bool = True,
     ) -> str:
         """Generate a markdown table without delta columns for cross-product data.
 
@@ -80,13 +80,15 @@ class RazorBladeCombinationsTableGenerator(BaseTableGenerator):
             max_rows: Maximum number of rows to include
             include_delta: Whether to include delta columns (ignored for this table)
             comparison_data: Historical data for delta calculations (ignored for this table)
-            comparison_period: Which comparison period to use (ignored for this table)
+            include_header: Whether to include the table header (default: True)
 
         Returns:
             Markdown table as a string
         """
         # Override to never include deltas for cross-product tables
-        return super().generate_table(max_rows=max_rows, include_delta=False)
+        return super().generate_table(
+            max_rows=max_rows, include_delta=False, include_header=include_header
+        )
 
 
 class HighestUseCountPerBladeTableGenerator(BaseTableGenerator):
@@ -155,7 +157,7 @@ class HighestUseCountPerBladeTableGenerator(BaseTableGenerator):
         max_rows: int = 20,
         include_delta: bool = False,
         comparison_data: Optional[Dict[str, Any]] = None,
-        comparison_period: str = "previous month",
+        include_header: bool = True,
     ) -> str:
         """Generate a markdown table without delta columns for cross-product data.
 
@@ -163,10 +165,12 @@ class HighestUseCountPerBladeTableGenerator(BaseTableGenerator):
             max_rows: Maximum number of rows to include
             include_delta: Whether to include delta columns (ignored for this table)
             comparison_data: Historical data for delta calculations (ignored for this table)
-            comparison_period: Which comparison period to use (ignored for this table)
+            include_header: Whether to include the table header (default: True)
 
         Returns:
             Markdown table as a string
         """
         # Override to never include deltas for cross-product tables
-        return super().generate_table(max_rows=max_rows, include_delta=False)
+        return super().generate_table(
+            max_rows=max_rows, include_delta=False, include_header=include_header
+        )
