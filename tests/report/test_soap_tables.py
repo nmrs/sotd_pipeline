@@ -52,8 +52,9 @@ class TestSoapsTableGenerator:
         }
         generator = SoapsTableGenerator(sample_data, debug=False)
         data = generator.get_table_data()
-        # SoapsTableGenerator doesn't filter missing fields, so both should be included
-        assert len(data) == 2
+        # SoapsTableGenerator now filters missing fields, so only valid record should be included
+        assert len(data) == 1
+        assert data[0]["name"] == "Stirling Executive Man"
 
     def test_table_title(self):
         """Test table title."""
@@ -102,8 +103,10 @@ class TestSoapMakersTableGenerator:
         }
         generator = SoapMakersTableGenerator(sample_data, debug=False)
         data = generator.get_table_data()
-        # SoapMakersTableGenerator doesn't filter missing fields, so both should be included
-        assert len(data) == 2
+        # SoapMakersTableGenerator now filters missing fields, so only valid record
+        # should be included
+        assert len(data) == 1
+        assert data[0]["maker"] == "Stirling"
 
     def test_table_title(self):
         """Test table title."""
