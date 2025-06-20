@@ -9,6 +9,11 @@ alwaysApply: true
 ## Project Overview
 This is a Python 3.11 data processing pipeline that extracts, processes, and analyzes "Shave of the Day" posts from Reddit's r/wetshaving community. The pipeline consists of 6 sequential phases: fetch, extract, match, enrich, aggregate, and report.
 
+## Pipeline --force Rule (MANDATORY)
+- **When running any pipeline step, ALWAYS use the `--force` flag unless the user explicitly says NOT to use `--force`.**
+- This ensures fresh data processing, avoids cached results, and guarantees that all code changes are actually tested.
+- If you want to run without --force, specify that explicitly in your request.
+
 ## Development Environment
 - **Python Version**: 3.11 (enforced by pyrightconfig.json)
 - **Virtual Environment**: Use `.venv` directory
@@ -76,3 +81,9 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 - Test files mirror source structure: `tests/{module}/test_{file}.py`
 - Strategy implementations: `sotd/match/{product}_matching_strategies/`
 - Utilities shared across phases: `sotd/utils/`
+
+## Pandas and Linting
+- When using pandas, if linter (Ruff) warnings are triggered by idiomatic pandas code that is not easily fixable, prefer using per-line `# noqa` disables.
+- If per-line disables do not work or would be excessive, use a file-level `# noqa` at the top of the file.
+- Do not spend excessive time making pandas code perfectly lint-free if it would harm readability or maintainability.
+- Prioritize code clarity and correctness over strict linter compliance for complex pandas operations.
