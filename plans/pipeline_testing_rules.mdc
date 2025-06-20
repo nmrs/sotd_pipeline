@@ -1,0 +1,209 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Pipeline Testing Rules
+
+## Default Testing Behavior
+
+### **MANDATORY**: Use --force for Pipeline Testing
+When running any pipeline step for testing purposes, **ALWAYS** use the `--force` flag unless:
+1. You are explicitly testing non-force mode behavior
+2. The user has specifically asked NOT to use `--force`
+3. You are running production/real data processing (not testing)
+
+### Rationale
+- `--force` ensures fresh data processing and avoids cached results
+- Testing should always use clean, reproducible data
+- Prevents confusion between cached and fresh results
+- Ensures all code changes are actually tested
+
+### Pipeline Step Examples
+
+#### Fetch Phase
+```bash
+# ✅ CORRECT - Testing with force
+python run.py fetch --month 2025-05 --force
+
+# ❌ INCORRECT - Testing without force (may use cached data)
+python run.py fetch --month 2025-05
+```
+
+#### Extract Phase
+```bash
+# ✅ CORRECT - Testing with force
+python run.py extract --month 2025-05 --force
+
+# ❌ INCORRECT - Testing without force
+python run.py extract --month 2025-05
+```
+
+#### Match Phase
+```bash
+# ✅ CORRECT - Testing with force
+python run.py match --month 2025-05 --force
+
+# ❌ INCORRECT - Testing without force
+python run.py match --month 2025-05
+```
+
+#### Enrich Phase
+```bash
+# ✅ CORRECT - Testing with force
+python run.py enrich --month 2025-05 --force
+
+# ❌ INCORRECT - Testing without force
+python run.py enrich --month 2025-05
+```
+
+#### Aggregate Phase
+```bash
+# ✅ CORRECT - Testing with force
+python run.py aggregate --month 2025-05 --force
+
+# ❌ INCORRECT - Testing without force
+python run.py aggregate --month 2025-05
+```
+
+#### Report Phase
+```bash
+# ✅ CORRECT - Testing with force
+python run.py report --month 2025-05 --force
+
+# ❌ INCORRECT - Testing without force
+python run.py report --month 2025-05
+```
+
+#### Full Pipeline
+```bash
+# ✅ CORRECT - Testing with force
+python run.py pipeline --month 2025-05 --force
+
+# ❌ INCORRECT - Testing without force
+python run.py pipeline --month 2025-05
+```
+
+### Exceptions to --force Rule
+
+#### 1. Explicit Non-Force Testing
+When specifically testing the behavior of non-force mode:
+```bash
+# ✅ CORRECT - Testing non-force behavior
+python run.py fetch --month 2025-05  # Testing cached data behavior
+```
+
+#### 2. User Explicitly Requests No Force
+When user specifically asks not to use force:
+```bash
+# ✅ CORRECT - User requested no force
+python run.py fetch --month 2025-05  # User said "don't use --force"
+```
+
+#### 3. Production Data Processing
+When processing real production data (not testing):
+```bash
+# ✅ CORRECT - Production processing
+python run.py pipeline --month 2025-05  # Real data, not testing
+```
+
+### Testing Workflow Patterns
+
+#### Development Testing
+```bash
+# Standard development testing workflow
+python run.py fetch --month 2025-05 --force
+python run.py extract --month 2025-05 --force
+python run.py match --month 2025-05 --force
+python run.py enrich --month 2025-05 --force
+python run.py aggregate --month 2025-05 --force
+python run.py report --month 2025-05 --force
+```
+
+#### Debug Testing
+```bash
+# Debug specific phase with force
+python run.py match --month 2025-05 --force --verbose
+```
+
+#### Integration Testing
+```bash
+# Full pipeline testing with force
+python run.py pipeline --month 2025-05 --force --verbose
+```
+
+### Error Handling with Force
+
+#### When Force Fails
+If `--force` causes issues, investigate:
+1. Check if data exists for the specified month
+2. Verify file permissions and paths
+3. Check for data corruption or invalid formats
+4. Review error messages for specific issues
+
+#### Fallback Behavior
+```bash
+# If force fails, try without force to see if it's a data issue
+python run.py fetch --month 2025-05 --force  # Fails
+python run.py fetch --month 2025-05          # Check if data exists
+```
+
+### Documentation Requirements
+
+#### Code Comments
+When writing code that runs pipeline steps, include comments about force usage:
+```python
+# Always use --force for testing to ensure fresh data processing
+subprocess.run(["python", "run.py", "fetch", "--month", month, "--force"])
+```
+
+#### Test Documentation
+Document force usage in test descriptions:
+```python
+def test_fetch_phase_with_force():
+    """Test fetch phase with --force flag for fresh data processing."""
+    # Test implementation
+```
+
+### Integration with Other Rules
+
+#### Git and Cleanup Rules
+- Force usage ensures clean testing before commits
+- Prevents committing with stale cached data
+- Aligns with "test before commit" workflow
+
+#### Development Workflow Rules
+- Force usage is part of the `make all` workflow
+- Ensures all quality checks use fresh data
+- Prevents false positives in testing
+
+### Common Mistakes to Avoid
+
+#### ❌ Forgetting Force in Testing
+```bash
+# ❌ WRONG - May use cached data
+python run.py match --month 2025-05
+```
+
+#### ❌ Using Force in Production
+```bash
+# ❌ WRONG - Unnecessary in production
+python run.py pipeline --month 2025-05 --force  # Production run
+```
+
+#### ❌ Inconsistent Force Usage
+```bash
+# ❌ WRONG - Inconsistent testing
+python run.py fetch --month 2025-05 --force
+python run.py extract --month 2025-05  # Missing force
+python run.py match --month 2025-05 --force
+```
+
+### Best Practices Summary
+
+1. **Always use `--force` for testing** unless explicitly testing non-force behavior
+2. **Document force usage** in code comments and test descriptions
+3. **Be consistent** across all pipeline phases in testing
+4. **Investigate force failures** before falling back to non-force mode
+5. **Align with development workflow** rules for quality assurance
+6. **Use force in CI/CD** testing to ensure reproducible results
