@@ -8,6 +8,8 @@ venv/
 .coverage
 coverage/
 htmlcov/
+# macOS system files
+.DS_Store
 # Keep data files
 !data/*.yaml
 # Ignore JSON files in data subdirectories
