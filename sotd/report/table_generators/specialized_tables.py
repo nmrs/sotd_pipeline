@@ -225,18 +225,18 @@ class SuperSpeedTipsTableGenerator(BaseTableGenerator):
                     print(f"[DEBUG] super_speed_tips record {i} is not a dict")
                 continue
 
-            super_speed_tip = record.get("super_speed_tip")
+            tip = record.get("tip")
             shaves = record.get("shaves", 0)
             unique_users = record.get("unique_users", 0)
 
-            if not super_speed_tip:
+            if not tip:
                 if self.debug:
-                    print(f"[DEBUG] super_speed_tips record {i} missing super_speed_tip field")
+                    print(f"[DEBUG] super_speed_tips record {i} missing tip field")
                 continue
 
             valid_data.append(
                 {
-                    "tip": super_speed_tip,
+                    "tip": tip,
                     "shaves": shaves,
                     "unique_users": unique_users,
                 }
@@ -259,82 +259,6 @@ class SuperSpeedTipsTableGenerator(BaseTableGenerator):
         """Get the column configuration for the table."""
         return {
             "tip": {"display_name": "Tip", "format": "text"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
-
-
-class StraightRazorSpecsTableGenerator(BaseTableGenerator):
-    """Table generator for straight razor specifications in the hardware report."""
-
-    def get_table_data(self) -> list[dict[str, Any]]:
-        """Get straight razor specs data from aggregated data."""
-        data = self.data.get("straight_razor_specs", [])
-
-        if not isinstance(data, list):
-            if self.debug:
-                print("[DEBUG] straight_razor_specs data is not a list")
-            return []
-
-        # Validate each record has required fields
-        valid_data = []
-        for i, record in enumerate(data):
-            if not isinstance(record, dict):
-                if self.debug:
-                    print(f"[DEBUG] straight_razor_specs record {i} is not a dict")
-                continue
-
-            specs = record.get("specs")
-            shaves = record.get("shaves", 0)
-            unique_users = record.get("unique_users", 0)
-
-            if not specs or not isinstance(specs, str):
-                if self.debug:
-                    print(f"[DEBUG] straight_razor_specs record {i} missing or invalid specs field")
-                continue
-
-            if not isinstance(shaves, (int, float)) or shaves <= 0:
-                if self.debug:
-                    print(f"[DEBUG] straight_razor_specs record {i} has invalid shaves: {shaves}")
-                continue
-
-            if not isinstance(unique_users, (int, float)) or unique_users <= 0:
-                if self.debug:
-                    print(
-                        f"[DEBUG] straight_razor_specs record {i} has invalid users: {unique_users}"
-                    )
-                continue
-
-            valid_data.append(
-                {
-                    "specs": specs,
-                    "shaves": shaves,
-                    "unique_users": unique_users,
-                }
-            )
-
-        if self.debug:
-            print(f"[DEBUG] Found {len(valid_data)} valid straight razor specs records")
-
-        return valid_data
-
-    def get_table_title(self) -> str:
-        """Get the table title."""
-        return "Straight Razor Specifications"
-
-    def get_name_key(self) -> str:
-        """Return the key to use for matching items in delta calculations."""
-        return "specs"
-
-    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
-        """Get the column configuration for the table."""
-        return {
-            "specs": {"display_name": "Specifications", "format": "text"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
