@@ -1,0 +1,147 @@
+# Report Templates for SOTD Pipeline
+# This file contains flexible report templates for both hardware and software reports.
+# Users can edit these templates to customize the entire report structure without modifying code.
+# Template variables use {{variable_name}} syntax and will be replaced with actual values.
+# Table placeholders use {{tables.table-name}} syntax and will be replaced with generated tables.
+#
+# Available variables for hardware template:
+#   {{total_shaves}} - Total number of shaves (formatted with commas, e.g., "1,234")
+#   {{unique_shavers}} - Number of unique users (e.g., "567")
+#   {{avg_shaves_per_user}} - Average shaves per user (formatted to 1 decimal, e.g., "2.2")
+#
+# Available table placeholders for hardware template:
+#   {{tables.razors}} - Razor usage statistics
+#   {{tables.razor-manufacturers}} - Razor manufacturer statistics
+#   {{tables.razor-formats}} - Razor format statistics
+#   {{tables.blades}} - Blade usage statistics
+#   {{tables.blade-manufacturers}} - Blade manufacturer statistics
+#   {{tables.brushes}} - Brush usage statistics
+#   {{tables.brush-handle-makers}} - Brush handle maker statistics
+#   {{tables.brush-knot-makers}} - Brush knot maker statistics
+#   {{tables.knot-fibers}} - Knot fiber type statistics
+#   {{tables.knot-sizes}} - Knot size statistics
+#   {{tables.blackbird-plates}} - Blackbird plate statistics
+#   {{tables.christopher-bradley-plates}} - Christopher Bradley plate statistics
+#   {{tables.game-changer-plates}} - Game Changer plate statistics
+#   {{tables.super-speed-tips}} - Super Speed tip statistics
+#   {{tables.straight-widths}} - Straight razor width statistics
+#   {{tables.straight-grinds}} - Straight razor grind statistics
+#   {{tables.straight-points}} - Straight razor point statistics
+#   {{tables.razor-blade-combinations}} - Razor/blade combination statistics
+#   {{tables.highest-use-count-per-blade}} - Highest use count per blade statistics
+#   {{tables.top-shavers}} - Top shaver statistics
+#
+# Available table placeholders for software template:
+#   {{tables.soap-makers}} - Soap maker statistics
+#   {{tables.soaps}} - Soap usage statistics
+#   {{tables.brand-diversity}} - Brand diversity statistics
+#   {{tables.top-shavers}} - Top shaver statistics
+
+hardware:
+  # Hardware report template - customize the entire report structure
+  # Variables: {{total_shaves}}, {{unique_shavers}}, {{avg_shaves_per_user}}
+  # Tables: All hardware table placeholders listed above
+  report_template: |
+    ## Notes & Caveats
+
+    ### Data Collection
+    - This data is collected from the r/wetshaving community's Shave of the Day (SOTD) posts
+    - **{{total_shaves}} shaves** from **{{unique_shavers}} unique users** were analyzed this month
+    - Users averaged **{{avg_shaves_per_user}} shaves** each during the reporting period
+    - Only posts that include product information are included in the analysis
+    - Users may post multiple SOTDs per day, which are all counted
+    - The data represents community participation, not necessarily market share or sales figures
+
+    ### Product Matching
+    - Product matching is performed automatically and may contain errors
+    - Product names are normalized for consistency across reports
+    - Some products may be grouped under generic categories (e.g., "Other Straight Razor")
+
+    ### Brush Data
+    - Brush handle makers and knot makers are attributed based on user input
+    - Fiber types are normalized to title case to prevent duplicates
+    - Knot sizes are filtered to reasonable ranges (15-50mm) to exclude invalid data
+    - Mixed fiber brushes are categorized separately from single-fiber types
+
+    ### Razor Data
+    - Razor formats are categorized based on blade type (DE, GEM, Injector, etc.)
+    - Straight razors include specifications for grind, width, and point types
+    - Plate-specific data is tracked for razors with interchangeable plates
+
+    ### Blade Data
+    - Blade formats are differentiated (DE, GEM, Injector, AC, etc.)
+    - Use counts represent individual blade usage, not package counts
+
+    ### Delta Calculations
+    - Position-based deltas show movement in rankings between periods
+    - ↑ indicates improved position, ↓ indicates declined position, = indicates no change
+    - "n/a" indicates the item was not present in the comparison period
+    - Delta calculations are based on position rankings, not absolute values
+
+    ### User Statistics
+    - "avg shaves per user" represents the average number of shaves per unique user for each product
+    - Cross-product tables show combinations and highest individual usage patterns
+    - User data is anonymized and aggregated for privacy
+
+    ### Data Quality
+    - Invalid or missing data is filtered out during processing
+    - Debug logging is available to identify data quality issues
+    - Historical comparisons require data from previous periods to be available
+
+    ## Tables
+
+    ### Razor Statistics
+    {{tables.razor-formats}}
+    {{tables.razors}}
+    {{tables.razor-manufacturers}}
+
+    ### Blade Statistics
+    {{tables.blades}}
+    {{tables.blade-manufacturers}}
+
+    ### Brush Statistics
+    {{tables.brushes}}
+    {{tables.brush-handle-makers}}
+    {{tables.brush-knot-makers}}
+    {{tables.knot-fibers}}
+    {{tables.knot-sizes}}
+
+    ### Specialized Analysis
+    {{tables.blackbird-plates}}
+    {{tables.christopher-bradley-plates}}
+    {{tables.game-changer-plates}}
+    {{tables.super-speed-tips}}
+    {{tables.straight-widths}}
+    {{tables.straight-grinds}}
+    {{tables.straight-points}}
+
+    ### Cross-Product Analysis
+    {{tables.razor-blade-combinations}}
+    {{tables.highest-use-count-per-blade}}
+
+    ### User Statistics
+    {{tables.top-shavers}}
+
+software:
+  # Software report template - customize the entire report structure
+  # Variables: (none currently - static content only)
+  # Tables: All software table placeholders listed above
+  report_template: |
+    ## Notes & Caveats
+
+    - This data is collected from the r/wetshaving community's Shave of the Day (SOTD) posts
+    - Only posts that include product information are included in the analysis
+    - Product matching is performed automatically and may contain errors
+    - Users may post multiple SOTDs per day, which are all counted
+    - The data represents community participation, not necessarily market share or sales figures
+    - Software refers to shaving soaps, creams, and other lathering products
+
+    ## Tables
+
+    ### Soap Statistics
+    {{tables.soap-makers}}
+    {{tables.soaps}}
+    {{tables.brand-diversity}}
+
+    ### User Statistics
+    {{tables.top-shavers}} 
