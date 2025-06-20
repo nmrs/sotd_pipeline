@@ -8,11 +8,6 @@ alwaysApply: false
 ## Overview
 
 This document outlines the implementation plan for rebuilding the Aggregate phase from scratch. The phase will process enriched SOTD data to generate statistical summaries for downstream reporting.
-# Aggregate Phase Implementation Plan
-
-## Overview
-
-This document outlines the implementation plan for rebuilding the Aggregate phase from scratch. The phase will process enriched SOTD data to generate statistical summaries for downstream reporting.
 
 ## File Organization
 
@@ -164,10 +159,18 @@ sotd/aggregate/aggregators/
 
 ### Phase 4: Format Aggregators
 - [x] **4.1 Razor Format Aggregator (`aggregators/formats/razor_format_aggregator.py`)**
-  - [x] Implement razor format aggregation
-  - [x] Extract format from razor.matched.format
+  - [x] Implement razor format aggregation with sophisticated format detection
+  - [x] **ENHANCED**: Mirror old RazorFormatExtractor logic for format combination
+  - [x] **ENHANCED**: Handle shavette + blade format combinations (e.g., "Shavette (AC)")
+  - [x] **ENHANCED**: Special Half DE processing (DE blade in shavette → "Shavette (Half DE)")
+  - [x] **ENHANCED**: Preserve full "Half DE" variants (e.g., "Half DE (multi-blade)")
+  - [x] **ENHANCED**: Fallback logic: razor format → blade format → default to DE
+  - [x] **ENHANCED**: Handle predefined shavette formats (e.g., "Shavette (AC)" from catalog)
   - [x] Add position field calculation
   - [x] Sort by shaves desc, unique_users desc
+  - [x] **COMPREHENSIVE TESTING**: Added 10 test cases covering all format detection scenarios
+
+**✅ Phase 4: Format Aggregators - COMPLETE WITH ENHANCED LOGIC**
 
 ### Phase 5: Brush Specialized Aggregators
 - [x] **5.1 Handle Maker Aggregator (`aggregators/brush_specialized/handle_maker_aggregator.py`)**
@@ -270,6 +273,7 @@ sotd/aggregate/aggregators/
   - [x] Test position field generation
   - [x] Test sorting logic
   - [x] Test data validation
+  - [x] **ENHANCED**: Comprehensive razor format tests with 10 scenarios
 
 - [x] **9.3 Integration Tests**
   - [x] Test end-to-end processing
@@ -367,3 +371,37 @@ sotd/aggregate/aggregators/
 - [x] Performance is acceptable for typical datasets
 - [x] Error handling is robust and informative
 - [x] Documentation is complete and accurate
+
+## Recent Enhancements (Latest Session)
+
+### Razor Format Aggregator Sophisticated Logic
+- **Implemented**: `_determine_razor_format()` function that mirrors old RazorFormatExtractor logic
+- **Shavette Format Detection**: Combines razor type + blade format (e.g., "Shavette (AC)", "Shavette (Half DE)")
+- **Half DE Special Processing**: 
+  - DE blade in shavette → "Shavette (Half DE)" (not "Shavette (DE)")
+  - Preserves full "Half DE" variants (e.g., "Half DE (multi-blade)")
+  - Always returns full razor format if it starts with "Half DE"
+- **Fallback Logic**: razor format → blade format → default to DE
+- **Predefined Format Handling**: Respects catalog entries like "Shavette (AC)"
+- **Comprehensive Testing**: 10 test scenarios covering all edge cases
+
+### Key Implementation Details
+- **Format Combination**: `f"{SHAVETTE} ({blade_format})"` for shavettes
+- **Half DE Detection**: `razor_format.startswith(HALF_DE)` check
+- **Blade Format Fallback**: When no razor format, use blade format
+- **Default Behavior**: Return "DE" when no formats available
+- **Edge Case Handling**: Skip records with no razor match (`razor_matched is None`)
+
+### Test Coverage
+- Basic format aggregation
+- Shavette + AC blade combination
+- Shavette + DE blade (becomes Half DE)
+- Shavette with unspecified blade format
+- Predefined shavette formats
+- Half DE detection and preservation
+- Blade format fallback
+- Default DE behavior
+- No razor match handling
+- Complex multi-format scenarios
+
+**Status**: All razor format aggregation tests passing ✅
