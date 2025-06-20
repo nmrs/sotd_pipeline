@@ -111,7 +111,7 @@ def process_month(
         soap_matcher = SoapMatcher()
 
         # Process records
-        records = data.get("records", [])
+        records = data.get("data", [])
         monitor.set_record_count(len(records))
 
         for record in records:
@@ -148,7 +148,7 @@ def process_month(
                         "record_count": len(records),
                         "performance": monitor.get_summary(),
                     },
-                    "records": records,
+                    "data": records,
                 },
                 f,
                 indent=2,

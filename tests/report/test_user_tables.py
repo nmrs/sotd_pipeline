@@ -89,7 +89,6 @@ class TestTopShaversTableGenerator:
             max_rows=20,
             include_delta=True,
             comparison_data=previous_data,
-            comparison_period="previous month",
         )
         assert "vs Previous Month" in table_md
         assert "+1" in table_md or "-1" in table_md or "0" in table_md
