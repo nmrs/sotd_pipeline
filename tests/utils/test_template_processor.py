@@ -12,47 +12,136 @@ def mock_template_content():
     return """
 hardware:
   report_template: |
-    # Hardware Report for {{month}}
-    
-    **Total Shaves:** {{total_shaves}}
-    **Unique Shavers:** {{unique_shavers}}
-    **Avg Shaves/User:** {{avg_shaves_per_user}}
-    
+    Welcome to your SOTD Hardware Report for {{month_year}}
+
+    ## Observations
+
+    * [Observations will be generated based on data analysis]
+
     ## Notes & Caveats
-    
-    This is a test template for integration testing.
-    
-    ## Tables
-    
-    ### Razor Statistics
+
+    * {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report.
+
+    * Average shaves per user: {{avg_shaves_per_user}}
+
+    * I only show the top n results per category to keep the tables readable and avoid max post length issues.
+
+    * Custom template content for testing
+
+    ## Razor Formats
+
+    {{tables.razor-formats}}
+
+    ## Razors
+
     {{tables.razors}}
-    
-    ### Blade Statistics
+
+    ## Razor Manufacturers
+
+    {{tables.razor-manufacturers}}
+
+    ## Blades
+
     {{tables.blades}}
-    
-    ### Brush Statistics
+
+    ## Blade Manufacturers
+
+    {{tables.blade-manufacturers}}
+
+    ## Brushes
+
     {{tables.brushes}}
-    
-    ### User Statistics
+
+    ## Brush Handle Makers
+
+    {{tables.brush-handle-makers}}
+
+    ## Brush Knot Makers
+
+    {{tables.brush-knot-makers}}
+
+    ## Knot Fibers
+
+    {{tables.knot-fibers}}
+
+    ## Knot Sizes
+
+    {{tables.knot-sizes}}
+
+    ## Blackbird Plates
+
+    {{tables.blackbird-plates}}
+
+    ## Christopher Bradley Plates
+
+    {{tables.christopher-bradley-plates}}
+
+    ## Game Changer Plates
+
+    {{tables.game-changer-plates}}
+
+    ## Super Speed Tips
+
+    {{tables.super-speed-tips}}
+
+    ## Straight Widths
+
+    {{tables.straight-widths}}
+
+    ## Straight Grinds
+
+    {{tables.straight-grinds}}
+
+    ## Straight Points
+
+    {{tables.straight-points}}
+
+    ## Most Used Blades in Most Used Razors
+
+    {{tables.razor-blade-combinations}}
+
+    ## Highest Use Count per Blade
+
+    {{tables.highest-use-count-per-blade}}
+
+    ## Top Shavers
+
     {{tables.top-shavers}}
 
 software:
   report_template: |
-    # Software Report for {{month}}
-    
-    **Total Shaves:** {{total_shaves}}
-    **Unique Shavers:** {{unique_shavers}}
-    
+    Welcome to your SOTD Lather Log for {{month_year}}
+
+    * {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report. Collectively, these shavers used {{unique_soaps}} distinct soaps from {{unique_brands}} distinct brands.
+
+    ## Observations
+
+    * [Observations will be generated based on data analysis]
+
     ## Notes & Caveats
-    
-    This is a test software template for integration testing.
-    
-    ## Tables
-    
-    ### Soap Statistics
+
+    * I only show the top n results per category to keep the tables readable and avoid max post length issues.
+
+    * The unique user column shows the number of different users who used a given brand/soap/etc in the month.
+
+    * The Brand Diversity table details the number of distinct soaps used during the month from that particular brand.
+
+    * The change Δ vs columns show how an item has moved up or down the rankings since that month. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to that month. n/a means the item was not present in that month.
+
+    ## Soap Makers
+
+    {{tables.soap-makers}}
+
+    ## Soaps
+
     {{tables.soaps}}
-    
-    ### User Statistics
+
+    ## Brand Diversity
+
+    {{tables.brand-diversity}}
+
+    ## Top Shavers
+
     {{tables.top-shavers}}
 """
 
@@ -247,10 +336,12 @@ def test_template_processor_with_all_placeholders(mock_template_file):
     """Test template processor with all placeholders using shared mock template."""
     # Variables for replacement
     variables = {
-        "month": "2025-01",
+        "month_year": "January 2025",
         "total_shaves": "1,234",
         "unique_shavers": "50",
         "avg_shaves_per_user": "24.7",
+        "unique_soaps": "100",
+        "unique_brands": "25",
     }
     table_generator = DummyTableGenerator()
 
@@ -259,17 +350,53 @@ def test_template_processor_with_all_placeholders(mock_template_file):
     result = processor.render_template("hardware", "report_template", variables, table_generator)
 
     # Validate variable replacement
-    assert "# Hardware Report for 2025-01" in result
-    assert "**Total Shaves:** 1,234" in result
-    assert "**Unique Shavers:** 50" in result
-    assert "**Avg Shaves/User:** 24.7" in result
+    assert "Welcome to your SOTD Hardware Report for January 2025" in result
+    assert "1,234 shave reports from 50 distinct shavers" in result
+    assert "Average shaves per user: 24.7" in result
+
     # Validate table placeholder replacement
+    assert "<table for razor-formats>" in result
     assert "<table for razors>" in result
+    assert "<table for razor-manufacturers>" in result
     assert "<table for blades>" in result
     assert "<table for brushes>" in result
+    assert "<table for brush-handle-makers>" in result
+    assert "<table for brush-knot-makers>" in result
+    assert "<table for knot-fibers>" in result
+    assert "<table for knot-sizes>" in result
+    assert "<table for blackbird-plates>" in result
+    assert "<table for christopher-bradley-plates>" in result
+    assert "<table for game-changer-plates>" in result
+    assert "<table for straight-widths>" in result
+    assert "<table for straight-grinds>" in result
+    assert "<table for straight-points>" in result
+    assert "<table for razor-blade-combinations>" in result
+    assert "<table for highest-use-count-per-blade>" in result
     assert "<table for top-shavers>" in result
     # Validate that all table names were called
-    assert set(table_generator.called) == {"razors", "blades", "brushes", "top-shavers"}
+    expected_tables = {
+        "razor-formats",
+        "razors",
+        "razor-manufacturers",
+        "blades",
+        "blade-manufacturers",
+        "brushes",
+        "brush-handle-makers",
+        "brush-knot-makers",
+        "knot-fibers",
+        "knot-sizes",
+        "blackbird-plates",
+        "christopher-bradley-plates",
+        "game-changer-plates",
+        "super-speed-tips",
+        "straight-widths",
+        "straight-grinds",
+        "straight-points",
+        "razor-blade-combinations",
+        "highest-use-count-per-blade",
+        "top-shavers",
+    }
+    assert set(table_generator.called) == expected_tables
 
 
 def test_get_available_table_placeholders(mock_template_file):
@@ -277,5 +404,26 @@ def test_get_available_table_placeholders(mock_template_file):
     processor = TemplateProcessor(templates_path=mock_template_file)
     placeholders = processor.get_available_table_placeholders("hardware")
 
-    expected_placeholders = {"razors", "blades", "brushes", "top-shavers"}
+    expected_placeholders = {
+        "razor-formats",
+        "razors",
+        "razor-manufacturers",
+        "blades",
+        "blade-manufacturers",
+        "brushes",
+        "brush-handle-makers",
+        "brush-knot-makers",
+        "knot-fibers",
+        "knot-sizes",
+        "blackbird-plates",
+        "christopher-bradley-plates",
+        "game-changer-plates",
+        "super-speed-tips",
+        "straight-widths",
+        "straight-grinds",
+        "straight-points",
+        "razor-blade-combinations",
+        "highest-use-count-per-blade",
+        "top-shavers",
+    }
     assert set(placeholders) == expected_placeholders
