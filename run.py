@@ -85,6 +85,79 @@ def run_pipeline(phases: List[str], args: List[str], debug: bool = False) -> int
     return 0
 
 
+def get_phase_range(phase_range: str) -> List[str]:
+    """
+    Parse a phase range string and return the list of phases to run.
+
+    Args:
+        phase_range: Phase range string in format:
+            - "phase" (single phase)
+            - "phase1:phase2" (inclusive range)
+            - "phase:" (from phase to end)
+            - ":phase" (from beginning to phase)
+            - "" (all phases)
+
+    Returns:
+        List of phases to run in order
+    """
+    all_phases = ["fetch", "extract", "match", "enrich", "aggregate", "report"]
+
+    if not phase_range:
+        return all_phases
+
+    if ":" not in phase_range:
+        # Single phase
+        if phase_range not in all_phases:
+            raise ValueError(f"Invalid phase: {phase_range}. Valid phases: {', '.join(all_phases)}")
+        return [phase_range]
+
+    # Parse range
+    parts = phase_range.split(":")
+    if len(parts) != 2:
+        raise ValueError(
+            f"Invalid phase range format: {phase_range}. Expected format: phase1:phase2"
+        )
+
+    start_phase, end_phase = parts
+
+    if not start_phase and not end_phase:
+        return all_phases
+
+    if not start_phase:
+        # :phase - from beginning to phase
+        if end_phase not in all_phases:
+            raise ValueError(
+                f"Invalid end phase: {end_phase}. Valid phases: {', '.join(all_phases)}"
+            )
+        end_idx = all_phases.index(end_phase)
+        return all_phases[: end_idx + 1]
+
+    if not end_phase:
+        # phase: - from phase to end
+        if start_phase not in all_phases:
+            raise ValueError(
+                f"Invalid start phase: {start_phase}. Valid phases: {', '.join(all_phases)}"
+            )
+        start_idx = all_phases.index(start_phase)
+        return all_phases[start_idx:]
+
+    # phase1:phase2 - inclusive range
+    if start_phase not in all_phases:
+        raise ValueError(
+            f"Invalid start phase: {start_phase}. Valid phases: {', '.join(all_phases)}"
+        )
+    if end_phase not in all_phases:
+        raise ValueError(f"Invalid end phase: {end_phase}. Valid phases: {', '.join(all_phases)}")
+
+    start_idx = all_phases.index(start_phase)
+    end_idx = all_phases.index(end_phase)
+
+    if start_idx > end_idx:
+        raise ValueError(f"Start phase '{start_phase}' comes after end phase '{end_phase}'")
+
+    return all_phases[start_idx : end_idx + 1]
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     """
     Main entry point for the SOTD pipeline.
@@ -126,7 +199,16 @@ Examples:
   python run.py pipeline --month 2025-01 --debug
   
   # Run specific phase range
-  python run.py pipeline --month 2025-01 --phases extract,match,enrich
+  python run.py pipeline --month 2025-01 extract:enrich
+  
+  # Run single phase
+  python run.py pipeline --month 2025-01 match
+  
+  # Run from phase to end
+  python run.py pipeline --month 2025-01 match:
+  
+  # Run from beginning to phase
+  python run.py pipeline --month 2025-01 :enrich
         """,
     )
 
@@ -150,18 +232,19 @@ Examples:
         description="Run multiple pipeline phases in sequence",
     )
 
-    # Pipeline arguments
+    # Phase range argument (optional, defaults to all phases)
     pipeline_parser.add_argument(
-        "--phases",
-        default="fetch,extract,match,enrich,aggregate,report",
-        help="Comma-separated list of phases to run (default: all phases)",
+        "phase_range",
+        nargs="?",
+        default="",
+        help="Phase range to run (e.g., extract:enrich, match:, :aggregate). Default: all phases",
     )
 
     # Common arguments for pipeline
     pipeline_parser.add_argument("--month", help="Process specific month (YYYY-MM format)")
     pipeline_parser.add_argument("--year", type=int, help="Process entire year (YYYY format)")
-    pipeline_parser.add_argument("--start", help="Start month for range (YYYY-MM format)")
-    pipeline_parser.add_argument("--end", help="End month for range (YYYY-MM format)")
+    pipeline_parser.add_argument("--start-month", help="Start month for range (YYYY-MM format)")
+    pipeline_parser.add_argument("--end-month", help="End month for range (YYYY-MM format)")
     pipeline_parser.add_argument("--range", help="Month range (YYYY-MM:YYYY-MM format)")
     pipeline_parser.add_argument(
         "--out-dir", default="data", help="Output directory (default: data)"
@@ -179,15 +262,19 @@ Examples:
 
     try:
         if args.command == "pipeline":
-            # Parse phases
-            phases = [p.strip() for p in args.phases.split(",")]
-            valid_phases = {"fetch", "extract", "match", "enrich", "aggregate", "report"}
-
-            invalid_phases = set(phases) - valid_phases
-            if invalid_phases:
-                print(f"[ERROR] Invalid phases: {', '.join(invalid_phases)}")
-                print(f"[INFO] Valid phases: {', '.join(valid_phases)}")
+            # Determine phases to run
+            try:
+                phases = get_phase_range(args.phase_range)
+            except ValueError as e:
+                print(f"[ERROR] {e}")
                 return 1
+
+            if not phases:
+                print("[ERROR] No phases specified to run")
+                return 1
+
+            if args.debug:
+                print(f"[DEBUG] Running phases: {', '.join(phases)}")
 
             # Build common arguments
             common_args = []
@@ -195,10 +282,10 @@ Examples:
                 common_args.extend(["--month", args.month])
             if args.year:
                 common_args.extend(["--year", str(args.year)])
-            if args.start:
-                common_args.extend(["--start", args.start])
-            if args.end:
-                common_args.extend(["--end", args.end])
+            if args.start_month:
+                common_args.extend(["--start", args.start_month])
+            if args.end_month:
+                common_args.extend(["--end", args.end_month])
             if args.range:
                 common_args.extend(["--range", args.range])
             if args.out_dir:
