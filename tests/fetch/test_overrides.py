@@ -21,7 +21,7 @@ class FakeReddit:
     def __init__(self, returned):
         self._returned = returned
 
-    def submission(self, *, submission_id: str):  # type: ignore[no-untyped-def]
+    def submission(self, submission_id: str):  # type: ignore[no-untyped-def]
         return self._returned[submission_id]
 
 
