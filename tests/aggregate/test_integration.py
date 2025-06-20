@@ -25,6 +25,7 @@ class TestAggregateIntegration:
                 "id": "test1",
                 "author": "user1",
                 "created_utc": 1640995200,
+                "thread_title": "SOTD Thread - Jan 01, 2025",
                 "body": (
                     "Razor: Karve Christopher Bradley\n"
                     "Blade: Feather\n"
@@ -71,6 +72,7 @@ class TestAggregateIntegration:
                 "id": "test2",
                 "author": "user2",
                 "created_utc": 1640995201,
+                "thread_title": "SOTD Thread - Jan 01, 2025",
                 "body": (
                     "Razor: Merkur 34C\nBlade: Astra SP\n"
                     "Brush: Elite handle w/ Declaration knot\n"
@@ -115,6 +117,7 @@ class TestAggregateIntegration:
                 "id": "test3",
                 "author": "user1",  # Same user as test1
                 "created_utc": 1640995202,
+                "thread_title": "SOTD Thread - Jan 02, 2025",
                 "body": (
                     "Razor: Karve Christopher Bradley\nBlade: Feather\n"
                     "Brush: Stirling\nSoap: Declaration Grooming"

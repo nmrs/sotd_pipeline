@@ -9,9 +9,9 @@ from sotd.aggregate.aggregators.cross_product import (
 
 def test_aggregate_users():
     records = [
-        {"author": "user1"},
-        {"author": "user2"},
-        {"author": "user1"},
+        {"author": "user1", "thread_title": "SOTD Thread - Jan 01, 2025"},
+        {"author": "user2", "thread_title": "SOTD Thread - Jan 01, 2025"},
+        {"author": "user1", "thread_title": "SOTD Thread - Jan 02, 2025"},
     ]
     # For simplicity, missed_days is not calculated here (would require more context)
     result = aggregate_users(records)
