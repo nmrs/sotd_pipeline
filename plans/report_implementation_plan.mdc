@@ -1,7 +1,47 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
 # Report Phase Implementation Plan
 
-## Project Overview
-Build the report phase of the SOTD pipeline that generates statistical analysis reports from aggregated data, producing two types of reports that mimic the community's monthly hardware and software reports. The phase will create formatted markdown reports with trend analysis and delta calculations.
+## References
+
+This implementation plan follows the specifications and rules defined in:
+
+- **Report Phase Specification**: `docs/report_phase_spec.md` - Defines the complete requirements, data structures, output formats, and functionality for the report phase
+- **Core Pipeline Rules**: `sotd-pipeline-core.mdc` - Defines development environment, code style, architecture patterns, and workflow rules
+
+All implementation must comply with these specifications and follow the established patterns and rules.
+
+## Overview
+
+The Report phase generates statistical analysis reports from aggregated SOTD data, producing two types of reports that mimic the community's monthly hardware and software reports. This implementation follows the modular architecture pattern established in other pipeline phases.
+
+## Architecture Compliance
+
+### Phase Structure Pattern
+Following the established pattern from other phases:
+- `run.py` (CLI entry point and main orchestration)
+- `cli.py` (argument parsing and validation) 
+- `load.py` (data loading from aggregated files)
+- `process.py` (report generation logic)
+- `save.py` (markdown file output)
+- `table_generators/` (modular table generation components)
+
+### Technology Stack
+- **pandas**: For data manipulation and table formatting (as specified in report_phase_spec.md)
+- **pathlib**: File path handling (following core pipeline rules)
+- **Modular design**: Base table generator with specialized implementations
+
+### Code Style Compliance
+- Python 3.11 (enforced by pyrightconfig.json)
+- Black formatting (100 char line length)
+- Ruff linting (E, F, I rules)
+- Pyright type checking in standard mode
+- Descriptive variable names reflecting the domain
+- Type hints for all function parameters and return values
+- File size preference: smaller, focused files under 300-400 lines
 
 ## Implementation Checklist
 
@@ -290,6 +330,9 @@ Requirements:
 - Include proper imports and type hints
 - Follow the existing code style (Black formatting, 100 char line length)
 
+Reference: report_phase_spec.md - CLI Interface section defines the required options and behavior
+Reference: sotd-pipeline-core.mdc - Development Environment and Code Style Rules
+
 The CLI should parse arguments and call a main `run()` function that will be implemented in subsequent steps. Include proper error handling for invalid arguments.
 
 Test this with basic argument parsing to ensure it follows the same pattern as other phases.
@@ -311,6 +354,9 @@ Requirements:
 - Include proper error handling and validation
 - Add type hints and docstrings
 
+Reference: report_phase_spec.md - Input/Output section defines the data structure and file locations
+Reference: sotd-pipeline-core.mdc - Error Handling philosophy (fail fast for internal errors, handle external failures gracefully)
+
 The module should handle loading both current month data and historical data for trend analysis. Include validation to ensure the data structure is correct before processing.
 
 Test with sample aggregated data to ensure proper loading and validation.
@@ -330,6 +376,9 @@ Requirements:
 - Include proper error handling and validation
 - Add type hints and docstrings
 
+Reference: report_phase_spec.md - Table Formatting section defines column order, data types, alignment, and row limits
+Reference: sotd-pipeline-core.mdc - File Size Preference (smaller, focused files with clear responsibilities)
+
 The base table generator should handle the common table formatting requirements and provide a foundation for specialized table generators. Focus on creating properly formatted markdown tables with the correct column structure.
 
 Test with sample aggregated data to ensure proper table formatting and output.
@@ -348,6 +397,9 @@ Requirements:
 - Handle hardware-specific data categories
 - Include proper error handling and validation
 - Add type hints and docstrings
+
+Reference: report_phase_spec.md - Hardware Report section defines the exact structure, sections, and table order
+Reference: sotd-pipeline-core.mdc - Domain-Specific Rules for product categorization and naming conventions
 
 The hardware report should follow the exact structure specified in the requirements, including the proper header format, notes & caveats section, and table ordering. Focus on creating the basic structure that can be extended with individual table generators.
 
@@ -369,6 +421,9 @@ Requirements:
 - Include proper error handling and validation
 - Add type hints and docstrings
 
+Reference: report_phase_spec.md - Trend Analysis section defines delta calculation rules, comparison periods, and symbol usage
+Reference: sotd-pipeline-core.mdc - Error Handling patterns for external failures
+
 The delta calculator should handle position-based comparisons and generate the appropriate Unicode arrows for trend analysis. Focus on accurate delta calculations and proper handling of missing data.
 
 Test with sample historical data to ensure proper delta calculations and symbol generation.
@@ -377,6 +432,7 @@ Test with sample historical data to ensure proper delta calculations and symbol 
 ## Success Criteria
 
 ### Functional Requirements
+Reference: report_phase_spec.md - Report Types, Data Processing Rules, and Output Structure sections
 - [ ] Generate hardware reports with all required tables and sections
 - [ ] Generate software reports with all required tables and sections
 - [ ] Calculate accurate delta values for trend analysis
@@ -386,19 +442,31 @@ Test with sample historical data to ensure proper delta calculations and symbol 
 - [ ] Include comprehensive error handling
 
 ### Quality Requirements
+Reference: sotd-pipeline-core.mdc - Development Environment, Code Style Rules, and Development Workflow Rules
 - [ ] Follow existing code style and patterns
 - [ ] Include comprehensive test coverage
 - [ ] Provide clear error messages
 - [ ] Handle edge cases and error conditions
 - [ ] Maintain good performance with large datasets
 - [ ] Include proper documentation and type hints
+- [ ] Pass all pre-commit validation: `make format lint typecheck test`
 
 ### Integration Requirements
+Reference: report_phase_spec.md - Pipeline Integration and Data Flow sections
 - [ ] Integrate with main pipeline workflow
 - [ ] Consume aggregated data correctly
 - [ ] Follow existing phase patterns and structure
 - [ ] Provide consistent CLI interface
 - [ ] Handle data flow properly
+
+### Specification Compliance
+Reference: report_phase_spec.md - Complete specification requirements
+- [ ] Implement all required report sections in correct order
+- [ ] Follow exact table formatting and column structure
+- [ ] Use correct delta calculation methodology and symbols
+- [ ] Generate proper markdown output format
+- [ ] Handle all specified data categories and edge cases
+- [ ] Implement proper file naming and output structure
 
 ## Notes
 
@@ -406,4 +474,7 @@ Test with sample historical data to ensure proper delta calculations and symbol 
 - Focus on modular design with clear separation of concerns
 - Prioritize comprehensive testing from the start
 - Ensure proper error handling and validation throughout
-- Maintain consistency with other pipeline phases 
+- Maintain consistency with other pipeline phases
+- **MANDATORY**: All implementation must comply with report_phase_spec.md requirements
+- **MANDATORY**: All code must follow sotd-pipeline-core.mdc development rules
+- **MANDATORY**: Run `make format lint typecheck test` before considering any task complete 
