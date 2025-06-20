@@ -405,3 +405,11 @@ sotd/aggregate/aggregators/
 - Complex multi-format scenarios
 
 **Status**: All razor format aggregation tests passing ✅
+
+- [ ] **User Aggregation: Missed Days Logic**
+  - [x] For each user, collect all dates they posted shaves (from thread titles)
+  - [x] Compare against all possible dates in the month
+  - [x] Calculate which days they missed
+  - [x] Store both the count (`missed_days`) and the list (`missed_dates`) of missed days (YYYY-MM-DD)
+  - [x] Sort users by shaves (descending), then missed_days (ascending)
+  - [x] Output structure: {"position": N, "user": "Username", "shaves": N, "missed_days": N, "missed_dates": [YYYY-MM-DD, ...]}
