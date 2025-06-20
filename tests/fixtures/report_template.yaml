@@ -1,36 +1,133 @@
 hardware:
-  template: |
+  report_template: |
+    Welcome to your SOTD Hardware Report for {{month_year}}
+
+    ## Observations
+
+    * [Observations will be generated based on data analysis]
+
     ## Notes & Caveats
 
-    ### Data Collection
-    - **{{total_shaves}} shaves** from **{{unique_shavers}} unique users**
-    - Users averaged **{{avg_shaves_per_user}} shaves** each
-    - Custom template content for testing
+    * {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report.
 
-    ## Tables
+    * Average shaves per user: {{avg_shaves_per_user}}
 
-    ### Razor Statistics
+    * I only show the top n results per category to keep the tables readable and avoid max post length issues.
+
+    * Custom template content for testing
+
+    ## Razor Formats
+
+    {{tables.razor-formats}}
+
+    ## Razors
+
     {{tables.razors}}
 
-    ### Blade Statistics
+    ## Razor Manufacturers
+
+    {{tables.razor-manufacturers}}
+
+    ## Blades
+
     {{tables.blades}}
 
-    ### Brush Statistics
+    ## Blade Manufacturers
+
+    {{tables.blade-manufacturers}}
+
+    ## Brushes
+
     {{tables.brushes}}
 
-    ### User Statistics
+    ## Brush Handle Makers
+
+    {{tables.brush-handle-makers}}
+
+    ## Brush Knot Makers
+
+    {{tables.brush-knot-makers}}
+
+    ## Knot Fibers
+
+    {{tables.knot-fibers}}
+
+    ## Knot Sizes
+
+    {{tables.knot-sizes}}
+
+    ## Blackbird Plates
+
+    {{tables.blackbird-plates}}
+
+    ## Christopher Bradley Plates
+
+    {{tables.christopher-bradley-plates}}
+
+    ## Game Changer Plates
+
+    {{tables.game-changer-plates}}
+
+    ## Super Speed Tips
+
+    {{tables.super-speed-tips}}
+
+    ## Straight Widths
+
+    {{tables.straight-widths}}
+
+    ## Straight Grinds
+
+    {{tables.straight-grinds}}
+
+    ## Straight Points
+
+    {{tables.straight-points}}
+
+    ## Most Used Blades in Most Used Razors
+
+    {{tables.razor-blade-combinations}}
+
+    ## Highest Use Count per Blade
+
+    {{tables.highest-use-count-per-blade}}
+
+    ## Top Shavers
+
     {{tables.top-shavers}}
 
 software:
-  template: |
+  report_template: |
+    Welcome to your SOTD Lather Log for {{month_year}}
+
+    * {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report. Collectively, these shavers used {{unique_soaps}} distinct soaps from {{unique_brands}} distinct brands.
+
+    ## Observations
+
+    * [Observations will be generated based on data analysis]
+
     ## Notes & Caveats
-    - Custom software template content
-    - This is a test template
 
-    ## Tables
+    * I only show the top n results per category to keep the tables readable and avoid max post length issues.
 
-    ### Soap Statistics
+    * The unique user column shows the number of different users who used a given brand/soap/etc in the month.
+
+    * The Brand Diversity table details the number of distinct soaps used during the month from that particular brand.
+
+    * The change Δ vs columns show how an item has moved up or down the rankings since that month. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to that month. n/a means the item was not present in that month.
+
+    ## Soap Makers
+
+    {{tables.soap-makers}}
+
+    ## Soaps
+
     {{tables.soaps}}
 
-    ### User Statistics
+    ## Brand Diversity
+
+    {{tables.brand-diversity}}
+
+    ## Top Shavers
+
     {{tables.top-shavers}} 
