@@ -1,12 +1,12 @@
 # SOTD Fetcher – Developer Specification
 
 ## Overview
-This tool extracts "Shave of the Day" (SOTD) reports from Reddit’s r/wetshaving subreddit by crawling top-level comments in daily SOTD threads. It supports monthly and yearly extraction, manual overrides, hybrid thread sourcing via Pushshift and PRAW, and outputs clean, sorted JSON files for later analysis.
+This tool extracts "Shave of the Day" (SOTD) reports from Reddit's r/wetshaving subreddit by crawling top-level comments in daily SOTD threads. It supports monthly and yearly extraction, manual overrides, hybrid thread sourcing via Pushshift and PRAW, and outputs clean, sorted JSON files for later analysis.
 
 ---
 
 ## Goals
-- Fetch all top-level comments from each day’s SOTD thread.
+- Fetch all top-level comments from each day's SOTD thread.
 - Combine Reddit and Pushshift APIs for coverage and redundancy.
 - Allow manual overrides to include or exclude specific threads.
 - Store clean JSON files per month and include metadata.
@@ -126,15 +126,48 @@ This tool extracts "Shave of the Day" (SOTD) reports from Reddit’s r/wetshavin
 ---
 
 ## CLI Usage
+
+### Unified Pipeline Interface (Recommended)
+```bash
+# Individual phases
+python run.py fetch --month 2025-05 --force
+python run.py extract --month 2025-05 --force
+python run.py match --month 2025-05 --force
+python run.py enrich --month 2025-05 --force
+python run.py aggregate --month 2025-05 --force
+python run.py report --month 2025-05 --force
+
+# Complete pipeline
+python run.py pipeline --month 2025-05 --force
+
+# Phase ranges
+python run.py pipeline --month 2025-05 --force extract:enrich
+python run.py pipeline --month 2025-05 --force match:
+python run.py pipeline --month 2025-05 --force :enrich
+
+# Date ranges
+python run.py pipeline --year 2024 --force
+python run.py pipeline --start-month 2024-01 --end-month 2024-06 --force
+python run.py pipeline --range 2024-01:2024-06 --force
+
+# Debug mode
+python run.py pipeline --month 2025-05 --force --debug
 ```
-python main.py wetshaving --month 202505
-python main.py wetshaving --year 2024 --manual path/to/manual_threads.json --strict --fallback-days 7 --verbose
+
+### Legacy Direct Phase Execution
+```bash
+python sotd/fetch/run.py --month 2025-05 --force
+python sotd/extract/run.py --month 2025-05 --force
+python sotd/match/run.py --month 2025-05 --force
+python sotd/enrich/run.py --month 2025-05 --force
 ```
+
+**Note**: The `--force` flag is MANDATORY for all pipeline operations unless explicitly specified otherwise. This ensures fresh data processing and avoids cached results.
 
 ---
 
 ## Logging and Verbosity
-- `--verbose` shows:
+- `--debug` shows:
   - Real-time progress updates
   - Thread and comment totals
   - Partial match detection

@@ -22,33 +22,33 @@ test:
 coverage:
 	pytest --cov=sotd --cov-report=term-missing tests/
 
-# Individual phase targets
+# Individual phase targets (with --force flag as per development rules)
 fetch:
-	python sotd/fetch/run.py --month 2025-05
+	python sotd/fetch/run.py --month 2025-05 --force
 
 extract:
-	python sotd/extract/run.py --month 2025-05
+	python sotd/extract/run.py --month 2025-05 --force
 
 match:
-	python sotd/match/run.py --month 2025-05
+	python sotd/match/run.py --month 2025-05 --force
 
 enrich:
-	python sotd/enrich/run.py --month 2025-05
+	python sotd/enrich/run.py --month 2025-05 --force
 
 aggregate:
-	python sotd/aggregate/run.py --month 2025-05
+	python sotd/aggregate/run.py --month 2025-05 --force
 
-# Pipeline targets
+# Pipeline targets (using unified run.py orchestration)
 pipeline:
-	python run.py pipeline --month 2025-05
+	python run.py pipeline --month 2025-05 --force
 
 pipeline-debug:
-	python run.py pipeline --month 2025-05 --debug
+	python run.py pipeline --month 2025-05 --force --debug
 
 # Performance testing
 performance-test:
-	python run.py aggregate --month 2025-01 --debug
-	python run.py aggregate --month 2025-02 --debug
+	python run.py aggregate --month 2025-01 --force --debug
+	python run.py aggregate --month 2025-02 --force --debug
 
 # Install dependencies
 install:

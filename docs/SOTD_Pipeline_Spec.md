@@ -8,6 +8,56 @@ This pipeline extracts, processes, and summarizes Shave of the Day (SOTD) conten
 
 ---
 
+## 🚀 Pipeline Orchestration
+
+The pipeline provides a unified orchestration interface through `run.py` that supports both individual phase execution and complete pipeline workflows.
+
+### Unified CLI Interface
+```bash
+# Individual phases
+python run.py fetch --month 2025-05 --force
+python run.py extract --month 2025-05 --force
+python run.py match --month 2025-05 --force
+python run.py enrich --month 2025-05 --force
+python run.py aggregate --month 2025-05 --force
+python run.py report --month 2025-05 --force
+
+# Complete pipeline
+python run.py pipeline --month 2025-05 --force
+
+# Phase ranges
+python run.py pipeline --month 2025-05 --force extract:enrich  # Run extract through enrich
+python run.py pipeline --month 2025-05 --force match:          # Run from match to end
+python run.py pipeline --month 2025-05 --force :enrich         # Run from start to enrich
+
+# Date ranges
+python run.py pipeline --year 2024 --force                    # Process entire year
+python run.py pipeline --start-month 2024-01 --end-month 2024-06 --force  # Date range
+python run.py pipeline --range 2024-01:2024-06 --force        # Alternative range syntax
+
+# Debug mode
+python run.py pipeline --month 2025-05 --force --debug
+```
+
+### Key Features
+- **Phase Range Support**: Run subsets of the pipeline using `phase1:phase2` syntax
+- **Date Range Support**: Process individual months, years, or custom date ranges
+- **Debug Logging**: Enable detailed logging with `--debug` flag
+- **Force Processing**: Use `--force` flag to ensure fresh data processing (MANDATORY)
+- **Error Handling**: Graceful failure handling with clear error messages
+- **Validation**: Comprehensive input validation for phase names and date formats
+
+### Phase Order
+The pipeline phases must be executed in this order:
+1. **fetch** - Extract Reddit threads/comments
+2. **extract** - Parse product mentions from comments
+3. **match** - Normalize product names against catalogs
+4. **enrich** - Extract additional metadata
+5. **aggregate** - Generate statistical summaries
+6. **report** - Create human-readable reports
+
+---
+
 ## 1. **Fetching**
 Extract relevant threads and top-level comments from Reddit using PRAW. Save raw Reddit data locally:
 

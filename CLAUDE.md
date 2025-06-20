@@ -12,12 +12,47 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `make coverage` - Run tests with coverage reporting
 
 ### Pipeline Execution
-Each phase has its own CLI script in `sotd/{phase}/run.py`:
+The pipeline can be run using the unified `run.py` orchestration script:
+
+#### Individual Phases
 ```bash
-python sotd/fetch/run.py --month 2025-05     # Fetch Reddit data
-python sotd/extract/run.py --month 2025-05   # Extract product mentions
-python sotd/match/run.py --month 2025-05     # Match to product catalogs
-python sotd/enrich/run.py --month 2025-05    # Add metadata
+python run.py fetch --month 2025-05 --force      # Fetch Reddit data
+python run.py extract --month 2025-05 --force    # Extract product mentions
+python run.py match --month 2025-05 --force      # Match to product catalogs
+python run.py enrich --month 2025-05 --force     # Add metadata
+python run.py aggregate --month 2025-05 --force  # Generate statistics
+python run.py report --month 2025-05 --force     # Generate reports
+```
+
+#### Complete Pipeline
+```bash
+python run.py pipeline --month 2025-05 --force   # Run all phases
+python run.py pipeline --month 2025-05 --force --debug  # With debug logging
+```
+
+#### Phase Ranges
+```bash
+python run.py pipeline --month 2025-05 --force extract:enrich  # Run extract through enrich
+python run.py pipeline --month 2025-05 --force match:          # Run from match to end
+python run.py pipeline --month 2025-05 --force :enrich         # Run from start to enrich
+```
+
+#### Date Ranges
+```bash
+python run.py pipeline --year 2024 --force                    # Process entire year
+python run.py pipeline --start-month 2024-01 --end-month 2024-06 --force  # Date range
+python run.py pipeline --range 2024-01:2024-06 --force        # Alternative range syntax
+```
+
+**Note**: The `--force` flag is MANDATORY for all pipeline operations unless explicitly specified otherwise. This ensures fresh data processing and avoids cached results.
+
+### Legacy Direct Phase Execution
+Individual phases can still be run directly (though the unified interface is preferred):
+```bash
+python sotd/fetch/run.py --month 2025-05 --force     # Fetch Reddit data
+python sotd/extract/run.py --month 2025-05 --force   # Extract product mentions
+python sotd/match/run.py --month 2025-05 --force     # Match to product catalogs
+python sotd/enrich/run.py --month 2025-05 --force    # Add metadata
 ```
 
 ## Architecture Overview
