@@ -54,4 +54,6 @@ Purpose: These are instructions to proceed carefully through an implementation p
 7. Proceed *until context limit is reached*
 
 
+I want to continue this work in a new chat. Augment this prompt to remind yourself of current progress and next steps so that I can use it in the new chat:
+
 Use the Tracked Implementation Development Process in @prompts.md to implement the @aggregate_implementation_plan.mdc using @aggregate_phase_spec.md and @sotd-pipeline-core.mdc for reference. perform multiple tasks before asking for user feedback or permission to continue.

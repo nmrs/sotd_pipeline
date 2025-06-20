@@ -350,3 +350,23 @@ This version marks the completion of the minimal viable product for the Extracti
 - Saved outputs to `data/extracted/YYYY-MM.json` with meta, data, and skipped sections
 - Built CLI entry point with `--month` and `--debug` options
 - Added full unit test coverage and CLI integration test
+
+# SOTD Pipeline - Core Development Rules
+# Shave of the Day Data Processing Pipeline
+
+## Project Overview
+This is a Python 3.11 data processing pipeline that extracts, processes, and analyzes "Shave of the Day" posts from Reddit's r/wetshaving community. The pipeline consists of 6 sequential phases: fetch, extract, match, enrich, aggregate, and report.
+
+## Pipeline --force Rule (MANDATORY)
+- **When running any pipeline step, ALWAYS use the `--force` flag unless the user explicitly says NOT to use `--force`.**
+- This ensures fresh data processing, avoids cached results, and guarantees that all code changes are actually tested.
+- If you want to run without --force, specify that explicitly in your request.
+
+## Development Environment
+- **Python Version**: 3.11 (enforced by pyrightconfig.json)
+- **Virtual Environment**: Use `.venv` directory
+- **Package Manager**: pip with requirements.txt/requirements-dev.txt
+- **Code Style**: Black (100 char line length)
+- **Linting**: Ruff (E, F, I rules)
+- **Type Checking**: Pyright in standard mode
+- **Testing**: pytest with coverage via pytest-cov
