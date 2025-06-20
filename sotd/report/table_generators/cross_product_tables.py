@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Cross-product table generators for the report phase."""
 
-from typing import Any, Optional, Dict
+from typing import Any, Dict, Optional
 
 from .base import BaseTableGenerator
 

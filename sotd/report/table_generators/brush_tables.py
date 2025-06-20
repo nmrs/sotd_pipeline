@@ -332,7 +332,7 @@ class BrushKnotSizesTableGenerator(BaseTableGenerator):
 
     def get_table_title(self) -> str:
         """Return the table title."""
-        return "Brush Knot Sizes"
+        return "Knot Sizes"
 
     def get_name_key(self) -> str:
         """Return the key to use for matching items in delta calculations."""

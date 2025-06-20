@@ -255,7 +255,7 @@ class TestBrushKnotSizesTableGenerator:
     def test_table_title(self):
         """Test table title."""
         generator = BrushKnotSizesTableGenerator({}, debug=False)
-        assert generator.get_table_title() == "Brush Knot Sizes"
+        assert generator.get_table_title() == "Knot Sizes"
 
     def test_column_config(self):
         """Test column configuration."""

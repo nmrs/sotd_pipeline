@@ -94,27 +94,19 @@ class SoftwareReportGenerator(BaseReportGenerator):
 
         # Check if we have comparison data for delta calculations
         include_delta = bool(self.comparison_data)
-        comparison_period = "previous month"  # Default comparison period
 
-        # If we have comparison data, use the first available period
+        # If we have comparison data, pass all available periods
         if self.comparison_data:
-            # Get the first available comparison period
-            available_periods = list(self.comparison_data.keys())
-            if available_periods:
-                comparison_period = available_periods[0]
-                comparison_data = self.comparison_data[comparison_period][
-                    1
-                ]  # Get the data, not metadata
-            else:
-                comparison_data = None
+            # Pass all comparison data to the generator
+            table_content = generator.generate_table(
+                include_delta=include_delta,
+                comparison_data=self.comparison_data,
+            )
         else:
-            comparison_data = None
-
-        table_content = generator.generate_table(
-            include_delta=include_delta,
-            comparison_data=comparison_data,
-            comparison_period=comparison_period,
-        )
+            table_content = generator.generate_table(
+                include_delta=include_delta,
+                comparison_data=None,
+            )
 
         # If the table is empty, provide a "No data available" message
         if not table_content:
