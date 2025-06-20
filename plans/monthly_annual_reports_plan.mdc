@@ -1,0 +1,201 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Monthly and Annual Hardware/Software Reports Plan
+
+## Overview
+
+This plan extends the existing report phase to support annual reports in addition to monthly reports, providing the r/wetshaving community with comprehensive yearly summaries that follow the same patterns and quality as monthly reports.
+
+## Requirements Summary
+
+### Primary Goal
+**Community Insights**: Provide the r/wetshaving community with comprehensive yearly summaries that complement the existing monthly reports.
+
+### Report Content
+**Simple Aggregation**: Combine all 12 months of data into one yearly summary (e.g., "Most used razors of 2024") without enhanced analysis or quarterly breakdowns.
+
+### File Organization
+**Simple Year Format**: Use `2024-hardware.md` and `2024-software.md` for annual reports, keeping them separate from monthly reports in the same directory structure.
+
+### CLI Interface
+**New Flag**: Add a `--annual` flag to the existing report command:
+- `python -m sotd.report run --month 2024-01 --type hardware` (monthly)
+- `python -m sotd.report run --annual --year 2024 --type hardware` (annual)
+
+### Data Processing
+**Skip Missing**: Include only the months that have data, with a note in the report about which months were missing (e.g., "Note: Data for March and July 2024 was not available").
+
+### Delta Analysis
+**Year-over-Year Deltas**: Include comparison columns like "Δ vs 2023", "Δ vs 2022", "Δ vs 2020" (similar to how monthly reports show "Δ vs Apr 2025", "Δ vs May 2024").
+
+### Report Content
+**Template-Based**: Use the existing template system, extending `data/report_templates.yaml` to include annual report sections alongside monthly sections.
+
+### Annual Aggregation
+**New Annual Aggregator**: Create a new annual aggregation module that loads 12 monthly aggregated files and applies the same aggregation logic to combine them.
+
+### Annual Aggregator CLI
+**Extend Existing**: Add annual aggregation as an option to the existing aggregate phase:
+- `python -m sotd.aggregate run --month 2024-01` (current monthly aggregation)
+- `python -m sotd.aggregate run --annual --year 2024` (new annual aggregation)
+
+### Force Behavior
+**Configurable**: Add a `--force` flag to control whether to regenerate annual data (following the same pattern as other phases).
+
+### Missing Data Handling
+**Skip Missing Months**: Include only the months that have aggregated data, and add metadata to the annual output indicating which months were included/excluded.
+
+### Metadata Structure
+**Follow Monthly Pattern**: Include basic metadata (`year`, `total_shaves`, `unique_shavers`, `avg_shaves_per_user`) plus missing months tracking (`missing_months: ["2024-03", "2024-07"]`) and included months summary (`included_months: ["2024-01", "2024-02", "2024-04", ...]`).
+
+### Data Validation
+**No Validation**: Just load and combine whatever monthly files exist without validation.
+
+### Range Support
+**Range Processing**: Support `--range:2021:2024` to generate 4 separate annual reports (one for each year), not one combined report spanning 4 years.
+
+### Range Processing Method
+**Sequential Processing**: Process each year in the range sequentially (2021, then 2022, then 2023, then 2024).
+
+### Range Output
+**Individual Files**: Generate separate files for each year (`2021-hardware.md`, `2022-hardware.md`, `2023-hardware.md`, `2024-hardware.md`).
+
+### Missing Years in Range
+**Follow Fetch Pattern**: Process each year in the range sequentially, skip years with no data (print a warning), continue processing other years, provide a summary at the end showing which years were processed and which were skipped.
+
+### Summary Output
+**Basic Summary**: Show totals and missing items, similar to fetch phase pattern. Example:
+```
+[INFO] Annual aggregation complete for 2021…2024: 
+  4 years processed, 2 years skipped (2021, 2022 had no data)
+  Total: 18,432 shaves, 1,247 unique users
+```
+
+## Implementation Architecture
+
+### Annual Aggregator Location
+**Extend Existing**: Add annual aggregation functionality to the existing `sotd/aggregate/` module.
+
+### Annual Data Storage
+**Same Format, Different Location**: Generate annual aggregated data in the same JSON format as monthly data, but save it to `data/aggregated/annual/2024.json`.
+
+### Report Integration
+**Automatic Trigger**: Have the report phase automatically trigger annual aggregation when `--annual` is used (transparent to the user).
+
+## Questions Remaining
+
+### 1. Template Structure Details ✅ RESOLVED
+- **Decision**: Extend existing templates with monthly/annual sections
+- **Structure**: 
+  ```yaml
+  monthly:
+    hardware:
+      report_template: |
+        # Monthly hardware template
+    software:
+      report_template: |
+        # Monthly software template
+  
+  annual:
+    hardware:
+      report_template: |
+        # Annual hardware template
+    software:
+      report_template: |
+        # Annual software template
+  ```
+- **Implementation**: Add annual sections to existing `data/report_templates.yaml` alongside monthly sections
+- **Variables**: Annual templates will use same variables as monthly ({{total_shaves}}, {{unique_shavers}}, {{avg_shaves_per_user}})
+- **Tables**: Annual templates will use same table placeholders as monthly templates
+
+### 2. Delta Calculation Implementation ✅ RESOLVED
+- **Decision**: Extend current logic to handle annual comparisons
+- **Implementation**: 
+  - Add `get_annual_comparison_periods(year)` function that returns `[(2023, "2023"), (2022, "2022"), (2020, "2020")]`
+  - Modify `load_comparison_data()` to handle annual vs monthly data loading
+  - Existing `DeltaCalculator` class remains unchanged (same position-based logic)
+- **Data Structure**: Annual aggregated files will have same JSON structure as monthly files
+- **Comparison Periods**: Annual reports will show "Δ vs 2023", "Δ vs 2022", "Δ vs 2020" columns
+
+### 3. Performance Considerations ✅ RESOLVED
+- **Decision**: Same as monthly - load annual aggregated file the same way
+- **Implementation**: No special performance considerations needed
+- **Data Loading**: Report phase loads from pre-aggregated annual files (`data/aggregated/annual/2024.json`)
+- **Memory Usage**: Same memory profile as monthly reports since we're loading from single aggregated files
+
+### 4. Error Handling Details ✅ RESOLVED
+- **Decision**: Follow monthly pattern - fail fast for internal errors, handle external failures gracefully
+- **Implementation**: Use same error handling as monthly reports
+- **Error Types**: 
+  - Internal errors: Fail fast with clear error messages
+  - External failures: Handle gracefully (missing files, network issues)
+  - Missing data: Skip missing months with warnings (already decided)
+- **Error Messages**: Consistent with existing pipeline error handling patterns
+
+### 5. Testing Strategy ✅ RESOLVED
+- **Decision**: Follow monthly pattern - use same testing approach as monthly reports
+- **Implementation**: 
+  - Use existing test fixtures and sample data patterns
+  - Test annual aggregation with same rigor as monthly aggregation
+  - Test annual reports with same table generation and delta calculation tests
+  - Follow existing test structure and naming conventions
+- **Test Coverage**: Same comprehensive coverage as monthly functionality
+- **Test Data**: Extend existing test fixtures to include annual scenarios
+
+### 6. Documentation Updates ✅ RESOLVED
+- **Decision**: Comprehensive update - update all relevant documentation
+- **Implementation**: 
+  - Update `docs/report_phase_spec.md` to include annual report sections
+  - Update CLI documentation to reflect new `--annual` and `--range` options
+  - Update template documentation to show annual template structure
+  - Update aggregate phase documentation to include annual aggregation
+  - Update any README files or usage examples
+- **Documentation Scope**: All documentation that references report or aggregate functionality
+- **Consistency**: Ensure all docs reflect both monthly and annual capabilities
+
+## ✅ All Questions Resolved
+
+All remaining questions have been answered through the Idea Honing process. The plan is now complete and ready for implementation.
+
+## Final Implementation Summary
+
+### Annual Aggregation
+- **Location**: Extend existing `sotd/aggregate/` module
+- **CLI**: `python -m sotd.aggregate run --annual --year 2024`
+- **Range Support**: `python -m sotd.aggregate run --annual --range:2021:2024`
+- **Output**: `data/aggregated/annual/2024.json` (same format as monthly)
+- **Missing Data**: Skip missing months with warnings and metadata tracking
+
+### Annual Reports
+- **CLI**: `python -m sotd.report run --annual --year 2024 --type hardware`
+- **Output**: `data/reports/2024-hardware.md` (same format as monthly)
+- **Templates**: Extend `data/report_templates.yaml` with annual sections
+- **Deltas**: Year-over-year comparisons (Δ vs 2023, Δ vs 2022, Δ vs 2020)
+- **Integration**: Automatic annual aggregation when `--annual` is used
+
+### Architecture
+- **Consistency**: Follow all existing patterns (error handling, testing, documentation)
+- **Performance**: Same as monthly reports (load from pre-aggregated files)
+- **Quality**: Same standards as monthly functionality
+
+## Next Steps
+
+1. **Implement Annual Aggregator**: Create the annual aggregation functionality in the existing aggregate module
+2. **Extend Report Phase**: Add annual report generation capabilities to the report phase
+3. **Update Templates**: Extend the template system to support annual reports
+4. **Implement Delta Calculations**: Add year-over-year delta calculation support
+5. **Add Range Support**: Implement the range processing functionality
+6. **Testing**: Create comprehensive tests for all new functionality
+7. **Documentation**: Update all relevant documentation
+
+## Success Criteria
+
+- Users can generate annual reports with `python -m sotd.report run --annual --year 2024 --type hardware`
+- Annual reports follow the same quality and format standards as monthly reports
+- Annual aggregation handles missing months gracefully with clear reporting
+- Range processing works correctly for multiple years
+- Year-over-year delta calculations provide meaningful insights
+- All functionality is properly tested and documented

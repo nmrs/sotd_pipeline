@@ -1,0 +1,1006 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Monthly and Annual Reports TDD Implementation Plan
+
+## Project Overview
+Extend the existing report phase to support annual reports in addition to monthly reports, providing comprehensive yearly summaries that follow the same patterns and quality as monthly reports.
+
+## TDD Implementation Philosophy
+
+### Core TDD Principles
+- **Test First**: Write tests before implementation for every feature
+- **Incremental Testing**: Develop tests incrementally as features are built
+- **Red-Green-Refactor**: Write failing test → implement → refactor cycle
+- **Test Coverage**: Each chunk includes comprehensive test development
+- **Integration Testing**: Test integration points as components are built
+- **Error Testing**: Test error scenarios and edge cases throughout development
+
+### Testing Strategy
+- **Unit Tests**: Test individual components in isolation
+- **Integration Tests**: Test component interactions as they're built
+- **Error Tests**: Test error handling and edge cases
+- **Performance Tests**: Test performance characteristics
+- **Documentation Tests**: Validate documentation accuracy
+
+## Architecture Blueprint
+
+### Core Components
+1. **Annual Aggregator**: Extends existing aggregate module to combine 12 months of data
+2. **Annual Report Generator**: Extends existing report phase to generate annual reports
+3. **Annual Delta Calculator**: Extends existing delta calculation for year-over-year comparisons
+4. **Annual Template System**: Extends existing template system for annual report sections
+5. **Annual CLI Interface**: Extends existing CLI with `--annual` and `--range` options
+
+### Data Flow
+1. Monthly aggregated data → Annual aggregator → Annual aggregated data
+2. Annual aggregated data → Annual report generator → Annual reports
+3. Previous years' data → Annual delta calculator → Year-over-year comparisons
+
+### File Structure
+```
+data/
+  aggregated/
+    annual/
+      2024.json          # Annual aggregated data
+    monthly/
+      2024-01.json       # Existing monthly data
+  reports/
+    2024-hardware.md     # Annual hardware report
+    2024-software.md     # Annual software report
+```
+
+## Implementation Chunks with Incremental Testing
+
+### Phase 1: Foundation - Annual Aggregator Core
+**Goal**: Create the core annual aggregation functionality with comprehensive incremental testing.
+
+#### Chunk 1.1: Annual Aggregator CLI Interface
+- **Objective**: Add `--annual` and `--range` flags to existing aggregate CLI
+- **Files**: `sotd/aggregate/cli.py`, `tests/aggregate/test_cli.py`
+- **Test Development**:
+  - Test CLI argument parsing for new flags
+  - Test help text generation for new options
+  - Test validation of year parameters
+  - Test backward compatibility with existing monthly functionality
+  - Test error handling for invalid arguments
+  - Test integration with existing CLI patterns
+- **Integration**: Extend existing CLI without breaking monthly functionality
+
+#### Chunk 1.2: Annual Data Loader
+- **Objective**: Load 12 months of aggregated data for a given year
+- **Files**: `sotd/aggregate/annual_loader.py`, `tests/aggregate/test_annual_loader.py`
+- **Test Development**:
+  - Test loading existing months successfully
+  - Test handling missing months with warnings
+  - Test data structure validation
+  - Test metadata generation for included/excluded months
+  - Test error handling for corrupted files
+  - Test performance with large datasets
+  - Test integration with existing data loading patterns
+- **Integration**: Reuse existing data loading patterns
+
+#### Chunk 1.3: Annual Aggregation Engine
+- **Objective**: Combine monthly aggregated data into annual summaries
+- **Files**: `sotd/aggregate/annual_engine.py`, `tests/aggregate/test_annual_engine.py`
+- **Test Development**:
+  - Test aggregation logic for each product type
+  - Test metadata generation (total_shaves, unique_shavers, avg_shaves_per_user)
+  - Test missing month tracking in metadata
+  - Test data consistency validation
+  - Test edge cases (no data, partial data, single month)
+  - Test performance with full year of data
+  - Test integration with existing aggregation patterns
+- **Integration**: Extend existing aggregation patterns
+
+#### Chunk 1.4: Annual Data Saver
+- **Objective**: Save annual aggregated data with proper metadata
+- **Files**: `sotd/aggregate/annual_save.py`, `tests/aggregate/test_annual_save.py`
+- **Test Development**:
+  - Test file format and structure validation
+  - Test metadata structure completeness
+  - Test error handling for file system issues
+  - Test file permissions and security
+  - Test output file validation
+  - Test integration with existing save patterns
+  - Test performance with large datasets
+- **Integration**: Follow existing save patterns
+
+#### Chunk 1.5: Annual Aggregator Integration
+- **Objective**: Wire together annual aggregation components
+- **Files**: `sotd/aggregate/annual_run.py`, `tests/aggregate/test_annual_integration.py`
+- **Test Development**:
+  - Test end-to-end annual aggregation workflow
+  - Test CLI integration and error flow
+  - Test component interaction and data flow
+  - Test logging and progress reporting
+  - Test error handling across components
+  - Test performance of complete workflow
+  - Test integration with existing aggregate module
+- **Integration**: Extend existing aggregate module
+
+### Phase 2: Report Generation - Annual Reports Core
+**Goal**: Create annual report generation with template support and incremental testing.
+
+#### Chunk 2.1: Annual Report CLI Interface
+- **Objective**: Add `--annual` flag to existing report CLI
+- **Files**: `sotd/report/cli.py`, `tests/report/test_cli.py`
+- **Test Development**:
+  - Test CLI argument parsing for annual flag
+  - Test help text generation for annual options
+  - Test validation of year parameters
+  - Test backward compatibility with monthly reports
+  - Test automatic annual aggregation triggering
+  - Test error handling for invalid arguments
+  - Test integration with existing CLI patterns
+- **Integration**: Extend existing CLI without breaking monthly functionality
+
+#### Chunk 2.2: Annual Template System
+- **Objective**: Extend template system to support annual report sections
+- **Files**: `data/report_templates.yaml`, `sotd/report/annual_templates.py`, `tests/report/test_annual_templates.py`
+- **Test Development**:
+  - Test template loading for annual sections
+  - Test variable substitution in annual templates
+  - Test section validation and structure
+  - Test integration with existing template system
+  - Test error handling for malformed templates
+  - Test template performance and caching
+  - Test backward compatibility with monthly templates
+- **Integration**: Extend existing template system
+
+#### Chunk 2.3: Annual Report Data Loader
+- **Objective**: Load annual aggregated data for report generation
+- **Files**: `sotd/report/annual_load.py`, `tests/report/test_annual_load.py`
+- **Test Development**:
+  - Test loading annual aggregated data successfully
+  - Test data structure validation
+  - Test error handling for missing data
+  - Test data integrity validation
+  - Test performance with large datasets
+  - Test integration with existing load patterns
+  - Test error messages and user feedback
+- **Integration**: Reuse existing load patterns
+
+#### Chunk 2.4: Annual Report Generator
+- **Objective**: Generate annual reports using templates and data
+- **Files**: `sotd/report/annual_generator.py`, `tests/report/test_annual_generator.py`
+- **Test Development**:
+  - Test report generation with valid data
+  - Test template processing and variable substitution
+  - Test output validation and quality
+  - Test table generation and formatting
+  - Test error handling during generation
+  - Test performance with complex reports
+  - Test integration with existing report generation patterns
+- **Integration**: Extend existing report generation patterns
+
+#### Chunk 2.5: Annual Report Integration
+- **Objective**: Wire together annual report components
+- **Files**: `sotd/report/annual_run.py`, `tests/report/test_annual_integration.py`
+- **Test Development**:
+  - Test end-to-end annual report generation workflow
+  - Test CLI integration and error flow
+  - Test component interaction and data flow
+  - Test logging and progress reporting
+  - Test error handling across components
+  - Test performance of complete workflow
+  - Test integration with existing report module
+- **Integration**: Extend existing report module
+
+### Phase 3: Delta Calculations - Year-over-Year Comparisons
+**Goal**: Add year-over-year delta calculation support with comprehensive testing.
+
+#### Chunk 3.1: Annual Delta Calculator
+- **Objective**: Calculate year-over-year deltas for annual reports
+- **Files**: `sotd/report/annual_delta_calculator.py`, `tests/report/test_annual_delta_calculator.py`
+- **Test Development**:
+  - Test delta calculations for each product type
+  - Test comparison periods (2023, 2022, 2020)
+  - Test data validation and integrity
+  - Test error handling for missing comparison data
+  - Test performance with large datasets
+  - Test integration with existing delta calculation patterns
+  - Test edge cases and boundary conditions
+- **Integration**: Extend existing delta calculation patterns
+
+#### Chunk 3.2: Annual Comparison Data Loader
+- **Objective**: Load previous years' data for delta calculations
+- **Files**: `sotd/report/annual_comparison_loader.py`, `tests/report/test_annual_comparison_loader.py`
+- **Test Development**:
+  - Test loading comparison data for multiple years
+  - Test handling missing years with warnings
+  - Test data structure validation
+  - Test performance with multiple years of data
+  - Test integration with existing comparison loading patterns
+  - Test error handling and user feedback
+  - Test data integrity validation
+- **Integration**: Reuse existing comparison loading patterns
+
+#### Chunk 3.3: Annual Delta Integration
+- **Objective**: Integrate delta calculations into annual report generation
+- **Files**: `sotd/report/annual_generator.py`, `tests/report/test_annual_delta_integration.py`
+- **Test Development**:
+  - Test delta integration in report generation
+  - Test table generation with delta columns
+  - Test formatting and alignment of delta data
+  - Test output accuracy and quality validation
+  - Test performance with delta calculations
+  - Test error handling during delta integration
+  - Test integration with existing table generation patterns
+- **Integration**: Extend existing report generation
+
+### Phase 4: Range Support - Multi-Year Processing
+**Goal**: Add support for processing multiple years in sequence with comprehensive testing.
+
+#### Chunk 4.1: Range Processor
+- **Objective**: Process multiple years sequentially
+- **Files**: `sotd/aggregate/range_processor.py`, `tests/aggregate/test_range_processor.py`
+- **Test Development**:
+  - Test range validation and parameter checking
+  - Test sequential processing of multiple years
+  - Test handling missing years with warnings
+  - Test progress reporting and summaries
+  - Test performance with large year ranges
+  - Test integration with existing processing patterns
+  - Test error handling and recovery
+- **Integration**: Extend existing aggregate functionality
+
+#### Chunk 4.2: Range Report Generator
+- **Objective**: Generate reports for multiple years
+- **Files**: `sotd/report/range_generator.py`, `tests/report/test_range_generator.py`
+- **Test Development**:
+  - Test multi-year report generation
+  - Test file naming and organization
+  - Test progress reporting and summaries
+  - Test performance with multiple years
+  - Test integration with existing report generation patterns
+  - Test error handling and recovery
+  - Test output validation and quality
+- **Integration**: Extend existing report functionality
+
+#### Chunk 4.3: Range Integration
+- **Objective**: Integrate range processing into CLI
+- **Files**: `sotd/aggregate/cli.py`, `sotd/report/cli.py`, `tests/aggregate/test_range_integration.py`, `tests/report/test_range_integration.py`
+- **Test Development**:
+  - Test CLI range processing functionality
+  - Test end-to-end range functionality
+  - Test user feedback and progress reporting
+  - Test error handling with clear messages
+  - Test integration with existing CLI patterns
+  - Test performance and responsiveness
+  - Test comprehensive range functionality validation
+- **Integration**: Complete range support
+
+### Phase 5: Quality Assurance - Comprehensive Testing and Documentation
+**Goal**: Ensure comprehensive testing and documentation with final validation.
+
+#### Chunk 5.1: Integration Testing Suite
+- **Objective**: Comprehensive integration tests for all annual functionality
+- **Files**: `tests/integration/test_annual_integration.py`
+- **Test Development**:
+  - Test complete annual aggregation workflows
+  - Test complete annual report generation workflows
+  - Test range processing workflows
+  - Test error scenarios and edge cases
+  - Test data integrity and output quality
+  - Test performance under various conditions
+  - Test comprehensive coverage of all functionality
+- **Integration**: Validate complete annual functionality
+
+#### Chunk 5.2: Documentation Testing and Updates
+- **Objective**: Update all relevant documentation with validation
+- **Files**: `docs/report_phase_spec.md`, `docs/aggregate_phase_spec.md`, README updates
+- **Test Development**:
+  - Test documentation accuracy and completeness
+  - Test usage examples and CLI documentation
+  - Test code examples and explanations
+  - Test integration with existing documentation patterns
+  - Test documentation quality and readability
+  - Test documentation validation and testing
+  - Test comprehensive documentation coverage
+- **Integration**: Ensure documentation reflects new functionality
+
+#### Chunk 5.3: Performance and Quality Validation
+- **Objective**: Validate performance and code quality
+- **Files**: Performance tests, quality checks
+- **Test Development**:
+  - Test performance benchmarks and metrics
+  - Test code quality metrics and standards
+  - Test production readiness validation
+  - Test comprehensive quality checks
+  - Test functionality validation under load
+  - Test error handling under stress
+  - Test final validation and testing
+- **Integration**: Ensure production readiness
+
+## TDD Implementation Prompts with Incremental Testing
+
+### Prompt 1: Annual Aggregator CLI Interface
+```text
+Implement the annual aggregator CLI interface by extending the existing aggregate CLI to support `--annual` and `--range` flags. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for CLI argument parsing, help text, and validation
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to modify:
+- sotd/aggregate/cli.py
+- tests/aggregate/test_cli.py
+
+Test Development Requirements:
+- Test CLI argument parsing for new flags
+- Test help text generation for new options
+- Test validation of year parameters
+- Test backward compatibility with existing monthly functionality
+- Test error handling for invalid arguments
+- Test integration with existing CLI patterns
+
+Implementation Requirements:
+- Add `--annual` flag for annual aggregation
+- Add `--year YYYY` parameter for specific year
+- Add `--range:YYYY:YYYY` parameter for year range
+- Maintain existing `--month` functionality
+- Add proper help text and validation
+- Follow existing CLI patterns and error handling
+```
+
+### Prompt 2: Annual Data Loader
+```text
+Implement the annual data loader that loads 12 months of aggregated data for a given year. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for loading existing months, handling missing months, and data validation
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to create:
+- sotd/aggregate/annual_loader.py
+- tests/aggregate/test_annual_loader.py
+
+Test Development Requirements:
+- Test loading existing months successfully
+- Test handling missing months with warnings
+- Test data structure validation
+- Test metadata generation for included/excluded months
+- Test error handling for corrupted files
+- Test performance with large datasets
+- Test integration with existing data loading patterns
+
+Implementation Requirements:
+- Load monthly aggregated files for specified year
+- Handle missing months with warnings
+- Validate data structure matches expected format
+- Return structured data with metadata about included/excluded months
+- Follow existing data loading patterns
+- Include comprehensive error handling
+```
+
+### Prompt 3: Annual Aggregation Engine
+```text
+Implement the annual aggregation engine that combines monthly aggregated data into annual summaries. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for aggregation logic, metadata generation, and missing month tracking
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to create:
+- sotd/aggregate/annual_engine.py
+- tests/aggregate/test_annual_engine.py
+
+Test Development Requirements:
+- Test aggregation logic for each product type
+- Test metadata generation (total_shaves, unique_shavers, avg_shaves_per_user)
+- Test missing month tracking in metadata
+- Test data consistency validation
+- Test edge cases (no data, partial data, single month)
+- Test performance with full year of data
+- Test integration with existing aggregation patterns
+
+Implementation Requirements:
+- Combine 12 months of aggregated data
+- Generate annual metadata (total_shaves, unique_shavers, avg_shaves_per_user)
+- Track missing months in metadata
+- Follow existing aggregation patterns for each product type
+- Ensure data consistency and validation
+- Handle edge cases (no data, partial data, etc.)
+```
+
+### Prompt 4: Annual Data Saver
+```text
+Implement the annual data saver that saves annual aggregated data with proper metadata. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for file format, metadata structure, and error handling
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to create:
+- sotd/aggregate/annual_save.py
+- tests/aggregate/test_annual_save.py
+
+Test Development Requirements:
+- Test file format and structure validation
+- Test metadata structure completeness
+- Test error handling for file system issues
+- Test file permissions and security
+- Test output file validation
+- Test integration with existing save patterns
+- Test performance with large datasets
+
+Implementation Requirements:
+- Save annual aggregated data to `data/aggregated/annual/YYYY.json`
+- Include comprehensive metadata (year, total_shaves, unique_shavers, avg_shaves_per_user, missing_months, included_months)
+- Follow existing save patterns and error handling
+- Ensure proper file permissions and error handling
+- Validate output file structure
+```
+
+### Prompt 5: Annual Aggregator Integration
+```text
+Wire together the annual aggregation components into a complete system. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for end-to-end annual aggregation, CLI integration
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to create:
+- sotd/aggregate/annual_run.py
+- tests/aggregate/test_annual_integration.py
+
+Test Development Requirements:
+- Test end-to-end annual aggregation workflow
+- Test CLI integration and error flow
+- Test component interaction and data flow
+- Test logging and progress reporting
+- Test error handling across components
+- Test performance of complete workflow
+- Test integration with existing aggregate module
+
+Implementation Requirements:
+- Integrate annual loader, engine, and saver
+- Handle CLI integration and error flow
+- Provide proper logging and progress reporting
+- Follow existing integration patterns
+- Ensure comprehensive error handling
+- Include proper validation and testing
+```
+
+### Prompt 6: Annual Report CLI Interface
+```text
+Implement the annual report CLI interface by extending the existing report CLI to support `--annual` flag. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for CLI argument parsing, help text, and validation
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to modify:
+- sotd/report/cli.py
+- tests/report/test_cli.py
+
+Test Development Requirements:
+- Test CLI argument parsing for annual flag
+- Test help text generation for annual options
+- Test validation of year parameters
+- Test backward compatibility with monthly reports
+- Test automatic annual aggregation triggering
+- Test error handling for invalid arguments
+- Test integration with existing CLI patterns
+
+Implementation Requirements:
+- Add `--annual` flag for annual reports
+- Add `--year YYYY` parameter for specific year
+- Maintain existing `--month` functionality
+- Add proper help text and validation
+- Follow existing CLI patterns and error handling
+- Ensure automatic annual aggregation when needed
+```
+
+### Prompt 7: Annual Template System
+```text
+Extend the template system to support annual report sections. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for template loading, variable substitution, and section validation
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to modify:
+- data/report_templates.yaml
+- sotd/report/annual_templates.py (new)
+- tests/report/test_annual_templates.py (new)
+
+Test Development Requirements:
+- Test template loading for annual sections
+- Test variable substitution in annual templates
+- Test section validation and structure
+- Test integration with existing template system
+- Test error handling for malformed templates
+- Test template performance and caching
+- Test backward compatibility with monthly templates
+
+Implementation Requirements:
+- Extend existing template file with annual sections
+- Support same variables as monthly templates
+- Include annual-specific template sections
+- Follow existing template patterns and validation
+- Ensure proper variable substitution
+- Include comprehensive error handling
+```
+
+### Prompt 8: Annual Report Data Loader
+```text
+Implement the annual report data loader that loads annual aggregated data for report generation. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for data loading, validation, and error handling
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to create:
+- sotd/report/annual_load.py
+- tests/report/test_annual_load.py
+
+Test Development Requirements:
+- Test loading annual aggregated data successfully
+- Test data structure validation
+- Test error handling for missing data
+- Test data integrity validation
+- Test performance with large datasets
+- Test integration with existing load patterns
+- Test error messages and user feedback
+
+Implementation Requirements:
+- Load annual aggregated data from `data/aggregated/annual/YYYY.json`
+- Validate data structure and format
+- Handle missing data with proper error messages
+- Follow existing load patterns
+- Include comprehensive error handling
+- Ensure data integrity validation
+```
+
+### Prompt 9: Annual Report Generator
+```text
+Implement the annual report generator that creates annual reports using templates and data. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for report generation, template processing, and output validation
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to create:
+- sotd/report/annual_generator.py
+- tests/report/test_annual_generator.py
+
+Test Development Requirements:
+- Test report generation with valid data
+- Test template processing and variable substitution
+- Test output validation and quality
+- Test table generation and formatting
+- Test error handling during generation
+- Test performance with complex reports
+- Test integration with existing report generation patterns
+
+Implementation Requirements:
+- Generate annual reports using templates and data
+- Follow existing report generation patterns
+- Include proper table generation and formatting
+- Handle template processing and variable substitution
+- Ensure output validation and quality
+- Include comprehensive error handling
+```
+
+### Prompt 10: Annual Report Integration
+```text
+Wire together the annual report components into a complete system. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for end-to-end annual report generation, CLI integration
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to create:
+- sotd/report/annual_run.py
+- tests/report/test_annual_integration.py
+
+Test Development Requirements:
+- Test end-to-end annual report generation workflow
+- Test CLI integration and error flow
+- Test component interaction and data flow
+- Test logging and progress reporting
+- Test error handling across components
+- Test performance of complete workflow
+- Test integration with existing report module
+
+Implementation Requirements:
+- Integrate annual loader, generator, and templates
+- Handle CLI integration and error flow
+- Provide proper logging and progress reporting
+- Follow existing integration patterns
+- Ensure comprehensive error handling
+- Include proper validation and testing
+```
+
+### Prompt 11: Annual Delta Calculator
+```text
+Implement the annual delta calculator for year-over-year comparisons. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for delta calculations, comparison periods, and data validation
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to create:
+- sotd/report/annual_delta_calculator.py
+- tests/report/test_annual_delta_calculator.py
+
+Test Development Requirements:
+- Test delta calculations for each product type
+- Test comparison periods (2023, 2022, 2020)
+- Test data validation and integrity
+- Test error handling for missing comparison data
+- Test performance with large datasets
+- Test integration with existing delta calculation patterns
+- Test edge cases and boundary conditions
+
+Implementation Requirements:
+- Calculate year-over-year deltas for annual reports
+- Support comparison periods (2023, 2022, 2020)
+- Follow existing delta calculation patterns
+- Handle missing comparison data gracefully
+- Ensure proper data validation
+- Include comprehensive error handling
+```
+
+### Prompt 12: Annual Comparison Data Loader
+```text
+Implement the annual comparison data loader that loads previous years' data for delta calculations. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for loading comparison data, handling missing years, and validation
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to create:
+- sotd/report/annual_comparison_loader.py
+- tests/report/test_annual_comparison_loader.py
+
+Test Development Requirements:
+- Test loading comparison data for multiple years
+- Test handling missing years with warnings
+- Test data structure validation
+- Test performance with multiple years of data
+- Test integration with existing comparison loading patterns
+- Test error handling and user feedback
+- Test data integrity validation
+
+Implementation Requirements:
+- Load previous years' annual aggregated data
+- Handle missing years with warnings
+- Validate data structure and format
+- Follow existing comparison loading patterns
+- Include comprehensive error handling
+- Ensure data integrity validation
+```
+
+### Prompt 13: Annual Delta Integration
+```text
+Integrate delta calculations into annual report generation. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for delta integration, table generation with deltas, and output validation
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to modify:
+- sotd/report/annual_generator.py
+- tests/report/test_annual_delta_integration.py
+
+Test Development Requirements:
+- Test delta integration in report generation
+- Test table generation with delta columns
+- Test formatting and alignment of delta data
+- Test output accuracy and quality validation
+- Test performance with delta calculations
+- Test error handling during delta integration
+- Test integration with existing table generation patterns
+
+Implementation Requirements:
+- Integrate delta calculations into annual report generation
+- Add delta columns to tables (Δ vs 2023, Δ vs 2022, Δ vs 2020)
+- Follow existing table generation patterns
+- Ensure proper formatting and alignment
+- Include comprehensive error handling
+- Validate output accuracy and quality
+```
+
+### Prompt 14: Range Processor
+```text
+Implement the range processor for multi-year processing. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for range validation, sequential processing, and error handling
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to create:
+- sotd/aggregate/range_processor.py
+- tests/aggregate/test_range_processor.py
+
+Test Development Requirements:
+- Test range validation and parameter checking
+- Test sequential processing of multiple years
+- Test handling missing years with warnings
+- Test progress reporting and summaries
+- Test performance with large year ranges
+- Test integration with existing processing patterns
+- Test error handling and recovery
+
+Implementation Requirements:
+- Process multiple years sequentially
+- Validate year ranges and parameters
+- Handle missing years with warnings
+- Provide progress reporting and summaries
+- Follow existing processing patterns
+- Include comprehensive error handling
+```
+
+### Prompt 15: Range Report Generator
+```text
+Implement the range report generator for multi-year report generation. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for multi-year report generation, file naming, and output validation
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to create:
+- sotd/report/range_generator.py
+- tests/report/test_range_generator.py
+
+Test Development Requirements:
+- Test multi-year report generation
+- Test file naming and organization
+- Test progress reporting and summaries
+- Test performance with multiple years
+- Test integration with existing report generation patterns
+- Test error handling and recovery
+- Test output validation and quality
+
+Implementation Requirements:
+- Generate reports for multiple years
+- Create separate files for each year
+- Follow existing file naming conventions
+- Provide progress reporting and summaries
+- Follow existing report generation patterns
+- Include comprehensive error handling
+```
+
+### Prompt 16: Range Integration
+```text
+Integrate range processing into CLI interfaces. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for CLI range processing and end-to-end range functionality
+2. **Implement minimal code** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for edge cases and error scenarios
+5. **Implement additional functionality** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to modify:
+- sotd/aggregate/cli.py
+- sotd/report/cli.py
+- tests/aggregate/test_range_integration.py
+- tests/report/test_range_integration.py
+
+Test Development Requirements:
+- Test CLI range processing functionality
+- Test end-to-end range functionality
+- Test user feedback and progress reporting
+- Test error handling with clear messages
+- Test integration with existing CLI patterns
+- Test performance and responsiveness
+- Test comprehensive range functionality validation
+
+Implementation Requirements:
+- Integrate range processing into CLI interfaces
+- Provide proper user feedback and progress reporting
+- Handle errors gracefully with clear messages
+- Follow existing CLI patterns
+- Ensure comprehensive error handling
+- Validate complete range functionality
+```
+
+### Prompt 17: Integration Testing Suite
+```text
+Create comprehensive integration tests for all annual functionality. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for end-to-end workflows, error scenarios, and edge cases
+2. **Implement minimal test infrastructure** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for additional scenarios and edge cases
+5. **Implement additional test infrastructure** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive test coverage
+
+Files to create:
+- tests/integration/test_annual_integration.py
+
+Test Development Requirements:
+- Test complete annual aggregation workflows
+- Test complete annual report generation workflows
+- Test range processing workflows
+- Test error scenarios and edge cases
+- Test data integrity and output quality
+- Test performance under various conditions
+- Test comprehensive coverage of all functionality
+
+Implementation Requirements:
+- Create comprehensive integration test suite
+- Test all major workflows and scenarios
+- Validate data integrity and output quality
+- Test error handling and edge cases
+- Ensure production readiness
+- Provide comprehensive coverage
+```
+
+### Prompt 18: Documentation Testing and Updates
+```text
+Update all relevant documentation to reflect new annual functionality. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for documentation accuracy, completeness, and examples
+2. **Implement minimal documentation updates** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for additional documentation requirements
+5. **Implement additional documentation** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive documentation coverage
+
+Files to modify:
+- docs/report_phase_spec.md
+- docs/aggregate_phase_spec.md
+- README files and usage examples
+
+Test Development Requirements:
+- Test documentation accuracy and completeness
+- Test usage examples and CLI documentation
+- Test code examples and explanations
+- Test integration with existing documentation patterns
+- Test documentation quality and readability
+- Test documentation validation and testing
+- Test comprehensive documentation coverage
+
+Implementation Requirements:
+- Update all documentation to include annual functionality
+- Add usage examples and CLI documentation
+- Ensure accuracy and completeness
+- Follow existing documentation patterns
+- Include proper examples and explanations
+- Validate documentation quality
+```
+
+### Prompt 19: Performance and Quality Validation
+```text
+Validate performance and code quality for production readiness. Follow strict TDD approach with incremental testing:
+
+1. **Write failing tests first** for performance benchmarks, code quality metrics, and production readiness
+2. **Implement minimal validation infrastructure** to make tests pass
+3. **Refactor** while keeping tests green
+4. **Add more tests** for additional quality requirements
+5. **Implement additional validation** to make new tests pass
+6. **Repeat** until all requirements are met with comprehensive quality validation
+
+Requirements:
+- Create performance benchmarks
+- Validate code quality metrics
+- Ensure production readiness
+- Run comprehensive quality checks
+- Validate all functionality works correctly
+- Ensure documentation is complete and accurate
+
+Test Development Requirements:
+- Test performance benchmarks and metrics
+- Test code quality metrics and standards
+- Test production readiness validation
+- Test comprehensive quality checks
+- Test functionality validation under load
+- Test error handling under stress
+- Test final validation and testing
+
+Implementation Requirements:
+- Create performance benchmarks
+- Validate code quality metrics
+- Ensure production readiness
+- Run comprehensive quality checks
+- Validate all functionality works correctly
+- Ensure documentation is complete and accurate
+```
+
+## Success Criteria
+
+### Functional Requirements
+- [ ] Annual aggregation works correctly with `--annual --year 2024`
+- [ ] Annual reports generate properly with `--annual --year 2024 --type hardware`
+- [ ] Range processing works with `--annual --range:2021:2024`
+- [ ] Year-over-year delta calculations show meaningful insights
+- [ ] Missing months are handled gracefully with clear reporting
+- [ ] All functionality follows existing patterns and quality standards
+
+### Quality Requirements
+- [ ] All code follows TDD approach with comprehensive incremental testing
+- [ ] All quality checks pass (`make format lint typecheck test`)
+- [ ] Documentation is complete and accurate with validation
+- [ ] Performance meets production requirements
+- [ ] Error handling is robust and user-friendly
+- [ ] Code follows existing patterns and conventions
+
+### Integration Requirements
+- [ ] Annual functionality integrates seamlessly with existing monthly functionality
+- [ ] CLI interfaces are consistent and user-friendly
+- [ ] Data formats are consistent with existing patterns
+- [ ] Error messages are clear and actionable
+- [ ] Progress reporting is informative and helpful
+
+## Implementation Notes
+
+### TDD Approach with Incremental Testing
+- **Test First**: Write failing tests before any implementation
+- **Incremental Development**: Add tests incrementally as features are built
+- **Red-Green-Refactor**: Strict adherence to TDD cycle
+- **Comprehensive Coverage**: Each chunk includes extensive test development
+- **Integration Testing**: Test integration points as components are built
+- **Error Testing**: Test error scenarios and edge cases throughout development
+
+### Quality Standards
+- Follow existing code patterns and conventions
+- Maintain backward compatibility
+- Ensure comprehensive error handling
+- Include proper logging and progress reporting
+- Validate all outputs and data integrity
+
+### Integration Strategy
+- Extend existing modules rather than creating new ones
+- Reuse existing patterns and utilities
+- Maintain consistent interfaces and data formats
+- Ensure seamless integration with existing functionality
+
+### Testing Strategy
+- **Unit Tests**: Test individual components in isolation
+- **Integration Tests**: Test component interactions as they're built
+- **Error Tests**: Test error handling and edge cases throughout
+- **Performance Tests**: Test performance characteristics
+- **Documentation Tests**: Validate documentation accuracy
+- **Incremental Development**: Build tests incrementally with each feature
