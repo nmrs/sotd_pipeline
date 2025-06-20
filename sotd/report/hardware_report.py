@@ -14,6 +14,10 @@ from .table_generators.brush_tables import (
     BrushKnotMakersTableGenerator,
     BrushKnotSizesTableGenerator,
 )
+from .table_generators.cross_product_tables import (
+    HighestUseCountPerBladeTableGenerator,
+    RazorBladeCombinationsTableGenerator,
+)
 from .table_generators.razor_tables import (
     RazorFormatsTableGenerator,
     RazorManufacturersTableGenerator,
@@ -29,6 +33,7 @@ from .table_generators.specialized_tables import (
     StraightWidthsTableGenerator,
     SuperSpeedTipsTableGenerator,
 )
+from .table_generators.user_tables import TopShaversTableGenerator
 
 
 class HardwareReportGenerator(BaseReportGenerator):
@@ -124,6 +129,21 @@ class HardwareReportGenerator(BaseReportGenerator):
         tables.append(
             self._generate_table("Straight Razor Specifications", StraightRazorSpecsTableGenerator)
         )
+
+        # Cross-product tables
+        tables.append(
+            self._generate_table(
+                "Most Used Blades in Most Used Razors", RazorBladeCombinationsTableGenerator
+            )
+        )
+        tables.append(
+            self._generate_table(
+                "Highest Use Count per Blade", HighestUseCountPerBladeTableGenerator
+            )
+        )
+
+        # User tables
+        tables.append(self._generate_table("Top Shavers", TopShaversTableGenerator))
 
         return tables
 

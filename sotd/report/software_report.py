@@ -8,6 +8,7 @@ from .table_generators.soap_tables import (
     SoapMakersTableGenerator,
     SoapsTableGenerator,
 )
+from .table_generators.user_tables import TopShaversTableGenerator
 
 
 class SoftwareReportGenerator(BaseReportGenerator):
@@ -81,6 +82,9 @@ class SoftwareReportGenerator(BaseReportGenerator):
         tables.append(self._generate_table("Soap Makers", SoapMakersTableGenerator))
         tables.append(self._generate_table("Soaps", SoapsTableGenerator))
         tables.append(self._generate_table("Brand Diversity", BrandDiversityTableGenerator))
+
+        # User tables
+        tables.append(self._generate_table("Top Shavers", TopShaversTableGenerator))
 
         return tables
 
