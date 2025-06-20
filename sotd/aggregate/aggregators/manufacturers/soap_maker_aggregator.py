@@ -44,7 +44,7 @@ def aggregate_soap_makers(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]
     grouped = df.groupby("maker").agg({"author": ["count", "nunique"]}).reset_index()
 
     # Flatten column names
-    grouped.columns = ["name", "shaves", "unique_users"]
+    grouped.columns = ["maker", "shaves", "unique_users"]
 
     # Sort by shaves desc, unique_users desc
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
@@ -58,7 +58,7 @@ def aggregate_soap_makers(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]
         result.append(
             {
                 "position": int(row["position"]),
-                "name": row["name"],
+                "maker": row["maker"],
                 "shaves": int(row["shaves"]),
                 "unique_users": int(row["unique_users"]),
             }

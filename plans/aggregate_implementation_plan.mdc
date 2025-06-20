@@ -264,12 +264,12 @@ sotd/aggregate/aggregators/
   - [x] Add error handling and logging
   - [x] Ensure all categories are processed
 
-- [ ] **9.2 Unit Tests**
-  - [ ] Test each aggregator individually
-  - [ ] Test metric calculation functions
-  - [ ] Test position field generation
-  - [ ] Test sorting logic
-  - [ ] Test data validation
+- [x] **9.2 Unit Tests**
+  - [x] Test each aggregator individually
+  - [x] Test metric calculation functions
+  - [x] Test position field generation
+  - [x] Test sorting logic
+  - [x] Test data validation
 
 - [ ] **9.3 Integration Tests**
   - [ ] Test end-to-end processing

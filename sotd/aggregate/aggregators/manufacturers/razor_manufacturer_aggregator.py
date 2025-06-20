@@ -13,7 +13,7 @@ def aggregate_razor_manufacturers(records: List[Dict[str, Any]]) -> List[Dict[st
         records: List of enriched comment records
 
     Returns:
-        List of razor manufacturer aggregations with position, name, shaves, and unique_users fields
+        List of razor manufacturer aggregations with position, brand, shaves, and unique_users fields
     """
     if not records:
         return []
@@ -44,7 +44,7 @@ def aggregate_razor_manufacturers(records: List[Dict[str, Any]]) -> List[Dict[st
     grouped = df.groupby("brand").agg({"author": ["count", "nunique"]}).reset_index()
 
     # Flatten column names
-    grouped.columns = ["name", "shaves", "unique_users"]
+    grouped.columns = ["brand", "shaves", "unique_users"]
 
     # Sort by shaves desc, unique_users desc
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
@@ -58,7 +58,7 @@ def aggregate_razor_manufacturers(records: List[Dict[str, Any]]) -> List[Dict[st
         result.append(
             {
                 "position": int(row["position"]),
-                "name": row["name"],
+                "brand": row["brand"],
                 "shaves": int(row["shaves"]),
                 "unique_users": int(row["unique_users"]),
             }
