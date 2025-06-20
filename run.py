@@ -243,8 +243,8 @@ Examples:
     # Common arguments for pipeline
     pipeline_parser.add_argument("--month", help="Process specific month (YYYY-MM format)")
     pipeline_parser.add_argument("--year", type=int, help="Process entire year (YYYY format)")
-    pipeline_parser.add_argument("--start-month", help="Start month for range (YYYY-MM format)")
-    pipeline_parser.add_argument("--end-month", help="End month for range (YYYY-MM format)")
+    pipeline_parser.add_argument("--start", help="Start month for range (YYYY-MM format)")
+    pipeline_parser.add_argument("--end", help="End month for range (YYYY-MM format)")
     pipeline_parser.add_argument("--range", help="Month range (YYYY-MM:YYYY-MM format)")
     pipeline_parser.add_argument(
         "--out-dir", default="data", help="Output directory (default: data)"
@@ -282,10 +282,10 @@ Examples:
                 common_args.extend(["--month", args.month])
             if args.year:
                 common_args.extend(["--year", str(args.year)])
-            if args.start_month:
-                common_args.extend(["--start", args.start_month])
-            if args.end_month:
-                common_args.extend(["--end", args.end_month])
+            if args.start:
+                common_args.extend(["--start", args.start])
+            if args.end:
+                common_args.extend(["--end", args.end])
             if args.range:
                 common_args.extend(["--range", args.range])
             if args.out_dir:
