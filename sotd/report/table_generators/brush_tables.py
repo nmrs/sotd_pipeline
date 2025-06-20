@@ -100,6 +100,10 @@ class BrushHandleMakersTableGenerator(BaseTableGenerator):
         """Return the table title."""
         return "Brush Handle Makers"
 
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "handle_maker"
+
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the brush handle makers table."""
         return {
@@ -152,6 +156,10 @@ class BrushKnotMakersTableGenerator(BaseTableGenerator):
         """Return the table title."""
         return "Brush Knot Makers"
 
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "brand"
+
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the brush knot makers table."""
         return {
@@ -200,6 +208,10 @@ class BrushFibersTableGenerator(BaseTableGenerator):
     def get_table_title(self) -> str:
         """Return the table title."""
         return "Brush Fibers"
+
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "fiber"
 
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the brush fibers table."""
@@ -252,6 +264,10 @@ class BrushKnotSizesTableGenerator(BaseTableGenerator):
     def get_table_title(self) -> str:
         """Return the table title."""
         return "Brush Knot Sizes"
+
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "knot_size_mm"
 
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the brush knot sizes table."""

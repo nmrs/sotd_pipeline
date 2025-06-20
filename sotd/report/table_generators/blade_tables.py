@@ -100,6 +100,10 @@ class BladeManufacturersTableGenerator(BaseTableGenerator):
         """Return the table title."""
         return "Blade Manufacturers"
 
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "brand"
+
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the blade manufacturers table."""
         return {

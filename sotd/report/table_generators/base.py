@@ -51,6 +51,18 @@ class BaseTableGenerator(ABC):
         # Default implementation - subclasses can override
         return self.get_table_title().lower().replace(" ", "_")
 
+    def get_name_key(self) -> str:
+        """Get the key to use for matching items in delta calculations.
+
+        This is used to determine which field contains the item name for matching
+        between current and historical datasets.
+
+        Returns:
+            Name key for delta calculations
+        """
+        # Default to "name" - subclasses can override
+        return "name"
+
     def generate_table(
         self,
         max_rows: int = 20,
@@ -215,6 +227,12 @@ class BaseTableGenerator(ABC):
         if not data:
             return data
 
+        # Check if positions already exist
+        if any("position" in item for item in data):
+            if self.debug:
+                print("[DEBUG] Positions already exist in data, skipping position addition")
+            return data
+
         # Sort by the first numeric field (usually count/usage)
         numeric_fields = []
         for key in data[0].keys():
@@ -275,8 +293,9 @@ class BaseTableGenerator(ABC):
 
         # Calculate deltas
         try:
+            name_key = self.get_name_key()
             result = self.delta_calculator.calculate_deltas(
-                current_data, historical_data, max_items=len(current_data)
+                current_data, historical_data, name_key=name_key, max_items=len(current_data)
             )
 
             if self.debug:

@@ -52,6 +52,10 @@ class BlackbirdPlatesTableGenerator(BaseTableGenerator):
         """Get the table title."""
         return "Blackbird Plates"
 
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "plate"
+
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         """Get the column configuration for the table."""
         return {
@@ -81,14 +85,21 @@ class ChristopherBradleyPlatesTableGenerator(BaseTableGenerator):
                     print(f"[DEBUG] christopher_bradley_plates record {i} is not a dict")
                 continue
 
-            plate = record.get("plate")
+            plate_type = record.get("plate_type")
+            plate_level = record.get("plate_level")
             shaves = record.get("shaves", 0)
             unique_users = record.get("unique_users", 0)
 
-            if not plate:
+            if not plate_type or not plate_level:
                 if self.debug:
-                    print(f"[DEBUG] christopher_bradley_plates record {i} missing plate field")
+                    print(
+                        f"[DEBUG] christopher_bradley_plates record {i} missing "
+                        f"plate_type or plate_level field"
+                    )
                 continue
+
+            # Create a combined plate identifier
+            plate = f"{plate_type}{plate_level}"
 
             valid_data.append(
                 {
@@ -106,6 +117,10 @@ class ChristopherBradleyPlatesTableGenerator(BaseTableGenerator):
     def get_table_title(self) -> str:
         """Get the table title."""
         return "Christopher Bradley Plates"
+
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "plate"
 
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         """Get the column configuration for the table."""
@@ -136,18 +151,18 @@ class GameChangerPlatesTableGenerator(BaseTableGenerator):
                     print(f"[DEBUG] game_changer_plates record {i} is not a dict")
                 continue
 
-            plate = record.get("plate")
+            gap = record.get("gap")
             shaves = record.get("shaves", 0)
             unique_users = record.get("unique_users", 0)
 
-            if not plate:
+            if not gap:
                 if self.debug:
-                    print(f"[DEBUG] game_changer_plates record {i} missing plate field")
+                    print(f"[DEBUG] game_changer_plates record {i} missing gap field")
                 continue
 
             valid_data.append(
                 {
-                    "plate": plate,
+                    "plate": gap,
                     "uses": shaves,
                     "users": unique_users,
                 }
@@ -161,6 +176,10 @@ class GameChangerPlatesTableGenerator(BaseTableGenerator):
     def get_table_title(self) -> str:
         """Get the table title."""
         return "Game Changer Plates"
+
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "plate"
 
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         """Get the column configuration for the table."""
@@ -191,18 +210,18 @@ class SuperSpeedTipsTableGenerator(BaseTableGenerator):
                     print(f"[DEBUG] super_speed_tips record {i} is not a dict")
                 continue
 
-            tip = record.get("tip")
+            super_speed_tip = record.get("super_speed_tip")
             shaves = record.get("shaves", 0)
             unique_users = record.get("unique_users", 0)
 
-            if not tip:
+            if not super_speed_tip:
                 if self.debug:
-                    print(f"[DEBUG] super_speed_tips record {i} missing tip field")
+                    print(f"[DEBUG] super_speed_tips record {i} missing super_speed_tip field")
                 continue
 
             valid_data.append(
                 {
-                    "tip": tip,
+                    "tip": super_speed_tip,
                     "uses": shaves,
                     "users": unique_users,
                 }
@@ -216,6 +235,10 @@ class SuperSpeedTipsTableGenerator(BaseTableGenerator):
     def get_table_title(self) -> str:
         """Get the table title."""
         return "Super Speed Tips"
+
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "tip"
 
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         """Get the column configuration for the table."""
@@ -284,6 +307,10 @@ class StraightRazorSpecsTableGenerator(BaseTableGenerator):
         """Get the table title."""
         return "Straight Razor Specifications"
 
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "specs"
+
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         """Get the column configuration for the table."""
         return {
@@ -328,6 +355,10 @@ class StraightWidthsTableGenerator(BaseTableGenerator):
 
     def get_table_title(self) -> str:
         return "Straight Widths"
+
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "name"
 
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         return {
@@ -378,6 +409,10 @@ class StraightGrindsTableGenerator(BaseTableGenerator):
     def get_table_title(self) -> str:
         return "Straight Grinds"
 
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "name"
+
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         return {
             "name": {"display_name": "Grind", "format": "text"},
@@ -426,6 +461,10 @@ class StraightPointsTableGenerator(BaseTableGenerator):
 
     def get_table_title(self) -> str:
         return "Straight Points"
+
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "name"
 
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         return {
