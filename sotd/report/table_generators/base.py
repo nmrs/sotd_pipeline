@@ -10,6 +10,135 @@ import pandas as pd
 from ..delta_calculator import DeltaCalculator
 
 
+class DataValidationMixin:
+    """Mixin providing common data validation functionality for table generators."""
+
+    def _validate_data_records(
+        self, data: list, data_key: str, required_fields: list[str]
+    ) -> list[dict]:
+        """Generic data validation for table generators.
+
+        Args:
+            data: Raw data list to validate
+            data_key: Key name for debug messages
+            required_fields: List of required field names
+
+        Returns:
+            List of validated data records
+        """
+        if not isinstance(data, list):
+            if self.debug:
+                print(f"[DEBUG] {data_key} data is not a list")
+            return []
+
+        valid_data = []
+        for i, record in enumerate(data):
+            if not isinstance(record, dict):
+                if self.debug:
+                    print(f"[DEBUG] {data_key} record {i} is not a dict")
+                continue
+
+            # Check for required fields
+            missing_fields = [field for field in required_fields if field not in record]
+            if missing_fields:
+                if self.debug:
+                    print(f"[DEBUG] {data_key} record {i} missing fields: {missing_fields}")
+                continue
+
+            # Ensure shaves is numeric and positive (if present)
+            if "shaves" in required_fields:
+                if not isinstance(record["shaves"], (int, float)) or record["shaves"] <= 0:
+                    if self.debug:
+                        print(
+                            f"[DEBUG] {data_key} record {i} has invalid shaves: {record['shaves']}"
+                        )
+                    continue
+
+            valid_data.append(record)
+
+        return valid_data
+
+
+class NoDeltaMixin:
+    """Mixin to disable delta calculations for cross-product tables."""
+
+    def generate_table(
+        self,
+        max_rows: int = 20,
+        include_delta: bool = False,
+        comparison_data: Optional[Dict[str, Any]] = None,
+        include_header: bool = True,
+    ) -> str:
+        """Generate a markdown table without delta columns.
+
+        Args:
+            max_rows: Maximum number of rows to include
+            include_delta: Whether to include delta columns (ignored for this table)
+            comparison_data: Historical data for delta calculations (ignored for this table)
+            include_header: Whether to include the table header (default: True)
+
+        Returns:
+            Markdown table as a string
+        """
+        # Override to never include deltas for cross-product tables
+        return super().generate_table(
+            max_rows=max_rows, include_delta=False, include_header=include_header
+        )
+
+
+# Standard column configurations
+STANDARD_PRODUCT_COLUMNS = {
+    "name": {"display_name": "name"},
+    "shaves": {"display_name": "shaves", "format": "number"},
+    "unique_users": {"display_name": "unique users", "format": "number"},
+    "avg_shaves_per_user": {
+        "display_name": "avg shaves per user",
+        "format": "decimal",
+        "decimals": 2,
+    },
+}
+
+STANDARD_MANUFACTURER_COLUMNS = {
+    "brand": {"display_name": "name"},
+    "shaves": {"display_name": "shaves", "format": "number"},
+    "unique_users": {"display_name": "unique users", "format": "number"},
+    "avg_shaves_per_user": {
+        "display_name": "avg shaves per user",
+        "format": "decimal",
+        "decimals": 2,
+    },
+}
+
+STANDARD_SPECIALIZED_COLUMNS = {
+    "plate": {"display_name": "name", "format": "text"},
+    "shaves": {"display_name": "shaves", "format": "number"},
+    "unique_users": {"display_name": "unique users", "format": "number"},
+    "avg_shaves_per_user": {
+        "display_name": "avg shaves per user",
+        "format": "decimal",
+        "decimals": 2,
+    },
+}
+
+STANDARD_USER_COLUMNS = {
+    "user_display": {"display_name": "user", "format": "text"},
+    "shaves": {"display_name": "shaves", "format": "number"},
+    "missed_days": {"display_name": "missed days", "format": "number"},
+}
+
+STANDARD_DIVERSITY_COLUMNS = {
+    "maker": {"display_name": "name"},
+    "unique_soaps": {"display_name": "unique soaps", "format": "number"},
+}
+
+STANDARD_USE_COUNT_COLUMNS = {
+    "user": {"display_name": "user"},
+    "blade": {"display_name": "blade"},
+    "format": {"display_name": "format"},
+    "uses": {"display_name": "uses", "format": "number"},
+}
+
+
 class BaseTableGenerator(ABC):
     """Base class for table generators."""
 
@@ -476,6 +605,38 @@ class BaseTableGenerator(ABC):
             }
 
         return updated_config
+
+
+class StandardProductTableGenerator(BaseTableGenerator, DataValidationMixin):
+    """Base class for standard product tables (name, shaves, unique_users, avg_shaves_per_user)."""
+
+    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
+        """Return standard product column configuration."""
+        return STANDARD_PRODUCT_COLUMNS
+
+
+class ManufacturerTableGenerator(BaseTableGenerator, DataValidationMixin):
+    """Base class for manufacturer tables (brand, shaves, unique_users, avg_shaves_per_user)."""
+
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "brand"
+
+    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
+        """Return standard manufacturer column configuration."""
+        return STANDARD_MANUFACTURER_COLUMNS
+
+
+class SpecializedTableGenerator(BaseTableGenerator, DataValidationMixin):
+    """Base class for specialized tables (plate, shaves, unique_users, avg_shaves_per_user)."""
+
+    def get_name_key(self) -> str:
+        """Return the key to use for matching items in delta calculations."""
+        return "plate"
+
+    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
+        """Return standard specialized column configuration."""
+        return STANDARD_SPECIALIZED_COLUMNS
 
 
 class SimpleTableGenerator(BaseTableGenerator):

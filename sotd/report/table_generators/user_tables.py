@@ -3,10 +3,10 @@
 
 from typing import Any, Dict, List
 
-from .base import BaseTableGenerator
+from .base import STANDARD_USER_COLUMNS, StandardProductTableGenerator
 
 
-class TopShaversTableGenerator(BaseTableGenerator):
+class TopShaversTableGenerator(StandardProductTableGenerator):
     """Table generator for top shavers with tie-breaking logic."""
 
     def get_table_data(self) -> List[Dict[str, Any]]:
@@ -56,20 +56,7 @@ class TopShaversTableGenerator(BaseTableGenerator):
         Returns:
             Column configuration dictionary
         """
-        return {
-            "user_display": {
-                "display_name": "user",
-                "format": "text",
-            },
-            "shaves": {
-                "display_name": "shaves",
-                "format": "number",
-            },
-            "missed_days": {
-                "display_name": "missed days",
-                "format": "number",
-            },
-        }
+        return STANDARD_USER_COLUMNS
 
     def get_name_key(self) -> str:
         """Get the key to use for matching items in delta calculations.

@@ -1,47 +1,18 @@
 #!/usr/bin/env python3
 """Table generators for specialized hardware data in the hardware report."""
 
-from typing import Any, Dict
+from typing import Any
 
-from .base import BaseTableGenerator
+from .base import SpecializedTableGenerator
 
 
-class BlackbirdPlatesTableGenerator(BaseTableGenerator):
+class BlackbirdPlatesTableGenerator(SpecializedTableGenerator):
     """Table generator for Blackbird plates in the hardware report."""
 
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get Blackbird plates data from aggregated data."""
         data = self.data.get("blackbird_plates", [])
-
-        if not isinstance(data, list):
-            if self.debug:
-                print("[DEBUG] blackbird_plates data is not a list")
-            return []
-
-        # Validate each record has required fields
-        valid_data = []
-        for i, record in enumerate(data):
-            if not isinstance(record, dict):
-                if self.debug:
-                    print(f"[DEBUG] blackbird_plates record {i} is not a dict")
-                continue
-
-            plate = record.get("plate")
-            shaves = record.get("shaves", 0)
-            unique_users = record.get("unique_users", 0)
-
-            if not plate:
-                if self.debug:
-                    print(f"[DEBUG] blackbird_plates record {i} missing plate field")
-                continue
-
-            valid_data.append(
-                {
-                    "plate": plate,
-                    "shaves": shaves,
-                    "unique_users": unique_users,
-                }
-            )
+        valid_data = self._validate_data_records(data, "blackbird_plates", ["plate", "shaves"])
 
         if self.debug:
             print(f"[DEBUG] Found {len(valid_data)} valid Blackbird plates records")
@@ -52,371 +23,182 @@ class BlackbirdPlatesTableGenerator(BaseTableGenerator):
         """Get the table title."""
         return "Blackbird Plates"
 
-    def get_name_key(self) -> str:
-        """Return the key to use for matching items in delta calculations."""
-        return "plate"
 
-    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
-        """Get the column configuration for the table."""
-        return {
-            "plate": {"display_name": "name", "format": "text"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
-
-
-class ChristopherBradleyPlatesTableGenerator(BaseTableGenerator):
+class ChristopherBradleyPlatesTableGenerator(SpecializedTableGenerator):
     """Table generator for Christopher Bradley plates in the hardware report."""
 
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get Christopher Bradley plates data from aggregated data."""
         data = self.data.get("christopher_bradley_plates", [])
+        valid_data = self._validate_data_records(
+            data, "christopher_bradley_plates", ["plate_type", "plate_level", "shaves"]
+        )
 
-        if not isinstance(data, list):
-            if self.debug:
-                print("[DEBUG] christopher_bradley_plates data is not a list")
-            return []
-
-        # Validate each record has required fields
-        valid_data = []
-        for i, record in enumerate(data):
-            if not isinstance(record, dict):
-                if self.debug:
-                    print(f"[DEBUG] christopher_bradley_plates record {i} is not a dict")
-                continue
-
+        # Create combined plate identifier
+        result = []
+        for record in valid_data:
             plate_type = record.get("plate_type")
             plate_level = record.get("plate_level")
-            shaves = record.get("shaves", 0)
-            unique_users = record.get("unique_users", 0)
-
-            if not plate_type or not plate_level:
-                if self.debug:
-                    print(
-                        f"[DEBUG] christopher_bradley_plates record {i} missing "
-                        f"plate_type or plate_level field"
-                    )
-                continue
-
-            # Create a combined plate identifier
-            plate = f"{plate_type}{plate_level}"
-
-            valid_data.append(
-                {
-                    "plate": plate,
-                    "shaves": shaves,
-                    "unique_users": unique_users,
-                }
-            )
+            if plate_type and plate_level:
+                result.append(
+                    {
+                        "plate": f"{plate_type}{plate_level}",
+                        "shaves": record.get("shaves", 0),
+                        "unique_users": record.get("unique_users", 0),
+                    }
+                )
 
         if self.debug:
-            print(f"[DEBUG] Found {len(valid_data)} valid Christopher Bradley plates records")
+            print(f"[DEBUG] Found {len(result)} valid Christopher Bradley plates records")
 
-        return valid_data
+        return result
 
     def get_table_title(self) -> str:
         """Get the table title."""
         return "Christopher Bradley Plates"
 
-    def get_name_key(self) -> str:
-        """Return the key to use for matching items in delta calculations."""
-        return "plate"
 
-    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
-        """Get the column configuration for the table."""
-        return {
-            "plate": {"display_name": "name", "format": "text"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
-
-
-class GameChangerPlatesTableGenerator(BaseTableGenerator):
+class GameChangerPlatesTableGenerator(SpecializedTableGenerator):
     """Table generator for Game Changer plates in the hardware report."""
 
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get Game Changer plates data from aggregated data."""
         data = self.data.get("game_changer_plates", [])
+        valid_data = self._validate_data_records(data, "game_changer_plates", ["gap", "shaves"])
 
-        if not isinstance(data, list):
-            if self.debug:
-                print("[DEBUG] game_changer_plates data is not a list")
-            return []
-
-        # Validate each record has required fields
-        valid_data = []
-        for i, record in enumerate(data):
-            if not isinstance(record, dict):
-                if self.debug:
-                    print(f"[DEBUG] game_changer_plates record {i} is not a dict")
-                continue
-
+        # Map gap to plate field
+        result = []
+        for record in valid_data:
             gap = record.get("gap")
-            shaves = record.get("shaves", 0)
-            unique_users = record.get("unique_users", 0)
-
-            if not gap:
-                if self.debug:
-                    print(f"[DEBUG] game_changer_plates record {i} missing gap field")
-                continue
-
-            valid_data.append(
-                {
-                    "plate": gap,
-                    "shaves": shaves,
-                    "unique_users": unique_users,
-                }
-            )
+            if gap:
+                result.append(
+                    {
+                        "plate": gap,
+                        "shaves": record.get("shaves", 0),
+                        "unique_users": record.get("unique_users", 0),
+                    }
+                )
 
         if self.debug:
-            print(f"[DEBUG] Found {len(valid_data)} valid Game Changer plates records")
+            print(f"[DEBUG] Found {len(result)} valid Game Changer plates records")
 
-        return valid_data
+        return result
 
     def get_table_title(self) -> str:
         """Get the table title."""
         return "Game Changer Plates"
 
-    def get_name_key(self) -> str:
-        """Return the key to use for matching items in delta calculations."""
-        return "plate"
 
-    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
-        """Get the column configuration for the table."""
-        return {
-            "plate": {"display_name": "name", "format": "text"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
-
-
-class SuperSpeedTipsTableGenerator(BaseTableGenerator):
+class SuperSpeedTipsTableGenerator(SpecializedTableGenerator):
     """Table generator for Super Speed tips in the hardware report."""
 
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get Super Speed tips data from aggregated data."""
         data = self.data.get("super_speed_tips", [])
+        valid_data = self._validate_data_records(data, "super_speed_tips", ["tip", "shaves"])
 
-        if not isinstance(data, list):
-            if self.debug:
-                print("[DEBUG] super_speed_tips data is not a list")
-            return []
-
-        # Validate each record has required fields
-        valid_data = []
-        for i, record in enumerate(data):
-            if not isinstance(record, dict):
-                if self.debug:
-                    print(f"[DEBUG] super_speed_tips record {i} is not a dict")
-                continue
-
+        # Map tip to plate field
+        result = []
+        for record in valid_data:
             tip = record.get("tip")
-            shaves = record.get("shaves", 0)
-            unique_users = record.get("unique_users", 0)
-
-            if not tip:
-                if self.debug:
-                    print(f"[DEBUG] super_speed_tips record {i} missing tip field")
-                continue
-
-            valid_data.append(
-                {
-                    "tip": tip,
-                    "shaves": shaves,
-                    "unique_users": unique_users,
-                }
-            )
+            if tip:
+                result.append(
+                    {
+                        "plate": tip,
+                        "shaves": record.get("shaves", 0),
+                        "unique_users": record.get("unique_users", 0),
+                    }
+                )
 
         if self.debug:
-            print(f"[DEBUG] Found {len(valid_data)} valid Super Speed tips records")
+            print(f"[DEBUG] Found {len(result)} valid Super Speed tips records")
 
-        return valid_data
+        return result
 
     def get_table_title(self) -> str:
         """Get the table title."""
         return "Super Speed Tips"
 
-    def get_name_key(self) -> str:
-        """Return the key to use for matching items in delta calculations."""
-        return "tip"
 
-    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
-        """Get the column configuration for the table."""
-        return {
-            "tip": {"display_name": "name", "format": "text"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
-
-
-class StraightWidthsTableGenerator(BaseTableGenerator):
+class StraightWidthsTableGenerator(SpecializedTableGenerator):
     """Table generator for straight razor widths in the hardware report."""
 
     def get_table_data(self) -> list[dict[str, Any]]:
+        """Get straight razor widths data from aggregated data."""
         data = self.data.get("straight_widths", [])
-        if not isinstance(data, list):
-            if self.debug:
-                print("[DEBUG] straight_widths data is not a list")
-            return []
-        valid_data = []
-        for i, record in enumerate(data):
-            if not isinstance(record, dict):
-                if self.debug:
-                    print(f"[DEBUG] straight_widths record {i} is not a dict")
-                continue
+        valid_data = self._validate_data_records(data, "straight_widths", ["width", "shaves"])
+
+        # Map width to plate field
+        result = []
+        for record in valid_data:
             width = record.get("width")
-            shaves = record.get("shaves", 0)
-            unique_users = record.get("unique_users", 0)
-            if not width:
-                if self.debug:
-                    print(f"[DEBUG] straight_widths record {i} missing width field")
-                continue
-            valid_data.append(
-                {
-                    "name": width,
-                    "shaves": shaves,
-                    "unique_users": unique_users,
-                }
-            )
-        return valid_data
+            if width:
+                result.append(
+                    {
+                        "plate": width,
+                        "shaves": record.get("shaves", 0),
+                        "unique_users": record.get("unique_users", 0),
+                    }
+                )
+
+        return result
 
     def get_table_title(self) -> str:
+        """Get the table title."""
         return "Straight Widths"
 
-    def get_name_key(self) -> str:
-        """Return the key to use for matching items in delta calculations."""
-        return "name"
 
-    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
-        return {
-            "name": {"display_name": "name", "format": "text"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
-
-
-class StraightGrindsTableGenerator(BaseTableGenerator):
+class StraightGrindsTableGenerator(SpecializedTableGenerator):
     """Table generator for straight razor grinds in the hardware report."""
 
     def get_table_data(self) -> list[dict[str, Any]]:
+        """Get straight razor grinds data from aggregated data."""
         data = self.data.get("straight_grinds", [])
-        if not isinstance(data, list):
-            if self.debug:
-                print("[DEBUG] straight_grinds data is not a list")
-            return []
-        valid_data = []
-        for i, record in enumerate(data):
-            if not isinstance(record, dict):
-                if self.debug:
-                    print(f"[DEBUG] straight_grinds record {i} is not a dict")
-                continue
+        valid_data = self._validate_data_records(data, "straight_grinds", ["grind", "shaves"])
+
+        # Map grind to plate field
+        result = []
+        for record in valid_data:
             grind = record.get("grind")
-            shaves = record.get("shaves", 0)
-            unique_users = record.get("unique_users", 0)
-            if not grind:
-                if self.debug:
-                    print(f"[DEBUG] straight_grinds record {i} missing grind field")
-                continue
-            valid_data.append(
-                {
-                    "name": grind,
-                    "shaves": shaves,
-                    "unique_users": unique_users,
-                }
-            )
-        return valid_data
+            if grind:
+                result.append(
+                    {
+                        "plate": grind,
+                        "shaves": record.get("shaves", 0),
+                        "unique_users": record.get("unique_users", 0),
+                    }
+                )
+
+        return result
 
     def get_table_title(self) -> str:
+        """Get the table title."""
         return "Straight Grinds"
 
-    def get_name_key(self) -> str:
-        """Return the key to use for matching items in delta calculations."""
-        return "name"
 
-    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
-        return {
-            "name": {"display_name": "name", "format": "text"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
-
-
-class StraightPointsTableGenerator(BaseTableGenerator):
+class StraightPointsTableGenerator(SpecializedTableGenerator):
     """Table generator for straight razor points in the hardware report."""
 
     def get_table_data(self) -> list[dict[str, Any]]:
+        """Get straight razor points data from aggregated data."""
         data = self.data.get("straight_points", [])
-        if not isinstance(data, list):
-            if self.debug:
-                print("[DEBUG] straight_points data is not a list")
-            return []
-        valid_data = []
-        for i, record in enumerate(data):
-            if not isinstance(record, dict):
-                if self.debug:
-                    print(f"[DEBUG] straight_points record {i} is not a dict")
-                continue
+        valid_data = self._validate_data_records(data, "straight_points", ["point", "shaves"])
+
+        # Map point to plate field
+        result = []
+        for record in valid_data:
             point = record.get("point")
-            shaves = record.get("shaves", 0)
-            unique_users = record.get("unique_users", 0)
-            if not point:
-                if self.debug:
-                    print(f"[DEBUG] straight_points record {i} missing point field")
-                continue
-            valid_data.append(
-                {
-                    "name": point,
-                    "shaves": shaves,
-                    "unique_users": unique_users,
-                }
-            )
-        return valid_data
+            if point:
+                result.append(
+                    {
+                        "plate": point,
+                        "shaves": record.get("shaves", 0),
+                        "unique_users": record.get("unique_users", 0),
+                    }
+                )
+
+        return result
 
     def get_table_title(self) -> str:
+        """Get the table title."""
         return "Straight Points"
-
-    def get_name_key(self) -> str:
-        """Return the key to use for matching items in delta calculations."""
-        return "name"
-
-    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
-        return {
-            "name": {"display_name": "name", "format": "text"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
