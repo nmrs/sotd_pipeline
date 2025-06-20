@@ -318,6 +318,9 @@ sotd/aggregate/aggregators/
 - Follow exact field names specified in aggregate phase spec
 - Include all required fields for each category
 - Ensure consistent output structure
+- **Field Name Corrections**: Updated to match actual report output:
+  - Users: Use "user" field (not "name")
+  - Highest Use Count per Blade: Use "user", "blade", "format", "uses" fields
 
 ### Error Handling
 - Fail fast for internal errors

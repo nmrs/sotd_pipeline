@@ -13,7 +13,8 @@ def aggregate_razor_manufacturers(records: List[Dict[str, Any]]) -> List[Dict[st
         records: List of enriched comment records
 
     Returns:
-        List of razor manufacturer aggregations with position, brand, shaves, and unique_users fields
+        List of razor manufacturer aggregations with position, brand, shaves, and
+        unique_users fields
     """
     if not records:
         return []

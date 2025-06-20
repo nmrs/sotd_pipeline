@@ -14,7 +14,7 @@ def aggregate_users(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         records: List of enriched comment records
 
     Returns:
-        List of user aggregations with position, author, shaves,
+        List of user aggregations with position, user, shaves,
         and missed_days fields
     """
     if not records:
@@ -40,9 +40,7 @@ def aggregate_users(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     df = pd.DataFrame(user_data)
 
     # Group by author and calculate metrics
-    grouped = df.groupby("author").agg({"author": "count"}).reset_index()
-
-    # Rename columns for clarity
+    grouped = df.groupby("author").size().reset_index()
     grouped.columns = ["author", "shaves"]
 
     # For now, set missed_days to 0 (placeholder for future enhancement)
@@ -60,7 +58,7 @@ def aggregate_users(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         result.append(
             {
                 "position": int(row["position"]),
-                "author": row["author"],
+                "user": row["author"],
                 "shaves": int(row["shaves"]),
                 "missed_days": int(row["missed_days"]),
             }

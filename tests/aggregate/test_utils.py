@@ -65,7 +65,7 @@ class TestValidation:
     def test_validate_records_invalid_type(self):
         """Test validation with invalid record type."""
         with pytest.raises(ValueError, match="Records must be a list"):
-            validate_records("not a list")
+            validate_records("not a list")  # type: ignore
 
     def test_validate_records_missing_author(self):
         """Test validation with missing author field."""
@@ -117,8 +117,6 @@ class TestValidation:
             {"author": None},
         ]
 
-        # The check_data_quality function doesn't filter out empty/None authors
-        # It just checks if there are any authors in the set
-        # Since empty string and None are in the set, it won't raise an error
-        # This test should pass without raising an exception
-        check_data_quality(records)
+        # Should raise an error when there are no valid authors
+        with pytest.raises(ValueError, match="No valid authors found in records"):
+            check_data_quality(records)

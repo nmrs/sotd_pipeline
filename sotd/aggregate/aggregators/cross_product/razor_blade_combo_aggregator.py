@@ -14,8 +14,8 @@ def aggregate_razor_blade_combos(records: List[Dict[str, Any]]) -> List[Dict[str
         records: List of enriched comment records
 
     Returns:
-        List of razor blade combination aggregations with position, razor_name,
-        blade_name, shaves, and unique_users fields
+        List of razor blade combination aggregations with position, name,
+        shaves, and unique_users fields
     """
     if not records:
         return []
@@ -33,11 +33,18 @@ def aggregate_razor_blade_combos(records: List[Dict[str, Any]]) -> List[Dict[str
         if not razor_matched or not blade_matched:
             continue
 
-        razor_brand = razor_matched.get("brand", "").strip()
-        razor_model = razor_matched.get("model", "").strip()
-        blade_brand = blade_matched.get("brand", "").strip()
-        blade_model = blade_matched.get("model", "").strip()
-        author = record.get("author", "").strip()
+        razor_brand = razor_matched.get("brand", "")
+        razor_model = razor_matched.get("model", "")
+        blade_brand = blade_matched.get("brand", "")
+        blade_model = blade_matched.get("model", "")
+        author = record.get("author", "")
+
+        # Handle None values and strip strings
+        razor_brand = razor_brand.strip() if razor_brand else ""
+        razor_model = razor_model.strip() if razor_model else ""
+        blade_brand = blade_brand.strip() if blade_brand else ""
+        blade_model = blade_model.strip() if blade_model else ""
+        author = author.strip() if author else ""
 
         # Skip if missing essential data
         if not (razor_brand and razor_model and blade_brand and blade_model and author):
@@ -45,8 +52,9 @@ def aggregate_razor_blade_combos(records: List[Dict[str, Any]]) -> List[Dict[str
 
         razor_name = f"{razor_brand} {razor_model}"
         blade_name = f"{blade_brand} {blade_model}"
+        combo_name = f"{razor_name} + {blade_name}"
 
-        combo_data.append({"razor_name": razor_name, "blade_name": blade_name, "author": author})
+        combo_data.append({"name": combo_name, "author": author})
 
     if not combo_data:
         return []
@@ -54,13 +62,11 @@ def aggregate_razor_blade_combos(records: List[Dict[str, Any]]) -> List[Dict[str
     # Convert to DataFrame for efficient aggregation
     df = pd.DataFrame(combo_data)
 
-    # Group by razor_name and blade_name and calculate metrics
-    grouped = (
-        df.groupby(["razor_name", "blade_name"]).agg({"author": ["count", "nunique"]}).reset_index()
-    )
+    # Group by name and calculate metrics
+    grouped = df.groupby("name").agg({"author": ["count", "nunique"]}).reset_index()
 
     # Flatten column names
-    grouped.columns = ["razor_name", "blade_name", "shaves", "unique_users"]
+    grouped.columns = ["name", "shaves", "unique_users"]
 
     # Sort by shaves desc, unique_users desc
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
@@ -74,8 +80,7 @@ def aggregate_razor_blade_combos(records: List[Dict[str, Any]]) -> List[Dict[str
         result.append(
             {
                 "position": int(row["position"]),
-                "razor_name": row["razor_name"],
-                "blade_name": row["blade_name"],
+                "name": row["name"],
                 "shaves": int(row["shaves"]),
                 "unique_users": int(row["unique_users"]),
             }

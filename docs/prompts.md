@@ -54,6 +54,4 @@ Purpose: These are instructions to proceed carefully through an implementation p
 7. Proceed *until context limit is reached*
 
 
-Use the Tracked Implementation Development Process in @prompts.md to implement the @aggregate_implementation_plan.mdc using @aggregate_phase_spec.md and @sotd-pipeline-core.mdc  for reference. 
-*mandatory* Proceed without user input *until context limit is reached,*
-
+Use the Tracked Implementation Development Process in @prompts.md to implement the @aggregate_implementation_plan.mdc using @aggregate_phase_spec.md and @sotd-pipeline-core.mdc for reference. perform multiple tasks before asking for user feedback or permission to continue.

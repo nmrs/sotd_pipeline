@@ -231,8 +231,8 @@ All aggregations must be sorted according to the following rules:
       {"position": 2, "maker": "Declaration Grooming", "shaves": 180, "unique_users": 25}
     ],
     "users": [
-      {"position": 1, "name": "user1", "shaves": 31, "missed_days": 0},
-      {"position": 2, "name": "user2", "shaves": 31, "missed_days": 2}
+      {"position": 1, "user": "user1", "shaves": 31, "missed_days": 0},
+      {"position": 2, "user": "user2", "shaves": 31, "missed_days": 2}
     ],
     "razor_blade_combinations": [
       {"position": 1, "name": "Fatip Grande + Gillette Minora", "shaves": 25, "unique_users": 8},
@@ -324,7 +324,7 @@ All aggregations must be sorted according to the following rules:
 - **Straight Points**: `{"position": N, "point": "Point", "shaves": N, "unique_users": N}`
 
 ### User Aggregations
-- **Users**: `{"position": N, "name": "Username", "shaves": N, "missed_days": N}`
+- **Users**: `{"position": N, "user": "Username", "shaves": N, "missed_days": N}`
 
 ### Cross-Product Aggregations
 - **Razor Blade Combinations**: `{"position": N, "name": "Razor + Blade", "shaves": N, "unique_users": N}`

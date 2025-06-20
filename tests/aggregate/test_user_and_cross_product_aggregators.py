@@ -16,10 +16,10 @@ def test_aggregate_users():
     # For simplicity, missed_days is not calculated here (would require more context)
     result = aggregate_users(records)
     assert len(result) == 2
-    assert result[0]["name"] == "user1"
+    assert result[0]["user"] == "user1"
     assert result[0]["shaves"] == 2
     assert result[0]["position"] == 1
-    assert result[1]["name"] == "user2"
+    assert result[1]["user"] == "user2"
     assert result[1]["shaves"] == 1
     assert result[1]["position"] == 2
 

@@ -86,7 +86,12 @@ def check_data_quality(records: list[dict[str, Any]]) -> None:
         raise ValueError("No records to process")
 
     # Check for reasonable number of unique authors
-    authors = set(record.get("author", "") for record in records)
+    authors = set()
+    for record in records:
+        author = record.get("author")
+        if author and isinstance(author, str) and author.strip():
+            authors.add(author.strip())
+
     if len(authors) < 1:
         raise ValueError("No valid authors found in records")
 

@@ -28,10 +28,16 @@ def aggregate_brushes(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         if not matched or not matched.get("brand") or not matched.get("model"):
             continue
 
-        brand = matched.get("brand", "").strip()
-        model = matched.get("model", "").strip()
-        fiber = matched.get("fiber", "").strip()
-        author = record.get("author", "").strip()
+        brand = matched.get("brand", "")
+        model = matched.get("model", "")
+        fiber = matched.get("fiber", "")
+        author = record.get("author", "")
+
+        # Handle None values and strip strings
+        brand = brand.strip() if brand else ""
+        model = model.strip() if model else ""
+        fiber = fiber.strip() if fiber else ""
+        author = author.strip() if author else ""
 
         if brand and model and fiber and author:
             brush_data.append({"brand": brand, "model": model, "fiber": fiber, "author": author})
