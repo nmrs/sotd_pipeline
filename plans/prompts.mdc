@@ -3,14 +3,11 @@ description:
 globs: 
 alwaysApply: false
 ---
-Idea Honing
-Ask me one question at a time so we can develop a thorough, step-by-step spec for this idea. Each question should build on my previous answers, and our end goal is to have a detailed specification I can hand off to a developer. Let’s do this iteratively and dig into every relevant detail. Remember, only one question at a time.
-
-Here’s the idea:
-
 # Development Workflows and Prompts
 
 This file contains reusable development workflows and prompts for the SOTD Pipeline project. Use these with Cursor AI by referencing `@prompts.mdc` followed by the specific section name.
+
+---
 
 ## 🚀 Development Workflows
 
@@ -39,7 +36,19 @@ Proceed through the remaining tasks in the current step one at a time. After com
 6. Commit regularly: Commit changes with clear messages after each chunk. Commits should include updates to implementation plan.
 7. Proceed *until context limit is reached*
 
+---
+
 ## 📋 Project Planning Prompts
+
+### Idea Honing
+**Use when**: Developing a thorough, step-by-step specification for a new idea.
+
+```
+Ask me one question at a time so we can develop a thorough, step-by-step spec for this idea. Each question should build on my previous answers, and our end goal is to have a detailed specification I can hand off to a developer. Let's do this iteratively and dig into every relevant detail. Remember, only one question at a time.
+
+Here's the idea:
+[INSERT IDEA HERE]
+```
 
 ### TDD Project Planning
 **Use when**: Starting a new feature or component with test-driven development.
@@ -62,6 +71,54 @@ From here you should have the foundation to provide a series of prompts for a co
 
 Make sure and separate each prompt section. Use markdown. Each prompt should be tagged as text using code tags. The goal is to output prompts, but context, etc is important as well.
 ```
+
+---
+
+## 📊 Data Analysis Prompts
+
+### SOTD Monthly Observations Prompt
+**Use when**: Generating insights and observations from monthly SOTD hardware reports.
+
+```
+Act as a **snark-drenched yet insightful data analyst** who's been elbow-deep in shave logs and spreadsheet stubble. You've inhaled an entire timeline of Shave-of-the-Day reports and now clutch **the freshest month's tables**—complete with **Δ columns, Top Shavers, and maximum-blade-use brag sheets**.
+
+## Mission
+
+Unleash **10 + observations** that spotlight the latest month in the context of the full date range.
+
+## Observation Fuel — Pick What Sparks Joy
+
+1. **Biggest movers** – products or brands posting the largest ↑ or ↓ vs. last month.  
+2. **Long-haul loyalty** – absurd cumulative counts or unbroken streaks (e.g., one Feather blade for 30 straight shaves).  
+3. **Underdog comebacks** – gear that languished for months, then rocketed into the Top lists.  
+4. **Brand defections** – makers that vanished—or rookies elbowing legacy names aside.  
+5. **Cross-category chemistry** – razor × blade or brush × soap pairings that climbed together.  
+6. **Persistent weirdness** – statistical outliers that refuse to behave.  
+7. **Top Shavers shout-outs** – name-drop or gently roast the heroes atop the leaderboard.  
+8. **Blade iron-men** – highest single-blade use counts (edge-of-sanity milestones).  
+9. **Leaderboard jockeying** – who muscled into the Top 10, who fell out of the Top 3, or which #1 and #3 swapped places like they're drafting at Eau Rouge.
+
+*Each observation should riff on at least one of these. Or maybe not. Maybe you're feeling crazy and want to highlight something totally unexpected.*
+
+*Prioritize 
+
+## Tone Guide
+
+- **Half of the observations**: *"Jerry Seinfeld writing for BuzzFeed."*  
+  - Keep it smart, punchy, and data-anchored.  
+  - Shamelessly name-check the community where possible.  
+  - Sprinkle metaphors involving boldness and questionable life choices—**but only where they sharpen the gag**.  
+  - End each observation with a wink, sigh, or raised eyebrow.  
+  - Humblebrag numbers sparingly, story-arc numbers generously.
+
+- **Half of the observations**: *Play the straight-man.*  
+  - Just the numbers here.  
+  - "This happened. It was remarkable, so I'm remarking on it."
+
+  > **Remember:** If forced to choose, pick the angle that delivers the most **noteworthy, surprising, or decision-driving finding**—then season with humor.
+```
+
+---
 
 ## 🛠️ Utility Prompts
 
@@ -88,6 +145,8 @@ You are the ChatGPT code editor. Review the error below. Read the file open in W
 Use the Tracked Implementation Development Process in @prompts.mdc to implement the @aggregate_implementation_plan.mdc using @aggregate_phase_spec.md and @sotd-pipeline-core.mdc for reference. Perform multiple tasks before asking for user feedback or permission to continue.
 ```
 
+---
+
 ## 📝 Usage Examples
 
 ### Starting a New Feature
@@ -109,3 +168,24 @@ Use the Session Continuation prompt in @prompts.mdc to continue the current work
 ```
 Use the Error Resolution prompt in @prompts.mdc to fix the current error.
 ```
+
+### Generating Observations
+```
+Use the SOTD Monthly Observations Prompt in @prompts.mdc to analyze the latest monthly report.
+```
+
+---
+
+## 🔄 Quick Reference
+
+| Scenario | Use This Prompt |
+|----------|----------------|
+| New feature with TDD | TDD Project Planning |
+| New feature without TDD | Non-TDD Project Planning |
+| Multi-session implementation | Tracked Implementation Development Process |
+| Error fixing | Error Resolution |
+| Session continuation | Session Continuation |
+| Monthly report analysis | SOTD Monthly Observations Prompt |
+| Checklist generation | TODO Checklist Generation |
+| Idea development | Idea Honing |
+
