@@ -1,5 +1,5 @@
 # pyright: reportAttributeAccessIssue=false
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 """Base table generator for the report phase."""
 
 from abc import ABC, abstractmethod
@@ -68,7 +68,6 @@ class BaseTableGenerator(ABC):
         max_rows: int = 20,
         include_delta: bool = False,
         comparison_data: Optional[Dict[str, Any]] = None,
-        comparison_period: str = "previous month",
     ) -> str:
         """Generate a markdown table.
 
@@ -76,7 +75,7 @@ class BaseTableGenerator(ABC):
             max_rows: Maximum number of rows to include
             include_delta: Whether to include delta columns
             comparison_data: Historical data for delta calculations
-            comparison_period: Which comparison period to use
+                           (dict mapping period to (metadata, data))
 
         Returns:
             Markdown table as a string
@@ -101,7 +100,7 @@ class BaseTableGenerator(ABC):
 
         # Calculate deltas if requested
         if include_delta and comparison_data:
-            table_data = self._calculate_deltas(table_data, comparison_data, comparison_period)
+            table_data = self._calculate_multi_period_deltas(table_data, comparison_data)
 
         # Convert to DataFrame
         df = pd.DataFrame(table_data)
@@ -116,7 +115,9 @@ class BaseTableGenerator(ABC):
 
         # Add delta column configuration if deltas are included
         if include_delta and comparison_data:
-            column_config = self._add_delta_column_config(column_config, comparison_period)
+            column_config = self._add_multi_period_delta_column_config(
+                column_config, comparison_data
+            )
 
         # Select and rename columns
         columns = list(column_config.keys())
@@ -374,6 +375,104 @@ class BaseTableGenerator(ABC):
                     item["avg_shaves_per_user"] = 0.0
 
         return data
+
+    def _calculate_multi_period_deltas(
+        self,
+        current_data: List[Dict[str, Any]],
+        comparison_data: Dict[str, Any],
+    ) -> List[Dict[str, Any]]:
+        """Calculate deltas for the current data across multiple periods.
+
+        Args:
+            current_data: Current period data with positions
+            comparison_data: Historical data for comparison
+                           (dict mapping period to (metadata, data))
+
+        Returns:
+            Current data with delta information added for each period
+        """
+        if not comparison_data:
+            if self.debug:
+                print("[DEBUG] No comparison data provided for delta calculation")
+            return current_data
+
+        # Start with the current data
+        result = current_data.copy()
+
+        # Calculate deltas for each period and add to the result
+        for period, (metadata, historical_data) in comparison_data.items():
+            # Get the historical data for this category
+            category_name = self.get_category_name()
+            historical_category_data = historical_data.get(category_name, [])
+
+            if not historical_category_data:
+                if self.debug:
+                    print(f"[DEBUG] No historical data found for category: {category_name}")
+                continue
+
+            # Add positions to historical data if not present
+            if not any("position" in item for item in historical_category_data):
+                historical_category_data = self._add_positions(historical_category_data)
+
+            # Calculate deltas for this period
+            try:
+                name_key = self.get_name_key()
+                period_deltas = self.delta_calculator.calculate_deltas(
+                    result, historical_category_data, name_key=name_key, max_items=len(result)
+                )
+
+                # Update the result with delta information for this period
+                for i, item in enumerate(result):
+                    if i < len(period_deltas):
+                        period_item = period_deltas[i]
+                        # Add delta information for this period
+                        period_key = period.lower().replace(" ", "_").replace("-", "_")
+                        delta_key = f"delta_{period_key}"
+                        result[i][delta_key] = period_item.get("delta_text", "n/a")
+
+                if self.debug:
+                    print(f"[DEBUG] Added deltas for period {period}")
+
+            except Exception as e:
+                if self.debug:
+                    print(f"[DEBUG] Error calculating deltas for period {period}: {e}")
+                # Add n/a for this period if calculation fails
+                for item in result:
+                    period_key = period.lower().replace(" ", "_").replace("-", "_")
+                    delta_key = f"delta_{period_key}"
+                    item[delta_key] = "n/a"
+
+        if self.debug:
+            print(f"[DEBUG] Calculated multi-period deltas for {len(result)} items")
+
+        return result
+
+    def _add_multi_period_delta_column_config(
+        self, column_config: Dict[str, Dict[str, Any]], comparison_data: Dict[str, Any]
+    ) -> Dict[str, Dict[str, Any]]:
+        """Add delta column configuration for multiple periods to the existing config.
+
+        Args:
+            column_config: Existing column configuration
+            comparison_data: Historical data for comparison
+                           (dict mapping period to (metadata, data))
+
+        Returns:
+            Updated column configuration with delta columns for multiple periods
+        """
+        # Create a copy to avoid modifying the original
+        updated_config = column_config.copy()
+
+        # Add delta column configuration for each period
+        for period, (metadata, _) in comparison_data.items():
+            # Create a safe column key
+            period_key = period.lower().replace(" ", "_").replace("-", "_")
+            updated_config[f"delta_{period_key}"] = {
+                "display_name": f"Δ vs {period}",
+                "format": "delta",
+            }
+
+        return updated_config
 
 
 class SimpleTableGenerator(BaseTableGenerator):

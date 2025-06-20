@@ -144,4 +144,4 @@ class TestReportIntegration:
         )
 
         # Should include delta column
-        assert "vs Previous Month" in report_content
+        assert "Δ vs previous month" in report_content

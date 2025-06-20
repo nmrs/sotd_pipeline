@@ -40,19 +40,19 @@ class TestDeltaCalculator:
         assert result[0]["name"] == "Razor A"
         assert result[0]["delta"] == 1
         assert result[0]["delta_symbol"] == "↑"
-        assert result[0]["delta_text"] == "+1"
+        assert result[0]["delta_text"] == "↑"
 
         # Razor B: moved from position 1 to 2 (worsened by 1)
         assert result[1]["name"] == "Razor B"
         assert result[1]["delta"] == -1
         assert result[1]["delta_symbol"] == "↓"
-        assert result[1]["delta_text"] == "-1"
+        assert result[1]["delta_text"] == "↓"
 
         # Razor C: stayed at position 3 (no change)
         assert result[2]["name"] == "Razor C"
         assert result[2]["delta"] == 0
-        assert result[2]["delta_symbol"] == "↔"
-        assert result[2]["delta_text"] == "0"
+        assert result[2]["delta_symbol"] == "="
+        assert result[2]["delta_text"] == "="
 
     def test_calculate_deltas_new_item(self):
         """Test delta calculation with new items not in historical data."""
@@ -75,7 +75,7 @@ class TestDeltaCalculator:
         # New Razor: not in historical data
         assert result[2]["name"] == "New Razor"
         assert result[2]["delta"] is None
-        assert result[2]["delta_symbol"] == "↔"
+        assert result[2]["delta_symbol"] == "n/a"
         assert result[2]["delta_text"] == "n/a"
 
     def test_calculate_deltas_missing_position(self):
@@ -167,8 +167,8 @@ class TestDeltaCalculator:
 
         assert calculator._get_delta_symbol(1) == "↑"  # Improved
         assert calculator._get_delta_symbol(-1) == "↓"  # Worsened
-        assert calculator._get_delta_symbol(0) == "↔"  # No change
-        assert calculator._get_delta_symbol(None) == "↔"  # New item
+        assert calculator._get_delta_symbol(0) == "="  # No change
+        assert calculator._get_delta_symbol(None) == "n/a"  # New item
 
     def test_calculate_category_deltas(self):
         """Test delta calculation for multiple categories."""
@@ -243,41 +243,41 @@ class TestDeltaCalculator:
     def test_format_delta_column(self):
         """Test delta column formatting."""
         items = [
-            {"name": "Item A", "delta_text": "+2", "delta_symbol": "↑"},
-            {"name": "Item B", "delta_text": "-1", "delta_symbol": "↓"},
-            {"name": "Item C", "delta_text": "0", "delta_symbol": "↔"},
-            {"name": "Item D", "delta_text": "n/a", "delta_symbol": "↔"},
+            {"name": "Item A", "delta_text": "↑", "delta_symbol": "↑"},
+            {"name": "Item B", "delta_text": "↓", "delta_symbol": "↓"},
+            {"name": "Item C", "delta_text": "=", "delta_symbol": "="},
+            {"name": "Item D", "delta_text": "n/a", "delta_symbol": "n/a"},
         ]
 
         calculator = DeltaCalculator()
         formatted = calculator.format_delta_column(items)
 
-        assert formatted == ["+2 ↑", "-1 ↓", "0 ↔", "n/a"]
+        assert formatted == ["↑", "↓", "=", "n/a"]
 
     def test_format_delta_column_missing_keys(self):
         """Test delta column formatting with missing keys."""
         items = [
-            {"name": "Item A", "delta_text": "+2"},  # Missing delta_symbol
+            {"name": "Item A", "delta_text": "↑"},  # Missing delta_symbol
             {"name": "Item B"},  # Missing both
         ]
 
         calculator = DeltaCalculator()
         formatted = calculator.format_delta_column(items)
 
-        assert formatted == ["+2 ↔", "n/a"]
+        assert formatted == ["↑", "n/a"]
 
     def test_format_delta_column_invalid_items(self):
         """Test delta column formatting with invalid items."""
         items = [
-            {"name": "Item A", "delta_text": "+2", "delta_symbol": "↑"},
+            {"name": "Item A", "delta_text": "↑", "delta_symbol": "↑"},
             "not a dict",  # Invalid item
-            {"name": "Item B", "delta_text": "-1", "delta_symbol": "↓"},
+            {"name": "Item B", "delta_text": "↓", "delta_symbol": "↓"},
         ]
 
         calculator = DeltaCalculator()
         formatted = calculator.format_delta_column(items)
 
-        assert formatted == ["+2 ↑", "n/a", "-1 ↓"]
+        assert formatted == ["↑", "n/a", "↓"]
 
 
 class TestCalculateDeltasForPeriod:

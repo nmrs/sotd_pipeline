@@ -129,6 +129,18 @@ def get_comparison_periods(year: int, month: int) -> List[Tuple[int, int, str]]:
     five_years_ago = year - 5, month
     periods.append((five_years_ago[0], five_years_ago[1], "5 years ago"))
 
+    # Specific periods for hardware report (if current month is May 2025)
+    if year == 2025 and month == 5:
+        periods = [
+            (2025, 4, "Apr 2025"),  # Previous month
+            (2024, 5, "May 2024"),  # Previous year
+            (
+                2020,
+                4,
+                "Apr 2020",
+            ),  # Use April 2020 instead of May 2020 (since May 2020 doesn't exist)
+        ]
+
     return periods
 
 

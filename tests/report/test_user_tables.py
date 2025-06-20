@@ -78,10 +78,15 @@ class TestTopShaversTableGenerator:
             ]
         }
         previous_data = {
-            "users": [
-                {"user": "user1", "shaves": 9, "missed_days": 2, "position": 2},
-                {"user": "user2", "shaves": 10, "missed_days": 1, "position": 1},
-            ]
+            "previous month": (
+                {"month": "2024-12"},  # metadata
+                {  # data
+                    "users": [
+                        {"user": "user1", "shaves": 9, "missed_days": 2, "position": 2},
+                        {"user": "user2", "shaves": 10, "missed_days": 1, "position": 1},
+                    ],
+                },
+            )
         }
         generator = TopShaversTableGenerator(current_data, debug=False)
         # Simulate delta calculation via base class (handled in generate_table)
@@ -90,5 +95,5 @@ class TestTopShaversTableGenerator:
             include_delta=True,
             comparison_data=previous_data,
         )
-        assert "vs Previous Month" in table_md
-        assert "+1" in table_md or "-1" in table_md or "0" in table_md
+        assert "Δ vs previous month" in table_md
+        assert "↑" in table_md or "↓" in table_md or "=" in table_md

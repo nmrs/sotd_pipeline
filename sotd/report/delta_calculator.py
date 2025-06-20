@@ -85,10 +85,10 @@ class DeltaCalculator:
             if historical_position is not None:
                 delta = historical_position - current_position
                 delta_symbol = self._get_delta_symbol(delta)
-                delta_text = f"{delta:+d}" if delta != 0 else "0"
+                delta_text = delta_symbol  # Use symbol only, not +/- format
             else:
                 delta = None
-                delta_symbol = "↔"
+                delta_symbol = "n/a"
                 delta_text = "n/a"
 
             # Create result item with delta information
@@ -117,13 +117,13 @@ class DeltaCalculator:
             Unicode arrow symbol
         """
         if delta is None:
-            return "↔"  # No change or new item
+            return "n/a"  # Not available (new item)
         elif delta > 0:
             return "↑"  # Moved up (better position)
         elif delta < 0:
             return "↓"  # Moved down (worse position)
         else:
-            return "↔"  # No change
+            return "="  # No change
 
     def calculate_category_deltas(
         self,
@@ -201,12 +201,13 @@ class DeltaCalculator:
                 continue
 
             delta_text = item.get(delta_key, "n/a")
-            delta_symbol = item.get("delta_symbol", "↔")
 
-            if delta_text == "n/a":
-                formatted_deltas.append("n/a")
+            # For symbol-only format, just return the symbol
+            if delta_text in ["↑", "↓", "=", "n/a"]:
+                formatted_deltas.append(delta_text)
             else:
-                formatted_deltas.append(f"{delta_text} {delta_symbol}")
+                # Fallback for any legacy format
+                formatted_deltas.append("n/a")
 
         return formatted_deltas
 
