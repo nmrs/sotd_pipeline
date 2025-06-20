@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional, Sequence
 
 from sotd.cli_utils.date_span import month_span
+from sotd.utils.performance import PerformanceMonitor
 
 from .comment import run_extraction_for_month
 from .save import save_month_file
@@ -17,7 +18,12 @@ def _process_month(
     year: int, month: int, base_path: Path, debug: bool, force: bool
 ) -> Optional[dict]:
     ym = f"{year:04d}-{month:02d}"
+    monitor = PerformanceMonitor("extract")
+    monitor.start_total_timing()
+
+    monitor.start_file_io_timing()
     all_comments = run_extraction_for_month(ym, base_path=str(base_path))
+    monitor.end_file_io_timing()
     if all_comments is None:
         if debug:
             logging.warning("Skipped missing input file: %s/comments/%s.json", base_path, ym)
@@ -48,11 +54,18 @@ def _process_month(
         "skipped": skipped,
     }
     out_path = base_path / "extracted" / f"{year:04d}-{month:02d}.json"
+    monitor.set_record_count(len(extracted))
+    monitor.set_file_sizes(base_path / "comments" / f"{ym}.json", out_path)
     if debug:
         logging.debug("Saving extraction result to: %s", out_path)
     if force and out_path.exists():
         out_path.unlink()
+    monitor.start_file_io_timing()
     save_month_file(month=ym, result=result, out_dir=base_path / "extracted")
+    monitor.end_file_io_timing()
+    monitor.end_total_timing()
+    if debug:
+        monitor.print_summary()
     return result
 
 

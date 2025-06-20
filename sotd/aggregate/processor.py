@@ -67,9 +67,10 @@ def normalize_fields(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 product = normalized_record[product_type]
                 if isinstance(product, dict) and "matched" in product:
                     matched = product["matched"]
-                    for key, value in matched.items():
-                        if isinstance(value, str):
-                            matched[key] = value.strip()
+                    if matched is not None and isinstance(matched, dict):
+                        for key, value in matched.items():
+                            if isinstance(value, str):
+                                matched[key] = value.strip()
 
         normalized.append(normalized_record)
 

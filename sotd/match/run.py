@@ -1,6 +1,7 @@
 import argparse
 import json
 import subprocess
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 from tqdm import tqdm
@@ -10,6 +11,7 @@ from sotd.match.blade_matcher import BladeMatcher
 from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.razor_matcher import RazorMatcher
 from sotd.match.soap_matcher import SoapMatcher
+from sotd.utils.performance import PerformanceMonitor, TimingContext
 
 
 def is_razor_matched(record: dict) -> bool:
@@ -50,81 +52,239 @@ def match_record(
     blade_matcher: BladeMatcher,
     soap_matcher: SoapMatcher,
     brush_matcher: BrushMatcher,
+    monitor: PerformanceMonitor,
 ) -> dict:
     result = record.copy()
+
     if "razor" in result:
-        result["razor"] = razor_matcher.match(result["razor"])
+        with TimingContext(monitor, "razor"):
+            result["razor"] = razor_matcher.match(result["razor"])
     if "blade" in result:
-        result["blade"] = blade_matcher.match(result["blade"])
+        with TimingContext(monitor, "blade"):
+            result["blade"] = blade_matcher.match(result["blade"])
     if "soap" in result:
-        result["soap"] = soap_matcher.match(result["soap"])
+        with TimingContext(monitor, "soap"):
+            result["soap"] = soap_matcher.match(result["soap"])
     if "brush" in result:
-        result["brush"] = brush_matcher.match(result["brush"])
+        with TimingContext(monitor, "brush"):
+            result["brush"] = brush_matcher.match(result["brush"])
     return result
+
+
+def process_month(
+    month: str,
+    base_path: Path,
+    force: bool = False,
+    debug: bool = False,
+    max_workers: int = 1,
+) -> dict:
+    """Process a single month of data."""
+    try:
+        # Initialize performance monitor
+        monitor = PerformanceMonitor("match", max_workers)
+        monitor.start_total_timing()
+
+        # Load extracted data
+        extracted_path = base_path / "extracted" / f"{month}.json"
+        if not extracted_path.exists():
+            return {"status": "skipped", "reason": "missing input file"}
+
+        # Check if output already exists and force is not set
+        matched_path = base_path / "matched" / f"{month}.json"
+        if matched_path.exists() and not force:
+            return {"status": "skipped", "reason": "output exists"}
+
+        # Load data
+        monitor.start_file_io_timing()
+        with open(extracted_path) as f:
+            data = json.load(f)
+        monitor.end_file_io_timing()
+
+        # Set file sizes
+        monitor.set_file_sizes(extracted_path, matched_path)
+
+        # Initialize matchers
+        monitor.start_processing_timing()
+        blade_matcher = BladeMatcher()
+        brush_matcher = BrushMatcher()
+        razor_matcher = RazorMatcher()
+        soap_matcher = SoapMatcher()
+
+        # Process records
+        records = data.get("records", [])
+        monitor.set_record_count(len(records))
+
+        for record in records:
+            # Match razor
+            with TimingContext(monitor, "razor_matching"):
+                if "razor" in record:
+                    record["razor"] = razor_matcher.match(record["razor"])
+
+            # Match blade
+            with TimingContext(monitor, "blade_matching"):
+                if "blade" in record:
+                    record["blade"] = blade_matcher.match(record["blade"])
+
+            # Match brush
+            with TimingContext(monitor, "brush_matching"):
+                if "brush" in record:
+                    record["brush"] = brush_matcher.match(record["brush"])
+
+            # Match soap
+            with TimingContext(monitor, "soap_matching"):
+                if "soap" in record:
+                    record["soap"] = soap_matcher.match(record["soap"])
+
+        monitor.end_processing_timing()
+
+        # Save results
+        monitor.start_file_io_timing()
+        matched_path.parent.mkdir(exist_ok=True)
+        with open(matched_path, "w") as f:
+            json.dump(
+                {
+                    "metadata": {
+                        "month": month,
+                        "record_count": len(records),
+                        "performance": monitor.get_summary(),
+                    },
+                    "records": records,
+                },
+                f,
+                indent=2,
+            )
+        monitor.end_file_io_timing()
+
+        # End timing and get performance summary
+        monitor.end_total_timing()
+        performance = monitor.get_summary()
+
+        if debug:
+            monitor.print_summary()
+
+        return {
+            "status": "completed",
+            "month": month,
+            "records_processed": len(records),
+            "performance": performance,
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "month": month,
+            "error": str(e),
+        }
 
 
 def run_match(args):
     base_path = Path(args.out_dir)
-    razor_matcher = RazorMatcher()
-    blade_matcher = BladeMatcher()
-    soap_matcher = SoapMatcher()
-    brush_matcher = BrushMatcher()
+    months = list(month_span(args))
 
-    for year, month in tqdm(month_span(args), desc="Months", unit="month"):
-        in_path = base_path / "extracted" / f"{year:04d}-{month:02d}.json"
-        out_path = base_path / "matched" / f"{year:04d}-{month:02d}.json"
+    # Determine if we should use parallel processing
+    if args.sequential:
+        use_parallel = False
+    elif args.parallel:
+        use_parallel = True
+    else:
+        use_parallel = len(months) > 1 and not args.debug
 
-        if not in_path.exists():
-            if args.debug:
-                print(f"Skipping missing input: {in_path}")
-            continue
+    if use_parallel:
+        print(f"Processing {len(months)} months in parallel...")
 
-        with in_path.open("r", encoding="utf-8") as f:
-            data = json.load(f).get("data", [])
-            if not isinstance(data, list):
-                raise ValueError(
-                    f"Unexpected JSON format in {in_path}. Expected a list of records under 'data'."
-                )
+        # Use ProcessPoolExecutor for month-level parallelization
+        max_workers = min(len(months), args.max_workers)
 
-        processed = [
-            match_record(record, razor_matcher, blade_matcher, soap_matcher, brush_matcher)
-            for record in tqdm(data, desc=f"{year}-{month:02d}", unit="record")
-        ]
-
-        razor_matches = sum(1 for r in processed if is_razor_matched(r))
-        blade_matches = sum(1 for r in processed if is_blade_matched(r))
-        soap_matches = sum(1 for r in processed if is_soap_matched(r))
-        brush_matches = sum(1 for r in processed if is_brush_matched(r))
-        no_matches = sum(
-            1
-            for r in processed
-            if not (
-                is_razor_matched(r)
-                or is_blade_matched(r)
-                or is_soap_matched(r)
-                or is_brush_matched(r)
-            )
-        )
-
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        if args.force and out_path.exists():
-            out_path.unlink()
-        with out_path.open("w", encoding="utf-8") as f:
-            output = {
-                "data": processed,
-                "meta": {
-                    "month": f"{year:04d}-{month:02d}",
-                    "records_input": len(data),
-                    "record_count": len(processed),
-                    "razor_matches": razor_matches,
-                    "blade_matches": blade_matches,
-                    "soap_matches": soap_matches,
-                    "brush_matches": brush_matches,
-                    "no_matches": no_matches,
-                    "fields": ["razor", "blade", "soap", "brush"],
-                },
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all month processing tasks
+            future_to_month = {
+                executor.submit(
+                    process_month,
+                    f"{year:04d}-{month:02d}",
+                    base_path,
+                    args.force,
+                    args.debug,
+                    max_workers,
+                ): f"{year:04d}-{month:02d}"
+                for year, month in months
             }
-            json.dump(output, f, ensure_ascii=False, indent=2)
+
+            # Process results as they complete
+            results = []
+            for future in tqdm(
+                as_completed(future_to_month), total=len(future_to_month), desc="Processing"
+            ):
+                month = future_to_month[future]
+                try:
+                    result = future.result()
+                    results.append(result)
+                except Exception as e:
+                    results.append({"status": "error", "month": month, "error": str(e)})
+
+        # Print summary of parallel processing
+        completed = [r for r in results if r["status"] == "completed"]
+        skipped = [r for r in results if r["status"] == "skipped"]
+        errors = [r for r in results if r["status"] == "error"]
+
+        print("\nParallel processing summary:")
+        print(f"  Completed: {len(completed)} months")
+        print(f"  Skipped: {len(skipped)} months")
+        print(f"  Errors: {len(errors)} months")
+
+        if completed:
+            total_records = sum(r.get("records_processed", 0) for r in completed)
+            total_time = sum(
+                r.get("performance", {}).get("total_processing_time_seconds", 0) for r in completed
+            )
+            avg_records_per_sec = total_records / total_time if total_time > 0 else 0
+
+            print("\nPerformance Summary:")
+            print(f"  Total Records: {total_records:,}")
+            print(f"  Total Processing Time: {total_time:.2f}s")
+            print(f"  Average Throughput: {avg_records_per_sec:.0f} records/sec")
+
+            # Print detailed performance for first completed month as example
+            if completed:
+                example = completed[0]
+                performance = example.get("performance", {})
+                print(f"\nExample month ({example['month']}) performance:")
+                print(f"  Records: {example.get('records_processed', 0):,}")
+                processing_time = performance.get("total_processing_time_seconds", 0)
+                print(f"  Processing Time: {processing_time:.2f}s")
+                records_per_sec = performance.get("records_per_second", 0)
+                print(f"  Throughput: {records_per_sec:.0f} records/sec")
+
+                # Print detailed performance summary by creating a new monitor
+                # with the performance data
+                monitor = PerformanceMonitor()
+                # Set the metrics manually since we can't directly set the summary
+                monitor.metrics.total_processing_time = performance.get(
+                    "total_processing_time_seconds", 0
+                )
+                monitor.metrics.file_io_time = performance.get("file_io_time_seconds", 0)
+                monitor.metrics.processing_time = performance.get("processing_time_seconds", 0)
+                monitor.metrics.record_count = performance.get("record_count", 0)
+                monitor.metrics.avg_time_per_record = performance.get(
+                    "avg_time_per_record_seconds", 0
+                )
+                monitor.metrics.records_per_second = performance.get("records_per_second", 0)
+
+                if args.debug:
+                    monitor.print_summary()
+
+    else:
+        # Sequential processing
+        print(f"Processing {len(months)} months sequentially...")
+
+        for year, month in tqdm(months, desc="Months", unit="month"):
+            result = process_month(f"{year:04d}-{month:02d}", base_path, args.force, args.debug, 1)
+
+            if result["status"] == "completed":
+                print(f"  {result['month']}: {result['records_processed']:,} records")
+            elif result["status"] == "skipped":
+                print(f"  {result['month']}: {result['reason']}")
+            else:
+                print(f"  {result['month']}: ERROR - {result['error']}")
 
 
 def run_analysis(args):
@@ -151,6 +311,11 @@ def main(argv=None):
     p.add_argument("--debug", action="store_true")
     p.add_argument("--force", action="store_true")
     p.add_argument("--mode", choices=["match", "analyze_unmatched_razors"], default="match")
+    p.add_argument("--parallel", action="store_true", help="Force parallel processing")
+    p.add_argument("--sequential", action="store_true", help="Force sequential processing")
+    p.add_argument(
+        "--max-workers", type=int, default=4, help="Maximum parallel workers (default: 4)"
+    )
 
     args = p.parse_args(argv)
 

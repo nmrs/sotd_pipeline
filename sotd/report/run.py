@@ -18,6 +18,8 @@ import datetime
 from pathlib import Path
 from typing import Sequence
 
+from sotd.utils.performance import PerformanceMonitor
+
 from . import load, process, save
 
 
@@ -79,6 +81,8 @@ CLI matrix
 
 def run_report(args: argparse.Namespace) -> None:
     """Main report generation logic."""
+    monitor = PerformanceMonitor("report")
+    monitor.start_total_timing()
     if args.debug:
         print("[DEBUG] Report phase started")
         print(f"[DEBUG] Month: {args.month}")
@@ -102,29 +106,34 @@ def run_report(args: argparse.Namespace) -> None:
     # Load aggregated data (always from data_root/aggregated)
     if args.debug:
         print(f"[DEBUG] Loading aggregated data for {args.month}")
-
     try:
+        monitor.start_file_io_timing()
         aggregated_file_path = load.get_aggregated_file_path(data_root, year, month)
         metadata, data = load.load_aggregated_data(aggregated_file_path, args.debug)
+        monitor.end_file_io_timing()
     except FileNotFoundError as e:
+        monitor.end_file_io_timing()
         raise FileNotFoundError(
             f"Aggregated data not found for {args.month}. "
             f"Run the aggregate phase first to generate the required data."
         ) from e
     except Exception as e:
+        monitor.end_file_io_timing()
         raise RuntimeError(f"Failed to load aggregated data: {e}") from e
 
     # Load historical data for delta calculations (always from data_root/aggregated)
     if args.debug:
         print("[DEBUG] Loading historical data for delta calculations")
-
     try:
+        monitor.start_file_io_timing()
         comparison_data = load.load_comparison_data(data_root, year, month, args.debug)
+        monitor.end_file_io_timing()
         if args.debug:
             print(f"[DEBUG] Loaded {len(comparison_data)} comparison periods")
             for period, (period_meta, _) in comparison_data.items():
                 print(f"[DEBUG] {period}: {period_meta['month']}")
     except Exception as e:
+        monitor.end_file_io_timing()
         if args.debug:
             print(f"[DEBUG] Warning: Failed to load historical data: {e}")
         comparison_data = {}
@@ -132,7 +141,6 @@ def run_report(args: argparse.Namespace) -> None:
     # Generate report content
     if args.debug:
         print(f"[DEBUG] Generating {args.type} report content")
-
     try:
         report_content = process.generate_report_content(
             args.type, metadata, data, comparison_data, args.debug
@@ -143,15 +151,22 @@ def run_report(args: argparse.Namespace) -> None:
     # Save report to file (output always goes to out_dir)
     if args.debug:
         print("[DEBUG] Saving report to file")
-
     try:
+        monitor.start_file_io_timing()
         output_path = save.generate_and_save_report(
             report_content, out_dir, year, month, args.type, args.force, args.debug
         )
+        monitor.end_file_io_timing()
     except FileExistsError as e:
+        monitor.end_file_io_timing()
         raise FileExistsError(f"Report file already exists. Use --force to overwrite: {e}") from e
     except Exception as e:
+        monitor.end_file_io_timing()
         raise RuntimeError(f"Failed to save report: {e}") from e
+
+    monitor.end_total_timing()
+    if args.debug:
+        monitor.print_summary()
 
     # Success message
     print(f"[INFO] Successfully generated {args.type} report for {args.month}")

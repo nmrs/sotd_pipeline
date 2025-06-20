@@ -8,6 +8,7 @@ from tqdm import tqdm
 from sotd.cli_utils.date_span import month_span
 from sotd.enrich.enrich import enrich_comments, setup_enrichers
 from sotd.enrich.save import calculate_enrichment_stats, load_matched_data, save_enriched_data
+from sotd.utils.performance import PerformanceMonitor
 
 
 def _process_month(
@@ -15,6 +16,8 @@ def _process_month(
 ) -> Optional[dict]:
     """Process enrichment for a single month."""
     ym = f"{year:04d}-{month:02d}"
+    monitor = PerformanceMonitor("enrich")
+    monitor.start_total_timing()
     in_path = base_path / "matched" / f"{year:04d}-{month:02d}.json"
     out_path = base_path / "enriched" / f"{year:04d}-{month:02d}.json"
 
@@ -23,13 +26,15 @@ def _process_month(
             print(f"Skipping missing input file: {in_path}")
         return None
 
-    # Load matched data with fail-fast error handling
+    monitor.start_file_io_timing()
     try:
         original_metadata, comments = load_matched_data(in_path)
     except (FileNotFoundError, ValueError, json.JSONDecodeError, OSError) as e:
+        monitor.end_file_io_timing()
         if debug:
             print(f"Failed to load matched data from {in_path}: {e}")
         return None
+    monitor.end_file_io_timing()
 
     # Extract original comment texts for enrichment - optimized version
     original_comments = []
@@ -51,12 +56,18 @@ def _process_month(
     # Calculate enrichment statistics
     enrichment_stats = calculate_enrichment_stats(enriched_comments)
 
-    # Save enriched data
+    monitor.set_record_count(len(enriched_comments))
+    monitor.set_file_sizes(in_path, out_path)
+
+    monitor.start_file_io_timing()
     save_enriched_data(
         out_path, enriched_comments, original_metadata, enrichment_stats, force=force
     )
+    monitor.end_file_io_timing()
+    monitor.end_total_timing()
 
     if debug:
+        monitor.print_summary()
         print(f"Enriched {len(enriched_comments)} records for {ym}")
         print(f"  Blade enriched: {enrichment_stats['blade_enriched']}")
         print(f"  Razor enriched: {enrichment_stats['razor_enriched']}")
@@ -67,6 +78,7 @@ def _process_month(
         "month": ym,
         "records_processed": len(enriched_comments),
         **enrichment_stats,
+        "performance": monitor.get_summary(),
     }
 
 
