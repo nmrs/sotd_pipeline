@@ -42,106 +42,147 @@ hardware:
   # Variables: {{total_shaves}}, {{unique_shavers}}, {{avg_shaves_per_user}}
   # Tables: All hardware table placeholders listed above
   report_template: |
+    Welcome to your SOTD Hardware Report for {{month_year}}
+
+    ## Observations
+
+    * [Observations will be generated based on data analysis]
+
     ## Notes & Caveats
 
-    ### Data Collection
-    - This data is collected from the r/wetshaving community's Shave of the Day (SOTD) posts
-    - **{{total_shaves}} shaves** from **{{unique_shavers}} unique users** were analyzed this month
-    - Users averaged **{{avg_shaves_per_user}} shaves** each during the reporting period
-    - Only posts that include product information are included in the analysis
-    - Users may post multiple SOTDs per day, which are all counted
-    - The data represents community participation, not necessarily market share or sales figures
+    * {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report.
 
-    ### Product Matching
-    - Product matching is performed automatically and may contain errors
-    - Product names are normalized for consistency across reports
-    - Some products may be grouped under generic categories (e.g., "Other Straight Razor")
+    * I only show the top n results per category to keep the tables readable and avoid max post length issues.
 
-    ### Brush Data
-    - Brush handle makers and knot makers are attributed based on user input
-    - Fiber types are normalized to title case to prevent duplicates
-    - Knot sizes are filtered to reasonable ranges (15-50mm) to exclude invalid data
-    - Mixed fiber brushes are categorized separately from single-fiber types
+    * Blade Format stats now differentiate between DE and half DE razors.
 
-    ### Razor Data
-    - Razor formats are categorized based on blade type (DE, GEM, Injector, etc.)
-    - Straight razors include specifications for grind, width, and point types
-    - Plate-specific data is tracked for razors with interchangeable plates
+    * "Other" in the Blade Format table includes vintage reusable blades (including Rolls, Valet Auto Strop, and old-style lather catchers with wedge blades) as well as other antique proprietary blade formats (e.g. Enders Speed Blade)
 
-    ### Blade Data
-    - Blade formats are differentiated (DE, GEM, Injector, AC, etc.)
-    - Use counts represent individual blade usage, not package counts
+    * Blades recorded as just 'GEM' will be matched to 'Personna GEM PTFE' per guidance [here](https://www.reddit.com/r/Wetshaving/comments/19a43q7/comment/kil95r8/)
 
-    ### Delta Calculations
-    - Position-based deltas show movement in rankings between periods
-    - ↑ indicates improved position, ↓ indicates declined position, = indicates no change
-    - "n/a" indicates the item was not present in the comparison period
-    - Delta calculations are based on position rankings, not absolute values
+    * The Personna name is [going away](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.badgerandblade.com/forum/threads/what-do-you-know-about-this-personna-no-longer-exists.647703/&ved=2ahUKEwiyi4n7pPKFAxXeLtAFHfNVDz8QFnoECAQQAQ&usg=AOvVaw38QYgjzknuIIIV94b6VDP5) for blades manufactured in the USA, but the majority of entries are still coming in under Personna, so I am sticking to that for this report. Once more than 50% of the entries come in under the new names, I will reverse this and map any old Personna entries to the new name.
 
-    ### User Statistics
-    - "avg shaves per user" represents the average number of shaves per unique user for each product
-    - Cross-product tables show combinations and highest individual usage patterns
-    - User data is anonymized and aggregated for privacy
+        * Personna GEM PTFE is now Accutec Pro Premium (GEM)
+      
+        * Personna Lab Blue is now Accuforge Super Stainless MicroCoat
+      
+        * Personna Med Prep is now Accuthrive Super Med Prep
 
-    ### Data Quality
-    - Invalid or missing data is filtered out during processing
-    - Debug logging is available to identify data quality issues
-    - Historical comparisons require data from previous periods to be available
+        * The German-made Personna Platinums (aka "Personna Reds") will continue to use the Personna brand
 
-    ## Tables
+    * In the case of most brush makers (eg Maggard) - knots are split into synthetic / badger / boar and attributed to the maker - eg 'Maggard Synthetic', though for particularly popular brush models (e.g. specific models from Semogue and Omega) or knots (e.g. DG, Chisel & Hound, or AP Shave Co.) they are reported on indvidually.
 
-    ### Razor Statistics
+    * The unique user column shows the number of different users who used a given razor / brush etc in the month. We can combine this with the total number of shaves to get the average number of times a user used a razor / brush etc
+
+    * The change Δ vs columns show how an item has moved up or down the rankings since that month. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to that month. n/a means the item was not present in that month.
+
+    ## Razor Formats
+
     {{tables.razor-formats}}
+
+    ## Razors
+
     {{tables.razors}}
+
+    ## Razor Manufacturers
+
     {{tables.razor-manufacturers}}
 
-    ### Blade Statistics
-    {{tables.blades}}
-    {{tables.blade-manufacturers}}
+    ## Blades
 
-    ### Brush Statistics
+    {{tables.blades}}
+
+    ## Brushes
+
     {{tables.brushes}}
+
+    ## Brush Handle Makers
+
     {{tables.brush-handle-makers}}
+
+    ## Brush Knot Makers
+
     {{tables.brush-knot-makers}}
+
+    ## Knot Fibers
+
     {{tables.knot-fibers}}
+
+    ## Knot Sizes
+
     {{tables.knot-sizes}}
 
-    ### Specialized Analysis
+    ## Blackbird Plates
+
     {{tables.blackbird-plates}}
+
+    ## Christopher Bradley Plates
+
     {{tables.christopher-bradley-plates}}
+
+    ## Game Changer Plates
+
     {{tables.game-changer-plates}}
-    {{tables.super-speed-tips}}
+
+    ## Straight Widths
+
     {{tables.straight-widths}}
+
+    ## Straight Grinds
+
     {{tables.straight-grinds}}
+
+    ## Straight Points
+
     {{tables.straight-points}}
 
-    ### Cross-Product Analysis
+    ## Most Used Blades in Most Used Razors
+
     {{tables.razor-blade-combinations}}
+
+    ## Highest Use Count per Blade
+
     {{tables.highest-use-count-per-blade}}
 
-    ### User Statistics
+    ## Top Shavers
+
     {{tables.top-shavers}}
 
 software:
   # Software report template - customize the entire report structure
-  # Variables: (none currently - static content only)
+  # Variables: {{total_shaves}}, {{unique_shavers}}, {{unique_soaps}}, {{unique_brands}}
   # Tables: All software table placeholders listed above
   report_template: |
+    Welcome to your SOTD Lather Log for {{month_year}}
+
+    * {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report. Collectively, these shavers used {{unique_soaps}} distinct soaps from {{unique_brands}} distinct brands.
+
+    ## Observations
+
+    * [Observations will be generated based on data analysis]
+
     ## Notes & Caveats
 
-    - This data is collected from the r/wetshaving community's Shave of the Day (SOTD) posts
-    - Only posts that include product information are included in the analysis
-    - Product matching is performed automatically and may contain errors
-    - Users may post multiple SOTDs per day, which are all counted
-    - The data represents community participation, not necessarily market share or sales figures
-    - Software refers to shaving soaps, creams, and other lathering products
+    * I only show the top n results per category to keep the tables readable and avoid max post length issues.
 
-    ## Tables
+    * The unique user column shows the number of different users who used a given brand/soap/etc in the month.
 
-    ### Soap Statistics
+    * The Brand Diversity table details the number of distinct soaps used during the month from that particular brand.
+
+    * The change Δ vs columns show how an item has moved up or down the rankings since that month. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to that month. n/a means the item was not present in that month.
+
+    ## Soap Makers
+
     {{tables.soap-makers}}
+
+    ## Soaps
+
     {{tables.soaps}}
+
+    ## Brand Diversity
+
     {{tables.brand-diversity}}
 
-    ### User Statistics
+    ## Top Shavers
+
     {{tables.top-shavers}} 

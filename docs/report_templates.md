@@ -12,35 +12,49 @@ The template file follows this simple structure:
 
 ```yaml
 hardware:
-  template: |
+  report_template: |
+    Welcome to your SOTD Hardware Report for {{month_year}}
+
+    ## Observations
+
+    * [Observations will be generated based on data analysis]
+
     ## Notes & Caveats
-    
-    ### Data Collection
-    - **{{total_shaves}} shaves** from **{{unique_shavers}} unique users**
-    - Users averaged **{{avg_shaves_per_user}} shaves** each
-    
-    ## Tables
-    
-    ### Razor Statistics
+
+    * {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report.
+
+    ## Razor Formats
+
     {{tables.razor-formats}}
+
+    ## Razors
+
     {{tables.razors}}
-    {{tables.razor-manufacturers}}
 
 software:
-  template: |
+  report_template: |
+    Welcome to your SOTD Lather Log for {{month_year}}
+
+    * {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report. Collectively, these shavers used {{unique_soaps}} distinct soaps from {{unique_brands}} distinct brands.
+
+    ## Observations
+
+    * [Observations will be generated based on data analysis]
+
     ## Notes & Caveats
-    
-    - This data is collected from the r/wetshaving community
-    
-    ## Tables
-    
-    ### Soap Statistics
+
+    * I only show the top n results per category to keep the tables readable and avoid max post length issues.
+
+    ## Soap Makers
+
     {{tables.soap-makers}}
+
+    ## Soaps
+
     {{tables.soaps}}
-    {{tables.brand-diversity}}
 ```
 
-**Note**: Each report type has a single `template` section containing the complete report structure. This simplified approach makes templates easier to edit and maintain.
+**Note**: Each report type has a single `report_template` section containing the complete report structure. This simplified approach makes templates easier to edit and maintain.
 
 ## Available Template Variables
 
@@ -50,17 +64,22 @@ The following variables are available for the hardware report template:
 
 | Variable | Description | Example Output |
 |----------|-------------|----------------|
+| `{{month_year}}` | Month and year in display format | `January 2025` |
 | `{{total_shaves}}` | Total number of shaves (formatted with commas) | `1,234` |
 | `{{unique_shavers}}` | Number of unique users | `567` |
 | `{{avg_shaves_per_user}}` | Average shaves per user (formatted to 1 decimal place) | `2.2` |
 
 ### Software Report Variables
 
-Currently, the software report template doesn't use any variables, but the system is extensible for future needs.
+The following variables are available for the software report template:
 
 | Variable | Description | Example Output |
 |----------|-------------|----------------|
-| *(none currently)* | *(none currently)* | *(none currently)* |
+| `{{month_year}}` | Month and year in display format | `January 2025` |
+| `{{total_shaves}}` | Total number of shaves (formatted with commas) | `1,234` |
+| `{{unique_shavers}}` | Number of unique users | `567` |
+| `{{unique_soaps}}` | Number of unique soaps used | `585` |
+| `{{unique_brands}}` | Number of unique soap brands/makers | `136` |
 
 ## Available Table Placeholders
 
@@ -70,9 +89,9 @@ The following table placeholders are available for the hardware report template:
 
 | Placeholder | Description | Content |
 |-------------|-------------|---------|
+| `{{tables.razor-formats}}` | Razor format statistics | DE, GEM, Injector, etc. |
 | `{{tables.razors}}` | Razor usage statistics | Top razors by usage |
 | `{{tables.razor-manufacturers}}` | Razor manufacturer statistics | Top manufacturers |
-| `{{tables.razor-formats}}` | Razor format statistics | DE, GEM, Injector, etc. |
 | `{{tables.blades}}` | Blade usage statistics | Top blades by usage |
 | `{{tables.blade-manufacturers}}` | Blade manufacturer statistics | Top blade manufacturers |
 | `{{tables.brushes}}` | Brush usage statistics | Top brushes by usage |
@@ -120,7 +139,8 @@ Variables use double curly braces: `{{variable_name}}`
 Example:
 ```yaml
 hardware:
-  template: |
+  report_template: |
+    Welcome to your SOTD Hardware Report for {{month_year}}
     - **{{total_shaves}} shaves** were analyzed this month
 ```
 
@@ -131,7 +151,7 @@ Table placeholders use the format: `{{tables.table-name}}`
 Example:
 ```yaml
 hardware:
-  template: |
+  report_template: |
     ## Razor Statistics
     {{tables.razors}}
     {{tables.razor-manufacturers}}
@@ -142,7 +162,7 @@ hardware:
 Use the `|` character for multi-line content:
 ```yaml
 hardware:
-  template: |
+  report_template: |
     ## Notes & Caveats
     
     This is a multi-line
@@ -159,7 +179,7 @@ hardware:
 ### Minimal Template
 ```yaml
 hardware:
-  template: |
+  report_template: |
     ## Hardware Report
     
     {{tables.razors}}
@@ -170,7 +190,7 @@ hardware:
 ### Detailed Template with Custom Headers
 ```yaml
 hardware:
-  template: |
+  report_template: |
     ## Notes & Caveats
     
     This report covers hardware usage for {{total_shaves}} shaves from {{unique_shavers}} users.
@@ -198,31 +218,6 @@ hardware:
     
     ### Knot Makers
     {{tables.brush-knot-makers}}
-    
-    ## User Statistics
-    
-    ### Top Contributors
-    {{tables.top-shavers}}
-```
-
-### Reordered Tables
-```yaml
-hardware:
-  template: |
-    ## Hardware Report
-    
-    ## User Statistics
-    {{tables.top-shavers}}
-    
-    ## Razor Statistics
-    {{tables.razors}}
-    {{tables.razor-manufacturers}}
-    
-    ## Blade Statistics
-    {{tables.blades}}
-    
-    ## Brush Statistics
-    {{tables.brushes}}
 ```
 
 ## Testing Templates
@@ -265,10 +260,10 @@ To add new template sections:
 1. Add a new section to the YAML file:
 ```yaml
 hardware:
-  template: |
+  report_template: |
     # existing content
 new_report_type:
-  template: |
+  report_template: |
     # new template content
 ```
 
