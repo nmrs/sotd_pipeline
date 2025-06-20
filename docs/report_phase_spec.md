@@ -75,7 +75,7 @@ Covers soaps, aftershaves, and related products with the following sections:
 ### Special Tables
 - **Most Used Blades in Most Used Razors**: Combinations of top razors with their most used blades
 - **Highest Use Count per Blade**: Per-user blade usage with format and use count
-- **Top Shavers**: Include all users tied for the 20th position
+- **Top Shavers**: Users ranked by shaves (descending), then by missed_days (ascending). Include all users tied for the 20th position in both shaves and missed_days.
 
 ## Output Structure
 
@@ -101,6 +101,21 @@ Welcome to your SOTD Hardware Report for May 2025
 | RazoRock Game Changer                    |      125 |             15 |                  8.33 | =               | =               | ↑8              |
 | Gillette Super Speed                     |      123 |             21 |                  5.86 | ↑1              | ↑3              | ↑3              |
 ```
+
+### Top Shavers Table
+```markdown
+## Top Shavers
+
+| User | Shaves | Missed Days |
+|:-----|-------:|------------:|
+| Engineered_Shave | 35 | 0 |
+| snoo-ting | 34 | 0 |
+| partyman97_3 | 32 | 0 |
+| 35048467 | 31 | 0 |
+| AdWorried2804 | 31 | 0 |
+```
+
+**Sorting:** By shaves (descending), then by missed_days (ascending). Include all users tied at the 20th position in both fields.
 
 ## CLI Interface
 
