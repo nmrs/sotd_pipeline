@@ -51,7 +51,7 @@ class BrushesTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the brushes table."""
         return {
-            "name": {"display_name": "Brush"},
+            "name": {"display_name": "name"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -112,7 +112,7 @@ class BrushHandleMakersTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the brush handle makers table."""
         return {
-            "handle_maker": {"display_name": "Handle Maker"},
+            "handle_maker": {"display_name": "name"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -173,7 +173,7 @@ class BrushKnotMakersTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the brush knot makers table."""
         return {
-            "brand": {"display_name": "Knot Maker"},
+            "brand": {"display_name": "name"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {

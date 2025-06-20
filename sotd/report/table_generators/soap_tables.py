@@ -14,11 +14,11 @@ class SoapMakersTableGenerator(BaseTableGenerator):
 
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         return {
-            "maker": {"display_name": "Maker"},
-            "shaves": {"display_name": "Shaves", "format": "number"},
-            "unique_users": {"display_name": "Unique Users", "format": "number"},
+            "maker": {"display_name": "name"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "Avg Shaves/User",
+                "display_name": "avg shaves per user",
                 "format": "decimal",
                 "decimals": 2,
             },
@@ -36,11 +36,11 @@ class SoapsTableGenerator(BaseTableGenerator):
 
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         return {
-            "name": {"display_name": "Soap"},
-            "shaves": {"display_name": "Shaves", "format": "number"},
-            "unique_users": {"display_name": "Unique Users", "format": "number"},
+            "name": {"display_name": "name"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
-                "display_name": "Avg Shaves/User",
+                "display_name": "avg shaves per user",
                 "format": "decimal",
                 "decimals": 2,
             },
@@ -69,6 +69,6 @@ class BrandDiversityTableGenerator(BaseTableGenerator):
 
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         return {
-            "maker": {"display_name": "Maker"},
-            "unique_soaps": {"display_name": "Unique Soaps", "format": "number"},
+            "maker": {"display_name": "name"},
+            "unique_soaps": {"display_name": "unique soaps", "format": "number"},
         }

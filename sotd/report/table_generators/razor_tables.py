@@ -53,7 +53,7 @@ class RazorFormatsTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the razor formats table."""
         return {
-            "format": {"display_name": "Format"},
+            "format": {"display_name": "name"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -109,7 +109,7 @@ class RazorsTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the razors table."""
         return {
-            "name": {"display_name": "Razor"},
+            "name": {"display_name": "name"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -170,7 +170,7 @@ class RazorManufacturersTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the razor manufacturers table."""
         return {
-            "brand": {"display_name": "Brand"},
+            "brand": {"display_name": "name"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {

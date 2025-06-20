@@ -33,7 +33,8 @@ class TopShaversTableGenerator(BaseTableGenerator):
             results.append(
                 {
                     "position": user_record.get("position", 0),
-                    "user": user_record["user"],
+                    "user": user_record["user"],  # for delta logic
+                    "user_display": f"u/{user_record['user']}",  # for output
                     "shaves": user_record["shaves"],
                     "missed_days": user_record["missed_days"],
                 }
@@ -56,7 +57,7 @@ class TopShaversTableGenerator(BaseTableGenerator):
             Column configuration dictionary
         """
         return {
-            "user": {
+            "user_display": {
                 "display_name": "user",
                 "format": "text",
             },

@@ -57,7 +57,7 @@ class RazorBladeCombinationsTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the razor-blade combinations table."""
         return {
-            "name": {"display_name": "Razor + Blade"},
+            "name": {"display_name": "name"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -134,6 +134,8 @@ class HighestUseCountPerBladeTableGenerator(BaseTableGenerator):
             # Add a name field for delta calculations (combine user and blade)
             record_with_name = record.copy()
             record_with_name["name"] = f"{record['user']} - {record['blade']}"
+            # Add u/ prefix to username for Reddit formatting
+            record_with_name["user"] = f"u/{record['user']}"
 
             valid_data.append(record_with_name)
 
@@ -146,10 +148,10 @@ class HighestUseCountPerBladeTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the highest use count per blade table."""
         return {
-            "user": {"display_name": "User"},
-            "blade": {"display_name": "Blade"},
-            "format": {"display_name": "Format"},
-            "uses": {"display_name": "Uses", "format": "number"},
+            "user": {"display_name": "user"},
+            "blade": {"display_name": "blade"},
+            "format": {"display_name": "format"},
+            "uses": {"display_name": "uses", "format": "number"},
         }
 
     def generate_table(

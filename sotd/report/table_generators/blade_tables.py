@@ -51,7 +51,7 @@ class BladesTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the blades table."""
         return {
-            "name": {"display_name": "Blade"},
+            "name": {"display_name": "name"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -112,7 +112,7 @@ class BladeManufacturersTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the blade manufacturers table."""
         return {
-            "brand": {"display_name": "Brand"},
+            "brand": {"display_name": "name"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {

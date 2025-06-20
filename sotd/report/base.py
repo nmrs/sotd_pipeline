@@ -36,11 +36,6 @@ class BaseReportGenerator(ABC):
         pass
 
     @abstractmethod
-    def generate_observations(self) -> str:
-        """Generate the observations section."""
-        pass
-
-    @abstractmethod
     def generate_notes_and_caveats(self) -> str:
         """Generate the notes and caveats section."""
         pass
@@ -51,24 +46,14 @@ class BaseReportGenerator(ABC):
         pass
 
     def generate_report(self) -> str:
-        """Generate the complete report."""
+        """Generate the complete report.
+
+        Returns:
+            Complete report as a string
+        """
         if self.debug:
             print("[DEBUG] Generating complete report")
 
-        sections = []
-
-        # Header
-        header = self.generate_header()
-        sections.append(header)
-        sections.append("")  # Empty line
-
-        # Observations
-        observations = self.generate_observations()
-        sections.append(observations)
-        sections.append("")  # Empty line
-
-        # Notes and caveats (now includes tables via templating)
-        notes = self.generate_notes_and_caveats()
-        sections.append(notes)
-
-        return "\n".join(sections)
+        # With the new templating system, the template contains the complete report structure
+        # including the welcome message and all sections, so we just return the rendered template
+        return self.generate_notes_and_caveats()

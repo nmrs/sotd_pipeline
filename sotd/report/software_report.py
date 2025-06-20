@@ -32,36 +32,17 @@ class SoftwareReportGenerator(BaseReportGenerator):
         super().__init__(metadata, data, comparison_data, debug, template_path)
 
     def generate_header(self) -> str:
-        """Generate the report header."""
-        month = self.metadata.get("month", "Unknown")
-        total_shaves = self.metadata.get("total_shaves", 0)
-        unique_shavers = self.metadata.get("unique_shavers", 0)
+        """Generate the report header.
 
-        # Parse month for display
-        try:
-            from datetime import datetime
-
-            date_obj = datetime.strptime(month, "%Y-%m")
-            month_display = date_obj.strftime("%B %Y")
-        except (ValueError, TypeError):
-            month_display = month
-
-        return (
-            f"# Software Report - {month_display}\n\n"
-            f"**Total Shaves:** {total_shaves:,}\n"
-            f"**Unique Shavers:** {unique_shavers:,}\n\n"
-        )
-
-    def generate_observations(self) -> str:
-        """Generate the observations section."""
-        return (
-            "## Observations\n\n"
-            "*(This section will be populated with automated observations about trends "
-            "and patterns in the software data.)*\n\n"
-        )
+        Note: This method is deprecated in favor of the templating system.
+        The template now contains the complete report structure including headers.
+        """
+        # This method is kept for backward compatibility but is no longer used
+        # Headers are now generated through the template system
+        return ""
 
     def generate_notes_and_caveats(self) -> str:
-        """Generate the notes and caveats section using the new templating system."""
+        """Generate the complete report content using the templating system."""
         # Get specific data collection statistics
         total_shaves = self.metadata.get("total_shaves", 0)
         unique_shavers = self.metadata.get("unique_shavers", 0)
@@ -96,7 +77,7 @@ class SoftwareReportGenerator(BaseReportGenerator):
         else:
             processor = TemplateProcessor()
 
-        # Use the new template structure
+        # Use the new template structure - this now returns the complete report
         return processor.render_template("software", "report_template", variables, table_generator)
 
     def generate_tables(self) -> List[str]:

@@ -59,7 +59,7 @@ class BlackbirdPlatesTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         """Get the column configuration for the table."""
         return {
-            "plate": {"display_name": "Plate", "format": "text"},
+            "plate": {"display_name": "name", "format": "text"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -130,7 +130,7 @@ class ChristopherBradleyPlatesTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         """Get the column configuration for the table."""
         return {
-            "plate": {"display_name": "Plate", "format": "text"},
+            "plate": {"display_name": "name", "format": "text"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -194,7 +194,7 @@ class GameChangerPlatesTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         """Get the column configuration for the table."""
         return {
-            "plate": {"display_name": "Plate", "format": "text"},
+            "plate": {"display_name": "name", "format": "text"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -258,7 +258,7 @@ class SuperSpeedTipsTableGenerator(BaseTableGenerator):
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         """Get the column configuration for the table."""
         return {
-            "tip": {"display_name": "Tip", "format": "text"},
+            "tip": {"display_name": "name", "format": "text"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -309,7 +309,7 @@ class StraightWidthsTableGenerator(BaseTableGenerator):
 
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         return {
-            "name": {"display_name": "Width", "format": "text"},
+            "name": {"display_name": "name", "format": "text"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -360,7 +360,7 @@ class StraightGrindsTableGenerator(BaseTableGenerator):
 
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         return {
-            "name": {"display_name": "Grind", "format": "text"},
+            "name": {"display_name": "name", "format": "text"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -411,7 +411,7 @@ class StraightPointsTableGenerator(BaseTableGenerator):
 
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         return {
-            "name": {"display_name": "Point", "format": "text"},
+            "name": {"display_name": "name", "format": "text"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
