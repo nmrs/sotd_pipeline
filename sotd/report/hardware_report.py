@@ -66,9 +66,20 @@ class HardwareReportGenerator(BaseReportGenerator):
         total_shaves = self.metadata.get("total_shaves", 0)
         unique_shavers = self.metadata.get("unique_shavers", 0)
         avg_shaves_per_user = self.metadata.get("avg_shaves_per_user", 0)
+        month = self.metadata.get("month", "Unknown")
+
+        # Parse month for display
+        try:
+            from datetime import datetime
+
+            date_obj = datetime.strptime(month, "%Y-%m")
+            month_year = date_obj.strftime("%B %Y")
+        except (ValueError, TypeError):
+            month_year = month
 
         # Prepare variables for template
         variables = {
+            "month_year": month_year,
             "total_shaves": f"{total_shaves:,}",
             "unique_shavers": str(unique_shavers),
             "avg_shaves_per_user": f"{avg_shaves_per_user:.1f}",
@@ -83,8 +94,8 @@ class HardwareReportGenerator(BaseReportGenerator):
         else:
             processor = TemplateProcessor()
 
-        # Use the simplified template structure
-        return processor.render_template("hardware", "template", variables, table_generator)
+        # Use the new template structure
+        return processor.render_template("hardware", "report_template", variables, table_generator)
 
     def generate_tables(self) -> List[str]:
         """Generate all tables for the hardware report.
