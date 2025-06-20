@@ -1,0 +1,36 @@
+hardware:
+  template: |
+    ## Notes & Caveats
+
+    ### Data Collection
+    - **{{total_shaves}} shaves** from **{{unique_shavers}} unique users**
+    - Users averaged **{{avg_shaves_per_user}} shaves** each
+    - Custom template content for testing
+
+    ## Tables
+
+    ### Razor Statistics
+    {{tables.razors}}
+
+    ### Blade Statistics
+    {{tables.blades}}
+
+    ### Brush Statistics
+    {{tables.brushes}}
+
+    ### User Statistics
+    {{tables.top-shavers}}
+
+software:
+  template: |
+    ## Notes & Caveats
+    - Custom software template content
+    - This is a test template
+
+    ## Tables
+
+    ### Soap Statistics
+    {{tables.soaps}}
+
+    ### User Statistics
+    {{tables.top-shavers}} 
