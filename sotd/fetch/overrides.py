@@ -84,7 +84,7 @@ def apply_overrides(
         if tid in present_ids:
             continue
         try:
-            sub = safe_call(reddit.submission, submission_id=tid)
+            sub = safe_call(reddit.submission, tid)
             if sub is not None:
                 kept.append(sub)
                 present_ids.add(tid)

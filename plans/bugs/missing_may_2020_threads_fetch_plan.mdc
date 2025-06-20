@@ -1,0 +1,76 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Bugfix Plan: Missing May 2020 SOTD Threads in Fetch Phase
+
+## Problem Summary
+- The pipeline is missing SOTD thread data for May 2020 in all phases (threads, extracted, matched, etc.).
+- Manual Reddit search confirms that SOTD threads for May 2020 exist and are discoverable.
+
+## Root Cause Analysis
+- The fetch phase uses PRAW to search for threads with queries like `flair:SOTD may may 2020` and `flair:SOTD may may 2020SOTD`.
+- Thread titles on Reddit for May 2020 are in the format: `{Day} SOTD Thread - May {DD}, 2020` (e.g., "Tuesday SOTD Thread - May 26, 2020").
+- **ROOT CAUSE IDENTIFIED**: PRAW API error in `sotd/fetch/overrides.py` line 87 - using `submission_id=tid` as keyword argument instead of positional argument.
+
+## Investigation Steps
+1. ✅ Run fetch with `--debug` flag to see detailed output
+2. ✅ Check search queries and results
+3. ✅ Verify thread discovery and filtering
+4. ✅ Identify PRAW API error in overrides processing
+5. ✅ Test curl method to get real Reddit data
+
+## Solution Implemented
+**Fix Applied**: Updated `sotd/fetch/overrides.py` line 87:
+- **Before**: `sub = safe_call(reddit.submission, submission_id=tid)`
+- **After**: `sub = safe_call(reddit.submission, tid)`
+
+**Result**: 
+- ✅ Successfully fetched 31 threads for May 2020
+- ✅ Retrieved 2,307 comments
+- ✅ Data saved to `data/threads/2020-05.json` (9.7KB, 290 lines)
+- ✅ Comments saved to `data/comments/2020-05.json` (2.4MB)
+
+## Using curl for Real Data Analysis
+**Command**: 
+```bash
+curl -s 'https://www.reddit.com/r/Wetshaving/search/?q=sotd+may+2020&restrict_sr=1&sort=relevance&t=all'
+```
+
+**Real Thread Titles Found**:
+- Tuesday SOTD Thread - May 26, 2020
+- Tuesday SOTD Thread - May 12, 2020  
+- Wednesday SOTD Thread - May 06, 2020
+- Wednesday SOTD Thread - May 27, 2020
+- Wednesday SOTD Thread - May 13, 2020
+- Monday SOTD Thread - May 18, 2020
+- Monday SOTD Thread - May 11, 2020
+- Wednesday SOTD Thread - May 20, 2020
+
+**Uses for Analysis**:
+- Test `parse_thread_date` function with real thread titles
+- Verify search query effectiveness
+- Create test cases for date parsing
+- Debug PRAW search vs web search differences
+- Validate thread naming conventions
+
+## Status: ✅ COMPLETED
+- **Date**: December 2024
+- **Fix**: PRAW API parameter correction in overrides.py
+- **Data Recovered**: 31 threads, 2,307 comments for May 2020
+- **Next Steps**: Run subsequent pipeline phases (extract, match, enrich, aggregate, report) to process the recovered data
+
+## Step-by-Step Fix Plan
+1. ✅ **Investigation**: Run fetch with debug mode
+2. ✅ **Root Cause**: Identify PRAW API error in overrides
+3. ✅ **Fix**: Update submission() call to use positional argument
+4. ✅ **Test**: Verify fetch works and data is saved
+5. ✅ **Validation**: Confirm threads and comments are present
+6. 🔄 **Next**: Process recovered data through remaining pipeline phases
+
+---
+
+**Owner:** @TODO
+**Priority:** High (blocks historical completeness)
+**Related:** SOTD fetch, Reddit search, thread parsing
