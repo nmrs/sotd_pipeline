@@ -14,6 +14,7 @@ def create_report_generator(
     data: Dict[str, Any],
     comparison_data: Optional[Dict[str, Any]] = None,
     debug: bool = False,
+    template_path: Optional[str] = None,
 ) -> BaseReportGenerator:
     """Create a report generator based on the report type.
 
@@ -23,6 +24,7 @@ def create_report_generator(
         data: Data from aggregated data
         comparison_data: Historical data for delta calculations
         debug: Enable debug logging
+        template_path: Optional custom path to template file for testing
 
     Returns:
         Appropriate report generator instance
@@ -34,9 +36,9 @@ def create_report_generator(
         comparison_data = {}
 
     if report_type == "hardware":
-        return HardwareReportGenerator(metadata, data, comparison_data, debug)
+        return HardwareReportGenerator(metadata, data, comparison_data, debug, template_path)
     elif report_type == "software":
-        return SoftwareReportGenerator(metadata, data, comparison_data, debug)
+        return SoftwareReportGenerator(metadata, data, comparison_data, debug, template_path)
     else:
         raise ValueError(f"Unsupported report type: {report_type}")
 
@@ -47,6 +49,7 @@ def generate_report_content(
     data: Dict[str, Any],
     comparison_data: Optional[Dict[str, Any]] = None,
     debug: bool = False,
+    template_path: Optional[str] = None,
 ) -> str:
     """Generate complete report content.
 
@@ -56,9 +59,12 @@ def generate_report_content(
         data: Data from aggregated data
         comparison_data: Historical data for delta calculations
         debug: Enable debug logging
+        template_path: Optional custom path to template file for testing
 
     Returns:
         Complete report content as a string
     """
-    generator = create_report_generator(report_type, metadata, data, comparison_data, debug)
+    generator = create_report_generator(
+        report_type, metadata, data, comparison_data, debug, template_path
+    )
     return generator.generate_report()

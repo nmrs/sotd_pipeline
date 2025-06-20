@@ -13,6 +13,7 @@ class BaseReportGenerator(ABC):
         data: Dict[str, Any],
         comparison_data: Optional[Dict[str, Any]] = None,
         debug: bool = False,
+        template_path: Optional[str] = None,
     ):
         """Initialize the report generator.
 
@@ -21,11 +22,13 @@ class BaseReportGenerator(ABC):
             data: Data from aggregated data
             comparison_data: Historical data for delta calculations
             debug: Enable debug logging
+            template_path: Optional custom path to template file for testing
         """
         self.metadata = metadata
         self.data = data
         self.comparison_data = comparison_data or {}
         self.debug = debug
+        self.template_path = template_path
 
     @abstractmethod
     def generate_header(self) -> str:
@@ -64,13 +67,8 @@ class BaseReportGenerator(ABC):
         sections.append(observations)
         sections.append("")  # Empty line
 
-        # Notes and caveats
+        # Notes and caveats (now includes tables via templating)
         notes = self.generate_notes_and_caveats()
         sections.append(notes)
-        sections.append("")  # Empty line
-
-        # Tables
-        tables = self.generate_tables()
-        sections.extend(tables)
 
         return "\n".join(sections)

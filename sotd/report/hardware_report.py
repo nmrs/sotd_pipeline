@@ -1,39 +1,12 @@
 """Hardware report generator for the SOTD pipeline report phase."""
 
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from sotd.utils.template_processor import TemplateProcessor
+
 from .base import BaseReportGenerator
-from .observations import ObservationsGenerator
-from .table_generators.blade_tables import (
-    BladeManufacturersTableGenerator,
-    BladesTableGenerator,
-)
-from .table_generators.brush_tables import (
-    BrushesTableGenerator,
-    BrushFibersTableGenerator,
-    BrushHandleMakersTableGenerator,
-    BrushKnotMakersTableGenerator,
-    BrushKnotSizesTableGenerator,
-)
-from .table_generators.cross_product_tables import (
-    HighestUseCountPerBladeTableGenerator,
-    RazorBladeCombinationsTableGenerator,
-)
-from .table_generators.razor_tables import (
-    RazorFormatsTableGenerator,
-    RazorManufacturersTableGenerator,
-    RazorsTableGenerator,
-)
-from .table_generators.specialized_tables import (
-    BlackbirdPlatesTableGenerator,
-    ChristopherBradleyPlatesTableGenerator,
-    GameChangerPlatesTableGenerator,
-    StraightGrindsTableGenerator,
-    StraightPointsTableGenerator,
-    StraightWidthsTableGenerator,
-    SuperSpeedTipsTableGenerator,
-)
-from .table_generators.user_tables import TopShaversTableGenerator
+from .table_generator import TableGenerator
 
 
 class HardwareReportGenerator(BaseReportGenerator):
@@ -45,6 +18,7 @@ class HardwareReportGenerator(BaseReportGenerator):
         data: Dict[str, Any],
         comparison_data: Optional[Dict[str, Any]] = None,
         debug: bool = False,
+        template_path: Optional[str] = None,
     ):
         """Initialize the hardware report generator.
 
@@ -53,12 +27,15 @@ class HardwareReportGenerator(BaseReportGenerator):
             data: Data from aggregated data
             comparison_data: Historical data for delta calculations
             debug: Enable debug logging
+            template_path: Optional custom path to template file for testing
         """
-        super().__init__(metadata, data, comparison_data, debug)
+        super().__init__(metadata, data, comparison_data, debug, template_path)
 
     def generate_header(self) -> str:
         """Generate the report header."""
         month = self.metadata.get("month", "Unknown")
+        total_shaves = self.metadata.get("total_shaves", 0)
+        unique_shavers = self.metadata.get("unique_shavers", 0)
 
         # Parse month for display
         try:
@@ -69,137 +46,52 @@ class HardwareReportGenerator(BaseReportGenerator):
         except (ValueError, TypeError):
             month_display = month
 
-        return f"Welcome to your SOTD Hardware Report for {month_display}\n\n"
+        return (
+            f"# Hardware Report - {month_display}\n\n"
+            f"**Total Shaves:** {total_shaves:,}\n"
+            f"**Unique Shavers:** {unique_shavers:,}\n\n"
+        )
 
     def generate_observations(self) -> str:
         """Generate the observations section."""
-        generator = ObservationsGenerator(self.metadata, self.data, self.comparison_data)
-        return generator.generate_observations()
+        return (
+            "## Observations\n\n"
+            "*(This section will be populated with automated observations about trends "
+            "and patterns in the hardware data.)*\n\n"
+        )
 
     def generate_notes_and_caveats(self) -> str:
-        """Generate the notes and caveats section."""
+        """Generate the notes and caveats section using the new templating system."""
         # Get specific data collection statistics
         total_shaves = self.metadata.get("total_shaves", 0)
         unique_shavers = self.metadata.get("unique_shavers", 0)
         avg_shaves_per_user = self.metadata.get("avg_shaves_per_user", 0)
 
-        return f"""## Notes & Caveats
+        # Prepare variables for template
+        variables = {
+            "total_shaves": f"{total_shaves:,}",
+            "unique_shavers": str(unique_shavers),
+            "avg_shaves_per_user": f"{avg_shaves_per_user:.1f}",
+        }
 
-### Data Collection
-- This data is collected from the r/wetshaving community's Shave of the Day (SOTD) posts
-- **{total_shaves:,} shaves** from **{unique_shavers} unique users** were analyzed this month
-- Users averaged **{avg_shaves_per_user:.1f} shaves** each during the reporting period
-- Only posts that include product information are included in the analysis
-- Users may post multiple SOTDs per day, which are all counted
-- The data represents community participation, not necessarily market share or sales figures
+        # Create table generator for table placeholders
+        table_generator = TableGenerator(self.data, self.comparison_data, self.debug)
 
-### Product Matching
-- Product matching is performed automatically and may contain errors
-- Product names are normalized for consistency across reports
-- Some products may be grouped under generic categories (e.g., "Other Straight Razor")
+        # Create template processor with custom path if provided
+        if self.template_path:
+            processor = TemplateProcessor(Path(self.template_path))
+        else:
+            processor = TemplateProcessor()
 
-### Brush Data
-- Brush handle makers and knot makers are attributed based on user input
-- Fiber types are normalized to title case to prevent duplicates
-- Knot sizes are filtered to reasonable ranges (15-50mm) to exclude invalid data
-- Mixed fiber brushes are categorized separately from single-fiber types
-
-### Razor Data
-- Razor formats are categorized based on blade type (DE, GEM, Injector, etc.)
-- Straight razors include specifications for grind, width, and point types
-- Plate-specific data is tracked for razors with interchangeable plates
-
-### Blade Data
-- Blade formats are differentiated (DE, GEM, Injector, AC, etc.)
-- Use counts represent individual blade usage, not package counts
-
-### Delta Calculations
-- Position-based deltas show movement in rankings between periods
-- ↑ indicates improved position, ↓ indicates declined position, = indicates no change
-- "n/a" indicates the item was not present in the comparison period
-- Delta calculations are based on position rankings, not absolute values
-
-### User Statistics
-- "avg shaves per user" represents the average number of shaves per unique user for each product
-- Cross-product tables show combinations and highest individual usage patterns
-- User data is anonymized and aggregated for privacy
-
-### Data Quality
-- Invalid or missing data is filtered out during processing
-- Debug logging is available to identify data quality issues
-- Historical comparisons require data from previous periods to be available
-
-"""
+        # Use the simplified template structure
+        return processor.render_template("hardware", "template", variables, table_generator)
 
     def generate_tables(self) -> List[str]:
-        """Generate all tables for the hardware report."""
-        tables = []
-        tables.append("## Tables\n\n")
+        """Generate all tables for the hardware report.
 
-        # Core product tables
-        tables.append(self._generate_table("Razors", RazorsTableGenerator))
-        tables.append(self._generate_table("Razor Manufacturers", RazorManufacturersTableGenerator))
-        tables.append(self._generate_table("Razor Formats", RazorFormatsTableGenerator))
-        tables.append(self._generate_table("Blades", BladesTableGenerator))
-        tables.append(self._generate_table("Blade Manufacturers", BladeManufacturersTableGenerator))
-        tables.append(self._generate_table("Brushes", BrushesTableGenerator))
-        tables.append(self._generate_table("Brush Handle Makers", BrushHandleMakersTableGenerator))
-        tables.append(self._generate_table("Brush Knot Makers", BrushKnotMakersTableGenerator))
-        tables.append(self._generate_table("Knot Fibers", BrushFibersTableGenerator))
-        tables.append(self._generate_table("Knot Sizes", BrushKnotSizesTableGenerator))
-
-        # Specialized tables
-        tables.append(self._generate_table("Blackbird Plates", BlackbirdPlatesTableGenerator))
-        tables.append(
-            self._generate_table(
-                "Christopher Bradley Plates", ChristopherBradleyPlatesTableGenerator
-            )
-        )
-        tables.append(self._generate_table("Game Changer Plates", GameChangerPlatesTableGenerator))
-        tables.append(self._generate_table("Super Speed Tips", SuperSpeedTipsTableGenerator))
-        tables.append(self._generate_table("Straight Widths", StraightWidthsTableGenerator))
-        tables.append(self._generate_table("Straight Grinds", StraightGrindsTableGenerator))
-        tables.append(self._generate_table("Straight Points", StraightPointsTableGenerator))
-
-        # Cross-product tables
-        tables.append(
-            self._generate_table(
-                "Most Used Blades in Most Used Razors", RazorBladeCombinationsTableGenerator
-            )
-        )
-        tables.append(
-            self._generate_table(
-                "Highest Use Count per Blade", HighestUseCountPerBladeTableGenerator
-            )
-        )
-
-        # User tables
-        tables.append(self._generate_table("Top Shavers", TopShaversTableGenerator))
-
-        return tables
-
-    def _generate_table(self, title: str, generator_class) -> str:
-        """Generate a single table using the specified generator."""
-        generator = generator_class(self.data, self.debug)
-
-        # Check if we have comparison data for delta calculations
-        include_delta = bool(self.comparison_data)
-
-        # If we have comparison data, pass all available periods
-        if self.comparison_data:
-            # Pass all comparison data to the generator
-            table_content = generator.generate_table(
-                include_delta=include_delta,
-                comparison_data=self.comparison_data,
-            )
-        else:
-            table_content = generator.generate_table(
-                include_delta=include_delta,
-                comparison_data=None,
-            )
-
-        # If the table is empty, provide a "No data available" message
-        if not table_content:
-            return f"### {title}\n\n*No data available*\n\n"
-
-        return table_content
+        Note: This method is now deprecated in favor of the templating system.
+        Tables are now generated through the template placeholders.
+        """
+        # This method is kept for backward compatibility but is no longer used
+        # Tables are now generated through the template system
+        return []
