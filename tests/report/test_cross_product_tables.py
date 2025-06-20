@@ -97,7 +97,7 @@ class TestHighestUseCountPerBladeTableGenerator:
         generator = HighestUseCountPerBladeTableGenerator(sample_data, debug=False)
         data = generator.get_table_data()
         assert len(data) == 2
-        assert data[0]["user"] == "user1"
+        assert data[0]["user"] == "u/user1"
         assert data[0]["blade"] == "Gillette Nacet"
         assert data[0]["uses"] == 15
 

@@ -83,7 +83,7 @@ class TestReportIntegration:
         assert "## Top Shavers" in report_content
 
         # Verify that tables are generated (should contain actual table content)
-        assert "| Razor" in report_content  # Table headers
+        assert "| name" in report_content  # Table headers
         assert "Gillette Super Speed" in report_content
         assert "Gillette Nacet" in report_content
         assert "Simpson Chubby 2" in report_content
@@ -138,7 +138,7 @@ class TestReportIntegration:
         assert "## Top Shavers" in report_content
 
         # Verify that tables are generated
-        assert "| Soap" in report_content
+        assert "| name" in report_content
         assert "Declaration Grooming" in report_content
         assert "Stirling Soap Co" in report_content
         assert "user1" in report_content

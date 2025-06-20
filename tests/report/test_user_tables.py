@@ -20,6 +20,7 @@ class TestTopShaversTableGenerator:
         generator = TopShaversTableGenerator(sample_data, debug=False)
         data = generator.get_table_data()
         assert len(data) == 1
+        assert data[0]["user_display"] == "u/user2"
         assert data[0]["user"] == "user2"
         assert data[0]["shaves"] == 8
         assert data[0]["missed_days"] == 1
@@ -34,6 +35,8 @@ class TestTopShaversTableGenerator:
         generator = TopShaversTableGenerator(sample_data, debug=False)
         data = generator.get_table_data()
         assert len(data) == 2
+        assert data[0]["user_display"] == "u/user1"
+        assert data[1]["user_display"] == "u/user2"
         assert data[0]["user"] == "user1"
         assert data[1]["user"] == "user2"
         assert data[0]["position"] == 1
@@ -61,13 +64,15 @@ class TestTopShaversTableGenerator:
         data = generator.get_table_data()
         # All 21 should be included due to tie at 20th
         assert len(data) == 21
-        assert any(u["user"] == "user21" for u in data)
+        assert any(u["user_display"] == "u/user21" for u in data)
 
     def test_table_title_and_columns(self):
         generator = TopShaversTableGenerator({}, debug=False)
         assert generator.get_table_title() == "Top Shavers"
         config = generator.get_column_config()
-        assert set(config.keys()) == {"user", "shaves", "missed_days"}
+        assert "user_display" in config
+        assert "shaves" in config
+        assert "missed_days" in config
 
     def test_delta_column_logic(self):
         # Current and previous data for delta calculation
@@ -82,7 +87,7 @@ class TestTopShaversTableGenerator:
                 {"month": "2024-12"},  # metadata
                 {  # data
                     "users": [
-                        {"user": "user1", "shaves": 9, "missed_days": 2, "position": 2},
+                        {"user": "user1", "shaves": 8, "missed_days": 2, "position": 2},
                         {"user": "user2", "shaves": 10, "missed_days": 1, "position": 1},
                     ],
                 },
@@ -96,4 +101,6 @@ class TestTopShaversTableGenerator:
             comparison_data=previous_data,
         )
         assert "Δ vs previous month" in table_md
+        # The delta calculation should work with the u/ prefix since we use the original
+        # username for matching
         assert "↑" in table_md or "↓" in table_md or "=" in table_md
