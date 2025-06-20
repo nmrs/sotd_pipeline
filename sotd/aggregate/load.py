@@ -14,9 +14,18 @@ def load_enriched_data(month: str, data_dir: Path) -> list[dict[str, Any]]:
         raise FileNotFoundError(f"Enriched data file not found: {file_path}")
     with file_path.open("r", encoding="utf-8") as f:
         try:
-            data = json.load(f)
+            content = json.load(f)
         except json.JSONDecodeError as e:
             raise ValueError(f"Malformed JSON in {file_path}: {e}")
+
+    # Handle both direct list format and wrapped format with 'data' key
+    if isinstance(content, list):
+        data = content
+    elif isinstance(content, dict) and "data" in content:
+        data = content["data"]
+    else:
+        raise ValueError(f"Expected a list of records or dict with 'data' key in {file_path}")
+
     if not isinstance(data, list):
         raise ValueError(f"Expected a list of records in {file_path}")
     # Basic validation: check for required fields in at least one record

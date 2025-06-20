@@ -251,6 +251,15 @@ All enrichers must include:
 }
 ```
 
+## Brush Data Model Clarification (2024-06)
+
+- The `brand` field in `brush.matched` is the knot maker (e.g., Declaration Grooming, Semogue).
+- The `handle_maker` field in `brush.matched` is the handle maker (e.g., Dogwood Handcrafts, Semogue).
+- The `knot_maker` field is a legacy/unused field and is always null in current data; it is not used for aggregation or enrichment.
+- All enrichment and aggregation logic should use `brand` for knot maker and `handle_maker` for handle maker.
+- This matches the current data model and aggregation requirements.
+- No bug exists in enrichment regarding knot maker; the aggregator code should be updated to use `brand` for knot maker.
+
 ## Error Handling Strategy
 
 ### Partial Extraction Success

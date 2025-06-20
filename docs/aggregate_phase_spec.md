@@ -438,3 +438,11 @@ Follow the same pattern as other phases:
 
 # Note: The output keys for brush fiber and knot size aggregations are 'brush_fibers' and 'brush_knot_sizes'.
 # These are grouped by fiber type and knot size (mm) respectively, matching the code and output structure.
+
+## Brush Aggregation Data Model Clarification (2024-06)
+
+- For brush knot maker aggregation, use `brush.matched.brand` (not `knot_maker`).
+- For brush handle maker aggregation, use `brush.matched.handle_maker`.
+- The `knot_maker` field is a legacy/unused field and is always null in current data; it should not be used for aggregation.
+- The aggregator code and documentation should be updated to reflect this reality.
+- This matches the current data model and enrich phase output.

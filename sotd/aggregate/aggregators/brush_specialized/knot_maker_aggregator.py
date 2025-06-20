@@ -25,15 +25,15 @@ def aggregate_knot_makers(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]
         brush = record.get("brush", {})
         matched = brush.get("matched", {})
 
-        # Skip if no matched brush data or no knot_maker
-        if not matched or not matched.get("knot_maker"):
+        # Skip if no matched brush data or no brand (knot maker)
+        if not matched or not matched.get("brand"):
             continue
 
-        knot_maker = matched.get("knot_maker", "").strip()
+        brand = matched.get("brand", "").strip()
         author = record.get("author", "").strip()
 
-        if knot_maker and author:
-            knot_maker_data.append({"brand": knot_maker, "author": author})
+        if brand and author:
+            knot_maker_data.append({"brand": brand, "author": author})
 
     if not knot_maker_data:
         return []
@@ -41,7 +41,7 @@ def aggregate_knot_makers(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]
     # Convert to DataFrame for efficient aggregation
     df = pd.DataFrame(knot_maker_data)
 
-    # Group by brand (knot_maker) and calculate metrics
+    # Group by brand (knot maker) and calculate metrics
     grouped = df.groupby("brand").agg({"author": ["count", "nunique"]}).reset_index()
 
     # Flatten column names
