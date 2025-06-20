@@ -1,5 +1,12 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
+## User Aggregation: Missed Days Logic
+- For each user, collect all dates they posted shaves (from thread titles)
+- Compare against all possible dates in the month
+- Calculate which days they missed
+- Store both the count (`missed_days`) and the list (`missed_dates`) of missed days (YYYY-MM-DD)
+- Sort users by shaves (descending), then missed_days (ascending)
+- Output structure: {"position": N, "user": "Username", "shaves": N, "missed_days": N, "missed_dates": [YYYY-MM-DD, ...]}
