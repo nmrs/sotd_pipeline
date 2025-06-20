@@ -24,8 +24,12 @@ def aggregate_knot_sizes(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     knot_size_data = []
     for record in records:
         brush = record.get("brush", {})
-        matched = brush.get("matched", {})
-        enriched = brush.get("enriched", {})
+        matched = brush.get("matched")
+        enriched = brush.get("enriched")
+
+        # Ensure matched and enriched are dicts
+        matched = matched if isinstance(matched, dict) else {}
+        enriched = enriched if isinstance(enriched, dict) else {}
 
         # Try matched.knot_size_mm first, then fallback to enriched.knot_size_mm
         knot_size_mm = matched.get("knot_size_mm") or enriched.get("knot_size_mm")

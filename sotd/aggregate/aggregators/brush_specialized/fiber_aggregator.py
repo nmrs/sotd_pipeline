@@ -24,8 +24,12 @@ def aggregate_fibers(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     fiber_data = []
     for record in records:
         brush = record.get("brush", {})
-        matched = brush.get("matched", {})
-        enriched = brush.get("enriched", {})
+        matched = brush.get("matched")
+        enriched = brush.get("enriched")
+
+        # Ensure matched and enriched are dicts
+        matched = matched if isinstance(matched, dict) else {}
+        enriched = enriched if isinstance(enriched, dict) else {}
 
         # Try matched.fiber first, then fallback to enriched.fiber
         fiber = matched.get("fiber") or enriched.get("fiber")
