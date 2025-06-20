@@ -1,10 +1,20 @@
 from typing import Any, Dict, List
 
+from .aggregators.brush_specialized import (
+    aggregate_fibers,
+    aggregate_handle_makers,
+    aggregate_knot_makers,
+    aggregate_knot_sizes,
+)
 from .aggregators.core import (
     aggregate_blades,
     aggregate_brushes,
     aggregate_razors,
     aggregate_soaps,
+)
+from .aggregators.cross_product import (
+    aggregate_highest_use_count_per_blade,
+    aggregate_razor_blade_combos,
 )
 from .aggregators.formats import aggregate_razor_formats
 from .aggregators.manufacturers import (
@@ -12,6 +22,16 @@ from .aggregators.manufacturers import (
     aggregate_razor_manufacturers,
     aggregate_soap_makers,
 )
+from .aggregators.razor_specialized import (
+    aggregate_blackbird_plates,
+    aggregate_christopher_bradley_plates,
+    aggregate_game_changer_plates,
+    aggregate_straight_grinds,
+    aggregate_straight_points,
+    aggregate_straight_widths,
+    aggregate_super_speed_tips,
+)
+from .aggregators.users import aggregate_users
 from .utils.metrics import calculate_metadata
 
 
@@ -104,6 +124,24 @@ def aggregate_all(records: List[Dict[str, Any]], month: str) -> Dict[str, Any]:
             "soap_makers": aggregate_soap_makers(records),
             # Format aggregations
             "razor_formats": aggregate_razor_formats(records),
+            # Brush specialized aggregations
+            "brush_handle_makers": aggregate_handle_makers(records),
+            "brush_knot_makers": aggregate_knot_makers(records),
+            "brush_fibers": aggregate_fibers(records),
+            "brush_knot_sizes": aggregate_knot_sizes(records),
+            # Razor specialized aggregations
+            "blackbird_plates": aggregate_blackbird_plates(records),
+            "christopher_bradley_plates": aggregate_christopher_bradley_plates(records),
+            "game_changer_plates": aggregate_game_changer_plates(records),
+            "super_speed_tips": aggregate_super_speed_tips(records),
+            "straight_widths": aggregate_straight_widths(records),
+            "straight_grinds": aggregate_straight_grinds(records),
+            "straight_points": aggregate_straight_points(records),
+            # User aggregations
+            "users": aggregate_users(records),
+            # Cross-product aggregations
+            "razor_blade_combinations": aggregate_razor_blade_combos(records),
+            "highest_use_count_per_blade": aggregate_highest_use_count_per_blade(records),
         },
     }
 
