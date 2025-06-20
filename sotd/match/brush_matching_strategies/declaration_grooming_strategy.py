@@ -96,7 +96,6 @@ class DeclarationGroomingBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                         "fiber": fiber,
                         "knot_size_mm": knot_size,
                         "handle_maker": None,
-                        "knot_maker": None,
                         "source_text": value,
                         "source_type": "exact",
                     },

@@ -25,7 +25,6 @@ class OmegaSemogueBrushMatchingStrategy:
                 "fiber": "boar",
                 "knot_size_mm": None,
                 "handle_maker": None,
-                "knot_maker": None,
                 "source_text": model_match.group(0),
                 "source_type": "exact",
             }

@@ -28,9 +28,9 @@ def test_aggregate_handle_makers():
 
 def test_aggregate_knot_makers():
     records = [
-        {"author": "user1", "brush": {"matched": {"knot_maker": "Declaration Grooming"}}},
-        {"author": "user2", "brush": {"matched": {"knot_maker": "Declaration Grooming"}}},
-        {"author": "user1", "brush": {"matched": {"knot_maker": "Semogue"}}},
+        {"author": "user1", "brush": {"matched": {"brand": "Declaration Grooming"}}},
+        {"author": "user2", "brush": {"matched": {"brand": "Declaration Grooming"}}},
+        {"author": "user1", "brush": {"matched": {"brand": "Semogue"}}},
     ]
     result = aggregate_knot_makers(records)
     assert len(result) == 2

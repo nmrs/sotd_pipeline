@@ -40,7 +40,6 @@ class ChiselAndHoundBrushMatchingStrategy(BaseBrushMatchingStrategy):
                     "fiber": entry["fiber"],
                     "knot_size_mm": entry["knot_size_mm"],
                     "handle_maker": None,
-                    "knot_maker": None,
                     "source_text": value,
                     "source_type": "exact",
                 }
