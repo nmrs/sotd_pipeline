@@ -1,12 +1,12 @@
-"""Integration tests for end-to-end report generation."""
+"""Integration tests for report generation."""
 
 from sotd.report.process import generate_report_content
 
 
 class TestReportIntegration:
-    """Integration tests for complete report generation."""
+    """Integration tests for report generation."""
 
-    def test_hardware_report_generation(self):
+    def test_hardware_report_generation(self, template_file):
         """Test complete hardware report generation with sample data."""
         # Sample aggregated data
         metadata = {
@@ -34,38 +34,42 @@ class TestReportIntegration:
             ],
         }
 
-        # Generate report content
-        report_content = generate_report_content("hardware", metadata, data, debug=False)
+        # Generate report content with custom template
+        report_content = generate_report_content(
+            "hardware", metadata, data, template_path=str(template_file), debug=False
+        )
 
         # Verify report structure
-        assert "Welcome to your SOTD Hardware Report for January 2025" in report_content
-        assert "## Observations" in report_content
+        assert "# Hardware Report - January 2025" in report_content
+        assert "**Total Shaves:** 1,000" in report_content
+        assert "**Unique Shavers:** 50" in report_content
         assert "## Notes & Caveats" in report_content
-        assert "## Tables" in report_content
+        assert "Custom template content for testing" in report_content
+        assert "### Razor Statistics" in report_content
+        assert "### Blade Statistics" in report_content
+        assert "### Brush Statistics" in report_content
+        assert "### User Statistics" in report_content
 
-        # Verify tables are included
-        assert "### Razors" in report_content
-        assert "### Blades" in report_content
-        assert "### Brushes" in report_content
-        assert "### Top Shavers" in report_content
+        # Verify that tables are generated (should contain actual table content)
+        assert "| Razor" in report_content  # Table headers
+        assert "Gillette Super Speed" in report_content
+        assert "Gillette Nacet" in report_content
+        assert "Simpson Chubby 2" in report_content
+        assert "user1" in report_content
 
-    def test_software_report_generation(self):
+    def test_software_report_generation(self, template_file):
         """Test complete software report generation with sample data."""
         # Sample aggregated data
         metadata = {
             "month": "2025-01",
-            "total_shaves": 1000,
-            "unique_shavers": 50,
+            "total_shaves": 500,
+            "unique_shavers": 25,
         }
 
         data = {
             "soaps": [
-                {"name": "Declaration Grooming Sellout", "shaves": 35, "unique_users": 18},
-                {"name": "Stirling Executive Man", "shaves": 25, "unique_users": 12},
-            ],
-            "soap_makers": [
-                {"brand": "Declaration Grooming", "shaves": 70, "unique_users": 35},
-                {"brand": "Stirling", "shaves": 55, "unique_users": 28},
+                {"name": "Declaration Grooming", "shaves": 20, "unique_users": 10},
+                {"name": "Stirling Soap Co", "shaves": 15, "unique_users": 8},
             ],
             "users": [
                 {"user": "user1", "shaves": 31, "missed_days": 0, "position": 1},
@@ -73,24 +77,27 @@ class TestReportIntegration:
             ],
         }
 
-        # Generate report content
-        report_content = generate_report_content("software", metadata, data, debug=False)
+        # Generate report content with custom template
+        report_content = generate_report_content(
+            "software", metadata, data, template_path=str(template_file), debug=False
+        )
 
         # Verify report structure
         assert "# Software Report - January 2025" in report_content
-        assert "**Total Shaves:** 1,000" in report_content
-        assert "**Unique Shavers:** 50" in report_content
-        assert "## Observations" in report_content
+        assert "**Total Shaves:** 500" in report_content
+        assert "**Unique Shavers:** 25" in report_content
         assert "## Notes & Caveats" in report_content
-        assert "## Tables" in report_content
+        assert "Custom software template content" in report_content
+        assert "### Soap Statistics" in report_content
+        assert "### User Statistics" in report_content
 
-        # Verify tables are included
-        assert "### Soap Makers" in report_content
-        assert "### Soaps" in report_content
-        assert "### Brand Diversity" in report_content
-        assert "### Top Shavers" in report_content
+        # Verify that tables are generated
+        assert "| Soap" in report_content
+        assert "Declaration Grooming" in report_content
+        assert "Stirling Soap Co" in report_content
+        assert "user1" in report_content
 
-    def test_report_with_empty_data(self):
+    def test_report_with_empty_data(self, template_file):
         """Test report generation with empty data."""
         metadata = {
             "month": "2025-01",
@@ -101,12 +108,19 @@ class TestReportIntegration:
         data = {}
 
         # Should not raise exceptions
-        report_content = generate_report_content("hardware", metadata, data, debug=False)
+        report_content = generate_report_content(
+            "hardware", metadata, data, template_path=str(template_file), debug=False
+        )
 
         # Should still have basic structure
-        assert "Welcome to your SOTD Hardware Report for January 2025" in report_content
+        assert "# Hardware Report - January 2025" in report_content
+        assert "**Total Shaves:** 0" in report_content
+        assert "**Unique Shavers:** 0" in report_content
 
-    def test_report_with_delta_calculations(self):
+        # Should handle empty data gracefully
+        assert "*No data available" in report_content
+
+    def test_report_with_delta_calculations(self, template_file):
         """Test report generation with historical data for delta calculations."""
         metadata = {
             "month": "2025-01",
@@ -140,7 +154,12 @@ class TestReportIntegration:
 
         # Generate report content with deltas
         report_content = generate_report_content(
-            "hardware", metadata, data, comparison_data, debug=False
+            "hardware",
+            metadata,
+            data,
+            comparison_data,
+            template_path=str(template_file),
+            debug=False,
         )
 
         # Should include delta column
