@@ -1,0 +1,111 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+Idea Honing
+Ask me one question at a time so we can develop a thorough, step-by-step spec for this idea. Each question should build on my previous answers, and our end goal is to have a detailed specification I can hand off to a developer. Let’s do this iteratively and dig into every relevant detail. Remember, only one question at a time.
+
+Here’s the idea:
+
+# Development Workflows and Prompts
+
+This file contains reusable development workflows and prompts for the SOTD Pipeline project. Use these with Cursor AI by referencing `@prompts.mdc` followed by the specific section name.
+
+## 🚀 Development Workflows
+
+### Task Driven TDD Loop
+**Use when**: Implementing features with test-driven development approach.
+
+```
+Proceed through the remaining tasks in the current step one at a time. After completing each task:
+1. Update the implementation plan to reflect the completed work.
+2. Run make format lint typecheck test.
+3. If any errors or failures occur, fix them immediately.
+4. Commit the changes with a clear message summarizing the task completed.
+```
+
+### Tracked Implementation Development Process
+**Use when**: Working through a multi-session implementation plan systematically.
+
+**Purpose**: These are instructions to proceed carefully through an implementation plan without causing major errors and ensuring that incremental progress is tracked. The plan is designed to be self-contained and will help you track progress across multiple development sessions without losing your place.
+
+**Process**:
+1. Start with first unchecked item
+2. Follow the workflow: Complete each chunk before moving to the next
+3. Run quality checks: Use "make format lint typecheck test" after each chunk, fixing any errors that result
+4. Check off tasks: Mark each completed task in the implementation plan document with [x] and save the file
+5. Update session notes: Add notes after each work session
+6. Commit regularly: Commit changes with clear messages after each chunk. Commits should include updates to implementation plan.
+7. Proceed *until context limit is reached*
+
+## 📋 Project Planning Prompts
+
+### TDD Project Planning
+**Use when**: Starting a new feature or component with test-driven development.
+
+```
+Draft a detailed, step-by-step blueprint for building this project. Then, once you have a solid plan, break it down into small, iterative chunks that build on each other. Look at these chunks and then go another round to break it into small steps. Review the results and make sure that the steps are small enough to be implemented safely with strong testing, but big enough to move the project forward. Iterate until you feel that the steps are right sized for this project.
+
+From here you should have the foundation to provide a series of prompts for a code-generation LLM that will implement each step in a test-driven manner. Prioritize best practices, incremental progress, and early testing, ensuring no big jumps in complexity at any stage. Make sure that each prompt builds on the previous prompts, and ends with wiring things together. There should be no hanging or orphaned code that isn't integrated into a previous step.
+
+Make sure and separate each prompt section. Use markdown. Each prompt should be tagged as text using code tags. The goal is to output prompts, but context, etc is important as well.
+```
+
+### Non-TDD Project Planning
+**Use when**: Starting a new feature without strict TDD requirements.
+
+```
+Draft a detailed, step-by-step blueprint for building this project. Then, once you have a solid plan, break it down into small, iterative chunks that build on each other. Look at these chunks and then go another round to break it into small steps. Review the results and make sure that the steps are small enough to be implemented safely, but big enough to move the project forward. Iterate until you feel that the steps are right sized for this project.
+
+From here you should have the foundation to provide a series of prompts for a code-generation LLM that will implement each step. Prioritize best practices, and incremental progress, ensuring no big jumps in complexity at any stage. Make sure that each prompt builds on the previous prompts, and ends with wiring things together. There should be no hanging or orphaned code that isn't integrated into a previous step.
+
+Make sure and separate each prompt section. Use markdown. Each prompt should be tagged as text using code tags. The goal is to output prompts, but context, etc is important as well.
+```
+
+## 🛠️ Utility Prompts
+
+### TODO Checklist Generation
+**Use when**: Need a comprehensive checklist for a task or feature.
+
+```
+Can you make a `todo.md` that I can use as a checklist? Be thorough.
+```
+
+### Error Resolution
+**Use when**: Need to fix a specific error in the codebase.
+
+```
+You are the ChatGPT code editor. Review the error below. Read the file open in Work with Code and determine the best plan to resolve the issue. Generate a diff and apply it directly to the file open in Work with Code.
+
+[error]
+```
+
+### Session Continuation
+**Use when**: Continuing work in a new chat session.
+
+```
+Use the Tracked Implementation Development Process in @prompts.mdc to implement the @aggregate_implementation_plan.mdc using @aggregate_phase_spec.md and @sotd-pipeline-core.mdc for reference. Perform multiple tasks before asking for user feedback or permission to continue.
+```
+
+## 📝 Usage Examples
+
+### Starting a New Feature
+```
+Follow the TDD Project Planning prompt in @prompts.mdc to plan the new feature.
+```
+
+### Working Through Implementation
+```
+Follow the Tracked Implementation Development Process in @prompts.mdc to implement the current phase.
+```
+
+### Continuing in New Session
+```
+Use the Session Continuation prompt in @prompts.mdc to continue the current work.
+```
+
+### Fixing Errors
+```
+Use the Error Resolution prompt in @prompts.mdc to fix the current error.
+```
