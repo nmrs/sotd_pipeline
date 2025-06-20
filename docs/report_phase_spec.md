@@ -138,7 +138,18 @@ python -m sotd.report run --month 2025-05 --type software --force
 ### Technology Stack
 - **pandas**: For data manipulation and table formatting
 - **pathlib**: File path handling
+- **YAML**: Template configuration and customization
 - **Modular design**: Base table generator with specialized implementations
+
+### Template System
+The report phase uses a flexible template system for customizable report generation:
+
+- **Template Location**: `data/report_templates.yaml`
+- **Template Structure**: YAML-based templates with variable replacement and table placeholders
+- **Customization**: Users can modify report structure and content without changing code
+- **Testing**: Comprehensive test coverage with shared fixtures in `tests/fixtures/`
+
+For detailed template documentation, see [Report Templates](report_templates.md).
 
 ### Architecture Pattern
 Follows existing phase structure:
@@ -148,6 +159,8 @@ Follows existing phase structure:
 - `process.py`: Report generation logic
 - `save.py`: Markdown file output
 - `table_generators/`: Modular table generation components
+- `hardware_report.py`: Hardware report generator with template support
+- `software_report.py`: Software report generator with template support
 
 ### Performance Considerations
 - Load historical data only for delta calculations
