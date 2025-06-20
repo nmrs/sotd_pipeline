@@ -3,6 +3,7 @@
 from typing import Any, Dict, List, Optional
 
 from .base import BaseReportGenerator
+from .observations import ObservationsGenerator
 from .table_generators.blade_tables import (
     BladeManufacturersTableGenerator,
     BladesTableGenerator,
@@ -72,19 +73,22 @@ class HardwareReportGenerator(BaseReportGenerator):
 
     def generate_observations(self) -> str:
         """Generate the observations section."""
-        # TODO: Add automated trend analysis based on data patterns
-        return (
-            "## Observations\n\n"
-            "*(This section will be populated with automated observations about trends "
-            "and patterns in the hardware data, including notable changes and insights.)*\n\n"
-        )
+        generator = ObservationsGenerator(self.metadata, self.data, self.comparison_data)
+        return generator.generate_observations()
 
     def generate_notes_and_caveats(self) -> str:
         """Generate the notes and caveats section."""
-        return """## Notes & Caveats
+        # Get specific data collection statistics
+        total_shaves = self.metadata.get("total_shaves", 0)
+        unique_shavers = self.metadata.get("unique_shavers", 0)
+        avg_shaves_per_user = self.metadata.get("avg_shaves_per_user", 0)
+
+        return f"""## Notes & Caveats
 
 ### Data Collection
 - This data is collected from the r/wetshaving community's Shave of the Day (SOTD) posts
+- **{total_shaves:,} shaves** from **{unique_shavers} unique users** were analyzed this month
+- Users averaged **{avg_shaves_per_user:.1f} shaves** each during the reporting period
 - Only posts that include product information are included in the analysis
 - Users may post multiple SOTDs per day, which are all counted
 - The data represents community participation, not necessarily market share or sales figures
@@ -111,7 +115,7 @@ class HardwareReportGenerator(BaseReportGenerator):
 
 ### Delta Calculations
 - Position-based deltas show movement in rankings between periods
-- ↑ indicates improved position, ↓ indicates declined position, ↔ indicates no change
+- ↑ indicates improved position, ↓ indicates declined position, = indicates no change
 - "n/a" indicates the item was not present in the comparison period
 - Delta calculations are based on position rankings, not absolute values
 
