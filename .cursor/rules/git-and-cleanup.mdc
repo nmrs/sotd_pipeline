@@ -1,5 +1,5 @@
 ---
-description: Git and Cleanup Rules
+description: use with all git operations and cleanup
 globs: 
 alwaysApply: false
 ---
