@@ -1,0 +1,361 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# SOTD Pipeline - Lessons Learned
+
+## Overview
+
+This document consolidates all lessons learned from the SOTD Pipeline development experience, organized by category for easy reference. These insights have been gathered from completed implementation plans, TDD processes, refactoring efforts, and ongoing development work.
+
+## Development Methodology
+
+### TDD (Test-Driven Development) Lessons
+
+#### ✅ **Always Write Tests First**
+- **Lesson**: TDD approach caught edge cases early (e.g., missing months, empty data, corrupted files)
+- **Impact**: Prevents bugs before they reach production
+- **Application**: Write failing tests before implementing any feature
+- **Example**: Annual aggregation tests caught missing month handling before implementation
+
+#### ✅ **Incremental Test Development**
+- **Lesson**: Develop tests incrementally as features are built, not all at once
+- **Impact**: Better test coverage and earlier bug detection
+- **Application**: Add tests for each new functionality as it's implemented
+- **Example**: Annual loader tests were built incrementally: basic loading → missing months → error handling → performance
+
+#### ✅ **Test Alignment with Actual Behavior**
+- **Lesson**: Tests must match actual CLI behavior, including error types and messages
+- **Impact**: Prevents false negatives and ensures accurate test coverage
+- **Application**: Test error handling matches actual implementation (SystemExit vs ValueError)
+- **Example**: CLI tests updated to expect SystemExit for argparse errors, ValueError for custom validation
+
+### Pipeline Testing Rules
+
+#### ✅ **Always Use --force for Testing**
+- **Lesson**: `--force` ensures fresh data processing and avoids cached results
+- **Impact**: Prevents confusion between cached and fresh results
+- **Application**: Always use `--force` when testing unless explicitly testing non-force behavior
+- **Example**: `python run.py fetch --month 2025-05 --force` for testing
+
+#### ✅ **Consistent Force Usage**
+- **Lesson**: Be consistent across all pipeline phases in testing
+- **Impact**: Ensures reproducible testing results
+- **Application**: Use `--force` for all phases during development testing
+- **Example**: All phases in development workflow should use `--force`
+
+## Architecture Patterns
+
+### Data Structure Design
+
+#### ✅ **Unified Product Structure**
+- **Lesson**: Enriched data should be nested within product fields, not at record level
+- **Impact**: Easier debugging, cleaner data access, better maintainability
+- **Application**: Structure data as `{product: {original, matched, enriched}}` not `{product, enriched}`
+- **Example**: 
+  ```json
+  {
+    "razor": {
+      "original": "Koraat Moarteen",
+      "matched": {"brand": "Koraat", "model": "Moarteen"},
+      "enriched": {"grind": "full_hollow", "width": "15/16"}
+    }
+  }
+  ```
+
+#### ✅ **Consistent Metadata Structure**
+- **Lesson**: Consistent metadata structure is critical for downstream phases
+- **Impact**: Prevents downstream errors and ensures data integrity
+- **Application**: Always include standard metadata fields (total_shaves, unique_shavers, included_months, missing_months)
+- **Example**: Annual aggregation metadata includes missing months tracking for transparency
+
+### Error Handling Philosophy
+
+#### ✅ **Fail Fast for Internal Errors**
+- **Lesson**: Use minimal try/except for internal/logic errors during development
+- **Impact**: Catches bugs early and provides clear error messages
+- **Application**: Let internal errors fail immediately with clear stack traces
+- **Example**: Validation errors should fail fast with descriptive messages
+
+#### ✅ **Handle External Failures Gracefully**
+- **Lesson**: Handle external failures (Reddit API, missing files, network issues) gracefully
+- **Impact**: Robust pipeline operation in production environments
+- **Application**: Catch and handle external errors with appropriate fallbacks
+- **Example**: Missing months in annual aggregation are skipped with warnings, not fatal errors
+
+#### ✅ **Specific Exception Types**
+- **Lesson**: Never use bare except clauses; use specific exception types
+- **Impact**: Better error handling and debugging
+- **Application**: Catch specific exceptions (FileNotFoundError, KeyError, etc.)
+- **Example**: `except FileNotFoundError:` not `except:`
+
+## Performance Optimization
+
+### Parallelization Lessons
+
+#### ❌ **Record-Level Parallelization Doesn't Help**
+- **Lesson**: Record-level parallelization was slower than sequential (up to 61% slower)
+- **Impact**: Avoid unnecessary complexity for no performance benefit
+- **Application**: Stick with sequential processing for record-level operations
+- **Example**: Match phase record processing is faster sequential than parallel
+
+#### ❌ **Matcher-Level Parallelization Doesn't Help**
+- **Lesson**: Matcher-level parallelization was also slower (about 16% slower)
+- **Impact**: Thread overhead outweighs benefits for fast operations
+- **Application**: Keep matchers sequential; they're too fast to benefit from parallelization
+- **Example**: Individual matcher operations are sub-millisecond, so thread overhead dominates
+
+#### ✅ **Month-Level Parallelization Shows Promise**
+- **Lesson**: Month-level parallelization is more likely to yield benefits
+- **Impact**: Separate processes avoid GIL contention
+- **Application**: Consider parallelization at month/phase level, not record level
+- **Example**: Processing multiple months in parallel using process pools
+
+#### ✅ **Performance Monitoring is Essential**
+- **Lesson**: Comprehensive performance monitoring provides actionable insights
+- **Impact**: Data-driven optimization decisions and early regression detection
+- **Application**: Always include performance metrics in pipeline phases
+- **Example**: Track records per second, memory usage, and timing for each operation
+
+### Memory and Resource Management
+
+#### ✅ **Standardize Data Formats**
+- **Lesson**: Consistent data formats (list-of-dicts) improve performance and maintainability
+- **Impact**: Easier aggregation, better memory usage, consistent processing
+- **Application**: Use standardized formats across all phases
+- **Example**: All product category data uses list-of-dicts format for both monthly and annual aggregation
+
+## Code Quality and Maintainability
+
+### Refactoring Lessons
+
+#### ✅ **Eliminate Code Redundancy**
+- **Lesson**: Identified ~800-1000 lines of duplicated code across modules
+- **Impact**: Improved maintainability and consistency
+- **Application**: Create unified base classes and utilities for common patterns
+- **Example**: Unified performance monitoring, CLI patterns, and file I/O operations
+
+#### ✅ **High Impact, Low Risk First**
+- **Lesson**: Prioritize refactoring by impact and risk level
+- **Impact**: Safe, incremental improvements with maximum benefit
+- **Application**: Start with high-impact, low-risk changes before tackling complex refactoring
+- **Example**: Performance monitoring unification before complex aggregator refactoring
+
+#### ✅ **Logical Commit Organization**
+- **Lesson**: Organize git commits by type and dependency order
+- **Impact**: Easier rollback, better code review, cleaner history
+- **Application**: Split changes by type (fix/feat/test/refactor/docs/cleanup)
+- **Example**: Separate commits for CLI changes, core logic, and tests
+
+### File Organization
+
+#### ✅ **Smaller, Focused Files**
+- **Lesson**: Prefer smaller, focused files with clear responsibilities over large monolithic files
+- **Impact**: Better readability, maintainability, and easier testing
+- **Application**: Aim for files under 300-400 lines when possible
+- **Example**: Split large files into logical modules with single responsibilities
+
+#### ✅ **Mirror Test Structure**
+- **Lesson**: Test files should mirror source structure for easy navigation
+- **Impact**: Easier test maintenance and discovery
+- **Application**: Organize tests to match source directory structure
+- **Example**: `tests/aggregate/test_annual_loader.py` mirrors `sotd/aggregate/annual_loader.py`
+
+## Data Processing Patterns
+
+### Validation and Quality
+
+#### ✅ **Early, Strict Validation**
+- **Lesson**: Check configuration and input data at startup, fail immediately on issues
+- **Impact**: Prevents downstream errors and provides clear feedback
+- **Application**: Validate data structure and types early in processing
+- **Example**: Annual loader validates structure and types before processing
+
+#### ✅ **Forward Compatibility**
+- **Lesson**: Allow extra fields in data for forward compatibility
+- **Impact**: Easier schema evolution and backward compatibility
+- **Application**: Don't fail on unknown fields, preserve them when possible
+- **Example**: Annual data loader allows extra fields for future extensions
+
+### Data Flow Patterns
+
+#### ✅ **Consistent Loader Patterns**
+- **Lesson**: Consistent loader/test patterns across phases simplify future maintenance
+- **Impact**: Easier to understand and modify data loading logic
+- **Application**: Use consistent patterns for all data loading operations
+- **Example**: All loaders return (metadata, data) tuple for compatibility
+
+#### ✅ **Metadata Preservation**
+- **Lesson**: Include comprehensive metadata in all output files
+- **Impact**: Better debugging, tracking, and data lineage
+- **Application**: Always include processing timestamps, statistics, and validation info
+- **Example**: Include total_shaves, unique_shavers, included_months, missing_months in metadata
+
+## CLI and User Experience
+
+### Argument Validation
+
+#### ✅ **Validation Order Matters**
+- **Lesson**: Required argument checks must come before conflict checks for correct error reporting
+- **Impact**: Better user experience with clear error messages
+- **Application**: Order validation logic: conflicts before required arguments
+- **Example**: Check for mutually exclusive arguments before checking required arguments
+
+#### ✅ **Clear Error Messages**
+- **Lesson**: Provide clear, actionable error messages for all invalid argument combinations
+- **Impact**: Better user experience and easier debugging
+- **Application**: Match error messages to user expectations and argparse behavior
+- **Example**: SystemExit for mutually exclusive arguments, ValueError for custom validation
+
+### Backward Compatibility
+
+#### ✅ **Preserve Existing Functionality**
+- **Lesson**: All new functionality must preserve existing behavior
+- **Impact**: No breaking changes for existing users
+- **Application**: Test backward compatibility thoroughly before releasing
+- **Example**: Annual CLI extends existing monthly functionality without breaking it
+
+## Testing Strategy
+
+### Test Coverage
+
+#### ✅ **Comprehensive Edge Case Testing**
+- **Lesson**: Test edge cases early (empty data, missing files, corrupted data, single records)
+- **Impact**: Robust handling of real-world scenarios
+- **Application**: Include edge case tests for all new functionality
+- **Example**: Annual aggregation tests include empty data, partial data, and single month scenarios
+
+#### ✅ **Integration Testing**
+- **Lesson**: Test component interactions as they're built, not just individual components
+- **Impact**: Catches integration issues early
+- **Application**: Write integration tests alongside unit tests
+- **Example**: Test annual aggregation integration with loader, engine, and save components
+
+#### ✅ **Performance Testing**
+- **Lesson**: Test performance characteristics with realistic data sizes
+- **Impact**: Ensures acceptable performance in production
+- **Application**: Include performance tests for data processing operations
+- **Example**: Test annual report generation with large datasets (<5s for 100 products per category)
+
+### Test Data Management
+
+#### ✅ **Realistic Test Data**
+- **Lesson**: Use realistic test data that mirrors production scenarios
+- **Impact**: More accurate test results and better confidence
+- **Application**: Create test fixtures that represent real-world data structures
+- **Example**: Test with actual SOTD comment formats and product specifications
+
+## Documentation and Communication
+
+### Documentation Synchronization
+
+#### ✅ **Update Documentation with Code**
+- **Lesson**: Any code, workflow, or process change MUST be reflected in all relevant documentation
+- **Impact**: Keeps documentation current and useful
+- **Application**: Update documentation as part of the same commit as code changes
+- **Example**: Update phase specifications, CLI documentation, and README files together
+
+#### ✅ **MDC Plan File Updates**
+- **Lesson**: Always update relevant MDC plan files to reflect progress, completion status, and lessons learned
+- **Impact**: Maintains project history and knowledge transfer
+- **Application**: Update plan files before showing completion summaries to users
+- **Example**: Mark tasks as complete, add implementation decisions, record lessons learned
+
+### Code Comments and Documentation
+
+#### ✅ **Document Force Usage**
+- **Lesson**: Document force usage in code comments and test descriptions
+- **Impact**: Clear understanding of testing behavior
+- **Application**: Include comments about force usage when writing pipeline code
+- **Example**: `# Always use --force for testing to ensure fresh data processing`
+
+## Quality Assurance
+
+### Pre-Commit Validation
+
+#### ✅ **Mandatory Quality Checks**
+- **Lesson**: Run `make format lint typecheck test` before considering any task complete
+- **Impact**: Ensures code quality and prevents regressions
+- **Application**: All checks must pass before committing or marking tasks complete
+- **Example**: Format, lint, type check, and test all new code before completion
+
+#### ✅ **Clean Type and Lint Checks**
+- **Lesson**: Keep type and lint checks clean for all new code
+- **Impact**: Maintains code quality standards
+- **Application**: Use `# type: ignore` for intentional test violations, not for ignoring real issues
+- **Example**: Fix type issues in production code, use type ignore only in tests when necessary
+
+## Domain-Specific Insights
+
+### Product Matching
+
+#### ✅ **Strategy Pattern for Complex Matching**
+- **Lesson**: Use strategy pattern for complex product matching scenarios
+- **Impact**: Easier to extend and maintain matching logic
+- **Application**: Create strategy classes for different matching approaches
+- **Example**: Brush matching strategies for different handle/knot combinations
+
+#### ✅ **Catalog Data Preservation**
+- **Lesson**: All matchers must preserve complete catalog specifications in match output
+- **Impact**: Maintains data integrity and enables downstream enrichment
+- **Application**: Include all catalog fields in matched data, not just basic brand/model
+- **Example**: Preserve straight razor grind, width, point specifications from catalog
+
+### Data Recovery and Resilience
+
+#### ✅ **Graceful Missing Data Handling**
+- **Lesson**: Handle missing data gracefully with clear reporting
+- **Impact**: Robust pipeline operation even with incomplete data
+- **Application**: Skip missing data with warnings and metadata tracking
+- **Example**: Annual aggregation includes missing months in metadata for transparency
+
+#### ✅ **Corrupted File Handling**
+- **Lesson**: Treat corrupted files as missing data, not fatal errors
+- **Impact**: Robust annual aggregation even with partial/corrupt data
+- **Application**: Catch JSON decode errors and treat as missing data
+- **Example**: Corrupted monthly files are skipped with warnings in annual aggregation
+
+## Implementation Best Practices
+
+### Development Workflow
+
+#### ✅ **Task-Driven TDD Loop**
+- **Lesson**: Follow systematic approach: write tests → implement → refactor → quality checks → commit
+- **Impact**: Consistent, high-quality development process
+- **Application**: Use this loop for all feature development
+- **Example**: Write failing tests first, implement minimal code, run quality checks, commit with clear message
+
+#### ✅ **Incremental Implementation**
+- **Lesson**: Implement features incrementally with comprehensive testing at each step
+- **Impact**: Early bug detection and easier debugging
+- **Application**: Build features in small, testable chunks
+- **Example**: Annual aggregation built incrementally: CLI → loader → engine → save → integration
+
+### Error Recovery and Debugging
+
+#### ✅ **Robust Error Messages**
+- **Lesson**: Provide clear, actionable error messages for all failure scenarios
+- **Impact**: Easier debugging and better user experience
+- **Application**: Include context and suggestions in error messages
+- **Example**: "Missing required argument: --year (required when using --annual)"
+
+#### ✅ **Debug Output for Integration**
+- **Lesson**: Use print-based debug output for CLI integration tests
+- **Impact**: Easier to capture and assert on CLI behavior
+- **Application**: Capture stdout for CLI test assertions
+- **Example**: Use print statements in CLI integration tests for easier assertion
+
+## Conclusion
+
+These lessons learned represent the collective wisdom from extensive development experience with the SOTD Pipeline. They provide a foundation for maintaining high code quality, robust functionality, and efficient development practices. Future development should follow these patterns to ensure consistency and avoid repeating past mistakes.
+
+The key themes are:
+1. **Test-first development** with comprehensive coverage
+2. **Consistent patterns** across all phases and modules
+3. **Robust error handling** with clear messaging
+4. **Performance monitoring** and data-driven optimization
+5. **Documentation synchronization** with all changes
+6. **Quality assurance** through mandatory pre-commit checks
+
+Following these lessons will ensure the pipeline continues to evolve with high quality and maintainability.
