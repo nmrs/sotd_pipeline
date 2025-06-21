@@ -17,9 +17,9 @@ This file contains reusable development workflows and prompts for the SOTD Pipel
 ```
 Proceed through the remaining tasks in the current step one at a time. After completing each task:
 1. Update the implementation plan to reflect the completed work.
-2. Run make format lint typecheck test.
-3. If any errors or failures occur, fix them immediately.
-4. Commit the changes with a clear message summarizing the task completed.
+2. Commit the changes with a clear message summarizing the task completed.
+3. Move to the next task.
+4. Run quality checks (make format lint typecheck test) only before commits, not after every task.
 ```
 
 ### Tracked Implementation Development Process
@@ -30,11 +30,12 @@ Proceed through the remaining tasks in the current step one at a time. After com
 **Process**:
 1. Start with first unchecked item
 2. Follow the workflow: Complete each chunk before moving to the next
-3. Run quality checks: Use "make format lint typecheck test" after each chunk, fixing any errors that result
+3. **Skip quality checks during development** (run only before commits)
 4. Check off tasks: Mark each completed task in the implementation plan document with [x] and save the file
 5. Update session notes: Add notes after each work session
 6. Commit regularly: Commit changes with clear messages after each chunk. Commits should include updates to implementation plan.
-7. Proceed *until context limit is reached*
+7. **Run quality checks before commits**: Use "make format lint typecheck test" before committing, fixing any errors that result
+8. Proceed *until context limit is reached*
 
 ---
 

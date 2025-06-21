@@ -75,6 +75,7 @@ class TestDataQuality:
         records = [
             {"author": ""},
             {"author": "   "},
+            {"author": None},  # Test None values as well
         ]
 
         with pytest.raises(ValueError, match="No valid authors found in records"):
