@@ -13,73 +13,15 @@ CLI matrix
 --force                    → force overwrite existing files
 """
 
-import argparse
-import datetime
 from pathlib import Path
 from typing import Sequence
 
 from sotd.utils.performance import PerformanceMonitor
 
-from . import load, process, save
+from . import cli, load, process, save
 
 
-def parse_report_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    """Parse and validate CLI arguments for the report phase."""
-    parser = argparse.ArgumentParser(
-        description="Generate statistical analysis reports from aggregated SOTD data",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-CLI matrix
-──────────
-(no flags)                 → current month, hardware report
---month YYYY-MM            → that single month
---type hardware|software   → report type (default: hardware)
---data-root DIR            → root directory for all input data (default: data)
---out-dir DIR              → output directory for report file (default: data)
---debug                    → enable debug logging
---force                    → force overwrite existing files
-""",
-    )
-
-    # Date arguments
-    parser.add_argument("--month", help="Process specific month (YYYY-MM format)")
-
-    # Report type
-    parser.add_argument(
-        "--type",
-        choices=["hardware", "software"],
-        default="hardware",
-        help="Report type (default: hardware)",
-    )
-
-    # Data root for all input data
-    parser.add_argument(
-        "--data-root",
-        default="data",
-        help="Root directory for all input data (default: data)",
-    )
-
-    # Output directory for report file
-    parser.add_argument(
-        "--out-dir",
-        default="data",
-        help="Output directory for report file (default: data)",
-    )
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument("--force", action="store_true", help="Force overwrite existing files")
-
-    args = parser.parse_args(argv)
-
-    # Validate date arguments
-    if not args.month:
-        # Default to current month
-        now = datetime.datetime.now()
-        args.month = f"{now.year:04d}-{now.month:02d}"
-
-    return args
-
-
-def run_report(args: argparse.Namespace) -> None:
+def run_report(args) -> None:
     """Main report generation logic."""
     monitor = PerformanceMonitor("report")
     monitor.start_total_timing()
@@ -176,7 +118,9 @@ def run_report(args: argparse.Namespace) -> None:
 def main(argv: Sequence[str] | None = None) -> None:
     """Main entry point for the report phase."""
     try:
-        args = parse_report_args(argv)
+        parser = cli.get_parser()
+        args = parser.parse_args(argv)
+        cli.validate_args(args)
         run_report(args)
     except KeyboardInterrupt:
         print("\n[INFO] Report generation interrupted by user")

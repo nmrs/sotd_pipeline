@@ -4,7 +4,8 @@
 from typing import Optional, Sequence
 
 from ..cli_utils.date_span import month_span
-from .cli import get_parser, process_months
+from .cli import get_parser
+from .engine import process_months
 
 
 def run(args) -> None:

@@ -27,15 +27,10 @@ def get_parser() -> BaseCLIParser:
         help="Operation mode (default: match)",
     )
 
-    # Parallel processing options
-    parallel_group = parser.add_mutually_exclusive_group()
-    parallel_group.add_argument("--parallel", action="store_true", help="Force parallel processing")
-    parallel_group.add_argument(
-        "--sequential", action="store_true", help="Force sequential processing"
-    )
-
-    parser.add_argument(
-        "--max-workers", type=int, default=4, help="Maximum parallel workers (default: 4)"
+    # Add standardized parallel processing arguments
+    parser.add_parallel_processing_arguments(
+        default_max_workers=4,
+        help_max_workers="Maximum parallel workers for month processing (default: 4)",
     )
 
     return parser
