@@ -172,10 +172,22 @@ class BaseCLIParser(argparse.ArgumentParser):
 
     def validate_args(self, args: argparse.Namespace) -> argparse.Namespace:
         """Validate parsed arguments."""
-        # Check that at least one date specification method is provided
+        # Special case: --list-months and --audit can work without date arguments
+        # These are utility operations that don't require date ranges
         has_primary_date = bool(args.month or args.year or args.range)
         has_start_end = bool(args.start or args.end)
 
+        if (
+            hasattr(args, "list_months")
+            and args.list_months
+            and not has_primary_date
+            and not has_start_end
+        ):
+            return args
+        if hasattr(args, "audit") and args.audit and not has_primary_date and not has_start_end:
+            return args
+
+        # Check that at least one date specification method is provided
         if not has_primary_date and not has_start_end:
             self.error("Must provide --month, --year, --range, or both --start and --end")
 

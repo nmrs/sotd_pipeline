@@ -28,6 +28,7 @@ from tqdm import tqdm
 
 from sotd.cli_utils.date_span import month_span
 from sotd.fetch.audit import _audit_months, list_available_months
+from sotd.fetch.cli import get_parser
 from sotd.fetch.merge import merge_records
 from sotd.fetch.overrides import apply_overrides, load_overrides
 from sotd.fetch.reddit import (
@@ -199,23 +200,8 @@ def _process_month(
 # main                                                                        #
 # --------------------------------------------------------------------------- #
 def main(argv: Sequence[str] | None = None) -> None:  # easier to test
-    p = argparse.ArgumentParser(description="Fetch & persist SOTD data")
-    g = p.add_mutually_exclusive_group()
-    g.add_argument("--month")
-    g.add_argument("--year")
-    g.add_argument("--range")
-    p.add_argument("--start")
-    p.add_argument("--end")
-    p.add_argument("--out-dir", default="data")
-    p.add_argument("--debug", action="store_true")
-    p.add_argument("--force", action="store_true")
-    p.add_argument("--audit", action="store_true")
-    p.add_argument(
-        "--list-months",
-        action="store_true",
-        help="List months with existing threads or comments files",
-    )
-    args = p.parse_args(argv)
+    parser = get_parser()
+    args = parser.parse_args(argv)
 
     # If --list-months is set, list months and exit
     if args.list_months:
