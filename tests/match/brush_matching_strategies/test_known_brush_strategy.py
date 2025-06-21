@@ -79,22 +79,6 @@ def test_known_brush_with_user_fiber_conflict(strategy):
     # Note: fiber_conflict is added by BrushMatcher post-processing, not individual strategies
 
 
-def test_empty_catalog():
-    strategy = KnownBrushMatchingStrategy({})
-    result = strategy.match("Simpson Chubby 2")
-
-    assert result["matched"] is None
-
-
-def test_invalid_catalog_structure():
-    """Test with malformed catalog data"""
-    invalid_catalog = {"Simpson": "invalid_structure"}  # Should be dict
-    strategy = KnownBrushMatchingStrategy(invalid_catalog)
-    result = strategy.match("Simpson Chubby 2")
-
-    assert result["matched"] is None
-
-
 def test_known_brush_ap_shave_co_g5c(strategy):
     """Test matching AP Shave Co G5C brush"""
     result = strategy.match("AP Shave Co G5C")

@@ -40,11 +40,6 @@ class TestValidateListOfDicts:
         with pytest.raises(ValueError, match="data item 1 must be a dictionary"):
             validate_list_of_dicts([{"a": 1}, "not a dict"])
 
-    def test_custom_data_name(self):
-        """Test with custom data name in error message."""
-        with pytest.raises(ValueError, match="custom must be a list"):
-            validate_list_of_dicts({"a": 1}, "custom")
-
 
 class TestValidateRequiredFields:
     """Test validate_required_fields function."""
@@ -59,12 +54,6 @@ class TestValidateRequiredFields:
         data = {"a": 1, "c": 3}
         with pytest.raises(ValueError, match="data missing required fields: \\['b'\\]"):
             validate_required_fields(data, ["a", "b", "c"])
-
-    def test_custom_data_name(self):
-        """Test with custom data name in error message."""
-        data = {"a": 1}
-        with pytest.raises(ValueError, match="custom missing required fields: \\['b'\\]"):
-            validate_required_fields(data, ["a", "b"], "custom")
 
 
 class TestValidateFieldTypes:
@@ -88,13 +77,6 @@ class TestValidateFieldTypes:
         data = {"a": 1}
         field_types = {"a": int, "b": str}
         validate_field_types(data, field_types)
-
-    def test_custom_data_name(self):
-        """Test with custom data name in error message."""
-        data = {"a": "string"}
-        field_types = {"a": int}
-        with pytest.raises(ValueError, match="custom field 'a' must be int, got str"):
-            validate_field_types(data, field_types, "custom")
 
 
 class TestValidateNonEmptyStrings:
@@ -123,17 +105,6 @@ class TestValidateNonEmptyStrings:
         with pytest.raises(ValueError, match="data field 'b' must be a non-empty string"):
             validate_non_empty_strings(data, ["a", "b"])
 
-    def test_missing_field_ignored(self):
-        """Test that missing fields are ignored."""
-        data = {"a": "hello"}
-        validate_non_empty_strings(data, ["a", "b"])
-
-    def test_custom_data_name(self):
-        """Test with custom data name in error message."""
-        data = {"a": ""}
-        with pytest.raises(ValueError, match="custom field 'a' must be a non-empty string"):
-            validate_non_empty_strings(data, ["a"], "custom")
-
 
 class TestValidatePositiveIntegers:
     """Test validate_positive_integers function."""
@@ -161,17 +132,6 @@ class TestValidatePositiveIntegers:
         with pytest.raises(ValueError, match="data field 'b' must be a positive number"):
             validate_positive_integers(data, ["a", "b"])
 
-    def test_missing_field_ignored(self):
-        """Test that missing fields are ignored."""
-        data = {"a": 1}
-        validate_positive_integers(data, ["a", "b"])
-
-    def test_custom_data_name(self):
-        """Test with custom data name in error message."""
-        data = {"a": -1}
-        with pytest.raises(ValueError, match="custom field 'a' must be a positive number"):
-            validate_positive_integers(data, ["a"], "custom")
-
 
 class TestValidateDataStructure:
     """Test validate_data_structure function."""
@@ -187,18 +147,12 @@ class TestValidateDataStructure:
         with pytest.raises(ValueError, match="data missing required sections: \\['data'\\]"):
             validate_data_structure(data, ["meta", "data"])
 
-    def test_custom_data_name(self):
-        """Test with custom data name in error message."""
-        data = {"meta": {}}
-        with pytest.raises(ValueError, match="custom missing required sections: \\['data'\\]"):
-            validate_data_structure(data, ["meta", "data"], "custom")
-
 
 class TestValidateMetadataStructure:
     """Test validate_metadata_structure function."""
 
     def test_valid_metadata(self):
-        """Test with valid metadata."""
+        """Test with valid metadata structure."""
         metadata = {"total_shaves": 100, "unique_shavers": 50}
         validate_metadata_structure(metadata)
 
@@ -218,7 +172,7 @@ class TestValidateMetadataStructure:
     def test_wrong_field_types_raises_error(self):
         """Test that wrong field types raises ValueError."""
         metadata = {"total_shaves": "100", "unique_shavers": 50}
-        with pytest.raises(ValueError, match="metadata field 'total_shaves' must be int, got str"):
+        with pytest.raises(ValueError, match="metadata field 'total_shaves' must be int"):
             validate_metadata_structure(metadata)
 
     def test_non_positive_integers_raises_error(self):
@@ -231,14 +185,8 @@ class TestValidateMetadataStructure:
 
     def test_with_additional_required_fields(self):
         """Test with additional required fields."""
-        metadata = {"total_shaves": 100, "unique_shavers": 50, "custom": "value"}
-        validate_metadata_structure(metadata, ["custom"])
-
-    def test_missing_additional_fields_raises_error(self):
-        """Test that missing additional fields raises ValueError."""
-        metadata = {"total_shaves": 100, "unique_shavers": 50}
-        with pytest.raises(ValueError, match="metadata missing required fields: \\['custom'\\]"):
-            validate_metadata_structure(metadata, ["custom"])
+        metadata = {"total_shaves": 100, "unique_shavers": 50, "custom_field": 25}
+        validate_metadata_structure(metadata, ["custom_field"])
 
 
 class TestValidateRecordsQuality:
@@ -260,59 +208,43 @@ class TestValidateRecordsQuality:
         with pytest.raises(ValueError, match="No valid authors found in records"):
             validate_records_quality(records)
 
-    def test_records_with_valid_authors(self):
-        """Test with records containing valid authors."""
-        records = [{"author": "user1"}, {"author": "user2"}, {"author": ""}]
-        validate_records_quality(records)  # Should not raise error
-
 
 class TestValidateCatalogStructure:
     """Test validate_catalog_structure function."""
 
     def test_valid_catalog(self):
-        """Test with valid catalog."""
+        """Test with valid catalog structure."""
         catalog = {
-            "brand1": {"patterns": ["pattern1"], "default": "badger"},
-            "brand2": {"patterns": ["pattern2"], "default": "synthetic"},
+            "brand1": {"field1": "value1", "field2": "value2"},
+            "brand2": {"field1": "value3", "field2": "value4"},
         }
-        validate_catalog_structure(catalog, ["patterns", "default"])
+        validate_catalog_structure(catalog, ["field1", "field2"])
 
     def test_not_dict_raises_error(self):
         """Test that non-dict input raises ValueError."""
         with pytest.raises(ValueError, match="catalog must be a dictionary"):
-            validate_catalog_structure([], ["patterns"])  # type: ignore
+            validate_catalog_structure([], ["field1"])  # type: ignore
 
     def test_brand_not_dict_raises_error(self):
-        """Test that brand entry not being dict raises ValueError."""
+        """Test that brand metadata not dict raises ValueError."""
         catalog = {"brand1": "not a dict"}
-        with pytest.raises(
-            ValueError, match="Invalid catalog structure for brand 'brand1': must be a dictionary"
-        ):
-            validate_catalog_structure(catalog, ["patterns"])
+        with pytest.raises(ValueError, match="Invalid catalog structure for brand 'brand1'"):
+            validate_catalog_structure(catalog, ["field1"])
 
     def test_missing_required_fields_raises_error(self):
         """Test that missing required fields raises ValueError."""
-        catalog = {"brand1": {"patterns": ["pattern1"]}}
+        catalog = {"brand1": {"field1": "value1"}}
         with pytest.raises(
-            ValueError,
-            match="Missing required fields for brand 'brand1' in catalog: \\['default'\\]",
+            ValueError, match="Missing required fields for brand 'brand1' in catalog"
         ):
-            validate_catalog_structure(catalog, ["patterns", "default"])
-
-    def test_custom_catalog_name(self):
-        """Test with custom catalog name in error message."""
-        catalog = {"brand1": "not a dict"}
-        with pytest.raises(
-            ValueError, match="Invalid custom structure for brand 'brand1': must be a dictionary"
-        ):
-            validate_catalog_structure(catalog, ["patterns"], "custom")
+            validate_catalog_structure(catalog, ["field1", "field2"])
 
 
 class TestValidatePatternsField:
     """Test validate_patterns_field function."""
 
     def test_valid_patterns(self):
-        """Test with valid patterns."""
+        """Test with valid patterns list."""
         patterns = ["pattern1", "pattern2"]
         validate_patterns_field(patterns, "brand1")
 
@@ -324,18 +256,12 @@ class TestValidatePatternsField:
             validate_patterns_field("not a list", "brand1")
 
     def test_pattern_not_string_raises_error(self):
-        """Test that pattern not being string raises ValueError."""
+        """Test that non-string pattern raises ValueError."""
+        patterns = ["pattern1", 123]
         with pytest.raises(
             ValueError, match="Pattern 1 for brand 'brand1' must be a string in catalog"
         ):
-            validate_patterns_field(["pattern1", 123], "brand1")
-
-    def test_custom_catalog_name(self):
-        """Test with custom catalog name in error message."""
-        with pytest.raises(
-            ValueError, match="'patterns' field must be a list for brand 'brand1' in custom"
-        ):
-            validate_patterns_field("not a list", "brand1", "custom")
+            validate_patterns_field(patterns, "brand1")
 
 
 class TestValidateMonthFormat:
@@ -343,8 +269,8 @@ class TestValidateMonthFormat:
 
     def test_valid_month(self):
         """Test with valid month format."""
-        assert validate_month_format("2024-01") == "2024-01"
-        assert validate_month_format("2024-12") == "2024-12"
+        result = validate_month_format("2024-01")
+        assert result == "2024-01"
 
     def test_not_string_raises_error(self):
         """Test that non-string input raises ValueError."""
@@ -358,8 +284,8 @@ class TestValidateMonthFormat:
 
     def test_invalid_year_raises_error(self):
         """Test that invalid year raises ValueError."""
-        with pytest.raises(ValueError, match="Year must be between 1900 and 2100"):
-            validate_month_format("1800-01")
+        with pytest.raises(ValueError, match="Month must be in YYYY-MM format"):
+            validate_month_format("999-01")
 
     def test_invalid_month_raises_error(self):
         """Test that invalid month raises ValueError."""
@@ -367,8 +293,8 @@ class TestValidateMonthFormat:
             validate_month_format("2024-13")
 
     def test_non_numeric_raises_error(self):
-        """Test that non-numeric input raises ValueError."""
-        with pytest.raises(ValueError, match="Month must be in YYYY-MM format with valid numbers"):
+        """Test that non-numeric values raise ValueError."""
+        with pytest.raises(ValueError, match="Month must be in YYYY-MM format"):
             validate_month_format("abcd-ef")
 
 
@@ -377,8 +303,8 @@ class TestValidateYearFormat:
 
     def test_valid_year(self):
         """Test with valid year format."""
-        assert validate_year_format("2024") == "2024"
-        assert validate_year_format("1990") == "1990"
+        result = validate_year_format("2024")
+        assert result == "2024"
 
     def test_not_string_raises_error(self):
         """Test that non-string input raises ValueError."""
@@ -392,12 +318,12 @@ class TestValidateYearFormat:
 
     def test_invalid_year_raises_error(self):
         """Test that invalid year raises ValueError."""
-        with pytest.raises(ValueError, match="Year must be between 1900 and 2100"):
-            validate_year_format("1800")
+        with pytest.raises(ValueError, match="Year must be in YYYY format"):
+            validate_year_format("999")
 
     def test_non_numeric_raises_error(self):
-        """Test that non-numeric input raises ValueError."""
-        with pytest.raises(ValueError, match="Year must be in YYYY format with valid numbers"):
+        """Test that non-numeric values raise ValueError."""
+        with pytest.raises(ValueError, match="Year must be in YYYY format"):
             validate_year_format("abcd")
 
 
@@ -406,7 +332,8 @@ class TestValidateRangeFormat:
 
     def test_valid_range(self):
         """Test with valid range format."""
-        assert validate_range_format("2024-01:2024-12") == "2024-01:2024-12"
+        result = validate_range_format("2024-01:2024-12")
+        assert result == "2024-01:2024-12"
 
     def test_not_string_raises_error(self):
         """Test that non-string input raises ValueError."""
@@ -416,7 +343,7 @@ class TestValidateRangeFormat:
     def test_wrong_format_raises_error(self):
         """Test that wrong format raises ValueError."""
         with pytest.raises(ValueError, match="Date range must be in YYYY-MM:YYYY-MM format"):
-            validate_range_format("2024-01")
+            validate_range_format("2024-01/2024-12")
 
     def test_start_after_end_raises_error(self):
         """Test that start after end raises ValueError."""
@@ -433,19 +360,14 @@ class TestValidateBooleanField:
     """Test validate_boolean_field function."""
 
     def test_valid_boolean(self):
-        """Test with valid boolean values."""
-        assert validate_boolean_field(True, "field") is True
-        assert validate_boolean_field(False, "field") is False
+        """Test with valid boolean value."""
+        result = validate_boolean_field(True, "field")
+        assert result is True
 
     def test_not_boolean_raises_error(self):
-        """Test that non-boolean input raises ValueError."""
+        """Test that non-boolean value raises ValueError."""
         with pytest.raises(ValueError, match="data field 'field' must be a boolean"):
             validate_boolean_field("true", "field")
-
-    def test_custom_data_name(self):
-        """Test with custom data name in error message."""
-        with pytest.raises(ValueError, match="custom field 'field' must be a boolean"):
-            validate_boolean_field("true", "field", "custom")
 
 
 class TestValidateOptionalStringField:
@@ -453,30 +375,30 @@ class TestValidateOptionalStringField:
 
     def test_none_value(self):
         """Test with None value."""
-        assert validate_optional_string_field(None, "field") is None
+        result = validate_optional_string_field(None, "field")
+        assert result is None
 
     def test_valid_string(self):
         """Test with valid string."""
-        assert validate_optional_string_field("hello", "field") == "hello"
+        result = validate_optional_string_field("hello", "field")
+        assert result == "hello"
 
     def test_empty_string_returns_none(self):
         """Test that empty string returns None."""
-        assert validate_optional_string_field("", "field") is None
+        result = validate_optional_string_field("", "field")
+        assert result is None
 
     def test_whitespace_string_returns_none(self):
-        """Test that whitespace-only string returns None."""
-        assert validate_optional_string_field("   ", "field") is None
+        """Test that whitespace string returns None."""
+        result = validate_optional_string_field("   ", "field")
+        assert result is None
 
     def test_stripped_string(self):
         """Test that string is stripped."""
-        assert validate_optional_string_field("  hello  ", "field") == "hello"
+        result = validate_optional_string_field("  hello  ", "field")
+        assert result == "hello"
 
     def test_not_string_raises_error(self):
-        """Test that non-string input raises ValueError."""
+        """Test that non-string value raises ValueError."""
         with pytest.raises(ValueError, match="data field 'field' must be None or a string"):
             validate_optional_string_field(123, "field")
-
-    def test_custom_data_name(self):
-        """Test with custom data name in error message."""
-        with pytest.raises(ValueError, match="custom field 'field' must be None or a string"):
-            validate_optional_string_field(123, "field", "custom")

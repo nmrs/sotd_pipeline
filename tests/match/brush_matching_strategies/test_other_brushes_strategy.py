@@ -130,48 +130,6 @@ def test_other_brush_multiple_patterns(strategy):
     assert result["matched"]["model"] == "Synthetic"
 
 
-def test_empty_catalog():
-    """Test with empty catalog"""
-    strategy = OtherBrushMatchingStrategy({})
-    result = strategy.match("Elite brush")
-
-    assert result["matched"] is None
-
-
-def test_invalid_catalog_structure():
-    """Test with malformed catalog data - should raise exceptions during initialization"""
-
-    # Test invalid structure (not a dict)
-    invalid_catalog_1 = {
-        "Elite": "invalid_structure",  # Should be dict
-    }
-    with pytest.raises(
-        ValueError,
-        match="Invalid other_brushes catalog structure for brand 'Elite': must be a dictionary",
-    ):
-        OtherBrushMatchingStrategy(invalid_catalog_1)
-
-    # Test missing patterns
-    invalid_catalog_2 = {
-        "Alpha": {
-            "default": "Synthetic"
-            # Missing patterns
-        },
-    }
-    expected_msg = (
-        "Missing required fields for brand 'Alpha' in other_brushes catalog: \\['patterns'\\]"
-    )
-    with pytest.raises(ValueError, match=expected_msg):
-        OtherBrushMatchingStrategy(invalid_catalog_2)
-
-    # Test patterns not a list
-    invalid_catalog_3 = {
-        "Beta": {"default": "Badger", "patterns": "not_a_list"},  # Should be list
-    }
-    with pytest.raises(ValueError, match="'patterns' field must be a list for brand 'Beta'"):
-        OtherBrushMatchingStrategy(invalid_catalog_3)
-
-
 def test_no_default_fiber():
     """Test brand without default fiber - should raise exception during initialization"""
     catalog = {

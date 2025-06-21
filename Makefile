@@ -19,6 +19,15 @@ typecheck:
 test:
 	PYTHONPATH=. pytest tests/
 
+test-fast:
+	PYTHONPATH=. pytest tests/ -n 4 -q
+
+test-parallel:
+	PYTHONPATH=. pytest tests/ -n auto -q
+
+test-slow:
+	PYTHONPATH=. pytest tests/ --durations=10 -v
+
 coverage:
 	pytest --cov=sotd --cov-report=term-missing tests/
 

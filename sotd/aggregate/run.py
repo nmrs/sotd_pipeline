@@ -21,12 +21,16 @@ def run(args) -> None:
     if args.annual:
         # Handle annual aggregation
         if args.year:
-            process_annual(args.year, args.out_dir, debug=args.debug, force=args.force)
+            process_annual(
+                year=args.year, data_dir=args.out_dir, debug=args.debug, force=args.force
+            )
         elif args.range:
             # Parse year range for annual mode
             start_year, end_year = args.range.split(":")
             years = [str(year) for year in range(int(start_year), int(end_year) + 1)]
-            process_annual_range(years, args.out_dir, debug=args.debug, force=args.force)
+            process_annual_range(
+                years=years, data_dir=args.out_dir, debug=args.debug, force=args.force
+            )
     else:
         # Handle monthly aggregation (existing logic)
         # Get months to process
@@ -34,7 +38,7 @@ def run(args) -> None:
         months = [f"{year:04d}-{month:02d}" for year, month in month_tuples]
 
         # Process the months
-        process_months(months, args.out_dir, debug=args.debug, force=args.force)
+        process_months(months=months, data_dir=args.out_dir, debug=args.debug, force=args.force)
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:

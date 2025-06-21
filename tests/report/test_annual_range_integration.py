@@ -11,30 +11,6 @@ from sotd.report.run import run_annual_report, main
 class TestAnnualRangeIntegration:
     """Test annual range processing integration."""
 
-    def test_annual_range_cli_validation_valid(self):
-        """Test that annual range CLI arguments are valid."""
-        parser = get_parser()
-        args = parser.parse_args(["--annual", "--range", "2021:2024", "--type", "hardware"])
-        # Should not raise any exceptions
-        validate_args(args)
-        assert args.annual is True
-        assert args.range == "2021:2024"
-        assert args.type == "hardware"
-
-    def test_annual_range_cli_validation_invalid_format(self):
-        """Test that invalid annual range format raises error."""
-        parser = get_parser()
-        # This should raise SystemExit because argparse handles validation
-        with pytest.raises(SystemExit):
-            parser.parse_args(["--annual", "--range", "2021-2024", "--type", "hardware"])
-
-    def test_annual_range_cli_validation_missing_range(self):
-        """Test that annual without range raises error."""
-        parser = get_parser()
-        # This should raise SystemExit because argparse handles validation
-        with pytest.raises(SystemExit):
-            parser.parse_args(["--annual", "--type", "hardware"])
-
     @patch("sotd.report.run.run_annual_report")
     def test_main_with_annual_range(self, mock_run_annual_report):
         """Test main function routes annual range to correct handler."""

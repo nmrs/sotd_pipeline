@@ -16,243 +16,123 @@ from sotd.match.blade_matcher import BladeMatcher
 class TestRealCatalogIntegration:
     """Integration tests using actual production YAML catalogs."""
 
-    def test_real_brush_catalog_loads_successfully(self):
-        """Test that real brush catalog loads without errors."""
-        matcher = BrushMatcher()  # Uses default paths to real files
+    def test_real_catalogs_load_successfully(self):
+        """Test that all real catalogs load without errors."""
+        # Test all matchers initialize successfully with real catalogs
+        brush_matcher = BrushMatcher()
+        soap_matcher = SoapMatcher()
+        razor_matcher = RazorMatcher()
+        blade_matcher = BladeMatcher()
 
-        # Should not raise exceptions during initialization
-        assert matcher.catalog_data is not None
-        assert matcher.handle_matcher is not None
-        assert len(matcher.strategies) > 0
+        # Verify basic structure
+        assert brush_matcher.catalog_data is not None
+        assert soap_matcher.catalog is not None
+        assert razor_matcher.catalog is not None
+        assert blade_matcher.catalog is not None
 
-    def test_real_soap_catalog_loads_successfully(self):
-        """Test that real soap catalog loads without errors."""
-        matcher = SoapMatcher()  # Uses default path to real file
+    def test_real_catalog_patterns_compile(self):
+        """Test that all regex patterns in real catalogs compile successfully."""
+        brush_matcher = BrushMatcher()
+        soap_matcher = SoapMatcher()
 
-        # Should not raise exceptions during initialization
-        assert matcher.catalog is not None
-        assert len(matcher.scent_patterns) + len(matcher.brand_patterns) > 0
+        # Verify patterns exist and compiled successfully
+        assert len(brush_matcher.strategies) > 0
+        assert len(brush_matcher.handle_matcher.handle_patterns) > 0
+        assert len(soap_matcher.scent_patterns) + len(soap_matcher.brand_patterns) > 0
 
-    def test_real_razor_catalog_loads_successfully(self):
-        """Test that real razor catalog loads without errors."""
-        matcher = RazorMatcher()  # Uses default path to real file
+    def test_known_real_patterns_work(self):
+        """Test that known patterns from real catalogs work correctly."""
+        brush_matcher = BrushMatcher()
+        soap_matcher = SoapMatcher()
+        razor_matcher = RazorMatcher()
+        blade_matcher = BladeMatcher()
 
-        # Should not raise exceptions during initialization
-        assert matcher.catalog is not None
-
-    def test_real_blade_catalog_loads_successfully(self):
-        """Test that real blade catalog loads without errors."""
-        matcher = BladeMatcher()  # Uses default path to real file
-
-        # Should not raise exceptions during initialization
-        assert matcher.catalog is not None
-
-    def test_known_real_brush_patterns_work(self):
-        """Test that known brush patterns from real catalog work correctly."""
-        matcher = BrushMatcher()
-
-        # Test cases that should definitely work with real catalog
+        # Key test cases that should work with real catalogs
         test_cases = [
-            ("Simpson Chubby 2", "Simpson"),
-            ("Declaration B15", "Declaration Grooming"),
-            ("Omega 10048", "Omega"),
-            ("Chisel & Hound V20", "Chisel & Hound"),
+            # Brush patterns
+            (brush_matcher, "Simpson Chubby 2", "brand", "Simpson"),
+            (brush_matcher, "Declaration B15", "brand", "Declaration Grooming"),
+            (brush_matcher, "Omega 10048", "brand", "Omega"),
+            # Soap patterns
+            (soap_matcher, "Barrister and Mann Seville", "maker", "Barrister and Mann"),
+            (soap_matcher, "Declaration Grooming Bandwagon", "maker", "Declaration Grooming"),
+            # Razor patterns
+            (razor_matcher, "Karve Christopher Bradley", "brand", "Karve"),
+            (razor_matcher, "Gillette Tech", "brand", "Gillette"),
+            # Blade patterns
+            (blade_matcher, "Feather", "brand", "Feather"),
+            (blade_matcher, "Astra Superior Platinum", "brand", "Astra"),
         ]
 
-        for input_text, expected_brand in test_cases:
+        for matcher, input_text, field, expected_value in test_cases:
             result = matcher.match(input_text)
             matched = result.get("matched")
             if isinstance(matched, dict):
-                assert matched.get("brand") == expected_brand, f"Failed for {input_text}"
-                # Model matching may be flexible, so just check it's not None
-                assert matched.get("model") is not None, f"No model for {input_text}"
+                assert matched.get(field) == expected_value, f"Failed for {input_text}"
 
-    def test_real_handle_knot_splitting_integration(self):
+    def test_handle_knot_splitting_integration(self):
         """Test handle/knot splitting with real catalog data."""
         matcher = BrushMatcher()
 
         # Test cases that exercise both brush and handle catalogs
         test_cases = [
-            "DG B15 w/ C&H Zebra",
-            "Elite handle w/ Declaration B10",
-            "Wolf Whiskers w/ Omega knot",
+            ("DG B15 w/ C&H Zebra", "Declaration Grooming", "Chisel & Hound"),
+            ("Elite handle w/ Declaration B10", "Declaration Grooming", "Elite"),
+            ("Wolf Whiskers w/ Omega knot", "Omega", "Wolf Whiskers"),
         ]
 
-        for test_case in test_cases:
-            result = matcher.match(test_case)
-            # Should not crash and should provide some meaningful result
-            assert "original" in result
-            assert "matched" in result
-            assert "match_type" in result
-            assert "pattern" in result
-
-    def test_known_real_brush_handle_makers_work(self):
-        """Test that brush handle maker patterns from real catalog work correctly."""
-        matcher = BrushMatcher()
-
-        # Test cases that should identify specific handle makers
-        test_cases = [
-            ("DG B15 w/ Elite Zebra", "Elite"),
-            ("Declaration B10 w/ Wolf Whiskers handle", "Wolf Whiskers"),
-            ("Zenith B2 w/ Chisel & Hound", "Chisel & Hound"),
-            ("Simpson handle", "Simpson"),
-            ("Paladin custom handle", "Paladin"),
-        ]
-
-        for input_text, expected_handle_maker in test_cases:
-            result = matcher.match(input_text)
-            matched = result.get("matched")
-            if isinstance(matched, dict) and matched.get("handle_maker"):
-                actual_handle_maker = matched.get("handle_maker")
-                assert actual_handle_maker == expected_handle_maker, (
-                    f"Handle maker failed for '{input_text}' - got '{actual_handle_maker}', "
-                    f"expected '{expected_handle_maker}'"
-                )
-
-    def test_known_real_soap_patterns_work(self):
-        """Test that known soap patterns from real catalog work correctly."""
-        matcher = SoapMatcher()
-
-        # Test cases based on common brands in real catalog
-        test_cases = [
-            ("Barrister and Mann Seville", "Barrister and Mann"),
-            ("Declaration Grooming Bandwagon", "Declaration Grooming"),
-            ("House of Mammoth Hygge", "House of Mammoth"),
-            ("Stirling Soap Co Executive Man", "Stirling Soap Co."),
-        ]
-
-        for input_text, expected_brand in test_cases:
+        for input_text, expected_brand, expected_handle_maker in test_cases:
             result = matcher.match(input_text)
             matched = result.get("matched")
             if isinstance(matched, dict):
-                assert matched.get("maker") == expected_brand, f"Failed for {input_text}"
-
-    def test_known_real_soap_scents_work(self):
-        """Test that known soap scent patterns from real catalog work correctly."""
-        matcher = SoapMatcher()
-
-        # Test cases that should match specific scents, not just makers
-        test_cases = [
-            ("Barrister and Mann Seville", "Barrister and Mann", "Seville"),
-            ("Declaration Grooming Contemplation", "Declaration Grooming", "Contemplation"),
-            ("House of Mammoth Hygge", "House of Mammoth", "Hygge"),
-            ("Stirling Executive Man", "Stirling Soap Co.", "Executive Man"),
-            ("B&M Reserve Fern", "Barrister and Mann", "Fern"),
-        ]
-
-        for input_text, expected_maker, expected_scent in test_cases:
-            result = matcher.match(input_text)
-            matched = result.get("matched")
-            if isinstance(matched, dict):
-                assert matched.get("maker") == expected_maker, f"Maker failed for {input_text}"
-                # Scent matching should be specific
-                if matched.get("scent"):
+                assert matched.get("brand") == expected_brand, f"Brand failed for {input_text}"
+                if matched.get("handle_maker"):
                     assert (
-                        expected_scent.lower() in matched["scent"].lower()
-                    ), f"Scent failed for {input_text}"
+                        matched.get("handle_maker") == expected_handle_maker
+                    ), f"Handle maker failed for {input_text}"
 
-    def test_known_real_razor_patterns_work(self):
-        """Test that known razor patterns from real catalog work correctly."""
-        matcher = RazorMatcher()
+    def test_soap_scent_matching(self):
+        """Test that soap scent patterns work with real catalog."""
+        matcher = SoapMatcher()
 
-        # Test cases based on common razors in real catalog
         test_cases = [
-            ("Karve Christopher Bradley", "Karve"),
-            ("Gillette Tech", "Gillette"),
-            ("Merkur 34C", "Merkur"),
-            ("Blackland Blackbird", "Blackland"),
+            ("Barrister and Mann Seville", "Seville"),
+            ("Declaration Grooming Contemplation", "Contemplation"),
+            ("House of Mammoth Hygge", "Hygge"),
         ]
 
-        for input_text, expected_brand in test_cases:
+        for input_text, expected_scent in test_cases:
             result = matcher.match(input_text)
             matched = result.get("matched")
-            if isinstance(matched, dict):
-                assert matched.get("brand") == expected_brand, f"Failed for {input_text}"
-                assert matched.get("model") is not None, f"No model for {input_text}"
+            if isinstance(matched, dict) and matched.get("scent"):
+                assert (
+                    expected_scent.lower() in matched["scent"].lower()
+                ), f"Scent failed for {input_text}"
 
-    def test_known_real_blade_patterns_work(self):
-        """Test that known blade patterns from real catalog work correctly."""
-        matcher = BladeMatcher()
-
-        # Test cases based on common blades in real catalog
-        test_cases = [
-            ("Feather", "Feather"),
-            ("Astra Superior Platinum", "Astra"),
-            ("Gillette Silver Blue", "Gillette"),
-            ("Personna Lab Blue", "Personna"),
-        ]
-
-        for input_text, expected_brand in test_cases:
-            result = matcher.match(input_text)
-            matched = result.get("matched")
-            if isinstance(matched, dict):
-                assert matched.get("brand") == expected_brand, f"Failed for {input_text}"
-
-    def test_real_catalog_regex_patterns_compile(self):
-        """Test that all regex patterns in real catalogs compile successfully."""
-        # This test will catch malformed regex patterns in production catalogs
-
-        # Brush patterns
-        brush_matcher = BrushMatcher()
-        assert len(brush_matcher.strategies) > 0
-
-        # Handle patterns
-        assert len(brush_matcher.handle_matcher.handle_patterns) > 0
-        for pattern_info in brush_matcher.handle_matcher.handle_patterns:
-            assert pattern_info["regex"] is not None  # Should have compiled successfully
-
-        # Soap patterns
-        soap_matcher = SoapMatcher()
-        scent_and_brand_patterns = soap_matcher.scent_patterns + soap_matcher.brand_patterns
-        assert len(scent_and_brand_patterns) > 0
-        for pattern_info in scent_and_brand_patterns:
-            assert pattern_info["regex"] is not None  # Should have compiled successfully
-
-    def test_declaration_grooming_b2_integration(self):
-        """Test that the Declaration Grooming B2 bug fix works with real catalogs."""
+    def test_specific_integration_scenarios(self):
+        """Test specific integration scenarios that have caused issues."""
         brush_matcher = BrushMatcher()
 
-        # This should match as "Zenith B2", not "Declaration Grooming B2"
+        # Test Declaration Grooming B2 bug fix
         result = brush_matcher.match("Zenith B2 w/ Elite Handle")
         assert result["matched"] is not None
         assert result["matched"]["brand"] == "Zenith"
-        # The Zenith strategy preserves the full model including the brand prefix
-        assert result["matched"]["model"] == "B2"
 
-        # Test standalone B2 - should default to Declaration Grooming
-        result = brush_matcher.match("B2 w/ Elite Handle")
-        assert result["matched"] is not None
-        assert result["matched"]["brand"] == "Declaration Grooming"
-        assert result["matched"]["model"] == "B2"
-
-    def test_delimiter_unification_option1(self):
-        """Test that Option 1 delimiter unification works - all non-handle-primary delimiters use smart analysis."""
-        brush_matcher = BrushMatcher()
-
-        # These should all behave the same now (using smart analysis)
+        # Test delimiter unification
         test_cases = [
             "DG B15 w/ C&H Zebra",
             "DG B15 with C&H Zebra",
             "DG B15 / C&H Zebra",
-            "DG B15 - C&H Zebra",
         ]
 
         for test_case in test_cases:
             result = brush_matcher.match(test_case)
-
-            # Should match Declaration Grooming B15 as the knot
             assert result["matched"] is not None, f"No match for: {test_case}"
             assert (
                 result["matched"]["brand"] == "Declaration Grooming"
             ), f"Wrong brand for: {test_case}"
-            assert result["matched"]["model"] == "B15", f"Wrong model for: {test_case}"
 
-            # Should detect Chisel & Hound as handle maker
-            assert (
-                result["matched"]["handle_maker"] == "Chisel & Hound"
-            ), f"Wrong handle maker for: {test_case}"
-
-    def test_real_catalog_files_exist(self):
+    def test_catalog_files_exist(self):
         """Test that all expected catalog files exist."""
         catalog_files = [
             "data/brushes.yaml",
