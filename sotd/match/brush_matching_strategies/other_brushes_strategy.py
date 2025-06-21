@@ -2,6 +2,9 @@ import re
 
 from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
 from sotd.match.brush_matching_strategies.utils.knot_size_utils import parse_knot_size
+from sotd.match.brush_matching_strategies.utils.pattern_utils import (
+    validate_catalog_structure,
+)
 from sotd.match.brush_matching_strategies.yaml_backed_strategy import (
     YamlBackedBrushMatchingStrategy,
 )
@@ -14,26 +17,11 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
 
     def _validate_catalog(self):
         """Validate that all other_brushes entries have required fields."""
-        for brand, metadata in self.catalog.items():
-            if not isinstance(metadata, dict):
-                raise ValueError(
-                    f"Invalid catalog structure for brand '{brand}': must be a dictionary"
-                )
-
-            if "patterns" not in metadata:
-                raise ValueError(
-                    f"Missing 'patterns' field for brand '{brand}' in other_brushes catalog"
-                )
-
-            if "default" not in metadata:
-                raise ValueError(
-                    f"Missing 'default' fiber field for brand '{brand}' in other_brushes catalog"
-                )
-
-            if not isinstance(metadata["patterns"], list):
-                raise ValueError(
-                    f"'patterns' field must be a list for brand '{brand}' in other_brushes catalog"
-                )
+        validate_catalog_structure(
+            self.catalog,
+            required_fields=["patterns", "default"],
+            catalog_name="other_brushes catalog",
+        )
 
     def match(self, value: str) -> dict:
         # Handle other_brushes format: brand -> {default: fiber, patterns: []}

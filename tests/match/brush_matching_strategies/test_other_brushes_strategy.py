@@ -146,7 +146,8 @@ def test_invalid_catalog_structure():
         "Elite": "invalid_structure",  # Should be dict
     }
     with pytest.raises(
-        ValueError, match="Invalid catalog structure for brand 'Elite': must be a dictionary"
+        ValueError,
+        match="Invalid other_brushes catalog structure for brand 'Elite': must be a dictionary",
     ):
         OtherBrushMatchingStrategy(invalid_catalog_1)
 
@@ -157,7 +158,10 @@ def test_invalid_catalog_structure():
             # Missing patterns
         },
     }
-    with pytest.raises(ValueError, match="Missing 'patterns' field for brand 'Alpha'"):
+    expected_msg = (
+        "Missing required fields for brand 'Alpha' in other_brushes catalog: \\['patterns'\\]"
+    )
+    with pytest.raises(ValueError, match=expected_msg):
         OtherBrushMatchingStrategy(invalid_catalog_2)
 
     # Test patterns not a list
@@ -178,5 +182,8 @@ def test_no_default_fiber():
     }
 
     # Should raise ValueError during initialization
-    with pytest.raises(ValueError, match="Missing 'default' fiber field for brand 'TestBrand'"):
+    expected_msg = (
+        "Missing required fields for brand 'TestBrand' in other_brushes catalog: \\['default'\\]"
+    )
+    with pytest.raises(ValueError, match=expected_msg):
         OtherBrushMatchingStrategy(catalog)

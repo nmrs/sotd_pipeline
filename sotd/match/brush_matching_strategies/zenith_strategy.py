@@ -1,21 +1,29 @@
 import re
 
 from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
+from sotd.match.brush_matching_strategies.utils.pattern_utils import (
+    create_strategy_result,
+    validate_string_input,
+)
 
 
 class ZenithBrushMatchingStrategy:
     def match(self, value: str) -> dict:
-        if not isinstance(value, str):
-            return {"original": value, "matched": None, "pattern": None, "strategy": "Zenith"}
+        # Use unified string validation
+        normalized_text = validate_string_input(value)
+        if normalized_text is None:
+            return create_strategy_result(
+                original_value=value, matched_data=None, pattern=None, strategy_name="Zenith"
+            )
 
         zenith_re = r"zenith.*([a-wyz]\d{1,3})"
-        res = re.search(zenith_re, value, re.IGNORECASE)
+        res = re.search(zenith_re, normalized_text, re.IGNORECASE)
 
         if res:
-            fiber = match_fiber(value) or "Boar"
+            fiber = match_fiber(normalized_text) or "Boar"
             model = res.group(1).upper()
 
-            matched = {
+            matched_data = {
                 "brand": "Zenith",
                 "model": model,
                 "fiber": fiber,
@@ -25,14 +33,16 @@ class ZenithBrushMatchingStrategy:
                 "source_type": "exact",
             }
 
-            return {
-                "original": value,
-                "matched": matched,
-                "pattern": zenith_re,
-                "strategy": "Zenith",
-            }
+            return create_strategy_result(
+                original_value=value,
+                matched_data=matched_data,
+                pattern=zenith_re,
+                strategy_name="Zenith",
+            )
 
-        return {"original": value, "matched": None, "pattern": None, "strategy": "Zenith"}
+        return create_strategy_result(
+            original_value=value, matched_data=None, pattern=None, strategy_name="Zenith"
+        )
 
     def _get_default_match(self) -> dict:
         return {

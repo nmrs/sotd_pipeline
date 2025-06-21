@@ -1,6 +1,11 @@
 import re
 from typing import Optional
 
+from sotd.match.brush_matching_strategies.utils.pattern_utils import (
+    compile_catalog_patterns,
+    create_strategy_result,
+    validate_string_input,
+)
 from sotd.match.brush_matching_strategies.yaml_backed_strategy import (
     YamlBackedBrushMatchingStrategy,
 )
@@ -12,21 +17,10 @@ class DeclarationGroomingBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
         self.patterns = self._compile_patterns()
 
     def _compile_patterns(self):
-        compiled = []
-        for brand, models in self.catalog.items():
-            for model, entry in models.items():
-                for pattern in entry.get("patterns", []):
-                    compiled.append(
-                        {
-                            "brand": brand,
-                            "model": model,
-                            "pattern": pattern,
-                            "compiled": re.compile(pattern, re.IGNORECASE),
-                            "fiber": entry.get("fiber"),
-                            "knot_size_mm": entry.get("knot_size_mm"),
-                        }
-                    )
-        return sorted(compiled, key=lambda x: len(x["pattern"]), reverse=True)
+        """Compile patterns using the unified pattern utilities."""
+        return compile_catalog_patterns(
+            self.catalog, pattern_field="patterns", metadata_fields=["fiber", "knot_size_mm"]
+        )
 
     def _extract_knot_size(self, text: str) -> Optional[float]:
         match = re.search(r"(\d{2}(\.\d+)?)\s*-?\s*mm", text, re.IGNORECASE)
@@ -44,16 +38,17 @@ class DeclarationGroomingBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
         }
 
     def match(self, value: str) -> dict:
-        if not isinstance(value, str):
-            return {
-                "original": value,
-                "matched": None,
-                "pattern": None,
-                "strategy": "DeclarationGrooming",
-            }
+        # Use unified string validation
+        normalized_text = validate_string_input(value)
+        if normalized_text is None:
+            return create_strategy_result(
+                original_value=value,
+                matched_data=None,
+                pattern=None,
+                strategy_name="DeclarationGrooming",
+            )
 
-        normalized = value.strip()
-        lowered = normalized.lower()
+        lowered = normalized_text.lower()
         default_fiber = "Badger"
         default_knot_size_mm = 28.0
 
@@ -71,41 +66,43 @@ class DeclarationGroomingBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
         has_non_dg_context = any(re.search(pattern, lowered) for pattern in non_dg_brand_patterns)
 
         if has_non_dg_context:
-            return {
-                "original": value,
-                "matched": None,
-                "pattern": None,
-                "strategy": "DeclarationGrooming",
-            }
+            return create_strategy_result(
+                original_value=value,
+                matched_data=None,
+                pattern=None,
+                strategy_name="DeclarationGrooming",
+            )
 
         # Now check model patterns if we have DG context
         for entry in self.patterns:
             if entry["compiled"].search(lowered):
                 knot_size = (
-                    self._extract_knot_size(normalized)
+                    self._extract_knot_size(normalized_text)
                     or entry.get("knot_size_mm")
                     or default_knot_size_mm
                 )
                 fiber = entry.get("fiber") or default_fiber
 
-                return {
-                    "original": value,
-                    "matched": {
-                        "brand": entry["brand"],
-                        "model": entry["model"],
-                        "fiber": fiber,
-                        "knot_size_mm": knot_size,
-                        "handle_maker": None,
-                        "source_text": value,
-                        "source_type": "exact",
-                    },
-                    "pattern": entry["pattern"],
-                    "strategy": "DeclarationGrooming",
+                matched_data = {
+                    "brand": entry["brand"],
+                    "model": entry["model"],
+                    "fiber": fiber,
+                    "knot_size_mm": knot_size,
+                    "handle_maker": None,
+                    "source_text": value,
+                    "source_type": "exact",
                 }
 
-        return {
-            "original": value,
-            "matched": None,
-            "pattern": None,
-            "strategy": "DeclarationGrooming",
-        }
+                return create_strategy_result(
+                    original_value=value,
+                    matched_data=matched_data,
+                    pattern=entry["pattern"],
+                    strategy_name="DeclarationGrooming",
+                )
+
+        return create_strategy_result(
+            original_value=value,
+            matched_data=None,
+            pattern=None,
+            strategy_name="DeclarationGrooming",
+        )

@@ -1,4 +1,7 @@
-import re
+from sotd.match.brush_matching_strategies.utils.pattern_utils import (
+    compile_patterns_with_metadata,
+    validate_string_input,
+)
 
 from .base_brush_matching_strategy import BaseBrushMatchingStrategy
 
@@ -8,17 +11,16 @@ class ChiselAndHoundBrushMatchingStrategy(BaseBrushMatchingStrategy):
         self.patterns = self._build_patterns()
 
     def _build_patterns(self):
-        patterns = []
+        """Build patterns using the unified pattern utilities."""
+        patterns_data = []
         for v in range(27, 9, -1):
             for pattern in [
                 r"chis.*[fh]ou",
                 r"\bc(?:\s*\&\s*|\s+and\s+|\s*\+\s*)h\b",
             ]:
                 regex = rf"{pattern}.*\bv\s*{v}\b"
-                compiled = re.compile(regex, re.IGNORECASE)
-                patterns.append(
+                patterns_data.append(
                     {
-                        "compiled": compiled,
                         "pattern": regex,
                         "brand": "Chisel & Hound",
                         "model": f"V{v}",
@@ -26,12 +28,16 @@ class ChiselAndHoundBrushMatchingStrategy(BaseBrushMatchingStrategy):
                         "knot_size_mm": 26.0,
                     }
                 )
-        return sorted(patterns, key=lambda x: len(x["pattern"]), reverse=True)
+
+        return compile_patterns_with_metadata(patterns_data)
 
     def match(self, value: str) -> dict | None:
-        if not isinstance(value, str):
+        # Use unified string validation
+        normalized_text = validate_string_input(value)
+        if normalized_text is None:
             return None
-        normalized = value.strip().lower()
+
+        normalized = normalized_text.lower()
         for entry in self.patterns:
             if entry["compiled"].search(normalized):
                 return {

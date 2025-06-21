@@ -1,5 +1,8 @@
-import re
-
+from sotd.match.brush_matching_strategies.utils.pattern_utils import (
+    compile_catalog_patterns,
+    create_strategy_result,
+    validate_string_input,
+)
 from sotd.match.brush_matching_strategies.yaml_backed_strategy import (
     YamlBackedBrushMatchingStrategy,
 )
@@ -11,36 +14,24 @@ class KnownBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
         self.patterns = self._compile_known_brush_patterns()
 
     def _compile_known_brush_patterns(self) -> list[dict]:
-        raw = self.catalog
-
-        all_patterns = []
-        for brand, models in raw.items():
-            if not isinstance(models, dict):
-                continue  # Skip invalid entries
-            for model, details in models.items():
-                if not details or "patterns" not in details:
-                    continue
-                entry = {
-                    "brand": brand,
-                    "model": model if model else None,
-                    "fiber": details.get("fiber"),
-                    "knot_size_mm": details.get("knot_size_mm"),
-                    "handle_maker": details.get("handle_maker"),
-                }
-                patterns = details["patterns"]
-                patterns = sorted(patterns, key=len, reverse=True)
-                for pattern in patterns:
-                    compiled = re.compile(pattern, re.IGNORECASE)
-                    all_patterns.append({"compiled": compiled, "pattern": pattern, **entry})
-        return sorted(all_patterns, key=lambda x: len(x["pattern"]), reverse=True)
+        """Compile patterns using the unified pattern utilities."""
+        return compile_catalog_patterns(
+            self.catalog,
+            pattern_field="patterns",
+            metadata_fields=["fiber", "knot_size_mm", "handle_maker"],
+        )
 
     def match(self, value: str) -> dict:
-        if not isinstance(value, str):
-            return {"original": value, "matched": None, "pattern": None, "strategy": "KnownBrush"}
+        # Use unified string validation
+        normalized_text = validate_string_input(value)
+        if normalized_text is None:
+            return create_strategy_result(
+                original_value=value, matched_data=None, pattern=None, strategy_name="KnownBrush"
+            )
 
-        text = value.strip()
+        # Use unified pattern matching
         for entry in self.patterns:
-            if entry["compiled"].search(text):
+            if entry["compiled"].search(normalized_text):
                 entry_result = {
                     "brand": entry.get("brand"),
                     "model": entry.get("model"),
@@ -49,18 +40,14 @@ class KnownBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                     "handle_maker": entry.get("handle_maker"),
                     "source_text": value,
                 }
-                return {
-                    "original": value,
-                    "matched": entry_result,
-                    "match_type": "exact",
-                    "pattern": entry["pattern"],
-                    "strategy": "KnownBrush",
-                }
+                return create_strategy_result(
+                    original_value=value,
+                    matched_data=entry_result,
+                    pattern=entry["pattern"],
+                    strategy_name="KnownBrush",
+                    match_type="exact",
+                )
 
-        return {
-            "original": value,
-            "matched": None,
-            "match_type": None,
-            "pattern": None,
-            "strategy": "KnownBrush",
-        }
+        return create_strategy_result(
+            original_value=value, matched_data=None, pattern=None, strategy_name="KnownBrush"
+        )
