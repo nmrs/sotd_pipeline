@@ -6,19 +6,76 @@ a complete end-to-end workflow for annual data processing.
 """
 
 import logging
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
+from ..utils.performance_base import BasePerformanceMetrics, BasePerformanceMonitor
 from .annual_engine import process_annual, process_annual_range
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class AnnualRunMetrics(BasePerformanceMetrics):
+    """Performance metrics for annual run integration."""
+
+    # Annual run specific fields
+    year: str = field(default="")
+    years_processed: int = field(default=0)
+    years_failed: int = field(default=0)
+    validation_passed: bool = field(default=False)
+    validation_errors: int = field(default=0)
+
+    def to_dict(self) -> Dict:
+        """Convert metrics to dictionary for JSON serialization."""
+        base_dict = super().to_dict()
+        base_dict.update(
+            {
+                "year": self.year,
+                "years_processed": self.years_processed,
+                "years_failed": self.years_failed,
+                "validation_passed": self.validation_passed,
+                "validation_errors": self.validation_errors,
+            }
+        )
+        return base_dict
+
+
+class AnnualRunPerformanceMonitor(BasePerformanceMonitor):
+    """Performance monitor for annual run integration."""
+
+    def __init__(self, year: str, parallel_workers: int = 1):
+        self.year = year
+        super().__init__("annual_run", parallel_workers)
+        # Type annotation to help type checker
+        self.metrics: AnnualRunMetrics = self.metrics
+
+    def _create_metrics(self, phase_name: str, parallel_workers: int) -> AnnualRunMetrics:
+        """Create annual run performance metrics."""
+        metrics = AnnualRunMetrics()
+        metrics.year = self.year
+        metrics.phase_name = phase_name
+        metrics.parallel_workers = parallel_workers
+        return metrics
+
+    def print_summary(self) -> None:
+        """Print a human-readable performance summary."""
+        metrics = self.metrics
+        print(f"\n=== Annual Run Performance Summary ({metrics.year}) ===")
+        print(f"Total Processing Time: {metrics.total_processing_time:.2f}s")
+        print(f"Years Processed: {metrics.years_processed}")
+        print(f"Years Failed: {metrics.years_failed}")
+        print(f"Validation Passed: {metrics.validation_passed}")
+        print(f"Validation Errors: {metrics.validation_errors}")
+        print(f"Peak Memory Usage: {metrics.peak_memory_mb:.1f}MB")
 
 
 def run_annual_aggregation(
     year: str, data_dir: Path, debug: bool = False, force: bool = False, verbose: bool = False
 ) -> bool:
     """
-    Run complete annual aggregation workflow.
+    Run complete annual aggregation workflow with performance monitoring.
 
     Args:
         year: Year to process (YYYY format)
@@ -30,6 +87,9 @@ def run_annual_aggregation(
     Returns:
         True if successful, False otherwise
     """
+    monitor = AnnualRunPerformanceMonitor(year)
+    monitor.start_total_timing()
+
     try:
         if verbose:
             logger.info(f"Starting annual aggregation for year {year}")
@@ -38,7 +98,12 @@ def run_annual_aggregation(
             logger.info(f"Debug mode: {debug}")
 
         # Process annual aggregation
+        monitor.start_processing_timing()
         process_annual(year, data_dir, debug=debug, force=force)
+        monitor.end_processing_timing()
+
+        # Update metrics
+        monitor.metrics.years_processed = 1
 
         if verbose:
             logger.info(f"Annual aggregation for year {year} completed successfully")
@@ -47,11 +112,17 @@ def run_annual_aggregation(
 
     except Exception as e:
         logger.error(f"Annual aggregation failed for year {year}: {e}")
+        monitor.metrics.years_failed = 1
         if debug:
             import traceback
 
             logger.error(traceback.format_exc())
         return False
+
+    finally:
+        monitor.end_total_timing()
+        if debug:
+            monitor.print_summary()
 
 
 def run_annual_range_aggregation(
@@ -63,7 +134,7 @@ def run_annual_range_aggregation(
     verbose: bool = False,
 ) -> bool:
     """
-    Run annual aggregation for a range of years.
+    Run annual aggregation for a range of years with performance monitoring.
 
     Args:
         start_year: Start year (YYYY format)
@@ -76,6 +147,13 @@ def run_annual_range_aggregation(
     Returns:
         True if all years successful, False if any failed
     """
+    # Use the first year for monitoring
+    monitor = AnnualRunPerformanceMonitor(start_year)
+    monitor.start_total_timing()
+
+    # Initialize years variable
+    years = []
+
     try:
         if verbose:
             logger.info(f"Starting annual aggregation for range {start_year}-{end_year}")
@@ -87,7 +165,12 @@ def run_annual_range_aggregation(
         years = [str(year) for year in range(int(start_year), int(end_year) + 1)]
 
         # Process annual aggregation for range
+        monitor.start_processing_timing()
         process_annual_range(years, data_dir, debug=debug, force=force)
+        monitor.end_processing_timing()
+
+        # Update metrics
+        monitor.metrics.years_processed = len(years)
 
         if verbose:
             logger.info(
@@ -98,16 +181,22 @@ def run_annual_range_aggregation(
 
     except Exception as e:
         logger.error(f"Annual range aggregation failed for {start_year}-{end_year}: {e}")
+        monitor.metrics.years_failed = len(years)
         if debug:
             import traceback
 
             logger.error(traceback.format_exc())
         return False
 
+    finally:
+        monitor.end_total_timing()
+        if debug:
+            monitor.print_summary()
+
 
 def validate_annual_data(year: str, data_dir: Path) -> dict:
     """
-    Validate annual aggregated data for a year.
+    Validate annual aggregated data for a year using unified patterns.
 
     Args:
         year: Year to validate (YYYY format)
@@ -136,7 +225,7 @@ def validate_annual_data(year: str, data_dir: Path) -> dict:
             validation_result["errors"].append(f"Annual file not found: {annual_file}")
             return validation_result
 
-        # Load and validate data structure
+        # Load and validate data structure using unified file I/O
         from sotd.utils.file_io import load_json_data
 
         annual_data = load_json_data(annual_file)
@@ -230,7 +319,7 @@ def validate_annual_data(year: str, data_dir: Path) -> dict:
 
 def get_annual_summary(year: str, data_dir: Path) -> Optional[dict]:
     """
-    Get summary information for annual aggregated data.
+    Get summary information for annual aggregated data using unified patterns.
 
     Args:
         year: Year to get summary for (YYYY format)
@@ -245,7 +334,8 @@ def get_annual_summary(year: str, data_dir: Path) -> Optional[dict]:
         if not annual_file.exists():
             return None
 
-        from sotd.utils.file_io import load_json_data
+        # Use unified file I/O patterns
+        from sotd.utils.file_io import get_file_size_mb, load_json_data
 
         annual_data = load_json_data(annual_file)
 
@@ -254,7 +344,7 @@ def get_annual_summary(year: str, data_dir: Path) -> Optional[dict]:
         summary = {
             "year": year,
             "file_path": str(annual_file),
-            "file_size_mb": annual_file.stat().st_size / (1024 * 1024),
+            "file_size_mb": get_file_size_mb(annual_file),
             "total_shaves": metadata.get("total_shaves", 0),
             "unique_shavers": metadata.get("unique_shavers", 0),
             "included_months": metadata.get("included_months", []),
@@ -276,7 +366,7 @@ def get_annual_summary(year: str, data_dir: Path) -> Optional[dict]:
 
 def list_available_annual_years(data_dir: Path) -> list:
     """
-    List all available annual aggregated years.
+    List all available annual aggregated years using unified patterns.
 
     Args:
         data_dir: Data directory containing annual aggregated files
