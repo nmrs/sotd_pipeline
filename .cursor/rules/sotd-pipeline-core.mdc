@@ -59,6 +59,10 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
   - Recording lessons learned for future reference
   - Updating status indicators (TODO, IN_PROGRESS, COMPLETE, etc.)
   - Adding timestamps for major milestones
+  - **TIMING**: Update MDC plan files **BEFORE** showing completion summaries to the user, not after
+  - **WORKFLOW STEP**: After completing any task, **immediately** update the relevant MDC plan file to mark tasks as complete and add session notes
+  - **VALIDATION**: **ALWAYS** verify that MDC plan files are updated before considering any task complete or moving to the next task
+  - **CONTENT**: Include completion status, lessons learned, implementation decisions, deviations from plan, and timestamps for major milestones
 
 ## Domain-Specific Rules
 - **Product Catalogs**: Maintain consistent structure in YAML files (`data/brushes.yaml`, `data/handles.yaml`, `data/razors.yaml`, `data/blades.yaml`, `data/soaps.yaml`)
