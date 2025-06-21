@@ -5,6 +5,8 @@ alwaysApply: false
 ---
 # SOTD Pipeline Refactoring Implementation Plan
 
+**ALWAYS update this plan file before proceeding to the next chunk or showing a summary to the user. Plan updates must be made immediately after completing a chunk or major task.**
+
 ## Overview
 This plan implements a systematic refactoring of the SOTD Pipeline codebase to eliminate code redundancy and improve maintainability. The refactoring follows the Task Driven TDD Loop approach with incremental, test-driven changes.
 
@@ -25,11 +27,11 @@ This plan implements a systematic refactoring of the SOTD Pipeline codebase to e
 
 - **Phase 2: Medium Impact, Medium Risk Refactoring** - **PARTIALLY COMPLETE**
   - Chunk 2.1: Core Aggregators Refactor ✅ COMPLETE
+  - Chunk 2.2: Analysis Tools Split ✅ COMPLETE
+  - Chunk 2.3: Annual Aggregation Refactoring ✅ COMPLETE
+  - Chunk 2.4: Annual Reporting Refactoring ✅ COMPLETE
 
 ### 🔄 **IN PROGRESS / NEXT**
-- Chunk 2.2: Analysis Tools Split
-- Chunk 2.3: Annual Aggregation Refactoring (NEW - addresses recent annual work)
-- Chunk 2.4: Annual Reporting Refactoring (NEW - addresses recent annual work)
 - Chunk 2.5: Enhance Table Generators
 
 ### 📊 **PROGRESS METRICS**
@@ -144,33 +146,66 @@ This plan implements a systematic refactoring of the SOTD Pipeline codebase to e
 ### Chunk 2.4: Annual Reporting Refactoring
 **Priority**: MEDIUM | **Risk**: LOW | **Estimated Lines**: ~100 eliminated
 
-#### Task 2.4.1: Refactor Annual Generator
-- [ ] Update `sotd/report/annual_generator.py` to use unified patterns
-- [ ] Remove duplicated report generation logic
-- [ ] Standardize annual report generation with monthly patterns
-- [ ] Add integration tests for annual generator refactoring
-- [ ] Run quality checks and commit
+#### Task 2.4.1: Refactor Annual Generator ✅ COMPLETE
+- [x] Update `sotd/report/annual_generator.py` to use unified patterns
+- [x] Remove duplicated report generation logic
+- [x] Standardize annual report generation with monthly patterns
+- [x] Add integration tests for annual generator refactoring
+- [x] Run quality checks and commit
 
-#### Task 2.4.2: Refactor Annual Delta Calculator
-- [ ] Update `sotd/report/annual_delta_calculator.py` to use unified patterns
-- [ ] Remove duplicated delta calculation logic
-- [ ] Standardize annual delta calculation with monthly patterns
-- [ ] Add integration tests for annual delta calculator refactoring
-- [ ] Run quality checks and commit
+**Notes:**
+- Refactored annual generator to use unified patterns consistent with monthly report generation
+- Created new `AnnualReportGenerator` class that follows `BaseReportGenerator` patterns
+- Added helper functions: `create_annual_report_generator`, `generate_annual_report_content`
+- Preserved legacy `LegacyAnnualReportGenerator` for backward compatibility with delta table functionality
+- Updated tests to use new class structure while maintaining all existing functionality
+- All quality checks passing (format, lint, typecheck)
+- Comprehensive integration tests confirm output and API compatibility
+- Eliminated ~50 lines of duplicated code and improved maintainability
+- Annual report generation functionality fully preserved with enhanced patterns
 
-#### Task 2.4.3: Refactor Annual Comparison Loader
-- [ ] Update `sotd/report/annual_comparison_loader.py` to use unified patterns
-- [ ] Remove duplicated data loading logic
-- [ ] Standardize annual comparison loading with other loaders
-- [ ] Add integration tests for annual comparison loader refactoring
-- [ ] Run quality checks and commit
+#### Task 2.4.2: Refactor Annual Delta Calculator ✅ COMPLETE
+- [x] Update `sotd/report/annual_delta_calculator.py` to use unified patterns
+- [x] Remove duplicated delta calculation logic
+- [x] Standardize annual delta calculation with monthly patterns
+- [x] Add integration tests for annual delta calculator refactoring
+- [x] Run quality checks and commit
 
-#### Task 2.4.4: Refactor Annual Run Integration
-- [ ] Update `sotd/report/annual_run.py` to use unified patterns
-- [ ] Remove duplicated CLI and execution logic
-- [ ] Standardize annual run integration with other phases
-- [ ] Add integration tests for annual run refactoring
-- [ ] Run quality checks and commit
+**Notes:**
+- Refactored annual delta calculator to use unified performance monitoring and patterns
+- Removed custom metrics classes in favor of standard PerformanceMonitor
+- All quality checks passing (format, lint, typecheck)
+- Comprehensive integration tests confirm output and API compatibility
+- Annual delta calculation functionality fully preserved with enhanced patterns
+
+#### Task 2.4.3: Refactor Annual Comparison Loader ✅ COMPLETE
+- [x] Update `sotd/report/annual_comparison_loader.py` to use unified patterns
+- [x] Remove duplicated data loading logic
+- [x] Standardize annual comparison loading with other loaders
+- [x] Add integration tests for annual comparison loader refactoring
+- [x] Run quality checks and commit
+
+**Notes:**
+- Refactored annual comparison loader to use unified PerformanceMonitor and patterns
+- Removed custom metrics classes in favor of standard PerformanceMonitor
+- All quality checks passing (format, lint, typecheck)
+- Comprehensive integration tests confirm output and API compatibility
+- Annual comparison loading functionality fully preserved with enhanced patterns
+
+#### Task 2.4.4: Refactor Annual Run Integration ✅ COMPLETE
+- [x] Update `sotd/report/annual_run.py` to use unified patterns
+- [x] Remove duplicated CLI and execution logic
+- [x] Standardize annual run integration with other phases
+- [x] Add integration tests for annual run refactoring
+- [x] Run quality checks and commit
+
+**Notes:**
+- Refactored annual_run.py to use unified PerformanceMonitor pattern
+- Removed custom AnnualRunMetrics and AnnualRunPerformanceMonitor classes
+- Preserved all functionality including debug output and error handling
+- Updated tests to use new PerformanceMonitor instead of old classes
+- All quality checks passing (format, lint, typecheck)
+- Annual run integration functionality fully preserved with enhanced patterns
 
 ### Chunk 2.5: Enhance Table Generators
 **Priority**: MEDIUM | **Risk**: LOW | **Estimated Lines**: ~100 eliminated
@@ -333,6 +368,32 @@ diff data/aggregated/2025-01.json data/aggregated/2025-01.json.backup
 - [ ] Performance regression testing
 
 ## Recent Updates
+
+### Session 20: [2024-12-19] - Chunk 2.4 Annual Reporting Refactoring Complete
+- **COMPLETED**: Refactored annual_generator.py to use unified patterns
+  - Created new AnnualReportGenerator class that follows BaseReportGenerator patterns
+  - Added helper functions: create_annual_report_generator, generate_annual_report_content
+  - Preserved legacy LegacyAnnualReportGenerator for backward compatibility
+  - Eliminated ~50 lines of duplicated code and improved maintainability
+- **COMPLETED**: Refactored annual_delta_calculator.py to use unified patterns
+  - Removed custom metrics classes in favor of standard PerformanceMonitor
+  - All quality checks passing (format, lint, typecheck)
+  - Annual delta calculation functionality fully preserved with enhanced patterns
+- **COMPLETED**: Refactored annual_comparison_loader.py to use unified patterns
+  - Removed custom metrics classes in favor of standard PerformanceMonitor
+  - All quality checks passing (format, lint, typecheck)
+  - Annual comparison loading functionality fully preserved with enhanced patterns
+- **COMPLETED**: Refactored annual_run.py to use unified patterns
+  - Removed custom AnnualRunMetrics and AnnualRunPerformanceMonitor classes
+  - Used unified PerformanceMonitor from sotd.utils.performance
+  - Preserved all functionality including debug output and error handling
+  - Updated tests to use new PerformanceMonitor instead of old classes
+  - All quality checks passing (format, lint, typecheck)
+- **COMPLETED**: Verified data integrity - all annual reporting functionality preserved
+- **COMPLETED**: All quality checks passing (format, lint, typecheck)
+- **COMPLETED**: Eliminated ~100 lines of duplicated code and improved maintainability
+- **CURRENT STATUS**: Chunk 2.4 (Annual Reporting Refactoring) is now FULLY COMPLETE
+- **NEXT**: Begin Chunk 2.5 (Enhance Table Generators) to complete Phase 2
 
 ### Session 19: [2024-12-19] - Chunk 2.3 Annual Aggregation Refactoring Complete
 - **COMPLETED**: Refactored annual_engine.py to use unified performance monitoring patterns
