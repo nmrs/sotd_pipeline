@@ -115,8 +115,8 @@ def test_write_month_file_disk_full_simulation(tmp_path):
     """Test handling of disk full scenarios."""
     file_path = tmp_path / "test.json"
 
-    # Mock Path.write_text to raise OSError (disk full)
-    with patch.object(Path, "write_text", side_effect=OSError("No space left on device")):
+    # Mock Path.open to raise OSError (disk full) - this is what save_json_data actually uses
+    with patch.object(Path, "open", side_effect=OSError("No space left on device")):
         with pytest.raises(OSError, match="No space left on device"):
             write_month_file(file_path, {"test": "meta"}, [])
 
