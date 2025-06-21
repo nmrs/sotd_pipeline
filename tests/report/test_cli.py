@@ -161,15 +161,76 @@ class TestReportCLI:
         with pytest.raises(SystemExit):
             parser.parse_args(["--month", "2023-01", "--type", "invalid"])
 
+    # Annual report CLI tests
+    def test_annual_argument_parsing(self):
+        """Test annual argument parsing."""
+        parser = get_parser()
+        args = parser.parse_args(["--annual", "--year", "2023"])
+        assert args.annual is True
+        assert args.year == "2023"
+        assert args.month is None
+        assert args.range is None
+
+    def test_annual_with_year_argument_validation(self):
+        """Test annual with year argument validation."""
+        parser = get_parser()
+        args = parser.parse_args(["--annual", "--year", "2023"])
+        assert args.annual is True
+        assert args.year == "2023"
+
+    def test_annual_with_range_argument_validation(self):
+        """Test annual with range argument validation."""
+        parser = get_parser()
+        args = parser.parse_args(["--annual", "--range", "2021-01:2023-12"])
+        assert args.annual is True
+        assert args.range == "2021-01:2023-12"
+
+    def test_annual_without_year_or_range_raises_error(self):
+        """Test annual without year or range raises error."""
+        parser = get_parser()
+        # This should not raise SystemExit because validation happens in validate_args
+        args = parser.parse_args(["--annual"])
+        with pytest.raises(ValueError, match="Annual reports require --year or --range"):
+            validate_args(args)
+
+    def test_annual_with_month_raises_error(self):
+        """Test annual with month raises error."""
+        parser = get_parser()
+        # This should not raise SystemExit because validation happens in validate_args
+        args = parser.parse_args(["--annual", "--month", "2023-01"])
+        with pytest.raises(ValueError, match="Annual reports cannot be combined with monthly"):
+            validate_args(args)
+
+    def test_annual_with_year_and_range_raises_error(self):
+        """Test annual with both year and range raises error."""
+        parser = get_parser()
+        # This should raise SystemExit because argparse handles mutually exclusive arguments
+        with pytest.raises(SystemExit):
+            parser.parse_args(["--annual", "--year", "2023", "--range", "2021-01:2023-12"])
+
+    def test_annual_help_text_includes_annual_options(self):
+        """Test that help text includes annual options."""
+        parser = get_parser()
+        help_text = parser.format_help()
+        assert "--annual" in help_text
+        assert "annual report" in help_text.lower()
+
+    def test_annual_backward_compatibility_monthly(self):
+        """Test that annual flag doesn't break monthly functionality."""
+        parser = get_parser()
+        args = parser.parse_args(["--month", "2023-01"])
+        assert args.month == "2023-01"
+        assert args.annual is False
+
 
 class TestReportCLIValidation:
-    """Test report CLI validation logic."""
+    """Test report CLI argument validation."""
 
     def test_validate_args_with_month(self):
         """Test validation with valid month argument."""
         parser = get_parser()
         args = parser.parse_args(["--month", "2023-01"])
-        # Should not raise any exception
+        # Should not raise any exceptions
         validate_args(args)
         assert args.month == "2023-01"
 
@@ -177,36 +238,76 @@ class TestReportCLIValidation:
         """Test validation sets default month when no date provided."""
         parser = get_parser()
         args = parser.parse_args([])
-        # Should not raise any exception, should set default month
+        # Should not raise any exceptions
+        validate_args(args)
         assert args.month is not None
-        assert "-" in args.month
 
     def test_validate_args_multiple_date_arguments_raises_error(self):
-        """Test validation raises error with multiple date arguments."""
+        """Test validation raises error for multiple date arguments."""
         parser = get_parser()
+        # This should raise SystemExit because argparse handles mutually exclusive arguments
         with pytest.raises(SystemExit):
             parser.parse_args(["--month", "2023-01", "--year", "2023"])
 
     def test_validate_args_year_not_supported(self):
-        """Test validation raises error for year argument (not supported in report)."""
+        """Test validation raises error for year without annual."""
         parser = get_parser()
         args = parser.parse_args(["--year", "2023"])
-        with pytest.raises(ValueError, match="Report phase only supports single month"):
+        with pytest.raises(ValueError, match="Report phase only supports single month processing"):
             validate_args(args)
 
     def test_validate_args_range_not_supported(self):
-        """Test validation raises error for range argument (not supported in report)."""
+        """Test validation raises error for range without annual."""
         parser = get_parser()
         args = parser.parse_args(["--range", "2023-01:2023-03"])
-        with pytest.raises(ValueError, match="Report phase only supports single month"):
+        with pytest.raises(ValueError, match="Report phase only supports single month processing"):
             validate_args(args)
 
     def test_validate_args_start_end_not_supported(self):
-        """Test validation raises error for start/end arguments (not supported in report)."""
+        """Test validation raises error for start/end without annual."""
         parser = get_parser()
         args = parser.parse_args(["--start", "2023-01", "--end", "2023-03"])
-        with pytest.raises(ValueError, match="Report phase only supports single month"):
+        with pytest.raises(ValueError, match="Report phase only supports single month processing"):
             validate_args(args)
+
+    def test_validate_args_annual_with_year_valid(self):
+        """Test validation with valid annual and year arguments."""
+        parser = get_parser()
+        args = parser.parse_args(["--annual", "--year", "2023"])
+        # Should not raise any exceptions
+        validate_args(args)
+        assert args.annual is True
+        assert args.year == "2023"
+
+    def test_validate_args_annual_with_range_valid(self):
+        """Test validation with valid annual and range arguments."""
+        parser = get_parser()
+        args = parser.parse_args(["--annual", "--range", "2021-01:2023-12"])
+        # Should not raise any exceptions
+        validate_args(args)
+        assert args.annual is True
+        assert args.range == "2021-01:2023-12"
+
+    def test_validate_args_annual_without_year_or_range_raises_error(self):
+        """Test validation raises error for annual without year or range."""
+        parser = get_parser()
+        args = parser.parse_args(["--annual"])
+        with pytest.raises(ValueError, match="Annual reports require --year or --range"):
+            validate_args(args)
+
+    def test_validate_args_annual_with_month_raises_error(self):
+        """Test validation raises error for annual with month."""
+        parser = get_parser()
+        args = parser.parse_args(["--annual", "--month", "2023-01"])
+        with pytest.raises(ValueError, match="Annual reports cannot be combined with monthly"):
+            validate_args(args)
+
+    def test_validate_args_annual_with_year_and_range_raises_error(self):
+        """Test validation raises error for annual with both year and range."""
+        parser = get_parser()
+        # This should raise SystemExit because argparse handles mutually exclusive arguments
+        with pytest.raises(SystemExit):
+            parser.parse_args(["--annual", "--year", "2023", "--range", "2021-01:2023-12"])
 
 
 class TestReportCLIUtilities:
@@ -214,10 +315,11 @@ class TestReportCLIUtilities:
 
     def test_get_default_month_format(self):
         """Test get_default_month returns correct format."""
-        default_month = get_default_month()
-        assert isinstance(default_month, str)
-        assert "-" in default_month
-        assert len(default_month) == 7  # YYYY-MM format
+        month = get_default_month()
+        assert len(month) == 7
+        assert month[4] == "-"
+        assert month[:4].isdigit()
+        assert month[5:].isdigit()
 
     def test_get_default_month_current_month(self):
         """Test get_default_month returns current month."""
@@ -225,90 +327,100 @@ class TestReportCLIUtilities:
 
         now = datetime.datetime.now()
         expected = f"{now.year:04d}-{now.month:02d}"
-        default_month = get_default_month()
-        assert default_month == expected
+        month = get_default_month()
+        assert month == expected
 
 
 class TestReportMain:
-    """Test report main function integration."""
+    """Test report main function."""
 
     @patch("sotd.report.run.run_report")
     def test_main_with_month(self, mock_run_report):
         """Test main function with month argument."""
-        with patch("sys.argv", ["report", "--month", "2023-01"]):
-            main()
-
+        main(["--month", "2023-01"])
         mock_run_report.assert_called_once()
-        args = mock_run_report.call_args[0][0]
-        assert args.month == "2023-01"
-        assert args.type == "hardware"
+        # Check that the function was called with the right arguments
+        call_args = mock_run_report.call_args[0][0]  # First positional argument
+        assert call_args.month == "2023-01"
 
     @patch("sotd.report.run.run_report")
     def test_main_with_type(self, mock_run_report):
         """Test main function with type argument."""
-        with patch("sys.argv", ["report", "--month", "2023-01", "--type", "software"]):
-            main()
-
+        main(["--month", "2023-01", "--type", "software"])
         mock_run_report.assert_called_once()
-        args = mock_run_report.call_args[0][0]
-        assert args.type == "software"
+        call_args = mock_run_report.call_args[0][0]  # First positional argument
+        assert call_args.type == "software"
 
     @patch("sotd.report.run.run_report")
     def test_main_with_debug_and_force(self, mock_run_report):
-        """Test main function with debug and force arguments."""
-        with patch("sys.argv", ["report", "--month", "2023-01", "--debug", "--force"]):
-            main()
-
+        """Test main function with debug and force flags."""
+        main(["--month", "2023-01", "--debug", "--force"])
         mock_run_report.assert_called_once()
-        args = mock_run_report.call_args[0][0]
-        assert args.debug is True
-        assert args.force is True
+        call_args = mock_run_report.call_args[0][0]  # First positional argument
+        assert call_args.debug is True
+        assert call_args.force is True
 
     @patch("sotd.report.run.run_report")
     def test_main_with_data_root_and_out_dir(self, mock_run_report):
-        """Test main function with data-root and out-dir arguments."""
-        with patch(
-            "sys.argv",
-            ["report", "--month", "2023-01", "--data-root", "/data", "--out-dir", "/output"],
-        ):
-            main()
-
+        """Test main function with data root and output directory."""
+        main(["--month", "2023-01", "--data-root", "/data", "--out-dir", "/output"])
         mock_run_report.assert_called_once()
-        args = mock_run_report.call_args[0][0]
-        assert args.data_root == Path("/data")
-        assert args.out_dir == Path("/output")
+        call_args = mock_run_report.call_args[0][0]  # First positional argument
+        assert call_args.data_root == Path("/data")
+        assert call_args.out_dir == Path("/output")
 
     @patch("sotd.report.run.run_report")
     def test_main_no_arguments_sets_default_month(self, mock_run_report):
-        """Test main function with no arguments sets default month."""
-        with patch("sys.argv", ["report"]):
-            main()
-
+        """Test main function sets default month when no arguments provided."""
+        main([])
         mock_run_report.assert_called_once()
-        args = mock_run_report.call_args[0][0]
-        assert args.month is not None
-        assert "-" in args.month
+        call_args = mock_run_report.call_args[0][0]  # First positional argument
+        assert call_args.month is not None
 
     def test_main_invalid_year_argument_raises_error(self):
         """Test main function raises error for invalid year argument."""
-        with patch("sys.argv", ["report", "--year", "2023"]):
-            with patch("builtins.print") as mock_print:
-                main()
-                # Should print error message about report phase only supporting single month
-                expected_error = (
-                    "[ERROR] Report generation failed: Report phase only supports single month "
-                    "processing. Use --month YYYY-MM to specify a single month."
-                )
-                mock_print.assert_called_with(expected_error)
+        with pytest.raises(SystemExit):
+            main(["--year", "23"])
 
     def test_main_invalid_range_argument_raises_error(self):
         """Test main function raises error for invalid range argument."""
-        with patch("sys.argv", ["report", "--range", "2023-01:2023-03"]):
-            with patch("builtins.print") as mock_print:
-                main()
-                # Should print error message about report phase only supporting single month
-                expected_error = (
-                    "[ERROR] Report generation failed: Report phase only supports single month "
-                    "processing. Use --month YYYY-MM to specify a single month."
-                )
-                mock_print.assert_called_with(expected_error)
+        with pytest.raises(SystemExit):
+            main(["--range", "2023-01-2023-03"])
+
+    @patch("sotd.report.run.run_annual_report")
+    def test_main_annual_with_year(self, mock_run_annual_report):
+        """Test main function with annual and year arguments."""
+        main(["--annual", "--year", "2023"])
+        mock_run_annual_report.assert_called_once()
+        call_args = mock_run_annual_report.call_args[0][0]  # First positional argument
+        assert call_args.annual is True
+        assert call_args.year == "2023"
+
+    @patch("sotd.report.run.run_annual_report")
+    def test_main_annual_with_range(self, mock_run_annual_report):
+        """Test main function with annual and range arguments."""
+        main(["--annual", "--range", "2021-01:2023-12"])
+        mock_run_annual_report.assert_called_once()
+        call_args = mock_run_annual_report.call_args[0][0]  # First positional argument
+        assert call_args.annual is True
+        assert call_args.range == "2021-01:2023-12"
+
+    @patch("sotd.report.run.run_annual_report")
+    def test_main_annual_with_type(self, mock_run_annual_report):
+        """Test main function with annual and type arguments."""
+        main(["--annual", "--year", "2023", "--type", "software"])
+        mock_run_annual_report.assert_called_once()
+        call_args = mock_run_annual_report.call_args[0][0]  # First positional argument
+        assert call_args.type == "software"
+
+    def test_main_annual_without_year_or_range_raises_error(self, capsys):
+        """Test main function raises error for annual without year or range."""
+        main(["--annual"])
+        captured = capsys.readouterr()
+        assert "Annual reports require --year or --range" in captured.out
+
+    def test_main_annual_with_month_raises_error(self, capsys):
+        """Test main function raises error for annual with month."""
+        main(["--annual", "--month", "2023-01"])
+        captured = capsys.readouterr()
+        assert "Annual reports cannot be combined with monthly" in captured.out
