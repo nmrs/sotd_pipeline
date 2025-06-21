@@ -268,7 +268,7 @@ class TestAnnualReportIntegration:
         with (
             patch("sotd.report.annual_run.generate_annual_report") as mock_generator,
             patch("sotd.report.annual_run.save_annual_report") as mock_saver,
-            patch("sotd.report.annual_run.AnnualRunPerformanceMonitor") as mock_monitor_class,
+            patch("sotd.report.annual_run.PerformanceMonitor") as mock_monitor_class,
         ):
 
             mock_generator.return_value = mock_report_content
@@ -277,11 +277,10 @@ class TestAnnualReportIntegration:
             # Create a proper mock monitor with the required attributes
             mock_monitor = Mock()
             mock_monitor.metrics = Mock()
-            mock_monitor.metrics.years_processed = 0
-            mock_monitor.metrics.years_successful = 0
-            mock_monitor.metrics.years_failed = 0
-            mock_monitor.metrics.report_types = []
-            mock_monitor.metrics.total_report_size_chars = 0
+            mock_monitor.metrics.record_count = 0
+            mock_monitor.metrics.total_processing_time = 0.0
+            mock_monitor.metrics.file_io_time = 0.0
+            mock_monitor.metrics.peak_memory_mb = 0.0
 
             mock_monitor_class.return_value = mock_monitor
 

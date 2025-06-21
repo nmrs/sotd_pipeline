@@ -7,81 +7,28 @@ a complete annual report generation workflow.
 """
 
 import logging
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Sequence
+from typing import Sequence
 
 from sotd.report.report_core import run_report  # Import run_report from new module
-from sotd.utils.performance_base import BasePerformanceMetrics, BasePerformanceMonitor
+from sotd.utils.performance import PerformanceMonitor
 
 from . import cli
 from .annual_generator import generate_annual_report  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
-# Compatibility alias for test patching
-PerformanceMonitor = BasePerformanceMonitor
-
-
-@dataclass
-class AnnualRunMetrics(BasePerformanceMetrics):
-    """Performance metrics for annual report generation."""
-
-    # Annual run specific fields
-    years_processed: int = field(default=0)
-    years_successful: int = field(default=0)
-    years_failed: int = field(default=0)
-    report_types: list[str] = field(default_factory=list)
-    total_report_size_chars: int = field(default=0)
-
-    def to_dict(self) -> Dict:
-        """Convert metrics to dictionary for JSON serialization."""
-        base_dict = super().to_dict()
-        base_dict.update(
-            {
-                "years_processed": self.years_processed,
-                "years_successful": self.years_successful,
-                "years_failed": self.years_failed,
-                "report_types": self.report_types,
-                "total_report_size_chars": self.total_report_size_chars,
-            }
-        )
-        return base_dict
-
-
-class AnnualRunPerformanceMonitor(BasePerformanceMonitor):
-    """Performance monitor for annual report generation."""
-
-    def __init__(self, parallel_workers: int = 1):
-        super().__init__("annual_run", parallel_workers)
-        # Type annotation to help type checker
-        self.metrics: AnnualRunMetrics = self.metrics
-
-    def _create_metrics(self, phase_name: str, parallel_workers: int) -> AnnualRunMetrics:
-        """Create annual run performance metrics."""
-        metrics = AnnualRunMetrics()
-        metrics.phase_name = phase_name
-        metrics.parallel_workers = parallel_workers
-        return metrics
-
-    def print_summary(self) -> None:
-        """Print a human-readable performance summary."""
-        metrics = self.metrics
-        print("\n=== Annual Run Performance Summary ===")
-        print(f"Total Processing Time: {metrics.total_processing_time:.2f}s")
-        print(f"File I/O Time: {metrics.file_io_time:.2f}s")
-        print(f"Years Processed: {metrics.years_processed}")
-        print(f"Years Successful: {metrics.years_successful}")
-        print(f"Years Failed: {metrics.years_failed}")
-        print(f"Report Types: {', '.join(metrics.report_types)}")
-        print(f"Total Report Size: {metrics.total_report_size_chars:,} characters")
-        print(f"Peak Memory Usage: {metrics.peak_memory_mb:.1f}MB")
-
 
 def run_annual_report(args) -> None:
     """Main annual report generation logic with performance monitoring."""
-    monitor = AnnualRunPerformanceMonitor()
+    monitor = PerformanceMonitor("annual_run")
     monitor.start_total_timing()
+
+    # Initialize variables to avoid linter errors
+    years: list[str] = []
+    years_successful = 0
+    years_failed = 0
+    total_report_size_chars = 0
 
     try:
         if args.debug:
@@ -124,10 +71,6 @@ def run_annual_report(args) -> None:
             logger.info(f"Processing years: {years}")
             print(f"[DEBUG] Processing years: {years}")
 
-        # Update metrics
-        monitor.metrics.years_processed = len(years)
-        monitor.metrics.report_types.append(args.type)
-
         # Process each year in the range
         for year in years:
             if args.debug:
@@ -139,10 +82,9 @@ def run_annual_report(args) -> None:
                 report_content = generate_annual_report(
                     args.type, year, data_root, args.debug, None
                 )
-                monitor.metrics.total_report_size_chars += len(report_content)
+                total_report_size_chars += len(report_content)
             except FileNotFoundError as e:
-                monitor.end_file_io_timing()
-                monitor.metrics.years_failed += 1
+                years_failed += 1
                 print(
                     f"[ERROR] Annual data not found for {year}. "
                     f"Run the aggregate phase first with --annual --year {year} "
@@ -154,8 +96,7 @@ def run_annual_report(args) -> None:
                     f"to generate the required data."
                 ) from e
             except Exception as e:
-                monitor.end_file_io_timing()
-                monitor.metrics.years_failed += 1
+                years_failed += 1
                 print(f"[ERROR] Failed to generate annual report content: {e}")
                 raise RuntimeError(f"Failed to generate annual report content: {e}") from e
 
@@ -169,15 +110,15 @@ def run_annual_report(args) -> None:
                     report_content, out_dir, year, args.type, args.force, args.debug
                 )
                 monitor.end_file_io_timing()
-                monitor.metrics.years_successful += 1
+                years_successful += 1
             except OSError:
                 monitor.end_file_io_timing()
-                monitor.metrics.years_failed += 1
+                years_failed += 1
                 print(f"[ERROR] Failed to save annual report for {year}")
                 raise
             except Exception as e:
                 monitor.end_file_io_timing()
-                monitor.metrics.years_failed += 1
+                years_failed += 1
                 print(f"[ERROR] Failed to save annual report: {e}")
                 raise RuntimeError(f"Failed to save annual report: {e}") from e
 
@@ -197,13 +138,24 @@ def run_annual_report(args) -> None:
                 f"{', '.join(years)}"
             )
             logger.info(
-                f"Annual report generation completed for {len(years)} years: " f"{', '.join(years)}"
+                f"Annual report generation completed for {len(years)} years: {', '.join(years)}"
             )
+
+        # Update final metrics
+        monitor.metrics.record_count = years_successful
 
     finally:
         monitor.end_total_timing()
         if args.debug:
-            monitor.print_summary()
+            print("\n=== Annual Run Performance Summary ===")
+            print(f"Total Processing Time: {monitor.metrics.total_processing_time:.2f}s")
+            print(f"File I/O Time: {monitor.metrics.file_io_time:.2f}s")
+            print(f"Years Processed: {len(years)}")
+            print(f"Years Successful: {years_successful}")
+            print(f"Years Failed: {years_failed}")
+            print(f"Report Type: {args.type}")
+            print(f"Total Report Size: {total_report_size_chars:,} characters")
+            print(f"Peak Memory Usage: {monitor.metrics.peak_memory_mb:.1f}MB")
 
 
 def save_annual_report(
