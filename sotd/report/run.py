@@ -6,6 +6,8 @@ CLI matrix
 ──────────
 (no flags)                 → current month, hardware report
 --month YYYY-MM            → that single month
+--annual --year YYYY       → annual report for specific year
+--annual --range YYYY:YYYY → annual reports for year range
 --type hardware|software   → report type (default: hardware)
 --data-root DIR            → root directory for all input data (default: data)
 --out-dir DIR              → output directory for report file (default: data)
@@ -115,13 +117,50 @@ def run_report(args) -> None:
     print(f"[INFO] Report saved to: {output_path}")
 
 
+def run_annual_report(args) -> None:
+    """Main annual report generation logic."""
+    monitor = PerformanceMonitor("annual_report")
+    monitor.start_total_timing()
+    if args.debug:
+        print("[DEBUG] Annual report phase started")
+        print(f"[DEBUG] Annual: {args.annual}")
+        print(f"[DEBUG] Year: {args.year}")
+        print(f"[DEBUG] Range: {args.range}")
+        print(f"[DEBUG] Report type: {args.type}")
+        print(f"[DEBUG] Data root: {args.data_root}")
+        print(f"[DEBUG] Output directory: {args.out_dir}")
+        print(f"[DEBUG] Force overwrite: {args.force}")
+
+    # For now, just print a placeholder message
+    # TODO: Implement actual annual report generation logic
+    if args.debug:
+        print("[DEBUG] Annual report generation not yet implemented")
+
+    print(f"[INFO] Annual report generation for {args.type} reports")
+    if args.year:
+        print(f"[INFO] Year: {args.year}")
+    if args.range:
+        print(f"[INFO] Range: {args.range}")
+
+    print("[INFO] Annual report generation placeholder - implementation pending")
+
+    monitor.end_total_timing()
+    if args.debug:
+        monitor.print_summary()
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     """Main entry point for the report phase."""
     try:
         parser = cli.get_parser()
         args = parser.parse_args(argv)
         cli.validate_args(args)
-        run_report(args)
+
+        # Route to appropriate function based on annual flag
+        if args.annual:
+            run_annual_report(args)
+        else:
+            run_report(args)
     except KeyboardInterrupt:
         print("\n[INFO] Report generation interrupted by user")
     except Exception as e:
