@@ -1,6 +1,51 @@
-# Data Recovery Plans
+# Completed Plans
 
-This folder contains plans and documentation for recovering missing or corrupted data in the SOTD pipeline.
+This directory contains completed implementation plans and related documentation.
+
+## Naming Convention
+
+**IMPORTANT**: When moving plans to the completed folder, always include the completion date in the filename to avoid conflicts and maintain historical tracking.
+
+### Format: `{plan_name}_{YYYY-MM-DD}.mdc`
+
+Examples:
+- `refactoring_implementation_plan_2024-12-19.mdc`
+- `bug_fix_plan_2024-12-20.mdc`
+- `feature_implementation_plan_2024-12-21.mdc`
+
+### Why This Matters
+
+- **Avoids conflicts**: Multiple plans with the same name can coexist
+- **Historical tracking**: Easy to see when plans were completed
+- **Better organization**: Clear timeline of project milestones
+- **Future reference**: Can track how long different types of work take
+
+### Process for Completing Plans
+
+1. Update the plan with final completion status and summary
+2. Move the plan to `plans/completed/` with date suffix
+3. Remove the original plan from the root `plans/` directory
+4. Commit both the move and any final updates together
+
+## Current Completed Plans
+
+- `refactoring_implementation_plan_2024-12-19.mdc` - Major refactoring of SOTD Pipeline codebase
+- `monthly_annual_reports_tdd_plan.mdc` - TDD approach for monthly/annual reports
+- `report_implementation_plan.mdc` - Report phase implementation
+- `refactoring_tdd_prompts.mdc` - TDD prompts for refactoring work
+- `refactoring_summary.mdc` - Summary of refactoring work
+- `match_phase_parallelization_plan.mdc` - Match phase performance optimization
+- `pipeline_testing_rules.mdc` - Testing rules and guidelines
+- `hardware_report_sync_plan.mdc` - Hardware report synchronization
+- `enrich_phase_implementation_plan.mdc` - Enrich phase implementation
+- `missing_months_recovery_plan.mdc` - Recovery of missing months data
+- `missing_months_analysis.mdc` - Analysis of missing months
+- `missing_may_2020_threads_fetch_plan.mdc` - Specific month recovery
+- `aggregate_future_enhancements_plan.mdc` - Future aggregation enhancements
+- `aggregate_implementation_plan.mdc` - Aggregate phase implementation
+- `aggregate-phase.mdc` - Aggregate phase overview
+- `monthly_annual_reports_plan.mdc` - Monthly/annual reports planning
+- `unified_product_structure_migration_plan.mdc` - Product structure migration
 
 ## Folder Organization
 
