@@ -191,6 +191,10 @@ class BaseCLIParser(argparse.ArgumentParser):
         if hasattr(args, "audit") and args.audit and not has_primary_date and not has_start_end:
             return args
 
+        # Special case: annual mode - don't set default month
+        if hasattr(args, "annual") and args.annual:
+            return args
+
         # If no date specification is provided
         if not has_primary_date and not has_start_end:
             if self._require_date_args:
