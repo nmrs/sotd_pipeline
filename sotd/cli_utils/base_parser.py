@@ -30,6 +30,7 @@ class BaseCLIParser(argparse.ArgumentParser):
         add_output_args: bool = True,
         add_debug_args: bool = True,
         add_force_args: bool = True,
+        require_date_args: bool = False,
         **kwargs,
     ):
         """
@@ -41,9 +42,12 @@ class BaseCLIParser(argparse.ArgumentParser):
             add_output_args: Whether to add output directory argument
             add_debug_args: Whether to add debug flag
             add_force_args: Whether to add force flag
+            require_date_args: Whether date arguments are required (no default to current month)
             **kwargs: Additional arguments passed to argparse.ArgumentParser
         """
         super().__init__(description=description, **kwargs)
+
+        self._require_date_args = require_date_args
 
         if add_date_args:
             self._add_date_arguments()
@@ -187,9 +191,20 @@ class BaseCLIParser(argparse.ArgumentParser):
         if hasattr(args, "audit") and args.audit and not has_primary_date and not has_start_end:
             return args
 
-        # Check that at least one date specification method is provided
+        # If no date specification is provided
         if not has_primary_date and not has_start_end:
-            self.error("Must provide --month, --year, --range, or both --start and --end")
+            if self._require_date_args:
+                self.error(
+                    "At least one date argument (--month, --year, --range, "
+                    "or --start/--end) is required"
+                )
+
+            # Default to current month if not required
+            import datetime
+
+            now = datetime.datetime.now()
+            args.month = f"{now.year:04d}-{now.month:02d}"
+            return args
 
         # Validate start/end pair
         if (args.start is not None) != (args.end is not None):

@@ -214,7 +214,7 @@ class TestBaseCLIParser:
 
     def test_required_date_argument(self):
         """Test that at least one date argument is required."""
-        parser = BaseCLIParser(description="Test")
+        parser = BaseCLIParser(description="Test", require_date_args=True)
 
         # Should fail without any date argument
         with pytest.raises(SystemExit):
