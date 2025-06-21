@@ -207,36 +207,36 @@ This plan implements a systematic refactoring of the SOTD Pipeline codebase to e
 - All quality checks passing (format, lint, typecheck)
 - Annual run integration functionality fully preserved with enhanced patterns
 
-### Chunk 2.5: Enhance Table Generators
+### Chunk 2.5: Enhance Table Generators ✅ COMPLETE
 **Priority**: MEDIUM | **Risk**: LOW | **Estimated Lines**: ~100 eliminated
 
 #### Task 2.5.1: Enhance Base Table Generator
-- [ ] Update `sotd/report/table_generators/base.py` with factory methods
-- [ ] Add common table type configurations
-- [ ] Create utility methods for common column patterns
-- [ ] Add comprehensive unit tests for enhanced base
-- [ ] Run quality checks and commit
+- [x] Update `sotd/report/table_generators/base.py` with factory methods
+- [x] Add common table type configurations
+- [x] Create utility methods for common column patterns
+- [x] Add comprehensive unit tests for enhanced base
+- [x] Run quality checks and commit
 
 #### Task 2.5.2: Refactor Soap Tables
-- [ ] Update `sotd/report/table_generators/soap_tables.py` to use enhanced base
-- [ ] Remove duplicated column configurations
-- [ ] Use factory methods for common table types
-- [ ] Add integration tests for soap tables
-- [ ] Run quality checks and commit
+- [x] Update `sotd/report/table_generators/soap_tables.py` to use enhanced base
+- [x] Remove duplicated column configurations
+- [x] Use factory methods for common table types
+- [x] Add integration tests for soap tables
+- [x] Run quality checks and commit
 
 #### Task 2.5.3: Refactor Razor Tables
-- [ ] Update `sotd/report/table_generators/razor_tables.py` to use enhanced base
-- [ ] Remove duplicated column configurations
-- [ ] Use factory methods for common table types
-- [ ] Add integration tests for razor tables
-- [ ] Run quality checks and commit
+- [x] Update `sotd/report/table_generators/razor_tables.py` to use enhanced base
+- [x] Remove duplicated column configurations
+- [x] Use factory methods for common table types
+- [x] Add integration tests for razor tables
+- [x] Run quality checks and commit
 
 #### Task 2.5.4: Refactor Other Table Generators
-- [ ] Update remaining table generators to use enhanced base
-- [ ] Remove duplicated column configurations
-- [ ] Use factory methods for common table types
-- [ ] Add integration tests for all table generators
-- [ ] Run quality checks and commit
+- [x] Update remaining table generators to use enhanced base
+- [x] Remove duplicated column configurations
+- [x] Use factory methods for common table types
+- [x] Add integration tests for all table generators
+- [x] Run quality checks and commit
 
 ## Phase 3: Low Impact, Low Risk Refactoring
 
@@ -244,10 +244,16 @@ This plan implements a systematic refactoring of the SOTD Pipeline codebase to e
 **Priority**: LOW | **Risk**: LOW | **Estimated Lines**: ~50 eliminated
 
 #### Task 3.1.1: Create Regex Utilities
-- [ ] Create `sotd/utils/regex_utils.py` with common regex patterns
-- [ ] Extract common pattern matching logic from enrichers
-- [ ] Add comprehensive unit tests for regex utilities
-- [ ] Run quality checks and commit
+- [x] Create `sotd/utils/regex_utils.py` with common regex patterns
+- [x] Extract common pattern matching logic from enrichers
+- [x] Add comprehensive unit tests for regex utilities
+- [x] Run quality checks and commit
+- **Notes:**
+    - Centralized all major regex patterns and extraction logic from enrichers and brush strategies into `sotd/utils/regex_utils.py`.
+    - Created comprehensive unit tests in `tests/utils/test_regex_utils.py` (48 tests, 100% pass).
+    - Functions now robustly handle `None` and empty input.
+    - All quality checks and linter rules are clean.
+    - Ready for next step: validation utilities extraction.
 
 #### Task 3.1.2: Create Validation Utilities
 - [ ] Create `sotd/utils/validation_utils.py` with common validation logic
@@ -368,6 +374,15 @@ diff data/aggregated/2025-01.json data/aggregated/2025-01.json.backup
 - [ ] Performance regression testing
 
 ## Recent Updates
+
+### Session 21: [2024-12-19] - Chunk 2.5 Table Generator Refactoring Complete
+- **COMPLETED**: Enhanced BaseTableGenerator with factory methods and common column patterns
+- **COMPLETED**: Refactored all table generator modules (soap, razor, blade, brush, user, cross-product, specialized) to use unified patterns
+- **COMPLETED**: Eliminated all duplicated column configuration code in product, manufacturer, and specialized tables
+- **COMPLETED**: Updated all affected tests to match new column config structure
+- **COMPLETED**: All quality checks and tests passing (format, lint, typecheck, pytest)
+- **CURRENT STATUS**: Phase 2 (Medium Impact, Medium Risk Refactoring) is now FULLY COMPLETE
+- **NEXT**: Begin Phase 3 (Low Impact, Low Risk Refactoring)
 
 ### Session 20: [2024-12-19] - Chunk 2.4 Annual Reporting Refactoring Complete
 - **COMPLETED**: Refactored annual_generator.py to use unified patterns

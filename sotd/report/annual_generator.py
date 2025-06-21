@@ -1,76 +1,163 @@
 """Annual report generator for SOTD pipeline."""
 
 import logging
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
-from sotd.utils.performance_base import BasePerformanceMetrics, BasePerformanceMonitor
+from sotd.utils.performance import PerformanceMonitor
 from sotd.utils.template_processor import TemplateProcessor
 
 from . import annual_load
+from .base import BaseReportGenerator
 from .table_generator import TableGenerator
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class AnnualGeneratorMetrics(BasePerformanceMetrics):
-    """Performance metrics for annual report generation."""
+class AnnualReportGenerator(BaseReportGenerator):
+    """Annual report generator that follows unified patterns."""
 
-    # Annual generator specific fields
-    year: str = field(default="")
-    report_type: str = field(default="")
-    template_processing_time: float = field(default=0.0)
-    table_generation_time: float = field(default=0.0)
-    report_size_chars: int = field(default=0)
+    def __init__(
+        self,
+        year: str,
+        report_type: str,
+        metadata: Dict[str, Any],
+        data: Dict[str, Any],
+        comparison_data: Optional[Dict[str, Any]] = None,
+        debug: bool = False,
+        template_path: Optional[str] = None,
+    ):
+        """Initialize the annual report generator.
 
-    def to_dict(self) -> Dict:
-        """Convert metrics to dictionary for JSON serialization."""
-        base_dict = super().to_dict()
-        base_dict.update(
-            {
-                "year": self.year,
-                "report_type": self.report_type,
-                "template_processing_time_seconds": self.template_processing_time,
-                "table_generation_time_seconds": self.table_generation_time,
-                "report_size_chars": self.report_size_chars,
-            }
-        )
-        return base_dict
-
-
-class AnnualGeneratorPerformanceMonitor(BasePerformanceMonitor):
-    """Performance monitor for annual report generation."""
-
-    def __init__(self, year: str, report_type: str, parallel_workers: int = 1):
+        Args:
+            year: Year to generate report for (YYYY format)
+            report_type: Type of report ('hardware' or 'software')
+            metadata: Metadata from annual aggregated data
+            data: Data from annual aggregated data
+            comparison_data: Historical data for delta calculations
+            debug: Enable debug logging
+            template_path: Optional custom path to template file for testing
+        """
+        super().__init__(metadata, data, comparison_data, debug, template_path)
         self.year = year
         self.report_type = report_type
-        super().__init__("annual_generator", parallel_workers)
-        # Type annotation to help type checker
-        self.metrics: AnnualGeneratorMetrics = self.metrics
 
-    def _create_metrics(self, phase_name: str, parallel_workers: int) -> AnnualGeneratorMetrics:
-        """Create annual generator performance metrics."""
-        metrics = AnnualGeneratorMetrics()
-        metrics.year = self.year
-        metrics.report_type = self.report_type
-        metrics.phase_name = phase_name
-        metrics.parallel_workers = parallel_workers
-        return metrics
+    def generate_header(self) -> str:
+        """Generate the report header.
 
-    def print_summary(self) -> None:
-        """Print a human-readable performance summary."""
-        metrics = self.metrics
-        print(
-            f"\n=== Annual Generator Performance Summary ({metrics.year} {metrics.report_type}) ==="
+        Note: This method is deprecated in favor of the templating system.
+        The template now contains the complete report structure including headers.
+        """
+        # This method is kept for backward compatibility but is no longer used
+        # Headers are now generated through the template system
+        return ""
+
+    def generate_notes_and_caveats(self) -> str:
+        """Generate the complete annual report content using the templating system."""
+
+        # Prepare variables for template
+        def _count(val):
+            if isinstance(val, list):
+                return len(val)
+            if isinstance(val, int):
+                return val
+            return 0
+
+        variables = {
+            "year": self.year,
+            "total_shaves": f"{self.metadata.get('total_shaves', 0):,}",
+            "unique_shavers": str(self.metadata.get("unique_shavers", 0)),
+            "included_months": str(_count(self.metadata.get("included_months", []))),
+            "missing_months": str(_count(self.metadata.get("missing_months", []))),
+        }
+
+        # Create table generator for table placeholders
+        table_generator = TableGenerator(self.data, self.comparison_data, self.debug)
+
+        # Create template processor with custom path if provided
+        if self.template_path:
+            processor = TemplateProcessor(Path(self.template_path))
+        else:
+            processor = TemplateProcessor()
+
+        # Generate report using annual template
+        annual_template_name = f"annual_{self.report_type}"
+        return processor.render_template(
+            annual_template_name, "report_template", variables, table_generator
         )
-        print(f"Total Processing Time: {metrics.total_processing_time:.2f}s")
-        print(f"Template Processing Time: {metrics.template_processing_time:.2f}s")
-        print(f"Table Generation Time: {metrics.table_generation_time:.2f}s")
-        print(f"File I/O Time: {metrics.file_io_time:.2f}s")
-        print(f"Report Size: {metrics.report_size_chars:,} characters")
-        print(f"Peak Memory Usage: {metrics.peak_memory_mb:.1f}MB")
+
+    def generate_tables(self) -> list[str]:
+        """Generate all tables for the annual report.
+
+        Note: This method is now deprecated in favor of the templating system.
+        Tables are now generated through the template placeholders.
+        """
+        # This method is kept for backward compatibility but is no longer used
+        # Tables are now generated through the template system
+        return []
+
+
+def create_annual_report_generator(
+    report_type: str,
+    year: str,
+    metadata: Dict[str, Any],
+    data: Dict[str, Any],
+    comparison_data: Optional[Dict[str, Any]] = None,
+    debug: bool = False,
+    template_path: Optional[str] = None,
+) -> AnnualReportGenerator:
+    """Create an annual report generator based on the report type.
+
+    Args:
+        report_type: Type of report ('hardware' or 'software')
+        year: Year to generate report for (YYYY format)
+        metadata: Metadata from annual aggregated data
+        data: Data from annual aggregated data
+        comparison_data: Historical data for delta calculations
+        debug: Enable debug logging
+        template_path: Optional custom path to template file for testing
+
+    Returns:
+        Annual report generator instance
+
+    Raises:
+        ValueError: If report_type is not supported
+    """
+    if report_type not in ["hardware", "software"]:
+        raise ValueError(f"Unsupported report type: {report_type}")
+
+    return AnnualReportGenerator(
+        year, report_type, metadata, data, comparison_data, debug, template_path
+    )
+
+
+def generate_annual_report_content(
+    report_type: str,
+    year: str,
+    metadata: Dict[str, Any],
+    data: Dict[str, Any],
+    comparison_data: Optional[Dict[str, Any]] = None,
+    debug: bool = False,
+    template_path: Optional[str] = None,
+) -> str:
+    """Generate complete annual report content.
+
+    Args:
+        report_type: Type of report ('hardware' or 'software')
+        year: Year to generate report for (YYYY format)
+        metadata: Metadata from annual aggregated data
+        data: Data from annual aggregated data
+        comparison_data: Historical data for delta calculations
+        debug: Enable debug logging
+        template_path: Optional custom path to template file for testing
+
+    Returns:
+        Complete annual report content as a string
+    """
+    generator = create_annual_report_generator(
+        report_type, year, metadata, data, comparison_data, debug, template_path
+    )
+    return generator.generate_report()
 
 
 def generate_annual_report(
@@ -97,7 +184,7 @@ def generate_annual_report(
         ValueError: If report_type is not supported
         KeyError: If required data is missing
     """
-    monitor = AnnualGeneratorPerformanceMonitor(year, report_type)
+    monitor = PerformanceMonitor("annual_generator")
     monitor.start_total_timing()
 
     try:
@@ -119,49 +206,14 @@ def generate_annual_report(
             logger.info(f"Total shaves: {metadata['total_shaves']}")
             logger.info(f"Unique shavers: {metadata['unique_shavers']}")
 
-        # Validate report type
-        if report_type not in ["hardware", "software"]:
-            raise ValueError(f"Unsupported report type: {report_type}")
-
-        # Prepare variables for template
-        def _count(val):
-            if isinstance(val, list):
-                return len(val)
-            if isinstance(val, int):
-                return val
-            return 0
-
-        variables = {
-            "year": year,
-            "total_shaves": f"{metadata['total_shaves']:,}",
-            "unique_shavers": str(metadata["unique_shavers"]),
-            "included_months": str(_count(metadata["included_months"])),
-            "missing_months": str(_count(metadata["missing_months"])),
-        }
-
-        # Create table generator for table placeholders
+        # Generate report content using unified patterns
         monitor.start_processing_timing()
-        table_generator = TableGenerator(
-            data, {}, debug
-        )  # No comparison data for annual reports yet
-        monitor.end_processing_timing()
-
-        # Create template processor with custom path if provided
-        if template_path:
-            processor = TemplateProcessor(Path(template_path))
-        else:
-            processor = TemplateProcessor()
-
-        # Generate report using annual template
-        monitor.start_processing_timing()
-        annual_template_name = f"annual_{report_type}"
-        result = processor.render_template(
-            annual_template_name, "report_template", variables, table_generator
+        result = generate_annual_report_content(
+            report_type, year, metadata, data, {}, debug, template_path
         )
         monitor.end_processing_timing()
 
         # Update metrics
-        monitor.metrics.report_size_chars = len(result)
         monitor.metrics.record_count = 1
 
         if debug:
@@ -175,7 +227,9 @@ def generate_annual_report(
             monitor.print_summary()
 
 
-class AnnualReportGenerator:
+class LegacyAnnualReportGenerator:
+    """Legacy annual report generator for backward compatibility."""
+
     def __init__(self, debug: bool = False):
         self.debug = debug
 

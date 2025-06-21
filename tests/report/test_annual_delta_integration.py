@@ -2,7 +2,7 @@
 """Integration tests for annual delta calculation in report generation."""
 
 from pathlib import Path
-from sotd.report.annual_generator import AnnualReportGenerator
+from sotd.report.annual_generator import LegacyAnnualReportGenerator
 from sotd.report.annual_delta_calculator import AnnualDeltaCalculator
 from sotd.report.annual_comparison_loader import AnnualComparisonLoader
 import tempfile
@@ -13,7 +13,7 @@ class TestAnnualDeltaIntegration:
     def setup_method(self):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.data_dir = Path(self.temp_dir.name)
-        self.generator = AnnualReportGenerator(debug=True)
+        self.generator = LegacyAnnualReportGenerator(debug=True)
         self.delta_calculator = AnnualDeltaCalculator(debug=True)
         self.comparison_loader = AnnualComparisonLoader(debug=True)
 

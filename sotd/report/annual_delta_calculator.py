@@ -2,69 +2,12 @@
 """Annual delta calculation functionality for year-over-year trend analysis."""
 
 import logging
-from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from sotd.report.delta_calculator import DeltaCalculator
-from sotd.utils.performance_base import BasePerformanceMetrics, BasePerformanceMonitor
+from sotd.utils.performance import PerformanceMonitor
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class AnnualDeltaMetrics(BasePerformanceMetrics):
-    """Performance metrics for annual delta calculation."""
-
-    # Annual delta specific fields
-    current_year: str = field(default="")
-    comparison_years: int = field(default=0)
-    categories_processed: int = field(default=0)
-    categories_with_deltas: int = field(default=0)
-    total_delta_calculations: int = field(default=0)
-
-    def to_dict(self) -> Dict:
-        """Convert metrics to dictionary for JSON serialization."""
-        base_dict = super().to_dict()
-        base_dict.update(
-            {
-                "current_year": self.current_year,
-                "comparison_years": self.comparison_years,
-                "categories_processed": self.categories_processed,
-                "categories_with_deltas": self.categories_with_deltas,
-                "total_delta_calculations": self.total_delta_calculations,
-            }
-        )
-        return base_dict
-
-
-class AnnualDeltaPerformanceMonitor(BasePerformanceMonitor):
-    """Performance monitor for annual delta calculation."""
-
-    def __init__(self, current_year: str, parallel_workers: int = 1):
-        self.current_year = current_year
-        super().__init__("annual_delta", parallel_workers)
-        # Type annotation to help type checker
-        self.metrics: AnnualDeltaMetrics = self.metrics
-
-    def _create_metrics(self, phase_name: str, parallel_workers: int) -> AnnualDeltaMetrics:
-        """Create annual delta performance metrics."""
-        metrics = AnnualDeltaMetrics()
-        metrics.current_year = self.current_year
-        metrics.phase_name = phase_name
-        metrics.parallel_workers = parallel_workers
-        return metrics
-
-    def print_summary(self) -> None:
-        """Print a human-readable performance summary."""
-        metrics = self.metrics
-        print(f"\n=== Annual Delta Performance Summary ({metrics.current_year}) ===")
-        print(f"Total Processing Time: {metrics.total_processing_time:.2f}s")
-        print(f"Processing Time: {metrics.processing_time:.2f}s")
-        print(f"Comparison Years: {metrics.comparison_years}")
-        print(f"Categories Processed: {metrics.categories_processed}")
-        print(f"Categories with Deltas: {metrics.categories_with_deltas}")
-        print(f"Total Delta Calculations: {metrics.total_delta_calculations}")
-        print(f"Peak Memory Usage: {metrics.peak_memory_mb:.1f}MB")
 
 
 class AnnualDeltaCalculator:
@@ -112,8 +55,7 @@ class AnnualDeltaCalculator:
             raise ValueError(
                 f"Expected dict for previous_year_data, got {type(previous_year_data)}"
             )
-        current_year = current_year_data.get("year", "unknown")
-        monitor = AnnualDeltaPerformanceMonitor(current_year)
+        monitor = PerformanceMonitor("annual_delta")
         monitor.start_total_timing()
 
         try:
@@ -149,12 +91,14 @@ class AnnualDeltaCalculator:
                 logger.info(f"Processing categories: {categories}")
 
             # Update metrics
-            monitor.metrics.comparison_years = 1
-            monitor.metrics.categories_processed = len(categories)
+            monitor.metrics.record_count = len(categories)
 
             # Calculate deltas for each category
             monitor.start_processing_timing()
             results = {}
+            categories_with_deltas = 0
+            total_delta_calculations = 0
+
             for category in categories:
                 current_category_data = current_data.get(category, [])
                 previous_category_data = previous_data.get(category, [])
@@ -177,8 +121,8 @@ class AnnualDeltaCalculator:
                         current_category_data, previous_category_data, max_items=max_items
                     )
                     results[category] = category_deltas
-                    monitor.metrics.categories_with_deltas += 1
-                    monitor.metrics.total_delta_calculations += len(category_deltas)
+                    categories_with_deltas += 1
+                    total_delta_calculations += len(category_deltas)
 
                     if self.debug:
                         logger.info(
@@ -192,6 +136,9 @@ class AnnualDeltaCalculator:
                     results[category] = current_category_data[:max_items]
 
             monitor.end_processing_timing()
+
+            # Update final metrics
+            monitor.metrics.record_count = total_delta_calculations
 
             return results
 
@@ -223,8 +170,7 @@ class AnnualDeltaCalculator:
         Returns:
             Dictionary mapping category names to lists with multi-year delta information
         """
-        current_year = current_year_data.get("year", "unknown")
-        monitor = AnnualDeltaPerformanceMonitor(current_year)
+        monitor = PerformanceMonitor("annual_delta")
         monitor.start_total_timing()
 
         try:
@@ -250,12 +196,13 @@ class AnnualDeltaCalculator:
                 logger.info(f"Processing multi-year deltas for categories: {categories}")
 
             # Update metrics
-            monitor.metrics.comparison_years = len(comparison_years_data)
-            monitor.metrics.categories_processed = len(categories)
+            monitor.metrics.record_count = len(categories)
 
             # Initialize results with current data
             monitor.start_processing_timing()
             results = {}
+            total_delta_calculations = 0
+
             for category in categories:
                 current_category_data = current_data.get(category, [])
                 if isinstance(current_category_data, list):
@@ -301,10 +248,7 @@ class AnnualDeltaCalculator:
                                             new_key = f"{key}_{comparison_year}"
                                             item[new_key] = value
 
-                    monitor.metrics.categories_with_deltas += len(year_deltas)
-                    monitor.metrics.total_delta_calculations += sum(
-                        len(deltas) for deltas in year_deltas.values()
-                    )
+                    total_delta_calculations += sum(len(deltas) for deltas in year_deltas.values())
 
                 except Exception as e:
                     if self.debug:
@@ -313,6 +257,9 @@ class AnnualDeltaCalculator:
                         )
 
             monitor.end_processing_timing()
+
+            # Update final metrics
+            monitor.metrics.record_count = total_delta_calculations
 
             return results
 
