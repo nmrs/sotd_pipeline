@@ -9,6 +9,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+from sotd.utils.file_io import load_json_data, save_json_data
+
 
 def load_matched_data(file_path: Path) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     """
@@ -31,14 +33,13 @@ def load_matched_data(file_path: Path) -> Tuple[Dict[str, Any], List[Dict[str, A
         raise FileNotFoundError(f"Matched data file not found: {file_path}")
 
     try:
-        with file_path.open("r", encoding="utf-8") as f:
-            content = json.load(f)
-    except json.JSONDecodeError as e:
-        # Fail fast on malformed JSON - this is a data quality error
-        raise ValueError(f"Invalid JSON in matched data file {file_path}: {e}")
-    except OSError as e:
-        # Fail fast on file system errors
-        raise OSError(f"File system error reading {file_path}: {e}")
+        content = load_json_data(file_path)
+    except (json.JSONDecodeError, OSError) as e:
+        # Re-raise with the same error messages expected by tests
+        if isinstance(e, json.JSONDecodeError):
+            raise ValueError(f"Invalid JSON in matched data file {file_path}: {e}")
+        else:
+            raise OSError(f"File system error reading {file_path}: {e}")
 
     # Fail fast on invalid data structure
     if not isinstance(content, dict):
@@ -101,9 +102,8 @@ def save_enriched_data(
         "meta": enrichment_metadata,
     }
 
-    # Write to file
-    with file_path.open("w", encoding="utf-8") as f:
-        json.dump(output, f, ensure_ascii=False, indent=2)
+    # Write to file using unified utilities
+    save_json_data(output, file_path, indent=2)
 
 
 def calculate_enrichment_stats(enriched_data: List[Dict[str, Any]]) -> Dict[str, Any]:
