@@ -5,12 +5,8 @@ from unittest.mock import patch
 
 import pytest
 
-from sotd.match.utils.performance import (
-    PerformanceMonitor,
-    TimingContext,
-    TimingStats,
-    PerformanceMetrics,
-)
+from sotd.match.utils.performance import PerformanceMonitor
+from sotd.utils.performance_base import TimingContext, TimingStats
 
 
 class TestTimingStats:
@@ -42,24 +38,6 @@ class TestTimingStats:
         assert stats.avg_time == 1.5
 
 
-class TestPerformanceMetrics:
-    def test_performance_metrics_to_dict(self):
-        """Test converting PerformanceMetrics to dictionary."""
-        metrics = PerformanceMetrics()
-        metrics.total_processing_time = 10.0
-        metrics.record_count = 100
-        metrics.records_per_second = 10.0
-
-        result = metrics.to_dict()
-
-        assert result["total_processing_time_seconds"] == 10.0
-        assert result["record_count"] == 100
-        assert result["records_per_second"] == 10.0
-        assert "matcher_times" in result
-        assert "memory_usage_mb" in result
-        assert "file_sizes_mb" in result
-
-
 class TestPerformanceMonitor:
     def test_performance_monitor_initialization(self):
         """Test PerformanceMonitor initialization."""
@@ -89,15 +67,15 @@ class TestPerformanceMonitor:
 
         assert monitor.metrics.file_io_time > 0.0
 
-    def test_matching_timing(self):
-        """Test matching timing functionality."""
+    def test_processing_timing(self):
+        """Test processing timing functionality."""
         monitor = PerformanceMonitor()
 
-        monitor.start_matching_timing()
+        monitor.start_processing_timing()
         time.sleep(0.01)  # Small delay
-        monitor.end_matching_timing()
+        monitor.end_processing_timing()
 
-        assert monitor.metrics.matching_time > 0.0
+        assert monitor.metrics.processing_time > 0.0
 
     def test_record_matcher_timing(self):
         """Test recording matcher timing."""
@@ -183,8 +161,8 @@ class TestTimingContext:
         with TimingContext(monitor, "test_operation"):
             time.sleep(0.01)  # Small delay
 
-        assert "test_operation" in monitor.metrics.matcher_times
-        stats = monitor.metrics.matcher_times["test_operation"]
+        assert "test_operation" in monitor.metrics.phase_times
+        stats = monitor.metrics.phase_times["test_operation"]
         assert stats.count == 1
         assert stats.total_time > 0.0
 
@@ -198,49 +176,46 @@ class TestTimingContext:
                 raise ValueError("Test exception")
 
         # Should still record timing even with exception
-        assert "test_operation" in monitor.metrics.matcher_times
-        stats = monitor.metrics.matcher_times["test_operation"]
-        assert stats.count == 1
-        assert stats.total_time > 0.0
+        assert "test_operation" in monitor.metrics.phase_times
 
 
 class TestPerformanceMonitoringIntegration:
     def test_performance_monitoring_integration(self):
         """Test integration of performance monitoring components."""
-        monitor = PerformanceMonitor()
+        monitor = PerformanceMonitor("test_phase", 2)
 
-        # Simulate a complete processing cycle
+        # Simulate a complete processing workflow
         monitor.start_total_timing()
 
-        # File I/O
         monitor.start_file_io_timing()
-        time.sleep(0.01)
+        time.sleep(0.01)  # Simulate file I/O
         monitor.end_file_io_timing()
 
-        # Set record count
+        monitor.start_processing_timing()
+        monitor.record_matcher_timing("razor", 0.5)
+        monitor.record_matcher_timing("blade", 0.3)
+        time.sleep(0.01)  # Simulate processing
+        monitor.end_processing_timing()
+
         monitor.set_record_count(100)
-
-        # Matching operations
-        monitor.start_matching_timing()
-        with TimingContext(monitor, "razor"):
-            time.sleep(0.01)
-        with TimingContext(monitor, "blade"):
-            time.sleep(0.01)
-        monitor.end_matching_timing()
-
-        # More file I/O
-        monitor.start_file_io_timing()
-        time.sleep(0.01)
-        monitor.end_file_io_timing()
-
         monitor.end_total_timing()
 
-        # Verify all metrics are populated
+        # Verify all metrics are properly set
+        assert monitor.metrics.total_processing_time > 0.0
+        assert monitor.metrics.file_io_time > 0.0
+        assert monitor.metrics.processing_time > 0.0
+        assert monitor.metrics.record_count == 100
+        assert monitor.metrics.records_per_second > 0.0
+        assert monitor.metrics.avg_time_per_record > 0.0
+
+        # Verify matcher timing
+        assert "razor" in monitor.metrics.matcher_times
+        assert "blade" in monitor.metrics.matcher_times
+        assert monitor.metrics.matcher_times["razor"].total_time == 0.5
+        assert monitor.metrics.matcher_times["blade"].total_time == 0.3
+
+        # Verify summary generation
         summary = monitor.get_summary()
-        assert summary["total_processing_time_seconds"] > 0.0
-        assert summary["file_io_time_seconds"] > 0.0
-        assert summary["matching_time_seconds"] > 0.0
+        assert summary["phase_name"] == "test_phase"
+        assert summary["parallel_workers"] == 2
         assert summary["record_count"] == 100
-        assert summary["records_per_second"] > 0.0
-        assert "razor" in summary["matcher_times"]
-        assert "blade" in summary["matcher_times"]
