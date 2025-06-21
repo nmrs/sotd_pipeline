@@ -9,11 +9,11 @@ a complete annual report generation workflow.
 from pathlib import Path
 from typing import Sequence
 
+from sotd.report.report_core import run_report  # Import run_report from new module
 from sotd.utils.performance import PerformanceMonitor
 
 from . import cli
 from .annual_generator import generate_annual_report  # noqa: F401
-from .run import run_report  # noqa: F401
 
 
 def run_annual_report(args) -> None:
@@ -34,43 +34,73 @@ def run_annual_report(args) -> None:
     data_root = Path(args.data_root)
     out_dir = Path(args.out_dir)
 
-    # Generate annual report content
-    if args.debug:
-        print(f"[DEBUG] Generating annual {args.type} report for {args.year}")
-    try:
-        report_content = generate_annual_report(args.type, args.year, data_root, args.debug, None)
-    except FileNotFoundError as e:
-        raise FileNotFoundError(
-            f"Annual data not found for {args.year}. "
-            f"Run the aggregate phase first with --annual --year {args.year} "
-            f"to generate the required data."
-        ) from e
-    except Exception as e:
-        raise RuntimeError(f"Failed to generate annual report content: {e}") from e
+    # Determine years to process
+    if args.year:
+        years = [args.year]
+    elif args.range:
+        # Parse year range for annual mode
+        start_year, end_year = args.range.split(":")
+        start_year_int, end_year_int = int(start_year), int(end_year)
+        # Ensure start_year <= end_year for proper range generation
+        actual_start = min(start_year_int, end_year_int)
+        actual_end = max(start_year_int, end_year_int)
+        years = [str(year) for year in range(actual_start, actual_end + 1)]
+    else:
+        raise ValueError("Annual reports require either --year or --range")
 
-    # Save report to file
     if args.debug:
-        print("[DEBUG] Saving annual report to file")
-    try:
-        monitor.start_file_io_timing()
-        output_path = save_annual_report(
-            report_content, out_dir, args.year, args.type, args.force, args.debug
-        )
-        monitor.end_file_io_timing()
-    except FileExistsError as e:
-        monitor.end_file_io_timing()
-        raise FileExistsError(f"Report file already exists. Use --force to overwrite: {e}") from e
-    except Exception as e:
-        monitor.end_file_io_timing()
-        raise RuntimeError(f"Failed to save annual report: {e}") from e
+        print(f"[DEBUG] Processing years: {years}")
+
+    # Process each year in the range
+    for year in years:
+        if args.debug:
+            print(f"[DEBUG] Generating annual {args.type} report for {year}")
+
+        try:
+            # Generate annual report content
+            report_content = generate_annual_report(args.type, year, data_root, args.debug, None)
+        except FileNotFoundError as e:
+            monitor.end_file_io_timing()
+            raise FileNotFoundError(
+                f"Annual data not found for {year}. "
+                f"Run the aggregate phase first with --annual --year {year} "
+                f"to generate the required data."
+            ) from e
+        except Exception as e:
+            monitor.end_file_io_timing()
+            raise RuntimeError(f"Failed to generate annual report content: {e}") from e
+
+        try:
+            # Save report to file
+            if args.debug:
+                print(f"[DEBUG] Saving annual report for {year}")
+            monitor.start_file_io_timing()
+            output_path = save_annual_report(
+                report_content, out_dir, year, args.type, args.force, args.debug
+            )
+            monitor.end_file_io_timing()
+        except OSError:
+            monitor.end_file_io_timing()
+            raise
+        except Exception as e:
+            monitor.end_file_io_timing()
+            raise RuntimeError(f"Failed to save annual report: {e}") from e
+
+        # Success message for this year
+        print(f"[INFO] Successfully generated {args.type} report for {year}")
+        print(f"[INFO] Report saved to: {output_path}")
 
     monitor.end_total_timing()
     if args.debug:
         monitor.print_summary()
 
-    # Success message
-    print(f"[INFO] Successfully generated {args.type} report for {args.year}")
-    print(f"[INFO] Report saved to: {output_path}")
+    # Final success message
+    if len(years) == 1:
+        print(f"[INFO] Annual report generation completed for {years[0]}")
+    else:
+        print(
+            f"[INFO] Annual report generation completed for {len(years)} years: {', '.join(years)}"
+        )
 
 
 def save_annual_report(

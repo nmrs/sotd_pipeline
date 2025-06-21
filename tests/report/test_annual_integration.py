@@ -181,7 +181,7 @@ class TestAnnualReportIntegration:
             mock_saver.side_effect = PermissionError("Permission denied")
 
             # Run the annual report generation
-            with pytest.raises(RuntimeError, match="Failed to save annual report"):
+            with pytest.raises(PermissionError, match="Permission denied"):
                 annual_run.run_annual_report(mock_args)
 
     def test_run_annual_report_software_type(self, mock_args, mock_annual_data, tmp_path):

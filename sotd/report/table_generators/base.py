@@ -252,6 +252,10 @@ class BaseTableGenerator(ABC):
 
         # Select and rename columns
         columns = list(column_config.keys())
+        # Ensure all columns from config are present in the DataFrame, fill missing with 'n/a'
+        for col in columns:
+            if col not in df.columns:
+                df[col] = "n/a"
         available_columns = [col for col in columns if col in df.columns]
 
         if not available_columns:
@@ -310,7 +314,15 @@ class BaseTableGenerator(ABC):
                 if config.get("format") == "number":
                     if col in df:
                         df[col] = (
-                            df[col].astype(object).apply(lambda x: f"{x:,}" if pd.notna(x) else "0")
+                            df[col]
+                            .astype(object)
+                            .apply(
+                                lambda x: (
+                                    f"{x:,}"
+                                    if isinstance(x, (int, float))
+                                    else ("n/a" if x == "n/a" else str(x))
+                                )
+                            )
                         )  # pyright: ignore[reportAttributeAccessIssue]
                 elif config.get("format") == "decimal":
                     decimals = config.get("decimals", 2)
@@ -595,8 +607,8 @@ class BaseTableGenerator(ABC):
         # Create a copy to avoid modifying the original
         updated_config = column_config.copy()
 
-        # Add delta column configuration for each period
-        for period, (metadata, _) in comparison_data.items():
+        # Always add delta column configuration for each period, even if historical data is empty
+        for period in comparison_data.keys():
             # Create a safe column key
             period_key = period.lower().replace(" ", "_").replace("-", "_")
             updated_config[f"delta_{period_key}"] = {

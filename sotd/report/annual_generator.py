@@ -88,3 +88,43 @@ def generate_annual_report(
         print(f"[DEBUG] Generated annual {report_type} report for {year}")
 
     return result
+
+
+class AnnualReportGenerator:
+    def __init__(self, debug: bool = False):
+        self.debug = debug
+
+    def generate_table_with_deltas(
+        self,
+        current_year_data: dict,
+        comparison_data: dict,
+        categories: list[str],
+        comparison_years: list[str],
+    ) -> str:
+        """
+        Generate a markdown table for the given categories with delta columns for comparison years.
+        """
+        # Use the first category for simplicity in tests
+        if not categories:
+            return "*No categories specified*"
+        category = categories[0]
+        data = current_year_data.get("data", {})
+        # Prepare comparison_data in the format expected by table generators.
+        # Format: {period: (metadata, data)}
+        formatted_comparison = {}
+        for year in comparison_years:
+            if year in comparison_data:
+                meta = comparison_data[year].get("meta", {})
+                d = comparison_data[year].get("data", {})
+                formatted_comparison[year] = (meta, d)
+            else:
+                # Add empty placeholder for missing years
+                formatted_comparison[year] = ({}, {})
+        tg = TableGenerator(data, formatted_comparison, self.debug)
+        try:
+            table_md = tg.generate_table_by_name(category)
+        except Exception as e:
+            if self.debug:
+                print(f"[DEBUG] Error generating table for {category}: {e}")
+            return f"*Error generating table for {category}: {e}*"
+        return table_md

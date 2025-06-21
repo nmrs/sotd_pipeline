@@ -181,32 +181,27 @@ class TestReportCLI:
     def test_annual_with_range_argument_validation(self):
         """Test annual with range argument validation."""
         parser = get_parser()
-        args = parser.parse_args(["--annual", "--range", "2021-01:2023-12"])
+        args = parser.parse_args(["--annual", "--range", "2021:2023"])
         assert args.annual is True
-        assert args.range == "2021-01:2023-12"
+        assert args.range == "2021:2023"
 
     def test_annual_without_year_or_range_raises_error(self):
         """Test annual without year or range raises error."""
         parser = get_parser()
-        # This should not raise SystemExit because validation happens in validate_args
-        args = parser.parse_args(["--annual"])
-        with pytest.raises(ValueError, match="Annual reports require --year or --range"):
-            validate_args(args)
+        with pytest.raises(SystemExit):
+            parser.parse_args(["--annual"])
 
     def test_annual_with_month_raises_error(self):
         """Test annual with month raises error."""
         parser = get_parser()
-        # This should not raise SystemExit because validation happens in validate_args
-        args = parser.parse_args(["--annual", "--month", "2023-01"])
-        with pytest.raises(ValueError, match="Annual reports cannot be combined with monthly"):
-            validate_args(args)
+        with pytest.raises(SystemExit):
+            parser.parse_args(["--annual", "--month", "2023-01"])
 
     def test_annual_with_year_and_range_raises_error(self):
         """Test annual with both year and range raises error."""
         parser = get_parser()
-        # This should raise SystemExit because argparse handles mutually exclusive arguments
         with pytest.raises(SystemExit):
-            parser.parse_args(["--annual", "--year", "2023", "--range", "2021-01:2023-12"])
+            parser.parse_args(["--annual", "--year", "2023", "--range", "2021:2023"])
 
     def test_annual_help_text_includes_annual_options(self):
         """Test that help text includes annual options."""
@@ -282,32 +277,28 @@ class TestReportCLIValidation:
     def test_validate_args_annual_with_range_valid(self):
         """Test validation with valid annual and range arguments."""
         parser = get_parser()
-        args = parser.parse_args(["--annual", "--range", "2021-01:2023-12"])
-        # Should not raise any exceptions
+        args = parser.parse_args(["--annual", "--range", "2021:2023"])
         validate_args(args)
         assert args.annual is True
-        assert args.range == "2021-01:2023-12"
+        assert args.range == "2021:2023"
 
     def test_validate_args_annual_without_year_or_range_raises_error(self):
         """Test validation raises error for annual without year or range."""
         parser = get_parser()
-        args = parser.parse_args(["--annual"])
-        with pytest.raises(ValueError, match="Annual reports require --year or --range"):
-            validate_args(args)
+        with pytest.raises(SystemExit):
+            parser.parse_args(["--annual"])
 
     def test_validate_args_annual_with_month_raises_error(self):
         """Test validation raises error for annual with month."""
         parser = get_parser()
-        args = parser.parse_args(["--annual", "--month", "2023-01"])
-        with pytest.raises(ValueError, match="Annual reports cannot be combined with monthly"):
-            validate_args(args)
+        with pytest.raises(SystemExit):
+            parser.parse_args(["--annual", "--month", "2023-01"])
 
     def test_validate_args_annual_with_year_and_range_raises_error(self):
         """Test validation raises error for annual with both year and range."""
         parser = get_parser()
-        # This should raise SystemExit because argparse handles mutually exclusive arguments
         with pytest.raises(SystemExit):
-            parser.parse_args(["--annual", "--year", "2023", "--range", "2021-01:2023-12"])
+            parser.parse_args(["--annual", "--year", "2023", "--range", "2021:2023"])
 
 
 class TestReportCLIUtilities:
@@ -399,11 +390,11 @@ class TestReportMain:
     @patch("sotd.report.run.run_annual_report")
     def test_main_annual_with_range(self, mock_run_annual_report):
         """Test main function with annual and range arguments."""
-        main(["--annual", "--range", "2021-01:2023-12"])
+        main(["--annual", "--range", "2021:2023"])
         mock_run_annual_report.assert_called_once()
         call_args = mock_run_annual_report.call_args[0][0]  # First positional argument
         assert call_args.annual is True
-        assert call_args.range == "2021-01:2023-12"
+        assert call_args.range == "2021:2023"
 
     @patch("sotd.report.run.run_annual_report")
     def test_main_annual_with_type(self, mock_run_annual_report):
@@ -415,12 +406,10 @@ class TestReportMain:
 
     def test_main_annual_without_year_or_range_raises_error(self, capsys):
         """Test main function raises error for annual without year or range."""
-        main(["--annual"])
-        captured = capsys.readouterr()
-        assert "Annual reports require --year or --range" in captured.out
+        with pytest.raises(SystemExit):
+            main(["--annual"])
 
     def test_main_annual_with_month_raises_error(self, capsys):
         """Test main function raises error for annual with month."""
-        main(["--annual", "--month", "2023-01"])
-        captured = capsys.readouterr()
-        assert "Annual reports cannot be combined with monthly" in captured.out
+        with pytest.raises(SystemExit):
+            main(["--annual", "--month", "2023-01"])
