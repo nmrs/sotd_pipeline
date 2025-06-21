@@ -6,6 +6,7 @@ from typing import Optional, Sequence
 from tqdm import tqdm
 
 from sotd.cli_utils.date_span import month_span
+from sotd.enrich.cli import get_parser
 from sotd.enrich.enrich import enrich_comments, setup_enrichers
 from sotd.enrich.save import calculate_enrichment_stats, load_matched_data, save_enriched_data
 from sotd.utils.performance import PerformanceMonitor
@@ -106,17 +107,8 @@ def run(args: argparse.Namespace) -> None:
 
 def main(argv: Sequence[str] | None = None) -> None:
     """Main CLI entry point for the enrich phase."""
-    p = argparse.ArgumentParser(description="Enrich SOTD data with detailed specifications")
-    g = p.add_mutually_exclusive_group()
-    g.add_argument("--month", type=str, help="e.g., 2025-04")
-    g.add_argument("--year", type=int, help="e.g., 2025 (runs all months in that year)")
-    g.add_argument("--range", type=str, help="Format: YYYY-MM:YYYY-MM (inclusive)")
-    p.add_argument("--start", type=str, help="Optional: overrides start date (YYYY-MM)")
-    p.add_argument("--end", type=str, help="Optional: overrides end date (YYYY-MM)")
-    p.add_argument("--out-dir", default="data", help="Base directory for data files")
-    p.add_argument("--debug", action="store_true", help="Enable debug output")
-    p.add_argument("--force", action="store_true", help="Overwrite existing output files")
-    args = p.parse_args(argv)
+    parser = get_parser()
+    args = parser.parse_args(argv)
 
     run(args)
 
