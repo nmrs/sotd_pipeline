@@ -2,7 +2,52 @@ from typing import Any, Dict, List
 
 import pandas as pd
 
+from ..base_aggregator import BaseAggregator
 
+
+class SoapAggregator(BaseAggregator):
+    """Aggregator for soap data from enriched records."""
+
+    def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Extract soap data from records for aggregation.
+
+        Args:
+            records: List of enriched comment records
+
+        Returns:
+            List of dictionaries with extracted soap data fields
+        """
+        soap_data = []
+        for record in records:
+            soap = record.get("soap", {})
+            matched = soap.get("matched", {})
+
+            # Skip if no matched soap data
+            if not matched or not matched.get("maker") or not matched.get("scent"):
+                continue
+
+            maker = matched.get("maker", "").strip()
+            scent = matched.get("scent", "").strip()
+            author = record.get("author", "").strip()
+
+            if maker and scent and author:
+                soap_data.append({"maker": maker, "scent": scent, "author": author})
+
+        return soap_data
+
+    def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
+        """Create composite name from maker and scent.
+
+        Args:
+            df: DataFrame with extracted soap data
+
+        Returns:
+            Series with composite names in "Maker - Scent" format
+        """
+        return df["maker"] + " - " + df["scent"]
+
+
+# Legacy function interface for backward compatibility
 def aggregate_soaps(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Aggregate soap data from enriched records.
 
@@ -15,57 +60,5 @@ def aggregate_soaps(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     Returns:
         List of soap aggregations with position, name, shaves, and unique_users fields
     """
-    if not records:
-        return []
-
-    # Extract soap data from records
-    soap_data = []
-    for record in records:
-        soap = record.get("soap", {})
-        matched = soap.get("matched", {})
-
-        # Skip if no matched soap data
-        if not matched or not matched.get("maker") or not matched.get("scent"):
-            continue
-
-        maker = matched.get("maker", "").strip()
-        scent = matched.get("scent", "").strip()
-        author = record.get("author", "").strip()
-
-        if maker and scent and author:
-            soap_data.append({"maker": maker, "scent": scent, "author": author})
-
-    if not soap_data:
-        return []
-
-    # Convert to DataFrame for efficient aggregation
-    df = pd.DataFrame(soap_data)
-
-    # Create composite name: "Maker - Scent"
-    df["name"] = df["maker"] + " - " + df["scent"]
-
-    # Group by name and calculate metrics
-    grouped = df.groupby("name").agg({"author": ["count", "nunique"]}).reset_index()
-
-    # Flatten column names
-    grouped.columns = ["name", "shaves", "unique_users"]
-
-    # Sort by shaves desc, unique_users desc
-    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
-
-    # Add position field (1-based rank)
-    grouped["position"] = range(1, len(grouped) + 1)
-
-    # Convert to list of dictionaries
-    result = []
-    for _, row in grouped.iterrows():
-        result.append(
-            {
-                "position": int(row["position"]),
-                "name": row["name"],
-                "shaves": int(row["shaves"]),
-                "unique_users": int(row["unique_users"]),
-            }
-        )
-
-    return result
+    aggregator = SoapAggregator()
+    return aggregator.aggregate(records)
