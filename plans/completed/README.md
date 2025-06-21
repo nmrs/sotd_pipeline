@@ -30,22 +30,23 @@ Examples:
 ## Current Completed Plans
 
 - `refactoring_implementation_plan_2024-12-19.mdc` - Major refactoring of SOTD Pipeline codebase
-- `monthly_annual_reports_tdd_plan.mdc` - TDD approach for monthly/annual reports
-- `report_implementation_plan.mdc` - Report phase implementation
-- `refactoring_tdd_prompts.mdc` - TDD prompts for refactoring work
-- `refactoring_summary.mdc` - Summary of refactoring work
-- `match_phase_parallelization_plan.mdc` - Match phase performance optimization
-- `pipeline_testing_rules.mdc` - Testing rules and guidelines
-- `hardware_report_sync_plan.mdc` - Hardware report synchronization
-- `enrich_phase_implementation_plan.mdc` - Enrich phase implementation
-- `missing_months_recovery_plan.mdc` - Recovery of missing months data
-- `missing_months_analysis.mdc` - Analysis of missing months
-- `missing_may_2020_threads_fetch_plan.mdc` - Specific month recovery
-- `aggregate_future_enhancements_plan.mdc` - Future aggregation enhancements
-- `aggregate_implementation_plan.mdc` - Aggregate phase implementation
-- `aggregate-phase.mdc` - Aggregate phase overview
-- `monthly_annual_reports_plan.mdc` - Monthly/annual reports planning
-- `unified_product_structure_migration_plan.mdc` - Product structure migration
+- `aggregate_implementation_plan_2025-06-20.mdc` - Aggregate phase implementation
+- `aggregate_future_enhancements_plan_2025-06-20.mdc` - Future aggregation enhancements
+- `aggregate-phase_2025-06-20.mdc` - Aggregate phase overview
+- `enrich_phase_implementation_plan_2025-06-20.mdc` - Enrich phase implementation
+- `hardware_report_sync_plan_2025-06-20.mdc` - Hardware report synchronization
+- `match_phase_parallelization_plan_2025-06-20.mdc` - Match phase performance optimization
+- `missing_months_analysis_2025-06-20.mdc` - Analysis of missing months
+- `missing_months_recovery_plan_2025-06-20.mdc` - Recovery of missing months data
+- `missing_may_2020_threads_fetch_plan.mdc` - Specific month recovery (already had date)
+- `monthly_annual_reports_plan_2025-06-21.mdc` - Monthly/annual reports planning
+- `monthly_annual_reports_tdd_plan_2025-06-20.mdc` - TDD approach for monthly/annual reports
+- `pipeline_testing_rules_2025-06-20.mdc` - Testing rules and guidelines
+- `prompts_2025-06-20.mdc` - General prompts and guidelines
+- `refactoring_summary_2025-06-20.mdc` - Summary of refactoring work
+- `refactoring_tdd_prompts_2025-06-20.mdc` - TDD prompts for refactoring work
+- `report_implementation_plan_2025-06-20.mdc` - Report phase implementation
+- `unified_product_structure_migration_plan_2025-06-20.mdc` - Product structure migration
 
 ## Folder Organization
 
