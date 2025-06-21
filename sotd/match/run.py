@@ -1,5 +1,6 @@
 import json
 import subprocess
+import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
@@ -11,7 +12,7 @@ from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.cli import get_parser
 from sotd.match.razor_matcher import RazorMatcher
 from sotd.match.soap_matcher import SoapMatcher
-from sotd.utils.performance import PerformanceMonitor, TimingContext
+from sotd.match.utils.performance import PerformanceMonitor
 
 
 def is_razor_matched(record: dict) -> bool:
@@ -57,17 +58,21 @@ def match_record(
     result = record.copy()
 
     if "razor" in result:
-        with TimingContext(monitor, "razor"):
-            result["razor"] = razor_matcher.match(result["razor"])
+        start_time = time.time()
+        result["razor"] = razor_matcher.match(result["razor"])
+        monitor.record_matcher_timing("razor", time.time() - start_time)
     if "blade" in result:
-        with TimingContext(monitor, "blade"):
-            result["blade"] = blade_matcher.match(result["blade"])
+        start_time = time.time()
+        result["blade"] = blade_matcher.match(result["blade"])
+        monitor.record_matcher_timing("blade", time.time() - start_time)
     if "soap" in result:
-        with TimingContext(monitor, "soap"):
-            result["soap"] = soap_matcher.match(result["soap"])
+        start_time = time.time()
+        result["soap"] = soap_matcher.match(result["soap"])
+        monitor.record_matcher_timing("soap", time.time() - start_time)
     if "brush" in result:
-        with TimingContext(monitor, "brush"):
-            result["brush"] = brush_matcher.match(result["brush"])
+        start_time = time.time()
+        result["brush"] = brush_matcher.match(result["brush"])
+        monitor.record_matcher_timing("brush", time.time() - start_time)
     return result
 
 
@@ -116,24 +121,28 @@ def process_month(
 
         for record in records:
             # Match razor
-            with TimingContext(monitor, "razor_matching"):
-                if "razor" in record:
-                    record["razor"] = razor_matcher.match(record["razor"])
+            if "razor" in record:
+                start_time = time.time()
+                record["razor"] = razor_matcher.match(record["razor"])
+                monitor.record_matcher_timing("razor", time.time() - start_time)
 
             # Match blade
-            with TimingContext(monitor, "blade_matching"):
-                if "blade" in record:
-                    record["blade"] = blade_matcher.match(record["blade"])
+            if "blade" in record:
+                start_time = time.time()
+                record["blade"] = blade_matcher.match(record["blade"])
+                monitor.record_matcher_timing("blade", time.time() - start_time)
 
             # Match brush
-            with TimingContext(monitor, "brush_matching"):
-                if "brush" in record:
-                    record["brush"] = brush_matcher.match(record["brush"])
+            if "brush" in record:
+                start_time = time.time()
+                record["brush"] = brush_matcher.match(record["brush"])
+                monitor.record_matcher_timing("brush", time.time() - start_time)
 
             # Match soap
-            with TimingContext(monitor, "soap_matching"):
-                if "soap" in record:
-                    record["soap"] = soap_matcher.match(record["soap"])
+            if "soap" in record:
+                start_time = time.time()
+                record["soap"] = soap_matcher.match(record["soap"])
+                monitor.record_matcher_timing("soap", time.time() - start_time)
 
         monitor.end_processing_timing()
 
@@ -254,23 +263,21 @@ def run_match(args):
                 records_per_sec = performance.get("records_per_second", 0)
                 print(f"  Throughput: {records_per_sec:.0f} records/sec")
 
-                # Print detailed performance summary by creating a new monitor
-                # with the performance data
-                monitor = PerformanceMonitor()
-                # Set the metrics manually since we can't directly set the summary
-                monitor.metrics.total_processing_time = performance.get(
-                    "total_processing_time_seconds", 0
-                )
-                monitor.metrics.file_io_time = performance.get("file_io_time_seconds", 0)
-                monitor.metrics.processing_time = performance.get("processing_time_seconds", 0)
-                monitor.metrics.record_count = performance.get("record_count", 0)
-                monitor.metrics.avg_time_per_record = performance.get(
-                    "avg_time_per_record_seconds", 0
-                )
-                monitor.metrics.records_per_second = performance.get("records_per_second", 0)
-
                 if args.debug:
-                    monitor.print_summary()
+                    print("\nDetailed Performance Summary:")
+                    print(f"  File I/O: {performance.get('file_io_time_seconds', 0):.2f}s")
+                    print(f"  Processing: {performance.get('processing_time_seconds', 0):.2f}s")
+                    avg_time_per_record = performance.get("avg_time_per_record_seconds", 0) * 1000
+                    print(f"  Average Time per Record: {avg_time_per_record:.1f}ms")
+
+                    # Print matcher performance if available
+                    matcher_times = performance.get("matcher_times", {})
+                    if matcher_times:
+                        print("\nMatcher Performance:")
+                        for matcher, stats in matcher_times.items():
+                            avg_time = stats.get("avg_time_seconds", 0) * 1000
+                            count = stats.get("count", 0)
+                            print(f"  {matcher}: {avg_time:.1f}ms avg ({count} calls)")
 
     else:
         # Sequential processing
