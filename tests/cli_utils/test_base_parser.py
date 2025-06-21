@@ -2,94 +2,29 @@
 Unit tests for BaseCLIParser.
 
 Tests the standardized CLI argument parsing functionality used across
-all SOTD pipeline phases.
+all SOTD Pipeline phases.
 """
 
+import argparse
 import pytest
 from pathlib import Path
-import argparse
 
-from sotd.cli_utils.base_parser import BaseCLIParser, validate_month, validate_year, validate_range
-
-
-class TestValidationFunctions:
-    """Test validation functions for CLI arguments."""
-
-    def test_validate_month_valid(self):
-        """Test valid month format."""
-        assert validate_month("2025-01") == "2025-01"
-        assert validate_month("2024-12") == "2024-12"
-        assert validate_month("2020-06") == "2020-06"
-
-    def test_validate_month_invalid(self):
-        """Test invalid month formats."""
-        with pytest.raises(argparse.ArgumentTypeError, match="Invalid month format"):
-            validate_month("2025-1")  # Missing leading zero
-
-        with pytest.raises(argparse.ArgumentTypeError, match="Invalid month value"):
-            validate_month("2025-13")  # Invalid month
-
-        with pytest.raises(argparse.ArgumentTypeError, match="Invalid month format"):
-            validate_month("25-01")  # Invalid year
-
-        with pytest.raises(argparse.ArgumentTypeError, match="Invalid month format"):
-            validate_month("2025/01")  # Wrong separator
-
-        with pytest.raises(argparse.ArgumentTypeError, match="Invalid month format"):
-            validate_month("invalid")  # Completely invalid
-
-    def test_validate_year_valid(self):
-        """Test valid year format."""
-        assert validate_year("2025") == "2025"
-        assert validate_year("2024") == "2024"
-        assert validate_year("2020") == "2020"
-
-    def test_validate_year_invalid(self):
-        """Test invalid year formats."""
-        with pytest.raises(argparse.ArgumentTypeError, match="Invalid year format"):
-            validate_year("25")  # Too short
-
-        with pytest.raises(argparse.ArgumentTypeError, match="Invalid year format"):
-            validate_year("20250")  # Too long
-
-        with pytest.raises(argparse.ArgumentTypeError, match="Invalid year format"):
-            validate_year("invalid")  # Non-numeric
-
-    def test_validate_range_valid(self):
-        """Test valid range format."""
-        assert validate_range("2025-01:2025-12") == "2025-01:2025-12"
-        assert validate_range("2024-06:2024-08") == "2024-06:2024-08"
-        assert validate_range("2020-01:2020-01") == "2020-01:2020-01"
-
-    def test_validate_range_invalid(self):
-        """Test invalid range formats."""
-        with pytest.raises(argparse.ArgumentTypeError, match="Invalid range format"):
-            validate_range("2025-01-2025-12")  # Missing colon
-
-        with pytest.raises(argparse.ArgumentTypeError, match="Invalid range format"):
-            validate_range("2025-1:2025-12")  # Missing leading zero
-
-        with pytest.raises(argparse.ArgumentTypeError, match="Invalid month value in range"):
-            validate_range("2025-01:2025-13")  # Invalid end month
-
-        with pytest.raises(argparse.ArgumentTypeError, match="Invalid range format"):
-            validate_range("invalid")  # Completely invalid
+from sotd.cli_utils.base_parser import BaseCLIParser
 
 
 class TestBaseCLIParser:
-    """Test BaseCLIParser class functionality."""
+    """Test cases for BaseCLIParser functionality."""
 
-    def test_init(self):
-        """Test parser initialization."""
-        parser = BaseCLIParser("Test description")
-        assert parser.parser.description == "Test description"
+    def test_basic_initialization(self):
+        """Test basic parser initialization with all default arguments."""
+        parser = BaseCLIParser(description="Test parser")
 
-    def test_common_arguments_present(self):
-        """Test that all common arguments are present."""
-        parser = BaseCLIParser("Test")
+        # Should have all common arguments
+        assert parser.description == "Test parser"
+
+        # Test that help works
         help_text = parser.format_help()
-
-        # Check that all common arguments are in help text
+        assert "Test parser" in help_text
         assert "--month" in help_text
         assert "--year" in help_text
         assert "--range" in help_text
@@ -99,149 +34,296 @@ class TestBaseCLIParser:
         assert "--debug" in help_text
         assert "--force" in help_text
 
+    def test_custom_initialization(self):
+        """Test parser initialization with custom argument selection."""
+        parser = BaseCLIParser(
+            description="Custom parser",
+            add_date_args=False,
+            add_output_args=True,
+            add_debug_args=False,
+            add_force_args=True,
+        )
+
+        help_text = parser.format_help()
+        assert "Custom parser" in help_text
+        assert "--month" not in help_text
+        assert "--year" not in help_text
+        assert "--range" not in help_text
+        assert "--start" not in help_text
+        assert "--end" not in help_text
+        assert "--out-dir" in help_text
+        assert "--debug" not in help_text
+        assert "--force" in help_text
+
+    def test_month_validation_valid(self):
+        """Test valid month format validation."""
+        parser = BaseCLIParser(description="Test")
+
+        # Valid formats
+        assert parser._validate_month("2023-01") == "2023-01"
+        assert parser._validate_month("2023-12") == "2023-12"
+        assert parser._validate_month("1999-06") == "1999-06"
+
+    def test_month_validation_invalid(self):
+        """Test invalid month format validation."""
+        parser = BaseCLIParser(description="Test")
+
+        # Invalid formats
+        invalid_formats = [
+            ("2023-1", "Invalid month format"),  # Missing leading zero
+            ("2023-13", "Invalid month value"),  # Invalid month
+            ("2023-00", "Invalid month value"),  # Invalid month
+            ("2023", "Invalid month format"),  # Missing month
+            ("2023-1-1", "Invalid month format"),  # Too many parts
+            ("abc-def", "Invalid month format"),  # Non-numeric
+            ("2023-1a", "Invalid month format"),  # Mixed format
+        ]
+
+        for invalid_format, expected_error in invalid_formats:
+            with pytest.raises(argparse.ArgumentTypeError) as exc_info:
+                parser._validate_month(invalid_format)
+            assert expected_error in str(exc_info.value)
+
+    def test_year_validation_valid(self):
+        """Test valid year format validation."""
+        parser = BaseCLIParser(description="Test")
+
+        # Valid formats
+        assert parser._validate_year("2023") == "2023"
+        assert parser._validate_year("1999") == "1999"
+        assert parser._validate_year("2100") == "2100"
+
+    def test_year_validation_invalid(self):
+        """Test invalid year format validation."""
+        parser = BaseCLIParser(description="Test")
+
+        # Invalid formats
+        invalid_formats = [
+            "202",  # Too short
+            "20234",  # Too long
+            "abc",  # Non-numeric
+            "20a3",  # Mixed format
+            "2023-01",  # Contains separator
+        ]
+
+        for invalid_format in invalid_formats:
+            with pytest.raises(argparse.ArgumentTypeError) as exc_info:
+                parser._validate_year(invalid_format)
+            assert "Invalid year format" in str(exc_info.value)
+
+    def test_range_validation_valid(self):
+        """Test valid range format validation."""
+        parser = BaseCLIParser(description="Test")
+
+        # Valid formats
+        assert parser._validate_range("2023-01:2023-12") == "2023-01:2023-12"
+        assert parser._validate_range("2022-06:2023-05") == "2022-06:2023-05"
+        assert parser._validate_range("1999-01:2000-12") == "1999-01:2000-12"
+
+    def test_range_validation_invalid(self):
+        """Test invalid range format validation."""
+        parser = BaseCLIParser(description="Test")
+
+        # Invalid formats
+        invalid_formats = [
+            ("2023-01", "Invalid range format"),  # Missing separator and end
+            ("2023-01:2023", "Invalid range format"),  # Invalid end format
+            ("2023:2023-12", "Invalid range format"),  # Invalid start format
+            ("2023-01-2023-12", "Invalid range format"),  # Wrong separator
+            ("abc-def:ghi-jkl", "Invalid range format"),  # Non-numeric
+            ("2023-01:2023-13", "Invalid month value in range"),  # Invalid end month
+        ]
+
+        for invalid_format, expected_error in invalid_formats:
+            with pytest.raises(argparse.ArgumentTypeError) as exc_info:
+                parser._validate_range(invalid_format)
+            assert expected_error in str(exc_info.value)
+
+    def test_parse_valid_month(self):
+        """Test parsing valid month argument."""
+        parser = BaseCLIParser(description="Test")
+        args = parser.parse_args(["--month", "2023-06"])
+
+        assert args.month == "2023-06"
+        assert args.year is None
+        assert args.range is None
+        assert args.start is None
+        assert args.end is None
+        assert args.out_dir == Path("data")
+        assert not args.debug
+        assert not args.force
+
+    def test_parse_valid_year(self):
+        """Test parsing valid year argument."""
+        parser = BaseCLIParser(description="Test")
+        args = parser.parse_args(["--year", "2023"])
+
+        assert args.month is None
+        assert args.year == "2023"
+        assert args.range is None
+        assert args.start is None
+        assert args.end is None
+
+    def test_parse_valid_range(self):
+        """Test parsing valid range argument."""
+        parser = BaseCLIParser(description="Test")
+        args = parser.parse_args(["--range", "2023-01:2023-12"])
+
+        assert args.month is None
+        assert args.year is None
+        assert args.range == "2023-01:2023-12"
+        assert args.start is None
+        assert args.end is None
+
+    def test_parse_start_end_range(self):
+        """Test parsing start/end range arguments."""
+        parser = BaseCLIParser(description="Test")
+        args = parser.parse_args(["--start", "2023-01", "--end", "2023-12"])
+
+        assert args.month is None
+        assert args.year is None
+        assert args.range is None
+        assert args.start == "2023-01"
+        assert args.end == "2023-12"
+
+    def test_parse_with_options(self):
+        """Test parsing with debug and force options."""
+        parser = BaseCLIParser(description="Test")
+        args = parser.parse_args(
+            ["--month", "2023-06", "--out-dir", "/custom/path", "--debug", "--force"]
+        )
+
+        assert args.month == "2023-06"
+        assert args.out_dir == Path("/custom/path")
+        assert args.debug
+        assert args.force
+
     def test_mutually_exclusive_date_args(self):
         """Test that date arguments are mutually exclusive."""
-        parser = BaseCLIParser("Test")
+        parser = BaseCLIParser(description="Test")
 
-        # Should fail when multiple date args are provided
+        # Should fail with multiple date arguments
         with pytest.raises(SystemExit):
-            parser.parse_args(["--month", "2025-01", "--year", "2025"])
-
-        with pytest.raises(SystemExit):
-            parser.parse_args(["--month", "2025-01", "--range", "2025-01:2025-12"])
+            parser.parse_args(["--month", "2023-06", "--year", "2023"])
 
         with pytest.raises(SystemExit):
-            parser.parse_args(["--year", "2025", "--range", "2025-01:2025-12"])
+            parser.parse_args(["--month", "2023-06", "--range", "2023-01:2023-12"])
 
-    def test_required_date_arg(self):
+        with pytest.raises(SystemExit):
+            parser.parse_args(["--year", "2023", "--range", "2023-01:2023-12"])
+
+    def test_required_date_argument(self):
         """Test that at least one date argument is required."""
-        parser = BaseCLIParser("Test")
+        parser = BaseCLIParser(description="Test")
 
-        # Should fail when no date args are provided
+        # Should fail without any date argument
         with pytest.raises(SystemExit):
-            parser.parse_args([])
+            parser.parse_args(["--debug", "--force"])
 
-    def test_valid_month_arg(self):
-        """Test parsing valid month argument."""
-        parser = BaseCLIParser("Test")
-        args = parser.parse_args(["--month", "2025-01"])
-        assert args.month == "2025-01"
-        assert args.year is None
-        assert args.range is None
+    def test_parallel_processing_arguments(self):
+        """Test adding parallel processing arguments."""
+        parser = BaseCLIParser(description="Test")
+        parser.add_parallel_processing_arguments(default_max_workers=8)
 
-    def test_valid_year_arg(self):
-        """Test parsing valid year argument."""
-        parser = BaseCLIParser("Test")
-        args = parser.parse_args(["--year", "2025"])
-        assert args.year == "2025"
-        assert args.month is None
-        assert args.range is None
+        help_text = parser.format_help()
+        assert "--parallel" in help_text
+        assert "--sequential" in help_text
+        assert "--max-workers" in help_text
 
-    def test_valid_range_arg(self):
-        """Test parsing valid range argument."""
-        parser = BaseCLIParser("Test")
-        args = parser.parse_args(["--range", "2025-01:2025-12"])
-        assert args.range == "2025-01:2025-12"
-        assert args.month is None
-        assert args.year is None
+        # Test parsing
+        args = parser.parse_args(["--month", "2023-06", "--parallel", "--max-workers", "6"])
+        assert args.parallel
+        assert not args.sequential
+        assert args.max_workers == 6
 
-    def test_start_end_args(self):
-        """Test parsing start/end arguments."""
-        parser = BaseCLIParser("Test")
-        args = parser.parse_args(["--month", "2025-01", "--start", "2025-01", "--end", "2025-12"])
-        assert args.start == "2025-01"
-        assert args.end == "2025-12"
+    def test_parallel_processing_mutually_exclusive(self):
+        """Test that parallel and sequential are mutually exclusive."""
+        parser = BaseCLIParser(description="Test")
+        parser.add_parallel_processing_arguments()
 
-    def test_default_values(self):
-        """Test default values for optional arguments."""
-        parser = BaseCLIParser("Test")
-        args = parser.parse_args(["--month", "2025-01"])
-        assert args.out_dir == Path("data")
-        assert args.debug is False
-        assert args.force is False
+        with pytest.raises(SystemExit):
+            parser.parse_args(["--month", "2023-06", "--parallel", "--sequential"])
 
-    def test_custom_values(self):
-        """Test custom values for optional arguments."""
-        parser = BaseCLIParser("Test")
-        args = parser.parse_args(
-            ["--month", "2025-01", "--out-dir", "/custom/path", "--debug", "--force"]
-        )
-        assert args.out_dir == Path("/custom/path")
-        assert args.debug is True
-        assert args.force is True
+    def test_parallel_processing_group_manual(self):
+        """Test manually adding parallel processing group."""
+        parser = BaseCLIParser(description="Test")
+        parallel_group = parser.add_parallel_processing_group()
 
-    def test_add_custom_argument(self):
-        """Test adding custom arguments."""
-        parser = BaseCLIParser("Test")
+        parallel_group.add_argument("--custom-parallel", action="store_true")
+        parallel_group.add_argument("--custom-sequential", action="store_true")
+
+        # Test that the group works
+        args = parser.parse_args(["--month", "2023-06", "--custom-parallel"])
+        assert args.custom_parallel
+        assert not args.custom_sequential
+
+    def test_custom_arguments(self):
+        """Test adding custom arguments to the parser."""
+        parser = BaseCLIParser(description="Test")
+        parser.add_argument("--custom-arg", type=str, help="Custom argument")
+
+        args = parser.parse_args(["--month", "2023-06", "--custom-arg", "test-value"])
+        assert args.custom_arg == "test-value"
+
+    def test_mutually_exclusive_groups(self):
+        """Test adding custom mutually exclusive groups."""
+        parser = BaseCLIParser(description="Test")
+        custom_group = parser.add_mutually_exclusive_group()
+        custom_group.add_argument("--option-a", action="store_true")
+        custom_group.add_argument("--option-b", action="store_true")
+
+        # Test that they work
+        args = parser.parse_args(["--month", "2023-06", "--option-a"])
+        assert args.option_a
+        assert not args.option_b
+
+        # Test that they're mutually exclusive
+        with pytest.raises(SystemExit):
+            parser.parse_args(["--month", "2023-06", "--option-a", "--option-b"])
+
+    def test_help_integration(self):
+        """Test that help text includes all arguments."""
+        parser = BaseCLIParser(description="Test parser")
         parser.add_argument("--custom", help="Custom argument")
 
-        args = parser.parse_args(["--month", "2025-01", "--custom", "value"])
-        assert args.custom == "value"
-
-    def test_add_mutually_exclusive_group(self):
-        """Test adding mutually exclusive groups."""
-        parser = BaseCLIParser("Test")
-        group = parser.add_mutually_exclusive_group()
-        group.add_argument("--option1", action="store_true")
-        group.add_argument("--option2", action="store_true")
-
-        # Should work with one option
-        args = parser.parse_args(["--month", "2025-01", "--option1"])
-        assert args.option1 is True
-        assert args.option2 is False
-
-        # Should fail with both options
-        with pytest.raises(SystemExit):
-            parser.parse_args(["--month", "2025-01", "--option1", "--option2"])
-
-    def test_parse_args_with_argv(self):
-        """Test parsing with custom argv."""
-        parser = BaseCLIParser("Test")
-        args = parser.parse_args(["--month", "2025-01"])
-        assert args.month == "2025-01"
-
-    def test_help_methods(self):
-        """Test help-related methods."""
-        parser = BaseCLIParser("Test")
-
-        # format_help should return a string
         help_text = parser.format_help()
-        assert isinstance(help_text, str)
-        assert "Test" in help_text
 
-        # print_help should not raise an exception
-        parser.print_help()
+        # Check that all arguments are present
+        assert "Test parser" in help_text
+        assert "--month" in help_text
+        assert "--year" in help_text
+        assert "--range" in help_text
+        assert "--start" in help_text
+        assert "--end" in help_text
+        assert "--out-dir" in help_text
+        assert "--debug" in help_text
+        assert "--force" in help_text
+        assert "--custom" in help_text
+        assert "Custom argument" in help_text
 
 
 class TestBaseCLIParserIntegration:
-    """Integration tests for BaseCLIParser with real scenarios."""
+    """Integration tests for BaseCLIParser with real usage patterns."""
 
     def test_typical_pipeline_usage(self):
         """Test typical pipeline usage patterns."""
-        parser = BaseCLIParser("Aggregate phase")
+        parser = BaseCLIParser(description="Test pipeline")
+        parser.add_parallel_processing_arguments()
 
-        # Single month processing
-        args = parser.parse_args(["--month", "2025-01", "--force"])
-        assert args.month == "2025-01"
-        assert args.force is True
+        # Test typical match phase usage
+        args = parser.parse_args(
+            ["--month", "2023-06", "--parallel", "--max-workers", "4", "--debug"]
+        )
 
-        # Year processing
-        args = parser.parse_args(["--year", "2025", "--debug"])
-        assert args.year == "2025"
-        assert args.debug is True
-
-        # Range processing
-        args = parser.parse_args(["--range", "2025-01:2025-06", "--out-dir", "/tmp/data"])
-        assert args.range == "2025-01:2025-06"
-        assert args.out_dir == Path("/tmp/data")
+        assert args.month == "2023-06"
+        assert args.parallel
+        assert args.max_workers == 4
+        assert args.debug
+        assert not args.force
 
     def test_error_messages(self):
         """Test that error messages are helpful."""
-        parser = BaseCLIParser("Test")
-
-        # Test missing required argument
-        with pytest.raises(SystemExit):
-            parser.parse_args([])
+        parser = BaseCLIParser(description="Test")
 
         # Test invalid month format
         with pytest.raises(SystemExit):

@@ -1,4 +1,3 @@
-import argparse
 import json
 import subprocess
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -9,6 +8,7 @@ from tqdm import tqdm
 from sotd.cli_utils.date_span import month_span
 from sotd.match.blade_matcher import BladeMatcher
 from sotd.match.brush_matcher import BrushMatcher
+from sotd.match.cli import get_parser
 from sotd.match.razor_matcher import RazorMatcher
 from sotd.match.soap_matcher import SoapMatcher
 from sotd.utils.performance import PerformanceMonitor, TimingContext
@@ -300,24 +300,9 @@ def run_analysis(args):
 
 
 def main(argv=None):
-    p = argparse.ArgumentParser(description="Match razors and blades from extracted SOTD data")
-    g = p.add_mutually_exclusive_group()
-    g.add_argument("--month", type=str, help="e.g., 2025-04")
-    g.add_argument("--year", type=int, help="e.g., 2025 (runs all months in that year)")
-    g.add_argument("--range", type=str, help="Format: YYYY-MM:YYYY-MM (inclusive)")
-    p.add_argument("--start", type=str, help="Optional: overrides start date (YYYY-MM)")
-    p.add_argument("--end", type=str, help="Optional: overrides end date (YYYY-MM)")
-    p.add_argument("--out-dir", default="data")
-    p.add_argument("--debug", action="store_true")
-    p.add_argument("--force", action="store_true")
-    p.add_argument("--mode", choices=["match", "analyze_unmatched_razors"], default="match")
-    p.add_argument("--parallel", action="store_true", help="Force parallel processing")
-    p.add_argument("--sequential", action="store_true", help="Force sequential processing")
-    p.add_argument(
-        "--max-workers", type=int, default=4, help="Maximum parallel workers (default: 4)"
-    )
-
-    args = p.parse_args(argv)
+    """Main entry point for the match phase."""
+    parser = get_parser()
+    args = parser.parse_args(argv)
 
     if args.mode == "match":
         run_match(args)

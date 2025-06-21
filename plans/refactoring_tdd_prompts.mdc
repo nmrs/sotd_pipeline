@@ -1,0 +1,525 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# SOTD Pipeline Refactoring TDD Prompts
+
+This document contains the specific TDD prompts for implementing the refactoring plan. Each prompt follows the Task Driven TDD Loop approach and should be executed sequentially.
+
+## Chunk 1.1: Unify Performance Monitoring
+
+### Prompt 1.1.1: Create Base Performance Monitor
+
+```text
+Follow the Task Driven TDD Loop to create the base performance monitoring classes.
+
+**Task**: Create `sotd/utils/performance_base.py` with abstract base classes for unified performance monitoring.
+
+**Requirements**:
+1. Create abstract base classes that can be inherited by both general and match-specific performance monitors
+2. Extract common `TimingStats` and `PerformanceMetrics` classes
+3. Create `BasePerformanceMonitor` with common functionality
+4. Ensure the base classes support both general timing and match-specific timing patterns
+5. Add comprehensive unit tests for all base classes
+
+**TDD Approach**:
+1. Write unit tests first for `TimingStats`, `PerformanceMetrics`, and `BasePerformanceMonitor`
+2. Implement the classes to make tests pass
+3. Ensure the base classes can handle both general timing (`processing_time`) and match-specific timing (`matching_time`)
+4. Add tests for edge cases and error conditions
+5. Run quality checks: `make format lint typecheck test`
+
+**Key Design Decisions**:
+- Use abstract base classes to allow customization by subclasses
+- Support both general and specific timing field names through configuration
+- Maintain backward compatibility with existing performance monitoring interfaces
+- Use dataclasses for clean, type-safe data structures
+
+**Files to Create/Modify**:
+- `sotd/utils/performance_base.py` (new)
+- `tests/utils/test_performance_base.py` (new)
+
+**Success Criteria**:
+- All unit tests pass
+- Base classes can be inherited by both general and match-specific monitors
+- No breaking changes to existing functionality
+- Code follows project style guidelines
+```
+
+### Prompt 1.1.2: Refactor Match Performance Monitor
+
+```text
+Follow the Task Driven TDD Loop to refactor the match performance monitor to inherit from the base classes.
+
+**Task**: Update `sotd/match/utils/performance.py` to inherit from the new base classes and remove duplicated code.
+
+**Requirements**:
+1. Update the match performance monitor to inherit from `BasePerformanceMonitor`
+2. Remove all duplicated code that now exists in the base classes
+3. Keep only match-specific logic (e.g., `matching_time` instead of `processing_time`)
+4. Update all imports in the match module to use the new structure
+5. Ensure all existing functionality is preserved
+
+**TDD Approach**:
+1. Write integration tests first to ensure existing match performance monitoring still works
+2. Refactor the match performance monitor to inherit from base classes
+3. Remove duplicated code while preserving match-specific functionality
+4. Update imports and ensure all tests pass
+5. Run quality checks: `make format lint typecheck test`
+
+**Key Design Decisions**:
+- Use inheritance to extend base functionality
+- Override only the methods that need match-specific behavior
+- Maintain the same public interface for existing consumers
+- Use composition where inheritance doesn't fit
+
+**Files to Modify**:
+- `sotd/match/utils/performance.py`
+- `tests/match/test_performance_monitoring.py` (update)
+
+**Success Criteria**:
+- All existing match performance monitoring functionality works
+- No duplicated code with base classes
+- Integration tests pass
+- Code follows project style guidelines
+```
+
+### Prompt 1.1.3: Update General Performance Monitor
+
+```text
+Follow the Task Driven TDD Loop to update the general performance monitor to use the new base classes.
+
+**Task**: Update `sotd/utils/performance.py` to use the new base classes and remove duplicated code.
+
+**Requirements**:
+1. Update the general performance monitor to inherit from `BasePerformanceMonitor`
+2. Remove all duplicated code that now exists in the base classes
+3. Keep only general functionality (e.g., `processing_time` instead of `matching_time`)
+4. Update all imports across the codebase to use the new structure
+5. Ensure all existing functionality is preserved
+
+**TDD Approach**:
+1. Write integration tests first to ensure existing general performance monitoring still works
+2. Refactor the general performance monitor to inherit from base classes
+3. Remove duplicated code while preserving general functionality
+4. Update all imports across the codebase
+5. Run quality checks: `make format lint typecheck test`
+
+**Key Design Decisions**:
+- Use inheritance to extend base functionality
+- Override only the methods that need general behavior
+- Maintain the same public interface for existing consumers
+- Update all import statements across the codebase
+
+**Files to Modify**:
+- `sotd/utils/performance.py`
+- All files that import from `sotd.utils.performance`
+- `tests/utils/test_performance.py` (update)
+
+**Success Criteria**:
+- All existing general performance monitoring functionality works
+- No duplicated code with base classes
+- All imports updated correctly
+- Integration tests pass
+- Code follows project style guidelines
+```
+
+### Prompt 1.1.4: Cleanup and Documentation
+
+```text
+Follow the Task Driven TDD Loop to complete the performance monitoring unification.
+
+**Task**: Remove the old match performance monitor file and update documentation.
+
+**Requirements**:
+1. Remove `sotd/match/utils/performance.py` (functionality moved to base)
+2. Update documentation for performance monitoring
+3. Add examples of using unified performance monitoring
+4. Ensure no broken imports remain
+5. Update any remaining references
+
+**TDD Approach**:
+1. Write tests to ensure no functionality is lost during cleanup
+2. Remove the old file and update imports
+3. Update documentation with examples
+4. Verify all tests still pass
+5. Run quality checks: `make format lint typecheck test`
+
+**Key Design Decisions**:
+- Ensure all functionality is preserved in the base classes
+- Update documentation to reflect the new unified approach
+- Provide clear examples for future developers
+- Remove any remaining references to the old structure
+
+**Files to Remove/Modify**:
+- Remove: `sotd/match/utils/performance.py`
+- Update: Documentation files
+- Update: Any remaining import statements
+
+**Success Criteria**:
+- No broken imports or references
+- Documentation is clear and complete
+- All tests pass
+- Code follows project style guidelines
+- Performance monitoring is now unified across the codebase
+```
+
+## Chunk 1.2: Standardize CLI Argument Patterns
+
+### Prompt 1.2.1: Create Base CLI Parser
+
+```text
+Follow the Task Driven TDD Loop to create the base CLI parser for standardizing argument patterns.
+
+**Task**: Create `sotd/cli_utils/base_parser.py` with `BaseCLIParser` class for common CLI argument patterns.
+
+**Requirements**:
+1. Create `BaseCLIParser` class that handles common argument patterns
+2. Implement standard arguments: `--month`, `--year`, `--range`, `--start`, `--end`, `--out-dir`, `--debug`, `--force`
+3. Add validation logic for date arguments
+4. Support mutually exclusive groups for date arguments
+5. Create comprehensive unit tests for the base parser
+
+**TDD Approach**:
+1. Write unit tests first for `BaseCLIParser` with all common argument patterns
+2. Implement the base parser to make tests pass
+3. Add validation logic for date formats and ranges
+4. Test edge cases and error conditions
+5. Run quality checks: `make format lint typecheck test`
+
+**Key Design Decisions**:
+- Use inheritance to allow subclasses to add phase-specific arguments
+- Implement common validation logic for date arguments
+- Support both individual and range date processing
+- Maintain consistent argument naming and help text
+- Use argparse's mutually exclusive groups for date arguments
+
+**Files to Create/Modify**:
+- `sotd/cli_utils/base_parser.py` (new)
+- `tests/cli_utils/test_base_parser.py` (new)
+
+**Success Criteria**:
+- All unit tests pass
+- Base parser handles all common argument patterns
+- Validation logic works correctly
+- Code follows project style guidelines
+- Base parser can be inherited by phase-specific parsers
+```
+
+### Prompt 1.2.2: Refactor Aggregate CLI
+
+```text
+Follow the Task Driven TDD Loop to refactor the aggregate CLI to use the base parser.
+
+**Task**: Update `sotd/aggregate/cli.py` to inherit from `BaseCLIParser` and remove duplicated code.
+
+**Requirements**:
+1. Update aggregate CLI to inherit from `BaseCLIParser`
+2. Remove all duplicated argument parsing code
+3. Keep only aggregate-specific arguments
+4. Ensure all existing functionality is preserved
+5. Add integration tests for the refactored CLI
+
+**TDD Approach**:
+1. Write integration tests first to ensure existing aggregate CLI functionality works
+2. Refactor aggregate CLI to inherit from base parser
+3. Remove duplicated argument parsing code
+4. Keep only aggregate-specific arguments and validation
+5. Run quality checks: `make format lint typecheck test`
+
+**Key Design Decisions**:
+- Use inheritance to extend base functionality
+- Override only the methods that need aggregate-specific behavior
+- Maintain the same public interface for existing consumers
+- Keep aggregate-specific validation logic
+
+**Files to Modify**:
+- `sotd/aggregate/cli.py`
+- `tests/aggregate/test_cli.py` (update)
+
+**Success Criteria**:
+- All existing aggregate CLI functionality works
+- No duplicated argument parsing code
+- Integration tests pass
+- Code follows project style guidelines
+- Aggregate CLI is now standardized
+```
+
+### Prompt 1.2.3: Refactor Match CLI
+
+```text
+Follow the Task Driven TDD Loop to refactor the match CLI to use the base parser.
+
+**Task**: Update `sotd/match/run.py` to use `BaseCLIParser` and remove duplicated code.
+
+**Requirements**:
+1. Update match CLI to inherit from `BaseCLIParser`
+2. Remove all duplicated argument parsing code
+3. Keep only match-specific arguments (mode, parallel, max-workers)
+4. Ensure all existing functionality is preserved
+5. Add integration tests for the refactored CLI
+
+**TDD Approach**:
+1. Write integration tests first to ensure existing match CLI functionality works
+2. Refactor match CLI to inherit from base parser
+3. Remove duplicated argument parsing code
+4. Keep only match-specific arguments and validation
+5. Run quality checks: `make format lint typecheck test`
+
+**Key Design Decisions**:
+- Use inheritance to extend base functionality
+- Override only the methods that need match-specific behavior
+- Maintain the same public interface for existing consumers
+- Keep match-specific validation logic
+
+**Files to Modify**:
+- `sotd/match/run.py`
+- `tests/match/test_cli.py` (update)
+
+**Success Criteria**:
+- All existing match CLI functionality works
+- No duplicated argument parsing code
+- Integration tests pass
+- Code follows project style guidelines
+- Match CLI is now standardized
+```
+
+### Prompt 1.2.4-1.2.8: Refactor Remaining CLIs
+
+```text
+Follow the Task Driven TDD Loop to refactor the remaining CLI modules.
+
+**Task**: Update the remaining CLI modules (extract, enrich, fetch, report, analysis tools) to use `BaseCLIParser`.
+
+**Requirements**:
+1. Update each CLI module to inherit from `BaseCLIParser`
+2. Remove all duplicated argument parsing code
+3. Keep only phase-specific arguments
+4. Ensure all existing functionality is preserved
+5. Add integration tests for each refactored CLI
+
+**TDD Approach**:
+1. Write integration tests first for each CLI module
+2. Refactor each CLI to inherit from base parser
+3. Remove duplicated argument parsing code
+4. Keep only phase-specific arguments and validation
+5. Run quality checks: `make format lint typecheck test`
+
+**Key Design Decisions**:
+- Use inheritance to extend base functionality
+- Override only the methods that need phase-specific behavior
+- Maintain the same public interface for existing consumers
+- Keep phase-specific validation logic
+
+**Files to Modify**:
+- `sotd/extract/run.py`
+- `sotd/enrich/run.py`
+- `sotd/fetch/run.py`
+- `sotd/report/run.py`
+- All files in `sotd/match/tools/`
+- `sotd/extract/analyze_cli.py`
+- Corresponding test files
+
+**Success Criteria**:
+- All existing CLI functionality works
+- No duplicated argument parsing code
+- Integration tests pass
+- Code follows project style guidelines
+- All CLIs are now standardized
+```
+
+## Chunk 1.3: Consolidate File I/O Operations
+
+### Prompt 1.3.1: Create Unified File I/O Utilities
+
+```text
+Follow the Task Driven TDD Loop to create unified file I/O utilities.
+
+**Task**: Create `sotd/utils/file_io.py` with unified file operations for JSON and YAML files.
+
+**Requirements**:
+1. Create `save_json_data()` with atomic writes and proper error handling
+2. Create `load_json_data()` with comprehensive error handling
+3. Create `save_yaml_data()` and `load_yaml_data()` with proper error handling
+4. Implement atomic write operations to prevent data corruption
+5. Add comprehensive unit tests for all file I/O utilities
+
+**TDD Approach**:
+1. Write unit tests first for all file I/O utilities
+2. Implement the utilities to make tests pass
+3. Add tests for error conditions and edge cases
+4. Ensure atomic write operations work correctly
+5. Run quality checks: `make format lint typecheck test`
+
+**Key Design Decisions**:
+- Use atomic writes to prevent data corruption
+- Implement comprehensive error handling
+- Support both JSON and YAML formats
+- Use UTF-8 encoding consistently
+- Provide clear error messages
+
+**Files to Create/Modify**:
+- `sotd/utils/file_io.py` (new)
+- `tests/utils/test_file_io.py` (new)
+
+**Success Criteria**:
+- All unit tests pass
+- File I/O utilities handle errors gracefully
+- Atomic writes prevent data corruption
+- Code follows project style guidelines
+- Utilities can be used across all modules
+```
+
+### Prompt 1.3.2-1.3.6: Refactor File I/O Across Modules
+
+```text
+Follow the Task Driven TDD Loop to refactor file I/O operations across all modules.
+
+**Task**: Update all modules to use the unified file I/O utilities and remove duplicated code.
+
+**Requirements**:
+1. Update each module to use the unified file I/O utilities
+2. Remove all duplicated file I/O code
+3. Ensure all existing functionality is preserved
+4. Add integration tests for file operations
+5. Update all imports to use the new utilities
+
+**TDD Approach**:
+1. Write integration tests first for each module's file operations
+2. Refactor each module to use unified utilities
+3. Remove duplicated file I/O code
+4. Update imports and ensure all tests pass
+5. Run quality checks: `make format lint typecheck test`
+
+**Key Design Decisions**:
+- Use the unified utilities consistently across all modules
+- Maintain the same public interface for existing consumers
+- Remove all duplicated file I/O code
+- Update all import statements
+
+**Files to Modify**:
+- `sotd/fetch/save.py`
+- `sotd/extract/save.py`
+- `sotd/enrich/save.py`
+- `sotd/aggregate/save.py`
+- `sotd/aggregate/load.py`
+- `sotd/report/load.py`
+- Corresponding test files
+
+**Success Criteria**:
+- All existing file I/O functionality works
+- No duplicated file I/O code
+- Integration tests pass
+- Code follows project style guidelines
+- File I/O is now unified across the codebase
+```
+
+## Quality Assurance Prompts
+
+### Prompt: Integration Testing
+
+```text
+Follow the Task Driven TDD Loop to create comprehensive integration tests.
+
+**Task**: Create integration tests for all refactored modules to ensure functionality is preserved.
+
+**Requirements**:
+1. Create integration tests for each refactored module
+2. Test complete workflows from CLI to file I/O
+3. Ensure all existing functionality is preserved
+4. Test edge cases and error conditions
+5. Verify performance characteristics are maintained
+
+**TDD Approach**:
+1. Write integration tests first for complete workflows
+2. Test each refactored module in isolation
+3. Test interactions between modules
+4. Test error conditions and edge cases
+5. Run quality checks: `make format lint typecheck test`
+
+**Key Design Decisions**:
+- Test complete workflows, not just individual functions
+- Use real data files for integration tests
+- Test error conditions and edge cases
+- Verify performance characteristics
+
+**Files to Create/Modify**:
+- Integration test files for each module
+- End-to-end workflow tests
+
+**Success Criteria**:
+- All integration tests pass
+- Complete workflows function correctly
+- Error conditions are handled properly
+- Performance characteristics are maintained
+```
+
+### Prompt: Documentation Updates
+
+```text
+Follow the Task Driven TDD Loop to update documentation for refactored modules.
+
+**Task**: Update all relevant documentation to reflect the refactored APIs and new utilities.
+
+**Requirements**:
+1. Update documentation for all refactored modules
+2. Create migration guides for any breaking changes
+3. Update examples and tutorials
+4. Document new utility functions and base classes
+5. Ensure documentation is clear and complete
+
+**TDD Approach**:
+1. Review existing documentation and identify areas that need updates
+2. Update documentation to reflect new APIs
+3. Create migration guides for any breaking changes
+4. Add examples for new utilities
+5. Verify documentation accuracy
+
+**Key Design Decisions**:
+- Maintain clear and complete documentation
+- Provide migration guides for any breaking changes
+- Include examples for new utilities
+- Ensure documentation is up-to-date
+
+**Files to Modify**:
+- All relevant documentation files
+- README files
+- API documentation
+- Migration guides
+
+**Success Criteria**:
+- Documentation is clear and complete
+- Migration guides are provided for breaking changes
+- Examples are included for new utilities
+- Documentation is up-to-date and accurate
+```
+
+## Success Criteria for All Prompts
+
+### Code Quality Metrics
+- All unit tests pass
+- All integration tests pass
+- Code coverage is maintained or improved
+- All quality checks pass: `make format lint typecheck test`
+- No new linting errors introduced
+
+### Functionality Validation
+- All existing functionality is preserved
+- All CLI commands work as expected
+- All file I/O operations work correctly
+- Performance monitoring works across all phases
+- No breaking changes to public APIs
+
+### Maintainability Improvements
+- Single source of truth for common patterns
+- Consistent error handling across modules
+- Standardized validation and file I/O operations
+- Clear separation of concerns
+- Reduced code duplication
+
+### Risk Mitigation
+- Each chunk is independently revertible
+- Comprehensive test coverage prevents regressions
+- Integration tests catch breaking changes early
+- Logical commit organization for easy rollback

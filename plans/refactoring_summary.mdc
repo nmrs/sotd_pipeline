@@ -1,0 +1,219 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# SOTD Pipeline Refactoring Summary
+
+## Overview
+
+This document provides a comprehensive plan for refactoring the SOTD Pipeline codebase to eliminate code redundancy and improve maintainability. The refactoring follows the **Task Driven TDD Loop** approach with incremental, test-driven changes.
+
+## Key Documents
+
+1. **`refactoring_implementation_plan.mdc`** - Detailed implementation plan with tasks and phases
+2. **`refactoring_tdd_prompts.mdc`** - Specific TDD prompts for each task
+3. **`refactoring_summary.mdc`** - This overview document
+
+## Refactoring Goals
+
+- **Eliminate ~800-1000 lines** of duplicated code
+- **Improve maintainability** through unified patterns
+- **Enhance consistency** across modules
+- **Preserve all existing functionality**
+- **Maintain comprehensive test coverage**
+
+## Identified Redundancy Areas
+
+### 1. Performance Monitoring (HIGH PRIORITY)
+- **Issue**: Two nearly identical performance monitoring modules
+- **Files**: `sotd/utils/performance.py` (277 lines) and `sotd/match/utils/performance.py` (216 lines)
+- **Solution**: Create unified base classes with inheritance
+- **Impact**: ~200 lines eliminated
+
+### 2. CLI Argument Patterns (HIGH PRIORITY)
+- **Issue**: Every phase has nearly identical CLI argument parsing
+- **Files**: 10+ CLI modules with repetitive patterns
+- **Solution**: Create `BaseCLIParser` with inheritance
+- **Impact**: ~300 lines eliminated
+
+### 3. File I/O Operations (HIGH PRIORITY)
+- **Issue**: Similar JSON/YAML file operations scattered across modules
+- **Files**: Multiple save/load modules with duplicated logic
+- **Solution**: Create unified file I/O utilities
+- **Impact**: ~150 lines eliminated
+
+### 4. Core Aggregators (MEDIUM PRIORITY)
+- **Issue**: Core aggregators have nearly identical structure
+- **Files**: `razor_aggregator.py`, `soap_aggregator.py`, `blade_aggregator.py`, `brush_aggregator.py`
+- **Solution**: Create `BaseAggregator` with configuration
+- **Impact**: ~200 lines eliminated
+
+### 5. Table Generators (MEDIUM PRIORITY)
+- **Issue**: Table generators have repetitive column configuration patterns
+- **Files**: Multiple table generator modules
+- **Solution**: Enhance base classes with factory methods
+- **Impact**: ~100 lines eliminated
+
+## Implementation Approach
+
+### Phase 1: High Impact, Low Risk (Start Here)
+1. **Chunk 1.1**: Unify Performance Monitoring
+2. **Chunk 1.2**: Standardize CLI Argument Patterns
+3. **Chunk 1.3**: Consolidate File I/O Operations
+
+### Phase 2: Medium Impact, Medium Risk
+1. **Chunk 2.1**: Refactor Core Aggregators
+2. **Chunk 2.2**: Enhance Table Generators
+
+### Phase 3: Low Impact, Low Risk
+1. **Chunk 3.1**: Extract Common Patterns
+2. **Chunk 3.2**: Optimize Brush Strategies
+
+## How to Use the TDD Prompts
+
+### For Each Task:
+
+1. **Start with the first unchecked task** in the implementation plan
+2. **Use the corresponding TDD prompt** from `refactoring_tdd_prompts.mdc`
+3. **Follow the Task Driven TDD Loop**:
+   - Write tests first
+   - Implement to make tests pass
+   - Run quality checks: `make format lint typecheck test`
+   - Fix any errors immediately
+   - Commit with clear message
+4. **Mark task as complete** in the implementation plan
+5. **Move to next task**
+
+### Example Workflow:
+
+```bash
+# 1. Start with first task
+# 2. Use TDD prompt 1.1.1 from refactoring_tdd_prompts.mdc
+# 3. Write tests first
+# 4. Implement functionality
+# 5. Run quality checks
+make format lint typecheck test
+# 6. Commit changes
+git commit -m "feat: create base performance monitor classes"
+# 7. Mark task complete in implementation plan
+# 8. Move to next task
+```
+
+## Quality Assurance Framework
+
+### Testing Strategy
+- **Unit tests** for all new utilities and base classes
+- **Integration tests** for all refactored modules
+- **End-to-end tests** for complete pipeline workflows
+- **Performance regression testing**
+
+### Code Quality Checks
+- **Formatting**: Black (100 char line length)
+- **Linting**: Ruff (E, F, I rules)
+- **Type checking**: Pyright in standard mode
+- **Testing**: pytest with coverage
+
+### Success Criteria
+- All quality checks pass: `make format lint typecheck test`
+- No new linting errors introduced
+- Test coverage maintained or improved
+- All existing functionality preserved
+
+## Risk Mitigation
+
+### Rollback Strategy
+- **Logical commit organization** following git-and-cleanup rules
+- **Each chunk independently revertible**
+- **Comprehensive test coverage** prevents regressions
+- **Integration tests** catch breaking changes early
+
+### Breaking Changes
+- **Minimal breaking changes** expected
+- **Migration guides** provided for any breaking changes
+- **Backward compatibility** maintained where possible
+- **Clear documentation** of any API changes
+
+## Expected Benefits
+
+### Code Quality
+- **~800-1000 lines** of duplicated code eliminated
+- **Single source of truth** for common patterns
+- **Consistent error handling** across modules
+- **Standardized validation** and file I/O operations
+
+### Maintainability
+- **Clear separation of concerns**
+- **Easier to test** common functionality once
+- **Centralized documentation** for shared patterns
+- **Reduced cognitive load** for developers
+
+### Performance
+- **No performance regressions**
+- **Maintained memory usage patterns**
+- **Validated with large datasets**
+- **Benchmarks before and after**
+
+## Getting Started
+
+### Prerequisites
+- Python 3.11 environment set up
+- All dependencies installed: `pip install -r requirements-dev.txt`
+- Current tests passing: `make test`
+
+### First Steps
+1. **Review the implementation plan**: `plans/refactoring_implementation_plan.mdc`
+2. **Start with Chunk 1.1**: Performance Monitoring unification
+3. **Use TDD prompt 1.1.1**: Create base performance monitor classes
+4. **Follow the Task Driven TDD Loop** for each task
+5. **Commit regularly** with clear, descriptive messages
+
+### Session Continuation
+If you need to continue work in a new session:
+1. **Check the implementation plan** for current progress
+2. **Start with the first unchecked task**
+3. **Use the corresponding TDD prompt**
+4. **Follow the Task Driven TDD Loop**
+
+## Support and Resources
+
+### Documentation
+- **Implementation Plan**: `plans/refactoring_implementation_plan.mdc`
+- **TDD Prompts**: `plans/refactoring_tdd_prompts.mdc`
+- **Project Rules**: See Cursor rules for development guidelines
+- **Git Guidelines**: Follow git-and-cleanup rules for commits
+
+### Quality Checks
+```bash
+# Run all quality checks
+make format lint typecheck test
+
+# Individual checks
+make format    # Black formatting
+make lint      # Ruff linting
+make typecheck # Pyright type checking
+make test      # Pytest with coverage
+```
+
+### Helpful Commands
+```bash
+# Check current test status
+make test
+
+# Check code coverage
+pytest --cov=sotd
+
+# Check for unused imports
+ruff check --select I
+
+# Check type issues
+pyright
+```
+
+## Conclusion
+
+This refactoring plan provides a systematic approach to eliminating code redundancy while maintaining all existing functionality. By following the Task Driven TDD Loop approach, we ensure that each change is well-tested and can be safely implemented.
+
+The plan prioritizes high-impact, low-risk changes first, allowing for early validation of the approach before tackling more complex refactoring tasks. Each chunk is independently revertible, providing a safe path forward.
+
+Start with Chunk 1.1 and work through the tasks systematically, using the TDD prompts to guide implementation. The result will be a more maintainable, consistent, and efficient codebase.

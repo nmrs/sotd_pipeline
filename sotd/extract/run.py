@@ -1,4 +1,3 @@
-import argparse
 import logging
 from pathlib import Path
 from typing import Optional, Sequence
@@ -6,6 +5,7 @@ from typing import Optional, Sequence
 from sotd.cli_utils.date_span import month_span
 from sotd.utils.performance import PerformanceMonitor
 
+from .cli import get_parser
 from .comment import run_extraction_for_month
 from .save import save_month_file
 
@@ -69,7 +69,8 @@ def _process_month(
     return result
 
 
-def run(args: argparse.Namespace) -> None:
+def run(args) -> None:
+    """Run the extract phase with the given arguments."""
     months = month_span(args)
     base_path = Path(args.out_dir)
 
@@ -78,18 +79,9 @@ def run(args: argparse.Namespace) -> None:
 
 
 def main(argv: Sequence[str] | None = None) -> None:
-    p = argparse.ArgumentParser(description="Extract SOTD data")
-    g = p.add_mutually_exclusive_group()
-    g.add_argument("--month")
-    g.add_argument("--year")
-    g.add_argument("--range")
-    p.add_argument("--start")
-    p.add_argument("--end")
-    p.add_argument("--out-dir", default="data")
-    p.add_argument("--debug", action="store_true")
-    p.add_argument("--force", action="store_true")
-    args = p.parse_args(argv)
-
+    """Main entry point for the extract phase."""
+    parser = get_parser()
+    args = parser.parse_args(argv)
     run(args)
 
 

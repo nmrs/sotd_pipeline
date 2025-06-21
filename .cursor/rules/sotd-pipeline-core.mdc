@@ -52,6 +52,13 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 - **Individual Phases**: Test individual phases with specific month data
 - **Pre-Commit Validation**: **MANDATORY**: Run `make format lint typecheck test` before considering any task complete or committing changes. All checks must pass.
 - **Documentation Synchronization**: **MANDATORY**: Any code, workflow, or process change MUST be reflected in all relevant documentation and Cursor rules. Documentation and rules must be updated as part of the same commit(s) as the code or process change.
+- **MDC Plan File Updates**: **MANDATORY**: When working on any task that involves an MDC plan file (in `plans/` directory), you MUST automatically update the relevant MDC file to reflect progress, completion status, lessons learned, or any changes to the plan. Do not ask the user to update it - update it yourself as part of completing the task. This includes:
+  - Marking completed tasks as done
+  - Adding notes about implementation decisions
+  - Documenting any deviations from the original plan
+  - Recording lessons learned for future reference
+  - Updating status indicators (TODO, IN_PROGRESS, COMPLETE, etc.)
+  - Adding timestamps for major milestones
 
 ## Domain-Specific Rules
 - **Product Catalogs**: Maintain consistent structure in YAML files (`data/brushes.yaml`, `data/handles.yaml`, `data/razors.yaml`, `data/blades.yaml`, `data/soaps.yaml`)
