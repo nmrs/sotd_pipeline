@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Tests for the annual data loader module.
 
@@ -5,9 +6,8 @@ This module tests the functionality for loading 12 months of aggregated data
 for a given year, including handling missing months and data validation.
 """
 
-import json
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -59,9 +59,7 @@ class TestAnnualDataLoader:
             },
         }
 
-        with patch("builtins.open", create=True) as mock_open:
-            mock_open.return_value.__enter__.return_value.read.return_value = json.dumps(mock_data)
-
+        with patch("sotd.aggregate.annual_loader.load_json_data", return_value=mock_data):
             loader = AnnualDataLoader("2024", Path("/data"))
             result = loader.load_monthly_file(Path("/data/2024-01.json"))
 

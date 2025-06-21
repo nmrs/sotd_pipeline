@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Enhanced analysis tool for validating brush matching performance."""
 
-import argparse
 from typing import List
 
-from rich.console import Console
-
+from sotd.cli_utils.base_parser import BaseCLIParser
+from sotd.match.tools.analysis_base import AnalysisTool
+from sotd.match.tools.cli_utils import BaseAnalysisCLI
 from sotd.match.tools.data_processor import (
     calculate_summary_statistics,
     extract_field_data,
@@ -25,80 +25,92 @@ from sotd.match.tools.report_generator import (
 )
 
 
+class EnhancedAnalyzer(AnalysisTool):
+    """Enhanced analyzer for product matching performance."""
+
+    def get_parser(self) -> BaseCLIParser:
+        """Get CLI parser for enhanced analysis tool."""
+        parser = BaseCLIParser(
+            description="Enhanced analysis of product matching performance",
+            add_help=True,
+        )
+
+        # Add analysis-specific arguments
+        parser.add_argument("--field", choices=["razor", "blade", "brush", "soap"], default="brush")
+        BaseAnalysisCLI.add_pattern_arguments(parser)
+
+        return parser
+
+    def run(self, args) -> None:
+        """Run the enhanced analysis tool."""
+        # Load data
+        all_data = load_analysis_data(args)
+
+        if not all_data:
+            self.console.print("[red]No data found for the specified time period[/red]")
+            return
+
+        # Show examples for specific pattern if requested
+        if args.show_examples:
+            show_pattern_examples(all_data, args.show_examples, args.field, args.example_limit)
+            return
+
+        # Extract and process field data
+        field_matches, match_types, confidence_scores = extract_field_data(all_data, args.field)
+        summary_stats = calculate_summary_statistics(field_matches, match_types, confidence_scores)
+
+        # Show summary statistics
+        self.console.print(
+            generate_summary_panel(
+                summary_stats["total_matches"],
+                summary_stats["match_type_counts"],
+                summary_stats["avg_confidence"],
+                summary_stats["potential_mismatches"],
+                args.field,
+            )
+        )
+
+        # Show potential mismatches
+        if args.show_mismatches:
+            self.console.print()
+            show_potential_mismatches(all_data, args.field, args.mismatch_limit)
+
+        # Pattern effectiveness analysis
+        if args.show_patterns:
+            pattern_stats = get_pattern_effectiveness(all_data, args.field)
+            self.console.print(generate_pattern_effectiveness_table(pattern_stats))
+
+        # Improvement opportunities
+        if args.show_opportunities:
+            opportunities = identify_improvement_opportunities(all_data, args.field)
+            self.console.print(generate_opportunities_table(opportunities))
+
+        # Quality distribution
+        if args.show_details:
+            self.console.print(
+                generate_confidence_analysis_panel(
+                    confidence_scores, summary_stats["total_matches"]
+                )
+            )
+
+
+def get_parser() -> BaseCLIParser:
+    """Get CLI parser for enhanced analysis tool."""
+    analyzer = EnhancedAnalyzer()
+    return analyzer.get_parser()
+
+
+def run(args) -> None:
+    """Run the enhanced analysis tool."""
+    analyzer = EnhancedAnalyzer()
+    analyzer.run(args)
+
+
 def main(argv: List[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(
-        description="Enhanced analysis of product matching performance"
-    )
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument("--month", type=str)
-    group.add_argument("--year", type=int)
-    group.add_argument("--range", type=str)
-    parser.add_argument("--out-dir", default="data")
-    parser.add_argument("--field", choices=["razor", "blade", "brush", "soap"], default="brush")
-    parser.add_argument("--show-details", action="store_true", help="Show detailed match analysis")
-    parser.add_argument("--show-patterns", action="store_true", help="Show pattern effectiveness")
-    parser.add_argument(
-        "--show-opportunities", action="store_true", help="Show improvement opportunities"
-    )
-    parser.add_argument("--show-mismatches", action="store_true", help="Show potential mismatches")
-    parser.add_argument(
-        "--show-examples",
-        type=str,
-        help="Show examples for specific pattern (e.g., 'Chisel & Hound Badger')",
-    )
-    parser.add_argument("--mismatch-limit", type=int, default=20, help="Limit mismatches shown")
-    parser.add_argument("--example-limit", type=int, default=15, help="Limit examples shown")
+    """Main entry point for the enhanced analysis tool."""
+    parser = get_parser()
     args = parser.parse_args(argv)
-
-    console = Console()
-
-    # Load data
-    all_data = load_analysis_data(args)
-
-    if not all_data:
-        console.print("[red]No data found for the specified time period[/red]")
-        return
-
-    # Show examples for specific pattern if requested
-    if args.show_examples:
-        show_pattern_examples(all_data, args.show_examples, args.field, args.example_limit)
-        return
-
-    # Extract and process field data
-    field_matches, match_types, confidence_scores = extract_field_data(all_data, args.field)
-    summary_stats = calculate_summary_statistics(field_matches, match_types, confidence_scores)
-
-    # Show summary statistics
-    console.print(
-        generate_summary_panel(
-            summary_stats["total_matches"],
-            summary_stats["match_type_counts"],
-            summary_stats["avg_confidence"],
-            summary_stats["potential_mismatches"],
-            args.field,
-        )
-    )
-
-    # Show potential mismatches
-    if args.show_mismatches:
-        console.print()
-        show_potential_mismatches(all_data, args.field, args.mismatch_limit)
-
-    # Pattern effectiveness analysis
-    if args.show_patterns:
-        pattern_stats = get_pattern_effectiveness(all_data, args.field)
-        console.print(generate_pattern_effectiveness_table(pattern_stats))
-
-    # Improvement opportunities
-    if args.show_opportunities:
-        opportunities = identify_improvement_opportunities(all_data, args.field)
-        console.print(generate_opportunities_table(opportunities))
-
-    # Quality distribution
-    if args.show_details:
-        console.print(
-            generate_confidence_analysis_panel(confidence_scores, summary_stats["total_matches"])
-        )
+    run(args)
 
 
 if __name__ == "__main__":

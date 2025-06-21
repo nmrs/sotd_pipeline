@@ -151,7 +151,8 @@ class TestAnnualAggregatorIntegration:
 
         # Run annual aggregation
         with patch("sotd.aggregate.annual_engine.save_annual_data") as mock_save:
-            process_annual("2024", temp_data_dir, debug=False, force=True)
+            # Pass the parent directory since process_annual expects data_dir/aggregated
+            process_annual("2024", temp_data_dir.parent, debug=False, force=True)
 
             # Verify save was called with correct data
             mock_save.assert_called_once()
@@ -182,7 +183,8 @@ class TestAnnualAggregatorIntegration:
         save_json_data(sample_monthly_data["2024-01"], month_file)
 
         with patch("sotd.aggregate.annual_engine.save_annual_data") as mock_save:
-            process_annual("2024", temp_data_dir, debug=False, force=True)
+            # Pass the parent directory since process_annual expects data_dir/aggregated
+            process_annual("2024", temp_data_dir.parent, debug=False, force=True)
 
             mock_save.assert_called_once()
 
@@ -258,7 +260,8 @@ class TestAnnualAggregatorIntegration:
 
             f = io.StringIO()
             with redirect_stdout(f):
-                process_annual("2024", temp_data_dir, debug=True, force=True)
+                # Pass the parent directory since process_annual expects data_dir/aggregated
+                process_annual("2024", temp_data_dir.parent, debug=True, force=True)
 
             output = f.getvalue()
             # Verify debug output contains expected messages
@@ -345,7 +348,8 @@ class TestAnnualAggregatorIntegration:
 
             start_time = time.time()
 
-            process_annual("2024", temp_data_dir, debug=False, force=True)
+            # Pass the parent directory since process_annual expects data_dir/aggregated
+            process_annual("2024", temp_data_dir.parent, debug=False, force=True)
 
             end_time = time.time()
             execution_time = end_time - start_time
@@ -361,6 +365,8 @@ class TestAnnualAggregatorIntegration:
             assert metadata["year"] == "2024"
             assert metadata["total_shaves"] == 12000  # 12 * 1000
             assert metadata["unique_shavers"] == 6000  # 12 * 500
+            assert len(metadata["included_months"]) == 12
+            assert len(metadata["missing_months"]) == 0
 
     def test_integration_with_existing_aggregate_module(self, temp_data_dir, sample_monthly_data):
         """Test integration with existing aggregate module patterns."""

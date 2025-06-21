@@ -306,8 +306,11 @@ def process_annual(year: str, data_dir: Path, debug: bool = False, force: bool =
     try:
         if debug:
             logger.info(f"Processing annual aggregation for {year}")
+            print(f"[DEBUG] Processing annual aggregation for {year}")
             logger.info(f"Data directory: {data_dir}")
+            print(f"[DEBUG] Data directory: {data_dir}")
             logger.info(f"Force: {force}")
+            print(f"[DEBUG] Force: {force}")
 
         # Load monthly data from the aggregated subdirectory
         monthly_data_dir = data_dir / "aggregated"
@@ -322,8 +325,11 @@ def process_annual(year: str, data_dir: Path, debug: bool = False, force: bool =
 
         if debug:
             logger.info(f"Loaded {len(monthly_data)} months of data")
+            print(f"[DEBUG] Loaded {len(monthly_data)} months of data")
             logger.info(f"Included months: {included_months}")
+            print(f"[DEBUG] Included months: {included_months}")
             logger.info(f"Missing months: {missing_months}")
+            print(f"[DEBUG] Missing months: {missing_months}")
 
         # Aggregate monthly data
         monitor.start_processing_timing()
@@ -334,8 +340,11 @@ def process_annual(year: str, data_dir: Path, debug: bool = False, force: bool =
 
         if debug:
             logger.info("Aggregated data generated")
+            print("[DEBUG] Aggregated data generated")
             logger.info(f"Total shaves: {aggregated_data['metadata']['total_shaves']}")
+            print(f"[DEBUG] Total shaves: {aggregated_data['metadata']['total_shaves']}")
             logger.info(f"Unique shavers: {aggregated_data['metadata']['unique_shavers']}")
+            print(f"[DEBUG] Unique shavers: {aggregated_data['metadata']['unique_shavers']}")
 
         # Save aggregated data
         monitor.start_file_io_timing()
@@ -349,6 +358,7 @@ def process_annual(year: str, data_dir: Path, debug: bool = False, force: bool =
 
         if debug:
             logger.info(f"Annual aggregation for {year} completed")
+            print(f"[DEBUG] Annual aggregation for {year} completed")
 
     finally:
         monitor.end_total_timing()

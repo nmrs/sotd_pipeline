@@ -1,20 +1,21 @@
 import json
-from pathlib import Path
 from io import StringIO
 import sys
-from sotd.match.tools.analyze_unmatched import main, strip_use_count
+from sotd.match.tools.analyze_unmatched import main
+from sotd.match.tools.unmatched_analyzer import UnmatchedAnalyzer
 
 
 def test_strip_use_count_function():
     """Test the strip_use_count function with various formats."""
-    assert strip_use_count("Feather (3)") == "Feather"
-    assert strip_use_count("Astra SP [5]") == "Astra SP"
-    assert strip_use_count("Derby Extra {7}") == "Derby Extra"
-    assert strip_use_count("Koraat (x2)") == "Koraat"
-    assert strip_use_count("Gillette [4x]") == "Gillette"
-    assert strip_use_count("Blade (X2)") == "Blade"
-    assert strip_use_count("No Count") == "No Count"
-    assert strip_use_count("Blade (10)") == "Blade"
+    analyzer = UnmatchedAnalyzer()
+    assert analyzer._strip_use_count("Feather (3)") == "Feather"
+    assert analyzer._strip_use_count("Astra SP [5]") == "Astra SP"
+    assert analyzer._strip_use_count("Derby Extra {7}") == "Derby Extra"
+    assert analyzer._strip_use_count("Koraat (x2)") == "Koraat"
+    assert analyzer._strip_use_count("Gillette [4x]") == "Gillette"
+    assert analyzer._strip_use_count("Blade (X2)") == "Blade"
+    assert analyzer._strip_use_count("No Count") == "No Count"
+    assert analyzer._strip_use_count("Blade (10)") == "Blade"
 
 
 def test_analyze_unmatched_blades_strips_use_count(tmp_path):

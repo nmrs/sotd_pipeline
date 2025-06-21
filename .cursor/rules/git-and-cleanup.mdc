@@ -25,28 +25,101 @@ When making multiple changes, **ALWAYS** organize them into separate, logical co
 - **Dependency Order**: Commit dependencies in logical sequence (tests after code, cleanup after refactoring)
 - **Reversible**: Each commit should be safely revertible without breaking the system
 
+### **MANDATORY**: Commit Size Guidelines
+
+#### **Avoid Overly Granular Commits**
+- ❌ **Too Small**: Single file changes that are part of a larger feature
+- ❌ **Too Small**: Individual test files when they're all testing the same feature
+- ❌ **Too Small**: Documentation updates that could be grouped with related code changes
+- ❌ **Too Small**: Minor fixes that could be combined with related changes
+
+#### **Optimal Commit Sizes**
+
+**✅ Feature Commits**: Complete logical features
+```bash
+# GOOD: Complete feature with CLI, core logic, and basic tests
+git commit -m "feat: implement annual report generation with CLI, engine, and templates"
+
+# BAD: Too granular - split across multiple commits
+git commit -m "feat: add annual report CLI"
+git commit -m "feat: add annual report engine" 
+git commit -m "feat: add annual report templates"
+```
+
+**✅ Test Commits**: All tests for a feature together
+```bash
+# GOOD: Comprehensive test suite for a feature
+git commit -m "test: add comprehensive test suite for annual aggregation including CLI, engine, and integration"
+
+# BAD: Too granular - individual test files
+git commit -m "test: add CLI tests for annual aggregation"
+git commit -m "test: add engine tests for annual aggregation"
+git commit -m "test: add integration tests for annual aggregation"
+```
+
+**✅ Refactor Commits**: Complete refactoring of a module or pattern
+```bash
+# GOOD: Complete refactoring with all related changes
+git commit -m "refactor: unify all file I/O operations with atomic writes and error handling"
+
+# BAD: Too granular - individual module refactoring
+git commit -m "refactor: update aggregate save to use unified utilities"
+git commit -m "refactor: update enrich save to use unified utilities"
+git commit -m "refactor: update report save to use unified utilities"
+```
+
+**✅ Documentation Commits**: Group related docs with their code changes
+```bash
+# GOOD: Documentation with related code changes
+git commit -m "feat: implement brush matching strategy with comprehensive documentation"
+
+# BAD: Separate documentation commits for related code
+git commit -m "feat: implement brush matching strategy"
+git commit -m "docs: add brush matching documentation"
+```
+
+#### **When to Split Commits**
+
+**Split when:**
+- **Different logical concerns**: Feature implementation vs bug fixes
+- **Different modules**: Unrelated functionality changes
+- **Different phases**: Core logic vs CLI vs tests vs documentation
+- **Breaking changes**: Changes that could affect other developers
+
+**Combine when:**
+- **Same logical unit**: All parts of a single feature
+- **Related functionality**: CLI, core logic, and basic tests for same feature
+- **Same module**: Multiple related changes within same file/module
+- **Dependent changes**: Changes that must be deployed together
+
 #### Examples of Good Commit Organization
 
 **Scenario: Adding new brush matching strategy with tests and documentation**
 ```bash
+# GOOD: Logical grouping by concern
 git commit -m "feat: add Zenith brush matching strategy with B-series pattern recognition"
-git commit -m "test: add comprehensive unit tests for Zenith brush matching strategy" 
-git commit -m "test: add integration tests for Zenith strategy with real catalog data"
+git commit -m "test: add comprehensive test suite for Zenith strategy including unit and integration tests"
 git commit -m "docs: update brush matching specification with Zenith strategy details"
 ```
 
 **Scenario: Fixing bug with multiple affected components**
 ```bash
-git commit -m "fix: correct Declaration Grooming strategy false positive matching"
-git commit -m "test: update DG strategy tests to prevent regression"
-git commit -m "test: add integration tests validating DG fix with real data"
+# GOOD: Bug fix with comprehensive test coverage
+git commit -m "fix: correct Declaration Grooming strategy false positive matching with comprehensive test updates"
 ```
 
 **Scenario: Refactoring with consistency improvements**
 ```bash
-git commit -m "refactor: unify delimiter handling logic in brush matcher"
-git commit -m "fix: ensure consistent model naming across all brush strategies"
-git commit -m "test: add model naming consistency validation tests"
+# GOOD: Complete refactoring with all related changes
+git commit -m "refactor: unify delimiter handling and model naming across all brush strategies"
+```
+
+**Scenario: Annual report feature implementation**
+```bash
+# GOOD: Complete feature implementation
+git commit -m "feat: implement annual report generation with CLI, engine, templates, and basic validation"
+git commit -m "test: add comprehensive test suite for annual report functionality including CLI, engine, and integration"
+git commit -m "docs: update report phase specification with annual report details"
 ```
 
 #### What NOT to Do
@@ -54,6 +127,8 @@ git commit -m "test: add model naming consistency validation tests"
 - ❌ **Mixed concerns**: Combining bug fixes with new features in one commit
 - ❌ **Incomplete changes**: Committing broken code that requires follow-up commits
 - ❌ **Generic messages**: `git commit -m "updates"` or `git commit -m "changes"`
+- ❌ **Overly granular**: Single file changes that are part of a larger logical unit
+- ❌ **Scattered tests**: Individual test commits when they all test the same feature
 
 ### Commit Message Standards
 

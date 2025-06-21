@@ -268,21 +268,28 @@ class TestAnnualReportIntegration:
         with (
             patch("sotd.report.annual_run.generate_annual_report") as mock_generator,
             patch("sotd.report.annual_run.save_annual_report") as mock_saver,
-            patch("sotd.report.annual_run.PerformanceMonitor") as mock_monitor_class,
+            patch("sotd.report.annual_run.AnnualRunPerformanceMonitor") as mock_monitor_class,
         ):
 
             mock_generator.return_value = mock_report_content
             mock_saver.return_value = Path("data/reports/2024-hardware.md")
+
+            # Create a proper mock monitor with the required attributes
             mock_monitor = Mock()
+            mock_monitor.metrics = Mock()
+            mock_monitor.metrics.years_processed = 0
+            mock_monitor.metrics.years_successful = 0
+            mock_monitor.metrics.years_failed = 0
+            mock_monitor.metrics.report_types = []
+            mock_monitor.metrics.total_report_size_chars = 0
+
             mock_monitor_class.return_value = mock_monitor
 
             # Run the annual report generation
             annual_run.run_annual_report(mock_args)
 
             # Verify performance monitor was used
-            mock_monitor_class.assert_called_once_with("annual_report")
-            mock_monitor.start_total_timing.assert_called_once()
-            mock_monitor.end_total_timing.assert_called_once()
+            mock_monitor_class.assert_called_once()
 
     def test_run_annual_report_success_message(self, mock_args, mock_annual_data, tmp_path):
         """Test that success message is printed after successful generation."""

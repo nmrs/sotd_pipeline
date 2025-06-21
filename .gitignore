@@ -19,6 +19,7 @@ data/extracted/*.json
 data/matched/*.json
 data/threads/*.json
 data/aggregated/*.json
+data/aggregated/annual/*.json
 # Ignore generated report files
 data/reports/*.md
 # Debug and temporary files

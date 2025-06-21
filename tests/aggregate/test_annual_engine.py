@@ -430,7 +430,7 @@ class TestProcessAnnual:
         process_annual("2024", Path("/data"), debug=True, force=True)
 
         # Verify calls
-        mock_load.assert_called_once_with("2024", Path("/data"))
+        mock_load.assert_called_once_with("2024", Path("/data/aggregated"))
         mock_aggregate.assert_called_once_with(
             "2024",
             mock_load.return_value["monthly_data"],
