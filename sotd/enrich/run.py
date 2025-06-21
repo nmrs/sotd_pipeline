@@ -9,7 +9,7 @@ from sotd.cli_utils.date_span import month_span
 from sotd.enrich.cli import get_parser
 from sotd.enrich.enrich import enrich_comments, setup_enrichers
 from sotd.enrich.save import calculate_enrichment_stats, load_matched_data, save_enriched_data
-from sotd.utils.performance import PerformanceMonitor
+from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
 
 
 def _process_month(
@@ -85,17 +85,47 @@ def _process_month(
 
 def run(args: argparse.Namespace) -> None:
     """Run the enrich phase for the specified date range."""
-    months = month_span(args)
+    months = list(month_span(args))
     base_path = Path(args.out_dir)
 
     # Set up enrichers once at the start - this is a major performance optimization
     setup_enrichers()
 
+    # Show progress bar for processing
+    print(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
+
     results = []
-    for year, month in tqdm(months, desc="Enriching months", unit="month"):
+    for year, month in tqdm(months, desc="Months", unit="month"):
         result = _process_month(year, month, base_path, debug=args.debug, force=args.force)
         if result:
             results.append(result)
+
+    # Print summary using standardized formatter
+    if len(months) == 1:
+        # Single month summary
+        year, month = months[0]
+        month_str = f"{year:04d}-{month:02d}"
+        if results:
+            stats = results[0]
+            summary = PipelineOutputFormatter.format_single_month_summary(
+                "enrich", month_str, stats
+            )
+            print(summary)
+    else:
+        # Multi-month summary
+        start_year, start_month = months[0]
+        end_year, end_month = months[-1]
+        start_str = f"{start_year:04d}-{start_month:02d}"
+        end_str = f"{end_year:04d}-{end_month:02d}"
+
+        total_stats = {
+            "total_records": sum(r["records_processed"] for r in results),
+            "total_enriched": sum(r["total_enriched"] for r in results),
+        }
+        summary = PipelineOutputFormatter.format_multi_month_summary(
+            "enrich", start_str, end_str, total_stats
+        )
+        print(summary)
 
     if args.debug and results:
         print("\nEnrichment Summary:")

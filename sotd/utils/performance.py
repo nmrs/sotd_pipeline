@@ -83,9 +83,97 @@ class PerformanceMonitor(BasePerformanceMonitor):
         print("=" * 60)
 
 
+class PipelineOutputFormatter:
+    """Standardized output formatting for pipeline phases."""
+
+    @staticmethod
+    def format_single_month_summary(phase: str, month: str, stats: Dict) -> str:
+        """Format summary for single month processing."""
+        if phase == "fetch":
+            missing_days = stats.get("missing_days", 0)
+            return (
+                f"[INFO] SOTD {phase} complete for {month}: "
+                f"{stats.get('threads', 0)} threads, "
+                f"{stats.get('comments', 0)} comments, "
+                f"{missing_days} missing day{'s' if missing_days != 1 else ''}"
+            )
+        elif phase == "extract":
+            return (
+                f"[INFO] SOTD {phase} complete for {month}: "
+                f"{stats.get('shave_count', 0)} shaves extracted, "
+                f"{stats.get('missing_count', 0)} missing, "
+                f"{stats.get('skipped_count', 0)} skipped"
+            )
+        elif phase == "match":
+            return (
+                f"[INFO] SOTD {phase} complete for {month}: "
+                f"{stats.get('records_processed', 0):,} records processed"
+            )
+        elif phase == "enrich":
+            return (
+                f"[INFO] SOTD {phase} complete for {month}: "
+                f"{stats.get('records_processed', 0):,} records enriched"
+            )
+        elif phase == "aggregate":
+            return (
+                f"[INFO] SOTD {phase} complete for {month}: "
+                f"{stats.get('record_count', 0):,} records aggregated"
+            )
+        elif phase == "report":
+            return (
+                f"[INFO] SOTD {phase} complete for {month}: "
+                f"{stats.get('report_type', 'hardware')} report generated"
+            )
+        else:
+            return f"[INFO] SOTD {phase} complete for {month}"
+
+    @staticmethod
+    def format_multi_month_summary(
+        phase: str, start_month: str, end_month: str, stats: Dict
+    ) -> str:
+        """Format summary for multi-month processing."""
+        if phase == "fetch":
+            total_missing = stats.get("total_missing_days", 0)
+            return (
+                f"[INFO] SOTD {phase} complete for {start_month}…{end_month}: "
+                f"{stats.get('total_threads', 0)} threads, "
+                f"{stats.get('total_comments', 0)} comments, "
+                f"{total_missing} missing day{'s' if total_missing != 1 else ''}"
+            )
+        else:
+            return (
+                f"[INFO] SOTD {phase} complete for {start_month}…{end_month}: "
+                f"{stats.get('total_records', 0):,} records processed"
+            )
+
+    @staticmethod
+    def format_progress_bar(desc: str, total: int, unit: str = "month") -> str:
+        """Format standardized progress bar description."""
+        return f"{desc.capitalize()} {total} {unit}{'s' if total != 1 else ''}"
+
+    @staticmethod
+    def format_parallel_summary(
+        completed: int, skipped: int, errors: int, total_records: int, total_time: float
+    ) -> str:
+        """Format parallel processing summary."""
+        avg_records_per_sec = total_records / total_time if total_time > 0 else 0
+
+        summary = "\nParallel processing summary:\n"
+        summary += f"  Completed: {completed} months\n"
+        summary += f"  Skipped: {skipped} months\n"
+        summary += f"  Errors: {errors} months\n"
+        summary += "\nPerformance Summary:\n"
+        summary += f"  Total Records: {total_records:,}\n"
+        summary += f"  Total Processing Time: {total_time:.2f}s\n"
+        summary += f"  Average Throughput: {avg_records_per_sec:.0f} records/sec"
+
+        return summary
+
+
 __all__ = [
     "PerformanceMonitor",
     "GeneralPerformanceMetrics",
     "TimingContext",
     "PipelinePerformanceTracker",
+    "PipelineOutputFormatter",
 ]

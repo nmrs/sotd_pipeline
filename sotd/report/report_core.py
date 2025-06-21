@@ -1,12 +1,16 @@
 from pathlib import Path
 
-from sotd.utils.performance import PerformanceMonitor
+from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
 
 
 def run_report(args) -> None:
     """Main report generation logic."""
     monitor = PerformanceMonitor("report")
     monitor.start_total_timing()
+
+    # Show progress indication
+    print(f"Processing report for {args.month}...")
+
     if args.debug:
         print("[DEBUG] Report phase started")
         print(f"[DEBUG] Month: {args.month}")
@@ -94,6 +98,13 @@ def run_report(args) -> None:
     if args.debug:
         monitor.print_summary()
 
-    # Success message
-    print(f"[INFO] Successfully generated {args.type} report for {args.month}")
-    print(f"[INFO] Report saved to: {output_path}")
+    # Print standardized summary
+    stats = {
+        "report_type": args.type,
+        "record_count": metadata.get("total_shaves", 0),
+    }
+    summary = PipelineOutputFormatter.format_single_month_summary("report", args.month, stats)
+    print(summary)
+
+    if args.debug:
+        print(f"[DEBUG] Report saved to: {output_path}")

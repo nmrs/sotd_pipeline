@@ -2,8 +2,10 @@ import logging
 from pathlib import Path
 from typing import Optional, Sequence
 
+from tqdm import tqdm
+
 from sotd.cli_utils.date_span import month_span
-from sotd.utils.performance import PerformanceMonitor
+from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
 
 from .cli import get_parser
 from .comment import run_extraction_for_month
@@ -71,11 +73,52 @@ def _process_month(
 
 def run(args) -> None:
     """Run the extract phase with the given arguments."""
-    months = month_span(args)
+    months = list(month_span(args))
     base_path = Path(args.out_dir)
 
-    for year, month in months:
-        _process_month(year, month, base_path, debug=args.debug, force=args.force)
+    # Show progress bar for processing
+    print(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
+
+    results = []
+    for year, month in tqdm(months, desc="Months", unit="month"):
+        result = _process_month(year, month, base_path, debug=args.debug, force=args.force)
+        if result:
+            results.append(
+                {
+                    "month": f"{year:04d}-{month:02d}",
+                    "shave_count": result["meta"]["shave_count"],
+                    "missing_count": result["meta"]["missing_count"],
+                    "skipped_count": result["meta"]["skipped_count"],
+                }
+            )
+
+    # Print summary using standardized formatter
+    if len(months) == 1:
+        # Single month summary
+        year, month = months[0]
+        month_str = f"{year:04d}-{month:02d}"
+        if results:
+            stats = results[0]
+            summary = PipelineOutputFormatter.format_single_month_summary(
+                "extract", month_str, stats
+            )
+            print(summary)
+    else:
+        # Multi-month summary
+        start_year, start_month = months[0]
+        end_year, end_month = months[-1]
+        start_str = f"{start_year:04d}-{start_month:02d}"
+        end_str = f"{end_year:04d}-{end_month:02d}"
+
+        total_stats = {
+            "total_records": sum(r["shave_count"] for r in results),
+            "total_missing": sum(r["missing_count"] for r in results),
+            "total_skipped": sum(r["skipped_count"] for r in results),
+        }
+        summary = PipelineOutputFormatter.format_multi_month_summary(
+            "extract", start_str, end_str, total_stats
+        )
+        print(summary)
 
 
 def main(argv: Sequence[str] | None = None) -> None:

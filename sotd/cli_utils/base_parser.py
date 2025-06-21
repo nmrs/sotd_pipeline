@@ -203,11 +203,19 @@ class BaseCLIParser(argparse.ArgumentParser):
                     "or --start/--end) is required"
                 )
 
-            # Default to current month if not required
+            # Default to previous month if not required (since current month is still in progress)
             import datetime
 
             now = datetime.datetime.now()
-            args.month = f"{now.year:04d}-{now.month:02d}"
+            # Calculate previous month
+            if now.month == 1:
+                prev_year = now.year - 1
+                prev_month = 12
+            else:
+                prev_year = now.year
+                prev_month = now.month - 1
+
+            args.month = f"{prev_year:04d}-{prev_month:02d}"
             return args
 
         # Validate start/end pair

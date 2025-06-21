@@ -184,7 +184,15 @@ Pipeline Phases:
   report     - Generate hardware and software reports
 
 Examples:
-  # Run individual phases
+  # Run individual phases (defaults to previous month)
+  python run.py fetch
+  python run.py extract
+  python run.py match
+  python run.py enrich
+  python run.py aggregate
+  python run.py report --type hardware
+  
+  # Run with specific month
   python run.py fetch --month 2025-01
   python run.py extract --month 2025-01
   python run.py match --month 2025-01
@@ -192,115 +200,80 @@ Examples:
   python run.py aggregate --month 2025-01
   python run.py report --month 2025-01 --type hardware
   
-  # Run complete pipeline
-  python run.py pipeline --month 2025-01
+  # Run complete pipeline (all phases, defaults to previous month)
+  python run.py
+  
+  # Run specific phase ranges (defaults to previous month)
+  python run.py extract:enrich
+  python run.py match:
+  python run.py :aggregate
+  python run.py fetch:match
   
   # Run with debug logging
-  python run.py pipeline --month 2025-01 --debug
-  
-  # Run specific phase range
-  python run.py pipeline --month 2025-01 extract:enrich
-  
-  # Run single phase
-  python run.py pipeline --month 2025-01 match
-  
-  # Run from phase to end
-  python run.py pipeline --month 2025-01 match:
-  
-  # Run from beginning to phase
-  python run.py pipeline --month 2025-01 :enrich
+  python run.py --debug --force
         """,
     )
 
-    subparsers = parser.add_subparsers(dest="command", help="Available commands")
-
-    # Individual phase commands
-    for phase in ["fetch", "extract", "match", "enrich", "aggregate", "report"]:
-        phase_parser = subparsers.add_parser(
-            phase,
-            help=f"Run {phase} phase",
-            description=f"Run the {phase} phase of the SOTD pipeline",
-        )
-        phase_parser.add_argument(
-            "phase_args", nargs=argparse.REMAINDER, help=f"Arguments to pass to {phase} phase"
-        )
-
-    # Pipeline command
-    pipeline_parser = subparsers.add_parser(
-        "pipeline",
-        help="Run complete pipeline or phase subset",
-        description="Run multiple pipeline phases in sequence",
-    )
-
-    # Phase range argument (optional, defaults to all phases)
-    pipeline_parser.add_argument(
+    # Phase or phase range argument (positional)
+    parser.add_argument(
         "phase_range",
         nargs="?",
         default="",
-        help="Phase range to run (e.g., extract:enrich, match:, :aggregate). Default: all phases",
+        help=(
+            "Phase or phase range to run (e.g., fetch, extract:enrich, match:, :aggregate). "
+            "Default: all phases"
+        ),
     )
 
-    # Common arguments for pipeline
-    pipeline_parser.add_argument("--month", help="Process specific month (YYYY-MM format)")
-    pipeline_parser.add_argument("--year", type=int, help="Process entire year (YYYY format)")
-    pipeline_parser.add_argument("--start", help="Start month for range (YYYY-MM format)")
-    pipeline_parser.add_argument("--end", help="End month for range (YYYY-MM format)")
-    pipeline_parser.add_argument("--range", help="Month range (YYYY-MM:YYYY-MM format)")
-    pipeline_parser.add_argument(
-        "--out-dir", default="data", help="Output directory (default: data)"
+    # Common arguments for all phases
+    parser.add_argument(
+        "--month", help="Process specific month (YYYY-MM format, default: previous month)"
     )
-    pipeline_parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    pipeline_parser.add_argument(
-        "--force", action="store_true", help="Force overwrite existing files"
-    )
+    parser.add_argument("--year", type=int, help="Process entire year (YYYY format)")
+    parser.add_argument("--start", help="Start month for range (YYYY-MM format)")
+    parser.add_argument("--end", help="End month for range (YYYY-MM format)")
+    parser.add_argument("--range", help="Month range (YYYY-MM:YYYY-MM format)")
+    parser.add_argument("--out-dir", default="data", help="Output directory (default: data)")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--force", action="store_true", help="Force overwrite existing files")
 
     args = parser.parse_args(argv)
 
-    if not args.command:
-        parser.print_help()
-        return 0
-
     try:
-        if args.command == "pipeline":
-            # Determine phases to run
-            try:
-                phases = get_phase_range(args.phase_range)
-            except ValueError as e:
-                print(f"[ERROR] {e}")
-                return 1
+        # Determine phases to run
+        try:
+            phases = get_phase_range(args.phase_range)
+        except ValueError as e:
+            print(f"[ERROR] {e}")
+            return 1
 
-            if not phases:
-                print("[ERROR] No phases specified to run")
-                return 1
+        if not phases:
+            print("[ERROR] No phases specified to run")
+            return 1
 
-            if args.debug:
-                print(f"[DEBUG] Running phases: {', '.join(phases)}")
+        if args.debug:
+            print(f"[DEBUG] Running phases: {', '.join(phases)}")
 
-            # Build common arguments
-            common_args = []
-            if args.month:
-                common_args.extend(["--month", args.month])
-            if args.year:
-                common_args.extend(["--year", str(args.year)])
-            if args.start:
-                common_args.extend(["--start", args.start])
-            if args.end:
-                common_args.extend(["--end", args.end])
-            if args.range:
-                common_args.extend(["--range", args.range])
-            if args.out_dir:
-                common_args.extend(["--out-dir", args.out_dir])
-            if args.debug:
-                common_args.append("--debug")
-            if args.force:
-                common_args.append("--force")
+        # Build common arguments
+        common_args = []
+        if args.month:
+            common_args.extend(["--month", args.month])
+        if args.year:
+            common_args.extend(["--year", str(args.year)])
+        if args.start:
+            common_args.extend(["--start", args.start])
+        if args.end:
+            common_args.extend(["--end", args.end])
+        if args.range:
+            common_args.extend(["--range", args.range])
+        if args.out_dir:
+            common_args.extend(["--out-dir", args.out_dir])
+        if args.debug:
+            common_args.append("--debug")
+        if args.force:
+            common_args.append("--force")
 
-            return run_pipeline(phases, common_args, debug=args.debug)
-
-        else:
-            # Individual phase
-            phase_args = getattr(args, "phase_args", [])
-            return run_phase(args.command, phase_args)
+        return run_pipeline(phases, common_args, debug=args.debug)
 
     except KeyboardInterrupt:
         print("\n[INFO] Interrupted by user")
