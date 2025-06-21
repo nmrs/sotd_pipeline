@@ -111,6 +111,6 @@ class TestBladeManufacturersTableGenerator:
         """Test column configuration."""
         generator = BladeManufacturersTableGenerator({}, debug=False)
         config = generator.get_column_config()
-        assert "brand" in config
+        assert "name" in config
         assert "shaves" in config
         assert "unique_users" in config

@@ -3,7 +3,7 @@
 
 from typing import Any
 
-from .base import ManufacturerTableGenerator, StandardProductTableGenerator
+from .base import BaseTableGenerator, StandardProductTableGenerator
 
 
 class BrushesTableGenerator(StandardProductTableGenerator):
@@ -35,21 +35,8 @@ class BrushHandleMakersTableGenerator(StandardProductTableGenerator):
         """Return the key to use for matching items in delta calculations."""
         return "handle_maker"
 
-    def get_column_config(self) -> dict[str, dict[str, Any]]:
-        """Return column configuration for the brush handle makers table."""
-        return {
-            "handle_maker": {"display_name": "name"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
 
-
-class BrushKnotMakersTableGenerator(ManufacturerTableGenerator):
+class BrushKnotMakersTableGenerator(StandardProductTableGenerator):
     """Table generator for brush knot makers in the hardware report."""
 
     def get_table_data(self) -> list[dict[str, Any]]:
@@ -108,19 +95,6 @@ class BrushFibersTableGenerator(StandardProductTableGenerator):
         """Return the key to use for matching items in delta calculations."""
         return "fiber"
 
-    def get_column_config(self) -> dict[str, dict[str, Any]]:
-        """Return column configuration for the brush fibers table."""
-        return {
-            "fiber": {"display_name": "Fiber"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
-
 
 class BrushKnotSizesTableGenerator(StandardProductTableGenerator):
     """Table generator for brush knot sizes in the hardware report."""
@@ -168,15 +142,52 @@ class BrushKnotSizesTableGenerator(StandardProductTableGenerator):
         """Return the key to use for matching items in delta calculations."""
         return "knot_size_mm"
 
-    def get_column_config(self) -> dict[str, dict[str, Any]]:
-        """Return column configuration for the brush knot sizes table."""
-        return {
-            "knot_size_mm": {"display_name": "Knot Size (mm)"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
+
+# Factory method alternatives for simplified table creation
+def create_brushes_table(data: dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a brushes table using factory method."""
+    return BaseTableGenerator.create_standard_product_table(
+        data=data, category="brushes", title="Brushes", name_key="name", debug=debug
+    )
+
+
+def create_brush_handle_makers_table(
+    data: dict[str, Any], debug: bool = False
+) -> BaseTableGenerator:
+    """Create a brush handle makers table using factory method."""
+    return BaseTableGenerator.create_standard_product_table(
+        data=data,
+        category="brush_handle_makers",
+        title="Brush Handle Makers",
+        name_key="handle_maker",
+        debug=debug,
+    )
+
+
+def create_brush_knot_makers_table(data: dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a brush knot makers table using factory method."""
+    return BaseTableGenerator.create_standard_product_table(
+        data=data,
+        category="brush_knot_makers",
+        title="Brush Knot Makers",
+        name_key="brand",
+        debug=debug,
+    )
+
+
+def create_brush_fibers_table(data: dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a brush fibers table using factory method."""
+    return BaseTableGenerator.create_standard_product_table(
+        data=data, category="brush_fibers", title="Knot Fibers", name_key="fiber", debug=debug
+    )
+
+
+def create_brush_knot_sizes_table(data: dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a brush knot sizes table using factory method."""
+    return BaseTableGenerator.create_standard_product_table(
+        data=data,
+        category="brush_knot_sizes",
+        title="Knot Sizes",
+        name_key="knot_size_mm",
+        debug=debug,
+    )

@@ -192,6 +192,127 @@ class BaseTableGenerator(ABC):
         # Default to "name" - subclasses can override
         return "name"
 
+    @classmethod
+    def create_standard_product_table(
+        cls,
+        data: Dict[str, Any],
+        category: str,
+        title: str,
+        name_key: str = "name",
+        debug: bool = False,
+    ) -> "BaseTableGenerator":
+        """Factory method to create a standard product table generator.
+
+        Args:
+            data: Data from aggregated data
+            category: Data category to use
+            title: Table title
+            name_key: Key to use for matching items in delta calculations
+            debug: Enable debug logging
+
+        Returns:
+            Configured table generator instance
+        """
+        return StandardProductTableFactory(
+            data=data, category=category, title=title, name_key=name_key, debug=debug
+        )
+
+    @classmethod
+    def create_manufacturer_table(
+        cls,
+        data: Dict[str, Any],
+        category: str,
+        title: str,
+        name_key: str = "brand",
+        debug: bool = False,
+    ) -> "BaseTableGenerator":
+        """Factory method to create a manufacturer table generator.
+
+        Args:
+            data: Data from aggregated data
+            category: Data category to use
+            title: Table title
+            name_key: Key to use for matching items in delta calculations
+            debug: Enable debug logging
+
+        Returns:
+            Configured table generator instance
+        """
+        return ManufacturerTableFactory(
+            data=data, category=category, title=title, name_key=name_key, debug=debug
+        )
+
+    @classmethod
+    def create_specialized_table(
+        cls,
+        data: Dict[str, Any],
+        category: str,
+        title: str,
+        name_key: str = "plate",
+        debug: bool = False,
+    ) -> "BaseTableGenerator":
+        """Factory method to create a specialized table generator.
+
+        Args:
+            data: Data from aggregated data
+            category: Data category to use
+            title: Table title
+            name_key: Key to use for matching items in delta calculations
+            debug: Enable debug logging
+
+        Returns:
+            Configured table generator instance
+        """
+        return SpecializedTableFactory(
+            data=data, category=category, title=title, name_key=name_key, debug=debug
+        )
+
+    @classmethod
+    def create_diversity_table(
+        cls,
+        data: Dict[str, Any],
+        category: str,
+        title: str,
+        name_key: str = "maker",
+        debug: bool = False,
+    ) -> "BaseTableGenerator":
+        """Factory method to create a diversity table generator.
+
+        Args:
+            data: Data from aggregated data
+            category: Data category to use
+            title: Table title
+            name_key: Key to use for matching items in delta calculations
+            debug: Enable debug logging
+
+        Returns:
+            Configured table generator instance
+        """
+        return DiversityTableFactory(
+            data=data, category=category, title=title, name_key=name_key, debug=debug
+        )
+
+    @classmethod
+    def create_use_count_table(
+        cls,
+        data: Dict[str, Any],
+        category: str,
+        title: str,
+        debug: bool = False,
+    ) -> "BaseTableGenerator":
+        """Factory method to create a use count table generator.
+
+        Args:
+            data: Data from aggregated data
+            category: Data category to use
+            title: Table title
+            debug: Enable debug logging
+
+        Returns:
+            Configured table generator instance
+        """
+        return UseCountTableFactory(data=data, category=category, title=title, debug=debug)
+
     def generate_table(
         self,
         max_rows: int = 20,
@@ -398,29 +519,15 @@ class BaseTableGenerator(ABC):
                 print("[DEBUG] Positions already exist in data, skipping position addition")
             return data
 
-        # Sort by the first numeric field (usually count/usage)
-        numeric_fields = []
-        for key in data[0].keys():
-            if isinstance(data[0][key], (int, float)):
-                numeric_fields.append(key)
-
-        if not numeric_fields:
-            if self.debug:
-                print("[DEBUG] No numeric fields found for positioning")
-            return data
-
-        # Sort by the first numeric field in descending order
-        sort_field = numeric_fields[0]
-        sorted_data = sorted(data, key=lambda x: x.get(sort_field, 0), reverse=True)
-
-        # Add position information
+        # Add positions based on shaves (descending order)
+        sorted_data = sorted(data, key=lambda x: x.get("shaves", 0), reverse=True)
         for i, item in enumerate(sorted_data):
             item["position"] = i + 1
 
         if self.debug:
-            print(f"[DEBUG] Added positions to {len(sorted_data)} items using {sort_field}")
+            print(f"[DEBUG] Added positions to {len(data)} items")
 
-        return sorted_data
+        return data
 
     def _calculate_deltas(
         self,
@@ -428,12 +535,12 @@ class BaseTableGenerator(ABC):
         comparison_data: Dict[str, Any],
         comparison_period: str,
     ) -> List[Dict[str, Any]]:
-        """Calculate deltas for the current data.
+        """Calculate deltas for the current data against historical data.
 
         Args:
             current_data: Current period data with positions
             comparison_data: Historical data for comparison
-            comparison_period: Which comparison period to use
+            comparison_period: Period name for the comparison
 
         Returns:
             Current data with delta information added
@@ -459,18 +566,29 @@ class BaseTableGenerator(ABC):
         # Calculate deltas
         try:
             name_key = self.get_name_key()
-            result = self.delta_calculator.calculate_deltas(
+            deltas = self.delta_calculator.calculate_deltas(
                 current_data, historical_data, name_key=name_key, max_items=len(current_data)
             )
 
-            if self.debug:
-                print(f"[DEBUG] Calculated deltas for {len(result)} items")
+            # Update the current data with delta information
+            for i, item in enumerate(current_data):
+                if i < len(deltas):
+                    delta_item = deltas[i]
+                    item["delta_text"] = delta_item.get("delta_text", "n/a")
+                    item["delta_position"] = delta_item.get("delta_position", "n/a")
 
-            return result
+            if self.debug:
+                print(f"[DEBUG] Calculated deltas for {len(current_data)} items")
+
         except Exception as e:
             if self.debug:
                 print(f"[DEBUG] Error calculating deltas: {e}")
-            return current_data
+            # Add n/a for deltas if calculation fails
+            for item in current_data:
+                item["delta_text"] = "n/a"
+                item["delta_position"] = "n/a"
+
+        return current_data
 
     def _add_delta_column_config(
         self, column_config: Dict[str, Dict[str, Any]], comparison_period: str
@@ -479,24 +597,24 @@ class BaseTableGenerator(ABC):
 
         Args:
             column_config: Existing column configuration
-            comparison_period: Which comparison period to use
+            comparison_period: Period name for the comparison
 
         Returns:
-            Updated column configuration with delta column
+            Updated column configuration with delta columns
         """
         # Create a copy to avoid modifying the original
         updated_config = column_config.copy()
 
         # Add delta column configuration
         updated_config["delta_text"] = {
-            "display_name": f"vs {comparison_period.title()}",
+            "display_name": f"Δ vs {comparison_period}",
             "format": "delta",
         }
 
         return updated_config
 
     def _add_avg_shaves_per_user(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Add avg shaves per user calculation to data.
+        """Add average shaves per user calculation to data.
 
         Args:
             data: List of data items
@@ -619,6 +737,236 @@ class BaseTableGenerator(ABC):
         return updated_config
 
 
+# Factory classes for common table types
+class StandardProductTableFactory(BaseTableGenerator, DataValidationMixin):
+    """Factory class for standard product tables."""
+
+    def __init__(
+        self,
+        data: Dict[str, Any],
+        category: str,
+        title: str,
+        name_key: str = "name",
+        debug: bool = False,
+    ):
+        """Initialize the factory.
+
+        Args:
+            data: Data from aggregated data
+            category: Data category to use
+            title: Table title
+            name_key: Key to use for matching items in delta calculations
+            debug: Enable debug logging
+        """
+        super().__init__(data, debug)
+        self.category = category
+        self._title = title
+        self._name_key = name_key
+
+    def get_table_data(self) -> List[Dict[str, Any]]:
+        """Get the data for the table."""
+        data = self.data.get(self.category, [])
+        return self._validate_data_records(data, self.category, ["name", "shaves"])
+
+    def get_table_title(self) -> str:
+        """Get the table title."""
+        return self._title
+
+    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
+        """Get the column configuration."""
+        return STANDARD_PRODUCT_COLUMNS
+
+    def get_category_name(self) -> str:
+        """Get the category name for data matching."""
+        return self.category
+
+    def get_name_key(self) -> str:
+        """Get the key to use for matching items in delta calculations."""
+        return self._name_key
+
+
+class ManufacturerTableFactory(BaseTableGenerator, DataValidationMixin):
+    """Factory class for manufacturer tables."""
+
+    def __init__(
+        self,
+        data: Dict[str, Any],
+        category: str,
+        title: str,
+        name_key: str = "brand",
+        debug: bool = False,
+    ):
+        """Initialize the factory.
+
+        Args:
+            data: Data from aggregated data
+            category: Data category to use
+            title: Table title
+            name_key: Key to use for matching items in delta calculations
+            debug: Enable debug logging
+        """
+        super().__init__(data, debug)
+        self.category = category
+        self._title = title
+        self._name_key = name_key
+
+    def get_table_data(self) -> List[Dict[str, Any]]:
+        """Get the data for the table."""
+        data = self.data.get(self.category, [])
+        return self._validate_data_records(data, self.category, ["brand", "shaves"])
+
+    def get_table_title(self) -> str:
+        """Get the table title."""
+        return self._title
+
+    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
+        """Get the column configuration."""
+        return STANDARD_MANUFACTURER_COLUMNS
+
+    def get_category_name(self) -> str:
+        """Get the category name for data matching."""
+        return self.category
+
+    def get_name_key(self) -> str:
+        """Get the key to use for matching items in delta calculations."""
+        return self._name_key
+
+
+class SpecializedTableFactory(BaseTableGenerator, DataValidationMixin):
+    """Factory class for specialized tables."""
+
+    def __init__(
+        self,
+        data: Dict[str, Any],
+        category: str,
+        title: str,
+        name_key: str = "plate",
+        debug: bool = False,
+    ):
+        """Initialize the factory.
+
+        Args:
+            data: Data from aggregated data
+            category: Data category to use
+            title: Table title
+            name_key: Key to use for matching items in delta calculations
+            debug: Enable debug logging
+        """
+        super().__init__(data, debug)
+        self.category = category
+        self._title = title
+        self._name_key = name_key
+
+    def get_table_data(self) -> List[Dict[str, Any]]:
+        """Get the data for the table."""
+        data = self.data.get(self.category, [])
+        return self._validate_data_records(data, self.category, ["plate", "shaves"])
+
+    def get_table_title(self) -> str:
+        """Get the table title."""
+        return self._title
+
+    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
+        """Get the column configuration."""
+        return STANDARD_SPECIALIZED_COLUMNS
+
+    def get_category_name(self) -> str:
+        """Get the category name for data matching."""
+        return self.category
+
+    def get_name_key(self) -> str:
+        """Get the key to use for matching items in delta calculations."""
+        return self._name_key
+
+
+class DiversityTableFactory(BaseTableGenerator, DataValidationMixin):
+    """Factory class for diversity tables."""
+
+    def __init__(
+        self,
+        data: Dict[str, Any],
+        category: str,
+        title: str,
+        name_key: str = "maker",
+        debug: bool = False,
+    ):
+        """Initialize the factory.
+
+        Args:
+            data: Data from aggregated data
+            category: Data category to use
+            title: Table title
+            name_key: Key to use for matching items in delta calculations
+            debug: Enable debug logging
+        """
+        super().__init__(data, debug)
+        self.category = category
+        self._title = title
+        self._name_key = name_key
+
+    def get_table_data(self) -> List[Dict[str, Any]]:
+        """Get the data for the table."""
+        data = self.data.get(self.category, [])
+        return self._validate_data_records(data, self.category, ["maker", "unique_soaps"])
+
+    def get_table_title(self) -> str:
+        """Get the table title."""
+        return self._title
+
+    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
+        """Get the column configuration."""
+        return STANDARD_DIVERSITY_COLUMNS
+
+    def get_category_name(self) -> str:
+        """Get the category name for data matching."""
+        return self.category
+
+    def get_name_key(self) -> str:
+        """Get the key to use for matching items in delta calculations."""
+        return self._name_key
+
+
+class UseCountTableFactory(BaseTableGenerator, DataValidationMixin):
+    """Factory class for use count tables."""
+
+    def __init__(
+        self,
+        data: Dict[str, Any],
+        category: str,
+        title: str,
+        debug: bool = False,
+    ):
+        """Initialize the factory.
+
+        Args:
+            data: Data from aggregated data
+            category: Data category to use
+            title: Table title
+            debug: Enable debug logging
+        """
+        super().__init__(data, debug)
+        self.category = category
+        self._title = title
+
+    def get_table_data(self) -> List[Dict[str, Any]]:
+        """Get the data for the table."""
+        data = self.data.get(self.category, [])
+        return self._validate_data_records(data, self.category, ["user", "blade", "uses"])
+
+    def get_table_title(self) -> str:
+        """Get the table title."""
+        return self._title
+
+    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
+        """Get the column configuration."""
+        return STANDARD_USE_COUNT_COLUMNS
+
+    def get_category_name(self) -> str:
+        """Get the category name for data matching."""
+        return self.category
+
+
+# Legacy classes for backward compatibility
 class StandardProductTableGenerator(BaseTableGenerator, DataValidationMixin):
     """Base class for standard product tables (name, shaves, unique_users, avg_shaves_per_user)."""
 

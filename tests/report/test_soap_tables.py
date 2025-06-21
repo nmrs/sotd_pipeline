@@ -117,7 +117,7 @@ class TestSoapMakersTableGenerator:
         """Test column configuration."""
         generator = SoapMakersTableGenerator({}, debug=False)
         config = generator.get_column_config()
-        assert "maker" in config
+        assert "name" in config
         assert "shaves" in config
         assert "unique_users" in config
 

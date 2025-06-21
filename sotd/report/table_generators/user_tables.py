@@ -3,7 +3,7 @@
 
 from typing import Any, Dict, List
 
-from .base import STANDARD_USER_COLUMNS, StandardProductTableGenerator
+from .base import STANDARD_USER_COLUMNS, BaseTableGenerator, StandardProductTableGenerator
 
 
 class TopShaversTableGenerator(StandardProductTableGenerator):
@@ -73,3 +73,11 @@ class TopShaversTableGenerator(StandardProductTableGenerator):
             Category name for data matching
         """
         return "users"
+
+
+# Factory method alternatives for simplified table creation
+def create_top_shavers_table(data: Dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a top shavers table using factory method."""
+    return BaseTableGenerator.create_standard_product_table(
+        data=data, category="users", title="Top Shavers", name_key="user", debug=debug
+    )

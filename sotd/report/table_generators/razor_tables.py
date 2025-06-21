@@ -1,6 +1,6 @@
 from typing import Any
 
-from .base import ManufacturerTableGenerator, StandardProductTableGenerator
+from .base import BaseTableGenerator, StandardProductTableGenerator
 
 
 class RazorFormatsTableGenerator(StandardProductTableGenerator):
@@ -19,19 +19,6 @@ class RazorFormatsTableGenerator(StandardProductTableGenerator):
         """Return the key to use for matching items in delta calculations."""
         return "format"
 
-    def get_column_config(self) -> dict[str, dict[str, Any]]:
-        """Return column configuration for the razor formats table."""
-        return {
-            "format": {"display_name": "name"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
-
 
 class RazorsTableGenerator(StandardProductTableGenerator):
     """Table generator for individual razors in the hardware report."""
@@ -45,21 +32,8 @@ class RazorsTableGenerator(StandardProductTableGenerator):
         """Return the table title."""
         return "Razors"
 
-    def get_column_config(self) -> dict[str, dict[str, Any]]:
-        """Return column configuration for the razors table."""
-        return {
-            "name": {"display_name": "name"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
 
-
-class RazorManufacturersTableGenerator(ManufacturerTableGenerator):
+class RazorManufacturersTableGenerator(StandardProductTableGenerator):
     """Table generator for razor manufacturers in the hardware report."""
 
     def get_table_data(self) -> list[dict[str, Any]]:
@@ -75,15 +49,30 @@ class RazorManufacturersTableGenerator(ManufacturerTableGenerator):
         """Return the key to use for matching items in delta calculations."""
         return "brand"
 
-    def get_column_config(self) -> dict[str, dict[str, Any]]:
-        """Return column configuration for the razor manufacturers table."""
-        return {
-            "brand": {"display_name": "name"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
+
+# Factory method alternatives for simplified table creation
+def create_razor_formats_table(data: dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a razor formats table using factory method."""
+    return BaseTableGenerator.create_standard_product_table(
+        data=data, category="razor_formats", title="Razor Formats", name_key="format", debug=debug
+    )
+
+
+def create_razors_table(data: dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a razors table using factory method."""
+    return BaseTableGenerator.create_standard_product_table(
+        data=data, category="razors", title="Razors", name_key="name", debug=debug
+    )
+
+
+def create_razor_manufacturers_table(
+    data: dict[str, Any], debug: bool = False
+) -> BaseTableGenerator:
+    """Create a razor manufacturers table using factory method."""
+    return BaseTableGenerator.create_standard_product_table(
+        data=data,
+        category="razor_manufacturers",
+        title="Razor Manufacturers",
+        name_key="brand",
+        debug=debug,
+    )

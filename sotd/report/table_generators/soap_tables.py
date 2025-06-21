@@ -2,12 +2,12 @@ from typing import Any, Dict, List
 
 from .base import (
     STANDARD_DIVERSITY_COLUMNS,
-    ManufacturerTableGenerator,
+    BaseTableGenerator,
     StandardProductTableGenerator,
 )
 
 
-class SoapMakersTableGenerator(ManufacturerTableGenerator):
+class SoapMakersTableGenerator(StandardProductTableGenerator):
     """Generates a table of soap makers with usage statistics."""
 
     def get_table_data(self) -> List[Dict[str, Any]]:
@@ -22,19 +22,6 @@ class SoapMakersTableGenerator(ManufacturerTableGenerator):
     def get_name_key(self) -> str:
         """Return the key to use for matching items in delta calculations."""
         return "maker"
-
-    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
-        """Return column configuration for the soap makers table."""
-        return {
-            "maker": {"display_name": "name"},
-            "shaves": {"display_name": "shaves", "format": "number"},
-            "unique_users": {"display_name": "unique users", "format": "number"},
-            "avg_shaves_per_user": {
-                "display_name": "avg shaves per user",
-                "format": "decimal",
-                "decimals": 2,
-            },
-        }
 
 
 class SoapsTableGenerator(StandardProductTableGenerator):
@@ -79,3 +66,29 @@ class BrandDiversityTableGenerator(StandardProductTableGenerator):
     def get_name_key(self) -> str:
         """Return the key to use for matching items in delta calculations."""
         return "maker"
+
+
+# Factory method alternatives for simplified table creation
+def create_soap_makers_table(data: Dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a soap makers table using factory method."""
+    return BaseTableGenerator.create_standard_product_table(
+        data=data, category="soap_makers", title="Soap Makers", name_key="maker", debug=debug
+    )
+
+
+def create_soaps_table(data: Dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a soaps table using factory method."""
+    return BaseTableGenerator.create_standard_product_table(
+        data=data, category="soaps", title="Soaps", name_key="name", debug=debug
+    )
+
+
+def create_brand_diversity_table(data: Dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a brand diversity table using factory method."""
+    return BaseTableGenerator.create_diversity_table(
+        data=data,
+        category="brand_diversity",
+        title="Brand Diversity (Unique Soaps per Maker)",
+        name_key="maker",
+        debug=debug,
+    )

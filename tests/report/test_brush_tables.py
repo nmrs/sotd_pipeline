@@ -114,7 +114,7 @@ class TestBrushHandleMakersTableGenerator:
         """Test column configuration."""
         generator = BrushHandleMakersTableGenerator({}, debug=False)
         config = generator.get_column_config()
-        assert "handle_maker" in config
+        assert "name" in config
         assert "shaves" in config
         assert "unique_users" in config
 
@@ -163,7 +163,7 @@ class TestBrushKnotMakersTableGenerator:
         """Test column configuration."""
         generator = BrushKnotMakersTableGenerator({}, debug=False)
         config = generator.get_column_config()
-        assert "brand" in config
+        assert "name" in config
         assert "shaves" in config
         assert "unique_users" in config
 
@@ -212,7 +212,7 @@ class TestBrushFibersTableGenerator:
         """Test column configuration."""
         generator = BrushFibersTableGenerator({}, debug=False)
         config = generator.get_column_config()
-        assert "fiber" in config
+        assert "name" in config
         assert "shaves" in config
         assert "unique_users" in config
 
@@ -261,6 +261,6 @@ class TestBrushKnotSizesTableGenerator:
         """Test column configuration."""
         generator = BrushKnotSizesTableGenerator({}, debug=False)
         config = generator.get_column_config()
-        assert "knot_size_mm" in config
+        assert "name" in config
         assert "shaves" in config
         assert "unique_users" in config

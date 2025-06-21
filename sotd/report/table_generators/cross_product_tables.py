@@ -5,6 +5,7 @@ from typing import Any
 
 from .base import (
     STANDARD_USE_COUNT_COLUMNS,
+    BaseTableGenerator,
     NoDeltaMixin,
     StandardProductTableGenerator,
 )
@@ -48,3 +49,29 @@ class HighestUseCountPerBladeTableGenerator(StandardProductTableGenerator, NoDel
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration for the highest use count per blade table."""
         return STANDARD_USE_COUNT_COLUMNS
+
+
+# Factory method alternatives for simplified table creation
+def create_razor_blade_combinations_table(
+    data: dict[str, Any], debug: bool = False
+) -> BaseTableGenerator:
+    """Create a razor-blade combinations table using factory method."""
+    return BaseTableGenerator.create_standard_product_table(
+        data=data,
+        category="razor_blade_combinations",
+        title="Most Used Blades in Most Used Razors",
+        name_key="name",
+        debug=debug,
+    )
+
+
+def create_highest_use_count_per_blade_table(
+    data: dict[str, Any], debug: bool = False
+) -> BaseTableGenerator:
+    """Create a highest use count per blade table using factory method."""
+    return BaseTableGenerator.create_use_count_table(
+        data=data,
+        category="highest_use_count_per_blade",
+        title="Highest Use Count per Blade",
+        debug=debug,
+    )

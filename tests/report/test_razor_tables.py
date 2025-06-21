@@ -62,7 +62,7 @@ class TestRazorFormatsTableGenerator:
         """Test column configuration."""
         generator = RazorFormatsTableGenerator({}, debug=False)
         config = generator.get_column_config()
-        assert "format" in config
+        assert "name" in config
         assert "shaves" in config
         assert "unique_users" in config
         assert "avg_shaves_per_user" in config
@@ -173,6 +173,6 @@ class TestRazorManufacturersTableGenerator:
         """Test column configuration."""
         generator = RazorManufacturersTableGenerator({}, debug=False)
         config = generator.get_column_config()
-        assert "brand" in config
+        assert "name" in config
         assert "shaves" in config
         assert "unique_users" in config

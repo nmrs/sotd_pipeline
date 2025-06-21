@@ -3,7 +3,7 @@
 
 from typing import Any
 
-from .base import SpecializedTableGenerator
+from .base import BaseTableGenerator, SpecializedTableGenerator
 
 
 class BlackbirdPlatesTableGenerator(SpecializedTableGenerator):
@@ -202,3 +202,85 @@ class StraightPointsTableGenerator(SpecializedTableGenerator):
     def get_table_title(self) -> str:
         """Get the table title."""
         return "Straight Points"
+
+
+# Factory method alternatives for simplified table creation
+def create_blackbird_plates_table(data: dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a Blackbird plates table using factory method."""
+    return BaseTableGenerator.create_specialized_table(
+        data=data,
+        category="blackbird_plates",
+        title="Blackbird Plates",
+        name_key="plate",
+        debug=debug,
+    )
+
+
+def create_christopher_bradley_plates_table(
+    data: dict[str, Any], debug: bool = False
+) -> BaseTableGenerator:
+    """Create a Christopher Bradley plates table using factory method."""
+    return BaseTableGenerator.create_specialized_table(
+        data=data,
+        category="christopher_bradley_plates",
+        title="Christopher Bradley Plates",
+        name_key="plate",
+        debug=debug,
+    )
+
+
+def create_game_changer_plates_table(
+    data: dict[str, Any], debug: bool = False
+) -> BaseTableGenerator:
+    """Create a Game Changer plates table using factory method."""
+    return BaseTableGenerator.create_specialized_table(
+        data=data,
+        category="game_changer_plates",
+        title="Game Changer Plates",
+        name_key="plate",
+        debug=debug,
+    )
+
+
+def create_super_speed_tips_table(data: dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a Super Speed tips table using factory method."""
+    return BaseTableGenerator.create_specialized_table(
+        data=data,
+        category="super_speed_tips",
+        title="Super Speed Tips",
+        name_key="plate",
+        debug=debug,
+    )
+
+
+def create_straight_widths_table(data: dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a straight widths table using factory method."""
+    return BaseTableGenerator.create_specialized_table(
+        data=data,
+        category="straight_widths",
+        title="Straight Widths",
+        name_key="plate",
+        debug=debug,
+    )
+
+
+def create_straight_grinds_table(data: dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a straight grinds table using factory method."""
+    return BaseTableGenerator.create_specialized_table(
+        data=data,
+        category="straight_grinds",
+        title="Straight Grinds",
+        name_key="plate",
+        debug=debug,
+    )
+
+
+def create_straight_points_table(data: dict[str, Any], debug: bool = False) -> BaseTableGenerator:
+    """Create a straight points table using factory method."""
+    return BaseTableGenerator.create_specialized_table(
+        data=data,
+        category="straight_points",
+        title="Straight Points",
+        name_key="plate",
+        debug=debug,
+    )
