@@ -31,7 +31,14 @@ def run_report(args) -> None:
     data_root = Path(args.data_root)
     out_dir = Path(args.out_dir)
 
+    # Import modules needed for processing
     from . import load, process, save
+
+    # Check if output already exists and force is not set
+    output_path = save.get_report_file_path(out_dir, year, month, args.type)
+    if output_path.exists() and not args.force:
+        print(f"  {args.month}: output exists")
+        return
 
     # Load aggregated data (always from data_root/aggregated)
     if args.debug:
@@ -87,9 +94,6 @@ def run_report(args) -> None:
             report_content, out_dir, year, month, args.type, args.force, args.debug
         )
         monitor.end_file_io_timing()
-    except FileExistsError as e:
-        monitor.end_file_io_timing()
-        raise FileExistsError(f"Report file already exists. Use --force to overwrite: {e}") from e
     except Exception as e:
         monitor.end_file_io_timing()
         raise RuntimeError(f"Failed to save report: {e}") from e

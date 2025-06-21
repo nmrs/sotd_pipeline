@@ -30,7 +30,7 @@ class BaseCLIParser(argparse.ArgumentParser):
         add_output_args: bool = True,
         add_debug_args: bool = True,
         add_force_args: bool = True,
-        require_date_args: bool = False,
+        require_date_args: bool = True,
         **kwargs,
     ):
         """
@@ -42,7 +42,8 @@ class BaseCLIParser(argparse.ArgumentParser):
             add_output_args: Whether to add output directory argument
             add_debug_args: Whether to add debug flag
             add_force_args: Whether to add force flag
-            require_date_args: Whether date arguments are required (no default to current month)
+            require_date_args: Whether date arguments are required (default: True since main run.py
+                provides them)
             **kwargs: Additional arguments passed to argparse.ArgumentParser
         """
         super().__init__(description=description, **kwargs)
@@ -203,19 +204,8 @@ class BaseCLIParser(argparse.ArgumentParser):
                     "or --start/--end) is required"
                 )
 
-            # Default to previous month if not required (since current month is still in progress)
-            import datetime
-
-            now = datetime.datetime.now()
-            # Calculate previous month
-            if now.month == 1:
-                prev_year = now.year - 1
-                prev_month = 12
-            else:
-                prev_year = now.year
-                prev_month = now.month - 1
-
-            args.month = f"{prev_year:04d}-{prev_month:02d}"
+            # Individual phases should always receive date arguments from main run.py
+            # No default logic needed here
             return args
 
         # Validate start/end pair

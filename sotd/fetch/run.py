@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import argparse
 import calendar
-import sys
 from datetime import date as _date
 from datetime import datetime, timezone
 from pathlib import Path
@@ -199,96 +198,107 @@ def _process_month(
 # --------------------------------------------------------------------------- #
 # main                                                                        #
 # --------------------------------------------------------------------------- #
-def main(argv: Sequence[str] | None = None) -> None:  # easier to test
-    parser = get_parser()
-    args = parser.parse_args(argv)
+def main(argv: Sequence[str] | None = None) -> int:  # easier to test
+    try:
+        parser = get_parser()
+        args = parser.parse_args(argv)
 
-    # If --list-months is set, list months and exit
-    if args.list_months:
-        months_found = list_available_months(args.out_dir)
-        if months_found:
-            for month in months_found:
-                print(month)
-            sys.exit(0)
-        else:
-            sys.exit(0)
+        # If --list-months is set, list months and exit
+        if args.list_months:
+            months_found = list_available_months(args.out_dir)
+            if months_found:
+                for month in months_found:
+                    print(month)
+                return 0
+            else:
+                return 0
 
-    # compute span
-    months = month_span(args)
+        # compute span
+        months = month_span(args)
 
-    if args.audit:
-        missing_info = _audit_months(months, args.out_dir)
-        any_missing = False
-        # Print missing files
-        for mf in missing_info.get("missing_files", []):
-            print(f"[MISSING FILE] {mf}")
-            any_missing = True
-        # Print missing days per month
-        for month_str, days in missing_info.get("missing_days", {}).items():
-            for d in days:
-                print(f"{month_str}: {d}")
+        if args.audit:
+            missing_info = _audit_months(months, args.out_dir)
+            any_missing = False
+            # Print missing files
+            for mf in missing_info.get("missing_files", []):
+                print(f"[MISSING FILE] {mf}")
                 any_missing = True
-        if not any_missing:
-            print("[INFO] Audit successful: no missing files or days detected.")
-            exit(0)
-        else:
-            exit(1)
+            # Print missing days per month
+            for month_str, days in missing_info.get("missing_days", {}).items():
+                for d in days:
+                    print(f"{month_str}: {d}")
+                    any_missing = True
+            if not any_missing:
+                print("[INFO] Audit successful: no missing files or days detected.")
+                return 0
+            else:
+                return 1
 
-    reddit = get_reddit()
+        reddit = get_reddit()
 
-    inc_over, exc_over = load_overrides()
+        inc_over, exc_over = load_overrides()
 
-    results = []
-    for year, month in tqdm(months, desc="Months", unit="month", disable=False):
-        result = _process_month(
-            year,
-            month,
-            args,
-            reddit=reddit,
-            include_overrides=inc_over,
-            exclude_overrides=exc_over,
-        )
-        results.append(result)
+        results = []
+        for year, month in tqdm(months, desc="Months", unit="month", disable=False):
+            result = _process_month(
+                year,
+                month,
+                args,
+                reddit=reddit,
+                include_overrides=inc_over,
+                exclude_overrides=exc_over,
+            )
+            results.append(result)
 
-    # Filter out any None results (e.g., if _process_month is monkeypatched to do nothing)
-    valid_results = [res for res in results if res is not None]
+        # Filter out any None results (e.g., if _process_month is monkeypatched to do nothing)
+        valid_results = [res for res in results if res is not None]
 
-    if len(valid_results) == 1:
-        res = valid_results[0]
-        year = res["year"]
-        month = res["month"]
-        missing_days = res["missing_days"]
-        if not (res["threads"] == 0 and len(missing_days) == calendar.monthrange(year, month)[1]):
-            for d in missing_days:
+        if len(valid_results) == 1:
+            res = valid_results[0]
+            year = res["year"]
+            month = res["month"]
+            missing_days = res["missing_days"]
+            if not (
+                res["threads"] == 0 and len(missing_days) == calendar.monthrange(year, month)[1]
+            ):
+                for d in missing_days:
+                    print(f"[WARN] Missing day: {d}")
+            print(
+                f"[INFO] SOTD fetch complete for {year:04d}-{month:02d}: "
+                f"{res['threads']} threads, "
+                f"{res['comments']} comments, "
+                f"{len(missing_days)} missing day{'s' if len(missing_days) != 1 else ''}"
+            )
+        elif len(valid_results) > 1:
+            # multiple months
+            all_missing_days = sorted(
+                d
+                for res in valid_results
+                for d in ([] if res.get("missing_days") is None else res["missing_days"])
+            )
+            for d in all_missing_days:
                 print(f"[WARN] Missing day: {d}")
-        print(
-            f"[INFO] SOTD fetch complete for {year:04d}-{month:02d}: "
-            f"{res['threads']} threads, "
-            f"{res['comments']} comments, "
-            f"{len(missing_days)} missing day{'s' if len(missing_days) != 1 else ''}"
-        )
-    elif len(valid_results) > 1:
-        # multiple months
-        all_missing_days = sorted(
-            d
-            for res in valid_results
-            for d in ([] if res.get("missing_days") is None else res["missing_days"])
-        )
-        for d in all_missing_days:
-            print(f"[WARN] Missing day: {d}")
-        start_ym = valid_results[0]["year"], valid_results[0]["month"]
-        end_ym = valid_results[-1]["year"], valid_results[-1]["month"]
-        total_threads = sum(res["threads"] for res in valid_results)
-        total_comments = sum(res["comments"] for res in valid_results)
-        total_missing = len(all_missing_days)
+            start_ym = valid_results[0]["year"], valid_results[0]["month"]
+            end_ym = valid_results[-1]["year"], valid_results[-1]["month"]
+            total_threads = sum(res["threads"] for res in valid_results)
+            total_comments = sum(res["comments"] for res in valid_results)
+            total_missing = len(all_missing_days)
 
-        print(
-            f"[INFO] SOTD fetch complete for "
-            f"{start_ym[0]:04d}-{start_ym[1]:02d}…{end_ym[0]:04d}-{end_ym[1]:02d}: "
-            f"{total_threads} threads, "
-            f"{total_comments} comments, "
-            f"{total_missing} missing day{'s' if total_missing != 1 else ''}"
-        )
+            print(
+                f"[INFO] SOTD fetch complete for "
+                f"{start_ym[0]:04d}-{start_ym[1]:02d}…{end_ym[0]:04d}-{end_ym[1]:02d}: "
+                f"{total_threads} threads, "
+                f"{total_comments} comments, "
+                f"{total_missing} missing day{'s' if total_missing != 1 else ''}"
+            )
+
+        return 0  # Success
+    except KeyboardInterrupt:
+        print("\n[INFO] Fetch phase interrupted by user")
+        return 1  # Interrupted
+    except Exception as e:
+        print(f"[ERROR] Fetch phase failed: {e}")
+        return 1  # Error
 
 
 if __name__ == "__main__":

@@ -10,7 +10,9 @@ from .processor import aggregate_all
 from .save import save_aggregated_data
 
 
-def process_months(months: Sequence[str], data_dir: Path, debug: bool = False) -> None:
+def process_months(
+    months: Sequence[str], data_dir: Path, debug: bool = False, force: bool = False
+) -> None:
     """Main orchestration for aggregating SOTD data for one or more months."""
     # Show progress bar for processing
     print(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
@@ -19,6 +21,13 @@ def process_months(months: Sequence[str], data_dir: Path, debug: bool = False) -
     for month in tqdm(months, desc="Months", unit="month"):
         monitor = PerformanceMonitor("aggregate")
         monitor.start_total_timing()
+
+        # Check if output already exists and force is not set
+        output_path = data_dir / "aggregated" / f"{month}.json"
+        if output_path.exists() and not force:
+            print(f"  {month}: output exists")
+            continue
+
         try:
             monitor.start_file_io_timing()
             records = load_enriched_data(month, data_dir)

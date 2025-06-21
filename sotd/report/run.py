@@ -22,7 +22,7 @@ from .annual_run import run_annual_report
 from .report_core import run_report
 
 
-def main(argv: Sequence[str] | None = None) -> None:
+def main(argv: Sequence[str] | None = None) -> int:
     """Main entry point for the report phase."""
     try:
         parser = cli.get_parser()
@@ -34,12 +34,16 @@ def main(argv: Sequence[str] | None = None) -> None:
             run_annual_report(args)
         else:
             run_report(args)
+
+        return 0  # Success
     except KeyboardInterrupt:
         print("\n[INFO] Report generation interrupted by user")
+        return 1  # Interrupted
     except Exception as e:
         print(f"[ERROR] Report generation failed: {e}")
         # Note: args might not be defined if parse_report_args fails
         # We'll handle this in the exception handler
+        return 1  # Error
 
 
 if __name__ == "__main__":

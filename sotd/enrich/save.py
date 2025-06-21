@@ -76,14 +76,10 @@ def save_enriched_data(
         enriched_data: List of enriched comment records
         original_metadata: Metadata from the matched data
         enrichment_stats: Statistics about the enrichment process
-        force: Whether to overwrite existing files
+        force: Whether to overwrite existing files (existence check handled by caller)
     """
     # Create output directory if it doesn't exist
     file_path.parent.mkdir(parents=True, exist_ok=True)
-
-    # Remove existing file if force is True
-    if force and file_path.exists():
-        file_path.unlink()
 
     # Generate enrichment metadata
     enrichment_metadata = {

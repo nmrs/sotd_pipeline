@@ -35,20 +35,19 @@ def save_report(
         debug: Enable debug logging
 
     Raises:
-        FileExistsError: If file exists and force=False
         OSError: If there are file system errors
     """
     if debug:
         print(f"[DEBUG] Saving report to: {output_path}")
 
-    # Check if file exists
-    if output_path.exists() and not force:
-        raise FileExistsError(
-            f"Report file already exists: {output_path}. Use --force to overwrite."
-        )
-
     # Ensure output directory exists
     output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Remove existing file if force is True
+    if force and output_path.exists():
+        if debug:
+            print(f"[DEBUG] Force flag set, removing existing file: {output_path}")
+        output_path.unlink()
 
     try:
         with open(output_path, "w", encoding="utf-8") as f:

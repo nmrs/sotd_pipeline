@@ -369,13 +369,12 @@ def test_process_month_comment_processing(
 # --------------------------------------------------------------------------- #
 @patch("sotd.fetch.run.list_available_months")
 def test_main_list_months(mock_list_months, capsys):
-    """main should list available months and exit when --list-months is used."""
+    """main should list available months and return 0 when --list-months is used."""
     mock_list_months.return_value = ["2025-01", "2025-02", "2025-03"]
 
-    with pytest.raises(SystemExit) as exc_info:
-        main(["--list-months"])
+    exit_code = main(["--list-months"])
 
-    assert exc_info.value.code == 0
+    assert exit_code == 0
 
     output = capsys.readouterr().out
     assert "2025-01" in output
@@ -385,25 +384,23 @@ def test_main_list_months(mock_list_months, capsys):
 
 @patch("sotd.fetch.run.list_available_months")
 def test_main_list_months_empty(mock_list_months):
-    """main should exit gracefully when no months are found."""
+    """main should return 0 gracefully when no months are found."""
     mock_list_months.return_value = []
 
-    with pytest.raises(SystemExit) as exc_info:
-        main(["--list-months"])
+    exit_code = main(["--list-months"])
 
-    assert exc_info.value.code == 0
+    assert exit_code == 0
 
 
 @patch("sotd.fetch.run._audit_months")
 def test_main_audit_mode_success(mock_audit, capsys):
-    """main should run audit mode and exit successfully when no issues found."""
+    """main should run audit mode and return 0 when no issues found."""
     mock_audit.return_value = {"missing_files": [], "missing_days": {}}
 
     with patch("sotd.fetch.run.month_span", return_value=[(2025, 5)]):
-        with pytest.raises(SystemExit) as exc_info:
-            main(["--audit", "--month", "2025-05"])
+        exit_code = main(["--audit", "--month", "2025-05"])
 
-    assert exc_info.value.code == 0
+    assert exit_code == 0
 
     output = capsys.readouterr().out
     assert "[INFO] Audit successful: no missing files or days detected." in output
@@ -411,17 +408,16 @@ def test_main_audit_mode_success(mock_audit, capsys):
 
 @patch("sotd.fetch.run._audit_months")
 def test_main_audit_mode_with_issues(mock_audit, capsys):
-    """main should report issues and exit with error code in audit mode."""
+    """main should report issues and return 1 in audit mode."""
     mock_audit.return_value = {
         "missing_files": ["threads/2025-05.json"],
         "missing_days": {"2025-05": ["2025-05-01", "2025-05-02"]},
     }
 
     with patch("sotd.fetch.run.month_span", return_value=[(2025, 5)]):
-        with pytest.raises(SystemExit) as exc_info:
-            main(["--audit", "--month", "2025-05"])
+        exit_code = main(["--audit", "--month", "2025-05"])
 
-    assert exc_info.value.code == 1
+    assert exit_code == 1
 
     output = capsys.readouterr().out
     assert "[MISSING FILE] threads/2025-05.json" in output
@@ -581,9 +577,10 @@ def test_main_invalid_arguments():
 
 @patch("sotd.fetch.run.get_reddit")
 def test_main_reddit_connection_error(mock_get_reddit):
-    """main should propagate Reddit connection errors."""
+    """main should return 1 when Reddit connection errors occur."""
     mock_get_reddit.side_effect = Exception("Reddit connection failed")
 
     with patch("sotd.fetch.run.month_span", return_value=[(2025, 5)]):
-        with pytest.raises(Exception, match="Reddit connection failed"):
-            main(["--month", "2025-05"])
+        exit_code = main(["--month", "2025-05"])
+
+    assert exit_code == 1

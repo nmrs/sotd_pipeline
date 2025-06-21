@@ -103,12 +103,10 @@ class TestMatchCLI:
             parser.parse_args(["--month", "2023-01", "--year", "2023"])
 
     def test_no_date_arguments_sets_default(self):
-        """Test that no date arguments sets default month."""
+        """Test that no date arguments raises error (date required by main run.py)."""
         parser = get_parser()
-        args = parser.parse_args([])
-        # Should not raise any exception, should set default month
-        assert args.month is not None
-        assert "-" in args.month
+        with pytest.raises(SystemExit):
+            parser.parse_args([])
 
     def test_out_dir_argument_default(self):
         """Test out-dir argument default value."""

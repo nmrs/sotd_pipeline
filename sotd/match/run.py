@@ -306,15 +306,24 @@ def run_analysis(args):
             print(f"Skipping missing file: {matched_path}")
 
 
-def main(argv=None):
+def main(argv=None) -> int:
     """Main entry point for the match phase."""
-    parser = get_parser()
-    args = parser.parse_args(argv)
+    try:
+        parser = get_parser()
+        args = parser.parse_args(argv)
 
-    if args.mode == "match":
-        run_match(args)
-    elif args.mode == "analyze_unmatched_razors":
-        run_analysis(args)
+        if args.mode == "match":
+            run_match(args)
+        elif args.mode == "analyze_unmatched_razors":
+            run_analysis(args)
+
+        return 0  # Success
+    except KeyboardInterrupt:
+        print("\n[INFO] Match phase interrupted by user")
+        return 1  # Interrupted
+    except Exception as e:
+        print(f"[ERROR] Match phase failed: {e}")
+        return 1  # Error
 
 
 if __name__ == "__main__":

@@ -34,14 +34,22 @@ def run(args) -> None:
         months = [f"{year:04d}-{month:02d}" for year, month in month_tuples]
 
         # Process the months
-        process_months(months, args.out_dir, debug=args.debug)
+        process_months(months, args.out_dir, debug=args.debug, force=args.force)
 
 
-def main(argv: Optional[Sequence[str]] = None) -> None:
+def main(argv: Optional[Sequence[str]] = None) -> int:
     """Main CLI entry point for the aggregate phase."""
-    parser = get_parser()
-    args = parser.parse_args(argv)
-    run(args)
+    try:
+        parser = get_parser()
+        args = parser.parse_args(argv)
+        run(args)
+        return 0  # Success
+    except KeyboardInterrupt:
+        print("\n[INFO] Aggregate phase interrupted by user")
+        return 1  # Interrupted
+    except Exception as e:
+        print(f"[ERROR] Aggregate phase failed: {e}")
+        return 1  # Error
 
 
 if __name__ == "__main__":

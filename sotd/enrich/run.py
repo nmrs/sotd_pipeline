@@ -27,6 +27,10 @@ def _process_month(
             print(f"Skipping missing input file: {in_path}")
         return None
 
+    # Check if output already exists and force is not set
+    if out_path.exists() and not force:
+        return {"status": "skipped", "month": ym, "reason": "output exists"}
+
     monitor.start_file_io_timing()
     try:
         original_metadata, comments = load_matched_data(in_path)
@@ -76,6 +80,7 @@ def _process_month(
         print(f"  Soap enriched: {enrichment_stats['soap_enriched']}")
 
     return {
+        "status": "completed",
         "month": ym,
         "records_processed": len(enriched_comments),
         **enrichment_stats,
@@ -98,9 +103,14 @@ def run(args: argparse.Namespace) -> None:
     for year, month in tqdm(months, desc="Months", unit="month"):
         result = _process_month(year, month, base_path, debug=args.debug, force=args.force)
         if result:
-            results.append(result)
+            if result.get("status") == "skipped":
+                print(f"  {result['month']}: {result['reason']}")
+            else:
+                results.append(result)
 
     # Print summary using standardized formatter
+    if not months:
+        return
     if len(months) == 1:
         # Single month summary
         year, month = months[0]
@@ -135,12 +145,20 @@ def run(args: argparse.Namespace) -> None:
         print(f"  Total records enriched: {total_enriched}")
 
 
-def main(argv: Sequence[str] | None = None) -> None:
+def main(argv: Sequence[str] | None = None) -> int:
     """Main CLI entry point for the enrich phase."""
-    parser = get_parser()
-    args = parser.parse_args(argv)
+    try:
+        parser = get_parser()
+        args = parser.parse_args(argv)
 
-    run(args)
+        run(args)
+        return 0  # Success
+    except KeyboardInterrupt:
+        print("\n[INFO] Enrich phase interrupted by user")
+        return 1  # Interrupted
+    except Exception as e:
+        print(f"[ERROR] Enrich phase failed: {e}")
+        return 1  # Error
 
 
 if __name__ == "__main__":

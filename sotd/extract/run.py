@@ -121,11 +121,19 @@ def run(args) -> None:
         print(summary)
 
 
-def main(argv: Sequence[str] | None = None) -> None:
+def main(argv: Sequence[str] | None = None) -> int:
     """Main entry point for the extract phase."""
-    parser = get_parser()
-    args = parser.parse_args(argv)
-    run(args)
+    try:
+        parser = get_parser()
+        args = parser.parse_args(argv)
+        run(args)
+        return 0  # Success
+    except KeyboardInterrupt:
+        print("\n[INFO] Extract phase interrupted by user")
+        return 1  # Interrupted
+    except Exception as e:
+        print(f"[ERROR] Extract phase failed: {e}")
+        return 1  # Error
 
 
 if __name__ == "__main__":

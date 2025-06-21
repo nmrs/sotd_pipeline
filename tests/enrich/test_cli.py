@@ -143,3 +143,9 @@ class TestEnrichCLI:
         assert "mode" not in help_text.lower()
         assert "parallel" not in help_text.lower()
         assert "max-workers" not in help_text.lower()
+
+    def test_no_date_arguments_raises_error(self):
+        """Test that no date arguments raises error (date required by main run.py)."""
+        parser = get_parser()
+        with pytest.raises(SystemExit):
+            parser.parse_args([])

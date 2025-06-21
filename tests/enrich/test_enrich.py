@@ -107,7 +107,7 @@ def test_run_with_no_months():
     with patch("sotd.enrich.run.month_span") as mock_span:
         mock_span.return_value = []
 
-        args = argparse.Namespace(out_dir="data", debug=True, force=False)
+        args = argparse.Namespace(month="2025-05", out_dir="data", debug=True, force=False)
 
         # Should not raise any exceptions
         run(args)

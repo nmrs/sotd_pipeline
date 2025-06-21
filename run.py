@@ -6,8 +6,23 @@ Individual phases can be run separately or as part of a complete pipeline workfl
 """
 
 import argparse
+import datetime
 import sys
 from typing import List, Optional
+
+
+def get_default_month() -> str:
+    """Get the default month (previous month) in YYYY-MM format."""
+    now = datetime.datetime.now()
+    # Calculate previous month
+    if now.month == 1:
+        prev_year = now.year - 1
+        prev_month = 12
+    else:
+        prev_year = now.year
+        prev_month = now.month - 1
+
+    return f"{prev_year:04d}-{prev_month:02d}"
 
 
 def run_phase(phase: str, args: List[str]) -> int:
@@ -39,9 +54,9 @@ def run_phase(phase: str, args: List[str]) -> int:
         module_name = phase_modules[phase]
         module = __import__(module_name, fromlist=["main"])
 
-        # Run the phase with provided arguments
-        module.main(args)
-        return 0
+        # Run the phase with provided arguments and capture exit code
+        exit_code = module.main(args)
+        return exit_code if exit_code is not None else 0
 
     except ImportError as e:
         print(f"[ERROR] Failed to import {phase} phase: {e}")
@@ -67,20 +82,40 @@ def run_pipeline(phases: List[str], args: List[str], debug: bool = False) -> int
         print(f"[DEBUG] Running pipeline phases: {', '.join(phases)}")
         print(f"[DEBUG] Base arguments: {args}")
 
+    # Add visual separation for multi-phase runs
+    if len(phases) > 1:
+        print(f"\n{'=' * 60}")
+        print(f"RUNNING PIPELINE: {len(phases)} phases")
+        print(f"Phases: {' → '.join(phases)}")
+        print(f"{'=' * 60}\n")
+
     for i, phase in enumerate(phases):
-        if debug:
+        # Add clear phase header
+        if len(phases) > 1:
+            print(f"\n{'=' * 50}")
+            print(f"PHASE {i + 1}/{len(phases)}: {phase.upper()}")
+            print(f"{'=' * 50}")
+        elif debug:
             print(f"\n[DEBUG] Running phase {i + 1}/{len(phases)}: {phase}")
 
         exit_code = run_phase(phase, args)
         if exit_code != 0:
-            print(f"[ERROR] Phase {phase} failed with exit code {exit_code}")
+            print(f"\n{'=' * 60}")
+            print(f"PIPELINE FAILED: Phase {phase} failed with exit code {exit_code}")
+            print(f"Completed phases: {', '.join(phases[:i])}")
+            print(f"Failed phase: {phase}")
+            print(f"Remaining phases: {', '.join(phases[i + 1 :])}")
+            print(f"{'=' * 60}\n")
             return exit_code
 
         if debug:
             print(f"[DEBUG] Phase {phase} completed successfully")
 
-    if debug:
-        print(f"\n[DEBUG] All {len(phases)} phases completed successfully")
+    # Add completion summary for multi-phase runs
+    if len(phases) > 1:
+        print(f"\n{'=' * 60}")
+        print(f"PIPELINE COMPLETE: {len(phases)} phases finished successfully")
+        print(f"{'=' * 60}\n")
 
     return 0
 
@@ -256,16 +291,27 @@ Examples:
 
         # Build common arguments
         common_args = []
+
+        # Handle date arguments - if none provided, default to previous month
+        has_date_args = bool(args.month or args.year or args.start or args.end or args.range)
+
         if args.month:
             common_args.extend(["--month", args.month])
-        if args.year:
+        elif args.year:
             common_args.extend(["--year", str(args.year)])
-        if args.start:
+        elif args.start:
             common_args.extend(["--start", args.start])
-        if args.end:
+        elif args.end:
             common_args.extend(["--end", args.end])
-        if args.range:
+        elif args.range:
             common_args.extend(["--range", args.range])
+        elif not has_date_args:
+            # Default to previous month if no date arguments provided
+            default_month = get_default_month()
+            common_args.extend(["--month", default_month])
+            if args.debug:
+                print(f"[DEBUG] No date arguments provided, defaulting to: {default_month}")
+
         if args.out_dir:
             common_args.extend(["--out-dir", args.out_dir])
         if args.debug:

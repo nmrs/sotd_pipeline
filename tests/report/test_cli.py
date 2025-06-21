@@ -230,12 +230,11 @@ class TestReportCLIValidation:
         assert args.month == "2023-01"
 
     def test_validate_args_no_date_sets_default(self):
-        """Test validation sets default month when no date provided."""
+        """Test validation raises error when no date provided (date required by main run.py)."""
         parser = get_parser()
-        args = parser.parse_args([])
-        # Should not raise any exceptions
-        validate_args(args)
-        assert args.month is not None
+        with pytest.raises(SystemExit):
+            args = parser.parse_args([])
+            validate_args(args)
 
     def test_validate_args_multiple_date_arguments_raises_error(self):
         """Test validation raises error for multiple date arguments."""
@@ -362,11 +361,9 @@ class TestReportMain:
 
     @patch("sotd.report.run.run_report")
     def test_main_no_arguments_sets_default_month(self, mock_run_report):
-        """Test main function sets default month when no arguments provided."""
-        main([])
-        mock_run_report.assert_called_once()
-        call_args = mock_run_report.call_args[0][0]  # First positional argument
-        assert call_args.month is not None
+        """Test main function raises error when no arguments provided (date required by main run.py)."""
+        with pytest.raises(SystemExit):
+            main([])
 
     def test_main_invalid_year_argument_raises_error(self):
         """Test main function raises error for invalid year argument."""
