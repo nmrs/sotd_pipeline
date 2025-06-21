@@ -1,6 +1,7 @@
-import json
 from pathlib import Path
 from typing import Any, Dict
+
+from sotd.utils.file_io import save_json_data
 
 
 def save_aggregated_data(data: Dict[str, Any], month: str, data_dir: Path) -> None:
@@ -9,12 +10,8 @@ def save_aggregated_data(data: Dict[str, Any], month: str, data_dir: Path) -> No
     output_dir.mkdir(exist_ok=True)
     file_path = output_dir / f"{month}.json"
 
-    # Create temporary file for atomic write
-    temp_path = file_path.with_suffix(".tmp")
-    with temp_path.open("w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-    # Atomic move
-    temp_path.replace(file_path)
+    # Use unified file I/O utilities for atomic write
+    save_json_data(data, file_path, indent=2)
 
 
 def generate_metadata(records: list[dict[str, Any]], month: str) -> Dict[str, Any]:
