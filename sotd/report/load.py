@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Data loading functionality for the report phase."""
 
-import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+from sotd.utils.file_io import load_json_data
 
 
 def get_aggregated_file_path(base_dir: Path, year: int, month: int) -> Path:
@@ -31,14 +32,8 @@ def load_aggregated_data(
     if debug:
         print(f"[DEBUG] Loading aggregated data from: {file_path}")
 
-    if not file_path.exists():
-        raise FileNotFoundError(f"Aggregated data file not found: {file_path}")
-
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            content = json.load(f)
-    except json.JSONDecodeError as e:
-        raise json.JSONDecodeError(f"Invalid JSON in {file_path}: {e}", e.doc, e.pos)
+    # Use unified file I/O utility for loading JSON data
+    content = load_json_data(file_path)
 
     # Validate expected structure
     if not isinstance(content, dict):
