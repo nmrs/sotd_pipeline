@@ -36,9 +36,9 @@ Extend the existing report phase to support annual reports in addition to monthl
 
 ### Overall Project Status
 - **Phase 1 Progress**: ✅ **COMPLETE** - All 5 chunks implemented and all 70 tests passing
-- **Phase 2 Progress**: 2/5 chunks started (Chunk 2.1 complete, 2.2 next)
-- **Total Progress**: ~40% of overall implementation
-- **Next Milestone**: Complete Chunk 2.2 and begin Chunk 2.3 (Annual Report Data Loader)
+- **Phase 2 Progress**: ✅ **COMPLETE** - All 5 chunks implemented and all tests passing
+- **Total Progress**: ~60% of overall implementation
+- **Next Milestone**: Complete Phase 3 (Annual Delta Calculator) and begin Phase 4 (Range Support)
 
 ### Quality Gates
 - **✅ Code Quality**: All new code follows project standards and patterns
@@ -295,19 +295,52 @@ data/
   8. Integration test now covers the complete workflow from data loading through template processing to final report output, verifying all key integration points.
 - **Timestamp:** 2024-06-20T23:45:00
 
-#### Chunk 2.5: Annual Report Integration 🔄 IN PROGRESS
+#### Chunk 2.5: Annual Report Integration ✅ COMPLETE
 - **Objective**: Wire together annual report components
 - **Files**: `sotd/report/annual_run.py`, `tests/report/test_annual_integration.py`
-- **Status**: 🔄 **IN PROGRESS** - Next step after 2.4 completion
+- **Status**: ✅ **COMPLETE** - All 18 integration tests passing as of 2024-06-20T23:10:20
 - **Test Development**:
-  - Test end-to-end annual report generation workflow
-  - Test CLI integration and error flow
-  - Test component interaction and data flow
-  - Test logging and progress reporting
-  - Test error handling across components
-  - Test performance of complete workflow
-  - Test integration with existing report module
-- **Integration**: Extend existing report module
+  - ✅ Test end-to-end annual report generation workflow
+  - ✅ Test CLI integration and error flow
+  - ✅ Test component interaction and data flow
+  - ✅ Test logging and progress reporting
+  - ✅ Test error handling across components
+  - ✅ Test performance of complete workflow
+  - ✅ Test integration with existing report module
+- **Implementation**:
+  - Created `annual_run.py` with `run_annual_report`, `save_annual_report`, and `main` functions
+  - Comprehensive integration tests in `test_annual_integration.py` covering all workflows and error scenarios
+  - Integration follows existing patterns and provides proper error handling and user feedback
+  - All 18 integration tests passing, full suite (1167 tests) passing
+- **Lessons Learned**:
+  1. Error message wrapping in integration layer provides better user experience
+  2. Tests must match actual error handling behavior (wrapped vs unwrapped exceptions)
+  3. Integration tests validate complete workflows from CLI through to file output
+  4. Performance monitoring integration works seamlessly with annual report generation
+- **Technical Decisions**:
+  1. Wrapped original exceptions with descriptive messages for better user experience
+  2. Maintained consistent error handling patterns with existing report module
+  3. Used performance monitoring throughout the workflow
+- **Timestamp:** 2024-06-20T23:10:20
+
+**Status:**
+- **Phase 2 is now COMPLETE.**
+- All 5 chunks (2.1-2.5) are implemented and all tests are PASSING as of 2024-06-20T23:10:20.
+
+**Key Implementation Decisions & Lessons Learned:**
+- Annual report CLI interface supports --annual, --year, --range flags with robust validation
+- Annual template system extends existing templates with annual-specific sections
+- Annual data loader follows consistent patterns with monthly loader for maintainability
+- Annual report generator integrates smoothly with existing template and data loading systems
+- Annual report integration provides complete end-to-end workflow with proper error handling
+- All integration tests validate complete workflows and error scenarios
+- Error message wrapping in integration layer improves user experience while maintaining testability
+- Performance monitoring integration works seamlessly across all components
+
+**Next Steps:**
+- Proceed to Phase 3: Chunk 3.1 (Annual Delta Calculator)
+
+**Timestamp:** 2024-06-20T23:10:20
 
 ### Phase 3: Delta Calculations - Year-over-Year Comparisons
 **Goal**: Add year-over-year delta calculation support with comprehensive testing.
@@ -1124,3 +1157,111 @@ Implementation Requirements:
 - **Performance Tests**: Test performance characteristics
 - **Documentation Tests**: Validate documentation accuracy
 - **Incremental Development**: Build tests incrementally with each feature
+
+## Memory and Resume Prompt for New Chat Sessions
+
+### Current Project Status Memory
+**Project**: SOTD Pipeline - Monthly and Annual Reports Implementation
+**Current Phase**: Phase 2 - Report Generation (Annual Reports Core)
+**Current Chunk**: Chunk 2.5 - Annual Report Integration (NEXT)
+**Overall Progress**: ~60% complete (Phase 1 complete, Phase 2 in progress)
+
+**Completed Work**:
+- ✅ **Phase 1 Complete**: Annual Aggregator Core (5 chunks, 70 tests passing)
+  - Annual CLI, loader, engine, saver, and integration all working
+- ✅ **Phase 2, Chunks 2.1-2.4 Complete**: Annual Report Core (4 chunks)
+  - Annual CLI interface, template system, data loader, and report generator all working
+- 🔄 **Phase 2, Chunk 2.5**: Annual Report Integration (IN PROGRESS - NEXT)
+
+**Key Technical Decisions Made**:
+1. Annual data uses same JSON structure as monthly data for consistency
+2. Template system extended with annual sections (annual_hardware, annual_software)
+3. Error handling follows existing patterns (FileNotFoundError, KeyError, ValueError)
+4. All components follow existing project patterns and naming conventions
+5. Comprehensive test coverage with both unit and integration tests
+
+**Current Test Status**:
+- All 70 annual aggregator tests passing
+- All 232 report tests passing (including new annual tests)
+- All quality checks (format, lint, typecheck) passing for new code
+
+**Next Immediate Task**: Implement Phase 2, Chunk 2.5 - Annual Report Integration
+- Create `sotd/report/annual_run.py` for end-to-end annual report workflow
+- Create `tests/report/test_annual_integration.py` for integration testing
+- Wire together annual generator, loader, and CLI components
+
+### Resume Prompt for New Chat
+
+```text
+I'm working on the SOTD Pipeline project implementing annual reports functionality. Here's where I am:
+
+**Current Status**: Phase 2, Chunk 2.5 - Annual Report Integration (NEXT TASK)
+**Project**: Monthly and Annual Reports TDD Implementation
+**Repository**: /Users/jmoore/Documents/Projects/sotd_pipeline
+
+**What's Been Completed**:
+- Phase 1: Annual Aggregator Core (5 chunks, 70 tests) ✅ COMPLETE
+- Phase 2, Chunks 2.1-2.4: Annual Report Core (4 chunks) ✅ COMPLETE
+  - Annual CLI interface with --annual, --year, --range flags
+  - Annual template system with hardware/software sections
+  - Annual data loader with validation and error handling
+  - Annual report generator with comprehensive test coverage
+
+**Current Task**: Phase 2, Chunk 2.5 - Annual Report Integration
+- Objective: Wire together annual report components into complete system
+- Files: `sotd/report/annual_run.py`, `tests/report/test_annual_integration.py`
+- Status: Ready to implement (all dependencies complete)
+
+**Key Context**:
+- Follow TDD approach: write tests first, implement, refactor
+- All new code must pass quality checks (format, lint, typecheck)
+- Use --force flag for testing pipeline phases
+- Follow existing project patterns and error handling
+- Update plan file after completing each task
+- All tests must pass before considering task complete
+
+**Technical Stack**:
+- Python 3.11, pytest, Black, Ruff, Pyright
+- Existing report phase with monthly functionality
+- Template system with YAML-based templates
+- Data flow: monthly aggregated → annual aggregated → annual reports
+
+**Next Steps After 2.5**:
+- Phase 3: Delta Calculations (year-over-year comparisons)
+- Phase 4: Range Support (multi-year processing)
+- Phase 5: Quality Assurance (comprehensive testing)
+
+Please help me implement Phase 2, Chunk 2.5 - Annual Report Integration following the TDD approach and project standards.
+```
+
+### Project Context for AI Assistant
+
+**Codebase Structure**:
+- Main pipeline phases: fetch, extract, match, enrich, aggregate, report
+- Annual functionality extends existing monthly functionality
+- All new code follows existing patterns and conventions
+- Comprehensive test coverage required for all new functionality
+
+**Development Workflow**:
+1. Write failing tests first (TDD approach)
+2. Implement minimal code to make tests pass
+3. Refactor while keeping tests green
+4. Add more tests for edge cases and error scenarios
+5. Run quality checks before committing
+6. Update plan file with progress and lessons learned
+
+**Quality Standards**:
+- All code must pass `make format lint typecheck`
+- All tests must pass before task completion
+- Follow existing error handling patterns
+- Maintain backward compatibility
+- Use descriptive variable names and clear documentation
+
+**Key Files for Current Task**:
+- `plans/monthly_annual_reports_tdd_plan.mdc` - Implementation plan and progress tracking
+- `sotd/report/annual_generator.py` - Annual report generator (complete)
+- `sotd/report/annual_load.py` - Annual data loader (complete)
+- `sotd/report/cli.py` - Annual CLI interface (complete)
+- `tests/report/test_annual_generator.py` - Annual generator tests (complete)
+
+**Resume Command**: Continue with Phase 2, Chunk 2.5 implementation following TDD approach
