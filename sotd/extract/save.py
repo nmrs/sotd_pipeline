@@ -1,5 +1,13 @@
-import json
+"""
+Save extracted data to JSON files.
+
+This module provides functions to save extraction results to JSON files
+with consistent formatting and structure.
+"""
+
 from pathlib import Path
+
+from sotd.utils.file_io import save_json_data
 
 
 def save_month_file(month: str, result: dict, out_dir: Path = Path("data/extracted")) -> None:
@@ -16,8 +24,6 @@ def save_month_file(month: str, result: dict, out_dir: Path = Path("data/extract
     - out_dir: Directory where the file will be saved
     """
     out_path = out_dir / f"{month}.json"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
 
     print(f"[DEBUG] Saving extraction result to: {out_path}")
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(result, f, indent=2, sort_keys=True, ensure_ascii=False)
+    save_json_data(result, out_path, indent=2)
