@@ -81,7 +81,17 @@ class MismatchAnalyzer(AnalysisTool):
         parser.add_argument(
             "--mark-correct",
             action="store_true",
-            help="Mark displayed matches as correct",
+            help="Mark displayed matches as correct (requires --force for safety)",
+        )
+        parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            help="Preview what would be marked as correct without making changes",
+        )
+        parser.add_argument(
+            "--no-confirm",
+            action="store_true",
+            help="Skip confirmation prompt (use with caution)",
         )
         parser.add_argument(
             "--clear-correct",
@@ -132,6 +142,14 @@ class MismatchAnalyzer(AnalysisTool):
 
         if not args.month:
             self.console.print("[red]Error: --month is required for analysis commands[/red]")
+            return
+
+        # Safety check: require --force when using --mark-correct
+        if args.mark_correct and not args.force:
+            self.console.print("[red]Error: --mark-correct requires --force for safety[/red]")
+            self.console.print(
+                "[yellow]Use --dry-run to preview what would be marked as correct[/yellow]"
+            )
             return
 
         # Load correct matches
@@ -274,10 +292,20 @@ class MismatchAnalyzer(AnalysisTool):
             self.console.print("[yellow]No records found in data[/yellow]")
             return mismatches
 
+        # Sort records by a stable key for deterministic processing order
+        # Use the original text as the primary sort key, with record ID as secondary
+        def record_sort_key(record):
+            field_data = record.get(field, {})
+            original = field_data.get("original", "")
+            record_id = record.get("id", "")
+            return (original.lower(), record_id)
+
+        sorted_records = sorted(records, key=record_sort_key)
+
         # Pre-load catalog patterns to avoid repeated loading
         catalog_patterns = self._load_catalog_patterns(field)
 
-        for record in records:
+        for record in sorted_records:
             field_data = record.get(field)
             if not isinstance(field_data, dict):
                 continue
@@ -409,6 +437,14 @@ class MismatchAnalyzer(AnalysisTool):
     def _save_correct_matches(self) -> None:
         """Save correct matches to file in YAML format."""
         try:
+            # Create backup before modifying
+            if self._correct_matches_file.exists():
+                backup_path = self._correct_matches_file.with_suffix(".yaml.backup")
+                import shutil
+
+                shutil.copy2(self._correct_matches_file, backup_path)
+                self.console.print(f"[dim]Backup created: {backup_path}[/dim]")
+
             # Ensure directory exists
             self._correct_matches_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -686,10 +722,12 @@ class MismatchAnalyzer(AnalysisTool):
         """Group duplicate mismatches and add count information."""
         grouped_mismatches = []
 
-        for mismatch_type, items in mismatches.items():
+        # Sort mismatch types for deterministic order
+        for mismatch_type in sorted(mismatches.keys()):
             if mismatch_type == "exact_matches":
                 continue  # Skip exact matches in mismatch display
 
+            items = mismatches[mismatch_type]
             # Group by the key information that makes a mismatch unique
             groups = {}
 
@@ -711,14 +749,16 @@ class MismatchAnalyzer(AnalysisTool):
                 if source:
                     groups[group_key]["sources"].add(source)
 
-            # Convert groups to list format
-            for group_key, group_info in groups.items():
+            # Convert groups to list format with deterministic sorting
+            for group_key in sorted(groups.keys()):
+                group_info = groups[group_key]
                 original, matched, pattern, reason, mismatch_type = group_key
 
                 # Create a modified item with count information
                 modified_item = group_info["item"].copy()
                 modified_item["count"] = group_info["count"]
-                modified_item["sources"] = list(group_info["sources"])
+                # Sort sources for deterministic order
+                modified_item["sources"] = sorted(list(group_info["sources"]))
                 modified_item["mismatch_type"] = mismatch_type
 
                 grouped_mismatches.append(modified_item)
@@ -814,7 +854,9 @@ class MismatchAnalyzer(AnalysisTool):
 
         # Handle mark-correct functionality
         if getattr(args, "mark_correct", False) and total_mismatches > 0:
-            self._mark_displayed_matches_as_correct(displayed_items, field)
+            self._mark_displayed_matches_as_correct(displayed_items, field, args)
+        elif getattr(args, "dry_run", False) and total_mismatches > 0:
+            self._preview_mark_correct(displayed_items, field, args)
 
     def display_all_matches(
         self, data: Dict, field: str, mismatches: Dict[str, List[Dict]], args
@@ -848,8 +890,17 @@ class MismatchAnalyzer(AnalysisTool):
         limit = getattr(args, "limit", 50)
         records = data.get("data", [])
 
+        # Sort records for deterministic display order
+        def record_sort_key(record):
+            field_data = record.get(field, {})
+            original = field_data.get("original", "")
+            record_id = record.get("id", "")
+            return (original.lower(), record_id)
+
+        sorted_records = sorted(records, key=record_sort_key)
+
         row_number = 1
-        for record in records[:limit]:
+        for record in sorted_records[:limit]:
             field_data = record.get(field)
             if not isinstance(field_data, dict):
                 continue
@@ -898,7 +949,9 @@ class MismatchAnalyzer(AnalysisTool):
 
         # Handle mark-correct functionality for displayed matches only
         if getattr(args, "mark_correct", False) and displayed_matches:
-            self._mark_displayed_matches_as_correct(displayed_matches, field)
+            self._mark_displayed_matches_as_correct(displayed_matches, field, args)
+        elif getattr(args, "dry_run", False) and displayed_matches:
+            self._preview_mark_correct(displayed_matches, field, args)
 
     def _count_filtered_matches(self, data: List[Dict], field: str) -> int:
         """Count how many matches were filtered out by correct matches."""
@@ -944,9 +997,51 @@ class MismatchAnalyzer(AnalysisTool):
             self.console.print("[dim]Use --clear-correct to reset all correct matches[/dim]")
 
     def _mark_displayed_matches_as_correct(
-        self, displayed_matches: List[Dict], field: str = "razor"
+        self, displayed_matches: List[Dict], field: str = "razor", args=None
     ) -> None:
         """Mark only the displayed matches as correct."""
+        if not displayed_matches:
+            self.console.print("[yellow]No matches to mark as correct[/yellow]")
+            return
+
+        # Show confirmation prompt
+        self.console.print(
+            f"\n[bold red]⚠️  WARNING: About to mark {len(displayed_matches)} "
+            f"matches as correct[/bold red]"
+        )
+        self.console.print("[red]This will modify data/correct_matches.yaml[/red]")
+        self.console.print(f"[red]Field: {field}[/red]")
+
+        # Show preview of what will be marked
+        self.console.print("\n[bold]Preview of matches to be marked:[/bold]")
+        for i, match in enumerate(displayed_matches[:5], 1):  # Show first 5
+            if "field_data" in match:
+                original = match["field_data"].get("original", "")
+                matched = match["field_data"].get("matched", {})
+                matched_text = self._get_matched_text(field, matched)
+            else:
+                original = match.get("original", "")
+                matched_text = match.get("matched_text", "")
+            self.console.print(f'  {i}. "{original}" → "{matched_text}"')
+
+        if len(displayed_matches) > 5:
+            self.console.print(f"  ... and {len(displayed_matches) - 5} more")
+
+        # Confirmation prompt
+        if not getattr(args, "no_confirm", False):
+            try:
+                response = input(
+                    "\n[bold]Are you sure you want to mark these as correct? (yes/no): [/bold]"
+                )
+                if response.lower() not in ["yes", "y"]:
+                    self.console.print("[yellow]Operation cancelled[/yellow]")
+                    return
+            except KeyboardInterrupt:
+                self.console.print("\n[yellow]Operation cancelled[/yellow]")
+                return
+        else:
+            self.console.print("[yellow]⚠️  Skipping confirmation prompt (--no-confirm)[/yellow]")
+
         marked_count = 0
 
         for match in displayed_matches:
@@ -984,9 +1079,43 @@ class MismatchAnalyzer(AnalysisTool):
 
         if marked_count > 0:
             self._save_correct_matches()
-            self.console.print(f"[green]Marked {marked_count} displayed matches as correct[/green]")
+            self.console.print(
+                f"[green]✅ Marked {marked_count} displayed matches as correct[/green]"
+            )
+            self.console.print("[green]Updated: data/correct_matches.yaml[/green]")
         else:
             self.console.print("[yellow]No matches to mark as correct[/yellow]")
+
+    def _preview_mark_correct(self, displayed_matches: List[Dict], field: str, args) -> None:
+        """Preview marking correct matches without actually marking them."""
+        if not displayed_matches:
+            self.console.print("[yellow]No matches to preview marking correct[/yellow]")
+            return
+
+        self.console.print(
+            f"\n[bold red]⚠️  WARNING: Previewing marking {len(displayed_matches)} "
+            f"matches as correct for {field}[/bold red]"
+        )
+        self.console.print("[red]This will not modify data/correct_matches.yaml[/red]")
+
+        # Show preview of what would be marked
+        self.console.print("\n[bold]Preview of matches to be marked:[/bold]")
+        for i, match in enumerate(displayed_matches[:5], 1):  # Show first 5
+            if "field_data" in match:
+                original = match["field_data"].get("original", "")
+                matched = match["field_data"].get("matched", {})
+                matched_text = self._get_matched_text(field, matched)
+            else:
+                original = match.get("original", "")
+                matched_text = match.get("matched_text", "")
+            self.console.print(f'  {i}. "{original}" → "{matched_text}"')
+
+        if len(displayed_matches) > 5:
+            self.console.print(f"  ... and {len(displayed_matches) - 5} more")
+
+        self.console.print("\n[dim]Use --mark-correct to mark these matches as correct[/dim]")
+        self.console.print("[dim]Use --show-correct to see previously marked correct matches[/dim]")
+        self.console.print("[dim]Use --clear-correct to reset all correct matches[/dim]")
 
 
 def main(argv: List[str] | None = None) -> None:

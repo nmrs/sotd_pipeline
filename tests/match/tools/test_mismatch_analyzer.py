@@ -4,6 +4,7 @@
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
+import shutil
 
 from sotd.match.tools.mismatch_analyzer import MismatchAnalyzer
 
@@ -36,8 +37,15 @@ class TestMismatchAnalyzer:
         # Clean up temporary files
         if self.temp_correct_matches.exists():
             self.temp_correct_matches.unlink()
+
+        # Clean up backup file if it exists
+        backup_file = self.temp_correct_matches.with_suffix(".yaml.backup")
+        if backup_file.exists():
+            backup_file.unlink()
+
         if self.temp_dir and Path(self.temp_dir).exists():
-            Path(self.temp_dir).rmdir()
+            # Use shutil.rmtree to remove directory and all contents
+            shutil.rmtree(self.temp_dir)
 
     def test_init(self):
         """Test MismatchAnalyzer initialization."""
