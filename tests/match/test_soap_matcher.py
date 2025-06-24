@@ -24,9 +24,64 @@ def soap_matcher_with_mock(mock_correct_matches):
 
 
 @pytest.fixture
-def matcher():
-    """Create a SoapMatcher instance for testing."""
-    return SoapMatcher()
+def matcher(tmp_path):
+    """Create a SoapMatcher instance for testing with temp files."""
+    # Create temp catalog
+    catalog_content = """
+Barrister and Mann:
+  Seville:
+    patterns:
+      - "b&m.*seville"
+      - "barrister.*mann.*seville"
+  Fougère Gothique:
+    patterns:
+      - "fougère.*gothique"
+House of Mammoth:
+  Alive:
+    patterns:
+      - "hom.*alive"
+      - "house.*mammoth.*alive"
+  Tusk:
+    patterns:
+      - "hom.*tusk"
+      - "house.*mammoth.*tusk"
+  Hygge:
+    patterns:
+      - "hom.*hygge"
+      - "house.*mammoth.*hygge"
+  Almond Leather:
+    patterns:
+      - "almond.*leather"
+Noble Otter:
+  'Tis the Season:
+    patterns:
+      - "'tis.*season"
+Strike Gold Shave:
+  Bee's Knees Soap:
+    patterns:
+      - "bee.*knees"
+Southern Witchcrafts:
+  Tres Matres:
+    patterns:
+      - "tres.*matres"
+"""
+    catalog_file = tmp_path / "soaps.yaml"
+    catalog_file.write_text(catalog_content)
+
+    # Create temp correct_matches
+    correct_matches_content = """
+soap:
+  Barrister and Mann:
+    Seville:
+      - "Barrister and Mann - Seville"
+  House of Mammoth:
+    Alive:
+      - "House of Mammoth - Alive"
+"""
+    correct_matches_file = tmp_path / "correct_matches.yaml"
+    correct_matches_file.write_text(correct_matches_content)
+
+    return SoapMatcher(catalog_path=catalog_file)
 
 
 def test_match_exact_scent(soap_matcher_with_mock):

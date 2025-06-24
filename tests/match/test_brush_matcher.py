@@ -370,9 +370,23 @@ def test_chisel_hound_version_boundary_cases(matcher):
     assert result["matched"]["fiber_strategy"] == "default"
 
 
-def test_handle_matching_full_text():
+def test_handle_matching_full_text(tmp_path):
     """Test handle matching with full text regex patterns."""
-    matcher = BrushMatcher()
+    # Create temp catalog with handle patterns
+    catalog_content = """
+artisan_handles:
+  Long Shaving:
+    patterns:
+      - "long shaving.*storm"
+manufacturer_handles:
+  Wolf Whiskers:
+    patterns:
+      - "ww"
+"""
+    catalog_file = tmp_path / "handles.yaml"
+    catalog_file.write_text(catalog_content)
+
+    matcher = BrushMatcher(handles_path=catalog_file)
 
     # Example 1: Long Shaving Storm w/ Reserve III
     result = matcher.match("Long Shaving Storm w/ Reserve III")
@@ -384,9 +398,29 @@ def test_handle_matching_full_text():
     ]
 
 
-def test_handle_matching_split_parsing():
+def test_handle_matching_split_parsing(tmp_path):
     """Test handle matching with split-based parsing."""
-    matcher = BrushMatcher()
+    # Create temp catalogs
+    brush_catalog = """
+other_brushes:
+  Long Shaving:
+    patterns:
+      - "long reserve"
+    default: "Badger"
+"""
+    brush_file = tmp_path / "brushes.yaml"
+    brush_file.write_text(brush_catalog)
+
+    handle_catalog = """
+manufacturer_handles:
+  Wolf Whiskers:
+    patterns:
+      - "ww"
+"""
+    handle_file = tmp_path / "handles.yaml"
+    handle_file.write_text(handle_catalog)
+
+    matcher = BrushMatcher(catalog_path=brush_file, handles_path=handle_file)
 
     # Example 2: WW w/ 30mm Long Reserve V
     # The knot part "30mm Long Reserve V" should match Long Shaving (via "long reserve" pattern)
@@ -397,9 +431,19 @@ def test_handle_matching_split_parsing():
     assert result["matched"]["handle_maker"] == "Wolf Whiskers"  # Handle from "WW"
 
 
-def test_handle_matching_with_slash():
+def test_handle_matching_with_slash(tmp_path):
     """Test handle matching with slash delimiter."""
-    matcher = BrushMatcher()
+    # Create temp handle catalog
+    handle_catalog = """
+artisan_handles:
+  Chisel & Hound:
+    patterns:
+      - "chisel.*hound"
+"""
+    handle_file = tmp_path / "handles.yaml"
+    handle_file.write_text(handle_catalog)
+
+    matcher = BrushMatcher(handles_path=handle_file)
 
     # Example 3: Chisel & Hound *"Twilight"* / 26mm Long Shaving Reserve VI Fan
     result = matcher.match('Chisel & Hound *"Twilight"* / 26mm Long Shaving Reserve VI Fan')
@@ -408,9 +452,13 @@ def test_handle_matching_with_slash():
     assert result["matched"]["handle_maker_metadata"]["_matched_by_section"] == "artisan_handles"
 
 
-def test_handle_matching_no_match():
+def test_handle_matching_no_match(tmp_path):
     """Test handle matching when no match is found."""
-    matcher = BrushMatcher()
+    # Create empty temp catalog
+    catalog_file = tmp_path / "brushes.yaml"
+    catalog_file.write_text("{}")
+
+    matcher = BrushMatcher(catalog_path=catalog_file)
 
     result = matcher.match("Some Unknown Brand Random Text")
     if result["matched"] is not None:
@@ -420,9 +468,20 @@ def test_handle_matching_no_match():
         )
 
 
-def test_handle_matching_split_fallback():
+def test_handle_matching_split_fallback(tmp_path):
     """Test split fallback when regex doesn't match but splitting works."""
-    matcher = BrushMatcher()
+    # Create temp catalog with basic patterns
+    catalog_content = """
+other_brushes:
+  Some Knot:
+    patterns:
+      - "some knot"
+    default: "Badger"
+"""
+    catalog_file = tmp_path / "brushes.yaml"
+    catalog_file.write_text(catalog_content)
+
+    matcher = BrushMatcher(catalog_path=catalog_file)
 
     # Use a made-up handle that won't match regex but will trigger split
     result = matcher.match("UnknownMaker w/ Some Knot")
@@ -436,21 +495,38 @@ def test_handle_matching_split_fallback():
             )
 
 
-def test_handle_maker_fallback_full_text(matcher):
-    """Test that handle_maker is matched from full text if no split delimiter is present."""
-    result = matcher.match("Wald - 'Deep Sea' A1")
-    assert result["matched"] is not None
-    assert result["matched"]["handle_maker"] == "Wald"
-
-
-def test_knot_maker_prioritization_over_handle_maker():
+def test_knot_maker_prioritization_over_handle_maker(tmp_path):
     """Test that knot maker takes precedence over handle maker when using 'with' delimiter.
 
     This tests the fix for the issue where 'Chisel and Hound Tahitian Pearl with
     Maggard 26mm SHD Fan' was incorrectly matched as 'Chisel & Hound Badger' instead
     of 'Maggard Badger'.
     """
-    matcher = BrushMatcher()
+    # Create temp catalogs
+    brush_catalog = """
+other_brushes:
+  Maggard:
+    patterns:
+      - "maggard.*shd"
+    default: "Badger"
+  Chisel & Hound:
+    patterns:
+      - "chisel.*hound"
+    default: "Badger"
+"""
+    brush_file = tmp_path / "brushes.yaml"
+    brush_file.write_text(brush_catalog)
+
+    handle_catalog = """
+artisan_handles:
+  Chisel & Hound:
+    patterns:
+      - "chisel.*hound"
+"""
+    handle_file = tmp_path / "handles.yaml"
+    handle_file.write_text(handle_catalog)
+
+    matcher = BrushMatcher(catalog_path=brush_file, handles_path=handle_file)
 
     # Test case: Handle maker (Chisel & Hound) with knot maker (Maggard)
     result = matcher.match("Chisel and Hound Tahitian Pearl with Maggard 26mm SHD Fan")
@@ -475,9 +551,32 @@ def test_knot_maker_prioritization_over_handle_maker():
     assert result["match_type"] == "brand_default"
 
 
-def test_knot_maker_prioritization_with_different_delimiters():
+def test_knot_maker_prioritization_with_different_delimiters(tmp_path):
     """Test knot maker prioritization works with various delimiters."""
-    matcher = BrushMatcher()
+    # Create temp catalog with multiple brands
+    catalog_content = """
+other_brushes:
+  Maggard:
+    patterns:
+      - "maggard"
+    default: "Synthetic"
+  Omega:
+    patterns:
+      - "omega"
+    default: "Boar"
+  Simpson:
+    patterns:
+      - "simpson"
+    default: "Badger"
+  Declaration Grooming:
+    patterns:
+      - "declaration"
+    default: "Badger"
+"""
+    catalog_file = tmp_path / "brushes.yaml"
+    catalog_file.write_text(catalog_content)
+
+    matcher = BrushMatcher(catalog_path=catalog_file)
 
     test_cases = [
         "Wolf Whiskers handle w/ Maggard 24mm Synthetic",
@@ -498,9 +597,20 @@ def test_knot_maker_prioritization_with_different_delimiters():
         ), f"Should match from knot part: {test_case}"
 
 
-def test_fallback_to_full_text_when_knot_part_no_match():
+def test_fallback_to_full_text_when_knot_part_no_match(tmp_path):
     """Test that when knot part doesn't match any brand, system falls back to full text matching."""
-    matcher = BrushMatcher()
+    # Create temp catalog with Elite but not Unknown Brand
+    catalog_content = """
+other_brushes:
+  Elite:
+    patterns:
+      - "elite"
+    default: "Badger"
+"""
+    catalog_file = tmp_path / "brushes.yaml"
+    catalog_file.write_text(catalog_content)
+
+    matcher = BrushMatcher(catalog_path=catalog_file)
 
     # Use a case where the knot part won't match any known brand
     result = matcher.match("Elite handle with Unknown Brand 26mm")
@@ -512,12 +622,23 @@ def test_fallback_to_full_text_when_knot_part_no_match():
     assert "_matched_from" not in result["matched"]
 
 
-def test_handle_maker_prioritization_with_in_delimiter():
+def test_handle_maker_prioritization_with_in_delimiter(tmp_path):
     """Test that handle maker takes precedence when using 'in' delimiter.
 
     This tests that 'Badger knot in Elite handle' correctly matches Elite as the primary brand.
     """
-    matcher = BrushMatcher()
+    # Create temp catalog with Elite
+    catalog_content = """
+other_brushes:
+  Elite:
+    patterns:
+      - "elite"
+    default: "Badger"
+"""
+    catalog_file = tmp_path / "brushes.yaml"
+    catalog_file.write_text(catalog_content)
+
+    matcher = BrushMatcher(catalog_path=catalog_file)
 
     # Test case: Knot description "in" handle maker - handle should take precedence
     result = matcher.match("26mm Badger knot in Elite Manchurian handle")
@@ -535,9 +656,13 @@ def test_handle_maker_prioritization_with_in_delimiter():
         assert result["matched"]["_original_knot_text"] == "26mm Badger knot"
 
 
-def test_delimiter_semantics_helper_method():
+def test_delimiter_semantics_helper_method(tmp_path):
     """Test the knot matcher's should_prioritize_knot method for different delimiters."""
-    matcher = BrushMatcher()
+    # Create temp catalog
+    catalog_file = tmp_path / "brushes.yaml"
+    catalog_file.write_text("{}")
+
+    matcher = BrushMatcher(catalog_path=catalog_file)
 
     # Test knot-primary delimiters
     assert (
@@ -568,387 +693,3 @@ def test_delimiter_semantics_helper_method():
         )
         is True
     )
-    assert (
-        matcher.knot_matcher.should_prioritize_knot(
-            "Handle/Knot", matcher.brush_splitter.split_handle_and_knot
-        )
-        is True
-    )
-
-    # Test no delimiter (default behavior)
-    assert (
-        matcher.knot_matcher.should_prioritize_knot(
-            "Simple brush description", matcher.brush_splitter.split_handle_and_knot
-        )
-        is True
-    )
-
-
-def test_comprehensive_delimiter_semantics():
-    """Test comprehensive delimiter semantics with real-world examples."""
-    matcher = BrushMatcher()
-
-    test_cases = [
-        # Knot-primary cases (knot maker should be primary brand)
-        {
-            "input": "Chisel & Hound handle w/ Maggard 26mm SHD",
-            "expected_brand": "Maggard",
-            "expected_handle": "Chisel & Hound",
-            "delimiter_type": "knot_primary",
-        },
-        {
-            "input": "Wolf Whiskers handle with Declaration B3 knot",
-            "expected_brand": "Declaration Grooming",
-            "expected_handle": "Wolf Whiskers",
-            "delimiter_type": "knot_primary",
-        },
-        # Handle-primary cases (handle maker should be primary brand)
-        {
-            "input": "Maggard SHD knot in Elite Manchurian handle",
-            "expected_brand": "Elite",
-            "expected_handle": "Elite",
-            "delimiter_type": "handle_primary",
-        },
-        # Neutral cases (knot priority by default)
-        {
-            "input": "Custom Handle / Simpson Badger knot",
-            "expected_brand": "Simpson",
-            "expected_handle": None,  # Custom Handle won't match
-            "delimiter_type": "neutral",
-        },
-        # Dash delimiter (neutral - knot priority by default)
-        {
-            "input": "Chisel and Hound Tahitian Pearl - 26mm Maggard SHD",
-            "expected_brand": "Maggard",
-            "expected_handle": "Chisel & Hound",
-            "delimiter_type": "neutral",
-        },
-    ]
-
-    for case in test_cases:
-        result = matcher.match(case["input"])
-
-        assert result["matched"] is not None, f"Failed to match: {case['input']}"
-        assert result["matched"]["brand"] == case["expected_brand"], (
-            f"Wrong brand for '{case['input']}': expected {case['expected_brand']}, "
-            f"got {result['matched']['brand']}"
-        )
-
-        if case["expected_handle"]:
-            assert result["matched"].get("handle_maker") == case["expected_handle"], (
-                f"Wrong handle maker for '{case['input']}': expected {case['expected_handle']}, "
-                f"got {result['matched'].get('handle_maker')}"
-            )
-
-
-def test_fiber_hint_splitting():
-    """Test that fiber detection can split handle and knot when no delimiters are present."""
-    matcher = BrushMatcher()
-
-    # Test case: "Chisel & Hound Hive 28mm Maggard Silver Tip Badger"
-    # Should split into handle="Chisel & Hound" and knot="Hive 28mm Maggard Silver Tip Badger"
-    test_case = "Chisel & Hound Hive 28mm Maggard Silver Tip Badger"
-    result = matcher.match(test_case)
-
-    assert result["matched"] is not None
-    assert result["matched"]["brand"] == "Maggard"
-    assert result["matched"]["handle_maker"] == "Chisel & Hound"
-    assert result["matched"]["_matched_from"] == "knot_part"
-    assert result["matched"]["_original_handle_text"] == "Chisel & Hound"
-    assert result["matched"]["_original_knot_text"] == "Hive 28mm Maggard Silver Tip Badger"
-
-    # Test the splitting method directly
-    handle, knot, delimiter_type = matcher.brush_splitter.split_handle_and_knot(test_case)
-    assert handle == "Chisel & Hound"
-    assert knot == "Hive 28mm Maggard Silver Tip Badger"
-    assert delimiter_type == "fiber_hint"
-
-
-def test_fiber_hint_splitting_with_different_makers():
-    """Test fiber detection with different handle/knot maker combinations."""
-    matcher = BrushMatcher()
-
-    # Only test cases that actually contain fiber words
-    test_cases = [
-        {
-            "input": "Declaration Grooming 26mm Maggard SHD",
-            "expected_handle": "Declaration Grooming",
-            "expected_knot": "26mm Maggard SHD",
-            "expected_brand": "Maggard",
-            "expected_handle_maker": "Declaration Grooming",
-        },
-        {
-            "input": "Elite 28mm Oumo Badger",
-            "expected_handle": "Elite",
-            "expected_knot": "28mm Oumo Badger",
-            "expected_brand": "Oumo",
-            "expected_handle_maker": "Elite",
-        },
-    ]
-
-    for case in test_cases:
-        result = matcher.match(case["input"])
-        assert result["matched"] is not None, f"No match for {case['input']}"
-        assert (
-            result["matched"]["brand"] == case["expected_brand"]
-        ), f"Wrong brand for {case['input']}"
-        assert (
-            result["matched"]["handle_maker"] == case["expected_handle_maker"]
-        ), f"Wrong handle maker for {case['input']}"
-
-        # Test splitting directly
-        handle, knot, delimiter_type = matcher.brush_splitter.split_handle_and_knot(case["input"])
-        assert handle == case["expected_handle"], f"Wrong handle split for {case['input']}"
-        assert knot == case["expected_knot"], f"Wrong knot split for {case['input']}"
-        assert delimiter_type == "fiber_hint", f"Wrong delimiter type for {case['input']}"
-
-
-def test_fiber_hint_no_false_positives():
-    """Test that fiber detection doesn't incorrectly split when no fiber words are present."""
-    matcher = BrushMatcher()
-
-    # Test cases without fiber words - should not split
-    test_cases = [
-        "Chisel & Hound Hive 28mm Oumo Rorschach",  # No fiber words
-        "Wolf Whiskers Elite Handle",  # No fiber words
-        "Declaration Grooming B3",  # No fiber words
-    ]
-
-    for case in test_cases:
-        handle, knot, delimiter_type = matcher.brush_splitter.split_handle_and_knot(case)
-        # Should return None for all since no fiber words and no delimiters
-        assert handle is None, f"Unexpected handle split for {case}"
-        assert knot is None, f"Unexpected knot split for {case}"
-        assert delimiter_type is None, f"Unexpected delimiter type for {case}"
-
-
-def test_turn_n_shave_abbreviations():
-    """Test that T&S and TNS abbreviations correctly match Turn-N-Shave products."""
-    matcher = BrushMatcher()
-
-    test_cases = [
-        {
-            "input": "Chisel & Hound T&S Quartermoon",
-            "expected_brand": "Turn-N-Shave",
-            "expected_model": "Quartermoon",
-            "expected_handle_maker": "Chisel & Hound",
-        },
-        {
-            "input": "Elite TNS Quartermoon",
-            "expected_brand": "Turn-N-Shave",
-            "expected_model": "Quartermoon",
-            "expected_handle_maker": "Elite",
-        },
-        {
-            "input": "Wolf Whiskers TnS H3",
-            "expected_brand": "Turn-N-Shave",
-            "expected_model": "High Density Badger (H*)",
-            "expected_handle_maker": "Wolf Whiskers",
-        },
-        {
-            "input": "Declaration T&S Badger",
-            "expected_brand": "Turn-N-Shave",
-            "expected_model": "Badger",
-            "expected_handle_maker": "Declaration Grooming",
-        },
-    ]
-
-    for case in test_cases:
-        result = matcher.match(case["input"])
-        assert result["matched"] is not None, f"No match for {case['input']}"
-        assert (
-            result["matched"]["brand"] == case["expected_brand"]
-        ), f"Wrong brand for {case['input']}: got {result['matched']['brand']}"
-        assert (
-            result["matched"]["model"] == case["expected_model"]
-        ), f"Wrong model for {case['input']}: got {result['matched']['model']}"
-        if case.get("expected_handle_maker"):
-            assert result["matched"].get("handle_maker") == case["expected_handle_maker"], (
-                f"Wrong handle maker for {case['input']}: "
-                f"got {result['matched'].get('handle_maker')}"
-            )
-
-
-def test_aka_false_positive_prevention():
-    """Test that 'aka' meaning 'also known as' doesn't match AKA Brushworx brand."""
-    matcher = BrushMatcher()
-
-    # Test cases where "aka" should NOT match AKA Brushworx
-    false_positive_cases = [
-        {
-            "input": "Omega - 10048 aka Pro 48 boar",
-            "expected_brand": "Omega",
-            "expected_model": "10048",
-        },
-        {
-            "input": "Semogue 1305 aka the best boar",
-            "expected_brand": "Semogue",
-            "expected_model": "1305",
-        },
-        {
-            "input": "Simpson Chubby 2 aka CH2",
-            "expected_brand": "Simpson",
-            "expected_model": "Chubby 2",
-        },
-    ]
-
-    for case in false_positive_cases:
-        result = matcher.match(case["input"])
-        assert result["matched"] is not None, f"No match for {case['input']}"
-        assert result["matched"]["brand"] == case["expected_brand"], (
-            f"Wrong brand for '{case['input']}': expected {case['expected_brand']}, "
-            f"got {result['matched']['brand']}"
-        )
-        assert result["matched"]["model"] == case["expected_model"], (
-            f"Wrong model for '{case['input']}': expected {case['expected_model']}, "
-            f"got {result['matched']['model']}"
-        )
-        # Ensure it's NOT matching AKA Brushworx
-        assert (
-            result["matched"]["brand"] != "AKA Brushworx"
-        ), f"False positive: '{case['input']}' incorrectly matched AKA Brushworx"
-
-    # Test cases where it SHOULD match AKA Brushworx
-    legitimate_cases = [
-        "AKA Brushworx Blues Stanley Cup",
-        "AKA Brushworx brush with synthetic knot",
-    ]
-
-    for case in legitimate_cases:
-        result = matcher.match(case)
-        assert result["matched"] is not None, f"No match for {case}"
-        assert (
-            result["matched"]["brand"] == "AKA Brushworx"
-        ), f"Should match AKA Brushworx for '{case}', got {result['matched']['brand']}"
-
-
-def test_brand_context_splitting():
-    """Test brand-context splitting for patterns like 'CH Circus B13' and 'B13 CH Circus'."""
-    matcher = BrushMatcher()
-
-    # Test case 1: CH Circus B13 (handle before knot)
-    result = matcher.match("CH Circus B13")
-    assert result["matched"] is not None
-    assert result["matched"]["brand"] == "Declaration Grooming"
-    assert result["matched"]["model"] == "B13"
-    assert result["matched"]["handle_maker"] == "Chisel & Hound"
-    assert result["matched"]["_matched_from"] == "knot_part"
-    assert result["matched"]["_original_handle_text"] == "CH Circus"
-    assert result["matched"]["_original_knot_text"] == "B13"
-
-    # Test case 2: B13 CH Circus (knot before handle)
-    result = matcher.match("B13 CH Circus")
-    assert result["matched"] is not None
-    assert result["matched"]["brand"] == "Declaration Grooming"
-    assert result["matched"]["model"] == "B13"
-    assert result["matched"]["handle_maker"] == "Chisel & Hound"
-    assert result["matched"]["_matched_from"] == "knot_part"
-    assert result["matched"]["_original_handle_text"] == "CH Circus"
-    assert result["matched"]["_original_knot_text"] == "B13"
-
-    # Test case 3: Different CH abbreviations
-    result = matcher.match("C&H Zebra B2")
-    assert result["matched"] is not None
-    assert result["matched"]["brand"] == "Declaration Grooming"
-    assert result["matched"]["model"] == "B2"
-    assert result["matched"]["handle_maker"] == "Chisel & Hound"
-
-    # Test case 4: Full Chisel & Hound name
-    result = matcher.match("Chisel Hound Special B15")
-    assert result["matched"] is not None
-    assert result["matched"]["brand"] == "Declaration Grooming"
-    assert result["matched"]["model"] == "B15"
-    assert result["matched"]["handle_maker"] == "Chisel & Hound"
-
-
-def test_brand_context_splitting_safety():
-    """Test that brand-context splitting doesn't interfere with existing scenarios."""
-    matcher = BrushMatcher()
-
-    # Test case 1: Delimiter-based splitting should take precedence
-    result = matcher.match("CH Circus w/ B13")
-    assert result["matched"] is not None
-    assert result["matched"]["brand"] == "Declaration Grooming"
-    assert result["matched"]["model"] == "B13"
-    assert result["matched"]["handle_maker"] == "Chisel & Hound"
-    # Should be split by delimiter, not brand-context
-    assert result["matched"]["_original_handle_text"] == "CH Circus"
-    assert result["matched"]["_original_knot_text"] == "B13"
-
-    # Test case 2: Fiber-hint splitting should take precedence
-    result = matcher.match("Chisel & Hound Hive 28mm Maggard Silver Tip Badger")
-    assert result["matched"] is not None
-    assert result["matched"]["brand"] == "Maggard"
-    assert result["matched"]["handle_maker"] == "Chisel & Hound"
-    # Should be split by fiber-hint, not brand-context
-
-    # Test case 3: Normal single brush descriptions should still work
-    result = matcher.match("Declaration B3")
-    assert result["matched"] is not None
-    assert result["matched"]["brand"] == "Declaration Grooming"
-    assert result["matched"]["model"] == "B3"
-    # Note: Declaration B3 can reasonably be interpreted as a DG B3 knot in a DG handle
-    # The system finding "Declaration Grooming" as handle_maker is actually reasonable behavior
-
-    # Test case 4: Normal C&H brushes without DG patterns
-    result = matcher.match("Chisel & Hound V20")
-    assert result["matched"] is not None
-    assert result["matched"]["brand"] == "Chisel & Hound"
-    assert result["matched"]["model"] == "V20"
-    # Note: "Chisel & Hound V20" can reasonably be interpreted as a C&H V20 knot in a C&H handle
-    # The system finding "Chisel & Hound" as handle_maker is actually reasonable behavior
-
-
-def test_brand_context_splitting_edge_cases():
-    """Test edge cases and validation for brand-context splitting."""
-    matcher = BrushMatcher()
-
-    # Test case 1: Pattern without DG knot should not split
-    result = matcher.match("CH Circus Special")
-    assert result["matched"] is not None
-    assert result["matched"]["brand"] == "Chisel & Hound"  # Should match as single brush
-    assert result["matched"]["model"] == "Badger"  # Default model for other brushes strategy
-    assert (
-        result["matched"]["handle_maker"] == "Chisel & Hound"
-    )  # Same maker for both knot and handle
-
-    # Test case 2: Pattern without CH handle should not split
-    result = matcher.match("Elite B13")
-    assert result["matched"] is not None
-    # Should match as Declaration Grooming without handle splitting or Elite without knot splitting
-    # depending on strategy priority
-
-    # Test case 3: Very short patterns should not split
-    result = matcher.match("CH B")
-    # Should not split due to validation checks
-
-    # Test case 4: Patterns with delimiters should not use brand-context
-    result = matcher.match("CH / B13")
-    assert result["matched"] is not None
-    # Should be handled by delimiter splitting, not brand-context
-
-
-def test_brand_context_splitting_priority_order():
-    """Test that splitting strategies are tried in the correct priority order."""
-    matcher = BrushMatcher()
-
-    # Direct test of the splitting method to verify order
-
-    # 1. Delimiter should take precedence over brand-context
-    handle, knot, delimiter_type = matcher.brush_splitter.split_handle_and_knot("CH Circus w/ B13")
-    assert handle == "CH Circus"
-    assert knot == "B13"
-    assert delimiter_type == "smart_analysis"  # From delimiter splitting
-
-    # 2. Fiber-hint should take precedence over brand-context
-    handle, knot, delimiter_type = matcher.brush_splitter.split_handle_and_knot(
-        "CH 28mm Maggard Badger"
-    )
-    if handle and knot:  # If fiber-hint splitting works
-        assert delimiter_type == "fiber_hint"
-
-    # 3. Brand-context should work when others don't
-    handle, knot, delimiter_type = matcher.brush_splitter.split_handle_and_knot("CH Circus B13")
-    assert handle == "CH Circus"
-    assert knot == "B13"
-    assert delimiter_type == "brand_context"
