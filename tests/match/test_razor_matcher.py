@@ -166,3 +166,80 @@ class TestRazorMatcher:
         assert result["matched"] is None
         assert result["pattern"] is None
         assert result["match_type"] is None
+
+
+def test_correct_matches_priority_before_regex(tmp_path):
+    """Test that correct matches are checked before regex patterns."""
+    # Create a test catalog with a regex pattern that would match
+    catalog_content = """
+Karve:
+  Christopher Bradley:
+    patterns:
+      - "karve.*cb"
+    format: "DE"
+"""
+    catalog_file = tmp_path / "razors.yaml"
+    catalog_file.write_text(catalog_content)
+
+    # Create a correct_matches.yaml with a different match for the same input
+    correct_matches_content = """
+razor:
+  Karve:
+    Christopher Bradley:
+      - "Karve CB"
+"""
+    correct_matches_file = tmp_path / "correct_matches.yaml"
+    correct_matches_file.write_text(correct_matches_content)
+
+    # Create matcher with test files
+    matcher = RazorMatcher(catalog_path=catalog_file)
+
+    # Test that the input matches the correct_matches entry, not the regex
+    result = matcher.match("Karve CB")
+
+    # Should match from correct_matches (exact match)
+    assert result["matched"] is not None
+    assert result["matched"]["brand"] == "Karve"
+    assert result["matched"]["model"] == "Christopher Bradley"
+    assert result["match_type"] == "exact"
+    assert result["pattern"] is None  # No pattern used for correct matches
+
+
+def test_regex_fallback_when_not_in_correct_matches(tmp_path):
+    """Test that regex patterns are used when input is not in correct_matches."""
+    # Create a test catalog with a regex pattern
+    catalog_content = """
+Karve:
+  Christopher Bradley:
+    patterns:
+      - "karve.*cb"
+    format: "DE"
+"""
+    catalog_file = tmp_path / "razors.yaml"
+    catalog_file.write_text(catalog_content)
+
+    # Create a correct_matches.yaml with a different entry
+    correct_matches_content = """
+razor:
+  Other:
+    Different:
+      - "Different Razor"
+"""
+    correct_matches_file = tmp_path / "correct_matches.yaml"
+    correct_matches_file.write_text(correct_matches_content)
+
+    # Create matcher with test files
+    matcher = RazorMatcher(catalog_path=catalog_file)
+
+    # Patch the correct_matches to use our test file
+    matcher.correct_matches = {"Other": {"Different": ["Different Razor"]}}
+
+    # Test that the input matches via regex since it's not in correct_matches
+    result = matcher.match("Karve CB")
+
+    # Should match from regex patterns
+    assert result["matched"] is not None
+    assert result["matched"]["brand"] == "Karve"
+    assert result["matched"]["model"] == "Christopher Bradley"
+    assert result["match_type"] == "regex"
+    assert result["pattern"] is not None  # Pattern should be used for regex matches
