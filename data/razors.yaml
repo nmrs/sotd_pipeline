@@ -1,6 +1,6 @@
 3D Printed:
-  ? ''
-  : patterns:
+  DE:
+    patterns:
     - 3d
 Above the Tie:
   H1:
@@ -187,6 +187,11 @@ Blackland:
     patterns:
     - (?:blackland)?.*sabre
     - (?:blackland)?.*saber
+  Sabre V2:
+    format: GEM
+    patterns:
+    - (?:blackland)?.*sabre.*v2
+    - (?:blackland)?.*saber.*v2
   Tradere:
     patterns:
     - (?:blackland)?.*tradere
@@ -393,11 +398,11 @@ Dovo:
   Shavette:
     format: Shavette
     patterns:
-    - '^(?!.*straight).*dovo(?:\s+shavette)*'
+    - dovo.*shavette
   Straight:
     format: Straight
     patterns:
-    - '^(?!.*shavette).*dovo(?:\s+straight)*'
+    - dovo.*(straight|\d{1,2}/(8|16)|ground)
 DublDuck:
   Hair Shaper:
     format: Shavette (Hair Shaper)
@@ -616,6 +621,11 @@ GEM:
     patterns:
     - gem.*damas
     - damaskeene
+  Damaskeene OC:
+    format: GEM
+    patterns:
+    - gem.*damas.*(oc|open.*comb)
+    - damaskeene.*(oc|open.*comb)
   Featherweight:
     format: GEM
     patterns:
@@ -794,7 +804,7 @@ Grand Shave King:
 Greencult:
   GC 2.0:
     patterns:
-    - GC.*2
+    - \bGC\b.*2\b
     - green.*cult
 Gutche:
   A77 Shavette:
@@ -940,13 +950,13 @@ Koraat:
     format: Straight
     grind: Full Hollow
     patterns:
-    - koraat.*moarteen
+    - koraat.*moarteen(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     point: Square
     width: 15/16
   Straight:
     format: Straight
     patterns:
-    - 'koraat'
+    - koraat.*(\d{1,2}/(8|16))?
     - ^ko\b
 Krect:
   Spiral Slant:
@@ -1189,6 +1199,10 @@ Other:
     - hess.*ezy
     - hair.*sha
     - marianna
+  Kamisori:
+    format: Straight
+    patterns:
+    - kamisori
   Straight Razor:
     format: Straight
     patterns:
@@ -1218,7 +1232,6 @@ Other:
     - hero.*germany
     - hollow
     - 'joseph\s*(elliot|allen)'
-    - kamisori
     - leger
     - le grelot
     - le thiernois
@@ -1637,6 +1650,10 @@ Schick:
     format: Shavette
     patterns:
     - schick.*kami
+  Dermaplaner:
+    format: Shavette (Disposable)
+    patterns:
+    - schick.*dermaplaner
   Eversharp:
     format: Injector
     patterns:
@@ -1697,7 +1714,7 @@ Spornette:
   Hair Shaper:
     format: Shavette (Hair Shaper)
     patterns:
-    - spo|ernette
+    - sp(o|e)rnette
 Standard Razors:
   Aluminum Series:
     patterns:
@@ -1784,8 +1801,8 @@ Tedalus:
   Essence Shavette:
     format: Shavette
     patterns:
-    - tedalus
-  Velocity-ONE:
+    - tedalus.*(essence|shavette)?
+  Velocity-ONE: 
     patterns:
     - tedal.*velo
 The Holy Black:
@@ -2013,6 +2030,9 @@ Yaqi:
   Slant:
     patterns:
     - yaqi.*slant
+  Slant 37:
+    patterns:
+    - yaqi.*slant 37\b
   Slope:
     patterns:
     - yaqi slope

@@ -1,12 +1,13 @@
 import re
 from pathlib import Path
+from typing import Any, Dict
 
-from sotd.match.base_matcher import BaseMatcher
+from .base_matcher import BaseMatcher, MatchType
 
 
 class RazorMatcher(BaseMatcher):
     def __init__(self, catalog_path: Path = Path("data/razors.yaml")):
-        super().__init__(catalog_path)
+        super().__init__(catalog_path, "razor")
         self.patterns = self._compile_patterns()
 
     def _compile_patterns(self):
@@ -21,24 +22,26 @@ class RazorMatcher(BaseMatcher):
                     )
         return sorted(compiled, key=lambda x: len(x[3]), reverse=True)
 
-    def match(self, value: str) -> dict:
+    def _match_with_regex(self, value: str) -> Dict[str, Any]:
+        """Match using regex patterns with REGEX match type."""
         original = value
-        if not isinstance(value, str):
+        normalized = self.normalize(value)
+        if not normalized:
             return {
                 "original": original,
                 "matched": None,
                 "pattern": None,
-                "match_type": None,
+                "match_type": None,  # Keep None for backward compatibility
             }
 
-        normalized = value.strip()
+        razor_text = normalized
 
         for brand, model, fmt, raw_pattern, compiled, entry in self.patterns:
-            if compiled.search(normalized):
+            if compiled.search(razor_text):
                 # Start with basic match data
                 matched_data = {
                     "brand": brand,
-                    "model": model,
+                    "model": str(model),  # Ensure model is always a string
                     "format": fmt,
                 }
 
@@ -52,12 +55,12 @@ class RazorMatcher(BaseMatcher):
                     "original": original,
                     "matched": matched_data,
                     "pattern": raw_pattern,
-                    "match_type": "exact",
+                    "match_type": MatchType.REGEX,
                 }
 
         return {
             "original": original,
             "matched": None,
             "pattern": None,
-            "match_type": None,
+            "match_type": None,  # Keep None for backward compatibility
         }

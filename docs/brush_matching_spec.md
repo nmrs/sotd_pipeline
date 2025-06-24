@@ -11,18 +11,50 @@ A single `brush` string provided by the extraction phase. This string may contai
 - Complex handle/knot combinations: `"DG B15 w/ C&H Zebra"`
 - Mixed specifications: `"Elite 26mm Boar handle w/ Declaration B10"`
 
+## Matching Priority Order
+
+1. **Correct Matches File**: If the input matches an entry in `data/correct_matches.yaml`, it is prioritized. The match result will have `match_type: exact` and will include all catalog fields for the matched brush.
+2. **Regex Patterns**: If not found in the correct matches file, regex patterns from the YAML catalogs are used. These matches have `match_type: regex` and also include all catalog fields.
+3. **Fallbacks**: Brand/alias/other fallback strategies as before.
+
+## Output Structure
+
+```python
+{
+    "original": "input_string",
+    "matched": {
+        "brand": str | None,
+        "model": str | None, 
+        "fiber": str | None,
+        "knot_size_mm": float | None,
+        "handle_maker": str | None,
+        ... # all catalog fields preserved
+    } | None,
+    "match_type": "exact|regex|alias|brand|fiber|knot|artisan|unmatched" | None,
+    "pattern": str | None
+}
+```
+
+## Integration with correct_matches.yaml
+
+- The file `data/correct_matches.yaml` contains manually confirmed brush matches.
+- If a brush string matches an entry in this file, it is matched directly, and all catalog fields are included in the output.
+- This takes precedence over all regex and fallback strategies.
+- The `match_type` will be `exact` for these matches.
+
 ## Architecture
 
 The system uses a **Strategy Pattern** with multiple specialized matching strategies tried in priority order, combined with intelligent handle/knot splitting and content analysis.
 
 ### Strategy Priority Order (Most to Least Specific)
 
-1. **KnownBrushMatchingStrategy** - Exact catalog matches from `known_brushes` section
-2. **DeclarationGroomingBrushMatchingStrategy** - DG-specific patterns with smart brand detection
-3. **ChiselAndHoundBrushMatchingStrategy** - C&H versioned knots (V10-V27)
-4. **OmegaSemogueBrushMatchingStrategy** - Omega/Semogue brand patterns
-5. **ZenithBrushMatchingStrategy** - Zenith brand patterns  
-6. **OtherBrushMatchingStrategy** - Generic brand patterns from `other_brushes` section
+1. **Correct Matches File** (see above)
+2. **KnownBrushMatchingStrategy** - Exact catalog matches from `known_brushes` section
+3. **DeclarationGroomingBrushMatchingStrategy** - DG-specific patterns with smart brand detection
+4. **ChiselAndHoundBrushMatchingStrategy** - C&H versioned knots (V10-V27)
+5. **OmegaSemogueBrushMatchingStrategy** - Omega/Semogue brand patterns
+6. **ZenithBrushMatchingStrategy** - Zenith brand patterns  
+7. **OtherBrushMatchingStrategy** - Generic brand patterns from `other_brushes` section
 
 ## Intelligent Handle/Knot Splitting
 

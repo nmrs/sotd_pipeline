@@ -55,7 +55,16 @@ def save_phase_output(data: dict, output_path: Path, phase_name: str):
 - Normalize product names consistently across phases
 - Use strategy pattern for complex matching scenarios
 - Cache compiled regex patterns and loaded catalogs
+- **Matching Priority:**
+    1. Check `data/correct_matches.yaml` for confirmed matches (match_type: exact)
+    2. If not found, use regex patterns from YAML catalogs (match_type: regex)
+    3. Fallbacks (brand, alias, etc.) as needed
 - **Preserve all catalog specifications**: Matchers must include all fields from YAML catalog entries (e.g., straight razor grind, width, point type) in match output, not just basic brand/model/format fields
+- The `match_type` field in match output indicates the source of the match:
+    - `exact`: From correct_matches.yaml (manually confirmed)
+    - `regex`: From regex pattern in YAML catalog
+    - `alias`, `brand`, etc.: Fallback strategies
+    - `None`: Unmatched
 
 ## YAML Catalog Structure
 Maintain consistent structure in product catalogs:

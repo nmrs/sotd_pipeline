@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from unittest.mock import patch
 
 from sotd.match.brush_matcher import BrushMatcher
 
@@ -61,6 +62,23 @@ def test_catalog():
 
 
 @pytest.fixture
+def mock_correct_matches():
+    """Mock correct matches data for testing."""
+    return {"Simpson": {"Chubby 2": ["Simpson Chubby 2"]}}
+
+
+@pytest.fixture
+def brush_matcher_with_mock(mock_correct_matches, test_catalog):
+    """Create a BrushMatcher with mocked correct matches and catalog."""
+    with (
+        patch.object(BrushMatcher, "_load_correct_matches", return_value=mock_correct_matches),
+        patch.object(BrushMatcher, "_load_catalog", return_value=test_catalog),
+    ):
+        matcher = BrushMatcher()
+        return matcher
+
+
+@pytest.fixture
 def matcher(tmp_path, test_catalog):
     """Create BrushMatcher with test catalog"""
     catalog_file = tmp_path / "test_brushes.yaml"
@@ -70,9 +88,9 @@ def matcher(tmp_path, test_catalog):
     return BrushMatcher(catalog_path=catalog_file)
 
 
-def test_brush_matcher_known_brush_match(matcher):
+def test_brush_matcher_known_brush_match(brush_matcher_with_mock):
     """Test matching against known_brushes section"""
-    result = matcher.match("Simpson Chubby 2")
+    result = brush_matcher_with_mock.match("Simpson Chubby 2")
 
     assert result["original"] == "Simpson Chubby 2"
     assert result["matched"] is not None
@@ -82,7 +100,7 @@ def test_brush_matcher_known_brush_match(matcher):
     assert result["matched"]["knot_size_mm"] == 27
     assert result["matched"]["fiber_strategy"] == "yaml"
     assert result["match_type"] == "exact"
-    assert result["pattern"] is not None
+    assert result["pattern"] is None
 
 
 def test_brush_matcher_declaration_grooming_match(matcher):

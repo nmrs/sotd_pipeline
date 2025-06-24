@@ -179,8 +179,12 @@ class BaseCLIParser(argparse.ArgumentParser):
         """Validate parsed arguments."""
         # Special case: --list-months and --audit can work without date arguments
         # These are utility operations that don't require date ranges
-        has_primary_date = bool(args.month or args.year or args.range)
-        has_start_end = bool(args.start or args.end)
+        has_primary_date = bool(
+            getattr(args, "month", None)
+            or getattr(args, "year", None)
+            or getattr(args, "range", None)
+        )
+        has_start_end = bool(getattr(args, "start", None) or getattr(args, "end", None))
 
         if (
             hasattr(args, "list_months")
@@ -209,7 +213,7 @@ class BaseCLIParser(argparse.ArgumentParser):
             return args
 
         # Validate start/end pair
-        if (args.start is not None) != (args.end is not None):
+        if (getattr(args, "start", None) is not None) != (getattr(args, "end", None) is not None):
             self.error("Both --start and --end must be provided together")
 
         return args

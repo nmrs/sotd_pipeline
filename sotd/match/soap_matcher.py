@@ -2,18 +2,17 @@ import difflib
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from rich.console import Console
 from rich.table import Table
 
-from sotd.match.base_matcher import BaseMatcher
-from sotd.utils.yaml_loader import load_yaml_with_nfc
+from .base_matcher import BaseMatcher, MatchType
 
 
 class SoapMatcher(BaseMatcher):
     def __init__(self, catalog_path: Path = Path("data/soaps.yaml")):
-        super().__init__(catalog_path)
+        super().__init__(catalog_path, "soap")
         self.scent_patterns, self.brand_patterns = self._compile_patterns()
 
     def _is_sample(self, text: str) -> bool:
@@ -53,9 +52,6 @@ class SoapMatcher(BaseMatcher):
         text = self._strip_surrounding_punctuation(text)
         return text
 
-    def _load_catalog(self):
-        return load_yaml_with_nfc(self.catalog_path)
-
     def _compile_patterns(self):
         scent_compiled = []
         brand_compiled = []
@@ -91,7 +87,8 @@ class SoapMatcher(BaseMatcher):
         brand_compiled = sorted(brand_compiled, key=lambda x: len(x["pattern"]), reverse=True)
         return scent_compiled, brand_compiled
 
-    def match(self, value: str) -> dict:
+    def _match_with_regex(self, value: str) -> Dict[str, Any]:
+        """Match using regex patterns with REGEX match type."""
         original = value
         normalized = re.sub(r"^[*_~]+|[*_~]+$", "", value.strip()) if isinstance(value, str) else ""
 
@@ -100,14 +97,17 @@ class SoapMatcher(BaseMatcher):
 
         result = self._match_scent_pattern(original, normalized)
         if result:
+            result["match_type"] = "regex"
             return result
 
         result = self._match_brand_pattern(original, normalized)
         if result:
+            result["match_type"] = "brand"
             return result
 
         result = self._match_dash_split(original, normalized)
         if result:
+            result["match_type"] = "alias"
             return result
 
         return self._no_match_result(original)
@@ -119,7 +119,7 @@ class SoapMatcher(BaseMatcher):
                     "original": original,
                     "matched": {"maker": pattern_info["maker"], "scent": pattern_info["scent"]},
                     "pattern": pattern_info["pattern"],
-                    "match_type": "exact",
+                    "match_type": MatchType.REGEX,  # Will be overridden by caller
                     "is_sample": self._is_sample(original),
                 }
         return None
@@ -138,7 +138,7 @@ class SoapMatcher(BaseMatcher):
                     "original": original,
                     "matched": {"maker": pattern_info["maker"], "scent": remainder},
                     "pattern": pattern_info["pattern"],
-                    "match_type": "brand_fallback",
+                    "match_type": MatchType.BRAND,  # Will be overridden by caller
                     "is_sample": self._is_sample(original),
                 }
         return None
@@ -155,7 +155,7 @@ class SoapMatcher(BaseMatcher):
                     "original": original,
                     "matched": {"maker": brand_guess, "scent": scent_guess},
                     "pattern": None,
-                    "match_type": "split_fallback",
+                    "match_type": MatchType.ALIAS,  # Will be overridden by caller
                     "is_sample": self._is_sample(original),
                 }
         return None
@@ -168,9 +168,61 @@ class SoapMatcher(BaseMatcher):
             "original": original,
             "matched": None,
             "pattern": None,
-            "match_type": None,
+            "match_type": None,  # Keep None for backward compatibility
             "is_sample": self._is_sample(original),
         }
+
+    def match(self, value: str) -> dict:
+        """
+        Main orchestration method for soap matching.
+        Ensures 'maker' and 'scent' are always present in the 'matched' dict for all match types.
+        """
+        if not isinstance(value, str):
+            return self._no_match_result(value)
+
+        # Use parent's match method which checks correct matches first
+        result = super().match(value)
+
+        # Ensure required fields are present
+        if result and result.get("matched"):
+            if "maker" not in result["matched"]:
+                result["matched"]["maker"] = None
+            if "scent" not in result["matched"]:
+                result["matched"]["scent"] = None
+        return result
+
+    def _check_correct_matches(self, value: str) -> Optional[Dict[str, Any]]:
+        """
+        Check if value matches any correct matches entry.
+
+        Returns match data if found, None otherwise.
+        """
+        if not value or not self.correct_matches:
+            return None
+
+        normalized_value = self.normalize(value)
+        if not normalized_value:
+            return None
+
+        # Search through correct matches structure
+        for maker, maker_data in self.correct_matches.items():
+            if not isinstance(maker_data, dict):
+                continue
+
+            for scent, strings in maker_data.items():
+                if not isinstance(strings, list):
+                    continue
+
+                # Check if normalized value matches any of the correct strings
+                for correct_string in strings:
+                    if self.normalize(correct_string) == normalized_value:
+                        # Return match data in the expected format for soaps
+                        return {
+                            "maker": maker,
+                            "scent": scent,
+                        }
+
+        return None
 
 
 # --- Utility analysis function ---

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import yaml
 
@@ -25,6 +25,9 @@ from sotd.match.brush_splitter_enhanced import EnhancedBrushSplitter
 from sotd.match.fiber_processor_enhanced import FiberProcessorEnhanced
 from sotd.match.handle_matcher_enhanced import EnhancedHandleMatcher
 from sotd.match.knot_matcher_enhanced import EnhancedKnotMatcher
+from sotd.utils.yaml_loader import load_yaml_with_nfc
+
+from .base_matcher import MatchType
 
 
 class BrushMatcher:
@@ -43,6 +46,7 @@ class BrushMatcher:
         self.catalog_path = catalog_path
         self.handles_path = handles_path
         self.catalog_data = self._load_catalog(catalog_path)
+        self.correct_matches = self._load_correct_matches()
 
         # Initialize specialized components
         self.handle_matcher = EnhancedHandleMatcher(handles_path)
@@ -68,24 +72,112 @@ class BrushMatcher:
         except (FileNotFoundError, yaml.YAMLError):
             return {}
 
+    def _load_correct_matches(self) -> Dict[str, Dict[str, Any]]:
+        """Load correct matches for brush field from correct_matches.yaml."""
+        correct_matches_path = Path("data/correct_matches.yaml")
+        if not correct_matches_path.exists():
+            return {}
+
+        try:
+            data = load_yaml_with_nfc(correct_matches_path)
+            return data.get("brush", {})
+        except Exception:
+            # If correct matches file is corrupted or can't be loaded, continue without it
+            return {}
+
+    def _check_correct_matches(self, value: str) -> Optional[Dict[str, Any]]:
+        """
+        Check if value matches any correct matches entry.
+
+        Returns match data if found, None otherwise.
+        """
+        if not value or not self.correct_matches:
+            return None
+
+        normalized_value = self._normalize_for_comparison(value)
+        if not normalized_value:
+            return None
+
+        # Search through correct matches structure
+        for brand, brand_data in self.correct_matches.items():
+            if not isinstance(brand_data, dict):
+                continue
+
+            for model, strings in brand_data.items():
+                if not isinstance(strings, list):
+                    continue
+
+                # Check if normalized value matches any of the correct strings
+                for correct_string in strings:
+                    normalized_correct = self._normalize_for_comparison(correct_string)
+                    if normalized_correct == normalized_value:
+                        # Return match data in the expected format
+                        return {
+                            "brand": brand,
+                            "model": model,
+                        }
+
+        return None
+
+    def _normalize_for_comparison(self, value: str) -> Optional[str]:
+        """Normalize a string for comparison."""
+        if not isinstance(value, str):
+            return None
+        return value.strip().lower()
+
     def match(self, value: str) -> dict:
         """
         Main orchestration method for brush matching.
 
         Coordinates the matching workflow by:
-        1. Splitting input into handle and knot components
-        2. Determining matching priority based on delimiter semantics
-        3. Attempting priority-based matching strategies
-        4. Falling back to main strategy matching
-        5. Post-processing results with fiber and handle information
+        1. Check correct matches first (highest priority)
+        2. Splitting input into handle and knot components
+        3. Determining matching priority based on delimiter semantics
+        4. Attempting priority-based matching strategies
+        5. Falling back to main strategy matching
+        6. Post-processing results with fiber and handle information
         """
         if not value:
             return {"original": value, "matched": None, "match_type": None, "pattern": None}
 
-        # Step 1: Split input into components
+        # Step 1: Check correct matches first (highest priority)
+        correct_match = self._check_correct_matches(value)
+        if correct_match:
+            # Merge in all catalog fields if available
+            brand = correct_match["brand"]
+            model = correct_match["model"]
+
+            # Search for catalog entry in different sections
+            catalog_entry = None
+            for section in ["known_brushes", "declaration_grooming", "other_brushes"]:
+                section_data = self.catalog_data.get(section, {})
+                if brand in section_data:
+                    brand_data = section_data[brand]
+                    if model in brand_data:
+                        catalog_entry = brand_data[model]
+                        break
+
+            matched = {"brand": brand, "model": model}
+            # Add catalog fields if present, else default to None
+            matched["fiber"] = catalog_entry.get("fiber", None) if catalog_entry else None
+            matched["knot_size_mm"] = (
+                catalog_entry.get("knot_size_mm", None) if catalog_entry else None
+            )
+            # Set fiber_strategy to "yaml" if we have fiber data from catalog, otherwise None
+            matched["fiber_strategy"] = (
+                "yaml" if (catalog_entry and catalog_entry.get("fiber")) else None
+            )
+            return {
+                "original": value,
+                "matched": matched,
+                "match_type": "exact",
+                "pattern": None,
+            }
+
+        # Step 2: Split input into components
         handle, knot, _ = self.brush_splitter.split_handle_and_knot(value)
 
-        # Step 2: Attempt priority-based matching
+        # Step 3: Attempt priority-based matching
         if knot and self.knot_matcher.should_prioritize_knot(
             value, self.brush_splitter.split_handle_and_knot
         ):
@@ -93,6 +185,13 @@ class BrushMatcher:
                 value, handle, knot, self._extract_match_dict, self._post_process_match
             )
             if result:
+                # Update match type to REGEX for regex-based matches
+                if result.get("match_type") == "exact":
+                    result["match_type"] = "regex"
+                # Ensure required keys
+                for k in ("brand", "model", "fiber", "knot_size_mm", "fiber_strategy"):
+                    if k not in result["matched"]:
+                        result["matched"][k] = None
                 return result
         elif (
             handle
@@ -105,17 +204,27 @@ class BrushMatcher:
                 value, handle, knot, self._extract_match_dict, self._post_process_match
             )
             if result:
+                # Update match type to REGEX for regex-based matches
+                if result.get("match_type") == "exact":
+                    result["match_type"] = "regex"
+                # Ensure required keys
+                for k in ("brand", "model", "fiber", "knot_size_mm", "fiber_strategy"):
+                    if k not in result["matched"]:
+                        result["matched"][k] = None
                 return result
 
-        # Step 3: Fall back to main strategy matching
+        # Step 4: Fall back to main strategy matching
         result = self._match_main_strategies(value)
-        if result:
+        if result and result.get("matched"):
+            for k in ("brand", "model", "fiber", "knot_size_mm", "fiber_strategy"):
+                if k not in result["matched"]:
+                    result["matched"][k] = None
             return result
 
         return {
             "original": value,
             "matched": None,
-            "match_type": None,
+            "match_type": None,  # Keep None for backward compatibility
             "pattern": None,
         }
 
@@ -126,15 +235,19 @@ class BrushMatcher:
                 m = self._extract_match_dict(result, strategy)
                 if m:
                     self._enrich_match_result(value, m)
+                    match_type = (
+                        result.get("match_type", "exact")
+                        if isinstance(result, dict)
+                        else m.get("source_type", "exact")
+                    )
+                    # Update match type to REGEX for regex-based matches
+                    if match_type == "exact":
+                        match_type = MatchType.REGEX
                     return self._post_process_match(
                         {
                             "original": value,
                             "matched": m,
-                            "match_type": (
-                                result.get("match_type", "exact")
-                                if isinstance(result, dict)
-                                else m.get("source_type", "exact")
-                            ),
+                            "match_type": match_type,
                             "pattern": (
                                 result.get("pattern")
                                 if isinstance(result, dict)

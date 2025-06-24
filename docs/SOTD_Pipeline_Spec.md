@@ -90,6 +90,46 @@ Match extracted product names to known item catalogs to normalize naming:
 - `Karve CB` → `Karve Christopher Bradley`
 - `RR GC .84` → `RazoRock Game Changer 0.84`
 
+**Matching Priority Order:**
+1. **Correct Matches File**: If the original value is found in `data/correct_matches.yaml` (manually confirmed), it is matched directly, and `match_type` is set to `exact`. All catalog specifications (e.g., grind, width, point) are preserved in the match output.
+2. **Regex Patterns**: If not found in the correct matches file, regex patterns from the YAML catalogs are used. These matches have `match_type` set to `regex`, and all catalog specifications are also preserved.
+3. **Brand/Alias Fallbacks**: If no regex match is found, fallback strategies may be used (e.g., brand-only, alias), with appropriate `match_type` values.
+
+**Field Structure:**
+- `original`: The original extracted value
+- `matched`: The canonical match result, including all catalog fields
+- `match_type`: One of `exact` (correct_matches.yaml), `regex` (pattern match), `alias`, `brand`, or `None` (unmatched)
+- `pattern`: The regex pattern used (if any)
+
+**Example:**
+```python
+{
+    "razor": {
+        "original": "Koraat Moarteen",
+        "matched": {
+            "brand": "Koraat",
+            "model": "Moarteen (r/Wetshaving exclusive)",
+            "format": "Straight",
+            "grind": "Full Hollow",
+            "point": "Square",
+            "width": "15/16"
+        },
+        "match_type": "exact",  # From correct_matches.yaml
+        "pattern": None
+    },
+    "blade": {
+        "original": "Feather (3)",
+        "matched": {
+            "brand": "Feather",
+            "model": "Hi-Stainless", 
+            "format": "DE"
+        },
+        "match_type": "regex",  # From regex pattern
+        "pattern": "feather.*hi"
+    }
+}
+```
+
 Track original values, match results, and confidence levels. **Preserves all catalog specifications** (e.g., straight razor grind, width, point type from YAML catalog). Save to:
 
 - `data/matched/YYYY-MM.json`

@@ -181,6 +181,302 @@ Use conventional commit format with clear, descriptive messages:
 - `cleanup: eliminate unused brush_yaml directory after consolidation`
 - `cleanup: remove redundant imports and apply ruff formatting fixes`
 
+## Comprehensive Rollback Procedures
+
+### **MANDATORY**: Complete Work Rollback
+When asked to undo work or rollback progress, **ALWAYS** perform a comprehensive analysis to identify and remove ALL related changes, not just the primary feature.
+
+#### Rollback Analysis Process
+1. **Review git history** to identify all commits related to the work being undone
+2. **Search for related changes** across the entire codebase that support or depend on the feature
+3. **Identify supporting infrastructure** (tests, documentation, configuration changes)
+4. **Check for integration points** where the feature was integrated into existing systems
+5. **Remove all related changes** in a single, comprehensive rollback
+
+#### **MANDATORY**: Git History Review
+Before performing any rollback, **ALWAYS** examine recent git history to identify all related commits:
+
+```bash
+# Review recent commits to identify all related changes
+git log --oneline -20  # Review last 20 commits
+git log --grep="feature_name" --oneline  # Search for specific feature
+git log --grep="analysis_tool" --oneline  # Example: search for analysis tool commits
+```
+
+#### **MANDATORY**: Cross-Module Impact Analysis
+When rolling back a feature, **ALWAYS** check for changes in related modules that support the feature:
+
+**Example Scenarios:**
+- **Analysis Tool Rollback**: If removing an analysis tool, also check for:
+  - Changes to matchers (razor_matcher.py, brush_matcher.py, etc.)
+  - CLI integration changes
+  - Test files for the tool
+  - Documentation updates
+  - Configuration changes
+  - Import statements added to support the tool
+
+- **Feature Rollback**: If removing a feature, also check for:
+  - Supporting infrastructure changes
+  - Database schema changes
+  - API endpoint modifications
+  - UI/CLI changes
+  - Test coverage additions
+  - Documentation updates
+
+#### **MANDATORY**: Comprehensive Removal Checklist
+When rolling back work, ensure ALL of the following are addressed:
+
+**Code Changes:**
+- [ ] Primary feature files removed
+- [ ] Supporting module changes reverted
+- [ ] Integration points removed
+- [ ] Import statements cleaned up
+- [ ] Configuration changes reverted
+
+**Test Changes:**
+- [ ] Test files for the feature removed
+- [ ] Test fixtures and mock data cleaned up
+- [ ] Integration tests updated
+- [ ] Test configuration changes reverted
+
+**Documentation Changes:**
+- [ ] Feature documentation removed
+- [ ] API documentation updated
+- [ ] README files cleaned up
+- [ ] Specification documents reverted
+
+**Infrastructure Changes:**
+- [ ] Configuration files reverted
+- [ ] Build system changes removed
+- [ ] Dependency changes reverted
+- [ ] Environment setup changes cleaned up
+
+#### **MANDATORY**: Single Rollback Commit
+All rollback changes should be committed together in a single, comprehensive commit:
+
+```bash
+# GOOD: Comprehensive rollback with clear description
+git commit -m "rollback: remove analysis tool and all supporting changes
+
+- Remove analysis tool implementation
+- Revert razor matcher changes that supported the tool
+- Remove test files for the analysis tool
+- Clean up CLI integration changes
+- Remove documentation for the feature
+- Revert configuration changes"
+
+# BAD: Partial rollback that leaves related changes
+git commit -m "rollback: remove analysis tool"
+# Missing: razor matcher changes, tests, documentation, etc.
+```
+
+#### **MANDATORY**: Validation After Rollback
+After completing a rollback, **ALWAYS** validate that the system is in a clean state:
+
+```bash
+# Run quality checks to ensure no broken references
+make format lint typecheck test
+
+# Check for any remaining references to removed features
+grep -r "removed_feature_name" . --include="*.py" --exclude-dir=.git
+
+# Verify imports are clean
+grep -r "from.*removed_module" . --include="*.py" --exclude-dir=.git
+```
+
+#### Rollback Examples
+
+**Example 1: Analysis Tool Rollback**
+```bash
+# Scenario: Remove analysis tool that required razor matcher changes
+# 1. Review git history for all related commits
+git log --grep="analysis" --oneline
+
+# 2. Identify all related changes:
+# - sotd/match/tools/analysis_tool.py (primary feature)
+# - sotd/match/razor_matcher.py (supporting changes)
+# - tests/match/tools/test_analysis_tool.py (tests)
+# - docs/analysis_tool_spec.md (documentation)
+
+# 3. Remove all changes in single commit
+git rm sotd/match/tools/analysis_tool.py
+git checkout HEAD~1 -- sotd/match/razor_matcher.py  # Revert supporting changes
+git rm tests/match/tools/test_analysis_tool.py
+git rm docs/analysis_tool_spec.md
+
+# 4. Commit comprehensive rollback
+git commit -m "rollback: remove analysis tool and all supporting infrastructure
+
+- Remove analysis tool implementation and tests
+- Revert razor matcher changes that supported the tool
+- Remove documentation and specifications
+- Clean up all integration points"
+```
+
+**Example 2: Feature Rollback with Multiple Dependencies**
+```bash
+# Scenario: Remove feature that touched multiple modules
+# 1. Review git history for feature-related commits
+git log --grep="feature_name" --oneline
+
+# 2. Identify all related changes across modules
+# - Primary feature files
+# - Supporting infrastructure changes
+# - Test coverage additions
+# - Documentation updates
+# - Configuration changes
+
+# 3. Comprehensive rollback
+git checkout HEAD~3 -- module1.py  # Revert to state before feature
+git checkout HEAD~2 -- module2.py  # Revert supporting changes
+git rm -r feature_directory/       # Remove feature files
+git rm tests/test_feature.py       # Remove tests
+git rm docs/feature_spec.md        # Remove documentation
+
+# 4. Commit with detailed description
+git commit -m "rollback: remove feature_name and all related changes
+
+- Remove primary feature implementation
+- Revert supporting changes in module1.py and module2.py
+- Remove test coverage for the feature
+- Clean up documentation and specifications
+- Revert configuration changes"
+```
+
+#### What NOT to Do During Rollback
+- ❌ **Partial rollback**: Removing only the primary feature without supporting changes
+- ❌ **Multiple commits**: Splitting rollback across multiple commits
+- ❌ **Incomplete cleanup**: Leaving references to removed features
+- ❌ **No validation**: Not running tests after rollback
+- ❌ **Generic messages**: `git commit -m "rollback changes"`
+- ❌ **Missing dependencies**: Not checking for changes in related modules
+
+#### **MANDATORY**: Rollback Documentation
+When performing a rollback, **ALWAYS** document the reason and scope:
+
+```bash
+# Include detailed description in commit message
+git commit -m "rollback: remove feature_name due to [reason]
+
+- Remove primary feature implementation
+- Revert supporting changes in [list modules]
+- Remove test coverage and documentation
+- Clean up all integration points
+
+Reason: [explain why rollback was necessary]
+Impact: [describe what was affected]"
+```
+
+## Plan Management and Naming Conventions
+
+### **MANDATORY**: Completed Plan Naming Convention
+When moving implementation plans to the `plans/completed/` folder, **ALWAYS** include the completion date in the filename to avoid conflicts and maintain historical tracking.
+
+#### Format: `{plan_name}_{YYYY-MM-DD}.mdc`
+
+**Examples:**
+- `refactoring_implementation_plan_2024-12-19.mdc`
+- `bug_fix_plan_2024-12-20.mdc`
+- `feature_implementation_plan_2024-12-21.mdc`
+
+#### Why This Matters
+- **Avoids conflicts**: Multiple plans with the same name can coexist
+- **Historical tracking**: Easy to see when plans were completed
+- **Better organization**: Clear timeline of project milestones
+- **Future reference**: Can track how long different types of work take
+
+### **MANDATORY**: Unified Plan Completion Policy
+**ALL completed plans** (regardless of their original location) must be moved to `plans/completed/` with appropriate subfolder organization.
+
+#### Plan Organization Structure
+```
+plans/
+├── completed/
+│   ├── bugs/                    # Completed bug fix plans
+│   │   ├── match_phase_output_bug_plan_2025-01-27.mdc
+│   │   └── ...
+│   ├── data-recovery/           # Completed data recovery plans
+│   │   ├── missing_months_recovery_plan_2025-06-20.mdc
+│   │   └── ...
+│   ├── features/                # Completed feature implementation plans
+│   │   ├── annual_report_plan_2025-06-20.mdc
+│   │   └── ...
+│   ├── refactoring/             # Completed refactoring plans
+│   │   ├── refactoring_implementation_plan_2024-12-19.mdc
+│   │   └── ...
+│   └── ...                      # Other categories as needed
+├── bugs/                        # Active bug fix plans
+├── data-recovery/               # Active data recovery plans
+├── features/                    # Active feature plans
+└── ...                          # Other active plan categories
+```
+
+#### Benefits of Unified Policy
+- **Single source of truth**: All completed work in one location
+- **Easy discovery**: Can quickly find all completed plans regardless of origin
+- **Consistent organization**: Same structure for all completed work
+- **Historical tracking**: Clear timeline of all project milestones
+- **Better archival**: Proper separation of active vs completed work
+
+#### Process for Completing Plans
+1. **Update the plan** with final completion status and summary
+2. **Create subfolder** in `plans/completed/` if it doesn't exist (e.g., `plans/completed/bugs/`)
+3. **Move to completed folder** with date suffix: `plans/completed/{category}/{plan_name}_{YYYY-MM-DD}.mdc`
+4. **Remove original** from source location
+5. **Commit both changes** together with descriptive message
+
+#### Example Workflow
+```bash
+# 1. Update plan with completion status
+# 2. Create subfolder if needed
+mkdir -p plans/completed/bugs
+
+# 3. Move with date suffix using git mv
+git mv plans/bugs/match_phase_output_bug_plan.mdc plans/completed/bugs/match_phase_output_bug_plan_2025-01-27.mdc
+
+# 4. Remove original (git mv handles this automatically)
+# No need for separate rm command when using git mv
+
+# 5. Commit the rename
+git commit -m "docs(plan): mark match phase output bug plan complete and move to completed/bugs with date suffix"
+```
+
+#### **MANDATORY**: Use `git mv` for Plan Renames
+- ✅ **Use**: `git mv plans/bugs/plan.mdc plans/completed/bugs/plan_YYYY-MM-DD.mdc`
+- ❌ **Don't use**: `mv plans/bugs/plan.mdc plans/completed/bugs/plan_YYYY-MM-DD.mdc`
+- **Why**: `git mv` explicitly tells Git this is a rename operation, preserving file history and showing up as "rename" in git log
+- **Benefit**: Better semantic tracking and cleaner git history
+
+#### Commit Message Pattern for Plan Completion
+- `docs(plan): mark {plan_name} complete and move to completed/{category} with date suffix`
+- `docs(plan): complete {plan_name} implementation and archive in completed/{category}`
+
+#### Subfolder Categories
+- **`bugs/`**: Bug fix plans and investigations
+- **`data-recovery/`**: Data recovery and missing data plans
+- **`features/`**: Feature implementation plans
+- **`refactoring/`**: Code refactoring and restructuring plans
+- **`testing/`**: Test implementation and improvement plans
+- **`documentation/`**: Documentation improvement plans
+- **`performance/`**: Performance optimization plans
+- **`infrastructure/`**: Infrastructure and tooling plans
+
+#### What NOT to Do
+- ❌ **Generic names**: `plan.mdc` or `implementation.mdc`
+- ❌ **No date suffix**: `match_phase_bug.mdc` (will conflict with future plans)
+- ❌ **Separate commits**: Moving and updating in different commits
+- ❌ **Incomplete status**: Moving plans without final completion summary
+- ❌ **Mixed categories**: Putting plans in wrong subfolders
+- ❌ **Leaving originals**: Not removing the original plan file after moving
+
+#### Migration from Old Structure
+When migrating existing completed plans to the new structure:
+1. **Identify completed plans** in subdirectories
+2. **Create appropriate subfolders** in `plans/completed/`
+3. **Move with git mv** using proper naming convention
+4. **Update any references** to the old plan locations
+5. **Commit all changes** together with descriptive message
+
 ## Git Ignore Patterns
 - Use `!data/*.yaml` to include all YAML catalogs without listing each file individually
 - Exclude temporary files, logs, and generated data
@@ -203,21 +499,6 @@ __pycache__/
 .coverage
 coverage/
 htmlcov/
-
-# Data files (but keep YAML catalogs)
-data/*
-!data/*.yaml
-
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Logs and temporary files
-*.log
-.aider*
-praw.ini  # API credentials
 ```
 
 ## File Cleanup Guidelines
@@ -304,56 +585,3 @@ Examples:
 - `cleanup: remove redundant brush_yaml folder and consolidate into brushes.yaml`
 - `refactor: remove knot_maker field as redundant with brand`
 - `fix: correct handle_maker key naming in brush matcher tests`
-
-## Plan Management and Naming Conventions
-
-### **MANDATORY**: Completed Plan Naming Convention
-When moving implementation plans to the `plans/completed/` folder, **ALWAYS** include the completion date in the filename to avoid conflicts and maintain historical tracking.
-
-#### Format: `{plan_name}_{YYYY-MM-DD}.mdc`
-
-**Examples:**
-- `refactoring_implementation_plan_2024-12-19.mdc`
-- `bug_fix_plan_2024-12-20.mdc`
-- `feature_implementation_plan_2024-12-21.mdc`
-
-#### Why This Matters
-- **Avoids conflicts**: Multiple plans with the same name can coexist
-- **Historical tracking**: Easy to see when plans were completed
-- **Better organization**: Clear timeline of project milestones
-- **Future reference**: Can track how long different types of work take
-
-#### Process for Completing Plans
-1. **Update the plan** with final completion status and summary
-2. **Move to completed folder** with date suffix: `plans/completed/{plan_name}_{YYYY-MM-DD}.mdc`
-3. **Remove original** from root `plans/` directory
-4. **Commit both changes** together with descriptive message
-
-#### Example Workflow
-```bash
-# 1. Update plan with completion status
-# 2. Move with date suffix using git mv (not regular mv)
-git mv plans/feature_plan.mdc plans/completed/feature_plan_2024-12-19.mdc
-
-# 3. Remove original (git mv handles this automatically)
-# No need for separate rm command when using git mv
-
-# 4. Commit the rename
-git commit -m "docs(plan): mark feature plan complete and move to completed folder with date suffix"
-```
-
-#### **MANDATORY**: Use `git mv` for Plan Renames
-- ✅ **Use**: `git mv plans/plan.mdc plans/completed/plan_YYYY-MM-DD.mdc`
-- ❌ **Don't use**: `mv plans/plan.mdc plans/completed/plan_YYYY-MM-DD.mdc`
-- **Why**: `git mv` explicitly tells Git this is a rename operation, preserving file history and showing up as "rename" in git log
-- **Benefit**: Better semantic tracking and cleaner git history
-
-#### Commit Message Pattern for Plan Completion
-- `docs(plan): mark {plan_name} complete and move to completed folder with date suffix`
-- `docs(plan): complete {plan_name} implementation and archive with completion date`
-
-#### What NOT to Do
-- ❌ **Generic names**: `plan.mdc` or `implementation.mdc`
-- ❌ **No date suffix**: `refactoring_plan.mdc` (will conflict with future plans)
-- ❌ **Separate commits**: Moving and updating in different commits
-- ❌ **Incomplete status**: Moving plans without final completion summary

@@ -1,0 +1,155 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Mismatch Identification Tool Implementation Plan
+
+## TDD Project Planning
+
+1. **Draft a Detailed Blueprint**:
+   - **Objective**: Create a comprehensive plan for building the Mismatch Identification Tool using TDD.
+   - **Steps**:
+     - Define the core functionalities: mismatch identification, visual indicators, and interactive filtering.
+     - Outline the modules: Data Processing, Visual Indicator, Interactive Filtering, Error Handling, and Documentation.
+     - Specify the key decisions: CLI design, technology stack, and performance optimization.
+
+2. **Break into Iterative Chunks**:
+   - **Objective**: Divide the project into small, manageable tasks.
+   - **Steps**:
+     - Milestone 1: Design and Prototyping
+       - Task 1: Design CLI prompts and options.
+       - Task 2: Prototype visual indicators.
+       - Task 3: Validate design with stakeholders.
+     - Milestone 2: Core Functionality Development
+       - Task 1: Develop data processing module.
+       - Task 2: Implement mismatch identification logic.
+       - Task 3: Develop interactive filtering module.
+     - Milestone 3: Performance Optimization
+       - Task 1: Optimize data processing.
+       - Task 2: Conduct performance testing.
+     - Milestone 4: Error Handling and Documentation
+       - Task 1: Implement error handling.
+       - Task 2: Develop user guide.
+     - Milestone 5: Testing and Validation
+       - Task 1: Perform unit and integration testing.
+       - Task 2: Validate functionality and performance.
+
+3. **Iterate and Refine**:
+   - **Objective**: Ensure the steps are right-sized for the project.
+   - **Steps**:
+     - Review each chunk to ensure it can be implemented safely with strong testing.
+     - Adjust the size of tasks to balance progress and complexity.
+     - Ensure each task builds on the previous ones and integrates into the overall project.
+
+4. **Provide Prompts for Code Generation**:
+   - **Objective**: Prepare prompts for implementing each step in a test-driven manner.
+   - **Steps**:
+     - Create prompts for each task, ensuring they prioritize best practices and incremental progress.
+     - Ensure no orphaned code; each prompt should integrate with previous steps.
+     - Separate each prompt section using markdown.
+
+## Project Tracker for Mismatch Identification Tool
+
+1. **TDD Project Planning**
+   - [x] Draft a Detailed Blueprint
+     - [x] Define core functionalities
+     - [x] Outline modules
+     - [x] Specify key decisions
+
+2. **Iterative Chunks**
+   - **Milestone 1: Design and Prototyping**
+     - [x] Design CLI prompts and options
+     - [x] Prototype visual indicators
+     - [x] Validate design with stakeholders
+   - **Milestone 2: Core Functionality Development**
+     - [x] Develop data processing module
+     - [x] Implement mismatch identification logic
+     - [x] Develop interactive filtering module
+   - **Milestone 3: Performance Optimization**
+     - [x] Optimize data processing
+     - [x] Conduct performance testing
+   - **Milestone 4: Error Handling and Documentation**
+     - [x] Implement error handling
+     - [x] Develop user guide
+   - **Milestone 5: Testing and Validation**
+     - [x] Perform unit and integration testing
+     - [x] Validate functionality and performance
+
+3. **Mismatch Identification Strategies**
+   - [x] Implement Multiple Regex Matches
+   - [x] Calculate Levenshtein Distance
+   - [x] Assign Pattern Confidence Scores
+   - [x] Implement User Feedback Loop
+   - [x] Add Visual Indicators
+
+4. **Integration with Existing Plan**
+   - [x] Ensure alignment with `docs/requirements.md`
+
+## Detailed Specifications
+
+- **Functionalities**:
+  - **Mismatch Identification**: Identify mismatches between matched and original product names, highlighting differences for human review.
+  - **Visual Indicators**: Use text-based indicators to show mismatches.
+  - **Interactive Filtering**: Allow filtering based on product type or mismatch severity.
+
+- **Data Formats**:
+  - Read JSON files from `data/matched/` containing matched and original product data.
+
+## Stakeholder Validation
+
+- Confirm design and prototyping tasks with stakeholders, ensuring CLI design and visual indicators meet user expectations.
+
+## Technology Stack
+
+- **Current Libraries**: Utilize existing libraries like `pandas`, `pyyaml`, and `praw`. Consider additional libraries if needed for performance or visualization.
+- **Compatibility**: Ensure compatibility with Python 3.11 and the existing codebase.
+
+## Performance Metrics
+
+- **Loading Time**: Aim for data loading in under 5 seconds, optimizing data handling with `pandas` if necessary.
+
+## Integration with Existing Systems
+
+- Ensure seamless integration with the SOTD Pipeline, particularly the match phase, reading from `data/matched/*.json` without affecting other processes.
+
+## Documentation and User Guide
+
+- Provide clear instructions on launching the tool and available options, including command-line arguments and configuration settings.
+
+## Mismatch Identification Strategies
+
+- **Multiple Regex Matches**: Check if an original string matches additional regex patterns beyond the one it stopped at to identify potential mismatches.
+
+- **Levenshtein Distance**: Calculate the Levenshtein distance between `original` and `matched` strings to flag potential mismatches, especially when the match type is not `exact`.
+
+- **Pattern Confidence Scores**: Assign confidence scores to regex patterns based on historical accuracy or frequency of correct matches. Flag low-confidence matches for review.
+
+- **User Feedback Loop**: Implement a feedback mechanism where users can flag incorrect matches, allowing the system to learn and refine matching algorithms.
+
+- **Visual Indicators**: Use color-coding or annotations in the output to highlight potential mismatches, making it easier for users to spot them.
+
+## Session Notes and Implementation Decisions
+
+### 2025-01-27 Session Notes (Completion)
+
+**Implementation Summary:**
+- Implemented `MismatchAnalyzer` as a new analysis tool, extending the existing `AnalysisTool` base class.
+- CLI entry point created as `analyze_mismatches.py` following project CLI patterns.
+- All mismatch identification strategies (multiple regex, Levenshtein, confidence, visual indicators) are implemented.
+- Interactive filtering and CLI options are provided.
+- Comprehensive unit tests created and all tests are passing.
+- Performance validated: tool is fast and responsive for typical data sizes.
+- Error handling and user feedback are robust.
+
+**Lessons Learned:**
+- Reusing the existing analysis tool architecture enabled rapid, robust implementation.
+- TDD and incremental test development caught edge cases (e.g., Levenshtein logic for empty strings).
+- CLI and test patterns from the codebase provided a strong foundation for new tool development.
+- Rich library is effective for visual indicators in CLI tools.
+- Early test failures on edge cases (empty string distance) highlighted the importance of test-driven bug discovery.
+
+**Next Steps:**
+- Document usage in the user guide and README.
+- Solicit stakeholder feedback on CLI/UX and visual indicators.
+- Monitor for real-world edge cases as the tool is adopted.

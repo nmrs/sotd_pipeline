@@ -2,6 +2,18 @@
 
 This guide shows how to use the enhanced analysis tool to validate and improve product matching performance in the SOTD pipeline. The tool works with all product types: brushes, razors, blades, and soaps.
 
+## Matching Priority and match_type Semantics
+
+- **Priority Order:**
+    1. **Correct Matches File**: If the original value is found in `data/correct_matches.yaml`, it is matched directly, and `match_type` is set to `exact`.
+    2. **Regex Patterns**: If not found in the correct matches file, regex patterns from the YAML catalogs are used. These matches have `match_type` set to `regex`.
+    3. **Fallbacks**: Brand/alias/other fallback strategies as before.
+- **All catalog specifications are preserved for both correct and regex matches.**
+
+## Confirming Matches
+- Use the mismatch analyzer tool to mark matches as correct, which will add them to `data/correct_matches.yaml` for future runs.
+- Confirmed matches will always be prioritized and marked as `match_type: exact`.
+
 ## Quick Reference Commands
 
 ### 1. Basic Health Check
@@ -275,54 +287,3 @@ python -m sotd.match.tools.analyze_matched_enhanced --month 2025-05 --field brus
 # Redirect output to file for sharing/archiving
 python -m sotd.match.tools.analyze_matched_enhanced --month 2025-05 --field brush --show-details --show-mismatches > brush_analysis_2025-05.txt
 ```
-
-### Drill Down Into Specific Issues
-```bash
-# Find all examples of a specific mismatch pattern
-python -m sotd.match.tools.analyze_matched_enhanced --month 2025-05 --field brush --show-examples "Chisel & Hound Badger"
-
-# Check if pattern exists across multiple months
-python -m sotd.match.tools.analyze_matched_enhanced --range 2024-12:2025-05 --field brush --show-examples "Oumo Badger"
-```
-
-## Related Tools
-
-### Check Unmatched Items
-```bash
-python -m sotd.match.tools.analyze_unmatched --month 2025-05 --field brush --limit 20
-```
-
-### View Actual Matches
-```bash
-python -m sotd.match.tools.analyze_matched --month 2025-05 --field brush --limit 10
-```
-
-### Run Matching
-```bash
-python -m sotd.match.run --range 2025-05:2025-05 --debug --force
-```
-
-## Tips for Success
-
-1. **Start with mismatches**: Run `--show-mismatches` to find the worst problems first
-2. **Use examples for investigation**: `--show-examples "Pattern Name"` reveals actual user input vs match results
-3. **Focus on high counts**: Prioritize issues with 10+ occurrences for maximum impact
-4. **Handle vs knot maker**: For brushes, determine if the issue is handle maker vs knot maker confusion
-5. **Test incrementally**: Add a few patterns, test, then add more
-6. **Monitor confidence**: Track the confidence score and mismatch rate as you make changes
-7. **Use pattern analysis**: Check `--show-patterns` to identify failing regex
-8. **Regular validation**: Run analysis monthly to catch new issues
-
-## Common Brush-Specific Issues
-
-### Handle vs Knot Maker Confusion
-**Example**: "Chisel & Hound Esmeralda w/Oumo Rorschach Badger" matched as "Chisel & Hound Badger"
-- **Problem**: Should be "Oumo Badger" since Oumo made the knot
-- **Solution**: Add patterns to recognize knot maker indicators like "w/", "with", "knot by"
-
-### Competing Brand Detection  
-**Example**: Input contains multiple brand names
-- **Problem**: Algorithm picks wrong brand as primary
-- **Solution**: Improve brand priority logic or add specific disambiguation patterns
-
-Remember: The goal is to maximize exact matches while minimizing potential mismatches! 
