@@ -1,0 +1,397 @@
+razor:
+  Above the Tie:
+    R2:
+    - ATT OC R2
+    S1:
+    - ATT S1
+    Windsor SSRH2:
+    - Above The Tie - Windsor SSRH2, OC Base Plate, DE - (original version not Windsor
+      Pro) $CNC $STAINLESSLESS
+  Bevel:
+    Essential Disposable:
+    - Bevel Disposable DE $PLASTIC
+    - Bevel Disposable DE
+  Blackland:
+    Blackbird:
+    - Blackland - Blackbird and Van Der Hagen - Traditional Safety Razor
+    - Blackland Razors Blackbird
+    - Blackland - Blackbird, DE safety razor, Brass, 101 mm handle \- "Brassbird"
+      $CNC
+    - Blackland Blackbird (SS) $CNC
+    - Blackland Blackbird OC $CNC
+    - Blackland SS
+    Era:
+    - Blackland Razors Era
+    Osprey:
+    - Blackland Osprey $ADJUSTABLE $CNC
+    Sabre:
+    - blackland razors sabre lvl 2 $moderngem $cnc
+    - blackland - sabre $cnc $moderngem
+    - Blackland Sabre Level 2 `$CNC` `$MODERNGEM`
+    Sabre V2:
+    - blackland sabre v2 $cnc $moderngem $adjustable
+    - blackland sabre v2 lvl 2 $moderngem
+    Vector:
+    - Blackland Vector $ARTISTCLUB $CNC
+    - Blackland Razors Vector (Lite) $ARTISTCLUB $CNC
+    - Vector Ti
+  Blutt Rasur:
+    BR-1:
+    - Blutt Rasur BR-1 0.99 $CNC
+  Böker:
+    Straight:
+    - H Boker 5/8" with Mother of Pearl handle and tang
+    - Böker - Dönges Expert Fire Folder $STR8SNOB $RAINBOW
+  CJB:
+    Kamisori Shavette:
+    - cjb kamisori shavette $kamisori
+    - CJB GR100B Kamisori $KAMISORI
+  Cartridge / Disposable:
+    ? ''
+    : - Gillette - Mach 3 disposable
+      - BiC Metal $PLASTIC
+  Charcoal Goods:
+    Everyday:
+    - Charcoal Goods - Gen 3 Everyday $CNC
+    - Charcoal Goods - Gen 3 Everyday Razor Hammered Handle
+    Lvl 2:
+    - charcoal goods lvl ii ss on triad aristocrat ss handle
+    - CG lvl 2 SB
+    - Charcoal Goods Level 2 with Stinger Handle
+  Chiseled Face:
+    Legacy:
+    - Chiseled Face - Legacy Ti
+    - Chiseled Face - Legacy
+    - Chiseled Face Legacy Titanium $CNC
+  Daune:
+    Double Edge Shavette:
+    - Daune
+  DublDuck:
+    Hair Shaper:
+    - dubl duck hair shaper $weckonista
+    - PearlDuck DUBL Duck Hair Shaper
+    - Dubl Duck Hair Shaper
+  Edwin Jagger:
+    DE89:
+    - EJ DE89 handle / Muhle R41 head $ZAMAC
+    - Edwin Jagger DE86
+  EldrormR Industries:
+    MM24:
+    - EldrormR Industries MM24 $FLIPTOP $MODERNGEM $REVENANT
+    - EldrormR Industries MM24 (two tone) $MODERNGEM $FLIPTOP
+    - MM24 $REVENANT $MODERNGEM
+    - u/EldrormR Industries MM24 $FLIPTOP $MODERNGEM $REVENANT
+  Ever-Ready:
+    '1912':
+    - vintage everready gem 1912 $twins $fliptop
+    - Gem - Gold1912 Ever Ready Sunray 1912 $TWINS $FLIPTOP
+    - Ever Ready - 1912 $FLIPTOP $TWINS $MACHINEAGE
+    - Ever-Ready 1912 $MACHINEAGE $FLIPTOP $TWINS
+  Fatip:
+    Gentile:
+    - Fatip Classic Testina Gentile - Chrome
+    Grande:
+    - Fatip Classic Grande
+    Lo Storto:
+    - fatip lo storto $slant
+    - Fatip - Lo Storto Gentile (Closed Comb, chrome). $SLANT
+    - Fatip Lo Storto
+    Piccolo:
+    - fatip piccolo slant open comb gold $slant
+    - fatip il piccolo sorto $slant
+    - Fatip Piccolo Slant $SLANT
+  Feather:
+    Shavette:
+    - feather artist club dx $kamisori
+    - feather artist club sr $artistclub $kamisori $plastic
+    - Feather Artist Club SS $KAMISORI
+    - Feather Artist Club SS Kamisori
+    - Feather Artist Club SS Western
+  GEM:
+    Clog Pruf:
+    - gem clog-pruf, gen 1
+    - gem clog pruf $fliptop $machineage
+    - gem - micromatic clog-pruf
+    - GEM - Clog Pruf - $RUSTYBUTTRUSTY
+    - GEM Micromatic Gen 2 "Peerless" Clog Pruf `$FLIPTOP` `$RUSTYBUTTRUSTY` `$ATOMICAGE`
+    - GEM Clog-Pruf $fliptop
+    - GEM Clog-Pruf
+    Damaskeene:
+    - gem damaskeene ('screwy') $rustybuttrusty $machienage
+    - 'GEM Damaskeene (''Skrewy'') #MACHINEAGE #RUSTYBUTTRUSTY'
+    - GEM Damaskeene ('Screwy')
+    - GEM Damaskeene ('Screwy') $RUSTYBUTTRUSTY $MACHINEAGE $FLIPTOP
+    - GEM Damaskeen ('Screwy') $FLIPTOP $TWINS $MACHINEAGE
+    Damaskeene OC:
+    - gem - damaskeene open comb $fliptop $machineage
+    Featherweight:
+    - gem - featherweight $atomic age $fliptop.
+    - GEM Featherweight
+    - GEM - Featherweight.
+    Flying Wing (aka Bullet Tip):
+    - gem flying wing / bullet tip $atomicage
+    - Gem - "Flying Wing" Bullet tip $ATOMICAGE
+    Junior:
+    - gem junior 1912 $twins $machineage $fliptop
+    - GEM Junior 1912
+    - GEM 1912 Junior $FLIPTOP $MACHINEAGE
+    Micromatic Open Comb:
+    - GEM MicroMatic $FLIPTOP $MACHINEAGE
+  Gillette:
+    Aristocrat:
+    - Gillette Aristocrat 1938 Rhodium $MACHINEAGE
+    - 'Gillette British Aristocrat #16 $ATOMICAGE'
+    - Gillette Aristocrat (1948-50)
+    - Gillette Aristocrat $ATOMICAGE
+    Fatboy:
+    - Gillette - Executive Fatboy $ADJUSTABLE $STAINLESSLESS $SPACEAGE
+    King C. Gillette:
+    - King C Gillette
+    NEW:
+    - Gillette New (Long Comb) $RUSTYBUTTRUSTY $STAINLESSLESS
+    Old Type:
+    - 'Gillette - ABC Pocket Edition: Floral'
+    Slim:
+    - gillette aristocrat slim (g3) $adjustable $fliptop $spaceage
+    - Qshave Adjustable and Gillette Slim Adjustable
+    - Gillette - Slim Adjustable N2 $ADJUSTABLE $SPACEAGE
+    Super Speed:
+    - Gillette Blue Tip Super Speed $ATOMICAGE
+    - 1956 Gillette Red Tip SuperSpeed
+    - Gold Plated Gillette Super Speed 47
+    - Gillette - R2 TTO - 1971 $SPACEAGE
+    - 1951 Gillette Black Tip SuperSpeed
+    Tech:
+    - Gillette Fat Handle Tech
+    - Gillette Tech head on Timeless Ti Crown handle
+    - Gillette Tech $STAINLESSLESS $MACHINEAGE
+    - Gillette Travel Tech K3 $JETSETTER $SPACEAGE
+    Tuckaway:
+    - Gillette SIlver Plated Tuckaway
+  Henson:
+    AL13:
+    - Henson Shaving Al +++
+    - V2 Henson + ("Dr. Squatch"). $ALUMINUM $CNC $RAINBOW
+    Ti22:
+    - henson ti22 $cnc
+    - henson ti22 +++ $cnc
+    - Henson Ti22
+  J.A. Henckels:
+    Friodur Straight:
+    - J.A.Henckels Friodur 17 - half hollow - square point - 13/16
+  Karve:
+    Bison:
+    - Karve Shaving Co - Bison (matte black aluminum)
+    Christopher Bradley:
+    - parker shavette (karve cb)
+    - karve cb ss sb (d plate, first pass; b plate, second pass) $cnc $adjustable
+    - karve cb ss sb (d plate, first pass; b plate, second pass)
+    - Karve CB SS SB (B Plate, First Pass; D Plate, Second Pass)
+    - Karve CB C $RUSTYBUTTRUSTY $STAINLESSLESS
+    - Karve CB SS SB (B Plate)
+    - Karve CB SB-C $RUSTYBUTTRUSTY $STAINLESSLESS
+    - Karve CB SB-D $CNC
+    - Karve CB
+    - Karve Brass CB OC-F
+    - Karve CB $CNC
+    - Karve Christopher Bradley (aluminum SB-C) $ALUMINUM
+    Overlander:
+    - Facón - Kamisori-style Shavette; Karve Shaving Co. - Overlander Brass **$KAMISORI
+      $RUSTYBUTTRUSTY**
+    - Karve - Overlander SS
+    - Karve Shaving Co. Overlander $ALUMINUM $RAINBOW
+  Koraat:
+    Moarteen (r/Wetshaving exclusive):
+    - koraat r/wetshaving moarteen 7/8
+    - koraat 14 "moarteen" 15/16" full hollow $str8snob
+    - koraat moarteen 14 square point 15/16 hollow
+    - koraat 15/16 full hollow - sub exclusive 'moarteen' (12)
+    - Koraat MOARteen r/Wetshaving Exclusive 15/16, Full Hollow Square Point
+    - Koraat Knives- Moarteen 15/16 Square Point $STR8SNOB
+    - Koraat MOARteen r/wetshaving Exclusive 15/16
+    - Koraat - r/Wetshaving exclusive Moarteen (15/16", full hollow, carbon steel)
+    - Koraat - Moarteen (square point, 15/16", full hollow, r/wetshaving exclusive)
+      (8) $RAINBOW $STR8SNOB
+    - Koraat *MOARteen* Sub-Exclusive (15/16", Full Hollow, Square Point) $RAINBOW
+      $STR8SNOB
+    - Koraat MOARteen 15/16" Full Hollow Custom Point josiguuh special
+    - Koraat 15/16 Full Hollow - Sub Exclusive 'Moarteen' (13)
+    - 'Koraat - r/Wetshaving exclusive Moarteen (15/16", full hollow, carbon steel)
+      #Str8Snob'
+    - Koraat - Moarteen (square point, 15/16", full hollow, r/wetshaving exclusive)
+      (9)
+    - Koraat 14 "Moarteen" 15/16" Full Hollow
+    - Koraat - Moarteen 15/16 $STR8SNOB
+    - Koraat MOARTEEN 15/16 $STR8SNOB
+    - Koraat 15/16 Full Hollow - Sub Exclusive 'Moarteen' (14)
+    - Koraat Knives - r/Wetshaving Exclusive Moarteen 15/16
+    - Koraat Moarteen - full hollow - square point - 15/16
+    - Koraat - MOARteen 15/16" Full Hollow Custom Point josiguuh special
+    - Koraat Moarteen
+    Straight:
+    - Koraat - Purist
+  Maggard:
+    Shavette:
+    - maggard shavette
+    Slant:
+    - Maggard MR11 with Slant Head $SLANT
+  Merkur:
+    34C:
+    - Razorock GOAT & Merkur 34C
+    - Merkur 34C $ZAMAC
+    37C:
+    - merkur 37c
+    - merkur 37c $zamac $slant
+    - merkur 37c $slant $zamac
+    41C:
+    - Merkur 41c
+    Futur:
+    - Qshave Adjustable (Merkur Futur copy) $FLIPTOP
+    - Merkur Futur (Matte Finish) $ADJUSTABLE
+  Mühle:
+    R41:
+    - Muninn Woodworks Forest Moss R41
+    Rocca:
+    - Muhle Rocca R94 $CNC
+    - Muhle Rocca Birch handle
+  OneBlade:
+    Core:
+    - OneBlade Core $PLASTIC
+  Other:
+    Kamisori:
+    - Dairi - Kamisori $KAMISORI
+    Shavette:
+    - Unbranded Shavette
+    - Stainless Steel Barber Razor Shavette - Alibaba
+    Straight Razor:
+    - yurii kravcenko konsul 8/8
+    - griffon xx "carbo-magnetic 60" 5/8
+    - Art Razors Capitaine 19/16 Full Hollow Square Tip $STR8SNOB $ALLNATURAL
+    - M. JUNG No. 80 Straight Razor
+    - River Razors 6/8 3/4 Hollow
+    - Erik Anton Berg 9/16 rattler
+  Paradigm:
+    Ti Diamondback:
+    - paradigm diamondback titanium $cnc
+  Ralf Aust:
+    Straight:
+    - Ralf Aust 6/8, Full Hollow Square Point $ALLNATURAL $STR8SNOB
+    - Ralf Aust 6/8 Full Hollow Square Point Horn Scales
+  RazoRock:
+    GOAT:
+    - RazoRock The GOAT
+    Game Changer:
+    - RazoRock Game Changer 0.84-P / MR5
+    - RazoRock Game Changer .76-P
+    - Razorock Game Changer .84
+    - Razorock Gamechanger .84
+    - Razorock Game Changer .84 $CNC
+    - Razorock Game Changer .84-P $CNC
+    Hawk v3:
+    - razorock hawk v3 $artistclub
+    - RazoRock Hawk v3 Standard $ARTISTCLUB
+    Lupo:
+    - RazoRock Lupo .58
+    - Razorock Lupo 95 CC
+    - Razorock Lupo DC
+    Mentor:
+    - RazoRock Frankenrazor - Mentor base, Mission cap
+    Superslant:
+    - Razorock Superslant L2++
+  Rex:
+    Konsul:
+    - Rex Konsul $SLANT $ADJUSTABLE $CNC
+  Rockwell:
+    6C:
+    - Rockwell 6C (R4) $ZAMAC $ADJUSTABLE
+    6S:
+    - rockwell 6s $adjustable
+    - rockwell 6s
+    - Rockwell 6S (4 plate)
+  Rolls:
+    Razor:
+    - Rolls - u/priusaurus's Rolls $foreversafety
+    - Rolls Razor $FOREVERSAFETY
+    - Rolls Razor Imperial no. 2 $ATOMICAGE $FOREVERSAFETY
+    - Rolls Razor $ATOMICAGE $FOREVERSAFETY
+    - Rolls $STAINLESSLESS $FOREVERSAFETY
+  Schick:
+    Dermaplaner:
+    - Schick Dermaplaner $PLASTIC
+    Hydromagic:
+    - 'Eversharp-Schick Hydro-magic (I2, NOS) #Injector'
+    Injector:
+    - Schick Injector Type M Variant D2,H1,G1 (1968 - 1973)
+    - Schick Injector Type M Variant D2,H1,G1 (1968 - 1973) $ADJUSTABLE $INJECTOR
+      $SPACEAGE
+    - Schick - Type I1
+    - Schick Injector G1 $Injector
+    - Schick Krona
+    - Schick Injector Razor Type E3
+    - Schick Adjustable Injector $ADJUSTABLE $INJECTOR
+    - Schick - Injector x 6" generic locking pliers $INJECTOR
+    - Gillette L7 "Championship" Injector $INJECTOR $RAINBOW $SPACEAGE
+  Supply:
+    SE:
+    - Supply - Sing Edge $INJECTOR
+  Tatara:
+    Masamune:
+    - Tatara Amakuni $ARTISTCLUB
+    - Tatara - Masamune OC
+    Muramasa:
+    - Tatara Muramasa $ADJUSTABLE $CNC
+    Nodachi:
+    - tatara masamune nodachi ti cc $cnc
+    - Tatara Masamune Nodachi Ti
+    - Tatara Masamune Nodachi Ti CC
+  Tedalus:
+    Essence Shavette:
+    - Tedalus Essence - Shavette
+  Valet:
+    Autostrop:
+    - Valet - Autostrop
+    - Valet Auto Strop $MACHINEAGE
+    - Valet AutoStrop Razor VB1 $MACHINEAGE $RUSTYBUTTRUSTY
+  Van Der Hagen:
+    Razor:
+    - Van Der Hagen 85mm Safety Razor
+  Wade & Butcher:
+    Straight:
+    - vintage wade & butcher (late 1800s) straight razor; calvalry called by karve
+      overlander brass $machineage $allnatural
+    - Wade & Butcher 5/8 $Machineage $Rustybuttrusty $Revenant
+  Weck:
+    Hair Shaper:
+    - weck - hair shaper $weckonista
+    - weck gold scales hair shaper
+    - weck hair shaper
+    - Weck Hair Shaper $WECKONISTA $RAINBOW $PLASTIC
+    - WECK Hair Shaper - Pink Scales
+    - Weck Hair Shaper $WECKONISTA
+    - Weck Hair Shaper (Translucent Blue Scales) $WECKONISTA $RAINBOW
+    - WECK Hair Shaper - Gold Scales
+    Sextoblade:
+    - Weck - Weck Junior $weckonista $rustybuttrusty
+  Whityle:
+    20T Glide Pro 4D:
+    - Whityle 20T Glide Pro 4D Razor $FLIPTOP
+  Wolfman:
+    WR1:
+    - Wolfman WR1 0.84
+    WR2:
+    - Wolfman WR2 0.95
+    - Wolfman WR2 $CNC
+    - Wolfman WR2 1.05mm
+    - Wolfman WR2 1.25
+    - Wolfman Razors WR2 1.15mm
+    - Wolfman WR2-SB 1.05 Gap
+    WR3:
+    - Wolfman Copper WR3 - $CNC $RUSTYBUTTRUSTY $MODERNGEM
+  Yaqi:
+    Slant 37:
+    - yaqi - slant 37 + rr ufo handle $slant
+    - yaqi slant 37 + rr ufo handle $slant
+    - Yaqi Slant 37 + RR UFO Handle
+  Yates:
+    Winning:
+    - YPM - Winning Razor Mk1, polished
