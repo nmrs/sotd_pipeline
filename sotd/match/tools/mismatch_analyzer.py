@@ -1030,7 +1030,7 @@ class MismatchAnalyzer(AnalysisTool):
         # Confirmation prompt
         if not getattr(args, "no_confirm", False):
             try:
-                response = input(
+                response = self.console.input(
                     "\n[bold]Are you sure you want to mark these as correct? (yes/no): [/bold]"
                 )
                 if response.lower() not in ["yes", "y"]:
