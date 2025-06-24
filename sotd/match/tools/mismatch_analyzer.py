@@ -36,6 +36,14 @@ class MismatchAnalyzer(AnalysisTool):
         self._compiled_patterns = {}  # Cache for compiled regex patterns
         self._correct_matches_data = {}  # Added for new _load_correct_matches method
 
+    def _escape_pattern_for_display(self, pattern: str) -> str:
+        """Escape square brackets in patterns for Rich table display."""
+        if not pattern:
+            return pattern
+        # Only escape opening brackets that Rich might interpret as formatting
+        # Leave closing brackets unescaped for proper display
+        return pattern.replace("[", "\\[")
+
     def _get_table(self, title: str = ""):
         """Lazy load Rich Table to reduce startup time."""
         return Table(title=title)
@@ -826,6 +834,9 @@ class MismatchAnalyzer(AnalysisTool):
             pattern = field_data.get("pattern", "")
             reason = item["reason"]
 
+            # Escape pattern for Rich table display
+            pattern = self._escape_pattern_for_display(pattern)
+
             # Add visual indicator
             indicator = self.mismatch_indicators.get(mismatch_type, "❓")
             type_text = f"{indicator} {mismatch_type.replace('_', ' ').title()}"
@@ -911,6 +922,9 @@ class MismatchAnalyzer(AnalysisTool):
             pattern = field_data.get("pattern", "")
             match_type = field_data.get("match_type", "")
             source = record.get("_source_file", "")
+
+            # Escape pattern for Rich table display
+            pattern = self._escape_pattern_for_display(pattern)
 
             # Check if this match was previously marked as correct
             match_key = self._create_match_key(field, original, matched)
