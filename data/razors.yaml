@@ -1,7 +1,11 @@
 3D Printed:
   DE:
     patterns:
-    - 3d
+    - 3d.*(?:printed)?
+  GEM:
+    format: GEM
+    patterns:
+    - 3d.*(?:printed)?.*gem
 Above the Tie:
   H1:
     patterns:
@@ -34,8 +38,12 @@ Above the Tie:
   SE1:
     format: AC
     patterns:
-    - '(?:\batt\b|tie).*se-*1*'
+    - (?:\batt\b|tie).*se-*1
     - (?:atlas|bamboo|calypso|colossus|kronos).*se1
+  SE2:
+    format: AC
+    patterns:
+    - (?:\batt\b|tie).*se-*2
   Windsor Pro SB90:
     patterns:
     - '\b(?:att|tie)\b.*sb90'
@@ -44,10 +52,10 @@ Above the Tie:
     patterns:
     - '\b(?:att|tie)\b.*(?:windsor)*\b.*ssrh2'
 Alpha:
-  The Guido:
+  Claymore:
+    format: AC
     patterns:
-    - alpha.*guido
-    - the guido
+    - alpha.*claymore
   Outlaw:
     patterns:
     - alpha.*outl
@@ -55,6 +63,10 @@ Alpha:
     format: AC
     patterns:
     - alpha.*spirit
+  The Guido:
+    patterns:
+    - alpha.*guido
+    - the guido
 Alshabab:
   Razor:
     patterns:
@@ -107,9 +119,7 @@ Aylsworth:
     patterns:
     - drakk?ant
     - aylsworth
-  Kopparkant:
-    patterns:
-    - kopp?arkant
+    - kopp?[ae]rkant
 BBNY:
   Safety Razor:
     patterns:
@@ -117,7 +127,7 @@ BBNY:
 Baili:
   3-Piece:
     patterns:
-    - baili
+    - baili(.*tech)?
     - '(bail[ie]|br|bt|bd)[\s-]*[12]\d{2}'
   TTO:
     patterns:
@@ -160,6 +170,10 @@ Berkeley:
     patterns:
     - berkeley
 Blackland:
+  Batch 002:
+    format: Half DE
+    patterns:
+    - blackland.*batch[0\s-]*2
   Blackbird:
     patterns:
     - 'bb\s*(sb|oc)'
@@ -351,7 +365,7 @@ Colonial:
   Silversmith:
     patterns:
     - silversmith
-Coooper:
+Cooper:
   Monobilt:
     patterns:
       - cooper
@@ -403,15 +417,19 @@ Dovo:
     format: Straight
     patterns:
     - dovo.*(straight|\d{1,2}/(8|16)|ground)
-DublDuck:
+Dubl Duck:
+  Goldedge:
+    format: Straight
+    patterns:
+    - dubl.*duck.*gold[\s-]?edge(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Hair Shaper:
     format: Shavette (Hair Shaper)
     patterns:
     - dubl ?duck.*shaper
-  # Straight:
-  #   format: Straight
-  #   patterns:
-  #   - (?!.*shaper)dubl ?duck.*(\d{1,2}/(8|16))?
+  Straight:
+    format: Straight
+    patterns:
+    - (?!.*shaper)dubl ?duck.*(\d{1,2}/(8|16))?
 Durham:
   Duplex:
     format: Shavette
@@ -448,6 +466,11 @@ Enders:
     format: Other
     patterns:
     - enders
+ERN:
+  Straight:
+    format: Straight
+    patterns:
+    - \bern\b(.*\d{1,2}/(8|16))?
 Ever-Ready:
   '1912':
     format: GEM
@@ -498,7 +521,7 @@ Executive Shaving:
   Claymore:
     format: AC
     patterns:
-    - claymore
+    - exec.*claymore
   Outlaw:
     patterns:
     - exec.*outlaw
@@ -571,7 +594,7 @@ Fine Accoutrements:
     patterns:
     - fine.*world
 Flying Eagle:
-  '':
+  Tech Clone:
     patterns:
     - flying.*eagle
 Focus:
@@ -643,10 +666,14 @@ GEM:
     format: GEM
     patterns:
     - gem.*(junior|jr)
+  Micromatic:
+    format: GEM
+    patterns:
+    - micromatic
   Micromatic Open Comb:
     format: GEM
     patterns:
-    - gem.*(micro.*matic|mmoc|ocmm)
+    - gem.*(micro.*matic.*open|mmoc|ocmm)
     - mmoc
     - ocmm
     - gem.*open.*comb
@@ -763,10 +790,11 @@ Gillette:
     - TV special
     - gil.*rocket
     - rocket.*hd
-    - gil.*mii*lord
+    - gil.*mi+lord
+    - ranger tech
   Tech:
     patterns:
-    - ^(?!.*milord|.*clone|.*knock-?off).*(gil|war|contract|slot|triangle|flat|hybrid|canada|english).*Tech
+    - ^(?!.*milord|.*ranger|.*clone|.*knock-?off).*(gil|war|contract|slot|triangle|flat|hybrid|canada|english).*Tech
     - fbt
     - 'triangle\s*slot'
     - \btech\b
@@ -915,7 +943,7 @@ Kai:
     patterns:
     - kai.*excelia
 Kampfe:
-  'Star Lather Catcher 1902 ':
+  Star Lather Catcher 1902:
     format: Other
     patterns:
     - kampfe(.*1902)?
@@ -1199,6 +1227,7 @@ Other:
     - hess.*ezy
     - hair.*sha
     - marianna
+    - burmax.*shavette
   Kamisori:
     format: Straight
     patterns:
@@ -1219,7 +1248,6 @@ Other:
     - dubl ?duck
     - engels
     - efendi
-    - \bern\b
     - frameback
     - fred.*Reynolds?
     - french.*point
@@ -1673,7 +1701,7 @@ Schick:
     patterns:
     - kry?ona
 Segal:
-  Gold Tone:
+  Unitary:
     patterns:
     - segal
 Seygus:
@@ -1788,15 +1816,15 @@ Tatara:
     - masamune
     - Matusumi
     - tatara
-  Muramasa:
-    patterns:
-    - muramasa
-  Nodachi:
+  Masamune Nodachi:
     patterns:
     - ta.*nodachi
     - masadachi
     - masamodachi
     - tatara.*dachi
+  Muramasa:
+    patterns:
+    - muramasa
 Tedalus:
   Essence Shavette:
     format: Shavette
@@ -1901,6 +1929,7 @@ Wade & Butcher:
     patterns:
     - wade.*butcher.*(straight|celebrated)?.*
     - w&b.*(straight|celebrated)?.*
+    - butcher.*wade.*(straight|celebrated)?.*
 Wardonia:
   '':
     patterns:
@@ -1917,23 +1946,20 @@ Weber:
     patterns:
     - weber.*ph
 Weck:
-  450-110:
-    format: Shavette
-    patterns:
-    - weck.*450-110
-  Hair Shaper:
+  Bantam:
     format: Shavette (Hair Shaper)
     patterns:
-    - weck.*hair
+    - weck.*bantam
   Med Prep:
-    format: Shavette
+    format: Shavette (Hair Shaper)
     patterns:
-    - weck.*med.*prep
+    - weck.*(med.*prep|450-110)
   Sextoblade:
-    format: Shavette
+    format: Shavette (Hair Shaper)
     patterns:
     - Sextoblade
     - weck
+    - weck.*hair
 Weishi:
   '9306':
     patterns:
