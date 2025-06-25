@@ -1,0 +1,23 @@
+# Extract Phase Filtering Rules
+# This file contains regex patterns to filter out garbage entries during extraction
+# Entries matching these patterns will be skipped and logged
+
+razor:
+  patterns:
+  - Hot Wheels.*Play.*Razor # toy/joke entry
+  - ^jus$
+blade:
+  patterns:
+  - ^leave$
+
+brush:
+  patterns:
+  - ^imma$
+
+soap:
+  patterns:
+  - ^this$
+
+# Global filters that apply to any field
+global:
+  patterns: []

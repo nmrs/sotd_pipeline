@@ -7,6 +7,12 @@ from typing import Dict, Set
 import yaml
 from rich.console import Console
 
+from sotd.utils.competition_tags import (
+    load_competition_tags,
+    normalize_for_storage,
+    strip_competition_tags,
+)
+
 
 class CorrectMatchesManager:
     """Manages loading, saving, and querying of correct matches."""
@@ -16,6 +22,32 @@ class CorrectMatchesManager:
         self._correct_matches_file = correct_matches_file or Path("data/correct_matches.yaml")
         self._correct_matches: Set[str] = set()
         self._correct_matches_data = {}
+
+    def _load_competition_tags(self) -> Dict[str, list]:
+        """Load competition tags configuration."""
+        return load_competition_tags()
+
+    def _strip_competition_tags(self, value: str, competition_tags: Dict[str, list]) -> str:
+        """
+        Strip competition tags from a string while preserving useful ones.
+
+        Args:
+            value: Input string that may contain competition tags
+            competition_tags: Configuration of tags to strip/preserve
+
+        Returns:
+            String with unwanted competition tags removed
+        """
+        return strip_competition_tags(value, competition_tags)
+
+    def _normalize_for_storage(self, value: str) -> str:
+        """
+        Normalize a string for storage in correct_matches.yaml.
+
+        This strips competition tags and normalizes whitespace to prevent
+        bloat and duplicates in the file.
+        """
+        return normalize_for_storage(value)
 
     def load_correct_matches(self) -> None:
         """Load previously marked correct matches from file."""
@@ -80,7 +112,13 @@ class CorrectMatchesManager:
                         field_data[field][maker] = {}
                     if scent not in field_data[field][maker]:
                         field_data[field][maker][scent] = []
-                    field_data[field][maker][scent].append(original)
+                    # Normalize the original string before storing to prevent bloat
+                    normalized_original = self._normalize_for_storage(original)
+                    if (
+                        normalized_original
+                        and normalized_original not in field_data[field][maker][scent]
+                    ):
+                        field_data[field][maker][scent].append(normalized_original)
                 else:
                     brand = match_data["matched"]["brand"]
                     model = match_data["matched"]["model"]
@@ -88,7 +126,13 @@ class CorrectMatchesManager:
                         field_data[field][brand] = {}
                     if model not in field_data[field][brand]:
                         field_data[field][brand][model] = []
-                    field_data[field][brand][model].append(original)
+                    # Normalize the original string before storing to prevent bloat
+                    normalized_original = self._normalize_for_storage(original)
+                    if (
+                        normalized_original
+                        and normalized_original not in field_data[field][brand][model]
+                    ):
+                        field_data[field][brand][model].append(normalized_original)
 
             # Save to file
             with self._correct_matches_file.open("w", encoding="utf-8") as f:

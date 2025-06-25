@@ -5,6 +5,8 @@ import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
 import shutil
+import io
+from rich.console import Console
 
 from sotd.match.tools.mismatch_analyzer import MismatchAnalyzer
 
@@ -55,6 +57,7 @@ class TestMismatchAnalyzer:
             "low_confidence": "⚠️",
             "regex_match": "🔍",
             "potential_mismatch": "❌",
+            "perfect_regex_matches": "✨",
         }
 
     def test_get_parser(self):
@@ -304,6 +307,7 @@ class TestMismatchAnalyzer:
             "levenshtein_distance": [],
             "low_confidence": [],
             "exact_matches": [],
+            "perfect_regex_matches": [],
         }
 
         args = Mock()
@@ -347,3 +351,52 @@ class TestMismatchAnalyzer:
 
         # Should not raise an exception
         self.analyzer.display_all_matches({"data": test_data}, "razor", mismatches, args)
+
+    def test_display_mismatches_all_columns(self):
+        """Test that all columns are present and correct in the table output."""
+        # Prepare a fake mismatch with all fields
+        mismatches = {
+            "multiple_patterns": [
+                {
+                    "record": {"_source_file": "2025-06.json"},
+                    "field_data": {
+                        "original": "Aylsworth Apex",
+                        "matched": {"brand": "Aylsworth", "model": "Apex"},
+                        "pattern": r"aylsworth.*apex",
+                        "match_type": "regex",
+                    },
+                    "reason": "Matches 2 patterns: aylsworth.*apex, aylsworth apex",
+                }
+            ],
+            "levenshtein_distance": [],
+            "low_confidence": [],
+            "exact_matches": [],
+            "perfect_regex_matches": [],
+        }
+        args = Mock()
+        args.limit = 5
+        args.pattern_width = 40
+
+        # Capture output
+        buf = io.StringIO()
+        test_console = Console(file=buf, force_terminal=True, width=120)
+        self.analyzer.console = test_console
+
+        self.analyzer.display_mismatches(mismatches, "razor", args)
+        output = buf.getvalue()
+
+        # Check for all expected columns
+        assert "Type" in output
+        assert "Original" in output
+        assert "Matched" in output
+        assert "Pattern" in output
+        assert "Reason" in output
+        assert "Sour" in output  # Column is truncated to "Sour…"
+
+        # Check for expected values
+        assert "Aylsworth Apex" in output
+        assert "aylsworth.*apex" in output
+        # The source file may be truncated in the table, so check for the prefix
+        assert "2025-06" in output or "2025…" in output
+        # The reason text might be processed differently, so just check that some reason is present
+        assert "Multiple" in output or "multiple" in output

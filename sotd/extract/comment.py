@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from sotd.extract.fields import extract_field
+from sotd.extract.filter import should_skip_field
 from sotd.utils.text import preprocess_body
 
 logger = logging.getLogger(__name__)
@@ -28,6 +29,12 @@ def parse_comment(comment: dict) -> Optional[dict]:
             if field not in seen_fields:
                 value = extract_field(line, field)
                 if value:
+                    # Apply filtering to extracted values
+                    should_skip, reason = should_skip_field(field, value)
+                    if should_skip:
+                        logger.debug(f"Filtered {field} field: '{value}' - {reason}")
+                        continue
+
                     result[field] = value
                     seen_fields.add(field)
 

@@ -2,7 +2,6 @@
 """Mismatch identification tool for analyzing potential regex mismatches."""
 
 import hashlib
-import json
 import re
 import time
 from pathlib import Path
@@ -14,6 +13,11 @@ from rich.table import Table
 
 from sotd.cli_utils.base_parser import BaseCLIParser
 from sotd.match.tools.analysis_base import AnalysisTool
+from sotd.utils.competition_tags import (
+    load_competition_tags,
+    normalize_for_storage,
+    strip_competition_tags,
+)
 from sotd.utils.yaml_loader import load_yaml_with_nfc
 
 
@@ -28,6 +32,7 @@ class MismatchAnalyzer(AnalysisTool):
             "low_confidence": "⚠️",
             "regex_match": "🔍",
             "potential_mismatch": "❌",
+            "perfect_regex_matches": "✨",
         }
         self._catalog_patterns = {}  # Cache for catalog patterns
         self._catalog_cache_info = {}  # Cache metadata (timestamps, hashes)
@@ -51,9 +56,9 @@ class MismatchAnalyzer(AnalysisTool):
             return pattern
         return pattern[: max_length - 3] + "..."
 
-    def _get_table(self, title: str = ""):
+    def _get_table(self, title: str = "", expand: bool = False):
         """Lazy load Rich Table to reduce startup time."""
-        return Table(title=title)
+        return Table(title=title, expand=expand)
 
     def get_parser(self) -> BaseCLIParser:
         """Get CLI parser for mismatch analysis."""
@@ -92,6 +97,16 @@ class MismatchAnalyzer(AnalysisTool):
             "--show-all",
             action="store_true",
             help="Show all matches, not just mismatches",
+        )
+        parser.add_argument(
+            "--show-unconfirmed",
+            action="store_true",
+            help="Show only unconfirmed matches (not exact or previously confirmed)",
+        )
+        parser.add_argument(
+            "--show-regex-matches",
+            action="store_true",
+            help="Show only regex matches that haven't been confirmed (excludes unmatched)",
         )
         parser.add_argument(
             "--mark-correct",
@@ -190,16 +205,18 @@ class MismatchAnalyzer(AnalysisTool):
         if args.force:
             self._clear_pattern_cache()
 
-        # Load data
-        data_path = Path("data") / "matched" / f"{args.month}.json"
-        if not data_path.exists():
-            self.console.print(f"[red]Error: No matched data found for {args.month}[/red]")
-            return
+        # Load data using the parent class method to get _source_file field
+        # Set up args.out_dir for the load_matched_data method
+        if not hasattr(args, "out_dir"):
+            args.out_dir = Path("data")
+        if not hasattr(args, "debug"):
+            args.debug = False
 
         try:
-            with data_path.open("r", encoding="utf-8") as f:
-                data = json.load(f)
-        except (json.JSONDecodeError, KeyError) as e:
+            records = self.load_matched_data(args)
+            # Convert to the expected format with data wrapper
+            data = {"data": records}
+        except Exception as e:
             self.console.print(f"[red]Error loading data: {e}[/red]")
             return
 
@@ -209,6 +226,10 @@ class MismatchAnalyzer(AnalysisTool):
         # Display results
         if args.show_all:
             self.display_all_matches(data, args.field, mismatches, args)
+        elif args.show_unconfirmed:
+            self.display_unconfirmed_matches(data, args.field, args)
+        elif args.show_regex_matches:
+            self.display_regex_matches(data, args.field, args)
         else:
             self.display_mismatches(mismatches, args.field, args)
 
@@ -259,7 +280,6 @@ class MismatchAnalyzer(AnalysisTool):
         self._catalog_patterns.clear()
         self._catalog_cache_info.clear()
         self._compiled_patterns.clear()
-        self.console.print("[green]Pattern cache cleared[/green]")
 
     def _get_file_hash(self, file_path: Path) -> str:
         """Get SHA-256 hash of file contents."""
@@ -315,6 +335,7 @@ class MismatchAnalyzer(AnalysisTool):
             "levenshtein_distance": [],
             "low_confidence": [],
             "exact_matches": [],
+            "perfect_regex_matches": [],
         }
 
         # Extract the actual records from the data structure
@@ -397,6 +418,26 @@ class MismatchAnalyzer(AnalysisTool):
                     }
                 )
 
+            # Check for perfect regex matches when threshold is 0
+            # (to help populate correct_matches.yaml)
+            if args.threshold == 0 and match_type == "regex":
+                # Check if this is a perfect or near-perfect match (Levenshtein distance <= 2)
+                distance = self._levenshtein_distance(original, matched_text)
+                if distance <= 2:
+                    reason = (
+                        "Perfect regex match (threshold 0)"
+                        if distance == 0
+                        else f"Near-perfect regex match (distance {distance})"
+                    )
+                    mismatches["perfect_regex_matches"].append(
+                        {
+                            "record": record,
+                            "field_data": field_data,
+                            "match_key": match_key,
+                            "reason": reason,
+                        }
+                    )
+
             # Check confidence scores (if confidence field exists)
             if hasattr(args, "confidence_threshold") and confidence < args.confidence_threshold:
                 mismatches["low_confidence"].append(
@@ -413,8 +454,8 @@ class MismatchAnalyzer(AnalysisTool):
     def _create_match_key(self, field: str, original: str, matched: Dict) -> str:
         """Create a unique key for a match based on field, original text, and matched data."""
         matched_text = self._get_matched_text(field, matched)
-        # Normalize for consistent key generation
-        original_normalized = original.lower().strip()
+        # Normalize for consistent key generation - use normalized original to match storage format
+        original_normalized = self._normalize_for_storage(original).lower().strip()
         matched_normalized = matched_text.lower().strip()
         return f"{field}:{original_normalized}|{matched_normalized}"
 
@@ -465,6 +506,32 @@ class MismatchAnalyzer(AnalysisTool):
             self._correct_matches = set()
             self._correct_matches_data = {}
 
+    def _load_competition_tags(self) -> Dict[str, List[str]]:
+        """Load competition tags configuration."""
+        return load_competition_tags()
+
+    def _strip_competition_tags(self, value: str, competition_tags: Dict[str, List[str]]) -> str:
+        """
+        Strip competition tags from a string while preserving useful ones.
+
+        Args:
+            value: Input string that may contain competition tags
+            competition_tags: Configuration of tags to strip/preserve
+
+        Returns:
+            String with unwanted competition tags removed
+        """
+        return strip_competition_tags(value, competition_tags)
+
+    def _normalize_for_storage(self, value: str) -> str:
+        """
+        Normalize a string for storage in correct_matches.yaml.
+
+        This strips competition tags and normalizes whitespace to prevent
+        bloat and duplicates in the file.
+        """
+        return normalize_for_storage(value)
+
     def _save_correct_matches(self) -> None:
         """Save correct matches to file in YAML format."""
         try:
@@ -501,8 +568,15 @@ class MismatchAnalyzer(AnalysisTool):
                     yaml_data[field][canonical_brand] = {}
                 if canonical_model not in yaml_data[field][canonical_brand]:
                     yaml_data[field][canonical_brand][canonical_model] = []
-                if original not in yaml_data[field][canonical_brand][canonical_model]:
-                    yaml_data[field][canonical_brand][canonical_model].append(original)
+
+                # Normalize the original string before storing to prevent bloat
+                normalized_original = self._normalize_for_storage(original)
+                if (
+                    normalized_original
+                    and normalized_original
+                    not in yaml_data[field][canonical_brand][canonical_model]
+                ):
+                    yaml_data[field][canonical_brand][canonical_model].append(normalized_original)
 
             # Alphabetize entries within each field/brand/model
             for field, field_data in yaml_data.items():
@@ -572,9 +646,10 @@ class MismatchAnalyzer(AnalysisTool):
         # Group patterns by product to avoid counting multiple patterns for the same product
         product_matches = {}
 
+        # Check all patterns and group by product
         for pattern_info in catalog_patterns:
             pattern_text = pattern_info.get("pattern", "")
-            if not pattern_text or pattern_text == current_pattern:
+            if not pattern_text:
                 continue
 
             # Use cached compiled pattern
@@ -739,6 +814,9 @@ class MismatchAnalyzer(AnalysisTool):
 
     def _get_matched_text(self, field: str, matched: Dict) -> str:
         """Extract text representation of matched data."""
+        if matched is None:
+            return ""
+
         if field == "soap":
             maker = matched.get("maker", "")
             scent = matched.get("scent", "")
@@ -776,12 +854,10 @@ class MismatchAnalyzer(AnalysisTool):
             for item in items:
                 field_data = item["field_data"]
                 original = field_data.get("original", "")
+                norm_original = normalize_for_storage(original)
                 matched = self._get_matched_text(field, field_data.get("matched", {}))
-                pattern = field_data.get("pattern", "")
-                reason = item["reason"]
-
-                # Create a unique key for grouping
-                group_key = (original, matched, pattern, reason, mismatch_type)
+                # Group by the actual match, not by mismatch type, case-insensitive
+                group_key = (norm_original.lower(), matched.lower())
 
                 if group_key not in groups:
                     groups[group_key] = {"count": 0, "item": item, "sources": set()}
@@ -794,7 +870,7 @@ class MismatchAnalyzer(AnalysisTool):
             # Convert groups to list format with deterministic sorting
             for group_key in sorted(groups.keys()):
                 group_info = groups[group_key]
-                original, matched, pattern, reason, mismatch_type = group_key
+                norm_original, matched = group_key
 
                 # Create a modified item with count information
                 modified_item = group_info["item"].copy()
@@ -808,8 +884,15 @@ class MismatchAnalyzer(AnalysisTool):
         return grouped_mismatches
 
     def display_mismatches(self, mismatches: Dict[str, List[Dict]], field: str, args) -> None:
-        """Display identified mismatches in a formatted table."""
-        mismatch_keys = ["multiple_patterns", "levenshtein_distance", "low_confidence"]
+        """Display identified mismatches in a formatted table, normalized and grouped."""
+        from sotd.utils.competition_tags import normalize_for_storage
+
+        mismatch_keys = [
+            "multiple_patterns",
+            "levenshtein_distance",
+            "low_confidence",
+            "perfect_regex_matches",
+        ]
         total_mismatches = sum(len(mismatches[key]) for key in mismatch_keys)
         exact_matches_count = len(mismatches.get("exact_matches", []))
 
@@ -824,8 +907,61 @@ class MismatchAnalyzer(AnalysisTool):
                 self.console.print(f"[green]✅ No potential mismatches found for {field}[/green]")
             return
 
-        # Group duplicate mismatches
-        grouped_mismatches = self._group_duplicate_mismatches(mismatches, field)
+        # Group duplicate mismatches by normalized original and matched
+        # (not by mismatch type), case-insensitive
+        grouped = {}
+        for mismatch_type in mismatch_keys:
+            for item in mismatches[mismatch_type]:
+                field_data = item["field_data"]
+                original = field_data.get("original", "")
+                norm_original = normalize_for_storage(original)
+                matched = self._get_matched_text(field, field_data.get("matched", {}))
+                reason = item["reason"]
+                # Group by the actual match, not by mismatch type, case-insensitive
+                group_key = (norm_original.lower(), matched.lower())
+                if group_key not in grouped:
+                    grouped[group_key] = {
+                        "count": 0,
+                        "item": item,
+                        "sources": set(),
+                        "mismatch_types": set(),
+                        "reasons": set(),
+                    }
+                grouped[group_key]["count"] += 1
+                grouped[group_key]["mismatch_types"].add(mismatch_type)
+                grouped[group_key]["reasons"].add(reason)
+                source = item["record"].get("_source_file", "")
+                if source:
+                    grouped[group_key]["sources"].add(source)
+
+        # Convert groups to list format with deterministic sorting
+        grouped_mismatches = []
+        # Define priority order
+        priority = [
+            "multiple_patterns",
+            "levenshtein_distance",
+            "low_confidence",
+            "perfect_regex_matches",
+        ]
+        for group_key in sorted(grouped.keys()):
+            group_info = grouped[group_key]
+            norm_original, matched = group_key
+            modified_item = group_info["item"].copy()
+            modified_item["count"] = group_info["count"]
+            modified_item["sources"] = sorted(list(group_info["sources"]))
+            # Choose the highest priority mismatch type present
+            mismatch_types = sorted(list(group_info["mismatch_types"]))
+            for p in priority:
+                if p in mismatch_types:
+                    modified_item["mismatch_type"] = p
+                    break
+            else:
+                modified_item["mismatch_type"] = mismatch_types[0] if mismatch_types else ""
+            modified_item["norm_original"] = norm_original
+            # Combine all reasons
+            reasons = sorted(list(group_info["reasons"]))
+            modified_item["reason"] = "; ".join(reasons)
+            grouped_mismatches.append(modified_item)
         unique_count = len(grouped_mismatches)
 
         # Show info about exact matches being skipped
@@ -841,15 +977,15 @@ class MismatchAnalyzer(AnalysisTool):
         )
 
         # Create table for mismatches
-        table = self._get_table(title=f"Potential Mismatches - {field.capitalize()}")
-        table.add_column("#", style="dim", justify="right", width=3)
-        table.add_column("Count", style="magenta", justify="center", width=6)
-        table.add_column("Type", style="cyan", width=25)
-        table.add_column("Original", style="yellow", width=30)
-        table.add_column("Matched", style="green", width=25)
-        table.add_column("Pattern", style="blue", width=getattr(args, "pattern_width", 80))
-        table.add_column("Reason", style="red", width=20)
-        table.add_column("Sources", style="dim", width=15)
+        table = self._get_table(title=f"Potential Mismatches - {field.capitalize()}", expand=True)
+        table.add_column("#", style="dim", justify="right")
+        table.add_column("Count", style="magenta", justify="center")
+        table.add_column("Type", style="cyan")
+        table.add_column("Original", style="yellow")
+        table.add_column("Matched", style="green")
+        table.add_column("Pattern", style="blue")
+        table.add_column("Reason", style="red")
+        table.add_column("Sources", style="dim")
 
         # Get limits and filters with defaults
         limit = getattr(args, "limit", 50)
@@ -863,17 +999,15 @@ class MismatchAnalyzer(AnalysisTool):
             count = item["count"]
             sources = item["sources"]
 
-            original = field_data.get("original", "")
+            norm_original = item["norm_original"]
             matched = self._get_matched_text(field, field_data.get("matched", {}))
-            pattern = field_data.get("pattern", "")
             reason = item["reason"]
 
+            # Get the actual regex pattern from field_data
+            pattern = field_data.get("pattern", "")
             # Escape pattern for Rich table display
             pattern = self._escape_pattern_for_display(pattern)
-            # Truncate pattern if it's too long for display
-            pattern = self._truncate_pattern_for_display(
-                pattern, max_length=getattr(args, "pattern_width", 80)
-            )
+            # No truncation, let it wrap
 
             # Add visual indicator
             indicator = self.mismatch_indicators.get(mismatch_type, "❓")
@@ -889,7 +1023,7 @@ class MismatchAnalyzer(AnalysisTool):
                 str(row_number),
                 count_text,
                 type_text,
-                original,
+                norm_original,
                 matched,
                 pattern,
                 reason,
@@ -910,20 +1044,23 @@ class MismatchAnalyzer(AnalysisTool):
     def display_all_matches(
         self, data: Dict, field: str, mismatches: Dict[str, List[Dict]], args
     ) -> None:
-        """Display all matches with mismatch indicators."""
+        """Display all matches with mismatch indicators, normalized and grouped."""
+        from sotd.utils.competition_tags import normalize_for_storage
+
         self.console.print(
             f"\n[bold]All {field.capitalize()} Matches with Mismatch Indicators:[/bold]\n"
         )
 
-        table = self._get_table(title=f"All Matches - {field.capitalize()}")
-        table.add_column("#", style="dim", justify="right", width=3)
-        table.add_column("Status", style="cyan", width=25)
-        table.add_column("Original", style="yellow", width=30)
-        table.add_column("Matched", style="green", width=25)
-        table.add_column("Pattern", style="blue", width=getattr(args, "pattern_width", 80))
-        table.add_column("Match Type", style="magenta", width=15)
-        table.add_column("Correct", style="dim", width=8)
-        table.add_column("Source", style="dim", width=15)
+        table = self._get_table(title=f"All Matches - {field.capitalize()}", expand=True)
+        table.add_column("#", style="dim", justify="right")
+        table.add_column("Count", style="magenta", justify="center")
+        table.add_column("Status", style="cyan")
+        table.add_column("Original", style="yellow")
+        table.add_column("Matched", style="green")
+        table.add_column("Pattern", style="blue")
+        table.add_column("Match Type", style="magenta")
+        table.add_column("Correct", style="dim")
+        table.add_column("Source", style="dim")
 
         # Create lookup for mismatches
         mismatch_lookup = {}
@@ -939,42 +1076,52 @@ class MismatchAnalyzer(AnalysisTool):
         limit = getattr(args, "limit", 50)
         records = data.get("data", [])
 
-        # Sort records for deterministic display order
-        def record_sort_key(record):
-            field_data = record.get(field, {})
-            original = field_data.get("original", "")
-            record_id = record.get("id", "")
-            return (original.lower(), record_id)
-
-        sorted_records = sorted(records, key=record_sort_key)
-
-        row_number = 1
-        for record in sorted_records[:limit]:
+        # Group by normalized original, matched_text, pattern, match_type
+        grouped = {}
+        for record in records:
             field_data = record.get(field)
             if not isinstance(field_data, dict):
                 continue
-
             original = field_data.get("original", "")
+            norm_original = normalize_for_storage(original)
             matched = field_data.get("matched", {})
             matched_text = self._get_matched_text(field, matched)
             pattern = field_data.get("pattern", "")
             match_type = field_data.get("match_type", "")
             source = record.get("_source_file", "")
+            record_id = record.get("id", "")
+            key = (norm_original, matched_text, pattern, match_type)
+            if key not in grouped:
+                grouped[key] = {
+                    "count": 0,
+                    "field_data": field_data,
+                    "matched_text": matched_text,
+                    "pattern": pattern,
+                    "match_type": match_type,
+                    "source": source,
+                    "record_ids": set(),
+                }
+            grouped[key]["count"] += 1
+            grouped[key]["record_ids"].add(record_id)
 
+        # Sort groups for deterministic display order
+        sorted_groups = sorted(grouped.items(), key=lambda x: (x[0][0], x[0][1], x[0][2], x[0][3]))
+
+        row_number = 1
+        for (norm_original, matched_text, pattern, match_type), group in sorted_groups[:limit]:
+            count = group["count"]
+            field_data = group["field_data"]
+            source = group["source"]
             # Escape pattern for Rich table display
-            pattern = self._escape_pattern_for_display(pattern)
-            # Truncate pattern if it's too long for display
-            pattern = self._truncate_pattern_for_display(
-                pattern, max_length=getattr(args, "pattern_width", 80)
-            )
-
+            pattern_disp = self._escape_pattern_for_display(pattern)
+            # No truncation, let it wrap
             # Check if this match was previously marked as correct
-            match_key = self._create_match_key(field, original, matched)
+            match_key = self._create_match_key(field, norm_original, {"brand": matched_text})
             is_correct = match_key in self._correct_matches
             correct_indicator = "✅" if is_correct else ""
-
             # Determine status and indicator
-            record_id = record.get("id", "")
+            # Use the first record_id in the group for mismatch lookup
+            record_id = next(iter(group["record_ids"])) if group["record_ids"] else ""
             if record_id in mismatch_lookup:
                 mismatch_type, reason = mismatch_lookup[record_id]
                 indicator = self.mismatch_indicators.get(mismatch_type, "❓")
@@ -983,21 +1130,208 @@ class MismatchAnalyzer(AnalysisTool):
                 status = f"{self.mismatch_indicators['regex_match']} Regex Match"
             else:
                 status = f"{self.mismatch_indicators['potential_mismatch']} Potential Mismatch"
-
             table.add_row(
                 str(row_number),
+                str(count),
                 status,
-                original,
+                norm_original,
                 matched_text,
-                pattern,
+                pattern_disp,
                 match_type,
                 correct_indicator,
                 source,
             )
-
-            # Track this displayed match
             displayed_matches.append(
-                {"match_key": match_key, "original": original, "matched_text": matched_text}
+                {"match_key": match_key, "original": norm_original, "matched_text": matched_text}
+            )
+            row_number += 1
+
+        self.console.print(table)
+
+        # Handle mark-correct functionality for displayed matches only
+        if getattr(args, "mark_correct", False) and displayed_matches:
+            self._mark_displayed_matches_as_correct(displayed_matches, field, args)
+        elif getattr(args, "dry_run", False) and displayed_matches:
+            self._preview_mark_correct(displayed_matches, field, args)
+
+    def display_unconfirmed_matches(self, data: Dict, field: str, args) -> None:
+        """Display only unconfirmed matches (not exact or previously confirmed)."""
+        from sotd.utils.competition_tags import normalize_for_storage
+
+        self.console.print(f"\n[bold]Unconfirmed {field.capitalize()} Matches:[/bold]\n")
+
+        table = self._get_table(title=f"Unconfirmed Matches - {field.capitalize()}", expand=True)
+        table.add_column("#", style="dim", justify="right")
+        table.add_column("Count", style="magenta", justify="center")
+        table.add_column("Original", style="yellow")
+        table.add_column("Matched", style="green")
+        table.add_column("Pattern", style="blue")
+        table.add_column("Match Type", style="magenta")
+        table.add_column("Source", style="dim")
+
+        # Track displayed matches for mark-correct functionality
+        displayed_matches = []
+
+        # Get limit with default
+        limit = getattr(args, "limit", 50)
+        records = data.get("data", [])
+
+        # Group by normalized original, matched_text, pattern, match_type
+        grouped = {}
+        for record in records:
+            field_data = record.get(field)
+            if not isinstance(field_data, dict):
+                continue
+            original = field_data.get("original", "")
+            norm_original = normalize_for_storage(original)
+            matched = field_data.get("matched", {})
+            matched_text = self._get_matched_text(field, matched)
+            pattern = field_data.get("pattern", "")
+            match_type = field_data.get("match_type", "")
+            source = record.get("_source_file", "")
+            record_id = record.get("id", "")
+
+            # Skip exact matches (from correct_matches.yaml)
+            if match_type == "exact":
+                continue
+
+            # Skip previously confirmed matches
+            match_key = self._create_match_key(field, norm_original, {"brand": matched_text})
+            if match_key in self._correct_matches:
+                continue
+
+            key = (norm_original, matched_text, pattern, match_type)
+            if key not in grouped:
+                grouped[key] = {
+                    "count": 0,
+                    "field_data": field_data,
+                    "matched_text": matched_text,
+                    "pattern": pattern,
+                    "match_type": match_type,
+                    "source": source,
+                    "record_ids": set(),
+                }
+            grouped[key]["count"] += 1
+            grouped[key]["record_ids"].add(record_id)
+
+        # Sort groups for deterministic display order
+        sorted_groups = sorted(grouped.items(), key=lambda x: (x[0][0], x[0][1], x[0][2], x[0][3]))
+
+        row_number = 1
+        for (norm_original, matched_text, pattern, match_type), group in sorted_groups[:limit]:
+            count = group["count"]
+            field_data = group["field_data"]
+            source = group["source"]
+            # Escape pattern for Rich table display
+            pattern_disp = self._escape_pattern_for_display(pattern)
+
+            # Create match key for this group
+            match_key = self._create_match_key(field, norm_original, {"brand": matched_text})
+
+            table.add_row(
+                str(row_number),
+                str(count),
+                norm_original,
+                matched_text,
+                pattern_disp,
+                match_type,
+                source,
+            )
+            displayed_matches.append(
+                {"match_key": match_key, "original": norm_original, "matched_text": matched_text}
+            )
+            row_number += 1
+
+        self.console.print(table)
+
+        # Handle mark-correct functionality for displayed matches only
+        if getattr(args, "mark_correct", False) and displayed_matches:
+            self._mark_displayed_matches_as_correct(displayed_matches, field, args)
+        elif getattr(args, "dry_run", False) and displayed_matches:
+            self._preview_mark_correct(displayed_matches, field, args)
+
+    def display_regex_matches(self, data: Dict, field: str, args) -> None:
+        """Display only regex matches (not exact or previously confirmed)."""
+        from sotd.utils.competition_tags import normalize_for_storage
+
+        self.console.print(f"\n[bold]Regex Matches for {field.capitalize()}:[/bold]\n")
+
+        table = self._get_table(title=f"Regex Matches - {field.capitalize()}", expand=True)
+        table.add_column("#", style="dim", justify="right")
+        table.add_column("Original", style="yellow")
+        table.add_column("Matched", style="green")
+        table.add_column("Pattern", style="blue")
+        table.add_column("Source", style="dim")
+
+        # Track displayed matches for mark-correct functionality
+        displayed_matches = []
+
+        # Get limit with default
+        limit = getattr(args, "limit", 50)
+        records = data.get("data", [])
+
+        # Group by normalized original, matched_text, pattern, match_type
+        grouped = {}
+        for record in records:
+            field_data = record.get(field)
+            if not isinstance(field_data, dict):
+                continue
+            original = field_data.get("original", "")
+            norm_original = normalize_for_storage(original)
+            matched = field_data.get("matched", {})
+            matched_text = self._get_matched_text(field, matched)
+            pattern = field_data.get("pattern", "")
+            match_type = field_data.get("match_type", "")
+            source = record.get("_source_file", "")
+            record_id = record.get("id", "")
+
+            # Skip exact matches (from correct_matches.yaml)
+            if match_type == "exact":
+                continue
+
+            # Skip previously confirmed matches
+            match_key = self._create_match_key(field, norm_original, {"brand": matched_text})
+            if match_key in self._correct_matches:
+                continue
+
+            # Skip unmatched rows (empty matched_text)
+            if not matched_text:
+                continue
+
+            key = (norm_original, matched_text, pattern, match_type)
+            if key not in grouped:
+                grouped[key] = {
+                    "count": 0,
+                    "field_data": field_data,
+                    "matched_text": matched_text,
+                    "pattern": pattern,
+                    "match_type": match_type,
+                    "source": source,
+                    "record_ids": set(),
+                }
+            grouped[key]["count"] += 1
+            grouped[key]["record_ids"].add(record_id)
+
+        # Sort groups for deterministic display order
+        sorted_groups = sorted(grouped.items(), key=lambda x: (x[0][0], x[0][1], x[0][2], x[0][3]))
+
+        row_number = 1
+        for (norm_original, matched_text, pattern, match_type), group in sorted_groups[:limit]:
+            field_data = group["field_data"]
+            source = group["source"]
+            # Escape pattern for Rich table display
+            pattern_disp = self._escape_pattern_for_display(pattern)
+            # No truncation, let it wrap
+
+            table.add_row(
+                str(row_number),
+                norm_original,
+                matched_text,
+                pattern_disp,
+                source,
+            )
+            displayed_matches.append(
+                {"match_key": self._create_match_key(field, norm_original, {"brand": matched_text})}
             )
             row_number += 1
 

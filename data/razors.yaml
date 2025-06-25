@@ -6,6 +6,10 @@
     format: GEM
     patterns:
     - 3d.*(?:printed)?.*gem
+  Lathercatcher:
+    format: GEM
+    patterns:
+    - 3d.*(?:printed)?.*lather.*catcher
 Above the Tie:
   H1:
     patterns:
@@ -31,6 +35,7 @@ Above the Tie:
     patterns:
     - '\b(?:att|tie)\b.*s-*1'
     - (?:atlas|bamboo|calypso|colossus|kronos).*s1
+    - above the tie.*(?:atlas|bamboo|calypso|colossus|kronos)
   S2:
     patterns:
     - '\b(?:att|tie)\b.*s-*2'
@@ -56,6 +61,9 @@ Alpha:
     format: AC
     patterns:
     - alpha.*claymore
+  Lone Star:
+    patterns:
+    - alpha.*lone.*star
   Outlaw:
     patterns:
     - alpha.*outl
@@ -93,6 +101,10 @@ Asylum:
     patterns:
     - asylum.*rx
 Atelier Durdan:
+  Horizon:
+    format: AC
+    patterns:
+    - durdan.*horizon
   Le Faulx:
     format: AC
     patterns:
@@ -268,7 +280,7 @@ Carbon:
     - carbon.*316
     - carbon.*orig
     - carbon.*ti
-    - carbon \+\+
+    - carbon \++
     - carbon razors?
 Cartridge / Disposable:
   '':
@@ -282,10 +294,7 @@ Cartridge / Disposable:
     - disposable
     - fusion
     - gillette blue
-    - gil.*et.*labs
-    - gil.*et.*guard
-    - gil.*et.*proglide
-    - gil.*et.*venus
+    - gil.*et.*(labs|guard|proglide|joy|venus)
     - harry
     - '\blidl\b'
     - 'mach.*(3|iii)'
@@ -436,7 +445,7 @@ Durham:
   Duplex:
     format: Shavette
     patterns:
-    - durham.*duplex
+    - durham.*(?:duplex|demonstrator)
 Eclipse:
   Red Ring:
     patterns:
@@ -800,12 +809,17 @@ Gillette:
     - fbt
     - 'triangle\s*slot'
     - \btech\b
+    - gil.*travel
   Toggle:
     patterns:
     - (gil.*)?toggle
   Tuckaway:
     patterns:
     - gil.*tuckaway
+GL Customs:
+  Keystone Light:
+    patterns:
+    - gl customs
 Goodfellas Smile:
   Bayonetta:
     patterns:
@@ -842,6 +856,10 @@ Gutche:
     patterns:
     - gutche
 H&S Co.:
+  NO75:
+    patterns:
+    - h\+s.*n[o0]75
+    - haircut.*n[0o]75
   Z074:
     patterns:
       - h\+s.*z074
@@ -850,6 +868,10 @@ Handlebar:
   Shaving Company Dali:
     patterns:
     - handlebar.*dali
+Haryali:
+  Travel Razor:
+    patterns:
+    - har+yali.*travel
 Headblade:
   ATX:
     format: Cartridge
@@ -980,7 +1002,7 @@ Koraat:
     format: Straight
     grind: Full Hollow
     patterns:
-    - koraat.*moarteen(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+    - koraat.*moar ?teen(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     point: Square
     width: 15/16
   Straight:
@@ -1041,6 +1063,9 @@ Lion:
     patterns:
     - lion.*\bde\b
 Lord:
+  L122:
+    patterns:
+    - lord.*l122
   L5:
     patterns:
     - lord.*l5
@@ -1078,7 +1103,7 @@ Maggard:
 Manscaped:
   The Plow 2.0:
     patterns:
-    - manscaped.*plow
+    - manscaped?.*plow
 Maxwell:
   June:
     format: Half DE
@@ -1148,6 +1173,11 @@ Mongoose:
     format: AC
     patterns:
     - goose
+Mossei:
+  Mono:
+    format: Injector
+    patterns:
+    - mossei.*mono
 Muninn Woodworks:
   Sextoblade:
     format: Shavette
@@ -1219,6 +1249,7 @@ Other:
   DE:
     patterns:
     - generic.*(safety|double)
+    - german travel razor
   DE Clone:
     patterns:
     - ^(?!.*(futur|eagle)).*(knockoff|clone)
@@ -1230,6 +1261,10 @@ Other:
     - hair.*sha
     - marianna
     - burmax.*shavette
+  Shavette (Disposable):
+      format: Shavette (Disposable)
+      patterns:
+      - (?:cvs|kroger).*dermaplane
   Kamisori:
     format: Straight
     patterns:
@@ -1237,12 +1272,13 @@ Other:
   Straight Razor:
     format: Straight
     patterns:
-    - '(&|and)\s+son'
-    - '\d{1,2}/(8|16)'
+    - (&|and)\s+son
+    - \d{1,2}/(8|16)
     - 20th.*Century.*Mfg.*HH
     - alberta
+    - bismarck
     - case.*red
-    - Cattaraugus
+    - cattaraugus
     - c-?mon
     - diamondine
     - ditzer
@@ -1261,7 +1297,9 @@ Other:
     - henkotsu
     - hero.*germany
     - hollow
-    - 'joseph\s*(elliot|allen)'
+    - joseph\s*(elliot|allen)
+    - kobar
+    - lee.*warrant
     - leger
     - le grelot
     - le thiernois
@@ -1287,14 +1325,10 @@ Other:
     - wacker
     - wedge
     - wester.*brothers
-    - wostenholm
+    - w[oe]stenholm
     - w.?\s?r.?\s?humphrey'?s
     - yankee.*cutlery
     - \bm\b.*karam
-    - \b5/8\b
-    - \b6/8\b
-    - \b7/8\b
-    - \b8/8\b
 PAA:
   Alpha Ecliptic:
     patterns:
@@ -1409,9 +1443,17 @@ Parker:
   A1R:
     patterns:
     - parker.*a1r
+  Adjustable Injector:
+    format: Injector
+    patterns:
+    - parker.*adjustable.*injector
   SR1:
     patterns:
     - parker.*sr1
+  SRB Shavette:
+    format: Shavette (Half DE)
+    patterns:
+    - parker.*srb.*shavette
   SRW:
     patterns:
     - parker.*srw
@@ -1528,7 +1570,7 @@ RazoRock:
   Hawk v2:
     format: AC
     patterns:
-    - hawk.*2
+    - (razorock)?.*hawk.*v?2
   Hawk v3:
     format: AC
     patterns:
@@ -1802,17 +1844,22 @@ Supply:
     - supply razor
     - ^supply$
 TRC:
-  Stainless Steel:
+  DE:
     patterns:
-    - '\btrc\b'
-    - the razor co.*stainless
-  Titanium:
-    patterns:
-    - '\btrc\b.*titanium'
+    - \btrc\b
+    - the razor co
   TTO:
     patterns:
-    - '\btrc\b.*tto'
+    - \btrc\b.*tto
+    - the razor co.*tto
+  Vanguard:
+    patterns:
+    - trc.*vanguard
 Tatara:
+  Amakuni:
+    format: AC
+    patterns:
+    - (tatara.*)?amakuni
   Masamune:
     patterns:
     - masamune
@@ -1834,8 +1881,12 @@ Tedalus:
     - tedalus.*(essence|shavette)?
   Velocity-ONE: 
     patterns:
-    - tedal.*velo
+    - tedal.*velo(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
 The Holy Black:
+  Shavette:
+    format: Shavette (Half DE)
+    patterns:
+    - holy.*black.*shavette
   SR-71:
     patterns:
     - sr-*71
@@ -2041,6 +2092,9 @@ Yaqi:
   Katana:
     patterns:
     - yaqi.*katana
+  Open Comb:
+    patterns:
+    - yaqi.*open.*comb(.*head)?
   Pink:
     patterns:
     - yaqi.*pink

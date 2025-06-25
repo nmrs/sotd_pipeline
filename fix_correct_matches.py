@@ -1,67 +1,12 @@
 #!/usr/bin/env python3
 """Clean up correct_matches.yaml by alphabetizing, stripping tags, and removing duplicates."""
 
-import re
 from pathlib import Path
 from typing import Dict, List
 
 import yaml
 
-
-def load_competition_tags(tags_path: Path) -> Dict[str, List[str]]:
-    """Load competition tags configuration."""
-    if not tags_path.exists():
-        return {"strip_tags": [], "preserve_tags": []}
-
-    try:
-        with tags_path.open("r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-        return {
-            "strip_tags": data.get("strip_tags", []),
-            "preserve_tags": data.get("preserve_tags", []),
-        }
-    except Exception:
-        return {"strip_tags": [], "preserve_tags": []}
-
-
-def strip_competition_tags(value: str, competition_tags: Dict[str, List[str]]) -> str:
-    """
-    Strip competition tags from a string while preserving useful ones.
-
-    Args:
-        value: Input string that may contain competition tags
-        competition_tags: Configuration of tags to strip/preserve
-
-    Returns:
-        String with unwanted competition tags removed
-    """
-    if not isinstance(value, str):
-        return value
-
-    # Get tags to strip and preserve
-    strip_tags = competition_tags.get("strip_tags", [])
-    preserve_tags = competition_tags.get("preserve_tags", [])
-
-    if not strip_tags:
-        return value
-
-    # Create a list of tags to actually strip (exclude preserve_tags)
-    tags_to_strip = [tag for tag in strip_tags if tag not in preserve_tags]
-
-    if not tags_to_strip:
-        return value
-
-    # Build regex pattern to match tags with word boundaries
-    # This ensures we match whole tags, not partial matches
-    # Also handle tags that might be wrapped in backticks or asterisks
-    strip_pattern = r"[`*]*\$(" + "|".join(re.escape(tag) for tag in tags_to_strip) + r")\b[`*]*"
-
-    # Remove the tags and clean up extra whitespace
-    cleaned = re.sub(strip_pattern, "", value, flags=re.IGNORECASE)
-    cleaned = re.sub(r"\s+", " ", cleaned)  # Normalize whitespace
-    cleaned = cleaned.strip()
-
-    return cleaned
+from sotd.utils.competition_tags import load_competition_tags, strip_competition_tags
 
 
 def clean_and_alphabetize_correct_matches(

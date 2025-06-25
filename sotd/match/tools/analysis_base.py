@@ -39,12 +39,15 @@ class AnalysisTool(ABC):
             if path.exists():
                 if args.debug:
                     print(f"Loading: {path}")
+
                 with path.open("r", encoding="utf-8") as f:
                     content = json.load(f)
                 data = content.get("data", [])
-                # Add source file information to each record
+
                 for record in data:
                     record["_source_file"] = f"{year:04d}-{month:02d}.json"
+                    record["_source_line"] = "unknown"
+
                 all_data.extend(data)
             else:
                 if args.debug:

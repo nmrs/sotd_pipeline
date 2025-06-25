@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from sotd.utils.competition_tags import load_competition_tags, strip_competition_tags
 from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 
 
@@ -46,19 +47,7 @@ class BaseMatcher:
 
     def _load_competition_tags(self) -> Dict[str, List[str]]:
         """Load competition tags configuration."""
-        tags_path = Path("data/competition_tags.yaml")
-        if not tags_path.exists():
-            return {"strip_tags": [], "preserve_tags": []}
-
-        try:
-            data = load_yaml_with_nfc(tags_path, loader_cls=UniqueKeyLoader)
-            return {
-                "strip_tags": data.get("strip_tags", []),
-                "preserve_tags": data.get("preserve_tags", []),
-            }
-        except Exception:
-            # If tags file is corrupted or can't be loaded, continue without it
-            return {"strip_tags": [], "preserve_tags": []}
+        return load_competition_tags()
 
     def _strip_competition_tags(self, value: str) -> str:
         """
@@ -70,35 +59,7 @@ class BaseMatcher:
         Returns:
             String with unwanted competition tags removed
         """
-        if not isinstance(value, str):
-            return value
-
-        # Get tags to strip and preserve
-        strip_tags = self.competition_tags.get("strip_tags", [])
-        preserve_tags = self.competition_tags.get("preserve_tags", [])
-
-        if not strip_tags:
-            return value
-
-        # Create a list of tags to actually strip (exclude preserve_tags)
-        tags_to_strip = [tag for tag in strip_tags if tag not in preserve_tags]
-
-        if not tags_to_strip:
-            return value
-
-        # Build regex pattern to match tags with word boundaries
-        # This ensures we match whole tags, not partial matches
-        # Also handle tags that might be wrapped in backticks or asterisks
-        strip_pattern = (
-            r"[`*]*\$(" + "|".join(re.escape(tag) for tag in tags_to_strip) + r")\b[`*]*"
-        )
-
-        # Remove the tags and clean up extra whitespace
-        cleaned = re.sub(strip_pattern, "", value, flags=re.IGNORECASE)
-        cleaned = re.sub(r"\s+", " ", cleaned)  # Normalize whitespace
-        cleaned = cleaned.strip()
-
-        return cleaned
+        return strip_competition_tags(value, self.competition_tags)
 
     def _build_correct_matches_lookup(self) -> Dict[str, Dict[str, Any]]:
         """
