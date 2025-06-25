@@ -38,7 +38,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 3
+        assert result["use_count"] == "3"
         assert result["_enriched_by"] == "BladeCountEnricher"
         assert result["_extraction_source"] == "user_comment"
 
@@ -50,7 +50,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 5
+        assert result["use_count"] == "5"
         assert result["_enriched_by"] == "BladeCountEnricher"
         assert result["_extraction_source"] == "user_comment"
 
@@ -62,7 +62,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 2
+        assert result["use_count"] == "2"
         assert result["_enriched_by"] == "BladeCountEnricher"
         assert result["_extraction_source"] == "user_comment"
 
@@ -74,7 +74,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 4
+        assert result["use_count"] == "4"
         assert result["_enriched_by"] == "BladeCountEnricher"
         assert result["_extraction_source"] == "user_comment"
 
@@ -86,7 +86,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 2
+        assert result["use_count"] == "2"
         assert result["_enriched_by"] == "BladeCountEnricher"
         assert result["_extraction_source"] == "user_comment"
 
@@ -98,7 +98,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 2
+        assert result["use_count"] == "2"
         assert result["_enriched_by"] == "BladeCountEnricher"
         assert result["_extraction_source"] == "user_comment"
 
@@ -119,7 +119,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 3
+        assert result["use_count"] == "3"
 
     def test_enrich_with_large_number(self, enricher):
         """Test extraction with large use count numbers."""
@@ -129,7 +129,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 15
+        assert result["use_count"] == "15"
 
     def test_enrich_with_single_digit(self, enricher):
         """Test extraction with single digit use count."""
@@ -139,7 +139,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 1
+        assert result["use_count"] == "1"
 
     def test_enrich_case_insensitive(self, enricher):
         """Test that extraction is case insensitive."""
@@ -149,7 +149,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 3
+        assert result["use_count"] == "3"
 
     def test_enrich_with_extra_text(self, enricher):
         """Test extraction when count is embedded in longer text."""
@@ -159,7 +159,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 5
+        assert result["use_count"] == "5"
 
     def test_extract_use_count_method(self, enricher):
         """Test the _extract_use_count method directly."""
@@ -197,7 +197,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 3
+        assert result["use_count"] == "3"
 
     def test_original_blade_matcher_compatibility_brackets(self, enricher):
         """Test compatibility with original blade matcher brackets format."""
@@ -207,7 +207,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 5
+        assert result["use_count"] == "5"
 
     def test_original_blade_matcher_compatibility_curly_braces(self, enricher):
         """Test compatibility with original blade matcher curly braces format."""
@@ -217,7 +217,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 7
+        assert result["use_count"] == "7"
 
     def test_original_blade_matcher_compatibility_x_prefix(self, enricher):
         """Test compatibility with original blade matcher x prefix format."""
@@ -227,7 +227,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 3
+        assert result["use_count"] == "3"
 
     def test_original_blade_matcher_compatibility_x_suffix(self, enricher):
         """Test compatibility with original blade matcher x suffix format."""
@@ -237,7 +237,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 5
+        assert result["use_count"] == "5"
 
     def test_original_blade_matcher_compatibility_uppercase_x(self, enricher):
         """Test compatibility with original blade matcher uppercase X format."""
@@ -247,7 +247,7 @@ class TestBladeCountEnricher:
         result = enricher.enrich(field_data, blade_extracted)
 
         assert result is not None
-        assert result["use_count"] == 2
+        assert result["use_count"] == "2"
 
     def test_original_blade_matcher_compatibility_no_count(self, enricher):
         """Test compatibility with original blade matcher no count format."""
@@ -261,17 +261,17 @@ class TestBladeCountEnricher:
     def test_enrich_with_real_world_examples(self, enricher):
         """Test with real-world comment examples."""
         test_cases = [
-            ("Astra SP (3)", 3),
-            ("Feather [5]", 5),
-            ("Gillette Platinum {2}", 2),
-            ("Personna x4", 4),
-            ("Derby (x2)", 2),
-            ("Voskhod 2x", 2),
-            ("Astra SP [5x]", 5),
-            ("Derby Extra (2X)", 2),
-            ("Great shave with Feather (3) today", 3),
-            ("Using Astra SP [5] for the first time", 5),
-            ("Derby Extra {7} - still going strong", 7),
+            ("Astra SP (3)", "3"),
+            ("Feather [5]", "5"),
+            ("Gillette Platinum {2}", "2"),
+            ("Personna x4", "4"),
+            ("Derby (x2)", "2"),
+            ("Voskhod 2x", "2"),
+            ("Astra SP [5x]", "5"),
+            ("Derby Extra (2X)", "2"),
+            ("Great shave with Feather (3) today", "3"),
+            ("Using Astra SP [5] for the first time", "5"),
+            ("Derby Extra {7} - still going strong", "7"),
         ]
 
         for comment, expected_count in test_cases:

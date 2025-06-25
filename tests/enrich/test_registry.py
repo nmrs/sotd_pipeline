@@ -137,7 +137,7 @@ class TestEnricherRegistry:
 
         # Check for unified structure: enriched data under product fields
         assert "enriched" in enriched_record["blade"]
-        assert enriched_record["blade"]["enriched"]["use_count"] == 3
+        assert enriched_record["blade"]["enriched"]["use_count"] == "3"
 
     def test_enrich_multiple_records(self):
         """Test enriching multiple records."""
@@ -174,12 +174,12 @@ class TestEnricherRegistry:
 
         # First record should have blade enrichment
         assert "enriched" in enriched_records[0]["blade"]
-        assert enriched_records[0]["blade"]["enriched"]["use_count"] == 3
+        assert enriched_records[0]["blade"]["enriched"]["use_count"] == "3"
 
         # Second record should have both blade and razor enrichment
         assert "enriched" in enriched_records[1]["blade"]
         assert "enriched" in enriched_records[1]["razor"]
-        assert enriched_records[1]["blade"]["enriched"]["use_count"] == 2
+        assert enriched_records[1]["blade"]["enriched"]["use_count"] == "2"
         assert enriched_records[1]["razor"]["enriched"]["grind"] == "Full Hollow"
         assert enriched_records[1]["razor"]["enriched"]["width"] == "6/8"
         assert enriched_records[1]["razor"]["enriched"]["point"] == "Round"
