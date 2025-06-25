@@ -172,7 +172,7 @@ class SoapMatcher(BaseMatcher):
             "is_sample": self._is_sample(original),
         }
 
-    def match(self, value: str) -> dict:
+    def match(self, value: str, bypass_correct_matches: bool = False) -> dict:
         """
         Main orchestration method for soap matching.
         Ensures 'maker' and 'scent' are always present in the 'matched' dict for all match types.
@@ -181,7 +181,7 @@ class SoapMatcher(BaseMatcher):
             return self._no_match_result(value)
 
         # Use parent's match method which checks correct matches first
-        result = super().match(value)
+        result = super().match(value, bypass_correct_matches=bypass_correct_matches)
 
         # Ensure required fields are present
         if result and result.get("matched"):

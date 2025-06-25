@@ -32,12 +32,7 @@ class ValidateCorrectMatches:
         self._data_dir = Path("data")
         self.correct_matches = None
         self.catalog_cache = {}
-        self.matchers = {
-            "razor": RazorMatcher(),
-            "blade": BladeMatcher(),
-            "brush": BrushMatcher(),
-            "soap": SoapMatcher(),
-        }
+        self._matchers = {}  # Lazy-loaded matchers cache
 
     def get_parser(self) -> argparse.ArgumentParser:
         """Get CLI argument parser.
@@ -346,8 +341,42 @@ class ValidateCorrectMatches:
         if self.correct_matches is None or field not in self.correct_matches:
             return issues
 
-        # This is a simplified implementation
-        # In practice, you'd check for overlapping regex patterns
+        try:
+            if field not in self.catalog_cache:
+                self.catalog_cache[field] = self._load_catalog(field)
+        except FileNotFoundError:
+            return issues
+
+        # Check for pattern conflicts by comparing patterns across brands
+        pattern_to_brand_model = {}
+
+        for brand, models in self.catalog_cache[field].items():
+            for model, data in models.items():
+                patterns = data.get("patterns", [])
+                for pattern in patterns:
+                    if pattern in pattern_to_brand_model:
+                        # Found a conflict - same pattern used by different brand/model
+                        existing_brand, existing_model = pattern_to_brand_model[pattern]
+                        conflict_msg = (
+                            f"Resolve pattern conflict: '{pattern}' used by both "
+                            f"{brand}:{model} and {existing_brand}:{existing_model}"
+                        )
+                        issues.append(
+                            {
+                                "issue_type": "pattern_conflict",
+                                "severity": "medium",
+                                "field": field,
+                                "brand": brand,
+                                "model": model,
+                                "pattern": pattern,
+                                "conflicting_brand": existing_brand,
+                                "conflicting_model": existing_model,
+                                "suggested_action": conflict_msg,
+                            }
+                        )
+                    else:
+                        pattern_to_brand_model[pattern] = (brand, model)
+
         return issues
 
     def _suggest_better_matches(self, field: str) -> List[Dict]:
@@ -398,7 +427,7 @@ class ValidateCorrectMatches:
 
         for issue in issues:
             severity = issue.get("severity", "low")
-            issue["priority_score"] = severity_scores.get(severity, 0)
+            issue["score"] = severity_scores.get(severity, 0)
 
         return issues
 
@@ -413,10 +442,10 @@ class ValidateCorrectMatches:
         """
         grouped = {}
         for issue in issues:
-            field = issue.get("field", "unknown")
-            if field not in grouped:
-                grouped[field] = []
-            grouped[field].append(issue)
+            brand = issue.get("brand", "unknown")
+            if brand not in grouped:
+                grouped[brand] = []
+            grouped[brand].append(issue)
         return grouped
 
     def _suggest_action_for_issue_type(self, issue_type: str) -> str:
@@ -434,6 +463,7 @@ class ValidateCorrectMatches:
             "pattern_conflict": f"Resolve {issue_type} pattern conflict",
             "better_match": f"Consider better {issue_type} match",
             "invalid_structure": f"Fix {issue_type} data structure",
+            "mismatched_entry": f"Update {issue_type} to match catalog",
         }
         return actions.get(issue_type, f"Review and fix {issue_type}")
 
@@ -447,7 +477,7 @@ class ValidateCorrectMatches:
             Prioritized list of issues
         """
         scored_issues = self._score_issues(issues)
-        return sorted(scored_issues, key=lambda x: x.get("priority_score", 0), reverse=True)
+        return sorted(scored_issues, key=lambda x: x.get("score", 0), reverse=True)
 
     def _generate_summary_statistics(self, issues: List[Dict]) -> Dict:
         """Generate summary statistics.
@@ -460,6 +490,7 @@ class ValidateCorrectMatches:
         """
         summary = {
             "total_checked": len(issues),
+            "total_issues": len(issues),
             "issues_found": len(issues),
             "by_field": {},
             "by_type": {},
@@ -549,7 +580,8 @@ class ValidateCorrectMatches:
         """
         # This method would use Rich console to display formatted output
         # For now, just print basic info
-        print(f"Found {summary['issues_found']} issues")
+        issues_found = summary.get("issues_found", summary.get("total_issues", 0))
+        print(f"Found {issues_found} issues")
         for field, count in summary.get("by_field", {}).items():
             print(f"  {field}: {count}")
 
@@ -584,7 +616,7 @@ class ValidateCorrectMatches:
             return []
 
         # Get the matcher for this field
-        matcher = self.matchers[field]
+        matcher = self._get_matcher(field)
 
         # Validate each correct match entry
         for brand, models in self.correct_matches[field].items():
@@ -617,6 +649,30 @@ class ValidateCorrectMatches:
 
         return issues
 
+    def _get_matcher(self, field: str):
+        """Get matcher for field, creating it lazily if needed.
+
+        Args:
+            field: Field type to get matcher for
+
+        Returns:
+            Matcher instance for the field
+        """
+        if field not in self._matchers:
+            # Lazy load matcher only when needed
+            if field == "razor":
+                self._matchers[field] = RazorMatcher()
+            elif field == "blade":
+                self._matchers[field] = BladeMatcher()
+            elif field == "brush":
+                self._matchers[field] = BrushMatcher()
+            elif field == "soap":
+                self._matchers[field] = SoapMatcher()
+            else:
+                raise ValueError(f"Unknown field: {field}")
+
+        return self._matchers[field]
+
     def _match_with_regex_only(self, matcher, value: str) -> Optional[Dict]:
         """Match using only regex patterns (no fallbacks).
 
@@ -641,32 +697,13 @@ class ValidateCorrectMatches:
         Returns:
             Match result dictionary or None
         """
-        import re
+        # Use the matcher's match method with bypass_correct_matches=True
+        # This tests what the regex patterns would match to if the correct match didn't exist
+        match_result = matcher.match(value, bypass_correct_matches=True)
 
-        # Get the catalog for this field
-        field = None
-        for f, m in self.matchers.items():
-            if m == matcher:
-                field = f
-                break
-
-        if field is None or field not in self.catalog_cache:
-            return None
-
-        catalog = self.catalog_cache[field]
-
-        # Try to match against catalog patterns
-        for brand, models in catalog.items():
-            for model, model_data in models.items():
-                patterns = model_data.get("patterns", [])
-                for pattern in patterns:
-                    if re.search(pattern, value, re.IGNORECASE):
-                        return {
-                            "brand": brand,
-                            "model": model,
-                            "pattern": pattern,
-                            "match_type": "regex",
-                        }
+        # Return the matched data if there was a match
+        if match_result and match_result.get("matched"):
+            return match_result["matched"]
 
         return None
 

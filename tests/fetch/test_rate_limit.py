@@ -46,11 +46,17 @@ def test_safe_call_success(monkeypatch, capsys):
     assert "[WARN] Reddit rate-limit hit; sleeping 0m 1s…" in out
 
 
-def test_safe_call_double_fail():
+def test_safe_call_double_fail(monkeypatch):
     """safe_call does not retry more than once."""
+    # Mock sleep to avoid actual sleeping during tests
+    slept: list[int] = []
+    monkeypatch.setattr(time, "sleep", lambda s: slept.append(int(s)))
 
     def fn():
         raise DummyRL(1)
 
     with pytest.raises(RateLimitExceeded):
         safe_call(fn)
+
+    # Verify that sleep was called once with the expected duration
+    assert slept == [2]  # sleep_time + 1

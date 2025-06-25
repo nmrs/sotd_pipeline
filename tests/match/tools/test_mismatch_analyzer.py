@@ -343,6 +343,7 @@ class TestMismatchAnalyzer:
 
         args = Mock()
         args.limit = 20
+        args.pattern_width = 80  # Add this to fix the Mock comparison issue
 
         # Should not raise an exception
         self.analyzer.display_all_matches({"data": test_data}, "razor", mismatches, args)

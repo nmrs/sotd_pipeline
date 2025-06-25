@@ -1,0 +1,33 @@
+# Competition tags configuration
+# Tags that should be stripped during matching (competition-only tags)
+strip_tags:
+  # Competition-specific tags that don't help with matching
+  - "FLIPTOP"
+  - "RUSTYBUTTRUSTY" 
+  - "REVENANT"
+  - "RAINBOW"
+  - "PLASTIC"
+  - "ZAMAC"
+  - "JETSETTER"
+  - "MERMAID"
+  - "CNC"
+  - "STAINLESSLESS"
+  - "ALUMINUM"
+  - "ADJUSTABLE"
+  - "ARTISTCLUB"
+  - "MACHINEAGE"
+  - "ATOMICAGE"
+  - "SPACEAGE"
+  - "TWINS"
+  - "STR8SNOB"
+  - "ALLNATURAL"
+  - "FOREVERSAFETY"
+  - "INJECTOR"
+  - "SLANT"
+
+# Tags that should be preserved (might be useful for matching)
+preserve_tags:
+  # Tags that could help with matching
+  - "MODERNGEM"
+  - "KAMISORI"
+  - "WECKONISTA"

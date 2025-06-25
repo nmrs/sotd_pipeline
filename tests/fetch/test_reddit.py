@@ -245,14 +245,20 @@ def test_safe_call_rate_limit_no_timing_info(monkeypatch, capsys):
     assert "[WARN] Reddit rate-limit hit; sleeping 1m 0s…" in output
 
 
-def test_safe_call_rate_limit_double_failure():
+def test_safe_call_rate_limit_double_failure(monkeypatch):
     """safe_call should not retry more than once."""
+    # Mock sleep to avoid actual sleeping during tests
+    slept: list[int] = []
+    monkeypatch.setattr(time, "sleep", lambda s: slept.append(int(s)))
 
     def always_failing():
         raise MockRateLimitException(sleep_time=1)
 
     with pytest.raises(TooManyRequests):
         safe_call(always_failing)
+
+    # Verify that sleep was called once with the expected duration
+    assert slept == [2]  # sleep_time + 1
 
 
 def test_safe_call_with_arguments():

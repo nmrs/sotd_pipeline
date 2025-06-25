@@ -119,6 +119,8 @@ Aylsworth:
     patterns:
     - drakk?ant
     - aylsworth
+  Kopparkant:
+    patterns:
     - kopp?[ae]rkant
 BBNY:
   Safety Razor:

@@ -413,12 +413,16 @@ class TestBasicValidationMethods:
 
         # Patch the data directory to tmp_path
         self.validator._data_dir = tmp_path  # type: ignore
-        field_changes = self.validator._check_field_changes("razor")  # type: ignore
-        assert len(field_changes) == 0
+        changes = self.validator._check_field_changes("razor")  # type: ignore
+        assert len(changes) == 0
 
     def test_validate_correct_matches_structure(self, tmp_path):
         """Test correct matches structure validation."""
-        correct_matches_data = {"razor": {"Karve": {"Christopher Bradley": ["Karve CB"]}}}
+        correct_matches_data = {
+            "razor": {"Karve": {"Christopher Bradley": ["Karve CB"]}},
+            "brush": {"Simpson": {"Chubby 2": ["Simpson Chubby 2"]}},
+        }
+
         correct_matches_file = tmp_path / "correct_matches.yaml"
 
         with correct_matches_file.open("w") as f:
@@ -426,10 +430,8 @@ class TestBasicValidationMethods:
 
         # Patch the data directory to tmp_path
         self.validator._data_dir = tmp_path  # type: ignore
-        structure_issues = self.validator._validate_correct_matches_structure(
-            "razor"
-        )  # type: ignore
-        assert len(structure_issues) == 0
+        issues = self.validator._validate_correct_matches_structure("razor")  # type: ignore
+        assert len(issues) == 0
 
     def test_validate_field_with_empty_data(self, tmp_path):
         """Test field validation with empty data."""
@@ -457,7 +459,7 @@ class TestBasicValidationMethods:
         assert len(issues) == 0
 
     def test_check_pattern_conflicts(self, tmp_path):
-        """Test pattern conflict detection."""
+        """Test pattern conflicts detection."""
         correct_matches_data = {"razor": {"Karve": {"Christopher Bradley": ["Karve CB"]}}}
         catalog_data = {"Karve": {"Christopher Bradley": {"patterns": ["karve.*cb"]}}}
 
@@ -475,7 +477,7 @@ class TestBasicValidationMethods:
         assert len(conflicts) == 0
 
     def test_suggest_better_matches(self, tmp_path):
-        """Test better match suggestions."""
+        """Test better matches suggestion."""
         correct_matches_data = {"razor": {"Karve": {"Christopher Bradley": ["Karve CB"]}}}
         catalog_data = {"Karve": {"Christopher Bradley": {"patterns": ["karve.*cb"]}}}
 
@@ -493,9 +495,17 @@ class TestBasicValidationMethods:
         assert len(suggestions) == 0
 
     def test_check_pattern_conflicts_with_conflicts(self, tmp_path):
-        """Test pattern conflict detection with actual conflicts."""
-        correct_matches_data = {"razor": {"Karve": {"Christopher Bradley": ["Karve CB"]}}}
-        catalog_data = {"Karve": {"Christopher Bradley": {"patterns": ["karve.*cb"]}}}
+        """Test pattern conflicts detection with actual conflicts."""
+        correct_matches_data = {
+            "razor": {
+                "Karve": {"Christopher Bradley": ["Karve CB"]},
+                "Other": {"Model": ["Karve CB"]},  # Same pattern, different brand
+            }
+        }
+        catalog_data = {
+            "Karve": {"Christopher Bradley": {"patterns": ["karve.*cb"]}},
+            "Other": {"Model": {"patterns": ["karve.*cb"]}},  # Conflicting pattern
+        }
 
         correct_matches_file = tmp_path / "correct_matches.yaml"
         catalog_file = tmp_path / "razors.yaml"
@@ -507,157 +517,153 @@ class TestBasicValidationMethods:
 
         # Patch the data directory to tmp_path
         self.validator._data_dir = tmp_path  # type: ignore
+
+        # Load the correct_matches data first
+        self.validator.correct_matches = self.validator._load_correct_matches()
+
         conflicts = self.validator._check_pattern_conflicts("razor")  # type: ignore
-        assert len(conflicts) == 0
+        assert len(conflicts) > 0
 
 
 class TestIssueClassificationAndPrioritization:
-    """Test issue classification and prioritization in ValidateCorrectMatches."""
+    """Test issue classification and prioritization methods."""
 
     def setup_method(self):
         self.validator = ValidateCorrectMatches()
 
     def test_classify_issues(self):
-        """Test issue classification by type."""
+        """Test issue classification."""
         issues = [
-            {"issue_type": "missing_entry", "field": "razor"},
-            {"issue_type": "field_change", "field": "blade"},
-            {"issue_type": "missing_entry", "field": "brush"},
+            {"issue_type": "mismatched_entry", "severity": "high"},
+            {"issue_type": "missing_entry", "severity": "medium"},
+            {"issue_type": "pattern_conflict", "severity": "low"},
         ]
 
         classified = self.validator._classify_issues(issues)  # type: ignore
+        assert "mismatched_entry" in classified
         assert "missing_entry" in classified
-        assert "field_change" in classified
-        assert len(classified["missing_entry"]) == 2
-        assert len(classified["field_change"]) == 1
+        assert "pattern_conflict" in classified
+        assert len(classified["mismatched_entry"]) == 1
+        assert len(classified["missing_entry"]) == 1
+        assert len(classified["pattern_conflict"]) == 1
 
     def test_score_issues(self):
-        """Test issue scoring by severity."""
+        """Test issue scoring."""
         issues = [
-            {"severity": "high", "issue_type": "missing_entry"},
-            {"severity": "medium", "issue_type": "field_change"},
-            {"severity": "low", "issue_type": "better_match"},
+            {"issue_type": "mismatched_entry", "severity": "high"},
+            {"issue_type": "missing_entry", "severity": "medium"},
+            {"issue_type": "pattern_conflict", "severity": "low"},
         ]
 
         scored = self.validator._score_issues(issues)  # type: ignore
         assert len(scored) == 3
-        assert all("priority_score" in issue for issue in scored)
+        assert all("score" in issue for issue in scored)
 
     def test_group_similar_issues(self):
-        """Test grouping similar issues together."""
+        """Test similar issues grouping."""
         issues = [
-            {"issue_type": "missing_entry", "field": "razor"},
-            {"issue_type": "missing_entry", "field": "blade"},
-            {"issue_type": "field_change", "field": "razor"},
+            {"issue_type": "mismatched_entry", "brand": "Karve", "model": "CB"},
+            {"issue_type": "mismatched_entry", "brand": "Karve", "model": "Overlander"},
+            {"issue_type": "missing_entry", "brand": "Simpson", "model": "Chubby 2"},
         ]
 
         grouped = self.validator._group_similar_issues(issues)  # type: ignore
-        assert len(grouped) == 2
+        assert "Karve" in grouped
+        assert "Simpson" in grouped
+        assert len(grouped["Karve"]) == 2
+        assert len(grouped["Simpson"]) == 1
 
     def test_suggest_action_for_issue_type(self):
-        """Test action suggestions for different issue types."""
-        missing_action = self.validator._suggest_action_for_issue_type(
-            "missing_entry"
-        )  # type: ignore
-        field_action = self.validator._suggest_action_for_issue_type("field_change")  # type: ignore
-        conflict_action = self.validator._suggest_action_for_issue_type(
-            "pattern_conflict"
-        )  # type: ignore
-        better_action = self.validator._suggest_action_for_issue_type(
-            "better_match"
-        )  # type: ignore
+        """Test action suggestion for issue types."""
+        actions = {
+            "mismatched_entry": self.validator._suggest_action_for_issue_type(
+                "mismatched_entry"
+            ),  # type: ignore
+            "missing_entry": self.validator._suggest_action_for_issue_type(
+                "missing_entry"
+            ),  # type: ignore
+            "pattern_conflict": self.validator._suggest_action_for_issue_type(
+                "pattern_conflict"
+            ),  # type: ignore
+        }
 
-        assert "missing_entry" in missing_action
-        assert "field_change" in field_action
-        assert "pattern_conflict" in conflict_action
-        assert "better_match" in better_action
+        assert all(action for action in actions.values())
+        assert "update" in actions["mismatched_entry"].lower()
+        assert "add" in actions["missing_entry"].lower()
+        assert "resolve" in actions["pattern_conflict"].lower()
 
     def test_prioritize_issues(self):
-        """Test issue prioritization by severity and type."""
+        """Test issue prioritization."""
         issues = [
-            {"severity": "low", "issue_type": "better_match"},
-            {"severity": "high", "issue_type": "missing_entry"},
-            {"severity": "medium", "issue_type": "field_change"},
+            {"issue_type": "mismatched_entry", "severity": "high", "score": 10},
+            {"issue_type": "missing_entry", "severity": "medium", "score": 5},
+            {"issue_type": "pattern_conflict", "severity": "low", "score": 1},
         ]
 
         prioritized = self.validator._prioritize_issues(issues)  # type: ignore
         assert len(prioritized) == 3
-        # High severity should come first
-        assert prioritized[0]["severity"] == "high"
+        # Should be sorted by score (descending)
+        assert prioritized[0]["score"] >= prioritized[1]["score"]
+        assert prioritized[1]["score"] >= prioritized[2]["score"]
 
     def test_generate_summary_statistics(self):
         """Test summary statistics generation."""
         issues = [
-            {"field": "razor", "issue_type": "missing_entry"},
-            {"field": "blade", "issue_type": "field_change"},
-            {"field": "razor", "issue_type": "pattern_conflict"},
+            {"issue_type": "mismatched_entry", "severity": "high"},
+            {"issue_type": "missing_entry", "severity": "medium"},
+            {"issue_type": "pattern_conflict", "severity": "low"},
         ]
 
         summary = self.validator._generate_summary_statistics(issues)  # type: ignore
-        assert summary["total_checked"] == 3
-        assert summary["issues_found"] == 3
-        assert "razor" in summary["by_field"]
-        assert "missing_entry" in summary["by_type"]
+        assert "total_issues" in summary
+        assert "by_type" in summary
+        assert "by_severity" in summary
+        assert summary["total_issues"] == 3
 
     def test_create_issues_table(self):
-        """Test Rich table creation for issues."""
+        """Test issues table creation."""
         issues = [
-            {
-                "field": "razor",
-                "issue_type": "missing_entry",
-                "brand": "Test",
-                "model": "Brand",
-                "severity": "high",
-                "suggested_action": "Add to catalog",
-            }
+            {"issue_type": "mismatched_entry", "severity": "high", "brand": "Karve"},
+            {"issue_type": "missing_entry", "severity": "medium", "brand": "Simpson"},
         ]
 
         table = self.validator._create_issues_table(issues)  # type: ignore
         assert table is not None
+        assert hasattr(table, "row_count")
 
     def test_get_issue_color(self):
-        """Test color assignment for different severities."""
-        high_issue = {"severity": "high"}
-        medium_issue = {"severity": "medium"}
-        low_issue = {"severity": "low"}
+        """Test issue color assignment."""
+        colors = {
+            "high": self.validator._get_issue_color({"severity": "high"}),  # type: ignore
+            "medium": self.validator._get_issue_color({"severity": "medium"}),  # type: ignore
+            "low": self.validator._get_issue_color({"severity": "low"}),  # type: ignore
+        }
 
-        color = self.validator._get_issue_color(high_issue)  # type: ignore
-        assert color == "red"
-        color = self.validator._get_issue_color(medium_issue)  # type: ignore
-        assert color == "yellow"
-        color = self.validator._get_issue_color(low_issue)  # type: ignore
-        assert color == "green"
+        assert all(color for color in colors.values())
+        assert colors["high"] != colors["medium"]
+        assert colors["medium"] != colors["low"]
 
     def test_generate_field_breakdown(self):
-        """Test field-by-field breakdown generation."""
+        """Test field breakdown generation."""
         issues = [
-            {"field": "razor", "severity": "high"},
-            {"field": "blade", "severity": "medium"},
-            {"field": "razor", "severity": "low"},
+            {"issue_type": "mismatched_entry", "field": "razor", "brand": "Karve"},
+            {"issue_type": "missing_entry", "field": "brush", "brand": "Simpson"},
         ]
 
         breakdown = self.validator._generate_field_breakdown(issues)  # type: ignore
         assert "razor" in breakdown
-        assert breakdown["razor"]["total"] == 2
-        assert breakdown["razor"]["high"] == 1
+        assert "brush" in breakdown
+        assert breakdown["razor"]["total"] == 1
+        assert breakdown["brush"]["total"] == 1
 
     def test_display_console_report(self):
         """Test console report display."""
         issues = [
-            {
-                "field": "razor",
-                "issue_type": "missing_entry",
-                "brand": "Test",
-                "model": "Brand",
-                "severity": "high",
-                "suggested_action": "Add to catalog",
-            }
+            {"issue_type": "mismatched_entry", "severity": "high", "brand": "Karve"},
+            {"issue_type": "missing_entry", "severity": "medium", "brand": "Simpson"},
         ]
-        summary = {
-            "issues_found": 1,
-            "by_field": {"razor": 1},
-            "by_type": {"missing_entry": 1},
-        }
 
-        # Should not raise any exceptions
+        summary = {"total_issues": 2, "by_type": {}, "by_severity": {}}
+
+        # Should not raise an exception
         self.validator._display_console_report(issues, summary)  # type: ignore

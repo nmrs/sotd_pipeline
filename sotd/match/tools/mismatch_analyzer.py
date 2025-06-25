@@ -35,6 +35,7 @@ class MismatchAnalyzer(AnalysisTool):
         self._correct_matches: Set[str] = set()
         self._compiled_patterns = {}  # Cache for compiled regex patterns
         self._correct_matches_data = {}  # Added for new _load_correct_matches method
+        self._test_correct_matches_file = None  # For test file support
 
     def _escape_pattern_for_display(self, pattern: str) -> str:
         """Escape square brackets in patterns for Rich table display."""
@@ -43,6 +44,12 @@ class MismatchAnalyzer(AnalysisTool):
         # Only escape opening brackets that Rich might interpret as formatting
         # Leave closing brackets unescaped for proper display
         return pattern.replace("[", "\\[")
+
+    def _truncate_pattern_for_display(self, pattern: str, max_length: int = 80) -> str:
+        """Truncate pattern for display if it's too long."""
+        if not pattern or len(pattern) <= max_length:
+            return pattern
+        return pattern[: max_length - 3] + "..."
 
     def _get_table(self, title: str = ""):
         """Lazy load Rich Table to reduce startup time."""
@@ -120,6 +127,16 @@ class MismatchAnalyzer(AnalysisTool):
             action="store_true",
             help="Force refresh of pattern cache",
         )
+        parser.add_argument(
+            "--pattern-width",
+            type=int,
+            default=80,
+            help="Maximum width for pattern display (default: 80)",
+        )
+        parser.add_argument(
+            "--test-correct-matches",
+            help="Use test correct_matches file instead of data/correct_matches.yaml",
+        )
 
         return parser
 
@@ -162,6 +179,12 @@ class MismatchAnalyzer(AnalysisTool):
 
         # Load correct matches
         self._load_correct_matches()
+
+        # Set test correct matches file if specified
+        if args.test_correct_matches:
+            self._set_test_correct_matches_file(args.test_correct_matches)
+            # Reload correct matches with test file
+            self._load_correct_matches()
 
         # Clear cache if forced
         if args.force:
@@ -399,11 +422,11 @@ class MismatchAnalyzer(AnalysisTool):
         """Load previously marked correct matches from file."""
         self._correct_matches = set()
         self._correct_matches_data = {}
-        if not self._correct_matches_file.exists():
+        if not self._get_correct_matches_file().exists():
             return
 
         try:
-            with self._correct_matches_file.open("r", encoding="utf-8") as f:
+            with self._get_correct_matches_file().open("r", encoding="utf-8") as f:
                 data = yaml.safe_load(f)
                 if not data:
                     return
@@ -446,15 +469,15 @@ class MismatchAnalyzer(AnalysisTool):
         """Save correct matches to file in YAML format."""
         try:
             # Create backup before modifying
-            if self._correct_matches_file.exists():
-                backup_path = self._correct_matches_file.with_suffix(".yaml.backup")
+            if self._get_correct_matches_file().exists():
+                backup_path = self._get_correct_matches_file().with_suffix(".yaml.backup")
                 import shutil
 
-                shutil.copy2(self._correct_matches_file, backup_path)
+                shutil.copy2(self._get_correct_matches_file(), backup_path)
                 self.console.print(f"[dim]Backup created: {backup_path}[/dim]")
 
             # Ensure directory exists
-            self._correct_matches_file.parent.mkdir(parents=True, exist_ok=True)
+            self._get_correct_matches_file().parent.mkdir(parents=True, exist_ok=True)
 
             # Organize matches hierarchically: field -> brand -> model -> [strings]
             yaml_data = {}
@@ -480,7 +503,18 @@ class MismatchAnalyzer(AnalysisTool):
                     yaml_data[field][canonical_brand][canonical_model] = []
                 if original not in yaml_data[field][canonical_brand][canonical_model]:
                     yaml_data[field][canonical_brand][canonical_model].append(original)
-            with self._correct_matches_file.open("w", encoding="utf-8") as f:
+
+            # Alphabetize entries within each field/brand/model
+            for field, field_data in yaml_data.items():
+                if isinstance(field_data, dict):
+                    for brand, brand_data in field_data.items():
+                        if isinstance(brand_data, dict):
+                            for model, entries in brand_data.items():
+                                if isinstance(entries, list):
+                                    # Sort entries alphabetically (case-insensitive)
+                                    entries.sort(key=str.lower)
+
+            with self._get_correct_matches_file().open("w", encoding="utf-8") as f:
                 yaml.dump(yaml_data, f, default_flow_style=False, indent=2, allow_unicode=True)
         except Exception as e:
             self.console.print(f"[red]Error saving correct matches: {e}[/red]")
@@ -513,8 +547,8 @@ class MismatchAnalyzer(AnalysisTool):
     def _clear_correct_matches(self) -> None:
         """Clear all correct matches."""
         self._correct_matches = set()
-        if self._correct_matches_file.exists():
-            self._correct_matches_file.unlink()
+        if self._get_correct_matches_file().exists():
+            self._get_correct_matches_file().unlink()
         self.console.print("[green]Cleared all correct matches[/green]")
 
     def _clear_correct_matches_by_field(self, field: str) -> None:
@@ -808,14 +842,14 @@ class MismatchAnalyzer(AnalysisTool):
 
         # Create table for mismatches
         table = self._get_table(title=f"Potential Mismatches - {field.capitalize()}")
-        table.add_column("#", style="dim", justify="right")
-        table.add_column("Count", style="magenta", justify="center")
-        table.add_column("Type", style="cyan")
-        table.add_column("Original", style="yellow")
-        table.add_column("Matched", style="green")
-        table.add_column("Pattern", style="blue")
-        table.add_column("Reason", style="red")
-        table.add_column("Sources", style="dim")
+        table.add_column("#", style="dim", justify="right", width=3)
+        table.add_column("Count", style="magenta", justify="center", width=6)
+        table.add_column("Type", style="cyan", width=25)
+        table.add_column("Original", style="yellow", width=30)
+        table.add_column("Matched", style="green", width=25)
+        table.add_column("Pattern", style="blue", width=getattr(args, "pattern_width", 80))
+        table.add_column("Reason", style="red", width=20)
+        table.add_column("Sources", style="dim", width=15)
 
         # Get limits and filters with defaults
         limit = getattr(args, "limit", 50)
@@ -836,6 +870,10 @@ class MismatchAnalyzer(AnalysisTool):
 
             # Escape pattern for Rich table display
             pattern = self._escape_pattern_for_display(pattern)
+            # Truncate pattern if it's too long for display
+            pattern = self._truncate_pattern_for_display(
+                pattern, max_length=getattr(args, "pattern_width", 80)
+            )
 
             # Add visual indicator
             indicator = self.mismatch_indicators.get(mismatch_type, "❓")
@@ -878,14 +916,14 @@ class MismatchAnalyzer(AnalysisTool):
         )
 
         table = self._get_table(title=f"All Matches - {field.capitalize()}")
-        table.add_column("#", style="dim", justify="right")
-        table.add_column("Status", style="cyan")
-        table.add_column("Original", style="yellow")
-        table.add_column("Matched", style="green")
-        table.add_column("Pattern", style="blue")
-        table.add_column("Match Type", style="magenta")
-        table.add_column("Correct", style="dim")
-        table.add_column("Source", style="dim")
+        table.add_column("#", style="dim", justify="right", width=3)
+        table.add_column("Status", style="cyan", width=25)
+        table.add_column("Original", style="yellow", width=30)
+        table.add_column("Matched", style="green", width=25)
+        table.add_column("Pattern", style="blue", width=getattr(args, "pattern_width", 80))
+        table.add_column("Match Type", style="magenta", width=15)
+        table.add_column("Correct", style="dim", width=8)
+        table.add_column("Source", style="dim", width=15)
 
         # Create lookup for mismatches
         mismatch_lookup = {}
@@ -925,6 +963,10 @@ class MismatchAnalyzer(AnalysisTool):
 
             # Escape pattern for Rich table display
             pattern = self._escape_pattern_for_display(pattern)
+            # Truncate pattern if it's too long for display
+            pattern = self._truncate_pattern_for_display(
+                pattern, max_length=getattr(args, "pattern_width", 80)
+            )
 
             # Check if this match was previously marked as correct
             match_key = self._create_match_key(field, original, matched)
@@ -1130,6 +1172,16 @@ class MismatchAnalyzer(AnalysisTool):
         self.console.print("\n[dim]Use --mark-correct to mark these matches as correct[/dim]")
         self.console.print("[dim]Use --show-correct to see previously marked correct matches[/dim]")
         self.console.print("[dim]Use --clear-correct to reset all correct matches[/dim]")
+
+    def _set_test_correct_matches_file(self, test_file: str) -> None:
+        """Set test correct matches file."""
+        self._test_correct_matches_file = Path(test_file)
+
+    def _get_correct_matches_file(self) -> Path:
+        """Get the correct matches file to use (test or production)."""
+        if self._test_correct_matches_file and self._test_correct_matches_file.exists():
+            return self._test_correct_matches_file
+        return self._correct_matches_file
 
 
 def main(argv: List[str] | None = None) -> None:
