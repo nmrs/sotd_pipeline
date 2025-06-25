@@ -2,17 +2,21 @@ razor:
   3D Printed:
     DE:
     - 3D Printed - Tride
+    - 3D Printed - Tride $plastic $rainbow
   Above the Tie:
     R2:
     - ATT OC R2
     S1:
     - Above the Tie Atlas S1
+    - Above the Tie Atlas S1 $SLANT
     - ATT S1
     - ATT S1 Slant
+    - ATT S1 Slant $SLANT
     SE2:
     - Above The Tie SE2 OC
     Windsor Pro SB90:
     - Above The Tie - Calypso Blue V2 SB90, DE
+    - Above The Tie - Calypso Blue V2 SB90, DE $ALUMINUM
     Windsor SSRH2:
     - Above The Tie - Windsor SSRH2, OC Base Plate, DE - (original version not Windsor
       Pro)
@@ -22,51 +26,68 @@ razor:
     Outlaw:
     - Alpha Outlaw Evolution Ti
     - Alpha Shaving Works - Lone Star Outlaw
+    - Alpha Shaving Works - Lone Star Outlaw **$RAINBOW**
   Alshabab:
     Razor:
     - Alshabab Original
+    - Alshabab Original $PLASTIC $RAINBOW
   Assured for Men:
     Dollar Tree Safety Razor:
     - Assured for Men Safety Razor
   Asylum:
     Rx:
     - Asylum Artist Club RX v2
+    - Asylum Artist Club RX v2 $ARTISTCLUB $CNC
+    - Asylum Artist Club RX v2 $CNC $ARTISTCLUB
     - Asylum Rx V2 - AC Razor
   Aylsworth:
     Apex:
     - Aylsworth APEX-SS
     - Aylsworth Razors - Apex
+    - Aylsworth Razors - Apex $ALUMINUM $CNC
     - Aylsworth Razors - Apex Titanium
     Drakkant:
     - Aylsworth Drakkant Brass
+    - Aylsworth Drakkant Brass $RUSTYBUTTRUSTY
     - Aylsworth Razors - Drakkant SS
     - Aylsworth Razors Drakkant Plus
     - Aylsworth Razors Drakkant Ti
+    - Aylsworth Razors Drakkant Ti $CNC
     Kopparkant:
     - Aylesworth Razors - Kopparkant
     - Aylsworth Kopperkant
   Baili:
     3-Piece:
     - BAILI - Classic 3-piece DE
+    - BAILI - Classic 3-piece DE $ZAMAC $JETSETTER
     - BAILI BR 176
+    - BAILI BR 176 $ZAMAC
     - Baili BR172
+    - Baili BR172 $ZAMAC
     - Baili BT131 / TiBam *"Norsborg"* handle
     - Baili Tech Copy
   Bambaw:
     Safety Razor:
     - Bambaw Sea Green
+    - Bambaw Sea Green $MERMAID
+    - Bambaw Sea Green $RAINBOW $ZAMAC
   Bevel:
     Essential Disposable:
     - Bevel Disposable DE
   Blackland:
     Batch 002:
     - Blackland Razors - Batch 002
+    - Blackland Razors - Batch 002 $ALUMINUM
     Blackbird:
     - Blackland - Blackbird and Van Der Hagen - Traditional Safety Razor
     - Blackland - Blackbird SS
+    - Blackland - Blackbird SS $CNC
     - Blackland - Blackbird Ti
+    - Blackland - Blackbird Ti $RAINBOW
     - Blackland - Blackbird, DE safety razor, Brass, 101 mm handle \- "Brassbird"
     - Blackland Blackbird
+    - Blackland Blackbird $CNC
+    - Blackland Blackbird $RUSTYBUTTRUSTY
     - Blackland Blackbird (Brass)
     - Blackland Blackbird (SS)
     - Blackland Blackbird brass
@@ -74,13 +95,19 @@ razor:
     - Blackland Blackbird Lite SS
     - Blackland Blackbird OC
     - Blackland Blackbird SS
+    - Blackland Blackbird SS $CNC $STAINLESSLESS
     - Blackland Blackbird Ti
+    - Blackland Blackbird Ti $CNC
     - Blackland Blackbird Ti Lite
+    - Blackland Blackbird Ti Lite $CNC
     - Blackland Blackbird Ti SB
+    - Blackland Blackbird Ti SB $CNC
     - Blackland Blackbird Titanium
     - Blackland Razors - Blackbird
+    - Blackland Razors - Blackbird `$CNC`
     - Blackland Razors Blackbird
     - Blackland Razors Blackbird Lite
+    - Blackland Razors Blackbird Lite $CNC
     - Blackland Razors Blackbird Ti
     - Blackland SS
     Era:
@@ -89,6 +116,7 @@ razor:
     Osprey:
     - Blackland Osprey
     - Blackland Razors Osprey Camping Edition
+    - Blackland Razors Osprey Camping Edition $ADJUSTABLE
     Sabre:
     - blackland - sabre $moderngem
     - Blackland Razors Sabre (level 2)
@@ -101,16 +129,20 @@ razor:
     - Blackland Sabre v2 Lvl 4
     Tradere:
     - Blackland - Tradere OC
+    - Blackland - Tradere OC $CNC
     Vector:
     - Blackland - Vector OC Gold PVD Coated
     - Blackland - Vector SS
+    - Blackland - Vector SS $ARTISTCLUB
     - Blackland Razors Vector
-    - Blackland Razors Vector (lite)
+    - Blackland Razors Vector $ARTISTCLUB
     - Blackland Razors Vector (Lite)
     - Blackland Razors Vector Lite
+    - Blackland Razors Vector Lite $ARTISTCLUB $CNC
     - Blackland Vector
-    - Blackland Vector Titanium
+    - Blackland Vector $ARTISTCLUB
     - Blackland Vector titanium
+    - Blackland Vector titanium $ARTISTCLUB
     - Blackland, Vector
     - Vector Ti
   Blutt Rasur:
@@ -119,6 +151,7 @@ razor:
   Bulimica:
     Safety Razor:
     - BULIMICA - Rainbow Safety Razor (Green)
+    - BULIMICA - Rainbow Safety Razor (Green) $RAINBOW
   Böker:
     King Cutter:
     - Böker - King cutter
@@ -127,6 +160,7 @@ razor:
     - Böker - Dönges Expert Fire Folder
     - Böker 14er 8/8" Full Hollow
     - Böker S.S. Paris Wins (6/8", carbon steel, full hollow, square point)
+    - Böker S.S. Paris Wins (6/8", carbon steel, full hollow, square point) $MACHINEAGE
     - Custom designed Böker 6/8 with bog oak scale and French head
     - H Boker 5/8" with Mother of Pearl handle and tang
   CJB:
@@ -138,6 +172,7 @@ razor:
     - C.V. Heljestrand - MK 32
     - C.V. Heljestrand MK 31 11/16" Söderfors Extra Specialstål Full Hollow
     - C.V.Heljestrand - No.2
+    - C.V.Heljestrand - No.2 $RUSTYBUTTRUSTY
     - Carl Victor Heljestrand 5/8
   Carbon:
     Cx:
@@ -149,15 +184,22 @@ razor:
   Cartridge / Disposable:
     ? ''
     : - Bevel Essential Disposable Safety Razor
+      - Bevel Essential Disposable Safety Razor $PLASTIC
       - Bic - Sensitive
+      - Bic - Sensitive $plastic $rainbow
+      - Bic - Single Blade $JETSETTER $PLATIC
       - Bic - Single Blade $PLATIC
-      - Bic Metal
       - BiC Metal
       - Bic Sensitive
+      - Bic Sensitive $PLASTIC $RAINBOW
       - BiC Sensitive Disposable Razor
+      - BiC Sensitive Disposable Razor $PLASTIC $RAINBOW
       - BIC Sensitive Single Blade Razor
+      - BIC Sensitive Single Blade Razor `$PLASTIC` `$RAINBOW`
       - Bic Single Blade Disposable
+      - Bic Single Blade Disposable $PLASTIC
       - BIC single-blade disposable
+      - Equate - 2 Blade Disposable Cartridge $RAINBOW
       - Gillette - Mach 3 disposable
   Charcoal Goods:
     Everyday:
@@ -173,6 +215,7 @@ razor:
     - CharcoalGoods LV2
     Lvl 3:
     - Charcoal Goods - Gen 1 Level 3
+    - Charcoal Goods - Gen 1 Level 3 $CNC
   Chiseled Face:
     Legacy:
     - Chiseled Face - Legacy
@@ -181,17 +224,23 @@ razor:
     - Chiseled Face - Titanium Legacy Razor
     - Chiseled Face Brass Legacy
     - Chiseled Face Groomatorium - Legacy Ti
+    - Chiseled Face Groomatorium - Legacy Ti $CNC
     - Chiseled Face Legacy (Aluminum)
     - Chiseled Face Legacy Aluminum
+    - Chiseled Face Legacy Aluminum $ALUMINUM
     - Chiseled Face Legacy Ti
+    - Chiseled Face Legacy Ti $RAINBOW
     - Chiseled Face Legacy Titanium
     - Chiseled Face Titanium Legacy Razor
+    - Chiseled Face Titanium Legacy Razor `$RAINBOW`
   Clix:
     E-Z Flo:
     - Clix E-Z Flo
+    - Clix E-Z Flo $RUSTYBUTTRUSTY
   Colonial:
     General:
     - AL Colonial General
+    - AL Colonial General $ALUMINUM
   Cooper:
     Monobilt:
     - 'Cooper - Monobilt #FLIPTOP'
@@ -201,6 +250,7 @@ razor:
   Diane:
     Double Edge Shaver:
     - Diane Double Edge Shaver
+    - Diane Double Edge Shaver $PLASTIC
   Dovo:
     Shavette:
     - Dovo - Shavette
@@ -215,24 +265,55 @@ razor:
     - PearlDuck DUBL Duck Hair Shaper
     Straight:
     - Dubl Duck Pearl Duck 6/8 Full Hollow
+  ERN:
+    Straight:
+    - ERN - 5/8" Hollow Ground
+    - Ern 207, 6/8 full hollow round point
+    - Ern 22 7/8, full hollow square point
+    - Ern ATOR, 6/8 full hollow round point
+    - Ern Ferreteria Sardon Arequipa 2611, 15/16 full hollow round point
   Edwin Jagger:
     DE89:
     - Edwin Jagger DE86
+    - Edwin Jagger DE89 $ZAMAC
+    - Edwin Jagger DE89 Octagonal Gold
     - EJ DE89 handle / Muhle R41 head
   EldrormR Industries:
     MM24:
+    - EldromR Industries Two-Tone MM24 $FLIPTOP $MODERNGEM
+    - EldrormR Industries - MM24 $FLIPTOP
+    - EldrormR Industries - MM24 $MODERNGEM
+    - EldrormR Industries - MM24 (two-tone)
+    - EldrormR Industries MM24 $FLIPTOP $MODERNGEM
+    - EldrormR Industries MM24 $FLIPTOP $RUSTYBUTTRUSTY
     - EldrormR Industries MM24 $MODERNGEM
+    - EldrormR Industries MM24 $MODERNGEM $FLIPTOP
+    - EldrormR Industries MM24 $MODERNGEM $FLIPTOP $STAINLESSLESS
+    - EldrormR Industries MM24 (two tone)
     - EldrormR Industries MM24 (two tone) $MODERNGEM
+    - EldrormR Industries MM24 `$FLIPTOP` `$MODERNGEM` `$RUSTYBUTTRUSTY`
+    - EldrormR Industries MM24 Brass
+    - Eldrormr MM24 $FLIPTOP $MODERNGEM
+    - Eldrormr MM24 $FLIPTOP $MODERNGEM $RUSTYBUTTRUSTY
     - MM24 $MODERNGEM
     - u/EldrormR Industries MM24 $MODERNGEM
   Ever-Ready:
     '1912':
     - Ever Ready - 1912
+    - Ever Ready 1912 $FLIPTOP $MACHINEAGE
     - Ever-Ready 1912
+    - Ever-Ready 1912 $TWINS
     - Gem - Gold1912 Ever Ready Sunray 1912
     - vintage everready gem 1912
     '1924':
     - 1924 EVER READY Single edge (BRASS)
+    - 1924 EVER READY Single edge (BRASS) $FLIPTOP $MACHINEAGE
+    Streamline:
+    - Ever Ready - Ambassador $FLIPTOP
+    - Ever Ready Streamline
+    - Ever Ready Streamline $FLIPTOP
+    - Ever Ready Streamline gen 2
+    - EverReady Streamline Strop Outfit Gen 2
   Fatip:
     Gentile:
     - Fatip Classic Testina Gentile - Chrome
@@ -240,7 +321,6 @@ razor:
     - Fatip Classic Grande
     Lo Storto:
     - Fatip - Lo Storto Gentile (Closed Comb, chrome).
-    - Fatip Lo Storto
     - fatip lo storto
     Piccolo:
     - fatip il piccolo sorto
@@ -248,11 +328,23 @@ razor:
     - fatip piccolo slant open comb gold
   Feather:
     Shavette:
+    - Feather - SS Kamisori $KAMISORI
+    - Feather AC Kamisori $KAMISORI
     - feather artist club dx $kamisori
     - feather artist club sr $kamisori
     - Feather Artist Club SS $KAMISORI
     - Feather Artist Club SS Kamisori
     - Feather Artist Club SS Western
+    - Feather SS Kamisori
+  Filarmonica:
+    Straight:
+    - Filarmonica 13 Novodur 13/16" Para Profesionales Full Hollow
+  Fine Accoutrements:
+    DE5:
+    - Fine Accouterments DE5
+  Flying Eagle:
+    Tech Clone:
+    - Flying Eagle - Tech Clone $ZAMAC
   GEM:
     Clog Pruf:
     - GEM - Clog Pruf -
@@ -277,7 +369,6 @@ razor:
     - gem flying wing / bullet tip
     Junior:
     - GEM 1912 Junior
-    - GEM Junior 1912
     - gem junior 1912
     Micromatic:
     - GEM MicroMatic
@@ -302,16 +393,20 @@ razor:
     Slim:
     - 1962 Gillette Slim Adjustable
     - 1963 Gillette Slim Adjustable
+    - 1963 Gillette Slim Adjustable $ADJUSTABLE
     - 1968 Gillette Slim Adjustable
+    - 1968 Gillette Slim Adjustable $ADJUSTABLE $SPACEAGE
     - Gillette - Slim Adjustable N2
     - gillette aristocrat slim (g3)
     - Qshave Adjustable and Gillette Slim Adjustable
     Super Speed:
     - 1951 Gillette Black Tip SuperSpeed
     - 1953 Gillette Super Speed
+    - 1953 Gillette Super Speed $ATOMICAGE
     - 1953 Gillette Super-Speed
     - 1956 Gillette Red Tip SuperSpeed
     - 1961 (G-2) Gillette Flare Tip
+    - 1961 (G-2) Gillette Flare Tip **$SPACEAGE**
     - 1967 Vintage Gillette SuperSpeed
     - Gillette - R2 TTO - 1971
     - Gillette Blue Tip Super Speed
@@ -327,15 +422,17 @@ razor:
   Henson:
     AL13:
     - Dr. Squatch AL-13
+    - Dr. Squatch AL-13 $ALUMINUM $CNC $RAINBOW
     - Dr. Squatch Safety Razor
+    - Dr. Squatch Safety Razor $TWINS
     - Henson Shaving Al +++
     - V2 Henson + ("Dr. Squatch").
     Ti22:
-    - Henson Ti22
     - henson ti22
     - henson ti22 +++
   J.A. Henckels:
     Friodur Straight:
+    - Friodur 14 $STR8SNOB
     - J.A.Henckels Friodur 17 - half hollow - square point - 13/16
   Karve:
     Bison:
@@ -367,7 +464,6 @@ razor:
     - Koraat - r/Wetshaving exclusive Moarteen (15/16", full hollow, carbon steel)
     - 'Koraat - r/Wetshaving exclusive Moarteen (15/16", full hollow, carbon steel)
       #Str8Snob'
-    - Koraat 14 "Moarteen" 15/16" Full Hollow
     - koraat 14 "moarteen" 15/16" full hollow
     - koraat 15/16 full hollow - sub exclusive 'moarteen' (12)
     - Koraat 15/16 Full Hollow - Sub Exclusive 'Moarteen' (13)
@@ -429,7 +525,13 @@ razor:
     - Delolme - Le Thiernois No14 Acier Spécial pour Coiffeur (8/8", hollow ground,
       round tip, carbon steel)
     - Ditzer - Ditzer Gold - 4/8 round point
+    - E. A. Berg Eskilstuna Swedish Frameback
+    - Ed Wüsthof Barber's King 13/16 Full Hollow
     - Erik Anton Berg 9/16 rattler
+    - F.W. Engels Leader 6/8 Full Hollow Square Point
+    - F.W. Engels Special $MACHINEAGE $RUSTYBUTTRUSTY $RAINBOW
+    - F.W. Engels Special $RUSTYBUTTRUSTY $RAINBOW $MACHINEAGE
+    - Frederick Reynold - Swayback $ALLNATURAL
     - griffon xx "carbo-magnetic 60" 5/8
     - M. JUNG No. 80 Straight Razor
     - River Razors 6/8 3/4 Hollow
@@ -500,7 +602,6 @@ razor:
     - Tatara Amakuni
     Masamune Nodachi:
     - Tatara Masamune Nodachi Ti
-    - Tatara Masamune Nodachi Ti CC
     - tatara masamune nodachi ti cc
     Muramasa:
     - Tatara Muramasa
@@ -549,7 +650,6 @@ razor:
   Yaqi:
     Slant 37:
     - yaqi - slant 37 + rr ufo handle
-    - Yaqi Slant 37 + RR UFO Handle
     - yaqi slant 37 + rr ufo handle
   Yates:
     Winning:
