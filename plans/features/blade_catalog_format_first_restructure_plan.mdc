@@ -1,0 +1,405 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Blade Catalog Format-First Restructure Implementation Plan
+
+## Overview
+
+Restructure the blade catalog from brand-first to format-first organization to enable context-aware blade matching without pattern conflicts. This addresses the ambiguity issues like "Personna (5)" matching to DE blades when used with Hair Shaper razors.
+
+## Problem Statement
+
+### Current Issues
+1. **Pattern Conflicts**: Same pattern (e.g., `personn*a`) exists under multiple blade types, causing incorrect matches
+2. **Context Blindness**: Blade matcher doesn't consider razor format when matching
+3. **Quote Inconsistencies**: Inconsistent quoting in current YAML structure
+4. **Maintenance Difficulty**: Hard to see all blades of a given format
+
+### Specific Examples
+- `Weck Hair Shaper + Personna (5)` incorrectly matches to `Personna Lab Blue (DE)` instead of `Personna Hair Shaper`
+- `Schick Dermaplaner + Schick` incorrectly matches to `Schick Injector` instead of being cleared (disposable)
+
+## Proposed Solution
+
+### New Structure
+```yaml
+# Format: brand -> model -> patterns
+DE:
+  Personna:
+    Lab Blue:
+      patterns: ["personn*a", "personn*a.*blue"]
+    Platinum:
+      patterns: ["personn*a.*plat"]
+  Feather:
+    Hi-Stainless:
+      patterns: ["feather"]
+
+Hair Shaper:
+  Personna:
+    Hair Shaper:
+      patterns: ["personn*a", "personn.*hair.*shap", "person.*specimen"]
+    Specimen:
+      patterns: ["person.*specimen"]
+
+AC:
+  Feather:
+    Pro:
+      patterns: ["feather.*pro"]
+  Kai:
+    Captain Blade:
+      patterns: ["kai.*blade", "kai.*cap"]
+
+# Special sections for razor types that don't use blades
+Cartridge:
+  Cartridge:
+    Cartridge:
+      patterns: ["cartridge", "disposable", "gil.*fusion"]
+
+Disposable:
+  Disposable:
+    Disposable:
+      patterns: ["disposable", "single.*use"]
+
+Straight:
+  # Empty section - straight razors don't use blades
+```
+
+### Benefits
+1. **No Pattern Conflicts**: Same pattern can exist under multiple formats
+2. **Context-Aware by Design**: Start with razor's preferred format, fallback to others
+3. **Flexible**: Users can intentionally use different blade formats
+4. **Cleaner Organization**: Logical grouping by format → brand → model
+5. **Better Maintainability**: Easier to see all blades of a given format
+6. **Consistent Quoting**: Only quote when necessary
+7. **Preserves Blade Ignore Logic**: Maintains current behavior for cartridge/disposable/straight razors
+
+## Implementation Plan
+
+### Phase 1: Catalog Restructure (High Priority)
+- [ ] **Task 1.1**: Complete full catalog conversion to format-first structure
+  - Convert all ~820 lines from current brand-first to format-first
+  - Maintain all existing patterns and data
+  - Fix quote inconsistencies
+  - **Estimated Time**: 4-6 hours
+  - **Dependencies**: None
+
+- [ ] **Task 1.2**: Validate catalog structure
+  - Ensure all patterns are preserved
+  - Verify YAML syntax is correct
+  - Test loading with existing code
+  - **Estimated Time**: 1 hour
+  - **Dependencies**: Task 1.1
+
+### Phase 2: BladeMatcher Updates (High Priority)
+- [ ] **Task 2.1**: Update BladeMatcher to work with new structure
+  - Modify `_compile_patterns()` to handle format-first organization
+  - Update pattern compilation logic
+  - **Estimated Time**: 2-3 hours
+  - **Dependencies**: Task 1.2
+
+- [ ] **Task 2.2**: Implement context-aware matching
+  - Add `match_with_context()` method with format prioritization
+  - Implement format mapping (razor format → blade format)
+  - Add fallback logic to other formats
+  - **Estimated Time**: 3-4 hours
+  - **Dependencies**: Task 2.1
+
+- [ ] **Task 2.3**: Preserve blade ignore functionality
+  - Ensure `irrelevant_formats` logic is maintained in match phase
+  - Verify cartridge/disposable/straight razors still skip blade matching
+  - Test that blade data is cleared for these formats
+  - **Estimated Time**: 1-2 hours
+  - **Dependencies**: Task 2.2
+
+- [ ] **Task 2.4**: Update match phase integration
+  - Modify `match_record()` to use context-aware matching
+  - Update `match_record_with_monitoring()` for pipeline use
+  - Ensure blade ignore logic is preserved
+  - **Estimated Time**: 1-2 hours
+  - **Dependencies**: Task 2.3
+
+### Phase 3: Matcher Tools Updates (High Priority)
+- [ ] **Task 3.1**: Update PatternManager for format-first structure
+  - Modify `_extract_patterns_from_catalog()` to handle format-first organization
+  - Update pattern extraction logic for new structure
+  - Ensure backward compatibility with existing tools
+  - **Estimated Time**: 2-3 hours
+  - **Dependencies**: Task 2.4
+
+- [ ] **Task 3.2**: Update BladeAnalyzer for new structure
+  - Modify pattern analysis to work with format-first organization
+  - Update field breakdown to show format information
+  - Ensure all analysis features work with new structure
+  - **Estimated Time**: 2-3 hours
+  - **Dependencies**: Task 3.1
+
+- [ ] **Task 3.3**: Update Blade-Razor Conflict Analyzer
+  - Modify `analyze_blade_razor_conflicts.py` to work with new catalog structure
+  - Update format compatibility checking logic
+  - Ensure conflict detection works with format-first organization
+  - **Estimated Time**: 2-3 hours
+  - **Dependencies**: Task 3.2
+
+- [ ] **Task 3.4**: Update other analysis tools
+  - Update `analyze_personna_blade_matches.py` for new structure
+  - Update `mismatch_analyzer.py` blade-related functionality
+  - Update any other tools that directly access blade catalog
+  - **Estimated Time**: 2-3 hours
+  - **Dependencies**: Task 3.3
+
+### Phase 4: Testing and Validation (High Priority)
+- [ ] **Task 4.1**: Comprehensive test suite
+  - Unit tests for new BladeMatcher functionality
+  - Integration tests with real catalog data
+  - Performance tests for format-first matching
+  - **Estimated Time**: 3-4 hours
+  - **Dependencies**: Task 3.4
+
+- [ ] **Task 4.2**: Blade ignore functionality testing
+  - Test cartridge razors skip blade matching entirely
+  - Test shavette(disposable) razors skip blade matching entirely
+  - Test straight razors skip blade matching entirely
+  - Verify blade data is cleared for these formats
+  - **Estimated Time**: 2-3 hours
+  - **Dependencies**: Task 4.1
+
+- [ ] **Task 4.3**: Matcher tools testing
+  - Test PatternManager with new catalog structure
+  - Test BladeAnalyzer with format-first organization
+  - Test conflict analyzer with new structure
+  - **Estimated Time**: 2-3 hours
+  - **Dependencies**: Task 4.2
+
+- [ ] **Task 4.4**: Edge case testing
+  - Test all razor format combinations
+  - Test fallback scenarios
+  - Test pattern conflicts resolution
+  - **Estimated Time**: 2-3 hours
+  - **Dependencies**: Task 4.3
+
+- [ ] **Task 4.5**: Pipeline integration testing
+  - Test with real pipeline data
+  - Verify no regressions in existing functionality
+  - Performance validation
+  - **Estimated Time**: 2-3 hours
+  - **Dependencies**: Task 4.4
+
+### Phase 5: Migration and Cleanup (Medium Priority)
+- [ ] **Task 5.1**: Replace old catalog
+  - Backup current `data/blades.yaml`
+  - Replace with new format-first structure
+  - Update any hardcoded references
+  - **Estimated Time**: 1 hour
+  - **Dependencies**: Task 4.5
+
+- [ ] **Task 5.2**: Remove old context-aware logic
+  - Remove temporary `match_with_context()` method
+  - Clean up format mapping code
+  - Remove test files
+  - **Estimated Time**: 1 hour
+  - **Dependencies**: Task 5.1
+
+- [ ] **Task 5.3**: Documentation updates
+  - Update blade catalog documentation
+  - Update matching logic documentation
+  - Update matcher tools documentation
+  - Add examples of new behavior
+  - Document blade ignore functionality
+  - **Estimated Time**: 1-2 hours
+  - **Dependencies**: Task 5.2
+
+## Technical Details
+
+### Format Mapping
+```python
+format_mapping = {
+    "SHAVETTE (HAIR SHAPER)": "Hair Shaper",
+    "SHAVETTE (AC)": "AC", 
+    "SHAVETTE (DE)": "DE",
+    "SHAVETTE (HALF DE)": "DE",
+    "SHAVETTE (A77)": "A77",
+    "SHAVETTE (DISPOSABLE)": "Disposable",  # Will skip blade matching
+    "DE": "DE",
+    "AC": "AC",
+    "GEM": "GEM",
+    "INJECTOR": "Injector",
+    "CARTRIDGE": "Cartridge",  # Will skip blade matching
+    "STRAIGHT": "Straight",  # Will skip blade matching
+}
+```
+
+### Blade Ignore Logic Preservation
+The current logic in `sotd/match/match.py` must be preserved:
+
+```python
+# Skip blade matching for formats where blade is irrelevant
+irrelevant_formats = ["SHAVETTE (DISPOSABLE)", "CARTRIDGE", "STRAIGHT"]
+
+if razor_format in irrelevant_formats:
+    # Clear blade info since it's irrelevant for these razor formats
+    result["blade"] = {"original": result["blade"], "matched": None, "match_type": None}
+else:
+    # For other formats, try context-aware matching
+    result["blade"] = blade_matcher.match_with_context(result["blade"], razor_format)
+```
+
+### Matching Algorithm
+1. **Check if razor format is in `irrelevant_formats`**
+2. **If irrelevant, clear blade data and return (skip matching entirely)**
+3. If relevant, map razor format to preferred blade format
+4. Try matching in preferred format first
+5. If no match, fallback to other formats in order: DE, AC, GEM, Injector, Hair Shaper, A77, FHS
+6. Return first successful match
+
+### Tools That Need Updates
+
+#### PatternManager Updates
+- **File**: `sotd/match/tools/managers/pattern_manager.py`
+- **Method**: `_extract_patterns_from_catalog()`
+- **Changes**: Handle format-first structure (format → brand → model → patterns)
+- **Impact**: All analysis tools that use PatternManager
+
+#### BladeAnalyzer Updates
+- **File**: `sotd/match/tools/analyzers/blade_analyzer.py`
+- **Methods**: `_show_pattern_analysis()`, `_show_field_breakdown()`
+- **Changes**: Update to work with format-first organization
+- **Impact**: Blade-specific analysis functionality
+
+#### Blade-Razor Conflict Analyzer Updates
+- **File**: `sotd/match/tools/analyzers/analyze_blade_razor_conflicts.py`
+- **Methods**: `process_file()`, format compatibility checking
+- **Changes**: Update to work with new catalog structure
+- **Impact**: Conflict detection and analysis
+
+#### Other Analysis Tools
+- **Files**: `analyze_personna_blade_matches.py`, `mismatch_analyzer.py`
+- **Changes**: Update any direct catalog access to handle format-first structure
+- **Impact**: Personna-specific analysis and mismatch detection
+
+### Performance Considerations
+- Format-first organization may require more iterations for fallback matching
+- Pattern compilation should be optimized for format sections
+- Consider caching format-specific pattern lists
+- Tools may need performance optimization for new structure
+
+## Success Criteria
+
+### Functional Requirements
+- [ ] All existing blade patterns preserved and functional
+- [ ] Context-aware matching works for Hair Shaper razors
+- [ ] Fallback matching works for cross-format usage
+- [ ] No regressions in existing functionality
+- [ ] Performance within acceptable limits (<10% degradation)
+- [ ] All matcher tools work with new structure
+- [ ] **Blade ignore functionality preserved - cartridge/disposable/straight razors skip blade matching entirely**
+
+### Quality Requirements
+- [ ] All tests passing (existing + new)
+- [ ] Code coverage maintained or improved
+- [ ] Documentation updated
+- [ ] No linting errors
+- [ ] Type checking passes
+- [ ] All analysis tools functional
+
+### User Experience
+- [ ] Hair Shaper + Personna (5) → Personna Hair Shaper ✅
+- [ ] DE Razor + Personna (5) → Personna Lab Blue ✅
+- [ ] AC Razor + Feather Pro → Feather Pro ✅
+- [ ] GEM Razor + GEM PTFE → Personna PTFE ✅
+- [ ] **Cartridge Razor + Any Blade → Blade Cleared (No Matching) ✅**
+- [ ] **Shavette(Disposable) + Any Blade → Blade Cleared (No Matching) ✅**
+- [ ] **Straight Razor + Any Blade → Blade Cleared (No Matching) ✅**
+- [ ] All analysis tools provide accurate results ✅
+
+## Risk Assessment
+
+### Low Risk
+- **Pattern Preservation**: All existing patterns will be maintained
+- **Backward Compatibility**: Old matching logic can be kept as fallback
+- **Testing**: Comprehensive test coverage will catch issues
+- **Blade Ignore Logic**: Current logic is well-defined and can be preserved
+
+### Medium Risk
+- **Performance**: Format-first matching may be slower than current approach
+- **Complexity**: New matching logic adds complexity to BladeMatcher
+- **Tools Integration**: Multiple analysis tools need updates
+
+### High Risk
+- **Analysis Tools**: Complex tools like mismatch_analyzer may have hidden dependencies
+- **PatternManager**: Core utility used by many tools, changes affect wide scope
+
+### Mitigation Strategies
+- **Performance**: Profile and optimize matching algorithm
+- **Complexity**: Thorough testing and documentation
+- **Tools**: Incremental updates with extensive testing
+- **Rollback**: Keep backup of current catalog and logic
+- **Blade Ignore**: Explicit testing of ignore functionality
+
+## Timeline
+
+### Week 1: Foundation
+- Complete catalog restructure (Tasks 1.1-1.2)
+- Begin BladeMatcher updates (Task 2.1)
+
+### Week 2: Core Implementation
+- Complete BladeMatcher updates (Tasks 2.2-2.4)
+- Begin matcher tools updates (Task 3.1)
+
+### Week 3: Tools Integration
+- Complete matcher tools updates (Tasks 3.2-3.4)
+- Begin comprehensive testing (Task 4.1)
+
+### Week 4: Testing and Validation
+- Complete testing suite (Tasks 4.2-4.5)
+- Address any issues found
+
+### Week 5: Migration and Cleanup
+- Complete migration (Tasks 5.1-5.3)
+- Final validation and documentation
+
+## Dependencies
+
+### External Dependencies
+- None
+
+### Internal Dependencies
+- Existing blade catalog structure
+- Current BladeMatcher implementation
+- Match phase integration
+- PatternManager and analysis tools
+- All blade-related analysis utilities
+
+## Notes
+
+### Lessons from Testing
+- Format-first approach achieved 100% success rate in initial testing
+- Context-aware matching correctly prioritizes razor-appropriate blade formats
+- Fallback logic handles cross-format usage gracefully
+
+### Blade Ignore Functionality
+- **Current Behavior**: Cartridge, shavette(disposable), and straight razors skip blade matching entirely
+- **Preservation**: This logic must be maintained in format-first approach
+- **Implementation**: No blade patterns needed for these formats - matching is skipped at match phase level
+- **Testing**: Explicit tests for blade ignore functionality
+
+### Tools Impact Analysis
+- **PatternManager**: High impact - used by multiple analysis tools
+- **BladeAnalyzer**: Medium impact - blade-specific analysis
+- **Conflict Analyzer**: Medium impact - format compatibility checking
+- **Other Tools**: Low-Medium impact - may have direct catalog access
+
+### Future Enhancements
+- Consider adding blade format validation in enrich phase
+- Explore performance optimizations for large catalogs
+- Consider user-configurable format preferences
+- Enhance analysis tools with format-specific insights
+
+---
+
+**Status**: PLANNING  
+**Priority**: HIGH  
+**Estimated Total Time**: 20-28 hours  
+**Created**: 2025-01-27  
+**Last Updated**: 2025-01-27

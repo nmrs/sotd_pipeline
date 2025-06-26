@@ -1,0 +1,322 @@
+# Blade catalog organized by format for context-aware matching
+# Format: brand -> model -> patterns
+
+DE:
+  "7 O'Clock":
+    Permasharp:
+      patterns:
+        - clock.*perm
+    Sharpedge:
+      patterns:
+        - gill.*sharp.*edg
+        - clock.*sharp.*edg
+        - clock.*yellow
+        - gill.*yellow
+    Super Platinum:
+      patterns:
+        - clock.*pla
+        - clock.*black
+        - gill.*black
+        - 7OC.*pla
+        - \b7 ?sp\b
+        - \b7'o.*black
+    Super Stainless:
+      patterns:
+        - clock.*sta
+        - clock.*green
+        - clock
+        - gil.*et.*super.*stain
+        - gil.*et.*green
+  Astra:
+    Superior Platinum:
+      patterns:
+        - astra.*plat
+        - astra.*green
+        - astra.*sp
+        - astra
+    Superior Stainless:
+      patterns:
+        - astra.*sta
+        - astra.*blue
+        - astra.*ss
+  Feather:
+    Hi-Stainless:
+      patterns:
+        - feather
+        - feather.*hi.*st
+        - feather.*hs
+        - 'feather\s*blade'
+        - feather.*de
+  Gillette:
+    Blue:
+      patterns:
+        - gil.*blu
+    Nacet:
+      patterns:
+        - nancet
+        - nacet
+        - nacrt
+    Platinum:
+      patterns:
+        - gil.*pla
+    Silver Blue:
+      patterns:
+        - gsb
+        - Gill.*sil.*blue
+        - silver.*blue
+        - gill.*sb
+        - gill.*blu.*sil
+    Winner:
+      patterns:
+        - gil.*winner(?:.*black)?
+        - winner
+  Personna:
+    Lab Blue:
+      patterns:
+        - (person+a)?.*lab *blue
+        - personn*a.*blue
+        - personn*a.*c.*c
+        - personn*a
+        - accuforge
+    Platinum:
+      patterns:
+        - ^person+a?\b.*plat
+        - personn*a.*red
+        - personn*a.*stainless
+        - personn*a.*super
+    Med Prep:
+      patterns:
+        - person.*med
+        - med.*prep
+        - accu-?thrive
+  Schick:
+    Stainless:
+      patterns:
+        - schl?ick.*s(?:tainles)*s
+
+Hair Shaper:
+  Annie:
+    Hair Shaper:
+      patterns:
+        - ^annie\b
+        - ^annir\b
+        - \bannie\b
+  Diane:
+    Hair Shaper:
+      patterns:
+        - diane
+  Dovo:
+    Professional Shavette:
+      patterns:
+        - dovo.*prof.*shavette
+  Durham Duplex:
+    Hair Shaper:
+      patterns:
+        - durham
+  Fromm:
+    Hair Shaper:
+      patterns:
+        - fromm
+  Gutche:
+    Hair Shaper:
+      patterns:
+        - gutche
+  Kismet:
+    Hair Shaper:
+      patterns:
+        - kismet
+  Personna:
+    Hair Shaper:
+      patterns:
+        - personn.*hair.*shap
+        - person.*specimen
+        - person+a
+    Specimen:
+      patterns:
+        - person.*specimen
+  Weck:
+    Sextoblade:
+      patterns:
+        - weck
+
+AC:
+  Dorco:
+    BB-20:
+      patterns:
+        - dorco.*bb*
+  Feather:
+    Pro:
+      patterns:
+        - feather.*pro
+        - feather.*a.*c
+    Pro Light:
+      patterns:
+        - feather.*light
+    Pro Super:
+      patterns:
+        - feather.*super
+        - 'pro\s*super'
+    ProGuard:
+      patterns:
+        - feather.*pro.*guard
+    Soft Guard:
+      patterns:
+        - feather.*soft
+  Kai:
+    Captain Blade:
+      patterns:
+        - kai.*blade
+        - 'kai captain\s*$'
+        - kai.*cap
+    Captain Sharpblade:
+      patterns:
+        - kai.*sharp
+    Captain Titan Mild:
+      patterns:
+        - kai.*titan
+        - kai.*cap.*mild
+    Captain Titan Mild Protouch MG:
+      patterns:
+        - 'kai.*pro\s*(?:touch|guard)'
+        - 'protouch'
+    Salon Select Premium Guard:
+      patterns:
+        - kai.*prem.*guard
+  Schick:
+    Proline:
+      patterns:
+        - (schick.*)?proline
+        - (schick.*)?(proline.*)?p[ -]?[23]0
+  Sapphoo:
+    Red:
+      patterns:
+        - 'sapp?hoo(\s*red)?'
+
+GEM:
+  GEM:
+    Blue Star:
+      patterns:
+        - gem.*blue.*star
+  PAL:
+    Blue Blade:
+      patterns:
+        - \bpal\b.*blue
+  Personna:
+    PTFE:
+      patterns:
+        - (person|gem).*p[tf]{2}e
+        - gem by personna
+        - (ptfe|pfte).*(person|gem)
+        - (person|ptfe).*gem
+        - ptfe
+        - ptfs
+        - gem
+        - acc?utec
+        - accu.*(gem|coated|p[ft]{2}e)
+    Stainless:
+      patterns:
+        - (personna)*gem.*stainless
+        - gem.*ss
+        - person.*gem.*uncoated
+  Ted Pella:
+    PTFE:
+      patterns:
+        - pella.*ptfe
+  Treet:
+    GEM:
+      patterns:
+        - treet.*gem
+        - gem.*treet
+
+Injector:
+  Personna:
+    Injector:
+      patterns:
+        - (person|personna).*(inject|injector)
+  Schick:
+    Injector:
+      patterns:
+        - s?c?hick
+        - inject
+        - schick.*inject
+    Proline:
+      patterns:
+        - (schick.*)?(proline.*)?b[ -]?20
+  Supply Co.:
+    Black Label:
+      patterns:
+        - supply
+        - black label
+  Ted Pella:
+    Injector:
+      patterns:
+        - pella
+        - pella.*injector
+
+A77:
+  Cloud:
+    A77:
+      patterns:
+        - cloud.*a77
+  Snow Mountain Wolf:
+    A77:
+      patterns:
+        - snow moun?tain wolf
+
+FHS:
+  Feather:
+    FHS-1:
+      patterns:
+        - (feather)?.*\bfhs\b
+  OneBlade:
+    HiCarbon SE:
+      patterns:
+        - oneblade.*hicarbon
+
+Cartridge:
+  Cartridge:
+    Cartridge:
+      patterns:
+        - cartridge
+        - cien\s*men
+        - disposable
+        - gil.*fusion
+        - gil.*guard
+        - gil.*labs
+        - gil.*proglide
+        - harry.{1}?s
+        - mach ?(iii|3|three)
+        - sensor ?(iii|3|three)
+        - trac( |-)?(2|two|ii)
+        - twin.*pivot
+        - xtreme2
+
+Other:
+  Crown:
+    Super Stainless SE:
+      patterns:
+        - crown.*stainless.*\bse\b
+  Enders:
+    Speed Blade:
+      patterns:
+        - enders
+  Heljestrand:
+    Wedge:
+      patterns:
+        - heljestrand
+  Kampfe:
+    Wedge:
+      patterns:
+        - kampfe
+  L'Essor:
+    Wedge:
+      patterns:
+        - "l'essor"
+  Rolls Razor:
+    Blade:
+      patterns:
+        - rolls
+  Valet:
+    Blade:
+      patterns:
+        - valet 
