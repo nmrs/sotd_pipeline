@@ -300,6 +300,7 @@ Cartridge / Disposable:
     - 'mach.*(3|iii)'
     - pace.*6
     - simply (?:max|smooth)
+    - (?:schick)?.*hydro.*5
     - 'trac\b.*(2|ii)'
 Charcoal Goods:
   Everyday:
@@ -1076,7 +1077,7 @@ Lord:
     - lord.*s ?625
 Maggard:
   Shavette:
-    fprmat: Shavette
+    format: Shavette
     patterns:
     - magg.*shavette
   Slant:
@@ -1759,7 +1760,7 @@ Schick:
     - injector
   Krona:
     patterns:
-    - kry?ona
+    - (?:schick)?.*kry?ona
 Segal:
   Unitary:
     patterns:

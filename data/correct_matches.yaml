@@ -421,7 +421,7 @@ razor:
     Heritage:
     - Gillette Heritage Inspired
     King C. Gillette:
-    - '*New* King C. Gillette'
+    - '** King C. Gillette'
     - Gillette - King C Chrome
     - Gillette - King C Gillette
     - Gillette - King Chrome (Target)
@@ -429,21 +429,21 @@ razor:
     - King C Gillette
     - King C. Gillette
     Knack:
-    - Gillette Knack (1968)
+    - Gillette Knack
     Lady Gillette:
     - Gillette - 1966 Lady Gillette
     - Gillette - 1966 Lady Gillette.
     - Gillette Lady Gillette (Blue)
     NEW:
-    - Gillette "The New" Vintage Razor
-    - Gillette long-comb NEW
-    - Gillette New (Long Comb)
-    - Gillette NEW Big Boy (~1930)
-    - Gillette NEW DeLuxe (1930)
-    - Gillette New Long Comb
-    - Gillette NEW Short Comb Replated
-    - Gillette New Standard
-    - Gillette short-comb NEW
+    - Gillette "The " Vintage Razor
+    - Gillette (Long Comb)
+    - Gillette Big Boy (~1930)
+    - Gillette DeLuxe
+    - Gillette Long Comb
+    - Gillette long-comb
+    - Gillette Short Comb Replated
+    - Gillette short-comb
+    - Gillette Standard
     Old Type:
     - 'Gillette - ABC Pocket Edition: Floral'
     - Gillette Old Type
@@ -457,11 +457,11 @@ razor:
     - 1962 Gillette Slim Adjustable
     - 1963 Gillette Slim Adjustable
     - 1968 Gillette Slim Adjustable
-    - Gillette *Slim* Adjustable (1962)
+    - Gillette *Slim* Adjustable
     - Gillette - Slim
     - Gillette - Slim Adjustable
     - Gillette - Slim Adjustable (L4, 1966)
-    - Gillette - Slim Adjustable M-4 (1967)
+    - Gillette - Slim Adjustable M-4
     - Gillette - Slim Adjustable N2
     - Gillette - Slim Adjustable.
     - Gillette - Slim J2
@@ -499,7 +499,6 @@ razor:
     - Gillette - Rocket HD
     - Gillette - Rocket HD500 (England)
     - Gillette - Super Speed Black Tip
-    - Gillette - Super Speed Black Tip X2
     - Gillette 40's-style superspeed
     - Gillette Black Tip Super Speed
     - Gillette black-handled superspeed
@@ -510,7 +509,7 @@ razor:
     - Gillette Milord Tech
     - Gillette Ranger Tech
     - Gillette Red Tip
-    - Gillette Red Tip Super Speed (1957)
+    - Gillette Red Tip Super Speed
     - Gillette Red Tip Super Speed TTO (E1 - 1959 Q1)
     - Gillette red-tip (C4 --> Q4 1957)
     - Gillette Super Speed
@@ -649,17 +648,12 @@ razor:
     - Koraat *MOARteen* Sub-Exclusive (15/16", Full Hollow, Square Point)
     - Koraat - MOARTEEN
     - Koraat - Moarteen (square point, 15/16", full hollow, r/wetshaving exclusive)
-      (8)
-    - Koraat - Moarteen (square point, 15/16", full hollow, r/wetshaving exclusive)
-      (9)
     - Koraat - Moarteen 15/16
     - Koraat - MOARteen 15/16" Full Hollow Custom Point josiguuh special
     - Koraat - r/Wetshaving exclusive MOARteen
     - Koraat - r/Wetshaving exclusive Moarteen (15/16", full hollow, carbon steel)
     - koraat 14 "moarteen" 15/16" full hollow
-    - koraat 15/16 full hollow - sub exclusive 'moarteen' (12)
-    - Koraat 15/16 Full Hollow - Sub Exclusive 'Moarteen' (13)
-    - Koraat 15/16 Full Hollow - Sub Exclusive 'Moarteen' (14)
+    - Koraat 15/16 Full Hollow - Sub Exclusive 'Moarteen'
     - Koraat Knives - r/Wetshaving Exclusive Moarteen 15/16
     - Koraat Knives- Moarteen 15/16 Square Point
     - Koraat MOAR TEEN
@@ -702,8 +696,6 @@ razor:
   Maggard:
     SS70:
     - Maggard Razors CNC .70
-    Shavette:
-    - maggard shavette
     Slant:
     - Gillette handles and Maggard Slant head
     - Maggard MR11 with Slant Head
@@ -742,7 +734,6 @@ razor:
     - Vtg. Mercur Slant
     39C:
     - Merkur 39C
-    - Merkur 39C [18]
     41C:
     - Merkur 41c
     Futur:
@@ -836,7 +827,7 @@ razor:
     - Goerge Westenholm Original Pipe Razor
     - Gold Dollar 208
     - Gold Dollar 66
-    - Gold Dollar Straight Razor (6)
+    - Gold Dollar Straight Razor
     - Griffith 15/16 Silver Steel Full Hollow
     - griffon xx "carbo-magnetic 60" 5/8
     - Hadoson - Matsukura Frameback 7/8
@@ -847,9 +838,7 @@ razor:
     - John Clarke and Son - 6/8 round point / full hollow - Scheffield
     - Joseph Allen & Sons - Non XLL The Celebrated Extra Hollow Ground Barbers Notch
       Horn Scale
-    - Joseph Rogers & Sons Near Wedge (6)
-    - Joseph Rogers & Sons Near Wedge (7)
-    - Joseph Rogers & Sons Near Wedge (8)
+    - Joseph Rogers & Sons Near Wedge
     - JR Torrey - Unnamed, Hollow Ground, 6/8"
     - Kikuboshi 6/8" Frameback
     - Kobar - High Class - Monday
@@ -871,10 +860,7 @@ razor:
     - Solingen - 5/8" Hollow Ground Round Point
     - Thomas Turner & Co. - Cutlers to his majesty - 6/8 square point
     - Union 5/8 Full Hollow Square Point
-    - Union Razor Cutlery 5/8 Full Hollow (3)
-    - Union Razor Cutlery 5/8 Full Hollow (4)
-    - Union Razor Cutlery 5/8 Full Hollow (5)
-    - Union Razor Cutlery 5/8 Full Hollow (6)
+    - Union Razor Cutlery 5/8 Full Hollow
     - Victoria 4 (6/8", half hollow, round tip, carbon steel)
     - Vostok 1968 Straight
     - W. Greaves & Sons The Canadian - wedge - barber's notch - 11/16
@@ -921,7 +907,7 @@ razor:
     - Pearl OC
   Personna:
     BBS-0:
-    - 'Personna - New Angle 70: BBS-0'
+    - 'Personna - Angle 70: BBS-0'
   Ralf Aust:
     Straight:
     - Ralf Aust - Ralf Aust 5/8" Round Point Straight Razor
@@ -1065,13 +1051,10 @@ razor:
     - Schick - Injector Type G
     - Schick - Injector Type J
     - Schick - Injector x 6" generic locking pliers
-    - Schick - Krona 1960s TTO DE
-    - Schick - Krona.
     - Schick - Stick Schick
     - Schick - Type I1
     - Schick - Type L1
     - Schick Adjustable Injector
-    - Schick Hydro 5
     - Schick Injector
     - Schick Injector G1
     - Schick Injector I1 .
@@ -1082,7 +1065,6 @@ razor:
     - Schick Injector Type J
     - Schick Injector Type M Variant D2,H1,G1 (1968 - 1973)
     - Schick Injector Type N1
-    - Schick Krona
     - Schick L1
     - Schick M1 Adjustable
     - Schick skintimate women's razor
@@ -1097,6 +1079,10 @@ razor:
     - Shick injector Adjustable( 6-4-2)
     - Vintage SCHICK Injector Razor Type-E (1930-1940s)
     - ~~Gillette~~ Schick L7 "Championship" Injector
+    Krona:
+    - Schick - Krona 1960s TTO DE
+    - Schick - Krona.
+    - Schick Krona
   Segal:
     Unitary:
     - Segal Unitary
@@ -1127,9 +1113,9 @@ razor:
   Tatara:
     Amakuni:
     - Tatara *Amakuni*
+    - Tatara Amakuni
     Masamune:
     - Tatara - Masamune OC
-    - Tatara Amakuni
     - Tatara Masamune
     Masamune Nodachi:
     - Tatara Masamune Nodachi Ti
@@ -1298,4 +1284,4 @@ razor:
     Short Comb:
     - Ikon Razors - Ikon Short Comb with Bulldog 80 mm handle
     X3:
-    - iKon X3
+    - iKon

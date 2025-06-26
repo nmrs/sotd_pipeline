@@ -124,7 +124,7 @@ Clifton:
       - clifton
 Cloud:
   A77:
-    format: Antelope/A77
+    format: A77
     patterns:
       - cloud.*a77
   Super Stainless:
@@ -387,8 +387,12 @@ Kai:
   Captain Titan Mild Protouch MG:
     format: AC
     patterns:
-      - 'kai.*pro\s*touch'
+      - 'kai.*pro\s*(?:touch|guard)'
       - 'protouch'
+  Salon Select Premium Guard:
+    format: AC
+    patterns:
+      - kai.*prem.*guard
 Kampfe:
   Wedge:
     format: Other
@@ -489,7 +493,7 @@ Personna:
   GEM PTFE:
     format: GEM
     patterns:
-      - (person|gem).*(ptfe|pfte)
+      - (person|gem).*p[tf]{2}e(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - gem by personna
       - (ptfe|pfte).*(person|gem)
       - (person|ptfe).*gem
@@ -497,6 +501,7 @@ Personna:
       - ptfs
       - gem
       - acc?utec
+      - accu.*(gem|coated|p[ft]{2}e)
   GEM Stainless:
     format: GEM
     patterns:
@@ -504,9 +509,11 @@ Personna:
       - gem.*ss
       - person.*gem.*uncoated
   Hair Shaper:
+    format: Hair Shaper
     patterns:
       - personn.*hair.*shap
       - person.*specimen
+      - person+a
   Injector:
     format: Injector
     patterns:
@@ -589,10 +596,16 @@ Schick:
     patterns:
       - s?c?hick
       - inject
+      - schick.*inject(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Proline (AC):
     format: AC
     patterns:
       - (schick.*)?proline
+      - (schick.*)?(proline.*)?p[ -]?[23]0
+  Proline (Injector):
+    format: Injector
+    patterns:
+      - (schick.*)?(proline.*)?b[ -]?20
   Stainless (DE):
     patterns:
       - schl?ick.*s(?:tainles)*s
