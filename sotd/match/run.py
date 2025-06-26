@@ -61,10 +61,26 @@ def match_record(
         start_time = time.time()
         result["razor"] = razor_matcher.match(result["razor"])
         monitor.record_matcher_timing("razor", time.time() - start_time)
+
     if "blade" in result:
         start_time = time.time()
-        result["blade"] = blade_matcher.match(result["blade"])
+        # Check if razor is cartridge/disposable/straight and clear blade if so
+        razor_matched = result.get("razor", {}).get("matched", {})
+        if razor_matched:
+            razor_format = razor_matched.get("format", "").upper()
+            irrelevant_formats = ["SHAVETTE (DISPOSABLE)", "CARTRIDGE", "STRAIGHT"]
+
+            if razor_format in irrelevant_formats:
+                # Clear blade info since it's irrelevant for these razor formats
+                result["blade"] = {"original": result["blade"], "matched": None, "match_type": None}
+            else:
+                # For other formats, match normally
+                result["blade"] = blade_matcher.match(result["blade"])
+        else:
+            # No razor context, match blade normally
+            result["blade"] = blade_matcher.match(result["blade"])
         monitor.record_matcher_timing("blade", time.time() - start_time)
+
     if "soap" in result:
         start_time = time.time()
         result["soap"] = soap_matcher.match(result["soap"])
@@ -119,30 +135,13 @@ def process_month(
         records = data.get("data", [])
         monitor.set_record_count(len(records))
 
-        for record in records:
-            # Match razor
-            if "razor" in record:
-                start_time = time.time()
-                record["razor"] = razor_matcher.match(record["razor"])
-                monitor.record_matcher_timing("razor", time.time() - start_time)
-
-            # Match blade
-            if "blade" in record:
-                start_time = time.time()
-                record["blade"] = blade_matcher.match(record["blade"])
-                monitor.record_matcher_timing("blade", time.time() - start_time)
-
-            # Match brush
-            if "brush" in record:
-                start_time = time.time()
-                record["brush"] = brush_matcher.match(record["brush"])
-                monitor.record_matcher_timing("brush", time.time() - start_time)
-
-            # Match soap
-            if "soap" in record:
-                start_time = time.time()
-                record["soap"] = soap_matcher.match(record["soap"])
-                monitor.record_matcher_timing("soap", time.time() - start_time)
+        for i, record in enumerate(records):
+            # Use the match_record function that includes blade clearing logic
+            matched_record = match_record(
+                record, razor_matcher, blade_matcher, soap_matcher, brush_matcher, monitor
+            )
+            # Update the record in the list
+            records[i] = matched_record
 
         monitor.end_processing_timing()
 
