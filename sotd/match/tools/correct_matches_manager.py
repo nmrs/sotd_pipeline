@@ -7,7 +7,7 @@ from typing import Dict, Set
 import yaml
 from rich.console import Console
 
-from sotd.utils.competition_tags import (
+from sotd.utils.match_filter_utils import (
     load_competition_tags,
     normalize_for_storage,
     strip_competition_tags,

@@ -6,7 +6,7 @@ from typing import Dict, List
 
 import yaml
 
-from sotd.utils.competition_tags import load_competition_tags, strip_competition_tags
+from sotd.utils.match_filter_utils import load_competition_tags, strip_competition_tags
 
 
 def clean_and_alphabetize_correct_matches(

@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from sotd.utils.competition_tags import load_competition_tags, strip_competition_tags
+from sotd.utils.match_filter_utils import load_competition_tags, strip_competition_tags
 from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 
 

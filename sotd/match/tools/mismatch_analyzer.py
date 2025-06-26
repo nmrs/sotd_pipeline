@@ -13,7 +13,7 @@ from rich.table import Table
 
 from sotd.cli_utils.base_parser import BaseCLIParser
 from sotd.match.tools.analysis_base import AnalysisTool
-from sotd.utils.competition_tags import (
+from sotd.utils.match_filter_utils import (
     load_competition_tags,
     normalize_for_storage,
     strip_competition_tags,
@@ -885,7 +885,7 @@ class MismatchAnalyzer(AnalysisTool):
 
     def display_mismatches(self, mismatches: Dict[str, List[Dict]], field: str, args) -> None:
         """Display identified mismatches in a formatted table, normalized and grouped."""
-        from sotd.utils.competition_tags import normalize_for_storage
+        from sotd.utils.match_filter_utils import normalize_for_storage
 
         mismatch_keys = [
             "multiple_patterns",
@@ -1045,7 +1045,7 @@ class MismatchAnalyzer(AnalysisTool):
         self, data: Dict, field: str, mismatches: Dict[str, List[Dict]], args
     ) -> None:
         """Display all matches with mismatch indicators, normalized and grouped."""
-        from sotd.utils.competition_tags import normalize_for_storage
+        from sotd.utils.match_filter_utils import normalize_for_storage
 
         self.console.print(
             f"\n[bold]All {field.capitalize()} Matches with Mismatch Indicators:[/bold]\n"
@@ -1156,7 +1156,7 @@ class MismatchAnalyzer(AnalysisTool):
 
     def display_unconfirmed_matches(self, data: Dict, field: str, args) -> None:
         """Display only unconfirmed matches (not exact or previously confirmed)."""
-        from sotd.utils.competition_tags import normalize_for_storage
+        from sotd.utils.match_filter_utils import normalize_for_storage
 
         self.console.print(f"\n[bold]Unconfirmed {field.capitalize()} Matches:[/bold]\n")
 
@@ -1252,7 +1252,7 @@ class MismatchAnalyzer(AnalysisTool):
 
     def display_regex_matches(self, data: Dict, field: str, args) -> None:
         """Display only regex matches (not exact or previously confirmed)."""
-        from sotd.utils.competition_tags import normalize_for_storage
+        from sotd.utils.match_filter_utils import normalize_for_storage
 
         self.console.print(f"\n[bold]Regex Matches for {field.capitalize()}:[/bold]\n")
 

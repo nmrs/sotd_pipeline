@@ -299,8 +299,7 @@ Cartridge / Disposable:
     - '\blidl\b'
     - 'mach.*(3|iii)'
     - pace.*6
-    - sensor
-    - simply smooth
+    - simply (?:max|smooth)
     - 'trac\b.*(2|ii)'
 Charcoal Goods:
   Everyday:
@@ -1002,7 +1001,7 @@ Koraat:
     format: Straight
     grind: Full Hollow
     patterns:
-    - koraat.*moar ?teen(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+    - (?:koraat)?.*moar ?teen(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     point: Square
     width: 15/16
   Straight:
@@ -1104,6 +1103,11 @@ Manscaped:
   The Plow 2.0:
     patterns:
     - manscaped?.*plow
+Master Barber:
+  Magic Razor:
+    format: Shavette (Half DE)
+    patterns:
+    - (?:master|magic) barber.*magic
 Maxwell:
   June:
     format: Half DE
@@ -1133,6 +1137,7 @@ Merkur:
     - (merkur.*)?37c
     - merkur.*37c.*(slant)*
     - coles slant
+    - mer[ck]ur.*slant
   '38C':
     patterns:
     - (merkur.*)?38c
@@ -1265,6 +1270,7 @@ Other:
       format: Shavette (Disposable)
       patterns:
       - (?:cvs|kroger).*dermaplane
+      - sassy.*eyebrow
   Kamisori:
     format: Straight
     patterns:
@@ -1356,6 +1362,15 @@ PAA:
   Phantom Blue:
     patterns:
     - phantom blue
+PAL:
+  Adjustable Injector:
+    format: Injector
+    patterns:
+    - pal.*injector
+  Injectomatic:
+    format: Injector
+    patterns:
+    - pal.*injectomatic
 Paradigm:
   17-4:
     patterns:
@@ -1699,10 +1714,11 @@ Rubin:
     - russian.*ruby
     - '\brubin\b'
     - ruby adjustable
+    - Рубин
 Saiver:
-  Profimed:
+  DE:
     patterns:
-    - saiver
+    - sa[iy]ver
 Sanguine:
   Coolcut 9:
     format: Shavette (AC)
@@ -2092,6 +2108,9 @@ Yaqi:
   Katana:
     patterns:
     - yaqi.*katana
+  Knight Helmet:
+    patterns:
+    - yaqi.*knight.*helmet
   Open Comb:
     patterns:
     - yaqi.*open.*comb(.*head)?
@@ -2104,6 +2123,10 @@ Yaqi:
   Remus:
     patterns:
     - yaqi.*remus
+  Romulus:
+    format: AC
+    patterns:
+    - yaqi.*romulus
   SE:
     format: Half DE
     patterns:
@@ -2153,6 +2176,10 @@ Yintal:
     format: Shavette (Half DE)
     patterns:
     - yintal.*shavet
+Yuma:
+  DE:
+    patterns:
+    - ^yuma$
 Zomchí:
   '':
     patterns:
