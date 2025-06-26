@@ -1,6 +1,7 @@
 import pytest
 
 from sotd.enrich.blade_enricher import BladeCountEnricher
+from sotd.utils.match_filter_utils import extract_blade_use_count
 
 
 class TestBladeCountEnricher:
@@ -162,31 +163,31 @@ class TestBladeCountEnricher:
         assert result["use_count"] == "5"
 
     def test_extract_use_count_method(self, enricher):
-        """Test the _extract_use_count method directly."""
+        """Test the extract_blade_use_count function directly."""
         # Test various formats
-        assert enricher._extract_use_count("Astra SP (3)") == 3
-        assert enricher._extract_use_count("Feather [5]") == 5
-        assert enricher._extract_use_count("Gillette {2}") == 2
-        assert enricher._extract_use_count("Personna x4") == 4
-        assert enricher._extract_use_count("Derby (x2)") == 2
-        assert enricher._extract_use_count("Voskhod 2x") == 2
+        assert extract_blade_use_count("Astra SP (3)") == 3
+        assert extract_blade_use_count("Feather [5]") == 5
+        assert extract_blade_use_count("Gillette {2}") == 2
+        assert extract_blade_use_count("Personna x4") == 4
+        assert extract_blade_use_count("Derby (x2)") == 2
+        assert extract_blade_use_count("Voskhod 2x") == 2
 
         # Test no match cases
-        assert enricher._extract_use_count("Astra SP") is None
-        assert enricher._extract_use_count("") is None
-        assert enricher._extract_use_count("Just text with no numbers") is None
+        assert extract_blade_use_count("Astra SP") is None
+        assert extract_blade_use_count("") is None
+        assert extract_blade_use_count("Just text with no numbers") is None
 
     def test_extract_use_count_edge_cases(self, enricher):
         """Test edge cases for use count extraction."""
         # Test with leading/trailing whitespace
-        assert enricher._extract_use_count("  Astra SP (3)  ") == 3
+        assert extract_blade_use_count("  Astra SP (3)  ") == 3
 
         # Test with mixed case
-        assert enricher._extract_use_count("Astra SP (X3)") == 3
-        assert enricher._extract_use_count("Astra SP (x3)") == 3
+        assert extract_blade_use_count("Astra SP (X3)") == 3
+        assert extract_blade_use_count("Astra SP (x3)") == 3
 
         # Test with multiple matches (should get first)
-        assert enricher._extract_use_count("Astra SP (3) shave #5") == 3
+        assert extract_blade_use_count("Astra SP (3) shave #5") == 3
 
     # Additional tests to validate against original blade matcher behavior
     def test_original_blade_matcher_compatibility_parentheses(self, enricher):
