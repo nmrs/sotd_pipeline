@@ -106,7 +106,12 @@ class PatternManager:
                 return self._catalog_patterns[field]
 
         # Load from file
-        catalog_path = Path(f"data/{field}s.yaml")
+        if field == "blade":
+            # Use the new format-first blade catalog
+            catalog_path = Path("data/blades_format_first.yaml")
+        else:
+            catalog_path = Path(f"data/{field}s.yaml")
+
         if not catalog_path.exists():
             self.console.print(f"[yellow]Warning: No catalog file found for {field}s[/yellow]")
             return []
@@ -128,30 +133,54 @@ class PatternManager:
         """Extract patterns from catalog data."""
         patterns = []
 
-        for brand, brand_data in catalog_data.items():
-            if not isinstance(brand_data, dict):
-                continue
-
-            for model, model_data in brand_data.items():
-                if not isinstance(model_data, dict):
+        if field == "blade":
+            # New format-first structure: format -> brand -> model -> patterns
+            for format_name, brands in catalog_data.items():
+                if not isinstance(brands, dict):
                     continue
-
-                model_patterns = model_data.get("patterns", [])
-                if not isinstance(model_patterns, list):
+                for brand, models in brands.items():
+                    if not isinstance(models, dict):
+                        continue
+                    for model, model_data in models.items():
+                        if not isinstance(model_data, dict):
+                            continue
+                        model_patterns = model_data.get("patterns", [])
+                        if not isinstance(model_patterns, list):
+                            continue
+                        for pattern in model_patterns:
+                            patterns.append(
+                                {
+                                    "format": format_name,
+                                    "brand": brand,
+                                    "model": model,
+                                    "pattern": pattern,
+                                    "product_key": self._get_product_key(
+                                        {"brand": brand, "model": model}, field
+                                    ),
+                                }
+                            )
+        else:
+            # Old brand-first structure
+            for brand, brand_data in catalog_data.items():
+                if not isinstance(brand_data, dict):
                     continue
-
-                for pattern in model_patterns:
-                    patterns.append(
-                        {
-                            "brand": brand,
-                            "model": model,
-                            "pattern": pattern,
-                            "product_key": self._get_product_key(
-                                {"brand": brand, "model": model}, field
-                            ),
-                        }
-                    )
-
+                for model, model_data in brand_data.items():
+                    if not isinstance(model_data, dict):
+                        continue
+                    model_patterns = model_data.get("patterns", [])
+                    if not isinstance(model_patterns, list):
+                        continue
+                    for pattern in model_patterns:
+                        patterns.append(
+                            {
+                                "brand": brand,
+                                "model": model,
+                                "pattern": pattern,
+                                "product_key": self._get_product_key(
+                                    {"brand": brand, "model": model}, field
+                                ),
+                            }
+                        )
         return patterns
 
     def find_multiple_pattern_matches(

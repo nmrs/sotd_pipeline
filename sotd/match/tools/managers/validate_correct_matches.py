@@ -173,7 +173,7 @@ class ValidateCorrectMatches:
         # Map field names to catalog file names (actual files use plural names)
         field_to_file = {
             "razor": "razors.yaml",
-            "blade": "blades.yaml",
+            "blade": "blades_format_first.yaml",
             "brush": "brushes.yaml",
             "soap": "soaps.yaml",
         }

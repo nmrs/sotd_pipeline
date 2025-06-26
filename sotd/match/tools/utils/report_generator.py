@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from sotd.match.tools.confidence_analyzer import analyze_match_confidence
+from sotd.match.tools.analyzers.confidence_analyzer import analyze_match_confidence
 
 
 def generate_summary_panel(

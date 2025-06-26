@@ -7,8 +7,8 @@ from typing import Dict, List
 from rich.table import Table
 
 from sotd.cli_utils.base_parser import BaseCLIParser
-from sotd.match.tools.analysis_base import AnalysisTool
-from sotd.match.tools.cli_utils import BaseAnalysisCLI
+from sotd.match.tools.utils.analysis_base import AnalysisTool
+from sotd.match.tools.utils.cli_utils import BaseAnalysisCLI
 
 
 class RazorAnalyzer(AnalysisTool):

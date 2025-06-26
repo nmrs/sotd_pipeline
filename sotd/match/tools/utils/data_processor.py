@@ -44,7 +44,7 @@ def extract_field_data(
             match_types.append(match_type)
 
             # Analyze match confidence
-            from sotd.match.tools.confidence_analyzer import analyze_match_confidence
+            from sotd.match.tools.analyzers.confidence_analyzer import analyze_match_confidence
 
             confidence = analyze_match_confidence(original, brand, model, match_type)
             confidence_scores.append(confidence["score"])

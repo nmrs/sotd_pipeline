@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import Mock
-from sotd.match.tools.validate_correct_matches import ValidateCorrectMatches
+from sotd.match.tools.managers.validate_correct_matches import ValidateCorrectMatches
 import yaml
 
 
@@ -68,7 +68,7 @@ class TestValidateCorrectMatches:
     def test_imports_work_correctly(self):
         """Test that all required imports work correctly."""
         # This test ensures that the module can be imported without errors
-        from sotd.match.tools.validate_correct_matches import ValidateCorrectMatches
+        from sotd.match.tools.managers.validate_correct_matches import ValidateCorrectMatches
 
         assert ValidateCorrectMatches is not None
 

@@ -3,7 +3,7 @@
 
 from typing import List
 
-from sotd.match.tools.soap_analyzer import SoapAnalyzer
+from sotd.match.tools.analyzers.soap_analyzer import SoapAnalyzer
 
 
 def get_parser():

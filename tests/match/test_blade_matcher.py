@@ -7,22 +7,21 @@ from sotd.match.blade_matcher import BladeMatcher
 @pytest.fixture
 def matcher(tmp_path):
     yaml_content = """
-Feather:
-  DE:
-    patterns:
-      - feather
+DE:
+  Feather:
+    DE:
+      patterns:
+        - feather
 
-Astra:
-  SP:
-    format: DE
-    patterns:
-      - astra.*sp
+  Astra:
+    SP:
+      patterns:
+        - astra.*sp
 
-Derby:
-  Extra:
-    format: DE
-    patterns:
-      - derby.*extra
+  Derby:
+    Extra:
+      patterns:
+        - derby.*extra
 """
     path = tmp_path / "blades.yaml"
     path.write_text(yaml_content)

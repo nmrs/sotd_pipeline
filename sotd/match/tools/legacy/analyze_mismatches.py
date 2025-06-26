@@ -3,7 +3,7 @@
 
 from typing import List
 
-from sotd.match.tools.mismatch_analyzer import MismatchAnalyzer
+from sotd.match.tools.analyzers.mismatch_analyzer import MismatchAnalyzer
 
 
 def get_parser():

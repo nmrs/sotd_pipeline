@@ -9,12 +9,12 @@ import collections
 import pytest
 from unittest.mock import Mock
 
-from sotd.match.tools.analysis_base import AnalysisTool
-from sotd.match.tools.cli_utils import BaseAnalysisCLI
+from sotd.match.tools.utils.analysis_base import AnalysisTool
+from sotd.match.tools.utils.cli_utils import BaseAnalysisCLI
 from sotd.cli_utils.base_parser import BaseCLIParser
-from sotd.match.tools.unmatched_analyzer import UnmatchedAnalyzer
-from sotd.match.tools.field_analyzer import FieldAnalyzer
-from sotd.match.tools.analyze_matched_enhanced import EnhancedAnalyzer
+from sotd.match.tools.analyzers.unmatched_analyzer import UnmatchedAnalyzer
+from sotd.match.tools.analyzers.field_analyzer import FieldAnalyzer
+from sotd.match.tools.legacy.analyze_matched_enhanced import EnhancedAnalyzer
 
 
 class TestAnalysisToolsIntegration:

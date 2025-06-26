@@ -6,22 +6,23 @@ from .base_matcher import BaseMatcher, MatchType
 
 
 class BladeMatcher(BaseMatcher):
-    def __init__(self, catalog_path: Path = Path("data/blades.yaml")):
-        # catalog_path = base_path / "blades.yaml"
+    def __init__(self, catalog_path: Path = Path("data/blades_format_first.yaml")):
+        # catalog_path = base_path / "blades_format_first.yaml"
         super().__init__(catalog_path, "blade")
         self.patterns = self._compile_patterns()
 
     def _compile_patterns(self):
         compiled = []
-        for brand, models in self.catalog.items():
-            for model, entry in models.items():
-                # label = f"{brand} {model}"
-                patterns = entry.get("patterns", [])
-                fmt = entry.get("format", "DE")
-                for pattern in patterns:
-                    compiled.append(
-                        (brand, model, fmt, pattern, re.compile(pattern, re.IGNORECASE), entry)
-                    )
+        for format_name, brands in self.catalog.items():
+            for brand, models in brands.items():
+                for model, entry in models.items():
+                    patterns = entry.get("patterns", [])
+                    # Use the format from the catalog structure, not from the entry
+                    fmt = format_name
+                    for pattern in patterns:
+                        compiled.append(
+                            (brand, model, fmt, pattern, re.compile(pattern, re.IGNORECASE), entry)
+                        )
         return sorted(compiled, key=lambda x: len(x[3]), reverse=True)
 
     def _match_with_regex(self, value: str) -> Dict[str, Any]:

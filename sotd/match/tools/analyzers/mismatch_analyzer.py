@@ -710,7 +710,7 @@ class MismatchAnalyzer(AnalysisTool):
         # Map field names to catalog files
         field_to_catalog = {
             "razor": "razors.yaml",
-            "blade": "blades.yaml",
+            "blade": "blades_format_first.yaml",
             "brush": "brushes.yaml",
             "soap": "soaps.yaml",
         }
@@ -774,6 +774,23 @@ class MismatchAnalyzer(AnalysisTool):
                                         "scent": scent,
                                     }
                                 )
+        elif field == "blade":
+            # New format-first structure: format -> brand -> model -> patterns
+            for format_name, brands in catalog_data.items():
+                if isinstance(brands, dict):
+                    for brand, models in brands.items():
+                        if isinstance(models, dict):
+                            for model, model_data in models.items():
+                                if isinstance(model_data, dict) and "patterns" in model_data:
+                                    for pattern in model_data["patterns"]:
+                                        patterns.append(
+                                            {
+                                                "pattern": pattern,
+                                                "brand": brand,
+                                                "model": model,
+                                                "format": format_name,
+                                            }
+                                        )
         else:
             # Other catalogs have brand -> model -> patterns structure
             for brand, brand_data in catalog_data.items():

@@ -5,8 +5,8 @@ from typing import Dict, List
 
 from rich.console import Console
 
-from sotd.match.tools.correct_matches_manager import CorrectMatchesManager
-from sotd.match.tools.pattern_manager import PatternManager
+from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
+from sotd.match.tools.managers.pattern_manager import PatternManager
 
 
 class MismatchDetector:

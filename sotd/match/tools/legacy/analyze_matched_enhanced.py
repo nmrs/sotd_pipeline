@@ -4,18 +4,18 @@
 from typing import List
 
 from sotd.cli_utils.base_parser import BaseCLIParser
-from sotd.match.tools.analysis_base import AnalysisTool
-from sotd.match.tools.cli_utils import BaseAnalysisCLI
-from sotd.match.tools.data_processor import (
+from sotd.match.tools.analyzers.pattern_analyzer import (
+    get_pattern_effectiveness,
+    identify_improvement_opportunities,
+)
+from sotd.match.tools.utils.analysis_base import AnalysisTool
+from sotd.match.tools.utils.cli_utils import BaseAnalysisCLI
+from sotd.match.tools.utils.data_processor import (
     calculate_summary_statistics,
     extract_field_data,
     load_analysis_data,
 )
-from sotd.match.tools.pattern_analyzer import (
-    get_pattern_effectiveness,
-    identify_improvement_opportunities,
-)
-from sotd.match.tools.report_generator import (
+from sotd.match.tools.utils.report_generator import (
     generate_confidence_analysis_panel,
     generate_opportunities_table,
     generate_pattern_effectiveness_table,

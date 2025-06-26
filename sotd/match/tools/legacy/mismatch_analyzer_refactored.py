@@ -8,11 +8,11 @@ from typing import List, Optional
 from rich.console import Console
 
 from sotd.cli_utils.base_parser import BaseCLIParser
-from sotd.match.tools.analysis_base import AnalysisTool
-from sotd.match.tools.correct_matches_manager import CorrectMatchesManager
-from sotd.match.tools.mismatch_detector import MismatchDetector
-from sotd.match.tools.mismatch_display import MismatchDisplay
-from sotd.match.tools.pattern_manager import PatternManager
+from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
+from sotd.match.tools.managers.pattern_manager import PatternManager
+from sotd.match.tools.utils.analysis_base import AnalysisTool
+from sotd.match.tools.utils.mismatch_detector import MismatchDetector
+from sotd.match.tools.utils.mismatch_display import MismatchDisplay
 
 
 class MismatchAnalyzer(AnalysisTool):

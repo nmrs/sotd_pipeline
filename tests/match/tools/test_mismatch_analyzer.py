@@ -8,7 +8,7 @@ import shutil
 import io
 from rich.console import Console
 
-from sotd.match.tools.mismatch_analyzer import MismatchAnalyzer
+from sotd.match.tools.analyzers.mismatch_analyzer import MismatchAnalyzer
 
 
 class TestMismatchAnalyzer:

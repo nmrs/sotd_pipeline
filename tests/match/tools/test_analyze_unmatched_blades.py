@@ -1,8 +1,8 @@
 import json
 from io import StringIO
 import sys
-from sotd.match.tools.analyze_unmatched import main
-from sotd.match.tools.unmatched_analyzer import UnmatchedAnalyzer
+from sotd.match.tools.legacy.analyze_unmatched import main
+from sotd.match.tools.analyzers.unmatched_analyzer import UnmatchedAnalyzer
 
 
 def test_strip_use_count_function():

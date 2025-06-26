@@ -1,7 +1,7 @@
 import json
 import tempfile
 from pathlib import Path
-from sotd.match.tools.analyze_unmatched import main
+from sotd.match.tools.legacy.analyze_unmatched import main
 from io import StringIO
 import sys
 

@@ -4,7 +4,7 @@
 from collections import defaultdict
 from typing import Any, Dict, List
 
-from sotd.match.tools.confidence_analyzer import analyze_match_confidence
+from sotd.match.tools.analyzers.confidence_analyzer import analyze_match_confidence
 
 
 def get_pattern_effectiveness(

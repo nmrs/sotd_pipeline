@@ -3,7 +3,7 @@
 
 from typing import List
 
-from sotd.match.tools.field_analyzer import FieldAnalyzer
+from sotd.match.tools.analyzers.field_analyzer import FieldAnalyzer
 
 
 def get_parser():
