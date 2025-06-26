@@ -261,7 +261,7 @@ class TestMismatchAnalyzer:
         # Should have multiple pattern matches (for the one with "razor with Astra blade")
         assert len(mismatches["multiple_patterns"]) >= 0  # May vary based on implementation
 
-    @patch("sotd.match.tools.mismatch_analyzer.AnalysisTool.load_matched_data")
+    @patch("sotd.match.tools.analyzers.mismatch_analyzer.AnalysisTool.load_matched_data")
     def test_run_with_no_data(self, mock_load_data):
         """Test running with no data."""
         mock_load_data.return_value = []
@@ -272,7 +272,7 @@ class TestMismatchAnalyzer:
         # Should not raise an exception
         self.analyzer.run(args)
 
-    @patch("sotd.match.tools.mismatch_analyzer.AnalysisTool.load_matched_data")
+    @patch("sotd.match.tools.analyzers.mismatch_analyzer.AnalysisTool.load_matched_data")
     def test_run_with_data(self, mock_load_data):
         """Test running with data."""
         test_data = [

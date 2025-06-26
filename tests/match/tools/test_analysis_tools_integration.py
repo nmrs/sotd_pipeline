@@ -6,8 +6,6 @@ from io import StringIO
 import sys
 from unittest.mock import patch
 import collections
-import pytest
-from unittest.mock import Mock
 
 from sotd.match.tools.utils.analysis_base import AnalysisTool
 from sotd.match.tools.utils.cli_utils import BaseAnalysisCLI
@@ -205,16 +203,18 @@ class TestAnalysisToolsIntegration:
         )()
 
         # Mock the data loading functions to avoid complex dependencies
-        with patch("sotd.match.tools.analyze_matched_enhanced.load_analysis_data") as mock_load:
+        with patch(
+            "sotd.match.tools.legacy.analyze_matched_enhanced.load_analysis_data"
+        ) as mock_load:
             mock_load.return_value = test_data["data"]
 
             with patch(
-                "sotd.match.tools.analyze_matched_enhanced.extract_field_data"
+                "sotd.match.tools.legacy.analyze_matched_enhanced.extract_field_data"
             ) as mock_extract:
                 mock_extract.return_value = ([test_data["data"][0]["brush"]], ["exact"], [0.9])
 
                 with patch(
-                    "sotd.match.tools.analyze_matched_enhanced.calculate_summary_statistics"
+                    "sotd.match.tools.legacy.analyze_matched_enhanced.calculate_summary_statistics"
                 ) as mock_stats:
                     mock_stats.return_value = {
                         "total_matches": 1,

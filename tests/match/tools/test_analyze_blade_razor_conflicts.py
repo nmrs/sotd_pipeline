@@ -141,9 +141,12 @@ class TestBladeRazorConflictAnalysis:
                 "records_with_razor": 0,
                 "records_with_both": 0,
                 "conflicts_found": 0,
+                "acceptable_conflicts_found": 0,
                 "conflicts_by_type": {},
+                "acceptable_conflicts_by_type": {},
             }
             module.conflict_examples = []
+            module.acceptable_conflict_examples = []
 
             # Process the file
             process_file(temp_file)
@@ -241,9 +244,12 @@ class TestBladeRazorConflictAnalysis:
                 "records_with_razor": 0,
                 "records_with_both": 0,
                 "conflicts_found": 0,
+                "acceptable_conflicts_found": 0,
                 "conflicts_by_type": {},
+                "acceptable_conflicts_by_type": {},
             }
             module.conflict_examples = []
+            module.acceptable_conflict_examples = []
 
             # Process the file
             process_file(temp_file)
