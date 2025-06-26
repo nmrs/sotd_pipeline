@@ -66,3 +66,78 @@ class BladeMatcher(BaseMatcher):
             "pattern": None,
             "match_type": None,  # Keep None for backward compatibility
         }
+
+    def match_with_context(self, value: str, razor_format: str) -> Dict[str, Any]:
+        """Match blade with context-aware format prioritization."""
+        original = value
+        normalized = self.normalize(value)
+        if not normalized:
+            return {
+                "original": original,
+                "matched": None,
+                "pattern": None,
+                "match_type": None,
+            }
+
+        blade_text = normalized
+
+        # Map razor formats to blade formats
+        format_mapping = {
+            "SHAVETTE (HAIR SHAPER)": "HAIR SHAPER",
+            "SHAVETTE (AC)": "AC",
+            "SHAVETTE (DE)": "DE",
+            "SHAVETTE (HALF DE)": "DE",
+            "SHAVETTE (A77)": "A77",
+            "SHAVETTE (DISPOSABLE)": "DISPOSABLE",
+            "CARTRIDGE": "CARTRIDGE",
+            "STRAIGHT": "STRAIGHT",
+            "DE": "DE",
+            "AC": "AC",
+            "GEM": "GEM",
+            "INJECTOR": "INJECTOR",
+        }
+
+        target_blade_format = format_mapping.get(razor_format, razor_format)
+
+        # First, try to find matches with format that matches target blade format
+        format_matches = []
+        other_matches = []
+
+        for brand, model, fmt, raw_pattern, compiled, entry in self.patterns:
+            if compiled.search(blade_text):
+                match_data = {
+                    "brand": brand,
+                    "model": str(model),
+                    "format": fmt,
+                }
+
+                # Preserve all additional specifications from the catalog entry
+                for key, value in entry.items():
+                    if key not in ["patterns", "format"]:
+                        match_data[key] = value
+
+                match_result = {
+                    "original": original,
+                    "matched": match_data,
+                    "pattern": raw_pattern,
+                    "match_type": MatchType.REGEX,
+                }
+
+                # Prioritize format matches
+                if fmt.upper() == target_blade_format:
+                    format_matches.append(match_result)
+                else:
+                    other_matches.append(match_result)
+
+        # Return format match if found, otherwise fall back to other matches
+        if format_matches:
+            return format_matches[0]  # Return first format match
+        elif other_matches:
+            return other_matches[0]  # Return first other match
+
+        return {
+            "original": original,
+            "matched": None,
+            "pattern": None,
+            "match_type": None,
+        }

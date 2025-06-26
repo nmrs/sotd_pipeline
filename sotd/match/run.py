@@ -1,5 +1,6 @@
 import json
 import subprocess
+import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
@@ -9,7 +10,6 @@ from sotd.cli_utils.date_span import month_span
 from sotd.match.blade_matcher import BladeMatcher
 from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.cli import get_parser
-from sotd.match.match import match_record_with_monitoring
 from sotd.match.razor_matcher import RazorMatcher
 from sotd.match.soap_matcher import SoapMatcher
 from sotd.match.utils.performance import PerformanceMonitor
@@ -45,6 +45,35 @@ def is_brush_matched(record: dict) -> bool:
         and isinstance(record["brush"].get("matched"), dict)
         and bool(record["brush"]["matched"].get("brand"))
     )
+
+
+def match_record(
+    record: dict,
+    razor_matcher: RazorMatcher,
+    blade_matcher: BladeMatcher,
+    soap_matcher: SoapMatcher,
+    brush_matcher: BrushMatcher,
+    monitor: PerformanceMonitor,
+) -> dict:
+    result = record.copy()
+
+    if "razor" in result:
+        start_time = time.time()
+        result["razor"] = razor_matcher.match(result["razor"])
+        monitor.record_matcher_timing("razor", time.time() - start_time)
+    if "blade" in result:
+        start_time = time.time()
+        result["blade"] = blade_matcher.match(result["blade"])
+        monitor.record_matcher_timing("blade", time.time() - start_time)
+    if "soap" in result:
+        start_time = time.time()
+        result["soap"] = soap_matcher.match(result["soap"])
+        monitor.record_matcher_timing("soap", time.time() - start_time)
+    if "brush" in result:
+        start_time = time.time()
+        result["brush"] = brush_matcher.match(result["brush"])
+        monitor.record_matcher_timing("brush", time.time() - start_time)
+    return result
 
 
 def process_month(
@@ -90,16 +119,30 @@ def process_month(
         records = data.get("data", [])
         monitor.set_record_count(len(records))
 
-        for i, record in enumerate(records):
-            # Use context-aware match_record function from match.py
-            records[i] = match_record_with_monitoring(
-                record,
-                razor_matcher,
-                blade_matcher,
-                soap_matcher,
-                brush_matcher,
-                monitor,
-            )
+        for record in records:
+            # Match razor
+            if "razor" in record:
+                start_time = time.time()
+                record["razor"] = razor_matcher.match(record["razor"])
+                monitor.record_matcher_timing("razor", time.time() - start_time)
+
+            # Match blade
+            if "blade" in record:
+                start_time = time.time()
+                record["blade"] = blade_matcher.match(record["blade"])
+                monitor.record_matcher_timing("blade", time.time() - start_time)
+
+            # Match brush
+            if "brush" in record:
+                start_time = time.time()
+                record["brush"] = brush_matcher.match(record["brush"])
+                monitor.record_matcher_timing("brush", time.time() - start_time)
+
+            # Match soap
+            if "soap" in record:
+                start_time = time.time()
+                record["soap"] = soap_matcher.match(record["soap"])
+                monitor.record_matcher_timing("soap", time.time() - start_time)
 
         monitor.end_processing_timing()
 

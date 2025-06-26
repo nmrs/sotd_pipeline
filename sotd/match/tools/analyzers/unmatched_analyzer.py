@@ -2,12 +2,19 @@
 """Focused module for unmatched analysis functionality."""
 
 import re
+import sys
 from collections import defaultdict
+from pathlib import Path
 from typing import Dict, List
 
+# Add project root to Python path for direct execution
+project_root = Path(__file__).parent.parent.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 from sotd.cli_utils.base_parser import BaseCLIParser
-from sotd.match.tools.analysis_base import AnalysisTool
-from sotd.match.tools.cli_utils import BaseAnalysisCLI
+from sotd.match.tools.utils.analysis_base import AnalysisTool
+from sotd.match.tools.utils.cli_utils import BaseAnalysisCLI
 
 
 class UnmatchedAnalyzer(AnalysisTool):

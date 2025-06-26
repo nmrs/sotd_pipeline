@@ -3,12 +3,19 @@
 
 from collections import defaultdict
 from typing import Dict, List
+import sys
+from pathlib import Path
 
 from rich.table import Table
 
 from sotd.cli_utils.base_parser import BaseCLIParser
-from sotd.match.tools.analysis_base import AnalysisTool
-from sotd.match.tools.cli_utils import BaseAnalysisCLI
+from sotd.match.tools.utils.analysis_base import AnalysisTool
+from sotd.match.tools.utils.cli_utils import BaseAnalysisCLI
+
+# Add project root to Python path for direct execution
+project_root = Path(__file__).parent.parent.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 
 class BladeAnalyzer(AnalysisTool):
