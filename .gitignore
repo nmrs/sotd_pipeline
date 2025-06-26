@@ -30,4 +30,4 @@ debug_*.py
 praw.ini
 .env
 *.bk
-*.bk/
+*.bk/data/correct_matches.yaml.backup
