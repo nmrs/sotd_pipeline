@@ -8,11 +8,6 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
-# Add project root to Python path for direct execution
-project_root = Path(__file__).parent.parent.parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
 import yaml
 from rich.console import Console
 from rich.table import Table
@@ -25,6 +20,11 @@ from sotd.utils.match_filter_utils import (
     strip_competition_tags,
 )
 from sotd.utils.yaml_loader import load_yaml_with_nfc
+
+# Add project root to Python path for direct execution
+project_root = Path(__file__).parent.parent.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 
 class MismatchAnalyzer(AnalysisTool):

@@ -23,7 +23,7 @@ def test_hair_shaper_case():
     razor_matched = result["razor"].get("matched", {})
     blade_matched = result["blade"].get("matched", {})
 
-    print(f"\nAnalysis:")
+    print("\nAnalysis:")
     print(f"Razor format: {razor_matched.get('format', 'NOT_FOUND')}")
     print(f"Blade format: {blade_matched.get('format', 'NOT_FOUND')}")
 
@@ -36,7 +36,7 @@ def test_hair_shaper_case():
         print("   Personna blade correctly matched to Hair Shaper format")
     else:
         print("❌ FAILURE: Context-aware blade matching did not work as expected")
-        print(f"   Expected: Razor=Shavette (Hair Shaper), Blade=Hair Shaper")
+        print("   Expected: Razor=Shavette (Hair Shaper), Blade=Hair Shaper")
         print(f"   Got: Razor={razor_matched.get('format')}, Blade={blade_matched.get('format')}")
 
 

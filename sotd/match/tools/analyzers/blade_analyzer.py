@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Focused module for blade-specific analysis functionality."""
 
-from collections import defaultdict
-from typing import Dict, List
 import sys
+from collections import defaultdict
 from pathlib import Path
+from typing import Dict, List
 
 from rich.table import Table
 
