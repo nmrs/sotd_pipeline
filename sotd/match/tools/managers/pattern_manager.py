@@ -108,7 +108,7 @@ class PatternManager:
         # Load from file
         if field == "blade":
             # Use the new format-first blade catalog
-            catalog_path = Path("data/blades_format_first.yaml")
+            catalog_path = Path("data/blades.yaml")
         else:
             catalog_path = Path(f"data/{field}s.yaml")
 

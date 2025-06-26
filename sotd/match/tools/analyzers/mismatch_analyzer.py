@@ -710,7 +710,7 @@ class MismatchAnalyzer(AnalysisTool):
         # Map field names to catalog files
         field_to_catalog = {
             "razor": "razors.yaml",
-            "blade": "blades_format_first.yaml",
+            "blade": "blades.yaml",
             "brush": "brushes.yaml",
             "soap": "soaps.yaml",
         }

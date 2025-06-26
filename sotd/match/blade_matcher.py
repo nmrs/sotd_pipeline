@@ -6,8 +6,8 @@ from .base_matcher import BaseMatcher, MatchType
 
 
 class BladeMatcher(BaseMatcher):
-    def __init__(self, catalog_path: Path = Path("data/blades_format_first.yaml")):
-        # catalog_path = base_path / "blades_format_first.yaml"
+    def __init__(self, catalog_path: Path = Path("data/blades.yaml")):
+        # catalog_path = base_path / "blades.yaml"
         super().__init__(catalog_path, "blade")
         self.patterns = self._compile_patterns()
 
