@@ -74,8 +74,8 @@ def match_record(
                 # Clear blade info since it's irrelevant for these razor formats
                 result["blade"] = {"original": result["blade"], "matched": None, "match_type": None}
             else:
-                # For other formats, match normally
-                result["blade"] = blade_matcher.match(result["blade"])
+                # For other formats, use context-aware matching
+                result["blade"] = blade_matcher.match_with_context(result["blade"], razor_format)
         else:
             # No razor context, match blade normally
             result["blade"] = blade_matcher.match(result["blade"])
