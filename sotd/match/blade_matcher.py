@@ -23,7 +23,19 @@ class BladeMatcher(BaseMatcher):
                         compiled.append(
                             (brand, model, fmt, pattern, re.compile(pattern, re.IGNORECASE), entry)
                         )
-        return sorted(compiled, key=lambda x: len(x[3]), reverse=True)
+
+        # Sort by pattern specificity: longer patterns first, then by pattern complexity
+        def pattern_sort_key(item):
+            pattern = item[3]
+            # Primary sort: pattern length (longer = more specific)
+            length_score = len(pattern)
+            # Secondary sort: pattern complexity (more special chars = more specific)
+            complexity_score = sum(1 for c in pattern if c in r"[].*+?{}()|^$\\")
+            # Tertiary sort: prefer patterns with word boundaries
+            boundary_score = pattern.count(r"\b") + pattern.count(r"\s")
+            return (-length_score, -complexity_score, -boundary_score)
+
+        return sorted(compiled, key=pattern_sort_key)
 
     def _match_with_regex(self, value: str) -> Dict[str, Any]:
         """Match using regex patterns with REGEX match type."""
@@ -87,7 +99,7 @@ class BladeMatcher(BaseMatcher):
             "SHAVETTE (HAIR SHAPER)": "HAIR SHAPER",
             "SHAVETTE (AC)": "AC",
             "SHAVETTE (DE)": "DE",
-            "SHAVETTE (HALF DE)": "DE",
+            "SHAVETTE (HALF DE)": "HALF DE",
             "SHAVETTE (A77)": "A77",
             "SHAVETTE (DISPOSABLE)": "DISPOSABLE",
             "CARTRIDGE": "CARTRIDGE",
@@ -96,13 +108,13 @@ class BladeMatcher(BaseMatcher):
             "AC": "AC",
             "GEM": "GEM",
             "INJECTOR": "INJECTOR",
+            "FHS": "FHS",
         }
 
         target_blade_format = format_mapping.get(razor_format, razor_format)
 
-        # First, try to find matches with format that matches target blade format
-        format_matches = []
-        other_matches = []
+        # Collect all matches first
+        all_matches = []
 
         for brand, model, fmt, raw_pattern, compiled, entry in self.patterns:
             if compiled.search(blade_text):
@@ -124,17 +136,25 @@ class BladeMatcher(BaseMatcher):
                     "match_type": MatchType.REGEX,
                 }
 
-                # Prioritize format matches
-                if fmt.upper() == target_blade_format:
-                    format_matches.append(match_result)
-                else:
-                    other_matches.append(match_result)
+                all_matches.append(match_result)
 
-        # Return format match if found, otherwise fall back to other matches
-        if format_matches:
-            return format_matches[0]  # Return first format match
-        elif other_matches:
-            return other_matches[0]  # Return first other match
+        # If we have matches, prioritize by format compatibility
+        if all_matches:
+            # First, try to find exact format matches
+            format_matches = [
+                m for m in all_matches if m["matched"]["format"].upper() == target_blade_format
+            ]
+            if format_matches:
+                return format_matches[0]  # Return first format match
+
+            # Special fallback case: Half DE razors can use DE blades
+            if target_blade_format == "HALF DE":
+                de_matches = [m for m in all_matches if m["matched"]["format"].upper() == "DE"]
+                if de_matches:
+                    return de_matches[0]  # Return first DE match as fallback
+
+            # If no exact format match and no fallback, return the first match (original behavior)
+            return all_matches[0]
 
         return {
             "original": original,

@@ -1,3 +1,164 @@
+blade:
+  7 O'Clock:
+    Sharpedge (Yellow):
+    - 7'O Clock - Yellow
+    Super Platinum (Black):
+    - 7sp
+    - Gilette 7 O'Clock - Super Platinum
+    Super Stainless (Green):
+    - Gilette 7 O' Clock Super Stainless (Green) \
+  Annie:
+    Hair Shaper:
+    - Annie Hair Shaper
+    - Annie Hair Shaper Blade
+  Asco:
+    Platium:
+    - ASCO Orange Platinum
+  Assured for Men:
+    DE:
+    - Assured for Men
+  Astra:
+    Superior Platinum (Green):
+    - Astra
+    - Astra - Platinum
+    - Astra - Superior Platinum.
+    - Astra Green
+    - Astra Green (Indian)
+    - Astra Green \
+    - Astra Platinum
+    - Astra SP
+    - Astra SP (Green)
+    - Astra SP Green
+    - Astra Super Platinum (Greens)
+    - Astra Superior Platinum
+    - Astra Superior Platinum, DE
+    - Astra Superior Platinum.
+    Superior Stainless (Blue):
+    - Astra Blue
+    - Astra Stainless
+    - Astra Superior Stainless (ASS)
+    - Astra Superior Stainless (Blue)
+  Bevel:
+    Double Edge:
+    - Bevel
+  Bic:
+    Astor Stainless:
+    - BIC Astor Stainless
+    - Bic Astor Stainless Steel
+    Chrome:
+    - Bic
+    - Bic Chrome
+    - BIC Chrome Platinum
+  Big Ben:
+    Super Stainless:
+    - Big Ben - Super Stainless
+    - Big Ben Stainless Steel
+    - Big Ben Super Stainless (Purple)
+  Bolzano:
+    Superinox:
+    - Bolzano
+    - Bolzano - Superinox
+    - Bolzano Superinox
+  Cloud:
+    Super Stainless:
+    - Cloud Super Blades
+  Crown:
+    Super Stainless:
+    - Crown - Super Stainless
+  Crystal:
+    Super:
+    - Crystal
+  Derby:
+    Extra:
+    - Derby Extra
+  Dorco:
+    HST-300:
+    - Dorco HST-300-P1 1/2 DE
+    Prime:
+    - Dorco Prime Platinum
+    ST-300:
+    - Dorco
+    - Dorco Stainless
+    Titan:
+    - Dorco Titan
+  Durablade:
+    Sharp Hi Chromium:
+    - Durablade Sharp Hi Chromium
+  Feather:
+    DE:
+    - Feather
+    - Feather (DE)
+    - Feather - Hi-Stainless
+    - Feather - HiStainless
+    - Feather Hi Stainless
+    - Feather Hi-Stainless
+    - Feather Hi-Stainless (2nd)
+    - Feather Stainless
+    FHS-1:
+    - Feather ASD-10
+    - Feather FHS-10
+    Pro:
+    - Feather - Professional
+    - Feather Artist Club PRO
+    - Feather Artist Club Professional
+    - Feather Artist Club Professional (SE)
+    - Feather Pro
+    - Feather Pro (AC)
+    - Feather Professional
+    - Feather Professional AC Blade
+    Pro Super:
+    - Feather Pro Super
+    - Feather Professional Super
+    ProGuard:
+    - Feather - Pro Guard
+    - Feather - Pro guard Artis club
+    - Feather Artist Club Pro Guard
+    - Feather Pro Guard
+    - Feather ProGuard
+  Filoso:
+    Platinum:
+    - Filoso
+    - Filoso - Platinum Blade
+    - Filoso - The Barbers Blade
+  FlyDear:
+    Super Platinum:
+    - FlyDear
+    - FlyDear - 9/10
+  Fromm:
+    Hair Shaper:
+    - Fromm
+    - Fromm - Hair Shaper
+    - FROMM Hair Shaper Blade
+  GEM:
+    Blue Star:
+    - Gem - Blue Star uncoated blade
+    - Gem - Blue Star uncoated blades
+    - GEM Blue Star
+  Generic:
+    Kai Clone:
+    - Chinese KAI Clone
+  Lord:
+    Blue Sword Platinum:
+    - Blue Sword Platinum
+  Personna:
+    GEM PTFE:
+    - AccuForge Coated
+    - Accuforge GEM coated stainless steel
+    - Accuforge GEM Microcoat
+    - Accuforge Pro PTFE GEM
+    - AccuTec Pro Premium
+    - Accutec Pro Premium (GEM)
+    - GEM
+    - Gem Blade
+    - GEM PTFE
+    - GEM PTFE (?)
+    - GEM PTFE / Schick Injector
+    - GEM SS PTFE
+    Lab Blue:
+    - Accuforge
+  Tatra:
+    Platinum:
+    - Czech Blades Tatra Platinum Stainless
 razor:
   3D Printed:
     DE:
@@ -197,6 +358,7 @@ razor:
       - Harry's Cartridge Razor
       - Schick - Xtreme 2 Mens Disposable
       - Schick Disposable
+      - Schick Hydro 5
       - Schick Hydro 5 Cartridge
       - Simply Max - Alibaba
       - Simply Smooth Triple Blade
@@ -653,7 +815,6 @@ razor:
     - Koraat - r/Wetshaving exclusive MOARteen
     - Koraat - r/Wetshaving exclusive Moarteen (15/16", full hollow, carbon steel)
     - koraat 14 "moarteen" 15/16" full hollow
-    - koraat 15/16 full hollow - sub exclusive 'moarteen'
     - Koraat 15/16 Full Hollow - Sub Exclusive 'Moarteen'
     - Koraat Knives - r/Wetshaving Exclusive Moarteen 15/16
     - Koraat Knives- Moarteen 15/16 Square Point
@@ -698,7 +859,7 @@ razor:
     SS70:
     - Maggard Razors CNC .70
     Shavette:
-    - maggard shavette
+    - Maggard shavette
     Slant:
     - Gillette handles and Maggard Slant head
     - Maggard MR11 with Slant Head
@@ -1058,7 +1219,6 @@ razor:
     - Schick - Type I1
     - Schick - Type L1
     - Schick Adjustable Injector
-    - Schick Hydro 5
     - Schick Injector
     - Schick Injector G1
     - Schick Injector I1 .
@@ -1083,6 +1243,10 @@ razor:
     - Shick injector Adjustable( 6-4-2)
     - Vintage SCHICK Injector Razor Type-E (1930-1940s)
     - ~~Gillette~~ Schick L7 "Championship" Injector
+    Krona:
+    - Schick - Krona 1960s TTO DE
+    - Schick - Krona.
+    - Schick Krona
   Segal:
     Unitary:
     - Segal Unitary

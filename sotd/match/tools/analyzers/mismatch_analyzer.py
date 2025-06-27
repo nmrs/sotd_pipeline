@@ -1,30 +1,31 @@
 #!/usr/bin/env python3
 """Mismatch identification tool for analyzing potential regex mismatches."""
 
-import hashlib
-import re
 import sys
-import time
 from pathlib import Path
-from typing import Dict, List, Optional, Set
-
-import yaml
-from rich.console import Console
-from rich.table import Table
-
-from sotd.cli_utils.base_parser import BaseCLIParser
-from sotd.match.tools.utils.analysis_base import AnalysisTool
-from sotd.utils.match_filter_utils import (
-    load_competition_tags,
-    normalize_for_storage,
-    strip_competition_tags,
-)
-from sotd.utils.yaml_loader import load_yaml_with_nfc
 
 # Add project root to Python path for direct execution
 project_root = Path(__file__).parent.parent.parent.parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
+
+import hashlib  # noqa: E402
+import re  # noqa: E402
+import time  # noqa: E402
+from typing import Dict, List, Optional, Set  # noqa: E402
+
+import yaml  # noqa: E402
+from rich.console import Console  # noqa: E402
+from rich.table import Table  # noqa: E402
+
+from sotd.cli_utils.base_parser import BaseCLIParser  # noqa: E402
+from sotd.match.tools.utils.analysis_base import AnalysisTool  # noqa: E402
+from sotd.utils.match_filter_utils import (  # noqa: E402
+    load_competition_tags,
+    normalize_for_storage,
+    strip_competition_tags,
+)
+from sotd.utils.yaml_loader import load_yaml_with_nfc  # noqa: E402
 
 
 class MismatchAnalyzer(AnalysisTool):
@@ -459,7 +460,26 @@ class MismatchAnalyzer(AnalysisTool):
 
     def _create_match_key(self, field: str, original: str, matched: Dict) -> str:
         """Create a unique key for a match based on field, original text, and matched data."""
-        matched_text = self._get_matched_text(field, matched)
+        # Handle None matched data
+        if matched is None:
+            matched = {}
+
+        # Use format-free matched text for consistency with correct_matches.yaml storage
+        if field == "soap":
+            maker = matched.get("maker", "")
+            scent = matched.get("scent", "")
+            matched_text = f"{maker} {scent}".strip()
+        elif field in ["razor", "blade"]:
+            brand = matched.get("brand", "")
+            model = matched.get("model", "")
+            matched_text = f"{brand} {model}".strip()
+        elif field == "brush":
+            brand = matched.get("brand", "")
+            model = matched.get("model", "")
+            matched_text = f"{brand} {model}".strip()
+        else:
+            matched_text = str(matched)
+
         # Normalize for consistent key generation - use normalized original to match storage format
         original_normalized = self._normalize_for_storage(original).lower().strip()
         matched_normalized = matched_text.lower().strip()
@@ -847,11 +867,19 @@ class MismatchAnalyzer(AnalysisTool):
         elif field == "razor":
             brand = matched.get("brand", "")
             model = matched.get("model", "")
-            return f"{brand} {model}".strip()
+            format_info = matched.get("format", "")
+            if format_info:
+                return f"{brand} {model} ({format_info})".strip()
+            else:
+                return f"{brand} {model}".strip()
         elif field == "blade":
             brand = matched.get("brand", "")
             model = matched.get("model", "")
-            return f"{brand} {model}".strip()
+            format_info = matched.get("format", "")
+            if format_info:
+                return f"{brand} {model} ({format_info})".strip()
+            else:
+                return f"{brand} {model}".strip()
         elif field == "brush":
             brand = matched.get("brand", "")
             model = matched.get("model", "")
@@ -1042,6 +1070,7 @@ class MismatchAnalyzer(AnalysisTool):
             # Format sources
             sources_text = ", ".join(sources) if sources else ""
 
+            # Create row data based on field type
             table.add_row(
                 str(row_number),
                 count_text,
@@ -1128,7 +1157,10 @@ class MismatchAnalyzer(AnalysisTool):
             grouped[key]["record_ids"].add(record_id)
 
         # Sort groups for deterministic display order
-        sorted_groups = sorted(grouped.items(), key=lambda x: (x[0][0], x[0][1], x[0][2], x[0][3]))
+        sorted_groups = sorted(
+            grouped.items(),
+            key=lambda x: (x[0][0] or "", x[0][1] or "", x[0][2] or "", x[0][3] or ""),
+        )
 
         row_number = 1
         for (norm_original, matched_text, pattern, match_type), group in sorted_groups[:limit]:
@@ -1139,7 +1171,7 @@ class MismatchAnalyzer(AnalysisTool):
             pattern_disp = self._escape_pattern_for_display(pattern)
             # No truncation, let it wrap
             # Check if this match was previously marked as correct
-            match_key = self._create_match_key(field, norm_original, {"brand": matched_text})
+            match_key = self._create_match_key(field, norm_original, field_data.get("matched", {}))
             is_correct = match_key in self._correct_matches
             correct_indicator = "✅" if is_correct else ""
             # Determine status and indicator
@@ -1153,6 +1185,8 @@ class MismatchAnalyzer(AnalysisTool):
                 status = f"{self.mismatch_indicators['regex_match']} Regex Match"
             else:
                 status = f"{self.mismatch_indicators['potential_mismatch']} Potential Mismatch"
+
+            # Create row data based on field type
             table.add_row(
                 str(row_number),
                 str(count),
@@ -1165,7 +1199,11 @@ class MismatchAnalyzer(AnalysisTool):
                 source,
             )
             displayed_matches.append(
-                {"match_key": match_key, "original": norm_original, "matched_text": matched_text}
+                {
+                    "match_key": self._create_match_key(
+                        field, norm_original, field_data.get("matched", {})
+                    )
+                }
             )
             row_number += 1
 
@@ -1219,10 +1257,11 @@ class MismatchAnalyzer(AnalysisTool):
                 continue
 
             # Skip previously confirmed matches
-            match_key = self._create_match_key(field, norm_original, {"brand": matched_text})
+            match_key = self._create_match_key(field, norm_original, matched)
             if match_key in self._correct_matches:
                 continue
 
+            # Use format-free text for grouping key
             key = (norm_original, matched_text, pattern, match_type)
             if key not in grouped:
                 grouped[key] = {
@@ -1238,7 +1277,10 @@ class MismatchAnalyzer(AnalysisTool):
             grouped[key]["record_ids"].add(record_id)
 
         # Sort groups for deterministic display order
-        sorted_groups = sorted(grouped.items(), key=lambda x: (x[0][0], x[0][1], x[0][2], x[0][3]))
+        sorted_groups = sorted(
+            grouped.items(),
+            key=lambda x: (x[0][0] or "", x[0][1] or "", x[0][2] or "", x[0][3] or ""),
+        )
 
         row_number = 1
         for (norm_original, matched_text, pattern, match_type), group in sorted_groups[:limit]:
@@ -1249,19 +1291,32 @@ class MismatchAnalyzer(AnalysisTool):
             pattern_disp = self._escape_pattern_for_display(pattern)
 
             # Create match key for this group
-            match_key = self._create_match_key(field, norm_original, {"brand": matched_text})
+            match_key = self._create_match_key(field, norm_original, field_data.get("matched", {}))
 
+            # Get format information for razors and blades
+            format_info = ""
+            if field in ["razor", "blade"]:
+                matched_dict = field_data.get("matched", {})
+                if matched_dict:  # Add null check
+                    format_info = matched_dict.get("format", "")
+
+            # Create row data based on field type
             table.add_row(
                 str(row_number),
                 str(count),
                 norm_original,
                 matched_text,
+                format_info,
                 pattern_disp,
                 match_type,
                 source,
             )
             displayed_matches.append(
-                {"match_key": match_key, "original": norm_original, "matched_text": matched_text}
+                {
+                    "match_key": self._create_match_key(
+                        field, norm_original, field_data.get("matched", {})
+                    )
+                }
             )
             row_number += 1
 
@@ -1313,7 +1368,7 @@ class MismatchAnalyzer(AnalysisTool):
                 continue
 
             # Skip previously confirmed matches
-            match_key = self._create_match_key(field, norm_original, {"brand": matched_text})
+            match_key = self._create_match_key(field, norm_original, matched)
             if match_key in self._correct_matches:
                 continue
 
@@ -1321,6 +1376,7 @@ class MismatchAnalyzer(AnalysisTool):
             if not matched_text:
                 continue
 
+            # Use format-free text for grouping key
             key = (norm_original, matched_text, pattern, match_type)
             if key not in grouped:
                 grouped[key] = {
@@ -1336,7 +1392,10 @@ class MismatchAnalyzer(AnalysisTool):
             grouped[key]["record_ids"].add(record_id)
 
         # Sort groups for deterministic display order
-        sorted_groups = sorted(grouped.items(), key=lambda x: (x[0][0], x[0][1], x[0][2], x[0][3]))
+        sorted_groups = sorted(
+            grouped.items(),
+            key=lambda x: (x[0][0] or "", x[0][1] or "", x[0][2] or "", x[0][3] or ""),
+        )
 
         row_number = 1
         for (norm_original, matched_text, pattern, match_type), group in sorted_groups[:limit]:
@@ -1346,15 +1405,28 @@ class MismatchAnalyzer(AnalysisTool):
             pattern_disp = self._escape_pattern_for_display(pattern)
             # No truncation, let it wrap
 
+            # Get format information for razors and blades
+            format_info = ""
+            if field in ["razor", "blade"]:
+                matched_dict = field_data.get("matched", {})
+                if matched_dict:  # Add null check
+                    format_info = matched_dict.get("format", "")
+
+            # Create row data based on field type
             table.add_row(
                 str(row_number),
                 norm_original,
                 matched_text,
+                format_info,
                 pattern_disp,
                 source,
             )
             displayed_matches.append(
-                {"match_key": self._create_match_key(field, norm_original, {"brand": matched_text})}
+                {
+                    "match_key": self._create_match_key(
+                        field, norm_original, field_data.get("matched", {})
+                    )
+                }
             )
             row_number += 1
 

@@ -30,6 +30,10 @@ AC:
     Soft Guard:
       patterns:
       - feather.*soft
+  Generic:
+    Kai Clone:
+      patterns:
+      - kai.*clone
   Kai:
     Captain Blade:
       patterns:
@@ -128,15 +132,15 @@ DE:
   Astra:
     Superior Platinum (Green):
       patterns:
-      - astra.*plat
-      - astra.*green
-      - astra.*sp
+      - astra.*plat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - astra.*green(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - astra.*sp(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - astra
     Superior Stainless (Blue):
       patterns:
-      - astra.*sta
-      - astra.*blue
-      - astra.*ss
+      - astra.*sta(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - astra.*blue(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - astra.*ss(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Baile:
     Platinum:
       patterns:
@@ -220,7 +224,7 @@ DE:
       - doric prime
     ST-300:
       patterns:
-      - dorco.*st.*300
+      - dorco.*\bst.*300
       - dorco
     ST-301:
       patterns:
@@ -241,6 +245,10 @@ DE:
       patterns:
       - (?:durablade)?.*sharp.*\bti
       - durablade
+    Sharp Hi Chromium:
+      patterns:
+      - (?:durablade)?.*sharp.*hi.*chromium
+      - durablade.*chrom
   Eddison:
     Stainless:
       patterns:
@@ -361,10 +369,6 @@ DE:
     Ultra:
       patterns:
       - laser
-  Leaf:
-    DE:
-      patterns:
-      - leaf
   Lord:
     Blue Sword Platinum:
       patterns:
@@ -667,7 +671,7 @@ FHS:
   Feather:
     FHS-1:
       patterns:
-      - (feather)?.*\bfhs\b
+      - (feather)?.*\b(fhs|asd)\b
   OneBlade:
     HiCarbon SE:
       patterns:
@@ -748,7 +752,24 @@ Half DE:
     Super Stainless SE:
       patterns:
       - crown.*stainless.*\bse\b
+  Dorco:
+    HST-300:
+      patterns:
+      - dorco.*hst.*300
+  Gillette:
+    Perma-Sharp SE:
+      patterns:
+      - (?!.*\bde\b).*perma\s*-*sharp
+
+  Leaf:
+    SE:
+      patterns:
+      - leaf(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
 Injector:
+  Parker:
+    Injector:
+      patterns:
+      - parker.*inject
   Personna:
     Injector:
       patterns:
