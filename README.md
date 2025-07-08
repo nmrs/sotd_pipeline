@@ -101,6 +101,20 @@ sotd_pipeline/
 - **Test Coverage**: 71% with comprehensive edge case coverage
 - **Development Speed**: Fast feedback loop with optimized testing strategy
 
+## Product Matching Normalization (2024-07)
+
+All correct match lookups in the pipeline now use a single, canonical normalization function:
+
+```
+from sotd.utils.match_filter_utils import normalize_for_matching
+```
+
+- This function is the only allowed normalization for correct match lookups.
+- The old `normalize_for_storage` function is deprecated and should not be used.
+- See [docs/product_matching_validation.md](docs/product_matching_validation.md) for details and examples.
+
+This change ensures that all entries in `correct_matches.yaml` are always found as exact matches, eliminating normalization inconsistencies and "confirmed but not exact" mismatches.
+
 ---
 
 For detailed information, see the [Pipeline Specification](docs/SOTD_Pipeline_Spec.md). 
