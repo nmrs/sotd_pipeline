@@ -162,6 +162,7 @@ def process_month(
                 },
                 f,
                 indent=2,
+                ensure_ascii=False,
             )
         monitor.end_file_io_timing()
 

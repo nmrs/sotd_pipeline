@@ -13,7 +13,7 @@ def preprocess_body(body: str) -> str:
     body = body.replace("’", "'").replace("‘", "'")
     body = body.replace("“", '"').replace("”", '"')
     body = body.replace("–", "-").replace("—", "-")
-    body = re.sub(r"\\([*_`\\])", r"\1", body)  # remove escapes from *, _, `, \
+    body = re.sub(r"\\([*_`\\[\]])", r"\1", body)  # remove escapes from *, _, `, \, [, ]
 
     # Normalize whitespace per line (preserve newlines)
     lines = body.splitlines()

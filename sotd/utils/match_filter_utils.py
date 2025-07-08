@@ -194,8 +194,62 @@ def strip_handle_indicators(value: str) -> str:
     slash_handle_pattern = r"\s*/\s*(?:[*`\"']*)?([^,\s]+(?:\s+[^,\s]+)*?)(?:[*`\"']*)?\s+handle\b"
     cleaned = re.sub(slash_handle_pattern, "", cleaned, flags=re.IGNORECASE)
 
+    # Pattern for "[brand] handle / [brand] head" (handle first, then head)
+    # (e.g., "EJ DE89 handle / Muhle R41 head")
+    handle_first_pattern = (
+        r"^([^,\s]+(?:\s+[^,\s]+)*?)\s+handle\s*/\s*([^,\s]+(?:\s+[^,\s]+)*?)\s+head\b"
+    )
+    cleaned = re.sub(handle_first_pattern, r"\2", cleaned, flags=re.IGNORECASE)
+
+    # Pattern for "[brand] handle with [brand] head" (handle first, then head)
+    # (e.g., "EJ DE89 handle with Muhle R41 head")
+    handle_first_with_pattern = (
+        r"^([^,\s]+(?:\s+[^,\s]+)*?)\s+handle\s+with\s+([^,\s]+(?:\s+[^,\s]+)*?)\s+head\b"
+    )
+    cleaned = re.sub(handle_first_with_pattern, r"\2", cleaned, flags=re.IGNORECASE)
+
     # Clean up extra whitespace and normalize
     cleaned = re.sub(r"\s+", " ", cleaned)  # Normalize whitespace
+    cleaned = cleaned.strip()
+
+    return cleaned
+
+
+def strip_razor_use_counts(value: str) -> str:
+    """
+    Strip use count patterns from razor strings.
+
+    This removes patterns like:
+    - "(6)", "(12)", "(23)" - use counts in parentheses
+    - "[5]", "[10]" - use counts in brackets
+    - "(new)" - new razor indicators
+    - Cleans up empty parentheses
+
+    Args:
+        value: Input string that may contain use count patterns
+
+    Returns:
+        String with use count patterns removed
+    """
+    if not isinstance(value, str):
+        return value
+
+    cleaned = value
+
+    # Remove use counts like (6), (12), (23) anywhere in the string
+    cleaned = re.sub(r"\(\d+\)", "", cleaned)
+
+    # Remove use counts like [5], [10] anywhere in the string
+    cleaned = re.sub(r"\[\d+\]", "", cleaned)
+
+    # Remove new razor indicators like (new)
+    cleaned = re.sub(r"\(\s*new\s*\)", "", cleaned, flags=re.IGNORECASE)
+
+    # Clean up empty parentheses left behind
+    cleaned = re.sub(r"\(\s*\)", "", cleaned)
+
+    # Clean up extra whitespace and normalize
+    cleaned = re.sub(r"\s+", " ", cleaned)
     cleaned = cleaned.strip()
 
     return cleaned
@@ -244,9 +298,10 @@ def normalize_for_matching(
     if field == "blade":
         normalized = strip_blade_count_patterns(normalized)
 
-    # For razor strings, also strip handle indicators
+    # For razor strings, also strip handle indicators and use counts
     if field == "razor":
         normalized = strip_handle_indicators(normalized)
+        normalized = strip_razor_use_counts(normalized)
 
     # For soap strings, also strip soap-related patterns
     if field == "soap":
