@@ -111,11 +111,11 @@ def strip_blade_count_patterns(value: str) -> str:
     usage_count_x_pattern = r"(?:[\(\[\{])\s*(?:x)?(\d+)(?:x)?\s*[\)\]\}]"
     cleaned = re.sub(usage_count_x_pattern, "", cleaned, flags=re.IGNORECASE)
 
-    # Pattern for "times" usage: (4 times), [5 times], {3 times}, etc.
+    # Pattern for "times" usage: (4 times), [5 times], {3 times}, (1 time), etc.
     usage_times_pattern = r"(?:[\(\[\{])\s*(\d+)\s+times?\s*[\)\]\}]"
     cleaned = re.sub(usage_times_pattern, "", cleaned, flags=re.IGNORECASE)
 
-    # Pattern for ordinal usage: (7th use), [3rd use], {2nd use}, etc.
+    # Pattern for ordinal usage: (7th use), [3rd use], {2nd use}, (1st use), (4th use), etc.
     usage_ordinal_pattern = r"(?:[\(\[\{])\s*(\d+)(?:st|nd|rd|th)\s+use\s*[\)\]\}]"
     cleaned = re.sub(usage_ordinal_pattern, "", cleaned, flags=re.IGNORECASE)
 
@@ -127,12 +127,12 @@ def strip_blade_count_patterns(value: str) -> str:
     )
     cleaned = re.sub(usage_word_pattern, "", cleaned, flags=re.IGNORECASE)
 
-    # Note: Removed standalone pattern (x4, 2x) as it was causing false positives
-    # with model names like "X3" in "iKon X3". Blade count patterns are almost
-    # always in parentheses/brackets, so standalone patterns are too ambiguous.
+    # Pattern for standalone usage: x4, 2x without brackets
+    standalone_pattern = r"\b(?:x(\d+)|(\d+)x)\b"
+    cleaned = re.sub(standalone_pattern, "", cleaned, flags=re.IGNORECASE)
 
-    # Pattern for "new" (meaning 1st use) - only in parentheses/brackets
-    new_pattern = r"(?:[\(\[\{])\s*new\s*[\)\]\}]"
+    # Pattern for "new" (meaning 1st use) - standalone word or in parentheses
+    new_pattern = r"(?:[\(\[\{])\s*new\s*[\)\]\}]|\bnew\b"
     cleaned = re.sub(new_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for ordinal use without brackets: 3rd use, 2nd use, etc.
@@ -150,91 +150,7 @@ def strip_blade_count_patterns(value: str) -> str:
     return cleaned
 
 
-def strip_razor_usage_patterns(value: str) -> str:
-    """
-    Strip common razor usage, handle, and setting patterns while preserving core brand/model.
-
-    This function removes patterns like:
-    - "with OSS handle", "with bulldog handle"
-    - "(setting: 3)", "(level 2)", "(plate C)"
-    - "slant", "open comb", "closed comb"
-    - Usage indicators like "(2nd use)", "(new)"
-
-    Args:
-        value: Input string that may contain usage patterns
-
-    Returns:
-        String with usage patterns removed, preserving core brand/model
-    """
-    if not isinstance(value, str):
-        return value
-
-    cleaned = value
-
-    # Handle patterns: "with X handle", "w/ X handle"
-    handle_patterns = [
-        r"\s+with\s+[^,)]+\s+handle\b",
-        r"\s+w/\s+[^,)]+\s+handle\b",
-        r"\s+handle\s+[^,)]+\b",
-    ]
-    for pattern in handle_patterns:
-        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Setting/level patterns: "(setting: 3)", "(level 2)", "(plate C)"
-    setting_patterns = [
-        r"\s*\(setting:\s*\d+\)",
-        r"\s*\(level\s*\d+\)",
-        r"\s*\(plate\s*[A-Z0-9]+\)",
-        r"\s*\(lvl\s*\d+\)",
-        r"\s*\(setting\s*\d+\)",
-    ]
-    for pattern in setting_patterns:
-        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Format indicators: "slant", "open comb", "closed comb", "OC", "SB"
-    format_patterns = [
-        r"\s+slant\b",
-        r"\s+open\s+comb\b",
-        r"\s+closed\s+comb\b",
-        r"\s+OC\b",
-        r"\s+SB\b",
-        r"\s+DC\b",  # Dual comb
-    ]
-    for pattern in format_patterns:
-        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Usage indicators: "(2nd use)", "(new)", "(first use)"
-    usage_patterns = [
-        r"\s*\(\d+(?:st|nd|rd|th)\s+use\)",
-        r"\s*\(new\)",
-        r"\s*\(first\s+use\)",
-        r"\s*\(second\s+use\)",
-        r"\s*\(third\s+use\)",
-    ]
-    for pattern in usage_patterns:
-        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Material/finish patterns: "(brass)", "(titanium)", "(stainless)"
-    material_patterns = [
-        r"\s*\(brass\)",
-        r"\s*\(titanium\)",
-        r"\s*\(stainless\)",
-        r"\s*\(aluminum\)",
-        r"\s*\(copper\)",
-    ]
-    for pattern in material_patterns:
-        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
-
-    # Clean up extra whitespace and normalize
-    cleaned = re.sub(r"\s+", " ", cleaned)  # Normalize whitespace
-    cleaned = cleaned.strip()
-
-    return cleaned
-
-
-def normalize_for_storage(
-    value: str, competition_tags: Dict[str, List[str]] | None = None, field: str | None = None
-) -> str:
+def normalize_for_storage(value: str, competition_tags: Dict[str, List[str]] | None = None) -> str:
     """
     Normalize a string for storage in correct_matches.yaml.
 
@@ -244,7 +160,6 @@ def normalize_for_storage(
     Args:
         value: Input string to normalize
         competition_tags: Competition tags configuration. If None, loads from file.
-        field: The field type ('blade', 'razor', 'brush', 'soap') to determine normalization rules
 
     Returns:
         Normalized string ready for storage
@@ -255,14 +170,11 @@ def normalize_for_storage(
     # Strip competition tags and normalize
     normalized = strip_competition_tags(value, competition_tags)
 
-    # Apply field-specific normalization
-    if field == "blade":
-        # Only apply blade count pattern stripping to blade strings
-        # This prevents accidentally stripping model names like "X3" from razors
-        normalized = strip_blade_count_patterns(normalized)
-    elif field == "razor":
-        # Strip common razor usage patterns while preserving core brand/model
-        normalized = strip_razor_usage_patterns(normalized)
+    # For blade strings, also strip blade count and usage patterns
+    # This prevents bloat in correct_matches.yaml by removing patterns like (3x), [2x], etc.
+    # Note: We can't easily detect if this is a blade string here, so we'll apply it generally
+    # The blade enricher will handle the actual extraction of counts
+    normalized = strip_blade_count_patterns(normalized)
 
     return normalized
 

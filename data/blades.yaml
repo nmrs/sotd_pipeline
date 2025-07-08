@@ -2,11 +2,7 @@ A77:
   Cloud:
     A77:
       patterns:
-      - cloud.*a77  
-  RhinoceRos:
-    A77:
-      patterns:
-      - rh?inoceros.*a77
+      - cloud.*a77
   Snow Mountain Wolf:
     A77:
       patterns:
@@ -169,10 +165,10 @@ DE:
     Superinox:
       patterns:
       - b(o|a)la?z(o|a)n(o|a)
-  Böker:
+  "Bo\u0308ker":
     DE:
       patterns:
-      - b[öo]ker
+      - "b[o\xF6]ker"
   Bulimica:
     DE:
       patterns:
@@ -344,16 +340,16 @@ DE:
       patterns:
       - gil.*winner(?:.*black)?
       - winner
-  Glätz:
+  "Gl\xE4tz":
     Super Platinum:
       patterns:
-      - gl[aä]tz
-      - gl[aä]z sp
-      - gl[aä]tz plat
+      - glatz
+      - glatz sp
+      - glatz plat
     Supreme Stainless:
       patterns:
-      - gl[aä]tz ss
-      - gl[aä]tz.*stai
+      - glatz ss
+      - glatz.*stai
   Kai:
     DE:
       patterns:
@@ -386,9 +382,6 @@ DE:
     Platinum:
       patterns:
       - lord.*plat
-    Super Chrome:
-      patterns:
-      - lord.*sup.*chr
     Super Stainless:
       patterns:
       - lord.*sup
@@ -407,10 +400,10 @@ DE:
     DE:
       patterns:
       - my.*blades
-  Mühle:
+  "M\xFChle":
     Traditional:
       patterns:
-      - m[üu]hle
+      - "m[u\xFC]hle"
   Neva:
     Super Stainless:
       patterns:
@@ -432,13 +425,11 @@ DE:
       - p74
     Lab Blue:
       patterns:
-      - accuforge
       - (person+a)?.*lab *blue
       - personn*a.*blue
       - personn*a.*c.*c
       - personn*a
-      - personn*a.*stainless
-      - personn*a.*super
+      - accuforge
     Med Prep:
       patterns:
       - person.*med
@@ -448,6 +439,8 @@ DE:
       patterns:
       - ^person+a?\b.*plat
       - personn*a.*red
+      - personn*a.*stainless
+      - personn*a.*super
     TOMY:
       patterns:
       - \btomy\b
@@ -484,10 +477,6 @@ DE:
     Platinum:
       patterns:
       - \brex\b.*plat
-  RhinoceRos:
-    DE:
-      patterns:
-      - rh?inoceros
   Rockwell:
     Swedish Stainless:
       patterns:
@@ -501,16 +490,15 @@ DE:
       patterns:
       - schl?ick.*s(?:tainles)*s
   Shark:
-    Super Chrome:
+    Chrome:
       patterns:
-      - shark(.*super.*)?.*chr
-    Super Platinum:
+      - shark.*chr
+    Platinum:
       patterns:
-      - shark(.*super.*)?.*pla
-    Super Stainless:
+      - shark.*pla
+    Stainless:
       patterns:
-      - shark(.*stain)?
-      - shark(.*super)?
+      - shark
   Sharp Star:
     Platinum:
       patterns:
@@ -560,9 +548,6 @@ DE:
       patterns:
       - tatara
   Tatra:
-    Carbon Steel:
-      patterns:
-      - tatra.*carb
     Platinum:
       patterns:
       - tatra
@@ -590,12 +575,13 @@ DE:
     Dura Sharp:
       patterns:
       - treet.*dura.*shar
-    Edge:
-      patterns:
-      - treet.*edge
     Falcon:
       patterns:
       - treet.*falcon
+    GEM:
+      patterns:
+      - treet.*gem
+      - gem.*treet
     New:
       patterns:
       - treet.*new
@@ -660,14 +646,18 @@ DE:
       - wizamet
       - wiz
       - super.*iridium
+  XR:
+    RhinoceRos:
+      patterns:
+      - rhinoceros
   Zircon:
     Platinum:
       patterns:
       - zircon.*plat
-  Zomchí:
+  "Zomchi\u0301":
     Superior Platinum:
       patterns:
-      - zomch(í|i)
+      - "zomch(i\u0301|i)"
   Zorrik:
     Super Platinum:
       patterns:
@@ -709,18 +699,13 @@ GEM:
       - accu.*(gem|coated|p[ft]{2}e)
     GEM Stainless:
       patterns:
-      - (personna)?.*gem.*stainless
-      - gem.*\bss\b
+      - (personna)*gem.*stainless
+      - gem.*ss
       - person.*gem.*uncoated
   Ted Pella:
     PTFE:
       patterns:
       - pella.*ptfe
-  Treet:
-    GEM:
-      patterns:
-      - treet.*gem
-      - gem.*treet
 Hair Shaper:
   Annie:
     Hair Shaper:
@@ -775,15 +760,12 @@ Half DE:
     Perma-Sharp SE:
       patterns:
       - (?!.*\bde\b).*perma\s*-*sharp
+
   Leaf:
     SE:
       patterns:
-      - \bleaf\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - leaf(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
 Injector:
-  Generic:
-    Injector:
-      patterns:
-      - (generic|unbranded).*inject
   Parker:
     Injector:
       patterns:

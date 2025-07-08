@@ -40,14 +40,14 @@ class CorrectMatchesManager:
         """
         return strip_competition_tags(value, competition_tags)
 
-    def _normalize_for_storage(self, value: str, field: str | None = None) -> str:
+    def _normalize_for_storage(self, value: str) -> str:
         """
         Normalize a string for storage in correct_matches.yaml.
 
         This strips competition tags and normalizes whitespace to prevent
         bloat and duplicates in the file.
         """
-        return normalize_for_storage(value, field=field)
+        return normalize_for_storage(value)
 
     def load_correct_matches(self) -> None:
         """Load previously marked correct matches from file."""
@@ -113,7 +113,7 @@ class CorrectMatchesManager:
                     if scent not in field_data[field][maker]:
                         field_data[field][maker][scent] = []
                     # Normalize the original string before storing to prevent bloat
-                    normalized_original = self._normalize_for_storage(original, field="soap")
+                    normalized_original = self._normalize_for_storage(original)
                     if (
                         normalized_original
                         and normalized_original not in field_data[field][maker][scent]
@@ -127,7 +127,7 @@ class CorrectMatchesManager:
                     if model not in field_data[field][brand]:
                         field_data[field][brand][model] = []
                     # Normalize the original string before storing to prevent bloat
-                    normalized_original = self._normalize_for_storage(original, field=field)
+                    normalized_original = self._normalize_for_storage(original)
                     if (
                         normalized_original
                         and normalized_original not in field_data[field][brand][model]

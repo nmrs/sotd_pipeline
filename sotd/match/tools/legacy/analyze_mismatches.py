@@ -1,24 +1,5 @@
 #!/usr/bin/env python3
-"""CLI entry point for mismatch identification tool.
-
-USAGE:
-------
-To revalidate all entries in correct_matches.yaml against current regex patterns:
-
-    python -m sotd.match.tools.legacy.analyze_mismatches --revalidate-correct-matches
-
-To restrict revalidation to a specific field (razor, blade, brush, or soap):
-
-    python -m sotd.match.tools.legacy.analyze_mismatches --revalidate-correct-matches --field razor
-
-This will:
-- Check every entry in correct_matches.yaml
-- Report entries that no longer match any regex
-- Report entries that now match a different product/model than originally expected
-- Summarize results and show tables of problematic entries (first 10 of each type)
-
-Use --clear-correct or --clear-field <field> to reset problematic entries if needed.
-"""
+"""CLI entry point for mismatch identification tool."""
 
 from typing import List
 
