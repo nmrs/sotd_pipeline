@@ -70,7 +70,7 @@ class TestAnnualDataLoading:
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Test loading
         metadata, data = annual_load.load_annual_data(file_path)
@@ -115,7 +115,7 @@ class TestAnnualDataLoading:
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         with pytest.raises(KeyError, match="Missing 'metadata' section"):
             annual_load.load_annual_data(file_path)
@@ -136,7 +136,7 @@ class TestAnnualDataLoading:
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         with pytest.raises(KeyError, match="Missing required metadata field"):
             annual_load.load_annual_data(file_path)
@@ -170,7 +170,7 @@ class TestAnnualDataLoading:
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         with pytest.raises(KeyError, match="Missing required product category"):
             annual_load.load_annual_data(file_path)
@@ -206,7 +206,7 @@ class TestAnnualDataLoading:
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Should not raise any exceptions with debug=True
         metadata, data = annual_load.load_annual_data(file_path, debug=True)
@@ -411,7 +411,7 @@ class TestAnnualDataIntegration:
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Test that the function signature matches existing patterns
         metadata, data = annual_load.load_annual_data(file_path, debug=False)
@@ -474,7 +474,7 @@ class TestAnnualDataIntegration:
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         metadata, data = annual_load.load_annual_data(file_path)
 
@@ -500,7 +500,9 @@ class TestAnnualDataErrorHandling:
         # Create a file that exists but has invalid JSON
         with open(file_path, "w") as f:
             f.write(
-                '{"metadata": {"year": "2024", "total_shaves": 1200, "unique_shavers": 100, "included_months": ["2024-01"], "missing_months": ["2024-02"]}, "razors": [], "blades": [], "brushes": [], "soaps": []'
+                '{"metadata": {"year": "2024", "total_shaves": 1200, "unique_shavers": 100, '
+                '"included_months": ["2024-01"], "missing_months": ["2024-02"]}, '
+                '"razors": [], "blades": [], "brushes": [], "soaps": []'  # Missing closing brace
             )
 
         with pytest.raises(json.JSONDecodeError):
@@ -539,7 +541,7 @@ class TestAnnualDataErrorHandling:
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Should not raise any exceptions
         metadata, data = annual_load.load_annual_data(file_path)
@@ -588,7 +590,7 @@ class TestAnnualDataPerformance:
         file_path = tmp_path / "aggregated" / "annual" / "2024.json"
         file_path.parent.mkdir(parents=True)
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Test loading performance
         metadata, data = annual_load.load_annual_data(file_path)

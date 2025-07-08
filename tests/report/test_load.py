@@ -33,7 +33,7 @@ class TestLoadAggregatedData:
         file_path = tmp_path / "aggregated" / "2025-01.json"
         file_path.parent.mkdir(parents=True)
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Test loading
         metadata, data = load.load_aggregated_data(file_path)
@@ -66,7 +66,7 @@ class TestLoadAggregatedData:
 
         file_path = tmp_path / "missing_meta.json"
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         with pytest.raises(KeyError, match="Missing 'meta' section"):
             load.load_aggregated_data(file_path)
@@ -83,7 +83,7 @@ class TestLoadAggregatedData:
 
         file_path = tmp_path / "missing_data.json"
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         with pytest.raises(KeyError, match="Missing 'data' section"):
             load.load_aggregated_data(file_path)
@@ -100,7 +100,7 @@ class TestLoadAggregatedData:
 
         file_path = tmp_path / "missing_fields.json"
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         with pytest.raises(KeyError, match="Missing required metadata field"):
             load.load_aggregated_data(file_path)
@@ -118,7 +118,7 @@ class TestLoadAggregatedData:
 
         file_path = tmp_path / "debug_test.json"
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Should not raise any exceptions with debug=True
         metadata, data = load.load_aggregated_data(file_path, debug=True)
@@ -148,7 +148,7 @@ class TestHistoricalDataLoading:
         file_path = tmp_path / "aggregated" / "2024-12.json"
         file_path.parent.mkdir(parents=True)
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Test loading
         result = load.load_historical_data(tmp_path, 2024, 12)
@@ -255,7 +255,7 @@ class TestComparisonDataLoading:
         for period, data in periods_data.items():
             file_path = aggregated_dir / f"{period}.json"
             with open(file_path, "w") as f:
-                json.dump(data, f)
+                json.dump(data, f, ensure_ascii=False)
 
         # Test loading comparison data
         comparison_data = load.load_comparison_data(tmp_path, 2025, 3)
@@ -281,7 +281,7 @@ class TestComparisonDataLoading:
         file_path = tmp_path / "aggregated" / "2024-03.json"
         file_path.parent.mkdir(parents=True)
         with open(file_path, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Test loading comparison data
         comparison_data = load.load_comparison_data(tmp_path, 2025, 3)

@@ -55,7 +55,7 @@ def test_match_phase_integration_with_updated_matchers(tmp_path, sample_extracte
     # Write sample extracted data
     extracted_file = extracted_path / "2025-01.json"
     with extracted_file.open("w") as f:
-        json.dump(sample_extracted_data, f)
+        json.dump(sample_extracted_data, f, ensure_ascii=False)
 
     # Create correct_matches.yaml with some test entries
     correct_matches_content = """
@@ -172,7 +172,7 @@ def test_match_phase_uses_default_correct_matches(tmp_path, sample_extracted_dat
     # Write sample extracted data
     extracted_file = extracted_path / "2025-01.json"
     with extracted_file.open("w") as f:
-        json.dump(sample_extracted_data, f)
+        json.dump(sample_extracted_data, f, ensure_ascii=False)
 
     # Create a default correct_matches.yaml in the expected location
     default_correct_matches_content = """

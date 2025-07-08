@@ -65,7 +65,7 @@ class TestAnnualReportIntegration:
 
         annual_file = annual_data_dir / "2024.json"
         with open(annual_file, "w") as f:
-            json.dump(mock_annual_data, f)
+            json.dump(mock_annual_data, f, ensure_ascii=False)
 
         # Mock the annual generator to return a simple report
         mock_report_content = "# Annual Hardware Report 2024\n\nTest report content"
@@ -101,7 +101,7 @@ class TestAnnualReportIntegration:
 
         annual_file = annual_data_dir / "2024.json"
         with open(annual_file, "w") as f:
-            json.dump(mock_annual_data, f)
+            json.dump(mock_annual_data, f, ensure_ascii=False)
 
         mock_report_content = "# Annual Hardware Report 2024\n\nTest report content"
 
@@ -149,7 +149,7 @@ class TestAnnualReportIntegration:
 
         annual_file = annual_data_dir / "2024.json"
         with open(annual_file, "w") as f:
-            json.dump(mock_annual_data, f)
+            json.dump(mock_annual_data, f, ensure_ascii=False)
 
         with patch("sotd.report.annual_run.generate_annual_report") as mock_generator:
             mock_generator.side_effect = ValueError("Invalid report type")
@@ -168,7 +168,7 @@ class TestAnnualReportIntegration:
 
         annual_file = annual_data_dir / "2024.json"
         with open(annual_file, "w") as f:
-            json.dump(mock_annual_data, f)
+            json.dump(mock_annual_data, f, ensure_ascii=False)
 
         mock_report_content = "# Annual Hardware Report 2024\n\nTest report content"
 
@@ -196,7 +196,7 @@ class TestAnnualReportIntegration:
 
         annual_file = annual_data_dir / "2024.json"
         with open(annual_file, "w") as f:
-            json.dump(mock_annual_data, f)
+            json.dump(mock_annual_data, f, ensure_ascii=False)
 
         mock_report_content = "# Annual Software Report 2024\n\nTest report content"
 
@@ -231,7 +231,7 @@ class TestAnnualReportIntegration:
 
         annual_file = annual_data_dir / "2024.json"
         with open(annual_file, "w") as f:
-            json.dump(mock_annual_data, f)
+            json.dump(mock_annual_data, f, ensure_ascii=False)
 
         mock_report_content = "# Annual Hardware Report 2024\n\nTest report content"
 
@@ -261,7 +261,7 @@ class TestAnnualReportIntegration:
 
         annual_file = annual_data_dir / "2024.json"
         with open(annual_file, "w") as f:
-            json.dump(mock_annual_data, f)
+            json.dump(mock_annual_data, f, ensure_ascii=False)
 
         mock_report_content = "# Annual Hardware Report 2024\n\nTest report content"
 
@@ -300,7 +300,7 @@ class TestAnnualReportIntegration:
 
         annual_file = annual_data_dir / "2024.json"
         with open(annual_file, "w") as f:
-            json.dump(mock_annual_data, f)
+            json.dump(mock_annual_data, f, ensure_ascii=False)
 
         mock_report_content = "# Annual Hardware Report 2024\n\nTest report content"
         output_path = Path("data/reports/2024-hardware.md")

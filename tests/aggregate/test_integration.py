@@ -177,7 +177,7 @@ class TestAggregateIntegration:
         # Write sample enriched data
         enriched_file = temp_data_dir / "enriched" / "2025-01.json"
         with open(enriched_file, "w") as f:
-            json.dump(sample_enriched_data, f)
+            json.dump(sample_enriched_data, f, ensure_ascii=False)
 
         # Process the month
         process_months(["2025-01"], temp_data_dir, debug=True)
@@ -248,7 +248,7 @@ class TestAggregateIntegration:
         # Test loading enriched data
         enriched_file = temp_data_dir / "enriched" / "2025-01.json"
         with open(enriched_file, "w") as f:
-            json.dump(sample_enriched_data, f)
+            json.dump(sample_enriched_data, f, ensure_ascii=False)
 
         records = load_enriched_data("2025-01", temp_data_dir)
         assert len(records) == 3
@@ -273,7 +273,7 @@ class TestAggregateIntegration:
         # Write sample data
         enriched_file = temp_data_dir / "enriched" / "2025-01.json"
         with open(enriched_file, "w") as f:
-            json.dump(sample_enriched_data, f)
+            json.dump(sample_enriched_data, f, ensure_ascii=False)
 
         # Test single month processing
         with patch(
@@ -294,7 +294,7 @@ class TestAggregateIntegration:
         invalid_data = {"invalid": "structure"}
         enriched_file = temp_data_dir / "enriched" / "2025-01.json"
         with open(enriched_file, "w") as f:
-            json.dump(invalid_data, f)
+            json.dump(invalid_data, f, ensure_ascii=False)
 
         with pytest.raises(ValueError, match="Expected a list of records"):
             load_enriched_data("2025-01", temp_data_dir)
@@ -305,7 +305,7 @@ class TestAggregateIntegration:
         empty_data = []
         enriched_file = temp_data_dir / "enriched" / "2025-01.json"
         with open(enriched_file, "w") as f:
-            json.dump(empty_data, f)
+            json.dump(empty_data, f, ensure_ascii=False)
 
         records = load_enriched_data("2025-01", temp_data_dir)
         aggregated_data = aggregate_all(records, "2025-01")
@@ -326,7 +326,7 @@ class TestAggregateIntegration:
         ]
 
         with open(enriched_file, "w") as f:
-            json.dump(single_record_data, f)
+            json.dump(single_record_data, f, ensure_ascii=False)
 
         records = load_enriched_data("2025-01", temp_data_dir)
         aggregated_data = aggregate_all(records, "2025-01")
@@ -338,7 +338,7 @@ class TestAggregateIntegration:
         """Test debug mode provides useful output."""
         enriched_file = temp_data_dir / "enriched" / "2025-01.json"
         with open(enriched_file, "w") as f:
-            json.dump(sample_enriched_data, f)
+            json.dump(sample_enriched_data, f, ensure_ascii=False)
 
         process_months(["2025-01"], temp_data_dir, debug=True)
 
@@ -352,7 +352,7 @@ class TestAggregateIntegration:
         for month in ["2025-01", "2025-02"]:
             enriched_file = temp_data_dir / "enriched" / f"{month}.json"
             with open(enriched_file, "w") as f:
-                json.dump(sample_enriched_data, f)
+                json.dump(sample_enriched_data, f, ensure_ascii=False)
 
         process_months(["2025-01", "2025-02"], temp_data_dir)
 

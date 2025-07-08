@@ -19,7 +19,7 @@ class TestAnnualComparisonLoader:
     def _write_annual_file(self, year: str, data: dict):
         file_path = self.data_dir / f"{year}.json"
         with file_path.open("w", encoding="utf-8") as f:
-            json.dump(data, f)
+            json.dump(data, f, ensure_ascii=False)
         return file_path
 
     def test_load_single_year(self):
@@ -62,7 +62,7 @@ class TestAnnualComparisonLoader:
         year = "2025"
         file_path = self.data_dir / f"{year}.json"
         with file_path.open("w", encoding="utf-8") as f:
-            json.dump([1, 2, 3], f)
+            json.dump([1, 2, 3], f, ensure_ascii=False)
         result = self.loader.load_comparison_years([year], self.data_dir)
         assert year not in result
 

@@ -58,7 +58,7 @@ class TestAnnualReportGenerator:
         annual_data_file = tmp_path / "aggregated" / "annual" / "2024.json"
         annual_data_file.parent.mkdir(parents=True)
         with open(annual_data_file, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Generate annual hardware report
         result = annual_generator.generate_annual_report(
@@ -116,7 +116,7 @@ class TestAnnualReportGenerator:
         annual_data_file = tmp_path / "aggregated" / "annual" / "2024.json"
         annual_data_file.parent.mkdir(parents=True)
         with open(annual_data_file, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Should raise KeyError for missing annual_hardware template
         with pytest.raises(KeyError, match="Template 'annual_hardware' not found"):
@@ -171,7 +171,7 @@ class TestAnnualReportGenerator:
         annual_data_file = tmp_path / "aggregated" / "annual" / "2024.json"
         annual_data_file.parent.mkdir(parents=True)
         with open(annual_data_file, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Create template with extra fields
         import yaml
@@ -250,7 +250,7 @@ class TestAnnualReportGenerator:
         annual_data_file = tmp_path / "aggregated" / "annual" / "2024.json"
         annual_data_file.parent.mkdir(parents=True)
         with open(annual_data_file, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Generate annual hardware report and measure performance
         import time
@@ -361,7 +361,7 @@ class TestAnnualReportGenerator:
         annual_data_file = tmp_path / "aggregated" / "annual" / "2024.json"
         annual_data_file.parent.mkdir(parents=True)
         with open(annual_data_file, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Create custom template to test template processor integration
         import yaml

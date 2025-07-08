@@ -82,7 +82,7 @@ def test_process_month_valid_data(tmp_path):
 
     matched_file = matched_dir / "2025-01.json"
     with matched_file.open("w") as f:
-        json.dump(matched_data, f)
+        json.dump(matched_data, f, ensure_ascii=False)
 
     result = _process_month(2025, 1, base_path, debug=True, force=False)
 

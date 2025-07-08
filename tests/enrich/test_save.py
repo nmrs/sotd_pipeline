@@ -29,7 +29,7 @@ class TestLoadMatchedData:
                     {"id": "2", "author": "user2", "body": "test2"},
                 ],
             }
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         try:
             result = load_matched_data(Path(f.name))
@@ -63,7 +63,7 @@ class TestLoadMatchedData:
         """Test loading file missing data section."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             test_data = {"meta": {"month": "2025-01"}}
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         try:
             with pytest.raises(ValueError, match="Missing 'data' section"):
@@ -75,7 +75,7 @@ class TestLoadMatchedData:
         """Test loading file with invalid data type."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             test_data = {"meta": {"month": "2025-01"}, "data": "not a list"}
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         try:
             with pytest.raises(ValueError, match="Expected list for 'data'"):
@@ -191,7 +191,7 @@ class TestSaveEnrichedData:
             # Create initial file
             output_path.parent.mkdir(parents=True, exist_ok=True)
             with output_path.open("w") as f:
-                json.dump({"old": "data"}, f)
+                json.dump({"old": "data"}, f, ensure_ascii=False)
 
             assert output_path.exists()
 

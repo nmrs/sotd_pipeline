@@ -109,7 +109,7 @@ class TestLoadJsonData:
         file_path = tmp_path / "test.json"
 
         with file_path.open("w", encoding="utf-8") as f:
-            json.dump(data, f)
+            json.dump(data, f, ensure_ascii=False)
 
         loaded_data = load_json_data(file_path)
         assert loaded_data == data

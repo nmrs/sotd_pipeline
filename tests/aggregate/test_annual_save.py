@@ -214,7 +214,7 @@ class TestSaveAnnualData:
             "soaps": [],
         }
         with open(annual_file, "w") as f:
-            json.dump(initial_data, f)
+            json.dump(initial_data, f, ensure_ascii=False)
 
         # New data to save
         new_data = {
@@ -441,7 +441,7 @@ class TestSaveAnnualData:
             "data": {"razors": [{"name": "Razor A", "shaves": 50, "unique_users": 25}]},
         }
         with open(monthly_file, "w") as f:
-            json.dump(monthly_data, f)
+            json.dump(monthly_data, f, ensure_ascii=False)
 
         # Now save annual data (should not interfere with monthly data)
         annual_data = {

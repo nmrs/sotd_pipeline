@@ -15,7 +15,7 @@ def test_run_extraction_for_month_valid(monkeypatch):
         path = Path(tmpdir) / "data/comments/2025-04.json"
         path.parent.mkdir(parents=True)
         with open(path, "w", encoding="utf-8") as f:
-            json.dump({"data": comments}, f)
+            json.dump({"data": comments}, f, ensure_ascii=False)
 
         monkeypatch.chdir(tmpdir)
         result = run_extraction_for_month("2025-04")

@@ -22,7 +22,7 @@ def test_analyze_skipped_patterns_outputs_expected(capsys):
     with tempfile.TemporaryDirectory() as tmpdir:
         path = Path(tmpdir) / "2025-04.json"
         with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f)
+            json.dump(data, f, ensure_ascii=False)
 
         analyze_skipped_patterns([path], top_n=5, show_examples=1)
         out = capsys.readouterr().out
@@ -50,7 +50,7 @@ def test_analyze_common_prefixes_outputs_expected(capsys):
     with tempfile.TemporaryDirectory() as tmpdir:
         path = Path(tmpdir) / "2025-04.json"
         with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f)
+            json.dump(data, f, ensure_ascii=False)
 
         analyze_common_prefixes([path], show_examples=2)
         out = capsys.readouterr().out

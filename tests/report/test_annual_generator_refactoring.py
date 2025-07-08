@@ -181,7 +181,7 @@ class TestAnnualGeneratorRefactoring:
         annual_data_file = tmp_path / "aggregated" / "annual" / "2024.json"
         annual_data_file.parent.mkdir(parents=True)
         with open(annual_data_file, "w") as f:
-            json.dump(test_data, f)
+            json.dump(test_data, f, ensure_ascii=False)
 
         # Test complete report generation
         result = generate_annual_report("hardware", "2024", tmp_path, debug=True)

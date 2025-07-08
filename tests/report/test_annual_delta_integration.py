@@ -23,7 +23,7 @@ class TestAnnualDeltaIntegration:
     def _write_annual_file(self, year: str, data: dict):
         file_path = self.data_dir / f"{year}.json"
         with file_path.open("w", encoding="utf-8") as f:
-            json.dump(data, f)
+            json.dump(data, f, ensure_ascii=False)
         return file_path
 
     def test_delta_column_integration(self):
