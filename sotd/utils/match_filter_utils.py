@@ -111,7 +111,7 @@ def strip_blade_count_patterns(value: str) -> str:
     usage_count_x_pattern = r"(?:[\(\[\{])\s*(?:x)?(\d+)(?:x)?\s*[\)\]\}]"
     cleaned = re.sub(usage_count_x_pattern, "", cleaned, flags=re.IGNORECASE)
 
-    # Pattern for "times" usage: (4 times), [5 times], {3 times}, (1 time), etc.
+    # Pattern for "times" usage: (4 times), [5 times], {3 times}, etc.
     usage_times_pattern = r"(?:[\(\[\{])\s*(\d+)\s+times?\s*[\)\]\}]"
     cleaned = re.sub(usage_times_pattern, "", cleaned, flags=re.IGNORECASE)
 
@@ -150,16 +150,66 @@ def strip_blade_count_patterns(value: str) -> str:
     return cleaned
 
 
-def normalize_for_storage(value: str, competition_tags: Dict[str, List[str]] | None = None) -> str:
+def strip_handle_indicators(value: str) -> str:
+    """
+    Strip handle swap/modification indicators from razor strings.
+
+    This removes patterns like:
+    - "w/ [brand] handle" or "with [brand] handle"
+    - "handle: [brand]" or "handle [brand]"
+    - "using [brand] handle"
+    - "w/ [brand] [model] handle"
+    - "Razor / [brand] handle" or "Razor / *[brand]* handle"
+
+    Args:
+        value: Input string that may contain handle indicators
+
+    Returns:
+        String with handle indicators removed
+    """
+    if not isinstance(value, str):
+        return value
+
+    # Start with the original value
+    cleaned = value
+
+    # Pattern for "w/ [brand] handle" or "with [brand] handle"
+    handle_pattern = r"\s+(?:w/|with)\s+([^,\s]+(?:\s+[^,\s]+)*?)\s+handle\b"
+    cleaned = re.sub(handle_pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Pattern for "handle: [brand]" or "handle [brand]"
+    handle_colon_pattern = r"\s+handle\s*:\s*([^,\s]+(?:\s+[^,\s]+)*?)\b"
+    cleaned = re.sub(handle_colon_pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Pattern for "using [brand] handle"
+    using_pattern = r"\s+using\s+([^,\s]+(?:\s+[^,\s]+)*?)\s+handle\b"
+    cleaned = re.sub(using_pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Pattern for "Razor / [brand] handle" or "Razor / *[brand]* handle"
+    slash_handle_pattern = r"\s*/\s*(?:[*`\"']*)?([^,\s]+(?:\s+[^,\s]+)*?)(?:[*`\"']*)?\s+handle\b"
+    cleaned = re.sub(slash_handle_pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Clean up extra whitespace and normalize
+    cleaned = re.sub(r"\s+", " ", cleaned)  # Normalize whitespace
+    cleaned = cleaned.strip()
+
+    return cleaned
+
+
+def normalize_for_storage(
+    value: str, competition_tags: Dict[str, List[str]] | None = None, field: str | None = None
+) -> str:
     """
     Normalize a string for storage in correct_matches.yaml.
 
-    This strips competition tags and normalizes whitespace to prevent
-    bloat and duplicates in the file.
+    - Strips competition tags and normalizes whitespace to prevent bloat and duplicates in the file.
+    - For blades only, strips blade count/usage patterns (including 'new' as usage).
+    - For razors only, strips handle swap/modification indicators.
 
     Args:
         value: Input string to normalize
         competition_tags: Competition tags configuration. If None, loads from file.
+        field: The product field (e.g., 'blade', 'razor', etc.)
 
     Returns:
         Normalized string ready for storage
@@ -170,11 +220,13 @@ def normalize_for_storage(value: str, competition_tags: Dict[str, List[str]] | N
     # Strip competition tags and normalize
     normalized = strip_competition_tags(value, competition_tags)
 
-    # For blade strings, also strip blade count and usage patterns
-    # This prevents bloat in correct_matches.yaml by removing patterns like (3x), [2x], etc.
-    # Note: We can't easily detect if this is a blade string here, so we'll apply it generally
-    # The blade enricher will handle the actual extraction of counts
-    normalized = strip_blade_count_patterns(normalized)
+    # For blade strings, also strip blade count and usage patterns (including 'new')
+    if field == "blade":
+        normalized = strip_blade_count_patterns(normalized)
+
+    # For razor strings, also strip handle indicators
+    if field == "razor":
+        normalized = strip_handle_indicators(normalized)
 
     return normalized
 

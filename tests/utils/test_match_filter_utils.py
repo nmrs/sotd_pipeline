@@ -11,6 +11,7 @@ from sotd.utils.match_filter_utils import (
     extract_blade_use_count,
     extract_blade_count,
     extract_blade_and_use_count,
+    strip_handle_indicators,
 )
 
 
@@ -445,3 +446,118 @@ class TestExtractBladeAndUseCount:
         blade_count, use_count = extract_blade_and_use_count("treet platinum")
         assert blade_count is None
         assert use_count is None
+
+
+class TestStripHandleIndicators:
+    """Test handle indicator stripping for razors."""
+
+    def test_strip_handle_indicators_basic(self):
+        """Test basic handle indicator patterns."""
+        test_cases = [
+            ("Razor w/ Blackland handle", "Razor"),
+            ("Razor with Merkur handle", "Razor"),
+            ("Razor handle: Wolfman", "Razor"),
+            ("Razor using Karve handle", "Razor"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_handle_indicators(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_handle_indicators_complex_brands(self):
+        """Test handle indicators with complex brand names."""
+        test_cases = [
+            (
+                "Aylsworth Razors - Frank-kant, Drakkant SS w/ Blackland Razors Vector Handle",
+                "Aylsworth Razors - Frank-kant, Drakkant SS",
+            ),
+            ("Razor with Above the Tie handle", "Razor"),
+            ("Razor w/ Charcoal Goods handle", "Razor"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_handle_indicators(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_handle_indicators_case_insensitive(self):
+        """Test that handle indicators are stripped case-insensitively."""
+        test_cases = [
+            ("Razor W/ Blackland Handle", "Razor"),
+            ("Razor WITH Merkur HANDLE", "Razor"),
+            ("Razor Handle: Wolfman", "Razor"),
+            ("Razor USING Karve Handle", "Razor"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_handle_indicators(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_handle_indicators_no_match(self):
+        """Test strings that don't contain handle indicators."""
+        test_cases = [
+            "Merkur 34C",
+            "Blackland Blackbird",
+            "Razor without handle info",
+            "Razor handle info",  # No colon or "w/"
+        ]
+        for input_str in test_cases:
+            result = strip_handle_indicators(input_str)
+            assert result == input_str, f"Should not change '{input_str}', but got '{result}'"
+
+    def test_strip_handle_indicators_whitespace_cleanup(self):
+        """Test that whitespace is properly cleaned up after stripping."""
+        test_cases = [
+            ("Razor   w/   Blackland   handle  ", "Razor"),
+            ("Razor  with  Merkur  handle  ", "Razor"),
+            ("Razor  handle:  Wolfman  ", "Razor"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_handle_indicators(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_handle_indicators_none_input(self):
+        """Test None input."""
+        result = strip_handle_indicators(None)  # type: ignore
+        assert result is None
+
+    def test_strip_handle_indicators_empty_string(self):
+        """Test empty string input."""
+        result = strip_handle_indicators("")
+        assert result == ""
+
+    def test_normalize_for_storage_razor_with_handle_indicators(self):
+        """Test that normalize_for_storage strips handle indicators for razor field."""
+        # Use competition tags that don't include our test tags
+        test_competition_tags = {
+            "strip_tags": ["SOMEOTHER"],
+            "preserve_tags": ["CNC", "SOTD", "ARTISTCLUB"],
+        }
+        test_cases = [
+            ("Razor w/ Blackland handle $CNC", "Razor $CNC"),
+            ("Razor with Merkur handle #sotd", "Razor #sotd"),
+            ("Razor handle: Wolfman $ARTISTCLUB", "Razor $ARTISTCLUB"),
+        ]
+        for input_str, expected in test_cases:
+            result = normalize_for_storage(input_str, test_competition_tags, field="razor")
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_normalize_for_storage_razor_no_handle_indicators(self):
+        """Test that normalize_for_storage doesn't affect razors without handle indicators."""
+        # Use competition tags that don't include our test tags
+        test_competition_tags = {"strip_tags": ["SOMEOTHER"], "preserve_tags": ["CNC", "SOTD"]}
+        test_cases = [
+            ("Merkur 34C $CNC", "Merkur 34C $CNC"),
+            ("Blackland Blackbird #sotd", "Blackland Blackbird #sotd"),
+        ]
+        for input_str, expected in test_cases:
+            result = normalize_for_storage(input_str, test_competition_tags, field="razor")
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"

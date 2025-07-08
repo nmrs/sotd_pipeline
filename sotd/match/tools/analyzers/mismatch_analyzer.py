@@ -272,14 +272,17 @@ class MismatchAnalyzer(AnalysisTool):
         self.console.print("\n[bold][Summary][/bold]")
         if total_exact_matches > 0:
             self.console.print(
-                f"  • Exact matches (from correct_matches.yaml): "
+                f"  • Matches with match_type='exact' (found via correct_matches.yaml): "
                 f"[green]{total_exact_matches}[/green]"
             )
         if total_confirmed > total_exact_matches:
             self.console.print(
-                f"  • Previously confirmed: [green]{total_confirmed - total_exact_matches}[/green]"
+                f"  • Matches in correct_matches.yaml but not found as exact: "
+                f"[yellow]{total_confirmed - total_exact_matches}[/yellow]"
             )
-        self.console.print(f"  • Remaining unconfirmed: [yellow]{total_unconfirmed}[/yellow]")
+        self.console.print(
+            f"  • Matches not in correct_matches.yaml: [yellow]{total_unconfirmed}[/yellow]"
+        )
         self.console.print("")
 
     def _clear_pattern_cache(self) -> None:
@@ -481,7 +484,7 @@ class MismatchAnalyzer(AnalysisTool):
             matched_text = str(matched)
 
         # Normalize for consistent key generation - use normalized original to match storage format
-        original_normalized = self._normalize_for_storage(original).lower().strip()
+        original_normalized = self._normalize_for_storage(original, field=field).lower().strip()
         matched_normalized = matched_text.lower().strip()
         return f"{field}:{original_normalized}|{matched_normalized}"
 
@@ -549,14 +552,14 @@ class MismatchAnalyzer(AnalysisTool):
         """
         return strip_competition_tags(value, competition_tags)
 
-    def _normalize_for_storage(self, value: str) -> str:
+    def _normalize_for_storage(self, value: str, field: str) -> str:
         """
         Normalize a string for storage in correct_matches.yaml.
 
         This strips competition tags and normalizes whitespace to prevent
         bloat and duplicates in the file.
         """
-        return normalize_for_storage(value)
+        return normalize_for_storage(value, field=field)
 
     def _save_correct_matches(self) -> None:
         """Save correct matches to file in YAML format."""
@@ -596,7 +599,7 @@ class MismatchAnalyzer(AnalysisTool):
                     yaml_data[field][canonical_brand][canonical_model] = []
 
                 # Normalize the original string before storing to prevent bloat
-                normalized_original = self._normalize_for_storage(original)
+                normalized_original = self._normalize_for_storage(original, field)
                 if (
                     normalized_original
                     and normalized_original
@@ -905,7 +908,7 @@ class MismatchAnalyzer(AnalysisTool):
             for item in items:
                 field_data = item["field_data"]
                 original = field_data.get("original", "")
-                norm_original = normalize_for_storage(original)
+                norm_original = normalize_for_storage(original, field=field)
                 matched = self._get_matched_text(field, field_data.get("matched", {}))
                 # Group by the actual match, not by mismatch type, case-insensitive
                 group_key = (norm_original.lower(), matched.lower())
@@ -965,9 +968,10 @@ class MismatchAnalyzer(AnalysisTool):
             for item in mismatches[mismatch_type]:
                 field_data = item["field_data"]
                 original = field_data.get("original", "")
-                norm_original = normalize_for_storage(original)
+                norm_original = normalize_for_storage(original, field=field)
                 matched = self._get_matched_text(field, field_data.get("matched", {}))
                 reason = item["reason"]
+
                 # Group by the actual match, not by mismatch type, case-insensitive
                 group_key = (norm_original.lower(), matched.lower())
                 if group_key not in grouped:
@@ -1033,6 +1037,7 @@ class MismatchAnalyzer(AnalysisTool):
         table.add_column("Count", style="magenta", justify="center")
         table.add_column("Type", style="cyan")
         table.add_column("Original", style="yellow")
+        table.add_column("Normalized", style="blue")
         table.add_column("Matched", style="green")
         table.add_column("Pattern", style="blue")
         table.add_column("Reason", style="red")
@@ -1075,7 +1080,8 @@ class MismatchAnalyzer(AnalysisTool):
                 str(row_number),
                 count_text,
                 type_text,
-                norm_original,
+                field_data.get("original", ""),  # Original: exact string from matched data
+                norm_original,  # Normalized: normalized version
                 matched,
                 pattern,
                 reason,
@@ -1135,7 +1141,7 @@ class MismatchAnalyzer(AnalysisTool):
             if not isinstance(field_data, dict):
                 continue
             original = field_data.get("original", "")
-            norm_original = normalize_for_storage(original)
+            norm_original = normalize_for_storage(original, field=field)
             matched = field_data.get("matched", {})
             matched_text = self._get_matched_text(field, matched)
             pattern = field_data.get("pattern", "")
@@ -1244,7 +1250,7 @@ class MismatchAnalyzer(AnalysisTool):
             if not isinstance(field_data, dict):
                 continue
             original = field_data.get("original", "")
-            norm_original = normalize_for_storage(original)
+            norm_original = normalize_for_storage(original, field=field)
             matched = field_data.get("matched", {})
             matched_text = self._get_matched_text(field, matched)
             pattern = field_data.get("pattern", "")
@@ -1355,7 +1361,7 @@ class MismatchAnalyzer(AnalysisTool):
             if not isinstance(field_data, dict):
                 continue
             original = field_data.get("original", "")
-            norm_original = normalize_for_storage(original)
+            norm_original = normalize_for_storage(original, field=field)
             matched = field_data.get("matched", {})
             matched_text = self._get_matched_text(field, matched)
             pattern = field_data.get("pattern", "")

@@ -51,8 +51,8 @@ Above the Tie:
     - (?:\batt\b|tie).*se-*2
   Windsor Pro SB90:
     patterns:
-    - '\b(?:att|tie)\b.*sb90'
-    - '\b(?:att|tie)\b.*windsor'
+    - \b(?:att|tie)\b.*sb90(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+    - \b(?:att|tie)\b.*windsor
   Windsor SSRH2:
     patterns:
     - '\b(?:att|tie)\b.*(?:windsor)*\b.*ssrh2'
@@ -61,12 +61,10 @@ Alpha:
     format: AC
     patterns:
     - alpha.*claymore
-  Lone Star:
-    patterns:
-    - alpha.*lone.*star
   Outlaw:
     patterns:
     - alpha.*outl
+    - alpha.*lone.*star
   Spirit:
     format: AC
     patterns:
@@ -131,8 +129,6 @@ Aylsworth:
     patterns:
     - drakk?ant
     - aylsworth
-  Kopparkant:
-    patterns:
     - kopp?[ae]rkant
 BBNY:
   Safety Razor:
@@ -173,9 +169,11 @@ Beard Struggle:
     patterns:
     - '\bseax\b'
 Bevel:
-  Essential Disposable:
+  Essential Disposable: 
+    #this is a disposable razor with a preloaded bevel de blade, 
+    #so marking this as a DE, not cartridge
     patterns:
-    - bevel disposable
+    - bevel.*disposable
   Safety Razor:
     patterns:
     - bevel
@@ -226,7 +224,7 @@ Blackland:
   Vector:
     format: AC
     patterns:
-    - (?:blackland)?.*vector
+    - (?:black(land|bird))?.*vector
 Blutt Rasur:
   BR-1:
     patterns:
@@ -703,9 +701,6 @@ Gillette:
     patterns:
     - gil.*te.*sterling
     - o.{1}clock
-  Aristocrat:
-    patterns:
-    - art?istocrat
   Diplomat:
     patterns:
     - Diplomat
@@ -774,6 +769,7 @@ Gillette:
     - sheraton
   Slim:
     patterns:
+    - art?istocrat
     - Gil.*Slim
     - sl?im.*adjust
     - '\d\d.*slim'
@@ -1267,6 +1263,11 @@ Other:
     - hair.*sha
     - marianna
     - burmax.*shavette
+  Shavette (AC):
+    format: Shavette (AC)
+    patterns:
+    - shavette.*\bac\b
+    - \bac\b.*shavette
   Shavette (Disposable):
       format: Shavette (Disposable)
       patterns:

@@ -25,7 +25,10 @@ class RazorMatcher(BaseMatcher):
     def _match_with_regex(self, value: str) -> Dict[str, Any]:
         """Match using regex patterns with REGEX match type."""
         original = value
-        normalized = self.normalize(value)
+        # Use normalize_for_storage to strip handle indicators and competition tags
+        from sotd.utils.match_filter_utils import normalize_for_storage
+
+        normalized = normalize_for_storage(value, field="razor")
         if not normalized:
             return {
                 "original": original,
