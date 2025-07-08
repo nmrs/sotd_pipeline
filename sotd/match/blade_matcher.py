@@ -1,14 +1,17 @@
 import re
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from .base_matcher import BaseMatcher, MatchType
 
 
 class BladeMatcher(BaseMatcher):
-    def __init__(self, catalog_path: Path = Path("data/blades.yaml")):
-        # catalog_path = base_path / "blades.yaml"
-        super().__init__(catalog_path, "blade")
+    def __init__(
+        self,
+        catalog_path: Path = Path("data/blades.yaml"),
+        correct_matches_path: Optional[Path] = None,
+    ):
+        super().__init__(catalog_path, "blade", correct_matches_path=correct_matches_path)
         self.patterns = self._compile_patterns()
 
     def _compile_patterns(self):
@@ -39,8 +42,12 @@ class BladeMatcher(BaseMatcher):
 
     def _match_with_regex(self, value: str) -> Dict[str, Any]:
         """Match using regex patterns with REGEX match type."""
+        from sotd.utils.match_filter_utils import normalize_for_matching
+
         original = value
-        normalized = self.normalize(value)
+        # All correct match lookups must use normalize_for_matching
+        # (see docs/product_matching_validation.md)
+        normalized = normalize_for_matching(value, field="blade")
         if not normalized:
             return {
                 "original": original,
@@ -82,8 +89,17 @@ class BladeMatcher(BaseMatcher):
 
     def match_with_context(self, value: str, razor_format: str) -> Dict[str, Any]:
         """Match blade with context-aware format prioritization."""
+        from sotd.utils.match_filter_utils import normalize_for_matching
+
         original = value
-        normalized = self.normalize(value)
+        # Step 1: Check correct matches first (highest priority)
+        correct_match = self.match(value)
+        if correct_match and correct_match.get("match_type") == "exact":
+            return correct_match
+
+        # All correct match lookups must use normalize_for_matching
+        # (see docs/product_matching_validation.md)
+        normalized = normalize_for_matching(value, field="blade")
         if not normalized:
             return {
                 "original": original,

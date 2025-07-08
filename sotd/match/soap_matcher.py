@@ -11,8 +11,12 @@ from .base_matcher import BaseMatcher, MatchType
 
 
 class SoapMatcher(BaseMatcher):
-    def __init__(self, catalog_path: Path = Path("data/soaps.yaml")):
-        super().__init__(catalog_path, "soap")
+    def __init__(
+        self,
+        catalog_path: Path = Path("data/soaps.yaml"),
+        correct_matches_path: Optional[Path] = None,
+    ):
+        super().__init__(catalog_path, "soap", correct_matches_path=correct_matches_path)
         self.scent_patterns, self.brand_patterns = self._compile_patterns()
 
     def _is_sample(self, text: str) -> bool:
@@ -192,11 +196,8 @@ class SoapMatcher(BaseMatcher):
         return result
 
     def _check_correct_matches(self, value: str) -> Optional[Dict[str, Any]]:
-        """
-        Check if value matches any correct matches entry.
-
-        Returns match data if found, None otherwise.
-        """
+        # All correct match lookups must use normalize_for_matching
+        # (see docs/product_matching_validation.md)
         if not value or not self.correct_matches:
             return None
 

@@ -3,6 +3,7 @@ import subprocess
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+from typing import Optional
 
 from tqdm import tqdm
 
@@ -98,6 +99,7 @@ def process_month(
     force: bool = False,
     debug: bool = False,
     max_workers: int = 1,
+    correct_matches_path: Optional[Path] = None,
 ) -> dict:
     """Process a single month of data."""
     try:
@@ -126,10 +128,10 @@ def process_month(
 
         # Initialize matchers
         monitor.start_processing_timing()
-        blade_matcher = BladeMatcher()
-        brush_matcher = BrushMatcher()
-        razor_matcher = RazorMatcher()
-        soap_matcher = SoapMatcher()
+        blade_matcher = BladeMatcher(correct_matches_path=correct_matches_path)
+        brush_matcher = BrushMatcher(correct_matches_path=correct_matches_path)
+        razor_matcher = RazorMatcher(correct_matches_path=correct_matches_path)
+        soap_matcher = SoapMatcher(correct_matches_path=correct_matches_path)
 
         # Process records
         records = data.get("data", [])

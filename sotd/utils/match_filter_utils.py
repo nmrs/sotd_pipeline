@@ -104,7 +104,7 @@ def strip_blade_count_patterns(value: str) -> str:
     cleaned = value
 
     # Pattern for leading blade count: e.g. [2x], (2x), {2x}, [X2], (x2), etc.
-    leading_blade_count_pattern = r"^\s*(?:[\(\[\{])\s*(?:x)?(\d+)(?:x)?\s*[\)\]\}]\s*"
+    leading_blade_count_pattern = r"^\s*(?:[\(\[\{])\s*(?:x)?(\d+)(?:x)?\s*[\)\]\}]"
     cleaned = re.sub(leading_blade_count_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for usage count with 'x': (3x), [x3], {2x}, (x4), etc.
@@ -196,23 +196,38 @@ def strip_handle_indicators(value: str) -> str:
     return cleaned
 
 
-def normalize_for_storage(
+# --- CANONICAL NORMALIZATION FUNCTION ---
+# All correct match lookups in the SOTD Pipeline must use this function.
+# See docs/product_matching_validation.md for details and examples.
+
+
+def normalize_for_matching(
     value: str, competition_tags: Dict[str, List[str]] | None = None, field: str | None = None
 ) -> str:
     """
-    Normalize a string for storage in correct_matches.yaml.
+    Canonical normalization function for correct match lookups.
+
+    This is the single source of truth for normalizing strings when performing
+    correct match lookups in matchers, analyzers, and any other consumers.
+    All components must use this function to ensure consistent normalization.
 
     - Strips competition tags and normalizes whitespace to prevent bloat and duplicates in the file.
     - For blades only, strips blade count/usage patterns (including 'new' as usage).
     - For razors only, strips handle swap/modification indicators.
+    - For soaps only, strips soap-related patterns (sample, puck, croap, cream, etc.).
+    - Preserves case to maintain consistency with stored correct_matches.yaml entries.
 
     Args:
         value: Input string to normalize
         competition_tags: Competition tags configuration. If None, loads from file.
-        field: The product field (e.g., 'blade', 'razor', etc.)
+        field: The product field (e.g., 'blade', 'razor', 'soap', etc.)
 
     Returns:
-        Normalized string ready for storage
+        Normalized string ready for correct match lookups
+
+    Note:
+        This function replaces normalize_for_storage() and should be used by all
+        components that perform correct match lookups to ensure consistency.
     """
     if not isinstance(value, str):
         return value
@@ -228,7 +243,172 @@ def normalize_for_storage(
     if field == "razor":
         normalized = strip_handle_indicators(normalized)
 
+    # For soap strings, also strip soap-related patterns
+    if field == "soap":
+        normalized = strip_soap_patterns(normalized)
+
     return normalized
+
+
+def strip_soap_patterns(value: str) -> str:
+    """
+    Strip soap-related patterns from soap strings.
+
+    This removes patterns like:
+    - "soap", "puck", "croap", "cream", "shaving soap", "shaving cream"
+      (at the end or surrounded by whitespace/punctuation)
+    - Sample markers like "(sample)" or "sample" at the end
+    - Use counts like "(23)" anywhere in the string
+    - Cleans up empty parentheses
+
+    Args:
+        value: Input string that may contain soap-related patterns
+
+    Returns:
+        String with soap-related patterns removed
+    """
+    if not isinstance(value, str):
+        return value
+
+    cleaned = value
+    original = value
+
+    # Remove sample markers like (sample) (case-insensitive)
+    cleaned = re.sub(r"\(\s*sample\s*\)", "", cleaned, flags=re.IGNORECASE)
+
+    # Remove use counts like (23) anywhere in the string
+    cleaned = re.sub(r"\(\d+\)", "", cleaned)
+
+    # Remove soap-related suffixes at the end (with optional whitespace/punctuation)
+    cleaned = re.sub(
+        r"[\s\-_/,:;]*(soap( sample)?|croap|puck|cream|shav.*soap|shav.*cream)[\s\-_/,:;]*$",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    # Remove croap/puck/cream/soap as last word, even if surrounded by whitespace or punctuation
+    cleaned = re.sub(
+        r"[\s\-_/,:;]*(croap|puck|cream|soap)[\s\-_/,:;]*$",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    # Remove 'sample' only if at the end (not in the middle)
+    cleaned = re.sub(
+        r"[\s\-_/,:;]*sample[\s\-_/,:;]*$",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    # Clean up empty parentheses left behind
+    cleaned = re.sub(r"\(\s*\)", "", cleaned)
+    # Remove croap/puck/cream/soap as last word again after cleaning up parentheses
+    cleaned = re.sub(
+        r"[\s\-_/,:;]*(croap|puck|cream|soap)[\s\-_/,:;]*$",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    # Clean up extra whitespace and normalize
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    cleaned = cleaned.strip()
+    # If result is empty and original started with 'soap', return 'soap'
+    if not cleaned and original.strip().lower().startswith("soap"):
+        return "soap"
+    return cleaned
+
+
+# --- DEPRECATED: DO NOT USE ---
+# This function is retained for backward compatibility only.
+# All new code must use normalize_for_matching. See docs/product_matching_validation.md.
+def normalize_for_storage(
+    value: str, competition_tags: Dict[str, List[str]] | None = None, field: str | None = None
+) -> str:
+    """
+    Deprecated: Use normalize_for_matching() instead.
+
+    This function is kept for backward compatibility but should be replaced
+    with normalize_for_matching() in all new code.
+
+    For backward compatibility, this function automatically detects field type
+    based on content patterns when field is not specified:
+    - Contains blade patterns (3x), (new), etc. -> blade field
+    - Contains handle indicators (/ [brand] handle) -> razor field
+    - Contains soap patterns (sample, puck, croap) -> soap field
+    """
+    import warnings
+
+    warnings.warn(
+        "normalize_for_storage() is deprecated, use normalize_for_matching() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
+    # Auto-detect field type for backward compatibility
+    if field is None and isinstance(value, str):
+        # Check for blade patterns
+        # Define ordinal words for word-based patterns
+        ordinal_words = (
+            "first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|"
+            "eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|"
+            "seventeenth|eighteenth|nineteenth|twentieth"
+        )
+        blade_patterns = [
+            r"\(\d+x?\)",
+            r"\[\d*x?\]",
+            r"\{\d*x?\}",  # (3x), [x3], {2x}
+            r"\(\d+\s+times?\)",
+            r"\[\d+\s+times?\]",
+            r"\{\d+\s+times?\}",  # (4 times)
+            r"\(\d+(?:st|nd|rd|th)\s+use\)",
+            r"\[\d+(?:st|nd|rd|th)\s+use\]",  # (7th use)
+            r"\(\s*new\s*\)",
+            r"\[\s*new\s*\]",
+            r"\{\s*new\s*\}",  # (new)
+            r"\bnew\b",  # standalone "new"
+            r"\d+(?:st|nd|rd|th)\s+use\b",  # 3rd use
+            r"x\d+",
+            r"\d+x",  # x4, 2x
+            # Word-based ordinal patterns
+            r"\(\s*(" + ordinal_words + r")\s+use\s*\)",
+            r"\[\s*(" + ordinal_words + r")\s+use\s*\]",
+            r"\{\s*(" + ordinal_words + r")\s+use\s*\}",
+        ]
+        for pattern in blade_patterns:
+            if re.search(pattern, value, re.IGNORECASE):
+                field = "blade"
+                break
+
+        # Check for razor handle indicators
+        if field is None:
+            handle_patterns = [
+                r"/\s*\[.*?\]\s*handle",
+                r"with\s+\[.*?\]\s*handle",
+                r"handle\s+swap",
+                r"handle\s+modification",
+            ]
+            for pattern in handle_patterns:
+                if re.search(pattern, value, re.IGNORECASE):
+                    field = "razor"
+                    break
+
+        # Check for soap patterns
+        if field is None:
+            soap_patterns = [
+                r"\(\s*sample\s*\)",
+                r"\bsample\b",
+                r"\bpuck\b",
+                r"\bcroap\b",
+                r"\bcream\b",
+                r"shav.*soap",
+                r"shav.*cream",
+            ]
+            for pattern in soap_patterns:
+                if re.search(pattern, value, re.IGNORECASE):
+                    field = "soap"
+                    break
+
+    return normalize_for_matching(value, competition_tags, field)
 
 
 def extract_blade_use_count(text: str) -> Optional[int]:

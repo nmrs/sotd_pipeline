@@ -22,7 +22,7 @@ from sotd.cli_utils.base_parser import BaseCLIParser  # noqa: E402
 from sotd.match.tools.utils.analysis_base import AnalysisTool  # noqa: E402
 from sotd.utils.match_filter_utils import (  # noqa: E402
     load_competition_tags,
-    normalize_for_storage,
+    normalize_for_matching,
     strip_competition_tags,
 )
 from sotd.utils.yaml_loader import load_yaml_with_nfc  # noqa: E402
@@ -484,7 +484,7 @@ class MismatchAnalyzer(AnalysisTool):
             matched_text = str(matched)
 
         # Normalize for consistent key generation - use normalized original to match storage format
-        original_normalized = self._normalize_for_storage(original, field=field).lower().strip()
+        original_normalized = normalize_for_matching(original, None, field=field).lower().strip()
         matched_normalized = matched_text.lower().strip()
         return f"{field}:{original_normalized}|{matched_normalized}"
 
@@ -552,14 +552,14 @@ class MismatchAnalyzer(AnalysisTool):
         """
         return strip_competition_tags(value, competition_tags)
 
-    def _normalize_for_storage(self, value: str, field: str) -> str:
+    def _normalize_for_matching(self, value: str, field: str) -> str:
         """
         Normalize a string for storage in correct_matches.yaml.
 
         This strips competition tags and normalizes whitespace to prevent
         bloat and duplicates in the file.
         """
-        return normalize_for_storage(value, field=field)
+        return normalize_for_matching(value, None, field)
 
     def _save_correct_matches(self) -> None:
         """Save correct matches to file in YAML format."""
@@ -599,7 +599,7 @@ class MismatchAnalyzer(AnalysisTool):
                     yaml_data[field][canonical_brand][canonical_model] = []
 
                 # Normalize the original string before storing to prevent bloat
-                normalized_original = self._normalize_for_storage(original, field)
+                normalized_original = normalize_for_matching(original, None, field)
                 if (
                     normalized_original
                     and normalized_original
@@ -908,7 +908,7 @@ class MismatchAnalyzer(AnalysisTool):
             for item in items:
                 field_data = item["field_data"]
                 original = field_data.get("original", "")
-                norm_original = normalize_for_storage(original, field=field)
+                norm_original = normalize_for_matching(original, None, field=field)
                 matched = self._get_matched_text(field, field_data.get("matched", {}))
                 # Group by the actual match, not by mismatch type, case-insensitive
                 group_key = (norm_original.lower(), matched.lower())
@@ -939,7 +939,7 @@ class MismatchAnalyzer(AnalysisTool):
 
     def display_mismatches(self, mismatches: Dict[str, List[Dict]], field: str, args) -> None:
         """Display identified mismatches in a formatted table, normalized and grouped."""
-        from sotd.utils.match_filter_utils import normalize_for_storage
+        from sotd.utils.match_filter_utils import normalize_for_matching
 
         mismatch_keys = [
             "multiple_patterns",
@@ -968,7 +968,7 @@ class MismatchAnalyzer(AnalysisTool):
             for item in mismatches[mismatch_type]:
                 field_data = item["field_data"]
                 original = field_data.get("original", "")
-                norm_original = normalize_for_storage(original, field=field)
+                norm_original = normalize_for_matching(original, None, field=field)
                 matched = self._get_matched_text(field, field_data.get("matched", {}))
                 reason = item["reason"]
 
@@ -1103,7 +1103,7 @@ class MismatchAnalyzer(AnalysisTool):
         self, data: Dict, field: str, mismatches: Dict[str, List[Dict]], args
     ) -> None:
         """Display all matches with mismatch indicators, normalized and grouped."""
-        from sotd.utils.match_filter_utils import normalize_for_storage
+        from sotd.utils.match_filter_utils import normalize_for_matching
 
         self.console.print(
             f"\n[bold]All {field.capitalize()} Matches with Mismatch Indicators:[/bold]\n"
@@ -1141,7 +1141,7 @@ class MismatchAnalyzer(AnalysisTool):
             if not isinstance(field_data, dict):
                 continue
             original = field_data.get("original", "")
-            norm_original = normalize_for_storage(original, field=field)
+            norm_original = normalize_for_matching(original, None, field)
             matched = field_data.get("matched", {})
             matched_text = self._get_matched_text(field, matched)
             pattern = field_data.get("pattern", "")
@@ -1223,7 +1223,7 @@ class MismatchAnalyzer(AnalysisTool):
 
     def display_unconfirmed_matches(self, data: Dict, field: str, args) -> None:
         """Display only unconfirmed matches (not exact or previously confirmed)."""
-        from sotd.utils.match_filter_utils import normalize_for_storage
+        from sotd.utils.match_filter_utils import normalize_for_matching
 
         self.console.print(f"\n[bold]Unconfirmed {field.capitalize()} Matches:[/bold]\n")
 
@@ -1250,7 +1250,7 @@ class MismatchAnalyzer(AnalysisTool):
             if not isinstance(field_data, dict):
                 continue
             original = field_data.get("original", "")
-            norm_original = normalize_for_storage(original, field=field)
+            norm_original = normalize_for_matching(original, None, field)
             matched = field_data.get("matched", {})
             matched_text = self._get_matched_text(field, matched)
             pattern = field_data.get("pattern", "")
@@ -1336,7 +1336,7 @@ class MismatchAnalyzer(AnalysisTool):
 
     def display_regex_matches(self, data: Dict, field: str, args) -> None:
         """Display only regex matches (not exact or previously confirmed)."""
-        from sotd.utils.match_filter_utils import normalize_for_storage
+        from sotd.utils.match_filter_utils import normalize_for_matching
 
         self.console.print(f"\n[bold]Regex Matches for {field.capitalize()}:[/bold]\n")
 
@@ -1361,7 +1361,7 @@ class MismatchAnalyzer(AnalysisTool):
             if not isinstance(field_data, dict):
                 continue
             original = field_data.get("original", "")
-            norm_original = normalize_for_storage(original, field=field)
+            norm_original = normalize_for_matching(original, None, field)
             matched = field_data.get("matched", {})
             matched_text = self._get_matched_text(field, matched)
             pattern = field_data.get("pattern", "")

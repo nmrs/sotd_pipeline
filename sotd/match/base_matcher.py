@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from sotd.utils.match_filter_utils import load_competition_tags, strip_competition_tags
+from sotd.utils.match_filter_utils import load_competition_tags, normalize_for_matching
 from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 
 
@@ -17,9 +17,12 @@ class MatchType:
 
 
 class BaseMatcher:
-    def __init__(self, catalog_path: Path, field_type: str):
+    def __init__(
+        self, catalog_path: Path, field_type: str, correct_matches_path: Optional[Path] = None
+    ):
         self.catalog_path = catalog_path
         self.field_type = field_type  # "razor", "blade", "brush", "soap"
+        self.correct_matches_path = correct_matches_path or Path("data/correct_matches.yaml")
         self.catalog = self._load_catalog()
         self.correct_matches = self._load_correct_matches()
         self.competition_tags = self._load_competition_tags()
@@ -33,13 +36,12 @@ class BaseMatcher:
         return load_yaml_with_nfc(self.catalog_path, loader_cls=UniqueKeyLoader)
 
     def _load_correct_matches(self) -> Dict[str, Dict[str, Any]]:
-        """Load correct matches for this field type from correct_matches.yaml."""
-        correct_matches_path = Path("data/correct_matches.yaml")
-        if not correct_matches_path.exists():
+        """Load correct matches for this field type from correct_matches.yaml (or injected path)."""
+        if not self.correct_matches_path.exists():
             return {}
 
         try:
-            data = load_yaml_with_nfc(correct_matches_path, loader_cls=UniqueKeyLoader)
+            data = load_yaml_with_nfc(self.correct_matches_path, loader_cls=UniqueKeyLoader)
             return data.get(self.field_type, {})
         except Exception:
             # If correct matches file is corrupted or can't be loaded, continue without it
@@ -59,13 +61,15 @@ class BaseMatcher:
         Returns:
             String with unwanted competition tags removed
         """
-        return strip_competition_tags(value, self.competition_tags)
+        # Use canonical normalization function for consistent behavior
+        return normalize_for_matching(value, self.competition_tags, self.field_type)
 
     def _build_correct_matches_lookup(self) -> Dict[str, Dict[str, Any]]:
         """
         Build a fast lookup dictionary from correct matches.
 
         Converts the nested structure to a flat dictionary for O(1) lookups.
+        Uses canonical normalize_for_matching function for consistent normalization.
         """
         lookup = {}
 
@@ -93,7 +97,10 @@ class BaseMatcher:
 
                 # Create lookup entries for each correct string
                 for correct_string in strings:
-                    normalized = self.normalize(correct_string)
+                    # Use canonical normalization function with field-specific processing
+                    normalized = normalize_for_matching(
+                        correct_string, self.competition_tags, self.field_type
+                    )
                     if normalized:
                         lookup[normalized] = matched
 
@@ -165,22 +172,39 @@ class BaseMatcher:
         return self._compiled_patterns[pattern_text]
 
     def _check_correct_matches(self, value: str) -> Optional[Dict[str, Any]]:
-        """
-        Check if value matches any correct matches entry using optimized lookup.
-
-        Returns match data if found, None otherwise.
-        Performance: O(1) instead of O(n×m×p) nested loop.
-        """
+        # --- CANONICAL NORMALIZATION ---
+        # All correct match lookups must use normalize_for_matching
+        # See docs/product_matching_validation.md for details.
         if not value or not self.correct_matches:
             return None
 
-        normalized_value = self.normalize(value)
+        # Use canonical normalization function with field-specific processing
+        normalized_value = normalize_for_matching(value, self.competition_tags, self.field_type)
         if not normalized_value:
             return None
 
         # Use pre-built lookup dictionary for O(1) access
         lookup = self._get_correct_matches_lookup()
-        return lookup.get(normalized_value)
+
+        # DEBUG: Print normalized value and lookup keys for all blade values
+        if self.field_type == "blade":
+            print(
+                f"DEBUG: _check_correct_matches normalized_value={normalized_value!r}", flush=True
+            )
+            print(f"DEBUG: _check_correct_matches lookup keys={list(lookup.keys())}", flush=True)
+
+        # Try exact match first
+        result = lookup.get(normalized_value)
+        if result:
+            return result
+
+        # Fall back to case-insensitive lookup for backward compatibility
+        normalized_lower = normalized_value.lower()
+        for key, match_data in lookup.items():
+            if key.lower() == normalized_lower:
+                return match_data
+
+        return None
 
     def _get_format_from_catalog(self, brand: str, model: str) -> str:
         """Get format from catalog for a brand/model combination."""
@@ -192,12 +216,19 @@ class BaseMatcher:
             return "DE"
 
     def normalize(self, value: Optional[str]) -> Optional[str]:
-        """Normalize a string for comparison."""
+        """
+        Normalize a string for comparison.
+
+        DEPRECATED: Use normalize_for_matching() directly for correct match lookups.
+        This method is kept for backward compatibility but should be replaced
+        with the canonical normalize_for_matching function.
+        """
         if not isinstance(value, str):
             return None
-        value = value.strip().lower()
-        value = self._strip_competition_tags(value)
-        return value
+        # Use canonical normalization function for consistency
+        from sotd.utils.match_filter_utils import normalize_for_matching
+
+        return normalize_for_matching(value, self.competition_tags, self.field_type)
 
     def clear_caches(self) -> None:
         """Clear all caches (useful for testing or when files are updated)."""

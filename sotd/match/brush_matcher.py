@@ -42,9 +42,11 @@ class BrushMatcher:
         self,
         catalog_path: Path = Path("data/brushes.yaml"),
         handles_path: Path = Path("data/handles.yaml"),
+        correct_matches_path: Optional[Path] = None,
     ):
         self.catalog_path = catalog_path
         self.handles_path = handles_path
+        self.correct_matches_path = correct_matches_path or Path("data/correct_matches.yaml")
         self.catalog_data = self._load_catalog(catalog_path)
         self.correct_matches = self._load_correct_matches()
 
@@ -73,13 +75,12 @@ class BrushMatcher:
             return {}
 
     def _load_correct_matches(self) -> Dict[str, Dict[str, Any]]:
-        """Load correct matches for brush field from correct_matches.yaml."""
-        correct_matches_path = Path("data/correct_matches.yaml")
-        if not correct_matches_path.exists():
+        """Load correct matches for brush field from correct_matches.yaml (or injected path)."""
+        if not self.correct_matches_path.exists():
             return {}
 
         try:
-            data = load_yaml_with_nfc(correct_matches_path)
+            data = load_yaml_with_nfc(self.correct_matches_path)
             return data.get("brush", {})
         except Exception:
             # If correct matches file is corrupted or can't be loaded, continue without it
@@ -87,14 +88,18 @@ class BrushMatcher:
 
     def _check_correct_matches(self, value: str) -> Optional[Dict[str, Any]]:
         """
-        Check if value matches any correct matches entry.
+        Check if value matches any correct matches entry using canonical normalization.
 
         Returns match data if found, None otherwise.
         """
+        from sotd.utils.match_filter_utils import normalize_for_matching
+
         if not value or not self.correct_matches:
             return None
 
-        normalized_value = self._normalize_for_comparison(value)
+        # All correct match lookups must use normalize_for_matching
+        # (see docs/product_matching_validation.md)
+        normalized_value = normalize_for_matching(value, field="brush")
         if not normalized_value:
             return None
 
@@ -109,7 +114,7 @@ class BrushMatcher:
 
                 # Check if normalized value matches any of the correct strings
                 for correct_string in strings:
-                    normalized_correct = self._normalize_for_comparison(correct_string)
+                    normalized_correct = normalize_for_matching(correct_string, field="brush")
                     if normalized_correct == normalized_value:
                         # Return match data in the expected format
                         return {
@@ -118,12 +123,6 @@ class BrushMatcher:
                         }
 
         return None
-
-    def _normalize_for_comparison(self, value: str) -> Optional[str]:
-        """Normalize a string for comparison."""
-        if not isinstance(value, str):
-            return None
-        return value.strip().lower()
 
     def match(self, value: str) -> dict:
         """

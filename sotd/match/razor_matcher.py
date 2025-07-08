@@ -1,13 +1,17 @@
 import re
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from .base_matcher import BaseMatcher, MatchType
 
 
 class RazorMatcher(BaseMatcher):
-    def __init__(self, catalog_path: Path = Path("data/razors.yaml")):
-        super().__init__(catalog_path, "razor")
+    def __init__(
+        self,
+        catalog_path: Path = Path("data/razors.yaml"),
+        correct_matches_path: Optional[Path] = None,
+    ):
+        super().__init__(catalog_path, "razor", correct_matches_path=correct_matches_path)
         self.patterns = self._compile_patterns()
 
     def _compile_patterns(self):
@@ -25,10 +29,11 @@ class RazorMatcher(BaseMatcher):
     def _match_with_regex(self, value: str) -> Dict[str, Any]:
         """Match using regex patterns with REGEX match type."""
         original = value
-        # Use normalize_for_storage to strip handle indicators and competition tags
-        from sotd.utils.match_filter_utils import normalize_for_storage
+        # All correct match lookups must use normalize_for_matching
+        # (see docs/product_matching_validation.md)
+        from sotd.utils.match_filter_utils import normalize_for_matching
 
-        normalized = normalize_for_storage(value, field="razor")
+        normalized = normalize_for_matching(value, field="razor")
         if not normalized:
             return {
                 "original": original,
