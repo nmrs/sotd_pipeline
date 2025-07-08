@@ -1,8 +1,3 @@
----
-description: use with all git operations and cleanup
-globs: 
-alwaysApply: false
----
 # Git and Cleanup Rules
 
 ## Logical Commit Organization
@@ -379,11 +374,32 @@ When moving implementation plans to the `plans/completed/` folder, **ALWAYS** in
 - `bug_fix_plan_2024-12-20.mdc`
 - `feature_implementation_plan_2024-12-21.mdc`
 
+#### **MANDATORY**: Use Actual Current Date
+**ALWAYS** use the actual current date when creating plan filenames. Never assume or guess the date.
+
+**Correct Process:**
+1. **Get actual current date**: Use `date +%Y-%m-%d` command
+2. **Use exact date**: Include the actual date in the filename
+3. **Verify accuracy**: Double-check the date is correct
+
+**Examples:**
+```bash
+# GOOD: Get actual current date
+date +%Y-%m-%d  # Returns actual current date like 2025-07-08
+
+# GOOD: Use actual date in filename
+ml_matching_enhancement_plan_2025-07-08.mdc
+
+# BAD: Assume or guess date
+ml_matching_enhancement_plan_2025-01-27.mdc  # Wrong date!
+```
+
 #### Why This Matters
 - **Avoids conflicts**: Multiple plans with the same name can coexist
 - **Historical tracking**: Easy to see when plans were completed
 - **Better organization**: Clear timeline of project milestones
 - **Future reference**: Can track how long different types of work take
+- **Accuracy**: Prevents confusion from incorrect dates
 
 ### **MANDATORY**: Unified Plan Completion Policy
 **ALL completed plans** (regardless of their original location) must be moved to `plans/completed/` with appropriate subfolder organization.
@@ -431,13 +447,16 @@ plans/
 # 2. Create subfolder if needed
 mkdir -p plans/completed/bugs
 
-# 3. Move with date suffix using git mv
-git mv plans/bugs/match_phase_output_bug_plan.mdc plans/completed/bugs/match_phase_output_bug_plan_2025-01-27.mdc
+# 3. Get actual current date
+CURRENT_DATE=$(date +%Y-%m-%d)
 
-# 4. Remove original (git mv handles this automatically)
+# 4. Move with actual date suffix using git mv
+git mv plans/bugs/match_phase_output_bug_plan.mdc plans/completed/bugs/match_phase_output_bug_plan_${CURRENT_DATE}.mdc
+
+# 5. Remove original (git mv handles this automatically)
 # No need for separate rm command when using git mv
 
-# 5. Commit the rename
+# 6. Commit the rename
 git commit -m "docs(plan): mark match phase output bug plan complete and move to completed/bugs with date suffix"
 ```
 
@@ -468,6 +487,7 @@ git commit -m "docs(plan): mark match phase output bug plan complete and move to
 - ❌ **Incomplete status**: Moving plans without final completion summary
 - ❌ **Mixed categories**: Putting plans in wrong subfolders
 - ❌ **Leaving originals**: Not removing the original plan file after moving
+- ❌ **Assumed dates**: Using guessed or assumed dates instead of actual current date
 
 #### Migration from Old Structure
 When migrating existing completed plans to the new structure:
@@ -580,6 +600,11 @@ def migrate_brush_data():
 - `test:` for test changes
 - `docs:` for documentation
 - `cleanup:` for removing unused code/files
+
+Examples:
+- `cleanup: remove redundant brush_yaml folder and consolidate into brushes.yaml`
+- `refactor: remove knot_maker field as redundant with brand`
+- `fix: correct handle_maker key naming in brush matcher tests`
 
 Examples:
 - `cleanup: remove redundant brush_yaml folder and consolidate into brushes.yaml`
