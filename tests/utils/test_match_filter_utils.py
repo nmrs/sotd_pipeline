@@ -11,6 +11,7 @@ from sotd.utils.match_filter_utils import (
     extract_blade_use_count,
     extract_blade_count,
     extract_blade_and_use_count,
+    strip_razor_usage_patterns,
 )
 
 
@@ -216,7 +217,7 @@ class TestNormalizeForStorage:
             "preserve_tags": [],
         }
 
-        result = normalize_for_storage("Razor $CNC $ARTISTCLUB", competition_tags)
+        result = normalize_for_storage("Razor $CNC $ARTISTCLUB", competition_tags, field="razor")
         assert result == "Razor"
 
     def test_normalize_for_storage_auto_load(self):
@@ -227,7 +228,7 @@ class TestNormalizeForStorage:
                 "preserve_tags": [],
             }
 
-            result = normalize_for_storage("Razor $CNC $ARTISTCLUB")
+            result = normalize_for_storage("Razor $CNC $ARTISTCLUB", field="razor")
             assert result == "Razor"
             mock_load.assert_called_once()
 
@@ -239,9 +240,12 @@ class TestNormalizeForStorage:
     def test_normalize_for_storage_integration(self):
         """Test integration with strip_blade_count_patterns."""
         # Test with competition tags
-        assert normalize_for_storage("treet platinum (3x) #sotd") == "treet platinum #sotd"
         assert (
-            normalize_for_storage("[2x] treet platinum (4 times) $TRICKORTREAT")
+            normalize_for_storage("treet platinum (3x) #sotd", field="blade")
+            == "treet platinum #sotd"
+        )
+        assert (
+            normalize_for_storage("[2x] treet platinum (4 times) $TRICKORTREAT", field="blade")
             == "treet platinum $TRICKORTREAT"
         )
 
@@ -283,9 +287,9 @@ class TestStripBladeCountPatterns:
         assert strip_blade_count_patterns("treet platinum {fourth use}") == "treet platinum"
         assert strip_blade_count_patterns("treet platinum (first use)") == "treet platinum"
 
-        # Test standalone patterns
-        assert strip_blade_count_patterns("treet platinum x4") == "treet platinum"
-        assert strip_blade_count_patterns("treet platinum 2x") == "treet platinum"
+        # Test standalone patterns (removed due to ambiguity with model names)
+        # assert strip_blade_count_patterns("treet platinum x4") == "treet platinum"
+        # assert strip_blade_count_patterns("treet platinum 2x") == "treet platinum"
 
         # Test complex combinations
         assert strip_blade_count_patterns("[2x] treet platinum (3x)") == "treet platinum"
@@ -297,8 +301,9 @@ class TestStripBladeCountPatterns:
 
         # Test new patterns: "new" (meaning 1st use)
         assert strip_blade_count_patterns("7'o clock - yellow (new)") == "7'o clock - yellow"
-        assert strip_blade_count_patterns("astra green new") == "astra green"
-        assert strip_blade_count_patterns("new blade") == "blade"
+        # Standalone 'new' is no longer stripped due to ambiguity
+        # assert strip_blade_count_patterns("astra green new") == "astra green"
+        # assert strip_blade_count_patterns("new blade") == "blade"
 
         # Test ordinal use without brackets: 3rd use, 2nd use, etc.
         assert strip_blade_count_patterns("astra green 3rd use") == "astra green"
@@ -322,19 +327,41 @@ class TestStripBladeCountPatterns:
     def test_strip_blade_count_patterns_integration(self):
         """Test blade count pattern stripping integrated with normalize_for_storage."""
         # Test that normalize_for_storage now strips blade patterns
-        assert normalize_for_storage("treet platinum (3x)") == "treet platinum"
-        assert normalize_for_storage("[2x] treet platinum (4 times)") == "treet platinum"
+        assert normalize_for_storage("treet platinum (3x)", field="blade") == "treet platinum"
         assert (
-            normalize_for_storage("treet platinum (second use) - amazing blade")
+            normalize_for_storage("[2x] treet platinum (4 times)", field="blade")
+            == "treet platinum"
+        )
+        assert (
+            normalize_for_storage("treet platinum (second use) - amazing blade", field="blade")
             == "treet platinum - amazing blade"
         )
 
         # Test with competition tags
-        assert normalize_for_storage("treet platinum (3x) #sotd") == "treet platinum #sotd"
         assert (
-            normalize_for_storage("[2x] treet platinum (4 times) $TRICKORTREAT")
+            normalize_for_storage("treet platinum (3x) #sotd", field="blade")
+            == "treet platinum #sotd"
+        )
+        assert (
+            normalize_for_storage("[2x] treet platinum (4 times) $TRICKORTREAT", field="blade")
             == "treet platinum $TRICKORTREAT"
         )
+
+    def test_normalize_for_storage_field_specific(self):
+        """Test that normalize_for_storage only strips blade patterns for blade field."""
+        # Blade field should strip patterns
+        assert normalize_for_storage("treet platinum (3x)", field="blade") == "treet platinum"
+        assert normalize_for_storage("iKon X3 (2x)", field="blade") == "iKon X3"
+
+        # Non-blade fields should NOT strip patterns
+        assert normalize_for_storage("iKon X3", field="razor") == "iKon X3"
+        assert normalize_for_storage("iKon X3", field="brush") == "iKon X3"
+        assert normalize_for_storage("iKon X3", field="soap") == "iKon X3"
+        assert normalize_for_storage("iKon X3", field=None) == "iKon X3"
+
+        # Test that blade count patterns are preserved in non-blade fields
+        assert normalize_for_storage("iKon X3 (3x)", field="razor") == "iKon X3 (3x)"
+        assert normalize_for_storage("iKon X3 [2x]", field="brush") == "iKon X3 [2x]"
 
 
 class TestExtractBladeUseCount:
@@ -445,3 +472,113 @@ class TestExtractBladeAndUseCount:
         blade_count, use_count = extract_blade_and_use_count("treet platinum")
         assert blade_count is None
         assert use_count is None
+
+
+class TestStripRazorUsagePatterns:
+    """Test razor usage pattern stripping."""
+
+    def test_strip_razor_usage_patterns_handle_patterns(self):
+        """Test handle pattern stripping."""
+        # Handle patterns
+        assert strip_razor_usage_patterns("iKon X3 with OSS handle") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 w/ bulldog handle") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 handle titanium") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 with custom handle") == "iKon X3"
+
+    def test_strip_razor_usage_patterns_setting_patterns(self):
+        """Test setting/level pattern stripping."""
+        # Setting patterns
+        assert strip_razor_usage_patterns("iKon X3 (setting: 3)") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (level 2)") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (plate C)") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (lvl 4)") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (setting 5)") == "iKon X3"
+
+    def test_strip_razor_usage_patterns_format_patterns(self):
+        """Test format indicator stripping."""
+        # Format patterns
+        assert strip_razor_usage_patterns("iKon X3 slant") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 open comb") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 closed comb") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 OC") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 SB") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 DC") == "iKon X3"
+
+    def test_strip_razor_usage_patterns_usage_patterns(self):
+        """Test usage indicator stripping."""
+        # Usage patterns
+        assert strip_razor_usage_patterns("iKon X3 (2nd use)") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (new)") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (first use)") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (second use)") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (third use)") == "iKon X3"
+
+    def test_strip_razor_usage_patterns_material_patterns(self):
+        """Test material/finish pattern stripping."""
+        # Material patterns
+        assert strip_razor_usage_patterns("iKon X3 (brass)") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (titanium)") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (stainless)") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (aluminum)") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (copper)") == "iKon X3"
+
+    def test_strip_razor_usage_patterns_combined_patterns(self):
+        """Test combined pattern stripping."""
+        # Multiple patterns
+        assert strip_razor_usage_patterns("iKon X3 with OSS handle (setting: 3) slant") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (brass) (2nd use) open comb") == "iKon X3"
+        assert (
+            strip_razor_usage_patterns("iKon X3 w/ bulldog handle (level 2) (titanium)")
+            == "iKon X3"
+        )
+
+    def test_strip_razor_usage_patterns_preserve_core_names(self):
+        """Test that core brand/model names are preserved."""
+        # Core names should be preserved
+        assert strip_razor_usage_patterns("iKon X3") == "iKon X3"
+        assert strip_razor_usage_patterns("Blackland Blackbird") == "Blackland Blackbird"
+        assert (
+            strip_razor_usage_patterns("Karve Christopher Bradley") == "Karve Christopher Bradley"
+        )
+        assert strip_razor_usage_patterns("Wolfman WR2") == "Wolfman WR2"
+
+    def test_strip_razor_usage_patterns_edge_cases(self):
+        """Test edge cases."""
+        # Edge cases
+        assert strip_razor_usage_patterns("") == ""
+        assert strip_razor_usage_patterns("iKon") == "iKon"  # Just brand
+        assert strip_razor_usage_patterns("X3") == "X3"  # Just model
+        assert strip_razor_usage_patterns("iKon X3 with") == "iKon X3 with"  # Incomplete pattern
+
+    def test_strip_razor_usage_patterns_case_insensitive(self):
+        """Test case insensitive pattern matching."""
+        # Case insensitive
+        assert strip_razor_usage_patterns("iKon X3 WITH OSS HANDLE") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (SETTING: 3)") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 SLANT") == "iKon X3"
+        assert strip_razor_usage_patterns("iKon X3 (BRASS)") == "iKon X3"
+
+    def test_strip_razor_usage_patterns_integration(self):
+        """Test integration with normalize_for_storage."""
+        # Test that normalize_for_storage now strips razor patterns
+        assert normalize_for_storage("iKon X3 with OSS handle", field="razor") == "iKon X3"
+        assert normalize_for_storage("iKon X3 (setting: 3) slant", field="razor") == "iKon X3"
+        assert normalize_for_storage("iKon X3 (brass) (2nd use)", field="razor") == "iKon X3"
+
+        # Test that non-razor fields are not affected
+        assert (
+            normalize_for_storage("iKon X3 with OSS handle", field="blade")
+            == "iKon X3 with OSS handle"
+        )
+        assert (
+            normalize_for_storage("iKon X3 with OSS handle", field="brush")
+            == "iKon X3 with OSS handle"
+        )
+        assert (
+            normalize_for_storage("iKon X3 with OSS handle", field="soap")
+            == "iKon X3 with OSS handle"
+        )
+        assert (
+            normalize_for_storage("iKon X3 with OSS handle", field=None)
+            == "iKon X3 with OSS handle"
+        )

@@ -51,8 +51,8 @@ Above the Tie:
     - (?:\batt\b|tie).*se-*2
   Windsor Pro SB90:
     patterns:
-    - '\b(?:att|tie)\b.*sb90'
-    - '\b(?:att|tie)\b.*windsor'
+    - \b(?:att|tie)\b.*sb90(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+    - \b(?:att|tie)\b.*windsor
   Windsor SSRH2:
     patterns:
     - '\b(?:att|tie)\b.*(?:windsor)*\b.*ssrh2'
@@ -61,12 +61,10 @@ Alpha:
     format: AC
     patterns:
     - alpha.*claymore
-  Lone Star:
-    patterns:
-    - alpha.*lone.*star
   Outlaw:
     patterns:
     - alpha.*outl
+    - alpha.*lone.*star
   Spirit:
     format: AC
     patterns:
@@ -129,7 +127,7 @@ Aylsworth:
     - aylsworth.*apex
   Drakkant:
     patterns:
-    - drakk?ant
+    - drakk?ant(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     - aylsworth
   Kopparkant:
     patterns:
@@ -188,6 +186,7 @@ Blackland:
     format: Half DE
     patterns:
     - blackland.*batch[0\s-]*2
+    - blackland square
   Blackbird:
     patterns:
     - 'bb\s*(sb|oc)'
@@ -218,15 +217,14 @@ Blackland:
   Sabre V2:
     format: GEM
     patterns:
-    - (?:blackland)?.*sabre.*v2
-    - (?:blackland)?.*saber.*v2
+    - (?:blackland)?.*sab[re]{2}.*(v2|2.0)
   Tradere:
     patterns:
     - (?:blackland)?.*tradere
   Vector:
     format: AC
     patterns:
-    - (?:blackland)?.*vector
+    - (?:black(land|bird))?.*vector
 Blutt Rasur:
   BR-1:
     patterns:
@@ -294,13 +292,14 @@ Cartridge / Disposable:
     - disposable
     - fusion
     - gillette blue
-    - gil.*et.*(labs|guard|proglide|joy|venus)
+    - gil.*et.*(labs|guard|joy|proglide|sensor|venus)
     - harry
     - '\blidl\b'
     - 'mach.*(3|iii)'
     - pace.*6
     - simply (?:max|smooth)
     - (?:schick)?.*hydro.*5
+    - (?:schick)?.*\be?xtreme 2\b
     - 'trac\b.*(2|ii)'
 Charcoal Goods:
   Everyday:
@@ -343,10 +342,7 @@ CJB:
     format: Shavette (AC)
     patterns:
     - gr-?100b
-  Kamisori Shavette:
-    format: Shavette (AC)
-    patterns:
-    - cjb*vett*e
+    - cjb.*vet+e
     - cjb.*kamisori
 Classic:
   Cobra Classic:
@@ -703,9 +699,6 @@ Gillette:
     patterns:
     - gil.*te.*sterling
     - o.{1}clock
-  Aristocrat:
-    patterns:
-    - art?istocrat
   Diplomat:
     patterns:
     - Diplomat
@@ -774,6 +767,7 @@ Gillette:
     - sheraton
   Slim:
     patterns:
+    - art?istocrat
     - Gil.*Slim
     - sl?im.*adjust
     - '\d\d.*slim'
@@ -854,7 +848,7 @@ Gutche:
   A77 Shavette:
     format: Shavette (A77)
     patterns:
-    - gutche
+    - gutche(?:.*shavette)? 
 H&S Co.:
   NO75:
     patterns:
@@ -1227,6 +1221,9 @@ Occams Razor:
     patterns:
     - enoch
 OliWorks:
+  M3teorite:
+    patterns:
+    - (?:oliworks)?.*m3teorite
   OliBlade:
     patterns:
     - oli(works|blade)
@@ -1567,7 +1564,7 @@ RazoRock:
     - eco
   Game Changer:
     patterns:
-    - game.*changer?
+    - (?:razo ?rock)?.*game.*changer?(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     - gc
     - game.*center
     - game.*ganger
@@ -1856,7 +1853,7 @@ Supply:
     - sup.*ly.*inject
     - sup.*ly.*2
     - ^(?!.*sentry).*supply.*se
-    - supply single edge
+    - supply.*sing(?:le)? edge
     - supply adjustable
     - supply razor
     - ^supply$

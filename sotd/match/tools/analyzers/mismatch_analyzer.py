@@ -159,6 +159,12 @@ class MismatchAnalyzer(AnalysisTool):
             "--test-correct-matches",
             help="Use test correct_matches file instead of data/correct_matches.yaml",
         )
+        parser.add_argument(
+            "--revalidate-correct-matches",
+            action="store_true",
+            help="Re-evaluate all correct matches entries against current regex patterns "
+            "to ensure they still match correctly",
+        )
 
         return parser
 
@@ -180,6 +186,10 @@ class MismatchAnalyzer(AnalysisTool):
 
         if args.show_correct:
             self._display_correct_matches_summary()
+            return
+
+        if args.revalidate_correct_matches:
+            self._revalidate_correct_matches(args.field if hasattr(args, "field") else None)
             return
 
         # For analysis commands, field and month are required
@@ -481,7 +491,7 @@ class MismatchAnalyzer(AnalysisTool):
             matched_text = str(matched)
 
         # Normalize for consistent key generation - use normalized original to match storage format
-        original_normalized = self._normalize_for_storage(original).lower().strip()
+        original_normalized = self._normalize_for_storage(original, field=field).lower().strip()
         matched_normalized = matched_text.lower().strip()
         return f"{field}:{original_normalized}|{matched_normalized}"
 
@@ -549,14 +559,14 @@ class MismatchAnalyzer(AnalysisTool):
         """
         return strip_competition_tags(value, competition_tags)
 
-    def _normalize_for_storage(self, value: str) -> str:
+    def _normalize_for_storage(self, value: str, field: str | None = None) -> str:
         """
         Normalize a string for storage in correct_matches.yaml.
 
         This strips competition tags and normalizes whitespace to prevent
         bloat and duplicates in the file.
         """
-        return normalize_for_storage(value)
+        return normalize_for_storage(value, field=field)
 
     def _save_correct_matches(self) -> None:
         """Save correct matches to file in YAML format."""
@@ -596,7 +606,7 @@ class MismatchAnalyzer(AnalysisTool):
                     yaml_data[field][canonical_brand][canonical_model] = []
 
                 # Normalize the original string before storing to prevent bloat
-                normalized_original = self._normalize_for_storage(original)
+                normalized_original = self._normalize_for_storage(original, field=field)
                 if (
                     normalized_original
                     and normalized_original
@@ -607,12 +617,25 @@ class MismatchAnalyzer(AnalysisTool):
             # Alphabetize entries within each field/brand/model
             for field, field_data in yaml_data.items():
                 if isinstance(field_data, dict):
-                    for brand, brand_data in field_data.items():
+                    # Sort brands case-insensitively
+                    sorted_brands = sorted(field_data.keys(), key=str.lower)
+                    field_data_sorted = {}
+                    for brand in sorted_brands:
+                        brand_data = field_data[brand]
                         if isinstance(brand_data, dict):
-                            for model, entries in brand_data.items():
+                            # Sort models case-insensitively
+                            sorted_models = sorted(brand_data.keys(), key=str.lower)
+                            brand_data_sorted = {}
+                            for model in sorted_models:
+                                entries = brand_data[model]
                                 if isinstance(entries, list):
                                     # Sort entries alphabetically (case-insensitive)
                                     entries.sort(key=str.lower)
+                                brand_data_sorted[model] = entries
+                            field_data_sorted[brand] = brand_data_sorted
+                        else:
+                            field_data_sorted[brand] = brand_data
+                    yaml_data[field] = field_data_sorted
 
             with self._get_correct_matches_file().open("w", encoding="utf-8") as f:
                 yaml.dump(yaml_data, f, default_flow_style=False, indent=2, allow_unicode=True)
@@ -905,7 +928,7 @@ class MismatchAnalyzer(AnalysisTool):
             for item in items:
                 field_data = item["field_data"]
                 original = field_data.get("original", "")
-                norm_original = normalize_for_storage(original)
+                norm_original = normalize_for_storage(original, field=field)
                 matched = self._get_matched_text(field, field_data.get("matched", {}))
                 # Group by the actual match, not by mismatch type, case-insensitive
                 group_key = (norm_original.lower(), matched.lower())
@@ -965,7 +988,7 @@ class MismatchAnalyzer(AnalysisTool):
             for item in mismatches[mismatch_type]:
                 field_data = item["field_data"]
                 original = field_data.get("original", "")
-                norm_original = normalize_for_storage(original)
+                norm_original = normalize_for_storage(original, field=field)
                 matched = self._get_matched_text(field, field_data.get("matched", {}))
                 reason = item["reason"]
                 # Group by the actual match, not by mismatch type, case-insensitive
@@ -1135,7 +1158,7 @@ class MismatchAnalyzer(AnalysisTool):
             if not isinstance(field_data, dict):
                 continue
             original = field_data.get("original", "")
-            norm_original = normalize_for_storage(original)
+            norm_original = normalize_for_storage(original, field=field)
             matched = field_data.get("matched", {})
             matched_text = self._get_matched_text(field, matched)
             pattern = field_data.get("pattern", "")
@@ -1152,6 +1175,7 @@ class MismatchAnalyzer(AnalysisTool):
                     "match_type": match_type,
                     "source": source,
                     "record_ids": set(),
+                    "original": original,  # Store original for display
                 }
             grouped[key]["count"] += 1
             grouped[key]["record_ids"].add(record_id)
@@ -1167,6 +1191,7 @@ class MismatchAnalyzer(AnalysisTool):
             count = group["count"]
             field_data = group["field_data"]
             source = group["source"]
+            original = group["original"]  # Use original for display
             # Escape pattern for Rich table display
             pattern_disp = self._escape_pattern_for_display(pattern)
             # No truncation, let it wrap
@@ -1191,7 +1216,7 @@ class MismatchAnalyzer(AnalysisTool):
                 str(row_number),
                 str(count),
                 status,
-                norm_original,
+                original,  # Use original for display, not normalized
                 matched_text,
                 pattern_disp,
                 match_type,
@@ -1244,7 +1269,7 @@ class MismatchAnalyzer(AnalysisTool):
             if not isinstance(field_data, dict):
                 continue
             original = field_data.get("original", "")
-            norm_original = normalize_for_storage(original)
+            norm_original = normalize_for_storage(original, field=field)
             matched = field_data.get("matched", {})
             matched_text = self._get_matched_text(field, matched)
             pattern = field_data.get("pattern", "")
@@ -1355,7 +1380,7 @@ class MismatchAnalyzer(AnalysisTool):
             if not isinstance(field_data, dict):
                 continue
             original = field_data.get("original", "")
-            norm_original = normalize_for_storage(original)
+            norm_original = normalize_for_storage(original, field=field)
             matched = field_data.get("matched", {})
             matched_text = self._get_matched_text(field, matched)
             pattern = field_data.get("pattern", "")
@@ -1602,9 +1627,208 @@ class MismatchAnalyzer(AnalysisTool):
         self.console.print("[dim]Use --show-correct to see previously marked correct matches[/dim]")
         self.console.print("[dim]Use --clear-correct to reset all correct matches[/dim]")
 
+    def _revalidate_correct_matches(self, field: Optional[str] = None) -> None:
+        """Re-evaluate all correct matches entries against current regex patterns."""
+        self.console.print(
+            "[bold]Re-validating correct matches against current regex patterns...[/bold]"
+        )
+
+        # Load correct matches
+        self._load_correct_matches()
+
+        if not self._correct_matches_data:
+            self.console.print("[yellow]No correct matches found to revalidate[/yellow]")
+            return
+
+        # Import matchers for each field
+        from sotd.match.blade_matcher import BladeMatcher
+        from sotd.match.brush_matcher import BrushMatcher
+        from sotd.match.razor_matcher import RazorMatcher
+        from sotd.match.soap_matcher import SoapMatcher
+
+        matchers = {
+            "razor": RazorMatcher(),
+            "blade": BladeMatcher(),
+            "brush": BrushMatcher(),
+            "soap": SoapMatcher(),
+        }
+
+        issues = []
+        total_entries = 0
+
+        # Process each correct match entry
+        for match_key, stored_data in self._correct_matches_data.items():
+            entry_field = stored_data.get("field")
+            original = stored_data.get("original")
+            expected_matched = stored_data.get("matched", {})
+
+            # Filter by field if specified
+            if field and entry_field != field:
+                continue
+
+            if not entry_field or not original or entry_field not in matchers:
+                continue
+
+            total_entries += 1
+
+            # Test the entry against current regex patterns (bypass correct matches)
+            matcher = matchers[entry_field]
+            result = matcher.match(original, bypass_correct_matches=True)
+
+            # Check if the result matches what we expect
+            actual_matched = result.get("matched")
+            match_type = result.get("match_type")
+
+            if actual_matched is None:
+                # No regex match found
+                issues.append(
+                    {
+                        "type": "no_regex_match",
+                        "field": entry_field,
+                        "original": original,
+                        "expected": expected_matched,
+                        "actual": None,
+                        "match_type": match_type,
+                    }
+                )
+            elif not self._matches_are_equivalent(actual_matched, expected_matched, entry_field):
+                # Regex match found but different from expected
+                issues.append(
+                    {
+                        "type": "different_match",
+                        "field": entry_field,
+                        "original": original,
+                        "expected": expected_matched,
+                        "actual": actual_matched,
+                        "match_type": match_type,
+                        "pattern": result.get("pattern"),
+                    }
+                )
+
+        # Display results
+        self.console.print("\n[bold]Revalidation Results:[/bold]")
+        self.console.print(f"  • Total entries checked: {total_entries}")
+        self.console.print(f"  • Issues found: {len(issues)}")
+
+        if not issues:
+            self.console.print("\n[green]✅ All correct matches entries are still valid![/green]")
+            return
+
+        # Group issues by type
+        no_match_issues = [i for i in issues if i["type"] == "no_regex_match"]
+        different_match_issues = [i for i in issues if i["type"] == "different_match"]
+
+        if no_match_issues:
+            self.console.print(
+                f"\n[red]❌ {len(no_match_issues)} entries no longer match any regex:[/red]"
+            )
+            table = self._get_table(title="No Regex Match Found")
+            table.add_column("Field", style="cyan")
+            table.add_column("Original", style="yellow")
+            table.add_column("Expected Match", style="green")
+
+            for issue in no_match_issues[:10]:  # Show first 10
+                expected_text = self._get_matched_text(issue["field"], issue["expected"])
+                table.add_row(
+                    issue["field"],
+                    issue["original"],
+                    expected_text,
+                )
+
+            if len(no_match_issues) > 10:
+                table.add_row("...", f"... and {len(no_match_issues) - 10} more", "...")
+
+            self.console.print(table)
+
+        if different_match_issues:
+            self.console.print(
+                f"\n[yellow]⚠️  {len(different_match_issues)} entries match different "
+                f"regex patterns:[/yellow]"
+            )
+            table = self._get_table(title="Different Regex Match Found")
+            table.add_column("Field", style="cyan")
+            table.add_column("Original", style="yellow")
+            table.add_column("Expected", style="green")
+            table.add_column("Actual", style="red")
+            table.add_column("Pattern", style="dim")
+
+            for issue in different_match_issues[:10]:  # Show first 10
+                expected_text = self._get_matched_text(issue["field"], issue["expected"])
+                actual_text = self._get_matched_text(issue["field"], issue["actual"])
+                pattern = issue.get("pattern", "N/A")
+                table.add_row(
+                    issue["field"],
+                    issue["original"],
+                    expected_text,
+                    actual_text,
+                    self._truncate_pattern_for_display(pattern, 40),
+                )
+
+            if len(different_match_issues) > 10:
+                table.add_row("...", "...", "...", "...", "...")
+
+            self.console.print(table)
+
+        self.console.print(
+            "\n[dim]Use --clear-correct to reset all correct matches if needed[/dim]"
+        )
+        self.console.print("[dim]Use --clear-field <field> to reset specific field[/dim]")
+
     def _set_test_correct_matches_file(self, test_file: str) -> None:
         """Set test correct matches file."""
         self._test_correct_matches_file = Path(test_file)
+
+    def _matches_are_equivalent(
+        self, actual_matched: dict, expected_matched: dict, field: str
+    ) -> bool:
+        """Check if two matches are semantically equivalent, ignoring display formatting."""
+        if not actual_matched or not expected_matched:
+            return actual_matched == expected_matched
+
+        # For razors and blades, compare brand and model, but handle format specially
+        if field in ["razor", "blade"]:
+            actual_brand = actual_matched.get("brand", "")
+            actual_model = actual_matched.get("model", "")
+            actual_format = actual_matched.get("format", "")
+
+            expected_brand = expected_matched.get("brand", "")
+            expected_model = expected_matched.get("model", "")
+            expected_format = expected_matched.get("format", "")
+
+            # Brand and model must match exactly
+            if actual_brand != expected_brand or actual_model != expected_model:
+                return False
+
+            # Format should match, but if expected doesn't have format, that's OK
+            # (format might have been added later to the catalog)
+            if expected_format and actual_format != expected_format:
+                return False
+
+            return True
+
+        # For brushes, compare brand and model
+        elif field == "brush":
+            actual_brand = actual_matched.get("brand", "")
+            actual_model = actual_matched.get("model", "")
+
+            expected_brand = expected_matched.get("brand", "")
+            expected_model = expected_matched.get("model", "")
+
+            return actual_brand == expected_brand and actual_model == expected_model
+
+        # For soap, compare maker and scent
+        elif field == "soap":
+            actual_maker = actual_matched.get("maker", "")
+            actual_scent = actual_matched.get("scent", "")
+
+            expected_maker = expected_matched.get("maker", "")
+            expected_scent = expected_matched.get("scent", "")
+
+            return actual_maker == expected_maker and actual_scent == expected_scent
+
+        # For other fields, do direct comparison
+        else:
+            return actual_matched == expected_matched
 
     def _get_correct_matches_file(self) -> Path:
         """Get the correct matches file to use (test or production)."""
