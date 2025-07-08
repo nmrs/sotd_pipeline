@@ -1,9 +1,9 @@
 import sys
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
-from sotd.utils.match_filter_utils import normalize_for_storage
 from sotd.utils.file_io import load_yaml_data, save_yaml_data
+from sotd.utils.match_filter_utils import normalize_for_matching
 
 CORRECT_MATCHES_PATH = Path("data/correct_matches.yaml")
 BACKUP_PATH = Path("data/correct_matches.yaml.backup")
@@ -26,7 +26,7 @@ def main():
             seen = {}
             new_list = []
             for orig in originals:
-                norm = normalize_for_storage(orig, field="razor")
+                norm = normalize_for_matching(orig, None, field="razor")
                 if norm not in seen:
                     seen[norm] = orig
                     new_list.append(orig)
