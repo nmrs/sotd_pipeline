@@ -1,0 +1,187 @@
+=== Razor correct_matches.yaml cleanup summary ===
+Changed (normalized):
+  Above the Tie / R2:
+    - 'ATT OC R2' -> 'ATT R2'
+  Above the Tie / SE2:
+    - 'Above The Tie SE2 OC' -> 'Above The Tie SE2'
+  Above the Tie / Windsor SSRH2:
+    - 'Above The Tie - Windsor SSRH2, OC Base Plate, DE - (original version not Windsor Pro)' -> 'Above The Tie - Windsor SSRH2, Base Plate, DE - (original version not Windsor Pro)'
+  Aylsworth / Drakkant:
+    - 'Aylsworth Razors - Frank-kant, Drakkant SS w/ Blackland Razors Vector Handle' -> 'Aylsworth Razors - Frank-kant, Drakkant SS'
+  Blackland / Blackbird:
+    - 'Blackland - Blackbird, DE safety razor, Brass, 101 mm handle \- "Brassbird"' -> 'Blackland - Blackbird, DE safety razor, Brass, 101 mm"'
+    - 'Polished Brassbird OC' -> 'Polished Brassbird'
+  Blackland / Era:
+    - 'Blackland Era SB LVL 3' -> 'Blackland Era LVL 3'
+  Blackland / Sabre:
+    - 'Blackland Razors Sabre (level 2)' -> 'Blackland Razors Sabre'
+  Blackland / Tradere:
+    - 'Blackland - Tradere OC' -> 'Blackland - Tradere'
+  Blackland / Vector:
+    - 'Blackland - Vector OC Gold PVD Coated' -> 'Blackland - Vector Gold PVD Coated'
+  Böker / Straight:
+    - 'H Boker 5/8" with Mother of Pearl handle and tang' -> 'H Boker 5/8" and tang'
+  Charcoal Goods / Lvl 2:
+    - 'CG lvl 2 SB' -> 'CG lvl 2'
+    - 'Charcoal Goods Brass Level 2' -> 'Charcoal Goods Brass'
+    - 'Charcoal Goods Level 2 (Gen.3) Torpedo' -> 'Charcoal Goods (Gen.3) Torpedo'
+    - 'Charcoal Goods Level 2 with Stinger Handle' -> 'Charcoal Goods'
+    - 'Charcoal Goods Maze with level 2 plate' -> 'Charcoal Goods Maze with plate'
+  Charcoal Goods / Lvl 3:
+    - 'Charcoal Goods - Gen 1 Level 3' -> 'Charcoal Goods - Gen 1'
+  Chiseled Face / Legacy:
+    - 'Chiseled Face - Legacy Titanium with Imperial Handle, DE' -> 'Chiseled Face - Legacy Titanium, DE'
+  Edwin Jagger / DE89:
+    - 'EJ DE89 handle / Muhle R41 head' -> 'EJ DE89'
+  Ever-Ready / 1924:
+    - '1924 EVER READY Single edge (BRASS)' -> 'EVER READY Single edge'
+  Fatip / Piccolo:
+    - 'fatip piccolo slant open comb gold' -> 'fatip piccolo gold'
+  GEM / Damaskeene OC:
+    - 'gem - damaskeene open comb' -> 'gem - damaskeene'
+  GEM / Micromatic Open Comb:
+    - 'GEM - Micromatic Open Comb' -> 'GEM - Micromatic'
+    - 'Gem - Micromatic Open Comb - Gen 2' -> 'Gem - Micromatic - Gen 2'
+    - 'GEM Micromatic Open Comb' -> 'GEM Micromatic'
+  Gillette / Fatboy:
+    - '1961 Gillette 195/Fatboy' -> 'Gillette 195/Fatboy'
+  Gillette / Slim:
+    - '1962 Gillette Slim Adjustable' -> 'Gillette Slim Adjustable'
+  Gillette / Super Speed:
+    - '1951 Gillette Black Tip SuperSpeed' -> 'Gillette Black Tip SuperSpeed'
+    - '1953 Gillette Super Speed' -> 'Gillette Super Speed'
+    - '1953 Gillette Super-Speed' -> 'Gillette Super-Speed'
+    - '1956 Gillette Red Tip SuperSpeed' -> 'Gillette Red Tip SuperSpeed'
+    - '1957 Gillette Flare Tip SuperSpeed' -> 'Gillette Flare Tip SuperSpeed'
+    - '1961 (G-2) Gillette Flare Tip' -> '(G-2) Gillette Flare Tip'
+    - '1967 Vintage Gillette SuperSpeed' -> 'Vintage Gillette SuperSpeed'
+  Gillette / Tech:
+    - '1953 Gillette Tech' -> 'Gillette Tech'
+    - '1964 Gillette Travel Tech Head w/a Maggard SS Handle' -> 'Gillette Travel Tech Head w/a Maggard SS Handle'
+    - '1967 Gillette Travel Tech (M3)' -> 'Gillette Travel Tech (M3)'
+    - 'Gilette Pre-War Fat Handle Tech' -> 'Gilette Pre-War Fat'
+    - 'Gillette Fat Handle Tech' -> 'Gillette Fat'
+    - 'Gillette Tech Minora OC' -> 'Gillette Tech Minora'
+  Hoffritz / Slant:
+    - 'Hoffritz - Slant' -> 'Hoffritz -'
+    - 'Hoffritz Slant' -> 'Hoffritz'
+  iKon / Short Comb:
+    - 'Ikon Razors - Ikon Short Comb with Bulldog 80 mm handle' -> 'Ikon Razors - Ikon Short Comb'
+  Karve / Christopher Bradley:
+    - 'Karve Brass CB OC-F' -> 'Karve Brass CB-F'
+    - 'Karve CB (brass SB-D)' -> 'Karve CB (brass-D)'
+    - 'Karve CB SB C Brass' -> 'Karve CB C Brass'
+    - 'Karve CB SB-C' -> 'Karve CB-C'
+    - 'Karve CB SB-D' -> 'Karve CB-D'
+    - 'Karve CB SS SB (B Plate)' -> 'Karve CB SS (B Plate)'
+    - 'Karve CB SS SB (B Plate, First Pass; D Plate, Second Pass)' -> 'Karve CB SS (B Plate, First Pass; D Plate, Second Pass)'
+    - 'Karve CB SS SB (D Plate)' -> 'Karve CB SS (D Plate)'
+    - 'karve cb ss sb (d plate, first pass; b plate, second pass)' -> 'karve cb ss (d plate, first pass; b plate, second pass)'
+    - 'Karve Christopher Bradley (aluminum SB-C)' -> 'Karve Christopher Bradley (aluminum-C)'
+    - 'Karve Christopher Bradley (brass SB-D)' -> 'Karve Christopher Bradley (brass-D)'
+    - 'Karve Christopher Bradley SB-AA plate' -> 'Karve Christopher Bradley-AA plate'
+    - 'Karve Christopher Bradley SB-C' -> 'Karve Christopher Bradley-C'
+    - 'Karve Shaving CB (copper) / D Plate' -> 'Karve Shaving CB / D Plate'
+    - 'Karve Shaving Co. Christopher Bradley Copper, SB-D (Copper/Brass Knopf Pommel Handle)' -> 'Karve Shaving Co. Christopher Bradley Copper,-D (Copper/Brass Knopf Pommel Handle)'
+  Karve / Overlander:
+    - 'Karve Overlander Nickel Plated Brass w/ 90mm Overlander handle' -> 'Karve Overlander Nickel Plated Brass'
+  Maggard / Slant:
+    - 'Gillette handles and Maggard Slant head' -> 'Gillette handles and Maggard head'
+    - 'Maggard MR11 with Slant Head' -> 'Maggard MR11 with Head'
+    - 'Maggard Razors - Slant + RR UFO Handle' -> 'Maggard Razors - + RR UFO Handle'
+  Merkur / 37C:
+    - 'Vtg. Mercur Slant' -> 'Vtg. Mercur'
+  PAA / Chrimson Ghost:
+    - 'Phoenix Artisan Accoutrements - Crimson Ghost Monster Slant' -> 'Phoenix Artisan Accoutrements - Crimson Ghost Monster'
+  Parker / Semi Slant:
+    - 'Parker Semi Slant' -> 'Parker Semi'
+  Pearl / L-65 Semi Slant:
+    - 'Pearl - Slant' -> 'Pearl -'
+  Pearl / OC:
+    - 'Pearl OC' -> 'Pearl'
+  RazoRock / Game Changer:
+    - 'Razorock - Game Changer 84 OC' -> 'Razorock - Game Changer 84'
+    - 'Razorock - Game Changer 84CC / Tatara Masamune OC' -> 'Razorock - Game Changer 84CC / Tatara Masamune'
+    - 'RazoRock Game Changer 0.84 SB' -> 'RazoRock Game Changer 0.84'
+    - 'RazoRock GameChanger .84 OC' -> 'RazoRock GameChanger .84'
+  RazoRock / German 37 Slant:
+    - 'RazoRock - German 37 Slant Razor Torsionshobel, with UFO handle' -> 'RazoRock - German 37 Razor Torsionshobel,'
+    - 'RazoRock German 37 Slant' -> 'RazoRock German 37'
+  RazoRock / Lupo:
+    - 'Razorock - Lupo DC' -> 'Razorock - Lupo'
+    - 'Razorock Lupo 95 OC' -> 'Razorock Lupo 95'
+    - 'Razorock Lupo DC' -> 'Razorock Lupo'
+  RazoRock / Stealth Slant:
+    - 'RazoRock - Stealth Slant; stainless, with PVD coating.' -> 'RazoRock - Stealth; stainless, with PVD coating.'
+  Romer-7 / Ricardo:
+    - 'Ricardo OC' -> 'Ricardo'
+  Schick / Injector:
+    - '1972 Schick L7 "Championship"' -> 'Schick L7 "Championship"'
+  Stirling / Stainless DE Razor:
+    - 'Stirling Soap Company - Stirling Stainless Steel (Austin Handle / ST plate) Serial No. ST-01-084' -> 'Stirling Soap Company - Stirling Stainless Steel (Austin) Serial No. ST-01-084'
+  Tatara / Masamune:
+    - 'Tatara - Masamune OC' -> 'Tatara - Masamune'
+  Timeless / Razor:
+    - 'Timeless Bronze SB' -> 'Timeless Bronze'
+    - 'Timeless Bronze SB .38' -> 'Timeless Bronze .38'
+    - 'Timeless Matte Stainless OC 95' -> 'Timeless Matte Stainless 95'
+    - 'Timeless Razor - Bronze OC' -> 'Timeless Razor - Bronze'
+  Wade & Butcher / Straight:
+    - 'Butcher and Wade with Old Type Cap - Open Comb Frankenrazor' -> 'Butcher and Wade with Old Type Cap - Frankenrazor'
+  Wolfman / Guerilla:
+    - 'Wolfman Titanium Guerrilla (.54mm SB)' -> 'Wolfman Titanium Guerrilla (.54mm)'
+  Wolfman / WR1:
+    - 'Wolfman WR1 OC .80mm' -> 'Wolfman WR1 .80mm'
+  Wolfman / WR2:
+    - 'Wolfman - WR2 SB 1.25 Basic Polish' -> 'Wolfman - WR2 1.25 Basic Polish'
+    - 'Wolfman Razors - WR2-DC 0.95 SB / 1.25 OC, Darwin Handle, Antique Bronze' -> 'Wolfman Razors - WR2-DC 0.95 / 1.25, Darwin Handle, Antique Bronze'
+    - 'Wolfman Razors WR2-DC 0.95 SB / 1.25 OC' -> 'Wolfman Razors WR2-DC 0.95 / 1.25'
+    - 'Wolfman WR2 (1.55 mm SB / 1.25 mm OC)' -> 'Wolfman WR2 (1.55 mm / 1.25 mm)'
+    - 'Wolfman WR2 1.25 DC / WRH7' -> 'Wolfman WR2 1.25 / WRH7'
+    - 'Wolfman WR2 SB 1.35mm' -> 'Wolfman WR2 1.35mm'
+  Yaqi / Ghost:
+    - 'Yaqi Ghost 70 SP w/ Euro handle' -> 'Yaqi Ghost 70 SP'
+  Yaqi / Knight Helmet:
+    - 'Yaqi Knight Helmet head + WCS 175S handle (Head frozen with blade overnight) - 8/10' -> 'Yaqi Knight Helmet head + WCS 175S) - 8/10'
+  Yaqi / Open Comb:
+    - 'Yaqi - Open Comb Head with Henson AL Handle.' -> 'Yaqi - Head.'
+  Yaqi / Slant 37:
+    - 'yaqi - slant 37 + rr ufo handle' -> 'yaqi - 37 + rr ufo handle'
+    - 'yaqi slant 37 + rr ufo handle' -> 'yaqi 37 + rr ufo handle'
+  Yaqi / Slope:
+    - 'Yaqi Slope w/ Yaqi Bolt Handle' -> 'Yaqi Slope'
+  Yates / 'Merica:
+    - 'Yates 'Merica (brass)' -> 'Yates 'Merica'
+    - 'Yates *'Merica* (brass)' -> 'Yates *'Merica*'
+
+Removed duplicates:
+  Above the Tie / S1:
+    - 'ATT S1 Slant'
+  Blackland / Blackbird:
+    - 'Blackland Blackbird (Brass)'
+    - 'Blackland Blackbird OC'
+    - 'Blackland Blackbird Ti SB'
+    - 'Polished Brassbird SB'
+  Blackland / Sabre:
+    - 'Blackland Sabre Level 2'
+  Chiseled Face / Legacy:
+    - 'Chiseled Face Legacy (Aluminum)'
+  Fatip / Piccolo:
+    - 'Fatip Piccolo Slant'
+  Gillette / Slim:
+    - '1963 Gillette Slim Adjustable'
+    - '1968 Gillette Slim Adjustable'
+    - 'Gillette Slim Adjustable'
+  Gillette / Super Speed:
+    - 'Gillette Super Speed'
+  Gillette / Tech:
+    - 'Gillette Tech'
+  Karve / Christopher Bradley:
+    - 'Karve CB SB C'
+  RazoRock / Lupo:
+    - 'RazoRock Lupo .72 OC (face) + Leaf (2 blades for the dome)'
+    - 'RazoRock Lupo 72 OC'
+  Wolfman / WR2:
+    - 'Wolfman .95 WR2 w/ Alpha Bravo handle'
+
+Done. 
