@@ -95,7 +95,9 @@ def test_match_case_insensitive(soap_matcher_with_mock):
     result = soap_matcher_with_mock.match("barrister and mann - seville")
     assert result["matched"]["maker"] == "Barrister and Mann"
     assert result["matched"]["scent"] == "Seville"
-    assert result["match_type"] == "exact"
+    assert (
+        result["match_type"] == "regex"
+    )  # Case-insensitive matching now handled by regex fallback
 
 
 def test_match_partial_name(soap_matcher_with_mock):
@@ -216,3 +218,38 @@ def test_brand_regex_sorting_order(soap_matcher_with_mock):
     assert lengths == sorted(
         lengths, reverse=True
     ), "Scent patterns are not sorted by length descending"
+
+
+def test_correct_matches_priority_before_regex(tmp_path):
+    """Test that correct matches are checked before regex patterns for soaps."""
+    # Create a test catalog with a regex pattern that would match
+    catalog_content = """
+Barrister and Mann:
+  Seville:
+    patterns:
+      - "barrister.*mann.*seville"
+"""
+    catalog_file = tmp_path / "soaps.yaml"
+    catalog_file.write_text(catalog_content)
+
+    # Create a correct_matches.yaml with a different match for the same input
+    correct_matches_content = """
+soap:
+  Barrister and Mann:
+    Seville:
+      - "Barrister and Mann - Seville"
+"""
+    correct_matches_file = tmp_path / "correct_matches.yaml"
+    correct_matches_file.write_text(correct_matches_content)
+
+    matcher = SoapMatcher(catalog_path=catalog_file, correct_matches_path=correct_matches_file)
+
+    # Test that the input matches the correct_matches entry, not the regex
+    result = matcher.match("Barrister and Mann - Seville")
+
+    # Should match from correct_matches (exact match)
+    assert result["matched"] is not None
+    assert result["matched"]["maker"] == "Barrister and Mann"
+    assert result["matched"]["scent"] == "Seville"
+    assert result["match_type"] == "exact"
+    assert result["pattern"] is None

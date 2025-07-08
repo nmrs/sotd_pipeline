@@ -196,3 +196,41 @@ def test_format_fallback_for_half_de_razors(matcher):
     result = matcher.match_with_context("Perma-Sharp 1/2 DE", "HALF DE")
     assert result["matched"]["format"] == "DE"
     assert result["matched"]["model"] == "Perma-Sharp"
+
+
+def test_correct_matches_priority_before_regex(tmp_path):
+    """Test that correct matches are checked before regex patterns for blades."""
+    # Create a test catalog with a regex pattern that would match
+    catalog_content = """
+DE:
+  Gillette:
+    Nacet:
+      patterns:
+        - "gillette.*nacet"
+      format: "DE"
+"""
+    catalog_file = tmp_path / "blades.yaml"
+    catalog_file.write_text(catalog_content)
+
+    # Create a correct_matches.yaml with a different match for the same input
+    correct_matches_content = """
+blade:
+  Gillette:
+    Nacet:
+      - "Gillette Nacet"
+"""
+    correct_matches_file = tmp_path / "correct_matches.yaml"
+    correct_matches_file.write_text(correct_matches_content)
+
+    matcher = BladeMatcher(catalog_path=catalog_file, correct_matches_path=correct_matches_file)
+
+    # Test that the input matches the correct_matches entry, not the regex
+    result = matcher.match("Gillette Nacet")
+
+    # Should match from correct_matches (exact match)
+    assert result["matched"] is not None
+    assert result["matched"]["brand"] == "Gillette"
+    assert result["matched"]["model"] == "Nacet"
+    assert result["match_type"] == "exact"
+    # No pattern used for correct matches
+    assert result["pattern"] is None

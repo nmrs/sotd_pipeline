@@ -61,7 +61,6 @@ Böker:
       - 'b[oö]ker.*king.*cutter(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)'
   Fallback:
     patterns:
-      - 'b[oö]ker.*king.*cutter(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)'
       - 'b[öo]ker.*(\s+straight)?'
 """
     path = tmp_path / "razors.yaml"
@@ -241,7 +240,7 @@ razor:
     correct_matches_file.write_text(correct_matches_content)
 
     # Create matcher with test files
-    matcher = RazorMatcher(catalog_path=catalog_file)
+    matcher = RazorMatcher(catalog_path=catalog_file, correct_matches_path=correct_matches_file)
 
     # Test that the input matches the correct_matches entry, not the regex
     result = matcher.match("Karve CB")

@@ -38,35 +38,35 @@ class TestBaseMatcher:
     def test_strip_competition_tags_basic(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
         input_text = "EldrormR Industries MM24 $FLIPTOP $MODERNGEM $REVENANT"
-        expected = "eldrormr industries mm24 $moderngem"
+        expected = "EldrormR Industries MM24 $MODERNGEM"
         result = matcher.normalize(input_text)
         assert result == expected
 
     def test_strip_competition_tags_preserves_useful_tags(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
         input_text = "GEM Micromatic $MACHINEAGE $MODERNGEM"
-        expected = "gem micromatic $moderngem"
+        expected = "GEM Micromatic $MODERNGEM"
         result = matcher.normalize(input_text)
         assert result == expected
 
     def test_strip_competition_tags_multiple_spaces(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
         input_text = "Blackland  Blackbird  $CNC  $STAINLESSLESS"
-        expected = "blackland blackbird"
+        expected = "Blackland Blackbird"
         result = matcher.normalize(input_text)
         assert result == expected
 
     def test_strip_competition_tags_case_insensitive(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
         input_text = "Wolfman WR2 $cnc $stainlessless"
-        expected = "wolfman wr2"
+        expected = "Wolfman WR2"
         result = matcher.normalize(input_text)
         assert result == expected
 
     def test_strip_competition_tags_no_tags(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
         input_text = "Merkur 34C"
-        expected = "merkur 34c"
+        expected = "Merkur 34C"
         result = matcher.normalize(input_text)
         assert result == expected
 
@@ -83,41 +83,41 @@ class TestBaseMatcher:
     def test_strip_competition_tags_with_backticks(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
         input_text = "Blackland Razors - Blackbird `$CNC`"
-        expected = "blackland razors - blackbird"
+        expected = "Blackland Razors - Blackbird"
         result = matcher.normalize(input_text)
         assert result == expected
 
     def test_strip_competition_tags_with_asterisks(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
         input_text = "Alpha Shaving Works - Lone Star Outlaw **$RAINBOW**"
-        expected = "alpha shaving works - lone star outlaw"
+        expected = "Alpha Shaving Works - Lone Star Outlaw"
         result = matcher.normalize(input_text)
         assert result == expected
 
     def test_strip_competition_tags_partial_matches_preserved(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
         input_text = "GEMINI Razor $FLIPTOP"
-        expected = "gemini razor"
+        expected = "GEMINI Razor"
         result = matcher.normalize(input_text)
         assert result == expected
 
     def test_strip_competition_tags_unknown_tags_preserved(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
         input_text = "Wolfman WR2 $UNKNOWN_TAG $CNC"
-        expected = "wolfman wr2 $unknown_tag"
+        expected = "Wolfman WR2 $UNKNOWN_TAG"
         result = matcher.normalize(input_text)
         assert result == expected
 
     def test_strip_competition_tags_mixed_known_unknown(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
         input_text = "Blackland Blackbird $CNC $STAINLESSLESS $SOMETHING_ELSE $FLIPTOP"
-        expected = "blackland blackbird $something_else"
+        expected = "Blackland Blackbird $SOMETHING_ELSE"
         result = matcher.normalize(input_text)
         assert result == expected
 
     def test_strip_competition_tags_preserve_tags_work(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
         input_text = "Feather Artist Club $KAMISORI $MACHINEAGE"
-        expected = "feather artist club $kamisori"
+        expected = "Feather Artist Club $KAMISORI"
         result = matcher.normalize(input_text)
         assert result == expected

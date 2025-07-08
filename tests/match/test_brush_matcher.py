@@ -693,3 +693,33 @@ def test_delimiter_semantics_helper_method(tmp_path):
         )
         is True
     )
+
+
+def test_correct_matches_priority_before_regex(tmp_path, test_catalog):
+    """Test that correct matches are checked before regex patterns for brushes."""
+    # Create a test catalog with a regex pattern that would match
+    catalog_file = tmp_path / "brushes.yaml"
+    with catalog_file.open("w", encoding="utf-8") as f:
+        yaml.dump(test_catalog, f)
+
+    # Create a correct_matches.yaml with a different match for the same input
+    correct_matches_content = """
+brush:
+  Simpson:
+    Chubby 2:
+      - "Simpson Chubby 2"
+"""
+    correct_matches_file = tmp_path / "correct_matches.yaml"
+    correct_matches_file.write_text(correct_matches_content)
+
+    matcher = BrushMatcher(catalog_path=catalog_file, correct_matches_path=correct_matches_file)
+
+    # Test that the input matches the correct_matches entry, not the regex
+    result = matcher.match("Simpson Chubby 2")
+
+    # Should match from correct_matches (exact match)
+    assert result["matched"] is not None
+    assert result["matched"]["brand"] == "Simpson"
+    assert result["matched"]["model"] == "Chubby 2"
+    assert result["match_type"] == "exact"
+    assert result["pattern"] is None

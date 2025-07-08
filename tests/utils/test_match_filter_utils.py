@@ -5,13 +5,14 @@ from unittest.mock import mock_open, patch
 
 from sotd.utils.match_filter_utils import (
     load_competition_tags,
+    normalize_for_matching,
     strip_competition_tags,
-    normalize_for_storage,
     strip_blade_count_patterns,
     extract_blade_use_count,
     extract_blade_count,
     extract_blade_and_use_count,
     strip_handle_indicators,
+    strip_soap_patterns,
 )
 
 
@@ -208,7 +209,7 @@ class TestStripCompetitionTags:
 
 
 class TestNormalizeForStorage:
-    """Test normalization for storage."""
+    """Test normalization for storage (deprecated, now uses normalize_for_matching)."""
 
     def test_normalize_for_storage_basic(self):
         """Test basic normalization."""
@@ -217,7 +218,7 @@ class TestNormalizeForStorage:
             "preserve_tags": [],
         }
 
-        result = normalize_for_storage("Razor $CNC $ARTISTCLUB", competition_tags)
+        result = normalize_for_matching("Razor $CNC $ARTISTCLUB", competition_tags)
         assert result == "Razor"
 
     def test_normalize_for_storage_auto_load(self):
@@ -228,21 +229,24 @@ class TestNormalizeForStorage:
                 "preserve_tags": [],
             }
 
-            result = normalize_for_storage("Razor $CNC $ARTISTCLUB")
+            result = normalize_for_matching("Razor $CNC $ARTISTCLUB")
             assert result == "Razor"
             mock_load.assert_called_once()
 
     def test_normalize_for_storage_none_input(self):
         """Test None input."""
-        result = normalize_for_storage(None)  # type: ignore
+        result = normalize_for_matching(None)  # type: ignore
         assert result is None
 
     def test_normalize_for_storage_integration(self):
         """Test integration with strip_blade_count_patterns."""
         # Test with competition tags
-        assert normalize_for_storage("treet platinum (3x) #sotd") == "treet platinum #sotd"
         assert (
-            normalize_for_storage("[2x] treet platinum (4 times) $TRICKORTREAT")
+            normalize_for_matching("treet platinum (3x) #sotd", field="blade")
+            == "treet platinum #sotd"
+        )
+        assert (
+            normalize_for_matching("[2x] treet platinum (4 times) $TRICKORTREAT", field="blade")
             == "treet platinum $TRICKORTREAT"
         )
 
@@ -321,19 +325,25 @@ class TestStripBladeCountPatterns:
         assert strip_blade_count_patterns("(3) treet platinum") == "treet platinum"  # Simple number
 
     def test_strip_blade_count_patterns_integration(self):
-        """Test blade count pattern stripping integrated with normalize_for_storage."""
-        # Test that normalize_for_storage now strips blade patterns
-        assert normalize_for_storage("treet platinum (3x)") == "treet platinum"
-        assert normalize_for_storage("[2x] treet platinum (4 times)") == "treet platinum"
+        """Test blade count pattern stripping integrated with normalize_for_matching."""
+        # Test that normalize_for_matching now strips blade patterns
+        assert normalize_for_matching("treet platinum (3x)", field="blade") == "treet platinum"
         assert (
-            normalize_for_storage("treet platinum (second use) - amazing blade")
+            normalize_for_matching("[2x] treet platinum (4 times)", field="blade")
+            == "treet platinum"
+        )
+        assert (
+            normalize_for_matching("treet platinum (second use) - amazing blade", field="blade")
             == "treet platinum - amazing blade"
         )
 
         # Test with competition tags
-        assert normalize_for_storage("treet platinum (3x) #sotd") == "treet platinum #sotd"
         assert (
-            normalize_for_storage("[2x] treet platinum (4 times) $TRICKORTREAT")
+            normalize_for_matching("treet platinum (3x) #sotd", field="blade")
+            == "treet platinum #sotd"
+        )
+        assert (
+            normalize_for_matching("[2x] treet platinum (4 times) $TRICKORTREAT", field="blade")
             == "treet platinum $TRICKORTREAT"
         )
 
@@ -543,13 +553,13 @@ class TestStripHandleIndicators:
             ("Razor handle: Wolfman $ARTISTCLUB", "Razor $ARTISTCLUB"),
         ]
         for input_str, expected in test_cases:
-            result = normalize_for_storage(input_str, test_competition_tags, field="razor")
+            result = normalize_for_matching(input_str, test_competition_tags, field="razor")
             assert (
                 result == expected
             ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
 
     def test_normalize_for_storage_razor_no_handle_indicators(self):
-        """Test that normalize_for_storage doesn't affect razors without handle indicators."""
+        """Test that normalize_for_matching doesn't affect razors without handle indicators."""
         # Use competition tags that don't include our test tags
         test_competition_tags = {"strip_tags": ["SOMEOTHER"], "preserve_tags": ["CNC", "SOTD"]}
         test_cases = [
@@ -557,7 +567,262 @@ class TestStripHandleIndicators:
             ("Blackland Blackbird #sotd", "Blackland Blackbird #sotd"),
         ]
         for input_str, expected in test_cases:
-            result = normalize_for_storage(input_str, test_competition_tags, field="razor")
+            result = normalize_for_matching(input_str, test_competition_tags, field="razor")
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+
+class TestNormalizeForMatching:
+    """Test normalization for matching."""
+
+    def test_normalize_for_matching_basic(self):
+        """Test basic normalization functionality."""
+        competition_tags = {"strip_tags": ["CNC", "ARTISTCLUB"]}
+        result = normalize_for_matching("Razor $CNC $ARTISTCLUB", competition_tags)
+        assert result == "Razor"
+
+    def test_normalize_for_matching_auto_load(self):
+        """Test normalization with auto-loaded competition tags."""
+        result = normalize_for_matching("Razor $CNC $ARTISTCLUB")
+        assert result == "Razor"
+
+    def test_normalize_for_matching_none_input(self):
+        """Test normalization with None input."""
+        result = normalize_for_matching(None)  # type: ignore
+        assert result is None
+
+    def test_normalize_for_matching_blade_patterns(self):
+        """Test that normalize_for_matching strips blade patterns for blade field."""
+        # Test blade count patterns
+        assert normalize_for_matching("treet platinum (3x)", field="blade") == "treet platinum"
+        assert (
+            normalize_for_matching("[2x] treet platinum (4 times)", field="blade")
+            == "treet platinum"
+        )
+        assert (
+            normalize_for_matching("treet platinum (second use) - amazing blade", field="blade")
+            == "treet platinum - amazing blade"
+        )
+
+        # Test with competition tags
+        assert (
+            normalize_for_matching("treet platinum (3x) #sotd", field="blade")
+            == "treet platinum #sotd"
+        )
+        assert (
+            normalize_for_matching("[2x] treet platinum (4 times) $PLASTIC", field="blade")
+            == "treet platinum"
+        )
+
+    def test_normalize_for_matching_razor_handle_indicators(self):
+        """Test that normalize_for_matching strips handle indicators for razor field."""
+        test_competition_tags = {"strip_tags": ["CNC", "ARTISTCLUB"]}
+
+        # Test handle indicators
+        input_str = "Razor / [brand] handle"
+        result = normalize_for_matching(input_str, test_competition_tags, field="razor")
+        assert result == "Razor"
+
+        # Test razors without handle indicators
+        input_str = "Gillette Tech"
+        result = normalize_for_matching(input_str, test_competition_tags, field="razor")
+        assert result == "Gillette Tech"
+
+    def test_normalize_for_matching_case_preservation(self):
+        """Test that normalize_for_matching preserves case for correct match consistency."""
+        # Test that case is preserved (unlike BaseMatcher.normalize which lowercases)
+        assert (
+            normalize_for_matching("*New* King C. Gillette", field="razor")
+            == "*New* King C. Gillette"
+        )
+        assert normalize_for_matching("ATT S1", field="razor") == "ATT S1"
+        assert (
+            normalize_for_matching("Above The Tie Atlas S1", field="razor")
+            == "Above The Tie Atlas S1"
+        )
+
+    def test_normalize_for_matching_field_specific_behavior(self):
+        """Test that normalize_for_matching applies field-specific normalization correctly."""
+        # Blade field should strip patterns
+        assert normalize_for_matching("blade (3x)", field="blade") == "blade"
+
+        # Razor field should strip handle indicators
+        assert normalize_for_matching("razor / [brand] handle", field="razor") == "razor"
+
+        # Soap field should strip soap-related patterns
+        assert normalize_for_matching("soap sample", field="soap") == "soap"
+        assert normalize_for_matching("soap (sample)", field="soap") == "soap"
+
+        # Other fields should only strip competition tags
+        assert normalize_for_matching("brush $PLASTIC", field="brush") == "brush"
+
+    def test_normalize_for_matching_whitespace_normalization(self):
+        """Test that normalize_for_matching normalizes whitespace correctly."""
+        assert normalize_for_matching("  multiple    spaces  ", field="razor") == "multiple spaces"
+        assert normalize_for_matching("\ttabs\tand\tspaces\t", field="blade") == "tabs and spaces"
+
+    def test_normalize_for_matching_edge_cases(self):
+        """Test normalize_for_matching with edge cases."""
+        # Empty string
+        assert normalize_for_matching("", field="razor") == ""
+
+        # String with only whitespace
+        assert normalize_for_matching("   \t\n   ", field="blade") == ""
+
+        # String with only competition tags
+        assert normalize_for_matching("$CNC $ARTISTCLUB", field="razor") == ""
+
+        # String with only blade patterns
+        assert normalize_for_matching("(3x)", field="blade") == ""
+
+        # String with only handle indicators
+        assert normalize_for_matching("/ [brand] handle", field="razor") == ""
+
+    def test_normalize_for_matching_comprehensive_examples(self):
+        """Test normalize_for_matching with comprehensive real-world examples."""
+        # Real examples from correct_matches.yaml
+        assert (
+            normalize_for_matching("*New* King C. Gillette", field="razor")
+            == "*New* King C. Gillette"
+        )
+        assert normalize_for_matching("ATT S1", field="razor") == "ATT S1"
+        assert (
+            normalize_for_matching("Above The Tie Atlas S1", field="razor")
+            == "Above The Tie Atlas S1"
+        )
+
+        # Examples with patterns that should be stripped
+        assert (
+            normalize_for_matching("treet platinum (3x) #sotd", field="blade")
+            == "treet platinum #sotd"
+        )
+        assert normalize_for_matching("Razor / [brand] handle", field="razor") == "Razor"
+
+        # Examples with competition tags
+        assert normalize_for_matching("soap $PLASTIC", field="soap") == "soap"
+
+
+class TestStripSoapPatterns:
+    """Test soap pattern stripping."""
+
+    def test_strip_soap_patterns_basic(self):
+        """Test basic soap pattern stripping."""
+        test_cases = [
+            ("B&M Seville soap", "B&M Seville"),
+            ("Stirling Bay Rum sample", "Stirling Bay Rum"),
+            ("Declaration Grooming soap sample", "Declaration Grooming"),
+            ("Cella croap", "Cella"),
+            ("Proraso cream", "Proraso"),
+            ("MWF puck", "MWF"),
+            ("Arko shaving soap", "Arko"),
+            ("Tabac shaving cream", "Tabac"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_soap_patterns(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_soap_patterns_with_use_counts(self):
+        """Test soap pattern stripping with use counts."""
+        test_cases = [
+            ("B&M Seville (23)", "B&M Seville"),
+            ("Stirling Bay Rum (5)", "Stirling Bay Rum"),
+            ("Declaration Grooming ()", "Declaration Grooming"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_soap_patterns(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_soap_patterns_with_sample_markers(self):
+        """Test soap pattern stripping with sample markers."""
+        test_cases = [
+            ("B&M Seville (sample)", "B&M Seville"),
+            ("Stirling Bay Rum (SAMPLE)", "Stirling Bay Rum"),
+            ("Declaration Grooming ( Sample )", "Declaration Grooming"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_soap_patterns(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_soap_patterns_complex_combinations(self):
+        """Test soap pattern stripping with complex combinations."""
+        test_cases = [
+            ("B&M Seville soap (sample) (23)", "B&M Seville"),
+            ("Stirling Bay Rum cream (SAMPLE) (5)", "Stirling Bay Rum"),
+            ("Declaration Grooming croap ( Sample ) ()", "Declaration Grooming"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_soap_patterns(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_soap_patterns_no_match(self):
+        """Test strings that don't contain soap patterns."""
+        test_cases = [
+            "B&M Seville",
+            "Stirling Bay Rum",
+            "Declaration Grooming",
+            "Soap without patterns",
+        ]
+        for input_str in test_cases:
+            result = strip_soap_patterns(input_str)
+            assert result == input_str, f"Should not change '{input_str}', but got '{result}'"
+
+    def test_strip_soap_patterns_whitespace_cleanup(self):
+        """Test that whitespace is properly cleaned up after stripping."""
+        test_cases = [
+            ("B&M Seville   soap   (sample)   ", "B&M Seville"),
+            ("Stirling Bay Rum  cream  (23)  ", "Stirling Bay Rum"),
+            ("Declaration Grooming  croap  ", "Declaration Grooming"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_soap_patterns(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_soap_patterns_none_input(self):
+        """Test None input."""
+        result = strip_soap_patterns(None)  # type: ignore
+        assert result is None
+
+    def test_strip_soap_patterns_empty_string(self):
+        """Test empty string input."""
+        result = strip_soap_patterns("")
+        assert result == ""
+
+    def test_normalize_for_matching_soap_patterns(self):
+        """Test that normalize_for_matching strips soap patterns for soap field."""
+        # Test soap-related patterns
+        assert normalize_for_matching("B&M Seville soap", field="soap") == "B&M Seville"
+        assert normalize_for_matching("Stirling Bay Rum sample", field="soap") == "Stirling Bay Rum"
+        assert (
+            normalize_for_matching("Declaration Grooming (sample)", field="soap")
+            == "Declaration Grooming"
+        )
+
+        # Test with competition tags
+        assert normalize_for_matching("B&M Seville soap $PLASTIC", field="soap") == "B&M Seville"
+        assert (
+            normalize_for_matching("Stirling Bay Rum (23) #sotd", field="soap")
+            == "Stirling Bay Rum #sotd"
+        )
+
+    def test_normalize_for_matching_soap_no_patterns(self):
+        """Test that normalize_for_matching doesn't affect soaps without patterns."""
+        test_cases = [
+            ("B&M Seville", "B&M Seville"),
+            ("Stirling Bay Rum", "Stirling Bay Rum"),
+        ]
+        for input_str, expected in test_cases:
+            result = normalize_for_matching(input_str, field="soap")
             assert (
                 result == expected
             ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"

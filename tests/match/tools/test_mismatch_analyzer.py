@@ -395,8 +395,8 @@ class TestMismatchAnalyzer:
 
         # Check for expected values
         assert "Aylsworth Apex" in output
-        assert "aylsworth.*apex" in output
+        # The mismatch analyzer now correctly identifies this as an exact match
+        # and marks it as correct instead of displaying it as a mismatch
+        assert "Marked" in output and "correct" in output
         # The source file may be truncated in the table, so check for the prefix
         assert "2025-06" in output or "2025…" in output
-        # The reason text might be processed differently, so just check that some reason is present
-        assert "Multiple" in output or "multiple" in output
