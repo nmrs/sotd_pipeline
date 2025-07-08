@@ -468,6 +468,7 @@ class TestStripHandleIndicators:
             ("Razor with Merkur handle", "Razor"),
             ("Razor handle: Wolfman", "Razor"),
             ("Razor using Karve handle", "Razor"),
+            ("Charcoal Goods LVL II SS on Triad Aristocrat SS handle", "Charcoal Goods LVL II SS"),
         ]
         for input_str, expected in test_cases:
             result = strip_handle_indicators(input_str)
@@ -498,6 +499,7 @@ class TestStripHandleIndicators:
             ("Razor WITH Merkur HANDLE", "Razor"),
             ("Razor Handle: Wolfman", "Razor"),
             ("Razor USING Karve Handle", "Razor"),
+            ("Charcoal Goods LVL II SS ON Triad Aristocrat SS Handle", "Charcoal Goods LVL II SS"),
         ]
         for input_str, expected in test_cases:
             result = strip_handle_indicators(input_str)

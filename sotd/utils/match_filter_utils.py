@@ -185,6 +185,11 @@ def strip_handle_indicators(value: str) -> str:
     using_pattern = r"\s+using\s+([^,\s]+(?:\s+[^,\s]+)*?)\s+handle\b"
     cleaned = re.sub(using_pattern, "", cleaned, flags=re.IGNORECASE)
 
+    # Pattern for "on [brand] handle"
+    # (e.g., "Charcoal Goods LVL II SS on Triad Aristocrat SS handle")
+    on_handle_pattern = r"\s+on\s+([^,\s]+(?:\s+[^,\s]+)*?)\s+handle\b"
+    cleaned = re.sub(on_handle_pattern, "", cleaned, flags=re.IGNORECASE)
+
     # Pattern for "Razor / [brand] handle" or "Razor / *[brand]* handle"
     slash_handle_pattern = r"\s*/\s*(?:[*`\"']*)?([^,\s]+(?:\s+[^,\s]+)*?)(?:[*`\"']*)?\s+handle\b"
     cleaned = re.sub(slash_handle_pattern, "", cleaned, flags=re.IGNORECASE)

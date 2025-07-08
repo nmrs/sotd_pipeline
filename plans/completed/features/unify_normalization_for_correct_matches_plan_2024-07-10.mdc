@@ -154,6 +154,15 @@
     - Documentation and code comments must always be updated in sync with code changes.
     - Allowing injection of custom correct_matches files in matchers greatly improves test isolation and reliability.
 
+### Handle Normalization Enhancement (2025-01-27)
+- **Added new handle pattern**: `on [brand] handle` (e.g., "Charcoal Goods LVL II SS on Triad Aristocrat SS handle")
+- **Implementation**: Added `on_handle_pattern` regex to `strip_handle_indicators()` function in `sotd/utils/match_filter_utils.py`
+- **Testing**: Added comprehensive tests for both case-sensitive and case-insensitive variants
+- **Validation**: All existing tests continue to pass, confirming no regressions
+- **Example**: "Charcoal Goods LVL II SS on Triad Aristocrat SS handle" → "Charcoal Goods LVL II SS"
+- **Quality**: All quality checks (format, lint, typecheck, test) pass
+- **Documentation**: Updated function docstring to include the new pattern example
+
 ## Success Criteria
 
 1. **Zero "confirmed but not exact" mismatches**: All strings in `correct_matches.yaml` are found as exact matches by the matcher
