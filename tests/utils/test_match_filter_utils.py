@@ -13,6 +13,7 @@ from sotd.utils.match_filter_utils import (
     extract_blade_and_use_count,
     strip_handle_indicators,
     strip_soap_patterns,
+    strip_razor_use_counts,
 )
 
 
@@ -825,6 +826,113 @@ class TestStripSoapPatterns:
         ]
         for input_str, expected in test_cases:
             result = normalize_for_matching(input_str, field="soap")
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+
+class TestStripRazorUseCounts:
+    """Test razor use count stripping."""
+
+    def test_strip_razor_use_counts_basic(self):
+        """Test basic razor use count stripping."""
+        test_cases = [
+            ("Gold Dollar Straight Razor (6)", "Gold Dollar Straight Razor"),
+            ("Gold Dollar Straight Razor (12)", "Gold Dollar Straight Razor"),
+            ("Gold Dollar Straight Razor (23)", "Gold Dollar Straight Razor"),
+            ("Gold Dollar Straight Razor [5]", "Gold Dollar Straight Razor"),
+            ("Gold Dollar Straight Razor [10]", "Gold Dollar Straight Razor"),
+            ("Gold Dollar Straight Razor (new)", "Gold Dollar Straight Razor"),
+            ("Gold Dollar Straight Razor (NEW)", "Gold Dollar Straight Razor"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_razor_use_counts(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_razor_use_counts_multiple_patterns(self):
+        """Test razor use count stripping with multiple patterns."""
+        test_cases = [
+            ("Gold Dollar Straight Razor (6) (new)", "Gold Dollar Straight Razor"),
+            ("Gold Dollar Straight Razor [5] (new)", "Gold Dollar Straight Razor"),
+            ("Gold Dollar Straight Razor (new) (12)", "Gold Dollar Straight Razor"),
+        ]
+        for input_str, expected in test_cases:
+            result = strip_razor_use_counts(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_razor_use_counts_edge_cases(self):
+        """Test razor use count stripping with edge cases."""
+        # No patterns
+        assert strip_razor_use_counts("Gold Dollar Straight Razor") == "Gold Dollar Straight Razor"
+
+        # Empty string
+        assert strip_razor_use_counts("") == ""
+
+        # None input
+        assert strip_razor_use_counts(None) is None  # type: ignore
+
+        # Only patterns
+        assert strip_razor_use_counts("(6)") == ""
+        assert strip_razor_use_counts("[5]") == ""
+        assert strip_razor_use_counts("(new)") == ""
+
+    def test_strip_razor_use_counts_preserves_model_names(self):
+        """Test that actual model names are preserved, only use counts are stripped."""
+        # Real model names should be preserved
+        assert strip_razor_use_counts("Gillette New") == "Gillette New"
+        assert strip_razor_use_counts("iKon X3") == "iKon X3"
+        assert strip_razor_use_counts("Gillette Tech") == "Gillette Tech"
+        assert strip_razor_use_counts("Merkur 34C") == "Merkur 34C"
+
+        # Use counts should be stripped from real model names
+        assert strip_razor_use_counts("Gillette New (6)") == "Gillette New"
+        assert strip_razor_use_counts("iKon X3 (12)") == "iKon X3"
+        assert strip_razor_use_counts("Gillette Tech [5]") == "Gillette Tech"
+        assert strip_razor_use_counts("Merkur 34C (new)") == "Merkur 34C"
+
+        # Multiple use counts should all be stripped
+        assert strip_razor_use_counts("Gillette New (6) (new)") == "Gillette New"
+        assert strip_razor_use_counts("iKon X3 [10] (new)") == "iKon X3"
+
+        # Complex model names should be preserved completely
+        assert strip_razor_use_counts("Gillette New Standard") == "Gillette New Standard"
+        assert strip_razor_use_counts("Gillette New Long Comb") == "Gillette New Long Comb"
+        assert strip_razor_use_counts("Gillette New Short Comb") == "Gillette New Short Comb"
+        assert strip_razor_use_counts("Gillette New Big Boy") == "Gillette New Big Boy"
+        assert strip_razor_use_counts("Gillette New DeLuxe") == "Gillette New DeLuxe"
+        assert strip_razor_use_counts("iKon X3 Slant") == "iKon X3 Slant"
+        assert strip_razor_use_counts("Merkur 34C HD") == "Merkur 34C HD"
+        assert strip_razor_use_counts("Gillette Tech Ball End") == "Gillette Tech Ball End"
+        assert strip_razor_use_counts("Gillette Tech Fat Handle") == "Gillette Tech Fat Handle"
+        assert strip_razor_use_counts("Gillette Tech Flat Bottom") == "Gillette Tech Flat Bottom"
+
+    def test_strip_razor_use_counts_gillette_new_specific(self):
+        """Test specifically that 'Gillette New' is preserved exactly as-is."""
+        # This is a critical test case - ensure "Gillette New" is never stripped to just "Gillette"
+        assert strip_razor_use_counts("Gillette New") == "Gillette New"
+
+        # Test with use counts to ensure they're stripped but "New" is preserved
+        assert strip_razor_use_counts("Gillette New (6)") == "Gillette New"
+        assert strip_razor_use_counts("Gillette New [5]") == "Gillette New"
+        assert strip_razor_use_counts("Gillette New (new)") == "Gillette New"
+        assert strip_razor_use_counts("Gillette New (6) (new)") == "Gillette New"
+
+    def test_normalize_for_matching_razor_use_counts(self):
+        """Test that normalize_for_matching strips use counts for razor field."""
+        test_competition_tags = {"strip_tags": ["CNC", "ARTISTCLUB"]}
+
+        test_cases = [
+            ("Gold Dollar Straight Razor (6)", "Gold Dollar Straight Razor"),
+            ("Gold Dollar Straight Razor [5]", "Gold Dollar Straight Razor"),
+            ("Gold Dollar Straight Razor (new)", "Gold Dollar Straight Razor"),
+            ("Gold Dollar Straight Razor (6) $CNC", "Gold Dollar Straight Razor"),
+        ]
+        for input_str, expected in test_cases:
+            result = normalize_for_matching(input_str, test_competition_tags, field="razor")
             assert (
                 result == expected
             ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"

@@ -1,5 +1,3 @@
-import pytest
-from sotd.utils.text import preprocess_body
 from sotd.utils.text import preprocess_body
 
 
@@ -40,6 +38,17 @@ def test_unescapes_common_markdown():
     assert preprocess_body(r"\_escaped\_") == "_escaped_"
     assert preprocess_body(r"\`escaped\`") == "`escaped`"
     assert preprocess_body(r"\\backslash") == r"\backslash"
+
+
+def test_unescapes_brackets():
+    """Test that escaped brackets are properly unescaped."""
+    assert preprocess_body(r"\[2\]") == "[2]"
+    assert preprocess_body(r"\[3\]") == "[3]"
+    assert (
+        preprocess_body(r"Treet Carbon Steel \[2\] - \$STAINLESSLESS")
+        == "Treet Carbon Steel [2] - \$STAINLESSLESS"
+    )
+    assert preprocess_body(r"Some \[text\] with \[brackets\]") == "Some [text] with [brackets]"
 
 
 def test_collapses_whitespace():
