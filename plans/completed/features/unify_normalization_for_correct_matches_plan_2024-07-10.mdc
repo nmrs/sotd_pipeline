@@ -1,0 +1,234 @@
+# TDD Project Plan: Unify Normalization Logic for Correct Match Lookups
+
+## Overview
+
+**Goal:** Ensure that all correct match lookups (in matchers, analyzers, and any other consumers) use a single, canonical normalization function (`normalize_for_matching`). This will guarantee that any string stored in `correct_matches.yaml` will always be found as an exact match if the input is normalized the same way, eliminating "confirmed but not exact" mismatches.
+
+**Problem:** Currently, the matcher and analyzer use different normalization logic, causing strings in `correct_matches.yaml` to not be found as exact matches during processing, leading to confusing "confirmed but not exact" results.
+
+**Solution:** Centralize all normalization logic into a single `normalize_for_matching` function and ensure all components use it consistently.
+
+## Implementation Plan
+
+### Phase 1: Audit and Foundation (Chunks 1-2)
+
+#### Chunk 1.1: Audit Current Normalization Logic
+- [x] Search codebase for all normalization logic in matchers, base classes, and analyzer
+- [x] Document differences and overlaps between implementations
+- [x] Identify all places where normalization is performed for correct match lookups
+- [x] Create a comprehensive list of normalization inconsistencies
+
+**Findings from Audit:**
+- **BaseMatcher.normalize()**: Only strips competition tags and lowercases strings
+- **normalize_for_storage()**: Does field-specific normalization (blade patterns, handle indicators) AND preserves case
+- **BrushMatcher._normalize_for_comparison()**: Only lowercases strings (no competition tag stripping)
+- **Key Issue**: Matchers build lookup dictionaries using BaseMatcher.normalize() (lowercase), but correct_matches.yaml stores strings using normalize_for_storage() (case-preserved)
+- **Example**: "*New* King C. Gillette" becomes "*new* king c. gillette" in matcher lookup but stays "*New* King C. Gillette" in storage
+- **Result**: 100+ normalization inconsistencies found, but matchers still find exact matches due to case-insensitive comparison in _check_correct_matches
+
+#### Chunk 1.2: Create Failing Test Foundation
+- [x] Write a failing test that iterates over all entries in `correct_matches.yaml`
+- [x] For each entry, assert that the matcher finds it as an exact match
+- [x] This test should fail initially, proving the normalization inconsistency
+- [x] Add test to verify analyzer and matcher agree on what constitutes an exact match
+
+**Findings from Test Foundation:**
+- **100+ normalization inconsistencies found**: Matchers use lowercase normalization, storage preserves case
+- **Specific examples**: "*New* King C. Gillette" vs "*new* king c. gillette"
+- **Lookup dictionaries built with wrong normalization**: BaseMatcher builds lookup using its own normalize() method
+- **Current system still works**: Matchers find exact matches due to case-insensitive comparison in _check_correct_matches
+- **Root cause**: Two different normalization functions for the same purpose
+
+#### Chunk 2.1: Refactor Canonical Normalization Function
+- [x] Rename `normalize_for_storage` to `normalize_for_matching`
+- [x] Update function to handle all field-specific normalization needs (razor, blade, brush, soap)
+- [x] Add comprehensive docstrings explaining this is the canonical normalization for correct match lookups
+- [x] Ensure all field-specific quirks are handled (handle stripping for razors, blade count patterns, etc.)
+
+#### Chunk 2.2: Expand Normalization Tests
+- [x] Add/expand tests for edge cases and field-specific normalization
+- [x] Test normalization consistency across different input formats
+- [x] Add tests for competition tag stripping, handle indicators, blade patterns, etc.
+- [x] Ensure normalization is deterministic and consistent
+
+---
+
+### Session Notes (2024-07-09)
+- Refactored `normalize_for_storage` to `normalize_for_matching` and implemented robust field auto-detection for backward compatibility.
+- Added and fixed comprehensive tests for all field-specific normalization, including edge cases for soap, blade, and razor fields.
+- Fixed aggressive soap pattern stripping and ensured suffixes like "croap", "puck", etc. are always removed as trailing words.
+- All normalization tests now pass, and linter errors are resolved.
+- Lesson learned: Always re-apply suffix removal after cleaning up empty parentheses to handle complex combinations.
+- Next: Proceed to Phase 2, updating all matchers to use the canonical normalization function.
+
+### Phase 2: Update Matchers (Chunk 3)
+
+#### Chunk 3.1: Update BaseMatcher
+- [x] Modify `BaseMatcher` to use `normalize_for_matching(field=...)` for all correct match lookups
+- [x] Update `_check_correct_matches` method to use canonical normalization
+- [x] Remove or refactor any custom normalization methods that duplicate logic
+- [x] Add tests to verify BaseMatcher uses canonical normalization
+
+#### Chunk 3.2: Update All Matcher Subclasses
+- [x] Update `RazorMatcher` to use `normalize_for_matching(field="razor")`
+- [x] Update `BladeMatcher` to use `normalize_for_matching(field="blade")`
+- [x] Update `BrushMatcher` to use `normalize_for_matching(field="brush")`
+- [x] Update `SoapMatcher` to use `normalize_for_matching(field="soap")`
+- [x] Remove any custom normalization logic in each matcher
+- [x] Add tests for each matcher to verify correct match lookups work properly
+
+#### Chunk 3.3: Update Match Phase Integration
+- [x] Ensure `run.py match` uses the updated matchers correctly
+- [x] Test that match phase produces consistent results with canonical normalization
+- [x] Verify that exact matches are properly identified and marked
+
+##### Session Notes (2024-07-10)
+- Updated `process_month` to accept and pass `correct_matches_path` to all matchers, enabling test isolation and robust integration testing.
+- Added integration tests to verify that the match phase uses the correct matches file and identifies exact matches for all fields, including blades with usage counts.
+- Fixed `BladeMatcher.match_with_context` to check for correct matches before regex/contextual matching, ensuring correct match priority in all contexts.
+- All integration tests now pass, confirming that the match phase is fully aligned with the canonical normalization logic and correct match lookup.
+- **Lessons learned:**
+    - Context-aware matchers (like BladeMatcher) must always check for correct matches before applying regex/contextual logic to avoid subtle mismatches.
+    - Integration test coverage is essential for catching priority and normalization bugs that unit tests may miss.
+    - Always update plan files immediately after completing a chunk, per project rules.
+
+### Phase 3: Update Analyzer and Other Consumers (Chunk 4)
+
+#### Chunk 4.1: Update Mismatch Analyzer
+- [x] Ensure `MismatchAnalyzer` uses `normalize_for_matching` everywhere
+- [x] Update `_create_match_key` method to use canonical normalization
+- [x] Update `_load_correct_matches` method to use canonical normalization
+- [x] Add tests to verify analyzer uses canonical normalization consistently
+
+#### Chunk 4.2: Update Other Tools and Scripts
+- [x] Update any other tools that perform correct match lookups
+- [x] Update `CorrectMatchesManager` if it exists
+- [x] Update any utility scripts that normalize strings for matching
+- [x] Add tests for all updated components
+
+### Phase 4: Integration and Regression Testing (Chunk 5)
+
+#### Chunk 5.1: Comprehensive Integration Tests
+- [x] Run the full test suite to ensure no regressions
+- [x] Add regression tests for previously "confirmed but not exact" cases
+- [x] Test that the 4 problematic cases from the original issue are now resolved
+- [x] Verify that all existing exact matches still work correctly
+
+#### Chunk 5.2: End-to-End Validation
+- [x] Add a comprehensive test that iterates over all entries in `correct_matches.yaml`
+- [x] For each entry, assert that the matcher finds it as an exact match
+- [x] Test with real data from recent months to ensure no regressions
+- [x] Verify that the mismatch analyzer shows 0 "confirmed but not exact" cases
+
+---
+
+### Phase 5: Documentation and Cleanup (Chunk 6)
+
+#### Chunk 6.1: Update Documentation
+- [x] Update developer documentation to state that `normalize_for_matching` is the only allowed normalization for correct match lookups
+- [x] Add clear examples of how to use the canonical normalization function
+- [x] Document the field-specific normalization rules (handle stripping, blade patterns, etc.)
+- [x] Update any relevant README files or technical documentation
+
+#### Chunk 6.2: Code Cleanup and Comments
+- [x] Add comments in code where normalization is performed, referencing the canonical function
+- [x] Remove any dead code or outdated normalization utilities
+- [x] Ensure all imports are updated to use the new function name
+- [x] Add deprecation warnings for old function names if needed
+
+#### Chunk 6.3: Final Validation
+- [x] Run complete quality checks: `make format lint typecheck test`
+- [x] Verify that all tests pass, including the new comprehensive tests
+- [x] Test with real pipeline data to ensure end-to-end functionality
+- [x] Document any lessons learned or edge cases discovered
+
+### Completion Notes (2024-07-10)
+- All phases of the normalization unification plan are now complete.
+- Regression tests for all previously problematic "confirmed but not exact" cases have been added and pass.
+- All code, matchers, analyzers, and tools use the canonical `normalize_for_matching` function for correct match lookups.
+- All documentation, code comments, and test code have been updated to reflect the new normalization logic.
+- There are now **zero normalization inconsistencies** and all quality checks pass.
+- **Lessons learned:**
+    - Unified, field-aware normalization is essential for robust product matching and testability.
+    - Regression tests are critical for preventing recurrence of subtle normalization bugs.
+    - Documentation and code comments must always be updated in sync with code changes.
+    - Allowing injection of custom correct_matches files in matchers greatly improves test isolation and reliability.
+
+## Success Criteria
+
+1. **Zero "confirmed but not exact" mismatches**: All strings in `correct_matches.yaml` are found as exact matches by the matcher
+2. **Single source of truth**: All normalization logic uses `normalize_for_matching`
+3. **Comprehensive test coverage**: Tests verify normalization consistency across all components
+4. **No regressions**: All existing functionality continues to work correctly
+5. **Clear documentation**: Developers understand how to use the canonical normalization function
+
+## Risk Mitigation
+
+- **Incremental approach**: Each chunk builds on the previous, allowing for early detection of issues
+- **Comprehensive testing**: Extensive test coverage ensures no regressions
+- **Backward compatibility**: Maintain existing function signatures where possible
+- **Documentation**: Clear documentation prevents future inconsistencies
+
+## Dependencies
+
+- Existing `normalize_for_storage` function in `sotd/utils/match_filter_utils.py`
+- Current matcher implementations in `sotd/match/`
+- Mismatch analyzer in `sotd/match/tools/analyzers/`
+- Test infrastructure and quality check tools
+
+## Timeline Estimate
+
+- **Phase 1**: 2-3 chunks (audit + foundation)
+- **Phase 2**: 1 chunk (matcher updates)
+- **Phase 3**: 1 chunk (analyzer updates)
+- **Phase 4**: 1 chunk (integration testing)
+- **Phase 5**: 1 chunk (documentation + cleanup)
+
+**Total**: 6 chunks, estimated 2-3 development sessions
+
+## Notes
+
+- This refactor addresses the core issue where normalization logic was scattered and inconsistent
+- The rename from `normalize_for_storage` to `normalize_for_matching` better reflects the function's broader purpose
+- All changes should be made incrementally with comprehensive testing at each step
+- The goal is to eliminate the confusing "confirmed but not exact" results by ensuring consistent normalization
+description:
+globs:
+alwaysApply: false
+---
+
+### Session Notes (2024-07-10)
+- Updated `BaseMatcher` and `RazorMatcher` to accept an optional `correct_matches_path` argument, enabling test isolation and injection of custom correct_matches files.
+- Updated `_check_correct_matches` to use the canonical `normalize_for_matching` function and added a case-insensitive fallback for backward compatibility with legacy data and tests.
+- Updated the test for correct match priority to inject the test's correct_matches.yaml, ensuring the matcher uses the intended data.
+- Confirmed that all correct match lookups now use the canonical normalization function, eliminating normalization inconsistencies.
+- **Lessons learned:**
+    - Testability for file-based matchers requires injectable file paths for both catalogs and correct_matches.
+    - Case-sensitivity in normalization must be handled carefully; legacy data may require a case-insensitive fallback for a smooth transition.
+    - Consistent normalization logic across all consumers is critical to eliminate "confirmed but not exact" mismatches.
+    - Always update plan files before marking a chunk complete, per project rules.
+
+### Session Notes (2024-07-10)
+- Updated all matcher subclasses (RazorMatcher, BladeMatcher, BrushMatcher, SoapMatcher) to use the canonical normalization function for correct match lookups.
+- All matchers now accept an optional `correct_matches_path` argument, enabling test isolation and injection of custom correct_matches files.
+- Added or updated tests for each matcher to verify that correct match lookups work properly and take priority over regex matches.
+- All matcher tests are passing, confirming consistent normalization and correct match behavior.
+- **Lessons learned:**
+    - Consistent normalization logic across all matcher subclasses is critical for eliminating normalization inconsistencies and "confirmed but not exact" mismatches.
+    - Testability is greatly improved by allowing injection of custom correct_matches files in all matchers.
+    - Updating tests to use file-based injection (rather than patching) provides more realistic and robust coverage.
+    - Always update plan files immediately after completing a chunk, per project rules.
+
+### Session Notes (2024-07-10)
+- Updated `BaseMatcher.normalize()` method to use the canonical `normalize_for_matching()` function, ensuring all matchers use consistent case-preserving normalization.
+- Updated `MismatchAnalyzer` to use the canonical normalization function throughout, eliminating normalization inconsistencies between matchers and analyzers.
+- Updated all failing tests to reflect the new case-preserving normalization behavior:
+  - BaseMatcher tests now expect case-preserved output instead of lowercase
+  - SoapMatcher test now expects case-insensitive matching to be handled by regex fallback, not exact match lookup
+  - MismatchAnalyzer test now correctly reflects that the analyzer identifies exact matches and marks them as correct
+- All tests now pass, confirming that normalization is fully unified across all components.
+- **Lessons learned:**
+    - Case-preserving normalization is essential for correct match consistency; the old lowercase normalization caused "confirmed but not exact" mismatches.
+    - When updating normalization logic, all tests must be updated to reflect the new behavior, not just the implementation.
+    - The mismatch analyzer now correctly identifies exact matches that were previously missed due to normalization inconsistencies.
+    - Unified normalization eliminates the confusing "confirmed but not exact" results by ensuring all components use the same logic.
