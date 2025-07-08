@@ -94,18 +94,76 @@ razor:
     - Blackland Blackbird Ti Lite
     - Blackland Blackbird Ti SB
     - Blackland Blackbird Titanium
+    - Blackland Razors - Blackbird
+    - Blackland Razors Blackbird
+    - Blackland Razors Blackbird Lite
+    - Blackland Razors Blackbird Ti
+    - Blackland SS
     Dart:
     - Blackland Dart
     Era:
     - Blackland - Era
+    - Blackland Era
+    - Blackland Era SB LVL 3
+    - Blackland Razors Era
+    Osprey:
+    - Blackland Osprey
+    - Blackland Razors Osprey
+    - Blackland Razors Osprey Camping Edition
     Sabre:
     - Blackland - Sabre
+    - Blackland Razors Sabre (level 2)
+    - Blackland Razors Sabre lvl 2
+    - Blackland Sabre
+    - Blackland Sabre L2
+    - Blackland Sabre Level 2
+    Sabre V2:
+    - Blackland Sabre 2.0
+    - Blackland Sabre V2
+    - Blackland Sabre v2 Lvl 2
+    - Blackland Sabre v2 Lvl 4
+    Square (Workshop Batch 002):
+    - Blackland Razors - Batch 002
+    - Blackland Square
     Tradere:
     - Blackland - Tradere OC
     Vector:
     - Blackbird Vector
     - Blackland - Vector OC Gold PVD Coated
     - Blackland - Vector SS
+    - Blackland Razors Vector
+    - Blackland Razors Vector (lite)
+    - Blackland Razors Vector Lite
+    - Blackland Vector
+    - Blackland Vector (lite)
+    - Blackland Vector titanium
+    - Blackland, Vector
+  Blutt Rasur:
+    BR-1:
+    - Blutt Rasur BR-1 0.99
+  Bulimica:
+    Safety Razor:
+    - BULIMICA - Rainbow Safety Razor (Green)
+  Böker:
+    Elite Carbon 2.0:
+    - Böker Elite Carbon 2.0
+    King Cutter:
+    - Böker - King cutter
+    - Böker - King Cutter - 6/8 square point - full hollow
+    Straight:
+    - Boker No.1056 - full hollow - Dreadnought point - 5/8
+    - Böker - 14er (8/8", extra hollow, carbon steel, square point)
+    - Böker - Dönges Expert Fire Folder
+    - Böker 14er 8/8" Full Hollow
+    - Böker S.S. Paris Wins (6/8", carbon steel, full hollow, square point)
+  CV Heljestrand:
+    Straight:
+    - C.V. Heljestrand - MK 32
+    - C.V. Heljestrand MK 31 11/16" Söderfors Extra Specialstål Full Hollow
+    - C.V.Heljestrand - No.2
+  Carbon:
+    Cx:
+    - Carbon +
   Cartridge / Disposable:
     ? ''
     : - Bic - Sensitive
@@ -128,6 +186,8 @@ razor:
     - 1961 Gillette 195/Fatboy
     King C. Gillette:
     - '*New* King C. Gillette'
+    Service Razor:
+    - British Gillette 1940's WWII Service Razor
     Slim:
     - 1962 Gillette Slim Adjustable
     - 1963 Gillette Slim Adjustable
@@ -145,6 +205,10 @@ razor:
     - 1964 Gillette Travel Tech Head w
     - 1967 Gillette Travel Tech (M3)
   Other:
+    DE Clone:
+    - Captured Ring Woodwork 34C Clone - Mahogany Handle
+    Shavette:
+    - Burmax Products Aristocrat Shavette
     Shavette (AC):
     - AC Shavette - Orange Scales
     Straight Razor:
@@ -152,6 +216,12 @@ razor:
     - Bengall 5/8
     - Best Solingen 6/8 Hollow Round Point
     - Bismarck - No.49
+    - Campobasso 6/8 full hollow round point
+    - Campobasso, 6/8 full hollow round point
   Schick:
     Injector:
     - 1972 Schick L7 "Championship"
+  Wade & Butcher:
+    Straight:
+    - Butcher & Wade - 6/8" Wedge Barber's Notch
+    - Butcher and Wade with Old Type Cap - Open Comb Frankenrazor

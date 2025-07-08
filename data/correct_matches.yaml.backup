@@ -50,11 +50,73 @@ razor:
     Apex:
     - Aylsworth Apex
     - Aylsworth APEX-SS
+    - Aylsworth Razors - Apex
+    - Aylsworth Razors - Apex Titanium
     Drakkant:
     - Aylesworth Razors - Kopparkant
     - Aylsworth Drakkant
     - Aylsworth Drakkant Brass
     - Aylsworth Kopperkant
+    - Aylsworth Razors - Drakkant SS
+    - Aylsworth Razors - Frank-kant, Drakkant SS
+    - Aylsworth Razors Drakkant Plus
+    - Aylsworth Razors Drakkant Ti
+  Baili:
+    3-Piece:
+    - BAILI - Classic 3-piece DE
+    - Baili - Classic DE
+    - BAILI BR 176
+    - Baili BR172
+    - Baili BT131
+    - Baili Tech Copy
+  Bambaw:
+    Safety Razor:
+    - Bambaw Sea Green
+  Bevel:
+    Essential Disposable:
+    - Bevel Disposable DE
+    - Bevel Essential Disposable Safety Razor
+  Blackland:
+    Blackbird:
+    - Blackland - Blackbird and Van Der Hagen - Traditional Safety Razor
+    - Blackland - Blackbird SS
+    - Blackland - Blackbird Ti
+    - Blackland - Blackbird, DE safety razor, Brass, 101 mm handle \- "Brassbird"
+    - Blackland Blackbird
+    - Blackland Blackbird (Brass)
+    - Blackland Blackbird (SS)
+    - Blackland Blackbird brass
+    - Blackland Blackbird Lite
+    - Blackland Blackbird Lite SS
+    - Blackland Blackbird OC
+    - Blackland Blackbird SS
+    - Blackland Blackbird Ti
+    - Blackland Blackbird Ti Lite
+    - Blackland Blackbird Ti SB
+    - Blackland Blackbird Titanium
+    Dart:
+    - Blackland Dart
+    Era:
+    - Blackland - Era
+    Sabre:
+    - Blackland - Sabre
+    Tradere:
+    - Blackland - Tradere OC
+    Vector:
+    - Blackbird Vector
+    - Blackland - Vector OC Gold PVD Coated
+    - Blackland - Vector SS
+  Cartridge / Disposable:
+    ? ''
+    : - Bic - Sensitive
+      - Bic - Single Blade $PLATIC
+      - Bic 1 blade Disposable
+      - Bic Metal
+      - Bic Sensitive
+      - BiC Sensitive Disposable Razor
+      - BIC Sensitive Single Blade Razor
+      - Bic Single Blade Disposable
+      - BIC single-blade disposable
   Colonial:
     General:
     - AL Colonial General
@@ -80,13 +142,16 @@ razor:
     - 1967 Vintage Gillette SuperSpeed
     Tech:
     - 1953 Gillette Tech
-    - 1964 Gillette Travel Tech Head w/a Maggard SS Handle
+    - 1964 Gillette Travel Tech Head w
     - 1967 Gillette Travel Tech (M3)
   Other:
     Shavette (AC):
     - AC Shavette - Orange Scales
     Straight Razor:
     - Art Razors Capitaine 19/16 Full Hollow Square Tip
+    - Bengall 5/8
+    - Best Solingen 6/8 Hollow Round Point
+    - Bismarck - No.49
   Schick:
     Injector:
     - 1972 Schick L7 "Championship"

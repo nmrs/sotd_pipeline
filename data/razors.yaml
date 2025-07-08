@@ -182,10 +182,11 @@ Berkeley:
     patterns:
     - berkeley
 Blackland:
-  Batch 002:
+  Square (Workshop Batch 002):
     format: Half DE
     patterns:
     - blackland.*batch[0\s-]*2
+    - blackland.*square
   Blackbird:
     patterns:
     - 'bb\s*(sb|oc)'
@@ -211,13 +212,11 @@ Blackland:
   Sabre:
     format: GEM
     patterns:
-    - (?:blackland)?.*sabre
-    - (?:blackland)?.*saber
+    - (?:blackland)?.*sab[re]{2}
   Sabre V2:
     format: GEM
     patterns:
-    - (?:blackland)?.*sabre.*v2
-    - (?:blackland)?.*saber.*v2
+    - (?:blackland)?.*sab[re]{2}.*(\bv2|2\.0\b)
   Tradere:
     patterns:
     - (?:blackland)?.*tradere
@@ -274,32 +273,12 @@ Carbon:
   Cx:
     patterns:
     - carbon.*(cx|razor)
-    - carbon.*shav.*com
+    - carbon.*shav.*co
     - carbon.*316
     - carbon.*orig
-    - carbon.*ti
+    - carbon.*\bti
     - carbon \++
     - carbon razors?
-Cartridge / Disposable:
-  '':
-    format: Cartridge
-    patterns:
-    - atra
-    - '\bbic\b'
-    - \bcart\b
-    - cartridge
-    - dorco.*pace 7
-    - disposable
-    - fusion
-    - gillette blue
-    - gil.*et.*(labs|guard|proglide|joy|venus)
-    - harry
-    - '\blidl\b'
-    - 'mach.*(3|iii)'
-    - pace.*6
-    - simply (?:max|smooth)
-    - (?:schick)?.*hydro.*5
-    - 'trac\b.*(2|ii)'
 Charcoal Goods:
   Everyday:
     patterns:
@@ -539,6 +518,10 @@ Facon:
   Gladiator:
     patterns:
       - facon.*gladiator
+Fasan:
+  Bakelite Slant:
+    patterns:
+    - fasan.*slant
 Fatip:
   Gentile:
     patterns:
@@ -1248,10 +1231,31 @@ OneBlade:
     patterns:
     - oneblade.*hybrid
 Other:
+  Cartridge / Disposable:
+    format: Cartridge
+    patterns:
+    - atra
+    - '\bbic\b'
+    - \bcart\b
+    - cartridge
+    - dorco.*pace 7
+    - disposable
+    - fusion
+    - gillette blue
+    - gil.*et.*(labs|guard|joy|proglide|sensor|venus)
+    - harry
+    - '\blidl\b'
+    - 'mach.*(3|iii)'
+    - pace.*6
+    - simply (?:max|smooth)
+    - (?:schick)?.*hydro.*5
+    - 'trac\b.*(2|ii)'  
+    - shik pla5tik # https://www.reddit.com/r/Wetshaving/comments/1lmfkxs/saturday_lather_games_sotd_thread_jun_28_2025/n0bmt80/
   DE:
     patterns:
     - generic.*(safety|double)
     - german travel razor
+    - pazor.*batch
   DE Clone:
     patterns:
     - ^(?!.*(futur|eagle)).*(knockoff|clone)
@@ -1263,6 +1267,9 @@ Other:
     - hair.*sha
     - marianna
     - burmax.*shavette
+    - grotesque torture implement #https://www.reddit.com/r/Wetshaving/comments/1l1ajgv/monday_lather_games_sotd_thread_jun_02_2025/mvkvysm/
+    - chopstick kamisori
+    - ice ?pick kamisori
   Shavette (AC):
     format: Shavette (AC)
     patterns:
@@ -1276,7 +1283,7 @@ Other:
   Kamisori:
     format: Straight
     patterns:
-    - kamisori
+    - kami
   Straight Razor:
     format: Straight
     patterns:
@@ -1857,7 +1864,7 @@ Supply:
     - sup.*ly.*inject
     - sup.*ly.*2
     - ^(?!.*sentry).*supply.*se
-    - supply single edge
+    - supply.*sing.*edge
     - supply adjustable
     - supply razor
     - ^supply$
@@ -2038,6 +2045,10 @@ Weishi:
   Adjustable:
     patterns:
     - weishi.*adj.
+Well Kept:
+  Safety Razor:
+    patterns:
+    - well kept.*safety razor
 Whityle:
   20T Glide Pro 4D:
     format: Dual Half DE
