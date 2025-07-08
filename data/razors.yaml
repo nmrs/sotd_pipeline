@@ -335,7 +335,7 @@ Classic:
   King Cobra:
     format: AC
     patterns:
-    - king.*cobra
+    - (?:classic.*)?king.*cobra
 Clix:
   E-Z Flo:
     patterns:
@@ -514,10 +514,21 @@ Executive Shaving:
     patterns:
     - exec.*outlaw
     - '\bxec.*outlaw'
-Facon:
+Facón:
+  Shavette (AC):
+    patterns:
+    - fac[oó]n.*(ace|artist|stylist)
   Gladiator:
     patterns:
-      - facon.*gladiator
+      - fac[oó]n.*gladiator
+  Shavette (Half DE):
+    format: Shavette (Half DE)
+    patterns:
+    - fac[oó]n.*shavette
+  Kamisori Shavette:
+    format: Shavette (Half DE)
+    patterns:
+    - fac[oó]n.*kamisori.*shavette
 Fasan:
   Bakelite Slant:
     patterns:
@@ -1265,6 +1276,7 @@ Other:
     - shavette
     - hess.*ezy
     - hair.*sha
+    - kamisori.*shavette
     - marianna
     - burmax.*shavette
     - grotesque torture implement #https://www.reddit.com/r/Wetshaving/comments/1l1ajgv/monday_lather_games_sotd_thread_jun_02_2025/mvkvysm/
