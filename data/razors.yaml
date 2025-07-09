@@ -6,6 +6,10 @@
     format: GEM
     patterns:
     - 3d.*(?:printed)?.*gem
+  Half DE:
+    format: Half DE
+    patterns:
+    - 3d.*(?:printed)?.*half.*de
   Lathercatcher:
     format: GEM
     patterns:
@@ -81,6 +85,17 @@ Art of Shaving:
   Excalibur:
     patterns:
       - aos.*excalibur
+Art Razor:
+  Straight:
+    format: Straight
+    patterns:
+    - yurii.*kravcenko.*(?:\d{1,2}/(8|16))?
+    - art.*razor.*(?:\d{1,2}/(8|16))?
+  Kamisori:
+    format: Straight
+    patterns:
+    - yurii.*kravcenko.*kami
+    - art.*razor.*kami
 Assured for Men:
   Dollar Tree Safety Razor:
     patterns:
@@ -883,6 +898,11 @@ Hendrix Classics & Co:
   Garand:
     patterns:
     - garand
+Henkotsu:
+  Kamisori:
+    format: Straight
+    patterns:
+    - henkotsu.*kami
 Heritage:
   Adjustable:
     patterns:
@@ -1104,6 +1124,11 @@ Maxwell:
     format: Half DE
     patterns:
     - maxwell june
+Max Sprecher:
+  Straight:
+    format: Straight
+    patterns:
+    - max sprecher.*(?:\d{1,2}/(8|16))?
 Merkur:
   '15C':
     patterns:
@@ -1149,7 +1174,7 @@ Merkur:
     - (merkur.*)?51c
   Futur:
     patterns:
-    - ^(?!.*clone).*(merkur)?.*futur
+    - ^(?!.*\b(?:clone|copy)\b).*?(merkur)?.*?futur
   Progress:
     patterns:
     - (pro|mer|di)gress
@@ -1217,6 +1242,9 @@ Occams Razor:
     patterns:
     - enoch
 OliWorks:
+  M3teorite:
+    patterns:
+    - oliworks.*m3teorite
   OliBlade:
     patterns:
     - oli(works|blade)
@@ -1236,7 +1264,7 @@ OneBlade:
   Genesis:
     format: FHS
     patterns:
-    - oneblade.*genesis
+    - one ?blade.*genesis
   Hybrid:
     format: FHS
     patterns:
@@ -1262,6 +1290,8 @@ Other:
     - (?:schick)?.*hydro.*5
     - 'trac\b.*(2|ii)'  
     - shik pla5tik # https://www.reddit.com/r/Wetshaving/comments/1lmfkxs/saturday_lather_games_sotd_thread_jun_28_2025/n0bmt80/
+    - schick xtreme 2
+    - schick skintimate
   DE:
     patterns:
     - generic.*(safety|double)
@@ -1321,7 +1351,6 @@ Other:
     - goldedge
     - green.*lizard
     - hadoson
-    - henkotsu
     - hero.*germany
     - hollow
     - joseph\s*(elliot|allen)
@@ -1406,14 +1435,12 @@ Paradigm:
   Salient:
     patterns:
     - parad.*sal.*
-  Ti Diamondback:
+  Ti:
     patterns:
     - parad.*ti
-    - parad.*ti.*diam
-    - parad.*diam.*ti
   Ti II:
     patterns:
-    - parad.*ii
+    - parad.*ti.*ii
 Paragon:
   Don:
     patterns:
@@ -1554,6 +1581,15 @@ QShave:
   Parthenon:
     patterns:
     - parthenon
+Raido Star:
+  Kamisori:
+    format: Straight
+    patterns:
+    - raido star.*kami
+  Straight:
+    format: Straight
+    patterns:
+    - raido star.*(?:\d{1,2}/(8|16))?
 Ralf Aust:
   Straight:
     format: Straight
@@ -1755,6 +1791,11 @@ SCS:
     - simple.*clean.*shave
     - '\bscs\b'
 Schick:
+  Adjustable Injector:
+    format: Injector
+    patterns:
+    - sc?hick.*adjustable
+    - sc?hick.*\bm(1|2|3)\b
   BBR-1J Kamisori Shavette:
     format: Shavette
     patterns:
@@ -1781,6 +1822,10 @@ Schick:
   Krona:
     patterns:
     - (?:schick)?.*kry?ona
+  Magazine Repeating Razor:
+    format: Other
+    patterns:
+    - magazine.*repeating.*razor
 Segal:
   Unitary:
     patterns:
@@ -1799,7 +1844,6 @@ Shield:
     format: AC
     patterns:
     - shield.*avenger
-    - shield.*ac
   Evolution:
     format: AC
     patterns:
@@ -1807,6 +1851,11 @@ Shield:
   Predator:
     patterns:
     - shield.*pred
+  SE AC:
+    format: AC
+    patterns:
+    - shield.*se.*ac
+    - shield.*ac
 Silver STAR:
   Model 100:
     patterns:
@@ -1870,14 +1919,29 @@ Superior Cuts:
   : patterns:
     - 'superior\s*cuts'
 Supply:
+  SE Pro:
+    format: Injector
+    patterns:
+    - supply.*se.*pro(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+    - supply.*adjustable
+    - supply.*pro
+  SE (Easy Loading):
+    format: Injector
+    patterns:
+    - supply.*se.*easy
+    - supply.*easy.*load
+  SE 2.0:
+    format: Injector
+    patterns:
+    - supply.*se.*2
+    - supply.*v2
+    - sup.*ly.*2
   SE:
     format: Injector
     patterns:
-    - sup.*ly.*inject
-    - sup.*ly.*2
     - ^(?!.*sentry).*supply.*se
-    - supply.*sing.*edge
-    - supply adjustable
+    - sup.*ly.*inject
+    - supply.*single.*edge
     - supply razor
     - ^supply$
 TRC:
