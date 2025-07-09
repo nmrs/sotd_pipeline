@@ -90,12 +90,12 @@ Art Razor:
     format: Straight
     patterns:
     - yurii.*kravcenko.*(?:\d{1,2}/(8|16))?
-    - art.*razor.*(?:\d{1,2}/(8|16))?
+    - \bart\b.*razor.*(?:\d{1,2}/(8|16))?
   Kamisori:
     format: Straight
     patterns:
     - yurii.*kravcenko.*kami
-    - art.*razor.*kami
+    - \bart\b.*razor.*kami
 Assured for Men:
   Dollar Tree Safety Razor:
     patterns:
@@ -339,7 +339,7 @@ CJB:
     format: Shavette (AC)
     patterns:
     - cjb*vett*e
-    - cjb.*kamisori
+    - cjb.*kamisori.*(?:shavette)?
 Classic:
   Cobra Classic:
     format: AC

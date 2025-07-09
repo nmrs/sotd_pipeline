@@ -2,13 +2,19 @@
 """Focused module for soap-specific analysis functionality."""
 
 import json
+import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
 
-from sotd.cli_utils.base_parser import BaseCLIParser
-from sotd.cli_utils.date_span import month_span
-from sotd.match.soap_matcher import analyze_soap_matches
+# Add project root to Python path for direct execution
+project_root = Path(__file__).parent.parent.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from sotd.cli_utils.base_parser import BaseCLIParser  # noqa: E402
+from sotd.cli_utils.date_span import month_span  # noqa: E402
+from sotd.match.soap_matcher import analyze_soap_matches  # noqa: E402
 
 
 class SoapAnalyzer:

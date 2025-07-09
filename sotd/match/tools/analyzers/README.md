@@ -91,6 +91,45 @@ The blade-razor conflict analysis tool uses the following incompatibility rules:
 | CARTRIDGE    | DE, AC, GEM, INJECTOR |
 | DISPOSABLE   | DE, AC, GEM, INJECTOR |
 
+## Blade Format-Aware Duplicate Analysis
+
+### How Format-Aware Duplicates Are Handled
+- Analysis tools (including conflict and Personna blade analyzers) are format-aware and respect the validation rules for blade duplicates.
+- The same blade string (e.g., "Accuforge") may appear under multiple brand/model combinations **if and only if** those combinations represent different blade formats (e.g., DE, GEM, AC).
+- Duplicates within the same format are flagged as errors by the validator and may indicate a data or matching issue.
+
+### Reporting
+- When analyzing matched data, tools will:
+  - Distinguish between legitimate format-aware duplicates and problematic same-format duplicates.
+  - Provide clear reporting and examples for any detected issues.
+  - Reference the format of both the blade and razor in all conflict and duplicate reports.
+- For more details, see:
+  - [Blade Format-Aware Validation Plan](../../../plans/features/blade_format_aware_validation_plan_2025-07-09.mdc)
+  - Schema and examples at the top of `data/correct_matches.yaml`
+  - [Product Matching Validation](../../../docs/product_matching_validation.md)
+
+### Example
+A legitimate format-aware duplicate:
+```yaml
+blade:
+  Personna:
+    GEM PTFE:
+      - "Accuforge"   # GEM format
+    Lab Blue:
+      - "Accuforge"   # DE format
+# This is allowed because GEM PTFE and Lab Blue are different formats.
+```
+A forbidden duplicate (will be flagged):
+```yaml
+blade:
+  Personna:
+    Lab Blue:
+      - "Accuforge"   # DE format
+    Med Prep:
+      - "Accuforge"   # DE format
+# This is NOT allowed because both are DE format.
+```
+
 ## Contributing
 
 When adding new analysis tools:

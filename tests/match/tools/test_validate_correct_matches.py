@@ -198,6 +198,233 @@ class TestCLIInterface:
         assert exit_code == 1
 
 
+class TestBladeFormatAwareValidation:
+    """Test blade format-aware validation scenarios."""
+
+    def test_format_aware_blade_duplicates_allowed(self, tmp_path):
+        """Test that blade duplicates with different formats are allowed."""
+        # Setup correct_matches.yaml with format-aware blade duplicates
+        correct_matches_data = {
+            "blade": {
+                "Personna": {
+                    "GEM PTFE": ["Accuforge"],
+                    "Lab Blue": ["Accuforge"],  # Same string, different format
+                }
+            }
+        }
+
+        # Setup blades.yaml with format information
+        catalog_data = {
+            "GEM": {"Personna": {"GEM PTFE": {"patterns": ["accuforge"], "format": "GEM"}}},
+            "DE": {"Personna": {"Lab Blue": {"patterns": ["accuforge"], "format": "DE"}}},
+        }
+
+        correct_matches_file = tmp_path / "correct_matches.yaml"
+        catalog_file = tmp_path / "blades.yaml"
+        with correct_matches_file.open("w") as f:
+            yaml.dump(correct_matches_data, f)
+        with catalog_file.open("w") as f:
+            yaml.dump(catalog_data, f)
+
+        validator = ValidateCorrectMatches()
+        validator._data_dir = tmp_path  # type: ignore
+
+        # Should not flag format-aware duplicates as errors
+        issues = validator._check_duplicate_strings("blade")
+        assert len(issues) == 0, f"Expected no issues, got: {issues}"
+
+    def test_same_format_blade_duplicates_forbidden(self, tmp_path):
+        """Test that blade duplicates with same format are forbidden."""
+        # Setup correct_matches.yaml with same-format blade duplicates
+        correct_matches_data = {
+            "blade": {
+                "Personna": {
+                    "Lab Blue": ["Accuforge"],
+                    "Med Prep": ["Accuforge"],  # Same string, same format (DE)
+                }
+            }
+        }
+
+        # Setup blades.yaml with format information
+        catalog_data = {
+            "DE": {
+                "Personna": {
+                    "Lab Blue": {"patterns": ["accuforge"], "format": "DE"},
+                    "Med Prep": {"patterns": ["accuforge"], "format": "DE"},
+                }
+            }
+        }
+
+        correct_matches_file = tmp_path / "correct_matches.yaml"
+        catalog_file = tmp_path / "blades.yaml"
+        with correct_matches_file.open("w") as f:
+            yaml.dump(correct_matches_data, f)
+        with catalog_file.open("w") as f:
+            yaml.dump(catalog_data, f)
+
+        validator = ValidateCorrectMatches()
+        validator._data_dir = tmp_path  # type: ignore
+        # Explicitly load the data
+        validator.correct_matches = validator._load_correct_matches()
+        validator.catalog_cache["blade"] = validator._load_catalog("blade")
+
+        # Should flag same-format duplicates as errors
+        issues = validator._check_duplicate_strings("blade")
+        print(f"Debug: Found {len(issues)} issues")
+        print(f"Debug: Issues: {issues}")
+        assert len(issues) == 1, f"Expected 1 issue, got: {issues}"
+        assert issues[0]["issue_type"] == "duplicate_string"
+        assert issues[0]["duplicate_string"] == "Accuforge"
+
+    def test_get_blade_format_returns_correct_format(self, tmp_path):
+        """Test that _get_blade_format returns correct format information."""
+        # Setup blades.yaml with format information
+        catalog_data = {
+            "GEM": {"Personna": {"GEM PTFE": {"patterns": ["accuforge"], "format": "GEM"}}},
+            "DE": {"Personna": {"Lab Blue": {"patterns": ["accuforge"], "format": "DE"}}},
+        }
+
+        catalog_file = tmp_path / "blades.yaml"
+        with catalog_file.open("w") as f:
+            yaml.dump(catalog_data, f)
+
+        validator = ValidateCorrectMatches()
+        validator._data_dir = tmp_path  # type: ignore
+
+        # Test format detection
+        assert validator._get_blade_format("Personna", "GEM PTFE") == "GEM"
+        assert validator._get_blade_format("Personna", "Lab Blue") == "DE"
+        assert validator._get_blade_format("Unknown", "Unknown") == "unknown"
+
+    def test_format_aware_validation_with_real_data(self, tmp_path):
+        """Test format-aware validation with realistic data scenarios."""
+        # Setup realistic correct_matches.yaml with format-aware duplicates
+        correct_matches_data = {
+            "blade": {
+                "Personna": {
+                    "GEM PTFE": ["Accuforge", "Accuforge GEM Microcoat"],
+                    "Lab Blue": ["Accuforge"],  # Same string, different format
+                    "Med Prep": ["AccuTec - Med Prep"],  # Different string
+                },
+                "Astra": {
+                    "Superior Platinum (Green)": ["Astra SP"],
+                    "Superior Stainless (Blue)": ["Astra Blue"],
+                },
+            }
+        }
+
+        # Setup realistic blades.yaml
+        catalog_data = {
+            "GEM": {"Personna": {"GEM PTFE": {"patterns": ["accuforge"], "format": "GEM"}}},
+            "DE": {
+                "Personna": {
+                    "Lab Blue": {"patterns": ["accuforge"], "format": "DE"},
+                    "Med Prep": {"patterns": ["accutec"], "format": "DE"},
+                },
+                "Astra": {
+                    "Superior Platinum (Green)": {"patterns": ["astra"], "format": "DE"},
+                    "Superior Stainless (Blue)": {"patterns": ["astra"], "format": "DE"},
+                },
+            },
+        }
+
+        correct_matches_file = tmp_path / "correct_matches.yaml"
+        catalog_file = tmp_path / "blades.yaml"
+        with correct_matches_file.open("w") as f:
+            yaml.dump(correct_matches_data, f)
+        with catalog_file.open("w") as f:
+            yaml.dump(catalog_data, f)
+
+        validator = ValidateCorrectMatches()
+        validator._data_dir = tmp_path  # type: ignore
+
+        # Should not flag format-aware duplicates as errors
+        issues = validator._check_duplicate_strings("blade")
+        assert len(issues) == 0, f"Expected no issues, got: {issues}"
+
+    def test_validation_error_messages_for_format_aware_duplicates(self, tmp_path):
+        """Test that validation error messages are clear for format-aware scenarios."""
+        # Setup correct_matches.yaml with problematic same-format duplicates
+        correct_matches_data = {
+            "blade": {
+                "Personna": {
+                    "Lab Blue": ["Accuforge"],
+                    "Med Prep": ["Accuforge"],  # Same format, should be forbidden
+                }
+            }
+        }
+
+        catalog_data = {
+            "DE": {
+                "Personna": {
+                    "Lab Blue": {"patterns": ["accuforge"], "format": "DE"},
+                    "Med Prep": {"patterns": ["accuforge"], "format": "DE"},
+                }
+            }
+        }
+
+        correct_matches_file = tmp_path / "correct_matches.yaml"
+        catalog_file = tmp_path / "blades.yaml"
+        with correct_matches_file.open("w") as f:
+            yaml.dump(correct_matches_data, f)
+        with catalog_file.open("w") as f:
+            yaml.dump(catalog_data, f)
+
+        validator = ValidateCorrectMatches()
+        validator._data_dir = tmp_path  # type: ignore
+        # Explicitly load the data
+        validator.correct_matches = validator._load_correct_matches()
+        validator.catalog_cache["blade"] = validator._load_catalog("blade")
+
+        issues = validator._check_duplicate_strings("blade")
+        assert len(issues) == 1
+
+        issue = issues[0]
+        assert issue["issue_type"] == "duplicate_string"
+        assert "format" in issue["suggested_action"].lower()
+        assert "ambiguity" in issue["details"].lower()
+
+    def test_razor_duplicates_still_forbidden(self, tmp_path):
+        """Test that razor duplicates are still forbidden (no format-aware logic)."""
+        # Setup correct_matches.yaml with razor duplicates
+        correct_matches_data = {
+            "razor": {
+                "Blackland": {
+                    "Blackbird": ["Blackland Blackbird"],
+                    "Vector": ["Blackland Blackbird"],  # Duplicate string
+                }
+            }
+        }
+
+        catalog_data = {
+            "DE": {
+                "Blackland": {
+                    "Blackbird": {"patterns": ["blackbird"], "format": "DE"},
+                    "Vector": {"patterns": ["vector"], "format": "DE"},
+                }
+            }
+        }
+
+        correct_matches_file = tmp_path / "correct_matches.yaml"
+        catalog_file = tmp_path / "razors.yaml"
+        with correct_matches_file.open("w") as f:
+            yaml.dump(correct_matches_data, f)
+        with catalog_file.open("w") as f:
+            yaml.dump(catalog_data, f)
+
+        validator = ValidateCorrectMatches()
+        validator._data_dir = tmp_path  # type: ignore
+        # Explicitly load the data
+        validator.correct_matches = validator._load_correct_matches()
+        validator.catalog_cache["razor"] = validator._load_catalog("razor")
+
+        # Should flag razor duplicates as errors (no format-aware logic for razors)
+        issues = validator._check_duplicate_strings("razor")
+        assert len(issues) == 1
+        assert issues[0]["issue_type"] == "duplicate_string"
+        assert issues[0]["duplicate_string"] == "Blackland Blackbird"
+
+
 class TestCatalogLoading:
     """Test catalog loading infrastructure in ValidateCorrectMatches."""
 

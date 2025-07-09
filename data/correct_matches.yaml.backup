@@ -1,115 +1,3 @@
-# correct_matches.yaml
-#
-# SCHEMA AND FORMAT-AWARE VALIDATION RULES
-#
-# This file maps user-submitted product strings to canonical catalog entries for each product type.
-#
-# === Blade Format-Aware Duplicate Rules ===
-# - The same blade string (e.g., "Accuforge") may appear under multiple brand/model combinations
-#   **if and only if** those combinations represent different blade formats (e.g., DE, GEM, AC).
-# - Duplicate blade strings under the SAME format (e.g., both under DE) are FORBIDDEN and will be flagged as errors.
-# - Razor and other product types do NOT allow duplicates anywhere.
-# - The validator uses the format from blades.yaml to determine if a duplicate is legitimate.
-#
-# Example (legitimate):
-#   blade:
-#     Personna:
-#       GEM PTFE:
-#         - "Accuforge"   # GEM format
-#       Lab Blue:
-#         - "Accuforge"   # DE format
-#   # This is allowed because GEM PTFE and Lab Blue are different formats.
-#
-# Example (forbidden):
-#   blade:
-#     Personna:
-#       Lab Blue:
-#         - "Accuforge"   # DE format
-#       Med Prep:
-#         - "Accuforge"   # DE format
-#   # This is NOT allowed because both are DE format.
-#
-# See blade_format_aware_validation_plan_2025-07-09.mdc for full details.
-
-blade:
-  7 O'Clock:
-    Sharpedge (Yellow):
-    - 7'O Clock - Yellow
-    Super Platinum (Black):
-    - 7sp
-  Annie:
-    Hair Shaper:
-    - Annie Hair Shaper
-    - Annie Hair Shaper Blade
-  Asco:
-    Platium:
-    - ASCO Orange Platinum
-  Assured for Men:
-    DE:
-    - Assured for Men
-  Astra:
-    Superior Platinum (Green):
-    - Astra
-    - Astra - Platinum
-    - Astra - Superior Platinum.
-    - Astra Green
-    - Astra Green (Indian)
-    - Astra Green - [ on both razors]
-    - Astra Platinum
-    - Astra Platinum (green)
-    - Astra SP
-    - Astra SP (Green)
-    - Astra SP Green
-    - Astra Super Platinum (Greens)
-    - Astra Superior Platinum
-    - Astra Superior Platinum, DE
-    - Astra Superior Platinum.
-    Superior Stainless (Blue):
-    - Astra - Blue
-    - Astra Blue
-    - Astra Stainless
-    - Astra Superior Stainless (ASS)
-    - Astra Superior Stainless (Blue)
-  Bevel:
-    Double Edge:
-    - Bevel
-    - Bevel DE
-  Bic:
-    Astor Stainless:
-    - Bic Astor
-    - BIC Astor Stainless
-    - Bic Astor Stainless Steel
-    Chrome:
-    - Bic
-    - Bic Chrome
-    - BIC Chrome Platinum
-  Big Ben:
-    Super Stainless:
-    - Big Ben - Super Stainless
-    - Big Ben Stainless Steel
-    - Big Ben Super Stainless (Purple)
-  Bolzano:
-    Superinox:
-    - Bolzano
-    - Bolzano - Superinox
-  Lord:
-    Blue Sword Platinum:
-    - Blue Sword Platinum
-  Personna:
-    GEM PTFE:
-    - Accuforge - Gem Microcoat
-    - AccuForge
-    - Accuforge GEM Microcoat
-    - Accuforge Pro PTFE GEM
-    - AccuTec - Pro Premium Coated
-    - AccuTec Pro Premium
-    - Accutec Pro Premium (GEM)
-    GEM Stainless:
-    - Accuforge GEM coated stainless steel
-    Lab Blue:
-    - Accuforge
-    Med Prep:
-    - AccuTec - Med Prep
 razor:
   3D Printed:
     DE:
@@ -728,7 +616,7 @@ razor:
     - Henson Al 13
     - Henson AL 13 (+)
     - Henson Al 13 Blue
-    - Henson AL 13 Blue -
+    - Henson Al 13 Blue -
     - Henson AL 13 Mild Blue
     - Henson AL-13
     - Henson AL-13 in Copper color
@@ -1161,25 +1049,25 @@ razor:
     - Razorock - Game Changer 84CC / Tatara Masamune OC
     - Razorock .84 GameChanger
     - RazoRock Game Changer .68 Jaws (face) + Leaf (3 blades for the dome)
-    - RazoRock Game Changer .76
+    - Razorock Game Changer .76
     - RazoRock Game Changer .76-P
-    - RazoRock Game Changer .84
+    - Razorock Game Changer .84
     - RazoRock Game Changer .84 (face) + Leaf (3 blades for the dome)
-    - RazoRock Game changer .84 P
-    - RazoRock Game Changer .84-P
+    - Razorock Game changer .84 P
+    - Razorock Game Changer .84-P
     - RazoRock Game Changer 0.84 SB
     - RazoRock Game Changer 0.84-P / MR5
-    - RazoRock Game Changer 1.05
+    - Razorock Game Changer 1.05
     - RazoRock Game Changer Jaws .84 (face) + Leaf (2 blades for the dome)
-    - RazoRock Gamechanger . 84
+    - Razorock Gamechanger . 84
     - RazoRock GameChanger .76-B (CC)
-    - RazoRock Gamechanger .84
+    - Razorock Gamechanger .84
     - RazoRock GameChanger .84 OC
-    - RazoRock Gamechanger .84 w/ Titanium Halo
-    - RazoRock Gamechanger 84
-    - RazoRock Gamechanger, Aylsworth Drakkant Brass
-    - RazoRock GC.84
-    - RazoRock GC.84 $25
+    - Razorock Gamechanger .84 w/ Titanium Halo
+    - Razorock Gamechanger 84
+    - Razorock Gamechanger, Aylsworth Drakkant Brass
+    - Razorock GC.84
+    - Razorock GC.84 $25
     German 37 Slant:
     - RazoRock *German 37*
     - RazoRock - German 37 Slant Razor Torsionshobel,
@@ -1189,24 +1077,24 @@ razor:
     Hawk v3:
     - RazoRock - BLACK HAWK Single Edge Razor
     - RazoRock - Hawk V3
-    - RazoRock Hawk
+    - Razorock Hawk
     - RazoRock Hawk DLC
     - RazoRock Hawk v3
     - RazoRock Hawk v3 Standard
     Lupo:
     - Lupo 95
     - Razorock - Lupo 95OC
-    - RazoRock - Lupo DC
+    - Razorock - Lupo DC
     - RazoRock Lupo .58
     - RazoRock Lupo .72 (face) + Leaf (2 blades for the dome)
     - RazoRock Lupo .72 OC (face) + Leaf (2 blades for the dome)
     - RazoRock Lupo 58
     - RazoRock Lupo 72
     - RazoRock Lupo 72 OC
-    - RazoRock Lupo 95 CC
-    - RazoRock Lupo 95 OC
+    - Razorock Lupo 95 CC
+    - Razorock Lupo 95 OC
     - RazoRock Lupo Black
-    - RazoRock Lupo DC
+    - Razorock Lupo DC
     - RazoRock Lupo, Silver
     - RazoRock Lupo.58
     Mamba:

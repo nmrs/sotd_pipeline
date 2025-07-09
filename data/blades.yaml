@@ -696,7 +696,8 @@ GEM:
       - ptfs
       - gem
       - acc?utec
-      - accu.*(gem|coated|p[ft]{2}e)
+      # - accu.*(gem|coated|p[ft]{2}e)
+      - accuforge
     GEM Stainless:
       patterns:
       - (personna)*gem.*stainless

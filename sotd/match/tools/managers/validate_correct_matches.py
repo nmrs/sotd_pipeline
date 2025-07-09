@@ -1,22 +1,29 @@
+#!/usr/bin/env python3
 """Correct matches validation tool.
 
 This tool validates correct_matches.yaml against current catalog files to ensure
 previously approved matches are still aligned with catalog updates.
 """
 
-import argparse
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
 
-from rich.console import Console
-from rich.table import Table
+# Add project root to Python path for direct execution
+project_root = Path(__file__).parent.parent.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+import argparse  # noqa: E402
+from typing import Dict, List, Optional  # noqa: E402
+
+from rich.console import Console  # noqa: E402
+from rich.table import Table  # noqa: E402
 
 # Import the actual matchers
-from sotd.match.blade_matcher import BladeMatcher
-from sotd.match.brush_matcher import BrushMatcher
-from sotd.match.razor_matcher import RazorMatcher
-from sotd.match.soap_matcher import SoapMatcher
+from sotd.match.blade_matcher import BladeMatcher  # noqa: E402
+from sotd.match.brush_matcher import BrushMatcher  # noqa: E402
+from sotd.match.razor_matcher import RazorMatcher  # noqa: E402
+from sotd.match.soap_matcher import SoapMatcher  # noqa: E402
 
 
 class ValidateCorrectMatches:
@@ -144,6 +151,21 @@ class ValidateCorrectMatches:
                     print(f"   Current:  {current}")
                     print(f"   Should be: {should_be}")
                     print(f"   Action:   {issue['suggested_action']}")
+                elif issue_type == "duplicate_string":
+                    # Compact format for duplicate strings
+                    string = issue["duplicate_string"]
+                    first_loc = (
+                        f"{issue['first_location']['brand']}:{issue['first_location']['model']}"
+                    )
+                    second_loc = (
+                        f"{issue['second_location']['brand']}:{issue['second_location']['model']}"
+                    )
+
+                    print(f"{severity_icon} {issue_type}")
+                    print(f"   String: {string}")
+                    print(f"   First location: {first_loc}")
+                    print(f"   Second location: {second_loc}")
+                    print(f"   Action:   {issue['suggested_action']}")
                 else:
                     # Standard format for other issue types
                     details = issue.get("details", issue.get("suggested_action", "No details"))
@@ -245,6 +267,132 @@ class ValidateCorrectMatches:
 
         catalog = self.catalog_cache[field]
         return brand in catalog and model in catalog[brand]
+
+    def _check_duplicate_strings(self, field: str) -> List[Dict]:
+        """Check for duplicate strings in correct matches.
+
+        Args:
+            field: Field type to check
+
+        Returns:
+            List of duplicate string issues
+        """
+        issues = []
+
+        if self.correct_matches is None or field not in self.correct_matches:
+            return issues
+
+        # Track all strings and their locations with format information
+        string_locations = {}  # string -> list of (brand, model, format) tuples
+
+        for brand, models in self.correct_matches[field].items():
+            for model, correct_matches in models.items():
+                for correct_match in correct_matches:
+                    current_format = None
+                    if field == "blade":
+                        current_format = self._get_blade_format(brand, model)
+                    else:
+                        # For non-blade fields, use a dummy format to ensure duplicates are caught
+                        current_format = "default"
+
+                    # Check if this string already exists with the same format
+                    if correct_match in string_locations:
+                        for (
+                            existing_brand,
+                            existing_model,
+                            existing_format,
+                        ) in string_locations[correct_match]:
+                            # For blades, check if the formats are the same
+                            if field == "blade":
+                                if existing_format == current_format:
+                                    # Found a forbidden duplicate (same format)
+                                    issue = {
+                                        "issue_type": "duplicate_string",
+                                        "field": field,
+                                        "duplicate_string": correct_match,
+                                        "first_location": {
+                                            "brand": existing_brand,
+                                            "model": existing_model,
+                                        },
+                                        "second_location": {"brand": brand, "model": model},
+                                        "severity": "high",
+                                        "suggested_action": (
+                                            f"Remove duplicate string '{correct_match}' from either "
+                                            f"{existing_brand}:{existing_model} or "
+                                            f"{brand}:{model}. "
+                                            f"Each string must appear only once per format in "
+                                            f"correct_matches.yaml"
+                                        ),
+                                        "details": (
+                                            f"String '{correct_match}' appears in both "
+                                            f"{existing_brand}:{existing_model} and "
+                                            f"{brand}:{model} with the same format "
+                                            f"({current_format}). "
+                                            f"This creates ambiguity - the matcher won't know "
+                                            f"which to pick."
+                                        ),
+                                    }
+                                    issues.append(issue)
+                            else:
+                                # For non-blade fields, any duplicate is forbidden
+                                issue = {
+                                    "issue_type": "duplicate_string",
+                                    "field": field,
+                                    "duplicate_string": correct_match,
+                                    "first_location": {
+                                        "brand": existing_brand,
+                                        "model": existing_model,
+                                    },
+                                    "second_location": {"brand": brand, "model": model},
+                                    "severity": "high",
+                                    "suggested_action": (
+                                        f"Remove duplicate string '{correct_match}' from either "
+                                        f"{existing_brand}:{existing_model} or "
+                                        f"{brand}:{model}. "
+                                        f"Each string must appear only once in "
+                                        f"correct_matches.yaml"
+                                    ),
+                                    "details": (
+                                        f"String '{correct_match}' appears in both "
+                                        f"{existing_brand}:{existing_model} and "
+                                        f"{brand}:{model}. "
+                                        f"This creates ambiguity - the matcher won't know "
+                                        f"which to pick."
+                                    ),
+                                }
+                                issues.append(issue)
+
+                    # Add current location to tracking
+                    if correct_match not in string_locations:
+                        string_locations[correct_match] = []
+                    string_locations[correct_match].append((brand, model, current_format))
+
+        return issues
+
+    def _get_blade_format(self, brand: str, model: str) -> str:
+        """Get the format for a blade brand/model combination.
+
+        Args:
+            brand: Brand name
+            model: Model name
+
+        Returns:
+            Format string (e.g., "DE", "GEM", "AC")
+        """
+        if "blade" not in self.catalog_cache:
+            try:
+                self.catalog_cache["blade"] = self._load_catalog("blade")
+            except FileNotFoundError:
+                return "unknown"
+
+        catalog = self.catalog_cache["blade"]
+
+        # Look for the brand in the catalog
+        for format_name, brands in catalog.items():
+            if brand in brands and model in brands[brand]:
+                return format_name
+
+        return "unknown"
 
     def _check_missing_entries(self, field: str) -> List[Dict]:
         """Check for missing catalog entries.
@@ -464,6 +612,7 @@ class ValidateCorrectMatches:
             "better_match": f"Consider better {issue_type} match",
             "invalid_structure": f"Fix {issue_type} data structure",
             "mismatched_entry": f"Update {issue_type} to match catalog",
+            "duplicate_string": f"Remove {issue_type} from correct_matches.yaml",
         }
         return actions.get(issue_type, f"Review and fix {issue_type}")
 
@@ -614,6 +763,10 @@ class ValidateCorrectMatches:
         except FileNotFoundError:
             # If catalog file doesn't exist, we can't validate
             return []
+
+        # Check for duplicate strings first (highest priority)
+        duplicate_issues = self._check_duplicate_strings(field)
+        issues.extend(duplicate_issues)
 
         # Get the matcher for this field
         matcher = self._get_matcher(field)

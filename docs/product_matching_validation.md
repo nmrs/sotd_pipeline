@@ -40,3 +40,42 @@ The old `normalize_for_storage` function is **deprecated** and should not be use
 ## Lessons Learned
 - Consistent, field-aware normalization is critical for robust product matching.
 - All normalization logic must be unified in a single function to avoid subtle bugs and mismatches.
+
+## Blade Format-Aware Duplicate Validation
+
+### Rules for Blade Duplicates
+- The same blade string (e.g., "Accuforge") **may appear under multiple brand/model combinations** in `correct_matches.yaml` **if and only if** those combinations represent different blade formats (e.g., DE, GEM, AC).
+- **Duplicate blade strings under the SAME format** (e.g., both under DE) are **FORBIDDEN** and will be flagged as errors by the validator.
+- Razor and other product types do **NOT** allow duplicates anywhere.
+- The validator uses the format from `blades.yaml` to determine if a duplicate is legitimate.
+
+### Rationale
+This rule allows for legitimate cases where the same blade string is used for different physical blade formats (e.g., "Accuforge" for both GEM and DE Personna blades). It prevents ambiguity within a single format, ensuring that each string maps to only one canonical product per format.
+
+### Examples
+
+#### Legitimate (Allowed)
+```yaml
+blade:
+  Personna:
+    GEM PTFE:
+      - "Accuforge"   # GEM format
+    Lab Blue:
+      - "Accuforge"   # DE format
+# This is allowed because GEM PTFE and Lab Blue are different formats.
+```
+
+#### Forbidden (Will Fail Validation)
+```yaml
+blade:
+  Personna:
+    Lab Blue:
+      - "Accuforge"   # DE format
+    Med Prep:
+      - "Accuforge"   # DE format
+# This is NOT allowed because both are DE format.
+```
+
+### See Also
+- [Blade Format-Aware Validation Plan](../plans/features/blade_format_aware_validation_plan_2025-07-09.mdc)
+- Schema and examples at the top of `data/correct_matches.yaml`

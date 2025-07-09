@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
 """Focused module for brush-specific analysis functionality."""
 
+import sys
 from collections import defaultdict
+from pathlib import Path
 from typing import Dict, List
 
-from rich.table import Table
+# Add project root to Python path for direct execution
+project_root = Path(__file__).parent.parent.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
-from sotd.cli_utils.base_parser import BaseCLIParser
-from sotd.match.tools.utils.analysis_base import AnalysisTool
-from sotd.match.tools.utils.cli_utils import BaseAnalysisCLI
+from rich.table import Table  # noqa: E402
+
+from sotd.cli_utils.base_parser import BaseCLIParser  # noqa: E402
+from sotd.match.tools.utils.analysis_base import AnalysisTool  # noqa: E402
+from sotd.match.tools.utils.cli_utils import BaseAnalysisCLI  # noqa: E402
 
 
 class BrushAnalyzer(AnalysisTool):

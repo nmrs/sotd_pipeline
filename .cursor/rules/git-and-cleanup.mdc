@@ -1,3 +1,658 @@
+---
+alwaysApply: true
+---
+
+# Git and Cleanup Rules
+
+## **CRITICAL**: File Naming with Dates
+
+### **MANDATORY**: Always Use Actual Current Date
+When creating ANY file with a date in the filename, **ALWAYS** run `date +%Y-%m-%d` to get the actual current date. Never use assumed, guessed, or copied dates.
+
+**Examples:**
+```bash
+# ALWAYS do this first:
+CURRENT_DATE=$(date +%Y-%m-%d)
+echo $CURRENT_DATE  # Verify the date
+
+# Then use it in filenames:
+blade_format_aware_validation_plan_${CURRENT_DATE}.mdc
+```
+
+**Common Mistakes:**
+- ❌ Using dates from examples: `plan_2025-01-28.mdc` (wrong!)
+- ❌ Assuming the date: `plan_2025-07-08.mdc` (might be wrong!)
+- ❌ Copying from other files: Using dates from existing files
+
+**Correct Process:**
+1. Run `date +%Y-%m-%d` to get actual current date
+2. Use that exact date in the filename
+3. Double-check the date is correct
+
+## Logical Commit Organization
+
+### **MANDATORY**: Split Changes into Logical Commits
+When making multiple changes, **ALWAYS** organize them into separate, logical commits that can be understood and reviewed independently. Each commit should represent a single, cohesive change.
+
+#### Logical Commit Categories
+1. **Bug Fixes** (`fix:`): Address specific issues or incorrect behavior
+2. **Features** (`feat:`): Add new functionality or capabilities
+3. **Tests** (`test:`): Add, modify, or enhance test coverage
+4. **Refactoring** (`refactor:`): Restructure code without changing behavior
+5. **Documentation** (`docs:`): Update documentation, specs, or comments
+6. **Cleanup** (`cleanup:`): Remove unused code, files, or dependencies
+
+#### Commit Organization Principles
+- **Atomic Changes**: Each commit should be complete and self-contained
+- **Single Responsibility**: One logical change per commit
+- **Reviewable Size**: Commits should be digestible for code review
+- **Dependency Order**: Commit dependencies in logical sequence (tests after code, cleanup after refactoring)
+- **Reversible**: Each commit should be safely revertible without breaking the system
+
+### **MANDATORY**: Commit Size Guidelines
+
+#### **Avoid Overly Granular Commits**
+- ❌ **Too Small**: Single file changes that are part of a larger feature
+- ❌ **Too Small**: Individual test files when they're all testing the same feature
+- ❌ **Too Small**: Documentation updates that could be grouped with related code changes
+- ❌ **Too Small**: Minor fixes that could be combined with related changes
+
+#### **Optimal Commit Sizes**
+
+**✅ Feature Commits**: Complete logical features
+```bash
+# GOOD: Complete feature with CLI, core logic, and basic tests
+git commit -m "feat: implement annual report generation with CLI, engine, and templates"
+
+# BAD: Too granular - split across multiple commits
+git commit -m "feat: add annual report CLI"
+git commit -m "feat: add annual report engine" 
+git commit -m "feat: add annual report templates"
+```
+
+**✅ Test Commits**: All tests for a feature together
+```bash
+# GOOD: Comprehensive test suite for a feature
+git commit -m "test: add comprehensive test suite for annual aggregation including CLI, engine, and integration"
+
+# BAD: Too granular - individual test files
+git commit -m "test: add CLI tests for annual aggregation"
+git commit -m "test: add engine tests for annual aggregation"
+git commit -m "test: add integration tests for annual aggregation"
+```
+
+**✅ Refactor Commits**: Complete refactoring of a module or pattern
+```bash
+# GOOD: Complete refactoring with all related changes
+git commit -m "refactor: unify all file I/O operations with atomic writes and error handling"
+
+# BAD: Too granular - individual module refactoring
+git commit -m "refactor: update aggregate save to use unified utilities"
+git commit -m "refactor: update enrich save to use unified utilities"
+git commit -m "refactor: update report save to use unified utilities"
+```
+
+**✅ Documentation Commits**: Group related docs with their code changes
+```bash
+# GOOD: Documentation with related code changes
+git commit -m "feat: implement brush matching strategy with comprehensive documentation"
+
+# BAD: Separate documentation commits for related code
+git commit -m "feat: implement brush matching strategy"
+git commit -m "docs: add brush matching documentation"
+```
+
+#### **When to Split Commits**
+
+**Split when:**
+- **Different logical concerns**: Feature implementation vs bug fixes
+- **Different modules**: Unrelated functionality changes
+- **Different phases**: Core logic vs CLI vs tests vs documentation
+- **Breaking changes**: Changes that could affect other developers
+
+**Combine when:**
+- **Same logical unit**: All parts of a single feature
+- **Related functionality**: CLI, core logic, and basic tests for same feature
+- **Same module**: Multiple related changes within same file/module
+- **Dependent changes**: Changes that must be deployed together
+
+#### Examples of Good Commit Organization
+
+**Scenario: Adding new brush matching strategy with tests and documentation**
+```bash
+# GOOD: Logical grouping by concern
+git commit -m "feat: add Zenith brush matching strategy with B-series pattern recognition"
+git commit -m "test: add comprehensive test suite for Zenith strategy including unit and integration tests"
+git commit -m "docs: update brush matching specification with Zenith strategy details"
+```
+
+**Scenario: Fixing bug with multiple affected components**
+```bash
+# GOOD: Bug fix with comprehensive test coverage
+git commit -m "fix: correct Declaration Grooming strategy false positive matching with comprehensive test updates"
+```
+
+**Scenario: Refactoring with consistency improvements**
+```bash
+# GOOD: Complete refactoring with all related changes
+git commit -m "refactor: unify delimiter handling and model naming across all brush strategies"
+```
+
+**Scenario: Annual report feature implementation**
+```bash
+# GOOD: Complete feature implementation
+git commit -m "feat: implement annual report generation with CLI, engine, templates, and basic validation"
+git commit -m "test: add comprehensive test suite for annual report functionality including CLI, engine, and integration"
+git commit -m "docs: update report phase specification with annual report details"
+```
+
+#### What NOT to Do
+- ❌ **Monolithic commits**: `git commit -m "fix various issues and add tests"`
+- ❌ **Mixed concerns**: Combining bug fixes with new features in one commit
+- ❌ **Incomplete changes**: Committing broken code that requires follow-up commits
+- ❌ **Generic messages**: `git commit -m "updates"` or `git commit -m "changes"`
+- ❌ **Overly granular**: Single file changes that are part of a larger logical unit
+- ❌ **Scattered tests**: Individual test commits when they all test the same feature
+
+### Commit Message Standards
+
+#### Format Requirements
+Use conventional commit format with clear, descriptive messages:
+```
+<type>: <short description>
+
+[optional longer description explaining why the change was made]
+
+[optional footer with breaking changes or issue references]
+```
+
+#### Message Quality Guidelines
+- **Imperative mood**: "Add feature" not "Added feature" or "Adding feature"
+- **Specific descriptions**: Explain WHAT changed and WHY
+- **Context for reviewers**: Include enough detail for code review
+- **50/72 rule**: First line ≤50 chars, body lines ≤72 chars
+- **No periods**: Don't end the subject line with a period
+
+#### Enhanced Commit Type Examples
+
+**Bug Fixes (`fix:`):**
+- `fix: prevent Declaration Grooming false positives for Zenith B2 patterns`
+- `fix: resolve handle/knot splitting inconsistency with ambiguous delimiters`
+- `fix: correct fiber strategy detection when user input conflicts with catalog`
+
+**Features (`feat:`):**
+- `feat: implement intelligent handle/knot parsing with content analysis scoring`
+- `feat: add support for Chisel & Hound versioned knot patterns (V10-V27)`
+- `feat: integrate real-time catalog validation in brush matching strategies`
+
+**Tests (`test:`):**
+- `test: add comprehensive integration tests using production YAML catalogs`
+- `test: implement model naming consistency validation across all strategies`
+- `test: enhance brush matcher tests with delimiter unification scenarios`
+
+**Refactoring (`refactor:`):**
+- `refactor: consolidate brush catalog files into unified brushes.yaml structure`
+- `refactor: extract common pattern compilation logic into base matcher class`
+- `refactor: simplify strategy priority handling with unified interface`
+
+**Documentation (`docs:`):**
+- `docs: update brush matching specification with intelligent parsing details`
+- `docs: enhance testing patterns to mandate dual unit/integration coverage`
+- `docs: document delimiter semantics and content analysis scoring algorithms`
+
+**Cleanup (`cleanup:`):**
+- `cleanup: remove deprecated knot_maker field and update all references`
+- `cleanup: eliminate unused brush_yaml directory after consolidation`
+- `cleanup: remove redundant imports and apply ruff formatting fixes`
+
+## Comprehensive Rollback Procedures
+
+### **MANDATORY**: Complete Work Rollback
+When asked to undo work or rollback progress, **ALWAYS** perform a comprehensive analysis to identify and remove ALL related changes, not just the primary feature.
+
+#### Rollback Analysis Process
+1. **Review git history** to identify all commits related to the work being undone
+2. **Search for related changes** across the entire codebase that support or depend on the feature
+3. **Identify supporting infrastructure** (tests, documentation, configuration changes)
+4. **Check for integration points** where the feature was integrated into existing systems
+5. **Remove all related changes** in a single, comprehensive rollback
+
+#### **MANDATORY**: Git History Review
+Before performing any rollback, **ALWAYS** examine recent git history to identify all related commits:
+
+```bash
+# Review recent commits to identify all related changes
+git log --oneline -20  # Review last 20 commits
+git log --grep="feature_name" --oneline  # Search for specific feature
+git log --grep="analysis_tool" --oneline  # Example: search for analysis tool commits
+```
+
+#### **MANDATORY**: Cross-Module Impact Analysis
+When rolling back a feature, **ALWAYS** check for changes in related modules that support the feature:
+
+**Example Scenarios:**
+- **Analysis Tool Rollback**: If removing an analysis tool, also check for:
+  - Changes to matchers (razor_matcher.py, brush_matcher.py, etc.)
+  - CLI integration changes
+  - Test files for the tool
+  - Documentation updates
+  - Configuration changes
+  - Import statements added to support the tool
+
+- **Feature Rollback**: If removing a feature, also check for:
+  - Supporting infrastructure changes
+  - Database schema changes
+  - API endpoint modifications
+  - UI/CLI changes
+  - Test coverage additions
+  - Documentation updates
+
+#### **MANDATORY**: Comprehensive Removal Checklist
+When rolling back work, ensure ALL of the following are addressed:
+
+**Code Changes:**
+- [ ] Primary feature files removed
+- [ ] Supporting module changes reverted
+- [ ] Integration points removed
+- [ ] Import statements cleaned up
+- [ ] Configuration changes reverted
+
+**Test Changes:**
+- [ ] Test files for the feature removed
+- [ ] Test fixtures and mock data cleaned up
+- [ ] Integration tests updated
+- [ ] Test configuration changes reverted
+
+**Documentation Changes:**
+- [ ] Feature documentation removed
+- [ ] API documentation updated
+- [ ] README files cleaned up
+- [ ] Specification documents reverted
+
+**Infrastructure Changes:**
+- [ ] Configuration files reverted
+- [ ] Build system changes removed
+- [ ] Dependency changes reverted
+- [ ] Environment setup changes cleaned up
+
+#### **MANDATORY**: Single Rollback Commit
+All rollback changes should be committed together in a single, comprehensive commit:
+
+```bash
+# GOOD: Comprehensive rollback with clear description
+git commit -m "rollback: remove analysis tool and all supporting changes
+
+- Remove analysis tool implementation
+- Revert razor matcher changes that supported the tool
+- Remove test files for the analysis tool
+- Clean up CLI integration changes
+- Remove documentation for the feature
+- Revert configuration changes"
+
+# BAD: Partial rollback that leaves related changes
+git commit -m "rollback: remove analysis tool"
+# Missing: razor matcher changes, tests, documentation, etc.
+```
+
+#### **MANDATORY**: Validation After Rollback
+After completing a rollback, **ALWAYS** validate that the system is in a clean state:
+
+```bash
+# Run quality checks to ensure no broken references
+make format lint typecheck test
+
+# Check for any remaining references to removed features
+grep -r "removed_feature_name" . --include="*.py" --exclude-dir=.git
+
+# Verify imports are clean
+grep -r "from.*removed_module" . --include="*.py" --exclude-dir=.git
+```
+
+#### Rollback Examples
+
+**Example 1: Analysis Tool Rollback**
+```bash
+# Scenario: Remove analysis tool that required razor matcher changes
+# 1. Review git history for all related commits
+git log --grep="analysis" --oneline
+
+# 2. Identify all related changes:
+# - sotd/match/tools/analysis_tool.py (primary feature)
+# - sotd/match/razor_matcher.py (supporting changes)
+# - tests/match/tools/test_analysis_tool.py (tests)
+# - docs/analysis_tool_spec.md (documentation)
+
+# 3. Remove all changes in single commit
+git rm sotd/match/tools/analysis_tool.py
+git checkout HEAD~1 -- sotd/match/razor_matcher.py  # Revert supporting changes
+git rm tests/match/tools/test_analysis_tool.py
+git rm docs/analysis_tool_spec.md
+
+# 4. Commit comprehensive rollback
+git commit -m "rollback: remove analysis tool and all supporting infrastructure
+
+- Remove analysis tool implementation and tests
+- Revert razor matcher changes that supported the tool
+- Remove documentation and specifications
+- Clean up all integration points"
+```
+
+**Example 2: Feature Rollback with Multiple Dependencies**
+```bash
+# Scenario: Remove feature that touched multiple modules
+# 1. Review git history for feature-related commits
+git log --grep="feature_name" --oneline
+
+# 2. Identify all related changes across modules
+# - Primary feature files
+# - Supporting infrastructure changes
+# - Test coverage additions
+# - Documentation updates
+# - Configuration changes
+
+# 3. Comprehensive rollback
+git checkout HEAD~3 -- module1.py  # Revert to state before feature
+git checkout HEAD~2 -- module2.py  # Revert supporting changes
+git rm -r feature_directory/       # Remove feature files
+git rm tests/test_feature.py       # Remove tests
+git rm docs/feature_spec.md        # Remove documentation
+
+# 4. Commit with detailed description
+git commit -m "rollback: remove feature_name and all related changes
+
+- Remove primary feature implementation
+- Revert supporting changes in module1.py and module2.py
+- Remove test coverage for the feature
+- Clean up documentation and specifications
+- Revert configuration changes"
+```
+
+#### What NOT to Do During Rollback
+- ❌ **Partial rollback**: Removing only the primary feature without supporting changes
+- ❌ **Multiple commits**: Splitting rollback across multiple commits
+- ❌ **Incomplete cleanup**: Leaving references to removed features
+- ❌ **No validation**: Not running tests after rollback
+- ❌ **Generic messages**: `git commit -m "rollback changes"`
+- ❌ **Missing dependencies**: Not checking for changes in related modules
+
+#### **MANDATORY**: Rollback Documentation
+When performing a rollback, **ALWAYS** document the reason and scope:
+
+```bash
+# Include detailed description in commit message
+git commit -m "rollback: remove feature_name due to [reason]
+
+- Remove primary feature implementation
+- Revert supporting changes in [list modules]
+- Remove test coverage and documentation
+- Clean up all integration points
+
+Reason: [explain why rollback was necessary]
+Impact: [describe what was affected]"
+```
+
+## Plan Management and Naming Conventions
+
+### **MANDATORY**: Completed Plan Naming Convention
+When moving implementation plans to the `plans/completed/` folder, **ALWAYS** include the completion date in the filename to avoid conflicts and maintain historical tracking.
+
+#### Format: `{plan_name}_{YYYY-MM-DD}.mdc`
+
+**Examples:**
+- `refactoring_implementation_plan_2024-12-19.mdc`
+- `bug_fix_plan_2024-12-20.mdc`
+- `feature_implementation_plan_2024-12-21.mdc`
+
+#### **MANDATORY**: Use Actual Current Date
+**ALWAYS** use the actual current date when creating plan filenames. **NEVER** assume or guess the date.
+
+**Correct Process:**
+1. **Get actual current date**: Use `date +%Y-%m-%d` command
+2. **Use exact date**: Include the actual date in the filename
+3. **Verify accuracy**: Double-check the date is correct
+
+**CRITICAL**: When creating ANY file with a date in the filename, **ALWAYS** run `date +%Y-%m-%d` to get the actual current date. Never use dates from examples or assume what the date should be.
+
+**Examples:**
+```bash
+# GOOD: Get actual current date
+date +%Y-%m-%d  # Returns actual current date like 2025-07-09
+
+# GOOD: Use actual date in filename
+ml_matching_enhancement_plan_2025-07-09.mdc
+
+# BAD: Assume or guess date
+ml_matching_enhancement_plan_2025-01-27.mdc  # Wrong date!
+
+# BAD: Use date from examples
+blade_format_aware_validation_plan_2025-01-28.mdc  # Wrong date!
+```
+
+**Common Mistakes to Avoid:**
+- ❌ Using dates from examples or documentation
+- ❌ Assuming the date based on context
+- ❌ Using yesterday's or tomorrow's date
+- ❌ Copying dates from other files
+- ❌ Using placeholder dates like "2025-01-01"
+
+#### Why This Matters
+- **Avoids conflicts**: Multiple plans with the same name can coexist
+- **Historical tracking**: Easy to see when plans were completed
+- **Better organization**: Clear timeline of project milestones
+- **Future reference**: Can track how long different types of work take
+- **Accuracy**: Prevents confusion from incorrect dates
+
+### **MANDATORY**: Unified Plan Completion Policy
+**ALL completed plans** (regardless of their original location) must be moved to `plans/completed/` with appropriate subfolder organization.
+
+#### Plan Organization Structure
+```
+plans/
+├── completed/
+│   ├── bugs/                    # Completed bug fix plans
+│   │   ├── match_phase_output_bug_plan_2025-01-27.mdc
+│   │   └── ...
+│   ├── data-recovery/           # Completed data recovery plans
+│   │   ├── missing_months_recovery_plan_2025-06-20.mdc
+│   │   └── ...
+│   ├── features/                # Completed feature implementation plans
+│   │   ├── annual_report_plan_2025-06-20.mdc
+│   │   └── ...
+│   ├── refactoring/             # Completed refactoring plans
+│   │   ├── refactoring_implementation_plan_2024-12-19.mdc
+│   │   └── ...
+│   └── ...                      # Other categories as needed
+├── bugs/                        # Active bug fix plans
+├── data-recovery/               # Active data recovery plans
+├── features/                    # Active feature plans
+└── ...                          # Other active plan categories
+```
+
+#### Benefits of Unified Policy
+- **Single source of truth**: All completed work in one location
+- **Easy discovery**: Can quickly find all completed plans regardless of origin
+- **Consistent organization**: Same structure for all completed work
+- **Historical tracking**: Clear timeline of all project milestones
+- **Better archival**: Proper separation of active vs completed work
+
+#### Process for Completing Plans
+1. **Update the plan** with final completion status and summary
+2. **Create subfolder** in `plans/completed/` if it doesn't exist (e.g., `plans/completed/bugs/`)
+3. **Move to completed folder** with date suffix: `plans/completed/{category}/{plan_name}_{YYYY-MM-DD}.mdc`
+4. **Remove original** from source location
+5. **Commit both changes** together with descriptive message
+
+#### Example Workflow
+```bash
+# 1. Update plan with completion status
+# 2. Create subfolder if needed
+mkdir -p plans/completed/bugs
+
+# 3. Get actual current date
+CURRENT_DATE=$(date +%Y-%m-%d)
+
+# 4. Move with actual date suffix using git mv
+git mv plans/bugs/match_phase_output_bug_plan.mdc plans/completed/bugs/match_phase_output_bug_plan_${CURRENT_DATE}.mdc
+
+# 5. Remove original (git mv handles this automatically)
+# No need for separate rm command when using git mv
+
+# 6. Commit the rename
+git commit -m "docs(plan): mark match phase output bug plan complete and move to completed/bugs with date suffix"
+```
+
+#### **MANDATORY**: Use `git mv` for Plan Renames
+- ✅ **Use**: `git mv plans/bugs/plan.mdc plans/completed/bugs/plan_YYYY-MM-DD.mdc`
+- ❌ **Don't use**: `mv plans/bugs/plan.mdc plans/completed/bugs/plan_YYYY-MM-DD.mdc`
+- **Why**: `git mv` explicitly tells Git this is a rename operation, preserving file history and showing up as "rename" in git log
+- **Benefit**: Better semantic tracking and cleaner git history
+
+#### Commit Message Pattern for Plan Completion
+- `docs(plan): mark {plan_name} complete and move to completed/{category} with date suffix`
+- `docs(plan): complete {plan_name} implementation and archive in completed/{category}`
+
+#### Subfolder Categories
+- **`bugs/`**: Bug fix plans and investigations
+- **`data-recovery/`**: Data recovery and missing data plans
+- **`features/`**: Feature implementation plans
+- **`refactoring/`**: Code refactoring and restructuring plans
+- **`testing/`**: Test implementation and improvement plans
+- **`documentation/`**: Documentation improvement plans
+- **`performance/`**: Performance optimization plans
+- **`infrastructure/`**: Infrastructure and tooling plans
+
+#### What NOT to Do
+- ❌ **Generic names**: `plan.mdc` or `implementation.mdc`
+- ❌ **No date suffix**: `match_phase_bug.mdc` (will conflict with future plans)
+- ❌ **Separate commits**: Moving and updating in different commits
+- ❌ **Incomplete status**: Moving plans without final completion summary
+- ❌ **Mixed categories**: Putting plans in wrong subfolders
+- ❌ **Leaving originals**: Not removing the original plan file after moving
+- ❌ **Assumed dates**: Using guessed or assumed dates instead of actual current date
+- ❌ **Wrong dates**: Using dates from examples, documentation, or assuming the date
+- ❌ **Date copying**: Copying dates from other files or using placeholder dates
+
+#### Migration from Old Structure
+When migrating existing completed plans to the new structure:
+1. **Identify completed plans** in subdirectories
+2. **Create appropriate subfolders** in `plans/completed/`
+3. **Move with git mv** using proper naming convention
+4. **Update any references** to the old plan locations
+5. **Commit all changes** together with descriptive message
+
+## Git Ignore Patterns
+- Use `!data/*.yaml` to include all YAML catalogs without listing each file individually
+- Exclude temporary files, logs, and generated data
+- Keep override files and configuration templates
+
+```gitignore
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
+```
+
+## File Cleanup Guidelines
+- Remove redundant files when consolidating data structures
+- Update imports when moving or removing modules
+- Clean up unused test fixtures and mock data
+- Remove deprecated code paths after refactoring
+
+## Refactoring Cleanup Checklist
+When removing or consolidating code:
+
+1. **Search for all references** using grep/ripgrep
+2. **Update imports** in affected modules
+3. **Remove unused test files** and fixtures
+4. **Update .gitignore** if file patterns change
+5. **Check for broken imports** with `make typecheck`
+6. **Run full test suite** to catch integration issues
+7. **Update documentation** if APIs change
+
+## Temporary File Management
+- Use `tmp_path` fixture in tests for temporary files
+- Clean up generated test data in teardown
+- Don't commit temporary debugging files
+- Use descriptive names for temporary variables (avoid `temp`, `tmp`)
+
+## Code Removal Best Practices
+```python
+# Before removing a function/class, check usage:
+# grep -r "function_name" . --include="*.py"
+
+# When removing fields from data structures:
+# 1. Update all tests that reference the field
+# 2. Update documentation/specs
+# 3. Check for serialization/deserialization code
+# 4. Verify no downstream consumers depend on the field
+
+# Example: Removing knot_maker field
+# ✓ Remove from strategy return values
+# ✓ Remove from test assertions  
+# ✓ Update documentation
+# ✓ Check for any enrichment code using the field
+```
+
+## Dependency Cleanup
+- Remove unused imports at the top of files
+- Use `ruff --fix` to automatically remove unused imports
+- Check for unused dependencies in requirements.txt
+- Remove commented-out code blocks
+
+## Data Migration Patterns
+When consolidating data files:
+
+```python
+# Pattern for migrating from multiple files to single file
+def migrate_brush_data():
+    """Example: Consolidating brush_yaml/* into brushes.yaml"""
+    old_files = [
+        "data/brush_yaml/known_brushes.yaml",
+        "data/brush_yaml/other_brushes.yaml",
+        "data/brush_yaml/dg_brushes.yaml"
+    ]
+    
+    consolidated = {}
+    for file_path in old_files:
+        if Path(file_path).exists():
+            with open(file_path) as f:
+                data = yaml.safe_load(f)
+                consolidated.update(data)
+    
+    # Write consolidated file
+    with open("data/brushes.yaml", "w") as f:
+        yaml.dump(consolidated, f, default_flow_style=False)
+```
+
+## Commit Message Patterns
+- `feat:` for new features
+- `fix:` for bug fixes  
+- `refactor:` for code restructuring
+- `test:` for test changes
+- `docs:` for documentation
+- `cleanup:` for removing unused code/files
+
+Examples:
+- `cleanup: remove redundant brush_yaml folder and consolidate into brushes.yaml`
+- `refactor: remove knot_maker field as redundant with brand`
+- `fix: correct handle_maker key naming in brush matcher tests`
+
+Examples:
+- `cleanup: remove redundant brush_yaml folder and consolidate into brushes.yaml`
+- `refactor: remove knot_maker field as redundant with brand`
+- `fix: correct handle_maker key naming in brush matcher tests`
 # Git and Cleanup Rules
 
 ## Logical Commit Organization
