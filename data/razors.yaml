@@ -1221,7 +1221,7 @@ Mühle:
   R89:
     patterns:
     - R(89|106)
-    - "m[u\xFC]hle.*89"
+    - "m[uü]hle.*89"
   Rocca:
     patterns:
     - '\brocca\b'

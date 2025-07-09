@@ -31,3 +31,4 @@ praw.ini
 .env
 *.bk
 *.bk/data/correct_matches.yaml.backup
+data/backup/

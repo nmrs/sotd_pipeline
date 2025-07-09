@@ -119,7 +119,7 @@ DE:
       patterns:
       - albatross
   Asco:
-    Platium:
+    Platinum:
       patterns:
       - asco.*plat
     Super Stainless:
@@ -165,10 +165,10 @@ DE:
     Superinox:
       patterns:
       - b(o|a)la?z(o|a)n(o|a)
-  "Bo\u0308ker":
+  Böker:
     DE:
       patterns:
-      - "b[o\xF6]ker"
+      - b[oö]ker
   Bulimica:
     DE:
       patterns:
@@ -340,7 +340,7 @@ DE:
       patterns:
       - gil.*winner(?:.*black)?
       - winner
-  "Gl\xE4tz":
+  "Glätz":
     Super Platinum:
       patterns:
       - glatz
@@ -400,14 +400,14 @@ DE:
     DE:
       patterns:
       - my.*blades
-  "M\xFChle":
+  "Mühle":
     Traditional:
       patterns:
-      - "m[u\xFC]hle"
+      - "m[uü]hle"
   Neva:
     Super Stainless:
       patterns:
-      - "\u041D\u0435\u0432\u0430"
+      - "Нева"
       - neva
   PAA:
     Platinum Strangelet Super Sharps:
@@ -654,10 +654,10 @@ DE:
     Platinum:
       patterns:
       - zircon.*plat
-  "Zomchi\u0301":
+  "Zomchí":
     Superior Platinum:
       patterns:
-      - "zomch(i\u0301|i)"
+      - "zomch(í|i)"
   Zorrik:
     Super Platinum:
       patterns:
@@ -696,8 +696,7 @@ GEM:
       - ptfs
       - gem
       - acc?utec
-      # - accu.*(gem|coated|p[ft]{2}e)
-      - accuforge
+      - accu.*(gem|coated|p[ft]{2}e)
     GEM Stainless:
       patterns:
       - (personna)*gem.*stainless

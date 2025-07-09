@@ -344,7 +344,7 @@ Barrister and Mann:
       patterns:
       - '\bb ?(and|&|\+) ?m\b.*mar\w*n'
       - 'barris.*mar\w*n'
-    "Me\u0301lange":
+    "Mélange":
       patterns:
       - '\bb ?(and|&|\+) ?m\b.*m\wlange'
       - 'barris.*m\wlange'
@@ -602,7 +602,7 @@ Catie's Bubbles:
       - '\bcb\b.*b\w+g\w+t bay'
     Blugere:
       patterns:
-      - "blug(e|e\u0300)re"
+      - "blug(e|è)re"
     Cape Code Cranberry:
       patterns:
       - cape cod cranberry
@@ -622,7 +622,7 @@ Catie's Bubbles:
       - '\bcb\b.*dftr'
     Glace Herbe:
       patterns:
-      - "glac(e|e\u0301) herbe"
+      - "glac(e|é) herbe"
     Greek Fire:
       patterns:
       - greek fire
@@ -646,10 +646,10 @@ Catie's Bubbles:
       - cat.*bubb.*maggard
     Massepain:
       patterns:
-      - "(catie|cb).*mass(e|e\u0301)pain"
+      - "(catie|cb).*mass(e|é)pain"
     Menage a Lavande:
       patterns:
-      - "m(e|e\u0301)nage.*lavand"
+      - "m(e|é)nage.*lavand"
     Mille Chypre:
       patterns:
       - (catie|cb).*mille chypre
@@ -1609,12 +1609,12 @@ Klar Seifen:
   - 'klar(?: seifen)?'
 Kupa:
   patterns:
-  - "(k\u0443\u043F\u0430|kupa)"
+  - "(kупа|kupa)"
   scents:
     Shave Cream:
       format: Cream
       patterns:
-      - "(k\u0443\u043F\u0430|kupa)"
+      - "(kупа|kupa)"
 Kyna:
   format: Cream
   patterns:
@@ -1820,7 +1820,7 @@ Martin de Candre:
       patterns:
       - agrumes
       - argumes
-    "Foug\xE8re":
+    "Fougère":
       patterns:
       - 'martin.*foug.re'
       - '\bmdc\b.*foug.re'
@@ -1835,7 +1835,7 @@ Martin de Candre:
       - candre.*rose
     Vetyver:
       patterns:
-      - "martin.*candre.*v(e|e\u0301)t(i|y)ver"
+      - "martin.*candre.*v(e|é)t(i|y)ver"
 Marting Soaps:
   patterns:
   - 'marting( soaps)?'
@@ -2022,7 +2022,7 @@ Noble Otter:
       patterns:
       - jasmine green tea
       - noble.*jasmine.*tea
-      - "\u8309\u8389\u7DA0\u8336"
+      - "茉莉綠茶"
     King:
       patterns:
       - 'nob.*otter.*king(?!s)'
@@ -2985,7 +2985,7 @@ The Gentlemen's Groom Room:
       - highland bothy
 The Goodfellas Smile:
   patterns:
-  - "(the )?goodfella('|\u2019)?s('|\u2019)? smile"
+  - "(the )?goodfella('|’)?s('|’)? smile"
   scents:
     Abysso:
       patterns:

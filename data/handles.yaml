@@ -425,7 +425,7 @@ manufacturer_handles:
     - mountain.*hare
   Muhle:
     patterns:
-    - "\\bm[u\xFC]hle\\b"
+    - "\\bm[uü]hle\\b"
   Mutiny:
     patterns:
     - mutiny
