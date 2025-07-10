@@ -285,55 +285,69 @@ class ValidateCorrectMatches:
         # Track all strings and their locations with format information
         string_locations = {}  # string -> list of (brand, model, format) tuples
 
-        for brand, models in self.correct_matches[field].items():
-            for model, correct_matches in models.items():
-                for correct_match in correct_matches:
-                    current_format = None
-                    if field == "blade":
-                        current_format = self._get_blade_format(brand, model)
-                    else:
-                        # For non-blade fields, use a dummy format to ensure duplicates are caught
-                        current_format = "default"
+        if field == "blade":
+            # Special handling for blade structure: format -> brand -> model -> strings
+            for format_name, brands in self.correct_matches[field].items():
+                for brand, models in brands.items():
+                    for model, correct_matches in models.items():
+                        for correct_match in correct_matches:
+                            current_format = format_name  # Use the format from the structure
 
-                    # Check if this string already exists with the same format
-                    if correct_match in string_locations:
-                        for (
-                            existing_brand,
-                            existing_model,
-                            existing_format,
-                        ) in string_locations[correct_match]:
-                            # For blades, check if the formats are the same
-                            if field == "blade":
-                                if existing_format == current_format:
-                                    # Found a forbidden duplicate (same format)
-                                    issue = {
-                                        "issue_type": "duplicate_string",
-                                        "field": field,
-                                        "duplicate_string": correct_match,
-                                        "first_location": {
-                                            "brand": existing_brand,
-                                            "model": existing_model,
-                                        },
-                                        "second_location": {"brand": brand, "model": model},
-                                        "severity": "high",
-                                        "suggested_action": (
-                                            f"Remove duplicate string '{correct_match}' from "
-                                            f"either {existing_brand}:{existing_model} or "
-                                            f"{brand}:{model}. "
-                                            f"Each string must appear only once per format in "
-                                            f"correct_matches.yaml"
-                                        ),
-                                        "details": (
-                                            f"String '{correct_match}' appears in both "
-                                            f"{existing_brand}:{existing_model} and "
-                                            f"{brand}:{model} with the same format "
-                                            f"({current_format}). "
-                                            f"This creates ambiguity - the matcher won't know "
-                                            f"which to pick."
-                                        ),
-                                    }
-                                    issues.append(issue)
-                            else:
+                            # Check if this string already exists with the same format
+                            if correct_match in string_locations:
+                                for (
+                                    existing_brand,
+                                    existing_model,
+                                    existing_format,
+                                ) in string_locations[correct_match]:
+                                    if existing_format == current_format:
+                                        # Found a forbidden duplicate (same format)
+                                        issue = {
+                                            "issue_type": "duplicate_string",
+                                            "field": field,
+                                            "duplicate_string": correct_match,
+                                            "first_location": {
+                                                "brand": existing_brand,
+                                                "model": existing_model,
+                                            },
+                                            "second_location": {"brand": brand, "model": model},
+                                            "severity": "high",
+                                            "suggested_action": (
+                                                f"Remove duplicate string '{correct_match}' from "
+                                                f"either {existing_brand}:{existing_model} or "
+                                                f"{brand}:{model}. "
+                                                f"Each string must appear only once per format in "
+                                                f"correct_matches.yaml"
+                                            ),
+                                            "details": (
+                                                f"String '{correct_match}' appears in both "
+                                                f"{existing_brand}:{existing_model} and "
+                                                f"{brand}:{model} with the same format "
+                                                f"({current_format}). "
+                                                f"This creates ambiguity - the matcher won't know "
+                                                f"which to pick."
+                                            ),
+                                        }
+                                        issues.append(issue)
+
+                            # Add current location to tracking
+                            if correct_match not in string_locations:
+                                string_locations[correct_match] = []
+                            string_locations[correct_match].append((brand, model, current_format))
+        else:
+            # Standard handling for other fields: brand -> model -> strings
+            for brand, models in self.correct_matches[field].items():
+                for model, correct_matches in models.items():
+                    for correct_match in correct_matches:
+                        current_format = "default"  # For non-blade fields
+
+                        # Check if this string already exists
+                        if correct_match in string_locations:
+                            for (
+                                existing_brand,
+                                existing_model,
+                                existing_format,
+                            ) in string_locations[correct_match]:
                                 # For non-blade fields, any duplicate is forbidden
                                 issue = {
                                     "issue_type": "duplicate_string",
@@ -362,10 +376,10 @@ class ValidateCorrectMatches:
                                 }
                                 issues.append(issue)
 
-                    # Add current location to tracking
-                    if correct_match not in string_locations:
-                        string_locations[correct_match] = []
-                    string_locations[correct_match].append((brand, model, current_format))
+                        # Add current location to tracking
+                        if correct_match not in string_locations:
+                            string_locations[correct_match] = []
+                        string_locations[correct_match].append((brand, model, current_format))
 
         return issues
 
@@ -408,19 +422,37 @@ class ValidateCorrectMatches:
         if self.correct_matches is None or field not in self.correct_matches:
             return issues
 
-        for brand, models in self.correct_matches[field].items():
-            for model in models:
-                if not self._check_brand_model_exists(field, brand, model):
-                    issues.append(
-                        {
-                            "issue_type": "missing_entry",
-                            "field": field,
-                            "brand": brand,
-                            "model": model,
-                            "severity": "high",
-                            "suggested_action": f"Add {brand} {model} to {field} catalog",
-                        }
-                    )
+        if field == "blade":
+            # Special handling for blade structure: format -> brand -> model
+            for format_name, brands in self.correct_matches[field].items():
+                for brand, models in brands.items():
+                    for model in models:
+                        if not self._check_brand_model_exists(field, brand, model):
+                            issues.append(
+                                {
+                                    "issue_type": "missing_entry",
+                                    "field": field,
+                                    "brand": brand,
+                                    "model": model,
+                                    "severity": "high",
+                                    "suggested_action": f"Add {brand} {model} to {field} catalog",
+                                }
+                            )
+        else:
+            # Standard handling for other fields: brand -> model
+            for brand, models in self.correct_matches[field].items():
+                for model in models:
+                    if not self._check_brand_model_exists(field, brand, model):
+                        issues.append(
+                            {
+                                "issue_type": "missing_entry",
+                                "field": field,
+                                "brand": brand,
+                                "model": model,
+                                "severity": "high",
+                                "suggested_action": f"Add {brand} {model} to {field} catalog",
+                            }
+                        )
 
         return issues
 
@@ -438,12 +470,23 @@ class ValidateCorrectMatches:
         if self.correct_matches is None or field not in self.correct_matches:
             return issues
 
-        for brand, models in self.correct_matches[field].items():
-            for model in models:
-                if self._check_brand_model_exists(field, brand, model):
-                    # Check if any fields have changed
-                    # This is a simplified check - in practice you'd compare specific fields
-                    pass
+        if field == "blade":
+            # Special handling for blade structure: format -> brand -> model
+            for format_name, brands in self.correct_matches[field].items():
+                for brand, models in brands.items():
+                    for model in models:
+                        if self._check_brand_model_exists(field, brand, model):
+                            # Check if any fields have changed
+                            # This is a simplified check - in practice you'd compare specific fields
+                            pass
+        else:
+            # Standard handling for other fields: brand -> model
+            for brand, models in self.correct_matches[field].items():
+                for model in models:
+                    if self._check_brand_model_exists(field, brand, model):
+                        # Check if any fields have changed
+                        # This is a simplified check - in practice you'd compare specific fields
+                        pass
 
         return issues
 
@@ -461,17 +504,50 @@ class ValidateCorrectMatches:
         if self.correct_matches is None or field not in self.correct_matches:
             return issues
 
-        for brand, models in self.correct_matches[field].items():
-            if not isinstance(models, dict):
-                issues.append(
-                    {
-                        "issue_type": "invalid_structure",
-                        "field": field,
-                        "brand": brand,
-                        "severity": "high",
-                        "suggested_action": f"Fix structure for {brand} in {field}",
-                    }
-                )
+        if field == "blade":
+            # Special handling for blade structure: format -> brand -> model
+            for format_name, brands in self.correct_matches[field].items():
+                if not isinstance(brands, dict):
+                    issues.append(
+                        {
+                            "issue_type": "invalid_structure",
+                            "field": field,
+                            "format": format_name,
+                            "severity": "high",
+                            "suggested_action": (
+                                f"Fix structure for format {format_name} in {field}"
+                            ),
+                        }
+                    )
+                    continue
+
+                for brand, models in brands.items():
+                    if not isinstance(models, dict):
+                        issues.append(
+                            {
+                                "issue_type": "invalid_structure",
+                                "field": field,
+                                "format": format_name,
+                                "brand": brand,
+                                "severity": "high",
+                                "suggested_action": (
+                                    f"Fix structure for {brand} in {format_name} format"
+                                ),
+                            }
+                        )
+        else:
+            # Standard handling for other fields: brand -> model
+            for brand, models in self.correct_matches[field].items():
+                if not isinstance(models, dict):
+                    issues.append(
+                        {
+                            "issue_type": "invalid_structure",
+                            "field": field,
+                            "brand": brand,
+                            "severity": "high",
+                            "suggested_action": f"Fix structure for {brand} in {field}",
+                        }
+                    )
 
         return issues
 
@@ -772,33 +848,67 @@ class ValidateCorrectMatches:
         matcher = self._get_matcher(field)
 
         # Validate each correct match entry
-        for brand, models in self.correct_matches[field].items():
-            for model, correct_matches in models.items():
-                for correct_match in correct_matches:
-                    # Use the actual matcher to see what this would match to
-                    match_result = self._match_using_catalog_patterns(matcher, correct_match)
-
-                    # Check if the match result matches our expected brand/model
-                    if match_result and "brand" in match_result and "model" in match_result:
-                        actual_brand = match_result["brand"]
-                        actual_model = match_result["model"]
-
-                        if actual_brand != brand or actual_model != model:
-                            issues.append(
-                                {
-                                    "issue_type": "mismatched_entry",
-                                    "field": field,
-                                    "correct_match": correct_match,
-                                    "expected_brand": brand,
-                                    "expected_model": model,
-                                    "actual_brand": actual_brand,
-                                    "actual_model": actual_model,
-                                    "severity": "high",
-                                    "suggested_action": (
-                                        f"Update correct match to {actual_brand} {actual_model}"
-                                    ),
-                                }
+        if field == "blade":
+            # Special handling for blade structure: format -> brand -> model -> strings
+            for format_name, brands in self.correct_matches[field].items():
+                for brand, models in brands.items():
+                    for model, correct_matches in models.items():
+                        for correct_match in correct_matches:
+                            # Use the actual matcher to see what this would match to
+                            match_result = self._match_using_catalog_patterns(
+                                matcher, correct_match
                             )
+
+                            # Check if the match result matches our expected brand/model
+                            if match_result and "brand" in match_result and "model" in match_result:
+                                actual_brand = match_result["brand"]
+                                actual_model = match_result["model"]
+
+                                if actual_brand != brand or actual_model != model:
+                                    issues.append(
+                                        {
+                                            "issue_type": "mismatched_entry",
+                                            "field": field,
+                                            "correct_match": correct_match,
+                                            "expected_brand": brand,
+                                            "expected_model": model,
+                                            "actual_brand": actual_brand,
+                                            "actual_model": actual_model,
+                                            "severity": "high",
+                                            "suggested_action": (
+                                                f"Update correct match to {actual_brand} {actual_model}"
+                                            ),
+                                        }
+                                    )
+        else:
+            # Standard handling for other fields: brand -> model -> strings
+            for brand, models in self.correct_matches[field].items():
+                for model, correct_matches in models.items():
+                    for correct_match in correct_matches:
+                        # Use the actual matcher to see what this would match to
+                        match_result = self._match_using_catalog_patterns(matcher, correct_match)
+
+                        # Check if the match result matches our expected brand/model
+                        if match_result and "brand" in match_result and "model" in match_result:
+                            actual_brand = match_result["brand"]
+                            actual_model = match_result["model"]
+
+                            if actual_brand != brand or actual_model != model:
+                                issues.append(
+                                    {
+                                        "issue_type": "mismatched_entry",
+                                        "field": field,
+                                        "correct_match": correct_match,
+                                        "expected_brand": brand,
+                                        "expected_model": model,
+                                        "actual_brand": actual_brand,
+                                        "actual_model": actual_model,
+                                        "severity": "high",
+                                        "suggested_action": (
+                                            f"Update correct match to {actual_brand} {actual_model}"
+                                        ),
+                                    }
+                                )
 
         return issues
 
