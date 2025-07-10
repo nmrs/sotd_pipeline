@@ -166,6 +166,18 @@ class ValidateCorrectMatches:
                     print(f"   First location: {first_loc}")
                     print(f"   Second location: {second_loc}")
                     print(f"   Action:   {issue['suggested_action']}")
+                elif issue_type == "format_mismatch":
+                    # Compact format for format mismatches
+                    brand = issue["brand"]
+                    model = issue["model"]
+                    correct_format = issue["correct_format"]
+                    expected_format = issue["expected_format"]
+
+                    print(f"{severity_icon} {issue_type}")
+                    print(f"   Product: {brand} {model}")
+                    print(f"   Current format: {correct_format}")
+                    print(f"   Expected format: {expected_format}")
+                    print(f"   Action:   {issue['suggested_action']}")
                 else:
                     # Standard format for other issue types
                     details = issue.get("details", issue.get("suggested_action", "No details"))
@@ -844,6 +856,10 @@ class ValidateCorrectMatches:
         duplicate_issues = self._check_duplicate_strings(field)
         issues.extend(duplicate_issues)
 
+        # Check for format mismatches (blade field only)
+        format_issues = self._check_format_mismatches(field)
+        issues.extend(format_issues)
+
         # Get the matcher for this field
         matcher = self._get_matcher(field)
 
@@ -969,6 +985,63 @@ class ValidateCorrectMatches:
             return match_result["matched"]
 
         return None
+
+    def _check_format_mismatches(self, field: str) -> List[Dict]:
+        """Check for format mismatches between correct_matches.yaml and catalog.
+
+        Args:
+            field: Field type to check (only applies to blade field)
+
+        Returns:
+            List of format mismatch issues
+        """
+        issues = []
+
+        if field != "blade":
+            # Only blade field has format structure
+            return issues
+
+        if self.correct_matches is None or field not in self.correct_matches:
+            return issues
+
+        # Load blade catalog if not already loaded
+        if "blade" not in self.catalog_cache:
+            try:
+                self.catalog_cache["blade"] = self._load_catalog("blade")
+            except FileNotFoundError:
+                return issues
+
+        # Check each blade entry in correct_matches.yaml
+        for correct_format, brands in self.correct_matches[field].items():
+            for brand, models in brands.items():
+                for model in models:
+                    # Find what format this brand/model should be in according to blades.yaml
+                    expected_format = self._get_blade_format(brand, model)
+
+                    if expected_format != "unknown" and expected_format != correct_format:
+                        issues.append(
+                            {
+                                "issue_type": "format_mismatch",
+                                "field": field,
+                                "brand": brand,
+                                "model": model,
+                                "correct_format": correct_format,
+                                "expected_format": expected_format,
+                                "severity": "high",
+                                "suggested_action": (
+                                    f"Move {brand} {model} from {correct_format} format to "
+                                    f"{expected_format} format in correct_matches.yaml"
+                                ),
+                                "details": (
+                                    f"Brand {brand} model {model} is listed under "
+                                    f"{correct_format} format in correct_matches.yaml but "
+                                    f"should be under {expected_format} format according to "
+                                    f"blades.yaml"
+                                ),
+                            }
+                        )
+
+        return issues
 
     def main(self, args: Optional[List[str]] = None) -> int:
         """Main entry point for CLI.
