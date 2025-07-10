@@ -155,6 +155,12 @@ def strip_blade_count_patterns(value: str) -> str:
     )
     cleaned = re.sub(superscript_ordinal_pattern, "", cleaned, flags=re.IGNORECASE)
 
+    # Pattern for superscript ordinal patterns without 'use': (2^(nd)), (3^(rd)), etc.
+    superscript_ordinal_no_use_pattern = (
+        r"(?:[\(\[\{])\s*(\d+)\^\(\s*(?:st|nd|rd|th)\s*\)\s*[\)\]\}]"
+    )
+    cleaned = re.sub(superscript_ordinal_no_use_pattern, "", cleaned, flags=re.IGNORECASE)
+
     # Clean up extra whitespace and normalize
     cleaned = re.sub(r"\s+", " ", cleaned)  # Normalize whitespace
     cleaned = cleaned.strip()
