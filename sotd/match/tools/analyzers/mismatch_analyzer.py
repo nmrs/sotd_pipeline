@@ -981,6 +981,7 @@ class MismatchAnalyzer(AnalysisTool):
                         "sources": set(),
                         "mismatch_types": set(),
                         "reasons": set(),
+                        "comment_ids": set(),
                     }
                 grouped[group_key]["count"] += 1
                 grouped[group_key]["mismatch_types"].add(mismatch_type)
@@ -988,6 +989,9 @@ class MismatchAnalyzer(AnalysisTool):
                 source = item["record"].get("_source_file", "")
                 if source:
                     grouped[group_key]["sources"].add(source)
+                comment_id = item["record"].get("id", "")
+                if comment_id:
+                    grouped[group_key]["comment_ids"].add(comment_id)
 
         # Convert groups to list format with deterministic sorting
         grouped_mismatches = []
@@ -1004,6 +1008,7 @@ class MismatchAnalyzer(AnalysisTool):
             modified_item = group_info["item"].copy()
             modified_item["count"] = group_info["count"]
             modified_item["sources"] = sorted(list(group_info["sources"]))
+            modified_item["comment_ids"] = sorted(list(group_info["comment_ids"]))
             # Choose the highest priority mismatch type present
             mismatch_types = sorted(list(group_info["mismatch_types"]))
             for p in priority:
@@ -1041,6 +1046,7 @@ class MismatchAnalyzer(AnalysisTool):
         table.add_column("Matched", style="green")
         table.add_column("Pattern", style="blue")
         table.add_column("Reason", style="red")
+        table.add_column("Comment IDs", style="dim")
         table.add_column("Sources", style="dim")
 
         # Get limits and filters with defaults
@@ -1054,6 +1060,7 @@ class MismatchAnalyzer(AnalysisTool):
             mismatch_type = item["mismatch_type"]
             count = item["count"]
             sources = item["sources"]
+            comment_ids = item["comment_ids"]
 
             norm_original = item["norm_original"]
             matched = self._get_matched_text(field, field_data.get("matched", {}))
@@ -1075,6 +1082,17 @@ class MismatchAnalyzer(AnalysisTool):
             # Format sources
             sources_text = ", ".join(sources) if sources else ""
 
+            # Format comment IDs (show first few, then count)
+            if comment_ids:
+                if len(comment_ids) <= 3:
+                    comment_ids_text = ", ".join(comment_ids)
+                else:
+                    comment_ids_text = (
+                        f"{', '.join(comment_ids[:3])}... (+{len(comment_ids) - 3} more)"
+                    )
+            else:
+                comment_ids_text = ""
+
             # Create row data based on field type
             table.add_row(
                 str(row_number),
@@ -1085,9 +1103,10 @@ class MismatchAnalyzer(AnalysisTool):
                 matched,
                 pattern,
                 reason,
+                comment_ids_text,
                 sources_text,
             )
-            table.add_row("", "", "", "", "", "", "", "")  # Blank row for spacing
+            table.add_row("", "", "", "", "", "", "", "", "", "")  # Blank row for spacing
             displayed_items.append(item)
             row_number += 1
 
@@ -1118,6 +1137,7 @@ class MismatchAnalyzer(AnalysisTool):
         table.add_column("Pattern", style="blue")
         table.add_column("Match Type", style="magenta")
         table.add_column("Correct", style="dim")
+        table.add_column("Comment IDs", style="dim")
         table.add_column("Source", style="dim")
 
         # Create lookup for mismatches
@@ -1158,9 +1178,12 @@ class MismatchAnalyzer(AnalysisTool):
                     "match_type": match_type,
                     "source": source,
                     "record_ids": set(),
+                    "comment_ids": set(),
                 }
             grouped[key]["count"] += 1
             grouped[key]["record_ids"].add(record_id)
+            if record_id:
+                grouped[key]["comment_ids"].add(record_id)
 
         # Sort groups for deterministic display order
         sorted_groups = sorted(
@@ -1173,6 +1196,7 @@ class MismatchAnalyzer(AnalysisTool):
             count = group["count"]
             field_data = group["field_data"]
             source = group["source"]
+            comment_ids = sorted(list(group["comment_ids"]))
             # Escape pattern for Rich table display
             pattern_disp = self._escape_pattern_for_display(pattern)
             # No truncation, let it wrap
@@ -1192,6 +1216,17 @@ class MismatchAnalyzer(AnalysisTool):
             else:
                 status = f"{self.mismatch_indicators['potential_mismatch']} Potential Mismatch"
 
+            # Format comment IDs (show first few, then count)
+            if comment_ids:
+                if len(comment_ids) <= 3:
+                    comment_ids_text = ", ".join(comment_ids)
+                else:
+                    comment_ids_text = (
+                        f"{', '.join(comment_ids[:3])}... (+{len(comment_ids) - 3} more)"
+                    )
+            else:
+                comment_ids_text = ""
+
             # Create row data based on field type
             table.add_row(
                 str(row_number),
@@ -1202,6 +1237,7 @@ class MismatchAnalyzer(AnalysisTool):
                 pattern_disp,
                 match_type,
                 correct_indicator,
+                comment_ids_text,
                 source,
             )
             displayed_matches.append(
@@ -1234,6 +1270,7 @@ class MismatchAnalyzer(AnalysisTool):
         table.add_column("Matched", style="green")
         table.add_column("Pattern", style="blue")
         table.add_column("Match Type", style="magenta")
+        table.add_column("Comment IDs", style="dim")
         table.add_column("Source", style="dim")
 
         # Track displayed matches for mark-correct functionality
@@ -1278,9 +1315,12 @@ class MismatchAnalyzer(AnalysisTool):
                     "match_type": match_type,
                     "source": source,
                     "record_ids": set(),
+                    "comment_ids": set(),
                 }
             grouped[key]["count"] += 1
             grouped[key]["record_ids"].add(record_id)
+            if record_id:
+                grouped[key]["comment_ids"].add(record_id)
 
         # Sort groups for deterministic display order
         sorted_groups = sorted(
@@ -1293,6 +1333,7 @@ class MismatchAnalyzer(AnalysisTool):
             count = group["count"]
             field_data = group["field_data"]
             source = group["source"]
+            comment_ids = sorted(list(group["comment_ids"]))
             # Escape pattern for Rich table display
             pattern_disp = self._escape_pattern_for_display(pattern)
 
@@ -1306,6 +1347,17 @@ class MismatchAnalyzer(AnalysisTool):
                 if matched_dict:  # Add null check
                     format_info = matched_dict.get("format", "")
 
+            # Format comment IDs (show first few, then count)
+            if comment_ids:
+                if len(comment_ids) <= 3:
+                    comment_ids_text = ", ".join(comment_ids)
+                else:
+                    comment_ids_text = (
+                        f"{', '.join(comment_ids[:3])}... (+{len(comment_ids) - 3} more)"
+                    )
+            else:
+                comment_ids_text = ""
+
             # Create row data based on field type
             table.add_row(
                 str(row_number),
@@ -1315,6 +1367,7 @@ class MismatchAnalyzer(AnalysisTool):
                 format_info,
                 pattern_disp,
                 match_type,
+                comment_ids_text,
                 source,
             )
             displayed_matches.append(
@@ -1345,6 +1398,7 @@ class MismatchAnalyzer(AnalysisTool):
         table.add_column("Original", style="yellow")
         table.add_column("Matched", style="green")
         table.add_column("Pattern", style="blue")
+        table.add_column("Comment IDs", style="dim")
         table.add_column("Source", style="dim")
 
         # Track displayed matches for mark-correct functionality
@@ -1393,9 +1447,12 @@ class MismatchAnalyzer(AnalysisTool):
                     "match_type": match_type,
                     "source": source,
                     "record_ids": set(),
+                    "comment_ids": set(),
                 }
             grouped[key]["count"] += 1
             grouped[key]["record_ids"].add(record_id)
+            if record_id:
+                grouped[key]["comment_ids"].add(record_id)
 
         # Sort groups for deterministic display order
         sorted_groups = sorted(
@@ -1407,6 +1464,7 @@ class MismatchAnalyzer(AnalysisTool):
         for (norm_original, matched_text, pattern, match_type), group in sorted_groups[:limit]:
             field_data = group["field_data"]
             source = group["source"]
+            comment_ids = sorted(list(group["comment_ids"]))
             # Escape pattern for Rich table display
             pattern_disp = self._escape_pattern_for_display(pattern)
             # No truncation, let it wrap
@@ -1418,6 +1476,17 @@ class MismatchAnalyzer(AnalysisTool):
                 if matched_dict:  # Add null check
                     format_info = matched_dict.get("format", "")
 
+            # Format comment IDs (show first few, then count)
+            if comment_ids:
+                if len(comment_ids) <= 3:
+                    comment_ids_text = ", ".join(comment_ids)
+                else:
+                    comment_ids_text = (
+                        f"{', '.join(comment_ids[:3])}... (+{len(comment_ids) - 3} more)"
+                    )
+            else:
+                comment_ids_text = ""
+
             # Create row data based on field type
             table.add_row(
                 str(row_number),
@@ -1425,6 +1494,7 @@ class MismatchAnalyzer(AnalysisTool):
                 matched_text,
                 format_info,
                 pattern_disp,
+                comment_ids_text,
                 source,
             )
             displayed_matches.append(
