@@ -1,36 +1,229 @@
-# correct_matches.yaml
-#
-# SCHEMA AND FORMAT-AWARE VALIDATION RULES
-#
-# This file maps user-submitted product strings to canonical catalog entries for each product type.
-#
-# === Blade Format-Aware Duplicate Rules ===
-# - The same blade string (e.g., "Accuforge") may appear under multiple brand/model combinations
-#   **if and only if** those combinations represent different blade formats (e.g., DE, GEM, AC).
-# - Duplicate blade strings under the SAME format (e.g., both under DE) are FORBIDDEN and will be flagged as errors.
-# - Razor and other product types do NOT allow duplicates anywhere.
-# - The validator uses the format from blades.yaml to determine if a duplicate is legitimate.
-#
-# Example (legitimate):
-#   blade:
-#     Personna:
-#       GEM PTFE:
-#         - "Accuforge"   # GEM format
-#       Lab Blue:
-#         - "Accuforge"   # DE format
-#   # This is allowed because GEM PTFE and Lab Blue are different formats.
-#
-# Example (forbidden):
-#   blade:
-#     Personna:
-#       Lab Blue:
-#         - "Accuforge"   # DE format
-#       Med Prep:
-#         - "Accuforge"   # DE format
-#   # This is NOT allowed because both are DE format.
-#
-# See blade_format_aware_validation_plan_2025-07-09.mdc for full details.
-
+blade:
+  7 O'Clock:
+    Sharpedge (Yellow):
+    - 7'O Clock - Yellow
+    - Gillette - 7 O'Clock Sharp Edge
+    - Gillette 7 O'Clock (Yellow)
+    - Gillette 7 O'Clock Sharp Edge
+    - Gillette 7 O'Clock Sharp Edge (yellow)
+    - Gillette 7 O'Clock SharpEdge
+    - Gillette 7 O'clock SharpEdge .
+    - Gillette 7 O'Clock SharpEdge Yellow
+    - Gillette 7 O'Clock Yellow
+    Super Platinum (Black):
+    - 7sp
+    - Gilette 7 O'Clock - Super Platinum
+    - Gillette - 7 o'clock Super Platinum.
+    - Gillette 7o'clock Black
+    Super Stainless (Green):
+    - Gilette 7 O' Clock Super Stainless (Green)
+    - Gillette 7 O Clock Green
+    - Gillette 7 O'Clock Stainless (Green)
+    - Gillette 7 O'Clock Stainless Green
+    - Gillette 7 O'Clock Super Stainless (Green)
+    - Gillette 7 O'clock Super Stainless (green), DE
+  Annie:
+    Hair Shaper:
+    - Annie Hair Shaper
+    - Annie Hair Shaper Blade
+  Asco:
+    Platinum:
+    - ASCO Orange Platinum
+  Assured for Men:
+    DE:
+    - Assured for Men
+  Astra:
+    Superior Platinum (Green):
+    - Astra
+    - Astra - Platinum
+    - Astra - Superior Platinum.
+    - Astra Green
+    - Astra Green (Indian)
+    - Astra Green - [ on both razors]
+    - Astra Platinum
+    - Astra Platinum (green)
+    - Astra SP
+    - Astra SP (Green)
+    - Astra SP Green
+    - Astra Super Platinum (Greens)
+    - Astra Superior Platinum
+    - Astra Superior Platinum, DE
+    - Astra Superior Platinum.
+    - Gillette Astra Platinum Green
+    Superior Stainless (Blue):
+    - Astra - Blue
+    - Astra Blue
+    - Astra Stainless
+    - Astra Superior Stainless (ASS)
+    - Astra Superior Stainless (Blue)
+    - Gillette Astra Stainless Blue
+    - Gillette Astra Superior Stainless Blue
+  Bevel:
+    Double Edge:
+    - Bevel
+    - Bevel DE
+  Bic:
+    Astor Stainless:
+    - Bic Astor
+    - BIC Astor Stainless
+    - Bic Astor Stainless Steel
+    Chrome:
+    - Bic
+    - Bic Chrome
+    - BIC Chrome Platinum
+  Big Ben:
+    Super Stainless:
+    - Big Ben - Super Stainless
+    - Big Ben Stainless Steel
+    - Big Ben Super Stainless (Purple)
+  Bolzano:
+    Superinox:
+    - Bolzano
+    - Bolzano - Superinox
+    - Bolzano Superinox
+  Cloud:
+    A77:
+    - Cloud A77 Full Blade
+    Super Stainless:
+    - Cloud Super Blades
+  Crown:
+    Super Stainless:
+    - Crown - Super Stainless
+  Crystal:
+    Super:
+    - Crystal
+  Derby:
+    Extra:
+    - Derby - Extra
+    - Derby Extra
+    Premium:
+    - Derby Premium
+  Dorco:
+    HST-300:
+    - Dorco HST-300-P1 1/2 DE
+    Prime Platinum:
+    - Dorco Prime Platinum
+    ST-300:
+    - Dorco
+    - Dorco Stainless
+    Titan:
+    - Dorco Titan
+  Durablade:
+    Sharp Hi Chromium:
+    - Durablade Sharp Hi Chromium
+  Feather:
+    DE:
+    - Feather
+    - Feather (DE)
+    - Feather - Hi-Stainless
+    - Feather - HiStainless
+    - Feather Hi Stainless
+    - Feather Hi-Stainless
+    - Feather Stainless
+    FHS-1:
+    - Feather ASD-10
+    - Feather FHS-10
+    - FHS-10
+    Pro:
+    - Feather - Professional
+    - Feather Artist Club PRO
+    - Feather Artist Club Professional
+    - Feather Artist Club Professional (SE)
+    - Feather Pro
+    - Feather Pro (AC)
+    - Feather Professional
+    - Feather Professional AC Blade
+    Pro Super:
+    - Feather Pro Super
+    - Feather Professional Super
+    ProGuard:
+    - Feather - Pro Guard
+    - Feather - Pro guard Artis club
+    - Feather Artist Club Pro Guard
+    - Feather Pro Guard
+    - Feather ProGuard
+  Filoso:
+    Platinum:
+    - Filoso
+    - Filoso - Platinum Blade
+    - Filoso - The Barbers Blade
+  FlyDear:
+    Super Platinum:
+    - FlyDear
+    - FlyDear - 9/10
+  Fromm:
+    Hair Shaper:
+    - Fromm
+    - Fromm - Hair Shaper
+    - FROMM Hair Shaper Blade
+  GEM:
+    Blue Star:
+    - Gem - Blue Star uncoated blade
+    - Gem - Blue Star uncoated blades
+    - GEM Blue Star
+  Generic:
+    Kai Clone:
+    - Chinese KAI Clone
+  Gillette:
+    '365':
+    - Gillette 365
+    Blue:
+    - Gillette - Blue Blade
+    - Gillette Blue
+    Minora:
+    - Gillette - Minora
+    - Gillette - Minora Stainless.
+    - Gillette Minora
+    - Gillette Minora Stainless.
+    Nacet:
+    - Gillette - Nacet
+    - Gillette - Nacet Stainless
+    - Gillette Nacet
+    - Gillette Nacet.
+    Perma-Sharp:
+    - Gillete PermaSharp
+    - Gillette - Perma Sharp
+    - Gillette - Permasharp
+    - Gillette Green - Permasharp
+    Platinum:
+    - Gillette - Platinum
+    - Gillette - Platinum (half in Kamisori , whole in Overlander )
+    Silver Blue:
+    - Gillete Silver Blue
+    - Gillette - Silver Blue
+    Super Thin Platinum:
+    - Gillette - Super thin Platinum
+  King C Gillette:
+    DE:
+    - Gillette - King C Gillette Blades
+  Lord:
+    Blue Sword Platinum:
+    - Blue Sword Platinum
+  Personna:
+    GEM PTFE:
+    - Accuforge - Gem Microcoat
+    - AccuForge Coated
+    - Accuforge GEM coated stainless steel
+    - Accuforge GEM Microcoat
+    - Accuforge Pro PTFE GEM
+    - AccuTec - Pro Premium Coated
+    - AccuTec Pro Premium
+    - Accutec Pro Premium (GEM)
+    - GEM
+    - Gem Blade
+    - GEM PTFE
+    - GEM PTFE (?)
+    - GEM PTFE / Schick Injector
+    - GEM SS PTFE
+    GEM Stainless:
+    - GEM stainless
+    Lab Blue:
+    - Accuforge
+    Med Prep:
+    - AccuTec - Med Prep
+  Tatra:
+    Platinum:
+    - Czech Blades Tatra Platinum Stainless
 razor:
   3D Printed:
     DE:
@@ -625,6 +818,9 @@ razor:
   Greencult:
     GC 2.0:
     - Green Cult 2.0 Plate II
+  Gutche:
+    A77 Shavette:
+    - Gutche A77 Shavette
   H&S Co.:
     NO75:
     - Haircut & Save Co. - No75 Stainless Steel
@@ -931,13 +1127,13 @@ razor:
     - Chopstick Kamisori
     - ChronnoCrafts Ice Pick Kamisori 2.0
     - Grotesque Torture Implement $MEDIEVAL
-    - Gutche A77 Shavette
     - K-TEL Hair Magician Shavette
     - Kismet Shavette
-    - Knight A77 Shavette
     - Stainless Steel Barber Razor Shavette - Alibaba
     - Unbranded Shavette
     - Weller Shavette
+    Shavette (A77):
+    - Knight A77 Shavette
     Shavette (AC):
     - AC Shavette - Orange Scales
     Shavette (Disposable):
