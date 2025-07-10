@@ -13,6 +13,8 @@ class BladeMatcher(BaseMatcher):
     ):
         super().__init__(catalog_path, "blade", correct_matches_path=correct_matches_path)
         self.patterns = self._compile_patterns()
+        # Pre-compute normalized correct matches for performance
+        self._normalized_correct_matches = self._precompute_normalized_correct_matches()
 
     def _compile_patterns(self):
         compiled = []
@@ -39,6 +41,66 @@ class BladeMatcher(BaseMatcher):
             return (-length_score, -complexity_score, -boundary_score)
 
         return sorted(compiled, key=pattern_sort_key)
+
+    def _precompute_normalized_correct_matches(self) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Pre-compute normalized correct matches for performance.
+
+        Returns a dictionary mapping normalized strings to their match data.
+        """
+        from sotd.utils.match_filter_utils import normalize_for_matching
+
+        if not self.correct_matches:
+            return {}
+
+        normalized_matches = {}
+
+        # Iterate through all formats in correct matches
+        for format_name, format_data in self.correct_matches.items():
+            if not isinstance(format_data, dict):
+                continue
+
+            # Iterate through all brands in this format
+            for brand, brand_data in format_data.items():
+                if not isinstance(brand_data, dict):
+                    continue
+
+                # Iterate through all models in this brand
+                for model, strings in brand_data.items():
+                    if not isinstance(strings, list):
+                        continue
+
+                    # Find the catalog entry for this brand/model in this format
+                    catalog_entry = None
+                    if format_name in self.catalog:
+                        format_brands = self.catalog[format_name]
+                        if brand in format_brands and model in format_brands[brand]:
+                            catalog_entry = format_brands[brand][model]
+
+                    if catalog_entry is None:
+                        # If not found in catalog, use empty dict
+                        catalog_entry = {}
+
+                    # Build matched data structure
+                    matched = {
+                        "brand": brand,
+                        "model": model,
+                        "format": format_name,
+                    }
+                    # Add all other catalog fields except patterns and format
+                    for key, val in catalog_entry.items():
+                        if key not in ["patterns", "format"]:
+                            matched[key] = val
+
+                    # Check if this string matches any of the correct strings
+                    for correct_string in strings:
+                        normalized_correct = normalize_for_matching(correct_string, field="blade")
+                        if normalized_correct:
+                            if normalized_correct not in normalized_matches:
+                                normalized_matches[normalized_correct] = []
+                            normalized_matches[normalized_correct].append(matched)
+
+        return normalized_matches
 
     def _match_with_regex(self, value: str) -> Dict[str, Any]:
         """Match blade using regex patterns."""
@@ -94,7 +156,7 @@ class BladeMatcher(BaseMatcher):
         """
         from sotd.utils.match_filter_utils import normalize_for_matching
 
-        if not value or not self.correct_matches:
+        if not value or not self._normalized_correct_matches:
             return []
 
         # Use canonical normalization function
@@ -102,57 +164,8 @@ class BladeMatcher(BaseMatcher):
         if not normalized_value:
             return []
 
-        all_matches = []
-
-        # Iterate through all formats in correct matches
-        for format_name, format_data in self.correct_matches.items():
-            if not isinstance(format_data, dict):
-                continue
-
-            # Iterate through all brands in this format
-            for brand, brand_data in format_data.items():
-                if not isinstance(brand_data, dict):
-                    continue
-
-                # Iterate through all models in this brand
-                for model, strings in brand_data.items():
-                    if not isinstance(strings, list):
-                        continue
-
-                    # Check if this string matches any of the correct strings
-                    for correct_string in strings:
-                        normalized_correct = normalize_for_matching(correct_string, field="blade")
-                        if normalized_correct == normalized_value:
-                            # Find the catalog entry for this brand/model in this format
-                            catalog_entry = None
-
-                            # Look up in the catalog using format -> brand -> model
-                            if format_name in self.catalog:
-                                format_brands = self.catalog[format_name]
-                                if brand in format_brands and model in format_brands[brand]:
-                                    catalog_entry = format_brands[brand][model]
-
-                            if catalog_entry is None:
-                                # If not found in catalog, use empty dict
-                                catalog_entry = {}
-
-                            # Build matched data structure
-                            matched = {
-                                "brand": brand,
-                                "model": model,
-                                "format": format_name,
-                            }
-                            # Add all other catalog fields except patterns and format
-                            for key, val in catalog_entry.items():
-                                if key not in ["patterns", "format"]:
-                                    matched[key] = val
-
-                            all_matches.append(matched)
-
-        # Debug output
-        print(f"DEBUG: Found {len(all_matches)} matches for '{value}': {all_matches}")
-
-        return all_matches
+        # O(1) lookup using pre-computed normalized matches
+        return self._normalized_correct_matches.get(normalized_value, [])
 
     def _filter_by_format(
         self, matches: List[Dict[str, Any]], target_format: str
