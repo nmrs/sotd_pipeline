@@ -1073,14 +1073,16 @@ class MismatchAnalyzer(AnalysisTool):
                 group_key = (norm_original.lower(), matched.lower())
                 if group_key not in grouped:
                     grouped[group_key] = {
-                        "count": 0,
+                        "record_ids": set(),
                         "item": item,
                         "sources": set(),
                         "mismatch_types": set(),
                         "reasons": set(),
                         "comment_ids": set(),
                     }
-                grouped[group_key]["count"] += 1
+                record_id = item["record"].get("id", "")
+                if record_id:
+                    grouped[group_key]["record_ids"].add(record_id)
                 grouped[group_key]["mismatch_types"].add(mismatch_type)
                 grouped[group_key]["reasons"].add(reason)
                 source = item["record"].get("_source_file", "")
@@ -1103,7 +1105,7 @@ class MismatchAnalyzer(AnalysisTool):
             group_info = grouped[group_key]
             norm_original, matched = group_key
             modified_item = group_info["item"].copy()
-            modified_item["count"] = group_info["count"]
+            modified_item["count"] = len(group_info["record_ids"])
             modified_item["sources"] = sorted(list(group_info["sources"]))
             modified_item["comment_ids"] = sorted(list(group_info["comment_ids"]))
             # Choose the highest priority mismatch type present
@@ -1184,9 +1186,15 @@ class MismatchAnalyzer(AnalysisTool):
                 if len(comment_ids) <= 3:
                     comment_ids_text = ", ".join(comment_ids)
                 else:
-                    comment_ids_text = (
-                        f"{', '.join(comment_ids[:3])}... (+{len(comment_ids) - 3} more)"
+                    joined_ids = ", ".join(comment_ids[:3])
+                    comment_ids_text = f"{joined_ids}... " f"(+{len(comment_ids) - 3} more)"
+                # Debug: Show actual comment IDs for first few items
+                if row_number <= 3:
+                    debug_msg = (
+                        f"[dim]DEBUG: Row {row_number} - Count: {count}, "
+                        f"Comment IDs: {comment_ids}[/dim]"
                     )
+                    self.console.print(debug_msg)
             else:
                 comment_ids_text = ""
 
@@ -1319,7 +1327,7 @@ class MismatchAnalyzer(AnalysisTool):
                     comment_ids_text = ", ".join(comment_ids)
                 else:
                     comment_ids_text = (
-                        f"{', '.join(comment_ids[:3])}... (+{len(comment_ids) - 3} more)"
+                        f"{', '.join(comment_ids[:3])}... " f"(+{len(comment_ids) - 3} more)"
                     )
             else:
                 comment_ids_text = ""
@@ -1450,7 +1458,7 @@ class MismatchAnalyzer(AnalysisTool):
                     comment_ids_text = ", ".join(comment_ids)
                 else:
                     comment_ids_text = (
-                        f"{', '.join(comment_ids[:3])}... (+{len(comment_ids) - 3} more)"
+                        f"{', '.join(comment_ids[:3])}... " f"(+{len(comment_ids) - 3} more)"
                     )
             else:
                 comment_ids_text = ""
@@ -1579,7 +1587,7 @@ class MismatchAnalyzer(AnalysisTool):
                     comment_ids_text = ", ".join(comment_ids)
                 else:
                     comment_ids_text = (
-                        f"{', '.join(comment_ids[:3])}... (+{len(comment_ids) - 3} more)"
+                        f"{', '.join(comment_ids[:3])}... " f"(+{len(comment_ids) - 3} more)"
                     )
             else:
                 comment_ids_text = ""
