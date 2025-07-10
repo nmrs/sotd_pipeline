@@ -218,17 +218,15 @@ DE:
       patterns:
       - derb.*prem
   Dorco:
-    Prime:
+    Prime Platinum:
       patterns:
       - dorco.*prime
       - doric prime
+      - dorco.*st.*301
     ST-300:
       patterns:
-      - dorco.*\bst.*300
       - dorco
-    ST-301:
-      patterns:
-      - dorco.*st.*301
+      - dorco.*st.*300
     Titan:
       patterns:
       - dorco.*titan
@@ -286,7 +284,7 @@ DE:
       patterns:
       - flydear
   Gillette:
-    365:
+    '365':
       patterns:
       - \b365\b
     Blue:
@@ -332,6 +330,9 @@ DE:
     Super Thin Mejorada:
       patterns:
       - mejorada
+    Super Thin Platinum:
+      patterns:
+      - super.*thin.*plat
     Wilkinson Sword:
       patterns:
       - gil.*et.*wilk.*swor
@@ -340,7 +341,7 @@ DE:
       patterns:
       - gil.*winner(?:.*black)?
       - winner
-  "Glätz":
+  Glätz:
     Super Platinum:
       patterns:
       - glatz
