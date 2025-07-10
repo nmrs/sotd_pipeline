@@ -303,8 +303,9 @@ class TestStripBladeCountPatterns:
 
         # Test new patterns: "new" (meaning 1st use)
         assert strip_blade_count_patterns("7'o clock - yellow (new)") == "7'o clock - yellow"
-        assert strip_blade_count_patterns("astra green new") == "astra green"
-        assert strip_blade_count_patterns("new blade") == "blade"
+        # 'new' is NOT stripped if not in (), [], {}
+        assert strip_blade_count_patterns("astra green new") == "astra green new"
+        assert strip_blade_count_patterns("new blade") == "new blade"
 
         # Test ordinal use without brackets: 3rd use, 2nd use, etc.
         assert strip_blade_count_patterns("astra green 3rd use") == "astra green"
@@ -320,10 +321,28 @@ class TestStripBladeCountPatterns:
         assert strip_blade_count_patterns("indian blade") == "indian blade"
         assert strip_blade_count_patterns("blade indian") == "blade indian"
 
+        # Test unknown blade count patterns
+        assert strip_blade_count_patterns("treet platinum (?)") == "treet platinum"
+        assert strip_blade_count_patterns("treet platinum [?]") == "treet platinum"
+        assert strip_blade_count_patterns("treet platinum {?}") == "treet platinum"
+        assert strip_blade_count_patterns("Wizamet (?)") == "Wizamet"
+        assert strip_blade_count_patterns("King C. Gillette (?)") == "King C. Gillette"
+        assert strip_blade_count_patterns("GEM PTFE (?)") == "GEM PTFE"
+
         # Test edge cases
         assert strip_blade_count_patterns("") == ""
         assert strip_blade_count_patterns("treet platinum") == "treet platinum"  # No patterns
         assert strip_blade_count_patterns("(3) treet platinum") == "treet platinum"  # Simple number
+
+        # Test 'new' only stripped in (), [], {}
+        assert strip_blade_count_patterns("Astra SP (new)") == "Astra SP"
+        assert strip_blade_count_patterns("Astra SP [new]") == "Astra SP"
+        assert strip_blade_count_patterns("Astra SP {new}") == "Astra SP"
+        assert strip_blade_count_patterns("Astra SP new") == "Astra SP new"
+        assert strip_blade_count_patterns("New Edge") == "New Edge"
+        assert strip_blade_count_patterns("Treet New Edge (1)") == "Treet New Edge"
+        assert strip_blade_count_patterns("Gillette New Winner (new)") == "Gillette New Winner"
+        assert strip_blade_count_patterns("Gillette New Winner") == "Gillette New Winner"
 
     def test_strip_blade_count_patterns_integration(self):
         """Test blade count pattern stripping integrated with normalize_for_matching."""
@@ -641,6 +660,11 @@ class TestNormalizeForMatching:
             normalize_for_matching("[2x] treet platinum (4 times) $PLASTIC", field="blade")
             == "treet platinum"
         )
+
+        # Test unknown blade count patterns
+        assert normalize_for_matching("Wizamet (?)", field="blade") == "Wizamet"
+        assert normalize_for_matching("King C. Gillette (?)", field="blade") == "King C. Gillette"
+        assert normalize_for_matching("GEM PTFE (?)", field="blade") == "GEM PTFE"
 
     def test_normalize_for_matching_razor_handle_indicators(self):
         """Test that normalize_for_matching strips handle indicators for razor field."""

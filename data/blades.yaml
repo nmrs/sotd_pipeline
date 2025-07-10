@@ -555,6 +555,9 @@ DE:
       patterns:
       - tatara
   Tatra:
+    Carbon Steel:
+      patterns:
+      - tatra.*carb
     Platinum:
       patterns:
       - tatra
@@ -574,32 +577,31 @@ DE:
     Black Beauty:
       patterns:
       - treet\s*bla
+    Carbon:
+      patterns:
       - treet.*carb
-      - treet
     Classic:
       patterns:
       - tre(e|a)t.*classic
     Dura Sharp:
       patterns:
       - treet.*dura.*shar
+    Edge:
+      patterns:
+      - treet.*edge
     Falcon:
       patterns:
       - treet.*falcon
-    GEM:
+    King:
       patterns:
-      - treet.*gem
-      - gem.*treet
-    New:
-      patterns:
-      - treet.*new
+      - treet.*king
     New Edge:
       patterns:
+      - treet.*new
       - tre(e|a)t.*new.*edge
-    New Steel:
-      patterns:
-      - treet.*new.*steel
     Platinum:
       patterns:
+      - treet
       - treet.*pla
     Silver:
       patterns:
@@ -773,6 +775,10 @@ Half DE:
       patterns:
       - leaf(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
 Injector:
+  Generic:
+    Injector:
+      patterns:
+      - (generic|unbranded).*inject
   Parker:
     Injector:
       patterns:

@@ -172,8 +172,11 @@ blade:
       - Feather (DE)
       - Feather - Hi-stainless
       - Feather - HiStainless
+      - Feather - New Hi-Stainless
       - Feather Hi Stainless
       - Feather Hi-Stainless
+      - Feather New Hi Stainless
+      - Feather new Hi-Stainless
       - Feather Stainless
     Filoso:
       Platinum:
@@ -216,6 +219,7 @@ blade:
       Platinum:
       - Gillette - Platinum
       - Gillette - Platinum (half in Kamisori , whole in Overlander )
+      - Gillette - Platinum (half in Kamisori new, whole in Overlander new)
       - Gillette Platinum
       Silver Blue:
       - Gillete Silver Blue
@@ -244,7 +248,6 @@ blade:
       DE:
       - Gillette - King C Gillette Blades
       - King C. Gillette
-      - King C. Gillette (?)
     Ladas:
       Super Stainless:
       - Ladas
@@ -335,8 +338,70 @@ blade:
       - Tatara - Platinum
       - Tatara Stainless
     Tatra:
+      Carbon Steel:
+      - Tatra Carbon Steel
       Platinum:
       - Czech Blades Tatra Platinum Stainless
+      - Tatra Platinum
+    Tiger:
+      Platinum:
+      - Tiger
+      - Tiger - Platinum
+      - Tiger Platinum
+      - Tiger Platinum, DE
+    Topaz:
+      Platinum:
+      - Topaz Platinum
+    Treet:
+      Black Beauty:
+      - Treet Black Beauty Carbon
+      Carbon:
+      - Treet - Carbon Steel
+      - Treet Carbon Steel
+      - Treet Carbon Steel -
+      Classic:
+      - Treet - Classic Carbon
+      - Treet Classic
+      - Treet Classic Carbon Steel
+      Dura Sharp:
+      - Treet DuraSharp .
+      Edge:
+      - Treet Edge
+      Falcon:
+      - Treet - Falcon Carbon Steel
+      New Edge:
+      - Treet New Edge
+      Platinum:
+      - Treet
+      - Treet - Platinum
+      - Treet Platinum
+      Silver:
+      - Treet Silver
+    Van Der Hagen:
+      Stainless:
+      - Van Der Hagen Stainless
+    Voskhod:
+      Teflon Coated:
+      - Voskhod
+      - Voskhod - Teflon Coated.
+      - Voskhod Teflon Coated
+    Wilkinson Sword:
+      Classic:
+      - Wilkinson Sword
+      - Wilkinson Sword (German)
+    Willy's:
+      Premium:
+      - Willy's Premium
+    Wizamet:
+      Super Iridium:
+      - Wizamet
+      - Wizamet - Iridium Super Extra Stainless
+      - Wizamet - Super Iridium
+      - Wizamet - Super Iridium.
+      - Wizamet Half
+      - Wizamet iridium
+      - Wizamet Super Iridium
+      - Wizamet Super Iridium.
     XR:
       RhinoceRos:
       - Rhinoceros A77 Blade
@@ -370,8 +435,7 @@ blade:
       - Accutec Pro Premium (GEM)
       - Gem
       - Gem blade
-      - Gem PTFE
-      - GEM PTFE (?)
+      - GEM PTFE
       - GEM PTFE / Schick Injector
       - GEM SS PTFE
       - Personna - GEM PTFE
@@ -415,6 +479,9 @@ blade:
       - Personna Hair Shaper
       - Personna Hair Shaper Blade
       - Personna Specimen Prep
+    Weck:
+      Sextoblade:
+      - Weck hair shaper
   Half DE:
     Dorco:
       HST-300:
@@ -427,6 +494,11 @@ blade:
       - Leaf Single-Edge Blades
       - Leaf Super Platinum
   Injector:
+    Generic:
+      Injector:
+      - Unbranded Vintage Injector
+      - Vintage Generic Injector
+      - Vintage Unbranded Injector
     Parker:
       Injector:
       - Parker Injector
@@ -456,6 +528,12 @@ blade:
       - Schick - Proline B-20
       - Schick Proline B-20
       - Shick proline B20
+    Ted Pella:
+      Injector:
+      - Ted Pella - Injector
+      - Ted Pella Injector Blade
+      - Ted Pella PTFE
+      - Ted Pella Single Edge Injector
   Other:
     Kampfe:
       Wedge:
@@ -465,6 +543,10 @@ blade:
       - Rolls (not this kind of Rolls) Razor Wedge Blade
       - Rolls Blade
       - Rolls Razor
+    Valet:
+      Blade:
+      - Valet Auto Strop
+      - Valet SE Blade
 razor:
   3D Printed:
     DE:
@@ -1123,7 +1205,6 @@ razor:
   Kampfe:
     Star Lather Catcher 1902:
     - Kampfe Bros Star Lather Catcher
-    - Kampfe Bros Star Lather Catcher $STAINLESS
   Karve:
     Bison:
     - Karve - Bison Tangerine

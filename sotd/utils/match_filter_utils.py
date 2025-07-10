@@ -136,9 +136,16 @@ def strip_blade_count_patterns(value: str) -> str:
     standalone_pattern = r"\b(?:x(\d+)|(\d+)x)\b"
     cleaned = re.sub(standalone_pattern, "", cleaned, flags=re.IGNORECASE)
 
-    # Pattern for "new" (meaning 1st use) - standalone word or in parentheses
-    new_pattern = r"(?:[\(\[\{])\s*new\s*[\)\]\}]|\bnew\b"
+    # Pattern for "new" (meaning 1st use) - ONLY in parentheses/brackets/braces
+    new_pattern = r"(?:[\(\[\{])\s*new\s*[\)\]\}]"
     cleaned = re.sub(new_pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Special case: remove any double spaces left behind
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+
+    # Pattern for unknown blade count: (?), [?], {?}
+    unknown_count_pattern = r"(?:[\(\[\{])\s*\?\s*[\)\]\}]"
+    cleaned = re.sub(unknown_count_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for ordinal use without brackets: 3rd use, 2nd use, etc.
     # Match ordinal use patterns that are standalone or at the end of a string
