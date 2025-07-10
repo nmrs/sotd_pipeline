@@ -50,7 +50,7 @@ def test_match_with_use_count_parentheses(matcher):
 def test_match_with_use_count_brackets(matcher):
     result = matcher.match("Astra SP [5]")
     assert result["matched"]["brand"] == "Astra"
-    assert result["matched"]["model"] == "SP"
+    assert result["matched"]["model"] == "Superior Platinum (Green)"
     # Blade use count is now handled in the enrich phase
     assert result["original"] == "Astra SP [5]"
 
@@ -74,7 +74,7 @@ def test_match_with_use_count_x_prefix(matcher):
 def test_match_with_use_count_x_suffix(matcher):
     result = matcher.match("Astra SP [5x]")
     assert result["matched"]["brand"] == "Astra"
-    assert result["matched"]["model"] == "SP"
+    assert result["matched"]["model"] == "Superior Platinum (Green)"
     # Blade use count is now handled in the enrich phase
     assert result["original"] == "Astra SP [5x]"
 
@@ -234,3 +234,52 @@ blade:
     assert result["match_type"] == "exact"
     # No pattern used for correct matches
     assert result["pattern"] is None
+
+
+def test_fail_fast_on_malformed_yaml_data(tmp_path):
+    """Test that blade matcher fails fast when encountering malformed YAML data."""
+    # Create malformed YAML with list entries instead of dict entries
+    malformed_yaml = """
+DE:
+  Feather:
+    DE:
+      - feather  # This is a list, not a dict with patterns
+  Astra:
+    SP:
+      patterns:
+        - astra.*sp
+"""
+    path = tmp_path / "malformed_blades.yaml"
+    path.write_text(malformed_yaml)
+
+    # The matcher should fail fast when trying to compile patterns
+    with pytest.raises(AttributeError) as exc_info:
+        BladeMatcher(catalog_path=path)
+
+    # Verify the error message indicates the issue
+    error_msg = str(exc_info.value).lower()
+    assert "list" in error_msg or "get" in error_msg
+
+
+def test_fail_fast_on_non_dict_entry(tmp_path):
+    """Test that blade matcher fails fast when encountering non-dict entries."""
+    # Create YAML with string entries instead of dict entries
+    malformed_yaml = """
+DE:
+  Feather:
+    DE: "feather"  # This is a string, not a dict with patterns
+  Astra:
+    SP:
+      patterns:
+        - astra.*sp
+"""
+    path = tmp_path / "malformed_blades.yaml"
+    path.write_text(malformed_yaml)
+
+    # The matcher should fail fast when trying to compile patterns
+    with pytest.raises(AttributeError) as exc_info:
+        BladeMatcher(catalog_path=path)
+
+    # Verify the error message indicates the issue
+    error_msg = str(exc_info.value).lower()
+    assert "str" in error_msg or "get" in error_msg

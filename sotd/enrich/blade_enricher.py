@@ -16,6 +16,7 @@ class BladeCountEnricher(BaseEnricher):
     - "7'o clock - yellow (new)" -> use_count: 1
     - "astra green 3rd use" -> use_count: 3
     - "astra green [2\\]" -> use_count: 2
+    - "Feather Hi-Stainless (2nd)" -> use_count: 2
     """
 
     @property

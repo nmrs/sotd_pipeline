@@ -119,6 +119,11 @@ def strip_blade_count_patterns(value: str) -> str:
     usage_ordinal_pattern = r"(?:[\(\[\{])\s*(\d+)(?:st|nd|rd|th)\s+use\s*[\)\]\}]"
     cleaned = re.sub(usage_ordinal_pattern, "", cleaned, flags=re.IGNORECASE)
 
+    # Pattern for standalone ordinal numbers: (2nd), [3rd], {4th}, etc. (without "use")
+    # This pattern must match the full bracket structure to avoid false positives
+    standalone_ordinal_pattern = r"(?:[\(\[\{])\s*(\d+)(?:st|nd|rd|th)\s*[\)\]\}]"
+    cleaned = re.sub(standalone_ordinal_pattern, "", cleaned, flags=re.IGNORECASE)
+
     # Pattern for word-based ordinal usage: (second use), [third use], {fourth use}, etc.
     usage_word_pattern = (
         r"(?:[\(\[\{])\s*(first|second|third|fourth|fifth|sixth|seventh|eighth|"
@@ -136,7 +141,8 @@ def strip_blade_count_patterns(value: str) -> str:
     cleaned = re.sub(new_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for ordinal use without brackets: 3rd use, 2nd use, etc.
-    ordinal_use_pattern = r"\b(\d+)(?:st|nd|rd|th)\s+use\b"
+    # Match ordinal use patterns that are standalone or at the end of a string
+    ordinal_use_pattern = r"(?:^|\s)(\d+)(?:st|nd|rd|th)\s+use(?:\s|$)"
     cleaned = re.sub(ordinal_use_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for escaped bracket patterns: [2\], [3\], etc.
@@ -502,6 +508,12 @@ def extract_blade_use_count(text: str) -> Optional[int]:
     # Pattern 3: (7th use), [3rd use], {2nd use}, etc.
     pattern3 = r"(?:[\(\[\{])\s*(\d+)(?:st|nd|rd|th)\s+use\s*[\)\]\}]"
     match = re.search(pattern3, text, re.IGNORECASE)
+    if match:
+        return int(match.group(1))
+
+    # Pattern 3.5: (2nd), [3rd], {4th}, etc. (standalone ordinal numbers)
+    pattern3_5 = r"(?:[\(\[\{])\s*(\d+)(?:st|nd|rd|th)\s*[\)\]\}]"
+    match = re.search(pattern3_5, text, re.IGNORECASE)
     if match:
         return int(match.group(1))
 
