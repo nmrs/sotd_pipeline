@@ -285,6 +285,29 @@ def strip_razor_use_counts(value: str) -> str:
 # See docs/product_matching_validation.md for details and examples.
 
 
+def strip_trailing_periods(value: str | None) -> str:
+    """
+    Strip trailing periods from a string.
+
+    This removes periods that appear at the end of strings, which are common
+    in SOTD comments where users end their product listings with periods.
+
+    Args:
+        value: Input string that may have trailing periods
+
+    Returns:
+        String with trailing periods removed, or empty string if input is None
+    """
+    if not isinstance(value, str):
+        return ""
+
+    # Remove trailing periods and any trailing whitespace
+    cleaned = re.sub(r"\.\s*$", "", value)
+    # Also strip any remaining trailing whitespace
+    cleaned = cleaned.rstrip()
+    return cleaned
+
+
 def normalize_for_matching(
     value: str, competition_tags: Dict[str, List[str]] | None = None, field: str | None = None
 ) -> str:
@@ -296,6 +319,7 @@ def normalize_for_matching(
     All components must use this function to ensure consistent normalization.
 
     - Strips competition tags and normalizes whitespace to prevent bloat and duplicates in the file.
+    - Strips trailing periods that are common in SOTD comments.
     - For blades only, strips blade count/usage patterns (including 'new' as usage).
     - For razors only, strips handle swap/modification indicators.
     - For soaps only, strips soap-related patterns (sample, puck, croap, cream, etc.).
@@ -314,10 +338,13 @@ def normalize_for_matching(
         components that perform correct match lookups to ensure consistency.
     """
     if not isinstance(value, str):
-        return value
+        return ""
 
     # Strip competition tags and normalize
     normalized = strip_competition_tags(value, competition_tags)
+
+    # Strip trailing periods (common in SOTD comments)
+    normalized = strip_trailing_periods(normalized)
 
     # For blade strings, also strip blade count and usage patterns (including 'new')
     if field == "blade":

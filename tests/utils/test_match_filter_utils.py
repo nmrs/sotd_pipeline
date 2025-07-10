@@ -14,6 +14,7 @@ from sotd.utils.match_filter_utils import (
     strip_handle_indicators,
     strip_soap_patterns,
     strip_razor_use_counts,
+    strip_trailing_periods,
 )
 
 
@@ -619,6 +620,40 @@ class TestStripHandleIndicators:
             ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
 
 
+class TestStripTrailingPeriods:
+    """Test trailing period stripping functionality."""
+
+    def test_strip_trailing_periods_basic(self):
+        """Test basic trailing period stripping."""
+        assert strip_trailing_periods("Product Name.") == "Product Name"
+        assert strip_trailing_periods("Product Name .") == "Product Name"
+        assert strip_trailing_periods("Product Name . ") == "Product Name"
+        assert strip_trailing_periods("Product Name") == "Product Name"
+
+    def test_strip_trailing_periods_multiple_periods(self):
+        """Test stripping multiple trailing periods."""
+        assert strip_trailing_periods("Product Name...") == "Product Name.."
+        assert strip_trailing_periods("Product Name... ") == "Product Name.."
+
+    def test_strip_trailing_periods_edge_cases(self):
+        """Test edge cases for trailing period stripping."""
+        assert strip_trailing_periods(".") == ""
+        assert strip_trailing_periods(" . ") == ""
+        assert strip_trailing_periods("") == ""
+        assert strip_trailing_periods(None) == ""  # Now returns empty string instead of None
+        assert strip_trailing_periods("Product.Name") == "Product.Name"  # Middle period preserved
+
+    def test_strip_trailing_periods_real_examples(self):
+        """Test with real examples from correct_matches.yaml."""
+        assert strip_trailing_periods("Personna Lab Blue.") == "Personna Lab Blue"
+        assert strip_trailing_periods("Astra Superior Platinum.") == "Astra Superior Platinum"
+        assert (
+            strip_trailing_periods("Gillette 7 O'clock SharpEdge .")
+            == "Gillette 7 O'clock SharpEdge"
+        )
+        assert strip_trailing_periods("Wizamet Super Iridium.") == "Wizamet Super Iridium"
+
+
 class TestNormalizeForMatching:
     """Test normalization for matching."""
 
@@ -636,7 +671,7 @@ class TestNormalizeForMatching:
     def test_normalize_for_matching_none_input(self):
         """Test normalization with None input."""
         result = normalize_for_matching(None)  # type: ignore
-        assert result is None
+        assert result == ""  # Now returns empty string instead of None
 
     def test_normalize_for_matching_blade_patterns(self):
         """Test that normalize_for_matching strips blade patterns for blade field."""
@@ -679,6 +714,25 @@ class TestNormalizeForMatching:
         input_str = "Gillette Tech"
         result = normalize_for_matching(input_str, test_competition_tags, field="razor")
         assert result == "Gillette Tech"
+
+    def test_normalize_for_matching_trailing_periods(self):
+        """Test that normalize_for_matching strips trailing periods."""
+        # Test trailing periods with different fields
+        assert normalize_for_matching("Personna Lab Blue.", field="blade") == "Personna Lab Blue"
+        assert normalize_for_matching("Gillette Tech.", field="razor") == "Gillette Tech"
+        assert normalize_for_matching("B&M Seville.", field="soap") == "B&M Seville"
+
+        # Test with competition tags and trailing periods
+        assert (
+            normalize_for_matching("Personna Lab Blue. $PLASTIC", field="blade")
+            == "Personna Lab Blue"
+        )
+        assert normalize_for_matching("Gillette Tech. $CNC", field="razor") == "Gillette Tech"
+
+        # Test with other patterns and trailing periods
+        assert normalize_for_matching("treet platinum (3x).", field="blade") == "treet platinum"
+        assert normalize_for_matching("Razor / [brand] handle.", field="razor") == "Razor"
+        assert normalize_for_matching("B&M Seville soap sample.", field="soap") == "B&M Seville"
 
     def test_normalize_for_matching_case_preservation(self):
         """Test that normalize_for_matching preserves case for correct match consistency."""
