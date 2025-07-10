@@ -7,6 +7,7 @@ from unittest.mock import Mock, patch
 import shutil
 import io
 from rich.console import Console
+import re
 
 from sotd.match.tools.analyzers.mismatch_analyzer import MismatchAnalyzer
 
@@ -358,7 +359,7 @@ class TestMismatchAnalyzer:
         mismatches = {
             "multiple_patterns": [
                 {
-                    "record": {"_source_file": "2025-06.json"},
+                    "record": {"_source_file": "2025-06.json", "id": "t1_abc123"},
                     "field_data": {
                         "original": "Aylsworth Apex",
                         "matched": {"brand": "Aylsworth", "model": "Apex"},
@@ -391,6 +392,7 @@ class TestMismatchAnalyzer:
         assert "Matched" in output
         assert "Pattern" in output
         assert "Reason" in output
+        assert "Comment IDs" in output  # New column
         assert "Sour" in output  # Column is truncated to "Sour…"
 
         # Check for expected values
@@ -400,3 +402,168 @@ class TestMismatchAnalyzer:
         assert "Marked" in output and "correct" in output
         # The source file may be truncated in the table, so check for the prefix
         assert "2025-06" in output or "2025…" in output
+
+    def test_comment_id_column_in_display(self):
+        """Test that comment IDs are included in the display output."""
+        # Prepare test data with comment IDs that won't be filtered out
+        test_data = [
+            {
+                "id": "t1_abc123",
+                "razor": {
+                    "original": "Merkur 34C",
+                    "matched": {"brand": "Merkur", "model": "34C"},
+                    "pattern": r"merkur.*34c",
+                    "match_type": "regex",  # Not exact, so won't be filtered
+                },
+            },
+            {
+                "id": "t1_def456",
+                "razor": {
+                    "original": "Merkur 34C",
+                    "matched": {"brand": "Merkur", "model": "34C"},
+                    "pattern": r"merkur.*34c",
+                    "match_type": "regex",  # Not exact, so won't be filtered
+                },
+            },
+        ]
+
+        mismatches = {
+            "multiple_patterns": [],
+            "levenshtein_distance": [],
+            "low_confidence": [],
+            "exact_matches": [],
+            "perfect_regex_matches": [],
+        }
+
+        args = Mock()
+        args.limit = 10
+        args.pattern_width = 80
+
+        # Capture output
+        buf = io.StringIO()
+        test_console = Console(file=buf, force_terminal=True, width=120)
+        self.analyzer.console = test_console
+
+        # Test display_all_matches
+        self.analyzer.display_all_matches({"data": test_data}, "razor", mismatches, args)
+        output = buf.getvalue()
+
+        # Check that comment IDs column is included in the table header
+        assert "Comment IDs" in output
+
+        # Test display_unconfirmed_matches
+        buf = io.StringIO()
+        test_console = Console(file=buf, force_terminal=True, width=120)
+        self.analyzer.console = test_console
+
+        self.analyzer.display_unconfirmed_matches({"data": test_data}, "razor", args)
+        output = buf.getvalue()
+
+        # Check that comment IDs column is included in the table header
+        assert "Comment IDs" in output
+
+        # Test display_regex_matches
+        buf = io.StringIO()
+        test_console = Console(file=buf, force_terminal=True, width=120)
+        self.analyzer.console = test_console
+
+        self.analyzer.display_regex_matches({"data": test_data}, "razor", args)
+        output = buf.getvalue()
+
+        # Check that comment IDs column is included in the table header
+        assert "Comment IDs" in output
+
+        # Test display_mismatches with actual mismatch data
+        mismatch_data = {
+            "multiple_patterns": [
+                {
+                    "record": {"id": "t1_xyz789", "_source_file": "test.json"},
+                    "field_data": {
+                        "original": "Test Razor",
+                        "matched": {"brand": "Test", "model": "Razor"},
+                        "pattern": r"test.*razor",
+                        "match_type": "regex",
+                    },
+                    "reason": "Matches multiple patterns",
+                }
+            ],
+            "levenshtein_distance": [],
+            "low_confidence": [],
+            "exact_matches": [],
+            "perfect_regex_matches": [],
+        }
+
+        buf = io.StringIO()
+        test_console = Console(file=buf, force_terminal=True, width=120)
+        self.analyzer.console = test_console
+
+        self.analyzer.display_mismatches(mismatch_data, "razor", args)
+        output = buf.getvalue()
+
+        # Check that comment IDs column is included in the table header
+        assert "Comment IDs" in output
+        # Check that the comment ID is actually displayed in the data
+        assert "t1_xyz789" in output
+
+    def test_blade_format_aware_duplicates_are_separate(self):
+        """
+        Test that the same original string matched to different blades (GEM and DE)
+        are shown separately.
+        """
+        # Create mismatch data that will actually be displayed
+        mismatches = {
+            "multiple_patterns": [
+                {
+                    "record": {"id": "cmt1", "_source_file": "test.json"},
+                    "field_data": {
+                        "original": "Accuforge",
+                        "matched": {"brand": "Personna", "model": "Lab Blue", "format": "DE"},
+                        "pattern": r"accuforge",
+                        "match_type": "regex",
+                    },
+                    "reason": "Matches multiple patterns",
+                },
+                {
+                    "record": {"id": "cmt2", "_source_file": "test.json"},
+                    "field_data": {
+                        "original": "Accuforge",
+                        "matched": {"brand": "Personna", "model": "GEM PTFE", "format": "GEM"},
+                        "pattern": r"accuforge",
+                        "match_type": "regex",
+                    },
+                    "reason": "Matches multiple patterns",
+                },
+            ],
+            "levenshtein_distance": [],
+            "low_confidence": [],
+            "exact_matches": [],
+            "perfect_regex_matches": [],
+        }
+
+        args = Mock()
+        args.limit = 10
+        args.pattern_width = 80
+
+        buf = io.StringIO()
+        test_console = Console(file=buf, force_terminal=True, width=120)
+        self.analyzer.console = test_console
+
+        # Display mismatches and capture output (same as actual tool)
+        self.analyzer.display_mismatches(mismatches, "blade", args)
+        output = buf.getvalue()
+
+        # Strip ANSI escape codes from output
+        ansi_escape = re.compile(r"\x1b\[[0-9;]*m")
+        clean_output = ansi_escape.sub("", output)
+
+        # Assert both matches are shown as separate rows with full brand+model+format
+        assert "Personna Lab Blue (DE)" in clean_output
+        assert "Personna GEM PTFE (GEM)" in clean_output
+        accuforge_count = clean_output.count("Accuforge")
+        # Should appear for both rows
+        assert accuforge_count >= 2
+        # Check for both formats (DE and GEM) in output
+        has_de = ("DE" in clean_output) or ("(DE)" in clean_output)
+        has_gem = ("GEM" in clean_output) or ("(GEM)" in clean_output)
+        assert has_de
+        assert has_gem
