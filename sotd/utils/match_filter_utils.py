@@ -149,6 +149,12 @@ def strip_blade_count_patterns(value: str) -> str:
     escaped_bracket_pattern = r"\[(\d+)\\]"
     cleaned = re.sub(escaped_bracket_pattern, "", cleaned, flags=re.IGNORECASE)
 
+    # Pattern for superscript ordinal patterns: (2^(nd) use), (3^(rd) use), etc.
+    superscript_ordinal_pattern = (
+        r"(?:[\(\[\{])\s*(\d+)\^\(\s*(?:st|nd|rd|th)\s*\)\s+use\s*[\)\]\}]"
+    )
+    cleaned = re.sub(superscript_ordinal_pattern, "", cleaned, flags=re.IGNORECASE)
+
     # Clean up extra whitespace and normalize
     cleaned = re.sub(r"\s+", " ", cleaned)  # Normalize whitespace
     cleaned = cleaned.strip()
@@ -572,6 +578,14 @@ def extract_blade_use_count(text: str) -> Optional[int]:
     # Pattern 9: escaped bracket patterns: [2\], [3\], etc.
     escaped_bracket_pattern = r"\[(\d+)\\]"
     match = re.search(escaped_bracket_pattern, text, re.IGNORECASE)
+    if match:
+        return int(match.group(1))
+
+    # Pattern 10: superscript ordinal patterns: (2^(nd) use), (3^(rd) use), etc.
+    superscript_ordinal_pattern = (
+        r"(?:[\(\[\{])\s*(\d+)\^\(\s*(?:st|nd|rd|th)\s*\)\s+use\s*[\)\]\}]"
+    )
+    match = re.search(superscript_ordinal_pattern, text, re.IGNORECASE)
     if match:
         return int(match.group(1))
 
