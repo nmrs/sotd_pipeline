@@ -589,6 +589,14 @@ def extract_blade_use_count(text: str) -> Optional[int]:
     if match:
         return int(match.group(1))
 
+    # Pattern 11: superscript ordinal patterns without "use": (2^(nd)), (3^(rd)), etc.
+    superscript_ordinal_no_use_pattern = (
+        r"(?:[\(\[\{])\s*(\d+)\^\(\s*(?:st|nd|rd|th)\s*\)\s*[\)\]\}]"
+    )
+    match = re.search(superscript_ordinal_no_use_pattern, text, re.IGNORECASE)
+    if match:
+        return int(match.group(1))
+
     return None
 
 

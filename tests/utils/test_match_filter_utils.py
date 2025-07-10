@@ -458,6 +458,30 @@ class TestExtractBladeAndUseCount:
         assert blade_count is None
         assert use_count is None
 
+    def test_extract_blade_and_use_count_superscript_ordinals(self):
+        """Test extraction of superscript ordinal patterns without 'use' word."""
+        # Test superscript ordinal patterns: (2^(nd)), (3^(rd)), etc.
+        blade_count, use_count = extract_blade_and_use_count("Tatra Platinum (2^(nd))")
+        assert blade_count is None
+        assert use_count == 2
+
+        blade_count, use_count = extract_blade_and_use_count("Feather (3^(rd))")
+        assert blade_count is None
+        assert use_count == 3
+
+        blade_count, use_count = extract_blade_and_use_count("Astra (1^(st))")
+        assert blade_count is None
+        assert use_count == 1
+
+        blade_count, use_count = extract_blade_and_use_count("Personna (4^(th))")
+        assert blade_count is None
+        assert use_count == 4
+
+        # Test with blade count prefix
+        blade_count, use_count = extract_blade_and_use_count("[2x] Tatra Platinum (2^(nd))")
+        assert blade_count == 2
+        assert use_count == 2
+
 
 class TestStripHandleIndicators:
     """Test handle indicator stripping for razors."""
