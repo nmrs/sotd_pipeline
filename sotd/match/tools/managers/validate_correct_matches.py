@@ -317,8 +317,8 @@ class ValidateCorrectMatches:
                                         "second_location": {"brand": brand, "model": model},
                                         "severity": "high",
                                         "suggested_action": (
-                                            f"Remove duplicate string '{correct_match}' from either "
-                                            f"{existing_brand}:{existing_model} or "
+                                            f"Remove duplicate string '{correct_match}' from "
+                                            f"either {existing_brand}:{existing_model} or "
                                             f"{brand}:{model}. "
                                             f"Each string must appear only once per format in "
                                             f"correct_matches.yaml"
