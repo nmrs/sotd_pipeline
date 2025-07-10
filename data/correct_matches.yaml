@@ -66,14 +66,14 @@ blade:
       - Gillette 7 O'Clock Sharp Edge
       - Gillette 7 O'Clock Sharp Edge (yellow)
       - Gillette 7 O'Clock SharpEdge
-      - Gillette 7 O'clock SharpEdge .
+      - Gillette 7 O'clock SharpEdge
       - Gillette 7 O'Clock SharpEdge Yellow
       - Gillette 7 O'clock Yellow
       - Gillette Yellow
       Super Platinum (Black):
       - 7sp
       - Gilette 7 O'Clock - Super Platinum
-      - Gillette - 7 o'clock Super Platinum.
+      - Gillette - 7 o'clock Super Platinum
       - Gillette 7o'clock Black
       - Gillette Seven O'Clock Super Platinum
       Super Stainless (Green):
@@ -95,7 +95,7 @@ blade:
       Superior Platinum (Green):
       - Astra
       - Astra - Platinum
-      - Astra - Superior Platinum.
+      - Astra - Superior Platinum
       - Astra Green
       - Astra Green (Indian)
       - Astra Green - [ on both razors]
@@ -107,7 +107,6 @@ blade:
       - Astra Super Platinum (Greens)
       - Astra Superior Platinum
       - Astra Superior Platinum, DE
-      - Astra Superior Platinum.
       - Gillette Astra Platinum Green
       Superior Stainless (Blue):
       - Astra - Blue
@@ -196,14 +195,13 @@ blade:
       - Gillette Blue
       Minora:
       - Gillette - Minora
-      - Gillette - Minora Stainless.
+      - Gillette - Minora Stainless
       - Gillette Minora
-      - Gillette Minora Stainless.
+      - Gillette Minora Stainless
       Nacet:
       - Gillette - Nacet
       - Gillette - Nacet Stainless
       - Gillette Nacet
-      - Gillette Nacet.
       - Nacet
       Perma-Sharp:
       - Gillete PermaSharp
@@ -218,7 +216,6 @@ blade:
       - Permasharp
       Platinum:
       - Gillette - Platinum
-      - Gillette - Platinum (half in Kamisori , whole in Overlander )
       - Gillette - Platinum (half in Kamisori new, whole in Overlander new)
       - Gillette Platinum
       Silver Blue:
@@ -236,14 +233,14 @@ blade:
       Winner:
       - Gillette Winner
       - Gillette Winner Platinum
-      - Gillette Winner Stainless .
+      - Gillette Winner Stainless
     Glätz:
       Super Platinum:
       - Glatz
     Kai:
       DE:
       - Kai
-      - Kai - Stainless.
+      - Kai - Stainless
     King C Gillette:
       DE:
       - Gillette - King C Gillette Blades
@@ -273,12 +270,10 @@ blade:
       - Accuforge
       - Persona
       - Personna - Comfort Coated (Lab Blue)
-      - Personna - Lab Blue.
+      - Personna - Lab Blue
       - Personna Comfort Coat
       - Personna Comfort Coated
-      - Personna GEM PTFE
       - Personna Lab Blue
-      - Personna Lab Blue.
       - Personna Super Comfort Coated (aka Lab Blue)
       Med Prep:
       - AccuTec - Med Prep
@@ -286,9 +281,9 @@ blade:
       - Personna Med Prep
       Platinum:
       - Personna "Israeli Red"
+      - Personna - Platinum
       - Personna - Platinum (for both)
       - Personna - Platinum Chrome Israeli Red
-      - Personna - Platinum.
       - Personna Platinum
       - Personna Red
       - Personna Super Stainless
@@ -364,7 +359,7 @@ blade:
       - Treet Classic
       - Treet Classic Carbon Steel
       Dura Sharp:
-      - Treet DuraSharp .
+      - Treet DuraSharp
       Edge:
       - Treet Edge
       Falcon:
@@ -383,7 +378,7 @@ blade:
     Voskhod:
       Teflon Coated:
       - Voskhod
-      - Voskhod - Teflon Coated.
+      - Voskhod - Teflon Coated
       - Voskhod Teflon Coated
     Wilkinson Sword:
       Classic:
@@ -397,11 +392,9 @@ blade:
       - Wizamet
       - Wizamet - Iridium Super Extra Stainless
       - Wizamet - Super Iridium
-      - Wizamet - Super Iridium.
       - Wizamet Half
       - Wizamet iridium
       - Wizamet Super Iridium
-      - Wizamet Super Iridium.
     XR:
       RhinoceRos:
       - Rhinoceros A77 Blade
@@ -439,12 +432,10 @@ blade:
       - GEM PTFE / Schick Injector
       - GEM SS PTFE
       - Personna - GEM PTFE
-      - Personna - GEM PTFE.
       - Personna GEM
       - Personna GEM PTFE
       - Personna GEM PTFE Coated
       - Personna GEM PTFE, Crown Half Blade, Parker Injector
-      - Personna GEM PTFE.
       - Personna GEM Stainless PTFE
       - Personna PTFE
       - Personna PTFE Stainless Steel GEM
@@ -881,7 +872,7 @@ razor:
     Grande:
     - Fatip Classic Grande
     Lo Storto:
-    - Fatip - Lo Storto Gentile (Closed Comb, chrome).
+    - Fatip - Lo Storto Gentile (Closed Comb, chrome)
     - Fatip Lo Storto
     Piccolo:
     - Fatip il Piccolo Sorto
@@ -936,8 +927,8 @@ razor:
     Damaskeene OC:
     - GEM - Damaskeene Open Comb
     Featherweight:
-    - GEM - Featherweight $ATOMIC AGE .
-    - GEM - Featherweight.
+    - GEM - Featherweight
+    - GEM - Featherweight $ATOMIC AGE
     - GEM Featherweight
     Flying Wing (aka Bullet Tip):
     - Gem - "Flying Wing" Bullet tip
@@ -984,7 +975,6 @@ razor:
     Heritage:
     - Gillette Heritage Inspired
     King C. Gillette:
-    - '*New* King C. Gillette'
     - Gillette - King C Chrome
     - Gillette - King C Gillette
     - Gillette - King Chrome (Target)
@@ -995,7 +985,6 @@ razor:
     - Gillette Knack
     Lady Gillette:
     - Gillette - 1966 Lady Gillette
-    - Gillette - 1966 Lady Gillette.
     - Gillette Lady Gillette (Blue)
     NEW:
     - Gillette "The New" Vintage Razor
@@ -1032,7 +1021,6 @@ razor:
     - Gillette - Slim Adjustable (L4, 1966)
     - Gillette - Slim Adjustable M-4
     - Gillette - Slim Adjustable N2
-    - Gillette - Slim Adjustable.
     - Gillette - Slim J2
     - Gillette Adjustable Slim (H4)
     - Gillette Aristocrat
@@ -1069,10 +1057,9 @@ razor:
     - 1967 Vintage Gillette SuperSpeed
     - Gillette - 1940's English Parat TTO Double Edge
     - Gillette - 1950's Flare Tip Super Speed
+    - Gillette - Black Handled Super Speed
     - Gillette - Black Handled Super Speed - 1968
-    - Gillette - Black Handled Super Speed.
     - Gillette - Flare Tip Super Speed - 1956
-    - Gillette - Flare Tip Super Speed - 1956.
     - Gillette - Gillette Flare Tip Super Speed (1954 Z3)
     - Gillette - R2 TTO - 1971
     - Gillette - Red Tip Super Speed
@@ -1161,7 +1148,6 @@ razor:
     - Dr. Squatch Safety Razor
     - Henson
     - Henson - AL 13 Mild
-    - Henson - AL 13 Mild.
     - Henson - AL13
     - Henson - AL13 (Squatch)
     - Henson - AL13++
@@ -1181,13 +1167,13 @@ razor:
     - Henson Shaving Al +
     - Henson Shaving Al +++
     - Henson Shaving Al13 +
-    - V2 Henson + ("Dr. Squatch").
+    - V2 Henson + ("Dr. Squatch")
     Ti22:
     - Henson - Ti22 +++
     - Henson Razors - Ti-22 "++"
     - Henson Ti22
     - Henson Ti22 +++
-    - Titanium Henson +++, polished, tattooed ("Dark Age Mechanicus Shaver").
+    - Titanium Henson +++, polished, tattooed ("Dark Age Mechanicus Shaver")
   Hoffritz:
     Slant:
     - Hoffritz - Slant
@@ -1324,7 +1310,7 @@ razor:
   Master Barber:
     Magic Razor:
     - Magic Barber Magic Razor
-    - Master Barber - Magic Razor.
+    - Master Barber - Magic Razor
     - Master Barber Magic Razor
   Max Sprecher:
     Straight:
@@ -1460,7 +1446,7 @@ razor:
     - AC Shavette - Orange Scales
     Shavette (Disposable):
     - CVS Dermaplaner
-    - Kroger - Dermaplane .
+    - Kroger - Dermaplane
     - Sassy + Chic Eyebrow Razor
     Straight Razor:
     - Bengall 5/8
@@ -1587,7 +1573,7 @@ razor:
     - RazoRock - BBS Standard
     - RazoRock Baby Smooth
     Cyber:
-    - RazoRock / Italian Barber - Cyber Razor, Mild.
+    - RazoRock / Italian Barber - Cyber Razor, Mild
     Eco:
     - Razorock Eco Hulk Green
     GOAT:
@@ -1660,7 +1646,7 @@ razor:
     SLOC:
     - RazoRock SLOC
     Stealth Slant:
-    - RazoRock - Stealth Slant; stainless, with PVD coating.
+    - RazoRock - Stealth Slant; stainless, with PVD coating
     Superslant:
     - Razorock Superslant L2++
     Teck II:
@@ -1736,7 +1722,7 @@ razor:
     - Schick - Type L1
     - Schick Injector
     - Schick Injector G1
-    - Schick Injector I1 .
+    - Schick Injector I1
     - Schick Injector M29
     - Schick Injector Razor Type E3
     - Schick Injector Type F
@@ -1753,8 +1739,8 @@ razor:
     - Vintage SCHICK Injector Razor Type-E (1930-1940s)
     - ~~Gillette~~ Schick L7 "Championship" Injector
     Krona:
+    - Schick - Krona
     - Schick - Krona 1960s TTO DE
-    - Schick - Krona.
     - Schick Krona
     Magazine Repeating Razor:
     - Schick Magazine Repeating Razor (Type C3)
@@ -1817,7 +1803,6 @@ razor:
   Timeless:
     Razor:
     - Timeless - .38 Bronze
-    - Timeless - .38 Bronze.
     - Timeless Bronze SB
     - Timeless Bronze SB .38
     - Timeless Matte Stainless OC 95
@@ -1942,7 +1927,7 @@ razor:
     - Yaqi Knight Helmet head + WCS 175S handle (Head frozen with blade overnight)
       - 8/10
     Open Comb:
-    - Yaqi - Open Comb Head.
+    - Yaqi - Open Comb Head
     Romulus:
     - Yaqi Romulus
     Slant 37:
