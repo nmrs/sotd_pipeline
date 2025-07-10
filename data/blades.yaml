@@ -767,7 +767,7 @@ Half DE:
     Perma-Sharp SE:
       patterns:
       - (?!.*\bde\b).*perma\s*-*sharp
-
+      - perma\s*-*sharp.*(half|1/2)
   Leaf:
     SE:
       patterns:
@@ -778,9 +778,12 @@ Injector:
       patterns:
       - parker.*inject
   Personna:
+    74 Injector:
+      patterns:
+      - person.*74.*inject
     Injector:
       patterns:
-      - (person|personna).*(inject|injector)
+      - person.*inject
   Schick:
     Injector:
       patterns:

@@ -20,6 +20,7 @@ data/matched/*.json
 data/threads/*.json
 data/aggregated/*.json
 data/aggregated/annual/*.json
+data/correct_matches.yaml.backup
 # Ignore generated report files
 data/reports/*.md
 # Debug and temporary files

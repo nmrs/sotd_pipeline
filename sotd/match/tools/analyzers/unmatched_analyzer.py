@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Focused module for unmatched analysis functionality."""
 
-import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -15,6 +14,7 @@ if str(project_root) not in sys.path:
 from sotd.cli_utils.base_parser import BaseCLIParser  # noqa: E402
 from sotd.match.tools.utils.analysis_base import AnalysisTool  # noqa: E402
 from sotd.match.tools.utils.cli_utils import BaseAnalysisCLI  # noqa: E402
+from sotd.utils.match_filter_utils import strip_blade_count_patterns  # noqa: E402
 
 
 class UnmatchedAnalyzer(AnalysisTool):
@@ -87,8 +87,12 @@ class UnmatchedAnalyzer(AnalysisTool):
                 all_unmatched[original].append(file_info)
 
     def _strip_use_count(self, text: str) -> str:
-        """Strip use count from blade text, e.g. 'Koraat (5)' -> 'Koraat'."""
-        return re.sub(r"\s*[\(\[\{](?:x)?\d+(?:x)?[\)\]\}]", "", text, flags=re.IGNORECASE).strip()
+        """Strip use count from blade text using shared normalization logic.
+
+        This method uses the shared strip_blade_count_patterns function to ensure
+        consistency with enrich phase and mismatch analyzer normalization.
+        """
+        return strip_blade_count_patterns(text)
 
     def _print_unmatched_results(self, all_unmatched: Dict, field: str, limit: int) -> None:
         """Print unmatched analysis results."""

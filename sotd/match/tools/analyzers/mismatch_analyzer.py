@@ -511,9 +511,10 @@ class MismatchAnalyzer(AnalysisTool):
                                             for model, strings in brand_data.items():
                                                 if isinstance(strings, list):
                                                     for original in strings:
+                                                        brand_model = f"{brand} {model}"
                                                         match_key = (
                                                             f"{field}:{original.lower().strip()}|"
-                                                            f"{(brand + ' ' + model).lower().strip()}"
+                                                            f"{brand_model.lower().strip()}"
                                                         )
                                                         self._correct_matches.add(match_key)
                                                         self._correct_matches_data[match_key] = {
@@ -1187,7 +1188,7 @@ class MismatchAnalyzer(AnalysisTool):
                     comment_ids_text = ", ".join(comment_ids)
                 else:
                     joined_ids = ", ".join(comment_ids[:3])
-                    comment_ids_text = f"{joined_ids}... " f"(+{len(comment_ids) - 3} more)"
+                    comment_ids_text = f"{joined_ids}... (+{len(comment_ids) - 3} more)"
                 # Debug: Show actual comment IDs for first few items
                 if row_number <= 3:
                     debug_msg = (
@@ -1216,6 +1217,12 @@ class MismatchAnalyzer(AnalysisTool):
             row_number += 1
 
         self.console.print(table)
+
+        # Print total unique records in displayed mismatches
+        total_unique_records = sum(item["count"] for item in grouped_mismatches[:limit])
+        self.console.print(
+            f"[bold]Total unique records in displayed mismatches: {total_unique_records}[/bold]"
+        )
 
         # Handle mark-correct functionality
         if getattr(args, "mark_correct", False) and total_mismatches > 0:
@@ -1327,7 +1334,7 @@ class MismatchAnalyzer(AnalysisTool):
                     comment_ids_text = ", ".join(comment_ids)
                 else:
                     comment_ids_text = (
-                        f"{', '.join(comment_ids[:3])}... " f"(+{len(comment_ids) - 3} more)"
+                        f"{', '.join(comment_ids[:3])}... (+{len(comment_ids) - 3} more)"
                     )
             else:
                 comment_ids_text = ""
@@ -1458,7 +1465,7 @@ class MismatchAnalyzer(AnalysisTool):
                     comment_ids_text = ", ".join(comment_ids)
                 else:
                     comment_ids_text = (
-                        f"{', '.join(comment_ids[:3])}... " f"(+{len(comment_ids) - 3} more)"
+                        f"{', '.join(comment_ids[:3])}... (+{len(comment_ids) - 3} more)"
                     )
             else:
                 comment_ids_text = ""
@@ -1587,7 +1594,7 @@ class MismatchAnalyzer(AnalysisTool):
                     comment_ids_text = ", ".join(comment_ids)
                 else:
                     comment_ids_text = (
-                        f"{', '.join(comment_ids[:3])}... " f"(+{len(comment_ids) - 3} more)"
+                        f"{', '.join(comment_ids[:3])}... (+{len(comment_ids) - 3} more)"
                     )
             else:
                 comment_ids_text = ""

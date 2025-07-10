@@ -120,7 +120,11 @@ class TestNormalizationConsistency:
                         for model, correct_matches in brand_data.items():
                             for correct_match in correct_matches:
                                 # Test that the matcher finds this as an exact match
-                                result = matcher.match(correct_match)
+                                if field == "blade":
+                                    # Use format-aware matching for blades
+                                    result = matcher.match_with_context(correct_match, format_name)
+                                else:
+                                    result = matcher.match(correct_match)
 
                                 # Should be an exact match
                                 assert (

@@ -1,57 +1,31 @@
 blade:
-  DE:
-    7 O'Clock:
-      Sharpedge (Yellow):
-      - Gillette 7 O'clock Yellow
-      - Gillette Yellow
-      Super Platinum (Black):
-      - Gillette Seven O'Clock Super Platinum
-      Super Stainless (Green):
-      - Gillette 7 O Clock green
-      - Gillette Seven O'Clock Super Stainless
-      - Gillette Super Stainless (Green)
-    Astra:
-      Superior Stainless (Blue):
-      - GIllette Astra Stainless Blue
-    Bic:
-      Chrome:
-      - Bic Chrome Platinum
-    Feather:
-      DE:
-      - Feather - Hi-stainless
-    Gillette:
-      Perma-Sharp:
-      - Gillette Perma-Sharp
-      - Gillette PermaSharp
-      Platinum:
-      - Gillette Platinum
-      Silver Blue:
-      - Gillette Silver Blue
-      - GSB
-      Wilkinson Sword:
-      - Gillette Wilkinson Sword
-      - Gillette Wilkinson Sword (India)
-      - GWS
-      - GWS Chinese
-      Winner:
-      - Gillette Winner
-      - Gillette Winner Platinum
-      - Gillette Winner Stainless .
-    Glätz:
-      Super Platinum:
-      - Glatz
-    Kai:
-      DE:
-      - Kai
-      - Kai - Stainless.
-    King C Gillette:
-      DE:
-      - King C. Gillette
-      - King C. Gillette (?)
+  A77:
+    Cloud:
+      A77:
+      - Cloud A77 Full Blade
   AC:
     Feather:
+      Pro:
+      - Feather - Professional
+      - Feather Artist Club PRO
+      - Feather Artist Club Professional
+      - Feather Artist Club Professional (SE)
+      - Feather Pro
+      - Feather Pro (AC)
+      - Feather Professional
+      - Feather Professional AC Blade
       Pro Super:
+      - Feather Pro Super
       - Feather Professional SUPER
+      ProGuard:
+      - Feather - Pro Guard
+      - Feather - Pro guard Artis club
+      - Feather Artist Club Pro Guard
+      - Feather Pro Guard
+      - Feather ProGuard
+    Generic:
+      Kai Clone:
+      - Chinese KAI Clone
     Kai:
       Captain Blade:
       - Kai - Captain Original
@@ -73,7 +47,356 @@ blade:
       - KAI Captain Titan Mild Pink (SE)
       Salon Select Premium Guard:
       - Kai Salon Select Premium Guard
+    Schick:
+      Proline (AC):
+      - Schick P-30
+      - Schick P-30 Proline Artist Club (SE)
+      - Schick ProLine
+      - Schick Proline P-Series Artist Club
+  Cartridge:
+    Cartridge:
+      Cartridge:
+      - Personna Twin Pivot Plus (Atra) Cart
+  DE:
+    7 O'Clock:
+      Sharpedge (Yellow):
+      - 7'O Clock - Yellow
+      - Gillette - 7 O'Clock Sharp Edge
+      - Gillette 7 O'Clock (Yellow)
+      - Gillette 7 O'Clock Sharp Edge
+      - Gillette 7 O'Clock Sharp Edge (yellow)
+      - Gillette 7 O'Clock SharpEdge
+      - Gillette 7 O'clock SharpEdge .
+      - Gillette 7 O'Clock SharpEdge Yellow
+      - Gillette 7 O'clock Yellow
+      - Gillette Yellow
+      Super Platinum (Black):
+      - 7sp
+      - Gilette 7 O'Clock - Super Platinum
+      - Gillette - 7 o'clock Super Platinum.
+      - Gillette 7o'clock Black
+      - Gillette Seven O'Clock Super Platinum
+      Super Stainless (Green):
+      - Gilette 7 O' Clock Super Stainless (Green)
+      - Gillette 7 O Clock green
+      - Gillette 7 O'Clock Stainless (Green)
+      - Gillette 7 O'Clock Stainless Green
+      - Gillette 7 O'Clock Super Stainless (Green)
+      - Gillette 7 O'clock Super Stainless (green), DE
+      - Gillette Seven O'Clock Super Stainless
+      - Gillette Super Stainless (Green)
+    Asco:
+      Platinum:
+      - ASCO Orange Platinum
+    Assured for Men:
+      DE:
+      - Assured for Men
+    Astra:
+      Superior Platinum (Green):
+      - Astra
+      - Astra - Platinum
+      - Astra - Superior Platinum.
+      - Astra Green
+      - Astra Green (Indian)
+      - Astra Green - [ on both razors]
+      - Astra Platinum
+      - Astra Platinum (green)
+      - Astra SP
+      - Astra SP (Green)
+      - Astra SP Green
+      - Astra Super Platinum (Greens)
+      - Astra Superior Platinum
+      - Astra Superior Platinum, DE
+      - Astra Superior Platinum.
+      - Gillette Astra Platinum Green
+      Superior Stainless (Blue):
+      - Astra - Blue
+      - Astra Blue
+      - Astra Stainless
+      - Astra Superior Stainless (ASS)
+      - Astra Superior Stainless (Blue)
+      - GIllette Astra Stainless Blue
+      - Gillette Astra Superior Stainless Blue
+    Bevel:
+      Double Edge:
+      - Bevel
+      - Bevel DE
+    Bic:
+      Astor Stainless:
+      - Bic Astor
+      - BIC Astor Stainless
+      - Bic Astor Stainless Steel
+      Chrome:
+      - Bic
+      - Bic Chrome
+      - Bic Chrome Platinum
+    Big Ben:
+      Super Stainless:
+      - Big Ben - Super Stainless
+      - Big Ben Stainless Steel
+      - Big Ben Super Stainless (Purple)
+    Bolzano:
+      Superinox:
+      - Bolzano
+      - Bolzano - Superinox
+      - Bolzano Superinox
+    Cloud:
+      Super Stainless:
+      - Cloud Super Blades
+    Crown:
+      Super Stainless:
+      - Crown - Super Stainless
+    Crystal:
+      Super:
+      - Crystal
+    Derby:
+      Extra:
+      - Derby - Extra
+      - Derby Extra
+      Premium:
+      - Derby Premium
+    Dorco:
+      Prime Platinum:
+      - Dorco Prime Platinum
+      ST-300:
+      - Dorco
+      - Dorco Stainless
+      Titan:
+      - Dorco Titan
+    Durablade:
+      Sharp Hi Chromium:
+      - Durablade Sharp Hi Chromium
+    Feather:
+      DE:
+      - Feather
+      - Feather (DE)
+      - Feather - Hi-stainless
+      - Feather - HiStainless
+      - Feather Hi Stainless
+      - Feather Hi-Stainless
+      - Feather Stainless
+    Filoso:
+      Platinum:
+      - Filoso
+      - Filoso - Platinum Blade
+      - Filoso - The Barbers Blade
+    FlyDear:
+      Super Platinum:
+      - FlyDear
+      - FlyDear - 9/10
+      - modified FlyDear 🤦🏻♂️
+    Gillette:
+      '365':
+      - Gillette 365
+      Blue:
+      - Gillette - Blue Blade
+      - Gillette Blue
+      Minora:
+      - Gillette - Minora
+      - Gillette - Minora Stainless.
+      - Gillette Minora
+      - Gillette Minora Stainless.
+      Nacet:
+      - Gillette - Nacet
+      - Gillette - Nacet Stainless
+      - Gillette Nacet
+      - Gillette Nacet.
+      - Nacet
+      Perma-Sharp:
+      - Gillete PermaSharp
+      - Gillette - Perma Sharp
+      - Gillette - Permasharp
+      - Gillette Green - Permasharp
+      - Gillette Perma-Sharp
+      - Gillette PermaSharp
+      - Perma-sharp
+      - Perma-sharp Stainless
+      - Perma-Sharp Super
+      - Permasharp
+      Platinum:
+      - Gillette - Platinum
+      - Gillette - Platinum (half in Kamisori , whole in Overlander )
+      - Gillette Platinum
+      Silver Blue:
+      - Gillete Silver Blue
+      - Gillette - Silver Blue
+      - Gillette Silver Blue
+      - GSB
+      Super Thin Platinum:
+      - Gillette - Super thin Platinum
+      Wilkinson Sword:
+      - Gillette Wilkinson Sword
+      - Gillette Wilkinson Sword (India)
+      - GWS
+      - GWS Chinese
+      Winner:
+      - Gillette Winner
+      - Gillette Winner Platinum
+      - Gillette Winner Stainless .
+    Glätz:
+      Super Platinum:
+      - Glatz
+    Kai:
+      DE:
+      - Kai
+      - Kai - Stainless.
+    King C Gillette:
+      DE:
+      - Gillette - King C Gillette Blades
+      - King C. Gillette
+      - King C. Gillette (?)
+    Ladas:
+      Super Stainless:
+      - Ladas
+    Laser:
+      Ultra:
+      - Laser Super Platinum
+      - Laser Ultra
+    Lord:
+      Blue Sword Platinum:
+      - Blue Sword Platinum
+      Super Stainless:
+      - Lord Shark - Super Stainless
+      - Lord Super Chrome
+      - Lord Super Stainless Steel
+    Merkur:
+      Super Platinum:
+      - Merkur Super Platinum
+    Personna:
+      '74':
+      - Personna 74
+      - Personna P74
+      Lab Blue:
+      - Accuforge
+      - Persona
+      - Personna - Comfort Coated (Lab Blue)
+      - Personna - Lab Blue.
+      - Personna Comfort Coat
+      - Personna Comfort Coated
+      - Personna GEM PTFE
+      - Personna Lab Blue
+      - Personna Lab Blue.
+      - Personna Super Comfort Coated (aka Lab Blue)
+      Med Prep:
+      - AccuTec - Med Prep
+      - Persona Medical
+      - Personna Med Prep
+      Platinum:
+      - Personna "Israeli Red"
+      - Personna - Platinum (for both)
+      - Personna - Platinum Chrome Israeli Red
+      - Personna - Platinum.
+      - Personna Platinum
+      - Personna Red
+      - Personna Super Stainless
+    Polsilver:
+      Super Iridium:
+      - Polsilver SI
+      - Polsilver Super Iridium
+    RK:
+      Stainless:
+      - RK Stainless
+    Rapira:
+      Platinum Lux:
+      - Rapira
+      Super Stainless:
+      - Rapira Super Stainless
+      Swedish:
+      - Rapira Sweedish Super Steel
+    Rockwell:
+      Swedish Stainless:
+      - Rockwell Swedish Stainless Steel
+      - Rockwell Swedish Stainless Steel $WOODEN
+    Schick:
+      Stainless (DE):
+      - Schick Stainless
+    Shark:
+      Chrome:
+      - Lord Shark - Super Chrome
+      - Shark - Super Chrome
+      - Shark Super Chrome
+      - Shark Super Chromes
+      Stainless:
+      - Shark (Egypt)
+      - Shark SS
+    Silver Star:
+      Super Stainless:
+      - Lord Silver Star - Stainless
+    Statum:
+      Platinum:
+      - Statum
+    Super-Max:
+      Platinum:
+      - SuperMax Platinum Plus
+      Super Stainless (Green):
+      - Super- Super-Max Super Stainless
+    Tatara:
+      DE:
+      - Tatara - Platinum
+      - Tatara Stainless
+    Tatra:
+      Platinum:
+      - Czech Blades Tatra Platinum Stainless
+    XR:
+      RhinoceRos:
+      - Rhinoceros A77 Blade
+  FHS:
+    Feather:
+      FHS-1:
+      - Feather ASD-10
+      - Feather FHS-10
+      - FHS-10
+    OneBlade:
+      HiCarbon SE:
+      - OneBlade - HiCarbon SE
+  GEM:
+    GEM:
+      Blue Star:
+      - Gem - Blue Star uncoated blade
+      - Gem - Blue Star uncoated blades
+      - GEM Blue Star
+    PAL:
+      Blue Blade:
+      - PAL | Single Edge Carbon Steel BLUE Blades
+    Personna:
+      GEM PTFE:
+      - Accuforge - Gem Microcoat
+      - AccuForge Coated
+      - Accuforge GEM coated stainless steel
+      - Accuforge GEM Microcoat
+      - Accuforge Pro PTFE GEM
+      - AccuTec - Pro Premium Coated
+      - AccuTec Pro Premium
+      - Accutec Pro Premium (GEM)
+      - Gem
+      - Gem blade
+      - Gem PTFE
+      - GEM PTFE (?)
+      - GEM PTFE / Schick Injector
+      - GEM SS PTFE
+      - Personna - GEM PTFE
+      - Personna - GEM PTFE.
+      - Personna GEM
+      - Personna GEM PTFE
+      - Personna GEM PTFE Coated
+      - Personna GEM PTFE, Crown Half Blade, Parker Injector
+      - Personna GEM PTFE.
+      - Personna GEM Stainless PTFE
+      - Personna PTFE
+      - Personna PTFE Stainless Steel GEM
+      - PTFE
+      GEM Stainless:
+      - GEM stainless
   Hair Shaper:
+    Annie:
+      Hair Shaper:
+      - Annie Hair Shaper
+      - Annie Hair Shaper Blade
+    Fromm:
+      Hair Shaper:
+      - Fromm
+      - Fromm - Hair Shaper
+      - FROMM Hair Shaper Blade
     Gutche:
       Hair Shaper:
       - Gutche Hair Shaper Blade
@@ -81,20 +404,67 @@ blade:
       Hair Shaper:
       - Kismet
       - Kismet blade
+      - Kismet Blade Corked
+      - Kismet hair shaper
+      - Kismet Rostfrei
+      - Kismet Rostfrei, Polymer beschichtet
+    Personna:
+      Hair Shaper:
+      - Personna
+      - Personna - Hair Shaper
+      - Personna Hair Shaper
+      - Personna Hair Shaper Blade
+      - Personna Specimen Prep
+  Half DE:
+    Dorco:
+      HST-300:
+      - Dorco HST-300-P1 1/2 DE
+    Gillette:
+      Perma-Sharp SE:
+      - Permasharp 1/2 DE
+    Leaf:
+      SE:
+      - Leaf Single-Edge Blades
+      - Leaf Super Platinum
+  Injector:
+    Parker:
+      Injector:
+      - Parker Injector
+      - Parker SS Injector
+    Personna:
+      74 Injector:
+      - Personna - 74 - Injector
+      Injector:
+      - Personna injector
+      - Personna Injector (SE)
+      - Personna Injector Blade
+      - Personna Stainless Coated Injector Blades
+    Schick:
+      Injector:
+      - Injector
+      - Schick
+      - Schick - Chinese Schick Plus
+      - Schick - Injector
+      - Schick Injector
+      - Schick Injector Blade
+      - Schick Injector yellow
+      - Schick Krona
+      - Schick Stainless Steel Injector
+      - Schick Yellow
+      - Shick Injector blade
+      Proline (Injector):
+      - Schick - Proline B-20
+      - Schick Proline B-20
+      - Shick proline B20
   Other:
     Kampfe:
       Wedge:
       - Kampfe Bros Saturday
-  GEM:
-    Personna:
-      GEM PTFE:
-      - Gem
-      - Gem blade
-      - Gem PTFE
-  Injector:
-    Schick:
-      Injector:
-      - Injector
+    Rolls Razor:
+      Blade:
+      - Rolls (not this kind of Rolls) Razor Wedge Blade
+      - Rolls Blade
+      - Rolls Razor
 razor:
   3D Printed:
     DE:
