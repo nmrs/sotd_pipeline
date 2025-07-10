@@ -859,7 +859,7 @@ Gutche:
   A77 Shavette:
     format: Shavette (A77)
     patterns:
-    - gutche
+    - gutche.*(?:shavette)?
 H&S Co.:
   NO75:
     patterns:
@@ -1312,6 +1312,11 @@ Other:
     - grotesque torture implement #https://www.reddit.com/r/Wetshaving/comments/1l1ajgv/monday_lather_games_sotd_thread_jun_02_2025/mvkvysm/
     - chopstick kamisori
     - ice ?pick kamisori
+  Shavette (A77):
+    format: Shavette (A77)
+    patterns:
+    - shavette.*a77
+    - a77.*shavette
   Shavette (AC):
     format: Shavette (AC)
     patterns:
