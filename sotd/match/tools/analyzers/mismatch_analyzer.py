@@ -78,6 +78,13 @@ class MismatchAnalyzer(AnalysisTool):
             require_date_args=False,
         )
 
+        # Add debug argument
+        parser.add_argument(
+            "--debug",
+            action="store_true",
+            help="Enable debug output to show detailed processing information",
+        )
+
         # Main arguments
         parser.add_argument(
             "--field",
@@ -246,6 +253,11 @@ class MismatchAnalyzer(AnalysisTool):
         total_confirmed = 0
         total_unconfirmed = 0
         total_exact_matches = 0
+
+        # Debug: Track missing entries
+        missing_entries = []
+        confirmed_but_not_exact = []
+
         for record in records:
             field_data = record.get(args.field)
             if not isinstance(field_data, dict):
@@ -266,8 +278,28 @@ class MismatchAnalyzer(AnalysisTool):
             match_key = self._create_match_key(args.field, original, matched)
             if match_key in self._correct_matches:
                 total_confirmed += 1
+                # Debug: Track confirmed but not exact matches
+                if args.debug:
+                    confirmed_but_not_exact.append(
+                        {
+                            "original": original,
+                            "matched": matched,
+                            "match_key": match_key,
+                            "match_type": match_type,
+                        }
+                    )
             else:
                 total_unconfirmed += 1
+                # Debug: Track missing entries
+                if args.debug:
+                    missing_entries.append(
+                        {
+                            "original": original,
+                            "matched": matched,
+                            "match_key": match_key,
+                            "match_type": match_type,
+                        }
+                    )
 
         self.console.print("\n[bold][Summary][/bold]")
         if total_exact_matches > 0:
@@ -283,6 +315,38 @@ class MismatchAnalyzer(AnalysisTool):
         self.console.print(
             f"  • Matches not in correct_matches.yaml: [yellow]{total_unconfirmed}[/yellow]"
         )
+
+        # Debug: Show missing entries
+        if args.debug and missing_entries:
+            self.console.print(
+                f"\n[blue]DEBUG: Found {len(missing_entries)} missing entries:[/blue]"
+            )
+            for i, entry in enumerate(missing_entries[:10]):  # Show first 10
+                self.console.print(
+                    f"[blue]DEBUG: Missing {i+1}: Original='{entry['original']}', "
+                    f"Matched={entry['matched']}, Type={entry['match_type']}, "
+                    f"Key={entry['match_key']}[/blue]"
+                )
+            if len(missing_entries) > 10:
+                self.console.print(f"[blue]DEBUG: ... and {len(missing_entries) - 10} more[/blue]")
+
+        # Debug: Show confirmed but not exact matches
+        if args.debug and confirmed_but_not_exact:
+            self.console.print(
+                f"\n[blue]DEBUG: Found {len(confirmed_but_not_exact)} "
+                f"confirmed but not exact matches:[/blue]"
+            )
+            for i, entry in enumerate(confirmed_but_not_exact[:10]):  # Show first 10
+                self.console.print(
+                    f"[blue]DEBUG: Confirmed but not exact {i+1}: Original='{entry['original']}', "
+                    f"Matched={entry['matched']}, Type={entry['match_type']}, "
+                    f"Key={entry['match_key']}[/blue]"
+                )
+            if len(confirmed_but_not_exact) > 10:
+                self.console.print(
+                    f"[blue]DEBUG: ... and {len(confirmed_but_not_exact) - 10} more[/blue]"
+                )
+
         self.console.print("")
 
     def _clear_pattern_cache(self) -> None:
@@ -354,6 +418,29 @@ class MismatchAnalyzer(AnalysisTool):
             self.console.print("[yellow]No records found in data[/yellow]")
             return mismatches
 
+        # Debug: Show correct matches loading info
+        if args.debug:
+            self.console.print(
+                f"[blue]DEBUG: Loaded {len(self._correct_matches)} correct matches[/blue]"
+            )
+            self.console.print(
+                f"[blue]DEBUG: Processing {len(records)} records for field '{field}'[/blue]"
+            )
+
+            # Show some examples of correct match keys
+            correct_keys = list(self._correct_matches)[:5]
+            for key in correct_keys:
+                self.console.print(f"[blue]DEBUG: Correct match key example: {key}[/blue]")
+
+            # Debug: Show blade-specific correct match keys
+            if field == "blade":
+                blade_keys = [k for k in self._correct_matches if k.startswith("blade:")]
+                self.console.print(
+                    f"[blue]DEBUG: Found {len(blade_keys)} blade-specific correct match keys[/blue]"
+                )
+                for key in blade_keys[:5]:
+                    self.console.print(f"[blue]DEBUG: Blade correct match key: {key}[/blue]")
+
         # Sort records by a stable key for deterministic processing order
         # Use the original text as the primary sort key, with record ID as secondary
         def record_sort_key(record):
@@ -380,6 +467,24 @@ class MismatchAnalyzer(AnalysisTool):
 
             if not original or not matched:
                 continue
+
+            # Debug: Show processing info for first few records
+            if (
+                args.debug
+                and len(mismatches["exact_matches"])
+                + len(mismatches["multiple_patterns"])
+                + len(mismatches["levenshtein_distance"])
+                < 10
+            ):
+                match_key = self._create_match_key(field, original, matched)
+                self.console.print(
+                    f"[blue]DEBUG: Processing record - Original: '{original}', "
+                    f"Match type: {match_type}, Match key: {match_key}[/blue]"
+                )
+                if match_key in self._correct_matches:
+                    self.console.print("[green]DEBUG: Found in correct matches[/green]")
+                else:
+                    self.console.print("[yellow]DEBUG: NOT found in correct matches[/yellow]")
 
             # Skip exact matches (from correct_matches.yaml) - these are already confirmed correct
             if match_type == "exact":
