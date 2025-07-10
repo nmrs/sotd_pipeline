@@ -55,7 +55,7 @@ class BladeMatcher(BaseMatcher):
 
         normalized_matches = {}
 
-        # Iterate through all formats in correct matches
+        # Iterate through all formats in correct matches (blade section is organized by format)
         for format_name, format_data in self.correct_matches.items():
             if not isinstance(format_data, dict):
                 continue
@@ -85,7 +85,7 @@ class BladeMatcher(BaseMatcher):
                     matched = {
                         "brand": brand,
                         "model": model,
-                        "format": format_name,
+                        "format": format_name,  # Use the format from the structure
                     }
                     # Add all other catalog fields except patterns and format
                     for key, val in catalog_entry.items():
@@ -164,8 +164,17 @@ class BladeMatcher(BaseMatcher):
         if not normalized_value:
             return []
 
-        # O(1) lookup using pre-computed normalized matches
-        return self._normalized_correct_matches.get(normalized_value, [])
+        # Try exact match first
+        if normalized_value in self._normalized_correct_matches:
+            return self._normalized_correct_matches[normalized_value]
+
+        # If no exact match, try case-insensitive match
+        normalized_value_lower = normalized_value.lower()
+        for key, matches in self._normalized_correct_matches.items():
+            if key.lower() == normalized_value_lower:
+                return matches
+
+        return []
 
     def _filter_by_format(
         self, matches: List[Dict[str, Any]], target_format: str
