@@ -186,13 +186,6 @@ class BaseMatcher:
         # Use pre-built lookup dictionary for O(1) access
         lookup = self._get_correct_matches_lookup()
 
-        # DEBUG: Print normalized value and lookup keys for all blade values
-        if self.field_type == "blade":
-            print(
-                f"DEBUG: _check_correct_matches normalized_value={normalized_value!r}", flush=True
-            )
-            print(f"DEBUG: _check_correct_matches lookup keys={list(lookup.keys())}", flush=True)
-
         # Try exact match first
         result = lookup.get(normalized_value)
         if result:
