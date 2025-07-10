@@ -502,34 +502,60 @@ class MismatchAnalyzer(AnalysisTool):
                     return
                 for field, field_data in data.items():
                     if isinstance(field_data, dict):
-                        for brand, brand_data in field_data.items():
-                            if isinstance(brand_data, dict):
-                                for model, strings in brand_data.items():
-                                    if isinstance(strings, list):
-                                        for original in strings:
-                                            match_key = (
-                                                f"{field}:{original.lower().strip()}|"
-                                                f"{(brand + ' ' + model).lower().strip()}"
-                                            )
-                                            self._correct_matches.add(match_key)
-                                            self._correct_matches_data[match_key] = {
-                                                "original": original,
-                                                "matched": {
-                                                    "brand": (
-                                                        brand
-                                                        if field in ("razor", "blade", "brush")
-                                                        else None
-                                                    ),
-                                                    "model": (
-                                                        model
-                                                        if field in ("razor", "blade", "brush")
-                                                        else None
-                                                    ),
-                                                    "maker": brand if field == "soap" else None,
-                                                    "scent": model if field == "soap" else None,
-                                                },
-                                                "field": field,
-                                            }
+                        if field == "blade":
+                            # Handle format-first structure for blade field
+                            for format_name, format_data in field_data.items():
+                                if isinstance(format_data, dict):
+                                    for brand, brand_data in format_data.items():
+                                        if isinstance(brand_data, dict):
+                                            for model, strings in brand_data.items():
+                                                if isinstance(strings, list):
+                                                    for original in strings:
+                                                        match_key = (
+                                                            f"{field}:{original.lower().strip()}|"
+                                                            f"{(brand + ' ' + model).lower().strip()}"
+                                                        )
+                                                        self._correct_matches.add(match_key)
+                                                        self._correct_matches_data[match_key] = {
+                                                            "original": original,
+                                                            "matched": {
+                                                                "brand": brand,
+                                                                "model": model,
+                                                                "format": format_name,
+                                                            },
+                                                            "field": field,
+                                                        }
+                        else:
+                            # Handle brand-first structure for other fields
+                            for brand, brand_data in field_data.items():
+                                if isinstance(brand_data, dict):
+                                    for model, strings in brand_data.items():
+                                        if isinstance(strings, list):
+                                            for original in strings:
+                                                brand_model = f"{brand} {model}"
+                                                match_key = (
+                                                    f"{field}:{original.lower().strip()}|"
+                                                    f"{brand_model.lower().strip()}"
+                                                )
+                                                self._correct_matches.add(match_key)
+                                                self._correct_matches_data[match_key] = {
+                                                    "original": original,
+                                                    "matched": {
+                                                        "brand": (
+                                                            brand
+                                                            if field in ("razor", "blade", "brush")
+                                                            else None
+                                                        ),
+                                                        "model": (
+                                                            model
+                                                            if field in ("razor", "blade", "brush")
+                                                            else None
+                                                        ),
+                                                        "maker": brand if field == "soap" else None,
+                                                        "scent": model if field == "soap" else None,
+                                                    },
+                                                    "field": field,
+                                                }
         except (yaml.YAMLError, KeyError) as e:
             self.console.print(f"[yellow]Warning: Could not load correct matches: {e}[/yellow]")
             self._correct_matches = set()
@@ -575,47 +601,118 @@ class MismatchAnalyzer(AnalysisTool):
             # Ensure directory exists
             self._get_correct_matches_file().parent.mkdir(parents=True, exist_ok=True)
 
-            # Organize matches hierarchically: field -> brand -> model -> [strings]
+            # Organize matches hierarchically based on field type
             yaml_data = {}
             for match_key, stored_data in self._correct_matches_data.items():
                 field = stored_data.get("field")
                 original = stored_data.get("original")
                 matched_dict = stored_data.get("matched", {})
-                if field in ("razor", "blade", "brush"):
+
+                if field == "blade":
+                    # Use format-first structure for blade field
+                    canonical_format = matched_dict.get("format", "DE")  # Default to DE
                     canonical_brand = matched_dict.get("brand", "")
                     canonical_model = matched_dict.get("model", "")
+
+                    canonical_format = canonical_format.strip()
+                    canonical_brand = canonical_brand.strip()
+                    canonical_model = canonical_model.strip()
+
+                    if field not in yaml_data:
+                        yaml_data[field] = {}
+                    if canonical_format not in yaml_data[field]:
+                        yaml_data[field][canonical_format] = {}
+                    if canonical_brand not in yaml_data[field][canonical_format]:
+                        yaml_data[field][canonical_format][canonical_brand] = {}
+                    if canonical_model not in yaml_data[field][canonical_format][canonical_brand]:
+                        yaml_data[field][canonical_format][canonical_brand][canonical_model] = []
+
+                    # Normalize the original string before storing to prevent bloat
+                    normalized_original = normalize_for_matching(original, None, field)
+                    if (
+                        normalized_original
+                        and normalized_original
+                        not in yaml_data[field][canonical_format][canonical_brand][canonical_model]
+                    ):
+                        yaml_data[field][canonical_format][canonical_brand][canonical_model].append(
+                            normalized_original
+                        )
+
+                elif field in ("razor", "brush"):
+                    # Use brand-first structure for razor and brush fields
+                    canonical_brand = matched_dict.get("brand", "")
+                    canonical_model = matched_dict.get("model", "")
+
+                    canonical_brand = canonical_brand.strip()
+                    canonical_model = canonical_model.strip()
+
+                    if field not in yaml_data:
+                        yaml_data[field] = {}
+                    if canonical_brand not in yaml_data[field]:
+                        yaml_data[field][canonical_brand] = {}
+                    if canonical_model not in yaml_data[field][canonical_brand]:
+                        yaml_data[field][canonical_brand][canonical_model] = []
+
+                    # Normalize the original string before storing to prevent bloat
+                    normalized_original = normalize_for_matching(original, None, field)
+                    if (
+                        normalized_original
+                        and normalized_original
+                        not in yaml_data[field][canonical_brand][canonical_model]
+                    ):
+                        yaml_data[field][canonical_brand][canonical_model].append(
+                            normalized_original
+                        )
+
                 elif field == "soap":
+                    # Use brand-first structure for soap field
                     canonical_brand = matched_dict.get("maker", "")
                     canonical_model = matched_dict.get("scent", "")
+
+                    canonical_brand = canonical_brand.strip()
+                    canonical_model = canonical_model.strip()
+
+                    if field not in yaml_data:
+                        yaml_data[field] = {}
+                    if canonical_brand not in yaml_data[field]:
+                        yaml_data[field][canonical_brand] = {}
+                    if canonical_model not in yaml_data[field][canonical_brand]:
+                        yaml_data[field][canonical_brand][canonical_model] = []
+
+                    # Normalize the original string before storing to prevent bloat
+                    normalized_original = normalize_for_matching(original, None, field)
+                    if (
+                        normalized_original
+                        and normalized_original
+                        not in yaml_data[field][canonical_brand][canonical_model]
+                    ):
+                        yaml_data[field][canonical_brand][canonical_model].append(
+                            normalized_original
+                        )
                 else:
                     continue
-                canonical_brand = canonical_brand.strip()
-                canonical_model = canonical_model.strip()
-                if field not in yaml_data:
-                    yaml_data[field] = {}
-                if canonical_brand not in yaml_data[field]:
-                    yaml_data[field][canonical_brand] = {}
-                if canonical_model not in yaml_data[field][canonical_brand]:
-                    yaml_data[field][canonical_brand][canonical_model] = []
 
-                # Normalize the original string before storing to prevent bloat
-                normalized_original = normalize_for_matching(original, None, field)
-                if (
-                    normalized_original
-                    and normalized_original
-                    not in yaml_data[field][canonical_brand][canonical_model]
-                ):
-                    yaml_data[field][canonical_brand][canonical_model].append(normalized_original)
-
-            # Alphabetize entries within each field/brand/model
+            # Alphabetize entries within each field/brand/model (or field/format/brand/model)
             for field, field_data in yaml_data.items():
                 if isinstance(field_data, dict):
-                    for brand, brand_data in field_data.items():
-                        if isinstance(brand_data, dict):
-                            for model, entries in brand_data.items():
-                                if isinstance(entries, list):
-                                    # Sort entries alphabetically (case-insensitive)
-                                    entries.sort(key=str.lower)
+                    if field == "blade":
+                        # For blade field, sort by format -> brand -> model
+                        for format_name, format_data in field_data.items():
+                            if isinstance(format_data, dict):
+                                for brand, brand_data in format_data.items():
+                                    if isinstance(brand_data, dict):
+                                        for model, entries in brand_data.items():
+                                            if isinstance(entries, list):
+                                                # Sort entries alphabetically (case-insensitive)
+                                                entries.sort(key=str.lower)
+                    else:
+                        # For other fields, sort by brand -> model
+                        for brand, brand_data in field_data.items():
+                            if isinstance(brand_data, dict):
+                                for model, entries in brand_data.items():
+                                    if isinstance(entries, list):
+                                        # Sort entries alphabetically (case-insensitive)
+                                        entries.sort(key=str.lower)
 
             with self._get_correct_matches_file().open("w", encoding="utf-8") as f:
                 yaml.dump(yaml_data, f, default_flow_style=False, indent=2, allow_unicode=True)
