@@ -43,13 +43,19 @@ AC:
     Captain Sharpblade:
       patterns:
       - kai.*sharp
-    Captain Titan Mild:
+    Captain Titan:
       patterns:
       - kai.*titan
-      - kai.*cap.*mild
-    Captain Titan Mild Protouch MG:
+    Captain Titan Mild:
       patterns:
-      - kai.*pro\s*(?:touch|guard)
+      - kai.*cap.*mild
+    Captain ProGuard:
+      patterns:
+      - kai.*pro\s*guard
+      - proguard
+    Captain ProTouch:
+      patterns:
+      - kai.*pro\s*touch
       - protouch
     Salon Select Premium Guard:
       patterns:

@@ -67,12 +67,13 @@ razor:
     34C:
       - "Merkur 34C"
 blade:
-  Feather:
-    DE:
-      - "Feather"
-  Astra:
-    SP:
-      - "Astra SP"
+  DE:
+    Feather:
+      DE:
+        - "Feather"
+    Astra:
+      SP:
+        - "Astra SP"
 brush:
   Simpson:
     Chubby 2:

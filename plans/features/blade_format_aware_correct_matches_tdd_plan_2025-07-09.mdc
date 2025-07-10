@@ -1,0 +1,268 @@
+# Blade Format-Aware Correct Matches TDD Implementation Plan
+
+## Project Overview
+
+**Problem**: The current blade matching algorithm returns correct matches without considering razor format context. When the same blade string (e.g., "Accuforge") appears under multiple brand/model combinations representing different formats, the algorithm returns the first match found, ignoring the razor format.
+
+**Solution**: Enhance the blade matching algorithm to collect all correct matches for a string, filter by razor format compatibility using the same priority logic as regex matching, and return the format-appropriate match.
+
+**Goal**: Ensure that blade matching considers razor format context when multiple correct matches exist for the same string.
+
+## Current Status and Next Steps
+
+### Project Status (2025-07-09)
+**Current Phase**: Phase 1 - Core Algorithm Enhancement
+**Overall Progress**: 0% complete (Planning phase)
+**Test Status**: Not started
+
+## TDD Implementation Strategy
+
+### Phase 1: Core Algorithm Enhancement
+
+#### Chunk 1.1: Test-Driven Algorithm Design
+**Goal**: Design the format-aware correct match lookup algorithm
+
+**Test Cases**:
+- [ ] **Format-specific match found**: "Accuforge" with GEM razor → returns GEM PTFE match
+- [ ] **Format-specific match found**: "Accuforge" with DE razor → returns Lab Blue match  
+- [ ] **Single match exists**: "Astra" with DE razor → returns Astra match (no format ambiguity)
+- [ ] **No correct match**: "Unknown Blade" with any razor → returns None
+- [ ] **Multiple format matches**: "Feather" with DE razor → returns DE Feather match
+- [ ] **Multiple format matches**: "Feather" with AC razor → returns AC Feather match
+
+**Implementation**:
+- [ ] Enhance `BladeMatcher.match_with_context()` to collect all correct matches
+- [ ] Add format filtering logic using same priority as regex matching
+- [ ] Return format-appropriate match or fall back to regex
+
+#### Chunk 1.2: Data Structure Analysis
+**Goal**: Analyze current correct_matches.yaml structure and plan migration
+
+**Test Cases**:
+- [ ] **Structure analysis**: Verify current brand-first organization
+- [ ] **Format mapping**: Map existing entries to formats using blades.yaml
+- [ ] **Ambiguous strings**: Identify strings that appear in multiple formats
+- [ ] **Migration planning**: Design format-first structure
+
+**Implementation**:
+- [ ] Analyze current correct_matches.yaml structure
+- [ ] Map entries to formats using blades.yaml as reference
+- [ ] Identify format-ambiguous strings like "Accuforge"
+- [ ] Design new format-first structure
+
+### Phase 1.5: Data Migration to Format-First Structure
+
+#### Chunk 1.5.1: Data Analysis and Migration Strategy
+**Goal**: Analyze current structure and create migration plan
+
+**Test Cases**:
+- [ ] **Data analysis**: Parse current correct_matches.yaml structure
+- [ ] **Format mapping**: Map each entry to its format using blades.yaml
+- [ ] **Ambiguous detection**: Identify strings that appear in multiple formats
+- [ ] **Migration validation**: Verify all entries are preserved exactly
+
+**Implementation**:
+- [ ] Parse current correct_matches.yaml structure
+- [ ] Map each brand/model to format using blades.yaml
+- [ ] Identify strings that appear in multiple formats
+- [ ] Create migration script to convert to format-first structure
+
+#### Chunk 1.5.2: Data Migration Implementation
+**Goal**: Migrate data to format-first structure
+
+**Test Cases**:
+- [ ] **Migration script**: Convert brand-first to format-first structure
+- [ ] **Data preservation**: All original entries preserved exactly
+- [ ] **Format organization**: Entries organized by format → brand → model
+- [ ] **Backup creation**: Original file backed up before migration
+
+**Implementation**:
+- [ ] Create migration script to convert structure
+- [ ] Preserve all existing user entries exactly as they are
+- [ ] Organize by format → brand → model structure
+- [ ] Create backup of original file
+
+#### Chunk 1.5.3: Migration Validation
+**Goal**: Validate migration preserves all data correctly
+
+**Test Cases**:
+- [ ] **Entry count**: Same number of entries before and after migration
+- [ ] **Content preservation**: All original strings preserved exactly
+- [ ] **Format accuracy**: Entries mapped to correct formats
+- [ ] **Lookup functionality**: New structure works with existing lookup logic
+
+**Implementation**:
+- [ ] Verify entry count matches original
+- [ ] Validate all original strings are preserved
+- [ ] Test lookup functionality with new structure
+- [ ] Update any hardcoded references to old structure
+
+### Phase 2: Enhanced Lookup Implementation
+
+#### Chunk 2.1: Format-Aware Correct Match Collection
+**Goal**: Enhance correct match lookup to collect all matches for a string
+
+**Test Cases**:
+- [ ] **Single match**: "Astra" → returns single match
+- [ ] **Multiple matches**: "Accuforge" → returns all matches across formats
+- [ ] **No matches**: "Unknown" → returns empty list
+- [ ] **Case insensitive**: "ACCUFORGE" → returns same matches as "Accuforge"
+
+**Implementation**:
+- [ ] Modify `BladeMatcher.match()` to return all matches for a string
+- [ ] Handle case-insensitive matching
+- [ ] Return list of all matching brand/model combinations
+
+#### Chunk 2.2: Format Filtering Logic
+**Goal**: Implement format filtering using same priority as regex matching
+
+**Test Cases**:
+- [ ] **Format priority**: GEM razor with "Accuforge" → returns GEM PTFE match
+- [ ] **Format priority**: DE razor with "Accuforge" → returns Lab Blue match
+- [ ] **Format mapping**: Verify all razor formats map to correct blade formats
+- [ ] **Fallback logic**: No format match → fall back to first correct match
+
+**Implementation**:
+- [ ] Implement format mapping logic (same as regex matching)
+- [ ] Add format filtering to correct match results
+- [ ] Return format-appropriate match or fall back to first match
+- [ ] Use same format priority logic as existing regex matching
+
+#### Chunk 2.3: Integration with Existing Algorithm
+**Goal**: Integrate format-aware lookup into existing match_with_context flow
+
+**Test Cases**:
+- [ ] **Correct match with format**: Returns format-appropriate correct match
+- [ ] **Correct match without format**: Falls back to regex matching
+- [ ] **No correct match**: Proceeds to regex matching as before
+- [ ] **Performance**: No significant performance degradation
+
+**Implementation**:
+- [ ] Integrate format-aware lookup into match_with_context()
+- [ ] Maintain existing fallback behavior
+- [ ] Ensure performance remains acceptable
+- [ ] Preserve all existing functionality
+
+### Phase 3: Testing and Validation
+
+#### Chunk 3.1: Comprehensive Test Suite
+**Goal**: Create comprehensive test coverage for format-aware matching
+
+**Test Cases**:
+- [ ] **Unit tests**: All format-aware lookup functions
+- [ ] **Integration tests**: End-to-end blade matching with format context
+- [ ] **Edge cases**: Empty strings, special characters, case variations
+- [ ] **Performance tests**: Large dataset performance validation
+
+**Implementation**:
+- [ ] Create unit tests for all new functions
+- [ ] Add integration tests for complete matching flow
+- [ ] Include performance benchmarks
+- [ ] Test edge cases and error conditions
+
+#### Chunk 3.2: Real-World Validation
+**Goal**: Validate against real SOTD data
+
+**Test Cases**:
+- [ ] **Real data validation**: Test with actual SOTD comments
+- [ ] **Format accuracy**: Verify correct format matches in real data
+- [ ] **Backward compatibility**: Ensure existing matches still work
+- [ ] **Performance validation**: Test with large datasets
+
+**Implementation**:
+- [ ] Test with real SOTD data from multiple months
+- [ ] Validate format-aware matches are correct
+- [ ] Ensure no regressions in existing functionality
+- [ ] Measure performance impact
+
+### Phase 4: Documentation and Cleanup
+
+#### Chunk 4.1: Documentation Updates
+**Goal**: Update all relevant documentation
+
+**Test Cases**:
+- [ ] **Algorithm documentation**: Document format-aware matching logic
+- [ ] **Data structure documentation**: Document new correct_matches.yaml format
+- [ ] **Migration documentation**: Document data migration process
+- [ ] **User documentation**: Update any user-facing documentation
+
+**Implementation**:
+- [ ] Update blade matching specification
+- [ ] Document new data structure format
+- [ ] Create migration documentation
+- [ ] Update any relevant README files
+
+#### Chunk 4.2: Code Cleanup and Optimization
+**Goal**: Clean up implementation and optimize performance
+
+**Test Cases**:
+- [ ] **Code quality**: All linting and type checking passes
+- [ ] **Performance**: No significant performance regression
+- [ ] **Memory usage**: Efficient memory usage for large datasets
+- [ ] **Error handling**: Robust error handling for edge cases
+
+**Implementation**:
+- [ ] Run full quality checks (format, lint, typecheck, test)
+- [ ] Optimize performance if needed
+- [ ] Add comprehensive error handling
+- [ ] Clean up any temporary code or comments
+
+## Success Criteria
+
+### Functional Requirements
+- [ ] Format-aware correct match lookup works correctly
+- [ ] All existing functionality preserved
+- [ ] Data migration completed successfully
+- [ ] Performance remains acceptable
+- [ ] Comprehensive test coverage
+
+### Quality Requirements
+- [ ] All quality checks pass (format, lint, typecheck, test)
+- [ ] Documentation updated
+- [ ] Code follows project patterns
+- [ ] Error handling is robust
+
+### Validation Requirements
+- [ ] Real-world data validation successful
+- [ ] No regressions in existing functionality
+- [ ] Performance benchmarks met
+- [ ] Migration preserves all data correctly
+
+## Risk Mitigation
+
+### Technical Risks
+- **Data migration complexity**: Start with small subset, validate thoroughly
+- **Performance impact**: Monitor performance throughout development
+- **Backward compatibility**: Maintain existing API and behavior
+- **Format mapping accuracy**: Validate format mappings against blades.yaml
+
+### Process Risks
+- **Scope creep**: Focus on core format-aware lookup, avoid over-engineering
+- **Testing complexity**: Use TDD approach to ensure comprehensive coverage
+- **Data integrity**: Create backups and validate migration thoroughly
+
+## Timeline Estimate
+
+- **Phase 1**: 2-3 days (algorithm design and data analysis)
+- **Phase 1.5**: 1-2 days (data migration)
+- **Phase 2**: 3-4 days (implementation and integration)
+- **Phase 3**: 2-3 days (testing and validation)
+- **Phase 4**: 1-2 days (documentation and cleanup)
+
+**Total**: 9-14 days for complete implementation
+
+## Dependencies
+
+- **blades.yaml**: Used for format mapping and validation
+- **Existing blade matching logic**: Builds on current match_with_context method
+- **correct_matches.yaml**: Requires data migration to new structure
+- **Test infrastructure**: Uses existing test patterns and fixtures
+
+## Session Notes
+
+### Session 1: [2025-07-09] - Initial Planning
+- Created comprehensive TDD implementation plan
+- Added data migration phase for format-first structure
+- Identified key methods to enhance
+- Defined test strategy and success criteria
+- Plan ready for implementation

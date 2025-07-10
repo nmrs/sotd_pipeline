@@ -6,7 +6,7 @@ from sotd.match.blade_matcher import BladeMatcher
 
 @pytest.fixture
 def matcher(tmp_path):
-    yaml_content = """
+    yaml_content = r"""
 DE:
   Feather:
     DE:
@@ -14,9 +14,12 @@ DE:
         - feather
 
   Astra:
-    SP:
+    Superior Platinum (Green):
       patterns:
         - astra.*sp
+        - astra.*plat
+        - astra.*green
+        - astra
 
   Derby:
     Extra:
@@ -26,13 +29,13 @@ DE:
   Gillette:
     Perma-Sharp:
       patterns:
-        - perma\\s*-*sharp
+        - perma\s*-*sharp
 
 Half DE:
   Gillette:
     Perma-Sharp SE:
       patterns:
-        - ^(?!.*\\bde\\b).*perma\\s*-*sharp
+        - ^(?!.*\bde\b).*perma\s*-*sharp
 """
     path = tmp_path / "blades.yaml"
     path.write_text(yaml_content)
@@ -125,7 +128,7 @@ def test_se_razor_with_perma_sharp_blade(matcher):
 
 
 def test_se_razor_with_perma_sharp_half_de_blade(matcher):
-    """Test SE razor (Leaf Twig) with 'Perma-Sharp 1/2 DE' blade - should match DE format due to DE in text"""
+    """Test SE razor with 'Perma-Sharp 1/2 DE' blade - should match DE format due to DE in text"""
     result = matcher.match_with_context("Perma-Sharp 1/2 DE", "HALF DE")
     # Should not match SE pattern due to "DE" in text, so falls back to DE pattern
     assert result["matched"]["brand"] == "Gillette"
@@ -215,9 +218,10 @@ DE:
     # Create a correct_matches.yaml with a different match for the same input
     correct_matches_content = """
 blade:
-  Gillette:
-    Nacet:
-      - "Gillette Nacet"
+  DE:
+    Gillette:
+      Nacet:
+        - "Gillette Nacet"
 """
     correct_matches_file = tmp_path / "correct_matches.yaml"
     correct_matches_file.write_text(correct_matches_content)

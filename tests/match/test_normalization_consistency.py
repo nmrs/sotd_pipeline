@@ -112,38 +112,70 @@ class TestNormalizationConsistency:
 
             matcher = matchers[field]
 
-            for brand, brand_data in field_data.items():
-                for model, correct_matches in brand_data.items():
-                    for correct_match in correct_matches:
-                        # Test that the matcher finds this as an exact match
-                        result = matcher.match(correct_match)
+            # Handle format-first structure for blades, brand-first for other fields
+            if field == "blade":
+                # Format-first structure: format -> brand -> model -> strings
+                for format_name, format_data in field_data.items():
+                    for brand, brand_data in format_data.items():
+                        for model, correct_matches in brand_data.items():
+                            for correct_match in correct_matches:
+                                # Test that the matcher finds this as an exact match
+                                result = matcher.match(correct_match)
 
-                        # Should be an exact match
-                        assert result is not None, f"Matcher returned None for '{correct_match}'"
-                        assert result.get("match_type") == "exact", (
-                            f"Expected exact match for '{correct_match}', "
-                            f"got {result.get('match_type')}"
-                        )
+                                # Should be an exact match
+                                assert (
+                                    result is not None
+                                ), f"Matcher returned None for '{correct_match}'"
+                                assert result.get("match_type") == "exact", (
+                                    f"Expected exact match for '{correct_match}', "
+                                    f"got {result.get('match_type')}"
+                                )
 
-                        # Should match the expected brand/model
-                        if field == "soap":
-                            assert result.get("matched", {}).get("maker") == brand, (
-                                f"Expected maker '{brand}' for '{correct_match}', "
-                                f"got {result.get('matched', {}).get('maker')}"
+                                # Should match the expected brand/model
+                                assert result.get("matched", {}).get("brand") == brand, (
+                                    f"Expected brand '{brand}' for '{correct_match}', "
+                                    f"got {result.get('matched', {}).get('brand')}"
+                                )
+                                assert result.get("matched", {}).get("model") == model, (
+                                    f"Expected model '{model}' for '{correct_match}', "
+                                    f"got {result.get('matched', {}).get('model')}"
+                                )
+            else:
+                # Brand-first structure: brand -> model -> strings (for razors, brushes, soaps)
+                for brand, brand_data in field_data.items():
+                    for model, correct_matches in brand_data.items():
+                        for correct_match in correct_matches:
+                            # Test that the matcher finds this as an exact match
+                            result = matcher.match(correct_match)
+
+                            # Should be an exact match
+                            assert (
+                                result is not None
+                            ), f"Matcher returned None for '{correct_match}'"
+                            assert result.get("match_type") == "exact", (
+                                f"Expected exact match for '{correct_match}', "
+                                f"got {result.get('match_type')}"
                             )
-                            assert result.get("matched", {}).get("scent") == model, (
-                                f"Expected scent '{model}' for '{correct_match}', "
-                                f"got {result.get('matched', {}).get('scent')}"
-                            )
-                        else:
-                            assert result.get("matched", {}).get("brand") == brand, (
-                                f"Expected brand '{brand}' for '{correct_match}', "
-                                f"got {result.get('matched', {}).get('brand')}"
-                            )
-                            assert result.get("matched", {}).get("model") == model, (
-                                f"Expected model '{model}' for '{correct_match}', "
-                                f"got {result.get('matched', {}).get('model')}"
-                            )
+
+                            # Should match the expected brand/model
+                            if field == "soap":
+                                assert result.get("matched", {}).get("maker") == brand, (
+                                    f"Expected maker '{brand}' for '{correct_match}', "
+                                    f"got {result.get('matched', {}).get('maker')}"
+                                )
+                                assert result.get("matched", {}).get("scent") == model, (
+                                    f"Expected scent '{model}' for '{correct_match}', "
+                                    f"got {result.get('matched', {}).get('scent')}"
+                                )
+                            else:
+                                assert result.get("matched", {}).get("brand") == brand, (
+                                    f"Expected brand '{brand}' for '{correct_match}', "
+                                    f"got {result.get('matched', {}).get('brand')}"
+                                )
+                                assert result.get("matched", {}).get("model") == model, (
+                                    f"Expected model '{model}' for '{correct_match}', "
+                                    f"got {result.get('matched', {}).get('model')}"
+                                )
 
     def test_normalization_preserves_case_for_correct_matches(self):
         """Test that normalization preserves case for correct match consistency."""
