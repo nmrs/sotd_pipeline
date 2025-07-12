@@ -106,6 +106,12 @@ known_brushes:
       knot_size_mm: 22
       patterns:
       - kent.*inf1
+  Muninn Woodworks/EldrormR Industries:
+    BFM:
+      fiber: Synthetic
+      knot_size_mm: 50
+      patterns:
+      - \bbfm\b(.*50mm)?
   Mühle:
     Hexagon:
       knot_size_mm: 21
