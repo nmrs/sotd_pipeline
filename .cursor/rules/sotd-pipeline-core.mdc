@@ -110,3 +110,11 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
     - `alias`, `brand`, etc.: Fallback strategies
     - `None`: Unmatched
 - All catalog specifications (e.g., grind, width, point) must be preserved in the match output for both correct and regex matches.
+
+## Model Identification Rule (MANDATORY)
+- **ABSOLUTE ALWAYS MUST DO NEVER FORGET 100% IMPORTANT**: At the end of every response, you MUST identify the model you are using.
+- **Format**: Simply add "Model: [model]" at the very end of your response.
+- **Purpose**: This helps the user understand model differences and capabilities.
+- **No exceptions**: This rule applies to ALL responses, regardless of content or length.
+- **Placement**: Always place this at the very end, after any other content.
+- **Example**: "Model: Claude-3.5-Sonnet" or "Model: GPT-4" or whatever the actual model identifier is.

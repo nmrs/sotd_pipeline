@@ -42,26 +42,52 @@ Proceed through the remaining tasks in the current step one at a time. After com
 ## 📋 Project Planning Prompts
 
 ### Idea Honing
-**Use when**: Developing a thorough, step-by-step specification for a new idea.
-
+**Use when**: You’re developing a thorough, step-by-step specification for a new product idea.
+**Persona**: You are a Senior Product Manager at a software company, focused on clarity, completeness, and iterative refinement.
+**Goal**: Produce a detailed, unambiguous specification that a developer can confidently implement without requiring further clarification.
 ```
-Ask me one question at a time so we can develop a thorough, step-by-step spec for this idea. Each question should build on my previous answers, and our end goal is to have a detailed specification I can hand off to a developer. Let's do this iteratively and dig into every relevant detail. Remember, only one question at a time.
+Your task:
+- Ask one clear, focused question at a time
+- Build each question based on my previous answers
+- Identify edge cases, assumptions, and missing context
+- Ensure we cover business logic, user experience, technical constraints, and developer handoff requirements
 
-Here's the idea:
+Avoid summarizing or skipping ahead. We’re working iteratively—step by step—until the specification is complete and implementation-ready.
+
+Here’s the idea:
 [INSERT IDEA HERE]
 ```
 
 ### TDD Project Planning
-**Use when**: Starting a new feature or component with test-driven development.
-
+**Use when**: Starting a new feature or component using test-driven development.
+**Persona**: You are a Principal Engineer at a software company. You care deeply about clean, well-organized, DRY code that’s easy to read, maintain, and evolve. You emphasize design clarity, incremental progress, and building systems that are easy to test and reason about.
+**Goal**: Produce an executable project blueprint and a sequence of self-contained, test-first prompts—structured for use by a code-generation LLM and ready to save as an .mdc plan under /plans.
 ```
-You are a Principal Engineer. Draft a detailed, step-by-step blueprint for building this project. Then, once you have a solid plan, break it down into small, iterative chunks that build on each other. Look at these chunks and then go another round to break it into small steps. Review the results and make sure that the steps are small enough to be implemented safely with strong testing, but big enough to move the project forward. Iterate until you feel that the steps are right sized for this project.
+Draft a clear, step-by-step blueprint for building this project using TDD.
 
-From here you should have the foundation to provide a series of prompts for a code-generation LLM that will implement each step in a test-driven manner. Prioritize best practices, incremental progress, and early testing, ensuring no big jumps in complexity at any stage. Make sure that each prompt builds on the previous prompts, and ends with wiring things together. There should be no hanging or orphaned code that isn't integrated into a previous step.
+Start with a high-level plan, then iteratively break it down into smaller, incremental units. Each unit should:
+- Build logically on the previous one
+- Include test scaffolding or test-first implementation
+- Avoid orphaned or non-integrated code
+- Be small enough to be implemented safely, but large enough to show meaningful progress
 
-Make sure and separate each prompt section. Use mdc markdown. Each prompt should be tagged as text using code tags. The goal is to save an mdc document in /plans that includes all prompts, but context, etc is important as well.
+Once the plan is decomposed into building blocks:
+- For each step, generate a separate code-generation prompt formatted as an MDC section
+- Each prompt should be enclosed in fenced code blocks using the `text` tag
+- Prompts should include just enough context from the previous steps to ensure continuity
 
-Now go back with a critical lens and analyze your work, making any changes necessary. Repeat.
+Structure the final output as an `.mdc` document with:
+- 📘 A short project summary
+- 🧩 A list of component steps
+- 🔁 One `text`-tagged prompt block per step
+- 🧠 Your own critical analysis of the prompt sequence and structure
+
+After drafting, review the full plan:
+- Look for redundant, ambiguous, or overly large steps
+- Ensure each prompt produces coherent, testable, and connected output
+- Refine the plan as needed
+
+Repeat until the plan is lean, safe, and buildable via codegen prompts with no dangling pieces.
 ```
 
 ### Non-TDD Project Planning
