@@ -176,6 +176,83 @@ class BladeMatcher(BaseMatcher):
 
         return []
 
+    def _collect_correct_matches_in_format(
+        self, value: str, target_format: str
+    ) -> List[Dict[str, Any]]:
+        """
+        Collect correct matches for a given string in a specific format only.
+
+        Args:
+            value: The string to match
+            target_format: The target format to search in
+
+        Returns:
+            List of correct matches in the target format
+        """
+        from sotd.utils.match_filter_utils import normalize_for_matching
+
+        if not value or not self._normalized_correct_matches:
+            return []
+
+        # Use canonical normalization function
+        normalized_value = normalize_for_matching(value, field="blade")
+        if not normalized_value:
+            return []
+
+        # Find all correct matches
+        all_matches = []
+
+        # Try exact match first
+        if normalized_value in self._normalized_correct_matches:
+            all_matches = self._normalized_correct_matches[normalized_value]
+        else:
+            # If no exact match, try case-insensitive match
+            normalized_value_lower = normalized_value.lower()
+            for key, matches in self._normalized_correct_matches.items():
+                if key.lower() == normalized_value_lower:
+                    all_matches = matches
+                    break
+
+        # Filter to only include matches in the target format
+        format_matches = [m for m in all_matches if m["format"].upper() == target_format.upper()]
+        return format_matches
+
+    def _match_regex_in_format(
+        self, normalized_value: str, target_format: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Match using regex patterns in a specific format only.
+
+        Args:
+            normalized_value: The normalized string to match
+            target_format: The target format to search in
+
+        Returns:
+            Match result or None if no match found
+        """
+        # Search only patterns in the target format
+        for brand, model, fmt, raw_pattern, compiled, entry in self.patterns:
+            if fmt.upper() == target_format.upper() and compiled.search(normalized_value):
+                match_data = {
+                    "brand": brand,
+                    "model": str(model),
+                    "format": fmt,
+                }
+
+                # Preserve all additional specifications from the catalog entry
+                for key, value in entry.items():
+                    if key not in ["patterns", "format"]:
+                        match_data[key] = value
+
+                return {
+                    "original": normalized_value,
+                    "matched": match_data,
+                    "pattern": raw_pattern,
+                    "match_type": MatchType.REGEX,
+                }
+
+        return None
+
     def _filter_by_format(
         self, matches: List[Dict[str, Any]], target_format: str
     ) -> Optional[Dict[str, Any]]:
@@ -198,66 +275,22 @@ class BladeMatcher(BaseMatcher):
             return format_matches[0]  # Return first format match
 
         # Special fallback case: Half DE razors can use DE blades
+        # Only use fallback if no Half DE matches exist at all
         if target_format.upper() == "HALF DE":
-            de_matches = [m for m in matches if m["format"].upper() == "DE"]
-            if de_matches:
-                return de_matches[0]  # Return first DE match as fallback
+            half_de_matches = [m for m in matches if m["format"].upper() == "HALF DE"]
+            if not half_de_matches:  # Only fallback if no Half DE matches exist
+                de_matches = [m for m in matches if m["format"].upper() == "DE"]
+                if de_matches:
+                    return de_matches[0]  # Return first DE match as fallback
 
         # If no exact format match and no fallback, return the first match
         return matches[0]
 
     def match_with_context(self, value: str, razor_format: str) -> Dict[str, Any]:
-        """Match blade with context-aware format prioritization."""
+        """Match blade with context-aware format prioritization and strict format-aware fallback."""
         from sotd.utils.match_filter_utils import normalize_for_matching
 
         original = value
-
-        # Step 1: Check correct matches with format awareness
-        all_correct_matches = self._collect_all_correct_matches(value)
-        if all_correct_matches:
-            # Map razor formats to blade formats
-            format_mapping = {
-                "SHAVETTE (HAIR SHAPER)": "HAIR SHAPER",
-                "SHAVETTE (AC)": "AC",
-                "SHAVETTE (DE)": "DE",
-                "SHAVETTE (HALF DE)": "HALF DE",
-                "SHAVETTE (A77)": "A77",
-                "SHAVETTE (DISPOSABLE)": "DISPOSABLE",
-                "CARTRIDGE": "CARTRIDGE",
-                "STRAIGHT": "STRAIGHT",
-                "DE": "DE",
-                "AC": "AC",
-                "GEM": "GEM",
-                "INJECTOR": "INJECTOR",
-                "FHS": "FHS",
-            }
-
-            target_blade_format = format_mapping.get(razor_format, razor_format)
-
-            # Filter by format and return the best match
-            best_match = self._filter_by_format(all_correct_matches, target_blade_format)
-            if best_match:
-                return {
-                    "original": original,
-                    "matched": best_match,
-                    "pattern": None,  # No pattern used for correct matches
-                    "match_type": "exact",
-                }
-
-        # Step 2: Fall back to regex matching if no correct match found
-        # All correct match lookups must use normalize_for_matching
-        # (see docs/product_matching_validation.md)
-        normalized = normalize_for_matching(value, field="blade")
-        if not normalized:
-            return {
-                "original": original,
-                "matched": None,
-                "pattern": None,
-                "match_type": None,
-            }
-
-        blade_text = normalized
-
         # Map razor formats to blade formats
         format_mapping = {
             "SHAVETTE (HAIR SHAPER)": "HAIR SHAPER",
@@ -274,58 +307,69 @@ class BladeMatcher(BaseMatcher):
             "INJECTOR": "INJECTOR",
             "FHS": "FHS",
         }
-
         target_blade_format = format_mapping.get(razor_format, razor_format)
+        normalized = normalize_for_matching(value, field="blade")
 
-        # Collect all matches first
-        all_matches = []
-
-        for brand, model, fmt, raw_pattern, compiled, entry in self.patterns:
-            if compiled.search(blade_text):
-                match_data = {
-                    "brand": brand,
-                    "model": str(model),
-                    "format": fmt,
-                }
-
-                # Preserve all additional specifications from the catalog entry
-                for key, value in entry.items():
-                    if key not in ["patterns", "format"]:
-                        match_data[key] = value
-
-                match_result = {
+        # Special logic for Half DE razors
+        if target_blade_format == "HALF DE":
+            # 1. Check Half DE section of correct_matches.yaml
+            half_de_correct = self._collect_correct_matches_in_format(value, "HALF DE")
+            if half_de_correct:
+                return {
                     "original": original,
-                    "matched": match_data,
-                    "pattern": raw_pattern,
-                    "match_type": MatchType.REGEX,
+                    "matched": half_de_correct[0],
+                    "pattern": None,
+                    "match_type": "exact",
                 }
-
-                all_matches.append(match_result)
-
-        # If we have matches, prioritize by format compatibility
-        if all_matches:
-            # First, try to find exact format matches
-            format_matches = [
-                m for m in all_matches if m["matched"]["format"].upper() == target_blade_format
-            ]
-            if format_matches:
-                return format_matches[0]  # Return first format match
-
-            # Special fallback case: Half DE razors can use DE blades
-            if target_blade_format == "HALF DE":
-                de_matches = [m for m in all_matches if m["matched"]["format"].upper() == "DE"]
-                if de_matches:
-                    return de_matches[0]  # Return first DE match as fallback
-
-            # If no exact format match and no fallback, return the first match (original behavior)
-            return all_matches[0]
-
-        return {
-            "original": original,
-            "matched": None,
-            "pattern": None,
-            "match_type": None,
-        }
+            # 2. Fallback to Half DE section of blades.yaml for regex match
+            if normalized:
+                half_de_regex = self._match_regex_in_format(normalized, "HALF DE")
+                if half_de_regex:
+                    half_de_regex["original"] = original
+                    return half_de_regex
+            # 3. Check DE section of correct_matches.yaml
+            de_correct = self._collect_correct_matches_in_format(value, "DE")
+            if de_correct:
+                return {
+                    "original": original,
+                    "matched": de_correct[0],
+                    "pattern": None,
+                    "match_type": "exact",
+                }
+            # 4. Fallback to DE section of blades.yaml for regex match
+            if normalized:
+                de_regex = self._match_regex_in_format(normalized, "DE")
+                if de_regex:
+                    de_regex["original"] = original
+                    return de_regex
+            # 5. Not found
+            return {
+                "original": original,
+                "matched": None,
+                "pattern": None,
+                "match_type": None,
+            }
+        else:
+            # For all other formats, only check their own section for both correct and regex matches
+            correct = self._collect_correct_matches_in_format(value, target_blade_format)
+            if correct:
+                return {
+                    "original": original,
+                    "matched": correct[0],
+                    "pattern": None,
+                    "match_type": "exact",
+                }
+            if normalized:
+                regex = self._match_regex_in_format(normalized, target_blade_format)
+                if regex:
+                    regex["original"] = original
+                    return regex
+            return {
+                "original": original,
+                "matched": None,
+                "pattern": None,
+                "match_type": None,
+            }
 
     def match(self, value: str, bypass_correct_matches: bool = False) -> Dict[str, Any]:
         """
@@ -336,8 +380,18 @@ class BladeMatcher(BaseMatcher):
         # First try correct matches without context (will find all matches)
         all_correct_matches = self._collect_all_correct_matches(value)
         if all_correct_matches:
-            # If we have multiple matches, prioritize by pattern specificity
-            # For now, return the first match (correct matches are already prioritized)
+            # If we have multiple matches, prioritize by format compatibility
+            # Prioritize Half DE over DE when both exist
+            half_de_matches = [m for m in all_correct_matches if m["format"].upper() == "HALF DE"]
+            if half_de_matches:
+                return {
+                    "original": value,
+                    "matched": half_de_matches[0],
+                    "pattern": None,  # No pattern used for correct matches
+                    "match_type": "exact",
+                }
+
+            # If no Half DE matches, return the first match
             return {
                 "original": value,
                 "matched": all_correct_matches[0],
@@ -384,10 +438,16 @@ class BladeMatcher(BaseMatcher):
                     }
                 )
 
-        # If we have matches, prioritize by pattern specificity
+        # If we have matches, prioritize by format compatibility
         if all_matches:
-            # The patterns are already sorted by specificity in _compile_patterns
-            # So the first match should be the most specific
+            # Prioritize Half DE over DE when both exist
+            half_de_matches = [
+                m for m in all_matches if m["matched"]["format"].upper() == "HALF DE"
+            ]
+            if half_de_matches:
+                return half_de_matches[0]
+
+            # If no Half DE matches, return the first match (already sorted by specificity)
             return all_matches[0]
 
         return {

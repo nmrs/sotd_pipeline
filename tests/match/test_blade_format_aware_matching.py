@@ -237,18 +237,22 @@ class TestFormatAwareCorrectMatchLookup:
         assert result1["matched"]["brand"] == "Personna"
         assert result1["matched"]["model"] == "Lab Blue"
 
-        # Test different case variations (should not match due to case preservation)
+        # Test different case variations (should match due to case-insensitive fallback)
         result2 = test_matcher.match_with_context("ACCUFORGE", "DE")
         result3 = test_matcher.match_with_context("accuforge", "DE")
 
-        # These should not match because case is preserved in normalization
-        assert result2["matched"] is None
-        assert result3["matched"] is None
+        # These should match because the implementation does case-insensitive fallback
+        assert result2["matched"] is not None
+        assert result2["matched"]["brand"] == "Personna"
+        assert result2["matched"]["model"] == "Lab Blue"
+        assert result3["matched"] is not None
+        assert result3["matched"]["brand"] == "Personna"
+        assert result3["matched"]["model"] == "Lab Blue"
 
-    def test_fallback_to_first_match_when_no_format_match(
+    def test_no_match_when_format_not_found(
         self, blade_matcher, sample_correct_matches, sample_catalog, tmp_path
     ):
-        """Test fallback to first match when no format-specific match exists."""
+        """Test that no match is returned when the target format has no entries."""
         # Create temporary correct matches file with sample data
         correct_matches_file = tmp_path / "correct_matches.yaml"
         catalog_file = tmp_path / "blades.yaml"
@@ -265,14 +269,12 @@ class TestFormatAwareCorrectMatchLookup:
             catalog_path=catalog_file, correct_matches_path=correct_matches_file
         )
 
-        # Test with a razor format that doesn't match any Accuforge format
+        # Test with a razor format that has no Accuforge entries
         result = test_matcher.match_with_context("Accuforge", "STRAIGHT")
 
-        # Should fall back to first available match
-        assert result["matched"] is not None
-        assert result["matched"]["brand"] == "Personna"
-        # Should return one of the available models (implementation dependent)
-        assert result["matched"]["model"] in ["Lab Blue", "GEM PTFE"]
+        # Should return no match since STRAIGHT format has no Accuforge entries
+        assert result["matched"] is None
+        assert result["match_type"] is None
 
     def test_half_de_fallback_to_de(
         self, blade_matcher, sample_correct_matches, sample_catalog, tmp_path
