@@ -238,9 +238,11 @@ class TestBladeFormatAwareValidation:
         # Setup correct_matches.yaml with same-format blade duplicates
         correct_matches_data = {
             "blade": {
-                "Personna": {
-                    "Lab Blue": ["Accuforge"],
-                    "Med Prep": ["Accuforge"],  # Same string, same format (DE)
+                "DE": {
+                    "Personna": {
+                        "Lab Blue": ["Accuforge"],
+                        "Med Prep": ["Accuforge"],  # Same string, same format (DE)
+                    }
                 }
             }
         }
@@ -301,14 +303,20 @@ class TestBladeFormatAwareValidation:
         # Setup realistic correct_matches.yaml with format-aware duplicates
         correct_matches_data = {
             "blade": {
-                "Personna": {
-                    "GEM PTFE": ["Accuforge", "Accuforge GEM Microcoat"],
-                    "Lab Blue": ["Accuforge"],  # Same string, different format
-                    "Med Prep": ["AccuTec - Med Prep"],  # Different string
+                "GEM": {
+                    "Personna": {
+                        "GEM PTFE": ["Accuforge", "Accuforge GEM Microcoat"],
+                    }
                 },
-                "Astra": {
-                    "Superior Platinum (Green)": ["Astra SP"],
-                    "Superior Stainless (Blue)": ["Astra Blue"],
+                "DE": {
+                    "Personna": {
+                        "Lab Blue": ["Accuforge"],  # Same string, different format
+                        "Med Prep": ["AccuTec - Med Prep"],  # Different string
+                    },
+                    "Astra": {
+                        "Superior Platinum (Green)": ["Astra SP"],
+                        "Superior Stainless (Blue)": ["Astra Blue"],
+                    },
                 },
             }
         }
@@ -347,9 +355,11 @@ class TestBladeFormatAwareValidation:
         # Setup correct_matches.yaml with problematic same-format duplicates
         correct_matches_data = {
             "blade": {
-                "Personna": {
-                    "Lab Blue": ["Accuforge"],
-                    "Med Prep": ["Accuforge"],  # Same format, should be forbidden
+                "DE": {
+                    "Personna": {
+                        "Lab Blue": ["Accuforge"],
+                        "Med Prep": ["Accuforge"],  # Same format, should be forbidden
+                    }
                 }
             }
         }

@@ -238,7 +238,7 @@ class TestNormalizeForStorage:
     def test_normalize_for_storage_none_input(self):
         """Test None input."""
         result = normalize_for_matching(None)  # type: ignore
-        assert result is None
+        assert result == ""
 
     def test_normalize_for_storage_integration(self):
         """Test integration with strip_blade_count_patterns."""

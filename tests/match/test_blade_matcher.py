@@ -157,11 +157,11 @@ def test_se_razor_with_de_perma_sharp_blade(matcher):
 
 
 def test_simple_perma_sharp_without_context(matcher):
-    """Test simple Perma-Sharp without context - should match SE format (more specific pattern)"""
+    """Test simple Perma-Sharp without context - should match DE format (default behavior)"""
     result = matcher.match("Perma-Sharp")
     assert result["matched"]["brand"] == "Gillette"
-    assert result["matched"]["model"] == "Perma-Sharp SE"
-    assert result["matched"]["format"] == "Half DE"
+    assert result["matched"]["model"] == "Perma-Sharp"
+    assert result["matched"]["format"] == "DE"
     assert result["original"] == "Perma-Sharp"
 
 

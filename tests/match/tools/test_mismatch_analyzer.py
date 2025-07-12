@@ -249,6 +249,7 @@ class TestMismatchAnalyzer:
                 self.confidence_threshold = 0.8
                 self.show_correct = False
                 self.threshold = 3
+                self.debug = False
 
         args = Args()
 

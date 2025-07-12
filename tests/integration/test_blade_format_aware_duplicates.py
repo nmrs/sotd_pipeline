@@ -10,11 +10,17 @@ def test_blade_format_aware_duplicate_integration(tmp_path):
     # Setup correct_matches.yaml with both legitimate and forbidden duplicates
     correct_matches_data = {
         "blade": {
-            "Personna": {
-                "GEM PTFE": ["Accuforge"],  # GEM format
-                "Lab Blue": ["Accuforge"],  # DE format (legitimate duplicate)
-                "Med Prep": ["Accuforge"],  # DE format (forbidden duplicate)
-            }
+            "GEM": {
+                "Personna": {
+                    "GEM PTFE": ["Accuforge"],  # GEM format
+                }
+            },
+            "DE": {
+                "Personna": {
+                    "Lab Blue": ["Accuforge"],  # DE format (legitimate duplicate)
+                    "Med Prep": ["Accuforge"],  # DE format (forbidden duplicate)
+                }
+            },
         }
     }
     # Setup blades.yaml with format information
