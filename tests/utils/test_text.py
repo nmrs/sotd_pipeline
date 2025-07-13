@@ -45,8 +45,8 @@ def test_unescapes_brackets():
     assert preprocess_body(r"\[2\]") == "[2]"
     assert preprocess_body(r"\[3\]") == "[3]"
     assert (
-        preprocess_body(r"Treet Carbon Steel \[2\] - \$STAINLESSLESS")
-        == "Treet Carbon Steel [2] - \$STAINLESSLESS"
+        preprocess_body(r"Treet Carbon Steel \[2\] - \\$STAINLESSLESS")
+        == "Treet Carbon Steel [2] - \\$STAINLESSLESS"
     )
     assert preprocess_body(r"Some \[text\] with \[brackets\]") == "Some [text] with [brackets]"
 

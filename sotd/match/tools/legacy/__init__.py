@@ -14,14 +14,3 @@ Legacy tools:
 - analyze_mismatches.py (superseded by mismatch_analyzer.py)
 - mismatch_analyzer_refactored.py (superseded by mismatch_analyzer.py)
 """
-
-__all__ = [
-    "analyze_matched",
-    "analyze_matched_simple",
-    "analyze_matched_enhanced",
-    "analyze_unmatched",
-    "analyze_soap_matches",
-    "suggest_soap_patterns",
-    "analyze_mismatches",
-    "mismatch_analyzer_refactored",
-]

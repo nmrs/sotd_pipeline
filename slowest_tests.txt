@@ -1,0 +1,150 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.8, pytest-8.3.5, pluggy-1.6.0
+rootdir: /Users/jmoore/Documents/Projects/sotd_pipeline
+configfile: pyproject.toml
+plugins: xdist-3.7.0, cov-6.1.1
+collected 1473 items
+
+test_hair_shaper.py ..                                                   [  0%]
+tests/aggregate/test_annual_aggregator.py ........................       [  1%]
+tests/aggregate/test_annual_engine.py .......................            [  3%]
+tests/aggregate/test_annual_integration.py ..........                    [  4%]
+tests/aggregate/test_annual_loader.py .......................            [  5%]
+tests/aggregate/test_annual_save.py ..............                       [  6%]
+tests/aggregate/test_base_aggregator.py .........                        [  7%]
+tests/aggregate/test_brush_specialized_aggregators.py ....               [  7%]
+tests/aggregate/test_cli.py ..............................               [  9%]
+tests/aggregate/test_core_aggregators.py .........                       [ 10%]
+tests/aggregate/test_data_quality.py ................                    [ 11%]
+tests/aggregate/test_integration.py .......                              [ 11%]
+tests/aggregate/test_manufacturer_and_format_aggregators.py ............ [ 12%]
+.                                                                        [ 12%]
+tests/aggregate/test_razor_specialized_aggregators.py .......            [ 12%]
+tests/aggregate/test_user_and_cross_product_aggregators.py ...           [ 13%]
+tests/aggregate/test_utils.py ..........                                 [ 13%]
+tests/cli_utils/test_base_parser.py .......................              [ 15%]
+tests/cli_utils/test_date_span.py ........                               [ 15%]
+tests/enrich/test_blackbird_plate_enricher.py ....................       [ 17%]
+tests/enrich/test_blade_enricher.py ..........................           [ 19%]
+tests/enrich/test_brush_enricher.py .................................    [ 21%]
+tests/enrich/test_christopher_bradley_enricher.py .............          [ 22%]
+tests/enrich/test_cli.py .....                                           [ 22%]
+tests/enrich/test_enrich.py .......                                      [ 23%]
+tests/enrich/test_enricher.py .....                                      [ 23%]
+tests/enrich/test_game_changer_enricher.py ............................. [ 25%]
+..                                                                       [ 25%]
+tests/enrich/test_registry.py ...........                                [ 26%]
+tests/enrich/test_save.py .............                                  [ 27%]
+tests/enrich/test_straight_razor_enricher.py ........................... [ 28%]
+.....................                                                    [ 30%]
+tests/enrich/test_super_speed_tip_enricher.py ....................       [ 31%]
+tests/extract/test_analyze.py ..                                         [ 31%]
+tests/extract/test_cli_extract.py ...                                    [ 32%]
+tests/extract/test_comment.py ......                                     [ 32%]
+tests/extract/test_fields.py .                                           [ 32%]
+tests/extract/test_filter.py ...................                         [ 33%]
+tests/extract/test_run.py ..                                             [ 33%]
+tests/extract/test_save_extract.py .                                     [ 34%]
+tests/fetch/test_audit.py ....                                           [ 34%]
+tests/fetch/test_cli.py ........                                         [ 34%]
+tests/fetch/test_cli_span.py .........                                   [ 35%]
+tests/fetch/test_error_handling.py ....................                  [ 36%]
+tests/fetch/test_fetch.py ...                                            [ 36%]
+tests/fetch/test_merge.py .                                              [ 37%]
+tests/fetch/test_overrides.py ..                                         [ 37%]
+tests/fetch/test_rate_limit.py ..                                        [ 37%]
+tests/fetch/test_reddit.py .........................                     [ 39%]
+tests/fetch/test_run.py .......................                          [ 40%]
+tests/fetch/test_save_fetch.py .                                         [ 40%]
+tests/integration/test_blade_format_aware_duplicates.py .                [ 40%]
+tests/integration/test_real_catalog_integration.py .......               [ 41%]
+tests/match/brush_matching_strategies/test_chisel_and_hound_strategy.py . [ 41%]
+..............                                                           [ 42%]
+tests/match/brush_matching_strategies/test_declaration_grooming_strategy.py . [ 42%]
+...........                                                              [ 43%]
+tests/match/brush_matching_strategies/test_known_brush_strategy.py ..... [ 43%]
+.                                                                        [ 43%]
+tests/match/brush_matching_strategies/test_model_naming_consistency.py . [ 43%]
+......                                                                   [ 43%]
+tests/match/brush_matching_strategies/test_omega_semogue_strategy.py ... [ 44%]
+...........                                                              [ 44%]
+tests/match/brush_matching_strategies/test_other_brushes_strategy.py ... [ 45%]
+........                                                                 [ 45%]
+tests/match/brush_matching_strategies/test_pattern_utils.py ............ [ 46%]
+.................                                                        [ 47%]
+tests/match/brush_matching_strategies/test_zenith_strategy.py .......... [ 48%]
+.....                                                                    [ 48%]
+tests/match/test_base_matcher.py .............                           [ 49%]
+tests/match/test_base_matcher_optimization.py .......                    [ 49%]
+tests/match/test_blade_format_aware_matching.py .........                [ 50%]
+tests/match/test_blade_matcher.py .....................                  [ 52%]
+tests/match/test_brush_matcher.py ....................................   [ 54%]
+tests/match/test_match_cli.py .................                          [ 55%]
+tests/match/test_match_integration.py ..                                 [ 55%]
+tests/match/test_normalization_consistency.py ............               [ 56%]
+tests/match/test_performance_monitoring.py ...............               [ 57%]
+tests/match/test_razor_matcher.py ..............                         [ 58%]
+tests/match/test_soap_matcher.py ...............                         [ 59%]
+tests/match/tools/test_analysis_tools_integration.py .....               [ 59%]
+tests/match/tools/test_analyze_blade_razor_conflicts.py ......           [ 60%]
+tests/match/tools/test_analyze_unmatched_blades.py ...                   [ 60%]
+tests/match/tools/test_analyze_unmatched_razors.py .                     [ 60%]
+tests/match/tools/test_mismatch_analyzer.py .................            [ 61%]
+tests/match/tools/test_validate_correct_matches.py ..................... [ 63%]
+.................................                                        [ 65%]
+tests/report/test_annual_comparison_loader.py .......                    [ 65%]
+tests/report/test_annual_delta_calculator.py .............               [ 66%]
+tests/report/test_annual_delta_calculator_refactoring.py ...........     [ 67%]
+tests/report/test_annual_delta_integration.py ...                        [ 67%]
+tests/report/test_annual_generator.py ......                             [ 68%]
+tests/report/test_annual_generator_refactoring.py ...........            [ 68%]
+tests/report/test_annual_integration.py ..................               [ 70%]
+tests/report/test_annual_load.py .....................                   [ 71%]
+tests/report/test_annual_range_integration.py .................          [ 72%]
+tests/report/test_annual_templates.py .............                      [ 73%]
+tests/report/test_blade_tables.py ..........                             [ 74%]
+tests/report/test_brush_tables.py .........................              [ 75%]
+tests/report/test_cli.py ...........................                     [ 77%]
+tests/report/test_cross_product_tables.py ..........                     [ 78%]
+tests/report/test_delta_calculator.py ..................                 [ 79%]
+tests/report/test_integration.py ....                                    [ 79%]
+tests/report/test_load.py .....................                          [ 81%]
+tests/report/test_observations.py .........                              [ 81%]
+tests/report/test_razor_tables.py ................                       [ 83%]
+tests/report/test_soap_tables.py ...............                         [ 84%]
+tests/report/test_template_integration.py ..                             [ 84%]
+tests/report/test_user_tables.py ......                                  [ 84%]
+tests/test_date_utils.py .........                                       [ 85%]
+tests/utils/test_brush_utils.py ...........                              [ 85%]
+tests/utils/test_file_io.py ...............................              [ 88%]
+tests/utils/test_match_filter_utils.py ................................. [ 90%]
+...................................                                      [ 92%]
+tests/utils/test_performance_base.py ......................              [ 94%]
+tests/utils/test_performance_integration.py ........                     [ 94%]
+tests/utils/test_template_processor.py ...........                       [ 95%]
+tests/utils/test_text.py .........                                       [ 96%]
+tests/utils/test_validation_utils.py ................................... [ 98%]
+.......................                                                  [100%]
+
+============================= slowest 20 durations =============================
+1.91s call     tests/match/tools/test_validate_correct_matches.py::TestValidateCorrectMatches::test_run_method_accepts_args
+0.87s setup    tests/match/test_normalization_consistency.py::TestNormalizationConsistency::test_correct_matches_exact_match_consistency
+0.84s call     tests/integration/test_real_catalog_integration.py::TestRealCatalogIntegration::test_known_real_patterns_work
+0.82s setup    tests/match/test_normalization_consistency.py::TestNormalizationConsistency::test_matcher_analyzer_consistency
+0.82s call     tests/integration/test_real_catalog_integration.py::TestRealCatalogIntegration::test_real_catalogs_load_successfully
+0.82s setup    tests/match/test_normalization_consistency.py::TestNormalizationConsistency::test_no_confirmed_but_not_exact_mismatches
+0.60s call     tests/match/test_normalization_consistency.py::TestNormalizationConsistency::test_correct_matches_exact_match_consistency
+0.37s call     tests/match/test_match_integration.py::test_match_phase_integration_with_updated_matchers
+0.37s setup    tests/match/test_blade_matcher.py::test_se_razor_with_perma_sharp_half_de_blade
+0.36s setup    tests/match/test_blade_matcher.py::test_match_with_use_count_parentheses
+0.33s setup    tests/match/test_blade_matcher.py::test_match_with_use_count_x_prefix
+0.33s setup    tests/match/test_blade_matcher.py::test_match_without_use_count
+0.33s setup    tests/match/test_blade_matcher.py::test_regex_sorting_order
+0.33s setup    tests/match/test_blade_matcher.py::test_match_with_use_count_brackets
+0.33s setup    tests/match/test_blade_matcher.py::test_perma_sharp_with_use_count_de_context
+0.33s setup    tests/match/test_blade_matcher.py::test_de_razor_with_perma_sharp_blade
+0.33s setup    tests/match/test_blade_matcher.py::test_format_prioritization_with_multiple_matches
+0.33s setup    tests/match/test_blade_matcher.py::test_match_with_use_count_x_suffix
+0.33s setup    tests/match/test_blade_matcher.py::test_format_fallback_for_half_de_razors
+0.33s setup    tests/match/test_blade_matcher.py::test_simple_perma_sharp_without_context
+============================ 1473 passed in 27.60s =============================

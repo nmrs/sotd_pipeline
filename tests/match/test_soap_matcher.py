@@ -6,6 +6,63 @@ from unittest.mock import patch
 from sotd.match.soap_matcher import SoapMatcher
 
 
+@pytest.fixture(scope="session")
+def session_soap_catalog():
+    """Session-scoped soap catalog for all tests."""
+    return {
+        "Barrister and Mann": {
+            "Seville": {"patterns": ["b&m.*seville", "barrister.*mann.*seville"]},
+            "Fougère Gothique": {"patterns": ["fougère.*gothique"]},
+        },
+        "House of Mammoth": {
+            "Alive": {"patterns": ["hom.*alive", "house.*mammoth.*alive"]},
+            "Tusk": {"patterns": ["hom.*tusk", "house.*mammoth.*tusk"]},
+            "Hygge": {"patterns": ["hom.*hygge", "house.*mammoth.*hygge"]},
+            "Almond Leather": {"patterns": ["almond.*leather"]},
+        },
+        "Noble Otter": {"'Tis the Season": {"patterns": ["'tis.*season"]}},
+        "Strike Gold Shave": {"Bee's Knees Soap": {"patterns": ["bee.*knees"]}},
+        "Southern Witchcrafts": {"Tres Matres": {"patterns": ["tres.*matres"]}},
+    }
+
+
+@pytest.fixture(scope="session")
+def session_correct_matches():
+    """Session-scoped correct matches for all tests."""
+    return {
+        "soap": {
+            "Barrister and Mann": {"Seville": ["Barrister and Mann - Seville"]},
+            "House of Mammoth": {"Alive": ["House of Mammoth - Alive"]},
+        }
+    }
+
+
+@pytest.fixture(scope="session")
+def session_matcher(tmp_path_factory, session_soap_catalog, session_correct_matches):
+    """Session-scoped SoapMatcher instance."""
+    tmp_path = tmp_path_factory.mktemp("soap_matcher_tests")
+
+    # Create catalog file
+    catalog_file = tmp_path / "soaps.yaml"
+    with catalog_file.open("w", encoding="utf-8") as f:
+        import yaml
+
+        yaml.dump(session_soap_catalog, f)
+
+    # Create correct matches file
+    correct_matches_file = tmp_path / "correct_matches.yaml"
+    with correct_matches_file.open("w", encoding="utf-8") as f:
+        yaml.dump(session_correct_matches, f)
+
+    return SoapMatcher(catalog_path=catalog_file, correct_matches_path=correct_matches_file)
+
+
+@pytest.fixture(scope="class")
+def matcher(session_matcher):
+    """Class-scoped matcher that uses session-scoped instance."""
+    return session_matcher
+
+
 @pytest.fixture
 def mock_correct_matches():
     """Mock correct matches data for testing."""
@@ -21,67 +78,6 @@ def soap_matcher_with_mock(mock_correct_matches):
     with patch.object(SoapMatcher, "_load_correct_matches", return_value=mock_correct_matches):
         matcher = SoapMatcher()
         return matcher
-
-
-@pytest.fixture
-def matcher(tmp_path):
-    """Create a SoapMatcher instance for testing with temp files."""
-    # Create temp catalog
-    catalog_content = """
-Barrister and Mann:
-  Seville:
-    patterns:
-      - "b&m.*seville"
-      - "barrister.*mann.*seville"
-  Fougère Gothique:
-    patterns:
-      - "fougère.*gothique"
-House of Mammoth:
-  Alive:
-    patterns:
-      - "hom.*alive"
-      - "house.*mammoth.*alive"
-  Tusk:
-    patterns:
-      - "hom.*tusk"
-      - "house.*mammoth.*tusk"
-  Hygge:
-    patterns:
-      - "hom.*hygge"
-      - "house.*mammoth.*hygge"
-  Almond Leather:
-    patterns:
-      - "almond.*leather"
-Noble Otter:
-  'Tis the Season:
-    patterns:
-      - "'tis.*season"
-Strike Gold Shave:
-  Bee's Knees Soap:
-    patterns:
-      - "bee.*knees"
-Southern Witchcrafts:
-  Tres Matres:
-    patterns:
-      - "tres.*matres"
-"""
-    catalog_file = tmp_path / "soaps.yaml"
-    catalog_file.write_text(catalog_content)
-
-    # Create temp correct_matches
-    correct_matches_content = """
-soap:
-  Barrister and Mann:
-    Seville:
-      - "Barrister and Mann - Seville"
-  House of Mammoth:
-    Alive:
-      - "House of Mammoth - Alive"
-"""
-    correct_matches_file = tmp_path / "correct_matches.yaml"
-    correct_matches_file.write_text(correct_matches_content)
-
-    return SoapMatcher(catalog_path=catalog_file)
 
 
 def test_match_exact_scent(soap_matcher_with_mock):

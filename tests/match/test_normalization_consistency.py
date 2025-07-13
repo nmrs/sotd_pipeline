@@ -21,6 +21,30 @@ from sotd.utils.yaml_loader import (
 )
 
 
+@pytest.fixture(scope="session")
+def session_correct_matches_data() -> Dict[str, Any]:
+    """Session-scoped correct_matches.yaml data to avoid repeated loading."""
+    correct_matches_path = Path("data/correct_matches.yaml")
+    return load_yaml_with_nfc(correct_matches_path)
+
+
+@pytest.fixture(scope="session")
+def session_matchers():
+    """Session-scoped matcher instances to avoid repeated instantiation."""
+    return {
+        "razor": RazorMatcher(Path("data/razors.yaml")),
+        "blade": BladeMatcher(Path("data/blades.yaml")),
+        "brush": BrushMatcher(Path("data/brushes.yaml"), Path("data/handles.yaml")),
+        "soap": SoapMatcher(Path("data/soaps.yaml")),
+    }
+
+
+@pytest.fixture(scope="session")
+def session_analyzer():
+    """Session-scoped analyzer instance to avoid repeated instantiation."""
+    return MismatchAnalyzer()
+
+
 class TestNormalizationConsistency:
     """
     Test that all components use the canonical normalization and correct matches are always
@@ -28,25 +52,19 @@ class TestNormalizationConsistency:
     """
 
     @pytest.fixture
-    def correct_matches_data(self) -> Dict[str, Any]:
+    def correct_matches_data(self, session_correct_matches_data) -> Dict[str, Any]:
         """Load correct_matches.yaml data."""
-        correct_matches_path = Path("data/correct_matches.yaml")
-        return load_yaml_with_nfc(correct_matches_path)
+        return session_correct_matches_data
 
     @pytest.fixture
-    def matchers(self):
+    def matchers(self, session_matchers):
         """Create all matcher instances."""
-        return {
-            "razor": RazorMatcher(Path("data/razors.yaml")),
-            "blade": BladeMatcher(Path("data/blades.yaml")),
-            "brush": BrushMatcher(Path("data/brushes.yaml"), Path("data/handles.yaml")),
-            "soap": SoapMatcher(Path("data/soaps.yaml")),
-        }
+        return session_matchers
 
     @pytest.fixture
-    def analyzer(self):
+    def analyzer(self, session_analyzer):
         """Create mismatch analyzer instance."""
-        return MismatchAnalyzer()
+        return session_analyzer
 
     def test_normalize_for_matching_is_canonical(self):
         """Test that normalize_for_matching is the canonical normalization function."""
@@ -97,6 +115,7 @@ class TestNormalizationConsistency:
             assert matcher_result is not None
             assert analyzer_result is not None
 
+    @pytest.mark.slow
     def test_correct_matches_exact_match_consistency(self, correct_matches_data, matchers):
         """
         Test that all entries in correct_matches.yaml are found as exact matches by the matchers.
@@ -126,7 +145,6 @@ class TestNormalizationConsistency:
                                 else:
                                     result = matcher.match(correct_match)
 
-                                # Should be an exact match
                                 assert (
                                     result is not None
                                 ), f"Matcher returned None for '{correct_match}'"
@@ -152,7 +170,6 @@ class TestNormalizationConsistency:
                             # Test that the matcher finds this as an exact match
                             result = matcher.match(correct_match)
 
-                            # Should be an exact match
                             assert (
                                 result is not None
                             ), f"Matcher returned None for '{correct_match}'"
@@ -180,6 +197,44 @@ class TestNormalizationConsistency:
                                     f"Expected model '{model}' for '{correct_match}', "
                                     f"got {result.get('matched', {}).get('model')}"
                                 )
+
+    def test_correct_matches_sample_consistency(self, correct_matches_data, matchers):
+        """
+        Fast sample: For each field, test the first override entry in correct_matches.yaml for exact match.
+        This ensures the test is robust, fast, and always aligned with the override intent.
+        """
+        if not correct_matches_data:
+            pytest.skip("No correct_matches.yaml data available")
+
+        for field, field_data in correct_matches_data.items():
+            if field not in matchers:
+                continue
+            matcher = matchers[field]
+            # For blades, structure is format -> brand -> model -> [strings]
+            if field == "blade":
+                for format_name, brands in list(field_data.items())[:1]:
+                    for brand, models in list(brands.items())[:1]:
+                        for model, correct_matches in list(models.items())[:1]:
+                            for correct_match in correct_matches[:1]:
+                                result = matcher.match_with_context(correct_match, format_name)
+                                assert (
+                                    result is not None
+                                ), f"Matcher returned None for '{correct_match}'"
+                                assert (
+                                    result.get("match_type") == "exact"
+                                ), f"Expected exact match for '{correct_match}', got {result.get('match_type')}"
+            else:
+                # For other fields: brand -> model -> [strings]
+                for brand, models in list(field_data.items())[:1]:
+                    for model, correct_matches in list(models.items())[:1]:
+                        for correct_match in correct_matches[:1]:
+                            result = matcher.match(correct_match)
+                            assert (
+                                result is not None
+                            ), f"Matcher returned None for '{correct_match}'"
+                            assert (
+                                result.get("match_type") == "exact"
+                            ), f"Expected exact match for '{correct_match}', got {result.get('match_type')}"
 
     def test_normalization_preserves_case_for_correct_matches(self):
         """Test that normalization preserves case for correct match consistency."""

@@ -5,6 +5,7 @@ Integration tests using real YAML catalog files.
 These tests validate that changes to production YAML files don't break parsing.
 """
 
+import pytest
 from pathlib import Path
 
 from sotd.match.brush_matcher import BrushMatcher
@@ -13,40 +14,50 @@ from sotd.match.razor_matcher import RazorMatcher
 from sotd.match.blade_matcher import BladeMatcher
 
 
+@pytest.fixture(scope="session")
+def brush_matcher():
+    return BrushMatcher()
+
+
+@pytest.fixture(scope="session")
+def soap_matcher():
+    return SoapMatcher()
+
+
+@pytest.fixture(scope="session")
+def razor_matcher():
+    return RazorMatcher()
+
+
+@pytest.fixture(scope="session")
+def blade_matcher():
+    return BladeMatcher()
+
+
 class TestRealCatalogIntegration:
     """Integration tests using actual production YAML catalogs."""
 
-    def test_real_catalogs_load_successfully(self):
+    def test_real_catalogs_load_successfully(
+        self, brush_matcher, soap_matcher, razor_matcher, blade_matcher
+    ):
         """Test that all real catalogs load without errors."""
-        # Test all matchers initialize successfully with real catalogs
-        brush_matcher = BrushMatcher()
-        soap_matcher = SoapMatcher()
-        razor_matcher = RazorMatcher()
-        blade_matcher = BladeMatcher()
-
         # Verify basic structure
         assert brush_matcher.catalog_data is not None
         assert soap_matcher.catalog is not None
         assert razor_matcher.catalog is not None
         assert blade_matcher.catalog is not None
 
-    def test_real_catalog_patterns_compile(self):
+    def test_real_catalog_patterns_compile(self, brush_matcher, soap_matcher):
         """Test that all regex patterns in real catalogs compile successfully."""
-        brush_matcher = BrushMatcher()
-        soap_matcher = SoapMatcher()
-
         # Verify patterns exist and compiled successfully
         assert len(brush_matcher.strategies) > 0
         assert len(brush_matcher.handle_matcher.handle_patterns) > 0
         assert len(soap_matcher.scent_patterns) + len(soap_matcher.brand_patterns) > 0
 
-    def test_known_real_patterns_work(self):
+    def test_known_real_patterns_work(
+        self, brush_matcher, soap_matcher, razor_matcher, blade_matcher
+    ):
         """Test that known patterns from real catalogs work correctly."""
-        brush_matcher = BrushMatcher()
-        soap_matcher = SoapMatcher()
-        razor_matcher = RazorMatcher()
-        blade_matcher = BladeMatcher()
-
         # Key test cases that should work with real catalogs
         test_cases = [
             # Brush patterns
@@ -70,10 +81,8 @@ class TestRealCatalogIntegration:
             if isinstance(matched, dict):
                 assert matched.get(field) == expected_value, f"Failed for {input_text}"
 
-    def test_handle_knot_splitting_integration(self):
+    def test_handle_knot_splitting_integration(self, brush_matcher):
         """Test handle/knot splitting with real catalog data."""
-        matcher = BrushMatcher()
-
         # Test cases that exercise both brush and handle catalogs
         test_cases = [
             ("DG B15 w/ C&H Zebra", "Declaration Grooming", "Chisel & Hound"),
@@ -82,7 +91,7 @@ class TestRealCatalogIntegration:
         ]
 
         for input_text, expected_brand, expected_handle_maker in test_cases:
-            result = matcher.match(input_text)
+            result = brush_matcher.match(input_text)
             matched = result.get("matched")
             if isinstance(matched, dict):
                 assert matched.get("brand") == expected_brand, f"Brand failed for {input_text}"
@@ -91,10 +100,8 @@ class TestRealCatalogIntegration:
                         matched.get("handle_maker") == expected_handle_maker
                     ), f"Handle maker failed for {input_text}"
 
-    def test_soap_scent_matching(self):
+    def test_soap_scent_matching(self, soap_matcher):
         """Test that soap scent patterns work with real catalog."""
-        matcher = SoapMatcher()
-
         test_cases = [
             ("Barrister and Mann Seville", "Seville"),
             ("Declaration Grooming Contemplation", "Contemplation"),
@@ -102,17 +109,15 @@ class TestRealCatalogIntegration:
         ]
 
         for input_text, expected_scent in test_cases:
-            result = matcher.match(input_text)
+            result = soap_matcher.match(input_text)
             matched = result.get("matched")
             if isinstance(matched, dict) and matched.get("scent"):
                 assert (
                     expected_scent.lower() in matched["scent"].lower()
                 ), f"Scent failed for {input_text}"
 
-    def test_specific_integration_scenarios(self):
+    def test_specific_integration_scenarios(self, brush_matcher):
         """Test specific integration scenarios that have caused issues."""
-        brush_matcher = BrushMatcher()
-
         # Test Declaration Grooming B2 bug fix
         result = brush_matcher.match("Zenith B2 w/ Elite Handle")
         assert result["matched"] is not None

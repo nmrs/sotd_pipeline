@@ -892,7 +892,8 @@ class ValidateCorrectMatches:
                                             "actual_model": actual_model,
                                             "severity": "high",
                                             "suggested_action": (
-                                                f"Update correct match to {actual_brand} {actual_model}"
+                                                f"Update correct match to {actual_brand} "
+                                                f"{actual_model}"
                                             ),
                                         }
                                     )

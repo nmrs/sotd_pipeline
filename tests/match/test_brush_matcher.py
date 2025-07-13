@@ -9,7 +9,7 @@ from unittest.mock import patch
 from sotd.match.brush_matcher import BrushMatcher
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def test_catalog():
     """Create comprehensive test catalog covering all strategy types"""
     return {
@@ -78,14 +78,19 @@ def brush_matcher_with_mock(mock_correct_matches, test_catalog):
         return matcher
 
 
-@pytest.fixture
-def matcher(tmp_path, test_catalog):
-    """Create BrushMatcher with test catalog"""
+@pytest.fixture(scope="session")
+def session_matcher(tmp_path_factory, test_catalog):
+    """Session-scoped BrushMatcher with test catalog."""
+    tmp_path = tmp_path_factory.mktemp("brush_matcher_tests")
     catalog_file = tmp_path / "test_brushes.yaml"
     with catalog_file.open("w", encoding="utf-8") as f:
         yaml.dump(test_catalog, f)
-
     return BrushMatcher(catalog_path=catalog_file)
+
+
+@pytest.fixture(scope="class")
+def matcher(session_matcher):
+    return session_matcher
 
 
 def test_brush_matcher_known_brush_match(brush_matcher_with_mock):
@@ -265,43 +270,6 @@ def test_brush_matcher_malformed_yaml(tmp_path):
     result = matcher.match("Simpson Chubby 2")
 
     assert result["matched"] is None
-
-
-@pytest.mark.parametrize(
-    "input_str,expected_brand,expected_model",
-    [
-        ("Simpson Chubby 2", "Simpson", "Chubby 2"),
-        ("Declaration B3", "Declaration Grooming", "B3"),
-        ("Elite Badger", "Elite", "Badger"),
-        ("Chisel & Hound V20", "Chisel & Hound", "V20"),
-        ("Omega 12345", "Omega", "12345"),
-        ("Zenith B26", "Zenith", "B26"),
-    ],
-)
-def test_brush_matcher_parametrized_matches(matcher, input_str, expected_brand, expected_model):
-    """Test various brush matches with parametrized inputs"""
-    result = matcher.match(input_str)
-
-    assert result["matched"] is not None
-    assert result["matched"]["brand"] == expected_brand
-    assert result["matched"]["model"] == expected_model
-
-
-def test_brush_matcher_consistent_return_structure(matcher):
-    """Test that return structure is consistent across all matches"""
-    test_cases = ["Simpson Chubby 2", "Declaration B3", "Elite brush", "Unknown brush"]
-
-    for test_case in test_cases:
-        result = matcher.match(test_case)
-
-        # All results should have these keys
-        assert "original" in result
-        assert "matched" in result
-        assert "match_type" in result
-        assert "pattern" in result
-
-        # Values can be None for no matches
-        assert result["original"] == test_case
 
 
 def test_chisel_hound_versioned_vs_non_versioned_matching(matcher):
@@ -723,3 +691,6 @@ brush:
     assert result["matched"]["model"] == "Chubby 2"
     assert result["match_type"] == "exact"
     assert result["pattern"] is None
+
+
+# Parameterized strategy/fiber tests

@@ -338,7 +338,8 @@ class MismatchAnalyzer(AnalysisTool):
             )
             for i, entry in enumerate(confirmed_but_not_exact[:10]):  # Show first 10
                 self.console.print(
-                    f"[blue]DEBUG: Confirmed but not exact {i + 1}: Original='{entry['original']}', "
+                    f"[blue]DEBUG: Confirmed but not exact {i + 1}: "
+                    f"Original='{entry['original']}', "
                     f"Matched={entry['matched']}, Type={entry['match_type']}, "
                     f"Key={entry['match_key']}[/blue]"
                 )
