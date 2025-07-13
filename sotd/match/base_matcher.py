@@ -5,6 +5,9 @@ from typing import Any, Dict, List, Optional
 from sotd.utils.match_filter_utils import load_competition_tags, normalize_for_matching
 from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 
+# Global catalog cache for YAML files
+_catalog_cache = {}
+
 
 class MatchType:
     """Constants for match types to improve semantic clarity."""
@@ -33,7 +36,14 @@ class BaseMatcher:
         self._compiled_patterns: Dict[str, Any] = {}  # Pattern -> compiled regex
 
     def _load_catalog(self) -> dict:
-        return load_yaml_with_nfc(self.catalog_path, loader_cls=UniqueKeyLoader)
+        # Use global cache to avoid repeated YAML loads
+        global _catalog_cache
+        cache_key = str(self.catalog_path.resolve())
+        if cache_key not in _catalog_cache:
+            _catalog_cache[cache_key] = load_yaml_with_nfc(
+                self.catalog_path, loader_cls=UniqueKeyLoader
+            )
+        return _catalog_cache[cache_key]
 
     def _load_correct_matches(self) -> Dict[str, Dict[str, Any]]:
         """Load correct matches for this field type from correct_matches.yaml (or injected path)."""
