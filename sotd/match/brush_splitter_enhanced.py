@@ -50,26 +50,49 @@ class EnhancedBrushSplitter:
         self, text: str, delimiter: str, delimiter_type: str
     ) -> tuple[Optional[str], Optional[str], Optional[str]]:
         """Smart splitting for ambiguous delimiters like 'w/' by analyzing content."""
-        parts = text.split(delimiter, 1)
-        if len(parts) != 2:
+        # Find all occurrences of the delimiter
+        delimiter_positions = []
+        start = 0
+        while True:
+            pos = text.find(delimiter, start)
+            if pos == -1:
+                break
+            delimiter_positions.append(pos)
+            start = pos + len(delimiter)
+
+        if not delimiter_positions:
             return None, None, None
 
-        part1 = parts[0].strip()
-        part2 = parts[1].strip()
+        # Try each split point and score the results
+        best_split = None
+        best_score_diff = -float("inf")
 
-        if not part1 or not part2:
-            return None, None, None
+        for pos in delimiter_positions:
+            part1 = text[:pos].strip()
+            part2 = text[pos + len(delimiter) :].strip()
 
-        # Analyze which part is more likely to be the handle
-        part1_handle_score = self._score_as_handle(part1)
-        part2_handle_score = self._score_as_handle(part2)
+            if not part1 or not part2:
+                continue
 
-        if part1_handle_score > part2_handle_score:
-            # Part 1 is more likely the handle
-            return part1, part2, delimiter_type
-        else:
-            # Part 2 is more likely the handle (or they're equal, default to part 2)
-            return part2, part1, delimiter_type
+            # Score each part as handle
+            part1_handle_score = self._score_as_handle(part1)
+            part2_handle_score = self._score_as_handle(part2)
+
+            # Calculate the difference between the better handle score and the worse one
+            # This helps us find the split that creates the most distinct handle/knot separation
+            if part1_handle_score > part2_handle_score:
+                score_diff = part1_handle_score - part2_handle_score
+                potential_split = (part1, part2, delimiter_type)
+            else:
+                score_diff = part2_handle_score - part1_handle_score
+                potential_split = (part2, part1, delimiter_type)
+
+            # Choose the split with the largest score difference
+            if score_diff > best_score_diff:
+                best_score_diff = score_diff
+                best_split = potential_split
+
+        return best_split if best_split else (None, None, None)
 
     def _split_by_delimiter(
         self, text: str, delimiter: str, delimiter_type: str, handle_first: bool
