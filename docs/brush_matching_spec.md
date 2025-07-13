@@ -28,10 +28,57 @@ A single `brush` string provided by the extraction phase. This string may contai
         "fiber": str | None,
         "knot_size_mm": float | None,
         "handle_maker": str | None,
+        "knot_maker": str | None,
         ... # all catalog fields preserved
+        "handle": {
+            "brand": str | None,
+            "model": str | None,
+            "source_text": str | None
+        } | None,
+        "knot": {
+            "brand": str | None,
+            "model": str | None,
+            "fiber": str | None,
+            "knot_size_mm": float | None,
+            "source_text": str | None
+        } | None,
     } | None,
     "match_type": "exact|regex|alias|brand|fiber|knot|artisan|unmatched" | None,
     "pattern": str | None
+}
+```
+
+**Note:**
+- The `handle` and `knot` subsections are always present in the output (when information is available), regardless of whether the match was catalog-driven or split-driven.
+- For catalog-driven matches (e.g., BFM), these subsections are populated directly from the catalog's nested `handle` and `knot` fields if present. For split/strategy matches, they are inferred from the input and matching logic.
+
+### Example Output (Catalog-Driven, e.g., BFM)
+```python
+{
+    "original": "Muninn Woodworks BFM",
+    "matched": {
+        "brand": "Muninn Woodworks/EldrormR Industries",
+        "model": "BFM",
+        "fiber": "Synthetic",
+        "knot_size_mm": 50,
+        "handle_maker": "Muninn Woodworks",
+        "knot_maker": "Moti",
+        ...
+        "handle": {
+            "brand": "Muninn Woodworks",
+            "model": None,
+            "source_text": "Muninn Woodworks BFM"
+        },
+        "knot": {
+            "brand": "Moti",
+            "model": "Motherlode",
+            "fiber": "Synthetic",
+            "knot_size_mm": 50,
+            "source_text": "Muninn Woodworks BFM"
+        }
+    },
+    "match_type": "regex",
+    "pattern": "\\bbfm\\b(.*50mm)?"
 }
 ```
 
@@ -127,6 +174,17 @@ model: string | null                    # Brush model/name
 fiber: "Badger" | "Boar" | "Synthetic" | null  # Knot fiber type
 knot_size_mm: float | null             # Knot diameter in millimeters
 handle_maker: string | null            # Handle manufacturer (if different from brush brand)
+knot_maker: string | null              # Knot manufacturer (if different from brush brand)
+handle:                                 # Handle subsection (if available)
+  brand: string | null
+  model: string | null
+  source_text: string | null
+knot:                                   # Knot subsection (if available)
+  brand: string | null
+  model: string | null
+  fiber: string | null
+  knot_size_mm: float | null
+  source_text: string | null
 _matched_by_strategy: string           # Which strategy produced the match
 _pattern_used: string                  # Regex pattern that matched
 fiber_strategy: "user_input" | "yaml" | "default"    # Source of fiber information

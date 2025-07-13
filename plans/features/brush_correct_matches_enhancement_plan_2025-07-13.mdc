@@ -1,0 +1,247 @@
+# Brush Correct Matches Enhancement Implementation Plan
+
+## Project Summary
+Enhance the brush matching system to support separate `handle:` and `knot:` sections in `correct_matches.yaml`, allowing manual confirmation of handle and knot components for combo brush/handle brushes. Simple brushes like "Simpson Chubby 2" continue to work exactly as they do now using the existing `brush:` section.
+
+**Reference**: [Brush Correct Matches Enhancement Specification](brush_correct_matches_enhancement_spec_2025-07-13.md)
+
+## Component Steps
+
+### Phase 1: Data Structure Enhancement
+- [ ] Update `correct_matches.yaml` structure to support `handle:` and `knot:` sections
+- [ ] Add validation for new section structures
+- [ ] Create migration utilities for existing brush entries
+- [ ] Test backward compatibility with existing `brush:` section
+
+### Phase 2: Brush Matcher Enhancement
+- [ ] Modify brush matcher to check `handle:` and `knot:` sections before regex matching
+- [ ] Implement correct match lookup for handle/knot combinations
+- [ ] Add post-processing logic for handle/knot metadata
+- [ ] Ensure existing `brush:` section functionality remains unchanged
+
+### Phase 3: Reporting Layer Updates
+- [ ] Update aggregation logic to handle handle/knot-only brushes
+- [ ] Implement fallback logic for reporting (knot brand/model when no brush brand/model)
+- [ ] Add tests for new reporting behavior
+- [ ] Verify aggregation functionality for handle makers and knot makers
+
+### Phase 4: Validation and Tools
+- [ ] Update mismatch analyzer to support handle/knot sections
+- [ ] Add validation tools for handle/knot correct matches
+- [ ] Create migration scripts for existing data
+- [ ] Add comprehensive testing for all new functionality
+
+## Implementation Details
+
+### Data Structure Changes
+
+#### Current Structure (Unaffected for Simple Brushes)
+```yaml
+brush:
+  Simpson:
+    Chubby 2:
+      - "Simpson Chubby 2"
+```
+
+#### New Structure (For Combo Brush/Handle Brushes)
+```yaml
+# Handle maker + specific model
+handle:
+  AP Shave Co:
+    Black Matte Alumihandle Layered Comfort:
+      - "AP Shave Co - Black Matte Alumihandle Layered Comfort - 25mm Mühle STF"
+
+# Handle maker only (no specific model)
+handle:
+  Muninn Woodworks:
+    null:
+      - "Muninn Woodworks BFM"
+
+knot:
+  Mühle:
+    STF:
+      strings:
+        - "AP Shave Co - Black Matte Alumihandle Layered Comfort - 25mm Mühle STF"
+      fiber: "Synthetic"
+      knot_size_mm: 25.0
+```
+
+### Brush Matcher Logic Changes
+
+#### Current Flow (Unaffected for Simple Brushes)
+1. Check `brush:` section in correct matches
+2. If found, return brand/model with `match_type: "exact"`
+3. If not found, proceed with regex matching
+
+#### New Flow (For Combo Brush/Handle Brushes)
+1. Check `handle:` and `knot:` sections in correct matches
+2. If found in both sections, return complete handle/knot breakdown
+3. If not found, proceed with existing regex matching and parsing
+4. Maintain backward compatibility with existing `brush:` section
+
+### Match Output Structure
+
+#### Simple Brush Output (Unachanged)
+```python
+{
+    "matched": {
+        "brand": "Simpson",
+        "model": "Chubby 2",
+        "handle_maker": None,
+        "handle": None,
+        "knot": None
+    },
+    "match_type": "exact"
+}
+```
+
+#### Combo Brush Output (New)
+```python
+# Case 1: Handle maker + specific model
+{
+    "matched": {
+        "brand": "Mühle",  # From knot
+        "model": "STF",    # From knot
+        "handle_maker": "AP Shave Co",
+        "handle": {
+            "brand": "AP Shave Co",
+            "model": "Black Matte Alumihandle Layered Comfort",
+            "source_text": "AP Shave Co - Black Matte Alumihandle Layered Comfort"
+        },
+        "knot": {
+            "brand": "Mühle",
+            "model": "STF",
+            "fiber": "Synthetic",
+            "knot_size_mm": 25.0,
+            "source_text": "25mm Mühle STF"
+        }
+    },
+    "match_type": "exact"
+}
+
+# Case 2: Handle maker only (no specific model)
+{
+    "matched": {
+        "brand": "Moti",  # From knot
+        "model": "Motherlode",  # From knot
+        "handle_maker": "Muninn Woodworks",
+        "handle": {
+            "brand": "Muninn Woodworks",
+            "model": None,  # No specific model
+            "source_text": "Muninn Woodworks BFM"
+        },
+        "knot": {
+            "brand": "Moti",
+            "model": "Motherlode",
+            "fiber": "Synthetic",
+            "knot_size_mm": 50.0,
+            "source_text": "Muninn Woodworks BFM"
+        }
+    },
+    "match_type": "exact"
+}
+```
+
+## Testing Strategy
+
+### Unit Tests
+- [ ] Test handle section lookup and parsing
+- [ ] Test knot section lookup and parsing
+- [ ] Test backward compatibility with existing brush section
+- [ ] Test error handling for malformed correct matches
+- [ ] Test simple brushes continue to work unchanged
+
+### Integration Tests
+- [ ] Test complete brush matching workflow with handle/knot sections
+- [ ] Test aggregation with handle/knot-only brushes
+- [ ] Test reporting fallback logic
+- [ ] Test performance with large correct matches files
+
+### Performance Tests
+- [ ] Benchmark correct match lookup vs regex matching
+- [ ] Test performance with large correct matches files
+- [ ] Verify no regression in existing functionality
+
+## Migration Strategy
+
+### Phase 1: Parallel Support
+- Support both `brush:` and `handle:`/`knot:` sections simultaneously
+- Existing brush entries continue to work unchanged
+- New entries can use either approach
+- No breaking changes to existing functionality
+
+### Phase 2: Gradual Migration
+- Create migration tools to convert `brush:` entries to `handle:`/`knot:` format
+- Validate migrated entries with mismatch analyzer
+- Update documentation and examples
+- Encourage use of new sections for combo brush/handle brushes
+
+### Phase 3: Deprecation (Future)
+- Mark `brush:` section as deprecated for combo brush/handle brushes
+- Encourage use of `handle:`/`knot:` sections for new entries
+- Plan for eventual removal of `brush:` section for complex brushes
+
+## Success Criteria
+
+1. **Performance**: Correct matches bypass all regex matching and parsing
+2. **Reliability**: Confirmed handle/knot combinations return consistent results
+3. **Completeness**: All handle and knot metadata preserved in correct matches
+4. **Compatibility**: Existing functionality continues to work unchanged
+5. **Validation**: Mismatch analyzer can validate handle and knot components
+6. **Reporting**: Aggregation and reporting work correctly with handle/knot-only brushes
+
+## Risks and Mitigation
+
+### Risk 1: Data Migration Complexity
+- **Mitigation**: Create comprehensive migration tools and validation
+- **Mitigation**: Support parallel operation during transition period
+- **Mitigation**: Maintain backward compatibility throughout
+
+### Risk 2: Reporting Logic Changes
+- **Mitigation**: Thorough testing of aggregation and reporting logic
+- **Mitigation**: Clear fallback rules for handle/knot-only brushes
+- **Mitigation**: Comprehensive integration testing
+
+### Risk 3: Performance Impact
+- **Mitigation**: Benchmark all changes and verify no regression
+- **Mitigation**: Optimize correct match lookup performance
+- **Mitigation**: Test with large datasets
+
+## Dependencies
+
+- Existing brush matcher and splitter functionality
+- Mismatch analyzer for validation
+- Aggregation and reporting systems
+- Test infrastructure for validation
+- Existing `brush:` section functionality (must remain unchanged)
+
+## Timeline
+
+- **Phase 1**: 1-2 days (data structure and validation)
+- **Phase 2**: 2-3 days (brush matcher enhancement)
+- **Phase 3**: 1-2 days (reporting layer updates)
+- **Phase 4**: 1-2 days (validation and tools)
+- **Total**: 5-9 days
+
+## Files to Modify
+
+### Core Implementation
+- `sotd/match/brush_matcher.py` - Add handle/knot section support
+- `data/correct_matches.yaml` - Add handle and knot sections
+- `sotd/match/tools/analyzers/mismatch_analyzer.py` - Support handle/knot validation
+
+### Testing
+- `tests/match/test_brush_matcher.py` - Add tests for new functionality
+- `tests/integration/test_brush_correct_matches.py` - Integration tests
+
+### Documentation
+- `docs/brush_correct_matches_enhancement_spec.md` - Specification (already created)
+- `README.md` - Update with new functionality
+
+## Conclusion
+
+This enhancement will significantly improve the reliability and performance of brush matching for combo brush/handle brushes by allowing manual confirmation of handle and knot components. The phased approach ensures backward compatibility while providing a clear migration path to the new structure. Simple brushes continue to work exactly as they do now, maintaining the existing functionality for straightforward cases.
+description:
+globs:
+alwaysApply: false
+---
