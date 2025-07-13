@@ -6,6 +6,19 @@ from sotd.match.tools.managers.validate_correct_matches import ValidateCorrectMa
 import yaml
 
 
+@pytest.fixture(scope="session")
+def session_validator():
+    """Session-scoped validator to avoid repeated instantiation."""
+    return ValidateCorrectMatches()
+
+
+@pytest.fixture(scope="session")
+def session_validator_with_console():
+    """Session-scoped validator with custom console."""
+    mock_console = Mock()
+    return ValidateCorrectMatches(console=mock_console)
+
+
 class TestValidateCorrectMatches:
     """Test the ValidateCorrectMatches class."""
 
@@ -23,17 +36,15 @@ class TestValidateCorrectMatches:
         validator = ValidateCorrectMatches(console=mock_console)
         assert validator.console == mock_console
 
-    def test_get_parser_returns_parser(self):
+    def test_get_parser_returns_parser(self, session_validator):
         """Test that get_parser returns a parser object."""
-        validator = ValidateCorrectMatches()
-        parser = validator.get_parser()
+        parser = session_validator.get_parser()
         assert parser is not None
         assert hasattr(parser, "add_argument")
 
-    def test_parser_has_required_arguments(self):
+    def test_parser_has_required_arguments(self, session_validator):
         """Test that parser has all required CLI arguments."""
-        validator = ValidateCorrectMatches()
-        parser = validator.get_parser()
+        parser = session_validator.get_parser()
 
         # Get all argument names
         args = [action.dest for action in parser._actions]
@@ -43,27 +54,6 @@ class TestValidateCorrectMatches:
         assert "all_fields" in args
         assert "verbose" in args
         assert "dry_run" in args
-
-    def test_run_method_exists(self):
-        """Test that run method exists and is callable."""
-        validator = ValidateCorrectMatches()
-        assert hasattr(validator, "run")
-        assert callable(validator.run)
-
-    def test_run_method_accepts_args(self):
-        """Test that run method accepts args parameter."""
-        validator = ValidateCorrectMatches()
-        mock_args = Mock()
-
-        # Should not raise an exception (implementation will come later)
-        try:
-            validator.run(mock_args)
-        except NotImplementedError:
-            # Expected for now since we haven't implemented it yet
-            pass
-        except Exception as e:
-            # Any other exception is unexpected
-            pytest.fail(f"Unexpected exception: {e}")
 
     def test_imports_work_correctly(self):
         """Test that all required imports work correctly."""
@@ -76,41 +66,42 @@ class TestValidateCorrectMatches:
 class TestCLIInterface:
     """Test CLI interface functionality."""
 
-    def test_cli_help_works(self):
+    def test_cli_help_works(self, session_validator):
         """Test that CLI help can be displayed."""
-        validator = ValidateCorrectMatches()
-        parser = validator.get_parser()
+        parser = session_validator.get_parser()
 
         # Should not raise an exception
         help_text = parser.format_help()
         assert help_text is not None
         assert len(help_text) > 0
 
-    def test_cli_parses_field_flag(self):
-        validator = ValidateCorrectMatches()
-        parser = validator.get_parser()
-        args = parser.parse_args(["--field", "razor"])
-        assert args.field == "razor"
-        assert not args.all_fields
-
-    def test_cli_parses_all_fields_flag(self):
-        validator = ValidateCorrectMatches()
-        parser = validator.get_parser()
-        args = parser.parse_args(["--all-fields"])
-        assert args.all_fields
-        assert args.field is None
-
-    def test_cli_parses_verbose_flag(self):
-        validator = ValidateCorrectMatches()
-        parser = validator.get_parser()
-        args = parser.parse_args(["--verbose"])
-        assert args.verbose
-
-    def test_cli_parses_dry_run_flag(self):
-        validator = ValidateCorrectMatches()
-        parser = validator.get_parser()
-        args = parser.parse_args(["--dry-run"])
-        assert args.dry_run
+    @pytest.mark.parametrize(
+        "cli_args,expected_field,expected_all_fields,expected_verbose,expected_dry_run",
+        [
+            (["--field", "razor"], "razor", False, False, False),
+            (["--all-fields"], None, True, False, False),
+            (["--verbose"], None, False, True, False),
+            (["--dry-run"], None, False, False, True),
+            (["--field", "blade", "--verbose"], "blade", False, True, False),
+            (["--all-fields", "--dry-run"], None, True, False, True),
+        ],
+    )
+    def test_cli_parses_flags(
+        self,
+        session_validator,
+        cli_args,
+        expected_field,
+        expected_all_fields,
+        expected_verbose,
+        expected_dry_run,
+    ):
+        """Test that CLI argument parsing works correctly for all flags."""
+        parser = session_validator.get_parser()
+        args = parser.parse_args(cli_args)
+        assert args.field == expected_field
+        assert args.all_fields == expected_all_fields
+        assert args.verbose == expected_verbose
+        assert args.dry_run == expected_dry_run
 
     def test_run_returns_issues_for_mismatched_entry(self, tmp_path):
         # Setup a correct_matches.yaml with a mismatched entry
@@ -162,9 +153,8 @@ class TestCLIInterface:
         issues = results["razor"]
         assert len(issues) == 0
 
-    def test_main_dry_run_exits_zero(self):
-        validator = ValidateCorrectMatches()
-        exit_code = validator.main(["--dry-run"])
+    def test_main_dry_run_exits_zero(self, session_validator):
+        exit_code = session_validator.main(["--dry-run"])
         assert exit_code == 0
 
     def test_main_returns_zero_for_no_issues(self, tmp_path):
