@@ -162,6 +162,7 @@ class BrushMatcher:
             matched["knot_size_mm"] = (
                 catalog_entry.get("knot_size_mm", None) if catalog_entry else None
             )
+            matched["knot_maker"] = catalog_entry.get("knot_maker", None) if catalog_entry else None
             # Set fiber_strategy to "yaml" if we have fiber data from catalog, otherwise None
             matched["fiber_strategy"] = (
                 "yaml" if (catalog_entry and catalog_entry.get("fiber")) else None
@@ -317,8 +318,70 @@ class BrushMatcher:
         # Resolve handle maker information
         self._resolve_handle_maker(updated, value)
 
+        # Add handle and knot subsections if we have split information
+        self._add_handle_knot_subsections(updated, value)
+
         result["matched"] = updated
         return result
+
+    def _add_handle_knot_subsections(self, updated: dict, value: str) -> None:
+        """Add handle and knot subsections to the match result if available."""
+        # Get the original split information if available
+        handle_text = updated.get("_original_handle_text")
+        knot_text = updated.get("_original_knot_text")
+
+        # If we don't have split text, try to split now
+        if not handle_text and not knot_text:
+            handle_text, knot_text, _ = self.brush_splitter.split_handle_and_knot(value)
+
+        # Add handle subsection if we have handle information
+        if handle_text:
+            handle_match = self.handle_matcher.match_handle_maker(handle_text)
+            if handle_match:
+                updated["handle"] = {
+                    "brand": handle_match["handle_maker"],
+                    "model": None,  # Could be extracted from handle_text if needed
+                    "source_text": handle_text,
+                }
+                # Keep handle_maker for backward compatibility
+                # The handle subsection provides additional structured data
+
+        # Add knot subsection if we have knot information
+        if knot_text:
+            # Try to match the knot against our strategies
+            knot_match = None
+            for strategy in self.strategies:
+                try:
+                    result = strategy.match(knot_text)
+                    if result and (
+                        (isinstance(result, dict) and result.get("matched"))
+                        or (isinstance(result, dict) and result.get("brand"))
+                    ):
+                        if isinstance(result, dict) and result.get("matched"):
+                            knot_match = result["matched"]
+                        elif isinstance(result, dict) and result.get("brand"):
+                            knot_match = result
+                        break
+                except (AttributeError, KeyError, TypeError):
+                    continue
+
+            if knot_match:
+                updated["knot"] = {
+                    "brand": knot_match.get("brand"),
+                    "model": knot_match.get("model"),
+                    "fiber": knot_match.get("fiber"),
+                    "source_text": knot_text,
+                }
+                # Keep brand/model for backward compatibility
+                # The knot subsection provides additional structured data
+            else:
+                # If no strategy match, just include the text
+                updated["knot"] = {
+                    "brand": None,
+                    "model": None,
+                    "fiber": None,
+                    "source_text": knot_text,
+                }
 
     def _resolve_handle_maker(self, updated: dict, value: str) -> None:
         """Resolve handle maker using multiple strategies."""
