@@ -118,3 +118,40 @@ This change ensures that all entries in `correct_matches.yaml` are always found 
 ---
 
 For detailed information, see the [Pipeline Specification](docs/SOTD_Pipeline_Spec.md). 
+
+## Brush Correct Matches Enhancement (2025-07)
+
+The brush matcher now supports advanced correct matching for combo brushes using separate `handle:` and `knot:` sections in `data/correct_matches.yaml`. For brushes like `DG B15 w/ C&H Zebra`, the matcher extracts and stores handle and knot details separately, and defers the decision of top-level brand/model to the reporting phase. Simple brushes continue to use the `brush:` section as before.
+
+### Example YAML
+```yaml
+handle:
+  Chisel & Hound:
+    Zebra:
+      - "DG B15 w/ C&H Zebra"
+knot:
+  Declaration Grooming:
+    B15:
+      strings:
+        - "DG B15 w/ C&H Zebra"
+      fiber: "Badger"
+      knot_size_mm: 26.0
+```
+
+### Example Match Output
+```python
+{
+    "matched": {
+        "brand": None,  # Deferred to reporting
+        "model": None,  # Deferred to reporting
+        "handle_maker": "Chisel & Hound",
+        "handle": {"brand": "Chisel & Hound", "model": "Zebra", "source_text": "DG B15 w/ C&H Zebra"},
+        "knot": {"brand": "Declaration Grooming", "model": "B15", "fiber": "Badger", "knot_size_mm": 26.0, "source_text": "DG B15 w/ C&H Zebra"}
+    },
+    "match_type": "exact"
+}
+```
+
+- For combo brushes, reporting/aggregation code should use the `knot` and `handle` fields for display.
+- For simple brushes, `brand` and `model` are set as before.
+- Backward compatibility is maintained for all existing data and workflows. 
