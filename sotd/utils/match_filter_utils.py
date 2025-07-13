@@ -7,6 +7,9 @@ from typing import Dict, List, Optional
 
 import yaml
 
+# Module-level cache for competition tags to avoid repeated file loads
+_COMPETITION_TAGS_CACHE: Dict[str, List[str]] | None = None
+
 
 def load_competition_tags(tags_path: Path | None = None) -> Dict[str, List[str]]:
     """
@@ -18,22 +21,31 @@ def load_competition_tags(tags_path: Path | None = None) -> Dict[str, List[str]]
     Returns:
         Dictionary with 'strip_tags' and 'preserve_tags' lists.
     """
+    global _COMPETITION_TAGS_CACHE
+
+    # Return cached result if available
+    if _COMPETITION_TAGS_CACHE is not None:
+        return _COMPETITION_TAGS_CACHE
+
     if tags_path is None:
         tags_path = Path("data/competition_tags.yaml")
 
     if not tags_path.exists():
-        return {"strip_tags": [], "preserve_tags": []}
+        _COMPETITION_TAGS_CACHE = {"strip_tags": [], "preserve_tags": []}
+        return _COMPETITION_TAGS_CACHE
 
     try:
         with tags_path.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
-        return {
+        _COMPETITION_TAGS_CACHE = {
             "strip_tags": data.get("strip_tags", []),
             "preserve_tags": data.get("preserve_tags", []),
         }
+        return _COMPETITION_TAGS_CACHE
     except Exception:
         # If tags file is corrupted or can't be loaded, continue without it
-        return {"strip_tags": [], "preserve_tags": []}
+        _COMPETITION_TAGS_CACHE = {"strip_tags": [], "preserve_tags": []}
+        return _COMPETITION_TAGS_CACHE
 
 
 def strip_competition_tags(value: str, competition_tags: Dict[str, List[str]] | None = None) -> str:
