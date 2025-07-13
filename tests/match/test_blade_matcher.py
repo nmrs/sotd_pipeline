@@ -4,8 +4,10 @@ import pytest
 from sotd.match.blade_matcher import BladeMatcher
 
 
-@pytest.fixture
-def matcher(tmp_path):
+@pytest.fixture(scope="class")
+def matcher(tmp_path_factory):
+    """Create a shared BladeMatcher instance for all tests."""
+    tmp_path = tmp_path_factory.mktemp("blade_matcher_tests")
     yaml_content = r"""
 DE:
   Feather:
@@ -40,6 +42,37 @@ Half DE:
     path = tmp_path / "blades.yaml"
     path.write_text(yaml_content)
     return BladeMatcher(catalog_path=path)
+
+
+@pytest.fixture(scope="class")
+def correct_matches_matcher(tmp_path_factory):
+    """Create a BladeMatcher with correct matches for testing."""
+    tmp_path = tmp_path_factory.mktemp("correct_matches_tests")
+
+    # Create a test catalog with a regex pattern that would match
+    catalog_content = """
+DE:
+  Gillette:
+    Nacet:
+      patterns:
+        - "gillette.*nacet"
+      format: "DE"
+"""
+    catalog_file = tmp_path / "blades.yaml"
+    catalog_file.write_text(catalog_content)
+
+    # Create a correct_matches.yaml with a different match for the same input
+    correct_matches_content = """
+blade:
+  DE:
+    Gillette:
+      Nacet:
+        - "Gillette Nacet"
+"""
+    correct_matches_file = tmp_path / "correct_matches.yaml"
+    correct_matches_file.write_text(correct_matches_content)
+
+    return BladeMatcher(catalog_path=catalog_file, correct_matches_path=correct_matches_file)
 
 
 def test_match_with_use_count_parentheses(matcher):
@@ -201,35 +234,10 @@ def test_format_fallback_for_half_de_razors(matcher):
     assert result["matched"]["model"] == "Perma-Sharp"
 
 
-def test_correct_matches_priority_before_regex(tmp_path):
+def test_correct_matches_priority_before_regex(correct_matches_matcher):
     """Test that correct matches are checked before regex patterns for blades."""
-    # Create a test catalog with a regex pattern that would match
-    catalog_content = """
-DE:
-  Gillette:
-    Nacet:
-      patterns:
-        - "gillette.*nacet"
-      format: "DE"
-"""
-    catalog_file = tmp_path / "blades.yaml"
-    catalog_file.write_text(catalog_content)
-
-    # Create a correct_matches.yaml with a different match for the same input
-    correct_matches_content = """
-blade:
-  DE:
-    Gillette:
-      Nacet:
-        - "Gillette Nacet"
-"""
-    correct_matches_file = tmp_path / "correct_matches.yaml"
-    correct_matches_file.write_text(correct_matches_content)
-
-    matcher = BladeMatcher(catalog_path=catalog_file, correct_matches_path=correct_matches_file)
-
     # Test that the input matches the correct_matches entry, not the regex
-    result = matcher.match("Gillette Nacet")
+    result = correct_matches_matcher.match("Gillette Nacet")
 
     # Should match from correct_matches (exact match)
     assert result["matched"] is not None
