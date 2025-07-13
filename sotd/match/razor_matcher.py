@@ -13,6 +13,8 @@ class RazorMatcher(BaseMatcher):
     ):
         super().__init__(catalog_path, "razor", correct_matches_path=correct_matches_path)
         self.patterns = self._compile_patterns()
+        # Add cache for expensive operations
+        self._match_cache = {}
 
     def _compile_patterns(self):
         compiled = []
@@ -28,6 +30,11 @@ class RazorMatcher(BaseMatcher):
 
     def _match_with_regex(self, value: str) -> Dict[str, Any]:
         """Match using regex patterns with REGEX match type."""
+        # Check cache first - ensure cache key is always a string
+        cache_key = str(value) if not isinstance(value, str) else value
+        if cache_key in self._match_cache:
+            return self._match_cache[cache_key]
+
         original = value
         # All correct match lookups must use normalize_for_matching
         # (see docs/product_matching_validation.md)
@@ -35,12 +42,14 @@ class RazorMatcher(BaseMatcher):
 
         normalized = normalize_for_matching(value, field="razor")
         if not normalized:
-            return {
+            result = {
                 "original": original,
                 "matched": None,
                 "pattern": None,
                 "match_type": None,  # Keep None for backward compatibility
             }
+            self._match_cache[cache_key] = result
+            return result
 
         razor_text = normalized
 
@@ -59,16 +68,20 @@ class RazorMatcher(BaseMatcher):
                     if key not in ["patterns", "format"]:
                         matched_data[key] = value
 
-                return {
+                result = {
                     "original": original,
                     "matched": matched_data,
                     "pattern": raw_pattern,
                     "match_type": MatchType.REGEX,
                 }
+                self._match_cache[cache_key] = result
+                return result
 
-        return {
+        result = {
             "original": original,
             "matched": None,
             "pattern": None,
             "match_type": None,  # Keep None for backward compatibility
         }
+        self._match_cache[cache_key] = result
+        return result
