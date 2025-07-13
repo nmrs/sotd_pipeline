@@ -65,6 +65,8 @@ class BrushMatcher:
         ]
         self.knot_matcher = EnhancedKnotMatcher(self.strategies)
         self.brush_splitter = EnhancedBrushSplitter(self.handle_matcher, self.strategies)
+        # Add cache for expensive operations
+        self._match_cache = {}
 
     def _load_catalog(self, catalog_path: Path) -> dict:
         """Load brush catalog from YAML file."""
@@ -92,15 +94,22 @@ class BrushMatcher:
 
         Returns match data if found, None otherwise.
         """
+        # Check cache first
+        cache_key = f"correct_matches:{value}"
+        if cache_key in self._match_cache:
+            return self._match_cache[cache_key]
+
         from sotd.utils.match_filter_utils import normalize_for_matching
 
         if not value or not self.correct_matches:
+            self._match_cache[cache_key] = None
             return None
 
         # All correct match lookups must use normalize_for_matching
         # (see docs/product_matching_validation.md)
         normalized_value = normalize_for_matching(value, field="brush")
         if not normalized_value:
+            self._match_cache[cache_key] = None
             return None
 
         # Search through correct matches structure
@@ -117,11 +126,14 @@ class BrushMatcher:
                     normalized_correct = normalize_for_matching(correct_string, field="brush")
                     if normalized_correct == normalized_value:
                         # Return match data in the expected format
-                        return {
+                        result = {
                             "brand": brand,
                             "model": model,
                         }
+                        self._match_cache[cache_key] = result
+                        return result
 
+        self._match_cache[cache_key] = None
         return None
 
     def match(self, value: str) -> dict:
@@ -290,6 +302,13 @@ class BrushMatcher:
 
     def _enrich_match_result(self, value: str, match_dict: dict) -> None:
         """Enrich match result with fiber and handle information."""
+        # Check cache first
+        cache_key = f"enrich:{value}"
+        if cache_key in self._match_cache:
+            cached_result = self._match_cache[cache_key]
+            match_dict.update(cached_result)
+            return
+
         # Process fiber information
         self.fiber_processor.process_fiber_info(value, match_dict)
 
@@ -304,8 +323,22 @@ class BrushMatcher:
                     "_pattern_used": handle_match["_pattern_used"],
                 }
 
+        # Cache the enrichment result
+        self._match_cache[cache_key] = {
+            "fiber": match_dict.get("fiber"),
+            "handle_maker": match_dict.get("handle_maker"),
+            "handle_maker_metadata": match_dict.get("handle_maker_metadata"),
+        }
+
     def _post_process_match(self, result: dict, value: str) -> dict:
         """Post-process match result with fiber and handle resolution."""
+        # Check cache first
+        cache_key = f"post_process:{value}"
+        if cache_key in self._match_cache:
+            cached_result = self._match_cache[cache_key]
+            result["matched"].update(cached_result)
+            return result
+
         if not result.get("matched"):
             return result
 
@@ -320,6 +353,15 @@ class BrushMatcher:
 
         # Add handle and knot subsections if we have split information
         self._add_handle_knot_subsections(updated, value)
+
+        # Cache the post-processing result
+        self._match_cache[cache_key] = {
+            "fiber": updated.get("fiber"),
+            "handle_maker": updated.get("handle_maker"),
+            "handle_maker_metadata": updated.get("handle_maker_metadata"),
+            "handle": updated.get("handle"),
+            "knot": updated.get("knot"),
+        }
 
         result["matched"] = updated
         return result
