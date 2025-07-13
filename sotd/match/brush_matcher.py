@@ -26,6 +26,7 @@ from sotd.match.fiber_processor_enhanced import FiberProcessorEnhanced
 from sotd.match.handle_matcher_enhanced import EnhancedHandleMatcher
 from sotd.match.knot_matcher_enhanced import EnhancedKnotMatcher
 from sotd.utils.yaml_loader import load_yaml_with_nfc
+from sotd.utils.match_filter_utils import normalize_for_matching
 
 from .base_matcher import MatchType
 
@@ -83,23 +84,29 @@ class BrushMatcher:
 
         try:
             data = load_yaml_with_nfc(self.correct_matches_path)
-            return data.get("brush", {})
+            # Load both brush section (for simple brushes) and handle/knot sections
+            # (for combo brushes)
+            correct_matches = {
+                "brush": data.get("brush", {}),
+                "handle": data.get("handle", {}),
+                "knot": data.get("knot", {}),
+            }
+            return correct_matches
         except Exception:
             # If correct matches file is corrupted or can't be loaded, continue without it
-            return {}
+            return {"brush": {}, "handle": {}, "knot": {}}
 
     def _check_correct_matches(self, value: str) -> Optional[Dict[str, Any]]:
         """
         Check if value matches any correct matches entry using canonical normalization.
 
         Returns match data if found, None otherwise.
+        Supports both brush section (simple brushes) and handle/knot sections (combo brushes).
         """
         # Check cache first
         cache_key = f"correct_matches:{value}"
         if cache_key in self._match_cache:
             return self._match_cache[cache_key]
-
-        from sotd.utils.match_filter_utils import normalize_for_matching
 
         if not value or not self.correct_matches:
             self._match_cache[cache_key] = None
@@ -112,8 +119,33 @@ class BrushMatcher:
             self._match_cache[cache_key] = None
             return None
 
+        # Step 1: Check handle/knot sections first (for combo brush/handle brushes)
+        handle_knot_match = self._check_handle_knot_correct_matches(value, normalized_value)
+        if handle_knot_match:
+            self._match_cache[cache_key] = handle_knot_match
+            return handle_knot_match
+
+        # Step 2: Check brush section (for simple brushes)
+        brush_match = self._check_brush_correct_matches(value, normalized_value)
+        if brush_match:
+            self._match_cache[cache_key] = brush_match
+            return brush_match
+
+        self._match_cache[cache_key] = None
+        return None
+
+    def _check_brush_correct_matches(
+        self, value: str, normalized_value: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Check if value matches any brush section correct matches entry.
+
+        Returns match data if found, None otherwise.
+        """
+        brush_section = self.correct_matches.get("brush", {})
+
         # Search through correct matches structure
-        for brand, brand_data in self.correct_matches.items():
+        for brand, brand_data in brush_section.items():
             if not isinstance(brand_data, dict):
                 continue
 
@@ -126,15 +158,191 @@ class BrushMatcher:
                     normalized_correct = normalize_for_matching(correct_string, field="brush")
                     if normalized_correct == normalized_value:
                         # Return match data in the expected format
-                        result = {
-                            "brand": brand,
-                            "model": model,
-                        }
-                        self._match_cache[cache_key] = result
+                        result = {"brand": brand, "model": model, "match_type": "brush_section"}
                         return result
 
-        self._match_cache[cache_key] = None
         return None
+
+    def _check_handle_knot_correct_matches(
+        self, value: str, normalized_value: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Check if value matches any handle/knot section correct matches entry.
+
+        Returns match data if found, None otherwise.
+        """
+        handle_section = self.correct_matches.get("handle", {})
+        knot_section = self.correct_matches.get("knot", {})
+
+        # Search through handle section
+        for handle_maker, handle_models in handle_section.items():
+            if not isinstance(handle_models, dict):
+                continue
+
+            for handle_model, strings in handle_models.items():
+                if not isinstance(strings, list):
+                    continue
+
+                # Check if normalized value matches any of the correct strings
+                for correct_string in strings:
+                    normalized_correct = normalize_for_matching(correct_string, field="brush")
+                    if normalized_correct == normalized_value:
+                        # Find corresponding knot information
+                        knot_info = self._find_knot_info_for_string(value, knot_section)
+
+                        result = {
+                            "handle_maker": handle_maker,
+                            "handle_model": handle_model,
+                            "knot_info": knot_info,
+                            "match_type": "handle_knot_section",
+                        }
+                        return result
+
+        return None
+
+    def _find_knot_info_for_string(
+        self, value: str, knot_section: dict
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Find knot information for a given input string.
+
+        Returns knot info if found, None otherwise.
+        """
+        from sotd.utils.match_filter_utils import normalize_for_matching
+
+        normalized_value = normalize_for_matching(value, field="brush")
+
+        # Search through knot section
+        for knot_maker, knot_models in knot_section.items():
+            if not isinstance(knot_models, dict):
+                continue
+
+            for knot_model, knot_data in knot_models.items():
+                if not isinstance(knot_data, dict):
+                    continue
+
+                strings = knot_data.get("strings", [])
+                if not isinstance(strings, list):
+                    continue
+
+                # Check if normalized value matches any of the correct strings
+                for correct_string in strings:
+                    normalized_correct = normalize_for_matching(correct_string, field="brush")
+                    if normalized_correct == normalized_value:
+                        return {
+                            "brand": knot_maker,
+                            "model": knot_model,
+                            "fiber": knot_data.get("fiber"),
+                            "knot_size_mm": knot_data.get("knot_size_mm"),
+                            "strings": strings,
+                        }
+
+        return None
+
+    def _process_handle_knot_correct_match(self, value: str, correct_match: Dict[str, Any]) -> dict:
+        """
+        Process correct match from handle/knot sections for combo brush/handle brushes.
+
+        Returns complete match structure with handle and knot breakdown.
+        """
+        handle_maker = correct_match["handle_maker"]
+        handle_model = correct_match["handle_model"]
+        knot_info = correct_match["knot_info"]
+
+        if not knot_info:
+            # Fallback to basic structure if no knot info found
+            return {
+                "original": value,
+                "matched": {
+                    "brand": None,
+                    "model": None,
+                    "handle_maker": handle_maker,
+                    "handle": {"brand": handle_maker, "model": handle_model, "source_text": value},
+                    "knot": None,
+                },
+                "match_type": "exact",
+                "pattern": None,
+            }
+
+        # Build complete match structure
+        matched = {
+            "brand": None,  # No top-level brand (deferred to reporting)
+            "model": None,  # No top-level model (deferred to reporting)
+            "handle_maker": handle_maker,
+            "handle": {"brand": handle_maker, "model": handle_model, "source_text": value},
+            "knot": {
+                "brand": knot_info["brand"],
+                "model": knot_info["model"],
+                "fiber": knot_info.get("fiber"),
+                "knot_size_mm": knot_info.get("knot_size_mm"),
+                "source_text": value,
+            },
+            "fiber": knot_info.get("fiber"),
+            "knot_size_mm": knot_info.get("knot_size_mm"),
+            "knot_maker": knot_info["brand"],
+            "fiber_strategy": "yaml" if knot_info.get("fiber") else None,
+        }
+
+        return {
+            "original": value,
+            "matched": matched,
+            "match_type": "exact",
+            "pattern": None,
+        }
+
+    def _process_brush_correct_match(self, value: str, correct_match: Dict[str, Any]) -> dict:
+        """
+        Process correct match from brush section for simple brushes (backward compatibility).
+
+        Returns match structure maintaining existing behavior.
+        """
+        brand = correct_match["brand"]
+        model = correct_match["model"]
+
+        # Search for catalog entry in different sections
+        catalog_entry = None
+        for section in ["known_brushes", "declaration_grooming", "other_brushes"]:
+            section_data = self.catalog_data.get(section, {})
+            if brand in section_data:
+                brand_data = section_data[brand]
+                if model in brand_data:
+                    catalog_entry = brand_data[model]
+                    break
+
+        matched = {"brand": brand, "model": model, "handle_maker": None}
+
+        # Handle nested knot and handle structures
+        if catalog_entry and "knot" in catalog_entry:
+            # Extract knot information from nested structure
+            knot_info = catalog_entry["knot"]
+            matched["fiber"] = knot_info.get("fiber")
+            matched["knot_size_mm"] = knot_info.get("knot_size_mm")
+            matched["knot_maker"] = knot_info.get("brand")  # knot.brand becomes knot_maker
+            # Set fiber_strategy to "yaml" if we have fiber data from catalog
+            matched["fiber_strategy"] = "yaml" if knot_info.get("fiber") else None
+        else:
+            # Fall back to direct catalog fields for backward compatibility
+            matched["fiber"] = catalog_entry.get("fiber", None) if catalog_entry else None
+            matched["knot_size_mm"] = (
+                catalog_entry.get("knot_size_mm", None) if catalog_entry else None
+            )
+            matched["knot_maker"] = catalog_entry.get("knot_maker", None) if catalog_entry else None
+            # Set fiber_strategy to "yaml" if we have fiber data from catalog, otherwise None
+            matched["fiber_strategy"] = (
+                "yaml" if (catalog_entry and catalog_entry.get("fiber")) else None
+            )
+
+        # Handle nested handle structure
+        if catalog_entry and "handle" in catalog_entry:
+            handle_info = catalog_entry["handle"]
+            matched["handle_maker"] = handle_info.get("brand")  # handle.brand becomes handle_maker
+
+        return {
+            "original": value,
+            "matched": matched,
+            "match_type": "exact",
+            "pattern": None,
+        }
 
     def match(self, value: str) -> dict:
         """
@@ -154,58 +362,12 @@ class BrushMatcher:
         # Step 1: Check correct matches first (highest priority)
         correct_match = self._check_correct_matches(value)
         if correct_match:
-            # Merge in all catalog fields if available
-            brand = correct_match["brand"]
-            model = correct_match["model"]
-
-            # Search for catalog entry in different sections
-            catalog_entry = None
-            for section in ["known_brushes", "declaration_grooming", "other_brushes"]:
-                section_data = self.catalog_data.get(section, {})
-                if brand in section_data:
-                    brand_data = section_data[brand]
-                    if model in brand_data:
-                        catalog_entry = brand_data[model]
-                        break
-
-            matched = {"brand": brand, "model": model}
-
-            # Handle nested knot and handle structures
-            if catalog_entry and "knot" in catalog_entry:
-                # Extract knot information from nested structure
-                knot_info = catalog_entry["knot"]
-                matched["fiber"] = knot_info.get("fiber")
-                matched["knot_size_mm"] = knot_info.get("knot_size_mm")
-                matched["knot_maker"] = knot_info.get("brand")  # knot.brand becomes knot_maker
-                # Set fiber_strategy to "yaml" if we have fiber data from catalog
-                matched["fiber_strategy"] = "yaml" if knot_info.get("fiber") else None
+            if correct_match.get("match_type") == "handle_knot_section":
+                # Handle combo brush/handle brushes with handle/knot sections
+                return self._process_handle_knot_correct_match(value, correct_match)
             else:
-                # Fall back to direct catalog fields for backward compatibility
-                matched["fiber"] = catalog_entry.get("fiber", None) if catalog_entry else None
-                matched["knot_size_mm"] = (
-                    catalog_entry.get("knot_size_mm", None) if catalog_entry else None
-                )
-                matched["knot_maker"] = (
-                    catalog_entry.get("knot_maker", None) if catalog_entry else None
-                )
-                # Set fiber_strategy to "yaml" if we have fiber data from catalog, otherwise None
-                matched["fiber_strategy"] = (
-                    "yaml" if (catalog_entry and catalog_entry.get("fiber")) else None
-                )
-
-            # Handle nested handle structure
-            if catalog_entry and "handle" in catalog_entry:
-                handle_info = catalog_entry["handle"]
-                matched["handle_maker"] = handle_info.get(
-                    "brand"
-                )  # handle.brand becomes handle_maker
-
-            return {
-                "original": value,
-                "matched": matched,
-                "match_type": "exact",
-                "pattern": None,
-            }
+                # Handle simple brushes with brush section (backward compatibility)
+                return self._process_brush_correct_match(value, correct_match)
 
         # Step 2: Split input into components
         handle, knot, _ = self.brush_splitter.split_handle_and_knot(value)

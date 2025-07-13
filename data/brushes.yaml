@@ -5,6 +5,15 @@ known_brushes:
       knot_size_mm: 28
       patterns:
       - alpha.*amber
+    Bulldog:
+      fiber: Synthetic
+      knot_size_mm: 28
+      patterns:
+      - alpha.*bulldog
+    Outlaw:
+      fiber: Synthetic
+      patterns:
+      - alpha.*outlaw
   AP Shave Co:
     Cashmere:
       fiber: Synthetic
@@ -30,10 +39,12 @@ known_brushes:
       fiber: Synthetic
       patterns:
       - \ba[\s.]*p\b.*g5a
+      - \bg5a\b
     G5B:
       fiber: Synthetic
       patterns:
       - \ba[\s.]*p\b.*g5b
+      - \bg5b\b
     G5C:
       fiber: Synthetic
       patterns:
@@ -109,10 +120,16 @@ known_brushes:
       - kent.*inf1
   Muninn Woodworks/EldrormR Industries:
     BFM:
-      fiber: Synthetic
-      knot_size_mm: 50
+      # knot_size_mm: 50
       patterns:
       - \bbfm\b(.*50mm)?
+      knot:
+        brand: Moti
+        fiber: Synthetic
+        knot_size_mm: 50
+        model: Motherlode
+      handle:
+        brand: Muninn Woodworks
   Mühle:
     Hexagon:
       knot_size_mm: 21
