@@ -38,6 +38,7 @@ known_brushes:
       fiber: Synthetic
       patterns:
       - \ba[\s.]*p\b.*g5c
+      - \bg5c\b
     Pure Bliss:
       fiber: Synthetic
       patterns:
