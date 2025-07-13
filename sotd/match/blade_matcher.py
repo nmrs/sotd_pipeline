@@ -15,6 +15,8 @@ class BladeMatcher(BaseMatcher):
         self.patterns = self._compile_patterns()
         # Pre-compute normalized correct matches for performance
         self._normalized_correct_matches = self._precompute_normalized_correct_matches()
+        # Add cache for expensive operations
+        self._match_cache = {}
 
     def _compile_patterns(self):
         compiled = []
@@ -104,6 +106,10 @@ class BladeMatcher(BaseMatcher):
 
     def _match_with_regex(self, value: str) -> Dict[str, Any]:
         """Match blade using regex patterns."""
+        # Check cache first
+        if value in self._match_cache:
+            return self._match_cache[value]
+
         from sotd.utils.match_filter_utils import normalize_for_matching
 
         original = value
@@ -112,12 +118,14 @@ class BladeMatcher(BaseMatcher):
         # (see docs/product_matching_validation.md)
         normalized = normalize_for_matching(value, field="blade")
         if not normalized:
-            return {
+            result = {
                 "original": original,
                 "matched": None,
                 "pattern": None,
                 "match_type": None,
             }
+            self._match_cache[value] = result
+            return result
 
         blade_text = normalized
 
@@ -134,19 +142,23 @@ class BladeMatcher(BaseMatcher):
                     if key not in ["patterns", "format"]:
                         match_data[key] = value
 
-                return {
+                result = {
                     "original": original,
                     "matched": match_data,
                     "pattern": raw_pattern,
                     "match_type": MatchType.REGEX,
                 }
+                self._match_cache[value] = result
+                return result
 
-        return {
+        result = {
             "original": original,
             "matched": None,
             "pattern": None,
             "match_type": None,
         }
+        self._match_cache[value] = result
+        return result
 
     def _collect_all_correct_matches(self, value: str) -> List[Dict[str, Any]]:
         """
@@ -154,26 +166,37 @@ class BladeMatcher(BaseMatcher):
 
         Returns a list of all matching brand/model combinations from correct_matches.yaml.
         """
+        # Check cache first
+        cache_key = f"correct_matches:{value}"
+        if cache_key in self._match_cache:
+            return self._match_cache[cache_key]
+
         from sotd.utils.match_filter_utils import normalize_for_matching
 
         if not value or not self._normalized_correct_matches:
+            self._match_cache[cache_key] = []
             return []
 
         # Use canonical normalization function
         normalized_value = normalize_for_matching(value, field="blade")
         if not normalized_value:
+            self._match_cache[cache_key] = []
             return []
 
         # Try exact match first
         if normalized_value in self._normalized_correct_matches:
-            return self._normalized_correct_matches[normalized_value]
+            result = self._normalized_correct_matches[normalized_value]
+            self._match_cache[cache_key] = result
+            return result
 
         # If no exact match, try case-insensitive match
         normalized_value_lower = normalized_value.lower()
         for key, matches in self._normalized_correct_matches.items():
             if key.lower() == normalized_value_lower:
+                self._match_cache[cache_key] = matches
                 return matches
 
+        self._match_cache[cache_key] = []
         return []
 
     def _collect_correct_matches_in_format(
