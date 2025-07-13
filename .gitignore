@@ -33,3 +33,6 @@ praw.ini
 *.bk
 *.bk/data/correct_matches.yaml.backup
 data/backup/
+# Profiling files
+*.prof
+profile_*.prof
