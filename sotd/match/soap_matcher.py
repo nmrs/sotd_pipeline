@@ -18,6 +18,8 @@ class SoapMatcher(BaseMatcher):
     ):
         super().__init__(catalog_path, "soap", correct_matches_path=correct_matches_path)
         self.scent_patterns, self.brand_patterns = self._compile_patterns()
+        # Add cache for expensive operations
+        self._match_cache = {}
 
     def _is_sample(self, text: str) -> bool:
         text = text.lower()
@@ -93,28 +95,40 @@ class SoapMatcher(BaseMatcher):
 
     def _match_with_regex(self, value: str) -> Dict[str, Any]:
         """Match using regex patterns with REGEX match type."""
+        # Check cache first - ensure cache key is always a string
+        cache_key = str(value) if not isinstance(value, str) else value
+        if cache_key in self._match_cache:
+            return self._match_cache[cache_key]
+
         original = value
         normalized = re.sub(r"^[*_~]+|[*_~]+$", "", value.strip()) if isinstance(value, str) else ""
 
         if not isinstance(value, str):
-            return self._no_match_result(original)
+            result = self._no_match_result(original)
+            self._match_cache[cache_key] = result
+            return result
 
         result = self._match_scent_pattern(original, normalized)
         if result:
             result["match_type"] = "regex"
+            self._match_cache[cache_key] = result
             return result
 
         result = self._match_brand_pattern(original, normalized)
         if result:
             result["match_type"] = "brand"
+            self._match_cache[cache_key] = result
             return result
 
         result = self._match_dash_split(original, normalized)
         if result:
             result["match_type"] = "alias"
+            self._match_cache[cache_key] = result
             return result
 
-        return self._no_match_result(original)
+        result = self._no_match_result(original)
+        self._match_cache[cache_key] = result
+        return result
 
     def _match_scent_pattern(self, original: str, normalized: str) -> Optional[dict]:
         for pattern_info in self.scent_patterns:
@@ -198,11 +212,18 @@ class SoapMatcher(BaseMatcher):
     def _check_correct_matches(self, value: str) -> Optional[Dict[str, Any]]:
         # All correct match lookups must use normalize_for_matching
         # (see docs/product_matching_validation.md)
+        cache_key = f"correct_matches:{str(value)}"
+        if hasattr(self, "_match_cache") and cache_key in self._match_cache:
+            return self._match_cache[cache_key]
         if not value or not self.correct_matches:
+            if hasattr(self, "_match_cache"):
+                self._match_cache[cache_key] = None
             return None
 
         normalized_value = self.normalize(value)
         if not normalized_value:
+            if hasattr(self, "_match_cache"):
+                self._match_cache[cache_key] = None
             return None
 
         # Search through correct matches structure
@@ -218,11 +239,12 @@ class SoapMatcher(BaseMatcher):
                 for correct_string in strings:
                     if self.normalize(correct_string) == normalized_value:
                         # Return match data in the expected format for soaps
-                        return {
-                            "maker": maker,
-                            "scent": scent,
-                        }
-
+                        result = {"maker": maker, "scent": scent}
+                        if hasattr(self, "_match_cache"):
+                            self._match_cache[cache_key] = result
+                        return result
+        if hasattr(self, "_match_cache"):
+            self._match_cache[cache_key] = None
         return None
 
 
