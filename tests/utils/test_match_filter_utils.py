@@ -23,6 +23,11 @@ class TestLoadCompetitionTags:
 
     def test_load_competition_tags_success(self):
         """Test successful loading of competition tags."""
+        # Clear the module cache first
+        import sotd.utils.match_filter_utils
+
+        sotd.utils.match_filter_utils._COMPETITION_TAGS_CACHE = None
+
         mock_data = {
             "strip_tags": ["CNC", "ARTISTCLUB", "FLIPTOP"],
             "preserve_tags": ["MODERNGEM", "KAMISORI"],
@@ -41,12 +46,22 @@ class TestLoadCompetitionTags:
 
     def test_load_competition_tags_missing_file(self, tmp_path):
         """Test loading when file doesn't exist."""
+        # Clear the module cache first
+        import sotd.utils.match_filter_utils
+
+        sotd.utils.match_filter_utils._COMPETITION_TAGS_CACHE = None
+
         tags_path = tmp_path / "nonexistent.yaml"
         result = load_competition_tags(tags_path)
         assert result == {"strip_tags": [], "preserve_tags": []}
 
     def test_load_competition_tags_corrupted_file(self, tmp_path):
         """Test loading when file is corrupted."""
+        # Clear the module cache first
+        import sotd.utils.match_filter_utils
+
+        sotd.utils.match_filter_utils._COMPETITION_TAGS_CACHE = None
+
         tags_path = tmp_path / "corrupted.yaml"
         tags_path.write_text("invalid: yaml: content: [")
 
@@ -55,6 +70,11 @@ class TestLoadCompetitionTags:
 
     def test_load_competition_tags_empty_file(self, tmp_path):
         """Test loading when file is empty."""
+        # Clear the module cache first
+        import sotd.utils.match_filter_utils
+
+        sotd.utils.match_filter_utils._COMPETITION_TAGS_CACHE = None
+
         tags_path = tmp_path / "empty.yaml"
         tags_path.touch()
 
@@ -665,6 +685,11 @@ class TestNormalizeForMatching:
 
     def test_normalize_for_matching_auto_load(self):
         """Test normalization with auto-loaded competition tags."""
+        # Clear the module cache first
+        import sotd.utils.match_filter_utils
+
+        sotd.utils.match_filter_utils._COMPETITION_TAGS_CACHE = None
+
         result = normalize_for_matching("Razor $CNC $ARTISTCLUB")
         assert result == "Razor"
 
@@ -675,6 +700,11 @@ class TestNormalizeForMatching:
 
     def test_normalize_for_matching_blade_patterns(self):
         """Test that normalize_for_matching strips blade patterns for blade field."""
+        # Clear the module cache first
+        import sotd.utils.match_filter_utils
+
+        sotd.utils.match_filter_utils._COMPETITION_TAGS_CACHE = None
+
         # Test blade count patterns
         assert normalize_for_matching("treet platinum (3x)", field="blade") == "treet platinum"
         assert (
@@ -717,6 +747,11 @@ class TestNormalizeForMatching:
 
     def test_normalize_for_matching_trailing_periods(self):
         """Test that normalize_for_matching strips trailing periods."""
+        # Clear the module cache first
+        import sotd.utils.match_filter_utils
+
+        sotd.utils.match_filter_utils._COMPETITION_TAGS_CACHE = None
+
         # Test trailing periods with different fields
         assert normalize_for_matching("Personna Lab Blue.", field="blade") == "Personna Lab Blue"
         assert normalize_for_matching("Gillette Tech.", field="razor") == "Gillette Tech"
@@ -749,6 +784,11 @@ class TestNormalizeForMatching:
 
     def test_normalize_for_matching_field_specific_behavior(self):
         """Test that normalize_for_matching applies field-specific normalization correctly."""
+        # Clear the module cache first
+        import sotd.utils.match_filter_utils
+
+        sotd.utils.match_filter_utils._COMPETITION_TAGS_CACHE = None
+
         # Blade field should strip patterns
         assert normalize_for_matching("blade (3x)", field="blade") == "blade"
 
@@ -769,6 +809,11 @@ class TestNormalizeForMatching:
 
     def test_normalize_for_matching_edge_cases(self):
         """Test normalize_for_matching with edge cases."""
+        # Clear the module cache first
+        import sotd.utils.match_filter_utils
+
+        sotd.utils.match_filter_utils._COMPETITION_TAGS_CACHE = None
+
         # Empty string
         assert normalize_for_matching("", field="razor") == ""
 
@@ -786,6 +831,11 @@ class TestNormalizeForMatching:
 
     def test_normalize_for_matching_comprehensive_examples(self):
         """Test normalize_for_matching with comprehensive real-world examples."""
+        # Clear the module cache first
+        import sotd.utils.match_filter_utils
+
+        sotd.utils.match_filter_utils._COMPETITION_TAGS_CACHE = None
+
         # Real examples from correct_matches.yaml
         assert (
             normalize_for_matching("*New* King C. Gillette", field="razor")
@@ -905,6 +955,11 @@ class TestStripSoapPatterns:
 
     def test_normalize_for_matching_soap_patterns(self):
         """Test that normalize_for_matching strips soap patterns for soap field."""
+        # Clear the module cache first
+        import sotd.utils.match_filter_utils
+
+        sotd.utils.match_filter_utils._COMPETITION_TAGS_CACHE = None
+
         # Test soap-related patterns
         assert normalize_for_matching("B&M Seville soap", field="soap") == "B&M Seville"
         assert normalize_for_matching("Stirling Bay Rum sample", field="soap") == "Stirling Bay Rum"

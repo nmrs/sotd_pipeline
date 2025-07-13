@@ -1,0 +1,372 @@
+# Match Phase Caching Optimization Plan
+
+## Overview
+This plan tracks the ongoing caching optimization work for the match phase, building on the successful performance improvements achieved through strategic caching of expensive operations.
+
+## Current State (as of July 13, 2025)
+- **Blade Matcher**: Caching implemented with 4.7% performance improvement (3.61s → 3.44s)
+- **Brush Matcher**: Caching implemented with data quality improvements
+- **Overall Match Phase**: 4.4% improvement (7.46s → 7.13s)
+- **All Tests**: 1462 tests passing with no regressions
+
+## Recent Progress
+
+### ✅ COMPLETED (Last 3 Commits)
+
+#### Commit a0aab96: Brush Matcher Caching
+- **Added `_match_cache` dictionary** to cache expensive operations
+- **Cached `_check_correct_matches()` results** to avoid repeated lookups
+- **Cached `_enrich_match_result()` results** to avoid repeated fiber/handle processing
+- **Cached `_post_process_match()` results** to avoid repeated post-processing
+- **Improved data quality** by properly setting fiber_strategy fields
+- **Added fiber_conflict tracking** when user input conflicts with catalog data
+- **Cleaned up data structure** by removing unnecessary null fields
+
+#### Commit 29caaf6: Blade Matcher Caching
+- **Added `_match_cache` dictionary** to cache expensive operations
+- **Cached `_match_with_regex()` results** to avoid repeated regex searches
+- **Cached `_collect_all_correct_matches()` results** to avoid repeated lookups
+- **Achieved 4.4% overall performance improvement** (7.46s → 7.13s)
+- **Achieved 4.7% blade matcher improvement** (3.61s → 3.44s)
+- **Maintained data integrity** - all results identical to backup
+
+#### Commit 0bec22c: Brush Matcher Structure Enhancement
+- **Added handle/knot subsections** to brush matcher output structure
+- **Preserved backward compatibility** with existing fields
+- **All tests and quality checks passing**
+
+## Implementation Phases
+
+### Phase 1: High-Impact Caching (Current) - ✅ PARTIALLY COMPLETE
+**Goal**: Implement caching for all major matchers to achieve 5-10% overall improvement
+
+#### Chunk 1.1: Blade Matcher Caching ✅ COMPLETE
+- [x] Add `_match_cache` dictionary
+- [x] Cache `_match_with_regex()` results
+- [x] Cache `_collect_all_correct_matches()` results
+- [x] Measure performance improvement
+- [x] Validate data integrity
+- **Result**: 4.7% improvement achieved
+
+#### Chunk 1.2: Brush Matcher Caching ✅ COMPLETE
+- [x] Add `_match_cache` dictionary
+- [x] Cache `_check_correct_matches()` results
+- [x] Cache `_enrich_match_result()` results
+- [x] Cache `_post_process_match()` results
+- [x] Improve data quality with fiber_strategy fields
+- [x] Add fiber_conflict tracking
+- **Result**: Caching implemented with data quality improvements
+
+#### Chunk 1.3: Razor Matcher Caching ❌ NOT STARTED
+**Priority**: HIGH | **Estimated Impact**: 3-5% improvement
+
+**Tasks**:
+- [ ] Add `_match_cache` dictionary to `RazorMatcher`
+- [ ] Cache `_match_with_regex()` results
+- [ ] Cache `_check_correct_matches()` results
+- [ ] Cache `_collect_all_correct_matches()` results
+- [ ] Measure performance improvement
+- [ ] Validate data integrity against backup
+- [ ] Run quality checks and commit
+- [ ] Document performance improvement in commit message
+
+**Test Requirements**:
+- [ ] Test caching behavior with existing test suite
+- [ ] Verify cache hit/miss patterns
+- [ ] Test performance improvement
+- [ ] Validate data consistency
+
+**Acceptance Criteria**:
+- Razor matcher caching provides measurable performance improvement
+- All existing functionality preserved
+- Data integrity maintained
+- All tests passing
+
+#### Chunk 1.4: Soap Matcher Caching ❌ NOT STARTED
+**Priority**: HIGH | **Estimated Impact**: 2-4% improvement
+
+**Tasks**:
+- [ ] Add `_match_cache` dictionary to `SoapMatcher`
+- [ ] Cache `_match_with_regex()` results
+- [ ] Cache `_check_correct_matches()` results
+- [ ] Cache `_collect_all_correct_matches()` results
+- [ ] Measure performance improvement
+- [ ] Validate data integrity against backup
+- [ ] Run quality checks and commit
+- [ ] Document performance improvement in commit message
+
+**Test Requirements**:
+- [ ] Test caching behavior with existing test suite
+- [ ] Verify cache hit/miss patterns
+- [ ] Test performance improvement
+- [ ] Validate data consistency
+
+**Acceptance Criteria**:
+- Soap matcher caching provides measurable performance improvement
+- All existing functionality preserved
+- Data integrity maintained
+- All tests passing
+
+### Phase 2: High-Impact Algorithm Optimizations ❌ NOT STARTED
+**Goal**: Address the biggest performance bottlenecks identified in profiling
+
+#### Chunk 2.1: YAML Loading Optimization (CRITICAL)
+**Priority**: CRITICAL | **Estimated Impact**: 50-70% improvement
+**Profiling Finding**: YAML loading takes 9.7s out of 15.5s total (62% of runtime)
+
+**Tasks**:
+- [ ] Cache YAML loading at module level (not per matcher)
+- [ ] Pre-load all catalogs once at startup
+- [ ] Share catalog data across matchers
+- [ ] Implement lazy loading for competition tags
+- [ ] Measure performance improvement
+- [ ] Validate data integrity against backup
+- [ ] Run quality checks and commit
+- [ ] Document dramatic performance improvement in commit message
+
+**Implementation Strategy**:
+```python
+# Global catalog cache
+_catalog_cache = {}
+
+def get_catalog(field: str) -> dict:
+    if field not in _catalog_cache:
+        _catalog_cache[field] = load_yaml_with_nfc(f"data/{field}.yaml")
+    return _catalog_cache[field]
+```
+
+#### Chunk 2.2: String Normalization Optimization (HIGH)
+**Priority**: HIGH | **Estimated Impact**: 20-30% improvement
+**Profiling Finding**: `normalize_for_matching` called 6,285 times, `strip_competition_tags` takes 9.8s
+
+**Tasks**:
+- [ ] Cache competition tags loading (called 3,721 times)
+- [ ] Optimize regex patterns in normalization
+- [ ] Pre-compile normalization regex patterns
+- [ ] Cache normalized strings for repeated inputs
+- [ ] Measure performance improvement
+- [ ] Validate data integrity against backup
+- [ ] Run quality checks and commit
+- [ ] Document performance improvement in commit message
+
+**Implementation Strategy**:
+```python
+# Cache competition tags at module level
+_competition_tags_cache = None
+
+def get_competition_tags() -> dict:
+    global _competition_tags_cache
+    if _competition_tags_cache is None:
+        _competition_tags_cache = load_competition_tags()
+    return _competition_tags_cache
+```
+
+#### Chunk 2.3: Regex Pattern Optimization (MEDIUM)
+**Priority**: MEDIUM | **Estimated Impact**: 10-15% improvement
+**Profiling Finding**: 3.3M regex searches, 872K regex compilations
+
+**Tasks**:
+- [ ] Pre-compile all regex patterns at startup
+- [ ] Optimize pattern ordering for early exit
+- [ ] Use more efficient regex patterns
+- [ ] Cache compiled patterns globally
+- [ ] Measure performance improvement
+- [ ] Validate data integrity against backup
+- [ ] Run quality checks and commit
+- [ ] Document performance improvement in commit message
+
+#### Chunk 2.4: Brush Strategy Optimization (MEDIUM)
+**Priority**: MEDIUM | **Estimated Impact**: 5-10% improvement
+**Profiling Finding**: `other_brushes_strategy.py:26(match)` takes 1.2s
+
+**Tasks**:
+- [ ] Optimize brush strategy pattern matching
+- [ ] Pre-compile strategy patterns
+- [ ] Optimize strategy selection logic
+- [ ] Cache strategy results
+- [ ] Measure performance improvement
+- [ ] Validate data integrity against backup
+- [ ] Run quality checks and commit
+- [ ] Document performance improvement in commit message
+
+### Phase 3: Fine-Tuning and Advanced Optimizations ❌ NOT STARTED
+**Goal**: Further optimizations and month-level parallelization
+
+#### Chunk 3.1: Cache Strategy Optimization
+**Tasks**:
+- [ ] Analyze cache hit/miss ratios for all matchers
+- [ ] Optimize cache key strategies
+- [ ] Consider cache size limits and eviction policies
+- [ ] Profile memory usage impact
+- [ ] Document caching best practices
+
+#### Chunk 3.2: Month-Level Parallelization (Future)
+**Tasks**:
+- [ ] Design month-level parallelization architecture
+- [ ] Implement process pool for multiple months
+- [ ] Benchmark against sequential processing
+- [ ] Validate data consistency across parallel runs
+
+## Performance Metrics
+
+### Current Baseline
+- **Overall Match Phase**: 7.13s for 1,544 records (2025-01)
+- **Blade Matcher**: 3.44s (4.7% improvement)
+- **Brush Matcher**: Caching implemented
+- **Razor Matcher**: Baseline performance
+- **Soap Matcher**: Baseline performance
+
+### Target Improvements
+- **Phase 1 (Caching)**: 8-12% improvement target
+- **Phase 2 (Algorithm)**: 50-80% improvement target
+- **YAML Loading**: 50-70% improvement (CRITICAL)
+- **String Normalization**: 20-30% improvement (HIGH)
+- **Regex Patterns**: 10-15% improvement (MEDIUM)
+- **Overall Phase**: 60-90% total improvement target
+- **Memory Usage**: Maintain current levels or improve
+
+## Success Criteria
+
+### Primary Metrics
+- [x] Blade matcher: 4.7% improvement achieved
+- [ ] Razor matcher: 3-5% improvement target
+- [ ] Soap matcher: 2-4% improvement target
+- [ ] Overall phase: 8-12% improvement target
+- [ ] All tests passing with no regressions
+
+### Secondary Metrics
+- [x] Data integrity maintained (all results identical)
+- [x] Memory usage remains reasonable
+- [x] Code maintainability preserved
+- [ ] Cache hit ratios >80% for expensive operations
+- [ ] Documentation updated with caching patterns
+
+## Risk Assessment
+
+### Low Risk
+- **Caching implementation**: Well-understood pattern
+- **Data integrity**: Extensive testing validates results
+- **Performance improvement**: Measurable and validated
+
+### Medium Risk
+- **Memory usage**: Monitor cache size impact
+- **Cache invalidation**: Ensure proper cache management
+- **Complexity**: Balance performance vs. maintainability
+- **Data corruption**: Risk of losing data during optimizations
+
+### Mitigation Strategies
+- **Incremental implementation**: Test each matcher individually
+- **Comprehensive testing**: Validate all functionality
+- **Performance monitoring**: Track memory and timing metrics
+- **Rollback capability**: Keep original implementations until validated
+- **Backup validation**: Validate against pre-optimization backup after each step
+- **Incremental commits**: Commit after every optimization step for easy rollback
+
+## Implementation Strategy
+
+### Development Workflow
+1. **Implement caching for one matcher at a time**
+2. **Test thoroughly before moving to next matcher**
+3. **Measure performance improvement for each**
+4. **Validate data integrity after each implementation**
+5. **Run quality checks and commit**
+6. **Validate against pre-optimization backup after each step**
+
+### Data Integrity Validation
+**CRITICAL**: After each optimization step, validate results against the pre-optimization backup:
+- **Backup file**: `data/matched/2025-06.json.pre_optimization_backup`
+- **Validation command**: Compare output with backup to ensure no data loss
+- **Acceptance criteria**: Results must be identical or better than backup
+- **Rollback plan**: If validation fails, revert to previous state immediately
+
+### Incremental Commit Strategy
+**MANDATORY**: Commit after every optimization step:
+- **Small, focused commits**: One optimization per commit
+- **Clear commit messages**: Describe the specific optimization and impact
+- **Validation included**: Each commit must pass all tests and data validation
+- **Performance metrics**: Include timing data in commit messages
+- **Rollback capability**: Each commit should be independently revertible
+
+### Testing Strategy
+- **Unit tests**: Verify caching behavior
+- **Integration tests**: Ensure end-to-end functionality
+- **Performance tests**: Measure improvement
+- **Memory tests**: Monitor resource usage
+- **Data integrity tests**: Validate against pre-optimization backup
+- **Regression tests**: Ensure no functionality loss
+
+### Documentation Updates
+- **Code comments**: Document caching strategies
+- **Performance metrics**: Track improvement over time
+- **Best practices**: Document patterns for future use
+
+## Next Steps
+
+### Immediate (Next Session)
+1. **Implement razor matcher caching** (Chunk 1.3)
+2. **Measure performance improvement**
+3. **Validate data integrity**
+4. **Run quality checks and commit**
+
+### Short Term (This Week)
+1. **Implement soap matcher caching** (Chunk 1.4)
+2. **Complete Phase 1 caching implementation**
+3. **Begin YAML loading optimization** (Chunk 2.1 - CRITICAL)
+4. **Measure dramatic performance improvement**
+
+### Medium Term (Next Week)
+1. **Complete Phase 2 algorithm optimizations**
+2. **Implement string normalization optimization** (Chunk 2.2)
+3. **Optimize regex patterns** (Chunk 2.3)
+4. **Target 60-90% total improvement**
+
+### Long Term (Future)
+1. **Fine-tune cache strategies**
+2. **Explore month-level parallelization**
+3. **Consider advanced optimizations**
+
+## Lessons Learned
+
+### Caching Patterns
+- **Cache expensive operations**: Regex matching, correct matches lookup
+- **Use descriptive cache keys**: Include operation type for clarity
+- **Validate cache hits**: Ensure cached results are correct
+- **Monitor memory usage**: Cache size should remain reasonable
+
+### Performance Patterns
+- **Regex operations**: Most expensive, best caching candidates
+- **Correct matches lookup**: Frequent operation, good caching target
+- **String normalization**: Moderate cost, consider caching
+- **Catalog lookups**: Already optimized, minimal caching benefit
+
+### Implementation Patterns
+- **Add cache dictionary**: `self._match_cache = {}`
+- **Check cache first**: `if key in self._match_cache: return self._match_cache[key]`
+- **Cache expensive results**: Store results before returning
+- **Use descriptive keys**: `f"operation:{input}"` format
+
+## Current Status
+
+### ✅ COMPLETED
+- Blade matcher caching with 4.7% improvement
+- Brush matcher caching with data quality improvements
+- Performance monitoring and metrics collection
+- Data integrity validation
+
+### 🔄 IN PROGRESS
+- Razor matcher caching implementation (next priority)
+- Soap matcher caching implementation (following)
+
+### 📋 NEXT STEPS
+1. Implement razor matcher caching
+2. Measure and validate performance improvement
+3. Implement soap matcher caching
+4. Complete Phase 1 caching optimization
+
+---
+
+*This plan tracks the ongoing caching optimization work and provides clear next steps for continuing the performance improvements.*
+description:
+globs:
+alwaysApply: false
+---
