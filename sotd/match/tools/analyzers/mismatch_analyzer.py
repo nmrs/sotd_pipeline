@@ -583,32 +583,23 @@ class MismatchAnalyzer(AnalysisTool):
             model = matched.get("model", "")
             matched_text = f"{brand} {model}".strip()
         elif field == "brush":
-            # Check if this is a combo brush with handle and knot subsections
-            handle = matched.get("handle", {})
-            knot = matched.get("knot", {})
-
-            if handle and knot:
-                # For combo brushes, use handle and knot information
-                handle_brand = handle.get("brand", "")
-                handle_model = handle.get("model", "")
-                knot_brand = knot.get("brand", "")
-                knot_model = knot.get("model", "")
-
-                # Create combo brush representation
-                if handle_brand and knot_brand:
+            brand = matched.get("brand", "")
+            model = matched.get("model", "")
+            if brand or model:
+                matched_text = f"{brand} {model}".strip()
+            else:
+                handle = matched.get("handle", {})
+                knot = matched.get("knot", {})
+                if handle and knot:
+                    handle_brand = handle.get("brand", "")
+                    handle_model = handle.get("model", "")
+                    knot_brand = knot.get("brand", "")
+                    knot_model = knot.get("model", "")
                     matched_text = (
                         f"{handle_brand} {handle_model} w/ {knot_brand} {knot_model}".strip()
                     )
                 else:
-                    # Fallback to top-level brand/model if handle/knot info is incomplete
-                    brand = matched.get("brand", "")
-                    model = matched.get("model", "")
-                    matched_text = f"{brand} {model}".strip()
-            else:
-                # For simple brushes, use top-level brand/model
-                brand = matched.get("brand", "")
-                model = matched.get("model", "")
-                matched_text = f"{brand} {model}".strip()
+                    matched_text = ""
         else:
             matched_text = str(matched)
 
@@ -1111,30 +1102,24 @@ class MismatchAnalyzer(AnalysisTool):
             else:
                 return f"{brand} {model}".strip()
         elif field == "brush":
-            # Check if this is a combo brush with handle and knot subsections
-            handle = matched.get("handle", {})
-            knot = matched.get("knot", {})
-
-            if handle and knot:
-                # For combo brushes, use handle and knot information
-                handle_brand = handle.get("brand", "")
-                handle_model = handle.get("model", "")
-                knot_brand = knot.get("brand", "")
-                knot_model = knot.get("model", "")
-
-                # Create combo brush representation
-                if handle_brand and knot_brand:
-                    return f"{handle_brand} {handle_model} w/ {knot_brand} {knot_model}".strip()
-                else:
-                    # Fallback to top-level brand/model if handle/knot info is incomplete
-                    brand = matched.get("brand", "")
-                    model = matched.get("model", "")
-                    return f"{brand} {model}".strip()
+            brand = matched.get("brand", "")
+            model = matched.get("model", "")
+            if brand or model:
+                matched_text = f"{brand} {model}".strip()
             else:
-                # For simple brushes, use top-level brand/model
-                brand = matched.get("brand", "")
-                model = matched.get("model", "")
-                return f"{brand} {model}".strip()
+                handle = matched.get("handle", {})
+                knot = matched.get("knot", {})
+                if handle and knot:
+                    handle_brand = handle.get("brand", "")
+                    handle_model = handle.get("model", "")
+                    knot_brand = knot.get("brand", "")
+                    knot_model = knot.get("model", "")
+                    matched_text = (
+                        f"{handle_brand} {handle_model} w/ {knot_brand} {knot_model}".strip()
+                    )
+                else:
+                    matched_text = ""
+            return matched_text
         else:
             return str(matched)
 

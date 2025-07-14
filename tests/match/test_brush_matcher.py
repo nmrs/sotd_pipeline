@@ -140,6 +140,7 @@ class TestBrushMatcher:
         result = brush_matcher.match("Muninn Woodworks BFM")
         print(f"DEBUG: Full result: {result}")
         print(f"DEBUG: Matched: {result['matched']}")
+        # For catalog-driven brushes, top-level brand/model should be set
         assert result["matched"]["brand"] == "Muninn Woodworks/EldrormR Industries"
         assert result["matched"]["model"] == "BFM"
 
@@ -152,6 +153,11 @@ class TestBrushMatcher:
 
         # Check that knot maker information is extracted from nested structure
         assert result["matched"]["knot_maker"] == "Moti"
+
+        # Check that handle and knot subsections are properly set
+        assert result["matched"]["handle"]["brand"] == "Muninn Woodworks"
+        assert result["matched"]["knot"]["brand"] == "Moti"
+        assert result["matched"]["knot"]["model"] == "Motherlode"
 
     def test_declaration_grooming_matching(self, brush_matcher):
         """Test Declaration Grooming brush matching."""
@@ -258,8 +264,13 @@ class TestBrushMatcherCorrectMatches:
 
         # Should fall back to regex matching since no exact match in test fixture
         assert result["match_type"] == "regex"
+        # For catalog-driven brushes, top-level brand/model should be set
         assert result["matched"]["brand"] == "Muninn Woodworks/EldrormR Industries"
         assert result["matched"]["model"] == "BFM"
+        # Check that handle and knot subsections are properly set
+        assert result["matched"]["handle"]["brand"] == "Muninn Woodworks"
+        assert result["matched"]["knot"]["brand"] == "Moti"
+        assert result["matched"]["knot"]["model"] == "Motherlode"
 
     def test_backward_compatibility(self, brush_matcher):
         """Test that existing brush section functionality continues to work."""

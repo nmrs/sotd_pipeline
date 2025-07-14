@@ -39,7 +39,7 @@ class EnhancedBrushSplitter:
         for delimiter in handle_primary_delimiters:
             if delimiter in text:
                 return self._split_by_delimiter(
-                    text, delimiter, "handle_primary", handle_first=False
+                    text, delimiter, "handle_primary", handle_first=True
                 )
         for delimiter in other_delimiters:
             if delimiter in text:

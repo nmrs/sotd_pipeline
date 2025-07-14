@@ -90,12 +90,23 @@ class TestRealCatalogIntegration:
             ("Wolf Whiskers w/ Omega knot", "Omega", "Wolf Whiskers"),
         ]
 
-        for input_text, expected_brand, expected_handle_maker in test_cases:
+        for input_text, expected_knot_brand, expected_handle_maker in test_cases:
             result = brush_matcher.match(input_text)
             matched = result.get("matched")
             if isinstance(matched, dict):
-                assert matched.get("brand") == expected_brand, f"Brand failed for {input_text}"
-                if matched.get("handle_maker"):
+                # For combo brushes, check knot brand and handle maker
+                if matched.get("knot") and matched.get("handle"):
+                    assert (
+                        matched["knot"].get("brand") == expected_knot_brand
+                    ), f"Knot brand failed for {input_text}"
+                    assert (
+                        matched.get("handle_maker") == expected_handle_maker
+                    ), f"Handle maker failed for {input_text}"
+                else:
+                    # For simple brushes, check top-level brand
+                    assert (
+                        matched.get("brand") == expected_knot_brand
+                    ), f"Brand failed for {input_text}"
                     assert (
                         matched.get("handle_maker") == expected_handle_maker
                     ), f"Handle maker failed for {input_text}"
@@ -121,7 +132,11 @@ class TestRealCatalogIntegration:
         # Test Declaration Grooming B2 bug fix
         result = brush_matcher.match("Zenith B2 w/ Elite Handle")
         assert result["matched"] is not None
-        assert result["matched"]["brand"] == "Zenith"
+        # For combo brushes, check knot brand instead of top-level brand
+        if result["matched"].get("knot"):
+            assert result["matched"]["knot"]["brand"] == "Zenith"
+        else:
+            assert result["matched"]["brand"] == "Zenith"
 
         # Test delimiter unification
         test_cases = [
@@ -133,9 +148,15 @@ class TestRealCatalogIntegration:
         for test_case in test_cases:
             result = brush_matcher.match(test_case)
             assert result["matched"] is not None, f"No match for: {test_case}"
-            assert (
-                result["matched"]["brand"] == "Declaration Grooming"
-            ), f"Wrong brand for: {test_case}"
+            # For combo brushes, check knot brand instead of top-level brand
+            if result["matched"].get("knot"):
+                assert (
+                    result["matched"]["knot"]["brand"] == "Declaration Grooming"
+                ), f"Wrong knot brand for: {test_case}"
+            else:
+                assert (
+                    result["matched"]["brand"] == "Declaration Grooming"
+                ), f"Wrong brand for: {test_case}"
 
     def test_catalog_files_exist(self):
         """Test that all expected catalog files exist."""

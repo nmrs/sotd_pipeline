@@ -1,4 +1,18 @@
-# Brush Matching Phase Specification
+# Brush Matching Specification
+
+## Combo Brushes vs. Catalog Brushes
+
+- **Catalog-driven brushes**: These are brushes that are explicitly defined in the catalog (e.g., `Muninn Woodworks/EldrormR Industries / BFM`). They may have both handle and knot subsections, but they represent a single, specific product. For these, the matcher preserves the top-level `brand` and `model` fields, even if handle and knot subsections are present.
+
+- **Combo brushes**: These are user-assembled or dynamically split brushes that do **not** match any known brush in the catalog. The matcher splits the input into handle and knot components and matches each separately. For these, the matcher clears the top-level `brand` and `model` fields (sets them to `None`) and only populates the `handle` and `knot` subsections.
+
+### Implementation Rule
+- **Preserve top-level brand/model** for catalog-driven brushes, even if handle/knot are present.
+- **Clear top-level brand/model** (set to `None`) for dynamic/user combos (not found in catalog) when both handle and knot are present.
+
+This ensures that reporting, aggregation, and user-facing output are correct for both known products and user combos.
+
+---
 
 ## Goal
 

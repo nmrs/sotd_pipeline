@@ -3,30 +3,24 @@ from typing import Any, Dict, Optional
 
 import yaml
 
-from sotd.match.brush_matching_strategies.chisel_and_hound_strategy import (
-    ChiselAndHoundBrushMatchingStrategy,
-)
-from sotd.match.brush_matching_strategies.declaration_grooming_strategy import (
-    DeclarationGroomingBrushMatchingStrategy,
-)
 from sotd.match.brush_matching_strategies.known_brush_strategy import (
     KnownBrushMatchingStrategy,
 )
-from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
-    OmegaSemogueBrushMatchingStrategy,
+from sotd.match.brush_matching_strategies.known_knot_strategy import (
+    KnownKnotMatchingStrategy,
 )
 from sotd.match.brush_matching_strategies.other_brushes_strategy import (
     OtherBrushMatchingStrategy,
 )
-from sotd.match.brush_matching_strategies.zenith_strategy import (
-    ZenithBrushMatchingStrategy,
+from sotd.match.brush_matching_strategies.other_knot_strategy import (
+    OtherKnotMatchingStrategy,
 )
 from sotd.match.brush_splitter_enhanced import EnhancedBrushSplitter
 from sotd.match.fiber_processor_enhanced import FiberProcessorEnhanced
 from sotd.match.handle_matcher_enhanced import EnhancedHandleMatcher
 from sotd.match.knot_matcher_enhanced import EnhancedKnotMatcher
-from sotd.utils.yaml_loader import load_yaml_with_nfc
 from sotd.utils.match_filter_utils import normalize_for_matching
+from sotd.utils.yaml_loader import load_yaml_with_nfc
 
 from .base_matcher import MatchType
 
@@ -43,12 +37,15 @@ class BrushMatcher:
         self,
         catalog_path: Path = Path("data/brushes.yaml"),
         handles_path: Path = Path("data/handles.yaml"),
+        knots_path: Path = Path("data/knots.yaml"),
         correct_matches_path: Optional[Path] = None,
     ):
         self.catalog_path = catalog_path
         self.handles_path = handles_path
+        self.knots_path = knots_path
         self.correct_matches_path = correct_matches_path or Path("data/correct_matches.yaml")
         self.catalog_data = self._load_catalog(catalog_path)
+        self.knots_data = self._load_knots(knots_path)
         self.correct_matches = self._load_correct_matches()
 
         # Initialize specialized components
@@ -56,13 +53,10 @@ class BrushMatcher:
         self.fiber_processor = FiberProcessorEnhanced()
         self.strategies = [
             KnownBrushMatchingStrategy(self.catalog_data.get("known_brushes", {})),
-            DeclarationGroomingBrushMatchingStrategy(
-                self.catalog_data.get("declaration_grooming", {})
-            ),
-            ChiselAndHoundBrushMatchingStrategy(),
-            OmegaSemogueBrushMatchingStrategy(),
-            ZenithBrushMatchingStrategy(),
             OtherBrushMatchingStrategy(self.catalog_data.get("other_brushes", {})),
+            # Add new knot-specific strategies
+            KnownKnotMatchingStrategy(self.knots_data.get("known_knots", {})),
+            OtherKnotMatchingStrategy(self.knots_data.get("other_knots", {})),
         ]
         self.knot_matcher = EnhancedKnotMatcher(self.strategies)
         self.brush_splitter = EnhancedBrushSplitter(self.handle_matcher, self.strategies)
@@ -71,11 +65,31 @@ class BrushMatcher:
 
     def _load_catalog(self, catalog_path: Path) -> dict:
         """Load brush catalog from YAML file."""
+        if not catalog_path.exists():
+            raise FileNotFoundError(f"Brush catalog file not found: {catalog_path}")
+
         try:
             with catalog_path.open("r", encoding="utf-8") as f:
-                return yaml.safe_load(f) or {}
-        except (FileNotFoundError, yaml.YAMLError):
-            return {}
+                data = yaml.safe_load(f)
+                if data is None:
+                    return {}
+                return data
+        except yaml.YAMLError as e:
+            raise ValueError(f"Invalid YAML in brush catalog {catalog_path}: {e}")
+
+    def _load_knots(self, knots_path: Path) -> dict:
+        """Load knot catalog from YAML file."""
+        if not knots_path.exists():
+            raise FileNotFoundError(f"Knot catalog file not found: {knots_path}")
+
+        try:
+            with knots_path.open("r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+                if data is None:
+                    return {}
+                return data
+        except yaml.YAMLError as e:
+            raise ValueError(f"Invalid YAML in knot catalog {knots_path}: {e}")
 
     def _load_correct_matches(self) -> Dict[str, Dict[str, Any]]:
         """Load correct matches for brush field from correct_matches.yaml (or injected path)."""
@@ -604,7 +618,13 @@ class BrushMatcher:
         return result
 
     def _add_handle_knot_subsections(self, updated: dict, value: str) -> None:
-        """Add handle and knot subsections to the match result if available."""
+        """Add handle and knot subsections to the match result if available.
+
+        - For known (catalog) brushes, preserve top-level brand/model even if
+          handle/knot are present.
+        - For dynamic/user combos (not found in catalog), clear top-level brand/model if both
+          handle and knot are present.
+        """
         # Prefer catalog-driven info if available
         brand = updated.get("brand")
         model = updated.get("model")
@@ -690,6 +710,10 @@ class BrushMatcher:
                             "knot_size_mm": None,
                             "source_text": knot_text,
                         }
+        # Only clear top-level brand/model for dynamic combos (not catalog-driven)
+        if updated.get("handle") and updated.get("knot") and catalog_entry is None:
+            updated["brand"] = None
+            updated["model"] = None
 
     def _resolve_handle_maker(self, updated: dict, value: str) -> None:
         """Resolve handle maker using multiple strategies."""
