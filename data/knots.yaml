@@ -65,17 +65,16 @@ known_knots:
       patterns:
       - \b2\s*bed\b
   Chisel & Hound:
-    fiber: Badger
     knot_size_mm: 26
     batch_patterns:
     - name: "v{batch}"
+      fiber: Badger
       patterns:
       - chis.*[fh]ou.*v{batch}
       - \bc(?:\&|and|\+)h\b.*v{batch}
       - \bch\b.*v{batch}
       valid_batches: ["10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28"]
   Declaration Grooming:
-    fiber: Badger
     knot_size_mm: 28
     batch_patterns:
     - name: "B{batch}"
@@ -83,9 +82,11 @@ known_knots:
       - (declaration|\bdg\b)?.*\bb{batch}\b
       valid_batches: ["1", "2", "3", "4", "5", "6", "7", "8", "10", "11", "12", "13", "14", "15"]
     B9A:
+      fiber: Badger
       patterns:
       - (declaration|\bdg\b)?.*\bb9a\+?\b
     B9B:
+      fiber: Badger
       patterns:
       - (declaration|\bdg\b)?.*\bb9b\+?\b
   Oumo:
@@ -162,52 +163,6 @@ known_knots:
       knot_size_mm: 27
       patterns:
       - wald.*j4
-  Zenith:
-    B16:
-      fiber: Boar
-      knot_size_mm: 24
-      patterns:
-      - zenith.*b16
-    B28:
-      fiber: Boar
-      knot_size_mm: 28
-      patterns:
-      - zen.*B28
-    B30:
-      fiber: Boar
-      knot_size_mm: 27.5
-      patterns:
-      - zen.*B30
-    B33:
-      fiber: Boar
-      knot_size_mm: 27.5
-      patterns:
-      - zen.*B33
-    B35:
-      fiber: Boar
-      knot_size_mm: 31
-      patterns:
-      - zen.*B35
-    B36:
-      fiber: Boar
-      knot_size_mm: 28
-      patterns:
-      - zen.*B36
-    B7:
-      fiber: Boar
-      knot_size_mm: 24
-      patterns:
-      - zenith.*b0?7
-    B8:
-      fiber: Boar
-      knot_size_mm: 28
-      patterns:
-      - zenith.*b8
-    B26:
-      fiber: Boar
-      knot_size_mm: 27
-      patterns:
-      - zen.*B26
 
 other_knots:
   AKA Brushworx:
@@ -597,6 +552,10 @@ other_knots:
     default: Synthetic
     patterns:
     - \bnom\b
+  Omega:
+    default: Boar
+    patterns:
+    - omega
   Oumo:
     default: Badger
     patterns:

@@ -10,45 +10,41 @@ from sotd.match.brush_matcher import BrushMatcher
 def test_catalog():
     """Create comprehensive test catalog covering all strategy types"""
     return {
-        "known_brushes": {
-            "Simpson": {
-                "Chubby 2": {
-                    "fiber": "Badger",
-                    "knot_size_mm": 27,
-                    "patterns": ["simp.*chubby\\s*2\\b", "simp.*ch2\\b"],
-                },
-                "Trafalgar T2": {
-                    "fiber": "Synthetic",
-                    "knot_size_mm": 24,
-                    "patterns": ["simp.*traf.*t2", "trafalgar.*t2"],
-                },
+        "Simpson": {
+            "Chubby 2": {
+                "fiber": "Badger",
+                "knot_size_mm": 27,
+                "patterns": ["simp.*chubby\\s*2\\b", "simp.*ch2\\b"],
             },
-            "Omega": {
-                "10048": {"fiber": "Boar", "knot_size_mm": 28, "patterns": ["omega.*(pro)*.*48"]}
-            },
-            "Wald": {
-                "A1": {"fiber": "Synthetic", "knot_size_mm": 29, "patterns": ["wald.*a1", "wald"]}
-            },
-            # Add BFM brush with nested knot and handle structures
-            "Muninn Woodworks/EldrormR Industries": {
-                "BFM": {
-                    "patterns": ["\\bbfm\\b(.*50mm)?"],
-                    "knot": {
-                        "brand": "Moti",
-                        "fiber": "Synthetic",
-                        "knot_size_mm": 50,
-                        "model": "Motherlode",
-                    },
-                    "handle": {"brand": "Muninn Woodworks"},
-                }
+            "Trafalgar T2": {
+                "fiber": "Synthetic",
+                "knot_size_mm": 24,
+                "patterns": ["simp.*traf.*t2", "trafalgar.*t2"],
             },
         },
-        "declaration_grooming": {
-            "Declaration Grooming": {
-                "B3": {"patterns": ["B3(\\.\\s|\\.$|\\s|$)"]},
-                "B10": {"patterns": ["b10"]},
-                "B15": {"patterns": ["b15"]},
+        "Omega": {
+            "10048": {"fiber": "Boar", "knot_size_mm": 28, "patterns": ["omega.*(pro)*.*48"]}
+        },
+        "Wald": {
+            "A1": {"fiber": "Synthetic", "knot_size_mm": 29, "patterns": ["wald.*a1", "wald"]}
+        },
+        # Add BFM brush with nested knot and handle structures
+        "Muninn Woodworks/EldrormR Industries": {
+            "BFM": {
+                "patterns": ["\\bbfm\\b(.*50mm)?"],
+                "knot": {
+                    "brand": "Moti",
+                    "fiber": "Synthetic",
+                    "knot_size_mm": 50,
+                    "model": "Motherlode",
+                },
+                "handle": {"brand": "Muninn Woodworks"},
             }
+        },
+        "Declaration Grooming": {
+            "B3": {"patterns": ["B3(\\.\\s|\\.$|\\s|$)"]},
+            "B10": {"patterns": ["b10"]},
+            "B15": {"patterns": ["b15"]},
         },
         "other_brushes": {
             "Elite": {"default": "Badger", "patterns": ["elite"]},

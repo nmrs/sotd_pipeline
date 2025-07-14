@@ -468,11 +468,13 @@ Zenith:
     patterns:
     - 506u
   506U N:
+    fiber: Boar
     fiber: Horse
     knot_size_mm: 27
     patterns:
     - 506.*u.*nthi
   506N XS:
+    fiber: Boar
     fiber: Horse
     knot_size_mm: 27
     patterns:
@@ -487,26 +489,8 @@ Zenith:
     knot_size_mm: 27
     patterns:
     - 507N
-  '508':
-    fiber: Boar
-    knot_size_mm: 27
-    patterns:
-    - zen.*B26
-  B03-A26:
-    fiber: Boar
-    knot_size_mm: 26
-    patterns:
-    - b03-a26
-  Butterscotch Chubby:
-    fiber: Boar
-    knot_size_mm: 28
-    patterns:
-    - zen.*B34
-    - zen.*butter.*chub
-    - zen.*chub.*butter
   r/wetshaving MOAR BOAR:
     fiber: Boar
-    knot_maker: Zenith
     knot_size_mm: 31
     name: r/wetshaving MOAR BOAR
     patterns:
@@ -514,3 +498,120 @@ Zenith:
     - 508\s*xl
     - wetshaving.*exc
     - maor boar
+  B1:
+    fiber: Boar
+    knot_size_mm: 26
+    knot_loft_mm: 64
+    patterns:
+    - zenith.*\bb1\b
+    - b02-a28
+  B2:
+    fiber: Boar
+    knot_size_mm: 26
+    knot_loft_mm: 57
+    patterns:
+    - zenith.*\bb2\b
+    - b03-a26
+  B3:
+    fiber: Boar
+    knot_size_mm: 26
+    knot_loft_mm: 64
+    patterns:
+    - zenith.*\bb3\b
+    - b06-80e
+  B7:
+    fiber: Boar
+    knot_size_mm: 24
+    knot_loft_mm: 57
+    patterns:
+    - zenith.*\bb7\b
+  B8:
+    fiber: Boar
+    knot_size_mm: 28
+    knot_loft_mm: 57
+    patterns:
+    - zenith.*\bb8\b
+    - b03-a26-l-28
+  B10:
+    fiber: Boar
+    knot_size_mm: 24
+    knot_loft_mm: 57
+    patterns:
+    - zenith.*\bb10\b
+    - b07-euro
+  B14:
+    fiber: Boar
+    knot_size_mm: 28
+    knot_loft_mm: 57
+    patterns:
+    - zenith.*\bb14\b
+    - b03-a26-l
+  B15:
+    fiber: Boar
+    knot_size_mm: 27.5
+    knot_loft_mm: 57
+    patterns:
+    - zenith.*\bb15\b
+    - b506.*olive
+  B17:
+    fiber: Boar
+    knot_size_mm: 24
+    knot_loft_mm: 48
+    patterns:
+    - zenith.*\bb17\b
+  B26:
+    fiber: Boar
+    knot_size_mm: 27
+    knot_loft_mm: 57
+    patterns:
+    - zenith.*\bb26\b
+    - 507mc/l
+  B28:
+    fiber: Boar
+    knot_size_mm: 28
+    knot_loft_mm: 57
+    patterns:
+    - zenith.*\bb28\b
+  B29:
+    fiber: Boar
+    knot_size_mm: 27
+    knot_loft_mm: 57
+    patterns:
+    - zenith.*\bb29\b
+    - 507bluel
+  B30:
+    fiber: Boar
+    knot_size_mm: 26
+    knot_loft_mm: 57
+    patterns:
+    - zenith.*\bb30\b
+    - 506.*short.*retro
+  B33:
+    fiber: Boar
+    knot_size_mm: 27
+    knot_loft_mm: 57
+    patterns:
+    - zenith.*\bb33\b
+    - 506.*copper
+  Butterscotch Chubby (B34):
+    fiber: Boar
+    knot_size_mm: 28
+    knot_loft_mm: 57
+    patterns:
+    - zenith.*\bb34\b
+    - (zenith|505).*butter
+  B35:
+    fiber: Boar
+    knot_size_mm: 31
+    knot_loft_mm: 57
+    patterns:
+    - zenith.*\bb35\b
+    - 508a
+  Copper Scrubby (B36):
+    fiber: Boar
+    knot_size_mm: 28
+    knot_loft_mm: 50
+    patterns:
+    - zenith.*\bb36\b
+    - copper.*scrubby
+

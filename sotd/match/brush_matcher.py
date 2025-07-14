@@ -51,8 +51,12 @@ class BrushMatcher:
         # Initialize specialized components
         self.handle_matcher = EnhancedHandleMatcher(handles_path)
         self.fiber_processor = FiberProcessorEnhanced()
+
+        # Filter out other_brushes for known brush strategy
+        known_brushes_data = {k: v for k, v in self.catalog_data.items() if k != "other_brushes"}
+
         self.strategies = [
-            KnownBrushMatchingStrategy(self.catalog_data.get("known_brushes", {})),
+            KnownBrushMatchingStrategy(known_brushes_data),
             OtherBrushMatchingStrategy(self.catalog_data.get("other_brushes", {})),
             # Add new knot-specific strategies
             KnownKnotMatchingStrategy(self.knots_data.get("known_knots", {})),
@@ -630,13 +634,11 @@ class BrushMatcher:
         model = updated.get("model")
         catalog_entry = None
         if brand and model:
-            for section in ["known_brushes", "declaration_grooming", "other_brushes"]:
-                section_data = self.catalog_data.get(section, {})
-                if brand in section_data:
-                    brand_data = section_data[brand]
-                    if model in brand_data:
-                        catalog_entry = brand_data[model]
-                        break
+            # Check in the main catalog (excluding other_brushes)
+            if brand in self.catalog_data and brand != "other_brushes":
+                brand_data = self.catalog_data[brand]
+                if model in brand_data:
+                    catalog_entry = brand_data[model]
         # Handle subsection from catalog
         if catalog_entry and isinstance(catalog_entry, dict) and "handle" in catalog_entry:
             handle_info = catalog_entry["handle"]
@@ -655,6 +657,13 @@ class BrushMatcher:
                 "knot_size_mm": knot_info.get("knot_size_mm"),
                 "source_text": value,  # Catalog-driven, so use full input
             }
+            # Extract fiber and knot_size_mm from nested knot info for top-level fields
+            if knot_info.get("fiber") and not updated.get("fiber"):
+                updated["fiber"] = knot_info["fiber"]
+            if knot_info.get("knot_size_mm") and not updated.get("knot_size_mm"):
+                updated["knot_size_mm"] = knot_info["knot_size_mm"]
+            if knot_info.get("brand") and not updated.get("knot_maker"):
+                updated["knot_maker"] = knot_info["brand"]
         # If not present in catalog, fall back to split/strategy logic
         if ("handle" not in updated) or (updated["handle"] is None):
             # Get the original split information if available
