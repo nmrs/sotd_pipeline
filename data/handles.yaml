@@ -64,6 +64,9 @@ artisan_handles:
     patterns:
     - ^(?!.*dogwood)declaration
     - ^(?!.*dogwood)\bdg\b
+    - washington
+    - jefferson
+    - jeffington
   DISCARD:
     patterns:
     - had forever.*mark rubbed off

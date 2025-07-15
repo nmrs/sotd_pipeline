@@ -1,0 +1,147 @@
+# Brush Matching Algorithm Priority Specification
+
+## Overview
+
+This specification defines the updated brush matching algorithm priority to better distinguish between complete brushes and handle/knot combinations. The current algorithm tries complete brush matching first, then falls back to handle/knot splitting. The new algorithm will check for delimiters first to determine the appropriate matching strategy.
+
+## Problem Statement
+
+The current brush matching algorithm has difficulty distinguishing between:
+1. **Complete brushes** that happen to contain delimiters (e.g., "Chisel & Hound Sakura with v21 Fanchurian" - same maker)
+2. **Handle/knot combinations** with different makers (e.g., "Wolf Whiskers RCE 1301 / Omega 10049 Boar" - different makers)
+
+This leads to incorrect matches where the algorithm chooses a complete brush match when it should be matching a handle/knot combination, or vice versa.
+
+## Requirements
+
+### 1. Delimiter Detection and Priority
+
+#### High Reliability Delimiters (Always Handle/Knot)
+- `" w/ "` - Very common, always indicates handle/knot combination
+- `" with "` - Common, usually indicates handle/knot combination  
+- `" / "` - Common, usually indicates handle/knot combination
+
+#### Medium Reliability Delimiters (Needs Smart Analysis)
+- `" + "` - Could be handle/knot OR joint venture OR fiber mix
+- `" - "` - Most common but ambiguous (needs smart analysis)
+- `" in "` - Handle-primary delimiter
+
+### 2. Algorithmic Priority
+
+#### Phase 1: Split Detection First
+1. **Check for high-reliability delimiters**:
+   - `" w/ "`, `" with "`, `" / "` → always try to split
+2. **Check for medium-reliability delimiters**:
+   - `" + "`, `" - "`, `" in "` → use smart analysis
+3. **If split found**:
+   - **Same maker** → treat as complete brush
+   - **Different makers** → treat as handle/knot combination
+
+#### Phase 2: Complete Brush Detection
+4. **If no delimiters, try complete brush matching**
+
+#### Phase 3: Fallback
+5. **If no split and no complete brush match, try other strategies**
+
+### 3. Complete Brush Detection
+
+For complete brushes, the algorithm should:
+1. **First**: Try to match as a complete brush in `brushes.yaml`
+2. **If found**: Run handle maker logic to identify the handle maker
+3. **And**: Run knot maker logic to identify the knot source
+4. **Result**: Three-part structure (brush, handle, knot)
+
+### 4. Handle/Knot Combination Detection
+
+For handle/knot combinations, the algorithm should:
+1. **Split** the input using delimiter detection
+2. **Match** handle and knot components separately
+3. **Determine** if components have same or different makers
+4. **Result**: Handle/knot combination with maker information
+
+## Examples
+
+### Complete Brushes (No Delimiters)
+- `"AP Shave Co G5C"` → Complete brush
+- `"Zenith 506U N"` → Complete brush
+- `"Semogue 1305"` → Complete brush
+
+### Complete Brushes (With Delimiters, Same Maker)
+- `"Chisel & Hound Sakura with v21 Fanchurian"` → Complete C&H brush (handle + knot from same maker)
+- `"Chisel & Hound - Rob's Finest - 25mm Synthetic"` → Complete C&H brush
+
+### Handle/Knot Combinations (Different Makers)
+- `"Wolf Whiskers RCE 1301 / Omega 10049 Boar"` → WW handle + Omega knot
+- `"Carnavis and Richardson - Industry w/26mm Frank Shaving Finest XD"` → C&R handle + Frank Shaving knot
+- `"Rad Dinosaur Creations -Blue Skys- 26mm G5C Synthetic"` → RDC handle + AP Shave Co knot
+
+### Edge Cases
+- `"C&H+TnS 27mm H8"` → C&H handle + TnS knot (handle/knot combination)
+- `"C&H + Mammoth DinoS'mores"` → Joint venture (complete brush)
+
+## Data Structure Requirements
+
+### Complete Brush Result
+```json
+{
+  "brush": "AKA Brushworks G5C",
+  "handle": {
+    "maker": "AKA Brushworks",
+    "model": "unknown"
+  },
+  "knot": {
+    "maker": "AP Shave Co",
+    "model": "G5C"
+  }
+}
+```
+
+### Handle/Knot Combination Result
+```json
+{
+  "handle": {
+    "maker": "Wolf Whiskers",
+    "model": "RCE 1301"
+  },
+  "knot": {
+    "maker": "Omega",
+    "model": "10049"
+  }
+}
+```
+
+## Implementation Requirements
+
+### 1. Catalog Updates
+- Add complete brush makers to `brushes.yaml` (Declaration Grooming, Chisel & Hound, etc.)
+- Ensure handle and knot maker logic can run for complete brushes
+
+### 2. Algorithm Updates
+- Modify brush matching priority order
+- Update delimiter detection and reliability classification
+- Enhance smart analysis for medium-reliability delimiters
+
+### 3. Testing Requirements
+- Test all delimiter types with various maker combinations
+- Verify complete brush detection works with and without delimiters
+- Ensure handle/knot combination detection works correctly
+- Test edge cases and ambiguous scenarios
+
+## Success Criteria
+
+1. **Correct Classification**: Algorithm correctly identifies complete brushes vs handle/knot combinations
+2. **Delimiter Handling**: All delimiter types are handled appropriately
+3. **Maker Detection**: Same maker vs different maker detection works correctly
+4. **Backward Compatibility**: Existing functionality is preserved
+5. **Performance**: No significant performance degradation
+
+## Dependencies
+
+- Existing brush matching infrastructure
+- Handle maker and knot maker logic
+- Smart analysis scoring system
+- Catalog data in `brushes.yaml`, `handles.yaml`, `knots.yaml`
+description:
+globs:
+alwaysApply: false
+---

@@ -1,0 +1,219 @@
+# Brush Matching Algorithm Priority - TDD Implementation Plan
+
+## Project Summary
+
+Implement updated brush matching algorithm priority to better distinguish between complete brushes and handle/knot combinations. The new algorithm will check for delimiters first to determine the appropriate matching strategy, rather than trying complete brush matching first.
+
+## Component Steps
+
+### Phase 1: Core Algorithm Updates
+
+#### Step 1.1: Update Delimiter Classification
+**Test-First Implementation**: Update delimiter classification to distinguish between high-reliability and medium-reliability delimiters.
+
+```text
+Create test file: tests/match/test_brush_splitter_delimiter_classification.py
+
+Test cases:
+1. High-reliability delimiters (" w/ ", " with ", " / ") should always trigger splitting
+2. Medium-reliability delimiters (" + ", " - ", " in ") should use smart analysis
+3. Non-delimiters (" x ", " × ", " & ", "()") should not trigger splitting
+4. Edge cases with multiple delimiters should be handled correctly
+
+Implementation:
+- Update EnhancedBrushSplitter._split_by_delimiters() method
+- Add delimiter reliability classification
+- Update delimiter lists and processing logic
+```
+
+#### Step 1.2: Implement New Algorithmic Priority
+**Test-First Implementation**: Modify the main brush matching algorithm to use the new priority order.
+
+```text
+Create test file: tests/match/test_brush_matcher_priority_order.py
+
+Test cases:
+1. High-reliability delimiters should trigger split detection first
+2. Medium-reliability delimiters should use smart analysis
+3. No delimiters should fall back to complete brush matching
+4. Same maker splits should be treated as complete brushes
+5. Different maker splits should be treated as handle/knot combinations
+
+Implementation:
+- Update BrushMatcher.match() method
+- Implement new priority order logic
+- Add maker comparison logic for split results
+```
+
+#### Step 1.3: Enhance Smart Analysis for Medium-Reliability Delimiters
+**Test-First Implementation**: Improve smart analysis for ambiguous delimiters.
+
+```text
+Create test file: tests/match/test_brush_splitter_smart_analysis_enhanced.py
+
+Test cases:
+1. " + " delimiter should handle handle/knot combinations correctly
+2. " + " delimiter should handle joint ventures correctly
+3. " + " delimiter should handle fiber mixes correctly
+4. " - " delimiter should use enhanced scoring
+5. " in " delimiter should prioritize handle component
+
+Implementation:
+- Enhance _score_as_handle() method
+- Add joint venture detection patterns to YAML files (prompt user for permission)
+- Ensure all maker detection uses YAML patterns, not hardcoded logic
+```
+
+### Phase 2: Complete Brush Detection Enhancement
+
+#### Step 2.1: Add Complete Brush Makers to Catalog
+**Test-First Implementation**: Add complete brush makers to brushes.yaml and update catalog loading.
+
+```text
+Create test file: tests/match/test_complete_brush_catalog.py
+
+Test cases:
+1. Declaration Grooming should be in brushes.yaml
+2. Chisel & Hound should be in brushes.yaml
+3. Other complete brush makers should be added
+4. Catalog loading should handle new entries correctly
+5. Complete brush patterns should match correctly
+
+Implementation:
+- Prompt user to add complete brush makers to brushes.yaml (Declaration Grooming, Chisel & Hound, etc.)
+- Update catalog loading logic
+- Add complete brush patterns to YAML files
+```
+
+#### Step 2.2: Implement Complete Brush Handle/Knot Logic
+**Test-First Implementation**: Add logic to run handle maker and knot maker detection for complete brushes.
+
+```text
+Create test file: tests/match/test_complete_brush_handle_knot_logic.py
+
+Test cases:
+1. Complete brush should run handle maker logic
+2. Complete brush should run knot maker logic
+3. Result should include three-part structure (brush, handle, knot)
+4. Handle maker should be identified correctly
+5. Knot maker should be identified correctly
+
+Implementation:
+- Add complete brush handle/knot detection
+- Implement three-part result structure
+- Update result formatting
+```
+
+### Phase 3: Handle/Knot Combination Detection
+
+#### Step 3.1: Implement Maker Comparison Logic
+**Test-First Implementation**: Add logic to determine if split components have same or different makers.
+
+```text
+Create test file: tests/match/test_maker_comparison_logic.py
+
+Test cases:
+1. Same maker splits should be identified correctly
+2. Different maker splits should be identified correctly
+3. Maker detection should work for various brand formats
+4. Edge cases with abbreviated names should be handled
+5. Unknown makers should be handled gracefully
+
+Implementation:
+- Add maker comparison logic using YAML patterns
+- Implement maker detection for split components using existing YAML catalogs
+- Handle edge cases by prompting user to add patterns to YAML files
+```
+
+#### Step 3.2: Update Result Structure for Handle/Knot Combinations
+**Test-First Implementation**: Update result structure to properly represent handle/knot combinations.
+
+```text
+Create test file: tests/match/test_handle_knot_combination_structure.py
+
+Test cases:
+1. Handle/knot combinations should have correct structure
+2. Handle maker should be identified correctly
+3. Knot maker should be identified correctly
+4. Model information should be preserved
+5. Fiber and size information should be included
+
+Implementation:
+- Update result structure for handle/knot combinations
+- Ensure all required fields are included
+- Maintain backward compatibility
+```
+
+### Phase 4: Integration and Testing
+
+#### Step 4.1: Integration Testing
+**Test-First Implementation**: Create comprehensive integration tests for the new algorithm.
+
+```text
+Create test file: tests/match/test_brush_matching_integration.py
+
+Test cases:
+1. Complete brushes with no delimiters
+2. Complete brushes with delimiters (same maker)
+3. Handle/knot combinations (different makers)
+4. Edge cases and ambiguous scenarios
+5. Performance with large datasets
+
+Implementation:
+- Create integration test suite
+- Test all delimiter types
+- Verify correct classification
+- Performance testing
+```
+
+#### Step 4.2: Backward Compatibility Testing
+**Test-First Implementation**: Ensure existing functionality is preserved.
+
+```text
+Create test file: tests/match/test_backward_compatibility.py
+
+Test cases:
+1. Existing brush matches should still work
+2. Existing handle/knot matches should still work
+3. Performance should not degrade significantly
+4. Error handling should remain robust
+5. API compatibility should be maintained
+
+Implementation:
+- Run existing test suite
+- Performance benchmarking
+- API compatibility verification
+```
+
+## Critical Analysis
+
+### Prompt Sequence Structure
+The implementation follows a logical progression:
+1. **Core Algorithm Updates** - Foundation changes to delimiter classification and priority
+2. **Complete Brush Enhancement** - Adding support for complete brush detection
+3. **Handle/Knot Combination Detection** - Improving combination detection logic
+4. **Integration and Testing** - Ensuring everything works together
+
+### Safety and Buildability
+- Each step builds on the previous one
+- Tests are written first to guide implementation
+- Backward compatibility is maintained throughout
+- Performance is monitored at each step
+
+### Dependencies and Integration
+- Steps are designed to be independent where possible
+- Integration points are clearly defined
+- Error handling is considered at each step
+- API compatibility is maintained
+
+### Refinements Made
+- Delimiter classification is clearly separated by reliability
+- Complete brush detection includes handle/knot logic
+- Maker comparison logic handles edge cases
+- Integration testing covers all scenarios
+
+The plan is lean, safe, and buildable via codegen prompts with no dangling pieces. Each step produces coherent, testable, and connected output that builds toward the final goal.
+description:
+globs:
+alwaysApply: false
+---

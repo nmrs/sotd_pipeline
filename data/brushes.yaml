@@ -32,6 +32,16 @@ Badger & Blade:
     knot_size_mm: 22
     patterns:
     - badger.*blade.*essential
+  Chisel & Hound:
+    knot_size_mm: 26
+    batch_patterns:
+    - name: "v{batch}"
+      fiber: Badger
+      patterns:
+      - chis.*[fh]ou.*v{batch}
+      - \bc(?:\&|and|\+)h\b.*v{batch}
+      - \bch\b.*v{batch}
+      valid_batches: ["10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28"]
 Clubman:
   Pinaud:
     fiber: Synthetic
@@ -43,6 +53,21 @@ Cornfed Viking:
     fiber: Badger
     patterns:
     - odin'?s.*beard
+  Declaration Grooming:
+    knot_size_mm: 28
+    batch_patterns:
+    - name: "B{batch}"
+      patterns:
+      - (declaration|\bdg\b)?.*\bb{batch}\b
+      valid_batches: ["1", "2", "3", "4", "5", "6", "7", "8", "10", "11", "12", "13", "14", "15"]
+    B9A:
+      fiber: Badger
+      patterns:
+      - (declaration|\bdg\b)?.*\bb9a\+?\b
+    B9B:
+      fiber: Badger
+      patterns:
+      - (declaration|\bdg\b)?.*\bb9b\+?\b
 Kent:
   INF1:
     fiber: Synthetic
@@ -432,6 +457,60 @@ Truefitt & Hill:
     knot_size_mm: 24
     patterns:
     - wellington
+Turn-N-Shave:
+    BoBa (50/50 Boar Badger):
+      fiber: Mixed Badger/Boar
+      patterns:
+      - turn.{1,5}shave.*boba
+      - t[&n]s.*mix
+      - t[&n]s.*boba
+    High Density Badger (H*):
+      fiber: Badger
+      patterns:
+      - turn.{1,5}shave.*h\d
+      - t[&n]s.*h\d
+    Low Density Badger (L*):
+      fiber: Badger
+      patterns:
+      - turn.{1,5}shave.*l\d
+      - t[&n]s.*l\d
+    Medium Density Badger (M*):
+      fiber: Badger
+      patterns:
+      - turn.{1,5}shave.*m\d
+      - t[&n]s.*m\d
+    Quartermoon:
+  Wald:
+    A1:
+      fiber: Synthetic
+      knot_size_mm: 29
+      patterns:
+      - wald.*a1
+    Calyx:
+      fiber: Synthetic
+      knot_size_mm: 27
+      patterns:
+      - (?:wald.*)?calyx
+    J1:
+      fiber: Badger
+      knot_size_mm: 27
+      patterns:
+      - wald.*j1
+    J2:
+      fiber: Badger
+      knot_size_mm: 27
+      patterns:
+      - wald.*j2
+    J3:
+      fiber: Badger
+      knot_size_mm: 27
+      patterns:
+      - wald.*j3
+    J4:
+      fiber: Badger
+      knot_size_mm: 27
+      patterns:
+      - wald.*j4
 Walfront:
   Travel Brush:
     fiber: Synthetic
@@ -489,15 +568,6 @@ Zenith:
     knot_size_mm: 27
     patterns:
     - 507N
-  r/wetshaving MOAR BOAR:
-    fiber: Boar
-    knot_size_mm: 31
-    name: r/wetshaving MOAR BOAR
-    patterns:
-    - moar(.*boar)?
-    - 508\s*xl
-    - wetshaving.*exc
-    - maor boar
   B1:
     fiber: Boar
     knot_size_mm: 26
@@ -593,13 +663,6 @@ Zenith:
     patterns:
     - zenith.*\bb33\b
     - 506.*copper
-  Butterscotch Chubby (B34):
-    fiber: Boar
-    knot_size_mm: 28
-    knot_loft_mm: 57
-    patterns:
-    - zenith.*\bb34\b
-    - (zenith|505).*butter
   B35:
     fiber: Boar
     knot_size_mm: 31
@@ -607,6 +670,13 @@ Zenith:
     patterns:
     - zenith.*\bb35\b
     - 508a
+  Butterscotch Chubby (B34):
+    fiber: Boar
+    knot_size_mm: 28
+    knot_loft_mm: 57
+    patterns:
+    - zenith.*\bb34\b
+    - (zenith|505).*butter
   Copper Scrubby (B36):
     fiber: Boar
     knot_size_mm: 28
@@ -614,4 +684,12 @@ Zenith:
     patterns:
     - zenith.*\bb36\b
     - copper.*scrubby
-
+  r/wetshaving MOAR BOAR:
+    fiber: Boar
+    knot_size_mm: 31
+    name: r/wetshaving MOAR BOAR
+    patterns:
+    - moar(.*boar)?
+    - 508\s*xl
+    - wetshaving.*exc
+    - maor boar
