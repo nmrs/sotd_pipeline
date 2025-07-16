@@ -6,14 +6,8 @@ import yaml
 from sotd.match.brush_matching_strategies.known_brush_strategy import (
     KnownBrushMatchingStrategy,
 )
-from sotd.match.brush_matching_strategies.known_knot_strategy import (
-    KnownKnotMatchingStrategy,
-)
 from sotd.match.brush_matching_strategies.other_brushes_strategy import (
     OtherBrushMatchingStrategy,
-)
-from sotd.match.brush_matching_strategies.other_knot_strategy import (
-    OtherKnotMatchingStrategy,
 )
 from sotd.match.brush_splitter_enhanced import EnhancedBrushSplitter
 from sotd.match.fiber_processor_enhanced import FiberProcessorEnhanced
@@ -39,11 +33,13 @@ class BrushMatcher:
         handles_path: Path = Path("data/handles.yaml"),
         knots_path: Path = Path("data/knots.yaml"),
         correct_matches_path: Optional[Path] = None,
+        debug: bool = False,
     ):
         self.catalog_path = catalog_path
         self.handles_path = handles_path
         self.knots_path = knots_path
         self.correct_matches_path = correct_matches_path or Path("data/correct_matches.yaml")
+        self.debug = debug
         self.catalog_data = self._load_catalog(catalog_path)
         self.knots_data = self._load_knots(knots_path)
         self.correct_matches = self._load_correct_matches()
@@ -52,15 +48,10 @@ class BrushMatcher:
         self.handle_matcher = EnhancedHandleMatcher(handles_path)
         self.fiber_processor = FiberProcessorEnhanced()
 
-        # Filter out other_brushes for known brush strategy
-        known_brushes_data = {k: v for k, v in self.catalog_data.items() if k != "other_brushes"}
-
+        # Only use YAML-driven strategies
         self.strategies = [
-            KnownBrushMatchingStrategy(known_brushes_data),
+            KnownBrushMatchingStrategy(self.catalog_data.get("known_brushes", {})),
             OtherBrushMatchingStrategy(self.catalog_data.get("other_brushes", {})),
-            # Add new knot-specific strategies
-            KnownKnotMatchingStrategy(self.knots_data.get("known_knots", {})),
-            OtherKnotMatchingStrategy(self.knots_data.get("other_knots", {})),
         ]
         self.knot_matcher = EnhancedKnotMatcher(self.strategies)
         self.brush_splitter = EnhancedBrushSplitter(self.handle_matcher, self.strategies)
@@ -269,15 +260,31 @@ class BrushMatcher:
 
         if not knot_info:
             # Fallback to basic structure if no knot info found
+            matched = {
+                "brand": None,
+                "model": None,
+                "handle_maker": handle_maker,
+                "handle": {"brand": handle_maker, "model": handle_model, "source_text": value},
+                "knot": None,
+            }
+            # Inject handle/knot fields for split input
+            handle, knot, _ = self.brush_splitter.split_handle_and_knot(value)
+            if handle or knot:
+                matched["handle"] = (
+                    {
+                        "brand": handle_maker if handle_maker else None,
+                        "model": handle_model if handle_model else None,
+                        "source_text": handle,
+                    }
+                    if handle
+                    else None
+                )
+                matched["knot"] = (
+                    None if not knot else {"brand": None, "model": None, "source_text": knot}
+                )
             return {
                 "original": value,
-                "matched": {
-                    "brand": None,
-                    "model": None,
-                    "handle_maker": handle_maker,
-                    "handle": {"brand": handle_maker, "model": handle_model, "source_text": value},
-                    "knot": None,
-                },
+                "matched": matched,
                 "match_type": "exact",
                 "pattern": None,
             }
@@ -300,7 +307,29 @@ class BrushMatcher:
             "knot_maker": knot_info["brand"],
             "fiber_strategy": "yaml" if knot_info.get("fiber") else None,
         }
-
+        # Inject handle/knot fields for split input
+        handle, knot, _ = self.brush_splitter.split_handle_and_knot(value)
+        if handle or knot:
+            matched["handle"] = (
+                {
+                    "brand": handle_maker if handle_maker else None,
+                    "model": handle_model if handle_model else None,
+                    "source_text": handle,
+                }
+                if handle
+                else None
+            )
+            matched["knot"] = (
+                {
+                    "brand": knot_info["brand"],
+                    "model": knot_info["model"],
+                    "fiber": knot_info.get("fiber"),
+                    "knot_size_mm": knot_info.get("knot_size_mm"),
+                    "source_text": knot,
+                }
+                if knot
+                else None
+            )
         return {
             "original": value,
             "matched": matched,
@@ -355,6 +384,31 @@ class BrushMatcher:
             handle_info = catalog_entry["handle"]
             matched["handle_maker"] = handle_info.get("brand")  # handle.brand becomes handle_maker
 
+        # --- Inject handle/knot fields for split input ---
+        handle, knot, _ = self.brush_splitter.split_handle_and_knot(value)
+        if handle or knot:
+            # Always include handle and knot fields for split input
+            matched["handle"] = (
+                {
+                    "brand": matched.get("handle_maker"),
+                    "model": None,
+                    "source_text": handle,
+                }
+                if handle
+                else None
+            )
+            matched["knot"] = (
+                {
+                    "brand": matched.get("knot_maker"),
+                    "model": matched.get("model"),
+                    "fiber": matched.get("fiber"),
+                    "knot_size_mm": matched.get("knot_size_mm"),
+                    "source_text": knot,
+                }
+                if knot
+                else None
+            )
+
         return {
             "original": value,
             "matched": matched,
@@ -374,6 +428,8 @@ class BrushMatcher:
         5. Falling back to main strategy matching
         6. Post-processing results with fiber and handle information
         """
+        handle_maker_name = None
+        knot_maker_name = None
         if not value:
             return {"original": value, "matched": None, "match_type": None, "pattern": None}
 
@@ -390,6 +446,72 @@ class BrushMatcher:
         # Step 2: Split input into components
         handle, knot, _ = self.brush_splitter.split_handle_and_knot(value)
 
+        # Step 2.5: Compare makers if both handle and knot are present
+        if handle and knot:
+            handle_maker = self.handle_matcher.match_handle_maker(handle)
+            # Find knot maker by trying all strategies
+            knot_maker = None
+            for strategy in self.strategies:
+                result = strategy.match(knot)
+                if result:
+                    if isinstance(result, dict):
+                        if (
+                            "matched" in result
+                            and result["matched"]
+                            and "brand" in result["matched"]
+                        ):
+                            knot_maker = result["matched"]
+                            break
+                        elif "brand" in result:
+                            knot_maker = result
+                            break
+            handle_maker_name = (
+                handle_maker.get("brand")
+                if handle_maker and "brand" in handle_maker
+                else (
+                    handle_maker.get("handle_maker")
+                    if handle_maker and "handle_maker" in handle_maker
+                    else None
+                )
+            )
+            knot_maker_name = knot_maker["brand"] if knot_maker and "brand" in knot_maker else None
+            if self.debug:
+                print(
+                    f"DEBUG: handle_maker_name={handle_maker_name}, "
+                    f"knot_maker_name={knot_maker_name}"
+                )
+            norm_handle = (
+                self._normalize_maker_name(handle_maker_name) if handle_maker_name else None
+            )
+            norm_knot = self._normalize_maker_name(knot_maker_name) if knot_maker_name else None
+            if self.debug:
+                print(f"DEBUG: norm_handle={norm_handle}, norm_knot={norm_knot}")
+            # If both makers are present and the same, treat as a complete brush
+            if handle_maker_name and knot_maker_name and norm_handle == norm_knot:
+                # For same-maker combinations, create a complete brush result
+                if self.debug:
+                    print("DEBUG: Entered same-maker comparison block")
+                normalized_maker = norm_handle
+                result = {
+                    "original": value,
+                    "matched": {
+                        "brand": normalized_maker,
+                        "model": None,
+                        "fiber": None,
+                        "knot_size_mm": None,
+                        "handle_maker": handle_maker_name,
+                        "knot_maker": knot_maker_name,
+                        "fiber_strategy": None,
+                        "_matched_by_strategy": "MakerComparison",
+                        "_pattern_used": "same_maker_comparison",
+                    },
+                    "match_type": "complete_brush",
+                    "pattern": "same_maker_comparison",
+                }
+                if self.debug:
+                    print(f"DEBUG: Constructed result: {result}")
+                return self._post_process_match(result, value)
+
         # Step 3: Attempt priority-based matching
         if knot and self.knot_matcher.should_prioritize_knot(
             value, self.brush_splitter.split_handle_and_knot
@@ -405,6 +527,22 @@ class BrushMatcher:
                 for k in ("brand", "model", "fiber", "knot_size_mm", "fiber_strategy"):
                     if k not in result["matched"]:
                         result["matched"][k] = None
+                # Final safety net: always include handle/knot fields for split inputs
+                if handle or knot:
+                    if "handle" not in result["matched"]:
+                        result["matched"]["handle"] = {
+                            "brand": result["matched"].get("handle_maker"),
+                            "model": None,
+                            "source_text": handle,
+                        }
+                    if "knot" not in result["matched"]:
+                        result["matched"]["knot"] = {
+                            "brand": result["matched"].get("knot_maker"),
+                            "model": result["matched"].get("model"),
+                            "fiber": result["matched"].get("fiber"),
+                            "knot_size_mm": result["matched"].get("knot_size_mm"),
+                            "source_text": knot,
+                        }
                 return result
         elif (
             handle
@@ -424,6 +562,22 @@ class BrushMatcher:
                 for k in ("brand", "model", "fiber", "knot_size_mm", "fiber_strategy"):
                     if k not in result["matched"]:
                         result["matched"][k] = None
+                # Final safety net: always include handle/knot fields for split inputs
+                if handle or knot:
+                    if "handle" not in result["matched"]:
+                        result["matched"]["handle"] = {
+                            "brand": result["matched"].get("handle_maker"),
+                            "model": None,
+                            "source_text": handle,
+                        }
+                    if "knot" not in result["matched"]:
+                        result["matched"]["knot"] = {
+                            "brand": result["matched"].get("knot_maker"),
+                            "model": result["matched"].get("model"),
+                            "fiber": result["matched"].get("fiber"),
+                            "knot_size_mm": result["matched"].get("knot_size_mm"),
+                            "source_text": knot,
+                        }
                 return result
 
         # Step 4: Fall back to main strategy matching
@@ -432,7 +586,72 @@ class BrushMatcher:
             for k in ("brand", "model", "fiber", "knot_size_mm", "fiber_strategy"):
                 if k not in result["matched"]:
                     result["matched"][k] = None
+            # Final safety net: always include handle/knot fields for split inputs
+            if handle or knot:
+                if "handle" not in result["matched"]:
+                    result["matched"]["handle"] = {
+                        "brand": result["matched"].get("handle_maker"),
+                        "model": None,
+                        "source_text": handle,
+                    }
+                if "knot" not in result["matched"]:
+                    result["matched"]["knot"] = {
+                        "brand": result["matched"].get("knot_maker"),
+                        "model": result["matched"].get("model"),
+                        "fiber": result["matched"].get("fiber"),
+                        "knot_size_mm": result["matched"].get("knot_size_mm"),
+                        "source_text": knot,
+                    }
             return result
+
+        # Ensure handle_maker_name and knot_maker_name are always defined
+        if "handle_maker_name" not in locals():
+            handle_maker_name = None
+        if "knot_maker_name" not in locals():
+            knot_maker_name = None
+
+        # If both handle and knot are present but no makers found, return minimal structure
+        if handle and knot:
+            # Extract fiber and size from knot text even when maker is unknown
+            fiber = self.fiber_processor.match_fiber(knot)
+            knot_size_mm = None
+
+            # Try to extract size from knot text
+            import re
+
+            size_match = re.search(r"(\d+)\s*mm", knot, re.IGNORECASE)
+            if size_match:
+                knot_size_mm = float(size_match.group(1))
+
+            minimal = {
+                "original": value,
+                "matched": {
+                    "brand": None,
+                    "model": None,
+                    "fiber": fiber,
+                    "knot_size_mm": knot_size_mm,
+                    "handle_maker": handle_maker_name,
+                    "knot_maker": knot_maker_name,
+                    "fiber_strategy": None,
+                    "_matched_by_strategy": "MinimalFallback",
+                    "_pattern_used": None,
+                    "handle": {
+                        "brand": handle_maker_name,
+                        "model": None,
+                        "source_text": handle,
+                    },
+                    "knot": {
+                        "brand": knot_maker_name,
+                        "model": None,
+                        "fiber": fiber,
+                        "knot_size_mm": knot_size_mm,
+                        "source_text": knot,
+                    },
+                },
+                "match_type": None,
+                "pattern": None,
+            }
+            return self._post_process_match(minimal, value)
 
         return {
             "original": value,
@@ -489,34 +708,63 @@ class BrushMatcher:
                     m["_matched_from"] = matched_from
                     m["_original_knot_text"] = knot
                     m["_original_handle_text"] = handle
+                    # For handle/knot combos, clear the brand/model (should be None)
+                    if matched_from in ["knot_part", "handle_part"]:
+                        m["brand"] = None
+                        m["model"] = None
                 # --- Begin nested knot/handle extraction ---
                 # Try to extract nested knot/handle fields from the catalog entry if present
                 brand = m.get("brand")
                 model = m.get("model")
+
+                # Ensure handle_maker and knot_maker fields are always present
+                if "handle_maker" not in m:
+                    m["handle_maker"] = None
+                if "knot_maker" not in m:
+                    m["knot_maker"] = None
+
                 # Only attempt if both are present
                 if brand and model:
-                    for section in ["known_brushes", "declaration_grooming", "other_brushes"]:
-                        section_data = self.catalog_data.get(section, {})
-                        if brand in section_data:
-                            brand_data = section_data[brand]
-                            if model in brand_data:
-                                catalog_entry = brand_data[model]
-                                # Extract knot info
-                                if isinstance(catalog_entry, dict) and "knot" in catalog_entry:
-                                    knot_info = catalog_entry["knot"]
-                                    m["fiber"] = knot_info.get("fiber")
-                                    m["knot_size_mm"] = knot_info.get("knot_size_mm")
-                                    m["knot_maker"] = knot_info.get("brand")
-                                    m["fiber_strategy"] = (
-                                        "yaml"
-                                        if knot_info.get("fiber")
-                                        else m.get("fiber_strategy")
-                                    )
-                                # Extract handle info
-                                if isinstance(catalog_entry, dict) and "handle" in catalog_entry:
-                                    handle_info = catalog_entry["handle"]
-                                    m["handle_maker"] = handle_info.get("brand")
-                                break
+                    # Check in known_brushes section first
+                    known_brushes_data = self.catalog_data.get("known_brushes", {})
+                    if brand in known_brushes_data:
+                        brand_data = known_brushes_data[brand]
+                        if model in brand_data:
+                            catalog_entry = brand_data[model]
+                            # Extract knot info
+                            if isinstance(catalog_entry, dict) and "knot" in catalog_entry:
+                                knot_info = catalog_entry["knot"]
+                                m["fiber"] = knot_info.get("fiber")
+                                m["knot_size_mm"] = knot_info.get("knot_size_mm")
+                                m["knot_maker"] = knot_info.get("brand")
+                                m["fiber_strategy"] = (
+                                    "yaml" if knot_info.get("fiber") else m.get("fiber_strategy")
+                                )
+                            # Extract handle info
+                            if isinstance(catalog_entry, dict) and "handle" in catalog_entry:
+                                handle_info = catalog_entry["handle"]
+                                m["handle_maker"] = handle_info.get("brand")
+                            return m
+                    # Fallback to other_brushes section
+                    other_brushes_data = self.catalog_data.get("other_brushes", {})
+                    if brand in other_brushes_data:
+                        brand_data = other_brushes_data[brand]
+                        if model in brand_data:
+                            catalog_entry = brand_data[model]
+                            # Extract knot info
+                            if isinstance(catalog_entry, dict) and "knot" in catalog_entry:
+                                knot_info = catalog_entry["knot"]
+                                m["fiber"] = knot_info.get("fiber")
+                                m["knot_size_mm"] = knot_info.get("knot_size_mm")
+                                m["knot_maker"] = knot_info.get("brand")
+                                m["fiber_strategy"] = (
+                                    "yaml" if knot_info.get("fiber") else m.get("fiber_strategy")
+                                )
+                            # Extract handle info
+                            if isinstance(catalog_entry, dict) and "handle" in catalog_entry:
+                                handle_info = catalog_entry["handle"]
+                                m["handle_maker"] = handle_info.get("brand")
+                            return m
                 # --- End nested knot/handle extraction ---
                 return m
             if "brand" in result:
@@ -527,30 +775,50 @@ class BrushMatcher:
                     m["_matched_from"] = matched_from
                     m["_original_knot_text"] = knot
                     m["_original_handle_text"] = handle
+                    # For handle/knot combos, clear the brand/model (should be None)
+                    if matched_from in ["knot_part", "handle_part"]:
+                        m["brand"] = None
+                        m["model"] = None
                 # --- Begin nested knot/handle extraction (brand/model dict case) ---
                 brand = m.get("brand")
                 model = m.get("model")
                 if brand and model:
-                    for section in ["known_brushes", "declaration_grooming", "other_brushes"]:
-                        section_data = self.catalog_data.get(section, {})
-                        if brand in section_data:
-                            brand_data = section_data[brand]
-                            if model in brand_data:
-                                catalog_entry = brand_data[model]
-                                if isinstance(catalog_entry, dict) and "knot" in catalog_entry:
-                                    knot_info = catalog_entry["knot"]
-                                    m["fiber"] = knot_info.get("fiber")
-                                    m["knot_size_mm"] = knot_info.get("knot_size_mm")
-                                    m["knot_maker"] = knot_info.get("brand")
-                                    m["fiber_strategy"] = (
-                                        "yaml"
-                                        if knot_info.get("fiber")
-                                        else m.get("fiber_strategy")
-                                    )
-                                if isinstance(catalog_entry, dict) and "handle" in catalog_entry:
-                                    handle_info = catalog_entry["handle"]
-                                    m["handle_maker"] = handle_info.get("brand")
-                                break
+                    # Check in known_brushes section first
+                    known_brushes_data = self.catalog_data.get("known_brushes", {})
+                    if brand in known_brushes_data:
+                        brand_data = known_brushes_data[brand]
+                        if model in brand_data:
+                            catalog_entry = brand_data[model]
+                            if isinstance(catalog_entry, dict) and "knot" in catalog_entry:
+                                knot_info = catalog_entry["knot"]
+                                m["fiber"] = knot_info.get("fiber")
+                                m["knot_size_mm"] = knot_info.get("knot_size_mm")
+                                m["knot_maker"] = knot_info.get("brand")
+                                m["fiber_strategy"] = (
+                                    "yaml" if knot_info.get("fiber") else m.get("fiber_strategy")
+                                )
+                            if isinstance(catalog_entry, dict) and "handle" in catalog_entry:
+                                handle_info = catalog_entry["handle"]
+                                m["handle_maker"] = handle_info.get("brand")
+                            return m
+                    # Fallback to other_brushes section
+                    other_brushes_data = self.catalog_data.get("other_brushes", {})
+                    if brand in other_brushes_data:
+                        brand_data = other_brushes_data[brand]
+                        if model in brand_data:
+                            catalog_entry = brand_data[model]
+                            if isinstance(catalog_entry, dict) and "knot" in catalog_entry:
+                                knot_info = catalog_entry["knot"]
+                                m["fiber"] = knot_info.get("fiber")
+                                m["knot_size_mm"] = knot_info.get("knot_size_mm")
+                                m["knot_maker"] = knot_info.get("brand")
+                                m["fiber_strategy"] = (
+                                    "yaml" if knot_info.get("fiber") else m.get("fiber_strategy")
+                                )
+                            if isinstance(catalog_entry, dict) and "handle" in catalog_entry:
+                                handle_info = catalog_entry["handle"]
+                                m["handle_maker"] = handle_info.get("brand")
+                            return m
                 # --- End nested knot/handle extraction ---
                 return m
         return None
@@ -603,11 +871,15 @@ class BrushMatcher:
         parsed_fiber = self.fiber_processor.match_fiber(value)
         self.fiber_processor.resolve_fiber(updated, parsed_fiber)
 
+        # Add handle and knot subsections if we have split information
+        # (This should be done before resolving makers to avoid conflicts)
+        self._add_handle_knot_subsections(updated, value)
+
         # Resolve handle maker information
         self._resolve_handle_maker(updated, value)
 
-        # Add handle and knot subsections if we have split information
-        self._add_handle_knot_subsections(updated, value)
+        # Resolve knot maker information
+        self._resolve_knot_maker(updated, value)
 
         # Cache the post-processing result
         self._match_cache[cache_key] = {
@@ -634,11 +906,19 @@ class BrushMatcher:
         model = updated.get("model")
         catalog_entry = None
         if brand and model:
-            # Check in the main catalog (excluding other_brushes)
-            if brand in self.catalog_data and brand != "other_brushes":
-                brand_data = self.catalog_data[brand]
+            # Check in the known_brushes section first
+            known_brushes_data = self.catalog_data.get("known_brushes", {})
+            if brand in known_brushes_data:
+                brand_data = known_brushes_data[brand]
                 if model in brand_data:
                     catalog_entry = brand_data[model]
+            # Fallback to other_brushes section
+            if not catalog_entry:
+                other_brushes_data = self.catalog_data.get("other_brushes", {})
+                if brand in other_brushes_data:
+                    brand_data = other_brushes_data[brand]
+                    if model in brand_data:
+                        catalog_entry = brand_data[model]
         # Handle subsection from catalog
         if catalog_entry and isinstance(catalog_entry, dict) and "handle" in catalog_entry:
             handle_info = catalog_entry["handle"]
@@ -719,8 +999,15 @@ class BrushMatcher:
                             "knot_size_mm": None,
                             "source_text": knot_text,
                         }
-        # Only clear top-level brand/model for dynamic combos (not catalog-driven)
-        if updated.get("handle") and updated.get("knot") and catalog_entry is None:
+        # Clear top-level brand/model for handle/knot combos (different makers)
+        # Only preserve brand/model for complete brushes (same maker or catalog-driven)
+        if (
+            updated.get("handle")
+            and updated.get("knot")
+            and catalog_entry is None
+            and updated.get("_matched_by_strategy")
+            not in ["MakerComparison", "KnownBrushMatchingStrategy"]
+        ):
             updated["brand"] = None
             updated["model"] = None
 
@@ -771,11 +1058,65 @@ class BrushMatcher:
 
     def _try_handle_from_brand(self, updated: dict, value: str) -> bool:
         """Try to use brand as handle maker if it's known."""
-        brand = updated.get("brand", "").strip()
-        if brand and self.handle_matcher.is_known_handle_maker(brand):
+        brand = (updated.get("brand") or "").strip()
+        if brand:
             updated["handle_maker"] = brand
             return True
         return False
+
+    def _resolve_knot_maker(self, updated: dict, value: str) -> None:
+        """Resolve knot maker using multiple strategies."""
+        if ("knot_maker" not in updated) or (updated["knot_maker"] is None):
+            # For complete brushes, knot maker is often the same as the brand
+            # But don't override if it's already been set from catalog
+            brand = updated.get("brand")
+            if brand and not updated.get("knot_maker"):
+                updated["knot_maker"] = brand
+            else:
+                # Try to find knot maker from split text or full text
+                knot_text = updated.get("_original_knot_text")
+                if not knot_text:
+                    _, knot_text, _ = self.brush_splitter.split_handle_and_knot(value)
+
+                if knot_text:
+                    # Try to match the knot against our strategies
+                    for strategy in self.strategies:
+                        try:
+                            result = strategy.match(knot_text)
+                            if result and (
+                                (isinstance(result, dict) and result.get("matched"))
+                                or (isinstance(result, dict) and result.get("brand"))
+                            ):
+                                if isinstance(result, dict) and result.get("matched"):
+                                    updated["knot_maker"] = result["matched"].get("brand")
+                                elif isinstance(result, dict) and result.get("brand"):
+                                    updated["knot_maker"] = result["brand"]
+                                break
+                        except (AttributeError, KeyError, TypeError):
+                            continue
+                else:
+                    updated["knot_maker"] = None
+
+    def _normalize_maker_name(self, maker_name: str) -> str:
+        """Normalize maker name for comparison by removing common suffixes."""
+        if not maker_name:
+            return ""
+
+        # Remove common suffixes that don't affect maker identity
+        normalized = maker_name
+        suffixes_to_remove = [
+            " (batch not specified)",
+            " (batch unspecified)",
+            " batch",
+            " (default)",
+        ]
+
+        for suffix in suffixes_to_remove:
+            if normalized.endswith(suffix):
+                normalized = normalized[: -len(suffix)]
+                break
+
+        return normalized.strip()
 
     def _try_handle_from_model(self, updated: dict, value: str) -> bool:
         """Try to extract handle maker from model field."""

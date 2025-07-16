@@ -65,30 +65,168 @@ known_knots:
       patterns:
       - \b2\s*bed\b
   Chisel & Hound:
+    fiber: Badger
     knot_size_mm: 26
-    batch_patterns:
-    - name: "v{batch}"
-      fiber: Badger
+    v10:
       patterns:
-      - chis.*[fh]ou.*v{batch}
-      - \bc(?:\&|and|\+)h\b.*v{batch}
-      - \bch\b.*v{batch}
-      valid_batches: ["10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28"]
+      - chis.*[fh]ou.*v10
+      - \bc(?:\&|and|\+)h\b.*v10
+      - \bch\b.*v10
+    v11:
+      patterns:
+      - chis.*[fh]ou.*v11
+      - \bc(?:\&|and|\+)h\b.*v11
+      - \bch\b.*v11
+    v12:
+      patterns:
+      - chis.*[fh]ou.*v12
+      - \bc(?:\&|and|\+)h\b.*v12
+      - \bch\b.*v12
+    v13:
+      patterns:
+      - chis.*[fh]ou.*v13
+      - \bc(?:\&|and|\+)h\b.*v13
+      - \bch\b.*v13
+    v14:
+      patterns:
+      - chis.*[fh]ou.*v14
+      - \bc(?:\&|and|\+)h\b.*v14
+      - \bch\b.*v14
+    v15:
+      patterns:
+      - chis.*[fh]ou.*v15
+      - \bc(?:\&|and|\+)h\b.*v15
+      - \bch\b.*v15
+    v16:
+      patterns:
+      - chis.*[fh]ou.*v16
+      - \bc(?:\&|and|\+)h\b.*v16
+      - \bch\b.*v16
+    v17:
+      patterns:
+      - chis.*[fh]ou.*v17
+      - \bc(?:\&|and|\+)h\b.*v17
+      - \bch\b.*v17
+    v18:
+      patterns:
+      - chis.*[fh]ou.*v18
+      - \bc(?:\&|and|\+)h\b.*v18
+      - \bch\b.*v18
+    v19:
+      patterns:
+      - chis.*[fh]ou.*v19
+      - \bc(?:\&|and|\+)h\b.*v19
+      - \bch\b.*v19
+    v20:
+      patterns:
+      - chis.*[fh]ou.*v20
+      - \bc(?:\&|and|\+)h\b.*v20
+      - \bch\b.*v20
+    v21:
+      patterns:
+      - chis.*[fh]ou.*v21
+      - \bc(?:\&|and|\+)h\b.*v21
+      - \bch\b.*v21
+    v22:
+      patterns:
+      - chis.*[fh]ou.*v22
+      - \bc(?:\&|and|\+)h\b.*v22
+      - \bch\b.*v22
+    v23:
+      patterns:
+      - chis.*[fh]ou.*v23
+      - \bc(?:\&|and|\+)h\b.*v23
+      - \bch\b.*v23
+    v24:
+      patterns:
+      - chis.*[fh]ou.*v24
+      - \bc(?:\&|and|\+)h\b.*v24
+      - \bch\b.*v24
+    v25:
+      patterns:
+      - chis.*[fh]ou.*v25
+      - \bc(?:\&|and|\+)h\b.*v25
+      - \bch\b.*v25
+    v26:
+      patterns:
+      - chis.*[fh]ou.*v26
+      - \bc(?:\&|and|\+)h\b.*v26
+      - \bch\b.*v26
+    v27:
+      patterns:
+      - chis.*[fh]ou.*v27
+      - \bc(?:\&|and|\+)h\b.*v27
+      - \bch\b.*v27
+    v28:
+      patterns:
+      - chis.*[fh]ou.*v28
+      - \bc(?:\&|and|\+)h\b.*v28
+      - \bch\b.*v28
   Declaration Grooming:
     knot_size_mm: 28
-    batch_patterns:
-    - name: "B{batch}"
+    fiber: Badger
+    B1:
       patterns:
-      - (declaration|\bdg\b)?.*\bb{batch}\b
-      valid_batches: ["1", "2", "3", "4", "5", "6", "7", "8", "10", "11", "12", "13", "14", "15"]
+      - (declaration|\bdg\b).*\bb1\b
+      - \bb1\b
+    B2:
+      patterns:
+      - (declaration|\bdg\b).*\bb2\b
+      - \bb2\b
+    B3:
+      patterns:
+      - (declaration|\bdg\b).*\bb3\b
+      - \bb3\b
+    B4:
+      patterns:
+      - (declaration|\bdg\b).*\bb4\b
+      - \bb4\b
+    B5:
+      patterns:
+      - (declaration|\bdg\b).*\bb5\b
+      - \bb5\b
+    B6:
+      patterns:
+      - (declaration|\bdg\b).*\bb6\b
+      - \bb6\b
+    B7:
+      patterns:
+      - (declaration|\bdg\b).*\bb7\b
+      - \bb7\b
+    B8:
+      patterns:
+      - (declaration|\bdg\b).*\bb8\b
+      - \bb8\b
     B9A:
-      fiber: Badger
-      patterns:
-      - (declaration|\bdg\b)?.*\bb9a\+?\b
+        patterns:
+        - (declaration|\bdg\b)?.*\bb9a\+?\b
     B9B:
-      fiber: Badger
       patterns:
       - (declaration|\bdg\b)?.*\bb9b\+?\b
+    B10:
+      patterns:
+      - (declaration|\bdg\b).*\bb10\b
+      - \bb10\b
+    B11:
+      patterns:
+      - (declaration|\bdg\b).*\bb11\b
+      - \bb11\b
+    B12:
+      patterns:
+      - (declaration|\bdg\b).*\bb12\b
+      - \bb12\b
+    B13:
+      patterns:
+      - (declaration|\bdg\b).*\bb13\b
+      - \bb13\b
+    B14:
+      patterns:
+      - (declaration|\bdg\b).*\bb14\b
+      - \bb14\b
+    B15:
+      patterns:
+      - (declaration|\bdg\b).*\bb15\b
+      - \bb15\b
   Oumo:
     Rorschach:
       fiber: Badger

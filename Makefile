@@ -1,6 +1,10 @@
-.PHONY: all lint format typecheck test coverage fetch extract match enrich aggregate pipeline performance-test install install-dev
+.PHONY: all lint format typecheck test coverage fetch extract match enrich aggregate pipeline performance-test install install-dev preprocess
 
-all: lint format typecheck test
+all: preprocess lint format typecheck test
+
+# Preprocess YAML catalogs
+preprocess:
+	python sotd/utils/yaml_preprocessor.py
 
 # Lint with Ruff
 lint:

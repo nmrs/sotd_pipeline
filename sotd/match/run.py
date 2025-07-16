@@ -129,7 +129,7 @@ def process_month(
         # Initialize matchers
         monitor.start_processing_timing()
         blade_matcher = BladeMatcher(correct_matches_path=correct_matches_path)
-        brush_matcher = BrushMatcher(correct_matches_path=correct_matches_path)
+        brush_matcher = BrushMatcher(correct_matches_path=correct_matches_path, debug=debug)
         razor_matcher = RazorMatcher(correct_matches_path=correct_matches_path)
         soap_matcher = SoapMatcher(correct_matches_path=correct_matches_path)
 

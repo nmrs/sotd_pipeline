@@ -1,7 +1,7 @@
 import re
 from typing import Optional
 
-from sotd.match.brush_matching_strategies.utils.fiber_utils import _FIBER_PATTERNS
+from sotd.match.brush_matching_strategies.utils.fiber_utils import _FIBER_PATTERNS, match_fiber
 
 
 class EnhancedBrushSplitter:
@@ -32,18 +32,72 @@ class EnhancedBrushSplitter:
         return self._split_by_brand_context(text)
 
     def _split_by_delimiters(self, text: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
-        """Split text using known delimiters and return parts and delimiter type."""
-        handle_primary_delimiters = [" in "]  # Handle takes precedence
-        other_delimiters = [" w/ ", " with ", " / ", "/", " - "]  # All use smart analysis
+        """Split text using known delimiters and return parts and delimiter type.
 
+        - `/` is treated as a high-reliability delimiter regardless of spaces
+          (e.g., 'A/B', 'A / B', 'A/ B', 'A /B').
+        - Always check for ' w/ ' and ' with ' delimiters before '/' to avoid
+          mis-splitting 'w/' as '/'.
+        - Other delimiters retain their original logic.
+        """
+        # High-reliability delimiters (always trigger splitting with simple logic)
+        high_reliability_delimiters = [" w/ ", " with "]
+        # Handle-primary delimiters (first part is handle)
+        handle_primary_delimiters = [" in "]
+        # Medium-reliability delimiters (need smart analysis)
+        medium_reliability_delimiters = [" + ", " - "]
+
+        # Always check for ' w/ ' and ' with ' first to avoid misinterpreting 'w/' as '/'
+        for delimiter in high_reliability_delimiters:
+            if delimiter in text:
+                return self._split_by_delimiter_simple(text, delimiter, "high_reliability")
+
+        # Special handling for `/` as high-reliability delimiter (any spaces, not part of 'w/')
+        slash_match = re.search(r"(.+?)(?<!w)\s*/\s*(.+)", text)
+        if slash_match:
+            part1 = slash_match.group(1).strip()
+            part2 = slash_match.group(2).strip()
+            if part1 and part2:
+                # Score both parts to determine which is handle vs knot
+                part1_handle_score = self._score_as_handle(part1)
+                part2_handle_score = self._score_as_handle(part2)
+                if part1_handle_score > part2_handle_score:
+                    return part1, part2, "high_reliability"
+                else:
+                    return part2, part1, "high_reliability"
+
+        # Check handle-primary delimiters (first part is handle)
         for delimiter in handle_primary_delimiters:
             if delimiter in text:
-                return self._split_by_delimiter(
-                    text, delimiter, "handle_primary", handle_first=True
-                )
-        for delimiter in other_delimiters:
+                return self._split_by_delimiter_simple(text, delimiter, "handle_primary")
+
+        # Check medium-reliability delimiters (use smart analysis)
+        for delimiter in medium_reliability_delimiters:
             if delimiter in text:
                 return self._split_by_delimiter_smart(text, delimiter, "smart_analysis")
+
+        return None, None, None
+
+    def _split_by_delimiter_simple(
+        self, text: str, delimiter: str, delimiter_type: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Content-based splitting for high-reliability delimiters.
+
+        Analyzes both sides to determine which is handle vs knot.
+        """
+        parts = text.split(delimiter, 1)
+        if len(parts) == 2:
+            part1 = parts[0].strip()
+            part2 = parts[1].strip()
+            if part1 and part2:
+                # Score both parts to determine which is handle vs knot
+                part1_handle_score = self._score_as_handle(part1)
+                part2_handle_score = self._score_as_handle(part2)
+
+                if part1_handle_score > part2_handle_score:
+                    return part1, part2, delimiter_type
+                else:
+                    return part2, part1, delimiter_type
         return None, None, None
 
     def _split_by_delimiter_smart(
@@ -162,13 +216,14 @@ class EnhancedBrushSplitter:
                 score += 2
 
         # Knot indicators (negative score for handle likelihood)
-        knot_terms = ["badger", "boar", "synthetic", "syn", "mm", "knot"]
+        knot_terms = ["syn", "mm", "knot"]
         for term in knot_terms:
             if term in text_lower:
                 score -= 5
 
-        # Fiber type patterns (strong knot indicators)
-        if any(fiber in text_lower for fiber in ["badger", "boar", "synthetic"]):
+        # Fiber type patterns (strong knot indicators) - use fiber_utils
+        fiber_type = match_fiber(text)
+        if fiber_type:
             score -= 8
 
         # Size patterns (knot indicators)

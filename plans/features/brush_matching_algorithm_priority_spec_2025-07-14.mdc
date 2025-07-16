@@ -28,20 +28,31 @@ This leads to incorrect matches where the algorithm chooses a complete brush mat
 
 ### 2. Algorithmic Priority
 
-#### Phase 1: Split Detection First
-1. **Check for high-reliability delimiters**:
-   - `" w/ "`, `" with "`, `" / "` → always try to split
-2. **Check for medium-reliability delimiters**:
-   - `" + "`, `" - "`, `" in "` → use smart analysis
-3. **If split found**:
-   - **Same maker** → treat as complete brush
-   - **Different makers** → treat as handle/knot combination
+#### Current Algorithm (Implemented):
+1. **Check correct matches first** (highest priority)
+2. **Split input into handle and knot components** 
+3. **Compare makers if both handle and knot are present**
+4. **If same maker** → treat as complete brush
+5. **If different makers** → use priority-based matching (knot vs handle priority)
+6. **Fall back to main strategy matching** (complete brush matching)
 
-#### Phase 2: Complete Brush Detection
-4. **If no delimiters, try complete brush matching**
+#### Complete Brush Matching Timing:
+Complete brush matching runs in **Step 6** as the final fallback, after:
+- Correct matches (Step 1)
+- Delimiter-based splitting and maker comparison (Steps 2-5)
+- Priority-based matching for different makers (Step 5)
 
-#### Phase 3: Fallback
-5. **If no split and no complete brush match, try other strategies**
+This ensures that:
+- **Correct matches always take precedence** (manual overrides)
+- **Delimiter-based logic is tried first** (user intent via delimiters)
+- **Complete brush matching is the final fallback** (catalog-driven matching)
+
+#### Decision: Step 1.2 Unnecessary
+The original Step 1.2 (changing priority order) was determined to be **unnecessary/a bad idea** because:
+1. **Current system already implements core logic** - splitting, maker comparison, same/different maker handling
+2. **Current order is actually better** - correct matches should always be highest priority
+3. **Bugs are in implementation, not priority order** - changing order wouldn't fix the bugs
+4. **Changing priority would expose bugs more prominently** without fixing them
 
 ### 3. Complete Brush Detection
 
@@ -145,3 +156,89 @@ description:
 globs:
 alwaysApply: false
 ---
+
+## Lessons Learned and Implementation Decisions (Step 1.1) ✅ COMPLETE
+
+**What Was Implemented:**
+- ✅ **Delimiter Classification**: High-reliability ("w/", "with", "/"), handle-primary ("in"), medium-reliability ("+", "-")
+- ✅ **Content Analysis**: All delimiter splitting uses `_score_as_handle()` to analyze both sides, not positional assignment
+- ✅ **User Input Robustness**: Handles all spacing variants (e.g., `"A/B"`, `"A / B"`, `"A/ B"`, `"A /B"`)
+- ✅ **Conflict Resolution**: Processes `" w/ "` before `/` to avoid misinterpreting `"w/"` as `/`
+- ✅ **Fiber Integration**: Uses canonical patterns from `fiber_utils.py` for fiber detection
+- ✅ **Comprehensive Testing**: All 1497 tests pass, covering all delimiter types and edge cases
+
+**Key Implementation Decisions:**
+1. **Delimiter Processing Order**: Always check `" w/ "` and `" with "` before `/` to avoid conflicts
+2. **Content Analysis Required**: Positional assignment (first part = handle) is insufficient for real-world cases
+3. **Regex Pattern**: Uses `r"(.+?)(?<!w)\s*/\s*(.+)"` to match `/` with optional spaces but not `"w/"`
+4. **Fiber Detection**: Uses `match_fiber()` from `fiber_utils.py` for canonical patterns
+
+**Lessons Learned:**
+- **User Input Variations**: Users will input delimiters with or without spaces, requiring robust handling
+- **Delimiter Conflicts**: `"w/"` and `/` can conflict, requiring careful processing order
+- **Content Analysis Essential**: Both sides must be analyzed using catalog patterns and heuristics
+- **Test Coverage Critical**: Comprehensive tests are essential for delimiter edge cases
+
+**No YAML Changes Needed**: All delimiter logic uses existing YAML patterns and fiber detection.
+
+**Next: Step 1.2** - Update BrushMatcher.match() for delimiter-first priority and maker comparison.
+
+## Clarification: Brand/Model for Handle/Knot Combos
+
+- For any handle/knot combo (e.g., 'B15 w/ custom handle'), the top-level brand/model MUST be None, even if the knot is a known/canonical knot (e.g., Declaration Grooming B15).
+- Only true complete brushes (catalog-driven, or same-maker splits) should preserve brand/model.
+
+### Example: Handle/Knot Combo
+
+Input: 'B15 w/ custom handle'
+
+Result:
+{
+  "original": "B15 w/ custom handle",
+  "matched": {
+    "brand": null,
+    "model": null,
+    "handle_maker": "custom",  # or None if unknown
+    "knot_maker": "Declaration Grooming",
+    "knot": {
+      "brand": "Declaration Grooming",
+      "model": "B15"
+    }
+  },
+  ...
+}
+
+- This rule prevents confusion in reporting and aggregation, and is now enforced by the test suite.
+
+## Analysis: Delimiter Priority Distinction (Step 1.1 Review)
+
+**Key Finding**: The distinction between high and medium reliability delimiters may be over-engineered, BUT `" in "` is fundamentally different and should be treated specially.
+
+**Current Differences:**
+- **High Reliability** (`" w/ "`, `" with "`, `/`): Uses `_split_by_delimiter_simple()` - single split point, content analysis
+- **Medium Reliability** (`" + "`, `" - "`): Uses `_split_by_delimiter_smart()` - multiple split points, thorough but expensive
+- **Handle Primary** (`" in "`): Uses `_split_by_delimiter_simple()` - but should use semantic meaning
+
+**Assessment:**
+1. **Same Scoring Logic**: High and medium reliability both use identical `_score_as_handle()` method
+2. **Arbitrary Classification**: Why is `" w/ "` high reliability but `" + "` medium?
+3. **Limited Downstream Impact**: Delimiter type is only used for logging/tracking
+4. **Over-Engineering**: The high/medium distinction adds complexity without clear benefits
+5. **Special Case**: `" in "` has semantic meaning ("knot in handle") and should override content analysis
+
+**Semantic Meaning of `" in "`:**
+- **Semantic**: "knot in handle" - the first part is the knot, second part is the handle
+- **Current Implementation**: Does content analysis and scores both parts
+- **Problem**: Content analysis can override semantic meaning
+- **Example**: "Declaration Grooming in Stirling handle" should be:
+  - Knot: "Declaration Grooming" (the thing that's "in" the handle)
+  - Handle: "Stirling handle" (the thing that contains the knot)
+- **Current Result**: Reversed due to content analysis
+
+**Recommendation**: 
+1. **Simplify high/medium distinction**: Use single approach for `" w/ "`, `" with "`, `/`, `" + "`, `" - "`
+2. **Preserve semantic meaning**: `" in "` should use positional assignment, not content analysis
+3. **Fix `" in "` implementation**: Use `_split_by_delimiter()` with `handle_first=False` (knot first, handle second)
+
+**Impact**: This would simplify the codebase while preserving the semantic meaning of `" in "` and maintaining functionality for other delimiters.
+

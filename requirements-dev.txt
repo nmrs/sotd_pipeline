@@ -7,3 +7,4 @@ pytest-xdist
 pyright
 rich
 streamlit>=1.28.0
+yamllint

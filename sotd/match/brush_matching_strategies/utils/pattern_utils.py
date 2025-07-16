@@ -71,7 +71,7 @@ def compile_catalog_patterns(
     pattern_field: str = "patterns",
     metadata_fields: Optional[List[str]] = None,
 ) -> List[Dict[str, Any]]:
-    """Compile patterns from a catalog structure.
+    """Compile patterns from a catalog structure with brand-level defaults.
 
     Args:
         catalog: Catalog dictionary with brand -> model -> metadata structure
@@ -81,13 +81,14 @@ def compile_catalog_patterns(
     Returns:
         List of compiled patterns with metadata
 
-    Example catalog structure:
+    Example catalog structure with brand-level defaults:
         {
             'Brand': {
+                'fiber': 'Badger',           # Brand-level default
+                'knot_size_mm': 28.0,        # Brand-level default
                 'Model': {
-                    'patterns': [r'brand.*model'],
-                    'fiber': 'Badger',
-                    'knot_size_mm': 28.0
+                    'patterns': [r'brand.*model']
+                    # Inherits fiber and knot_size_mm from brand level
                 }
             }
         }
@@ -101,6 +102,12 @@ def compile_catalog_patterns(
         if not isinstance(models, dict):
             continue
 
+        # Extract brand-level defaults
+        brand_defaults = {}
+        for field in metadata_fields:
+            if field in models:
+                brand_defaults[field] = models[field]
+
         for model, metadata in models.items():
             if not isinstance(metadata, dict):
                 continue
@@ -109,12 +116,15 @@ def compile_catalog_patterns(
             if not patterns:
                 continue
 
-            # Extract metadata fields
+            # Extract metadata fields with brand-level defaults as fallback
             pattern_metadata = {
                 "brand": brand,
                 "model": model if model else None,
-                **{field: metadata.get(field) for field in metadata_fields},
             }
+
+            # Add metadata fields, using model-level values or brand-level defaults
+            for field in metadata_fields:
+                pattern_metadata[field] = metadata.get(field, brand_defaults.get(field))
 
             # Create pattern entries
             for pattern in patterns:
