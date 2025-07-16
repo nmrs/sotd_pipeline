@@ -35,38 +35,23 @@ class UnmatchedAnalyzer(AnalysisTool):
         all_unmatched = defaultdict(list)
 
         for record in self.load_matched_data(args):
-            if args.field == "handle":
-                self._process_handle_unmatched(record, all_unmatched)
-            else:
-                self._process_field_unmatched(record, args.field, all_unmatched)
+            self._process_field_unmatched(record, args.field, all_unmatched)
 
         self._print_unmatched_results(all_unmatched, args.field, args.limit)
 
-    def _process_handle_unmatched(self, record: Dict, all_unmatched: Dict) -> None:
-        """Process unmatched handle records."""
-        brush = record.get("brush")
-        if isinstance(brush, dict):
-            matched = brush.get("matched")
-            if matched is None:
-                # If nothing matched at all, count as unmatched handle
-                original = brush.get("original", "")
-                file_info = {
-                    "file": record.get("_source_file", ""),
-                    "line": record.get("_source_line", "unknown"),
-                }
-                all_unmatched[original].append(file_info)
-            elif isinstance(matched, dict):
-                handle_maker = matched.get("handle_maker")
-                if not handle_maker:
-                    original = brush.get("original", "")
-                    file_info = {
-                        "file": record.get("_source_file", ""),
-                        "line": record.get("_source_line", "unknown"),
-                    }
-                    all_unmatched[original].append(file_info)
-
     def _process_field_unmatched(self, record: Dict, field: str, all_unmatched: Dict) -> None:
         """Process unmatched field records."""
+        if field == "brush":
+            # Use new brush-specific logic for handle/knot granularity
+            self._process_brush_unmatched(record, all_unmatched)
+        else:
+            # Use existing simple logic for razor, blade, soap
+            self._process_simple_field_unmatched(record, field, all_unmatched)
+
+    def _process_simple_field_unmatched(
+        self, record: Dict, field: str, all_unmatched: Dict
+    ) -> None:
+        """Process unmatched simple field records (razor, blade, soap)."""
         field_val = record.get(field)
         file_info = {
             "file": record.get("_source_file", ""),
@@ -85,6 +70,56 @@ class UnmatchedAnalyzer(AnalysisTool):
                 if field == "blade":
                     original = self._strip_use_count(original)
                 all_unmatched[original].append(file_info)
+
+    def _process_brush_unmatched(self, record: Dict, all_unmatched: Dict) -> None:
+        """Process unmatched brush records with handle/knot granularity."""
+        brush = record.get("brush")
+        if not isinstance(brush, dict):
+            return
+
+        matched = brush.get("matched")
+        original = brush.get("original", "")
+        file_info = {
+            "file": record.get("_source_file", ""),
+            "line": record.get("_source_line", "unknown"),
+        }
+
+        # If nothing matched at all, count as unmatched brush
+        if matched is None:
+            all_unmatched[original].append(file_info)
+            return
+
+        if not isinstance(matched, dict):
+            all_unmatched[original].append(file_info)
+            return
+
+        # Check handle component
+        handle = matched.get("handle")
+        if handle and handle.get("brand") in [None, "UnknownMaker", "Unknown"]:
+            handle_text = handle.get("source_text", "unknown handle")
+            matched_knot = matched.get("knot", {}).get("brand")
+            if matched_knot:
+                all_unmatched[f"❌ Handle: {handle_text} (✅ Knot: {matched_knot})"].append(
+                    file_info
+                )
+            else:
+                all_unmatched[f"❌ Handle: {handle_text}"].append(file_info)
+
+        # Check knot component
+        knot = matched.get("knot")
+        if knot and knot.get("brand") in [None, "UnknownKnot", "Unknown"]:
+            knot_text = knot.get("source_text", "unknown knot")
+            matched_handle = matched.get("handle", {}).get("brand")
+            if matched_handle:
+                all_unmatched[f"❌ Knot: {knot_text} (✅ Handle: {matched_handle})"].append(
+                    file_info
+                )
+            else:
+                all_unmatched[f"❌ Knot: {knot_text}"].append(file_info)
+
+        # If neither handle nor knot issues, but still unmatched, show as general brush issue
+        if not handle and not knot and matched.get("brand") is None:
+            all_unmatched[original].append(file_info)
 
     def _strip_use_count(self, text: str) -> str:
         """Strip use count from blade text using shared normalization logic.
