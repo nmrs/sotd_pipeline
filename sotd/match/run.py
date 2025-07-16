@@ -13,6 +13,7 @@ from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.cli import get_parser
 from sotd.match.razor_matcher import RazorMatcher
 from sotd.match.soap_matcher import SoapMatcher
+from sotd.match.types import MatchResult
 from sotd.match.utils.performance import PerformanceMonitor
 
 
@@ -60,7 +61,17 @@ def match_record(
 
     if "razor" in result:
         start_time = time.time()
-        result["razor"] = razor_matcher.match(result["razor"])
+        razor_result = razor_matcher.match(result["razor"])
+        # Convert MatchResult to dict if needed
+        if isinstance(razor_result, MatchResult):
+            result["razor"] = {
+                "original": razor_result.original,
+                "matched": razor_result.matched,
+                "match_type": razor_result.match_type,
+                "pattern": razor_result.pattern,
+            }
+        else:
+            result["razor"] = razor_result
         monitor.record_matcher_timing("razor", time.time() - start_time)
 
     if "blade" in result:
@@ -76,19 +87,59 @@ def match_record(
                 result["blade"] = {"original": result["blade"], "matched": None, "match_type": None}
             else:
                 # For other formats, use context-aware matching
-                result["blade"] = blade_matcher.match_with_context(result["blade"], razor_format)
+                blade_result = blade_matcher.match_with_context(result["blade"], razor_format)
+                # Convert MatchResult to dict if needed
+                if isinstance(blade_result, MatchResult):
+                    result["blade"] = {
+                        "original": blade_result.original,
+                        "matched": blade_result.matched,
+                        "match_type": blade_result.match_type,
+                        "pattern": blade_result.pattern,
+                    }
+                else:
+                    result["blade"] = blade_result
         else:
             # No razor context, match blade normally
-            result["blade"] = blade_matcher.match(result["blade"])
+            blade_result = blade_matcher.match(result["blade"])
+            # Convert MatchResult to dict if needed
+            if isinstance(blade_result, MatchResult):
+                result["blade"] = {
+                    "original": blade_result.original,
+                    "matched": blade_result.matched,
+                    "match_type": blade_result.match_type,
+                    "pattern": blade_result.pattern,
+                }
+            else:
+                result["blade"] = blade_result
         monitor.record_matcher_timing("blade", time.time() - start_time)
 
     if "soap" in result:
         start_time = time.time()
-        result["soap"] = soap_matcher.match(result["soap"])
+        soap_result = soap_matcher.match(result["soap"])
+        # Convert MatchResult to dict if needed
+        if isinstance(soap_result, MatchResult):
+            result["soap"] = {
+                "original": soap_result.original,
+                "matched": soap_result.matched,
+                "match_type": soap_result.match_type,
+                "pattern": soap_result.pattern,
+            }
+        else:
+            result["soap"] = soap_result
         monitor.record_matcher_timing("soap", time.time() - start_time)
     if "brush" in result:
         start_time = time.time()
-        result["brush"] = brush_matcher.match(result["brush"])
+        brush_result = brush_matcher.match(result["brush"])
+        # Convert MatchResult to dict if needed
+        if isinstance(brush_result, MatchResult):
+            result["brush"] = {
+                "original": brush_result.original,
+                "matched": brush_result.matched,
+                "match_type": brush_result.match_type,
+                "pattern": brush_result.pattern,
+            }
+        else:
+            result["brush"] = brush_result
         monitor.record_matcher_timing("brush", time.time() - start_time)
     return result
 
