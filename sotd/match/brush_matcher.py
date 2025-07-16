@@ -527,22 +527,6 @@ class BrushMatcher:
                 for k in ("brand", "model", "fiber", "knot_size_mm", "fiber_strategy"):
                     if k not in result["matched"]:
                         result["matched"][k] = None
-                # Final safety net: always include handle/knot fields for split inputs
-                if handle or knot:
-                    if "handle" not in result["matched"]:
-                        result["matched"]["handle"] = {
-                            "brand": result["matched"].get("handle_maker"),
-                            "model": None,
-                            "source_text": handle,
-                        }
-                    if "knot" not in result["matched"]:
-                        result["matched"]["knot"] = {
-                            "brand": result["matched"].get("knot_maker"),
-                            "model": result["matched"].get("model"),
-                            "fiber": result["matched"].get("fiber"),
-                            "knot_size_mm": result["matched"].get("knot_size_mm"),
-                            "source_text": knot,
-                        }
                 return result
         elif (
             handle
@@ -562,22 +546,6 @@ class BrushMatcher:
                 for k in ("brand", "model", "fiber", "knot_size_mm", "fiber_strategy"):
                     if k not in result["matched"]:
                         result["matched"][k] = None
-                # Final safety net: always include handle/knot fields for split inputs
-                if handle or knot:
-                    if "handle" not in result["matched"]:
-                        result["matched"]["handle"] = {
-                            "brand": result["matched"].get("handle_maker"),
-                            "model": None,
-                            "source_text": handle,
-                        }
-                    if "knot" not in result["matched"]:
-                        result["matched"]["knot"] = {
-                            "brand": result["matched"].get("knot_maker"),
-                            "model": result["matched"].get("model"),
-                            "fiber": result["matched"].get("fiber"),
-                            "knot_size_mm": result["matched"].get("knot_size_mm"),
-                            "source_text": knot,
-                        }
                 return result
 
         # Step 4: Fall back to main strategy matching
@@ -586,22 +554,6 @@ class BrushMatcher:
             for k in ("brand", "model", "fiber", "knot_size_mm", "fiber_strategy"):
                 if k not in result["matched"]:
                     result["matched"][k] = None
-            # Final safety net: always include handle/knot fields for split inputs
-            if handle or knot:
-                if "handle" not in result["matched"]:
-                    result["matched"]["handle"] = {
-                        "brand": result["matched"].get("handle_maker"),
-                        "model": None,
-                        "source_text": handle,
-                    }
-                if "knot" not in result["matched"]:
-                    result["matched"]["knot"] = {
-                        "brand": result["matched"].get("knot_maker"),
-                        "model": result["matched"].get("model"),
-                        "fiber": result["matched"].get("fiber"),
-                        "knot_size_mm": result["matched"].get("knot_size_mm"),
-                        "source_text": knot,
-                    }
             return result
 
         # Ensure handle_maker_name and knot_maker_name are always defined
@@ -955,12 +907,11 @@ class BrushMatcher:
             # Add handle subsection if we have handle information
             if handle_text:
                 handle_match = self.handle_matcher.match_handle_maker(handle_text)
-                if handle_match:
-                    updated["handle"] = {
-                        "brand": handle_match["handle_maker"],
-                        "model": None,  # Could be extracted from handle_text if needed
-                        "source_text": handle_text,
-                    }
+                updated["handle"] = {
+                    "brand": handle_match["handle_maker"] if handle_match else None,
+                    "model": None,  # Could be extracted from handle_text if needed
+                    "source_text": handle_text,
+                }
         if ("knot" not in updated) or (updated["knot"] is None):
             if not ("knot" in updated and updated["knot"]):
                 knot_text = updated.get("_original_knot_text")
