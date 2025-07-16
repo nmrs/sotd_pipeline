@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from sotd.match.types import MatchResult
+
 
 class BaseBrushMatchingStrategy(ABC):
     @abstractmethod
-    def match(self, value: str) -> Optional[dict]:
+    def match(self, value: str) -> Optional[MatchResult]:
         """Attempt to match the given string to a known brush pattern.
 
-        Returns a dict with match results (including at least a 'matched' field),
-        or None if no match is found.
+        Returns a MatchResult object, or None if no match is found.
         """
         pass

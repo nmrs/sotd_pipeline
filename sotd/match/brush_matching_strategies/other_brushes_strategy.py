@@ -8,6 +8,7 @@ from sotd.match.brush_matching_strategies.utils.pattern_utils import (
 from sotd.match.brush_matching_strategies.yaml_backed_strategy import (
     YamlBackedBrushMatchingStrategy,
 )
+from sotd.match.types import MatchResult, create_match_result
 
 
 class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
@@ -23,7 +24,7 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
             catalog_name="other_brushes catalog",
         )
 
-    def match(self, value: str) -> dict:
+    def match(self, value: str) -> MatchResult:
         # Handle other_brushes format: brand -> {default: fiber, patterns: []}
         for brand, metadata in self.catalog.items():
             patterns = sorted(metadata["patterns"], key=len, reverse=True)
@@ -59,6 +60,16 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                     elif default_knot_size is not None:
                         result["knot_size_mm"] = default_knot_size
 
-                    return {"matched": result, "match_type": "brand_default", "pattern": pattern}
+                    return create_match_result(
+                        original=value,
+                        matched=result,
+                        pattern=pattern,
+                        match_type="brand_default",
+                    )
 
-        return {"matched": None, "match_type": None, "pattern": None}
+        return create_match_result(
+            original=value,
+            matched=None,
+            pattern=None,
+            match_type=None,
+        )

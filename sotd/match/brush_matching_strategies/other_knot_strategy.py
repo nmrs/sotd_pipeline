@@ -46,32 +46,34 @@ class OtherKnotMatchingStrategy:
         all_patterns.sort(key=lambda x: len(x["pattern"]), reverse=True)
         return all_patterns
 
-    def match(self, value: str) -> dict:
-        # Use unified string validation
-        normalized_text = validate_string_input(value)
-        if normalized_text is None:
+    def match(self, value: str):
+        """Match input against other knot patterns. Always returns a MatchResult."""
+        if not validate_string_input(value):
             return create_strategy_result(
-                original_value=value, matched_data=None, pattern=None, strategy_name="OtherKnot"
+                original_value=value,
+                matched_data=None,
+                pattern=None,
+                strategy_name="OtherKnotMatchingStrategy",
             )
 
-        # Use pattern matching
-        for entry in self.patterns:
-            if entry["compiled"].search(normalized_text):
-                entry_result = {
-                    "brand": entry.get("brand"),
-                    "model": entry.get("model"),
-                    "fiber": entry.get("fiber"),
-                    "knot_size_mm": entry.get("knot_size_mm"),
-                    "source_text": value,
-                }
+        for pattern_data in self.patterns:
+            if pattern_data["compiled"].search(value):
                 return create_strategy_result(
                     original_value=value,
-                    matched_data=entry_result,
-                    pattern=entry["pattern"],
-                    strategy_name="OtherKnot",
-                    match_type="brand",
+                    matched_data={
+                        "brand": pattern_data["brand"],
+                        "model": pattern_data["model"],
+                        "fiber": pattern_data["fiber"],
+                        "knot_size_mm": pattern_data["knot_size_mm"],
+                    },
+                    pattern=pattern_data["pattern"],
+                    strategy_name="OtherKnotMatchingStrategy",
+                    match_type="regex",
                 )
 
         return create_strategy_result(
-            original_value=value, matched_data=None, pattern=None, strategy_name="OtherKnot"
+            original_value=value,
+            matched_data=None,
+            pattern=None,
+            strategy_name="OtherKnotMatchingStrategy",
         )

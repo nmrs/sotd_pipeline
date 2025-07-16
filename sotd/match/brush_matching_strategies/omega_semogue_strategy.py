@@ -4,10 +4,11 @@ from sotd.match.brush_matching_strategies.utils.pattern_utils import (
     create_strategy_result,
     validate_string_input,
 )
+from sotd.match.types import MatchResult
 
 
 class OmegaSemogueBrushMatchingStrategy:
-    def match(self, value: str) -> dict:
+    def match(self, value: str) -> MatchResult:
         # Use unified string validation
         normalized_text = validate_string_input(value)
         if normalized_text is None:

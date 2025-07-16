@@ -7,6 +7,8 @@ used across brush matching strategies to ensure consistency and maintainability.
 import re
 from typing import Any, Dict, List, Optional
 
+from sotd.match.types import MatchResult, create_match_result
+
 
 def validate_string_input(value: Any) -> Optional[str]:
     """Validate and normalize string input for pattern matching.
@@ -200,30 +202,14 @@ def create_strategy_result(
     pattern: Optional[str],
     strategy_name: str,
     match_type: Optional[str] = None,
-) -> Dict[str, Any]:
-    """Create a standardized strategy result structure.
-
-    Args:
-        original_value: Original input value
-        matched_data: Matched data dictionary
-        pattern: Pattern that was matched
-        strategy_name: Name of the strategy
-        match_type: Type of match (e.g., 'exact', 'partial', 'brand_default')
-
-    Returns:
-        Standardized strategy result
-    """
-    result = {
-        "original": original_value,
-        "matched": matched_data,
-        "pattern": pattern,
-        "strategy": strategy_name,
-    }
-
-    if match_type:
-        result["match_type"] = match_type
-
-    return result
+) -> MatchResult:
+    """Create a standardized strategy result as a MatchResult."""
+    return create_match_result(
+        original=original_value,
+        matched=matched_data,
+        match_type=match_type,
+        pattern=pattern,
+    )
 
 
 def validate_catalog_structure(
