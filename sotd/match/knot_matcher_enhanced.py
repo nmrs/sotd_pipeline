@@ -1,5 +1,7 @@
 from typing import Optional
 
+from sotd.match.types import MatchResult
+
 
 class EnhancedKnotMatcher:
     """Enhanced knot matching functionality extracted from BrushMatcher."""
@@ -52,26 +54,16 @@ class EnhancedKnotMatcher:
             if strategy.__class__.__name__ == handle_result.get("_matched_by_strategy"):
                 continue
 
-            if result := strategy.match(value):
-                if isinstance(result, dict):
-                    if "matched" in result and result.get("matched"):
-                        knot_match = result["matched"]
-                        # If we found a different brand, prioritize it as the knot maker
-                        if knot_match.get("brand") != handle_result.get("brand"):
-                            knot_match["_matched_by_strategy"] = strategy.__class__.__name__
-                            knot_match["_pattern_used"] = result.get("pattern")
-                            knot_match["_matched_from"] = "knot_fallback"
-                            knot_match["handle_maker"] = handle_result.get("brand")
-                            return knot_match
-                    elif "brand" in result:
-                        knot_match = result
-                        # If we found a different brand, prioritize it as the knot maker
-                        if knot_match.get("brand") != handle_result.get("brand"):
-                            knot_match["_matched_by_strategy"] = strategy.__class__.__name__
-                            knot_match["_pattern_used"] = result.get("_pattern_used", "unknown")
-                            knot_match["_matched_from"] = "knot_fallback"
-                            knot_match["handle_maker"] = handle_result.get("brand")
-                            return knot_match
+            result = strategy.match(value)
+            if result.matched:
+                knot_match = result.matched.copy()
+                # If we found a different brand, prioritize it as the knot maker
+                if knot_match.get("brand") != handle_result.get("brand"):
+                    knot_match["_matched_by_strategy"] = strategy.__class__.__name__
+                    knot_match["_pattern_used"] = result.pattern
+                    knot_match["_matched_from"] = "knot_fallback"
+                    knot_match["handle_maker"] = handle_result.get("brand")
+                    return knot_match
         return None
 
     def match_knot_priority(
@@ -81,29 +73,23 @@ class EnhancedKnotMatcher:
         knot: Optional[str],
         extract_match_dict_func,
         post_process_match_func,
-    ) -> Optional[dict]:
+    ) -> Optional["MatchResult"]:
         """Match brush with knot priority (when we have a clear handle/knot split)."""
         for strategy in self.strategies:
-            if result := strategy.match(knot):
+            result = strategy.match(knot)
+            # All strategies now return MatchResult objects
+            if result.matched:
                 m = extract_match_dict_func(result, strategy, "knot_part", handle, knot)
                 if m:
-                    return post_process_match_func(
-                        {
-                            "original": value,
-                            "matched": m,
-                            "match_type": (
-                                result.get("match_type", "exact")
-                                if isinstance(result, dict)
-                                else m.get("source_type", "exact")
-                            ),
-                            "pattern": (
-                                result.get("pattern")
-                                if isinstance(result, dict)
-                                else m.get("_pattern_used", "unknown")
-                            ),
-                        },
-                        value,
+                    from sotd.match.types import create_match_result
+
+                    match_result = create_match_result(
+                        original=value,
+                        matched=m,
+                        match_type=result.match_type or "exact",
+                        pattern=result.pattern or "unknown",
                     )
+                    return post_process_match_func(match_result, value)
         return None
 
     def match_handle_priority(
@@ -113,27 +99,21 @@ class EnhancedKnotMatcher:
         knot: Optional[str],
         extract_match_dict_func,
         post_process_match_func,
-    ) -> Optional[dict]:
+    ) -> Optional["MatchResult"]:
         """Match brush with handle priority (when we have a clear handle/knot split)."""
         for strategy in self.strategies:
-            if result := strategy.match(handle):
+            result = strategy.match(handle)
+            # All strategies now return MatchResult objects
+            if result.matched:
                 m = extract_match_dict_func(result, strategy, "handle_part", handle, knot)
                 if m:
-                    return post_process_match_func(
-                        {
-                            "original": value,
-                            "matched": m,
-                            "match_type": (
-                                result.get("match_type", "exact")
-                                if isinstance(result, dict)
-                                else m.get("source_type", "exact")
-                            ),
-                            "pattern": (
-                                result.get("pattern")
-                                if isinstance(result, dict)
-                                else m.get("_pattern_used", "unknown")
-                            ),
-                        },
-                        value,
+                    from sotd.match.types import create_match_result
+
+                    match_result = create_match_result(
+                        original=value,
+                        matched=m,
+                        match_type=result.match_type or "exact",
+                        pattern=result.pattern or "unknown",
                     )
+                    return post_process_match_func(match_result, value)
         return None

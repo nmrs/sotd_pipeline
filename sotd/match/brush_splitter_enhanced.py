@@ -78,6 +78,21 @@ class EnhancedBrushSplitter:
 
         return None, None, None
 
+    def _split_by_delimiter_positional(
+        self, text: str, delimiter: str, delimiter_type: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Positional splitting for 'w/' and 'with' delimiters.
+
+        Respects positional order: first part = handle, second part = knot.
+        """
+        parts = text.split(delimiter, 1)
+        if len(parts) == 2:
+            handle = parts[0].strip()
+            knot = parts[1].strip()
+            if handle and knot:
+                return handle, knot, delimiter_type
+        return None, None, None
+
     def _split_by_delimiter_simple(
         self, text: str, delimiter: str, delimiter_type: str
     ) -> tuple[Optional[str], Optional[str], Optional[str]]:
