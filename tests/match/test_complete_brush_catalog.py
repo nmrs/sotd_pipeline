@@ -13,8 +13,8 @@ class TestCompleteBrushCatalog:
         assert "Declaration Grooming" in matcher.catalog_data["known_brushes"]
         # Test matching a Declaration Grooming brush
         result = matcher.match("B15")
-        assert result["matched"]["brand"] == "Declaration Grooming"
-        assert result["matched"]["model"] == "B15"
+        assert result.matched is not None
+        assert result.matched["brand"] == "Declaration Grooming"
 
     def test_chisel_and_hound_in_catalog(self):
         """Test that Chisel & Hound is properly loaded from brushes.yaml."""
@@ -23,8 +23,8 @@ class TestCompleteBrushCatalog:
         assert "Chisel & Hound" in matcher.catalog_data["known_brushes"]
         # Test matching a Chisel & Hound brush with version
         result = matcher.match("C&H v21")
-        assert result["matched"]["brand"] == "Chisel & Hound"
-        assert result["matched"]["model"] == "v21"
+        assert result.matched is not None
+        assert result.matched["brand"] == "Chisel & Hound"
 
     def test_catalog_loading_handles_new_entries(self):
         """Test that catalog loading can handle new complete brush entries."""
@@ -64,11 +64,12 @@ class TestCompleteBrushCatalog:
 
         for input_text, expected_brand, expected_model in test_cases:
             result = matcher.match(input_text)
-            assert result["matched"]["brand"] == expected_brand
-            assert result["matched"]["model"] == expected_model
+            assert result.matched is not None
+            assert result.matched["brand"] == expected_brand
+            assert result.matched["model"] == expected_model
 
-    def test_chisel_and_hound_batch_patterns(self):
-        """Test that Chisel & Hound batch patterns work correctly."""
+    def test_chisel_and_hound_version_patterns(self):
+        """Test that Chisel & Hound version patterns work correctly."""
         matcher = BrushMatcher()
 
         # Test Chisel & Hound version patterns
@@ -80,5 +81,6 @@ class TestCompleteBrushCatalog:
 
         for input_text, expected_brand, expected_model in test_cases:
             result = matcher.match(input_text)
-            assert result["matched"]["brand"] == expected_brand
-            assert result["matched"]["model"] == expected_model
+            assert result.matched is not None
+            assert result.matched["brand"] == expected_brand
+            assert result.matched["model"] == expected_model

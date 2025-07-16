@@ -336,11 +336,10 @@ class TestCreateStrategyResult:
             strategy_name="TestStrategy",
         )
 
-        assert result["original"] == "test input"
-        assert result["matched"] == matched_data
-        assert result["pattern"] == r"test.*pattern"
-        assert result["strategy"] == "TestStrategy"
-        assert "match_type" not in result
+        assert result.original == "test input"
+        assert result.matched == matched_data
+        assert result.pattern == r"test.*pattern"
+        assert result.match_type is None
 
     def test_with_match_type(self):
         """Test strategy result with match type."""
@@ -352,7 +351,7 @@ class TestCreateStrategyResult:
             match_type="exact",
         )
 
-        assert result["match_type"] == "exact"
+        assert result.match_type == "exact"
 
     def test_no_match_result(self):
         """Test strategy result with no match."""
@@ -363,10 +362,9 @@ class TestCreateStrategyResult:
             strategy_name="TestStrategy",
         )
 
-        assert result["original"] == "test input"
-        assert result["matched"] is None
-        assert result["pattern"] is None
-        assert result["strategy"] == "TestStrategy"
+        assert result.original == "test input"
+        assert result.matched is None
+        assert result.pattern is None
 
 
 class TestValidateCatalogStructure:

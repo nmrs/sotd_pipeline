@@ -34,7 +34,7 @@ def session_matchers():
     return {
         "razor": RazorMatcher(Path("data/razors.yaml")),
         "blade": BladeMatcher(Path("data/blades.yaml")),
-        "brush": BrushMatcher(Path("data/brushes.yaml"), Path("data/handles.yaml")),
+        "brush": BrushMatcher(),  # Uses default config
         "soap": SoapMatcher(Path("data/soaps.yaml")),
     }
 
@@ -107,12 +107,14 @@ class TestNormalizationConsistency:
             matcher_result = matcher.match(test_string)
 
             # Test that analyzer uses canonical normalization
-            analyzer_result = analyzer._create_match_key(
-                field, test_string, matcher_result.get("matched", {})
-            )
+            # Handle both MatchResult objects and dictionaries
+            if hasattr(matcher_result, "matched"):
+                matched_data = matcher_result.matched or {}
+            else:
+                matched_data = matcher_result.get("matched") or {}
+            analyzer_result = analyzer._create_match_key(field, test_string, matched_data)
 
-            # Both should use the same normalization logic
-            assert matcher_result is not None
+            # Both should produce the same normalized key
             assert analyzer_result is not None
 
     @pytest.mark.slow
@@ -291,12 +293,21 @@ class TestNormalizationConsistency:
             result = matcher.match(test_string)
 
             # If it's an exact match, it should be consistent with analyzer
-            if result and result.get("match_type") == "exact":
-                analyzer_key = analyzer._create_match_key(
-                    field, test_string, result.get("matched", {})
-                )
-                # The analyzer should recognize this as an exact match
-                assert analyzer_key is not None
+            # Handle both MatchResult objects and dictionaries
+            if hasattr(result, "match_type"):
+                match_type = result.match_type
+            else:
+                match_type = result.get("match_type")
+
+            if result and match_type == "exact":
+                # Handle both MatchResult objects and dictionaries
+                if hasattr(result, "matched"):
+                    matched_data = result.matched or {}
+                else:
+                    matched_data = result.get("matched") or {}
+                analyzer_result = analyzer._create_match_key(field, test_string, matched_data)
+                # The analyzer should find the same match
+                assert analyzer_result is not None
 
 
 class TestNormalizationRegression:
