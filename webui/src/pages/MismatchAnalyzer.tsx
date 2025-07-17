@@ -14,8 +14,15 @@ const MismatchAnalyzer: React.FC = () => {
             return;
         }
 
-        // TODO: Implement mismatch analysis API call
-        setError('Mismatch analysis not yet implemented');
+        try {
+            setLoading(true);
+            setError(null);
+
+            // TODO: Implement mismatch analysis API call
+            setError('Mismatch analysis not yet implemented');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
