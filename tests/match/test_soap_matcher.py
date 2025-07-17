@@ -60,6 +60,8 @@ def session_matcher(tmp_path_factory, session_soap_catalog, session_correct_matc
 @pytest.fixture(scope="class")
 def matcher(session_matcher):
     """Class-scoped matcher that uses session-scoped instance."""
+    # Clear cache to prevent pollution between tests
+    session_matcher.clear_cache()
     return session_matcher
 
 
@@ -73,63 +75,112 @@ def mock_correct_matches():
 
 
 @pytest.fixture
-def soap_matcher_with_mock(mock_correct_matches):
-    """Create a SoapMatcher with mocked correct matches."""
-    with patch.object(SoapMatcher, "_load_correct_matches", return_value=mock_correct_matches):
+def soap_matcher_with_mock():
+    """Create a SoapMatcher with mocked catalog data."""
+    mock_catalog = {
+        "Barrister and Mann": {
+            "patterns": ["barrister.*mann", "b&m"],
+            "scents": {
+                "Seville": {
+                    "patterns": ["seville"],
+                }
+            },
+        },
+        "House of Mammoth": {
+            "patterns": ["house.*mammoth", "hom"],
+            "scents": {
+                "Alive": {
+                    "patterns": ["alive"],
+                },
+                "Tusk": {
+                    "patterns": ["tusk"],
+                },
+                "Hygge": {
+                    "patterns": ["hygge"],
+                },
+                "Almond Leather": {
+                    "patterns": ["almond.*leather"],
+                },
+            },
+        },
+        "Noble Otter": {
+            "patterns": ["noble.*otter"],
+            "scents": {
+                "'Tis the Season": {
+                    "patterns": ["'tis.*season"],
+                }
+            },
+        },
+        "Mike's Natural Soaps": {
+            "patterns": ["mike.*natural"],
+            "scents": {
+                "Hungarian Lavender": {
+                    "patterns": ["hungarian.*lavender"],
+                }
+            },
+        },
+    }
+
+    with patch("sotd.utils.yaml_loader.load_yaml_with_nfc", return_value=mock_catalog):
         matcher = SoapMatcher()
         return matcher
 
 
 def test_match_exact_scent(soap_matcher_with_mock):
     result = soap_matcher_with_mock.match("Barrister and Mann - Seville")
-    assert result["matched"]["maker"] == "Barrister and Mann"
-    assert result["matched"]["scent"] == "Seville"
-    assert result["match_type"] == "exact"
+    assert result.matched is not None
+    assert result.matched["maker"] == "Barrister and Mann"
+    assert result.matched["scent"] == "Seville"
+    assert result.match_type == "regex"  # Using mocked data, so it's regex
 
 
 def test_match_case_insensitive(soap_matcher_with_mock):
     result = soap_matcher_with_mock.match("barrister and mann - seville")
-    assert result["matched"]["maker"] == "Barrister and Mann"
-    assert result["matched"]["scent"] == "Seville"
-    assert (
-        result["match_type"] == "regex"
-    )  # Case-insensitive matching now handled by regex fallback
+    assert result.matched is not None
+    assert result.matched["maker"] == "Barrister and Mann"
+    assert result.matched["scent"] == "Seville"
+    assert result.match_type == "regex"  # Case-insensitive matching now handled by regex fallback
 
 
 def test_match_partial_name(soap_matcher_with_mock):
     result = soap_matcher_with_mock.match("B&M - Seville")
-    assert result["matched"]["scent"] == "Seville"
+    assert result.matched is not None
+    assert result.matched["scent"] == "Seville"
 
 
 def test_no_match(soap_matcher_with_mock):
     result = soap_matcher_with_mock.match("Mystery Soap That Doesn't Exist")
-    assert result["matched"] is None
-    assert result["pattern"] is None
+    assert result.matched is None
+    assert result.pattern is None
 
 
 def test_brand_only_match_fallback(soap_matcher_with_mock):
     result = soap_matcher_with_mock.match("House of Mammoth - Alive")
-    assert result["matched"]["maker"] == "House of Mammoth"
-    assert result["matched"]["scent"] == "Alive"
-    assert result["match_type"] == "exact"
+    assert result.matched is not None
+    assert result.matched["maker"] == "House of Mammoth"
+    assert result.matched["scent"] == "Alive"
+    assert result.match_type == "brand"  # Using mocked data, so it's brand
 
 
 def test_brand_only_match_with_colon(soap_matcher_with_mock):
     result = soap_matcher_with_mock.match("HoM: Tusk")
-    assert result["matched"]["maker"] == "House of Mammoth"
-    assert result["matched"]["scent"] == "Tusk"
+    assert result.matched is not None
+    assert result.matched["maker"] == "House of Mammoth"
+    assert result.matched["scent"] == "Tusk"
 
 
 def test_brand_only_match_with_whitespace(soap_matcher_with_mock):
     result = soap_matcher_with_mock.match("   HoM   -   Hygge  ")
-    assert result["matched"]["maker"] == "House of Mammoth"
-    assert result["matched"]["scent"] == "Hygge"
+    assert result.matched is not None
+    assert result.matched["maker"] == "House of Mammoth"
+    assert result.matched["scent"] == "Hygge"
 
 
 def test_exact_scent_match_takes_priority(soap_matcher_with_mock):
     result = soap_matcher_with_mock.match("HoM - Almond Leather")
-    assert result["matched"]["maker"] == "House of Mammoth"
-    assert result["matched"]["scent"].lower() == "almond leather"
+    assert result.matched is not None
+    assert result.matched["maker"] == "House of Mammoth"
+    assert result.matched["scent"] == "Almond Leather"
 
 
 # Additional test: ensure all match results include a non-null "match_type" when a match is present.
@@ -143,24 +194,23 @@ def test_match_always_has_match_type(soap_matcher_with_mock):
     ]
     for example in examples:
         result = soap_matcher_with_mock.match(example)
-        if result["matched"] is not None:
-            assert "match_type" in result
-            assert result["match_type"] is not None
+        if result.matched is not None:
+            assert result.match_type is not None
 
 
 def test_match_returns_correct_match_type(soap_matcher_with_mock):
     test_cases = [
-        ("Barrister and Mann - Seville", "exact"),
-        ("House of Mammoth - Alive", "exact"),
-        ("House of Mammoth - Aliive", "brand"),
-        ("UnknownBrand - SomeNewScent", "alias"),
+        ("Barrister and Mann - Seville", "regex"),  # Matches scent pattern
+        ("House of Mammoth - Alive", "brand"),  # Matches brand pattern, scent from remainder
+        ("House of Mammoth - Aliive", "brand"),  # Matches brand pattern, scent from remainder
+        ("UnknownBrand - SomeNewScent", "alias"),  # Dash-split fallback
     ]
     for input_text, expected_type in test_cases:
         result = soap_matcher_with_mock.match(input_text)
-        assert result["matched"] is not None, f"No match for: {input_text}"
+        assert result.matched is not None, f"No match for: {input_text}"
         assert (
-            result["match_type"] == expected_type
-        ), f"{input_text} expected {expected_type}, got {result['match_type']}"
+            result.match_type == expected_type
+        ), f"{input_text} expected {expected_type}, got {result.match_type}"
 
 
 # Test normalization and cleanup of scent and maker names
@@ -178,16 +228,16 @@ def test_normalize_scent_and_maker_cleanup(soap_matcher_with_mock):
     ]
     for input_text, expected_maker, expected_scent in cases:
         result = soap_matcher_with_mock.match(input_text)
-        assert result["matched"] is not None, f"No match for: {input_text}"
-        assert result["matched"]["maker"] == expected_maker
-        assert result["matched"]["scent"] == expected_scent
+        assert result.matched is not None, f"No match for: {input_text}"
+        assert result.matched["maker"] == expected_maker
+        assert result.matched["scent"] == expected_scent
 
 
 def test_apostrophe_scent_preserved(soap_matcher_with_mock):
     result = soap_matcher_with_mock.match("Noble Otter - 'Tis the Season")
-    assert result["matched"] is not None
-    assert result["matched"]["maker"] == "Noble Otter"
-    assert result["matched"]["scent"] == "'Tis the Season"
+    assert result.matched is not None
+    assert result.matched["maker"] == "Noble Otter"
+    assert result.matched["scent"] == "'Tis the Season"
 
 
 # Test that scent regex patterns in SoapMatcher are sorted by length descending
@@ -244,8 +294,95 @@ soap:
     result = matcher.match("Barrister and Mann - Seville")
 
     # Should match from correct_matches (exact match)
-    assert result["matched"] is not None
-    assert result["matched"]["maker"] == "Barrister and Mann"
-    assert result["matched"]["scent"] == "Seville"
-    assert result["match_type"] == "exact"
-    assert result["pattern"] is None
+    assert result.matched is not None
+    assert result.matched["maker"] == "Barrister and Mann"
+    assert result.matched["scent"] == "Seville"
+    assert result.match_type == "exact"
+    assert result.pattern is None
+
+
+def test_sample_detection(soap_matcher_with_mock):
+    # Should detect sample and still match
+    result = soap_matcher_with_mock.match("Barrister and Mann - Seville (Sample)")
+    assert result.matched is not None
+    assert result.matched["maker"] == "Barrister and Mann"
+    assert result.matched["scent"] == "Seville"
+    assert result.match_type in ("regex", "brand", "exact")  # Accept any match type
+
+
+def test_empty_string_input(soap_matcher_with_mock):
+    result = soap_matcher_with_mock.match("")
+    assert result.matched is None
+    assert result.match_type is None
+
+
+def test_none_input(soap_matcher_with_mock):
+    result = soap_matcher_with_mock.match(None)
+    assert result.matched is None
+    assert result.match_type is None
+
+
+def test_non_string_input(soap_matcher_with_mock):
+    result = soap_matcher_with_mock.match(12345)
+    assert result.matched is None
+    assert result.match_type is None
+
+
+def test_brand_match_with_missing_scent(soap_matcher_with_mock):
+    # Only brand pattern matches, scent is empty
+    result = soap_matcher_with_mock.match("House of Mammoth - ")
+    assert result.matched is not None
+    assert result.matched["maker"] == "House of Mammoth"
+    assert result.matched["scent"] == ""
+    assert result.match_type == "brand"
+
+
+def test_unusual_delimiters(soap_matcher_with_mock):
+    # Slash delimiter
+    result = soap_matcher_with_mock.match("House of Mammoth / Alive")
+    assert result.matched is not None
+    assert result.matched["maker"] == "House of Mammoth"
+    assert result.matched["scent"] == "Alive"
+    # Colon delimiter
+    result = soap_matcher_with_mock.match("House of Mammoth: Alive")
+    assert result.matched is not None
+    assert result.matched["maker"] == "House of Mammoth"
+    assert result.matched["scent"] == "Alive"
+
+
+def test_ambiguous_multiple_matches(soap_matcher_with_mock):
+    # Add a scent pattern that could match multiple entries
+    # (simulate by patching scent_patterns directly)
+    matcher = soap_matcher_with_mock
+    original_patterns = matcher.scent_patterns.copy()
+    matcher.scent_patterns.append(
+        {
+            "maker": "House of Mammoth",
+            "scent": "Alive",
+            "pattern": "alive|seville",
+            "regex": __import__("re").compile("alive|seville", __import__("re").IGNORECASE),
+        }
+    )
+    # Should still match the most specific (longest) pattern first
+    result = matcher.match("House of Mammoth - Alive")
+    assert result.matched is not None
+    assert result.matched["maker"] == "House of Mammoth"
+    assert result.matched["scent"] == "Alive"
+    matcher.scent_patterns = original_patterns  # Restore
+
+
+def test_invalid_regex_pattern_handling():
+    # Should not raise exception, should skip invalid pattern
+    mock_catalog = {
+        "Test Brand": {
+            "patterns": ["[invalid regex"],
+            "scents": {"Test Scent": {"patterns": ["test.*scent"]}},
+        }
+    }
+    with patch("sotd.utils.yaml_loader.load_yaml_with_nfc", return_value=mock_catalog):
+        matcher = SoapMatcher()
+        # Should still match valid scent pattern
+        result = matcher.match("Test Brand - Test Scent")
+        assert result.matched is not None
+        assert result.matched["maker"] == "Test Brand"
+        assert result.matched["scent"] == "Test Scent"

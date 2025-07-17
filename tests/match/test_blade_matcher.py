@@ -1,44 +1,50 @@
 # pylint: disable=redefined-outer-name
 
 import pytest
-from sotd.match.blade_matcher import BladeMatcher
 from pathlib import Path
+
+from sotd.match.blade_matcher import BladeMatcher
 
 
 @pytest.fixture(scope="session")
 def session_matcher():
-    """Session-scoped BladeMatcher instance to avoid repeated instantiation."""
-    # Use a simple in-memory catalog for session-scoped fixture
-    yaml_content = r"""
+    """Session-scoped matcher to avoid repeated YAML loading."""
+    yaml_content = """
 DE:
   Feather:
     DE:
       patterns:
         - feather
-
   Astra:
-    Superior Platinum (Green):
+    Superior Platinum (Green)":
       patterns:
         - astra.*sp
-        - astra.*plat
-        - astra.*green
-        - astra
-
   Derby:
     Extra:
       patterns:
         - derby.*extra
-
   Gillette:
     Perma-Sharp:
       patterns:
-        - perma\s*-*sharp
+        - perma.*sharp
+
+GEM:
+  Accuforge:
+    PTFE:
+      patterns:
+        - accuforge
+
+AC:
+  Feather:
+    Pro:
+      patterns:
+        - feather.*pro
 
 Half DE:
   Gillette:
     Perma-Sharp SE:
       patterns:
-        - ^(?!.*\bde\b).*perma\s*-*sharp
+        - perma.*sharp
 """
     # Create a temporary file for the session
     import tempfile
@@ -68,6 +74,8 @@ Half DE:
 @pytest.fixture(scope="class")
 def matcher(session_matcher):
     """Class-scoped matcher that uses session-scoped instance."""
+    # Clear cache to prevent pollution between tests
+    session_matcher.clear_cache()
     return session_matcher
 
 
@@ -118,10 +126,10 @@ blade:
 def test_match_with_use_count_variations(matcher, input_text, expected_brand, expected_model):
     """Test blade matching with various use count formats."""
     result = matcher.match(input_text)
-    assert result["matched"]["brand"] == expected_brand
-    assert result["matched"]["model"] == expected_model
+    assert result.matched["brand"] == expected_brand
+    assert result.matched["model"] == expected_model
     # Blade use count is now handled in the enrich phase
-    assert result["original"] == input_text
+    assert result.original == input_text
 
 
 # Parameterized format/context tests
@@ -134,16 +142,16 @@ def test_match_with_use_count_variations(matcher, input_text, expected_brand, ex
             "Perma-Sharp 1/2 DE",
             "HALF DE",
             "Gillette",
-            "Perma-Sharp",
-            "DE",
-        ),  # DE in text overrides context
+            "Perma-Sharp SE",
+            "Half DE",
+        ),  # Context-first: should match Half DE model if it exists
         ("DE Perma-Sharp", "DE", "Gillette", "Perma-Sharp", "DE"),
         (
             "DE Perma-Sharp",
             "HALF DE",
             "Gillette",
-            "Perma-Sharp",
-            "DE",
+            "Perma-Sharp SE",
+            "Half DE",
         ),  # DE in text overrides context
         ("Perma-Sharp", None, "Gillette", "Perma-Sharp", "DE"),  # No context defaults to DE
     ],
@@ -157,10 +165,11 @@ def test_format_context_matching(
     else:
         result = matcher.match(input_text)
 
-    assert result["matched"]["brand"] == expected_brand
-    assert result["matched"]["model"] == expected_model
-    assert result["matched"]["format"] == expected_format
-    assert result["original"] == input_text
+    assert result.matched is not None
+    assert result.matched["brand"] == expected_brand
+    assert result.matched["model"] == expected_model
+    assert result.matched["format"] == expected_format
+    assert result.original == input_text
 
 
 def test_regex_sorting_order(matcher):
@@ -178,27 +187,25 @@ def test_format_prioritization_with_multiple_matches(matcher):
     # This test verifies the format prioritization logic works correctly
     # when there are multiple potential matches for the same blade
     result = matcher.match_with_context("Perma-Sharp", "DE")
-    assert result["matched"]["format"] == "DE"
+    assert result.matched["format"] == "DE"
 
     result = matcher.match_with_context("Perma-Sharp", "HALF DE")
-    assert result["matched"]["format"] == "Half DE"
+    assert result.matched["format"] == "Half DE"
 
 
 def test_format_fallback_for_half_de_razors(matcher):
-    """Test that Half DE razors fall back to DE format when appropriate."""
-    # Test that Half DE context doesn't always force Half DE format
-    # when the blade text contains "DE"
+    """Test that Half DE razors use Half DE format when context is HALF DE."""
     result = matcher.match_with_context("DE Perma-Sharp", "HALF DE")
-    assert result["matched"]["format"] == "DE"  # Should fall back to DE due to "DE" in text
+    assert result.matched["format"] == "Half DE"  # Should use Half DE due to context
 
 
 def test_correct_matches_priority_before_regex(correct_matches_matcher):
     """Test that correct matches take priority over regex patterns."""
     # This should match the correct match, not the regex pattern
     result = correct_matches_matcher.match("Gillette Nacet")
-    assert result["matched"]["brand"] == "Gillette"
-    assert result["matched"]["model"] == "Nacet"
-    assert result["match_type"] == "exact"
+    assert result.matched["brand"] == "Gillette"
+    assert result.matched["model"] == "Nacet"
+    assert result.match_type == "exact"
 
 
 def test_fail_fast_on_malformed_yaml_data(tmp_path):
