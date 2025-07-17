@@ -2,6 +2,7 @@ from .blade_matcher import BladeMatcher
 from .brush_matcher import BrushMatcher  # placeholder
 from .razor_matcher import RazorMatcher
 from .soap_matcher import SoapMatcher
+from .types import MatchResult
 
 razor_matcher = RazorMatcher()
 blade_matcher = BladeMatcher()
@@ -14,7 +15,8 @@ def match_record(record: dict) -> dict:
 
     # Match razor first (required for blade matching)
     if "razor" in result:
-        result["razor"] = razor_matcher.match(result["razor"])
+        razor_result = razor_matcher.match(result["razor"])
+        result["razor"] = razor_result
 
     # Blade matching requires razor context
     if "blade" in result:
@@ -22,7 +24,8 @@ def match_record(record: dict) -> dict:
 
         # If no razor context, match blade normally (fallback behavior)
         if not razor_matched:
-            result["blade"] = blade_matcher.match(result["blade"])
+            blade_result = blade_matcher.match(result["blade"])
+            result["blade"] = blade_result
         else:
             razor_format = razor_matched.get("format", "").upper()
 
@@ -31,13 +34,20 @@ def match_record(record: dict) -> dict:
 
             if razor_format in irrelevant_formats:
                 # Clear blade info since it's irrelevant for these razor formats
-                result["blade"] = {"original": result["blade"], "matched": None, "match_type": None}
+                result["blade"] = MatchResult(
+                    original=result["blade"], matched=None, match_type=None, pattern=None
+                )
             else:
                 # For other formats, try context-aware matching
-                result["blade"] = blade_matcher.match_with_context(result["blade"], razor_format)
+                blade_result = blade_matcher.match_with_context(result["blade"], razor_format)
+                result["blade"] = blade_result
 
     if "soap" in result:
-        result["soap"] = soap_matcher.match(result["soap"])
+        soap_result = soap_matcher.match(result["soap"])
+        result["soap"] = soap_result
+
     if "brush" in result:
-        result["brush"] = brush_matcher.match(result["brush"])
+        brush_result = brush_matcher.match(result["brush"])
+        result["brush"] = brush_result
+
     return result

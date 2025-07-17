@@ -187,6 +187,16 @@ PatternList = List[Dict[str, Any]]
 StrategyList = List[Any]  # List of strategy objects
 
 
+class MatchType:
+    """Constants for match types to improve semantic clarity."""
+
+    EXACT = "exact"  # From correct_matches.yaml (manually verified)
+    REGEX = "regex"  # From regex patterns in YAML catalogs
+    ALIAS = "alias"  # Brand/model aliases
+    BRAND = "brand"  # Brand-only fallback
+    UNMATCHED = "unmatched"  # No match found
+
+
 def create_match_result(
     original: str,
     matched: Optional[Dict[str, Any]] = None,

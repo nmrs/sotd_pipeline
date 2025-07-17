@@ -7,19 +7,28 @@ from typing import Any, Dict, Optional
 from rich.console import Console
 from rich.table import Table
 
-from .base_matcher import BaseMatcher, MatchType
+from .loaders import CatalogLoader
+from .types import MatchResult, create_match_result, MatchType
 
 
-class SoapMatcher(BaseMatcher):
+class SoapMatcher:
     def __init__(
         self,
         catalog_path: Path = Path("data/soaps.yaml"),
         correct_matches_path: Optional[Path] = None,
     ):
-        super().__init__(catalog_path, "soap", correct_matches_path=correct_matches_path)
+        self.loader = CatalogLoader()
+        catalogs = self.loader.load_matcher_catalogs(
+            catalog_path, "soap", correct_matches_path=correct_matches_path
+        )
+        self.catalog = catalogs["catalog"]
+        self.correct_matches = catalogs["correct_matches"]
         self.scent_patterns, self.brand_patterns = self._compile_patterns()
-        # Add cache for expensive operations
         self._match_cache = {}
+
+    def clear_cache(self):
+        """Clear the match cache. Useful for testing to prevent cache pollution."""
+        self._match_cache.clear()
 
     def _is_sample(self, text: str) -> bool:
         text = text.lower()
@@ -93,40 +102,77 @@ class SoapMatcher(BaseMatcher):
         brand_compiled = sorted(brand_compiled, key=lambda x: len(x["pattern"]), reverse=True)
         return scent_compiled, brand_compiled
 
-    def _match_with_regex(self, value: str) -> Dict[str, Any]:
+    def _match_with_regex(self, value: str) -> MatchResult:
         """Match using regex patterns with REGEX match type."""
         # Check cache first - ensure cache key is always a string
         cache_key = str(value) if not isinstance(value, str) else value
         if cache_key in self._match_cache:
-            return self._match_cache[cache_key]
+            cached_result = self._match_cache[cache_key]
+            # Convert cached dict to MatchResult for backward compatibility
+            if isinstance(cached_result, dict):
+                return create_match_result(
+                    original=cached_result.get("original", value),
+                    matched=cached_result.get("matched"),
+                    match_type=cached_result.get("match_type"),
+                    pattern=cached_result.get("pattern"),
+                )
+            return cached_result
 
         original = value
         normalized = re.sub(r"^[*_~]+|[*_~]+$", "", value.strip()) if isinstance(value, str) else ""
 
         if not isinstance(value, str):
-            result = self._no_match_result(original)
+            result = create_match_result(
+                original=original,
+                matched=None,
+                match_type=None,
+                pattern=None,
+            )
             self._match_cache[cache_key] = result
             return result
 
         result = self._match_scent_pattern(original, normalized)
         if result:
             result["match_type"] = "regex"
-            self._match_cache[cache_key] = result
-            return result
+            match_result = create_match_result(
+                original=result["original"],
+                matched=result["matched"],
+                match_type=result["match_type"],
+                pattern=result["pattern"],
+            )
+            self._match_cache[cache_key] = match_result
+            return match_result
 
         result = self._match_brand_pattern(original, normalized)
         if result:
             result["match_type"] = "brand"
-            self._match_cache[cache_key] = result
-            return result
+            match_result = create_match_result(
+                original=result["original"],
+                matched=result["matched"],
+                match_type=result["match_type"],
+                pattern=result["pattern"],
+            )
+            self._match_cache[cache_key] = match_result
+            return match_result
 
         result = self._match_dash_split(original, normalized)
         if result:
             result["match_type"] = "alias"
-            self._match_cache[cache_key] = result
-            return result
+            match_result = create_match_result(
+                original=result["original"],
+                matched=result["matched"],
+                match_type=result["match_type"],
+                pattern=result["pattern"],
+            )
+            self._match_cache[cache_key] = match_result
+            return match_result
 
-        result = self._no_match_result(original)
+        result = create_match_result(
+            original=original,
+            matched=None,
+            match_type=None,
+            pattern=None,
+        )
         self._match_cache[cache_key] = result
         return result
 
@@ -190,23 +236,44 @@ class SoapMatcher(BaseMatcher):
             "is_sample": self._is_sample(original),
         }
 
-    def match(self, value: str, bypass_correct_matches: bool = False) -> dict:
+    def match(self, value: str, bypass_correct_matches: bool = False) -> MatchResult:
         """
         Main orchestration method for soap matching.
         Ensures 'maker' and 'scent' are always present in the 'matched' dict for all match types.
         """
         if not isinstance(value, str):
-            return self._no_match_result(value)
+            return create_match_result(
+                original=value,
+                matched=None,
+                match_type=None,
+                pattern=None,
+            )
 
-        # Use parent's match method which checks correct matches first
-        result = super().match(value, bypass_correct_matches=bypass_correct_matches)
+        # Check correct matches first (EXACT)
+        if not bypass_correct_matches:
+            correct = self._check_correct_matches(value)
+            if correct:
+                result = create_match_result(
+                    original=value,
+                    matched=correct,
+                    match_type=MatchType.EXACT,
+                    pattern=None,
+                )
+                # Ensure required fields are present
+                if result and result.matched:
+                    if "maker" not in result.matched:
+                        result.matched["maker"] = None
+                    if "scent" not in result.matched:
+                        result.matched["scent"] = None
+                return result
 
-        # Ensure required fields are present
-        if result and result.get("matched"):
-            if "maker" not in result["matched"]:
-                result["matched"]["maker"] = None
-            if "scent" not in result["matched"]:
-                result["matched"]["scent"] = None
+        # Fall back to regex/brand/alias matching
+        result = self._match_with_regex(value)
+        if result and result.matched:
+            if "maker" not in result.matched:
+                result.matched["maker"] = None
+            if "scent" not in result.matched:
+                result.matched["scent"] = None
         return result
 
     def _check_correct_matches(self, value: str) -> Optional[Dict[str, Any]]:
@@ -220,7 +287,7 @@ class SoapMatcher(BaseMatcher):
                 self._match_cache[cache_key] = None
             return None
 
-        normalized_value = self.normalize(value)
+        normalized_value = self._normalize_scent_text(value)
         if not normalized_value:
             if hasattr(self, "_match_cache"):
                 self._match_cache[cache_key] = None
@@ -237,7 +304,7 @@ class SoapMatcher(BaseMatcher):
 
                 # Check if normalized value matches any of the correct strings
                 for correct_string in strings:
-                    if self.normalize(correct_string) == normalized_value:
+                    if self._normalize_scent_text(correct_string) == normalized_value:
                         # Return match data in the expected format for soaps
                         result = {"maker": maker, "scent": scent}
                         if hasattr(self, "_match_cache"):

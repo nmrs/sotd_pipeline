@@ -1,20 +1,29 @@
 import re
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Optional
 
-from .base_matcher import BaseMatcher, MatchType
+from .loaders import CatalogLoader
+from .types import MatchResult, create_match_result, MatchType
 
 
-class RazorMatcher(BaseMatcher):
+class RazorMatcher:
     def __init__(
         self,
         catalog_path: Path = Path("data/razors.yaml"),
         correct_matches_path: Optional[Path] = None,
     ):
-        super().__init__(catalog_path, "razor", correct_matches_path=correct_matches_path)
+        self.loader = CatalogLoader()
+        catalogs = self.loader.load_matcher_catalogs(
+            catalog_path, "razor", correct_matches_path=correct_matches_path
+        )
+        self.catalog = catalogs["catalog"]
+        self.correct_matches = catalogs["correct_matches"]
         self.patterns = self._compile_patterns()
-        # Add cache for expensive operations
         self._match_cache = {}
+
+    def clear_cache(self):
+        """Clear the match cache. Useful for testing to prevent cache pollution."""
+        self._match_cache.clear()
 
     def _compile_patterns(self):
         compiled = []
@@ -28,26 +37,22 @@ class RazorMatcher(BaseMatcher):
                     )
         return sorted(compiled, key=lambda x: len(x[3]), reverse=True)
 
-    def _match_with_regex(self, value: str) -> Dict[str, Any]:
-        """Match using regex patterns with REGEX match type."""
-        # Check cache first - ensure cache key is always a string
+    def _match_with_regex(self, value: str) -> MatchResult:
         cache_key = str(value) if not isinstance(value, str) else value
         if cache_key in self._match_cache:
             return self._match_cache[cache_key]
 
         original = value
-        # All correct match lookups must use normalize_for_matching
-        # (see docs/product_matching_validation.md)
         from sotd.utils.match_filter_utils import normalize_for_matching
 
         normalized = normalize_for_matching(value, field="razor")
         if not normalized:
-            result = {
-                "original": original,
-                "matched": None,
-                "pattern": None,
-                "match_type": None,  # Keep None for backward compatibility
-            }
+            result = create_match_result(
+                original=original,
+                matched=None,
+                match_type=None,
+                pattern=None,
+            )
             self._match_cache[cache_key] = result
             return result
 
@@ -55,33 +60,79 @@ class RazorMatcher(BaseMatcher):
 
         for brand, model, fmt, raw_pattern, compiled, entry in self.patterns:
             if compiled.search(razor_text):
-                # Start with basic match data
                 matched_data = {
                     "brand": brand,
-                    "model": str(model),  # Ensure model is always a string
+                    "model": str(model),
                     "format": fmt,
                 }
-
-                # Preserve all additional specifications from the catalog entry
-                # (excluding patterns and format which are already handled)
                 for key, value in entry.items():
                     if key not in ["patterns", "format"]:
                         matched_data[key] = value
-
-                result = {
-                    "original": original,
-                    "matched": matched_data,
-                    "pattern": raw_pattern,
-                    "match_type": MatchType.REGEX,
-                }
+                result = create_match_result(
+                    original=original,
+                    matched=matched_data,
+                    pattern=raw_pattern,
+                    match_type=MatchType.REGEX,
+                )
                 self._match_cache[cache_key] = result
                 return result
 
-        result = {
-            "original": original,
-            "matched": None,
-            "pattern": None,
-            "match_type": None,  # Keep None for backward compatibility
-        }
+        result = create_match_result(
+            original=original,
+            matched=None,
+            match_type=None,
+            pattern=None,
+        )
         self._match_cache[cache_key] = result
         return result
+
+    def match(self, value: str, bypass_correct_matches: bool = False) -> MatchResult:
+        """
+        Match a razor value using correct matches first, then regex patterns.
+
+        Args:
+            value: The razor value to match
+            bypass_correct_matches: If True, skip correct_matches and use regex only
+
+        Returns:
+            MatchResult with match information
+        """
+        if not bypass_correct_matches:
+            # Check correct matches first
+            if self.correct_matches:
+                for brand, models in self.correct_matches.items():
+                    for model, entries in models.items():
+                        if isinstance(entries, list):
+                            # Simple string list format
+                            if value in entries:
+                                # Get format from catalog entry
+                                fmt = "DE"  # Default format
+                                if brand in self.catalog and model in self.catalog[brand]:
+                                    fmt = self.catalog[brand][model].get("format", "DE")
+                                return create_match_result(
+                                    original=value,
+                                    matched={"brand": brand, "model": model, "format": fmt},
+                                    match_type=MatchType.EXACT,
+                                    pattern=None,
+                                )
+                        elif isinstance(entries, dict):
+                            # Nested format with additional data
+                            strings = entries.get("strings", [])
+                            if value in strings:
+                                # Get format from catalog entry
+                                fmt = "DE"  # Default format
+                                if brand in self.catalog and model in self.catalog[brand]:
+                                    fmt = self.catalog[brand][model].get("format", "DE")
+                                matched_data = {"brand": brand, "model": model, "format": fmt}
+                                # Copy additional fields from the entry
+                                for key, val in entries.items():
+                                    if key != "strings":
+                                        matched_data[key] = val
+                                return create_match_result(
+                                    original=value,
+                                    matched=matched_data,
+                                    match_type=MatchType.EXACT,
+                                    pattern=None,
+                                )
+        # Fall back to regex matching
+        return self._match_with_regex(value)

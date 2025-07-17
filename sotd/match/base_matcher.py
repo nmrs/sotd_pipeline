@@ -4,19 +4,10 @@ from typing import Any, Dict, List, Optional
 
 from sotd.utils.match_filter_utils import load_competition_tags, normalize_for_matching
 from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
+from .types import MatchResult, create_match_result
 
 # Global catalog cache for YAML files
 _catalog_cache = {}
-
-
-class MatchType:
-    """Constants for match types to improve semantic clarity."""
-
-    EXACT = "exact"  # From correct_matches.yaml (manually verified)
-    REGEX = "regex"  # From regex patterns in YAML catalogs
-    ALIAS = "alias"  # Brand/model aliases
-    BRAND = "brand"  # Brand-only fallback
-    UNMATCHED = "unmatched"  # No match found
 
 
 class BaseMatcher:
@@ -239,7 +230,7 @@ class BaseMatcher:
         self._catalog_patterns = None
         self._compiled_patterns.clear()
 
-    def match(self, value: str, bypass_correct_matches: bool = False) -> Dict[str, Any]:
+    def match(self, value: str, bypass_correct_matches: bool = False) -> MatchResult:
         """
         Enhanced match method with correct matches priority.
 
@@ -258,22 +249,22 @@ class BaseMatcher:
         if not bypass_correct_matches:
             correct_match = self._check_correct_matches(value)
             if correct_match:
-                return {
-                    "original": original,
-                    "matched": correct_match,
-                    "pattern": None,  # No pattern used for correct matches
-                    "match_type": "exact",
-                }
+                return create_match_result(
+                    original=original,
+                    matched=correct_match,
+                    match_type="exact",
+                    pattern=None,
+                )
 
         # Step 2: Fall back to regex patterns (implemented by subclasses)
         # This should be implemented by each specific matcher
         return self._match_with_regex(value)
 
-    def _match_with_regex(self, value: str) -> Dict[str, Any]:
+    def _match_with_regex(self, value: str) -> MatchResult:
         """
         Match using regex patterns. To be implemented by subclasses.
 
-        This method should return the same structure as match() but with
-        match_type set to MatchType.REGEX for regex-based matches.
+        This method should return a MatchResult with match_type set to MatchType.REGEX
+        for regex-based matches.
         """
         raise NotImplementedError("Subclasses must implement _match_with_regex")

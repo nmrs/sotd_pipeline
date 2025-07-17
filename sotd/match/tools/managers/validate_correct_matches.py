@@ -978,14 +978,21 @@ class ValidateCorrectMatches:
             Match result dictionary or None
         """
         # Use the matcher's match method with bypass_correct_matches=True
-        # This tests what the regex patterns would match to if the correct match didn't exist
+        # This tests what the regex patterns would match to if the correct match
+        # didn't exist
         match_result = matcher.match(value, bypass_correct_matches=True)
 
-        # Return the matched data if there was a match
-        if match_result and match_result.get("matched"):
-            return match_result["matched"]
-
-        return None
+        # Convert MatchResult to dict if needed for backward compatibility
+        if hasattr(match_result, "matched"):
+            # MatchResult object
+            if match_result.matched:
+                return match_result.matched
+            return None
+        else:
+            # Dict object
+            if match_result and match_result.get("matched"):
+                return match_result.get("matched")
+            return None
 
     def _check_format_mismatches(self, field: str) -> List[Dict]:
         """Check for format mismatches between correct_matches.yaml and catalog.

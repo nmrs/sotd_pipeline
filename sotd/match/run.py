@@ -18,34 +18,46 @@ from sotd.match.utils.performance import PerformanceMonitor
 
 
 def is_razor_matched(record: dict) -> bool:
+    razor_result = record.get("razor")
+    if isinstance(razor_result, MatchResult):
+        return bool(razor_result.matched and razor_result.matched.get("manufacturer"))
     return (
-        isinstance(record.get("razor"), dict)
-        and isinstance(record["razor"].get("matched"), dict)
-        and bool(record["razor"]["matched"].get("manufacturer"))
+        isinstance(razor_result, dict)
+        and isinstance(razor_result.get("matched"), dict)
+        and bool(razor_result["matched"].get("manufacturer"))
     )
 
 
 def is_blade_matched(record: dict) -> bool:
+    blade_result = record.get("blade")
+    if isinstance(blade_result, MatchResult):
+        return bool(blade_result.matched and blade_result.matched.get("brand"))
     return (
-        isinstance(record.get("blade"), dict)
-        and isinstance(record["blade"].get("matched"), dict)
-        and bool(record["blade"]["matched"].get("brand"))
+        isinstance(blade_result, dict)
+        and isinstance(blade_result.get("matched"), dict)
+        and bool(blade_result["matched"].get("brand"))
     )
 
 
 def is_soap_matched(record: dict) -> bool:
+    soap_result = record.get("soap")
+    if isinstance(soap_result, MatchResult):
+        return bool(soap_result.matched and soap_result.matched.get("maker"))
     return (
-        isinstance(record.get("soap"), dict)
-        and isinstance(record["soap"].get("matched"), dict)
-        and bool(record["soap"]["matched"].get("maker"))
+        isinstance(soap_result, dict)
+        and isinstance(soap_result.get("matched"), dict)
+        and bool(soap_result["matched"].get("maker"))
     )
 
 
 def is_brush_matched(record: dict) -> bool:
+    brush_result = record.get("brush")
+    if isinstance(brush_result, MatchResult):
+        return bool(brush_result.matched and brush_result.matched.get("brand"))
     return (
-        isinstance(record.get("brush"), dict)
-        and isinstance(record["brush"].get("matched"), dict)
-        and bool(record["brush"]["matched"].get("brand"))
+        isinstance(brush_result, dict)
+        and isinstance(brush_result.get("matched"), dict)
+        and bool(brush_result["matched"].get("brand"))
     )
 
 
@@ -62,85 +74,64 @@ def match_record(
     if "razor" in result:
         start_time = time.time()
         razor_result = razor_matcher.match(result["razor"])
-        # Convert MatchResult to dict if needed
-        if isinstance(razor_result, MatchResult):
-            result["razor"] = {
-                "original": razor_result.original,
-                "matched": razor_result.matched,
-                "match_type": razor_result.match_type,
-                "pattern": razor_result.pattern,
-            }
-        else:
-            result["razor"] = razor_result
+        result["razor"] = razor_result
         monitor.record_matcher_timing("razor", time.time() - start_time)
 
     if "blade" in result:
         start_time = time.time()
         # Check if razor is cartridge/disposable/straight and clear blade if so
-        razor_matched = result.get("razor", {}).get("matched", {})
-        if razor_matched:
-            razor_format = razor_matched.get("format", "").upper()
+        razor_result = result.get("razor")
+        if isinstance(razor_result, MatchResult) and razor_result.matched:
+            razor_format = razor_result.matched.get("format", "").upper()
             irrelevant_formats = ["SHAVETTE (DISPOSABLE)", "CARTRIDGE", "STRAIGHT"]
 
             if razor_format in irrelevant_formats:
                 # Clear blade info since it's irrelevant for these razor formats
-                result["blade"] = {"original": result["blade"], "matched": None, "match_type": None}
+                result["blade"] = MatchResult(
+                    original=result["blade"], matched=None, match_type=None, pattern=None
+                )
             else:
                 # For other formats, use context-aware matching
                 blade_result = blade_matcher.match_with_context(result["blade"], razor_format)
-                # Convert MatchResult to dict if needed
-                if isinstance(blade_result, MatchResult):
-                    result["blade"] = {
-                        "original": blade_result.original,
-                        "matched": blade_result.matched,
-                        "match_type": blade_result.match_type,
-                        "pattern": blade_result.pattern,
-                    }
-                else:
-                    result["blade"] = blade_result
+                result["blade"] = blade_result
         else:
-            # No razor context, match blade normally
-            blade_result = blade_matcher.match(result["blade"])
-            # Convert MatchResult to dict if needed
-            if isinstance(blade_result, MatchResult):
-                result["blade"] = {
-                    "original": blade_result.original,
-                    "matched": blade_result.matched,
-                    "match_type": blade_result.match_type,
-                    "pattern": blade_result.pattern,
-                }
+            # Handle legacy dict format for razor
+            razor_matched = (
+                result.get("razor", {}).get("matched", {})
+                if isinstance(result.get("razor"), dict)
+                else {}
+            )
+            if razor_matched:
+                razor_format = razor_matched.get("format", "").upper()
+                irrelevant_formats = ["SHAVETTE (DISPOSABLE)", "CARTRIDGE", "STRAIGHT"]
+
+                if razor_format in irrelevant_formats:
+                    # Clear blade info since it's irrelevant for these razor formats
+                    result["blade"] = MatchResult(
+                        original=result["blade"], matched=None, match_type=None, pattern=None
+                    )
+                else:
+                    # For other formats, use context-aware matching
+                    blade_result = blade_matcher.match_with_context(result["blade"], razor_format)
+                    result["blade"] = blade_result
             else:
+                # No razor context, match blade normally
+                blade_result = blade_matcher.match(result["blade"])
                 result["blade"] = blade_result
         monitor.record_matcher_timing("blade", time.time() - start_time)
 
     if "soap" in result:
         start_time = time.time()
         soap_result = soap_matcher.match(result["soap"])
-        # Convert MatchResult to dict if needed
-        if isinstance(soap_result, MatchResult):
-            result["soap"] = {
-                "original": soap_result.original,
-                "matched": soap_result.matched,
-                "match_type": soap_result.match_type,
-                "pattern": soap_result.pattern,
-            }
-        else:
-            result["soap"] = soap_result
+        result["soap"] = soap_result
         monitor.record_matcher_timing("soap", time.time() - start_time)
+
     if "brush" in result:
         start_time = time.time()
         brush_result = brush_matcher.match(result["brush"])
-        # Convert MatchResult to dict if needed
-        if isinstance(brush_result, MatchResult):
-            result["brush"] = {
-                "original": brush_result.original,
-                "matched": brush_result.matched,
-                "match_type": brush_result.match_type,
-                "pattern": brush_result.pattern,
-            }
-        else:
-            result["brush"] = brush_result
+        result["brush"] = brush_result
         monitor.record_matcher_timing("brush", time.time() - start_time)
+
     return result
 
 
@@ -193,8 +184,20 @@ def process_month(
             matched_record = match_record(
                 record, razor_matcher, blade_matcher, soap_matcher, brush_matcher, monitor
             )
+            # Convert MatchResult objects to dicts for JSON serialization
+            converted_record = {}
+            for key, value in matched_record.items():
+                if hasattr(value, "original"):  # Check if it's a MatchResult
+                    converted_record[key] = {
+                        "original": value.original,
+                        "matched": value.matched,
+                        "match_type": value.match_type,
+                        "pattern": value.pattern,
+                    }
+                else:
+                    converted_record[key] = value
             # Update the record in the list
-            records[i] = matched_record
+            records[i] = converted_record
 
         monitor.end_processing_timing()
 
