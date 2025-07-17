@@ -1,0 +1,281 @@
+# React Web UI for SOTD Pipeline Analysis Tools
+
+## Project Overview
+
+Create an independent React-based web application as a companion to the SOTD pipeline, providing web-based interfaces for the unmatched_analyzer.py and mismatch_analyzer.py tools. The application will run locally on the developer's laptop and provide enhanced visualization and interaction capabilities for pipeline analysis.
+
+## Architecture & Technology Stack
+
+### Frontend
+- **Framework**: React with Vite (for fast development)
+- **UI Components**: React Table (lightweight, flexible, easy to migrate to Material-UI later)
+- **Date Picking**: React Datepicker
+- **State Management**: React hooks (useState, useEffect)
+- **Styling**: CSS modules or styled-components
+
+### Backend
+- **Framework**: FastAPI (Python)
+- **Integration**: Direct import and reuse of existing analyzer logic
+- **API**: REST endpoints for analysis operations
+- **Data Access**: Direct file system access to pipeline data
+
+### Project Structure
+```
+sotd_pipeline/
+├── sotd/                    # Existing pipeline
+├── webui/                   # React frontend
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   └── utils/
+│   ├── public/
+│   └── package.json
+├── api/                     # FastAPI backend
+│   ├── main.py
+│   ├── analyzers/           # API endpoints
+│   ├── utils/
+│   └── requirements.txt
+├── data/                    # Shared pipeline data
+└── run.py                   # Existing pipeline entry
+```
+
+## Development Environment
+
+### Setup
+- **Frontend**: `cd webui && npm run dev` (port 3000)
+- **Backend**: `cd api && uvicorn main:app --reload` (port 8000)
+- **Data Access**: Direct file system access to `data/matched/` and `data/extracted/`
+
+### File Access Strategy
+- **Date Range Picker**: Select multiple months (YYYY-MM format)
+- **File Validation**: Error if selected month's file doesn't exist
+- **Smart Detection**: Auto-detect available months from data directory
+
+## Implementation Phases
+
+### Phase 1: Unmatched Analyzer (Razor field only)
+
+#### Features
+- **Date Range Selection**: Pick multiple months for analysis
+- **Field Selection**: Start with razor field only
+- **Rich Data Table**: Sortable, filterable table with pagination
+- **File/Line Information**: Display source file and line numbers for unmatched items
+- **Sidebar Configuration**: Always-visible panel with analysis parameters
+- **Error Handling**: Strict validation with clear error messages and debug mode
+
+#### API Endpoints
+```
+POST /api/analyze/unmatched
+  - field: "razor"
+  - months: ["2025-01", "2025-02"]
+  - limit: number (default: 50)
+
+GET /api/files/available-months
+  - Returns list of available months from data/matched/
+
+GET /api/catalogs/razor
+  - Returns razors.yaml catalog data
+```
+
+#### UI Components
+- **DateRangePicker**: Select multiple months
+- **AnalysisTable**: Rich data table with columns:
+  - Original text
+  - File/line information
+  - Use count
+  - Source files
+- **ConfigurationPanel**: Sidebar with analysis parameters
+- **ErrorDisplay**: Clear error messages with debug information
+
+### Phase 2: Complete Unmatched Analyzer
+
+#### Additional Features
+- **All Fields**: Add blade, brush, soap field support
+- **Brush Granularity**: Full handle/knot component analysis (reusing Python logic)
+- **Enhanced Filtering**: Advanced search and filter capabilities
+- **Export Functionality**: Export results to JSON/CSV
+
+#### Brush Analysis Integration
+- **Backend Integration**: Reuse existing Python brush analysis logic
+- **Component Display**: Show handle/knot breakdown with icons
+- **Interactive Elements**: Clickable components for detailed view
+- **Special Indicators**: Visual indicators for matched/unmatched components
+
+#### API Extensions
+```
+POST /api/analyze/unmatched
+  - field: "razor" | "blade" | "brush" | "soap"
+  - months: ["2025-01", "2025-02"]
+  - limit: number
+  - include_components: boolean (for brush analysis)
+
+GET /api/catalogs/{field}
+  - Returns catalog data for any field
+```
+
+### Phase 3: Mismatch Analyzer
+
+#### Features
+- **Mismatch Detection**: Identify potential mismatches using existing logic
+- **Multiple Analysis Types**: 
+  - Multiple pattern matches
+  - Levenshtein distance analysis
+  - Low confidence matches
+  - Perfect regex matches
+- **Mark as Correct**: Integration with correct_matches.yaml
+- **Advanced Grouping**: Group duplicate mismatches with count information
+- **Bulk Actions**: Select and mark multiple items as correct
+
+#### API Endpoints
+```
+POST /api/analyze/mismatch
+  - field: "razor" | "blade" | "brush" | "soap"
+  - month: "2025-01"
+  - threshold: number (Levenshtein distance)
+  - limit: number
+  - show_all: boolean
+  - show_unconfirmed: boolean
+  - show_regex_matches: boolean
+
+POST /api/mark-correct
+  - matches: array of match keys to mark as correct
+  - field: string
+
+GET /api/correct-matches
+  - Returns current correct_matches.yaml data
+
+DELETE /api/correct-matches
+  - Clear all correct matches
+
+DELETE /api/correct-matches/{field}
+  - Clear correct matches for specific field
+```
+
+#### UI Enhancements
+- **Mismatch Indicators**: Visual indicators for different mismatch types
+- **Confidence Display**: Show confidence scores and thresholds
+- **Pattern Display**: Show regex patterns with proper formatting
+- **Bulk Selection**: Checkboxes for selecting multiple items
+- **Export Integration**: Direct export to correct_matches.yaml
+
+## Technical Specifications
+
+### Data Processing Strategy
+- **Hybrid Approach**: Basic filtering client-side, heavy analysis server-side
+- **Full File Loading**: Load complete JSON files for local processing
+- **Web Workers**: Use for heavy client-side computations if needed
+- **Caching**: Cache analysis results for previously analyzed months
+
+### Error Handling
+- **Strict Validation**: Fail fast with clear error messages
+- **Debug Mode**: Detailed error reporting and data inspection tools
+- **Graceful Degradation**: Show partial results when possible
+- **User-Friendly Messages**: Clear suggestions for fixing issues
+
+### Performance Considerations
+- **Virtual Scrolling**: For large datasets (thousands of records)
+- **Progressive Loading**: Load results in chunks as analysis completes
+- **Smart Caching**: Cache analysis results to avoid recomputation
+- **Memory Management**: Handle large JSON files efficiently
+
+### Integration with Pipeline
+- **File System Access**: Direct access to pipeline data files
+- **Catalog Integration**: Read YAML catalogs for analysis
+- **Correct Matches**: Read/write correct_matches.yaml
+- **Pipeline Triggers**: Option to trigger pipeline runs for missing months
+
+## User Experience Design
+
+### Navigation
+- **Route-based**: Separate pages for unmatched and mismatch analyzers
+- **Shared Header**: Common navigation and configuration
+- **Breadcrumbs**: Clear navigation path
+
+### Configuration Panel
+- **Always Visible**: Sidebar with analysis parameters
+- **Real-time Updates**: Parameters update results immediately
+- **Presets**: Pre-defined analysis configurations
+- **Validation**: Real-time parameter validation
+
+### Results Display
+- **Rich Tables**: Sortable, filterable, paginated data tables
+- **Expandable Details**: Click to expand file/line information
+- **Visual Indicators**: Icons and colors for different states
+- **Bulk Actions**: Select multiple items for batch operations
+
+### Error States
+- **Clear Messages**: User-friendly error descriptions
+- **Debug Information**: Technical details for developers
+- **Recovery Suggestions**: Clear steps to resolve issues
+- **Partial Results**: Show what data is available when possible
+
+## Development Workflow
+
+### Setup Instructions
+1. **Clone Repository**: Ensure pipeline codebase is available
+2. **Install Dependencies**: 
+   - Frontend: `cd webui && npm install`
+   - Backend: `cd api && pip install -r requirements.txt`
+3. **Start Development Servers**:
+   - Frontend: `cd webui && npm run dev`
+   - Backend: `cd api && uvicorn main:app --reload`
+4. **Access Application**: http://localhost:3000
+
+### Testing Strategy
+- **Unit Tests**: React components and API endpoints
+- **Integration Tests**: End-to-end analysis workflows
+- **Data Validation**: Test with real pipeline data
+- **Error Scenarios**: Test with corrupted/missing files
+
+### Deployment
+- **Local Development**: Run both servers locally
+- **Build Process**: Standard React build for frontend
+- **Distribution**: Self-contained application for developer use
+
+## Success Criteria
+
+### Phase 1 Success
+- [ ] Load and display unmatched razor data from pipeline files
+- [ ] Date range selection works with available months
+- [ ] Rich table displays file/line information correctly
+- [ ] Error handling works for missing/corrupted files
+- [ ] Performance acceptable with large datasets
+
+### Phase 2 Success
+- [ ] All fields (blade, brush, soap) work correctly
+- [ ] Brush analysis shows handle/knot granularity
+- [ ] Export functionality works for analysis results
+- [ ] Enhanced filtering and search capabilities
+
+### Phase 3 Success
+- [ ] Mismatch detection works with all analysis types
+- [ ] Mark as correct functionality integrates with pipeline
+- [ ] Bulk operations work for multiple selections
+- [ ] Advanced grouping and filtering capabilities
+
+## Future Enhancements
+
+### Potential Extensions
+- **Real-time Updates**: WebSocket integration for live analysis
+- **Advanced Visualizations**: Charts and graphs for analysis trends
+- **Pipeline Integration**: Direct pipeline execution from web UI
+- **Multi-user Support**: Shared analysis sessions
+- **Plugin Architecture**: Extensible analysis tools
+- **Mobile Support**: Responsive design for tablet use
+
+### Performance Optimizations
+- **Database Integration**: Move from file-based to database storage
+- **Caching Layer**: Redis or similar for analysis results
+- **Background Processing**: Celery or similar for long-running analysis
+- **CDN Integration**: For static assets and large datasets
+
+## Conclusion
+
+This specification provides a comprehensive plan for building a React-based web UI for the SOTD pipeline analysis tools. The phased approach allows for incremental development and validation, while the hybrid architecture leverages existing Python code while providing a modern web interface.
+
+The focus on local development, direct file access, and integration with existing pipeline tools ensures that the web UI will be a valuable companion to the current CLI-based workflow.
+description:
+globs:
+alwaysApply: false
+---

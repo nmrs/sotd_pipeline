@@ -1,0 +1,570 @@
+# React Web UI Analyzer Implementation Plan
+
+## 📘 Project Summary
+
+Create a React-based web application as a companion to the SOTD pipeline, providing web-based interfaces for the unmatched_analyzer.py and mismatch_analyzer.py tools. The application will run locally on the developer's laptop and provide enhanced visualization and interaction capabilities for pipeline analysis.
+
+## 🧩 Component Steps
+
+### Phase 1: Foundation & Backend API
+1. **FastAPI Backend Setup** - Create FastAPI server with basic structure and file system access
+2. **File System Integration** - Implement endpoints for reading pipeline data files
+3. **Catalog Integration** - Add endpoints for reading YAML catalog files
+4. **Basic Analysis Endpoint** - Implement unmatched analyzer endpoint for razor field only
+
+### Phase 2: React Frontend Foundation
+5. **React App Setup** - Create React app with Vite and basic project structure
+6. **Core Components** - Build reusable UI components (DateRangePicker, AnalysisTable, ConfigurationPanel)
+7. **API Integration** - Connect frontend to backend API with error handling
+8. **Basic UI Layout** - Implement responsive layout with sidebar configuration panel
+
+### Phase 3: Unmatched Analyzer Implementation
+9. **Date Range Selection** - Implement multi-month selection with validation
+10. **Analysis Table** - Build rich data table with sorting, filtering, and pagination
+11. **File/Line Display** - Add source file and line number information display
+12. **Error Handling** - Implement comprehensive error states and debug mode
+
+### Phase 4: Enhanced Unmatched Analyzer
+13. **Multi-Field Support** - Extend to support blade, brush, and soap fields
+14. **Brush Analysis Integration** - Add handle/knot component analysis with visual indicators
+15. **Advanced Filtering** - Implement advanced search and filter capabilities
+16. **Export Functionality** - Add JSON/CSV export for analysis results
+
+### Phase 5: Mismatch Analyzer
+17. **Mismatch Detection API** - Implement mismatch analyzer backend endpoint
+18. **Mismatch UI Components** - Build UI for different mismatch types and confidence display
+19. **Correct Matches Integration** - Add ability to mark items as correct and update correct_matches.yaml
+20. **Bulk Actions** - Implement bulk selection and batch operations
+
+### Phase 6: Integration & Polish
+21. **Navigation & Routing** - Add route-based navigation between analyzers
+22. **Performance Optimization** - Implement virtual scrolling and caching for large datasets
+23. **Error Recovery** - Add graceful degradation and partial results display
+24. **Final Integration** - Connect all components and ensure end-to-end functionality
+
+## 🔁 Implementation Prompts
+
+### Step 1: FastAPI Backend Setup
+
+```text
+Create a FastAPI backend for the SOTD pipeline analyzer web UI. The backend should:
+
+1. Set up FastAPI with CORS support for local development
+2. Create basic project structure in api/ directory
+3. Implement health check endpoint
+4. Add basic error handling and logging
+5. Set up requirements.txt with FastAPI, uvicorn, and other dependencies
+
+The backend should be able to run independently with: cd api && uvicorn main:app --reload
+
+Focus on clean, well-structured code that follows the existing pipeline patterns. Include basic tests for the health check endpoint.
+```
+
+### Step 2: File System Integration
+
+```text
+Extend the FastAPI backend to provide file system access to pipeline data:
+
+1. Create endpoint to list available months from data/matched/ directory
+2. Add endpoint to read specific month files with validation
+3. Implement error handling for missing/corrupted files
+4. Add file validation to ensure JSON structure is correct
+5. Create utility functions for safe file operations
+
+The endpoints should:
+- GET /api/files/available-months - Returns list of available months
+- GET /api/files/{month} - Returns data for specific month with validation
+
+Include comprehensive error handling and tests for file system operations.
+```
+
+### Step 3: Catalog Integration
+
+```text
+Add catalog integration to the FastAPI backend:
+
+1. Create endpoint to read YAML catalog files (razors.yaml, blades.yaml, etc.)
+2. Implement catalog validation and error handling
+3. Add endpoint to get catalog data for specific fields
+4. Create utility functions for YAML loading and validation
+5. Add tests for catalog loading and validation
+
+The endpoints should:
+- GET /api/catalogs/{field} - Returns catalog data for specific field (razor, blade, brush, soap)
+- GET /api/catalogs - Returns list of available catalogs
+
+Ensure proper error handling for missing or malformed YAML files.
+```
+
+### Step 4: Basic Analysis Endpoint
+
+```text
+Implement the basic unmatched analyzer endpoint for razor field only:
+
+1. Create POST /api/analyze/unmatched endpoint
+2. Integrate with existing unmatched_analyzer.py logic
+3. Accept parameters: field (razor), months (array), limit (number)
+4. Return analysis results with file/line information
+5. Add comprehensive validation and error handling
+
+The endpoint should:
+- Accept JSON payload with field, months, and limit parameters
+- Return analysis results with original text, file/line info, and use counts
+- Handle errors gracefully with clear error messages
+- Include basic performance metrics
+
+Focus on reusing existing Python analysis logic while providing clean API interface.
+```
+
+### Step 5: React App Setup
+
+```text
+Create React frontend application with Vite:
+
+1. Set up React app with Vite in webui/ directory
+2. Configure TypeScript for type safety
+3. Add essential dependencies (React Table, React Datepicker, etc.)
+4. Create basic project structure with components/, pages/, services/, utils/
+5. Set up development server configuration
+
+The app should:
+- Run on port 3000 with npm run dev
+- Have clean, organized project structure
+- Include basic routing setup
+- Have proper TypeScript configuration
+
+Focus on modern React patterns with hooks and functional components.
+```
+
+### Step 6: Core Components
+
+```text
+Build reusable UI components for the analyzer application:
+
+1. Create DateRangePicker component for multi-month selection
+2. Build AnalysisTable component with React Table integration
+3. Implement ConfigurationPanel component for analysis parameters
+4. Add ErrorDisplay component for error states and debug information
+5. Create LoadingSpinner and other utility components
+
+Components should:
+- Be reusable and well-typed with TypeScript
+- Handle loading states and error conditions
+- Be responsive and accessible
+- Follow consistent styling patterns
+
+Include basic tests for component rendering and user interactions.
+```
+
+### Step 7: API Integration
+
+```text
+Connect the React frontend to the FastAPI backend:
+
+1. Create API service layer with axios or fetch
+2. Implement error handling and retry logic
+3. Add request/response type definitions
+4. Create hooks for API calls (useAnalysis, useCatalogs, etc.)
+5. Add loading states and error handling in components
+
+The integration should:
+- Handle CORS and authentication (if needed)
+- Provide clear error messages for different failure types
+- Include proper TypeScript types for all API calls
+- Handle network errors and timeouts gracefully
+
+Focus on clean separation between UI and API logic.
+```
+
+### Step 8: Basic UI Layout
+
+```text
+Implement the basic UI layout for the analyzer application:
+
+1. Create responsive layout with sidebar configuration panel
+2. Add main content area for analysis results
+3. Implement navigation between different analyzer types
+4. Add header with application title and basic controls
+5. Ensure mobile-responsive design
+
+The layout should:
+- Have always-visible sidebar with configuration options
+- Provide clear navigation between unmatched and mismatch analyzers
+- Be responsive for different screen sizes
+- Follow consistent styling patterns
+
+Include basic styling with CSS modules or styled-components.
+```
+
+### Step 9: Date Range Selection
+
+```text
+Implement comprehensive date range selection functionality:
+
+1. Create DateRangePicker component with multi-month selection
+2. Add validation for available months from API
+3. Implement smart detection of available months
+4. Add error handling for invalid date selections
+5. Create visual indicators for selected/unavailable months
+
+The date picker should:
+- Allow selection of multiple months
+- Validate against available months from API
+- Show clear error messages for invalid selections
+- Provide visual feedback for selection state
+- Handle edge cases (no available months, etc.)
+
+Include comprehensive tests for date validation and selection logic.
+```
+
+### Step 10: Analysis Table
+
+```text
+Build rich data table for displaying analysis results:
+
+1. Implement sortable columns for all data fields
+2. Add filtering capabilities (text search, field filters)
+3. Implement pagination for large datasets
+4. Add expandable rows for detailed file/line information
+5. Create visual indicators for different data states
+
+The table should:
+- Display original text, file/line info, use counts, and source files
+- Support sorting by any column
+- Provide text search across all fields
+- Handle large datasets efficiently with pagination
+- Show loading states during data fetching
+
+Focus on performance and user experience for large datasets.
+```
+
+### Step 11: File/Line Display
+
+```text
+Implement detailed file and line number information display:
+
+1. Create component to show source file paths
+2. Add line number highlighting and navigation
+3. Implement expandable details for file information
+4. Add copy functionality for file paths and line numbers
+5. Create visual indicators for different file types
+
+The display should:
+- Show complete file paths with proper formatting
+- Highlight line numbers for easy identification
+- Allow copying of file/line information
+- Provide expandable details for complex file information
+- Handle edge cases (missing files, invalid line numbers)
+
+Include proper error handling for missing or invalid file information.
+```
+
+### Step 12: Error Handling
+
+```text
+Implement comprehensive error handling and debug mode:
+
+1. Create ErrorDisplay component for different error types
+2. Add debug mode with detailed technical information
+3. Implement graceful degradation for partial failures
+4. Add user-friendly error messages with recovery suggestions
+5. Create error boundary for React component errors
+
+Error handling should:
+- Provide clear, actionable error messages
+- Include debug information for developers
+- Suggest recovery steps for common issues
+- Handle network errors, file system errors, and validation errors
+- Show partial results when possible
+
+Focus on user experience while providing technical details for debugging.
+```
+
+### Step 13: Multi-Field Support
+
+```text
+Extend the unmatched analyzer to support all fields (blade, brush, soap):
+
+1. Update backend endpoint to handle all field types
+2. Add field selection UI component
+3. Implement field-specific validation and error handling
+4. Update frontend to handle different field types
+5. Add field-specific display components
+
+The multi-field support should:
+- Handle razor, blade, brush, and soap fields
+- Provide appropriate validation for each field type
+- Show field-specific information in results
+- Handle field-specific error conditions
+- Maintain consistent UI patterns across fields
+
+Include comprehensive tests for all field types and their specific behaviors.
+```
+
+### Step 14: Brush Analysis Integration
+
+```text
+Integrate brush analysis with handle/knot component breakdown:
+
+1. Reuse existing Python brush analysis logic in backend
+2. Create UI components for handle/knot component display
+3. Add visual indicators for matched/unmatched components
+4. Implement interactive elements for component details
+5. Add special indicators for brush-specific analysis
+
+The brush analysis should:
+- Show handle and knot components separately
+- Indicate which components are matched/unmatched
+- Provide detailed information for each component
+- Handle complex brush parsing scenarios
+- Maintain consistency with existing Python logic
+
+Focus on reusing existing brush analysis logic while providing enhanced UI.
+```
+
+### Step 15: Advanced Filtering
+
+```text
+Implement advanced search and filter capabilities:
+
+1. Add text search across all fields with highlighting
+2. Implement field-specific filters (brand, model, etc.)
+3. Add date range filtering for analysis periods
+4. Create filter persistence and URL state management
+5. Add filter reset and clear functionality
+
+The filtering should:
+- Support complex search queries
+- Provide real-time search results
+- Allow combination of multiple filters
+- Persist filter state across sessions
+- Include clear visual feedback for active filters
+
+Focus on performance and user experience for large datasets.
+```
+
+### Step 16: Export Functionality
+
+```text
+Add export functionality for analysis results:
+
+1. Implement JSON export with full analysis data
+2. Add CSV export with configurable columns
+3. Create export configuration options
+4. Add export progress indicators
+5. Implement file download handling
+
+The export functionality should:
+- Support multiple export formats (JSON, CSV)
+- Allow selection of export fields
+- Handle large datasets efficiently
+- Provide clear progress feedback
+- Include proper file naming and metadata
+
+Include proper error handling for export failures and large file handling.
+```
+
+### Step 17: Mismatch Detection API
+
+```text
+Implement mismatch analyzer backend endpoint:
+
+1. Create POST /api/analyze/mismatch endpoint
+2. Integrate with existing mismatch_analyzer.py logic
+3. Support multiple analysis types (pattern matches, Levenshtein, etc.)
+4. Add threshold and confidence parameters
+5. Implement comprehensive error handling
+
+The endpoint should:
+- Accept field, month, threshold, and analysis type parameters
+- Return mismatch results with confidence scores
+- Handle different mismatch types (multiple patterns, low confidence, etc.)
+- Provide detailed analysis information
+- Include performance metrics
+
+Focus on reusing existing Python analysis logic while providing clean API interface.
+```
+
+### Step 18: Mismatch UI Components
+
+```text
+Build UI components for mismatch analysis:
+
+1. Create components for different mismatch types
+2. Add confidence score display with visual indicators
+3. Implement pattern display with proper formatting
+4. Add mismatch type filtering and grouping
+5. Create visual indicators for different confidence levels
+
+The mismatch UI should:
+- Display different mismatch types clearly
+- Show confidence scores with visual indicators
+- Format regex patterns for readability
+- Allow filtering by mismatch type and confidence
+- Provide clear visual hierarchy for different information types
+
+Include comprehensive tests for mismatch display and interaction.
+```
+
+### Step 19: Correct Matches Integration
+
+```text
+Implement integration with correct_matches.yaml:
+
+1. Add endpoints for reading/writing correct_matches.yaml
+2. Create UI for marking items as correct
+3. Implement bulk marking functionality
+4. Add validation for correct match entries
+5. Create confirmation dialogs for destructive operations
+
+The integration should:
+- Allow marking individual items as correct
+- Support bulk selection and marking
+- Validate correct match entries before saving
+- Provide clear feedback for successful/failed operations
+- Include confirmation for destructive operations
+
+Focus on data integrity and user safety for correct matches operations.
+```
+
+### Step 20: Bulk Actions
+
+```text
+Implement bulk selection and batch operations:
+
+1. Add checkbox selection for multiple items
+2. Create bulk action toolbar with operation buttons
+3. Implement bulk marking as correct functionality
+4. Add bulk export for selected items
+5. Create selection state management
+
+The bulk actions should:
+- Allow selection of multiple items
+- Provide clear visual feedback for selection state
+- Support bulk operations (mark as correct, export)
+- Handle large selections efficiently
+- Include confirmation for bulk operations
+
+Focus on user experience and performance for bulk operations.
+```
+
+### Step 21: Navigation & Routing
+
+```text
+Implement route-based navigation between analyzers:
+
+1. Set up React Router for navigation
+2. Create separate pages for unmatched and mismatch analyzers
+3. Add shared header with navigation
+4. Implement breadcrumbs for clear navigation path
+5. Add route-based state management
+
+The navigation should:
+- Provide clear navigation between analyzers
+- Maintain state across route changes
+- Include breadcrumbs for navigation context
+- Handle route-based error states
+- Support browser back/forward navigation
+
+Focus on clean, intuitive navigation patterns.
+```
+
+### Step 22: Performance Optimization
+
+```text
+Implement performance optimizations for large datasets:
+
+1. Add virtual scrolling for large result sets
+2. Implement progressive loading for analysis results
+3. Add smart caching for analysis results
+4. Optimize memory usage for large JSON files
+5. Add performance monitoring and metrics
+
+The optimizations should:
+- Handle datasets with thousands of records efficiently
+- Provide smooth scrolling and interaction
+- Cache analysis results to avoid recomputation
+- Monitor and report performance metrics
+- Gracefully handle memory constraints
+
+Focus on maintaining responsiveness with large datasets.
+```
+
+### Step 23: Error Recovery
+
+```text
+Implement graceful degradation and partial results display:
+
+1. Add partial results display when full analysis fails
+2. Implement retry mechanisms for failed operations
+3. Create fallback displays for missing data
+4. Add recovery suggestions for common errors
+5. Implement error boundary for component-level errors
+
+The error recovery should:
+- Show partial results when possible
+- Provide clear recovery suggestions
+- Handle network failures gracefully
+- Support retry mechanisms for transient failures
+- Maintain application stability during errors
+
+Focus on user experience during error conditions.
+```
+
+### Step 24: Final Integration
+
+```text
+Connect all components and ensure end-to-end functionality:
+
+1. Integrate all analyzer components
+2. Test complete analysis workflows
+3. Verify error handling across all components
+4. Ensure consistent styling and user experience
+5. Add final polish and documentation
+
+The final integration should:
+- Support complete analysis workflows
+- Handle all error conditions gracefully
+- Provide consistent user experience
+- Include comprehensive documentation
+- Meet all success criteria from the specification
+
+Focus on end-to-end testing and user experience validation.
+```
+
+## 🧠 Critical Analysis
+
+### Prompt Sequence Structure
+The implementation plan follows a logical progression from backend foundation to frontend development to feature integration. Each step builds on previous work and maintains clear dependencies.
+
+### Strengths
+- **Incremental Development**: Each step is small enough to implement safely but large enough to show meaningful progress
+- **Test-First Approach**: Early steps include testing requirements to ensure quality
+- **Reuse of Existing Logic**: Backend steps focus on integrating existing Python analysis tools
+- **User Experience Focus**: Frontend steps prioritize responsive design and error handling
+- **Performance Considerations**: Later steps address scalability and optimization
+
+### Risk Mitigation
+- **Backend-First Approach**: Establishes solid API foundation before frontend development
+- **Component Isolation**: Each UI component can be developed and tested independently
+- **Error Handling**: Comprehensive error handling at each step prevents cascading failures
+- **Performance Planning**: Early consideration of performance issues prevents major refactoring
+
+### Integration Points
+- **API Contract**: Clear API specifications ensure frontend/backend compatibility
+- **Data Flow**: Consistent data structures across all components
+- **Error Propagation**: Unified error handling across all layers
+- **State Management**: Consistent state management patterns throughout the application
+
+### Success Metrics
+- **Functionality**: All specified features implemented and working
+- **Performance**: Acceptable performance with large datasets
+- **Error Handling**: Graceful handling of all error conditions
+- **User Experience**: Intuitive interface with clear feedback
+- **Integration**: Seamless integration with existing pipeline tools
+
+This plan provides a comprehensive roadmap for implementing the React analyzer web UI while maintaining code quality, user experience, and integration with existing pipeline tools.
+description:
+globs:
+alwaysApply: false
+---
