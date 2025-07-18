@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """Tests for analysis endpoints."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
-
 from main import app
 
 
