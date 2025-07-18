@@ -213,27 +213,48 @@ Use conventional commit format with clear, descriptive messages:
 - Cleaning up whitespace, comments, or documentation typos
 - Removing unused test fixtures or mock data
 
-**Use `fix:` for behavior changes:**
-- Changing how a feature works or behaves
-- Modifying user experience or functionality
-- Resolving bugs that affect program behavior
-- Changing API responses or data flow
-- Modifying caching, performance, or optimization behavior
-- Changing how data is processed or displayed
+**Use `fix:` for bug fixes:**
+- Resolving actual bugs or incorrect behavior
+- Fixing broken functionality
+- Correcting errors in logic or implementation
+- Resolving issues that cause failures or incorrect results
+
+**Use `feat:` for new features/enhancements:**
+- Adding new functionality
+- Enhancing existing features
+- Adding new capabilities or options
+
+**Use `refactor:` for behavior changes that aren't bugs:**
+- Restructuring code that changes behavior
+- Improving implementation without fixing bugs
+- Changing how features work for better design
+
+**Use `perf:` for performance changes:**
+- Optimizing performance that changes behavior
+- Improving speed, memory usage, or efficiency
 
 **Examples:**
 ```bash
 # ✅ GOOD cleanup: Removing unused code
 cleanup: remove unused imports and dead code after refactoring
 
-# ✅ GOOD fix: Changing behavior
-fix: remove client-side caching to ensure fresh API calls
+# ✅ GOOD fix: Fixing actual bug
+fix: resolve web UI vs CLI discrepancy by removing stale cache
+
+# ✅ GOOD refactor: Changing behavior for better design
+refactor: remove client-side caching to ensure fresh API calls
+
+# ✅ GOOD feat: Adding new capability
+feat: add dynamic fallback formats for better blade matching
 
 # ❌ BAD: Calling behavior change "cleanup"
 cleanup: remove client-side caching (this changes behavior!)
 
 # ❌ BAD: Calling dead code removal "fix"
 fix: remove unused imports (this doesn't fix anything!)
+
+# ❌ BAD: Calling bug fix "refactor"
+refactor: fix broken blade matching (this is a bug fix!)
 ```
 
 ## Comprehensive Rollback Procedures
