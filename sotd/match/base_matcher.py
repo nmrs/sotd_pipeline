@@ -11,6 +11,12 @@ from .types import MatchResult, create_match_result
 _catalog_cache = {}
 
 
+def clear_catalog_cache() -> None:
+    """Clear the global catalog cache. Useful when catalog files are modified."""
+    global _catalog_cache
+    _catalog_cache.clear()
+
+
 class BaseMatcher:
     def __init__(
         self, catalog_path: Path, field_type: str, correct_matches_path: Optional[Path] = None

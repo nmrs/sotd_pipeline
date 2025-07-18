@@ -18,6 +18,12 @@ from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 _yaml_catalog_cache: Dict[str, Dict[str, Any]] = {}
 
 
+def clear_yaml_cache() -> None:
+    """Clear the global YAML catalog cache. Useful when catalog files are modified."""
+    global _yaml_catalog_cache
+    _yaml_catalog_cache.clear()
+
+
 class CatalogLoader:
     """
     Handles loading of YAML catalog files with error handling, caching,
