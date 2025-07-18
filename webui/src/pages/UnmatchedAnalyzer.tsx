@@ -14,6 +14,7 @@ const UnmatchedAnalyzer: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [matchPhaseOutput, setMatchPhaseOutput] = useState<string | null>(null);
     const [results, setResults] = useState<UnmatchedAnalysisResult | null>(null);
     const [operationCount, setOperationCount] = useState(0);
     const [matchPhaseLoading, setMatchPhaseLoading] = useState(false);
@@ -101,6 +102,9 @@ const UnmatchedAnalyzer: React.FC = () => {
             };
 
             const result = await runMatchPhase(request);
+
+            // Store the output for display
+            setMatchPhaseOutput(result.error_details || null);
 
             if (result.success) {
                 setError(null);
@@ -259,6 +263,25 @@ const UnmatchedAnalyzer: React.FC = () => {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                )}
+
+                {matchPhaseOutput && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-sm font-medium text-gray-900">Match Phase Output</h3>
+                            <button
+                                onClick={() => setMatchPhaseOutput(null)}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                        <pre className="text-xs text-gray-700 bg-white p-3 rounded border overflow-x-auto whitespace-pre-wrap">
+                            {matchPhaseOutput}
+                        </pre>
                     </div>
                 )}
 
