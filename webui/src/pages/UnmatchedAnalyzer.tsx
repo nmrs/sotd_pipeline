@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { analyzeUnmatched, UnmatchedAnalysisResult, handleApiError } from '../services/api';
+import { analyzeUnmatched, UnmatchedAnalysisResult, handleApiError, runMatchPhase, MatchPhaseRequest } from '../services/api';
 import MonthSelector from '../components/MonthSelector';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorDisplay from '../components/ErrorDisplay';
@@ -12,8 +12,11 @@ const UnmatchedAnalyzer: React.FC = () => {
     const [limit, setLimit] = useState<number>(50);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [results, setResults] = useState<UnmatchedAnalysisResult | null>(null);
     const [operationCount, setOperationCount] = useState(0);
+    const [matchPhaseLoading, setMatchPhaseLoading] = useState(false);
+    const [forceMatch, setForceMatch] = useState(true);
 
 
     const fieldOptions = [
@@ -32,6 +35,7 @@ const UnmatchedAnalyzer: React.FC = () => {
         try {
             setLoading(true);
             setError(null);
+            setSuccessMessage(null);
             setResults(null);
             setOperationCount(prev => prev + 1);
 
@@ -59,6 +63,46 @@ const UnmatchedAnalyzer: React.FC = () => {
         return examples.slice(0, 3).join(', ') + (examples.length > 3 ? '...' : '');
     };
 
+    const handleRunMatchPhase = async () => {
+        if (selectedMonths.length === 0) {
+            setError('Please select at least one month');
+            return;
+        }
+
+        try {
+            setMatchPhaseLoading(true);
+            setError(null);
+            setSuccessMessage(null);
+
+            const request: MatchPhaseRequest = {
+                months: selectedMonths,
+                force: forceMatch,
+            };
+
+            const result = await runMatchPhase(request);
+
+            if (result.success) {
+                setError(null);
+                setSuccessMessage(result.message);
+                // Optionally refresh the analysis after successful match phase
+                if (results) {
+                    handleAnalyze();
+                }
+            } else {
+                // Display both the message and error details if available
+                const errorMessage = result.error_details
+                    ? `${result.message}\n\nError Details:\n${result.error_details}`
+                    : result.message;
+                setError(errorMessage);
+                setSuccessMessage(null);
+            }
+        } catch (err: any) {
+            setError(handleApiError(err));
+        } finally {
+            setMatchPhaseLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (results) {
             // eslint-disable-next-line no-console
@@ -75,21 +119,17 @@ const UnmatchedAnalyzer: React.FC = () => {
                 </p>
             </div>
 
-            {/* Configuration Panel - Compact at top */}
-            <div className="mb-8">
-                <div className="bg-white rounded-lg shadow p-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Analysis Configuration</h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Compact Configuration Panel */}
+            <div className="mb-4">
+                <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex flex-wrap items-center gap-4">
                         {/* Field Selection */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Product Field
-                            </label>
+                        <div className="flex items-center space-x-2">
+                            <label className="text-sm font-medium text-gray-700">Field:</label>
                             <select
                                 value={selectedField}
                                 onChange={(e) => setSelectedField(e.target.value)}
-                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                             >
                                 {fieldOptions.map((option) => (
                                     <option key={option.value} value={option.value}>
@@ -99,49 +139,70 @@ const UnmatchedAnalyzer: React.FC = () => {
                             </select>
                         </div>
 
-                        {/* Month Selection */}
-                        <div>
-                            <MonthSelector
-                                selectedMonths={selectedMonths}
-                                onMonthsChange={setSelectedMonths}
-                                label="Select Months to Analyze"
-                            />
+                        {/* Month Selection - Compact */}
+                        <div className="flex items-center space-x-2">
+                            <label className="text-sm font-medium text-gray-700">Months:</label>
+                            <div className="flex-1 min-w-0">
+                                <MonthSelector
+                                    selectedMonths={selectedMonths}
+                                    onMonthsChange={setSelectedMonths}
+                                    label=""
+                                />
+                            </div>
                         </div>
 
                         {/* Limit Selection */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Result Limit
-                            </label>
+                        <div className="flex items-center space-x-2">
+                            <label className="text-sm font-medium text-gray-700">Limit:</label>
                             <input
                                 type="number"
                                 value={limit}
                                 onChange={(e) => setLimit(parseInt(e.target.value) || 50)}
                                 min="1"
                                 max="1000"
-                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-20 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                             />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Maximum number of unmatched items to return (1-1000)
-                            </p>
                         </div>
-                    </div>
 
-                    {/* Analyze Button and Performance Monitor */}
-                    <div className="mt-6 flex items-center justify-between">
-                        <button
-                            onClick={handleAnalyze}
-                            disabled={loading || selectedMonths.length === 0}
-                            className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? 'Analyzing...' : 'Analyze Unmatched Items'}
-                        </button>
+                        {/* Action Buttons */}
+                        <div className="flex items-center space-x-2">
+                            <button
+                                onClick={handleAnalyze}
+                                disabled={loading || selectedMonths.length === 0}
+                                className="bg-blue-600 text-white py-1 px-3 rounded text-sm hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {loading ? 'Analyzing...' : 'Analyze'}
+                            </button>
 
-                        {/* Performance Monitor */}
-                        <PerformanceMonitor
-                            dataSize={results?.unmatched_items?.length || 0}
-                            operationCount={operationCount}
-                        />
+                            <button
+                                onClick={handleRunMatchPhase}
+                                disabled={matchPhaseLoading || selectedMonths.length === 0}
+                                className="bg-green-600 text-white py-1 px-3 rounded text-sm hover:bg-green-700 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {matchPhaseLoading ? 'Running...' : 'Match Phase'}
+                            </button>
+
+                            <div className="flex items-center space-x-1">
+                                <input
+                                    type="checkbox"
+                                    id="force-match"
+                                    checked={forceMatch}
+                                    onChange={(e) => setForceMatch(e.target.checked)}
+                                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                />
+                                <label htmlFor="force-match" className="text-xs text-gray-700">
+                                    Force
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Performance Monitor - Compact */}
+                        <div className="ml-auto">
+                            <PerformanceMonitor
+                                dataSize={results?.unmatched_items?.length || 0}
+                                operationCount={operationCount}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -152,6 +213,34 @@ const UnmatchedAnalyzer: React.FC = () => {
                     <ErrorDisplay error={error} onRetry={() => setError(null)} />
                 )}
 
+                {successMessage && (
+                    <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm text-green-800">{successMessage}</p>
+                            </div>
+                            <div className="ml-auto pl-3">
+                                <div className="-mx-1.5 -my-1.5">
+                                    <button
+                                        onClick={() => setSuccessMessage(null)}
+                                        className="inline-flex rounded-md bg-green-50 p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50"
+                                    >
+                                        <span className="sr-only">Dismiss</span>
+                                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {loading && (
                     <div className="bg-white rounded-lg shadow p-6">
                         <LoadingSpinner message="Analyzing unmatched items..." />
@@ -160,28 +249,28 @@ const UnmatchedAnalyzer: React.FC = () => {
 
                 {results && (
                     <div className="bg-white rounded-lg shadow">
-                        <div className="px-6 py-4 border-b border-gray-200">
-                            <h2 className="text-xl font-semibold text-gray-900">Analysis Results</h2>
-                            <p className="text-sm text-gray-600 mt-1">
-                                Field: {results.field || 'Unknown'} | Months: {results.months?.join(', ') || 'None'} |
-                                Total Unmatched: {results.total_unmatched || 0} |
-                                Processing Time: {results.processing_time?.toFixed(2) || '0.00'}s
-                            </p>
+                        <div className="px-4 py-3 border-b border-gray-200">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-semibold text-gray-900">Results</h2>
+                                <div className="text-xs text-gray-500">
+                                    {results.field} | {results.months?.join(', ')} | {results.total_unmatched || 0} items | {results.processing_time?.toFixed(2) || '0.00'}s
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="p-6">
+                        <div className="p-4">
                             {Array.isArray(results.unmatched_items) ? (
                                 results.unmatched_items.length === 0 ? (
-                                    <div className="text-center py-8">
-                                        <div className="text-green-600 text-6xl mb-4">✓</div>
-                                        <h3 className="text-lg font-medium text-gray-900 mb-2">No Unmatched Items Found</h3>
-                                        <p className="text-gray-600">
-                                            All {results.field} items in the selected months were successfully matched to the catalog.
+                                    <div className="text-center py-6">
+                                        <div className="text-green-600 text-4xl mb-2">✓</div>
+                                        <h3 className="text-base font-medium text-gray-900 mb-1">No Unmatched Items</h3>
+                                        <p className="text-sm text-gray-600">
+                                            All {results.field} items were successfully matched.
                                         </p>
                                     </div>
                                 ) : (
-                                    <div className="space-y-4">
-                                        <h3 className="text-lg font-medium text-gray-900">
+                                    <div>
+                                        <h3 className="text-base font-medium text-gray-900 mb-3">
                                             Top Unmatched Items ({results.unmatched_items.length})
                                         </h3>
                                         <VirtualizedTable
@@ -192,7 +281,7 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                     header: 'Item',
                                                     width: 300,
                                                     render: (item) => (
-                                                        <span className="font-medium text-gray-900">
+                                                        <span className="font-medium text-gray-900 text-sm">
                                                             {item.item}
                                                         </span>
                                                     ),
@@ -200,9 +289,9 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                 {
                                                     key: 'count',
                                                     header: 'Count',
-                                                    width: 100,
+                                                    width: 80,
                                                     render: (item) => (
-                                                        <span className="text-gray-500">
+                                                        <span className="text-gray-500 text-sm">
                                                             {item.count}
                                                         </span>
                                                     ),
@@ -212,23 +301,23 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                     header: 'Examples',
                                                     width: 400,
                                                     render: (item) => (
-                                                        <span className="text-gray-500">
+                                                        <span className="text-gray-500 text-sm">
                                                             {formatExamples(item.examples)}
                                                         </span>
                                                     ),
                                                 },
                                             ]}
-                                            height={400}
-                                            rowHeight={48}
+                                            height={350}
+                                            rowHeight={40}
                                         />
                                     </div>
                                 )
                             ) : (
-                                <div className="text-center py-8">
-                                    <div className="text-red-600 text-6xl mb-4">!</div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-2">Unexpected API Response</h3>
-                                    <p className="text-gray-600">
-                                        The analysis API did not return a valid list of unmatched items. Please try again or contact support.
+                                <div className="text-center py-6">
+                                    <div className="text-red-600 text-4xl mb-2">!</div>
+                                    <h3 className="text-base font-medium text-gray-900 mb-1">Invalid Response</h3>
+                                    <p className="text-sm text-gray-600">
+                                        The API did not return valid data. Please try again.
                                     </p>
                                 </div>
                             )}

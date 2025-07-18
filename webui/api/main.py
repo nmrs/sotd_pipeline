@@ -2,16 +2,15 @@
 """FastAPI backend for SOTD pipeline analyzer web UI."""
 
 import logging
-from typing import Dict, Any
+from typing import Any, Dict
 
+import uvicorn
+from analysis import router as analysis_router
+from catalogs import router as catalogs_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import uvicorn
-
 from files import router as files_router
-from catalogs import router as catalogs_router
-from analysis import router as analysis_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
