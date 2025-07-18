@@ -98,10 +98,13 @@ Half DE:
 
 
 def test_format_specific_match_found_gem_razor(test_matcher):
-    """Test 'Accuforge' with 'GEM' context returns GEM format."""
+    """Test 'Accuforge' with 'GEM' context returns DE format as fallback."""
     result = test_matcher.match_with_context("Accuforge", "GEM")
-    # Accuforge doesn't match any GEM patterns, so should return no match
-    assert result.matched is None
+    # Accuforge doesn't match any GEM patterns, so should fallback to DE
+    assert result.matched is not None
+    assert result.matched["brand"] == "Personna"
+    assert result.matched["model"] == "Lab Blue"
+    assert result.matched["format"] == "DE"
 
 
 def test_format_specific_match_found_de_razor(test_matcher):
@@ -126,10 +129,13 @@ def test_multiple_format_matches_de_razor(test_matcher):
 
 
 def test_multiple_format_matches_ac_razor(test_matcher):
-    """Test 'Feather' with 'AC' context returns AC format (model 'Pro')."""
+    """Test 'Feather' with 'AC' context returns DE format as fallback."""
     result = test_matcher.match_with_context("Feather", "AC")
-    # Feather doesn't match any AC patterns, so should return no match
-    assert result.matched is None
+    # Feather doesn't match any AC patterns, so should fallback to DE
+    assert result.matched is not None
+    assert result.matched["brand"] == "Feather"
+    assert result.matched["model"] == "DE"
+    assert result.matched["format"] == "DE"
 
 
 def test_case_insensitive_matching(test_matcher):
@@ -144,11 +150,13 @@ def test_case_insensitive_matching(test_matcher):
     assert result1.matched["brand"] == result2.matched["brand"] == result3.matched["brand"]
     assert result1.matched["model"] == result2.matched["model"] == result3.matched["model"]
     assert result1.matched["format"] == result2.matched["format"] == result3.matched["format"]
-    # GEM format - Accuforge doesn't match any patterns
+    # GEM format - Accuforge doesn't match any patterns, should fallback to DE
     result4 = test_matcher.match_with_context("ACCUFORGE", "GEM")
     result5 = test_matcher.match_with_context("accuforge", "GEM")
-    assert result4.matched is None
-    assert result5.matched is None
+    assert result4.matched is not None
+    assert result5.matched is not None
+    assert result4.matched["brand"] == result5.matched["brand"] == "Personna"
+    assert result4.matched["format"] == result5.matched["format"] == "DE"
 
 
 def test_no_match_when_format_not_found(test_matcher):
@@ -159,12 +167,11 @@ def test_no_match_when_format_not_found(test_matcher):
     assert result.match_type is None
     assert result.pattern is None
     assert result.original == "NonexistentBlade"
-    # Blade that exists in DE but not in GEM
+    # Blade that exists in DE but not in GEM - should fallback to DE
     result = test_matcher.match_with_context("Astra", "GEM")
-    assert result.matched is None
-    assert result.match_type is None
-    assert result.pattern is None
-    assert result.original == "Astra"
+    assert result.matched is not None
+    assert result.matched["brand"] == "Astra"
+    assert result.matched["format"] == "DE"
 
 
 def test_half_de_fallback_to_de(test_matcher):
@@ -188,13 +195,13 @@ def test_format_mapping_accuracy(test_matcher):
     """Test that razor format mapping works correctly for 'Feather'."""
     format_tests = [
         ("SHAVETTE (DE)", "DE"),
-        ("SHAVETTE (AC)", "AC"),
-        ("SHAVETTE (GEM)", "GEM"),
-        ("SHAVETTE (HALF DE)", "HALF DE"),
+        ("SHAVETTE (AC)", "DE"),  # AC doesn't have Feather, falls back to DE
+        ("SHAVETTE (GEM)", "DE"),  # GEM doesn't have Feather, falls back to DE
+        ("SHAVETTE (HALF DE)", "DE"),  # HALF DE doesn't have Feather, falls back to DE
         ("DE", "DE"),
-        ("AC", "AC"),
-        ("GEM", "GEM"),
-        ("HALF DE", "HALF DE"),
+        ("AC", "DE"),  # AC doesn't have Feather, falls back to DE
+        ("GEM", "DE"),  # GEM doesn't have Feather, falls back to DE
+        ("HALF DE", "DE"),  # HALF DE doesn't have Feather, falls back to DE
     ]
     for razor_format, expected_blade_format in format_tests:
         result = test_matcher.match_with_context("Feather", razor_format)
@@ -213,7 +220,7 @@ def test_complex_pattern_matching_gem(test_matcher):
         ("GEM PTFE", "Personna", "GEM PTFE", "GEM"),
         ("PTFE", "Personna", "GEM PTFE", "GEM"),
         ("Accutec", "Personna", "GEM PTFE", "GEM"),
-        ("Accuforge coated", "Accuforge", "GEM", "GEM"),
+        ("Accuforge coated", "Personna", "GEM PTFE", "GEM"),  # Should match GEM PTFE pattern
     ]
     for input_text, expected_brand, expected_model, expected_format in ptfe_tests:
         result = test_matcher.match_with_context(input_text, "GEM")
@@ -261,10 +268,11 @@ def test_pattern_specificity_ordering(test_matcher):
 
 def test_context_priority_over_text_content(test_matcher):
     """Test that razor context takes priority over text content."""
-    # Test that when context is GEM, it matches GEM format even if text suggests DE
+    # Test that when context is GEM, it matches GEM format if available, otherwise falls back
     result = test_matcher.match_with_context("Accuforge", "GEM")
-    # Accuforge doesn't match any GEM patterns, so should return no match
-    assert result.matched is None
+    # Accuforge doesn't match any GEM patterns, so should fallback to DE
+    assert result.matched is not None
+    assert result.matched["format"] == "DE"
 
     # Test that when context is DE, it matches DE format
     result = test_matcher.match_with_context("Accuforge", "DE")

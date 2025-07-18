@@ -234,3 +234,292 @@ DE:
 
     with pytest.raises(Exception):
         BladeMatcher(catalog_path=catalog_file)
+
+
+def test_flexible_fallback_system():
+    """Test the new flexible fallback system with format tracking."""
+    # Create a test catalog with blades in different formats
+    yaml_content = """
+DE:
+  Feather:
+    DE:
+      patterns:
+        - feather
+  Astra:
+    Superior Platinum (Green):
+      patterns:
+        - astra
+GEM:
+  Personna:
+    GEM PTFE:
+      patterns:
+        - ptfe
+        - gem
+AC:
+  Feather:
+    Pro:
+      patterns:
+        - feather.*pro
+INJECTOR:
+  Schick:
+    Injector:
+      patterns:
+        - schick
+FHS:
+  Feather:
+    FHS-1:
+      patterns:
+        - fhs
+"""
+    import tempfile
+    import os
+
+    temp_file = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)
+    temp_file.write(yaml_content)
+    temp_file.close()
+
+    matcher = BladeMatcher(catalog_path=Path(temp_file.name))
+
+    def cleanup():
+        try:
+            os.unlink(temp_file.name)
+        except OSError:
+            pass
+
+    import atexit
+
+    atexit.register(cleanup)
+
+    # Test 1: DE razor with DE blade (no fallback needed)
+    result = matcher.match_with_context("Feather", "DE")
+    assert result.matched is not None
+    assert result.matched["format"] == "DE"
+    assert result.matched["brand"] == "Feather"
+
+    # Test 2: GEM razor with blade that doesn't exist in GEM, should fallback to DE
+    result = matcher.match_with_context("Feather", "GEM")
+    assert result.matched is not None
+    assert result.matched["format"] == "DE"  # Should fallback to DE
+    assert result.matched["brand"] == "Feather"
+
+    # Test 3: AC razor with blade that doesn't exist in AC, should fallback to DE
+    result = matcher.match_with_context("Astra", "AC")
+    assert result.matched is not None
+    assert result.matched["format"] == "DE"  # Should fallback to DE
+    assert result.matched["brand"] == "Astra"
+
+    # Test 4: INJECTOR razor with blade that doesn't exist in INJECTOR, should fallback to DE
+    result = matcher.match_with_context("Astra", "INJECTOR")
+    assert result.matched is not None
+    assert result.matched["format"] == "DE"  # Should fallback to DE
+    assert result.matched["brand"] == "Astra"
+
+    # Test 5: FHS razor with blade that doesn't exist in FHS, should fallback to DE
+    result = matcher.match_with_context("Astra", "FHS")
+    assert result.matched is not None
+    assert result.matched["format"] == "DE"  # Should fallback to DE
+    assert result.matched["brand"] == "Astra"
+
+
+def test_format_tracking_optimization():
+    """Test that the format tracking optimization prevents redundant searches."""
+    # Create a test catalog with specific patterns
+    yaml_content = """
+DE:
+  Feather:
+    DE:
+      patterns:
+        - feather
+GEM:
+  Personna:
+    GEM PTFE:
+      patterns:
+        - ptfe
+AC:
+  Feather:
+    Pro:
+      patterns:
+        - feather.*pro
+"""
+    import tempfile
+    import os
+
+    temp_file = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)
+    temp_file.write(yaml_content)
+    temp_file.close()
+
+    matcher = BladeMatcher(catalog_path=Path(temp_file.name))
+
+    def cleanup():
+        try:
+            os.unlink(temp_file.name)
+        except OSError:
+            pass
+
+    import atexit
+
+    atexit.register(cleanup)
+
+    # Test 1: DE razor searches DE, should not search DE again in fallback
+    result = matcher.match_with_context("Feather", "DE")
+    assert result.matched is not None
+    assert result.matched["format"] == "DE"
+
+    # Test 2: GEM razor searches GEM first, then falls back to DE (not GEM again)
+    result = matcher.match_with_context("Feather", "GEM")
+    assert result.matched is not None
+    assert result.matched["format"] == "DE"  # Should fallback to DE, not search GEM twice
+
+    # Test 3: AC razor searches AC first, then falls back to DE (not AC again)
+    result = matcher.match_with_context("Feather Pro", "AC")
+    assert result.matched is not None
+    # Should match AC format since "feather.*pro" pattern exists
+    assert result.matched["format"] == "AC"
+
+
+def test_straight_razor_skip():
+    """Test that straight razors skip blade matching entirely."""
+    # Create a simple test catalog
+    yaml_content = """
+DE:
+  Feather:
+    DE:
+      patterns:
+        - feather
+"""
+    import tempfile
+    import os
+
+    temp_file = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)
+    temp_file.write(yaml_content)
+    temp_file.close()
+
+    matcher = BladeMatcher(catalog_path=Path(temp_file.name))
+
+    def cleanup():
+        try:
+            os.unlink(temp_file.name)
+        except OSError:
+            pass
+
+    import atexit
+
+    atexit.register(cleanup)
+
+    # Test that straight razors return no match for any blade
+    result = matcher.match_with_context("Feather", "STRAIGHT")
+    assert result.matched is None
+    assert result.match_type is None
+    assert result.pattern is None
+    assert result.original == "Feather"
+
+    # Test with any blade string
+    result = matcher.match_with_context("Any Blade", "STRAIGHT")
+    assert result.matched is None
+    assert result.match_type is None
+    assert result.pattern is None
+    assert result.original == "Any Blade"
+
+
+def test_half_de_special_fallback():
+    """Test that Half DE razors use the special Half DE → DE fallback."""
+    # Create a test catalog with Half DE and DE blades
+    yaml_content = """
+DE:
+  Feather:
+    DE:
+      patterns:
+        - feather
+  Astra:
+    Superior Platinum (Green):
+      patterns:
+        - astra
+Half DE:
+  Gillette:
+    Perma-Sharp SE:
+      patterns:
+        - perma.*sharp
+"""
+    import tempfile
+    import os
+
+    temp_file = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)
+    temp_file.write(yaml_content)
+    temp_file.close()
+
+    matcher = BladeMatcher(catalog_path=Path(temp_file.name))
+
+    def cleanup():
+        try:
+            os.unlink(temp_file.name)
+        except OSError:
+            pass
+
+    import atexit
+
+    atexit.register(cleanup)
+
+    # Test 1: Half DE razor with blade that exists in Half DE
+    result = matcher.match_with_context("Perma-Sharp", "HALF DE")
+    assert result.matched is not None
+    assert result.matched["format"] == "Half DE"
+    assert result.matched["brand"] == "Gillette"
+
+    # Test 2: Half DE razor with blade that only exists in DE (should fallback)
+    result = matcher.match_with_context("Feather", "HALF DE")
+    assert result.matched is not None
+    assert result.matched["format"] == "DE"  # Should fallback to DE
+    assert result.matched["brand"] == "Feather"
+
+    # Test 3: Half DE razor with blade that only exists in DE (should fallback)
+    result = matcher.match_with_context("Astra", "HALF DE")
+    assert result.matched is not None
+    assert result.matched["format"] == "DE"  # Should fallback to DE
+    assert result.matched["brand"] == "Astra"
+
+
+def test_non_context_match_fallback():
+    """Test that the non-context match method also uses the flexible fallback."""
+    # Create a test catalog
+    yaml_content = """
+DE:
+  Feather:
+    DE:
+      patterns:
+        - feather
+GEM:
+  Personna:
+    GEM PTFE:
+      patterns:
+        - ptfe
+"""
+    import tempfile
+    import os
+
+    temp_file = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)
+    temp_file.write(yaml_content)
+    temp_file.close()
+
+    matcher = BladeMatcher(catalog_path=Path(temp_file.name))
+
+    def cleanup():
+        try:
+            os.unlink(temp_file.name)
+        except OSError:
+            pass
+
+    import atexit
+
+    atexit.register(cleanup)
+
+    # Test that non-context matching uses flexible fallback
+    result = matcher.match("Feather")
+    assert result.matched is not None
+    assert result.matched["format"] == "DE"
+    assert result.matched["brand"] == "Feather"
+
+    # Test with a blade that doesn't exist in any format
+    result = matcher.match("NonexistentBlade")
+    assert result.matched is None
+    assert result.match_type is None
+    assert result.pattern is None
