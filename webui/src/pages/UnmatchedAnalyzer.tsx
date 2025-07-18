@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { analyzeUnmatched, UnmatchedAnalysisResult, handleApiError, runMatchPhase, MatchPhaseRequest } from '../services/api';
+import { analyzeUnmatched, UnmatchedAnalysisResult, handleApiError, runMatchPhase, MatchPhaseRequest, getCommentDetail, CommentDetail } from '../services/api';
 import MonthSelector from '../components/MonthSelector';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorDisplay from '../components/ErrorDisplay';
 import VirtualizedTable from '../components/VirtualizedTable';
 import PerformanceMonitor from '../components/PerformanceMonitor';
+import CommentModal from '../components/CommentModal';
 
 const UnmatchedAnalyzer: React.FC = () => {
     const [selectedField, setSelectedField] = useState<string>('razor');
@@ -17,7 +18,9 @@ const UnmatchedAnalyzer: React.FC = () => {
     const [operationCount, setOperationCount] = useState(0);
     const [matchPhaseLoading, setMatchPhaseLoading] = useState(false);
     const [forceMatch, setForceMatch] = useState(true);
-
+    const [selectedComment, setSelectedComment] = useState<CommentDetail | null>(null);
+    const [commentModalOpen, setCommentModalOpen] = useState(false);
+    const [commentLoading, setCommentLoading] = useState(false);
 
     const fieldOptions = [
         { value: 'razor', label: 'Razor' },
@@ -61,6 +64,24 @@ const UnmatchedAnalyzer: React.FC = () => {
     const formatExamples = (examples: string[]) => {
         if (examples.length === 0) return 'No examples available';
         return examples.slice(0, 3).join(', ') + (examples.length > 3 ? '...' : '');
+    };
+
+    const formatCommentIds = (commentIds: string[]) => {
+        if (commentIds.length === 0) return 'No comment IDs available';
+        return commentIds.slice(0, 3).join(', ') + (commentIds.length > 3 ? '...' : '');
+    };
+
+    const handleCommentClick = async (commentId: string) => {
+        try {
+            setCommentLoading(true);
+            const comment = await getCommentDetail(commentId, selectedMonths);
+            setSelectedComment(comment);
+            setCommentModalOpen(true);
+        } catch (err: any) {
+            setError(handleApiError(err));
+        } finally {
+            setCommentLoading(false);
+        }
     };
 
     const handleRunMatchPhase = async () => {
@@ -279,7 +300,7 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                 {
                                                     key: 'item',
                                                     header: 'Item',
-                                                    width: 300,
+                                                    width: 250,
                                                     render: (item) => (
                                                         <span className="font-medium text-gray-900 text-sm">
                                                             {item.item}
@@ -297,9 +318,39 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                     ),
                                                 },
                                                 {
+                                                    key: 'comment_ids',
+                                                    header: 'Comment IDs',
+                                                    width: 300,
+                                                    render: (item) => (
+                                                        <div className="text-sm">
+                                                            {item.comment_ids && item.comment_ids.length > 0 ? (
+                                                                <div className="flex flex-wrap gap-1">
+                                                                    {item.comment_ids.slice(0, 3).map((commentId, index) => (
+                                                                        <button
+                                                                            key={index}
+                                                                            onClick={() => handleCommentClick(commentId)}
+                                                                            disabled={commentLoading}
+                                                                            className="text-blue-600 hover:text-blue-800 underline text-xs bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                        >
+                                                                            {commentLoading ? 'Loading...' : commentId}
+                                                                        </button>
+                                                                    ))}
+                                                                    {item.comment_ids.length > 3 && (
+                                                                        <span className="text-gray-500 text-xs">
+                                                                            +{item.comment_ids.length - 3} more
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-gray-400 text-xs">No comment IDs</span>
+                                                            )}
+                                                        </div>
+                                                    ),
+                                                },
+                                                {
                                                     key: 'examples',
                                                     header: 'Examples',
-                                                    width: 400,
+                                                    width: 200,
                                                     render: (item) => (
                                                         <span className="text-gray-500 text-sm">
                                                             {formatExamples(item.examples)}
@@ -325,6 +376,16 @@ const UnmatchedAnalyzer: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            {/* Comment Modal */}
+            <CommentModal
+                comment={selectedComment}
+                isOpen={commentModalOpen}
+                onClose={() => {
+                    setCommentModalOpen(false);
+                    setSelectedComment(null);
+                }}
+            />
         </div>
     );
 };
