@@ -1,8 +1,7 @@
 ---
-description: 
-globs: 
 alwaysApply: true
 ---
+
 # SOTD Pipeline - Core Development Rules
 # Shave of the Day Data Processing Pipeline
 
@@ -13,6 +12,13 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 - **When running any pipeline step, ALWAYS use the `--force` flag unless the user explicitly says NOT to use `--force`.**
 - This ensures fresh data processing, avoids cached results, and guarantees that all code changes are actually tested.
 - If you want to run without --force, specify that explicitly in your request.
+
+## YAML File Update Restriction (MANDATORY)
+- **NEVER update YAML files without explicit user permission.**
+- **YAML files are data files, not code files, and should only be modified by the user.**
+- **If YAML changes are needed, suggest them to the user or ask for permission first.**
+- **This applies to all YAML files in the `data/` directory and any other YAML configuration files.**
+- **Exception**: Only update YAML files when the user explicitly requests it or gives permission.
 
 ## Development Environment
 - **Python Version**: 3.11 (enforced by pyrightconfig.json)
@@ -129,6 +135,153 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 ## Model Identification Rule (MANDATORY)
 - **ABSOLUTE ALWAYS MUST DO NEVER FORGET 100% IMPORTANT**: At the end of every response, you MUST identify the model you are using.
 - **Format**: Simply add "Model: [model]" at the very end of your response.
+- **Purpose**: This helps the user understand model differences and capabilities.
+- **No exceptions**: This rule applies to ALL responses, regardless of content or length.
+- **Placement**: Always place this at the very end, after any other content.
+- **Example**: "Model: Claude-3.5-Sonnet" or "Model: GPT-4" or whatever the actual model identifier is.
+
+- **Purpose**: This helps the user understand model differences and capabilities.
+- **No exceptions**: This rule applies to ALL responses, regardless of content or length.
+- **Placement**: Always place this at the very end, after any other content.
+- **Example**: "Model: Claude-3.5-Sonnet" or "Model: GPT-4" or whatever the actual model identifier is.
+# SOTD Pipeline - Core Development Rules
+# Shave of the Day Data Processing Pipeline
+
+## Project Overview
+This is a Python 3.11 data processing pipeline that extracts, processes, and analyzes "Shave of the Day" posts from Reddit's r/wetshaving community. The pipeline consists of 6 sequential phases: fetch, extract, match, enrich, aggregate, and report.
+
+## Pipeline --force Rule (MANDATORY)
+- **When running any pipeline step, ALWAYS use the `--force` flag unless the user explicitly says NOT to use `--force`.**
+- This ensures fresh data processing, avoids cached results, and guarantees that all code changes are actually tested.
+- If you want to run without --force, specify that explicitly in your request.
+
+## YAML File Update Restriction (MANDATORY)
+- **NEVER update YAML files without explicit user permission.**
+- **YAML files are data files, not code files, and should only be modified by the user.**
+- **If YAML changes are needed, suggest them to the user or ask for permission first.**
+- **This applies to all YAML files in the `data/` directory and any other YAML configuration files.**
+- **Exception**: Only update YAML files when the user explicitly requests it or gives permission.
+
+## Development Environment
+- **Python Version**: 3.11 (enforced by pyrightconfig.json)
+- **Virtual Environment**: Use `.venv` directory
+- **Package Manager**: pip with requirements.txt/requirements-dev.txt
+- **Code Style**: Black (100 char line length)
+- **Linting**: Ruff (E, F, I rules)
+- **Type Checking**: Pyright in standard mode
+- **Testing**: pytest with coverage via pytest-cov
+
+## Architecture Patterns
+- **Phase Structure**: Each phase follows the pattern: `run.py` (CLI), core logic modules, `save.py` (I/O)
+- **Matcher Strategy**: Use BaseMatcher as base class for all product matchers
+- **YAML Catalogs**: Store product data in YAML files under `data/` directory
+- **Data Flow**: Each phase reads from previous phase output, writes to `data/{phase}/YYYY-MM.json`
+
+## Code Style Rules
+- Use descriptive variable names that reflect the domain (e.g., `soap_matcher`, `blade_patterns`, `sotd_comment`)
+- Follow existing naming conventions: snake_case for functions/variables, PascalCase for classes
+- Use type hints for all function parameters and return values
+- Line length: 100 characters maximum (Black setting)
+- Use pathlib.Path for file system operations, not os.path
+- Prefer f-strings over .format() or % formatting
+- **File Size Preference**: Prefer smaller, focused files with clear responsibilities over large monolithic files. Aim for files under 300-400 lines when possible. Split large files into logical modules with single responsibilities. This improves readability, maintainability, and makes testing easier.
+
+## Error Handling
+- **Fail fast for internal errors**: Use minimal try/except for interactive development
+- **Handle external failures gracefully**: Reddit API failures, missing files, network issues
+- **Use specific exception types**: Never use bare except clauses
+- **Validate early**: Check configuration and input data at startup, fail immediately on issues
+
+## Development Workflow Rules
+- **Development Commands**: Use `make all` for complete development workflow
+- **Testing**: Run `make test` before committing
+- **Formatting**: Run `make format` to apply Black and Ruff formatting
+- **Type Checking**: Run `make typecheck` to validate types with Pyright
+- **Individual Phases**: Test individual phases with specific month data
+- **Pre-Commit Validation**: **MANDATORY**: Run `make format lint typecheck test` before considering any task complete or committing changes. All checks must pass.
+- **Documentation Synchronization**: **MANDATORY**: Any code, workflow, or process change MUST be reflected in all relevant documentation and Cursor rules. Documentation and rules must be updated as part of the same commit(s) as the code or process change.
+- **MDC Plan File Updates**: **MANDATORY**: When working on any task that involves an MDC plan file (in `plans/` directory), you MUST automatically update the relevant MDC file to reflect progress, completion status, lessons learned, or any changes to the plan. You do not need permission to update it - update it yourself **automatically** and **immediately** as part of completing the task. The agent never needs to ask permission to update the plan file (MDC) when completing or progressing a task. This is always required and should be done automatically. This includes:
+  - Marking completed tasks as done
+  - Adding notes about implementation decisions
+  - Documenting any deviations from the original plan
+  - Recording lessons learned for future reference
+  - Updating status indicators (TODO, IN_PROGRESS, COMPLETE, etc.)
+  - Adding timestamps for major milestones
+  - **TIMING**: Update MDC plan files **BEFORE** showing completion summaries to the user, not after
+  - **WORKFLOW STEP**: After completing any task, **immediately** update the relevant MDC plan file to mark tasks as complete and add session notes
+  - **VALIDATION**: **ALWAYS** verify that MDC plan files are updated before considering any task complete or moving to the next task
+  - **CONTENT**: Include completion status, lessons learned, implementation decisions, deviations from plan, and timestamps for major milestones
+
+## Domain-Specific Rules
+- **Product Catalogs**: Maintain consistent structure in YAML files (`data/brushes.yaml`, `data/handles.yaml`, `data/razors.yaml`, `data/blades.yaml`, `data/soaps.yaml`)
+- **Brand Normalization**: Follow established patterns for product brand/model separation
+- **Brush Matching**: Use strategy pattern for complex brush matching scenarios with handle/knot splitting
+- **Date Ranges**: Support both individual months and date ranges in CLI
+- **Manual Overrides**: Provide clear validation for manual thread includes/excludes
+- **Catalog Data Preservation**: All matchers must preserve complete catalog specifications (e.g., straight razor grind, width, point) in match output, not just basic brand/model/format fields
+
+## Brush Matching Specifics
+- **Handle Maker**: Extract from split input (e.g., "Elite handle w/ Declaration knot")
+- **Strategy Priority**: Known > Declaration > Chisel&Hound > Omega/Semogue > Zenith > Other
+- **Fiber/Knot Detection**: Distinguish user input vs catalog defaults vs YAML data
+- **No knot_maker field**: Removed as redundant with brand field
+
+## Common Patterns to Follow
+- Use `Path` objects for file system operations
+- Compile regex patterns once, use many times  
+- Validate data early with clear error messages for malformed input
+- Include metadata in all output files
+- Use descriptive variable names that reflect the shaving domain
+- Follow the existing error handling patterns for external APIs
+- Always use underscore naming for internal fields (e.g., `handle_maker`, not `handle maker`)
+
+## File Organization
+- Main YAML catalogs: `data/*.yaml` (brushes, handles, razors, blades, soaps)
+- Test files mirror source structure: `tests/{module}/test_{file}.py`
+- Strategy implementations: `sotd/match/{product}_matching_strategies/`
+- Utilities shared across phases: `sotd/utils/`
+
+## Pandas and Linting
+- When using pandas, if linter (Ruff) warnings are triggered by idiomatic pandas code that is not easily fixable, prefer using per-line `# noqa` disables.
+- If per-line disables do not work or would be excessive, use a file-level `# noqa` at the top of the file.
+- Do not spend excessive time making pandas code perfectly lint-free if it would harm readability or maintainability.
+- Prioritize code clarity and correctness over strict linter compliance for complex pandas operations.
+
+## Match Phase Matching Priority and match_type Semantics
+- The match phase must check `data/correct_matches.yaml` for confirmed matches before attempting regex or fallback matching.
+- If a match is found in correct_matches.yaml, it is returned with `match_type: exact` and all catalog fields are preserved.
+- If not found, regex patterns are used (`match_type: regex`).
+- Fallbacks (brand, alias, etc.) are used only if both fail.
+- The `match_type` field in match output indicates the source of the match:
+    - `exact`: From correct_matches.yaml (manually confirmed)
+    - `regex`: From regex pattern in YAML catalog
+    - `alias`, `brand`, etc.: Fallback strategies
+    - `None`: Unmatched
+- All catalog specifications (e.g., grind, width, point) must be preserved in the match output for both correct and regex matches.
+
+## File Naming and Date Formatting (MANDATORY)
+- **Date Format**: Use ISO 8601 format (YYYY-MM-DD) for all date suffixes in filenames
+- **Current Date Rule**: **ALWAYS** use the actual current date when creating files with date suffixes
+- **Command**: Use `date +%Y-%m-%d` to get the actual current date, never assume or guess
+- **Format**: `{plan_name}_{YYYY-MM-DD}.mdc` for plan files
+- **Examples**:
+  - ✅ **Correct**: `webui_react_analyzer_spec_2025-07-17.mdc` (actual current date)
+  - ❌ **Wrong**: `webui_react_analyzer_spec_2025-01-27.mdc` (assumed date)
+  - ❌ **Wrong**: `webui_react_analyzer_spec_2025-01-28.mdc` (assumed date)
+- **Process**: 
+  1. Run `date +%Y-%m-%d` to get actual current date
+  2. Use exact date in filename
+  3. Verify accuracy before creating file
+- **Why This Matters**: Avoids conflicts, maintains historical tracking, prevents confusion from incorrect dates
+
+## Model Identification Rule (MANDATORY)
+- **ABSOLUTE ALWAYS MUST DO NEVER FORGET 100% IMPORTANT**: At the end of every response, you MUST identify the model you are using.
+- **Format**: Simply add "Model: [model]" at the very end of your response.
+- **Purpose**: This helps the user understand model differences and capabilities.
+- **No exceptions**: This rule applies to ALL responses, regardless of content or length.
+- **Placement**: Always place this at the very end, after any other content.
+- **Example**: "Model: Claude-3.5-Sonnet" or "Model: GPT-4" or whatever the actual model identifier is.
+
 - **Purpose**: This helps the user understand model differences and capabilities.
 - **No exceptions**: This rule applies to ALL responses, regardless of content or length.
 - **Placement**: Always place this at the very end, after any other content.
