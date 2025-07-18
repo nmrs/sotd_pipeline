@@ -522,6 +522,13 @@ DE:
     Cryo Sputtered Platinum:
       patterns:
       - silver\s*max
+  Starmaxx:
+    Superior Platinum:
+      patterns:
+      - starmaxx(.*plat)?
+    Superior Stainless:
+      patterns:
+      - starmaxx.*(stain|\bss\b)
   Statum:
     Platinum:
       patterns:
