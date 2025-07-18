@@ -375,7 +375,12 @@ DE:
   Laser:
     Ultra:
       patterns:
-      - laser
+      - la[sz]er
+  Leningrad:
+    DE:
+      patterns:
+        - ленинград
+        - leningrad
   Lord:
     Blue Sword Platinum:
       patterns:
@@ -444,10 +449,11 @@ DE:
       - accu-?thrive
     Platinum:
       patterns:
-      - ^person+a?\b.*plat
-      - personn*a.*red
-      - personn*a.*stainless
-      - personn*a.*super
+      - person.*plat
+      - person.*red
+      - person.*stainless
+      - person.*\bss\b
+      - person.*super
     TOMY:
       patterns:
       - \btomy\b
@@ -460,7 +466,7 @@ DE:
   QShave:
     Titanium:
       patterns:
-      - qshave
+      - q-?shave
   RK:
     Stainless:
       patterns:
@@ -544,19 +550,20 @@ DE:
   Super-Max:
     Blue Diamond:
       patterns:
-      - super.*max.*(?:blu)*.*dia
+      - super[\s-]*max.*(?:blu)*.*dia
       - diamond(.*edge)?.*super.*plat
     Platinum:
       patterns:
-      - super.*max.*plat
+      - super[\s-]*max.*plat
     Stainless (Red):
       patterns:
-      - super\s*max.*stain
-      - super\s*max red
+      - super[\s-]*max.*(stain|\bss\b)
+      - super[\s-]*max.*red
+      - super[\s-]*max
     Super Stainless (Green):
       patterns:
       - super[\s-]?max.*super.*stain
-      - super[\s-]?max green
+      - super[\s-]?max.*green
   Tatara:
     DE:
       patterns:
@@ -584,9 +591,10 @@ DE:
     Black Beauty:
       patterns:
       - treet\s*bla
+      - black.*beauty
     Carbon:
       patterns:
-      - treet.*carb
+      - tree.*carb
     Classic:
       patterns:
       - tre(e|a)t.*classic
@@ -621,6 +629,7 @@ DE:
     Super Platinum:
       patterns:
       - v12.*platinum
+      - \bv12\b
   Van Der Hagen:
     Stainless:
       patterns:
@@ -781,6 +790,10 @@ Half DE:
     SE:
       patterns:
       - leaf(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+  Misaki:
+    Platinum SE:
+      patterns:
+      - misak[ia]
 Injector:
   Generic:
     Injector:

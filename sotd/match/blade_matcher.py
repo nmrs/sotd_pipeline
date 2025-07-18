@@ -23,10 +23,68 @@ class BladeMatcher:
         self._normalized_correct_matches = self._precompute_normalized_correct_matches()
         # Add cache for expensive operations
         self._match_cache = {}
+        # Build fallback formats list dynamically from catalog (general fallback)
+        self._fallback_formats = self._build_fallback_formats()
 
     def clear_cache(self):
         """Clear the match cache. Useful for testing to prevent cache pollution."""
         self._match_cache.clear()
+
+    def _build_fallback_formats(self, target_format: Optional[str] = None) -> List[str]:
+        """
+        Build fallback formats list dynamically from the catalog.
+
+        Args:
+            target_format: The target blade format to prioritize (if known)
+
+        Returns formats in order of preference for fallback matching.
+        """
+        if not self.catalog:
+            return []
+
+        # Get all formats from the catalog
+        available_formats = list(self.catalog.keys())
+
+        # If we have a target format, prioritize it first
+        if target_format:
+            # Find the actual format in the catalog (case-insensitive)
+            target_format_actual = None
+            for fmt in available_formats:
+                if fmt.upper() == target_format.upper():
+                    target_format_actual = fmt
+                    break
+
+            if target_format_actual:
+                fallback_formats = [target_format_actual]
+                # Add remaining formats (excluding the target)
+                remaining_formats = [
+                    fmt for fmt in available_formats if fmt != target_format_actual
+                ]
+                fallback_formats.extend(remaining_formats)
+                return fallback_formats
+
+        # For general fallback (no specific target), use a reasonable default order
+        # based on common usage patterns
+        default_order = [
+            "DE",  # Most common
+            "HALF DE",  # Specialized blades
+            "AC",  # Artist Club
+            "GEM",  # GEM format
+            "INJECTOR",  # Injector format
+            "FHS",  # Feather FHS
+            "HAIR SHAPER",  # Hair shaper
+            "A77",  # AC77
+            "CARTRIDGE",  # Cartridge razors
+        ]
+
+        # Start with default order formats that exist in catalog
+        fallback_formats = [fmt for fmt in default_order if fmt in available_formats]
+
+        # Add any remaining formats from catalog that weren't in default order
+        remaining_formats = [fmt for fmt in available_formats if fmt not in default_order]
+        fallback_formats.extend(remaining_formats)
+
+        return fallback_formats
 
     def _compile_patterns(self):
         compiled = []
@@ -341,6 +399,8 @@ class BladeMatcher:
             "SHAVETTE (HALF DE)": "HALF DE",
             "SHAVETTE (A77)": "A77",
             "SHAVETTE (DISPOSABLE)": "DISPOSABLE",
+            "SHAVETTE": None,  # Allow general matching for unspecified Shavette
+            "Shavette": None,  # Allow general matching for unspecified Shavette
             "CARTRIDGE": "CARTRIDGE",
             "STRAIGHT": "STRAIGHT",
             "DE": "DE",
@@ -348,6 +408,8 @@ class BladeMatcher:
             "GEM": "GEM",
             "INJECTOR": "INJECTOR",
             "FHS": "FHS",
+            "HALF DE (MULTI-BLADE)": "HALF DE",
+            "Half DE (multi-blade)": "HALF DE",
         }
         target_blade_format = format_mapping.get(razor_format, razor_format)
         normalized = normalize_for_matching(value, field="blade")
@@ -363,6 +425,11 @@ class BladeMatcher:
 
         # Track which formats we've already searched to avoid redundant work
         searched_formats = set()
+
+        # Handle None target format (general matching)
+        if target_blade_format is None:
+            # Try all formats without context restrictions
+            return self.match(value, bypass_correct_matches=False)
 
         # 1. Check correct matches in the target format
         searched_formats.add(target_blade_format.upper())
@@ -408,6 +475,27 @@ class BladeMatcher:
                         pattern=regex_de.get("pattern"),
                     )
 
+        # DE razors can also use Half DE blades (for specialized blades like Leaf)
+        if target_blade_format == "DE":
+            searched_formats.add("HALF DE")
+            correct_half_de = self._collect_correct_matches_in_format(value, "HALF DE")
+            if correct_half_de:
+                return create_match_result(
+                    original=original,
+                    matched=correct_half_de[0],
+                    match_type="exact",
+                    pattern=None,
+                )
+            if normalized:
+                regex_half_de = self._match_regex_in_format(normalized, "HALF DE")
+                if regex_half_de:
+                    return create_match_result(
+                        original=original,
+                        matched=regex_half_de["matched"],
+                        match_type=MatchType.REGEX,
+                        pattern=regex_half_de.get("pattern"),
+                    )
+
         # 4. General fallback system: try DE first, then other formats
         if normalized:
             # Try DE format first (most common) - unless we already searched it
@@ -430,7 +518,11 @@ class BladeMatcher:
                     )
 
             # Try other formats in order of preference - skip already searched formats
-            fallback_formats = ["AC", "GEM", "INJECTOR", "FHS", "HAIR SHAPER", "A77", "CARTRIDGE"]
+            # Use context-aware fallback list if we have a target format
+            if target_blade_format and target_blade_format != "DE":
+                fallback_formats = self._build_fallback_formats(target_blade_format)
+            else:
+                fallback_formats = self._fallback_formats
             for fallback_format in fallback_formats:
                 if fallback_format not in searched_formats:
                     correct_fallback = self._collect_correct_matches_in_format(
@@ -569,7 +661,7 @@ class BladeMatcher:
                 )
 
         # Try other formats in order of preference - skip already searched formats
-        fallback_formats = ["AC", "GEM", "INJECTOR", "FHS", "HAIR SHAPER", "A77", "CARTRIDGE"]
+        fallback_formats = self._fallback_formats
         for fallback_format in fallback_formats:
             if fallback_format not in searched_formats:
                 correct_fallback = self._collect_correct_matches_in_format(value, fallback_format)
