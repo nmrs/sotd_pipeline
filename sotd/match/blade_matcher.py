@@ -325,6 +325,15 @@ class BladeMatcher:
                 if de_matches:
                     return de_matches[0]  # Return first DE match as fallback
 
+        # Special fallback case: Other razors can use FHS blades (for Valet modifications)
+        # Only use fallback if no Other matches exist at all
+        if target_format.upper() == "OTHER":
+            other_matches = [m for m in matches if m["format"].upper() == "OTHER"]
+            if not other_matches:  # Only fallback if no Other matches exist
+                fhs_matches = [m for m in matches if m["format"].upper() == "FHS"]
+                if fhs_matches:
+                    return fhs_matches[0]  # Return first FHS match as fallback
+
         # If no exact format match and no fallback, return the first match
         return matches[0]
 
@@ -390,7 +399,27 @@ class BladeMatcher:
                         match_type=MatchType.REGEX,
                         pattern=regex_de.get("pattern"),
                     )
-        # 4. Not found
+        # 4. If context is OTHER, fallback to FHS section if no match found
+        # (for Valet modifications)
+        if target_blade_format == "OTHER":
+            correct_fhs = self._collect_correct_matches_in_format(value, "FHS")
+            if correct_fhs:
+                return create_match_result(
+                    original=original,
+                    matched=correct_fhs[0],
+                    match_type="exact",
+                    pattern=None,
+                )
+            if normalized:
+                regex_fhs = self._match_regex_in_format(normalized, "FHS")
+                if regex_fhs:
+                    return create_match_result(
+                        original=original,
+                        matched=regex_fhs["matched"],
+                        match_type=MatchType.REGEX,
+                        pattern=regex_fhs.get("pattern"),
+                    )
+        # 5. Not found
         return create_match_result(
             original=original,
             matched=None,
