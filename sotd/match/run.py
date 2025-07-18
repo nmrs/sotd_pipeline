@@ -90,8 +90,10 @@ def match_record(
                 result["blade"] = MatchResult(
                     original=result["blade"], matched=None, match_type=None, pattern=None
                 )
+                # Add flag to indicate this was intentionally skipped
+                result["blade"]._intentionally_skipped = True
             else:
-                # For other formats, use context-aware matching
+                # For other formats, use context-aware matching to ensure correct format
                 blade_result = blade_matcher.match_with_context(result["blade"], razor_format)
                 result["blade"] = blade_result
         else:
@@ -111,7 +113,7 @@ def match_record(
                         original=result["blade"], matched=None, match_type=None, pattern=None
                     )
                 else:
-                    # For other formats, use context-aware matching
+                    # For other formats, use context-aware matching to ensure correct format
                     blade_result = blade_matcher.match_with_context(result["blade"], razor_format)
                     result["blade"] = blade_result
             else:
@@ -193,6 +195,7 @@ def process_month(
                         "matched": value.matched,
                         "match_type": value.match_type,
                         "pattern": value.pattern,
+                        "_intentionally_skipped": getattr(value, "_intentionally_skipped", False),
                     }
                 else:
                     converted_record[key] = value

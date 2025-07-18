@@ -152,6 +152,14 @@ def strip_blade_count_patterns(value: str) -> str:
     new_pattern = r"(?:[\(\[\{])\s*new\s*[\)\]\}]"
     cleaned = re.sub(new_pattern, "", cleaned, flags=re.IGNORECASE)
 
+    # Pattern for location/condition indicators: (Thailand, new), (India), etc.
+    # Only match specific location/condition patterns, not all parenthetical content
+    location_condition_pattern = (
+        r"(?:[\(\[\{])\s*(?:Thailand|India|China|Russia|Turkey|Germany|Japan|USA|UK|"
+        r"new|old|vintage|sample|test)(?:\s*,\s*[^\)\]\}]+)*\s*[\)\]\}]"
+    )
+    cleaned = re.sub(location_condition_pattern, "", cleaned, flags=re.IGNORECASE)
+
     # Special case: remove any double spaces left behind
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
 
