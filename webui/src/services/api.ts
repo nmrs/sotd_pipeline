@@ -93,6 +93,28 @@ export const getCatalogContent = async (catalogName: string): Promise<any> => {
     }
 };
 
+// Comment operations
+export interface CommentDetail {
+    id: string;
+    author: string;
+    body: string;
+    created_utc: string;
+    thread_id: string;
+    thread_title: string;
+    url: string;
+}
+
+export const getCommentDetail = async (commentId: string, months: string[]): Promise<CommentDetail> => {
+    try {
+        const monthsParam = months.join(',');
+        const response = await api.get(`/analyze/comment/${commentId}?months=${monthsParam}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to fetch comment ${commentId}:`, error);
+        throw error;
+    }
+};
+
 // Analysis operations
 export interface UnmatchedAnalysisRequest {
     field: string;
@@ -104,6 +126,7 @@ export interface UnmatchedItem {
     item: string;
     count: number;
     examples: string[];
+    comment_ids: string[];
 }
 
 export interface UnmatchedAnalysisResult {
