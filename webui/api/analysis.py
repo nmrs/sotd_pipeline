@@ -180,10 +180,23 @@ async def run_match_phase(request: MatchPhaseRequest) -> MatchPhaseResponse:
             f"Starting match phase for {len(request.months)} months (force={request.force})"
         )
 
+        # Clear caches if force is enabled to pick up catalog changes
+        if request.force:
+            try:
+                from sotd.match.base_matcher import clear_catalog_cache
+                from sotd.match.loaders import clear_yaml_cache
+
+                clear_yaml_cache()
+                clear_catalog_cache()
+                logger.info("Cleared all caches due to force flag")
+            except ImportError:
+                logger.warning("Could not import cache clearing functions")
+
         # Run match phase for each month
         success_count = 0
         failed_months = []
         error_details = []
+        all_output = []
 
         for month in request.months:
             logger.info(f"Processing match phase for month: {month}")
@@ -204,6 +217,15 @@ async def run_match_phase(request: MatchPhaseRequest) -> MatchPhaseResponse:
                     timeout=300,  # 5 minute timeout
                 )
 
+                # Capture output for this month
+                month_output = f"=== Match Phase for {month} ===\n"
+                if result.stdout:
+                    month_output += f"STDOUT:\n{result.stdout}\n"
+                if result.stderr:
+                    month_output += f"STDERR:\n{result.stderr}\n"
+                month_output += f"Return Code: {result.returncode}\n"
+                all_output.append(month_output)
+
                 if result.returncode == 0:
                     logger.info(f"✅ Match phase completed for {month}")
                     success_count += 1
@@ -218,11 +240,15 @@ async def run_match_phase(request: MatchPhaseRequest) -> MatchPhaseResponse:
                 logger.error(error_msg)
                 failed_months.append(month)
                 error_details.append(error_msg)
+                all_output.append(
+                    f"=== Match Phase for {month} ===\nTIMEOUT: Command exceeded 5 minute limit\n"
+                )
             except Exception as e:
                 error_msg = f"❌ Match phase error for {month}: {e}"
                 logger.error(error_msg)
                 failed_months.append(month)
                 error_details.append(error_msg)
+                all_output.append(f"=== Match Phase for {month} ===\nERROR: {str(e)}\n")
 
         # Prepare response
         if failed_months:
@@ -237,12 +263,15 @@ async def run_match_phase(request: MatchPhaseRequest) -> MatchPhaseResponse:
 
         logger.info(f"Match phase summary: {message}")
 
+        # Combine all output for display
+        full_output = "\n".join(all_output)
+
         return MatchPhaseResponse(
             months=request.months,
             force=request.force,
             success=success,
             message=message,
-            error_details="\n".join(error_details) if error_details else None,
+            error_details=full_output if not success else full_output,  # Always include output
             processing_time=0.0,  # TODO: Add actual timing
         )
 
@@ -278,17 +307,18 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
             )
         analyzer = UnmatchedAnalyzer()
 
-        # Use shared implementation from UnmatchedAnalyzer
+        # Process each month individually to handle non-sequential months correctly
         all_results = []
 
-        # Process each month
         for month in request.months:
-            logger.info(f"Processing month: {month}")
-
-            # Create args object for the analyzer
+            # Create args object for each month
             class Args:
                 def __init__(self):
-                    self.month = month
+                    self.month = month  # Single month
+                    self.year = None
+                    self.range = None
+                    self.start = None
+                    self.end = None
                     self.field = request.field
                     self.limit = request.limit
                     self.out_dir = project_root / "data"
@@ -297,19 +327,12 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
             args = Args()
 
             try:
-                # Use shared analysis implementation
+                # Process this month
                 result = analyzer.analyze_unmatched(args)
-                logger.info(
-                    f"Loaded {len(analyzer.load_matched_data(args))} records for month {month}"
-                )
-                logger.info(
-                    f"After processing {month}: {result['total_unmatched']} unmatched items"
-                )
                 all_results.append(result)
-
+                logger.info(f"Processed {month}: {result['total_unmatched']} unmatched items")
             except Exception as e:
                 logger.warning(f"Error processing month {month}: {e}")
-                # Continue with other months
                 continue
 
         # Combine results from all months
@@ -341,7 +364,7 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
             )
 
         total_unmatched = len(combined_unmatched)
-        logger.info(f"Analysis complete. Found {total_unmatched} unmatched items")
+        logger.info(f"Analysis complete. Found {total_unmatched} unmatched items across all months")
 
         return UnmatchedAnalysisResponse(
             field=request.field,
