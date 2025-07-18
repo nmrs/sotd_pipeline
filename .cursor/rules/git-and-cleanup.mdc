@@ -202,6 +202,40 @@ Use conventional commit format with clear, descriptive messages:
 - `cleanup: eliminate unused brush_yaml directory after consolidation`
 - `cleanup: remove redundant imports and apply ruff formatting fixes`
 
+**⚠️ IMPORTANT: Cleanup vs Behavior Changes**
+
+**Use `cleanup:` for:**
+- Removing unused/dead code that's not called anywhere
+- Deleting unused files, imports, or dependencies
+- Removing deprecated fields or methods that are no longer referenced
+- Applying formatting fixes (ruff, black)
+- Removing unused configuration or environment variables
+- Cleaning up whitespace, comments, or documentation typos
+- Removing unused test fixtures or mock data
+
+**Use `fix:` for behavior changes:**
+- Changing how a feature works or behaves
+- Modifying user experience or functionality
+- Resolving bugs that affect program behavior
+- Changing API responses or data flow
+- Modifying caching, performance, or optimization behavior
+- Changing how data is processed or displayed
+
+**Examples:**
+```bash
+# ✅ GOOD cleanup: Removing unused code
+cleanup: remove unused imports and dead code after refactoring
+
+# ✅ GOOD fix: Changing behavior
+fix: remove client-side caching to ensure fresh API calls
+
+# ❌ BAD: Calling behavior change "cleanup"
+cleanup: remove client-side caching (this changes behavior!)
+
+# ❌ BAD: Calling dead code removal "fix"
+fix: remove unused imports (this doesn't fix anything!)
+```
+
 ## Comprehensive Rollback Procedures
 
 ### **MANDATORY**: Complete Work Rollback
