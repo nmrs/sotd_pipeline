@@ -57,11 +57,17 @@ class UnmatchedAnalyzer(AnalysisTool):
             # Extract examples from source files (limit to 5 examples)
             examples = list(set(info["file"] for info in file_infos if info["file"]))[:5]
 
+            # Extract comment IDs
+            comment_ids = [
+                info.get("comment_id", "") for info in file_infos if info.get("comment_id")
+            ]
+
             unmatched_items.append(
                 {
                     "item": original_text,
                     "count": len(file_infos),
                     "examples": examples,
+                    "comment_ids": comment_ids,
                 }
             )
 
@@ -88,6 +94,7 @@ class UnmatchedAnalyzer(AnalysisTool):
         file_info = {
             "file": record.get("_source_file", ""),
             "line": record.get("_source_line", "unknown"),
+            "comment_id": record.get("id", ""),
         }
 
         if isinstance(field_val, str):
@@ -122,6 +129,7 @@ class UnmatchedAnalyzer(AnalysisTool):
         file_info = {
             "file": record.get("_source_file", ""),
             "line": record.get("_source_line", "unknown"),
+            "comment_id": record.get("id", ""),
         }
 
         # If nothing matched at all, count as unmatched brush
@@ -176,14 +184,29 @@ class UnmatchedAnalyzer(AnalysisTool):
             f"descriptions across all files:\n"
         )
         # Sort alphabetically by value, then by file count descending
-        for value, files in sorted(all_unmatched.items(), key=lambda x: (x[0].lower(), -len(x[1])))[
-            :limit
-        ]:
-            print(f"{value:<60}  ({len(files)} uses)")
+        for value, file_infos in sorted(
+            all_unmatched.items(), key=lambda x: (x[0].lower(), -len(x[1]))
+        )[:limit]:
+            # Extract comment IDs for display
+            comment_ids = [
+                info.get("comment_id", "") for info in file_infos if info.get("comment_id")
+            ]
+
+            # Format comment IDs display
+            if comment_ids:
+                if len(comment_ids) <= 5:
+                    comment_ids_text = ", ".join(comment_ids)
+                else:
+                    comment_ids_text = (
+                        f"{', '.join(comment_ids[:5])}... (+{len(comment_ids) - 5} more)"
+                    )
+                print(f"{value:<60}  ({len(file_infos)} uses) - Comment IDs: {comment_ids_text}")
+            else:
+                print(f"{value:<60}  ({len(file_infos)} uses)")
 
             # Group by file and show line numbers
             file_lines = defaultdict(list)
-            for file_info in files:
+            for file_info in file_infos:
                 if isinstance(file_info, dict):
                     # If file_info is a dict with line number
                     file_name = file_info.get("file", file_info.get("_source_file", "unknown"))
