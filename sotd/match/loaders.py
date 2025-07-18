@@ -14,20 +14,19 @@ from sotd.match.config import BrushMatcherConfig
 from sotd.match.exceptions import CatalogLoadError
 from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 
-_yaml_catalog_cache = {}
+# Global cache for YAML catalog files to avoid repeated loads
+_yaml_catalog_cache: Dict[str, Dict[str, Any]] = {}
 
 
 class CatalogLoader:
     """
-    Unified catalog loader for all matchers in the SOTD pipeline.
-
-    Provides consistent YAML loading with error handling, validation,
+    Handles loading of YAML catalog files with error handling, caching,
     and loading statistics for all catalog types.
     """
 
     def __init__(self, config: Optional[BrushMatcherConfig] = None):
         self.config = config
-        self.load_stats = {
+        self.load_stats: Dict[str, int] = {
             "catalogs_loaded": 0,
             "errors": 0,
             "warnings": 0,
@@ -71,7 +70,7 @@ class CatalogLoader:
                     },
                 )
             _yaml_catalog_cache[abs_path] = data
-            self.load_stats["catalogs_loaded"] += 1
+            self.load_stats["catalogs_loaded"] += 1  # type: ignore
             return data
         except yaml.YAMLError as e:
             raise CatalogLoadError(
@@ -101,7 +100,7 @@ class CatalogLoader:
 
         try:
             data = load_yaml_with_nfc(path, loader_cls=UniqueKeyLoader)
-            self.load_stats["catalogs_loaded"] += 1
+            self.load_stats["catalogs_loaded"] += 1  # type: ignore
 
             if field_type:
                 # Return field-specific section
@@ -188,7 +187,7 @@ class CatalogLoader:
 
     def get_load_stats(self) -> Dict[str, Any]:
         """Get loading statistics and debug information."""
-        stats = dict(self.load_stats)
+        stats: Dict[str, Any] = dict(self.load_stats)
 
         if self.config:
             stats["config"] = self.config.get_debug_info()
