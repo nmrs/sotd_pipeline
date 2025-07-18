@@ -111,6 +111,21 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
     - `None`: Unmatched
 - All catalog specifications (e.g., grind, width, point) must be preserved in the match output for both correct and regex matches.
 
+## File Naming and Date Formatting (MANDATORY)
+- **Date Format**: Use ISO 8601 format (YYYY-MM-DD) for all date suffixes in filenames
+- **Current Date Rule**: **ALWAYS** use the actual current date when creating files with date suffixes
+- **Command**: Use `date +%Y-%m-%d` to get the actual current date, never assume or guess
+- **Format**: `{plan_name}_{YYYY-MM-DD}.mdc` for plan files
+- **Examples**:
+  - ✅ **Correct**: `webui_react_analyzer_spec_2025-07-17.mdc` (actual current date)
+  - ❌ **Wrong**: `webui_react_analyzer_spec_2025-01-27.mdc` (assumed date)
+  - ❌ **Wrong**: `webui_react_analyzer_spec_2025-01-28.mdc` (assumed date)
+- **Process**: 
+  1. Run `date +%Y-%m-%d` to get actual current date
+  2. Use exact date in filename
+  3. Verify accuracy before creating file
+- **Why This Matters**: Avoids conflicts, maintains historical tracking, prevents confusion from incorrect dates
+
 ## Model Identification Rule (MANDATORY)
 - **ABSOLUTE ALWAYS MUST DO NEVER FORGET 100% IMPORTANT**: At the end of every response, you MUST identify the model you are using.
 - **Format**: Simply add "Model: [model]" at the very end of your response.
