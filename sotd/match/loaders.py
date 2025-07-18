@@ -12,7 +12,7 @@ import yaml
 
 from sotd.match.config import BrushMatcherConfig
 from sotd.match.exceptions import CatalogLoadError
-from sotd.utils.yaml_loader import load_yaml_with_nfc, UniqueKeyLoader
+from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 
 _yaml_catalog_cache = {}
 
@@ -63,8 +63,7 @@ class CatalogLoader:
                 data = {}
             if not isinstance(data, dict):
                 raise CatalogLoadError(
-                    f"Invalid {catalog_type} catalog structure: expected dict, "
-                    f"got {type(data)}",
+                    f"Invalid {catalog_type} catalog structure: expected dict, got {type(data)}",
                     context={
                         "path": str(path),
                         "catalog_type": catalog_type,

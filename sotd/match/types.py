@@ -22,6 +22,7 @@ class MatchResult:
     matched: Optional[Dict[str, Any]] = None
     match_type: Optional[str] = None
     pattern: Optional[str] = None
+    _intentionally_skipped: bool = False
 
 
 @dataclass

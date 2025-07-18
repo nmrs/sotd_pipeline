@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 
 from sotd.utils.match_filter_utils import load_competition_tags, normalize_for_matching
 from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
+
 from .types import MatchResult, create_match_result
 
 # Global catalog cache for YAML files

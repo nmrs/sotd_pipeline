@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.table import Table
 
 from .loaders import CatalogLoader
-from .types import MatchResult, create_match_result, MatchType
+from .types import MatchResult, MatchType, create_match_result
 
 
 class SoapMatcher:

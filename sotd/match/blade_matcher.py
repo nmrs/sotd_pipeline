@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .loaders import CatalogLoader
-from .types import MatchResult, create_match_result, MatchType
+from .types import MatchResult, MatchType, create_match_result
 
 
 class BladeMatcher:

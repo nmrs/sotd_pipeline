@@ -39,6 +39,38 @@ class UnmatchedAnalyzer(AnalysisTool):
 
         self._print_unmatched_results(all_unmatched, args.field, args.limit)
 
+    def analyze_unmatched(self, args) -> dict:
+        """Analyze unmatched items and return structured results for API use."""
+        all_unmatched = defaultdict(list)
+
+        for record in self.load_matched_data(args):
+            self._process_field_unmatched(record, args.field, all_unmatched)
+
+        # Convert to structured format for API
+        unmatched_items = []
+        # Sort alphabetically by value, then by file count descending (same as CLI)
+        sorted_items = sorted(all_unmatched.items(), key=lambda x: (x[0].lower(), -len(x[1])))[
+            : args.limit
+        ]
+
+        for original_text, file_infos in sorted_items:
+            # Extract examples from source files (limit to 5 examples)
+            examples = list(set(info["file"] for info in file_infos if info["file"]))[:5]
+
+            unmatched_items.append(
+                {
+                    "item": original_text,
+                    "count": len(file_infos),
+                    "examples": examples,
+                }
+            )
+
+        return {
+            "field": args.field,
+            "total_unmatched": len(all_unmatched),
+            "unmatched_items": unmatched_items,
+        }
+
     def _process_field_unmatched(self, record: Dict, field: str, all_unmatched: Dict) -> None:
         """Process unmatched field records."""
         if field == "brush":
@@ -64,12 +96,20 @@ class UnmatchedAnalyzer(AnalysisTool):
                 field_val = self._strip_use_count(field_val)
             all_unmatched[field_val].append(file_info)
         elif isinstance(field_val, dict):
-            if "matched" not in field_val or not field_val["matched"]:
+            # Skip intentionally skipped blades
+            if field == "blade" and field_val.get("_intentionally_skipped", False):
+                return
+
+            # Check if matched field is missing, empty, or doesn't contain valid match data
+            matched = field_val.get("matched")
+            if not matched or (isinstance(matched, dict) and not matched.get("brand")):
                 # For blades, strip use count from original text
                 original = field_val.get("original", "")
                 if field == "blade":
-                    original = self._strip_use_count(original)
-                all_unmatched[original].append(file_info)
+                    normalized = self._strip_use_count(original)
+                    all_unmatched[normalized].append(file_info)
+                else:
+                    all_unmatched[original].append(file_info)
 
     def _process_brush_unmatched(self, record: Dict, all_unmatched: Dict) -> None:
         """Process unmatched brush records with handle/knot granularity."""
