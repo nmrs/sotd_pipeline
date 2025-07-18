@@ -325,20 +325,11 @@ class BladeMatcher:
                 if de_matches:
                     return de_matches[0]  # Return first DE match as fallback
 
-        # Special fallback case: Other razors can use FHS blades (for Valet modifications)
-        # Only use fallback if no Other matches exist at all
-        if target_format.upper() == "OTHER":
-            other_matches = [m for m in matches if m["format"].upper() == "OTHER"]
-            if not other_matches:  # Only fallback if no Other matches exist
-                fhs_matches = [m for m in matches if m["format"].upper() == "FHS"]
-                if fhs_matches:
-                    return fhs_matches[0]  # Return first FHS match as fallback
-
         # If no exact format match and no fallback, return the first match
         return matches[0]
 
     def match_with_context(self, value: str, razor_format: str) -> MatchResult:
-        """Match blade with context-aware format prioritization and strict format-aware fallback."""
+        """Match blade with context-aware format prioritization and flexible fallback."""
         from sotd.utils.match_filter_utils import normalize_for_matching
 
         original = value
@@ -361,7 +352,20 @@ class BladeMatcher:
         target_blade_format = format_mapping.get(razor_format, razor_format)
         normalized = normalize_for_matching(value, field="blade")
 
+        # Skip blade matching for straight razors
+        if target_blade_format == "STRAIGHT":
+            return create_match_result(
+                original=original,
+                matched=None,
+                match_type=None,
+                pattern=None,
+            )
+
+        # Track which formats we've already searched to avoid redundant work
+        searched_formats = set()
+
         # 1. Check correct matches in the target format
+        searched_formats.add(target_blade_format.upper())
         correct = self._collect_correct_matches_in_format(value, target_blade_format)
         if correct:
             return create_match_result(
@@ -370,6 +374,7 @@ class BladeMatcher:
                 match_type="exact",
                 pattern=None,
             )
+
         # 2. Fallback to regex match in the target format
         if normalized:
             regex = self._match_regex_in_format(normalized, target_blade_format)
@@ -380,8 +385,11 @@ class BladeMatcher:
                     match_type=MatchType.REGEX,
                     pattern=regex.get("pattern"),
                 )
-        # 3. If context is HALF DE, fallback to DE section if no match found
+
+        # 3. Special prioritized fallbacks (keep existing logic)
+        # Half DE razors can use DE blades
         if target_blade_format == "HALF DE":
+            searched_formats.add("DE")
             correct_de = self._collect_correct_matches_in_format(value, "DE")
             if correct_de:
                 return create_match_result(
@@ -399,26 +407,51 @@ class BladeMatcher:
                         match_type=MatchType.REGEX,
                         pattern=regex_de.get("pattern"),
                     )
-        # 4. If context is OTHER, fallback to FHS section if no match found
-        # (for Valet modifications)
-        if target_blade_format == "OTHER":
-            correct_fhs = self._collect_correct_matches_in_format(value, "FHS")
-            if correct_fhs:
-                return create_match_result(
-                    original=original,
-                    matched=correct_fhs[0],
-                    match_type="exact",
-                    pattern=None,
-                )
-            if normalized:
-                regex_fhs = self._match_regex_in_format(normalized, "FHS")
-                if regex_fhs:
+
+        # 4. General fallback system: try DE first, then other formats
+        if normalized:
+            # Try DE format first (most common) - unless we already searched it
+            if "DE" not in searched_formats:
+                correct_de = self._collect_correct_matches_in_format(value, "DE")
+                if correct_de:
                     return create_match_result(
                         original=original,
-                        matched=regex_fhs["matched"],
-                        match_type=MatchType.REGEX,
-                        pattern=regex_fhs.get("pattern"),
+                        matched=correct_de[0],
+                        match_type="exact",
+                        pattern=None,
                     )
+                regex_de = self._match_regex_in_format(normalized, "DE")
+                if regex_de:
+                    return create_match_result(
+                        original=original,
+                        matched=regex_de["matched"],
+                        match_type=MatchType.REGEX,
+                        pattern=regex_de.get("pattern"),
+                    )
+
+            # Try other formats in order of preference - skip already searched formats
+            fallback_formats = ["AC", "GEM", "INJECTOR", "FHS", "HAIR SHAPER", "A77", "CARTRIDGE"]
+            for fallback_format in fallback_formats:
+                if fallback_format not in searched_formats:
+                    correct_fallback = self._collect_correct_matches_in_format(
+                        value, fallback_format
+                    )
+                    if correct_fallback:
+                        return create_match_result(
+                            original=original,
+                            matched=correct_fallback[0],
+                            match_type="exact",
+                            pattern=None,
+                        )
+                    regex_fallback = self._match_regex_in_format(normalized, fallback_format)
+                    if regex_fallback:
+                        return create_match_result(
+                            original=original,
+                            matched=regex_fallback["matched"],
+                            match_type=MatchType.REGEX,
+                            pattern=regex_fallback.get("pattern"),
+                        )
+
         # 5. Not found
         return create_match_result(
             original=original,
@@ -429,9 +462,10 @@ class BladeMatcher:
 
     def match(self, value: str, bypass_correct_matches: bool = False) -> MatchResult:
         """
-        Match blade with format-aware logic.
+        Match blade with format-aware logic and flexible fallback.
 
         When no context is provided, prioritizes more specific patterns over default DE format.
+        Includes flexible fallback to try DE first, then other formats.
         """
         # First try correct matches without context (will find all matches)
         all_correct_matches = self._collect_all_correct_matches(value)
@@ -510,6 +544,50 @@ class BladeMatcher:
                 pattern=best_pattern,
                 match_type=MatchType.REGEX,
             )
+
+        # If no matches found, try flexible fallback to other formats
+        # Track which formats we've already searched to avoid redundant work
+        searched_formats = set()
+
+        # Try DE format first (most common) - unless we already searched it
+        if "DE" not in searched_formats:
+            correct_de = self._collect_correct_matches_in_format(value, "DE")
+            if correct_de:
+                return create_match_result(
+                    original=original,
+                    matched=correct_de[0],
+                    match_type="exact",
+                    pattern=None,
+                )
+            regex_de = self._match_regex_in_format(normalized, "DE")
+            if regex_de:
+                return create_match_result(
+                    original=original,
+                    matched=regex_de["matched"],
+                    match_type=MatchType.REGEX,
+                    pattern=regex_de.get("pattern"),
+                )
+
+        # Try other formats in order of preference - skip already searched formats
+        fallback_formats = ["AC", "GEM", "INJECTOR", "FHS", "HAIR SHAPER", "A77", "CARTRIDGE"]
+        for fallback_format in fallback_formats:
+            if fallback_format not in searched_formats:
+                correct_fallback = self._collect_correct_matches_in_format(value, fallback_format)
+                if correct_fallback:
+                    return create_match_result(
+                        original=original,
+                        matched=correct_fallback[0],
+                        match_type="exact",
+                        pattern=None,
+                    )
+                regex_fallback = self._match_regex_in_format(normalized, fallback_format)
+                if regex_fallback:
+                    return create_match_result(
+                        original=original,
+                        matched=regex_fallback["matched"],
+                        match_type=MatchType.REGEX,
+                        pattern=regex_fallback.get("pattern"),
+                    )
 
         return create_match_result(
             original=original,
