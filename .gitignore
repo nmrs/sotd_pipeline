@@ -36,3 +36,34 @@ data/backup/
 # Profiling files
 *.prof
 profile_*.prof
+
+# Node.js and web UI
+webui/node_modules/
+webui/.vite/
+webui/dist/
+webui/build/
+webui/.env.local
+webui/.env.development.local
+webui/.env.test.local
+webui/.env.production.local
+webui/npm-debug.log*
+webui/yarn-debug.log*
+webui/yarn-error.log*
+webui/.pnpm-debug.log*
+webui/coverage/
+webui/.nyc_output
+webui/.next/
+webui/.nuxt/
+webui/.output/
+webui/.cache/
+webui/.parcel-cache/
+webui/.eslintcache
+webui/.stylelintcache
+webui/.rpt2_cache/
+webui/.rts2_cache_cjs/
+webui/.rts2_cache_es/
+webui/.rts2_cache_umd/
+webui/.node_repl_history
+webui/*.tgz
+webui/.yarn-integrity
+webui/.env*.local
