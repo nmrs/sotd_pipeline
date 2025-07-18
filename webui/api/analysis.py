@@ -6,7 +6,7 @@ import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -58,12 +58,25 @@ class MatchPhaseResponse(BaseModel):
     processing_time: float
 
 
+class CommentDetail(BaseModel):
+    """Model for comment details."""
+
+    id: str
+    author: str
+    body: str
+    created_utc: str
+    thread_id: str
+    thread_title: str
+    url: str
+
+
 class UnmatchedItem(BaseModel):
     """Model for individual unmatched item."""
 
     item: str
     count: int
     examples: List[str]
+    comment_ids: List[str]
 
 
 class UnmatchedAnalysisResponse(BaseModel):
@@ -96,6 +109,64 @@ def validate_months(months: List[str]) -> None:
             raise HTTPException(
                 status_code=400, detail=f"Invalid month format: {month}. Expected format: YYYY-MM"
             )
+
+
+def find_comment_by_id(comment_id: str, months: List[str]) -> Optional[dict]:
+    """Find a comment by its ID across the specified months."""
+    import json
+
+    for month in months:
+        file_path = project_root / "data" / "matched" / f"{month}.json"
+        if not file_path.exists():
+            continue
+
+        try:
+            with file_path.open("r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            for record in data.get("data", []):
+                if record.get("id") == comment_id:
+                    return record
+        except Exception as e:
+            logger.warning(f"Error reading {file_path}: {e}")
+            continue
+
+    return None
+
+
+@router.get("/comment/{comment_id}", response_model=CommentDetail)
+async def get_comment_detail(comment_id: str, months: str) -> CommentDetail:
+    """Get detailed information for a specific comment."""
+    try:
+        # Parse months parameter (comma-separated list)
+        month_list = [m.strip() for m in months.split(",") if m.strip()]
+
+        if not month_list:
+            raise HTTPException(status_code=400, detail="At least one month must be specified")
+
+        # Find the comment
+        comment = find_comment_by_id(comment_id, month_list)
+
+        if not comment:
+            raise HTTPException(
+                status_code=404, detail=f"Comment {comment_id} not found in the specified months"
+            )
+
+        return CommentDetail(
+            id=comment.get("id", ""),
+            author=comment.get("author", ""),
+            body=comment.get("body", ""),
+            created_utc=comment.get("created_utc", ""),
+            thread_id=comment.get("thread_id", ""),
+            thread_title=comment.get("thread_title", ""),
+            url=comment.get("url", ""),
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching comment {comment_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error fetching comment: {str(e)}")
 
 
 @router.post("/match-phase", response_model=MatchPhaseResponse)
@@ -242,27 +313,30 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
                 continue
 
         # Combine results from all months
-        combined_unmatched = defaultdict(list)
+        combined_unmatched = defaultdict(lambda: {"examples": [], "comment_ids": []})
         for result in all_results:
             for item in result["unmatched_items"]:
-                combined_unmatched[item["item"]].extend(item.get("examples", []))
+                combined_unmatched[item["item"]]["examples"].extend(item.get("examples", []))
+                combined_unmatched[item["item"]]["comment_ids"].extend(item.get("comment_ids", []))
 
         # Convert to response format
         unmatched_items = []
         # Sort alphabetically by value, then by count descending
-        sorted_items = sorted(combined_unmatched.items(), key=lambda x: (x[0].lower(), -len(x[1])))[
-            : request.limit
-        ]
+        sorted_items = sorted(
+            combined_unmatched.items(), key=lambda x: (x[0].lower(), -len(x[1]["examples"]))
+        )[: request.limit]
 
-        for original_text, examples in sorted_items:
-            # Deduplicate examples and limit to 5
-            unique_examples = list(set(examples))[:5]
+        for original_text, data in sorted_items:
+            # Deduplicate examples and comment_ids and limit to 5
+            unique_examples = list(set(data["examples"]))[:5]
+            unique_comment_ids = list(set(data["comment_ids"]))[:5]
 
             unmatched_items.append(
                 UnmatchedItem(
                     item=original_text,
-                    count=len(examples),
+                    count=len(data["examples"]),
                     examples=unique_examples,
+                    comment_ids=unique_comment_ids,
                 )
             )
 
