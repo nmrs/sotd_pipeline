@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { analysisCache, catalogCache, fileCache, generateAnalysisKey, generateCatalogKey, generateFileKey } from '../utils/cache';
 
 const API_BASE_URL = '/api';
 
@@ -42,15 +41,8 @@ export const getAvailableMonths = async (): Promise<string[]> => {
 };
 
 export const getMonthData = async (month: string): Promise<MonthData> => {
-    const cacheKey = generateFileKey(month);
-    const cached = fileCache.get(cacheKey);
-    if (cached) {
-        return cached;
-    }
-
     try {
         const response = await api.get(`/files/month/${month}`);
-        fileCache.set(cacheKey, response.data);
         return response.data;
     } catch (error) {
         console.error(`Failed to fetch data for month ${month}:`, error);
@@ -77,15 +69,8 @@ export const getCatalogs = async (): Promise<CatalogInfo[]> => {
 };
 
 export const getCatalogContent = async (catalogName: string): Promise<any> => {
-    const cacheKey = generateCatalogKey(catalogName);
-    const cached = catalogCache.get(cacheKey);
-    if (cached) {
-        return cached;
-    }
-
     try {
         const response = await api.get(`/catalogs/${catalogName}`);
-        catalogCache.set(cacheKey, response.data);
         return response.data;
     } catch (error) {
         console.error(`Failed to fetch catalog ${catalogName}:`, error);
@@ -140,15 +125,8 @@ export interface UnmatchedAnalysisResult {
 export const analyzeUnmatched = async (
     request: UnmatchedAnalysisRequest
 ): Promise<UnmatchedAnalysisResult> => {
-    const cacheKey = generateAnalysisKey(request.field, request.months, request.limit);
-    const cached = analysisCache.get(cacheKey);
-    if (cached) {
-        return cached;
-    }
-
     try {
         const response = await api.post('/analyze/unmatched', request);
-        analysisCache.set(cacheKey, response.data);
         return response.data;
     } catch (error) {
         console.error('Failed to analyze unmatched items:', error);

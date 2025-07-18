@@ -95,6 +95,7 @@ const UnmatchedAnalyzer: React.FC = () => {
             setMatchPhaseLoading(true);
             setError(null);
             setSuccessMessage(null);
+            setMatchPhaseOutput(null); // Clear previous output before writing new content
 
             const request: MatchPhaseRequest = {
                 months: selectedMonths,
@@ -128,6 +129,8 @@ const UnmatchedAnalyzer: React.FC = () => {
         }
     };
 
+
+
     useEffect(() => {
         if (results) {
             // eslint-disable-next-line no-console
@@ -142,6 +145,7 @@ const UnmatchedAnalyzer: React.FC = () => {
                 <p className="text-gray-600">
                     Analyze unmatched items across selected months to identify patterns and potential catalog additions.
                 </p>
+
             </div>
 
             {/* Compact Configuration Panel */}
@@ -198,6 +202,7 @@ const UnmatchedAnalyzer: React.FC = () => {
                             >
                                 {loading ? 'Analyzing...' : 'Analyze'}
                             </button>
+
 
                             <button
                                 onClick={handleRunMatchPhase}
