@@ -1,12 +1,26 @@
 blade:
+  AC Blade:
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: 2025-06.json
+      id: mvtucxo
+      source: user
+    - file: 2025-06.json
+      id: mxfsteo
+      source: user
+    reason: not specific enough for matching
+  Artist Club:
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: 2025-06.json
+      id: mxfsteo
+      source: user
+    reason: not specific enough for matching
   I don't even know, tbh; I don't remember the last time I swapped this blade:
     added_date: '2025-07-19'
     comment_ids:
     - file: 2025-06.json
       id: mwoh2fd
-      source: user
-    - file: 2025-06.json
-      id: mwu2xp3
       source: user
   N/A:
     added_date: '2025-07-19'
@@ -19,9 +33,6 @@ blade:
     comment_ids:
     - file: 2025-06.json
       id: n02soyj
-      source: user
-    - file: 2025-06.json
-      id: n0akyig
       source: user
 brush: {}
 razor: {}
