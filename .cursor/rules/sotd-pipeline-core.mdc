@@ -69,6 +69,7 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
   - **WORKFLOW STEP**: After completing any task, **immediately** update the relevant MDC plan file to mark tasks as complete and add session notes
   - **VALIDATION**: **ALWAYS** verify that MDC plan files are updated before considering any task complete or moving to the next task
   - **CONTENT**: Include completion status, lessons learned, implementation decisions, deviations from plan, and timestamps for major milestones
+- **Playwright Test Automation**: **MANDATORY**: When running Playwright tests, ALWAYS use background mode to avoid blocking the conversation. Use `npm run test:e2e:background` or `./scripts/auto-test.sh` instead of direct `npx playwright test` commands. This ensures tests run in the background while allowing the conversation to continue. Monitor progress with `tail -f playwright-auto.log` and stop tests with `pkill -f playwright` if needed.
 
 ## Domain-Specific Rules
 - **Product Catalogs**: Maintain consistent structure in YAML files (`data/brushes.yaml`, `data/handles.yaml`, `data/razors.yaml`, `data/blades.yaml`, `data/soaps.yaml`)
