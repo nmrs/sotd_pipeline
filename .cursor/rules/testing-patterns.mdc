@@ -71,8 +71,8 @@ For all React components in the webui, follow this testing approach:
    - Located in `webui/src/**/*.{test,spec}.{ts,tsx}`
    - **Use by default** - provides fastest feedback for UI development
 
-2. **API Integration Tests** - Test API interactions with MSW (MEDIUM PRIORITY)
-   - Use MSW (Mock Service Worker) to mock API responses
+2. **API Integration Tests** - Test API interactions with Jest mocks (MEDIUM PRIORITY)
+   - Use Jest mocking to mock API responses
    - Test API integration without real server
    - Validate error handling and loading states
    - Located in `webui/src/**/*.api.test.{ts,tsx}`
@@ -113,49 +113,174 @@ describe('BrushTable', () => {
 });
 ```
 
-### MSW API Mocking Patterns
+### Jest Mocking Patterns
 ```typescript
-// webui/src/services/__tests__/api.test.ts
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
-import { fetchFilteredData } from '../api';
+// webui/src/components/__tests__/ApiIntegration.test.tsx
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import Dashboard from '../../pages/Dashboard';
 
-const server = setupServer(
-  rest.get('/api/filtered', (req, res, ctx) => {
-    return res(ctx.json({
-      data: mockData,
-      total: 100,
-      page: 1
-    }));
-  })
-);
+// Mock the API service
+jest.mock('../../services/api', () => ({
+  getAvailableMonths: jest.fn(),
+  getMonthData: jest.fn(),
+  getCatalogs: jest.fn(),
+  checkHealth: jest.fn(),
+}));
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+// Import the mocked function
+import { getAvailableMonths, checkHealth } from '../../services/api';
 
-test('should fetch filtered data', async () => {
-  const result = await fetchFilteredData({ page: 1 });
-  expect(result.data).toHaveLength(100);
+describe('API Integration', () => {
+  beforeEach(() => {
+    (getAvailableMonths as jest.Mock).mockClear();
+    (checkHealth as jest.Mock).mockClear();
+  });
+
+  test('should handle API error state', async () => {
+    // Mock health check to pass
+    (checkHealth as jest.Mock).mockResolvedValue(true);
+    // Mock API to fail
+    (getAvailableMonths as jest.Mock).mockRejectedValue(new Error('API Error'));
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+
+    // Should handle error gracefully
+    await waitFor(() => {
+      expect(screen.getByText(/checking system status/i)).toBeInTheDocument();
+    });
+  });
+
+  test('should handle API timeout', async () => {
+    // Mock slow API response
+    (getAvailableMonths as jest.Mock).mockImplementation(() => 
+      new Promise(resolve => setTimeout(() => resolve(['2024-01']), 100))
+    );
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+
+    // Should show loading state
+    expect(screen.getByText(/checking system status/i)).toBeInTheDocument();
+  });
 });
 ```
 
 ### WebUI Testing Commands
 ```bash
 # Unit tests (fastest feedback)
-npm run test:unit
-
-# All tests including unit and integration
-npm run test
+npm test
 
 # Watch mode for development
-npm run test:watch
+npm test -- --watch
 
 # Coverage report
-npm run test:coverage
+npm test -- --coverage
 
 # E2E tests (slowest, complete workflows)
 npm run test:e2e:background
+```
+
+## API Testing Strategy
+
+### **MANDATORY**: API Testing Hierarchy
+When testing APIs in the SOTD pipeline, follow this testing hierarchy:
+
+1. **Backend API Tests** - Test FastAPI endpoints directly (HIGHEST PRIORITY)
+   - Use FastAPI TestClient to test actual API endpoints
+   - Test with real data files and catalogs
+   - Located in `webui/api/test_*.py`
+   - **Use by default** - provides fastest feedback for API development
+
+2. **Frontend API Integration Tests** - Test React components with real API calls (MEDIUM PRIORITY)
+   - Use real API endpoints (not mocks) for integration testing
+   - Test actual API responses and error handling
+   - Located in `webui/src/**/*.integration.test.{ts,tsx}`
+   - **Use when necessary** - for validating frontend-backend integration
+
+3. **Frontend Unit Tests** - Test React components with mocked APIs (LOWEST PRIORITY)
+   - Use Jest mocks for fast component testing
+   - Test component behavior in isolation
+   - Located in `webui/src/**/*.{test,spec}.{ts,tsx}`
+   - **Use for development** - provides fastest feedback for UI development
+
+### Backend API Testing Patterns
+```python
+# webui/api/test_files.py
+import pytest
+from fastapi.testclient import TestClient
+from main import app
+
+@pytest.fixture
+def client():
+    """Create test client."""
+    return TestClient(app)
+
+def test_get_available_months_success(client, temp_data_dir):
+    """Test successful retrieval of available months."""
+    with patch("files.get_data_directory", return_value=temp_data_dir):
+        response = client.get("/api/files/available-months")
+        
+        assert response.status_code == 200
+        data = response.json()
+        assert "months" in data
+        assert data["total_months"] == 2
+```
+
+### Frontend API Integration Testing Patterns
+```typescript
+// webui/src/services/__tests__/api.integration.test.ts
+/**
+ * Tools used:
+ * - Jest (test runner)
+ * - React Testing Library (testing utilities)
+ * - Axios (HTTP client - already used in api.ts)
+ * - Real API endpoints (no mocking)
+ */
+
+import { getAvailableMonths, checkHealth, getCatalogs } from '../api';
+
+describe('API Integration (Real Endpoints)', () => {
+  // These tests use the same tools as unit tests but make real API calls
+  // No mocking - we're testing actual API integration
+  
+  test('should connect to health endpoint', async () => {
+    const health = await checkHealth();
+    expect(health).toBe(true);
+  }, 10000); // Longer timeout for real API calls
+
+  test('should fetch available months from real API', async () => {
+    const months = await getAvailableMonths();
+    expect(Array.isArray(months)).toBe(true);
+    // Should contain actual month data if available
+    if (months.length > 0) {
+      expect(months[0]).toMatch(/^\d{4}-\d{2}$/); // YYYY-MM format
+    }
+  }, 10000);
+});
+```
+
+### API Testing Commands
+```bash
+# Backend API tests (FastAPI endpoints)
+cd webui/api && python -m pytest test_*.py -v
+
+# Frontend integration tests (real API calls)
+npm test -- --testPathPattern=integration
+
+# Frontend unit tests (mocked APIs)
+npm test -- --testPathPattern=test.tsx
+
+# All API-related tests
+cd webui/api && python -m pytest test_*.py -v && cd .. && npm test
 ```
 
 ## Test File Structure and Naming
@@ -460,7 +585,7 @@ Follow the test priority hierarchy during development:
 ```bash
 # 1. Unit tests (fastest feedback loop) - START HERE
 make test-fast  # Python unit tests
-npm run test:unit  # React unit tests
+npm test  # React unit tests
 
 # 2. Integration tests (when needed for real data validation)
 python -m pytest tests/integration/ -v  # Python integration tests
@@ -482,10 +607,6 @@ npm run test  # All React tests
 
 ### WebUI Development Priority
 1. **Write React component unit tests first** - fastest feedback for UI development
-2. **Add API integration tests** when testing API interactions
+2. **Add API integration tests with Jest mocks** when testing API interactions
 3. **Add E2E tests** only when testing complete user workflows
 4. **Use React Testing Library by default** - provides best debugging and feedback
-
-2. **Add integration tests** when you need to validate real data compatibility
-3. **Add E2E tests** only when testing complete user workflows is necessary
-4. **Never skip unit tests** - they're the foundation of reliable development
