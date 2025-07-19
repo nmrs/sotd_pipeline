@@ -456,25 +456,34 @@ const UnmatchedAnalyzer: React.FC = () => {
                                             </div>
                                             <div className="flex items-center justify-between">
                                                 {/* Apply Changes Button - Compact and inline */}
-                                                {Object.keys(pendingChanges).length > 0 && (
-                                                    <div className="flex items-center space-x-2">
-                                                        <button
-                                                            onClick={handleApplyFilteredChanges}
-                                                            disabled={loading || !viewState.showFiltered}
-                                                            className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || !viewState.showFiltered
-                                                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                                                                : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                                                                }`}
-                                                        >
-                                                            {loading ? 'Applying...' : `Apply (${Object.keys(pendingChanges).length})`}
-                                                        </button>
-                                                        {!viewState.showFiltered && (
-                                                            <span className="text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">
-                                                                Show filtered to review
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                )}
+                                                {(() => {
+                                                    // Calculate only visible changes
+                                                    const visibleItems = searchSort.filteredAndSortedItems.map(item => item.item);
+                                                    const visibleChanges = Object.keys(pendingChanges).filter(itemName =>
+                                                        visibleItems.includes(itemName)
+                                                    );
+                                                    const visibleChangesCount = visibleChanges.length;
+
+                                                    return visibleChangesCount > 0 && (
+                                                        <div className="flex items-center space-x-2">
+                                                            <button
+                                                                onClick={handleApplyFilteredChanges}
+                                                                disabled={loading || !viewState.showFiltered}
+                                                                className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || !viewState.showFiltered
+                                                                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                                                                    : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                                                                    }`}
+                                                            >
+                                                                {loading ? 'Applying...' : `Apply (${visibleChangesCount})`}
+                                                            </button>
+                                                            {!viewState.showFiltered && (
+                                                                <span className="text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">
+                                                                    Show filtered to review
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })()}
 
                                                 {/* Search Box */}
                                                 <div className="flex items-center space-x-2">
