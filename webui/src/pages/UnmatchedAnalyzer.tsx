@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { analyzeUnmatched, UnmatchedAnalysisResult, handleApiError, runMatchPhase, MatchPhaseRequest, getCommentDetail, CommentDetail } from '../services/api';
 import MonthSelector from '../components/MonthSelector';
 import LoadingSpinner from '../components/LoadingSpinner';
-import ErrorDisplay from '../components/ErrorDisplay';
 import VirtualizedTable from '../components/VirtualizedTable';
 import PerformanceMonitor from '../components/PerformanceMonitor';
 import CommentModal from '../components/CommentModal';
@@ -105,11 +104,6 @@ const UnmatchedAnalyzer: React.FC = () => {
     const formatExamples = (examples: string[]) => {
         if (examples.length === 0) return 'No examples available';
         return examples.slice(0, 3).join(', ') + (examples.length > 3 ? '...' : '');
-    };
-
-    const formatCommentIds = (commentIds: string[]) => {
-        if (commentIds.length === 0) return 'No comment IDs available';
-        return commentIds.slice(0, 3).join(', ') + (commentIds.length > 3 ? '...' : '');
     };
 
     const handleCommentClick = async (commentId: string) => {
@@ -528,7 +522,7 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                     width: 200,
                                                     render: (item) => (
                                                         <span className="text-gray-500 text-sm">
-                                                            {formatExamples(item.examples)}
+                                                            {formatExamples(item.examples || [])}
                                                         </span>
                                                     ),
                                                 },

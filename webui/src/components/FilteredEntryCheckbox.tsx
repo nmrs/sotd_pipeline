@@ -19,6 +19,7 @@ const FilteredEntryCheckbox: React.FC<FilteredEntryCheckboxProps> = ({
     const [isFiltered, setIsFiltered] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [apiAvailable, setApiAvailable] = useState<boolean>(true);
 
     // Check initial filtered status
     useEffect(() => {
@@ -38,9 +39,11 @@ const FilteredEntryCheckbox: React.FC<FilteredEntryCheckboxProps> = ({
                 const status = response.data[key] || false;
                 setIsFiltered(status);
                 onStatusChange?.(status);
+                setApiAvailable(true);
             } catch (err: any) {
                 console.error('Failed to check filtered status:', err);
                 setError('Failed to check status');
+                setApiAvailable(false);
             } finally {
                 setIsLoading(false);
             }
@@ -50,7 +53,7 @@ const FilteredEntryCheckbox: React.FC<FilteredEntryCheckboxProps> = ({
     }, [category, itemName, commentIds, onStatusChange]);
 
     const handleCheckboxChange = async (checked: boolean) => {
-        if (!itemName || commentIds.length === 0 || disabled) return;
+        if (!itemName || commentIds.length === 0 || disabled || !apiAvailable) return;
 
         try {
             setIsLoading(true);
@@ -81,17 +84,38 @@ const FilteredEntryCheckbox: React.FC<FilteredEntryCheckboxProps> = ({
         } catch (err: any) {
             console.error('Failed to update filtered status:', err);
             setError('Failed to update status');
+            setApiAvailable(false);
         } finally {
             setIsLoading(false);
         }
     };
 
+    // If API is not available, show a disabled checkbox instead of error
+    if (!apiAvailable) {
+        return (
+            <div className="flex items-center">
+                <input
+                    type="checkbox"
+                    checked={false}
+                    disabled={true}
+                    className="rounded border-gray-300 text-gray-400 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Filtered entries API not available"
+                />
+            </div>
+        );
+    }
+
+    // If there's an error, show a disabled checkbox with error tooltip
     if (error) {
         return (
             <div className="flex items-center">
-                <div className="text-red-500 text-xs" title={error}>
-                    Error
-                </div>
+                <input
+                    type="checkbox"
+                    checked={false}
+                    disabled={true}
+                    className="rounded border-gray-300 text-red-400 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={error}
+                />
             </div>
         );
     }

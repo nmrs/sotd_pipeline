@@ -13,8 +13,7 @@ interface MonthSelectorProps {
 const MonthSelector: React.FC<MonthSelectorProps> = ({
     selectedMonths,
     onMonthsChange,
-    multiple = true,
-    label = 'Select Months'
+    multiple = true
 }) => {
     const [availableMonths, setAvailableMonths] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
