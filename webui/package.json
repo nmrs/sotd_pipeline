@@ -12,13 +12,12 @@
         "test:e2e:ui": "playwright test --ui",
         "test:e2e:headed": "playwright test --headed",
         "test:e2e:debug": "playwright test --debug",
-        "test:e2e:auto": "./scripts/run-tests.sh",
+        "test:e2e:auto": "./scripts/auto-playwright.sh",
         "test:e2e:quick": "./scripts/run-tests.sh -p chromium -g 'basic'",
         "test:e2e:all": "./scripts/run-tests.sh -p all",
         "test:e2e:monitor": "tail -f playwright-test-*.log",
         "test:e2e:background": "./scripts/auto-test.sh",
-        "test:e2e:watch": "./scripts/monitor-tests.sh",
-        "test:e2e:auto": "./scripts/auto-playwright.sh"
+        "test:e2e:watch": "./scripts/monitor-tests.sh"
     },
     "dependencies": {
         "@tanstack/react-table": "^8.10.7",
@@ -43,12 +42,12 @@
         "@typescript-eslint/eslint-plugin": "^6.10.0",
         "@typescript-eslint/parser": "^6.10.0",
         "@vitejs/plugin-react": "^4.1.0",
-        "autoprefixer": "^10.4.14",
+        "autoprefixer": "^10.4.21",
         "eslint": "^8.53.0",
         "eslint-plugin-react-hooks": "^4.6.0",
         "eslint-plugin-react-refresh": "^0.4.4",
-        "postcss": "^8.4.24",
-        "tailwindcss": "^3.4.0",
+        "postcss": "^8.5.6",
+        "tailwindcss": "^3.4.17",
         "typescript": "^5.2.2",
         "vite": "^7.0.5"
     }
