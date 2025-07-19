@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
@@ -120,7 +120,7 @@ export function VirtualizedTable<T>({
     const columnWidthsRef = useRef(columnWidths);
 
     // Update refs when state changes
-    React.useEffect(() => {
+    useEffect(() => {
         isResizingRef.current = isResizing;
         resizeColumnIndexRef.current = resizeColumnIndex;
         resizeStartXRef.current = resizeStartX;
@@ -203,7 +203,7 @@ export function VirtualizedTable<T>({
     }, []);
 
     // Add visual feedback during resize
-    React.useEffect(() => {
+    useEffect(() => {
         if (isResizing) {
             document.body.style.userSelect = 'none';
             document.body.style.cursor = 'col-resize';
@@ -234,7 +234,7 @@ export function VirtualizedTable<T>({
     }, []);
 
     // Cleanup event listeners on unmount
-    React.useEffect(() => {
+    useEffect(() => {
         return () => {
             const handlers = (window as any).__resizeHandlers;
             if (handlers) {
