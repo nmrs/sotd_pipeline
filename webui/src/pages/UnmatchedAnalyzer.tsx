@@ -464,12 +464,12 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                     );
                                                     const visibleChangesCount = visibleChanges.length;
 
-                                                    return visibleChangesCount > 0 && (
+                                                    return (
                                                         <div className="flex items-center space-x-2">
                                                             <button
                                                                 onClick={handleApplyFilteredChanges}
-                                                                disabled={loading}
-                                                                className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading
+                                                                disabled={loading || visibleChangesCount === 0}
+                                                                className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || visibleChangesCount === 0
                                                                     ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                                                                     : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
                                                                     }`}
