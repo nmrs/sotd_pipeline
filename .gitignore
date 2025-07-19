@@ -33,6 +33,12 @@ praw.ini
 *.bk
 *.bk/data/correct_matches.yaml.backup
 data/backup/
+# Debug screenshots and files
+debug-screenshot.png
+debug-screenshot-*.png
+*.debug.png
+*.debug.jpg
+*.debug.jpeg
 # Profiling files
 *.prof
 profile_*.prof
@@ -67,6 +73,13 @@ webui/.node_repl_history
 webui/*.tgz
 webui/.yarn-integrity
 webui/.env*.local
+# WebUI test results and debug files
+webui/test-results/
+webui/test-results-*/
+webui/playwright-report/
+webui/playwright-report-*/
+webui/.last-run.json
+webui/test-results/.last-run.json
 # WebUI server management files
 webui/.pids/
 webui/.pids/*.pid
