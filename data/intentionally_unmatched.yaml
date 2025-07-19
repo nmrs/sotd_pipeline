@@ -41,7 +41,43 @@ blade:
       id: mx0f6ht
       source: user
     reason: garbage
-brush: {}
+brush:
+  Hands:
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: mxazln2.json
+      id: mxazln2
+      source: user
+    - file: myhota1.json
+      id: myhota1
+      source: user
+    - file: mz17zzu.json
+      id: mz17zzu
+      source: user
+  My Hand:
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: mxljw15.json
+      id: mxljw15
+      source: user
+    - file: myfuuog.json
+      id: myfuuog
+      source: user
+    - file: mxxcov6.json
+      id: mxxcov6
+      source: user
+  None:
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: mxsklcx.json
+      id: mxsklcx
+      source: user
+    - file: mw4q0hm.json
+      id: mw4q0hm
+      source: user
+    - file: mxit7rm.json
+      id: mxit7rm
+      source: user
 razor:
   Hot Wheels Play Razor $PLASTIC $RAINBOW:
     added_date: '2025-07-19'

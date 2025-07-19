@@ -9,6 +9,7 @@ strip_tags:
   - ATOMICAGE
   - CNC
   - CENTENARIAN
+  - DOORKNOB
   - EIGHTDAYSAWEEK
   - FLIPTOP
   - FOREVERSAFETY
@@ -23,6 +24,7 @@ strip_tags:
   - RAINBOW
   - REVENANT
   - RUSTYBUTTRUSTY
+  - SHD
   - SLANT
   - SPACEAGE
   - SPACEACE
@@ -30,8 +32,10 @@ strip_tags:
   - STAINLESSLESS
   - STR8SNOB
   - STUBBY
+  - TOLL
   - TWINS
   - WECKONISTA
+  - WEDONTNEEDNOSTINKINGBADGERS
   - ZAMAC
 # Tags that should be preserved (might be useful for matching)
 preserve_tags:
