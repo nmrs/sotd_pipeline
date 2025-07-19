@@ -142,10 +142,21 @@ const UnmatchedAnalyzer: React.FC = () => {
     };
 
     const handleFilteredStatusChange = (itemName: string, isFiltered: boolean) => {
-        setPendingChanges(prev => ({
-            ...prev,
-            [itemName]: isFiltered,
-        }));
+        const currentStatus = filteredStatus[itemName] || false;
+
+        setPendingChanges(prev => {
+            const newChanges = { ...prev };
+
+            if (isFiltered === currentStatus) {
+                // If the new value matches the current status, remove from pending changes
+                delete newChanges[itemName];
+            } else {
+                // If the new value is different, add to pending changes
+                newChanges[itemName] = isFiltered;
+            }
+
+            return newChanges;
+        });
     };
 
     const handleApplyFilteredChanges = async () => {
