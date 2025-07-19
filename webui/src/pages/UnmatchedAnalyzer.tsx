@@ -51,6 +51,8 @@ const UnmatchedAnalyzer: React.FC = () => {
     // Search and sort hook
     const searchSort = useSearchSort({
         items: results?.unmatched_items || [],
+        showFiltered: viewState.showFiltered,
+        filteredStatus,
     });
 
     // Messaging hook
@@ -155,31 +157,33 @@ const UnmatchedAnalyzer: React.FC = () => {
         try {
             setLoading(true);
 
-            // Prepare entries for bulk update
-            const entries: Array<{
+            // Prepare a single entries array, each with its own month
+            const allEntries: Array<{
                 name: string;
                 action: 'add' | 'remove';
                 comment_id: string;
-                file_path: string;
                 source: string;
+                month: string;
             }> = [];
 
             Object.entries(pendingChanges).forEach(([itemName, shouldBeFiltered]) => {
                 const item = results?.unmatched_items?.find(i => i.item === itemName);
-                if (item && item.comment_ids) {
+                if (item && item.comment_ids && item.examples) {
+                    // Get the month from the first example file
+                    const month = item.examples[0]?.replace('.json', '') || selectedMonths[0];
                     item.comment_ids.forEach(commentId => {
-                        entries.push({
+                        allEntries.push({
                             name: itemName,
                             action: shouldBeFiltered ? 'add' : 'remove',
                             comment_id: commentId,
-                            file_path: `data/comments/${commentId.split('_')[0]}.json`,
                             source: 'user',
+                            month,
                         });
                     });
                 }
             });
 
-            if (entries.length === 0) {
+            if (allEntries.length === 0) {
                 messaging.addSuccessMessage('No changes to apply');
                 return;
             }
@@ -189,23 +193,24 @@ const UnmatchedAnalyzer: React.FC = () => {
 
             const response = await updateFilteredEntries({
                 category: selectedField,
-                entries,
+                entries: allEntries,
             });
 
-            if (response.success) {
-                // Update the filtered status with pending changes
-                setFilteredStatus(prev => ({
-                    ...prev,
-                    ...pendingChanges,
-                }));
-
-                // Clear pending changes
-                setPendingChanges({});
-
-                messaging.addSuccessMessage(`Updated ${entries.length} entries successfully`);
-            } else {
+            if (!response.success) {
                 messaging.addErrorMessage(response.message || 'Failed to update filtered entries');
+                return;
             }
+
+            // Update the filtered status with pending changes
+            setFilteredStatus(prev => ({
+                ...prev,
+                ...pendingChanges,
+            }));
+
+            // Clear pending changes
+            setPendingChanges({});
+
+            messaging.addSuccessMessage(`Updated ${Object.keys(pendingChanges).length} entries successfully`);
         } catch (err: any) {
             messaging.addErrorMessage(err.message || 'Failed to update filtered entries');
         } finally {
@@ -259,8 +264,9 @@ const UnmatchedAnalyzer: React.FC = () => {
         if (results) {
             // eslint-disable-next-line no-console
             console.log('UnmatchedAnalyzer results:', results);
+            console.log('showFiltered state:', viewState.showFiltered);
         }
-    }, [results]);
+    }, [results, viewState.showFiltered]);
 
     return (
         <div className="max-w-full mx-auto p-6">
@@ -271,6 +277,8 @@ const UnmatchedAnalyzer: React.FC = () => {
                 </p>
 
             </div>
+
+
 
             {/* Compact Configuration Panel */}
             <div className="mb-4">
@@ -487,17 +495,25 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                 </div>
                                             </div>
                                             {Object.keys(pendingChanges).length > 0 && (
-                                                <div className="flex items-center space-x-4 mt-3">
+                                                <div className="flex items-center space-x-4 mt-3 bg-yellow-50 border border-yellow-200 rounded p-3">
                                                     <button
                                                         onClick={handleApplyFilteredChanges}
-                                                        disabled={loading}
-                                                        className="bg-blue-600 text-white py-2 px-4 rounded text-sm hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        disabled={loading || !viewState.showFiltered}
+                                                        className={`py-2 px-4 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || !viewState.showFiltered
+                                                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                                                            : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                                                            }`}
                                                     >
                                                         {loading ? 'Applying...' : `Apply Changes (${Object.keys(pendingChanges).length})`}
                                                     </button>
                                                     <span className="text-sm text-gray-600">
                                                         {Object.keys(pendingChanges).length} item(s) with pending changes
                                                     </span>
+                                                    {!viewState.showFiltered && (
+                                                        <span className="text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">
+                                                            Show filtered items to review changes before applying
+                                                        </span>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>

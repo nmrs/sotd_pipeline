@@ -180,8 +180,8 @@ export interface FilteredEntry {
     name: string;
     action: 'add' | 'remove';
     comment_id?: string;
-    file_path?: string;
     source?: string;
+    month: string; // Add month to each entry
 }
 
 export interface FilteredEntryRequest {

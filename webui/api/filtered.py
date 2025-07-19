@@ -23,14 +23,18 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/filtered", tags=["filtered"])
 
 # Path to filtered entries file
-FILTERED_ENTRIES_PATH = Path("data/intentionally_unmatched.yaml")
+FILTERED_ENTRIES_PATH = (
+    Path(__file__).parent.parent.parent / "data" / "intentionally_unmatched.yaml"
+)
 
 
 class FilteredEntryRequest(BaseModel):
     """Request model for filtered entry operations."""
 
     category: str = Field(..., description="Product category (razor, brush, blade, soap)")
-    entries: List[Dict[str, Any]] = Field(..., description="List of entries to process")
+    entries: List[Dict[str, Any]] = Field(
+        ..., description="List of entries to process (each must include 'month')"
+    )
 
 
 class FilteredEntryResponse(BaseModel):
@@ -98,8 +102,8 @@ async def update_filtered_entries(request: FilteredEntryRequest):
             entry_name = entry.get("name")
             action = entry.get("action")
             comment_id = entry.get("comment_id")
-            file_path = entry.get("file_path")
             source = entry.get("source", "user")
+            month = entry.get("month")
 
             if not entry_name:
                 errors.append("Entry name is required")
@@ -109,11 +113,16 @@ async def update_filtered_entries(request: FilteredEntryRequest):
                 errors.append(f"Invalid action: {action}")
                 continue
 
-            if action == "add":
-                if not comment_id or not file_path:
-                    errors.append("comment_id and file_path are required for add action")
-                    continue
+            if not month:
+                errors.append("Month is required for each entry")
+                continue
 
+            file_path = f"{month}.json"
+
+            if action == "add":
+                if not comment_id:
+                    errors.append("comment_id is required for add action")
+                    continue
                 try:
                     manager.add_entry(category, entry_name, comment_id, file_path, source)
                     added_count += 1
@@ -121,10 +130,9 @@ async def update_filtered_entries(request: FilteredEntryRequest):
                     errors.append(f"Error adding entry {entry_name}: {str(e)}")
 
             elif action == "remove":
-                if not comment_id or not file_path:
-                    errors.append("comment_id and file_path are required for remove action")
+                if not comment_id:
+                    errors.append("comment_id is required for remove action")
                     continue
-
                 try:
                     if manager.remove_entry(category, entry_name, comment_id, file_path):
                         removed_count += 1

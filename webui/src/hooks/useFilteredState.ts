@@ -3,10 +3,11 @@ import { updateFilteredEntries, FilteredEntryRequest } from '../services/api';
 
 export interface UseFilteredStateOptions {
     category: string;
+    month: string;
     selectedItems: Set<string>;
-    items: Array<{ item: string; comment_ids?: string[];[key: string]: any }>;
+    items: any[];
     onSuccess?: (message: string) => void;
-    onError?: (error: string) => void;
+    onError?: (message: string) => void;
 }
 
 export interface FilteredState {
@@ -19,6 +20,7 @@ export interface FilteredState {
 
 export const useFilteredState = ({
     category,
+    month,
     selectedItems,
     items,
     onSuccess,
@@ -38,28 +40,28 @@ export const useFilteredState = ({
             name: string;
             action: 'add' | 'remove';
             comment_id?: string;
-            file_path?: string;
             source?: string;
+            month: string;
         }> = [];
 
         selectedItems.forEach(itemName => {
             const item = items.find(i => i.item === itemName);
             if (item && item.comment_ids && item.comment_ids.length > 0) {
                 // Add all comment IDs for this item
-                item.comment_ids.forEach(commentId => {
+                item.comment_ids.forEach((commentId: string) => {
                     entries.push({
                         name: itemName,
                         action,
                         comment_id: commentId,
-                        file_path: `data/comments/${commentId.split('_')[0]}.json`, // Extract month from comment ID
                         source: 'user',
+                        month, // Add month to each entry
                     });
                 });
             }
         });
 
         return entries;
-    }, [selectedItems, items]);
+    }, [selectedItems, items, month]);
 
     // Update filtered entries
     const updateFiltered = useCallback(async () => {
@@ -77,12 +79,12 @@ export const useFilteredState = ({
                 .flatMap(itemName => {
                     const item = items.find(i => i.item === itemName);
                     if (item && item.comment_ids) {
-                        return item.comment_ids.map(commentId => ({
+                        return item.comment_ids.map((commentId: string) => ({
                             name: itemName,
                             action: 'remove' as const,
                             comment_id: commentId,
-                            file_path: `data/comments/${commentId.split('_')[0]}.json`,
                             source: 'user',
+                            month, // Add month to each entry
                         }));
                     }
                     return [];
@@ -130,7 +132,7 @@ export const useFilteredState = ({
         } finally {
             setIsUpdating(false);
         }
-    }, [category, selectedItems, items, pendingChanges, hasChanges, prepareEntries, onSuccess, onError]);
+    }, [category, month, selectedItems, items, pendingChanges, hasChanges, prepareEntries, onSuccess, onError]);
 
     // Clear pending changes
     const clearPendingChanges = useCallback(() => {
