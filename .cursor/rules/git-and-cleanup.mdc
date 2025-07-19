@@ -37,7 +37,8 @@ When making multiple changes, **ALWAYS** organize them into separate, logical co
 3. **Tests** (`test:`): Add, modify, or enhance test coverage
 4. **Refactoring** (`refactor:`): Restructure code without changing behavior
 5. **Documentation** (`docs:`): Update documentation, specs, or comments
-6. **Cleanup** (`cleanup:`): Remove unused code, files, or dependencies
+6. **Data** (`data:`): Update catalog data, configuration files, or data maintenance
+7. **Cleanup** (`cleanup:`): Remove unused code, files, or dependencies
 
 #### Commit Organization Principles
 - **Atomic Changes**: Each commit should be complete and self-contained
@@ -196,6 +197,12 @@ Use conventional commit format with clear, descriptive messages:
 - `docs: update brush matching specification with intelligent parsing details`
 - `docs: enhance testing patterns to mandate dual unit/integration coverage`
 - `docs: document delimiter semantics and content analysis scoring algorithms`
+
+**Data (`data:`):**
+- `data: add new blade catalog entries for AMC De-Luxe Thin and Gillette Stainless`
+- `data: update intentionally unmatched items with garbage and non-razor entries`
+- `data: add new brush patterns for Zenith B-series handle recognition`
+- `data: update correct_matches.yaml with manually verified product matches`
 
 **Cleanup (`cleanup:`):**
 - `cleanup: remove deprecated knot_maker field and update all references`
