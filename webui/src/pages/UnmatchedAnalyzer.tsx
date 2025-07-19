@@ -7,6 +7,7 @@ import VirtualizedTable from '../components/VirtualizedTable';
 import PerformanceMonitor from '../components/PerformanceMonitor';
 import CommentModal from '../components/CommentModal';
 import FilteredEntryCheckbox from '../components/FilteredEntryCheckbox';
+import { useBulkSelection } from '../hooks/useBulkSelection';
 
 const UnmatchedAnalyzer: React.FC = () => {
     const [selectedField, setSelectedField] = useState<string>('razor');
@@ -24,6 +25,16 @@ const UnmatchedAnalyzer: React.FC = () => {
     const [commentModalOpen, setCommentModalOpen] = useState(false);
     const [commentLoading, setCommentLoading] = useState(false);
     const [filteredStatus, setFilteredStatus] = useState<Record<string, boolean>>({});
+
+    // Bulk selection hook
+    const bulkSelection = useBulkSelection({
+        items: results?.unmatched_items || [],
+        filteredStatus,
+        onSelectionChange: (selectedItems) => {
+            // Handle bulk selection changes
+            console.log('Bulk selection changed:', Array.from(selectedItems));
+        },
+    });
 
     const fieldOptions = [
         { value: 'razor', label: 'Razor' },
@@ -328,24 +339,61 @@ const UnmatchedAnalyzer: React.FC = () => {
                                     </div>
                                 ) : (
                                     <div>
-                                        <h3 className="text-base font-medium text-gray-900 mb-3">
-                                            Top Unmatched Items ({results.unmatched_items.length})
-                                        </h3>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h3 className="text-base font-medium text-gray-900">
+                                                Top Unmatched Items ({results.unmatched_items.length})
+                                            </h3>
+                                            {bulkSelection.totalItems > 0 && (
+                                                <div className="flex items-center space-x-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={bulkSelection.selectAll}
+                                                        ref={(el) => {
+                                                            if (el) {
+                                                                el.indeterminate = bulkSelection.indeterminate;
+                                                            }
+                                                        }}
+                                                        onChange={bulkSelection.toggleSelectAll}
+                                                        disabled={bulkSelection.totalItems === 0}
+                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        title="Select all visible items"
+                                                    />
+                                                    <span className="text-sm text-gray-600">
+                                                        Select All ({bulkSelection.totalItems} visible)
+                                                    </span>
+                                                    {bulkSelection.selectedVisibleItems.length > 0 && (
+                                                        <span className="text-sm text-blue-600 font-medium">
+                                                            {bulkSelection.selectedVisibleItems.length} selected
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                         <VirtualizedTable
                                             data={results.unmatched_items}
                                             columns={[
                                                 {
-                                                    key: 'filtered',
-                                                    header: 'Filtered',
-                                                    width: 80,
+                                                    key: 'selection',
+                                                    header: 'Select',
+                                                    width: 100,
                                                     render: (item) => (
-                                                        <FilteredEntryCheckbox
-                                                            category={selectedField}
-                                                            itemName={item.item}
-                                                            commentIds={item.comment_ids || []}
-                                                            onStatusChange={(isFiltered) => handleFilteredStatusChange(item.item, isFiltered)}
-                                                            disabled={commentLoading}
-                                                        />
+                                                        <div className="flex items-center space-x-2">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={bulkSelection.selectedItems.has(item.item)}
+                                                                onChange={() => bulkSelection.toggleItem(item.item)}
+                                                                disabled={filteredStatus[item.item]}
+                                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                title={filteredStatus[item.item] ? 'Item is filtered' : 'Select for bulk operation'}
+                                                            />
+                                                            <FilteredEntryCheckbox
+                                                                category={selectedField}
+                                                                itemName={item.item}
+                                                                commentIds={item.comment_ids || []}
+                                                                onStatusChange={(isFiltered) => handleFilteredStatusChange(item.item, isFiltered)}
+                                                                disabled={commentLoading}
+                                                            />
+                                                        </div>
                                                     ),
                                                 },
                                                 {
