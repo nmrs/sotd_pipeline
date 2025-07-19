@@ -130,7 +130,9 @@ DE:
       - asco.*plat
     Super Stainless:
       patterns:
-      - asco.*(stain|ss)
+      - asco.*stain
+      - asco.*\bss\b
+      - asco.*orange
   Assured for Men:
     DE:
       patterns:
@@ -421,6 +423,10 @@ DE:
       patterns:
       - "Нева"
       - neva
+  OK:
+    Super Stainless:
+      patterns:
+      - \bok\b.*(stain|\bss\b)
   PAA:
     Platinum Strangelet Super Sharps:
       patterns:
@@ -515,7 +521,7 @@ DE:
   Sharp Star:
     Platinum:
       patterns:
-      - sharp star(?:.*plat)
+      - sharp star(?:.*plat)?
   Shaving Revolution:
     Platinum:
       patterns:
@@ -586,7 +592,10 @@ DE:
   Topaz:
     Platinum:
       patterns:
-      - topaz\splatinum
+      - topaz.*plat
+    Stainless:
+      patterns:
+      - topaz.*(stain|\bss\b)
   Treet:
     Black Beauty:
       patterns:

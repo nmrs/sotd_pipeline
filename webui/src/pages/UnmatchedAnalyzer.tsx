@@ -6,6 +6,7 @@ import ErrorDisplay from '../components/ErrorDisplay';
 import VirtualizedTable from '../components/VirtualizedTable';
 import PerformanceMonitor from '../components/PerformanceMonitor';
 import CommentModal from '../components/CommentModal';
+import FilteredEntryCheckbox from '../components/FilteredEntryCheckbox';
 
 const UnmatchedAnalyzer: React.FC = () => {
     const [selectedField, setSelectedField] = useState<string>('razor');
@@ -22,6 +23,7 @@ const UnmatchedAnalyzer: React.FC = () => {
     const [selectedComment, setSelectedComment] = useState<CommentDetail | null>(null);
     const [commentModalOpen, setCommentModalOpen] = useState(false);
     const [commentLoading, setCommentLoading] = useState(false);
+    const [filteredStatus, setFilteredStatus] = useState<Record<string, boolean>>({});
 
     const fieldOptions = [
         { value: 'razor', label: 'Razor' },
@@ -83,6 +85,13 @@ const UnmatchedAnalyzer: React.FC = () => {
         } finally {
             setCommentLoading(false);
         }
+    };
+
+    const handleFilteredStatusChange = (itemName: string, isFiltered: boolean) => {
+        setFilteredStatus(prev => ({
+            ...prev,
+            [itemName]: isFiltered,
+        }));
     };
 
     const handleRunMatchPhase = async () => {
@@ -325,6 +334,20 @@ const UnmatchedAnalyzer: React.FC = () => {
                                         <VirtualizedTable
                                             data={results.unmatched_items}
                                             columns={[
+                                                {
+                                                    key: 'filtered',
+                                                    header: 'Filtered',
+                                                    width: 80,
+                                                    render: (item) => (
+                                                        <FilteredEntryCheckbox
+                                                            category={selectedField}
+                                                            itemName={item.item}
+                                                            commentIds={item.comment_ids || []}
+                                                            onStatusChange={(isFiltered) => handleFilteredStatusChange(item.item, isFiltered)}
+                                                            disabled={commentLoading}
+                                                        />
+                                                    ),
+                                                },
                                                 {
                                                     key: 'item',
                                                     header: 'Item',

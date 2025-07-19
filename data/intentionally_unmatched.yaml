@@ -1,0 +1,8 @@
+# Intentionally Unmatched Entries
+# This file stores entries that users have marked as intentionally unmatched
+# Structure: category -> entry_name -> metadata with comment_ids
+
+razor: {}
+brush: {}
+blade: {}
+soap: {} 

@@ -1,0 +1,523 @@
+# Unmatched Analyzer Filtering - TDD Implementation Plan
+
+## 📘 Project Summary
+
+Add checkbox functionality to the unmatched analyzer web UI to allow users to mark entries as "intentionally unmatched" and filter them out from future processing. This creates a clear audit trail of user decisions and improves data quality by distinguishing between "couldn't match" and "chose not to match" entries.
+
+**Core Components:**
+- Backend YAML storage for filtered entries
+- API endpoints for filtered entry management
+- Frontend checkbox UI with bulk operations
+- Match phase integration to skip filtered entries
+- Real-time UI updates with success messaging
+
+## 🧩 Component Steps
+
+### Phase 1: Backend Infrastructure (Foundation)
+1. **[x] YAML Data Structure & Utilities** - Core data persistence layer
+2. **[x] Filtered Entries API Endpoints** - REST API for CRUD operations
+3. **Match Phase Integration** - Pipeline filtering logic
+
+### Phase 2: Frontend UI Components (User Interface)
+4. **[x] Checkbox Component** - Individual entry selection
+5. **Bulk Selection Logic** - Select All functionality
+6. **Update Button & State Management** - User action handling
+
+### Phase 3: User Experience (Polish)
+7. **Show/Hide Filtered Toggle** - View management
+8. **Search & Sort Functionality** - Data navigation
+9. **Success/Error Messaging** - User feedback
+
+### Phase 4: Integration & Testing (Validation)
+10. **End-to-End Testing** - Complete workflow validation
+11. **Error Handling & Edge Cases** - Robustness testing
+12. **Performance Optimization** - Load testing and optimization
+
+## 🔁 Implementation Prompts
+
+### Step 1: YAML Data Structure & Utilities
+
+```text
+Create the foundational data structure and utilities for storing intentionally unmatched entries.
+
+**Requirements:**
+- Create `data/intentionally_unmatched.yaml` with the specified structure
+- Implement YAML loading/saving utilities in `sotd/utils/filtered_entries.py`
+- Support the data structure: category -> entry_name -> metadata with comment_ids
+- Include validation for data integrity
+- Add comprehensive tests for all utilities
+
+**Data Structure:**
+```yaml
+razor:
+  "Hot Wheels Play Razor":
+    added_date: "2025-01-27"
+    comment_ids:
+      - file: "data/comments/2025-01.json"
+        id: "abc123"
+        source: "user"
+```
+
+**Test Requirements:**
+- Test loading empty file
+- Test loading populated file
+- Test saving new entries
+- Test updating existing entries
+- Test merging duplicate comment_ids
+- Test validation of malformed data
+- Test error handling for corrupted files
+
+**Implementation Files:**
+- `sotd/utils/filtered_entries.py` (new)
+- `tests/utils/test_filtered_entries.py` (new)
+- `data/intentionally_unmatched.yaml` (new, empty structure)
+
+**Success Criteria:**
+- Can load/save filtered entries reliably
+- Handles edge cases gracefully
+- Comprehensive test coverage
+- Clear error messages for malformed data
+```
+
+### Step 2: Filtered Entries API Endpoints
+
+```text
+Implement REST API endpoints for managing filtered entries in the web UI.
+
+**Requirements:**
+- Add `GET /api/filtered` to retrieve current filtered entries
+- Add `POST /api/filtered` to add/remove entries
+- Support bulk operations for multiple entries
+- Return appropriate HTTP status codes and JSON responses
+- Include error handling for invalid requests
+
+**API Specifications:**
+- GET /api/filtered: Returns all filtered entries by category
+- POST /api/filtered: Accepts {category, entries: [{name, action: "add"|"remove"}]}
+- Response format: {success: bool, message: string, data?: object}
+
+**Test Requirements:**
+- Test GET endpoint with empty data
+- Test GET endpoint with populated data
+- Test POST endpoint adding single entry
+- Test POST endpoint removing single entry
+- Test POST endpoint bulk operations
+- Test error handling for invalid requests
+- Test concurrent access handling
+
+**Implementation Files:**
+- `webui/api/filtered.py` (new)
+- `tests/webui/api/test_filtered.py` (new)
+- Update `webui/api/__init__.py` to include new endpoints
+
+**Success Criteria:**
+- All endpoints return correct JSON responses
+- Bulk operations work correctly
+- Error handling is robust
+- API is well-documented and tested
+```
+
+### Step 3: Match Phase Integration
+
+```text
+Integrate filtered entries checking into the match phase to automatically skip intentionally unmatched entries.
+
+**Requirements:**
+- Load filtered entries at match phase startup
+- Check each entry against filtered list before matching
+- Skip entries that are in filtered list
+- Add new filtered entries with source: "pipeline" when appropriate
+- Preserve original data but mark as intentionally unmatched
+
+**Integration Points:**
+- Modify `sotd/match/match.py` to check filtered entries
+- Update `sotd/match/base_matcher.py` to support filtering
+- Add filtered entries loading to match phase initialization
+- Ensure filtered entries are preserved in output
+
+**Test Requirements:**
+- Test that filtered entries are skipped during matching
+- Test that new filtered entries are added with pipeline source
+- Test that original data is preserved
+- Test performance impact of filtering
+- Test error handling when filtered file is corrupted
+
+**Implementation Files:**
+- Update `sotd/match/match.py`
+- Update `sotd/match/base_matcher.py`
+- Update `sotd/match/run.py` for initialization
+- Add tests to existing match test files
+
+**Success Criteria:**
+- Filtered entries are automatically skipped
+- New filtered entries are tracked with pipeline source
+- No performance degradation
+- Clear audit trail maintained
+```
+
+### Step 4: Checkbox Component
+
+```text
+Create the frontend checkbox component for individual entry selection in the unmatched analyzer.
+
+**Requirements:**
+- Add checkboxes to each unmatched entry row
+- Implement individual selection state management
+- Connect to filtered entries API
+- Provide visual feedback for selection state
+- Handle loading and error states
+
+**UI Specifications:**
+- Checkbox appears in first column of each entry row
+- Checked = entry is filtered (greyed out)
+- Unchecked = entry is unfiltered (normal display)
+- Loading state while API calls are in progress
+- Error state with retry functionality
+
+**Test Requirements:**
+- Test checkbox state reflects filtered status
+- Test individual selection/deselection
+- Test API integration for single entries
+- Test loading and error states
+- Test visual feedback for different states
+
+**Implementation Files:**
+- Update `webui/src/components/UnmatchedAnalyzer.tsx`
+- Add `webui/src/components/FilteredEntryCheckbox.tsx` (new)
+- Update `webui/src/services/api.ts` for filtered endpoints
+- Add tests to existing UI test files
+
+**Success Criteria:**
+- Checkboxes correctly reflect filtered status
+- Individual selection works reliably
+- API integration is seamless
+- Visual feedback is clear and responsive
+```
+
+### Step 5: Bulk Selection Logic
+
+```text
+Implement Select All functionality and bulk operations for managing multiple entries at once.
+
+**Requirements:**
+- Add "Select All" checkbox that only affects visible entries
+- Implement bulk selection/deselection logic
+- Handle mixed selection states (some checked, some unchecked)
+- Provide clear visual feedback for bulk operations
+- Optimize performance for large datasets
+
+**UI Specifications:**
+- Select All checkbox in header row
+- Only selects currently visible entries (respects search/filter)
+- Shows mixed state when some entries are selected
+- Bulk operations are disabled unless state has changed
+- Clear indication of how many entries are selected
+
+**Test Requirements:**
+- Test Select All selects only visible entries
+- Test bulk operations with mixed selections
+- Test performance with large datasets
+- Test state management for complex selections
+- Test integration with search/filter functionality
+
+**Implementation Files:**
+- Update `webui/src/components/UnmatchedAnalyzer.tsx`
+- Add `webui/src/hooks/useBulkSelection.ts` (new)
+- Update `webui/src/services/api.ts` for bulk operations
+- Add tests for bulk selection logic
+
+**Success Criteria:**
+- Select All works correctly with visible entries only
+- Bulk operations handle mixed states properly
+- Performance remains good with large datasets
+- State management is reliable and predictable
+```
+
+### Step 6: Update Button & State Management
+
+```text
+Implement the "Update Filtered" button and comprehensive state management for user actions.
+
+**Requirements:**
+- Add "Update Filtered" button that's disabled unless state changed
+- Implement state tracking for pending changes
+- Handle bulk API operations efficiently
+- Provide real-time feedback during operations
+- Manage button text based on current selection
+
+**UI Specifications:**
+- Button text: "Update Filtered" (dynamic based on selection)
+- Disabled unless state has changed
+- Shows loading state during API calls
+- Provides success/error feedback
+- Auto-hides success messages after delay
+
+**Test Requirements:**
+- Test button state management
+- Test bulk API operations
+- Test success/error messaging
+- Test real-time UI updates
+- Test edge cases (no changes, all changes, mixed changes)
+
+**Implementation Files:**
+- Update `webui/src/components/UnmatchedAnalyzer.tsx`
+- Add `webui/src/hooks/useFilteredState.ts` (new)
+- Update `webui/src/services/api.ts` for state management
+- Add tests for state management logic
+
+**Success Criteria:**
+- Button state reflects current selection accurately
+- Bulk operations complete successfully
+- Real-time updates work smoothly
+- Error handling is user-friendly
+```
+
+### Step 7: Show/Hide Filtered Toggle
+
+```text
+Add Show/Hide Filtered toggle functionality to manage view state and improve user experience.
+
+**Requirements:**
+- Add toggle button to show/hide filtered entries
+- Implement view state management
+- Update Select All to respect current view
+- Provide clear visual distinction between filtered/unfiltered
+- Maintain state across page refreshes
+
+**UI Specifications:**
+- Toggle button: "Show Filtered" / "Hide Filtered"
+- Filtered entries are greyed out when visible
+- Select All only affects currently visible entries
+- Clear visual hierarchy for different entry states
+- State persists in localStorage
+
+**Test Requirements:**
+- Test toggle functionality
+- Test state persistence
+- Test Select All with different view states
+- Test visual feedback for different states
+- Test integration with search functionality
+
+**Implementation Files:**
+- Update `webui/src/components/UnmatchedAnalyzer.tsx`
+- Add `webui/src/hooks/useViewState.ts` (new)
+- Update `webui/src/services/api.ts` for view management
+- Add tests for view state management
+
+**Success Criteria:**
+- Toggle works reliably
+- State persists correctly
+- Visual feedback is clear
+- Integration with other features works smoothly
+```
+
+### Step 8: Search & Sort Functionality
+
+```text
+Implement search and sort functionality to improve data navigation and user experience.
+
+**Requirements:**
+- Add search box for filtering entries by text
+- Implement column header sorting
+- Ensure search and sort work together
+- Optimize performance for large datasets
+- Provide clear feedback for search results
+
+**UI Specifications:**
+- Search box with placeholder text
+- Sortable column headers with visual indicators
+- Search results count display
+- Clear search functionality
+- Responsive design for different screen sizes
+
+**Test Requirements:**
+- Test search functionality with various inputs
+- Test sorting by different columns
+- Test search and sort combination
+- Test performance with large datasets
+- Test edge cases (empty results, special characters)
+
+**Implementation Files:**
+- Update `webui/src/components/UnmatchedAnalyzer.tsx`
+- Add `webui/src/hooks/useSearchSort.ts` (new)
+- Update `webui/src/services/api.ts` for search
+- Add tests for search and sort functionality
+
+**Success Criteria:**
+- Search works accurately and quickly
+- Sorting works for all columns
+- Performance remains good
+- User experience is intuitive
+```
+
+### Step 9: Success/Error Messaging
+
+```text
+Implement comprehensive success and error messaging to provide clear user feedback.
+
+**Requirements:**
+- Display success messages for all operations
+- Show error messages with actionable information
+- Auto-hide success messages after delay
+- Provide retry functionality for failed operations
+- Maintain message history for debugging
+
+**UI Specifications:**
+- Success messages: "Added X entries to filtered list"
+- Error messages with specific error details
+- Auto-hide success messages after 3 seconds
+- Retry button for failed operations
+- Message history in console for debugging
+
+**Test Requirements:**
+- Test success message display and auto-hide
+- Test error message display and retry
+- Test message formatting for different operations
+- Test edge cases (no changes, all changes, mixed)
+- Test message persistence and cleanup
+
+**Implementation Files:**
+- Update `webui/src/components/UnmatchedAnalyzer.tsx`
+- Add `webui/src/components/MessageDisplay.tsx` (new)
+- Add `webui/src/hooks/useMessaging.ts` (new)
+- Add tests for messaging functionality
+
+**Success Criteria:**
+- Messages are clear and actionable
+- Auto-hide works correctly
+- Retry functionality is reliable
+- User experience is polished
+```
+
+### Step 10: End-to-End Testing
+
+```text
+Implement comprehensive end-to-end testing to validate the complete workflow.
+
+**Requirements:**
+- Test complete user workflow from start to finish
+- Validate API integration across all components
+- Test error scenarios and recovery
+- Verify data integrity throughout the process
+- Test performance with realistic data volumes
+
+**Test Scenarios:**
+- Complete workflow: mark entries, update filtered, verify pipeline integration
+- Error scenarios: network failures, corrupted data, invalid inputs
+- Performance testing: large datasets, concurrent operations
+- Edge cases: empty data, all filtered, mixed states
+
+**Implementation Files:**
+- Add `tests/webui/integration/test_filtered_workflow.py` (new)
+- Add `tests/webui/integration/test_api_integration.py` (new)
+- Add `tests/webui/integration/test_performance.py` (new)
+- Update existing test files for integration
+
+**Success Criteria:**
+- Complete workflow works reliably
+- Error scenarios are handled gracefully
+- Performance meets requirements
+- Data integrity is maintained
+```
+
+### Step 11: Error Handling & Edge Cases
+
+```text
+Implement robust error handling and edge case management for production reliability.
+
+**Requirements:**
+- Handle network failures gracefully
+- Manage corrupted data files
+- Provide fallback behavior for critical failures
+- Implement retry logic for transient failures
+- Add comprehensive logging for debugging
+
+**Error Scenarios:**
+- Network failures during API calls
+- Corrupted YAML files
+- Invalid user inputs
+- Concurrent access conflicts
+- Memory issues with large datasets
+
+**Implementation Files:**
+- Update all API endpoints with error handling
+- Add `webui/src/utils/errorHandler.ts` (new)
+- Add `sotd/utils/error_recovery.py` (new)
+- Update existing files with error handling
+- Add comprehensive error tests
+
+**Success Criteria:**
+- All error scenarios are handled gracefully
+- Fallback behavior is reliable
+- Debugging information is comprehensive
+- User experience remains good even during errors
+```
+
+### Step 12: Performance Optimization
+
+```text
+Optimize performance for large datasets and ensure smooth user experience.
+
+**Requirements:**
+- Optimize API calls for large datasets
+- Implement efficient data structures
+- Add caching where appropriate
+- Optimize UI rendering for large lists
+- Monitor and improve memory usage
+
+**Optimization Areas:**
+- API response times for large datasets
+- UI rendering performance
+- Memory usage with large filtered lists
+- Network request optimization
+- Caching strategies
+
+**Implementation Files:**
+- Update API endpoints with pagination/optimization
+- Add `webui/src/hooks/useOptimizedData.ts` (new)
+- Add `webui/src/utils/cache.ts` (new)
+- Update existing components for performance
+- Add performance monitoring
+
+**Success Criteria:**
+- Performance meets requirements for large datasets
+- Memory usage is optimized
+- User experience remains smooth
+- Monitoring provides actionable insights
+```
+
+## 🧠 Critical Analysis
+
+### Prompt Sequence Structure
+This TDD plan follows a logical progression from backend infrastructure to frontend UI to user experience to testing and optimization. Each step builds on the previous ones and produces testable, connected output.
+
+### Strengths
+- **Incremental Development**: Each step is small enough to implement safely but large enough to show meaningful progress
+- **Test-First Approach**: Every step includes comprehensive test requirements
+- **Logical Dependencies**: Steps build on each other without creating orphaned code
+- **Clear Success Criteria**: Each step has measurable outcomes
+- **Error Handling**: Robust error handling is built in from the start
+
+### Areas for Refinement
+- **API Design**: The API endpoints could be more RESTful with separate endpoints for add/remove
+- **State Management**: Consider using a more robust state management solution for complex UI state
+- **Performance**: Early performance considerations could prevent later optimization needs
+- **Testing Strategy**: Could include more integration tests earlier in the process
+
+### Risk Mitigation
+- **Data Integrity**: YAML structure validation prevents data corruption
+- **User Experience**: Real-time feedback prevents user confusion
+- **Error Recovery**: Comprehensive error handling ensures system reliability
+- **Performance**: Early optimization prevents scalability issues
+
+### Implementation Notes
+- Start with backend infrastructure to establish solid foundation
+- Frontend components can be developed in parallel once APIs are stable
+- Testing should be continuous throughout development
+- Performance monitoring should be added early to catch issues
+
+This plan provides a comprehensive roadmap for implementing the unmatched analyzer filtering feature using TDD principles, ensuring high quality, maintainable code with excellent test coverage.
+description:
+globs:
+alwaysApply: false
+---

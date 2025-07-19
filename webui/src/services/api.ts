@@ -173,4 +173,84 @@ export const handleApiError = (error: any): string => {
         // Something else happened
         return error.message || 'An unexpected error occurred';
     }
+};
+
+// Filtered entries operations
+export interface FilteredEntry {
+    name: string;
+    action: 'add' | 'remove';
+    comment_id?: string;
+    file_path?: string;
+    source?: string;
+}
+
+export interface FilteredEntryRequest {
+    category: string;
+    entries: FilteredEntry[];
+}
+
+export interface FilteredEntryResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+    added_count: number;
+    removed_count: number;
+    errors: string[];
+}
+
+export interface FilteredStatusRequest {
+    entries: Array<{
+        category: string;
+        name: string;
+    }>;
+}
+
+export interface FilteredStatusResponse {
+    success: boolean;
+    message: string;
+    data: Record<string, boolean>;
+}
+
+export const getFilteredEntries = async (): Promise<FilteredEntryResponse> => {
+    try {
+        const response = await api.get('/filtered/');
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch filtered entries:', error);
+        throw error;
+    }
+};
+
+export const getFilteredEntriesByCategory = async (category: string): Promise<FilteredEntryResponse> => {
+    try {
+        const response = await api.get(`/filtered/${category}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to fetch filtered entries for ${category}:`, error);
+        throw error;
+    }
+};
+
+export const updateFilteredEntries = async (
+    request: FilteredEntryRequest
+): Promise<FilteredEntryResponse> => {
+    try {
+        const response = await api.post('/filtered/', request);
+        return response.data;
+    } catch (error) {
+        console.error('Failed to update filtered entries:', error);
+        throw error;
+    }
+};
+
+export const checkFilteredStatus = async (
+    request: FilteredStatusRequest
+): Promise<FilteredStatusResponse> => {
+    try {
+        const response = await api.post('/filtered/check', request);
+        return response.data;
+    } catch (error) {
+        console.error('Failed to check filtered status:', error);
+        throw error;
+    }
 }; 
