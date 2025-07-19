@@ -1,8 +1,28 @@
-# Intentionally Unmatched Entries
-# This file stores entries that users have marked as intentionally unmatched
-# Structure: category -> entry_name -> metadata with comment_ids
-
-razor: {}
+blade:
+  I don't even know, tbh; I don't remember the last time I swapped this blade:
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: 2025-06.json
+      id: mwoh2fd
+      source: user
+    - file: 2025-06.json
+      id: mwu2xp3
+      source: user
+  N/A:
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: 2025-06.json
+      id: mwu3bfj
+      source: user
+  Not sure, didn't take it apart to see:
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: 2025-06.json
+      id: n02soyj
+      source: user
+    - file: 2025-06.json
+      id: n0akyig
+      source: user
 brush: {}
-blade: {}
-soap: {} 
+razor: {}
+soap: {}
