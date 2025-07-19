@@ -67,14 +67,18 @@ class FilteredEntriesManager:
         if category not in self._data:
             self._data[category] = {}
 
-        # Use reason as the key if provided, otherwise use entry_name
-        key_name = reason if reason else entry_name
+        # Always use entry_name as the key
+        key_name = entry_name
 
         if key_name not in self._data[category]:
             self._data[category][key_name] = {
                 "added_date": datetime.now().strftime("%Y-%m-%d"),
                 "comment_ids": [],
             }
+
+            # Add reason field if provided
+            if reason:
+                self._data[category][key_name]["reason"] = reason
 
         # Check if comment_id already exists
         comment_ids = self._data[category][key_name]["comment_ids"]
