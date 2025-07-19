@@ -187,6 +187,7 @@ export interface FilteredEntry {
 export interface FilteredEntryRequest {
     category: string;
     entries: FilteredEntry[];
+    reason?: string;
 }
 
 export interface FilteredEntryResponse {

@@ -55,20 +55,29 @@ class FilteredEntriesManager:
             raise ValueError(f"Error saving filtered entries to {self.file_path}: {e}")
 
     def add_entry(
-        self, category: str, entry_name: str, comment_id: str, file_path: str, source: str = "user"
+        self,
+        category: str,
+        entry_name: str,
+        comment_id: str,
+        file_path: str,
+        source: str = "user",
+        reason: Optional[str] = None,
     ) -> None:
         """Add an entry to the filtered list."""
         if category not in self._data:
             self._data[category] = {}
 
-        if entry_name not in self._data[category]:
-            self._data[category][entry_name] = {
+        # Use reason as the key if provided, otherwise use entry_name
+        key_name = reason if reason else entry_name
+
+        if key_name not in self._data[category]:
+            self._data[category][key_name] = {
                 "added_date": datetime.now().strftime("%Y-%m-%d"),
                 "comment_ids": [],
             }
 
         # Check if comment_id already exists
-        comment_ids = self._data[category][entry_name]["comment_ids"]
+        comment_ids = self._data[category][key_name]["comment_ids"]
         for existing in comment_ids:
             if existing["id"] == comment_id and existing["file"] == file_path:
                 return  # Already exists, no need to add

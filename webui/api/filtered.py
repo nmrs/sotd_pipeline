@@ -3,7 +3,7 @@
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -35,6 +35,7 @@ class FilteredEntryRequest(BaseModel):
     entries: List[Dict[str, Any]] = Field(
         ..., description="List of entries to process (each must include 'month')"
     )
+    reason: Optional[str] = Field(None, description="Optional reason for filtering entries")
 
 
 class FilteredEntryResponse(BaseModel):
@@ -83,6 +84,7 @@ async def update_filtered_entries(request: FilteredEntryRequest):
     try:
         category = request.category
         entries = request.entries
+        reason = request.reason
 
         if not category:
             raise HTTPException(status_code=400, detail="Category is required")
@@ -124,7 +126,7 @@ async def update_filtered_entries(request: FilteredEntryRequest):
                     errors.append("comment_id is required for add action")
                     continue
                 try:
-                    manager.add_entry(category, entry_name, comment_id, file_path, source)
+                    manager.add_entry(category, entry_name, comment_id, file_path, source, reason)
                     added_count += 1
                 except Exception as e:
                     errors.append(f"Error adding entry {entry_name}: {str(e)}")

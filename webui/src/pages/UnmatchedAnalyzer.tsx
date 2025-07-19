@@ -244,6 +244,7 @@ const UnmatchedAnalyzer: React.FC = () => {
             const response = await updateFilteredEntries({
                 category: selectedField,
                 entries: allEntries,
+                reason: reasonText.trim() || undefined,
             });
 
             if (!response.success) {
