@@ -124,21 +124,25 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 - **Date Format**: Use ISO 8601 format (YYYY-MM-DD) for all date suffixes in filenames
 - **Current Date Rule**: **ALWAYS** use the actual current date when creating files with date suffixes
 - **Command**: Use `date +%Y-%m-%d` to get the actual current date, never assume or guess
-- **Format**: `{plan_name}_{YYYY-MM-DD}.mdc` for plan files
+- **Format**: `{type}_{plan_name}_{YYYY-MM-DD}.mdc` for plan files
+- **Type Prefixes**:
+  - `plan_` - Implementation plans and development roadmaps
+  - `spec_` - Specifications and requirements documents
 - **Examples**:
-  - ✅ **Correct**: `webui_react_analyzer_spec_2025-07-17.mdc` (actual current date)
-  - ❌ **Wrong**: `webui_react_analyzer_spec_2025-01-27.mdc` (assumed date)
-  - ❌ **Wrong**: `webui_react_analyzer_spec_2025-01-28.mdc` (assumed date)
+  - ✅ **Correct**: `plan_brush_table_specialized_component_2025-07-19.mdc` (actual current date)
+  - ✅ **Correct**: `spec_webui_react_analyzer_2025-07-17.mdc` (actual current date)
+  - ❌ **Wrong**: `plan_brush_table_specialized_component_2025-01-27.mdc` (assumed date)
+  - ❌ **Wrong**: `spec_webui_react_analyzer_2025-01-28.mdc` (assumed date)
 - **Process**: 
   1. Run `date +%Y-%m-%d` to get actual current date
   2. Use exact date in filename
   3. Verify accuracy before creating file
-- **Why This Matters**: Avoids conflicts, maintains historical tracking, prevents confusion from incorrect dates
+- **Why This Matters**: Avoids conflicts, maintains historical tracking, prevents confusion from incorrect dates, improves autocomplete by grouping files by type
 
 ## Completed Plan Organization (MANDATORY)
 - **ALL completed plans** must be moved to `plans/completed/` with appropriate subfolder organization
 - **Use `git mv`** instead of `mv` to preserve file history and show as rename operations
-- **Add date suffix** to completed plan filenames: `{plan_name}_{YYYY-MM-DD}.mdc`
+- **Add date suffix** to completed plan filenames: `{type}_{plan_name}_{YYYY-MM-DD}.mdc`
 - **Subfolder organization**:
   - `plans/completed/features/` - Feature implementation plans
   - `plans/completed/bugs/` - Bug fix plans
@@ -150,7 +154,7 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 - **Process for completing plans**:
   1. Update plan with final completion status and summary
   2. Create subfolder in `plans/completed/` if it doesn't exist
-  3. Use `git mv` to move with date suffix: `git mv plans/plan.mdc plans/completed/category/plan_YYYY-MM-DD.mdc`
+  3. Use `git mv` to move with date suffix: `git mv plans/plan.mdc plans/completed/category/type_plan_YYYY-MM-DD.mdc`
   4. Commit with descriptive message: `docs(plan): mark {plan_name} complete and move to completed/{category}`
 - **Why This Matters**: Single source of truth for all completed work, easy discovery, consistent organization, historical tracking
 
