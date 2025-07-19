@@ -1,166 +1,140 @@
-# Playwright Test Automation Scripts
+# WebUI Server Management
 
-This directory contains automation scripts to run Playwright tests without blocking the conversation.
+This directory contains scripts for managing the SOTD Pipeline WebUI servers.
 
 ## Quick Start
 
-### 🚀 **Background Testing (Recommended)**
+From the project root directory:
+
 ```bash
-# Run tests in background (non-blocking)
-npm run test:e2e:background
+# Start both servers
+./manage-webui.sh start
 
-# Monitor progress
-tail -f playwright-auto.log
+# Stop both servers  
+./manage-webui.sh stop
 
-# Stop tests if needed
-kill <PID>
+# Check server status
+./manage-webui.sh status
+
+# Restart both servers
+./manage-webui.sh restart
 ```
 
-### 📊 **Advanced Automation**
+## Available Commands
+
+### `start`
+Starts both the frontend (Vite) and backend (FastAPI) servers:
+- **Frontend**: React app on http://localhost:3000
+- **Backend**: FastAPI API on http://localhost:8000
+
+### `stop`
+Stops both servers gracefully, with force kill if needed.
+
+### `restart`
+Stops both servers and then starts them again.
+
+### `status`
+Shows the current status of both servers and port availability.
+
+### `logs [server]`
+Shows real-time logs for the specified server:
 ```bash
-# Run with custom options
-./scripts/run-tests.sh -p chromium -g 'navigation'
-
-# Run all browsers
-./scripts/run-tests.sh -p all
-
-# Run in headed mode
-./scripts/run-tests.sh -h
-
-# Run in debug mode
-./scripts/run-tests.sh -d
+./manage-webui.sh logs frontend  # Frontend server logs
+./manage-webui.sh logs backend   # Backend server logs
 ```
 
-## Scripts Overview
+### `clean`
+Removes PID files and log files (useful if servers get stuck).
 
-### `auto-test.sh` - Simple Background Runner
-- **Purpose**: Quick background testing without blocking
-- **Usage**: `npm run test:e2e:background`
-- **Features**:
-  - Runs tests in background
-  - Logs to `playwright-auto.log`
-  - Provides PID for monitoring/stopping
-  - Non-blocking execution
+### `help`
+Shows the help message with all available commands.
 
-### `run-tests.sh` - Advanced Test Runner
-- **Purpose**: Full-featured test automation
-- **Usage**: `./scripts/run-tests.sh [OPTIONS]`
-- **Features**:
-  - Multiple browser support
-  - Pattern matching
-  - Different modes (headed, debug, UI)
-  - Comprehensive logging
-  - Progress monitoring
+## Server Architecture
 
-## Package.json Scripts
+The WebUI consists of two servers:
 
-```bash
-# Background testing (non-blocking)
-npm run test:e2e:background
+1. **Frontend Server (Vite)**
+   - **Port**: 3000
+   - **Purpose**: Serves the React application
+   - **Command**: `npm run dev`
+   - **Features**: Hot reloading, development server
 
-# Quick test (basic tests only)
-npm run test:e2e:quick
+2. **Backend Server (FastAPI)**
+   - **Port**: 8000
+   - **Purpose**: Provides API endpoints
+   - **Command**: `python main.py`
+   - **Features**: Data analysis, file operations, catalog management
 
-# All browsers
-npm run test:e2e:all
+## File Structure
 
-# Monitor logs
-npm run test:e2e:monitor
-
-# Standard Playwright commands
-npm run test:e2e          # All tests
-npm run test:e2e:ui       # Interactive UI
-npm run test:e2e:headed   # See browser
-npm run test:e2e:debug    # Debug mode
 ```
-
-## Monitoring and Control
-
-### Monitor Test Progress
-```bash
-# Watch log file
-tail -f playwright-auto.log
-
-# Watch with timestamps
-tail -f playwright-auto.log | while read line; do echo "$(date): $line"; done
-```
-
-### Stop Running Tests
-```bash
-# Find test process
-ps aux | grep playwright
-
-# Kill by PID
-kill <PID>
-
-# Kill all playwright processes
-pkill -f playwright
-```
-
-### View Results
-```bash
-# Open HTML report
-npx playwright show-report
-
-# View test results
-cat playwright-auto.log
+webui/
+├── scripts/
+│   ├── manage-servers.sh    # Main server management script
+│   └── README.md           # This file
+├── api/
+│   └── main.py             # FastAPI backend server
+├── package.json            # Frontend dependencies
+└── vite.config.ts          # Vite configuration
 ```
 
 ## Troubleshooting
 
-### Tests Not Starting
+### Port Already in Use
+If you get "port already in use" errors:
 ```bash
-# Check if dev server is running
-curl http://localhost:3000
+# Check what's using the port
+lsof -i :3000  # Frontend port
+lsof -i :8000  # Backend port
 
-# Restart dev server
-npm run dev
+# Kill the process if needed
+kill -9 <PID>
 ```
 
-### Tests Hanging
+### Servers Won't Start
+If servers fail to start:
 ```bash
-# Kill hanging processes
-pkill -f playwright
-pkill -f vite
-
-# Restart everything
-npm run dev &
-sleep 5
-npm run test:e2e:background
+# Clean up and try again
+./manage-webui.sh clean
+./manage-webui.sh start
 ```
 
-### Permission Issues
+### Servers Get Stuck
+If servers become unresponsive:
 ```bash
-# Make scripts executable
-chmod +x scripts/*.sh
+# Force stop and restart
+./manage-webui.sh stop
+./manage-webui.sh clean
+./manage-webui.sh start
 ```
 
-## Best Practices
+## Development Workflow
 
-1. **Use Background Mode**: Always use `npm run test:e2e:background` for non-blocking testing
-2. **Monitor Progress**: Use `tail -f playwright-auto.log` to watch progress
-3. **Clean Up**: Kill processes when done: `pkill -f playwright`
-4. **Check Logs**: Always check logs for errors and results
-5. **Use Quick Tests**: Use `npm run test:e2e:quick` for fast feedback
+1. **Start servers for development:**
+   ```bash
+   ./manage-webui.sh start
+   ```
+
+2. **Check status:**
+   ```bash
+   ./manage-webui.sh status
+   ```
+
+3. **View logs if needed:**
+   ```bash
+   ./manage-webui.sh logs frontend
+   ./manage-webui.sh logs backend
+   ```
+
+4. **Stop servers when done:**
+   ```bash
+   ./manage-webui.sh stop
+   ```
 
 ## Integration with Development
 
-### During Development
-```bash
-# Start dev server
-npm run dev
+- **Frontend**: http://localhost:3000 - React app for data analysis
+- **Backend**: http://localhost:8000 - API for pipeline data operations
+- **API Documentation**: http://localhost:8000/docs - FastAPI auto-generated docs
 
-# In another terminal, run tests in background
-npm run test:e2e:background
-
-# Monitor progress
-tail -f playwright-auto.log
-```
-
-### Continuous Testing
-```bash
-# Run tests every 30 seconds
-watch -n 30 'npm run test:e2e:background'
-```
-
-This automation setup ensures that Playwright tests never block your conversation and provide easy monitoring and control. 
+The frontend makes API calls to the backend to analyze SOTD pipeline data, manage catalogs, and perform data operations. 
