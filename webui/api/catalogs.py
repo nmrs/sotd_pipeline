@@ -4,6 +4,7 @@
 import logging
 from pathlib import Path
 from typing import Any, Dict, List
+from datetime import datetime
 
 import yaml
 from fastapi import APIRouter, HTTPException
@@ -48,14 +49,36 @@ def load_yaml_file(path: Path) -> Any:
         raise HTTPException(status_code=500, detail=f"Error loading YAML file: {e}")
 
 
-@router.get("/", response_model=List[str])
-async def list_catalogs() -> List[str]:
-    """List available catalog fields."""
-    available = []
+@router.get("/")
+async def list_catalogs() -> Dict[str, List[Dict[str, Any]]]:
+    """List available catalog fields with metadata."""
+    catalogs = []
     for field, filename in CATALOG_FILES.items():
-        if (CATALOG_DIR / filename).exists():
-            available.append(field)
-    return available
+        file_path = CATALOG_DIR / filename
+        if file_path.exists():
+            try:
+                stat = file_path.stat()
+                catalogs.append(
+                    {
+                        "name": field,
+                        "path": str(file_path),
+                        "size": stat.st_size,
+                        "last_modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    }
+                )
+            except Exception as e:
+                logger.error(f"Error getting stats for {file_path}: {e}")
+                # Still include the catalog even if we can't get stats
+                catalogs.append(
+                    {
+                        "name": field,
+                        "path": str(file_path),
+                        "size": 0,
+                        "last_modified": "",
+                    }
+                )
+
+    return {"catalogs": catalogs}
 
 
 @router.get("/{field}")
