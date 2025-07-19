@@ -13,15 +13,14 @@ export default {
 
     // Transform files
     transform: {
-        '^.+\\.(ts|tsx)$': 'ts-jest',
-        '^.+\\.(js|jsx)$': 'babel-jest'
+        '^.+\\.(ts|tsx)$': 'ts-jest'
     },
 
     // Setup files
     setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
 
     // Module name mapping
-    moduleNameMapping: {
+    moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',
         '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
     },
