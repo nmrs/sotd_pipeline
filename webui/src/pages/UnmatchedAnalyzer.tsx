@@ -8,6 +8,7 @@ import PerformanceMonitor from '../components/PerformanceMonitor';
 import CommentModal from '../components/CommentModal';
 import FilteredEntryCheckbox from '../components/FilteredEntryCheckbox';
 import { useBulkSelection } from '../hooks/useBulkSelection';
+import { useFilteredState } from '../hooks/useFilteredState';
 
 const UnmatchedAnalyzer: React.FC = () => {
     const [selectedField, setSelectedField] = useState<string>('razor');
@@ -33,6 +34,21 @@ const UnmatchedAnalyzer: React.FC = () => {
         onSelectionChange: (selectedItems) => {
             // Handle bulk selection changes
             console.log('Bulk selection changed:', Array.from(selectedItems));
+        },
+    });
+
+    // Filtered state hook
+    const filteredState = useFilteredState({
+        category: selectedField,
+        selectedItems: bulkSelection.selectedItems,
+        items: results?.unmatched_items || [],
+        onSuccess: (message) => {
+            setSuccessMessage(message);
+            // Clear selection after successful update
+            bulkSelection.clearSelection();
+        },
+        onError: (error) => {
+            setError(error);
         },
     });
 
@@ -344,27 +360,39 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                 Top Unmatched Items ({results.unmatched_items.length})
                                             </h3>
                                             {bulkSelection.totalItems > 0 && (
-                                                <div className="flex items-center space-x-2">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={bulkSelection.selectAll}
-                                                        ref={(el) => {
-                                                            if (el) {
-                                                                el.indeterminate = bulkSelection.indeterminate;
-                                                            }
-                                                        }}
-                                                        onChange={bulkSelection.toggleSelectAll}
-                                                        disabled={bulkSelection.totalItems === 0}
-                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        title="Select all visible items"
-                                                    />
-                                                    <span className="text-sm text-gray-600">
-                                                        Select All ({bulkSelection.totalItems} visible)
-                                                    </span>
-                                                    {bulkSelection.selectedVisibleItems.length > 0 && (
-                                                        <span className="text-sm text-blue-600 font-medium">
-                                                            {bulkSelection.selectedVisibleItems.length} selected
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="flex items-center space-x-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={bulkSelection.selectAll}
+                                                            ref={(el) => {
+                                                                if (el) {
+                                                                    el.indeterminate = bulkSelection.indeterminate;
+                                                                }
+                                                            }}
+                                                            onChange={bulkSelection.toggleSelectAll}
+                                                            disabled={bulkSelection.totalItems === 0}
+                                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            title="Select all visible items"
+                                                        />
+                                                        <span className="text-sm text-gray-600">
+                                                            Select All ({bulkSelection.totalItems} visible)
                                                         </span>
+                                                        {bulkSelection.selectedVisibleItems.length > 0 && (
+                                                            <span className="text-sm text-blue-600 font-medium">
+                                                                {bulkSelection.selectedVisibleItems.length} selected
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {filteredState.hasChanges && (
+                                                        <button
+                                                            onClick={filteredState.updateFiltered}
+                                                            disabled={filteredState.isUpdating}
+                                                            className="bg-blue-600 text-white py-1 px-3 rounded text-sm hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        >
+                                                            {filteredState.isUpdating ? 'Updating...' : 'Update Filtered'}
+                                                        </button>
                                                     )}
                                                 </div>
                                             )}

@@ -21,7 +21,7 @@ Add checkbox functionality to the unmatched analyzer web UI to allow users to ma
 ### Phase 2: Frontend UI Components (User Interface)
 4. **[x] Checkbox Component** - Individual entry selection
 5. **[x] Bulk Selection Logic** - Select All functionality
-6. **Update Button & State Management** - User action handling
+6. **[x] Update Button & State Management** - User action handling
 
 ### Phase 3: User Experience (Polish)
 7. **Show/Hide Filtered Toggle** - View management
