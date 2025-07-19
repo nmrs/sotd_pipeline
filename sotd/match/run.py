@@ -259,8 +259,11 @@ def process_month(
             converted_record = {}
             for key, value in matched_record.items():
                 if hasattr(value, "original"):  # Check if it's a MatchResult
+                    # Normalize the original text for clean display
+                    normalized_text = normalize_for_matching(value.original, field=key)
                     converted_record[key] = {
                         "original": value.original,
+                        "normalized": normalized_text,
                         "matched": value.matched,
                         "match_type": value.match_type,
                         "pattern": value.pattern,

@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
-"""Focused module for unmatched analysis functionality."""
+"""Unmatched analysis tool for SOTD pipeline."""
 
 import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
 
-# Add project root to Python path for direct execution
+# Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root))
 
 from sotd.cli_utils.base_parser import BaseCLIParser  # noqa: E402
 from sotd.match.tools.utils.analysis_base import AnalysisTool  # noqa: E402
 from sotd.match.tools.utils.cli_utils import BaseAnalysisCLI  # noqa: E402
-from sotd.utils.match_filter_utils import strip_blade_count_patterns  # noqa: E402
+from sotd.utils.match_filter_utils import (
+    clear_competition_tags_cache,
+    normalize_for_matching,
+)  # noqa: E402
 
 
 class UnmatchedAnalyzer(AnalysisTool):
@@ -41,6 +43,19 @@ class UnmatchedAnalyzer(AnalysisTool):
 
     def analyze_unmatched(self, args) -> dict:
         """Analyze unmatched items and return structured results for API use."""
+        # Clear all caches to ensure fresh data
+        clear_competition_tags_cache()
+
+        # Clear other caches if available
+        try:
+            from sotd.match.base_matcher import clear_catalog_cache
+            from sotd.match.loaders import clear_yaml_cache
+
+            clear_yaml_cache()
+            clear_catalog_cache()
+        except ImportError:
+            pass  # Cache clearing functions might not be available
+
         all_unmatched = defaultdict(list)
 
         for record in self.load_matched_data(args):
@@ -54,22 +69,79 @@ class UnmatchedAnalyzer(AnalysisTool):
         ]
 
         for original_text, file_infos in sorted_items:
-            # Extract examples from source files (limit to 5 examples)
-            examples = list(set(info["file"] for info in file_infos if info["file"]))[:5]
+            # Extract examples from source files (limit to 3 for API response)
+            examples = []
+            comment_ids = []
+            for file_info in file_infos[:3]:  # Limit to 3 examples
+                if isinstance(file_info, dict):
+                    file_name = file_info.get("file", "")
+                    if file_name:
+                        examples.append(file_name)
+                    comment_id = file_info.get("comment_id", "")
+                    if comment_id:
+                        comment_ids.append(comment_id)
+                else:
+                    # Backward compatibility for string file_info
+                    examples.append(str(file_info))
 
-            # Extract comment IDs
-            comment_ids = [
-                info.get("comment_id", "") for info in file_infos if info.get("comment_id")
-            ]
+            if args.field == "brush":
+                # For brush field, return detailed structure with component information
+                # Extract component-level unmatched data from file_infos
+                handle_unmatched = None
+                knot_unmatched = None
 
-            unmatched_items.append(
-                {
-                    "item": original_text,
-                    "count": len(file_infos),
-                    "examples": examples,
-                    "comment_ids": comment_ids,
-                }
-            )
+                # Look for component-level unmatched data in file_infos
+                for info in file_infos:
+                    if isinstance(info, dict) and "unmatched_components" in info:
+                        components = info["unmatched_components"]
+                        if components.get("handle") and not handle_unmatched:
+                            handle_unmatched = components["handle"]
+                        if components.get("knot") and not knot_unmatched:
+                            knot_unmatched = components["knot"]
+
+                # If we found component data, use it; otherwise use generic structure
+                if handle_unmatched or knot_unmatched:
+                    unmatched_items.append(
+                        {
+                            "item": original_text,
+                            "count": len(file_infos),
+                            "examples": examples,
+                            "comment_ids": comment_ids,
+                            "match_type": None,  # Unmatched items don't have match_type
+                            "matched": None,  # Unmatched items don't have matched data
+                            "unmatched": {
+                                "handle": handle_unmatched
+                                or {"text": original_text, "pattern": None},
+                                "knot": knot_unmatched or {"text": original_text, "pattern": None},
+                            },
+                        }
+                    )
+                else:
+                    # Use generic unmatched structure for brushes without component data
+                    unmatched_items.append(
+                        {
+                            "item": original_text,
+                            "count": len(file_infos),
+                            "examples": examples,
+                            "comment_ids": comment_ids,
+                            "match_type": None,  # Unmatched items don't have match_type
+                            "matched": None,  # Unmatched items don't have matched data
+                            "unmatched": {
+                                "handle": {"text": original_text, "pattern": None},
+                                "knot": {"text": original_text, "pattern": None},
+                            },
+                        }
+                    )
+            else:
+                # For other fields, return simple structure
+                unmatched_items.append(
+                    {
+                        "item": original_text,
+                        "count": len(file_infos),
+                        "examples": examples,
+                        "comment_ids": comment_ids,
+                    }
+                )
 
         return {
             "field": args.field,
@@ -98,10 +170,9 @@ class UnmatchedAnalyzer(AnalysisTool):
         }
 
         if isinstance(field_val, str):
-            # For blades, strip use count before adding to unmatched
-            if field == "blade":
-                field_val = self._strip_use_count(field_val)
-            all_unmatched[field_val].append(file_info)
+            # Use standardized normalization for all fields
+            normalized = normalize_for_matching(field_val, field=field)
+            all_unmatched[normalized].append(file_info)
         elif isinstance(field_val, dict):
             # Skip intentionally skipped blades (now using match_type)
             if field == "blade" and field_val.get("match_type") in [
@@ -110,16 +181,15 @@ class UnmatchedAnalyzer(AnalysisTool):
             ]:
                 return
 
-            # Check if matched field is missing, empty, or doesn't contain valid match data
-            matched = field_val.get("matched")
-            if not matched or (isinstance(matched, dict) and not matched.get("brand")):
-                # For blades, strip use count from original text
-                original = field_val.get("original", "")
-                if field == "blade":
-                    normalized = self._strip_use_count(original)
+                # Check if matched field is missing, empty, or doesn't contain valid match data
+                matched = field_val.get("matched")
+                if not matched or (isinstance(matched, dict) and not matched.get("brand")):
+                    # Use normalized field if available, otherwise normalize original
+                    normalized = field_val.get("normalized", "")
+                    if not normalized:
+                        original = field_val.get("original", "")
+                        normalized = normalize_for_matching(original, field=field)
                     all_unmatched[normalized].append(file_info)
-                else:
-                    all_unmatched[original].append(file_info)
 
     def _process_brush_unmatched(self, record: Dict, all_unmatched: Dict) -> None:
         """Process unmatched brush records with handle/knot granularity."""
@@ -129,6 +199,7 @@ class UnmatchedAnalyzer(AnalysisTool):
 
         matched = brush.get("matched")
         original = brush.get("original", "")
+
         file_info = {
             "file": record.get("_source_file", ""),
             "line": record.get("_source_line", "unknown"),
@@ -137,48 +208,74 @@ class UnmatchedAnalyzer(AnalysisTool):
 
         # If nothing matched at all, count as unmatched brush
         if matched is None:
-            all_unmatched[original].append(file_info)
+            # Use normalized field if available, otherwise normalize original
+            normalized = brush.get("normalized", "")
+            if not normalized:
+                normalized = normalize_for_matching(original, field="brush")
+            all_unmatched[normalized].append(file_info)
             return
 
         if not isinstance(matched, dict):
-            all_unmatched[original].append(file_info)
+            # Use normalized field if available, otherwise normalize original
+            normalized = brush.get("normalized", "")
+            if not normalized:
+                normalized = normalize_for_matching(original, field="brush")
+            all_unmatched[normalized].append(file_info)
             return
 
+        # Check if we have a complete brush match (brand and model identified)
+        # If so, consider it matched regardless of handle/knot component details
+        if matched.get("brand") and matched.get("model"):
+            # Complete brush match - don't add to unmatched
+            return
+
+        # Only check handle/knot components if we don't have a complete brush match
         # Check handle component
         handle = matched.get("handle")
-        if handle and handle.get("brand") in [None, "UnknownMaker", "Unknown"]:
+        handle_unmatched = None
+        if handle and (
+            handle.get("brand") is None or handle.get("brand") in ["UnknownMaker", "Unknown"]
+        ):
             handle_text = handle.get("source_text", "unknown handle")
-            matched_knot = matched.get("knot", {}).get("brand")
-            if matched_knot:
-                all_unmatched[f"❌ Handle: {handle_text} (✅ Knot: {matched_knot})"].append(
-                    file_info
-                )
-            else:
-                all_unmatched[f"❌ Handle: {handle_text}"].append(file_info)
+            handle_unmatched = {"text": handle_text, "pattern": None}
 
         # Check knot component
         knot = matched.get("knot")
-        if knot and knot.get("brand") in [None, "UnknownKnot", "Unknown"]:
+        knot_unmatched = None
+        if knot and (knot.get("brand") is None or knot.get("brand") in ["UnknownKnot", "Unknown"]):
             knot_text = knot.get("source_text", "unknown knot")
-            matched_handle = matched.get("handle", {}).get("brand")
-            if matched_handle:
-                all_unmatched[f"❌ Knot: {knot_text} (✅ Handle: {matched_handle})"].append(
-                    file_info
-                )
-            else:
-                all_unmatched[f"❌ Knot: {knot_text}"].append(file_info)
+            knot_unmatched = {"text": knot_text, "pattern": None}
 
+        # If we have unmatched components, add to the list
+        if handle_unmatched or knot_unmatched:
+            # Use normalized field if available, otherwise normalize original
+            normalized = brush.get("normalized", "")
+            if not normalized:
+                normalized = normalize_for_matching(original, field="brush")
+            all_unmatched[normalized].append(
+                {
+                    **file_info,
+                    "unmatched_components": {
+                        "handle": handle_unmatched,
+                        "knot": knot_unmatched,
+                    },
+                }
+            )
         # If neither handle nor knot issues, but still unmatched, show as general brush issue
-        if not handle and not knot and matched.get("brand") is None:
-            all_unmatched[original].append(file_info)
+        elif matched.get("brand") is None:
+            # Use normalized field if available, otherwise normalize original
+            normalized = brush.get("normalized", "")
+            if not normalized:
+                normalized = normalize_for_matching(original, field="brush")
+            all_unmatched[normalized].append(file_info)
 
     def _strip_use_count(self, text: str) -> str:
         """Strip use count from blade text using shared normalization logic.
 
-        This method uses the shared strip_blade_count_patterns function to ensure
-        consistency with enrich phase and mismatch analyzer normalization.
+        This method uses the standardized normalize_for_matching function to ensure
+        consistency with other blade processing in the pipeline.
         """
-        return strip_blade_count_patterns(text)
+        return normalize_for_matching(text, field="blade")
 
     def _print_unmatched_results(self, all_unmatched: Dict, field: str, limit: int) -> None:
         """Print unmatched analysis results."""

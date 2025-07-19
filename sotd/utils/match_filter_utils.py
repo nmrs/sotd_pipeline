@@ -11,6 +11,12 @@ import yaml
 _COMPETITION_TAGS_CACHE: Dict[str, List[str]] | None = None
 
 
+def clear_competition_tags_cache() -> None:
+    """Clear the competition tags cache to force reload from file."""
+    global _COMPETITION_TAGS_CACHE
+    _COMPETITION_TAGS_CACHE = None
+
+
 def load_competition_tags(tags_path: Path | None = None) -> Dict[str, List[str]]:
     """
     Load competition tags configuration from YAML file.
