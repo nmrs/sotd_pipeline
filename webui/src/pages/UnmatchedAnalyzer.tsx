@@ -454,7 +454,7 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                     </button>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center space-x-4">
+                                            <div className="flex items-center justify-between">
                                                 {/* Search Box */}
                                                 <div className="flex items-center space-x-2">
                                                     <input
@@ -475,58 +475,28 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                         </button>
                                                     )}
                                                 </div>
-                                                {/* Sort Controls */}
-                                                <div className="flex items-center space-x-2">
-                                                    <label className="text-xs text-gray-600">Sort by:</label>
-                                                    <select
-                                                        value={searchSort.sortField}
-                                                        onChange={(e) => searchSort.setSortField(e.target.value as any)}
-                                                        className="px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                                    >
-                                                        <option value="count">Count</option>
-                                                        <option value="item">Item</option>
-                                                        <option value="comment_ids">Comment IDs</option>
-                                                        <option value="examples">Examples</option>
-                                                    </select>
-                                                    <button
-                                                        onClick={searchSort.toggleSortDirection}
-                                                        className="p-1 text-gray-600 hover:text-gray-800"
-                                                        title={`Sort ${searchSort.sortDirection === 'asc' ? 'descending' : 'ascending'}`}
-                                                    >
-                                                        {searchSort.sortDirection === 'asc' ? (
-                                                            <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                                                <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
-                                                            </svg>
-                                                        ) : (
-                                                            <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                                                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                                                            </svg>
+
+                                                {/* Apply Changes Button - Compact and inline */}
+                                                {Object.keys(pendingChanges).length > 0 && (
+                                                    <div className="flex items-center space-x-2">
+                                                        <button
+                                                            onClick={handleApplyFilteredChanges}
+                                                            disabled={loading || !viewState.showFiltered}
+                                                            className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || !viewState.showFiltered
+                                                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                                                                : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                                                                }`}
+                                                        >
+                                                            {loading ? 'Applying...' : `Apply (${Object.keys(pendingChanges).length})`}
+                                                        </button>
+                                                        {!viewState.showFiltered && (
+                                                            <span className="text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">
+                                                                Show filtered to review
+                                                            </span>
                                                         )}
-                                                    </button>
-                                                </div>
+                                                    </div>
+                                                )}
                                             </div>
-                                            {Object.keys(pendingChanges).length > 0 && (
-                                                <div className="flex items-center space-x-4 mt-3 bg-yellow-50 border border-yellow-200 rounded p-3">
-                                                    <button
-                                                        onClick={handleApplyFilteredChanges}
-                                                        disabled={loading || !viewState.showFiltered}
-                                                        className={`py-2 px-4 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || !viewState.showFiltered
-                                                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                                                            : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                                                            }`}
-                                                    >
-                                                        {loading ? 'Applying...' : `Apply Changes (${Object.keys(pendingChanges).length})`}
-                                                    </button>
-                                                    <span className="text-sm text-gray-600">
-                                                        {Object.keys(pendingChanges).length} item(s) with pending changes
-                                                    </span>
-                                                    {!viewState.showFiltered && (
-                                                        <span className="text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">
-                                                            Show filtered items to review changes before applying
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            )}
                                         </div>
                                         <VirtualizedTable
                                             data={searchSort.filteredAndSortedItems}
