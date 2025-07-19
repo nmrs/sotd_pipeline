@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { analyzeUnmatched, UnmatchedAnalysisResult, handleApiError, runMatchPhase, MatchPhaseRequest, getCommentDetail, CommentDetail } from '../services/api';
 import MonthSelector from '../components/MonthSelector';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -12,6 +12,7 @@ import { useViewState } from '../hooks/useViewState';
 import { useSearchSort } from '../hooks/useSearchSort';
 import { useMessaging } from '../hooks/useMessaging';
 import MessageDisplay from '../components/MessageDisplay';
+import { checkFilteredStatus } from '../services/api';
 
 // Hook to get screen width
 const useScreenWidth = () => {
@@ -62,7 +63,37 @@ const UnmatchedAnalyzer: React.FC = () => {
     // Screen width hook for dynamic column sizing
     const screenWidth = useScreenWidth();
 
+    // Load filtered status from backend
+    const loadFilteredStatus = useCallback(async (items: any[], category: string) => {
+        if (!items || items.length === 0) return;
 
+        try {
+            const entries = items.map(item => ({
+                category,
+                name: item.item,
+            }));
+
+            const response = await checkFilteredStatus({ entries });
+
+            if (response.success) {
+                const newFilteredStatus: Record<string, boolean> = {};
+
+                // Parse the response data to extract filtered status
+                Object.entries(response.data).forEach(([key, isFiltered]) => {
+                    // Key format is "category:itemName"
+                    const itemName = key.split(':')[1];
+                    if (itemName) {
+                        newFilteredStatus[itemName] = isFiltered;
+                    }
+                });
+
+                setFilteredStatus(newFilteredStatus);
+            }
+        } catch (err: any) {
+            console.warn('Failed to load filtered status:', err);
+            // Don't show error to user, just log it
+        }
+    }, []);
 
     const fieldOptions = [
         { value: 'razor', label: 'Razor' },
@@ -91,6 +122,8 @@ const UnmatchedAnalyzer: React.FC = () => {
             // Validate the response structure
             if (result && typeof result === 'object') {
                 setResults(result);
+                // Load filtered status after analysis results are loaded
+                await loadFilteredStatus(result.unmatched_items || [], selectedField);
             } else {
                 throw new Error('Invalid response format from API');
             }
@@ -287,6 +320,11 @@ const UnmatchedAnalyzer: React.FC = () => {
             console.log('showFiltered state:', viewState.showFiltered);
         }
     }, [results, viewState.showFiltered]);
+
+    // Clear filtered status when field changes
+    useEffect(() => {
+        setFilteredStatus({});
+    }, [selectedField]);
 
     return (
         <div className="max-w-full mx-auto p-6">
