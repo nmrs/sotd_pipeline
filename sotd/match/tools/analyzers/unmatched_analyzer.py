@@ -103,8 +103,11 @@ class UnmatchedAnalyzer(AnalysisTool):
                 field_val = self._strip_use_count(field_val)
             all_unmatched[field_val].append(file_info)
         elif isinstance(field_val, dict):
-            # Skip intentionally skipped blades
-            if field == "blade" and field_val.get("_intentionally_skipped", False):
+            # Skip intentionally skipped blades (now using match_type)
+            if field == "blade" and field_val.get("match_type") in [
+                "filtered",
+                "irrelevant_razor_format",
+            ]:
                 return
 
             # Check if matched field is missing, empty, or doesn't contain valid match data

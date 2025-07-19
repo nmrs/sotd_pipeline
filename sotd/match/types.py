@@ -11,18 +11,12 @@ from typing import Any, Dict, List, Optional
 
 @dataclass
 class MatchResult:
-    """
-    Standardized result structure for brush matching operations.
-
-    This is the primary return type for all brush matching operations,
-    providing a consistent structure across all strategies and components.
-    """
+    """Result of a matching operation."""
 
     original: str
-    matched: Optional[Dict[str, Any]] = None
-    match_type: Optional[str] = None
-    pattern: Optional[str] = None
-    _intentionally_skipped: bool = False
+    matched: Optional[Dict[str, Any]]
+    match_type: Optional[str]
+    pattern: Optional[str]
 
 
 @dataclass
@@ -196,6 +190,12 @@ class MatchType:
     ALIAS = "alias"  # Brand/model aliases
     BRAND = "brand"  # Brand-only fallback
     UNMATCHED = "unmatched"  # No match found
+
+    # Intentional skipping scenarios
+    FILTERED = "filtered"  # From intentionally_unmatched.yaml (user filtered)
+    IRRELEVANT_RAZOR_FORMAT = (
+        "irrelevant_razor_format"  # Blade irrelevant for razor format (straight, cartridge, etc.)
+    )
 
 
 def create_match_result(

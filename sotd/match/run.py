@@ -15,6 +15,27 @@ from sotd.match.razor_matcher import RazorMatcher
 from sotd.match.soap_matcher import SoapMatcher
 from sotd.match.types import MatchResult
 from sotd.match.utils.performance import PerformanceMonitor
+from sotd.utils.filtered_entries import load_filtered_entries
+from sotd.utils.match_filter_utils import normalize_for_matching
+
+# Load filtered entries at module level for performance
+_filtered_entries_manager = None
+
+
+def _get_filtered_entries_manager():
+    """Get or create filtered entries manager."""
+    global _filtered_entries_manager
+    if _filtered_entries_manager is None:
+        filtered_file = Path("data/intentionally_unmatched.yaml")
+        try:
+            _filtered_entries_manager = load_filtered_entries(filtered_file)
+        except Exception:
+            # If filtered file doesn't exist or is corrupted, create empty manager
+            from sotd.utils.filtered_entries import FilteredEntriesManager
+
+            _filtered_entries_manager = FilteredEntriesManager(filtered_file)
+            _filtered_entries_manager.load()
+    return _filtered_entries_manager
 
 
 def is_razor_matched(record: dict) -> bool:
@@ -70,68 +91,116 @@ def match_record(
     monitor: PerformanceMonitor,
 ) -> dict:
     result = record.copy()
+    filtered_manager = _get_filtered_entries_manager()
 
     if "razor" in result:
         start_time = time.time()
-        razor_result = razor_matcher.match(result["razor"])
-        result["razor"] = razor_result
+        # Check if razor is filtered
+        if filtered_manager.is_filtered("razor", result["razor"]):
+            # Mark as intentionally unmatched
+            result["razor"] = MatchResult(
+                original=result["razor"],
+                matched=None,
+                match_type="filtered",
+                pattern=None,
+            )
+        else:
+            razor_result = razor_matcher.match(result["razor"])
+            result["razor"] = razor_result
         monitor.record_matcher_timing("razor", time.time() - start_time)
 
     if "blade" in result:
         start_time = time.time()
-        # Check if razor is cartridge/disposable/straight and clear blade if so
-        razor_result = result.get("razor")
-        if isinstance(razor_result, MatchResult) and razor_result.matched:
-            razor_format = razor_result.matched.get("format", "").upper()
-            irrelevant_formats = ["SHAVETTE (DISPOSABLE)", "CARTRIDGE", "STRAIGHT"]
-
-            if razor_format in irrelevant_formats:
-                # Clear blade info since it's irrelevant for these razor formats
-                result["blade"] = MatchResult(
-                    original=result["blade"], matched=None, match_type=None, pattern=None
-                )
-                # Add flag to indicate this was intentionally skipped
-                result["blade"]._intentionally_skipped = True
-            else:
-                # For other formats, use context-aware matching to ensure correct format
-                blade_result = blade_matcher.match_with_context(result["blade"], razor_format)
-                result["blade"] = blade_result
-        else:
-            # Handle legacy dict format for razor
-            razor_matched = (
-                result.get("razor", {}).get("matched", {})
-                if isinstance(result.get("razor"), dict)
-                else {}
+        # Check if blade is filtered (normalize first to handle use counts)
+        normalized_blade = normalize_for_matching(result["blade"], field="blade")
+        if filtered_manager.is_filtered("blade", normalized_blade):
+            # Mark as intentionally unmatched
+            result["blade"] = MatchResult(
+                original=result["blade"],
+                matched=None,
+                match_type="filtered",
+                pattern=None,
             )
-            if razor_matched:
-                razor_format = razor_matched.get("format", "").upper()
+        else:
+            # Check if razor is cartridge/disposable/straight and clear blade if so
+            razor_result = result.get("razor")
+            if isinstance(razor_result, MatchResult) and razor_result.matched:
+                razor_format = razor_result.matched.get("format", "").upper()
                 irrelevant_formats = ["SHAVETTE (DISPOSABLE)", "CARTRIDGE", "STRAIGHT"]
 
                 if razor_format in irrelevant_formats:
                     # Clear blade info since it's irrelevant for these razor formats
                     result["blade"] = MatchResult(
-                        original=result["blade"], matched=None, match_type=None, pattern=None
+                        original=result["blade"],
+                        matched=None,
+                        match_type="irrelevant_razor_format",
+                        pattern=None,
                     )
                 else:
                     # For other formats, use context-aware matching to ensure correct format
                     blade_result = blade_matcher.match_with_context(result["blade"], razor_format)
                     result["blade"] = blade_result
             else:
-                # No razor context, match blade normally
-                blade_result = blade_matcher.match(result["blade"])
-                result["blade"] = blade_result
+                # Handle legacy dict format for razor
+                razor_matched = (
+                    result.get("razor", {}).get("matched", {})
+                    if isinstance(result.get("razor"), dict)
+                    else {}
+                )
+                if razor_matched:
+                    razor_format = razor_matched.get("format", "").upper()
+                    irrelevant_formats = ["SHAVETTE (DISPOSABLE)", "CARTRIDGE", "STRAIGHT"]
+
+                    if razor_format in irrelevant_formats:
+                        # Clear blade info since it's irrelevant for these razor formats
+                        result["blade"] = MatchResult(
+                            original=result["blade"],
+                            matched=None,
+                            match_type="irrelevant_razor_format",
+                            pattern=None,
+                        )
+                    else:
+                        # For other formats, use context-aware matching to ensure correct format
+                        blade_result = blade_matcher.match_with_context(
+                            result["blade"], razor_format
+                        )
+                        result["blade"] = blade_result
+                else:
+                    # No razor context, match blade normally
+                    blade_result = blade_matcher.match(result["blade"])
+                    result["blade"] = blade_result
         monitor.record_matcher_timing("blade", time.time() - start_time)
 
     if "soap" in result:
         start_time = time.time()
-        soap_result = soap_matcher.match(result["soap"])
-        result["soap"] = soap_result
+        # Check if soap is filtered
+        if filtered_manager.is_filtered("soap", result["soap"]):
+            # Mark as intentionally unmatched
+            result["soap"] = MatchResult(
+                original=result["soap"],
+                matched=None,
+                match_type="filtered",
+                pattern=None,
+            )
+        else:
+            soap_result = soap_matcher.match(result["soap"])
+            result["soap"] = soap_result
         monitor.record_matcher_timing("soap", time.time() - start_time)
 
     if "brush" in result:
         start_time = time.time()
-        brush_result = brush_matcher.match(result["brush"])
-        result["brush"] = brush_result
+        # Check if brush is filtered
+        if filtered_manager.is_filtered("brush", result["brush"]):
+            # Mark as intentionally unmatched
+            result["brush"] = MatchResult(
+                original=result["brush"],
+                matched=None,
+                match_type="filtered",
+                pattern=None,
+            )
+        else:
+            brush_result = brush_matcher.match(result["brush"])
+            result["brush"] = brush_result
         monitor.record_matcher_timing("brush", time.time() - start_time)
 
     return result
@@ -195,7 +264,6 @@ def process_month(
                         "matched": value.matched,
                         "match_type": value.match_type,
                         "pattern": value.pattern,
-                        "_intentionally_skipped": getattr(value, "_intentionally_skipped", False),
                     }
                 else:
                     converted_record[key] = value
