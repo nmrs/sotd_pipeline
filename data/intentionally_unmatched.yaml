@@ -34,6 +34,27 @@ blade:
     - file: 2025-06.json
       id: n02soyj
       source: user
+  leave:
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: 2025-06.json
+      id: mx0f6ht
+      source: user
+    reason: garbage
 brush: {}
-razor: {}
+razor:
+  Hot Wheels Play Razor $PLASTIC $RAINBOW:
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: 2025-06.json
+      id: mx5l4qe
+      source: user
+    reason: not a real razor
+  jus:
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: 2025-06.json
+      id: mx0f6ht
+      source: user
+    reason: garbage
 soap: {}

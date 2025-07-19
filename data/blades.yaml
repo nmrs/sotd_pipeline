@@ -124,6 +124,11 @@ DE:
     DE:
       patterns:
       - albatross
+  AMC:
+    De-Luxe Thin:
+      patterns:
+      - amc.*de[-\s]*luxe?
+      - amc.*thin
   Asco:
     Platinum:
       patterns:
@@ -335,6 +340,9 @@ DE:
     Sputnik:
       patterns:
       - sputnik
+    Stainless:
+      patterns:
+      - gil.*stain
     Super Thin Mejorada:
       patterns:
       - mejorada
