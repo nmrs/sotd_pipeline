@@ -5,6 +5,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import VirtualizedTable from '../components/VirtualizedTable';
 import PerformanceMonitor from '../components/PerformanceMonitor';
 import CommentModal from '../components/CommentModal';
+import BrushTable from '../components/BrushTable';
+import { transformBrushDataArray, BrushMatcherOutput } from '../utils/brushDataTransformer';
 
 
 
@@ -570,110 +572,123 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <VirtualizedTable
-                                            data={searchSort.filteredAndSortedItems}
-                                            columns={[
-                                                {
-                                                    key: 'filtered',
-                                                    header: 'Filtered',
-                                                    width: columnWidths.filtered,
-                                                    render: (item) => {
-                                                        const isCurrentlyFiltered = filteredStatus[item.item] || false;
-                                                        const hasPendingChange = item.item in pendingChanges;
-                                                        const pendingValue = pendingChanges[item.item];
-                                                        const displayValue = hasPendingChange ? pendingValue : isCurrentlyFiltered;
+                                        {selectedField === 'brush' ? (
+                                            // Render BrushTable for brush field
+                                            <BrushTable
+                                                items={transformBrushDataArray(searchSort.filteredAndSortedItems as BrushMatcherOutput[])}
+                                                onBrushFilter={handleFilteredStatusChange}
+                                                onComponentFilter={handleFilteredStatusChange}
+                                                filteredStatus={filteredStatus}
+                                                pendingChanges={pendingChanges}
+                                                columnWidths={columnWidths}
+                                            />
+                                        ) : (
+                                            // Render regular VirtualizedTable for other fields
+                                            <VirtualizedTable
+                                                data={searchSort.filteredAndSortedItems}
+                                                columns={[
+                                                    {
+                                                        key: 'filtered',
+                                                        header: 'Filtered',
+                                                        width: columnWidths.filtered,
+                                                        render: (item) => {
+                                                            const isCurrentlyFiltered = filteredStatus[item.item] || false;
+                                                            const hasPendingChange = item.item in pendingChanges;
+                                                            const pendingValue = pendingChanges[item.item];
+                                                            const displayValue = hasPendingChange ? pendingValue : isCurrentlyFiltered;
 
-                                                        return (
-                                                            <div className="flex items-center">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={displayValue}
-                                                                    onChange={(e) => handleFilteredStatusChange(item.item, e.target.checked)}
-                                                                    disabled={commentLoading}
-                                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                    title={displayValue ? 'Mark as unfiltered' : 'Mark as intentionally unmatched'}
-                                                                />
-                                                                {hasPendingChange && (
-                                                                    <div className="ml-1">
-                                                                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    },
-                                                },
-                                                {
-                                                    key: 'item',
-                                                    header: 'Item',
-                                                    width: columnWidths.item,
-                                                    render: (item) => (
-                                                        <span className={`font-medium text-sm ${filteredStatus[item.item]
-                                                            ? 'text-gray-400 line-through'
-                                                            : 'text-gray-900'
-                                                            }`}>
-                                                            {item.item}
-                                                            {filteredStatus[item.item] && (
-                                                                <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                                                    Filtered
-                                                                </span>
-                                                            )}
-                                                        </span>
-                                                    ),
-                                                },
-                                                {
-                                                    key: 'count',
-                                                    header: 'Count',
-                                                    width: columnWidths.count,
-                                                    render: (item) => (
-                                                        <span className="text-gray-500 text-sm">
-                                                            {item.count}
-                                                        </span>
-                                                    ),
-                                                },
-                                                {
-                                                    key: 'comment_ids',
-                                                    header: 'Comment IDs',
-                                                    width: columnWidths.comment_ids,
-                                                    render: (item) => (
-                                                        <div className="text-sm">
-                                                            {item.comment_ids && item.comment_ids.length > 0 ? (
-                                                                <div className="flex flex-wrap gap-1">
-                                                                    {item.comment_ids.slice(0, 3).map((commentId, index) => (
-                                                                        <button
-                                                                            key={index}
-                                                                            onClick={() => handleCommentClick(commentId)}
-                                                                            disabled={commentLoading}
-                                                                            className="text-blue-600 hover:text-blue-800 underline text-xs bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                        >
-                                                                            {commentLoading ? 'Loading...' : commentId}
-                                                                        </button>
-                                                                    ))}
-                                                                    {item.comment_ids.length > 3 && (
-                                                                        <span className="text-gray-500 text-xs">
-                                                                            +{item.comment_ids.length - 3} more
-                                                                        </span>
+                                                            return (
+                                                                <div className="flex items-center">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={displayValue}
+                                                                        onChange={(e) => handleFilteredStatusChange(item.item, e.target.checked)}
+                                                                        disabled={commentLoading}
+                                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                        title={displayValue ? 'Mark as unfiltered' : 'Mark as intentionally unmatched'}
+                                                                    />
+                                                                    {hasPendingChange && (
+                                                                        <div className="ml-1">
+                                                                            <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                                                                        </div>
                                                                     )}
                                                                 </div>
-                                                            ) : (
-                                                                <span className="text-gray-400 text-xs">No comment IDs</span>
-                                                            )}
-                                                        </div>
-                                                    ),
-                                                },
-                                                {
-                                                    key: 'examples',
-                                                    header: 'Examples',
-                                                    width: columnWidths.examples,
-                                                    render: (item) => (
-                                                        <span className="text-gray-500 text-sm">
-                                                            {formatExamples(item.examples || [])}
-                                                        </span>
-                                                    ),
-                                                },
-                                            ]}
-                                            height={350}
-                                            rowHeight={40}
-                                        />
+                                                            );
+                                                        },
+                                                    },
+                                                    {
+                                                        key: 'item',
+                                                        header: 'Item',
+                                                        width: columnWidths.item,
+                                                        render: (item) => (
+                                                            <span className={`font-medium text-sm ${filteredStatus[item.item]
+                                                                ? 'text-gray-400 line-through'
+                                                                : 'text-gray-900'
+                                                                }`}>
+                                                                {item.item}
+                                                                {filteredStatus[item.item] && (
+                                                                    <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                                                        Filtered
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                        ),
+                                                    },
+                                                    {
+                                                        key: 'count',
+                                                        header: 'Count',
+                                                        width: columnWidths.count,
+                                                        render: (item) => (
+                                                            <span className="text-gray-500 text-sm">
+                                                                {item.count}
+                                                            </span>
+                                                        ),
+                                                    },
+                                                    {
+                                                        key: 'comment_ids',
+                                                        header: 'Comment IDs',
+                                                        width: columnWidths.comment_ids,
+                                                        render: (item) => (
+                                                            <div className="text-sm">
+                                                                {item.comment_ids && item.comment_ids.length > 0 ? (
+                                                                    <div className="flex flex-wrap gap-1">
+                                                                        {item.comment_ids.slice(0, 3).map((commentId, index) => (
+                                                                            <button
+                                                                                key={index}
+                                                                                onClick={() => handleCommentClick(commentId)}
+                                                                                disabled={commentLoading}
+                                                                                className="text-blue-600 hover:text-blue-800 underline text-xs bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                            >
+                                                                                {commentLoading ? 'Loading...' : commentId}
+                                                                            </button>
+                                                                        ))}
+                                                                        {item.comment_ids.length > 3 && (
+                                                                            <span className="text-gray-500 text-xs">
+                                                                                +{item.comment_ids.length - 3} more
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                ) : (
+                                                                    <span className="text-gray-400 text-xs">No comment IDs</span>
+                                                                )}
+                                                            </div>
+                                                        ),
+                                                    },
+                                                    {
+                                                        key: 'examples',
+                                                        header: 'Examples',
+                                                        width: columnWidths.examples,
+                                                        render: (item) => (
+                                                            <span className="text-gray-500 text-sm">
+                                                                {formatExamples(item.examples || [])}
+                                                            </span>
+                                                        ),
+                                                    },
+                                                ]}
+                                                height={350}
+                                                rowHeight={40}
+                                            />
+                                        )}
                                     </div>
                                 )
                             ) : (

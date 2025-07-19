@@ -1,0 +1,424 @@
+# Specialized Brush Table Component Specification
+
+## Overview
+
+Create a specialized React component for displaying brush data in the unmatched analyzer web UI. Unlike other product types (razor, blade, soap) which are single entities, brushes have complex multi-component structure with handle and knot components that may match independently. This component provides granular visibility into brush matching complexity while maintaining consistency with existing UI patterns.
+
+## Problem Statement
+
+### Current Limitations
+
+1. **Generic table display**: Existing VirtualizedTable treats brushes like simple products, hiding component-level matching issues
+2. **Missing component visibility**: Users can't see which specific components (handle/knot) failed to match
+3. **No component-level filtering**: Can't filter out just problematic components while keeping useful ones
+4. **Poor user experience**: Complex brush relationships are not visually represented
+
+### Use Case Examples
+
+#### Scenario 1: Handle Unmatched, Knot Matched
+**Input**: `"X Handle: Commonwealth 'CW' Badger (Knot: Declaration Grooming B15)"`
+**Current Display**: Shows as single unmatched item
+**Desired Display**: 
+```
+[✓] X Handle: Commonwealth 'CW' Badger (Knot: Declaration Grooming B15)
+    [✓] 🔧 Handle: X Handle: Commonwealth 'CW' Badger | Status: Unmatched
+    [ ] 🧶 Knot: Declaration Grooming B15 | Status: Matched
+```
+
+#### Scenario 2: Both Components Unmatched
+**Input**: `"Generic handle w/ unknown knot"`
+**Current Display**: Shows as single unmatched item
+**Desired Display**:
+```
+[✓] Generic handle w/ unknown knot
+    [✓] 🔧 Handle: Generic handle | Status: Unmatched
+    [✓] 🧶 Knot: unknown knot | Status: Unmatched
+```
+
+#### Scenario 3: Component-Level Filtering
+**Input**: `"X Handle: generic black handle (Knot: Declaration Grooming B15)"`
+**User Action**: Filter just the handle component
+**Result**: Handle marked as intentionally unmatched, knot still processed for matching
+
+## Requirements
+
+### Functional Requirements
+
+#### FR-1: Visual Hierarchy
+- **Primary row**: Display full brush text with main checkbox for entire brush filtering
+- **Sub-rows**: Show individual component issues with component-specific checkboxes
+- **Visual indicators**: Use icons (🔧 for handle, 🧶 for knot) to distinguish components
+- **Status display**: Show component status ("Unmatched", "Matched", "Filtered")
+
+#### FR-2: Component-Level Filtering
+- **Main checkbox**: Filter entire brush (adds to `brush` section in `intentionally_unmatched.yaml`)
+- **Component checkboxes**: Filter specific components (adds to `brush_handle`/`brush_knot` sections)
+- **Independent operation**: Component filtering independent from main brush filtering
+- **Visual feedback**: Clear indication of filtered vs unfiltered components
+
+#### FR-3: Conditional Display Logic
+- **Show sub-rows**: Always show when main checkbox is unchecked
+- **Hide sub-rows**: Completely hide when main checkbox is checked (irrelevant)
+- **Gray out matched**: Matched components shown but de-emphasized for completeness
+- **Status indicators**: Clear visual distinction between problematic and working components
+
+#### FR-4: Data Integration
+- **Reuse brush matcher**: Leverage existing `brush_matcher.py` logic and data structure
+- **Transform in UnmatchedAnalyzer**: Convert brush matcher output to BrushTable format
+- **Align with existing patterns**: Use same column structure as razor/blade tables
+- **Callback-based interaction**: Follow existing VirtualizedTable interaction patterns
+
+### Non-Functional Requirements
+
+#### NFR-1: Performance
+- **Virtualization support**: Leverage existing VirtualizedTable performance benefits
+- **Efficient rendering**: Minimize DOM elements for large datasets
+- **Responsive interaction**: Immediate visual feedback for user actions
+
+#### NFR-2: Consistency
+- **UI alignment**: Match existing unmatched analyzer patterns and styling
+- **Interaction patterns**: Follow same checkbox and filtering behavior as other product types
+- **Error handling**: Consistent error states and user feedback
+
+#### NFR-3: Maintainability
+- **Component separation**: Clean separation between display logic and data transformation
+- **Reusable design**: Component can be used in other contexts if needed
+- **Type safety**: Full TypeScript support with proper interfaces
+
+## Technical Specifications
+
+### Data Structure
+
+#### BrushData Interface
+```typescript
+interface BrushData {
+  main: {
+    text: string;           // original brush text
+    status: string;         // "Unmatched", "Matched", "Filtered"
+    count: number;          // number of occurrences
+    commentIds: string[];   // source comment IDs
+    isFiltered: boolean;    // main brush filtered status
+    pattern?: string;       // regex pattern from brush matcher
+  };
+  components: {
+    type: 'handle' | 'knot';
+    text: string;           // component source text
+    status: string;         // "Unmatched", "Matched", "Filtered"
+    isFiltered: boolean;    // component filtered status
+    brand?: string;         // matched brand (if any)
+    model?: string;         // matched model (if any)
+    fiber?: string;         // fiber type (knot only)
+    knotSizeMm?: number;    // knot size (knot only)
+  }[];
+}
+```
+
+#### Data Transformation
+```typescript
+// Transform brush matcher output to BrushTable format
+const transformBrushData = (unmatchedData) => {
+  return unmatchedData.map(record => {
+    const brushData = record.brush;
+    
+    return {
+      main: {
+        text: brushData.original,
+        status: brushData.matched ? "Matched" : "Unmatched",
+        count: 1, // Will be aggregated
+        commentIds: [record.id],
+        isFiltered: false, // Will be checked against intentionally_unmatched.yaml
+        pattern: brushData.pattern
+      },
+      components: [
+        // Handle component - always present if brush was split
+        brushData.matched?.handle && {
+          type: "handle",
+          text: brushData.matched.handle.source_text,
+          status: brushData.matched.handle.brand ? "Matched" : "Unmatched",
+          isFiltered: false,
+          brand: brushData.matched.handle.brand,
+          model: brushData.matched.handle.model
+        },
+        // Knot component - always present if brush was split
+        brushData.matched?.knot && {
+          type: "knot",
+          text: brushData.matched.knot.source_text,
+          status: brushData.matched.knot.brand ? "Matched" : "Unmatched",
+          isFiltered: false,
+          brand: brushData.matched.knot.brand,
+          model: brushData.matched.knot.model,
+          fiber: brushData.matched.knot.fiber,
+          knotSizeMm: brushData.matched.knot.knot_size_mm
+        }
+      ].filter(Boolean) // Remove null components
+    };
+  });
+};
+```
+
+**Key Decisions Made:**
+- **Component Display**: Show all sub-rows with 50% opacity for matched components
+- **Comment Aggregation**: Use same comment IDs as main brush (since same text = same result)
+- **Data Transformation**: Show all components (brush matcher always provides source_text)
+- **Performance**: Load all component data upfront, let virtualization handle rendering
+- **Error Handling**: Show error state for individual components, keep main row functional (fail-fast philosophy)
+- **API Contract**: Extend existing `UnmatchedAnalysisResult` interface with optional components
+- **Backend API**: Modify existing endpoint to detect brush field and return component data
+- **Integration**: Conditionally render BrushTable when `field === 'brush'`
+
+### Component Architecture
+
+#### BrushTable Component
+```typescript
+interface BrushTableProps {
+  brushes: BrushData[];
+  onBrushFilter: (brushText: string, isFiltered: boolean) => void;
+  onComponentFilter: (componentType: 'handle' | 'knot', text: string, isFiltered: boolean) => void;
+  onRowClick?: (brushData: BrushData) => void;
+  selectedBrushes?: Set<string>;
+  selectedComponents?: Set<string>;
+  showCheckboxes?: boolean;
+  hideFiltered?: boolean;
+}
+```
+
+#### Integration with UnmatchedAnalyzer
+```typescript
+// In UnmatchedAnalyzer.tsx
+{selectedField === 'brush' ? (
+  <BrushTable 
+    brushes={transformBrushData(results.unmatched_items)}
+    onBrushFilter={handleBrushFilter}
+    onComponentFilter={handleComponentFilter}
+    hideFiltered={!viewState.showFiltered}
+  />
+) : (
+  <VirtualizedTable 
+    data={results.unmatched_items}
+    columns={getColumnsForField(selectedField)}
+    // ... existing props
+  />
+)}
+```
+
+**Integration Strategy**: Conditionally render BrushTable when `field === 'brush'`, otherwise use existing VirtualizedTable
+
+### Filtering Integration
+
+#### Extended intentionally_unmatched.yaml Structure
+```yaml
+# Existing sections (unchanged)
+razor:
+  "Hot Wheels Play Razor":
+    added_date: '2025-07-19'
+    comment_ids: [...]
+    reason: not a real razor
+
+blade:
+  "AC Blade":
+    added_date: '2025-07-19'
+    comment_ids: [...]
+    reason: not specific enough for matching
+
+# New brush-specific sections
+brush:
+  "Generic handle w/ unknown knot":
+    added_date: '2025-07-19'
+    comment_ids: [...]
+    reason: entire brush is useless
+
+brush_handle:
+  "X Handle: generic black handle":
+    added_date: '2025-07-19'
+    comment_ids: [...]
+    reason: handle info is not useful
+
+brush_knot:
+  "unknown knot":
+    added_date: '2025-07-19'
+    comment_ids: [...]
+    reason: knot info is not useful
+```
+
+#### Filtering Logic
+- **Main brush filtering**: Adds to `brush` section, skips entire brush during matching
+- **Component filtering**: Adds to `brush_handle`/`brush_knot` sections, marks component as intentionally unmatched
+- **Independent operation**: Component filtering doesn't affect main brush filtering
+- **Clear separation**: Distinguish between "entire brush filtered" vs "just component filtered"
+
+**Filtering Rules:**
+1. **Main brush checkbox checked**: Add entire brush text to `brush` section → hide all component rows
+2. **Main brush checkbox unchecked + component checkbox checked**: Add component text to `brush_handle`/`brush_knot` section → keep other components visible
+3. **Independent operation**: Component filtering doesn't affect main brush filtering
+
+### Visual Design
+
+#### Main Row Display
+```
+[✓] X Handle: Commonwealth 'CW' Badger (Knot: Declaration Grooming B15) | Status: Mixed | Count: 3 | Comments: 3
+```
+
+#### Sub-row Display (when main checkbox unchecked)
+```
+    [✓] 🔧 Handle: X Handle: Commonwealth 'CW' Badger | Status: Unmatched
+    [ ] 🧶 Knot: Declaration Grooming B15 | Status: Matched (50% opacity)
+```
+
+#### Sub-row Display (when main checkbox checked)
+```
+    🔧 Handle: X Handle: Commonwealth 'CW' Badger
+    🧶 Knot: Declaration Grooming B15
+```
+
+### Column Structure
+
+#### Standard Columns (same as razor/blade)
+```typescript
+const brushColumns = [
+  {
+    key: 'filtered',
+    header: 'Filtered',
+    width: 80,
+    render: (brush: BrushData) => <BrushCheckbox />
+  },
+  {
+    key: 'item',
+    header: 'Brush',
+    width: 300,
+    render: (brush: BrushData) => <BrushText />
+  },
+  {
+    key: 'status',
+    header: 'Status',
+    width: 100,
+    render: (brush: BrushData) => <Status />
+  },
+  {
+    key: 'count',
+    header: 'Count',
+    width: 80,
+    render: (brush: BrushData) => <Count />
+  },
+  {
+    key: 'comment_ids',
+    header: 'Comments',
+    width: 200,
+    render: (brush: BrushData) => <Comments />
+  },
+  {
+    key: 'examples',
+    header: 'Examples',
+    width: 150,
+    render: (brush: BrushData) => <Examples />
+  }
+];
+```
+
+## Implementation Strategy
+
+### Phase 1: Core Component
+1. **Create BrushTable.tsx** - Main component with custom row renderer
+2. **Implement data transformation** - Convert brush matcher output to BrushTable format
+3. **Add basic rendering** - Main row with sub-rows display
+
+### Phase 2: Interaction Logic
+1. **Implement checkbox behavior** - Main and component-level filtering
+2. **Add filtering integration** - Extend FilteredEntriesManager with brush sections
+3. **Handle state management** - Pending changes and filtered status
+
+### Phase 3: Integration
+1. **Integrate with UnmatchedAnalyzer** - Conditional rendering based on field type
+2. **Add error handling** - Consistent error states and user feedback
+3. **Performance optimization** - Ensure virtualization works correctly
+
+### Phase 4: Polish
+1. **Add visual indicators** - Icons and status styling
+2. **Implement responsive design** - Handle different screen sizes
+3. **Add comprehensive testing** - Unit and integration tests
+
+## Success Criteria
+
+### Functional Success
+- [ ] Brush data displays with proper component breakdown
+- [ ] Component-level filtering works independently
+- [ ] Main brush filtering works correctly
+- [ ] Visual hierarchy is clear and intuitive
+- [ ] Integration with existing filtering system works
+
+### Technical Success
+- [ ] Component follows existing patterns and conventions
+- [ ] Performance is comparable to existing VirtualizedTable
+- [ ] TypeScript interfaces are complete and accurate
+- [ ] Error handling is robust and user-friendly
+
+### User Experience Success
+- [ ] Users can easily identify which components are problematic
+- [ ] Filtering actions are clear and predictable
+- [ ] Visual feedback is immediate and helpful
+- [ ] Component behavior is consistent with existing UI patterns
+
+## Dependencies
+
+### Existing Components
+- **VirtualizedTable**: Base table infrastructure and virtualization
+- **UnmatchedAnalyzer**: Integration point and data flow
+- **FilteredEntriesManager**: Extended for brush-specific filtering
+
+### Data Sources
+- **brush_matcher.py**: Source of brush matching logic and data structure
+- **intentionally_unmatched.yaml**: Extended with brush-specific sections
+- **matched data files**: Source of brush data for analysis
+
+### External Dependencies
+- **React**: Component framework
+- **TypeScript**: Type safety and development experience
+- **React Table**: Virtualization and performance optimization
+
+## Risk Assessment
+
+### Technical Risks
+- **Performance impact**: Complex rendering might affect virtualization performance
+- **State management complexity**: Multiple levels of filtering state
+- **Data transformation overhead**: Converting brush matcher output to UI format
+- **Error handling complexity**: Fail-fast approach requires robust error boundaries
+
+### Mitigation Strategies
+- **Leverage existing patterns**: Reuse VirtualizedTable infrastructure
+- **Incremental implementation**: Build and test each phase separately
+- **Comprehensive testing**: Ensure performance and functionality at each step
+- **Fail-fast error handling**: Show error state for individual components, keep main row functional
+
+## Future Enhancements
+
+### Potential Extensions
+- **Additional component types**: Support for other brush components if needed
+- **Advanced filtering**: More sophisticated component-level filtering options
+- **Export functionality**: Export brush analysis results
+- **Bulk operations**: Select and filter multiple components at once
+
+### Scalability Considerations
+- **Large datasets**: Ensure performance with thousands of brush records
+- **Complex brush structures**: Handle edge cases in brush parsing
+- **User customization**: Allow users to configure display preferences
+
+---
+
+**Status**: READY_FOR_IMPLEMENTATION  
+**Created**: 2025-07-19  
+**Updated**: 2025-01-27  
+**Type**: Component Specification  
+**Priority**: High  
+**Dependencies**: UnmatchedAnalyzer, VirtualizedTable, brush_matcher.py
+
+**Key Decisions Finalized:**
+- Component display with 50% opacity for matched components
+- Same comment IDs for all components (deterministic brush matching)
+- Show all components (brush matcher always provides source_text)
+- Load all component data upfront for virtualization
+- Fail-fast error handling for individual components
+- Extend existing API interface with optional components
+- Conditional rendering based on field type
+description:
+globs:
+alwaysApply: false
+---

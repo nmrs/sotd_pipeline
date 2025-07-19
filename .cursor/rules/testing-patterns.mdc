@@ -1,11 +1,33 @@
 ---
-description: 
-globs: **/test_*.py,**/tests/**/*.py
+globs: **/test*,**/tests/*
 alwaysApply: false
 ---
 # Testing Patterns for SOTD Pipeline
 
 ## Testing Strategy and Requirements
+
+### **MANDATORY**: Test Type Priority Hierarchy
+When adding or modifying any functionality in the SOTD pipeline, follow this priority order for test types:
+
+1. **Unit Tests** - Fast, isolated tests with mock dependencies (HIGHEST PRIORITY)
+   - Use mock catalogs and external services
+   - Test individual functions and methods in isolation
+   - Focus on logic validation and edge cases
+   - Located in `tests/{module}/test_{filename}.py`
+   - **Use by default** - provides fastest feedback and best debugging
+
+2. **Integration Tests** - Tests using real production data (MEDIUM PRIORITY)
+   - Use actual YAML catalog files (`data/*.yaml`)
+   - Test end-to-end workflows with real data
+   - Validate that catalog changes don't break functionality
+   - Located in `tests/integration/`
+   - **Use when necessary** - for validating real data compatibility
+
+3. **End-to-End (E2E) Tests** - Full system tests (LOWEST PRIORITY)
+   - Test complete user workflows and system interactions
+   - Use Playwright for web UI testing
+   - Located in `webui/tests/` and `tests/integration/`
+   - **Use only when necessary** - most expensive and slowest feedback
 
 ### **MANDATORY**: Unit and Integration Test Coverage
 When adding or modifying any functionality in the SOTD pipeline, you MUST provide both:
@@ -28,9 +50,16 @@ When adding or modifying any functionality in the SOTD pipeline, you MUST provid
 - **Data processing logic**: Add unit tests for edge cases + integration tests with sample data
 - **Configuration changes**: Add unit tests for validation + integration tests for real config files
 
-### Why Both Are Required
-- **Unit tests**: Catch logic bugs, provide fast feedback, enable isolated debugging
-- **Integration tests**: Catch production issues, validate real data compatibility, prevent regressions
+### Why This Priority Order
+- **Unit tests (Priority 1)**: Catch logic bugs, provide fastest feedback, enable isolated debugging, lowest cost
+- **Integration tests (Priority 2)**: Catch production issues, validate real data compatibility, prevent regressions, moderate cost
+- **E2E tests (Priority 3)**: Validate complete user workflows, catch system-level issues, highest cost and slowest feedback
+
+### When to Use Each Test Type
+- **Start with unit tests** - they provide the best feedback loop for development
+- **Add integration tests** when you need to validate real data compatibility
+- **Add E2E tests** only when testing complete user workflows is necessary
+- **Never skip unit tests** - they're the foundation of reliable development
 
 ## Test File Structure and Naming
 - Test files: `test_{module_name}.py`
@@ -327,15 +356,24 @@ def test_with_temp_catalog(temp_catalog):
 ```
 
 ## Development Workflow Integration
-Always run both test types during development:
+Follow the test priority hierarchy during development:
 
 ```bash
-# Unit tests (fast feedback loop)
-make test
+# 1. Unit tests (fastest feedback loop) - START HERE
+make test-fast
 
-# Integration tests (comprehensive validation)
+# 2. Integration tests (when needed for real data validation)
 python -m pytest tests/integration/ -v
 
-# All tests before committing
+# 3. E2E tests (only when testing complete user workflows)
+npm run test:e2e:background  # For web UI testing
+
+# All tests before committing (includes unit + integration)
 python -m pytest tests/ -v
 ```
+
+### Development Priority
+1. **Write unit tests first** - they provide the best development feedback
+2. **Add integration tests** when you need to validate real data compatibility
+3. **Add E2E tests** only when testing complete user workflows is necessary
+4. **Never skip unit tests** - they're the foundation of reliable development

@@ -1,0 +1,432 @@
+# Brush Table Specialized Component - TDD Implementation Plan
+
+## 📘 Project Summary
+
+Create a specialized React component for displaying brush data in the unmatched analyzer web UI. Unlike other product types which are single entities, brushes have complex multi-component structure with handle and knot components that may match independently. This component provides granular visibility into brush matching complexity while maintaining consistency with existing UI patterns.
+
+**Key Challenge**: Transform complex brush matching data into an intuitive hierarchical display with independent component-level filtering capabilities.
+
+**Success Criteria**: Users can identify problematic brush components, filter them independently, and maintain the same performance and UX patterns as existing product tables.
+
+---
+
+## 🧩 Component Steps
+
+### Phase 1: Foundation & Data Transformation
+1. ✅ **Test Data Transformation Logic** - Create tests for converting brush matcher output to BrushTable format
+2. ✅ **Implement Data Transformation** - Build the transformation logic with proper TypeScript interfaces
+3. ✅ **Test BrushData Interface** - Validate the data structure and component relationships
+
+### Phase 2: Core Component Architecture
+4. ✅ **Test BrushTable Component Structure** - Create tests for the main component with proper props
+5. ✅ **Implement Basic BrushTable** - Build the component with main row rendering
+6. ✅ **Test Sub-row Rendering** - Add tests for component-level display logic
+
+### Phase 3: Interaction & Filtering
+7. ✅ **Test Checkbox Behavior** - Create tests for main and component-level filtering
+8. ✅ **Implement Filtering Logic** - Build the checkbox interaction system
+9. ✅ **Test State Management** - Validate filtering state and pending changes
+
+### Phase 4: Integration & Polish
+10. ✅ **Test UnmatchedAnalyzer Integration** - Create tests for conditional rendering
+11. ✅ **Implement Integration** - Connect BrushTable to existing analyzer
+12. **Test Error Handling** - Add comprehensive error boundary tests
+13. **Performance Testing** - Validate virtualization and rendering performance
+
+---
+
+## 🔁 Implementation Prompts
+
+### Step 1: Test Data Transformation Logic
+
+```text
+Create comprehensive tests for the brush data transformation logic. This is the foundation that converts brush matcher output into the BrushTable format.
+
+Requirements:
+- Test transformation of brush matcher output to BrushData interface
+- Test handle and knot component extraction
+- Test status determination (Matched/Unmatched/Filtered)
+- Test edge cases: missing components, null values, empty data
+- Test comment ID aggregation and count calculation
+- Test pattern extraction from brush matcher output
+
+Create tests in `webui/tests/brush-table-transformation.test.ts` that cover:
+1. Basic transformation with both handle and knot components
+2. Handle-only brushes (no knot component)
+3. Knot-only brushes (no handle component)
+4. Matched vs unmatched component status
+5. Filtered status detection
+6. Error handling for malformed data
+7. Comment ID and count aggregation
+8. Pattern extraction and preservation
+
+Use realistic test data that mirrors actual brush matcher output structure.
+```
+
+### Step 2: Implement Data Transformation
+
+```text
+Implement the brush data transformation logic based on the test requirements from Step 1.
+
+Requirements:
+- Create TypeScript interfaces for BrushData and component structures
+- Implement transformBrushData function that converts brush matcher output
+- Handle all edge cases identified in tests
+- Ensure proper type safety and error handling
+- Follow existing code patterns and conventions
+
+Create the transformation logic in `webui/src/utils/brushDataTransformer.ts`:
+1. Define BrushData interface with main and components properties
+2. Define ComponentData interface for handle/knot components
+3. Implement transformBrushData function with proper error handling
+4. Add utility functions for status determination and component extraction
+5. Include comprehensive JSDoc documentation
+6. Ensure all tests from Step 1 pass
+
+The transformation should handle:
+- Brush matcher output structure
+- Component status determination (Matched/Unmatched/Filtered)
+- Comment ID aggregation
+- Pattern extraction and preservation
+- Edge cases and error conditions
+```
+
+### Step 3: Test BrushData Interface
+
+```text
+Create tests to validate the BrushData interface and ensure it properly represents brush component relationships.
+
+Requirements:
+- Test BrushData interface structure and type safety
+- Test component relationship validation
+- Test status consistency between main brush and components
+- Test filtering state management
+- Test serialization/deserialization for API integration
+
+Create tests in `webui/tests/brushDataInterface.test.ts` that cover:
+1. Interface structure validation
+2. Component type safety (handle/knot)
+3. Status consistency rules
+4. Filtering state relationships
+5. API serialization compatibility
+6. Error handling for invalid data
+7. TypeScript compilation validation
+8. Integration with existing interfaces
+
+Focus on ensuring the interface properly represents the complex brush component relationships while maintaining type safety.
+```
+
+### Step 4: Test BrushTable Component Structure
+
+```text
+Create tests for the BrushTable component structure and props interface.
+
+Requirements:
+- Test BrushTable component props interface
+- Test component rendering structure
+- Test integration with VirtualizedTable
+- Test conditional rendering logic
+- Test prop validation and default values
+
+Create tests in `webui/tests/BrushTable.test.tsx` that cover:
+1. Component props interface validation
+2. Basic rendering without data
+3. Main row rendering with brush data
+4. Sub-row rendering with component data
+5. Checkbox rendering and interaction
+6. Status display and styling
+7. Error boundary behavior
+8. Integration with VirtualizedTable props
+
+Use React Testing Library and focus on user interaction patterns and accessibility.
+```
+
+### Step 5: Implement Basic BrushTable
+
+```text
+Implement the basic BrushTable component with main row rendering based on the tests from Step 4.
+
+Requirements:
+- Create BrushTable component with proper TypeScript interfaces
+- Implement main row rendering with brush text and status
+- Add basic checkbox functionality
+- Integrate with VirtualizedTable infrastructure
+- Follow existing component patterns and styling
+
+Create the component in `webui/src/components/BrushTable.tsx`:
+1. Define BrushTableProps interface
+2. Implement main row rendering with brush text display
+3. Add basic checkbox component for main brush filtering
+4. Integrate with VirtualizedTable row rendering
+5. Add proper TypeScript types and error handling
+6. Follow existing component patterns and conventions
+7. Include comprehensive JSDoc documentation
+
+The component should:
+- Render main brush row with text and status
+- Display checkbox for main brush filtering
+- Handle basic user interactions
+- Integrate with existing table infrastructure
+- Maintain consistent styling with other tables
+```
+
+### Step 6: Test Sub-row Rendering
+
+```text
+Create tests for sub-row rendering logic that displays individual brush components.
+
+Requirements:
+- Test sub-row rendering for handle and knot components
+- Test conditional display based on main checkbox state
+- Test component-specific checkbox behavior
+- Test visual hierarchy and styling
+- Test icon display (🔧 for handle, 🧶 for knot)
+
+Create tests in `webui/tests/BrushTableSubRows.test.tsx` that cover:
+1. Sub-row rendering when main checkbox is unchecked
+2. Sub-row hiding when main checkbox is checked
+3. Component-specific checkbox rendering
+4. Icon display for different component types
+5. Status display for matched/unmatched components
+6. Visual hierarchy and indentation
+7. Opacity changes for matched components
+8. Error handling for missing component data
+
+Focus on the visual hierarchy and user interaction patterns for component-level filtering.
+```
+
+### Step 7: Test Checkbox Behavior
+
+```text
+Create tests for the checkbox interaction behavior at both main brush and component levels.
+
+Requirements:
+- Test main brush checkbox filtering behavior
+- Test component-level checkbox filtering behavior
+- Test independent operation of main vs component filtering
+- Test callback integration with filtering system
+- Test state management and visual feedback
+
+Create tests in `webui/tests/BrushTableCheckboxes.test.tsx` that cover:
+1. Main brush checkbox click behavior
+2. Component checkbox click behavior
+3. Independent operation of main vs component filtering
+4. Callback integration with onBrushFilter and onComponentFilter
+5. Visual feedback for filtered vs unfiltered items
+6. State management for pending changes
+7. Error handling for callback failures
+8. Accessibility and keyboard navigation
+
+Use React Testing Library to test actual user interactions and ensure proper callback behavior.
+```
+
+### Step 8: Implement Filtering Logic
+
+```text
+Implement the checkbox filtering logic based on the tests from Step 7.
+
+Requirements:
+- Implement main brush checkbox filtering
+- Implement component-level checkbox filtering
+- Add callback integration with filtering system
+- Implement state management for pending changes
+- Add visual feedback for filtered items
+
+Extend the BrushTable component in `webui/src/components/BrushTable.tsx`:
+1. Add checkbox interaction handlers
+2. Implement main brush filtering logic
+3. Implement component-level filtering logic
+4. Add callback integration with onBrushFilter and onComponentFilter
+5. Add state management for pending changes
+6. Implement visual feedback for filtered items
+7. Add error handling for callback failures
+8. Ensure accessibility compliance
+
+The filtering logic should:
+- Handle main brush checkbox independently
+- Handle component checkboxes independently
+- Provide immediate visual feedback
+- Integrate with existing filtering system
+- Maintain proper state management
+```
+
+### Step 9: Test State Management
+
+```text
+Create tests for the filtering state management and pending changes system.
+
+Requirements:
+- Test state management for main brush filtering
+- Test state management for component filtering
+- Test pending changes tracking
+- Test integration with FilteredEntriesManager
+- Test error handling for state updates
+
+Create tests in `webui/tests/BrushTableState.test.tsx` that cover:
+1. Main brush filtering state management
+2. Component filtering state management
+3. Pending changes tracking and persistence
+4. Integration with FilteredEntriesManager
+5. Error handling for state update failures
+6. State synchronization between components
+7. Undo/redo functionality for filtering actions
+8. Performance with large datasets
+
+Focus on ensuring proper state management and integration with the existing filtering system.
+```
+
+### Step 10: Test UnmatchedAnalyzer Integration
+
+```text
+Create tests for integrating BrushTable with the existing UnmatchedAnalyzer component.
+
+Requirements:
+- Test conditional rendering based on field type
+- Test data flow from UnmatchedAnalyzer to BrushTable
+- Test integration with existing filtering system
+- Test error handling and fallback behavior
+- Test performance with existing analyzer patterns
+
+Create tests in `webui/tests/UnmatchedAnalyzerBrushIntegration.test.tsx` that cover:
+1. Conditional rendering when field === 'brush'
+2. Data transformation integration
+3. Filtering system integration
+4. Error handling and fallback to VirtualizedTable
+5. Performance comparison with existing tables
+6. State management integration
+7. User interaction flow consistency
+8. Accessibility and navigation patterns
+
+Ensure the integration maintains consistency with existing analyzer patterns while adding brush-specific functionality.
+```
+
+### Step 11: Implement Integration
+
+```text
+Implement the integration of BrushTable with UnmatchedAnalyzer based on the tests from Step 10.
+
+Requirements:
+- Add conditional rendering logic to UnmatchedAnalyzer
+- Integrate data transformation with existing data flow
+- Extend filtering system for brush-specific sections
+- Add error handling and fallback behavior
+- Maintain performance and consistency
+
+Modify `webui/src/pages/UnmatchedAnalyzer.tsx`:
+1. Add conditional rendering for brush field type
+2. Integrate brush data transformation
+3. Extend filtering system with brush-specific sections
+4. Add error handling and fallback to VirtualizedTable
+5. Maintain existing performance and accessibility
+6. Add comprehensive error boundaries
+7. Ensure consistent user experience
+
+The integration should:
+- Conditionally render BrushTable when field === 'brush'
+- Transform brush data using the logic from Step 2
+- Integrate with existing filtering system
+- Provide fallback to VirtualizedTable on errors
+- Maintain performance and accessibility standards
+```
+
+### Step 12: Test Error Handling
+
+```text
+Create comprehensive error handling tests for the BrushTable component and integration.
+
+Requirements:
+- Test error boundaries for component failures
+- Test fallback behavior for malformed data
+- Test error handling for callback failures
+- Test graceful degradation for missing data
+- Test error reporting and user feedback
+
+Create tests in `webui/tests/BrushTableErrorHandling.test.tsx` that cover:
+1. Error boundary behavior for component failures
+2. Fallback to VirtualizedTable on critical errors
+3. Error handling for malformed brush data
+4. Callback failure handling and user feedback
+5. Graceful degradation for missing component data
+6. Error reporting and logging
+7. User-friendly error messages
+8. Recovery mechanisms for transient errors
+
+Focus on fail-fast error handling while maintaining user experience and data integrity.
+```
+
+### Step 13: Performance Testing
+
+```text
+Create performance tests to validate that BrushTable maintains performance standards with large datasets.
+
+Requirements:
+- Test virtualization performance with large brush datasets
+- Test rendering performance for complex brush structures
+- Test memory usage and garbage collection
+- Test interaction responsiveness
+- Test integration performance impact
+
+Create tests in `webui/tests/BrushTablePerformance.test.tsx` that cover:
+1. Virtualization performance with 1000+ brush records
+2. Rendering performance for complex brush structures
+3. Memory usage and garbage collection patterns
+4. Interaction responsiveness for filtering actions
+5. Integration performance impact on UnmatchedAnalyzer
+6. DOM element count and rendering efficiency
+7. Scroll performance and smoothness
+8. Filtering operation performance
+
+Use realistic datasets and performance benchmarks to ensure the component meets performance requirements.
+```
+
+---
+
+## 🧠 Critical Analysis
+
+### Architecture Strengths
+- **Incremental TDD approach**: Each step builds logically on the previous one, ensuring no orphaned code
+- **Comprehensive testing**: Every component and integration point has dedicated tests
+- **Fail-fast philosophy**: Error handling is prioritized throughout the implementation
+- **Performance focus**: Virtualization and rendering efficiency are tested explicitly
+- **Consistency emphasis**: Integration maintains existing patterns and user experience
+
+### Risk Mitigation
+- **Data transformation complexity**: Step 2 focuses on robust transformation logic with comprehensive error handling
+- **State management complexity**: Steps 7-9 address the multi-level filtering state systematically
+- **Integration challenges**: Steps 10-11 ensure smooth integration with existing systems
+- **Performance concerns**: Step 13 validates performance with realistic datasets
+
+### Implementation Strategy
+- **Foundation first**: Data transformation (Steps 1-3) provides the core logic
+- **Component architecture**: Basic component structure (Steps 4-6) establishes the UI foundation
+- **Interaction logic**: Filtering behavior (Steps 7-9) adds user functionality
+- **Integration polish**: Final integration (Steps 10-13) ensures production readiness
+
+### Quality Assurance
+- **Comprehensive test coverage**: Each step includes dedicated test files
+- **Type safety**: TypeScript interfaces are defined and tested throughout
+- **Error handling**: Fail-fast approach with graceful degradation
+- **Performance validation**: Explicit performance testing ensures scalability
+- **Accessibility**: User interaction patterns are tested for accessibility compliance
+
+### Success Metrics
+- **Functional completeness**: All specification requirements are covered by test-driven implementation
+- **Performance standards**: Component maintains performance comparable to existing tables
+- **Integration success**: Seamless integration with existing analyzer patterns
+- **User experience**: Intuitive component-level filtering with clear visual feedback
+- **Maintainability**: Clean separation of concerns with comprehensive documentation
+
+This TDD implementation plan provides a systematic, test-driven approach to building the brush table specialized component while ensuring quality, performance, and maintainability throughout the development process.
+
+---
+
+**Status**: READY_FOR_IMPLEMENTATION  
+**Created**: 2025-07-19  
+**Type**: TDD Implementation Plan  
+**Priority**: High  
+**Dependencies**: UnmatchedAnalyzer, VirtualizedTable, brush_matcher.py  
+**Estimated Effort**: 13 steps, ~2-3 development sessions
+description:
+globs:
+alwaysApply: false
+---
