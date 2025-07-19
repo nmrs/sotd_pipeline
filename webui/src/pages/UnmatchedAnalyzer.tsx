@@ -1,17 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { analyzeUnmatched, UnmatchedAnalysisResult, handleApiError, runMatchPhase, MatchPhaseRequest, getCommentDetail, CommentDetail } from '../services/api';
 import MonthSelector from '../components/MonthSelector';
 import LoadingSpinner from '../components/LoadingSpinner';
 import VirtualizedTable from '../components/VirtualizedTable';
 import PerformanceMonitor from '../components/PerformanceMonitor';
 import CommentModal from '../components/CommentModal';
-import FilteredEntryCheckbox from '../components/FilteredEntryCheckbox';
-import { useBulkSelection } from '../hooks/useBulkSelection';
-import { useFilteredState } from '../hooks/useFilteredState';
+
+
+
 import { useViewState } from '../hooks/useViewState';
 import { useSearchSort } from '../hooks/useSearchSort';
 import { useMessaging } from '../hooks/useMessaging';
 import MessageDisplay from '../components/MessageDisplay';
+
+// Hook to get screen width
+const useScreenWidth = () => {
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setScreenWidth(window.innerWidth);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    return screenWidth;
+};
 
 const UnmatchedAnalyzer: React.FC = () => {
     const [selectedField, setSelectedField] = useState<string>('razor');
@@ -27,6 +43,7 @@ const UnmatchedAnalyzer: React.FC = () => {
     const [commentModalOpen, setCommentModalOpen] = useState(false);
     const [commentLoading, setCommentLoading] = useState(false);
     const [filteredStatus, setFilteredStatus] = useState<Record<string, boolean>>({});
+    const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
 
     // View state hook
     const viewState = useViewState();
@@ -39,30 +56,10 @@ const UnmatchedAnalyzer: React.FC = () => {
     // Messaging hook
     const messaging = useMessaging();
 
-    // Bulk selection hook
-    const bulkSelection = useBulkSelection({
-        items: searchSort.filteredAndSortedItems,
-        filteredStatus: viewState.showFiltered ? {} : filteredStatus, // Show all items when filtered is visible
-        onSelectionChange: (selectedItems) => {
-            // Handle bulk selection changes
-            console.log('Bulk selection changed:', Array.from(selectedItems));
-        },
-    });
+    // Screen width hook for dynamic column sizing
+    const screenWidth = useScreenWidth();
 
-    // Filtered state hook
-    const filteredState = useFilteredState({
-        category: selectedField,
-        selectedItems: bulkSelection.selectedItems,
-        items: results?.unmatched_items || [],
-        onSuccess: (message) => {
-            messaging.addSuccessMessage(message);
-            // Clear selection after successful update
-            bulkSelection.clearSelection();
-        },
-        onError: (error) => {
-            messaging.addErrorMessage(error);
-        },
-    });
+
 
     const fieldOptions = [
         { value: 'razor', label: 'Razor' },
@@ -106,6 +103,29 @@ const UnmatchedAnalyzer: React.FC = () => {
         return examples.slice(0, 3).join(', ') + (examples.length > 3 ? '...' : '');
     };
 
+    // Calculate dynamic column widths based on screen size
+    const columnWidths = useMemo(() => {
+        // Account for padding and margins (roughly 100px total)
+        const availableWidth = Math.max(screenWidth - 100, 800); // Minimum 800px
+
+        // Define column proportions (total should be 100%)
+        const proportions = {
+            filtered: 8,    // 8%
+            item: 35,       // 35%
+            count: 8,       // 8%
+            comment_ids: 35, // 35%
+            examples: 14,   // 14%
+        };
+
+        return {
+            filtered: Math.floor(availableWidth * proportions.filtered / 100),
+            item: Math.floor(availableWidth * proportions.item / 100),
+            count: Math.floor(availableWidth * proportions.count / 100),
+            comment_ids: Math.floor(availableWidth * proportions.comment_ids / 100),
+            examples: Math.floor(availableWidth * proportions.examples / 100),
+        };
+    }, [screenWidth]);
+
     const handleCommentClick = async (commentId: string) => {
         try {
             setCommentLoading(true);
@@ -120,10 +140,77 @@ const UnmatchedAnalyzer: React.FC = () => {
     };
 
     const handleFilteredStatusChange = (itemName: string, isFiltered: boolean) => {
-        setFilteredStatus(prev => ({
+        setPendingChanges(prev => ({
             ...prev,
             [itemName]: isFiltered,
         }));
+    };
+
+    const handleApplyFilteredChanges = async () => {
+        if (Object.keys(pendingChanges).length === 0) {
+            messaging.addSuccessMessage('No changes to apply');
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            // Prepare entries for bulk update
+            const entries: Array<{
+                name: string;
+                action: 'add' | 'remove';
+                comment_id: string;
+                file_path: string;
+                source: string;
+            }> = [];
+
+            Object.entries(pendingChanges).forEach(([itemName, shouldBeFiltered]) => {
+                const item = results?.unmatched_items?.find(i => i.item === itemName);
+                if (item && item.comment_ids) {
+                    item.comment_ids.forEach(commentId => {
+                        entries.push({
+                            name: itemName,
+                            action: shouldBeFiltered ? 'add' : 'remove',
+                            comment_id: commentId,
+                            file_path: `data/comments/${commentId.split('_')[0]}.json`,
+                            source: 'user',
+                        });
+                    });
+                }
+            });
+
+            if (entries.length === 0) {
+                messaging.addSuccessMessage('No changes to apply');
+                return;
+            }
+
+            // Import the API function
+            const { updateFilteredEntries } = await import('../services/api');
+
+            const response = await updateFilteredEntries({
+                category: selectedField,
+                entries,
+            });
+
+            if (response.success) {
+                // Update the filtered status with pending changes
+                setFilteredStatus(prev => ({
+                    ...prev,
+                    ...pendingChanges,
+                }));
+
+                // Clear pending changes
+                setPendingChanges({});
+
+                messaging.addSuccessMessage(`Updated ${entries.length} entries successfully`);
+            } else {
+                messaging.addErrorMessage(response.message || 'Failed to update filtered entries');
+            }
+        } catch (err: any) {
+            messaging.addErrorMessage(err.message || 'Failed to update filtered entries');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleRunMatchPhase = async () => {
@@ -176,7 +263,7 @@ const UnmatchedAnalyzer: React.FC = () => {
     }, [results]);
 
     return (
-        <div className="max-w-6xl mx-auto p-6">
+        <div className="max-w-full mx-auto p-6">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">Unmatched Item Analyzer</h1>
                 <p className="text-gray-600">
@@ -327,9 +414,15 @@ const UnmatchedAnalyzer: React.FC = () => {
                                     <div>
                                         <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center space-x-4">
-                                                <h3 className="text-base font-medium text-gray-900">
-                                                    Top Unmatched Items ({searchSort.searchResultsCount} of {searchSort.totalItemsCount})
-                                                </h3>
+                                                <div>
+                                                    <h3 className="text-base font-medium text-gray-900">
+                                                        Top Unmatched Items ({searchSort.searchResultsCount} of {searchSort.totalItemsCount})
+                                                    </h3>
+                                                    <p className="text-xs text-gray-500">
+                                                        Screen: {screenWidth}px | Available: {Math.max(screenWidth - 100, 800)}px |
+                                                        Item: {columnWidths.item}px | Comments: {columnWidths.comment_ids}px
+                                                    </p>
+                                                </div>
                                                 <div className="flex items-center space-x-2">
                                                     <button
                                                         onClick={viewState.toggleShowFiltered}
@@ -393,41 +486,18 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                     </button>
                                                 </div>
                                             </div>
-                                            {bulkSelection.totalItems > 0 && (
-                                                <div className="flex items-center space-x-4">
-                                                    <div className="flex items-center space-x-2">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={bulkSelection.selectAll}
-                                                            ref={(el) => {
-                                                                if (el) {
-                                                                    el.indeterminate = bulkSelection.indeterminate;
-                                                                }
-                                                            }}
-                                                            onChange={bulkSelection.toggleSelectAll}
-                                                            disabled={bulkSelection.totalItems === 0}
-                                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                            title="Select all visible items"
-                                                        />
-                                                        <span className="text-sm text-gray-600">
-                                                            Select All ({bulkSelection.totalItems} visible)
-                                                        </span>
-                                                        {bulkSelection.selectedVisibleItems.length > 0 && (
-                                                            <span className="text-sm text-blue-600 font-medium">
-                                                                {bulkSelection.selectedVisibleItems.length} selected
-                                                            </span>
-                                                        )}
-                                                    </div>
-
-                                                    {filteredState.hasChanges && (
-                                                        <button
-                                                            onClick={filteredState.updateFiltered}
-                                                            disabled={filteredState.isUpdating}
-                                                            className="bg-blue-600 text-white py-1 px-3 rounded text-sm hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        >
-                                                            {filteredState.isUpdating ? 'Updating...' : 'Update Filtered'}
-                                                        </button>
-                                                    )}
+                                            {Object.keys(pendingChanges).length > 0 && (
+                                                <div className="flex items-center space-x-4 mt-3">
+                                                    <button
+                                                        onClick={handleApplyFilteredChanges}
+                                                        disabled={loading}
+                                                        className="bg-blue-600 text-white py-2 px-4 rounded text-sm hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {loading ? 'Applying...' : `Apply Changes (${Object.keys(pendingChanges).length})`}
+                                                    </button>
+                                                    <span className="text-sm text-gray-600">
+                                                        {Object.keys(pendingChanges).length} item(s) with pending changes
+                                                    </span>
                                                 </div>
                                             )}
                                         </div>
@@ -435,33 +505,38 @@ const UnmatchedAnalyzer: React.FC = () => {
                                             data={searchSort.filteredAndSortedItems}
                                             columns={[
                                                 {
-                                                    key: 'selection',
-                                                    header: 'Select',
-                                                    width: 100,
-                                                    render: (item) => (
-                                                        <div className="flex items-center space-x-2">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={bulkSelection.selectedItems.has(item.item)}
-                                                                onChange={() => bulkSelection.toggleItem(item.item)}
-                                                                disabled={filteredStatus[item.item]}
-                                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                title={filteredStatus[item.item] ? 'Item is filtered' : 'Select for bulk operation'}
-                                                            />
-                                                            <FilteredEntryCheckbox
-                                                                category={selectedField}
-                                                                itemName={item.item}
-                                                                commentIds={(item.comment_ids || []) as string[]}
-                                                                onStatusChange={(isFiltered) => handleFilteredStatusChange(item.item, isFiltered)}
-                                                                disabled={commentLoading}
-                                                            />
-                                                        </div>
-                                                    ),
+                                                    key: 'filtered',
+                                                    header: 'Filtered',
+                                                    width: columnWidths.filtered,
+                                                    render: (item) => {
+                                                        const isCurrentlyFiltered = filteredStatus[item.item] || false;
+                                                        const hasPendingChange = item.item in pendingChanges;
+                                                        const pendingValue = pendingChanges[item.item];
+                                                        const displayValue = hasPendingChange ? pendingValue : isCurrentlyFiltered;
+
+                                                        return (
+                                                            <div className="flex items-center">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={displayValue}
+                                                                    onChange={(e) => handleFilteredStatusChange(item.item, e.target.checked)}
+                                                                    disabled={commentLoading}
+                                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                    title={displayValue ? 'Mark as unfiltered' : 'Mark as intentionally unmatched'}
+                                                                />
+                                                                {hasPendingChange && (
+                                                                    <div className="ml-1">
+                                                                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    },
                                                 },
                                                 {
                                                     key: 'item',
                                                     header: 'Item',
-                                                    width: 250,
+                                                    width: columnWidths.item,
                                                     render: (item) => (
                                                         <span className={`font-medium text-sm ${filteredStatus[item.item]
                                                             ? 'text-gray-400 line-through'
@@ -479,7 +554,7 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                 {
                                                     key: 'count',
                                                     header: 'Count',
-                                                    width: 80,
+                                                    width: columnWidths.count,
                                                     render: (item) => (
                                                         <span className="text-gray-500 text-sm">
                                                             {item.count}
@@ -489,7 +564,7 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                 {
                                                     key: 'comment_ids',
                                                     header: 'Comment IDs',
-                                                    width: 300,
+                                                    width: columnWidths.comment_ids,
                                                     render: (item) => (
                                                         <div className="text-sm">
                                                             {item.comment_ids && item.comment_ids.length > 0 ? (
@@ -519,7 +594,7 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                 {
                                                     key: 'examples',
                                                     header: 'Examples',
-                                                    width: 200,
+                                                    width: columnWidths.examples,
                                                     render: (item) => (
                                                         <span className="text-gray-500 text-sm">
                                                             {formatExamples(item.examples || [])}
