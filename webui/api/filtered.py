@@ -126,7 +126,14 @@ async def update_filtered_entries(request: FilteredEntryRequest):
                     errors.append("comment_id is required for add action")
                     continue
                 try:
-                    manager.add_entry(category, entry_name, comment_id, file_path, source, reason)
+                    manager.add_entry(
+                        category=category,
+                        entry_name=entry_name,
+                        comment_id=comment_id,
+                        file_path=file_path,
+                        source=source,
+                        reason=reason,
+                    )
                     added_count += 1
                 except Exception as e:
                     errors.append(f"Error adding entry {entry_name}: {str(e)}")
