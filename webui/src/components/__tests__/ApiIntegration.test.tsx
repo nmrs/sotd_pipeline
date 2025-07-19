@@ -1,44 +1,61 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
-import App from '../../App';
 import { MemoryRouter } from 'react-router-dom';
+import Dashboard from '../../pages/Dashboard';
 
-const server = setupServer(
-    rest.get('/api/filtered', (req: any, res: any, ctx: any) => {
-        return res(ctx.json({ data: [], total: 0, page: 1 }));
-    })
-);
+// Mock the API service
+jest.mock('../../services/api', () => ({
+    getAvailableMonths: jest.fn(),
+    getMonthData: jest.fn(),
+    getCatalogs: jest.fn(),
+    checkHealth: jest.fn(),
+}));
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+// Import the mocked function
+import { getAvailableMonths, checkHealth } from '../../services/api';
 
 describe('API Integration', () => {
-    test('should fetch filtered entries', async () => {
-        render(
-            <MemoryRouter>
-                <App />
-            </MemoryRouter>
-        );
-        await waitFor(() => expect(screen.getByRole('main')).toBeInTheDocument());
+    beforeEach(() => {
+        (getAvailableMonths as jest.Mock).mockClear();
+        (checkHealth as jest.Mock).mockClear();
     });
 
-    test('should handle API errors gracefully', async () => {
-        server.use(
-            rest.get('/api/filtered', (req: any, res: any, ctx: any) => {
-                return res(ctx.status(500), ctx.json({ error: 'Internal server error' }));
-            })
-        );
+    test('should handle API error state', async () => {
+        // Mock health check to pass
+        (checkHealth as jest.Mock).mockResolvedValue(true);
+
+        // Mock API error
+        (getAvailableMonths as jest.Mock).mockRejectedValue(new Error('API Error'));
+
         render(
             <MemoryRouter>
-                <App />
+                <Dashboard />
             </MemoryRouter>
         );
-        // Check for error message or fallback UI
+
         await waitFor(() => {
-            expect(screen.getByRole('main')).toBeInTheDocument();
+            expect(screen.getByText(/error/i)).toBeInTheDocument();
         });
+    });
+
+    test('should handle API timeout', async () => {
+        // Mock health check to pass
+        (checkHealth as jest.Mock).mockResolvedValue(true);
+
+        // Mock a timeout scenario
+        (getAvailableMonths as jest.Mock).mockImplementation(() =>
+            new Promise(resolve => setTimeout(() => resolve(['2024-01', '2024-02']), 10000))
+        );
+
+        render(
+            <MemoryRouter>
+                <Dashboard />
+            </MemoryRouter>
+        );
+
+        // Should handle timeout gracefully
+        await waitFor(() => {
+            expect(screen.getByText(/timeout|error/i)).toBeInTheDocument();
+        }, { timeout: 2000 });
     });
 }); 
