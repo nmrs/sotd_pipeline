@@ -1,7 +1,3 @@
----
-globs: **/test*,**/tests/*
-alwaysApply: false
----
 # Testing Patterns for SOTD Pipeline
 
 ## Testing Strategy and Requirements
@@ -13,7 +9,7 @@ When adding or modifying any functionality in the SOTD pipeline, follow this pri
    - Use mock catalogs and external services
    - Test individual functions and methods in isolation
    - Focus on logic validation and edge cases
-   - Located in `tests/{module}/test_{filename}.py`
+   - Located in `tests/{module}/test_{filename}.py` (Python) or `src/**/*.{test,spec}.{ts,tsx}` (React)
    - **Use by default** - provides fastest feedback and best debugging
 
 2. **Integration Tests** - Tests using real production data (MEDIUM PRIORITY)
@@ -36,7 +32,7 @@ When adding or modifying any functionality in the SOTD pipeline, you MUST provid
    - Use mock catalogs and external services
    - Test individual functions and methods in isolation
    - Focus on logic validation and edge cases
-   - Located in `tests/{module}/test_{filename}.py`
+   - Located in `tests/{module}/test_{filename}.py` (Python) or `src/**/*.{test,spec}.{ts,tsx}` (React)
 
 2. **Integration Tests** - Tests using real production data
    - Use actual YAML catalog files (`data/*.yaml`)
@@ -49,6 +45,8 @@ When adding or modifying any functionality in the SOTD pipeline, you MUST provid
 - **API changes**: Add unit tests with mocked APIs + integration tests with real services
 - **Data processing logic**: Add unit tests for edge cases + integration tests with sample data
 - **Configuration changes**: Add unit tests for validation + integration tests for real config files
+- **React components**: Add unit tests with React Testing Library + integration tests with real API data
+- **UI interactions**: Add unit tests for user interactions + E2E tests for complete workflows
 
 ### Why This Priority Order
 - **Unit tests (Priority 1)**: Catch logic bugs, provide fastest feedback, enable isolated debugging, lowest cost
@@ -61,8 +59,107 @@ When adding or modifying any functionality in the SOTD pipeline, you MUST provid
 - **Add E2E tests** only when testing complete user workflows is necessary
 - **Never skip unit tests** - they're the foundation of reliable development
 
+## WebUI Testing Strategy
+
+### **MANDATORY**: React Component Testing with React Testing Library
+For all React components in the webui, follow this testing approach:
+
+1. **Component Unit Tests** - Test individual React components (HIGHEST PRIORITY)
+   - Use React Testing Library for component testing
+   - Mock external dependencies (APIs, services)
+   - Test component rendering, user interactions, and state changes
+   - Located in `webui/src/**/*.{test,spec}.{ts,tsx}`
+   - **Use by default** - provides fastest feedback for UI development
+
+2. **API Integration Tests** - Test API interactions with MSW (MEDIUM PRIORITY)
+   - Use MSW (Mock Service Worker) to mock API responses
+   - Test API integration without real server
+   - Validate error handling and loading states
+   - Located in `webui/src/**/*.api.test.{ts,tsx}`
+   - **Use when necessary** - for validating API integration
+
+3. **E2E Tests** - Test complete user workflows (LOWEST PRIORITY)
+   - Use Playwright for browser-based testing
+   - Test complete user journeys and cross-browser compatibility
+   - Located in `webui/tests/`
+   - **Use only when necessary** - for complete workflow validation
+
+### React Testing Library Patterns
+```typescript
+// webui/src/components/__tests__/BrushTable.test.tsx
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import BrushTable from '../BrushTable';
+
+describe('BrushTable', () => {
+  test('should render brush data correctly', () => {
+    render(<BrushTable data={mockBrushData} />);
+    
+    expect(screen.getByText('Simpson Chubby 2')).toBeInTheDocument();
+    expect(screen.getByText('Declaration B15')).toBeInTheDocument();
+  });
+
+  test('should handle user interactions', async () => {
+    const user = userEvent.setup();
+    render(<BrushTable data={mockBrushData} />);
+    
+    const filterInput = screen.getByPlaceholderText(/filter/i);
+    await user.type(filterInput, 'Simpson');
+    
+    expect(screen.getByText('Simpson Chubby 2')).toBeInTheDocument();
+    expect(screen.queryByText('Declaration B15')).not.toBeInTheDocument();
+  });
+});
+```
+
+### MSW API Mocking Patterns
+```typescript
+// webui/src/services/__tests__/api.test.ts
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
+import { fetchFilteredData } from '../api';
+
+const server = setupServer(
+  rest.get('/api/filtered', (req, res, ctx) => {
+    return res(ctx.json({
+      data: mockData,
+      total: 100,
+      page: 1
+    }));
+  })
+);
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+test('should fetch filtered data', async () => {
+  const result = await fetchFilteredData({ page: 1 });
+  expect(result.data).toHaveLength(100);
+});
+```
+
+### WebUI Testing Commands
+```bash
+# Unit tests (fastest feedback)
+npm run test:unit
+
+# All tests including unit and integration
+npm run test
+
+# Watch mode for development
+npm run test:watch
+
+# Coverage report
+npm run test:coverage
+
+# E2E tests (slowest, complete workflows)
+npm run test:e2e:background
+```
+
 ## Test File Structure and Naming
-- Test files: `test_{module_name}.py`
+- Test files: `test_{module_name}.py` (Python) or `*.{test,spec}.{ts,tsx}` (React)
 - Test functions: `test_{functionality}_when_{condition}_then_{expected}`
 - Mock classes: `Mock{ServiceName}` (e.g., `MockSubmission`, `MockPRAW`)
 - Mirror source structure in `tests/` directory
@@ -178,6 +275,8 @@ def test_fetch_with_rate_limit_error(mock_reddit):
 - **Data Validation**: Test input validation and edge cases
 - **API Integration**: Mock external services extensively
 - **End-to-End**: Include integration tests for complete workflows
+- **React Components**: Test rendering, user interactions, and state changes
+- **UI Interactions**: Test form submissions, filtering, and navigation
 
 ## Performance Testing
 ```python
@@ -360,20 +459,33 @@ Follow the test priority hierarchy during development:
 
 ```bash
 # 1. Unit tests (fastest feedback loop) - START HERE
-make test-fast
+make test-fast  # Python unit tests
+npm run test:unit  # React unit tests
 
 # 2. Integration tests (when needed for real data validation)
-python -m pytest tests/integration/ -v
+python -m pytest tests/integration/ -v  # Python integration tests
+npm run test  # React integration tests
 
 # 3. E2E tests (only when testing complete user workflows)
 npm run test:e2e:background  # For web UI testing
 
 # All tests before committing (includes unit + integration)
-python -m pytest tests/ -v
+python -m pytest tests/ -v  # All Python tests
+npm run test  # All React tests
 ```
 
 ### Development Priority
 1. **Write unit tests first** - they provide the best development feedback
+2. **Add integration tests** when you need to validate real data compatibility
+3. **Add E2E tests** only when testing complete user workflows is necessary
+4. **Never skip unit tests** - they're the foundation of reliable development
+
+### WebUI Development Priority
+1. **Write React component unit tests first** - fastest feedback for UI development
+2. **Add API integration tests** when testing API interactions
+3. **Add E2E tests** only when testing complete user workflows
+4. **Use React Testing Library by default** - provides best debugging and feedback
+
 2. **Add integration tests** when you need to validate real data compatibility
 3. **Add E2E tests** only when testing complete user workflows is necessary
 4. **Never skip unit tests** - they're the foundation of reliable development
