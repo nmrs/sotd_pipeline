@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getAvailableMonths } from '../services/api';
+import { useAvailableMonths } from '../hooks/useAvailableMonths';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorDisplay from './ErrorDisplay';
 
@@ -15,28 +15,9 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
     onMonthsChange,
     multiple = true
 }) => {
-    const [availableMonths, setAvailableMonths] = useState<string[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { availableMonths, loading, error } = useAvailableMonths();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const fetchMonths = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                const months = await getAvailableMonths();
-                setAvailableMonths(months.sort().reverse()); // Sort newest first
-            } catch (err: any) {
-                setError(err.message || 'Failed to load available months');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchMonths();
-    }, []);
 
     // Close dropdown when clicking outside
     useEffect(() => {

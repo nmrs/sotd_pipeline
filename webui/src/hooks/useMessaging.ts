@@ -30,7 +30,7 @@ export const useMessaging = (options: UseMessagingOptions = {}): UseMessagingRet
 
     // Auto-hide messages
     useEffect(() => {
-        const timeouts: number[] = [];
+        const timeouts: ReturnType<typeof setTimeout>[] = [];
 
         messages.forEach((message) => {
             if (message.autoHide && message.type === 'success') {

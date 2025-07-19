@@ -7,6 +7,8 @@ interface UseSearchSortOptions {
     items: Array<{ item: string; count: number; comment_ids?: string[]; examples?: string[];[key: string]: any }>;
     defaultSortField?: SortField;
     defaultSortDirection?: SortDirection;
+    showFiltered?: boolean;
+    filteredStatus?: Record<string, boolean>;
 }
 
 interface UseSearchSortReturn {
@@ -27,19 +29,29 @@ export const useSearchSort = ({
     items,
     defaultSortField = 'count',
     defaultSortDirection = 'desc',
+    showFiltered = true,
+    filteredStatus = {},
 }: UseSearchSortOptions): UseSearchSortReturn => {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortField, setSortField] = useState<SortField>(defaultSortField);
     const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSortDirection);
 
-    // Filter items based on search term
+    // Filter items based on search term and filtered status
     const filteredItems = useMemo(() => {
+        let filtered = items;
+
+        // Filter out items that are marked as filtered when showFiltered is false
+        if (!showFiltered) {
+            filtered = filtered.filter(item => !filteredStatus[item.item]);
+        }
+
+        // Filter by search term
         if (!searchTerm.trim()) {
-            return items;
+            return filtered;
         }
 
         const term = searchTerm.toLowerCase();
-        return items.filter(item => {
+        return filtered.filter(item => {
             // Search in item name
             if (item.item.toLowerCase().includes(term)) {
                 return true;
@@ -61,7 +73,7 @@ export const useSearchSort = ({
 
             return false;
         });
-    }, [items, searchTerm]);
+    }, [items, searchTerm, showFiltered, filteredStatus]);
 
     // Sort filtered items
     const filteredAndSortedItems = useMemo(() => {
