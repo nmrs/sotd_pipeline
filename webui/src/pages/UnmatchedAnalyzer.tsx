@@ -44,6 +44,7 @@ const UnmatchedAnalyzer: React.FC = () => {
     const [commentLoading, setCommentLoading] = useState(false);
     const [filteredStatus, setFilteredStatus] = useState<Record<string, boolean>>({});
     const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
+    const [reasonText, setReasonText] = useState<string>('');
 
     // View state hook
     const viewState = useViewState();
@@ -165,6 +166,11 @@ const UnmatchedAnalyzer: React.FC = () => {
             return;
         }
 
+        // Log reason if provided (for development/debugging)
+        if (reasonText.trim()) {
+            console.log('Reason provided:', reasonText);
+        }
+
         try {
             setLoading(true);
 
@@ -220,6 +226,9 @@ const UnmatchedAnalyzer: React.FC = () => {
 
             // Clear pending changes
             setPendingChanges({});
+
+            // Clear reason text
+            setReasonText('');
 
             messaging.addSuccessMessage(`Updated ${Object.keys(pendingChanges).length} entries successfully`);
         } catch (err: any) {
@@ -466,6 +475,15 @@ const UnmatchedAnalyzer: React.FC = () => {
 
                                                     return (
                                                         <div className="flex items-center space-x-2">
+                                                            {visibleChangesCount > 0 && (
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Reason (optional)..."
+                                                                    value={reasonText}
+                                                                    onChange={(e) => setReasonText(e.target.value)}
+                                                                    className="px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 w-48"
+                                                                />
+                                                            )}
                                                             <button
                                                                 onClick={handleApplyFilteredChanges}
                                                                 disabled={loading || visibleChangesCount === 0}
