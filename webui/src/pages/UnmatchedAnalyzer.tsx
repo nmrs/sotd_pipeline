@@ -468,19 +468,14 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                         <div className="flex items-center space-x-2">
                                                             <button
                                                                 onClick={handleApplyFilteredChanges}
-                                                                disabled={loading || !viewState.showFiltered}
-                                                                className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || !viewState.showFiltered
+                                                                disabled={loading}
+                                                                className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading
                                                                     ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                                                                     : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
                                                                     }`}
                                                             >
                                                                 {loading ? 'Applying...' : `Apply (${visibleChangesCount})`}
                                                             </button>
-                                                            {!viewState.showFiltered && (
-                                                                <span className="text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">
-                                                                    Show filtered to review
-                                                                </span>
-                                                            )}
                                                         </div>
                                                     );
                                                 })()}
