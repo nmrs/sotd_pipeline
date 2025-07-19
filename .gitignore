@@ -67,3 +67,7 @@ webui/.node_repl_history
 webui/*.tgz
 webui/.yarn-integrity
 webui/.env*.local
+# WebUI server management files
+webui/.pids/
+webui/.pids/*.pid
+webui/.pids/*.log
