@@ -9,14 +9,16 @@ import CommentModal from '../components/CommentModal';
 import FilteredEntryCheckbox from '../components/FilteredEntryCheckbox';
 import { useBulkSelection } from '../hooks/useBulkSelection';
 import { useFilteredState } from '../hooks/useFilteredState';
+import { useViewState } from '../hooks/useViewState';
+import { useSearchSort } from '../hooks/useSearchSort';
+import { useMessaging } from '../hooks/useMessaging';
+import MessageDisplay from '../components/MessageDisplay';
 
 const UnmatchedAnalyzer: React.FC = () => {
     const [selectedField, setSelectedField] = useState<string>('razor');
     const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
     const [limit, setLimit] = useState<number>(50);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [matchPhaseOutput, setMatchPhaseOutput] = useState<string | null>(null);
     const [results, setResults] = useState<UnmatchedAnalysisResult | null>(null);
     const [operationCount, setOperationCount] = useState(0);
@@ -27,10 +29,21 @@ const UnmatchedAnalyzer: React.FC = () => {
     const [commentLoading, setCommentLoading] = useState(false);
     const [filteredStatus, setFilteredStatus] = useState<Record<string, boolean>>({});
 
+    // View state hook
+    const viewState = useViewState();
+
+    // Search and sort hook
+    const searchSort = useSearchSort({
+        items: results?.unmatched_items || [],
+    });
+
+    // Messaging hook
+    const messaging = useMessaging();
+
     // Bulk selection hook
     const bulkSelection = useBulkSelection({
-        items: results?.unmatched_items || [],
-        filteredStatus,
+        items: searchSort.filteredAndSortedItems,
+        filteredStatus: viewState.showFiltered ? {} : filteredStatus, // Show all items when filtered is visible
         onSelectionChange: (selectedItems) => {
             // Handle bulk selection changes
             console.log('Bulk selection changed:', Array.from(selectedItems));
@@ -43,12 +56,12 @@ const UnmatchedAnalyzer: React.FC = () => {
         selectedItems: bulkSelection.selectedItems,
         items: results?.unmatched_items || [],
         onSuccess: (message) => {
-            setSuccessMessage(message);
+            messaging.addSuccessMessage(message);
             // Clear selection after successful update
             bulkSelection.clearSelection();
         },
         onError: (error) => {
-            setError(error);
+            messaging.addErrorMessage(error);
         },
     });
 
@@ -61,14 +74,12 @@ const UnmatchedAnalyzer: React.FC = () => {
 
     const handleAnalyze = async () => {
         if (selectedMonths.length === 0) {
-            setError('Please select at least one month');
+            messaging.addErrorMessage('Please select at least one month');
             return;
         }
 
         try {
             setLoading(true);
-            setError(null);
-            setSuccessMessage(null);
             setResults(null);
             setOperationCount(prev => prev + 1);
 
@@ -85,7 +96,7 @@ const UnmatchedAnalyzer: React.FC = () => {
                 throw new Error('Invalid response format from API');
             }
         } catch (err: any) {
-            setError(handleApiError(err));
+            messaging.addErrorMessage(handleApiError(err));
         } finally {
             setLoading(false);
         }
@@ -108,7 +119,7 @@ const UnmatchedAnalyzer: React.FC = () => {
             setSelectedComment(comment);
             setCommentModalOpen(true);
         } catch (err: any) {
-            setError(handleApiError(err));
+            messaging.addErrorMessage(handleApiError(err));
         } finally {
             setCommentLoading(false);
         }
@@ -123,14 +134,12 @@ const UnmatchedAnalyzer: React.FC = () => {
 
     const handleRunMatchPhase = async () => {
         if (selectedMonths.length === 0) {
-            setError('Please select at least one month');
+            messaging.addErrorMessage('Please select at least one month');
             return;
         }
 
         try {
             setMatchPhaseLoading(true);
-            setError(null);
-            setSuccessMessage(null);
             setMatchPhaseOutput(null); // Clear previous output before writing new content
 
             const request: MatchPhaseRequest = {
@@ -144,8 +153,7 @@ const UnmatchedAnalyzer: React.FC = () => {
             setMatchPhaseOutput(result.error_details || null);
 
             if (result.success) {
-                setError(null);
-                setSuccessMessage(result.message);
+                messaging.addSuccessMessage(result.message);
                 // Optionally refresh the analysis after successful match phase
                 if (results) {
                     handleAnalyze();
@@ -155,11 +163,10 @@ const UnmatchedAnalyzer: React.FC = () => {
                 const errorMessage = result.error_details
                     ? `${result.message}\n\nError Details:\n${result.error_details}`
                     : result.message;
-                setError(errorMessage);
-                setSuccessMessage(null);
+                messaging.addErrorMessage(errorMessage);
             }
         } catch (err: any) {
-            setError(handleApiError(err));
+            messaging.addErrorMessage(handleApiError(err));
         } finally {
             setMatchPhaseLoading(false);
         }
@@ -275,37 +282,6 @@ const UnmatchedAnalyzer: React.FC = () => {
 
             {/* Results Panel - Full width */}
             <div className="space-y-6">
-                {error && (
-                    <ErrorDisplay error={error} onRetry={() => setError(null)} />
-                )}
-
-                {successMessage && (
-                    <div className="bg-green-50 border border-green-200 rounded-md p-4">
-                        <div className="flex">
-                            <div className="flex-shrink-0">
-                                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                            </div>
-                            <div className="ml-3">
-                                <p className="text-sm text-green-800">{successMessage}</p>
-                            </div>
-                            <div className="ml-auto pl-3">
-                                <div className="-mx-1.5 -my-1.5">
-                                    <button
-                                        onClick={() => setSuccessMessage(null)}
-                                        className="inline-flex rounded-md bg-green-50 p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50"
-                                    >
-                                        <span className="sr-only">Dismiss</span>
-                                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {matchPhaseOutput && (
                     <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
@@ -356,9 +332,73 @@ const UnmatchedAnalyzer: React.FC = () => {
                                 ) : (
                                     <div>
                                         <div className="flex items-center justify-between mb-3">
-                                            <h3 className="text-base font-medium text-gray-900">
-                                                Top Unmatched Items ({results.unmatched_items.length})
-                                            </h3>
+                                            <div className="flex items-center space-x-4">
+                                                <h3 className="text-base font-medium text-gray-900">
+                                                    Top Unmatched Items ({searchSort.searchResultsCount} of {searchSort.totalItemsCount})
+                                                </h3>
+                                                <div className="flex items-center space-x-2">
+                                                    <button
+                                                        onClick={viewState.toggleShowFiltered}
+                                                        className={`px-3 py-1 rounded text-sm font-medium transition-colors ${viewState.showFiltered
+                                                            ? 'bg-gray-600 text-white hover:bg-gray-700'
+                                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                            }`}
+                                                    >
+                                                        {viewState.showFiltered ? 'Hide Filtered' : 'Show Filtered'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center space-x-4">
+                                                {/* Search Box */}
+                                                <div className="flex items-center space-x-2">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Search items..."
+                                                        value={searchSort.searchTerm}
+                                                        onChange={(e) => searchSort.setSearchTerm(e.target.value)}
+                                                        className="px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                    />
+                                                    {searchSort.searchTerm && (
+                                                        <button
+                                                            onClick={searchSort.clearSearch}
+                                                            className="text-gray-400 hover:text-gray-600"
+                                                        >
+                                                            <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                {/* Sort Controls */}
+                                                <div className="flex items-center space-x-2">
+                                                    <label className="text-xs text-gray-600">Sort by:</label>
+                                                    <select
+                                                        value={searchSort.sortField}
+                                                        onChange={(e) => searchSort.setSortField(e.target.value as any)}
+                                                        className="px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                    >
+                                                        <option value="count">Count</option>
+                                                        <option value="item">Item</option>
+                                                        <option value="comment_ids">Comment IDs</option>
+                                                        <option value="examples">Examples</option>
+                                                    </select>
+                                                    <button
+                                                        onClick={searchSort.toggleSortDirection}
+                                                        className="p-1 text-gray-600 hover:text-gray-800"
+                                                        title={`Sort ${searchSort.sortDirection === 'asc' ? 'descending' : 'ascending'}`}
+                                                    >
+                                                        {searchSort.sortDirection === 'asc' ? (
+                                                            <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+                                                            </svg>
+                                                        ) : (
+                                                            <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                            </svg>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </div>
                                             {bulkSelection.totalItems > 0 && (
                                                 <div className="flex items-center space-x-4">
                                                     <div className="flex items-center space-x-2">
@@ -398,7 +438,7 @@ const UnmatchedAnalyzer: React.FC = () => {
                                             )}
                                         </div>
                                         <VirtualizedTable
-                                            data={results.unmatched_items}
+                                            data={searchSort.filteredAndSortedItems}
                                             columns={[
                                                 {
                                                     key: 'selection',
@@ -417,7 +457,7 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                             <FilteredEntryCheckbox
                                                                 category={selectedField}
                                                                 itemName={item.item}
-                                                                commentIds={item.comment_ids || []}
+                                                                commentIds={(item.comment_ids || []) as string[]}
                                                                 onStatusChange={(isFiltered) => handleFilteredStatusChange(item.item, isFiltered)}
                                                                 disabled={commentLoading}
                                                             />
@@ -429,8 +469,16 @@ const UnmatchedAnalyzer: React.FC = () => {
                                                     header: 'Item',
                                                     width: 250,
                                                     render: (item) => (
-                                                        <span className="font-medium text-gray-900 text-sm">
+                                                        <span className={`font-medium text-sm ${filteredStatus[item.item]
+                                                            ? 'text-gray-400 line-through'
+                                                            : 'text-gray-900'
+                                                            }`}>
                                                             {item.item}
+                                                            {filteredStatus[item.item] && (
+                                                                <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                                                    Filtered
+                                                                </span>
+                                                            )}
                                                         </span>
                                                     ),
                                                 },
@@ -512,6 +560,12 @@ const UnmatchedAnalyzer: React.FC = () => {
                     setCommentModalOpen(false);
                     setSelectedComment(null);
                 }}
+            />
+
+            {/* Message Display */}
+            <MessageDisplay
+                messages={messaging.messages}
+                onRemoveMessage={messaging.removeMessage}
             />
         </div>
     );
