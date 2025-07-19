@@ -2,9 +2,9 @@
 """Catalog integration for SOTD pipeline analyzer API."""
 
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
-from datetime import datetime
 
 import yaml
 from fastapi import APIRouter, HTTPException
