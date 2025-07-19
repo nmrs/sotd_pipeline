@@ -7,7 +7,18 @@ const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
     },
+});
+
+// Add cache-busting interceptor to all requests
+api.interceptors.request.use((config) => {
+    // Add timestamp to prevent caching
+    const separator = config.url?.includes('?') ? '&' : '?';
+    config.url = `${config.url}${separator}_t=${Date.now()}`;
+    return config;
 });
 
 // Health check
@@ -112,6 +123,10 @@ export interface UnmatchedItem {
     count: number;
     examples: string[];
     comment_ids: string[];
+    // Optional fields for brush matching data
+    match_type?: string;
+    matched?: any;
+    unmatched?: any;
 }
 
 export interface UnmatchedAnalysisResult {
@@ -126,7 +141,8 @@ export const analyzeUnmatched = async (
     request: UnmatchedAnalysisRequest
 ): Promise<UnmatchedAnalysisResult> => {
     try {
-        const response = await api.post('/analyze/unmatched', request);
+        // Add cache-busting timestamp to prevent browser caching
+        const response = await api.post(`/analyze/unmatched?_t=${Date.now()}`, request);
         return response.data;
     } catch (error) {
         console.error('Failed to analyze unmatched items:', error);
@@ -248,7 +264,8 @@ export const checkFilteredStatus = async (
     request: FilteredStatusRequest
 ): Promise<FilteredStatusResponse> => {
     try {
-        const response = await api.post('/filtered/check', request);
+        // Add cache-busting timestamp to prevent browser caching
+        const response = await api.post(`/filtered/check?_t=${Date.now()}`, request);
         return response.data;
     } catch (error) {
         console.error('Failed to check filtered status:', error);

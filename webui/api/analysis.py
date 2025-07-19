@@ -77,6 +77,10 @@ class UnmatchedItem(BaseModel):
     count: int
     examples: List[str]
     comment_ids: List[str]
+    # Optional fields for brush matching data
+    match_type: Optional[str] = None
+    matched: Optional[dict] = None
+    unmatched: Optional[dict] = None
 
 
 class UnmatchedAnalysisResponse(BaseModel):
@@ -336,11 +340,36 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
                 continue
 
         # Combine results from all months
-        combined_unmatched = defaultdict(lambda: {"examples": [], "comment_ids": []})
-        for result in all_results:
-            for item in result["unmatched_items"]:
-                combined_unmatched[item["item"]]["examples"].extend(item.get("examples", []))
-                combined_unmatched[item["item"]]["comment_ids"].extend(item.get("comment_ids", []))
+        if request.field == "brush":
+            # For brush field, preserve detailed structure
+            combined_unmatched = {}
+            for result in all_results:
+                for item in result["unmatched_items"]:
+                    key = item["item"]
+                    if key not in combined_unmatched:
+                        combined_unmatched[key] = {
+                            "examples": [],
+                            "comment_ids": [],
+                            "match_type": item.get("match_type"),
+                            "matched": item.get("matched"),
+                            "unmatched": item.get("unmatched"),
+                        }
+                    # Safely extend lists
+                    examples = item.get("examples", [])
+                    comment_ids = item.get("comment_ids", [])
+                    if examples:
+                        combined_unmatched[key]["examples"].extend(examples)
+                    if comment_ids:
+                        combined_unmatched[key]["comment_ids"].extend(comment_ids)
+        else:
+            # For other fields, use simple structure
+            combined_unmatched = defaultdict(lambda: {"examples": [], "comment_ids": []})
+            for result in all_results:
+                for item in result["unmatched_items"]:
+                    combined_unmatched[item["item"]]["examples"].extend(item.get("examples", []))
+                    combined_unmatched[item["item"]]["comment_ids"].extend(
+                        item.get("comment_ids", [])
+                    )
 
         # Convert to response format
         unmatched_items = []
@@ -351,17 +380,34 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
 
         for original_text, data in sorted_items:
             # Deduplicate examples and comment_ids and limit to 5
-            unique_examples = list(set(data["examples"]))[:5]
-            unique_comment_ids = list(set(data["comment_ids"]))[:5]
+            examples = data.get("examples", [])
+            comment_ids = data.get("comment_ids", [])
+            unique_examples = list(set(examples))[:5] if examples else []
+            unique_comment_ids = list(set(comment_ids))[:5] if comment_ids else []
 
-            unmatched_items.append(
-                UnmatchedItem(
-                    item=original_text,
-                    count=len(data["examples"]),
-                    examples=unique_examples,
-                    comment_ids=unique_comment_ids,
+            if request.field == "brush":
+                # For brush field, include detailed structure
+                unmatched_items.append(
+                    UnmatchedItem(
+                        item=original_text,
+                        count=len(examples) if examples else 0,
+                        examples=unique_examples,
+                        comment_ids=unique_comment_ids,
+                        match_type=data.get("match_type"),
+                        matched=data.get("matched"),
+                        unmatched=data.get("unmatched"),
+                    )
                 )
-            )
+            else:
+                # For other fields, use simple structure
+                unmatched_items.append(
+                    UnmatchedItem(
+                        item=original_text,
+                        count=len(examples) if examples else 0,
+                        examples=unique_examples,
+                        comment_ids=unique_comment_ids,
+                    )
+                )
 
         total_unmatched = len(combined_unmatched)
         logger.info(f"Analysis complete. Found {total_unmatched} unmatched items across all months")

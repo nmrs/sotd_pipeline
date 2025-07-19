@@ -325,28 +325,44 @@ export function VirtualizedTable<T>({
 
             {/* Virtualized List */}
             <div style={{ height }}>
-                <AutoSizer>
-                    {({ height: autoHeight, width }: { height: number; width: number }) => (
-                        <List
-                            height={autoHeight}
-                            itemCount={sortedData.length}
-                            itemSize={rowHeight}
-                            width={width}
-                            itemData={{
-                                items: sortedData,
-                                columns,
-                                columnWidths,
-                                rowHeight,
-                                onRowClick,
-                                selectedRows,
-                                onRowSelect,
-                                showCheckboxes,
-                            }}
-                        >
-                            {Row}
-                        </List>
-                    )}
-                </AutoSizer>
+                {sortedData.length === 0 ? (
+                    <div
+                        style={{
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#f9fafb',
+                            color: '#6b7280',
+                            fontSize: '14px'
+                        }}
+                    >
+                        No items found for the selected criteria.
+                    </div>
+                ) : (
+                    <AutoSizer>
+                        {({ height: autoHeight, width }: { height: number; width: number }) => (
+                            <List
+                                height={autoHeight}
+                                itemCount={sortedData.length}
+                                itemSize={rowHeight}
+                                width={width}
+                                itemData={{
+                                    items: sortedData,
+                                    columns,
+                                    columnWidths,
+                                    rowHeight,
+                                    onRowClick,
+                                    selectedRows,
+                                    onRowSelect,
+                                    showCheckboxes,
+                                }}
+                            >
+                                {Row}
+                            </List>
+                        )}
+                    </AutoSizer>
+                )}
             </div>
 
             {/* Footer with count */}
