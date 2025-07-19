@@ -11,6 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from files import router as files_router
+from filtered import router as filtered_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -27,6 +28,7 @@ app = FastAPI(
 app.include_router(files_router)
 app.include_router(catalogs_router)
 app.include_router(analysis_router)
+app.include_router(filtered_router)
 
 # Add CORS middleware for local development
 app.add_middleware(
