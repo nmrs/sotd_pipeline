@@ -221,15 +221,19 @@ const UnmatchedAnalyzer: React.FC = () => {
                 if (item && item.comment_ids && item.examples) {
                     // Get the month from the first example file
                     const month = item.examples[0]?.replace('.json', '') || selectedMonths[0];
-                    item.comment_ids.forEach(commentId => {
+
+                    // Send one entry per item, not per comment_id
+                    // Use the first comment_id as representative
+                    const firstCommentId = item.comment_ids[0];
+                    if (firstCommentId) {
                         allEntries.push({
                             name: itemName,
                             action: shouldBeFiltered ? 'add' : 'remove',
-                            comment_id: commentId,
+                            comment_id: firstCommentId,
                             source: 'user',
                             month,
                         });
-                    });
+                    }
                 }
             });
 
@@ -237,6 +241,13 @@ const UnmatchedAnalyzer: React.FC = () => {
                 messaging.addSuccessMessage('No changes to apply');
                 return;
             }
+
+            // Debug: Log what we're sending
+            console.log('Sending to API:', {
+                category: selectedField,
+                entries: allEntries,
+                reason: reasonText.trim() || undefined,
+            });
 
             // Import the API function
             const { updateFilteredEntries } = await import('../services/api');
