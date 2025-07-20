@@ -814,23 +814,7 @@ known_brushes:
     - maor boar
 
 other_brushes:
-  AP Shave Co:
-    default: Synthetic
-    patterns:
-    - A\.? ?P\.? ?\s*shave\s*(co)?
-    - \bap\b
-    - \bapsc\b
-  Chisel & Hound:
-    default: Badger
-    patterns:
-    - chis.*[fh]ou
-    - \bc(?:\&|and|\+)h\b
-    - \bch\b
   Gilette:
     default: Synthetic
     patterns:
     - gillette
-  Yaqi:
-    default: Synthetic
-    patterns:
-    - yaqi
