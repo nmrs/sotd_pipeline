@@ -299,14 +299,26 @@ const BrushSplitRow: React.FC<{
 
             {/* Confidence */}
             <div className="w-24 p-3">
-                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getConfidenceColor(split.system_confidence)}`}>
+                <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getConfidenceColor(split.system_confidence)}`}
+                    title={split.system_reasoning || 'No reasoning available'}
+                >
                     {split.system_confidence || 'N/A'}
                 </span>
             </div>
 
             {/* Validation Status */}
             <div className="w-32 p-3">
-                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getValidationStatusColor(split.validated, split.corrected)}`}>
+                <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getValidationStatusColor(split.validated, split.corrected)}`}
+                    title={split.validated ?
+                        (split.corrected ?
+                            `Corrected on ${new Date(split.validated_at || '').toLocaleDateString()}` :
+                            `Validated on ${new Date(split.validated_at || '').toLocaleDateString()}`
+                        ) :
+                        'Pending validation'
+                    }
+                >
                     {split.validated ? (split.corrected ? 'Corrected' : 'Validated') : 'Pending'}
                 </span>
             </div>

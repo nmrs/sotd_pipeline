@@ -195,6 +195,36 @@ describe('BrushSplitTable', () => {
             expect(lowConfidence).toHaveClass('text-red-600', 'bg-red-50');
         });
 
+        it('should display confidence tooltips with reasoning', () => {
+            render(<BrushSplitTable {...defaultProps} />);
+
+            const highConfidence = screen.getByText('high');
+            const mediumConfidence = screen.getByText('medium');
+            const lowConfidence = screen.getByText('low');
+
+            expect(highConfidence).toHaveAttribute('title', 'Delimiter split detected');
+            expect(mediumConfidence).toHaveAttribute('title', 'Single component brush');
+            expect(lowConfidence).toHaveAttribute('title', 'Brand context split');
+        });
+
+        it('should display validation status tooltips with dates', () => {
+            render(<BrushSplitTable {...defaultProps} />);
+
+            const validatedStatus = screen.getByText('Validated');
+            const correctedStatus = screen.getByText('Corrected');
+
+            expect(validatedStatus).toHaveAttribute('title', 'Validated on 1/20/2025');
+            expect(correctedStatus).toHaveAttribute('title', 'Corrected on 1/20/2025');
+        });
+
+        it('should display pending validation tooltip', () => {
+            render(<BrushSplitTable {...defaultProps} />);
+
+            const pendingStatus = screen.getByText('Pending');
+
+            expect(pendingStatus).toHaveAttribute('title', 'Pending validation');
+        });
+
         it('should display validation status with correct colors', () => {
             render(<BrushSplitTable {...defaultProps} />);
 
