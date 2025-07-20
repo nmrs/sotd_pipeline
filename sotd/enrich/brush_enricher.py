@@ -2,6 +2,7 @@ import re
 from typing import Optional
 
 from sotd.enrich.enricher import BaseEnricher
+from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
 
 
 class BrushEnricher(BaseEnricher):
@@ -45,7 +46,7 @@ class BrushEnricher(BaseEnricher):
             return None
 
         user_knot_size = self._extract_knot_size(brush_extracted)
-        user_fiber = self._extract_fiber(brush_extracted)
+        user_fiber = match_fiber(brush_extracted)
 
         # Get catalog data from new format (knot section) or legacy format (top-level)
         knot_section = field_data.get("knot", {})
@@ -61,6 +62,15 @@ class BrushEnricher(BaseEnricher):
             "_enriched_by": "BrushEnricher",
             "_extraction_source": "catalog" if catalog_knot_size else "none",
         }
+
+        # Check if user data indicates a custom knot (fiber or size differs from catalog)
+        has_custom_knot = False
+        if user_fiber is not None and catalog_fiber is not None:
+            if user_fiber.lower() != catalog_fiber.lower():
+                has_custom_knot = True
+        if user_knot_size is not None and catalog_knot_size is not None:
+            if abs(user_knot_size - catalog_knot_size) >= 0.1:  # Allow small tolerance
+                has_custom_knot = True
 
         # Handle knot size merging
         if user_knot_size is not None:
@@ -97,6 +107,33 @@ class BrushEnricher(BaseEnricher):
                 enriched_data["fiber"] = user_fiber
                 enriched_data["_fiber_extraction_source"] = "user_comment"
 
+        # If custom knot detected, modify the brush data structure
+        if has_custom_knot:
+            enriched_data["_custom_knot"] = True
+            enriched_data["_custom_knot_reason"] = []
+            if (
+                user_fiber is not None
+                and catalog_fiber is not None
+                and user_fiber.lower() != catalog_fiber.lower()
+            ):
+                enriched_data["_custom_knot_reason"].append(
+                    f"fiber_mismatch:{catalog_fiber}->{user_fiber}"
+                )
+            if (
+                user_knot_size is not None
+                and catalog_knot_size is not None
+                and abs(user_knot_size - catalog_knot_size) >= 0.1
+            ):
+                enriched_data["_custom_knot_reason"].append(
+                    f"size_mismatch:{catalog_knot_size}->{user_knot_size}"
+                )
+
+            # For custom knots, we need to modify the brush data structure
+            # This will be handled by the enrich phase orchestrator
+            enriched_data["_modify_brush_structure"] = True
+            enriched_data["_custom_knot_brand"] = None
+            enriched_data["_custom_knot_model"] = None
+
         return enriched_data
 
     def _extract_knot_size(self, text: str) -> Optional[float]:
@@ -120,39 +157,5 @@ class BrushEnricher(BaseEnricher):
         match = re.search(r"\b(2[0-9](?:\.\d+)?|3[0-5](?:\.\d+)?)\b", text)
         if match:
             return float(match.group(1))
-
-        return None
-
-    def _extract_fiber(self, text: str) -> Optional[str]:
-        """Extract fiber type from text."""
-        if not text:
-            return None
-
-        # Order matters - check more specific patterns first
-        fiber_patterns = [
-            ("Mixed Badger/Boar", r"(mix|mixed|mi[sx]tura?|badg.*boar|boar.*badg|hybrid|fusion)"),
-            (
-                "Synthetic",
-                (
-                    r"(acrylic|timber|tux|mew|silk|synt|synbad|2bed|captain|cashmere|"
-                    r"faux.*horse|black.*(magic|wolf)|g4|boss|st-?(1|2)|trafalgar\s*t[23]|"
-                    r"\bt[23]\b|kong|hi\s*brush|ak47|g5[abc]|stf|quartermoon|fibre|"
-                    r"\bmig\b|synthetic badger|motherlode)"
-                ),
-            ),
-            (
-                "Badger",
-                (
-                    r"(hmw|high.*mo|(2|3|two|three)[\s-]*band|shd|badger|silvertip|super|"
-                    r"gelo|gelous|gelousy|finest|best|ultralux|fanchurian|\blod\b)"
-                ),
-            ),
-            ("Boar", r"\b(boar|shoat)\b"),
-            ("Horse", r"\bhorse(hair)?\b"),
-        ]
-
-        for fiber, pattern in fiber_patterns:
-            if re.search(pattern, text, re.IGNORECASE):
-                return fiber
 
         return None

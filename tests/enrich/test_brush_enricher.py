@@ -261,38 +261,51 @@ class TestRealWorldExamples:
 class TestFiberExtraction:
     def test_extract_fiber_badger(self, enricher):
         """Test extraction of badger fiber types."""
-        assert enricher._extract_fiber("badger brush") == "Badger"
-        assert enricher._extract_fiber("silvertip brush") == "Badger"
-        assert enricher._extract_fiber("2-band brush") == "Badger"
-        assert enricher._extract_fiber("shd brush") == "Badger"
+        field_data = {"matched": {"brand": "Test", "model": "Test"}}
+        assert enricher.enrich(field_data["matched"], "badger brush")["fiber"] == "Badger"
+        assert enricher.enrich(field_data["matched"], "silvertip brush")["fiber"] == "Badger"
+        assert enricher.enrich(field_data["matched"], "2 band brush")["fiber"] == "Badger"
+        assert enricher.enrich(field_data["matched"], "shd brush")["fiber"] == "Badger"
 
     def test_extract_fiber_boar(self, enricher):
         """Test extraction of boar fiber types."""
-        assert enricher._extract_fiber("boar brush") == "Boar"
-        assert enricher._extract_fiber("shoat brush") == "Boar"
+        field_data = {"matched": {"brand": "Test", "model": "Test"}}
+        assert enricher.enrich(field_data["matched"], "boar brush")["fiber"] == "Boar"
+        assert enricher.enrich(field_data["matched"], "shoat brush")["fiber"] == "Boar"
 
     def test_extract_fiber_synthetic(self, enricher):
         """Test extraction of synthetic fiber types."""
-        assert enricher._extract_fiber("synthetic brush") == "Synthetic"
-        assert enricher._extract_fiber("tuxedo brush") == "Synthetic"
-        assert enricher._extract_fiber("cashmere brush") == "Synthetic"
-        assert enricher._extract_fiber("quartermoon brush") == "Synthetic"
+        field_data = {"matched": {"brand": "Test", "model": "Test"}}
+        assert enricher.enrich(field_data["matched"], "synthetic brush")["fiber"] == "Synthetic"
+        assert enricher.enrich(field_data["matched"], "tuxedo brush")["fiber"] == "Synthetic"
+        assert enricher.enrich(field_data["matched"], "cashmere brush")["fiber"] == "Synthetic"
+        assert enricher.enrich(field_data["matched"], "quartermoon brush")["fiber"] == "Synthetic"
 
     def test_extract_fiber_mixed(self, enricher):
         """Test extraction of mixed fiber types."""
-        assert enricher._extract_fiber("mixed badger boar") == "Mixed Badger/Boar"
-        assert enricher._extract_fiber("hybrid brush") == "Mixed Badger/Boar"
+        field_data = {"matched": {"brand": "Test", "model": "Test"}}
+        assert (
+            enricher.enrich(field_data["matched"], "mixed badger boar")["fiber"]
+            == "Mixed Badger/Boar"
+        )
+        assert (
+            enricher.enrich(field_data["matched"], "hybrid brush")["fiber"] == "Mixed Badger/Boar"
+        )
 
     def test_extract_fiber_horse(self, enricher):
         """Test extraction of horse fiber types."""
-        assert enricher._extract_fiber("horse brush") == "Horse"
-        assert enricher._extract_fiber("horsehair brush") == "Horse"
+        field_data = {"matched": {"brand": "Test", "model": "Test"}}
+        assert enricher.enrich(field_data["matched"], "horse brush")["fiber"] == "Horse"
+        assert enricher.enrich(field_data["matched"], "horsehair brush")["fiber"] == "Horse"
 
     def test_extract_fiber_no_match(self, enricher):
         """Test extraction when no fiber is found."""
-        assert enricher._extract_fiber("Great brush") is None
-        assert enricher._extract_fiber("") is None
-        assert enricher._extract_fiber(None) is None
+        field_data = {"matched": {"brand": "Test", "model": "Test"}}
+        result = enricher.enrich(field_data["matched"], "Great brush")
+        assert result["fiber"] is None
+        # Empty string should return None from enricher
+        result = enricher.enrich(field_data["matched"], "")
+        assert result is None
 
 
 class TestFiberConflictResolution:
@@ -364,6 +377,108 @@ class TestFiberConflictResolution:
         assert result is not None
         assert result["fiber"] == "Badger"
         # No _fiber_extraction_source since no user fiber was extracted
+
+
+class TestCustomKnotDetection:
+    def test_custom_knot_fiber_mismatch(self, enricher):
+        """Test custom knot detection when fiber differs from catalog."""
+        field_data = {
+            "matched": {
+                "brand": "Simpson",
+                "model": "Chubby 2",
+                "knot": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "fiber": "Badger",  # Catalog default
+                    "knot_size_mm": 27.0,
+                },
+            }
+        }
+        brush_extracted = "Simpson Chubby 2 28mm Boar"  # User says Boar, catalog says Badger
+
+        result = enricher.enrich(field_data["matched"], brush_extracted)
+
+        assert result is not None
+        assert result["_custom_knot"] is True
+        assert "fiber_mismatch:Badger->Boar" in result["_custom_knot_reason"]
+        assert "size_mismatch:27.0->28.0" in result["_custom_knot_reason"]
+        assert result["fiber"] == "Boar"  # User fiber takes precedence
+        assert result["knot_size_mm"] == 28.0  # User size takes precedence
+        assert result["_modify_brush_structure"] is True
+
+    def test_custom_knot_size_mismatch(self, enricher):
+        """Test custom knot detection when size differs from catalog."""
+        field_data = {
+            "matched": {
+                "brand": "Simpson",
+                "model": "Chubby 2",
+                "knot": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "fiber": "Badger",
+                    "knot_size_mm": 27.0,  # Catalog default
+                },
+            }
+        }
+        brush_extracted = "Simpson Chubby 2 24mm"  # User says 24mm, catalog says 27mm
+
+        result = enricher.enrich(field_data["matched"], brush_extracted)
+
+        assert result is not None
+        assert result["_custom_knot"] is True
+        assert "size_mismatch:27.0->24.0" in result["_custom_knot_reason"]
+        assert result["knot_size_mm"] == 24.0  # User size takes precedence
+        assert result["_modify_brush_structure"] is True
+
+    def test_custom_knot_both_mismatch(self, enricher):
+        """Test custom knot detection when both fiber and size differ from catalog."""
+        field_data = {
+            "matched": {
+                "brand": "Simpson",
+                "model": "Chubby 2",
+                "knot": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "fiber": "Badger",  # Catalog default
+                    "knot_size_mm": 27.0,  # Catalog default
+                },
+            }
+        }
+        brush_extracted = "Simpson Chubby 2 24mm Synthetic"  # User says Synthetic 24mm
+
+        result = enricher.enrich(field_data["matched"], brush_extracted)
+
+        assert result is not None
+        assert result["_custom_knot"] is True
+        assert "fiber_mismatch:Badger->Synthetic" in result["_custom_knot_reason"]
+        assert "size_mismatch:27.0->24.0" in result["_custom_knot_reason"]
+        assert result["fiber"] == "Synthetic"
+        assert result["knot_size_mm"] == 24.0
+        assert result["_modify_brush_structure"] is True
+
+    def test_no_custom_knot_when_matching(self, enricher):
+        """Test that custom knot is not detected when user data matches catalog."""
+        field_data = {
+            "matched": {
+                "brand": "Simpson",
+                "model": "Chubby 2",
+                "knot": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "fiber": "Badger",
+                    "knot_size_mm": 27.0,
+                },
+            }
+        }
+        brush_extracted = "Simpson Chubby 2 27mm Badger"  # User confirms catalog
+
+        result = enricher.enrich(field_data["matched"], brush_extracted)
+
+        assert result is not None
+        assert result.get("_custom_knot") is None  # No custom knot detected
+        assert result.get("_modify_brush_structure") is None
+        assert result["fiber"] == "Badger"
+        assert result["knot_size_mm"] == 27.0
 
 
 class TestCombinedKnotSizeAndFiber:
