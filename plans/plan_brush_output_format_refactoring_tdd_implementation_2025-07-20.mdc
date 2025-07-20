@@ -159,7 +159,7 @@ def _final_cleanup(self, match_dict):
 - [ ] Tests that check for removed fields (`handle_maker`, `knot_maker`)
 - [ ] Tests that validate new section structure
 
-### Phase 3: Downstream Phase Updates (MEDIUM PRIORITY) - ⏳ PENDING
+### Phase 3: Downstream Phase Updates (MEDIUM PRIORITY) - ✅ COMPLETE
 
 #### 3.1 Update Enrich Phase - ✅ COMPLETE
 **Files**: `sotd/enrich/brush_enricher.py`
@@ -475,6 +475,24 @@ export interface BrushMatcherOutput {
 - [ ] All integration tests pass
 - [ ] WebUI components function correctly
 - [ ] Documentation is complete and accurate
+
+## Session Notes
+
+### Session 1 (2025-07-20)
+- Started implementation of brush output format refactoring
+- Completed Phase 1 (Core Implementation) and Phase 2 (Test Suite Updates)
+- All match phase tests passing with new brush output format
+- Ready to continue with Phase 3 (Downstream Phase Updates)
+
+### Session 2 (2025-07-20)
+- Completed Phase 3 (Downstream Phase Updates)
+- Updated brush enricher to work with new handle/knot section structure
+- Updated all brush specialized aggregators to use consistent handle/knot sections
+- Updated core brush aggregator to handle composite brushes with null top-level fields
+- Updated test data to use new format with handle/knot sections
+- All enrich, aggregate, and report phases now work with new brush format
+- All tests passing: 75 brush-related tests, 202 aggregate tests, 283 report tests
+- Phase 3 complete - ready to continue with Phase 4 (WebUI Updates)
 
 ## Conclusion
 
