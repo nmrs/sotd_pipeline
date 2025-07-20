@@ -699,6 +699,401 @@ htmlcov/
 ```
 
 ## File Cleanup Guidelines
+
+### **MANDATORY**: Use `git rm` for ALL Deletions
+When removing files from the repository, **ALWAYS** use `git rm` instead of `rm` to ensure proper Git tracking and history preservation. This applies to ALL file deletions, not just Git operations.
+
+#### **MANDATORY**: File Deletion Commands
+- ✅ **Use**: `git rm filename` - Removes file and stages deletion
+- ✅ **Use**: `git rm -r directory/` - Removes directory recursively
+- ❌ **Don't use**: `rm filename` - Removes file but doesn't update Git
+- ❌ **Don't use**: `rm -rf directory/` - Removes directory but doesn't update Git
+
+#### **MANDATORY**: Git Rm Benefits
+- **Proper tracking**: Git knows the file was intentionally removed
+- **History preservation**: File history is maintained in Git
+- **Staging**: Deletion is automatically staged for commit
+- **Clean commits**: No need for separate `git add` after deletion
+- **Revert capability**: Can easily revert file deletion if needed
+- **No orphaned files**: Prevents files from remaining in Git history when deleted from filesystem
+- **Consistent state**: Ensures Git repository state matches filesystem state
+
+#### Examples of Proper File Deletion
+```bash
+# ✅ GOOD: Remove single file with git rm
+git rm unused_module.py
+
+# ✅ GOOD: Remove directory recursively with git rm
+git rm -r deprecated_directory/
+
+# ✅ GOOD: Remove multiple files with git rm
+git rm file1.py file2.py file3.py
+
+# ✅ GOOD: Remove with commit message
+git rm old_config.yaml && git commit -m "cleanup: remove deprecated configuration file"
+
+# ❌ BAD: Remove with regular rm (doesn't update Git, creates orphaned files)
+rm unused_module.py
+
+# ❌ BAD: Remove directory with regular rm (doesn't update Git)
+rm -rf deprecated_directory/
+
+# ❌ BAD: Need separate git add after regular rm (extra steps, risk of forgetting)
+rm file.py
+git add -A  # Extra step needed, easy to forget
+```
+
+#### **MANDATORY**: Deletion Workflow
+1. **Use git rm**: `git rm filename` or `git rm -r directory/`
+2. **Verify deletion**: Check `git status` to confirm deletion is staged
+3. **Commit with context**: `git commit -m "cleanup: remove [reason for deletion]"`
+4. **Verify completion**: Check `git log` to confirm deletion is recorded
+
+#### **MANDATORY**: Deletion Commit Messages
+Use descriptive commit messages that explain WHY the file was removed:
+
+```bash
+# ✅ GOOD: Clear reason for deletion
+git commit -m "cleanup: remove deprecated brush_yaml directory after consolidation"
+
+# ✅ GOOD: Specific about what was removed
+git commit -m "cleanup: remove unused test fixtures and mock data"
+
+# ✅ GOOD: Context about replacement
+git commit -m "cleanup: remove old configuration files replaced by new format"
+
+# ❌ BAD: Generic deletion message
+git commit -m "cleanup: remove files"
+
+# ❌ BAD: No context about why
+git commit -m "cleanup: delete stuff"
+```
+
+#### **MANDATORY**: Deletion Validation
+After deleting files, **ALWAYS** validate that the deletion was successful:
+
+```bash
+# 1. Check git status to confirm deletion is staged
+git status
+
+# 2. Verify file is actually removed from filesystem
+ls -la filename  # Should show "No such file or directory"
+
+# 3. Check that no broken references remain
+grep -r "deleted_filename" . --include="*.py" --exclude-dir=.git
+
+# 4. Run tests to ensure no functionality was broken
+make test-fast
+
+# 5. Commit the deletion (git rm automatically stages the deletion)
+git commit -m "cleanup: remove [filename] - [reason]"
+
+# 6. Verify no orphaned files remain in Git
+git ls-files | grep filename  # Should return nothing if properly deleted
+```
+
+#### **MANDATORY**: Deletion Safety Checks
+Before deleting files, **ALWAYS** perform these safety checks:
+
+1. **Check for references**: `grep -r "filename" . --include="*.py"`
+2. **Check imports**: Look for `import filename` or `from filename`
+3. **Check documentation**: Look for references in docs and README files
+4. **Check configuration**: Look for references in config files
+5. **Run tests**: Ensure deletion doesn't break existing functionality
+6. **Use git rm**: **NEVER** use regular `rm` - always use `git rm` to prevent orphaned files
+
+#### **MANDATORY**: Deletion Rollback
+If deletion causes issues, **ALWAYS** know how to rollback:
+
+```bash
+# Rollback last commit (if deletion was just committed)
+git reset --soft HEAD~1
+
+# Restore specific file from previous commit
+git checkout HEAD~1 -- filename
+
+# Restore entire directory from previous commit
+git checkout HEAD~1 -- directory/
+
+# Commit the restoration
+git commit -m "fix: restore [filename] - deletion caused [issue]"
+```
+
+#### **MANDATORY**: Deletion Categories
+Use appropriate commit types for different deletion scenarios:
+
+```bash
+# cleanup: for removing unused/dead code
+git commit -m "cleanup: remove unused imports and dead code"
+
+# refactor: for removing deprecated features
+git commit -m "refactor: remove deprecated knot_maker field"
+
+# fix: for removing broken/problematic code
+git commit -m "fix: remove broken configuration that caused errors"
+
+# data: for removing data files
+git commit -m "data: remove outdated catalog entries"
+```
+
+#### **MANDATORY**: Deletion Documentation
+When deleting files that might be referenced elsewhere, **ALWAYS** document the deletion:
+
+```bash
+# Add to commit message or create documentation
+git commit -m "cleanup: remove deprecated brush_yaml directory
+
+- Consolidated all brush data into single brushes.yaml file
+- Updated all references to use new consolidated structure
+- Removed redundant brush_yaml/ subdirectory
+- All functionality preserved in new structure"
+```
+
+#### **MANDATORY**: Deletion in Refactoring
+When refactoring involves file deletions, **ALWAYS** use git rm:
+
+```bash
+# Example: Consolidating multiple files into one
+# 1. Create new consolidated file
+# 2. Update all references to use new file
+# 3. Remove old files with git rm
+git rm old_file1.py old_file2.py old_file3.py
+
+# 4. Commit the consolidation
+git commit -m "refactor: consolidate [files] into [new_file] for better organization"
+```
+
+#### **MANDATORY**: Deletion in Cleanup
+When cleaning up unused code, **ALWAYS** use git rm:
+
+```bash
+# Example: Removing unused test files
+git rm tests/test_unused_feature.py
+
+# Example: Removing unused data files
+git rm data/old_catalog.yaml
+
+# Example: Removing unused documentation
+git rm docs/deprecated_spec.md
+
+# Commit cleanup
+git commit -m "cleanup: remove unused files and dead code"
+```
+
+### **MANDATORY**: Use `git mv` for ALL Moves and Renames
+When moving or renaming files in the repository, **ALWAYS** use `git mv` instead of `mv` to ensure proper Git tracking and history preservation. This applies to ALL file moves and renames, not just Git operations.
+
+#### **MANDATORY**: File Move/Rename Commands
+- ✅ **Use**: `git mv oldname newname` - Moves/renames file and stages change
+- ✅ **Use**: `git mv olddir/ newdir/` - Moves/renames directory
+- ✅ **Use**: `git mv file1 file2 file3 destdir/` - Moves multiple files to directory
+- ❌ **Don't use**: `mv oldname newname` - Moves file but doesn't update Git
+- ❌ **Don't use**: `mv olddir/ newdir/` - Moves directory but doesn't update Git
+
+#### **MANDATORY**: Git Mv Benefits
+- **Proper tracking**: Git knows the file was intentionally moved/renamed
+- **History preservation**: File history is maintained in Git
+- **Staging**: Move/rename is automatically staged for commit
+- **Clean commits**: No need for separate `git add` after move/rename
+- **Revert capability**: Can easily revert move/rename if needed
+- **No orphaned files**: Prevents files from remaining in Git history when moved from filesystem
+- **Consistent state**: Ensures Git repository state matches filesystem state
+- **Blame tracking**: Maintains file history and blame information across moves
+
+#### Examples of Proper File Move/Rename
+```bash
+# ✅ GOOD: Rename single file with git mv
+git mv old_module.py new_module.py
+
+# ✅ GOOD: Move file to different directory with git mv
+git mv src/old_file.py dest/new_file.py
+
+# ✅ GOOD: Rename directory with git mv
+git mv old_directory/ new_directory/
+
+# ✅ GOOD: Move multiple files with git mv
+git mv file1.py file2.py file3.py dest_directory/
+
+# ✅ GOOD: Move with commit message
+git mv old_config.yaml new_config.yaml && git commit -m "refactor: rename configuration file for clarity"
+
+# ❌ BAD: Move with regular mv (doesn't update Git, creates orphaned files)
+mv old_module.py new_module.py
+
+# ❌ BAD: Move directory with regular mv (doesn't update Git)
+mv old_directory/ new_directory/
+
+# ❌ BAD: Need separate git add after regular mv (extra steps, risk of forgetting)
+mv file.py dest/
+git add -A  # Extra step needed, easy to forget
+```
+
+#### **MANDATORY**: Move/Rename Workflow
+1. **Use git mv**: `git mv oldname newname` or `git mv olddir/ newdir/`
+2. **Verify move/rename**: Check `git status` to confirm change is staged
+3. **Commit with context**: `git commit -m "refactor: move/rename [reason for change]"`
+4. **Verify completion**: Check `git log` to confirm move/rename is recorded
+
+#### **MANDATORY**: Move/Rename Commit Messages
+Use descriptive commit messages that explain WHY the file was moved/renamed:
+
+```bash
+# ✅ GOOD: Clear reason for move/rename
+git commit -m "refactor: move brush matcher to specialized strategies directory"
+
+# ✅ GOOD: Specific about what was moved/renamed
+git commit -m "refactor: rename config files for better organization and clarity"
+
+# ✅ GOOD: Context about reorganization
+git commit -m "refactor: consolidate utility modules into unified utils package"
+
+# ❌ BAD: Generic move/rename message
+git commit -m "refactor: move files"
+
+# ❌ BAD: No context about why
+git commit -m "refactor: rename stuff"
+```
+
+#### **MANDATORY**: Move/Rename Validation
+After moving/renaming files, **ALWAYS** validate that the change was successful:
+
+```bash
+# 1. Check git status to confirm move/rename is staged
+git status
+
+# 2. Verify file is actually moved/renamed in filesystem
+ls -la newname  # Should show the file exists
+ls -la oldname  # Should show "No such file or directory"
+
+# 3. Check that no broken references remain
+grep -r "oldname" . --include="*.py" --exclude-dir=.git
+
+# 4. Update any imports or references to use new name
+# (This is often needed after move/rename)
+
+# 5. Run tests to ensure no functionality was broken
+make test-fast
+
+# 6. Commit the move/rename (git mv automatically stages the change)
+git commit -m "refactor: move/rename [oldname] to [newname] - [reason]"
+
+# 7. Verify no orphaned files remain in Git
+git ls-files | grep oldname  # Should return nothing if properly moved
+```
+
+#### **MANDATORY**: Move/Rename Safety Checks
+Before moving/renaming files, **ALWAYS** perform these safety checks:
+
+1. **Check for references**: `grep -r "filename" . --include="*.py"`
+2. **Check imports**: Look for `import filename` or `from filename`
+3. **Check documentation**: Look for references in docs and README files
+4. **Check configuration**: Look for references in config files
+5. **Run tests**: Ensure move/rename doesn't break existing functionality
+6. **Use git mv**: **NEVER** use regular `mv` - always use `git mv` to prevent orphaned files
+7. **Plan import updates**: Identify all files that need import updates after move/rename
+
+#### **MANDATORY**: Move/Rename Rollback
+If move/rename causes issues, **ALWAYS** know how to rollback:
+
+```bash
+# Rollback last commit (if move/rename was just committed)
+git reset --soft HEAD~1
+
+# Restore specific file from previous commit
+git checkout HEAD~1 -- oldname
+
+# Restore entire directory from previous commit
+git checkout HEAD~1 -- olddir/
+
+# Commit the restoration
+git commit -m "fix: restore [oldname] - move/rename caused [issue]"
+```
+
+#### **MANDATORY**: Move/Rename Categories
+Use appropriate commit types for different move/rename scenarios:
+
+```bash
+# refactor: for reorganizing code structure
+git commit -m "refactor: move brush strategies to specialized directory for better organization"
+
+# feat: for moving files as part of new feature
+git commit -m "feat: move API handlers to dedicated handlers module"
+
+# docs: for reorganizing documentation
+git commit -m "docs: reorganize documentation into logical sections"
+
+# data: for reorganizing data files
+git commit -m "data: consolidate catalog files into unified structure"
+```
+
+#### **MANDATORY**: Move/Rename Documentation
+When moving/renaming files that might be referenced elsewhere, **ALWAYS** document the change:
+
+```bash
+# Add to commit message or create documentation
+git commit -m "refactor: move brush matching strategies to specialized directory
+
+- Moved brush strategies from generic matchers/ to specialized brush_matching_strategies/
+- Updated all imports to use new module paths
+- Improved organization for better maintainability
+- All functionality preserved in new structure"
+```
+
+#### **MANDATORY**: Move/Rename in Refactoring
+When refactoring involves file moves/renames, **ALWAYS** use git mv:
+
+```bash
+# Example: Reorganizing module structure
+# 1. Create new directory structure
+mkdir -p new_module_structure/
+
+# 2. Move files with git mv
+git mv old_module/file1.py new_module_structure/file1.py
+git mv old_module/file2.py new_module_structure/file2.py
+
+# 3. Update imports in all affected files
+# (This is often the most time-consuming part)
+
+# 4. Commit the reorganization
+git commit -m "refactor: reorganize module structure for better organization"
+```
+
+#### **MANDATORY**: Move/Rename in Cleanup
+When cleaning up involves file moves/renames, **ALWAYS** use git mv:
+
+```bash
+# Example: Consolidating scattered files
+git mv scattered_file1.py unified_directory/
+git mv scattered_file2.py unified_directory/
+
+# Example: Renaming for clarity
+git mv confusing_name.py clear_name.py
+
+# Example: Moving to appropriate location
+git mv misplaced_config.yaml config/
+
+# Commit cleanup
+git commit -m "refactor: consolidate and rename files for better organization"
+```
+
+#### **MANDATORY**: Import Updates After Move/Rename
+After moving/renaming files, **ALWAYS** update all imports:
+
+```bash
+# 1. Find all files that import the moved/renamed file
+grep -r "from old_module" . --include="*.py"
+grep -r "import old_module" . --include="*.py"
+
+# 2. Update imports to use new path
+# Example: from old_module import function -> from new_module import function
+
+# 3. Test that imports work correctly
+python -c "import new_module"  # Should not raise ImportError
+
+# 4. Run tests to ensure no functionality was broken
+make test-fast
+```
+
 - Remove redundant files when consolidating data structures
 - Update imports when moving or removing modules
 - Clean up unused test fixtures and mock data

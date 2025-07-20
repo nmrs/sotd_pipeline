@@ -58,6 +58,7 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 - **Individual Phases**: Test individual phases with specific month data
 - **Pre-Commit Validation**: **MANDATORY**: Run `make format lint typecheck test` before considering any task complete or committing changes. All checks must pass.
 - **Documentation Synchronization**: **MANDATORY**: Any code, workflow, or process change MUST be reflected in all relevant documentation and Cursor rules. Documentation and rules must be updated as part of the same commit(s) as the code or process change.
+- **Git Backup Strategy**: **MANDATORY**: Rely on git for backups of YAML files and artifacts. Do not create backup files in tools unless the specification explicitly calls for it. Git provides version control, history tracking, and rollback capabilities that are superior to manual backup files. This applies to all data files, configuration files, and pipeline artifacts.
 - **MDC Plan File Updates**: **MANDATORY**: When working on any task that involves an MDC plan file (in `plans/` directory), you MUST automatically update the relevant MDC file to reflect progress, completion status, lessons learned, or any changes to the plan. You do not need permission to update it - update it yourself **automatically** and **immediately** as part of completing the task. The agent never needs to ask permission to update the plan file (MDC) when completing or progressing a task. This is always required and should be done automatically. This includes:
   - Marking completed tasks as done
   - Adding notes about implementation decisions
@@ -147,6 +148,7 @@ Before considering any plan complete, verify:
 - **Date Ranges**: Support both individual months and date ranges in CLI
 - **Manual Overrides**: Provide clear validation for manual thread includes/excludes
 - **Catalog Data Preservation**: All matchers must preserve complete catalog specifications (e.g., straight razor grind, width, point) in match output, not just basic brand/model/format fields
+- **No Backward Compatibility Required**: Since we own the entire pipeline and can rerun it at any point, backward compatibility is not a concern. Focus on correct data representation and optimal functionality.
 
 ## Brush Matching Specifics
 - **Handle Maker**: Extract from split input (e.g., "Elite handle w/ Declaration knot")

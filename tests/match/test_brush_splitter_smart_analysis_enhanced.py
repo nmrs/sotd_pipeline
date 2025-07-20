@@ -113,8 +113,8 @@ class TestBrushSplitterSmartAnalysisEnhanced:
             ),
             (
                 "Elite - Declaration B15",
-                "Declaration B15",
                 "Elite",
+                "Declaration B15",
             ),  # B15 should score higher as knot
         ]
 

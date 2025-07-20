@@ -166,8 +166,14 @@ class TestBrushMatcher:
     def test_known_brush_matching(self, brush_matcher):
         """Test matching of known brushes from catalog."""
         result = brush_matcher.match("Simpson Chubby 2")
+        # Top-level fields (backward compatibility)
         assert result.matched["brand"] == "Simpson"
         assert result.matched["model"] == "Chubby 2"
+        # Nested handle/knot sections (new unified format)
+        assert result.matched["handle"]["brand"] == "Simpson"
+        assert result.matched["handle"]["model"] == "Chubby 2"
+        assert result.matched["knot"]["brand"] == "Simpson"
+        assert result.matched["knot"]["model"] == "Chubby 2"
         # Check fiber and knot_size_mm in knot section
         assert result.matched["knot"]["fiber"] == "Badger"
         assert result.matched["knot"]["knot_size_mm"] == 27
@@ -222,7 +228,8 @@ class TestBrushMatcher:
     def test_no_match_handling(self, brush_matcher):
         """Test handling of unmatched brushes."""
         result = brush_matcher.match("Unknown Brush 123")
-        assert result is None
+        assert result.matched is None
+        assert result.match_type is None
 
     def test_empty_input_handling(self, brush_matcher):
         """Test handling of empty input."""
@@ -265,8 +272,13 @@ class TestBrushMatcherCorrectMatches:
 
         # Should fall back to regex matching since no brush section in test fixture
         assert result.match_type == "regex"
+        # Simple brush should have both top-level and nested sections for complete brush
         assert result.matched["brand"] == "Simpson"
         assert result.matched["model"] == "Chubby 2"
+        assert result.matched["handle"]["brand"] == "Simpson"
+        assert result.matched["handle"]["model"] == "Chubby 2"
+        assert result.matched["knot"]["brand"] == "Simpson"
+        assert result.matched["knot"]["model"] == "Chubby 2"
 
     def test_handle_knot_section_correct_match(self, brush_matcher):
         """Test that combo brush/handle brushes work with handle/knot sections."""
@@ -293,13 +305,18 @@ class TestBrushMatcherCorrectMatches:
         assert result.matched["brand"] == "Muninn Woodworks/EldrormR Industries"
         assert result.matched["model"] == "BFM"
 
-    def test_backward_compatibility(self, brush_matcher):
-        """Test that existing brush section functionality continues to work."""
-        # Test that simple brush still works with regex matching
+    def test_simple_brush_complete_representation(self, brush_matcher):
+        """Test that simple brushes have complete representation."""
+        # Test that simple brush has both top-level and nested sections for complete brush
         result = brush_matcher.match("Simpson Chubby 2")
         assert result.match_type == "regex"
+        # Simple brush should have both top-level and nested sections for complete brush
         assert result.matched["brand"] == "Simpson"
         assert result.matched["model"] == "Chubby 2"
+        assert result.matched["handle"]["brand"] == "Simpson"
+        assert result.matched["handle"]["model"] == "Chubby 2"
+        assert result.matched["knot"]["brand"] == "Simpson"
+        assert result.matched["knot"]["model"] == "Chubby 2"
 
     def test_no_correct_match_falls_back_to_regex(self, brush_matcher):
         """Test that unmatched brushes fall back to regex matching."""
@@ -360,8 +377,8 @@ class TestBrushMatcherPriorityOrder:
     def test_no_delimiter_treated_as_complete_brush(self, brush_matcher):
         # No delimiter, should match as a complete brush
         result = brush_matcher.match("Simpson Chubby 2")
-        assert result.matched["brand"] == "Simpson"
-        assert result.matched["model"] == "Chubby 2"
+        assert result.matched["handle"]["brand"] == "Simpson"
+        assert result.matched["handle"]["model"] == "Chubby 2"
 
     def test_ambiguous_maker_split_falls_back_to_combo(self, brush_matcher):
         result = brush_matcher.match("UnknownMaker handle w/ Declaration B15")

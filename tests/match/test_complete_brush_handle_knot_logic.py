@@ -47,8 +47,9 @@ class TestCompleteBrushHandleKnotLogic:
         result = matcher.match("B15")
 
         if result.matched:
-            # Should have handle_maker field
-            assert "handle_maker" in result.matched
+            # Should have handle section with brand
+            assert "handle" in result.matched
+            assert "brand" in result.matched["handle"]
 
     def test_knot_maker_identified_correctly(self):
         """Test that knot maker should be identified correctly."""
@@ -59,8 +60,9 @@ class TestCompleteBrushHandleKnotLogic:
         result = matcher.match("C&H v21")
 
         if result.matched:
-            # Should have knot_maker field
-            assert "knot_maker" in result.matched
+            # Should have knot section with brand
+            assert "knot" in result.matched
+            assert "brand" in result.matched["knot"]
 
     def test_complete_brush_with_delimiters(self):
         """Test complete brush detection with delimiters."""

@@ -66,6 +66,10 @@ class BrushMatcher:
         self.knots_data = catalogs["knots"]
         self.correct_matches = catalogs["correct_matches"]
 
+        # DEBUG: Print correct_matches_path and loaded correct_matches
+        print(f"[BrushMatcher DEBUG] correct_matches_path: {self.correct_matches_path}")
+        print(f"[BrushMatcher DEBUG] loaded correct_matches: {self.correct_matches}")
+
         # Initialize specialized components
         self.correct_matches_checker = CorrectMatchesChecker(config, self.correct_matches)
         self.handle_matcher = EnhancedHandleMatcher(config.handles_path)
@@ -114,14 +118,18 @@ class BrushMatcher:
 
         # Convert CorrectMatchData to dictionary for backward compatibility
         if result is not None:
-            result_dict = {
-                "brand": result.brand,
-                "model": result.model,
-                "handle_maker": result.handle_maker,
-                "handle_model": result.handle_model,
-                "knot_info": result.knot_info,
-                "match_type": result.match_type,
-            }
+            result_dict = {}
+            if hasattr(result, "brand"):
+                result_dict["brand"] = result.brand
+            if hasattr(result, "model"):
+                result_dict["model"] = result.model
+            if hasattr(result, "handle_maker"):
+                result_dict["handle_maker"] = result.handle_maker
+            if hasattr(result, "handle_model"):
+                result_dict["handle_model"] = result.handle_model
+            if hasattr(result, "knot_info"):
+                result_dict["knot_info"] = result.knot_info
+            result_dict["match_type"] = result.match_type
             self._cache.set(cache_key, result_dict)
             return result_dict
 
@@ -178,8 +186,15 @@ class BrushMatcher:
 
         Returns MatchResult structure maintaining existing behavior.
         """
-        brand = correct_match["brand"]
-        model = correct_match["model"]
+        # Handle both CorrectMatchData objects and dictionaries
+        if hasattr(correct_match, "brand"):
+            # It's a CorrectMatchData object
+            brand = correct_match.brand
+            model = correct_match.model
+        else:
+            # It's a dictionary
+            brand = correct_match["brand"]
+            model = correct_match["model"]
 
         # Search for catalog entry in different sections
         catalog_entry = None
@@ -191,61 +206,47 @@ class BrushMatcher:
                     catalog_entry = brand_data[model]
                     break
 
-        matched = {"brand": brand, "model": model}
+        # For simple brushes, create unified format with nested sections AND preserve top-level
+        # fields
+        matched = {
+            "brand": brand,  # Top-level brand for simple brushes
+            "model": model,  # Top-level model for simple brushes
+            "handle": {
+                "brand": brand,  # Handle brand is the brush brand
+                "model": model,  # Handle model is the brush model
+                "source_text": value,  # Full text as source
+                "_matched_by": "CorrectMatches",
+                "_pattern": "correct_matches_brush",
+            },
+            "knot": {
+                "brand": brand,  # Knot brand is the brush brand
+                "model": model,  # Knot model is the brush model
+                "fiber": None,  # Will be populated from catalog if available
+                "knot_size_mm": None,  # Will be populated from catalog if available
+                "source_text": value,  # Full text as source
+                "_matched_by": "CorrectMatches",
+                "_pattern": "correct_matches_brush",
+            },
+        }
 
-        # Handle nested knot and handle structures
-        if catalog_entry and "knot" in catalog_entry:
-            # Extract knot information from nested structure
-            knot_info = catalog_entry["knot"]
-            matched["fiber"] = knot_info.get("fiber")
-            matched["knot_size_mm"] = knot_info.get("knot_size_mm")
-            # Set fiber_strategy to "yaml" if we have fiber data from catalog
-            matched["fiber_strategy"] = "yaml" if knot_info.get("fiber") else None
-        else:
-            # Fall back to direct catalog fields for backward compatibility
-            matched["fiber"] = catalog_entry.get("fiber", None) if catalog_entry else None
-            matched["knot_size_mm"] = (
-                catalog_entry.get("knot_size_mm", None) if catalog_entry else None
-            )
-            # Set fiber_strategy to "yaml" if we have fiber data from catalog, otherwise None
-            matched["fiber_strategy"] = (
-                "yaml" if (catalog_entry and catalog_entry.get("fiber")) else None
-            )
+        # Populate fiber and knot_size_mm from catalog if available
+        if catalog_entry:
+            if "knot" in catalog_entry:
+                # Extract knot information from nested structure
+                knot_info = catalog_entry["knot"]
+                matched["knot"]["fiber"] = knot_info.get("fiber")
+                matched["knot"]["knot_size_mm"] = knot_info.get("knot_size_mm")
+            else:
+                # Fall back to direct catalog fields for backward compatibility
+                matched["knot"]["fiber"] = catalog_entry.get("fiber")
+                matched["knot"]["knot_size_mm"] = catalog_entry.get("knot_size_mm")
 
-        # Handle nested handle structure
-        handle_maker = None
+        # Handle nested handle structure for handle maker
         if catalog_entry and "handle" in catalog_entry:
             handle_info = catalog_entry["handle"]
             handle_maker = handle_info.get("brand")  # handle.brand becomes handle_maker
-
-        # --- Inject handle/knot fields for split input ---
-        handle, knot, _ = self.brush_splitter.split_handle_and_knot(value)
-        if handle or knot:
-            # Always include handle and knot fields for split input
-            matched["handle"] = (
-                {
-                    "brand": handle_maker,
-                    "model": None,
-                    "source_text": handle,
-                    "_matched_by": "CorrectMatches",
-                    "_pattern": "correct_matches_brush",
-                }
-                if handle
-                else None
-            )
-            matched["knot"] = (
-                {
-                    "brand": brand,  # For single-brand brushes, knot brand is same as brush brand
-                    "model": matched.get("model"),
-                    "fiber": matched.get("fiber"),
-                    "knot_size_mm": matched.get("knot_size_mm"),
-                    "source_text": knot,
-                    "_matched_by": "CorrectMatches",
-                    "_pattern": "correct_matches_brush",
-                }
-                if knot
-                else None
-            )
+            if handle_maker:
+                matched["handle"]["brand"] = handle_maker
 
         from sotd.match.types import create_match_result
 
@@ -298,6 +299,8 @@ class BrushMatcher:
                 # Convert to dict format
                 correct_match_dict = {
                     "match_type": getattr(correct_match, "match_type", None),
+                    "brand": getattr(correct_match, "brand", None),
+                    "model": getattr(correct_match, "model", None),
                     "matched": getattr(correct_match, "matched", {}),
                     "handle_maker": getattr(correct_match, "handle_maker", None),
                     "handle_model": getattr(correct_match, "handle_model", None),
@@ -512,6 +515,10 @@ class BrushMatcher:
                         "_pattern": "handle_only",
                     },
                 }
+                # Resolve handle and knot makers
+                self._resolve_handle_maker(matched, value)
+                self._resolve_knot_maker(matched, value)
+
             else:
                 # Knot match - extract and process
                 match_dict = self._extract_match_dict(best_match, None)
@@ -521,6 +528,9 @@ class BrushMatcher:
                     )
                     self._enrich_match_result(match_dict, value)
                     self._post_process_match(match_dict)
+                    # Resolve handle and knot makers
+                    self._resolve_handle_maker(match_dict, value)
+                    self._resolve_knot_maker(match_dict, value)
                     self._final_cleanup(match_dict)
                     matched = match_dict
                 else:
@@ -542,7 +552,15 @@ class BrushMatcher:
                 pattern=getattr(best_match, "pattern", "handle_matching"),
             )
 
-        return None
+        # No match found - return proper unmatched structure
+        from sotd.match.types import create_match_result
+
+        return create_match_result(
+            original=value,
+            matched=None,
+            match_type=None,
+            pattern=None,
+        )
 
     def _final_cleanup(self, match_dict: dict) -> None:
         """Remove any redundant top-level fields from the final output."""
@@ -553,8 +571,8 @@ class BrushMatcher:
             "source_text",
             "knot_size_mm",
             "fiber",
-            "handle_maker",
-            "knot_maker",
+            # Don't remove brand/model for simple brushes - they should be preserved
+            "handle_maker",  # Remove redundant handle_maker field
             "_original_knot_text",
             "_original_handle_text",
             "fiber_strategy",
@@ -582,8 +600,6 @@ class BrushMatcher:
             m["_pattern_used"] = result.pattern
 
             # Remove redundant fields immediately
-            m.pop("handle_maker", None)
-            m.pop("knot_maker", None)
             m.pop("_original_knot_text", None)
             m.pop("_original_handle_text", None)
             m.pop("_matched_from", None)
@@ -835,12 +851,14 @@ class BrushMatcher:
             if handle_text:
                 handle_match = self.handle_matcher.match_handle_maker(handle_text)
                 # Extract the brand from handle_text if no match found
-                # This handles cases like "UnknownMaker handle" where UnknownMaker isn't in the catalog
+                # This handles cases like "UnknownMaker handle" where UnknownMaker isn't in the
+                # catalog
                 handle_brand = None
                 if handle_match:
                     handle_brand = handle_match["handle_maker"]
                 else:
-                    # Try to extract brand from handle_text (e.g., "UnknownMaker handle" -> "UnknownMaker")
+                    # Try to extract brand from handle_text (e.g., "UnknownMaker handle" ->
+                    # "UnknownMaker")
                     # Remove common handle-related words to get the brand
                     handle_words = handle_text.lower().split()
                     if "handle" in handle_words:
@@ -919,6 +937,9 @@ class BrushMatcher:
                 if strategy(updated, value):
                     return
 
+            # If no strategy succeeded, set to None to ensure field exists
+            updated["handle_maker"] = None
+
     def _try_handle_from_split_text(self, updated: dict, value: str) -> bool:
         """Try to find handle maker from split text components."""
         handle_text = updated.get("_original_handle_text")
@@ -987,6 +1008,10 @@ class BrushMatcher:
                             continue
                 else:
                     updated["knot_maker"] = None
+
+            # If no strategy succeeded, set to None to ensure field exists
+            if "knot_maker" not in updated:
+                updated["knot_maker"] = None
 
     def _normalize_maker_name(self, maker_name: str) -> str:
         """Normalize maker name for comparison by removing common suffixes."""

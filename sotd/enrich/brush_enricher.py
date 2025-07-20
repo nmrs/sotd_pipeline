@@ -12,6 +12,10 @@ class BrushEnricher(BaseEnricher):
     def target_field(self) -> str:
         return "brush"
 
+    def _extract_knot_size(self, text: str) -> Optional[float]:
+        """Extract knot size from text using pattern utils."""
+        return extract_knot_size(text)
+
     def applies_to(self, record: dict) -> bool:
         """Check if this enricher applies to the record."""
         brush_data = record.get("brush", {})

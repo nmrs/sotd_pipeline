@@ -1,14 +1,14 @@
 # Brush Matching Specification
 
-## Combo Brushes vs. Catalog Brushes
+## Catalog Brushes vs. Combo Brushes
 
-- **Catalog-driven brushes**: These are brushes that are explicitly defined in the catalog (e.g., `Muninn Woodworks/EldrormR Industries / BFM`). They may have both handle and knot subsections, but they represent a single, specific product. For these, the matcher preserves the top-level `brand` and `model` fields, even if handle and knot subsections are present.
+- **Catalog-driven brushes**: These are brushes that are explicitly defined in the catalog (e.g., `Simpson Chubby 2`, `Muninn Woodworks/EldrormR Industries / BFM`). They represent complete, commercially available products. For these, the matcher preserves the top-level `brand` and `model` fields AND populates the `handle` and `knot` subsections to reflect the complete brush. This provides both backward compatibility and the new unified structure.
 
 - **Combo brushes**: These are user-assembled or dynamically split brushes that do **not** match any known brush in the catalog. The matcher splits the input into handle and knot components and matches each separately. For these, the matcher clears the top-level `brand` and `model` fields (sets them to `None`) and only populates the `handle` and `knot` subsections.
 
 ### Implementation Rule
-- **Preserve top-level brand/model** for catalog-driven brushes, even if handle/knot are present.
-- **Clear top-level brand/model** (set to `None`) for dynamic/user combos (not found in catalog) when both handle and knot are present.
+- **For catalog-driven brushes**: Preserve top-level `brand`/`model` AND populate `handle`/`knot` sections with the same values to represent the complete brush.
+- **For combo brushes**: Clear top-level `brand`/`model` (set to `None`) and only populate `handle`/`knot` sections.
 
 This ensures that reporting, aggregation, and user-facing output are correct for both known products and user combos.
 
@@ -70,7 +70,38 @@ A single `brush` string provided by the extraction phase. This string may contai
 - **New fields**: `source_text` provides the original text that was matched for each component, `_matched_by` indicates which strategy was used, and `_pattern` shows the specific pattern that matched.
 - **Removed fields**: `handle_maker` and `knot_maker` are no longer included as they were redundant with the handle/knot section structure.
 
-### Example Output (Catalog-Driven, e.g., BFM)
+### Example Output (Simple Catalog Brush, e.g., Simpson Chubby 2)
+```python
+{
+    "original": "Simpson Chubby 2",
+    "matched": {
+        "brand": "Simpson",
+        "model": "Chubby 2",
+        "fiber": "Badger",
+        "knot_size_mm": 27,
+        "handle": {
+            "brand": "Simpson",
+            "model": "Chubby 2",
+            "source_text": "Simpson Chubby 2",
+            "_matched_by": "known_brush",
+            "_pattern": "\\bchubby\\s*2\\b"
+        },
+        "knot": {
+            "brand": "Simpson", 
+            "model": "Chubby 2",
+            "fiber": "Badger",
+            "knot_size_mm": 27,
+            "source_text": "Simpson Chubby 2",
+            "_matched_by": "known_brush",
+            "_pattern": "\\bchubby\\s*2\\b"
+        }
+    },
+    "match_type": "regex",
+    "pattern": "\\bchubby\\s*2\\b"
+}
+```
+
+### Example Output (Complex Catalog Brush, e.g., BFM)
 ```python
 {
     "original": "Muninn Woodworks BFM",
@@ -79,7 +110,6 @@ A single `brush` string provided by the extraction phase. This string may contai
         "model": "BFM",
         "fiber": "Synthetic",
         "knot_size_mm": 50,
-        # Removed: handle_maker, knot_maker
         "handle": {
             "brand": "Muninn Woodworks",
             "model": None,

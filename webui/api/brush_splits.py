@@ -9,7 +9,6 @@ import json
 import logging
 import re
 from dataclasses import dataclass, field
-from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -424,7 +423,7 @@ class StatisticsCalculator:
             filtered = [
                 s
                 for s in filtered
-                if s.corrected and s.system_confidence and s.system_confidence.value == confidence
+                if s.system_confidence and s.system_confidence.value == confidence
             ]
 
         # Filter by split type
@@ -468,6 +467,7 @@ class StatisticsCalculator:
         from datetime import datetime, timedelta
 
         cutoff_date = datetime.now() - timedelta(days=7)
+        today = datetime.now().date()
 
         for split in splits:
             if split.validated and split.validated_at:
@@ -490,10 +490,28 @@ class StatisticsCalculator:
                 except ValueError:
                     continue
 
+        # Count validations by time period
+        validated_today = 0
+        validated_this_week = 0
+
+        for validation in recent_validations:
+            try:
+                validation_date_str = validation["validated_at"].replace("Z", "+00:00")
+                validation_date = datetime.fromisoformat(validation_date_str)
+                validation_date_only = validation_date.date()
+
+                if validation_date_only == today:
+                    validated_today += 1
+                validated_this_week += 1
+            except ValueError:
+                continue
+
         return {
             "recent_validations": recent_validations[:10],  # Limit to 10 most recent
             "total_recent": len(recent_validations),
             "recent_corrections": len([v for v in recent_validations if v["corrected"]]),
+            "validated_today": validated_today,
+            "validated_this_week": validated_this_week,
         }
 
 
@@ -546,17 +564,6 @@ class BrushSplitValidator:
     def save_validated_splits(self, splits: List[BrushSplit]) -> bool:
         """Save validated splits to YAML file with fail-fast error handling."""
         try:
-            # Create backup of existing file
-            if self.yaml_path.exists():
-                backup_path = self.yaml_path.with_suffix(".yaml.backup")
-                try:
-                    import shutil
-
-                    shutil.copy2(self.yaml_path, backup_path)
-                    logger.info(f"Created backup: {backup_path}")
-                except Exception as e:
-                    logger.warning(f"Failed to create backup: {e}")
-
             # Prepare data for saving
             data = {"splits": [split.to_dict() for split in splits]}
 
@@ -584,12 +591,14 @@ class BrushSplitValidator:
         self, original: str, handle: Optional[str], knot: str
     ) -> tuple[ConfidenceLevel, str]:
         """Calculate confidence level and reasoning for a brush split."""
+        # Check for empty components first
+        if handle is None or not handle.strip() or not knot.strip():
+            if handle is None:
+                return ConfidenceLevel.HIGH, "Single component brush"
+            return ConfidenceLevel.LOW, "Warning: empty component detected"
+
         if not handle:  # Single component brush
             return ConfidenceLevel.HIGH, "Single component brush"
-
-        # Check for empty components
-        if not handle.strip() or not knot.strip():
-            return ConfidenceLevel.LOW, "Warning: empty component detected"
 
         # Check for very short components
         if len(handle) < 3 or len(knot) < 3:
@@ -655,9 +664,6 @@ class BrushSplitValidator:
         self, original: str, handle: Optional[str], knot: str, validated_at: Optional[str] = None
     ) -> BrushSplit:
         """Create a validated brush split."""
-        if validated_at is None:
-            validated_at = datetime.utcnow().isoformat() + "Z"
-
         # Calculate system confidence and reasoning
         system_confidence, system_reasoning = self.calculate_confidence(original, handle, knot)
 
@@ -677,7 +683,7 @@ class BrushSplitValidator:
             original=original,
             handle=handle,
             knot=knot,
-            validated=True,
+            validated=validated_at is not None,
             corrected=corrected,
             validated_at=validated_at,
             system_handle=system_handle,
@@ -1026,16 +1032,20 @@ async def save_splits(data: SaveSplitsRequest):
 async def save_single_split(data: SaveSplitRequest):
     """Save a single brush split correction to YAML file.
 
-    This endpoint is used when a user corrects an AI-generated split in the validator.
-    It saves the correction to the YAML file and tracks what was changed.
-
     Args:
-        data: SaveSplitRequest containing the corrected split data
+        data: SaveSplitRequest containing the brush split to save
 
     Returns:
         SaveSplitResponse with success status and correction details
     """
     try:
+        # Validate input data
+        if not data.original or not data.original.strip():
+            raise HTTPException(status_code=400, detail="Original field cannot be empty")
+
+        if not data.knot or not data.knot.strip():
+            raise HTTPException(status_code=400, detail="Knot field cannot be empty")
+
         # Load existing validated splits
         validator.load_validated_splits()
 
@@ -1072,6 +1082,8 @@ async def save_single_split(data: SaveSplitRequest):
             system_reasoning=system_reasoning,
         )
 
+    except HTTPException:
+        raise
     except (FileNotFoundError, DataCorruptionError, ProcessingError) as e:
         logger.error(f"Failed to save brush split: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to save brush split: {str(e)}")

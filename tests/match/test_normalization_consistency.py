@@ -13,6 +13,13 @@ from sotd.utils.yaml_loader import load_yaml_with_nfc
 
 def _convert_match_result_to_dict(match_result):
     """Convert MatchResult to dict for backward compatibility in tests."""
+    if match_result is None:
+        return {
+            "original": None,
+            "matched": None,
+            "match_type": None,
+            "pattern": None,
+        }
     return {
         "original": match_result.original,
         "matched": match_result.matched,

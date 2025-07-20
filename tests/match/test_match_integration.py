@@ -103,6 +103,10 @@ soap:
         "2025-01", base_path, force=True, debug=False, correct_matches_path=correct_matches_file
     )
 
+    # Print error details if processing failed
+    if result["status"] == "error":
+        print(f"Processing failed with error: {result.get('error', 'Unknown error')}")
+
     # Verify processing completed successfully
     assert result["status"] == "completed"
     assert result["month"] == "2025-01"
@@ -134,8 +138,10 @@ soap:
     assert first_record["blade"]["matched"]["model"] == "DE"
 
     assert first_record["brush"]["match_type"] == "exact"
-    assert first_record["brush"]["matched"]["brand"] == "Simpson"
-    assert first_record["brush"]["matched"]["model"] == "Chubby 2"
+    assert first_record["brush"]["matched"]["handle"]["brand"] == "Simpson"
+    assert first_record["brush"]["matched"]["handle"]["model"] == "Chubby 2"
+    assert first_record["brush"]["matched"]["knot"]["brand"] == "Simpson"
+    assert first_record["brush"]["matched"]["knot"]["model"] == "Chubby 2"
 
     assert first_record["soap"]["match_type"] == "exact"
     assert first_record["soap"]["matched"]["maker"] == "Barrister and Mann"
@@ -152,8 +158,10 @@ soap:
     assert second_record["blade"]["matched"]["model"] == "SP"
 
     assert second_record["brush"]["match_type"] == "exact"
-    assert second_record["brush"]["matched"]["brand"] == "Declaration Grooming"
-    assert second_record["brush"]["matched"]["model"] == "B3"
+    assert second_record["brush"]["matched"]["handle"]["brand"] == "Declaration Grooming"
+    assert second_record["brush"]["matched"]["handle"]["model"] == "B3"
+    assert second_record["brush"]["matched"]["knot"]["brand"] == "Declaration Grooming"
+    assert second_record["brush"]["matched"]["knot"]["model"] == "B3"
 
     assert second_record["soap"]["match_type"] == "exact"
     assert second_record["soap"]["matched"]["maker"] == "House of Mammoth"
@@ -161,6 +169,9 @@ soap:
 
     # Third record should have no matches (unmatched)
     third_record = records[2]
+    print(f"DEBUG: Third record brush: {third_record.get('brush')}")
+    print(f"DEBUG: Third record brush type: {type(third_record.get('brush'))}")
+    print(f"DEBUG: Third record full: {third_record}")
     assert third_record["razor"]["matched"] is None
     assert third_record["blade"]["matched"] is None
     assert third_record["brush"]["matched"] is None

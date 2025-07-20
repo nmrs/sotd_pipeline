@@ -2,6 +2,7 @@ import re
 from typing import Optional
 
 from sotd.match.brush_matching_strategies.utils.fiber_utils import _FIBER_PATTERNS, match_fiber
+from sotd.match.brush_matching_strategies.utils.knot_size_utils import parse_knot_size
 
 
 class EnhancedBrushSplitter:
@@ -55,16 +56,8 @@ class EnhancedBrushSplitter:
             if handle and knot:
                 return handle, knot, delimiter_type
 
-            # If splitting fails, try to match as individual components
-            if self._is_known_knot(text):
-                # It's a known knot, treat as unsplittable knot
-                return None, text, "unsplittable_knot"
-            elif self._is_known_handle(text):
-                # It's a known handle, treat as unsplittable handle
-                return text, None, "unsplittable_handle"
-            else:
-                # Unknown string that can't be split - treat as knot (user preference)
-                return None, text, "unsplittable"
+            # If no splitting methods worked, return None to indicate no splitting
+            return None, None, None
 
     def _split_by_delimiters(self, text: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
         """Split text using known delimiters and return parts and delimiter type.
@@ -74,6 +67,7 @@ class EnhancedBrushSplitter:
         - Always check for ' w/ ' and ' with ' delimiters before '/' to avoid
           mis-splitting 'w/' as '/'.
         - Other delimiters retain their original logic.
+        - Non-delimiters like " x ", " × ", " & ", "()" are NOT treated as delimiters.
         """
         # High-reliability delimiters (always trigger splitting with simple logic)
         high_reliability_delimiters = [" w/ ", " with "]
@@ -81,6 +75,27 @@ class EnhancedBrushSplitter:
         handle_primary_delimiters = [" in "]
         # Medium-reliability delimiters (need smart analysis)
         medium_reliability_delimiters = [" + ", " - "]
+        # Non-delimiters (should NOT trigger splitting)
+        non_delimiters = [" x ", " × ", " & ", "()"]
+
+        # Check if text contains any non-delimiters - if so, don't split
+        # But be smarter about " & " - only treat as non-delimiter if it's not part of a brand name
+        for non_delimiter in non_delimiters:
+            if non_delimiter in text:
+                # Special handling for " & " - only treat as non-delimiter if it's not part of a
+                # brand name
+                if non_delimiter == " & ":
+                    # Check if " & " is followed by a space and another word (likely a brand name)
+                    # or if it's followed immediately by another word (likely a delimiter)
+                    if re.search(r" &\s+\w", text):
+                        # " & " is followed by space + word, likely a brand name, so don't treat as
+                        # non-delimiter
+                        continue
+                    else:
+                        # " & " is followed immediately by word, likely a delimiter
+                        return None, None, None
+                else:
+                    return None, None, None
 
         # Always check for ' w/ ' and ' with ' first to avoid misinterpreting 'w/' as '/'
         for delimiter in high_reliability_delimiters:
@@ -109,7 +124,13 @@ class EnhancedBrushSplitter:
         # Check medium-reliability delimiters (use smart analysis)
         for delimiter in medium_reliability_delimiters:
             if delimiter in text:
-                return self._split_by_delimiter_smart(text, delimiter, "smart_analysis")
+                # For " - " delimiter, be extra smart about brand aliases and logical grouping
+                if delimiter == " - ":
+                    return self._split_by_delimiter_smart_enhanced(
+                        text, delimiter, "smart_analysis"
+                    )
+                else:
+                    return self._split_by_delimiter_smart(text, delimiter, "smart_analysis")
 
         return None, None, None
 
@@ -227,6 +248,126 @@ class EnhancedBrushSplitter:
 
         return best_split if best_split else (None, None, None)
 
+    def _split_by_delimiter_smart_enhanced(
+        self, text: str, delimiter: str, delimiter_type: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Enhanced smart splitting for " - " delimiter that considers brand aliases and logical
+        grouping."""
+        # Find all occurrences of the delimiter
+        delimiter_positions = []
+        start = 0
+        while True:
+            pos = text.find(delimiter, start)
+            if pos == -1:
+                break
+            delimiter_positions.append(pos)
+            start = pos + len(delimiter)
+
+        if not delimiter_positions:
+            return None, None, None
+
+        # Try each delimiter position and score the results
+        best_split = None
+        best_score = -float("inf")
+
+        for pos in delimiter_positions:
+            part1 = text[:pos].strip()
+            part2 = text[pos + len(delimiter) :].strip()
+
+            if not part1 or not part2:
+                continue
+
+            # Check if part2 contains another delimiter
+            if " - " in part2:
+                # This looks like "Brand - Alias - Size Fiber" or "Brand Handle - Size Fiber" pattern
+                sub_parts = part2.split(" - ", 1)
+                if len(sub_parts) == 2:
+                    middle_part = sub_parts[0].strip()
+                    size_fiber_part = sub_parts[1].strip()
+
+                    # Check if middle_part looks like a brand alias (not a handle description)
+                    if self._looks_like_brand_alias(middle_part, size_fiber_part):
+                        # This is likely "Brand - Alias - Size Fiber" pattern
+                        # Handle should be part1, knot should be the combined alias + size/fiber
+                        score = self._score_split(part1, part2)
+                        if score > best_score:
+                            best_score = score
+                            best_split = (part1, part2, delimiter_type)
+                    elif self._looks_like_handle_description(middle_part):
+                        # This is likely "Brand Handle - Size Fiber" pattern
+                        # Try splitting on the second delimiter instead
+                        # This means part1 + middle_part should be handle, size_fiber_part should be knot
+                        combined_handle = f"{part1} - {middle_part}"
+                        score = self._score_split(combined_handle, size_fiber_part)
+                        if score > best_score:
+                            best_score = score
+                            best_split = (combined_handle, size_fiber_part, delimiter_type)
+            else:
+                # No second delimiter, check if part2 looks like a complete knot description
+                if self._looks_like_complete_knot(part2):
+                    # This looks like "Brand - Complete Knot Description"
+                    score = self._score_split(part1, part2)
+                    if score > best_score:
+                        best_score = score
+                        best_split = (part1, part2, delimiter_type)
+
+        # Return the best split found, or fall back to regular smart analysis
+        if best_split:
+            return best_split
+        else:
+            return self._split_by_delimiter_smart(text, delimiter, delimiter_type)
+
+    def _score_split(self, handle: str, knot: str) -> float:
+        """Score a potential handle/knot split."""
+        handle_score = self._score_as_handle(handle)
+        knot_score = self._score_as_knot(knot)
+        return handle_score + knot_score
+
+    def _looks_like_brand_alias(self, alias_part: str, size_fiber_part: str) -> bool:
+        """Check if a part looks like a brand alias followed by size/fiber info."""
+        # Check if size_fiber_part contains size and fiber information
+        has_size = parse_knot_size(size_fiber_part) is not None
+        has_fiber = match_fiber(size_fiber_part) is not None
+
+        # If the second part has size/fiber info, the first part is likely a brand alias
+        return has_size or has_fiber
+
+    def _looks_like_handle_description(self, text: str) -> bool:
+        """Check if text looks like a handle description rather than a brand alias."""
+        text_lower = text.lower()
+
+        # Handle-specific terms that indicate this is a handle description
+        handle_terms = ["handle", "custom", "artisan", "turned", "wood", "resin", "zebra", "burl"]
+        for term in handle_terms:
+            if term in text_lower:
+                return True
+
+        # If it contains size/fiber info, it's likely not a handle description
+        if parse_knot_size(text) is not None:
+            return False
+        if match_fiber(text) is not None:
+            return False
+
+        return False
+
+    def _looks_like_complete_knot(self, text: str) -> bool:
+        """Check if text looks like a complete knot description."""
+        text_lower = text.lower()
+
+        # Check for size patterns using knot_size_utils
+        has_size = parse_knot_size(text) is not None
+
+        # Check for fiber types using fiber_utils
+        has_fiber = match_fiber(text) is not None
+
+        # Check for version patterns (like B15, V20, etc.)
+        has_version = bool(re.search(r"\b[bv]\d{1,2}\b", text_lower))
+
+        # Check for knot-specific terms
+        has_knot_terms = bool(re.search(r"\b(knot|tip|density)\b", text_lower))
+
+        return has_size or has_fiber or has_version or has_knot_terms
+
     def _split_by_delimiter(
         self, text: str, delimiter: str, delimiter_type: str, handle_first: bool
     ) -> tuple[Optional[str], Optional[str], Optional[str]]:
@@ -318,22 +459,32 @@ class EnhancedBrushSplitter:
     def _score_as_knot(self, text: str) -> int:
         """Score how likely a text is to be a knot (higher = more likely knot)."""
         score = 0
-        text_lower = text.lower()
 
         # Strong knot indicators
-        if "knot" in text_lower:
+        if "knot" in text.lower():
             score += 10
 
         # Test against brush strategies to see if this looks like a knot
         knot_strategy_matches = 0
+        known_knot_matches = 0
+        other_knot_matches = 0
+
         for strategy in self.strategies:
             try:
                 result = strategy.match(text)
-                if result and (
-                    (isinstance(result, dict) and result.get("matched"))
-                    or (isinstance(result, dict) and result.get("brand"))
-                ):
+                if result and result.matched:
                     knot_strategy_matches += 1
+                    # Check if this is a known knot vs other knot
+                    brand = result.matched.get("brand", "")
+                    model = result.matched.get("model", "")
+                    strategy_name = result.strategy_name
+
+                    # Known knots have specific brand/model combinations from known_knots section
+                    if brand and model and "KnownKnot" in strategy_name:
+                        known_knot_matches += 1
+                    # Other knots are from other_knots section
+                    elif brand and "OtherKnot" in strategy_name:
+                        other_knot_matches += 1
             except (AttributeError, KeyError, TypeError, re.error):
                 # Some strategies might fail on certain inputs due to regex errors,
                 # missing attributes, or type issues - skip and continue
@@ -345,10 +496,16 @@ class EnhancedBrushSplitter:
         elif knot_strategy_matches == 1:
             score += 8
 
+        # Known knots get much higher scores than other knots
+        if known_knot_matches >= 1:
+            score += 25  # Significant bonus for known knots
+        elif other_knot_matches >= 1:
+            score += 5  # Small bonus for other knots
+
         # Knot-related terms
         knot_terms = ["syn", "mm", "knot", "badger", "boar", "synthetic"]
         for term in knot_terms:
-            if term in text_lower:
+            if term in text.lower():
                 score += 3
 
         # Fiber type patterns (strong knot indicators) - use fiber_utils
@@ -357,15 +514,15 @@ class EnhancedBrushSplitter:
             score += 10
 
         # Size patterns (knot indicators)
-        if re.search(r"\d{2}\s*mm", text_lower):
+        if re.search(r"\d{2}\s*mm", text, re.IGNORECASE):
             score += 8
 
         # Chisel & Hound versioning patterns (knot indicators)
-        if re.search(r"\bv\d{2}\b", text_lower):
+        if re.search(r"\bv\d{2}\b", text, re.IGNORECASE):
             score += 8
 
         # Declaration Grooming patterns (B2, B15, etc.)
-        if re.search(r"\bB\d{1,2}[A-Z]?\b", text_lower):
+        if re.search(r"B\d{1,2}[A-Z]?\b", text, re.IGNORECASE):
             score += 10
 
         # Handle indicators (negative score for knot likelihood)
@@ -381,7 +538,7 @@ class EnhancedBrushSplitter:
             "burl",
         ]
         for term in handle_terms:
-            if term in text_lower:
+            if term in text.lower():
                 score -= 5
 
         # Test against actual handle patterns from handles.yaml (negative for knot)
