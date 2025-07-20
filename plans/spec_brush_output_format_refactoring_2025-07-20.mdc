@@ -1,0 +1,292 @@
+# Brush Output Format Refactoring Specification
+
+**Date**: 2025-07-20  
+**Status**: SPECIFICATION  
+**Type**: Data Format Refactoring  
+**Priority**: HIGH  
+
+## Overview
+
+The current brush output format in the match phase has several structural issues that create confusion, redundancy, and inconsistent data access patterns. This specification defines the improved format that addresses these issues while maintaining all necessary information for analysis.
+
+## Current Issues
+
+### 1. **Redundant Fields**
+- `handle_maker`/`knot_maker` duplicate `handle.brand`/`knot.brand`
+- Top-level `fiber` duplicates `knot.fiber`
+- Multiple `_original_*` fields that duplicate `source_text`
+
+### 2. **Inconsistent Strategy Attribution**
+- Same strategy name and pattern used for both handle and knot sections
+- Confusing `_matched_from` fields that don't align with actual matching logic
+- Strategy names don't clearly indicate their purpose
+
+### 3. **Poor Data Structure**
+- Inconsistent field presence between handle and knot sections
+- Missing data shown as omitted fields rather than explicit nulls
+- Fiber conflicts not clearly resolved
+
+### 4. **Excessive Metadata**
+- Too many `_` prefixed fields that may not be needed for analysis
+- Redundant pattern and strategy information
+- Unclear data source attribution
+
+## Proposed Format
+
+### Core Structure
+
+#### Example 1: Composite Brush (Non-Catalog)
+```yaml
+brush:
+  original: "Rad Dinosaur Creations - Jetson - 25mm Muhle STF"
+  normalized: "Rad Dinosaur Creations - Jetson - 25mm Muhle STF"
+  matched:
+    # Top-level composite info (null for non-catalog composite brushes)
+    brand: null
+    model: null
+    
+    # Component sections with consistent structure
+    handle:
+      brand: "Rad Dinosaur Creations"
+      model: "Jetson"
+      source_text: "Rad Dinosaur Creations"
+      _matched_by: "HandleMatchingStrategy"
+      _pattern: "rad.*dinosaur.*creations"
+    
+    knot:
+      brand: "Muhle"
+      model: "STF"
+      fiber: "Badger"
+      knot_size_mm: 25
+      source_text: "25mm Muhle STF"
+      _matched_by: "KnotMatchingStrategy"
+      _pattern: "\\bm[uü]hle\\b"
+    
+    # Match metadata
+    _matched_by: "CompositeBrushStrategy"
+    _pattern: "composite_delimiter_split"
+    match_type: "regex"
+```
+
+#### Example 2: Catalog Composite Brush (BFM)
+```yaml
+brush:
+  original: "Muninn Woodworks BFM"
+  normalized: "Muninn Woodworks BFM"
+  matched:
+    # Top-level composite info (populated for catalog composite brushes)
+    brand: "EldrormR Industries/Muninn Woodworks"
+    model: "BFM"
+    
+    # Component sections with consistent structure
+    handle:
+      brand: "Muninn Woodworks"
+      model: null
+      source_text: "Muninn Woodworks"
+      _matched_by: "KnownBrushMatchingStrategy"
+      _pattern: "\\bbfm\\b(.*50mm)?"
+    
+    knot:
+      brand: "Moti"
+      model: "Motherlode"
+      fiber: "Synthetic"
+      knot_size_mm: 50
+      source_text: "BFM"
+      _matched_by: "KnownBrushMatchingStrategy"
+      _pattern: "\\bbfm\\b(.*50mm)?"
+    
+    # Match metadata
+    _matched_by: "KnownBrushMatchingStrategy"
+    _pattern: "\\bbfm\\b(.*50mm)?"
+    match_type: "regex"
+```
+
+#### Example 3: Single-Brand Brush (Simpson Chubby 2)
+```yaml
+brush:
+  original: "Simpson Chubby 2"
+  normalized: "Simpson Chubby 2"
+  matched:
+    # Top-level brand/model (populated for single-brand brushes)
+    brand: "Simpson"
+    model: "Chubby 2"
+    
+    # Component sections with consistent structure (same brand for single-brand brushes)
+    handle:
+      brand: "Simpson"
+      model: "Chubby 2"
+      source_text: "Simpson Chubby 2"
+      _matched_by: "KnownBrushMatchingStrategy"
+      _pattern: "simp.*chubby\\s*2\\b"
+    
+    knot:
+      brand: "Simpson"
+      model: "Chubby 2"
+      fiber: "Badger"
+      knot_size_mm: 27
+      source_text: "Simpson Chubby 2"
+      _matched_by: "KnownBrushMatchingStrategy"
+      _pattern: "simp.*chubby\\s*2\\b"
+    
+    # Match metadata
+    _matched_by: "KnownBrushMatchingStrategy"
+    _pattern: "simp.*chubby\\s*2\\b"
+    match_type: "regex"
+```
+
+### Key Improvements
+
+#### 1. **Removed Redundant Fields**
+- ❌ `handle_maker: null` (redundant with `handle.brand`)
+- ❌ `knot_maker: null` (redundant with `knot.brand`)
+- ❌ Top-level `fiber: "Badger"` (redundant with `knot.fiber`)
+- ❌ `_original_knot_text` (redundant with `knot.source_text`)
+- ❌ `_original_handle_text` (redundant with `handle.source_text`)
+- ❌ `_original_model` (redundant with `model`)
+
+#### 2. **Consistent Section Structure**
+All brushes have handle and knot sections with the same core fields:
+- `brand` (required)
+- `model` (required, null if missing)
+- `source_text` (required)
+- `_matched_by` (required)
+- `_pattern` (required)
+
+**Single-brand brushes**: Same brand/model in both handle and knot sections
+**Composite brushes**: Different brands/models in handle and knot sections
+
+#### 3. **Correct Strategy Attribution**
+- Handle sections matched by handle strategies
+- Knot sections matched by knot strategies
+- Clear strategy names that indicate purpose
+
+#### 4. **Simplified Metadata**
+- Reduced `_` prefixed fields to essential ones
+- Clear data source attribution
+- Consistent naming conventions
+
+## Implementation Requirements
+
+### 1. **Data Structure Changes**
+- Remove redundant top-level fields
+- Ensure consistent field presence in subsections
+- Use explicit nulls for missing data
+
+### 2. **Strategy Attribution Fixes**
+- Update matching logic to use correct strategies for each section
+- Ensure pattern names reflect their actual purpose
+- Remove confusing `_matched_from` fields
+
+### 3. **Fiber Handling**
+- Remove top-level fiber field
+- Ensure fiber conflicts are resolved clearly
+- Preserve user input when conflicts occur
+
+### 4. **Backward Compatibility**
+- **Note**: This is a breaking change to the output format
+- Update all downstream consumers (enrich, aggregate, report phases)
+- Update all tests that validate brush output structure
+
+## Testing Requirements
+
+### Unit Tests
+- Test brush matcher output format changes
+- Test strategy attribution logic
+- Test fiber conflict resolution
+- Test null handling for missing data
+
+### Integration Tests
+- Test complete match phase with new format
+- Test enrich phase compatibility
+- Test aggregate phase compatibility
+- Test report phase compatibility
+
+### Test Coverage
+- 100% coverage for new format structure
+- 100% coverage for strategy attribution
+- 100% coverage for fiber handling
+
+## Migration Plan
+
+### Phase 1: Implementation
+1. Update brush matcher to produce new format
+2. Update all tests to expect new format
+3. Run full pipeline to validate changes
+
+### Phase 2: Consumer Updates
+1. Update enrich phase to handle new format
+2. Update aggregate phase to handle new format
+3. Update report phase to handle new format
+
+### Phase 3: Validation
+1. Run complete pipeline with `--force`
+2. Validate all reports still work correctly
+3. Update documentation
+
+## Benefits
+
+### 1. **Cleaner Data Structure**
+- No redundant fields
+- Consistent field presence
+- Clear data relationships
+
+### 2. **Better Analysis**
+- Easier to access component data
+- Clearer strategy attribution
+- More reliable data extraction
+- **Unified aggregation logic**: All brushes have consistent structure
+- **Simplified reporting**: Same field paths for all brush types
+
+### 3. **Reduced Confusion**
+- No ambiguous field names
+- Clear data source attribution
+- Consistent naming conventions
+
+### 4. **Improved Maintainability**
+- Less complex data structure
+- Fewer edge cases to handle
+- Clearer code intent
+
+## Risks and Mitigation
+
+### Risk: Breaking Changes
+- **Mitigation**: Comprehensive testing and gradual rollout
+- **Mitigation**: Clear documentation of format changes
+
+### Risk: Data Loss
+- **Mitigation**: Ensure all necessary data is preserved in new format
+- **Mitigation**: Validate with real data before deployment
+
+### Risk: Performance Impact
+- **Mitigation**: Measure performance before and after changes
+- **Mitigation**: Optimize if necessary
+
+## Success Criteria
+
+1. **All tests pass** with new format
+2. **No data loss** in migration
+3. **Improved readability** of output format
+4. **Reduced complexity** in downstream processing
+5. **Better analysis capabilities** for composite brushes
+
+## Timeline
+
+- **Specification**: 2025-07-20 (COMPLETE)
+- **Implementation**: TBD
+- **Testing**: TBD
+- **Deployment**: TBD
+
+## Dependencies
+
+- Brush matcher refactoring
+- Test suite updates
+- Downstream phase updates
+- Documentation updates
+
+---
+
+**Model**: Claude-3.5-Sonnet
+description:
+globs:
+alwaysApply: false
+---
