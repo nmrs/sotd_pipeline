@@ -29,7 +29,42 @@ class EnhancedBrushSplitter:
             return handle, knot, delimiter_type
 
         # Try brand-context splitting as last resort (most speculative)
-        return self._split_by_brand_context(text)
+        handle, knot, delimiter_type = self._split_by_brand_context(text)
+        if handle and knot:
+            return handle, knot, delimiter_type
+
+        # If no splitting is possible, try to match against known brushes/knots/handles
+        # Try matching as a complete brush first, then try splitting, then individual components
+        if self._is_known_brush(text):
+            # It's a known complete brush, don't split it
+            return None, None, None
+        else:
+            # Try to split and see if we can match the parts
+            handle, knot, delimiter_type = self._split_by_delimiters(text)
+            if handle and knot:
+                # Splitting succeeded - return the split components regardless of match status
+                # The brush matcher will handle matching each component separately
+                return handle, knot, delimiter_type
+
+            # Try other splitting methods
+            handle, knot, delimiter_type = self._split_by_fiber_hint(text)
+            if handle and knot:
+                return handle, knot, delimiter_type
+
+            handle, knot, delimiter_type = self._split_by_brand_context(text)
+            if handle and knot:
+                return handle, knot, delimiter_type
+
+            # If splitting fails, try to match as individual components
+            if self._is_known_knot(text):
+                # It's a known knot, treat as unsplittable knot
+                return None, text, "unsplittable_knot"
+            elif self._is_known_handle(text):
+                # It's a known handle, treat as unsplittable handle
+                return text, None, "unsplittable_handle"
+            else:
+                # Unknown string that can't be split - treat as knot (user preference)
+                return None, text, "unsplittable"
 
     def _split_by_delimiters(self, text: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
         """Split text using known delimiters and return parts and delimiter type.
@@ -438,3 +473,60 @@ class EnhancedBrushSplitter:
             return None, None, None
 
         return handle_text, knot_text, "brand_context"
+
+    def _is_known_knot(self, text: str) -> bool:
+        """Check if the text matches a known knot in the knots catalog."""
+        if not self.strategies:
+            return False
+
+        # Try to match against knot strategies specifically
+        for strategy in self.strategies:
+            try:
+                result = strategy.match(text)
+                if result and (
+                    (isinstance(result, dict) and result.get("matched"))
+                    or (isinstance(result, dict) and result.get("brand"))
+                ):
+                    # Check if this strategy is specifically for knots
+                    strategy_name = strategy.__class__.__name__.lower()
+                    if "knot" in strategy_name:
+                        # Additional check: make sure this isn't also a known brush
+                        # If it's a known brush, it should be treated as a complete brush,
+                        # not a knot
+                        if not self._is_known_brush(text):
+                            return True
+            except (AttributeError, KeyError, TypeError, re.error):
+                # Some strategies might fail on certain inputs - skip and continue
+                continue
+        return False
+
+    def _is_known_handle(self, text: str) -> bool:
+        """Check if the text matches a known handle in the handles catalog."""
+        if not self.handle_matcher:
+            return False
+
+        try:
+            handle_match = self.handle_matcher.match_handle_maker(text)
+            return handle_match is not None
+        except (AttributeError, KeyError, TypeError, re.error):
+            return False
+
+    def _is_known_brush(self, text: str) -> bool:
+        """Check if the text matches a known brush in the catalog."""
+        if not self.strategies:
+            return False
+
+        # Try to match against all strategies
+        for strategy in self.strategies:
+            try:
+                result = strategy.match(text)
+                if result and (
+                    (isinstance(result, dict) and result.get("matched"))
+                    or (isinstance(result, dict) and result.get("brand"))
+                    or (hasattr(result, "matched") and getattr(result, "matched", None))
+                ):
+                    return True
+            except (AttributeError, KeyError, TypeError, re.error):
+                # Some strategies might fail on certain inputs - skip and continue
+                continue
+        return False
