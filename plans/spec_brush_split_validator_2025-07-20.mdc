@@ -1,0 +1,245 @@
+# Brush Split Validator Specification
+
+## Overview
+
+The Brush Split Validator is a web UI tool for validating and correcting brush string splits from the SOTD Pipeline. It loads brush strings from selected months, displays them in a virtualized table with inline editing capabilities, and outputs validated splits to a YAML file for AI model training and testing scenarios.
+
+## Problem Statement
+
+Brush splitting in the SOTD Pipeline is complex and requires validation to ensure accuracy. The current brush matching system uses multiple strategies (delimiter-based, fiber-hint, brand-context) but may produce incorrect splits. Manual validation is needed to create high-quality training data for improving the splitting algorithms.
+
+## Core Functionality
+
+### Data Loading
+- Load brush strings from selected months (using same month selection as UnmatchedAnalyzer)
+- Auto-load existing validated splits from `data/brush_splits.yaml`
+- Global validation - once a brush string is validated, it applies across all months
+- Auto-add new occurrences to existing validated entries
+- Collapse duplicate strings in UI but save all individual comment IDs
+
+### Validation Workflow
+- Display brush strings in virtualized table with inline editing
+- Show current split results with confidence levels and reasoning
+- Allow users to correct splits and mark as validated
+- Support batch validation operations
+- Track validation progress and statistics
+
+## UI Components
+
+### Month Selection
+- Reusable component (shared with UnmatchedAnalyzer)
+- Multi-select dropdown for choosing months
+- Load brush strings from `data/matched/YYYY-MM.json` files
+
+### Virtualized Table
+- High-performance table for handling 1000+ strings
+- Inline editing for handle and knot fields
+- Batch selection with checkboxes
+- Filtering and searching capabilities
+- Progress indicator showing validated vs remaining
+
+### Table Columns
+1. **Original String**: Normalized brush string from matched data
+2. **Handle**: Editable field (null for single-component brushes)
+3. **Knot**: Editable field (full string for single-component brushes)
+4. **Status**: Visual indicator (unvalidated/validated/corrected)
+5. **Confidence**: Color-coded confidence level with reasoning
+6. **Comment IDs**: Clickable links to view source comments
+7. **Batch Selection**: Checkboxes for batch operations
+
+### Confidence Levels
+- **High** (green): Delimiter-based splits with reasonable component lengths
+- **Medium** (yellow): Fiber-hint splits, brand-context splits, or delimiter splits with short components
+- **Low** (red): Very short components (<3 chars), empty components, or no split detected
+
+### Reasoning Text
+- "Delimiter split: 'w/' detected"
+- "Fiber-based split: detected knot component"
+- "Brand context split: DG + CH pattern"
+- "No split: single component"
+- "Warning: handle too short (<3 chars)"
+- "Warning: empty knot component"
+
+## YAML Output Structure
+
+### File Location
+- Default path: `data/brush_splits.yaml`
+- Auto-load on tool startup
+- Manual save button to write changes
+
+### Data Structure
+```yaml
+brush_splits:
+  - original: "Declaration B15 w/ Chisel & Hound Zebra"
+    handle: "Chisel & Hound Zebra"
+    knot: "Declaration B15"
+    validated: true
+    corrected: false
+    validated_at: "2025-01-27T14:30:00Z"
+    system_handle: "Declaration B15"  # Only if corrected=true
+    system_knot: "Chisel & Hound Zebra"  # Only if corrected=true
+    system_confidence: "high"  # Only if corrected=true
+    system_reasoning: "Delimiter split: 'w/' detected"  # Only if corrected=true
+    occurrences:
+      - file: "2025-01.json"
+        comment_ids: ["abc123", "def456"]
+      - file: "2025-02.json"
+        comment_ids: ["hij789"]
+```
+
+### Field Descriptions
+- `original`: Normalized brush string from matched data
+- `handle`: Validated handle component (null for single-component)
+- `knot`: Validated knot component (full string for single-component)
+- `validated`: Boolean indicating user has reviewed this split
+- `corrected`: Boolean indicating user made changes to system split
+- `validated_at`: ISO timestamp of when user validated
+- `system_*`: Original system split (only present if corrected=true)
+- `occurrences`: List of files and comment IDs where string appears
+
+## User Interface Features
+
+### Revalidation Mode
+- Toggle to show all entries (including validated)
+- Validated entries displayed with different visual indicator (grayed out/background)
+- Can edit validated entries directly (stays "validated" status)
+- Track timestamp of last validation
+
+### Batch Operations
+- Select multiple entries with checkboxes
+- "Mark Selected as Validated" button
+- "Mark Selected as Needs Correction" button
+- Keyboard shortcuts for quick validation
+
+### Keyboard Shortcuts
+- `Enter`: Mark current row as validated
+- `Space`: Toggle selection for batch operations
+- `Tab`: Move between handle/knot edit fields
+- `Ctrl+Enter`: Mark multiple selected rows as validated
+
+### Statistics Display
+- Progress: validated/total with percentage
+- Corrections: corrected/validated with percentage
+- Split type breakdown: delimiter, fiber-hint, brand-context, no-split
+
+## Technical Implementation
+
+### API Endpoints
+- `GET /api/brush-splits/load` - Load brush strings from selected months
+- `GET /api/brush-splits/yaml` - Load existing validated splits
+- `POST /api/brush-splits/save` - Save validated splits to YAML
+- `GET /api/brush-splits/statistics` - Get validation statistics
+
+### Data Processing
+- Load brush strings from `data/matched/YYYY-MM.json` files
+- Extract normalized brush strings from matched data
+- Collapse duplicates while preserving all comment IDs
+- Merge with existing validated splits from YAML
+- Track new occurrences automatically
+
+### Performance Considerations
+- Virtualized table for large datasets
+- Efficient loading of brush strings from multiple months
+- Optimized YAML parsing and writing
+- Background processing for statistics calculation
+
+## Integration
+
+### Web UI Integration
+- New page at `/brush-split-validator`
+- Route name: "Brush Split Validator"
+- Shared navigation header with other tools
+- Consistent styling with existing components
+
+### File Management
+- Auto-load from `data/brush_splits.yaml` on startup
+- Save button to write to filesystem
+- No export functionality (developer has direct access)
+- Git tracking for version control
+
+## Success Criteria
+
+### Functional Requirements
+- [ ] Load brush strings from selected months
+- [ ] Display in virtualized table with inline editing
+- [ ] Show confidence levels and reasoning
+- [ ] Support batch validation operations
+- [ ] Save validated splits to YAML
+- [ ] Track validation progress and statistics
+- [ ] Handle single-component brushes correctly
+- [ ] Support revalidation of previously validated entries
+
+### Performance Requirements
+- [ ] Handle 1000+ brush strings efficiently
+- [ ] Fast loading from multiple month files
+- [ ] Responsive inline editing
+- [ ] Smooth virtualized table scrolling
+
+### Quality Requirements
+- [ ] Accurate split validation
+- [ ] Clear confidence indicators
+- [ ] Intuitive user interface
+- [ ] Reliable YAML output format
+- [ ] Proper error handling
+
+## Future Enhancements
+
+### Potential Improvements
+- Export functionality for specific date ranges
+- Advanced filtering by split type or confidence level
+- Bulk import of validation corrections
+- Integration with brush matching algorithm testing
+- Performance optimizations for very large datasets
+
+### Training Data Applications
+- AI model training for improved split detection
+- Algorithm validation and testing
+- Quality assessment of current splitting strategies
+- Pattern analysis for new split detection methods
+
+## Dependencies
+
+### Frontend Dependencies
+- React with TypeScript
+- Virtualized table component (existing)
+- Month selector component (shared)
+- API integration utilities
+
+### Backend Dependencies
+- Python 3.11
+- YAML file handling
+- JSON file processing
+- Brush matching algorithms (existing)
+
+### Data Dependencies
+- `data/matched/YYYY-MM.json` files
+- `data/brush_splits.yaml` (created by tool)
+- Brush matching strategies and algorithms
+
+## Implementation Notes
+
+### Development Approach
+- Follow TDD methodology for implementation
+- Use existing components where possible
+- Maintain consistency with current codebase patterns
+- Focus on performance for large datasets
+
+### Testing Strategy
+- Unit tests for split validation logic
+- Integration tests for YAML file handling
+- UI tests for virtualized table functionality
+- Performance tests for large dataset handling
+
+### Documentation Requirements
+- API documentation for new endpoints
+- User guide for validation workflow
+- Technical documentation for YAML format
+- Integration guide for AI training applications
+
+---
+
+*This specification defines the complete requirements for the Brush Split Validator tool. Implementation should follow the SOTD Pipeline development rules and TDD methodology.*
+description:
+globs:
+alwaysApply: false
+---

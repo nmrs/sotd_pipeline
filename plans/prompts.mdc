@@ -14,7 +14,7 @@ Proceed through the remaining tasks in the current step one at a time. After com
 1. Update the implementation plan to reflect the completed work.
 2. Commit the changes with a clear message summarizing the task completed.
 3. Move to the next task.
-4. Run quality checks (make format lint typecheck test) only before commits, not after every task.
+4. Run quality checks (for example "make format lint typecheck test" but use whatever is appropriae for the current work) only before commits, not after every task.
 ```
 
 ### Tracked Implementation Development Process

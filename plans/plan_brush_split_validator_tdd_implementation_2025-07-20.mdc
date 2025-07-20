@@ -1,0 +1,689 @@
+# Brush Split Validator - TDD Implementation Plan
+
+## 📘 Project Summary
+
+The Brush Split Validator is a web UI tool for validating and correcting brush string splits from the SOTD Pipeline. It provides a virtualized table interface for manual validation of brush splits, supporting inline editing, batch operations, and YAML output for AI model training. The tool integrates with existing brush matching algorithms and follows the established SOTD Pipeline patterns.
+
+## 🧩 Component Steps
+
+### Phase 1: Core Data Infrastructure
+1. **✅ Brush Split Data Model** - Define TypeScript interfaces and Python data structures
+2. **✅ Brush String Loading** - API endpoint to load brush strings from matched data
+3. **Split Validation Logic** - Core algorithms for confidence scoring and reasoning
+4. **YAML File Management** - Load/save validated splits with proper structure
+
+### Phase 2: Backend API Foundation
+5. **API Endpoints** - REST endpoints for data loading and saving
+6. **Statistics Calculation** - Progress tracking and validation metrics
+7. **Data Processing Pipeline** - Efficient handling of large datasets
+8. **Error Handling** - Robust error management for file operations
+
+### Phase 3: Frontend Core Components
+9. **Month Selector Integration** - Reuse existing month selection component
+10. **Virtualized Table Foundation** - High-performance table with basic display
+11. **Inline Editing** - Editable handle/knot fields with validation
+12. **Confidence Display** - Visual indicators for split confidence levels
+
+### Phase 4: User Interface Features
+13. **Batch Operations** - Checkbox selection and bulk validation
+14. **Keyboard Shortcuts** - Navigation and quick validation shortcuts
+15. **Progress Tracking** - Statistics display and validation progress
+16. **Revalidation Mode** - Toggle for editing previously validated entries
+
+### Phase 5: Integration and Polish
+17. **Route Integration** - Add to web UI navigation and routing
+18. **Performance Optimization** - Virtualization and large dataset handling
+19. **Testing Suite** - Comprehensive unit and integration tests
+20. **Documentation** - API docs and user guide
+
+## 🔁 Implementation Prompts
+
+### ✅ Step 1: Brush Split Data Model
+
+**Status**: COMPLETE - 2025-07-20
+
+**Completed Work**:
+- Created TypeScript interfaces in `webui/src/types/brushSplit.ts`:
+  - `BrushSplitOccurrence` - Represents file occurrences with comment IDs
+  - `BrushSplit` - Main data structure with validation fields
+  - `BrushSplitValidationStatus` - Status tracking
+  - `BrushSplitStatistics` - Progress tracking
+  - `BrushSplitLoadResponse`, `BrushSplitSaveRequest`, `BrushSplitSaveResponse` - API response types
+- Created Python data structures in `webui/api/brush_splits.py`:
+  - `BrushSplitOccurrence` dataclass with serialization methods
+  - `BrushSplit` dataclass with comprehensive validation fields
+  - `BrushSplitStatistics` dataclass with percentage calculations
+  - `BrushSplitValidator` class with confidence calculation logic
+  - `ConfidenceLevel` and `ValidationStatus` enums
+  - `normalize_brush_string` utility function
+- Created comprehensive test suite in `tests/webui/api/test_brush_splits.py`:
+  - 29 test cases covering all data structures
+  - Tests for serialization/deserialization, edge cases, validation logic
+  - All tests passing with proper type safety and validation
+
+**Key Features Implemented**:
+- Proper handling of single-component vs multi-component brushes
+- System field preservation for corrected splits
+- Confidence level calculation with reasoning text
+- YAML file loading/saving with atomic operations
+- Comprehensive error handling and validation
+- Type-safe API response structures
+
+**Next Steps**: Proceed to Step 2 - Brush String Loading
+
+### ✅ Step 2: Brush String Loading
+
+**Status**: COMPLETE - 2025-07-20
+
+**Completed Work**:
+- Implemented brush string loading functionality in `/api/brush-splits/load` endpoint
+- Added proper error handling for missing files and corrupted data
+- Implemented brush string normalization and deduplication
+- Created comprehensive test suite for API endpoints
+- Registered brush_splits router in main FastAPI application
+- Added support for multiple month selection with efficient data processing
+
+**Key Features Implemented**:
+- Load brush strings from `data/matched/YYYY-MM.json` files
+- Extract and normalize brush strings from matched data
+- Collapse duplicates while preserving all comment IDs
+- Merge with existing validated splits from YAML
+- Calculate statistics for validation progress
+- Handle missing files and corrupted data gracefully
+- Support multiple month selection efficiently
+
+**API Endpoints Created**:
+- `GET /api/brush-splits/load` - Load brush strings from selected months
+- `GET /api/brush-splits/yaml` - Load existing validated splits
+- `POST /api/brush-splits/save` - Save validated splits to YAML
+- `GET /api/brush-splits/statistics` - Get validation statistics
+
+**Test Coverage**:
+- 14 integration tests for API endpoints
+- Tests for error handling (missing files, corrupted data)
+- Tests for data normalization and deduplication
+- Tests for statistics calculation
+- Tests for YAML loading/saving functionality
+
+**Next Steps**: Proceed to Step 3 - Split Validation Logic
+
+### ✅ Step 3: Split Validation Logic
+
+**Status**: COMPLETE - 2025-07-20
+
+**Completed Work**:
+- Enhanced confidence calculation with sophisticated algorithms
+- Added support for fiber-hint splits using fiber indicators
+- Added support for brand-context splits using brand patterns
+- Improved reasoning text with detailed explanations
+- Updated data loading to use matched data with existing split information
+- Added comprehensive test coverage for all split types
+
+**Key Features Implemented**:
+- Confidence scoring algorithm (high/medium/low) for existing splits
+- Reasoning text generation that explains confidence levels
+- Support for delimiter-based, fiber-hint, and brand-context splits
+- Proper handling of single-component brushes
+- Validation functions focused on split quality assessment
+- Data loading from matched data with existing split information
+
+**Confidence Scoring Logic**:
+- **HIGH**: Delimiter splits (w/, with, /, -), single component brushes
+- **MEDIUM**: Fiber-hint splits with good component quality, brand-context splits
+- **LOW**: Very short components (<3 chars), empty components, poor quality splits
+
+**Split Type Detection**:
+- **Delimiter**: " w/ ", " with ", " / ", "/", " - "
+- **Fiber-hint**: Contains fiber indicators (badger, boar, synthetic, silvertip, syn)
+- **Brand-context**: Contains brand indicators (omega, semogue, zenith, simpson, declaration, dg, chisel, c&h)
+
+**Test Coverage**:
+- Unit tests for each confidence level calculation
+- Tests for all split types (delimiter, fiber-hint, brand-context)
+- Edge case tests (empty strings, single characters, no splits)
+- Integration tests with real brush string examples
+
+**Next Steps**: Proceed to Step 4 - YAML File Management
+
+### Step 4: YAML File Management
+
+```text
+Implement confidence scoring for existing brush string splits to help users validate split quality.
+
+Requirements:
+- Create confidence scoring algorithm (high/medium/low) for existing splits
+- Implement reasoning text generation that explains confidence levels
+- Support validation of delimiter-based, fiber-hint, and brand-context splits
+- Handle single-component brushes correctly
+- Create validation functions focused on split quality assessment
+
+Focus on:
+- Accurate confidence scoring based on split characteristics
+- Clear reasoning text that explains the confidence decision
+- Proper handling of edge cases (very short components, empty strings)
+- Simple validation logic that doesn't re-implement splitting
+- Performance optimization for batch validation
+
+Test requirements:
+- Unit tests for each confidence level calculation
+- Tests for all split types (delimiter, fiber-hint, brand-context)
+- Edge case tests (empty strings, single characters, no splits)
+- Integration tests with real brush string examples
+- Performance tests for batch validation
+```
+
+### Step 4: YAML File Management
+
+```text
+Implement YAML file handling for loading and saving validated brush splits with proper structure and error handling.
+
+Requirements:
+- Create functions to load existing validated splits from data/brush_splits.yaml
+- Implement save functionality with proper YAML structure
+- Handle merging of new occurrences with existing validated entries
+- Support auto-loading on startup and manual save operations
+- Add proper error handling for file operations
+
+Focus on:
+- Proper YAML structure matching the specification
+- Efficient merging of new occurrences with existing data
+- Atomic save operations to prevent data loss
+- Clear error messages for file operation failures
+- Validation of YAML structure and data integrity
+
+Test requirements:
+- Unit tests for YAML loading and saving
+- Tests for merging new occurrences with existing data
+- Error handling tests for corrupted YAML files
+- Integration tests with real file system operations
+- Performance tests for large YAML files
+```
+
+### Step 5: API Endpoints
+
+```text
+Create the complete REST API endpoints for the Brush Split Validator, including data loading, saving, and statistics.
+
+Requirements:
+- GET /api/brush-splits/load - Load brush strings from selected months
+- GET /api/brush-splits/yaml - Load existing validated splits
+- POST /api/brush-splits/save - Save validated splits to YAML
+- GET /api/brush-splits/statistics - Get validation statistics
+- Add proper error handling and status codes
+- Include request/response validation
+
+Focus on:
+- RESTful API design with proper HTTP methods
+- Request validation and error responses
+- Efficient data serialization/deserialization
+- Proper status codes for different scenarios
+- API documentation and type safety
+
+Test requirements:
+- Unit tests for each API endpoint
+- Integration tests with real data
+- Error handling tests for invalid requests
+- Performance tests for large datasets
+- API documentation tests
+```
+
+### Step 6: Statistics Calculation
+
+```text
+Implement statistics calculation for validation progress, correction rates, and split type breakdown.
+
+Requirements:
+- Calculate validation progress (validated/total with percentage)
+- Track correction rates (corrected/validated with percentage)
+- Provide split type breakdown (delimiter, fiber-hint, brand-context, no-split)
+- Support real-time statistics updates
+- Create efficient calculation algorithms
+
+Focus on:
+- Accurate progress tracking across large datasets
+- Efficient calculation algorithms for real-time updates
+- Clear statistics presentation for UI consumption
+- Support for filtered statistics (by month, confidence level, etc.)
+- Memory-efficient calculation for large datasets
+
+Test requirements:
+- Unit tests for each statistic calculation
+- Tests for edge cases (empty datasets, all validated, no corrections)
+- Performance tests for large datasets
+- Integration tests with real validation data
+- Accuracy tests with known datasets
+```
+
+### Step 7: Data Processing Pipeline
+
+```text
+Create an efficient data processing pipeline that handles large datasets and provides smooth user experience.
+
+Requirements:
+- Implement background processing for large datasets
+- Create efficient data structures for virtualized table
+- Support incremental loading and processing
+- Add progress indicators for long operations
+- Optimize memory usage for large datasets
+
+Focus on:
+- Background processing to prevent UI blocking
+- Efficient data structures for fast table rendering
+- Memory optimization for datasets with 1000+ entries
+- Progress tracking for user feedback
+- Error recovery for failed operations
+
+Test requirements:
+- Performance tests for large datasets (1000+ entries)
+- Memory usage tests for efficient processing
+- Background processing tests
+- Error recovery tests for failed operations
+- Integration tests with real large datasets
+```
+
+### Step 8: Error Handling
+
+```text
+Implement comprehensive error handling for all file operations, API calls, and user interactions.
+
+Requirements:
+- Handle missing or corrupted data files gracefully
+- Provide clear error messages for user actions
+- Implement retry logic for transient failures
+- Add logging for debugging and monitoring
+- Support graceful degradation for partial failures
+
+Focus on:
+- User-friendly error messages
+- Proper error categorization (user error vs system error)
+- Retry logic for network and file operations
+- Comprehensive logging for debugging
+- Graceful handling of partial data failures
+
+Test requirements:
+- Unit tests for each error scenario
+- Integration tests with corrupted data files
+- Network failure simulation tests
+- User error handling tests
+- Logging and monitoring tests
+```
+
+### Step 9: Month Selector Integration
+
+```text
+Integrate the existing month selector component with the Brush Split Validator, ensuring consistent behavior and proper data loading.
+
+Requirements:
+- Reuse existing month selector component
+- Implement proper data loading when months are selected
+- Handle month selection changes efficiently
+- Maintain state consistency between components
+- Add proper loading indicators
+
+Focus on:
+- Consistent UI behavior with other tools
+- Efficient data loading on month selection changes
+- Proper state management between components
+- Loading indicators for user feedback
+- Error handling for invalid month selections
+
+Test requirements:
+- Integration tests with existing month selector
+- Tests for month selection change handling
+- Loading state tests
+- Error handling tests for invalid selections
+- UI consistency tests with other tools
+```
+
+### Step 10: Virtualized Table Foundation
+
+```text
+Create the foundation for the virtualized table component that will display brush strings efficiently.
+
+Requirements:
+- Implement high-performance virtualized table
+- Display brush strings with proper columns
+- Support basic sorting and filtering
+- Add proper row selection handling
+- Implement smooth scrolling for large datasets
+
+Focus on:
+- High performance for 1000+ entries
+- Proper column layout and sizing
+- Efficient rendering and scrolling
+- Basic sorting and filtering capabilities
+- Consistent styling with existing components
+
+Test requirements:
+- Performance tests for large datasets
+- Rendering tests for different data sizes
+- Scrolling performance tests
+- Sorting and filtering tests
+- UI consistency tests
+```
+
+### Step 11: Inline Editing
+
+```text
+Implement inline editing capabilities for handle and knot fields with proper validation and user feedback.
+
+Requirements:
+- Add inline editing for handle and knot fields
+- Implement proper validation for edited values
+- Support Tab navigation between fields
+- Add visual feedback for validation state
+- Handle single-component brush editing correctly
+
+Focus on:
+- Intuitive editing experience
+- Proper validation with clear feedback
+- Keyboard navigation support
+- Visual indicators for validation state
+- Correct handling of single-component brushes
+
+Test requirements:
+- Unit tests for editing functionality
+- Validation tests for different input types
+- Keyboard navigation tests
+- UI tests for editing interactions
+- Integration tests with validation logic
+```
+
+### Step 12: Confidence Display
+
+```text
+Implement visual confidence indicators and reasoning text display for brush string splits.
+
+Requirements:
+- Display confidence levels with color coding (green/yellow/red)
+- Show reasoning text for split decisions
+- Support different confidence level displays
+- Add tooltips for detailed reasoning
+- Implement proper accessibility features
+
+Focus on:
+- Clear visual indicators for confidence levels
+- Readable reasoning text display
+- Proper color coding for accessibility
+- Tooltip implementation for detailed information
+- Consistent styling with existing components
+
+Test requirements:
+- Unit tests for confidence display logic
+- UI tests for visual indicators
+- Accessibility tests for color coding
+- Tooltip functionality tests
+- Styling consistency tests
+```
+
+### Step 13: Batch Operations
+
+```text
+Implement batch selection and bulk validation operations for efficient processing of multiple entries.
+
+Requirements:
+- Add checkboxes for row selection
+- Implement "Mark Selected as Validated" functionality
+- Add "Mark Selected as Needs Correction" functionality
+- Support keyboard shortcuts for batch operations
+- Add visual feedback for batch operations
+
+Focus on:
+- Efficient batch selection handling
+- Clear visual feedback for selected items
+- Keyboard shortcuts for quick operations
+- Proper state management for batch operations
+- Performance optimization for large selections
+
+Test requirements:
+- Unit tests for batch selection logic
+- UI tests for checkbox interactions
+- Keyboard shortcut tests
+- Performance tests for large selections
+- Integration tests with validation logic
+```
+
+### Step 14: Keyboard Shortcuts
+
+```text
+Implement comprehensive keyboard shortcuts for efficient navigation and validation workflow.
+
+Requirements:
+- Enter: Mark current row as validated
+- Space: Toggle selection for batch operations
+- Tab: Move between handle/knot edit fields
+- Ctrl+Enter: Mark multiple selected rows as validated
+- Add proper focus management
+
+Focus on:
+- Intuitive keyboard navigation
+- Proper focus management between elements
+- Clear visual feedback for keyboard actions
+- Accessibility compliance
+- Consistent behavior across different browsers
+
+Test requirements:
+- Unit tests for keyboard shortcut handling
+- Focus management tests
+- Cross-browser compatibility tests
+- Accessibility tests for keyboard navigation
+- Integration tests with table navigation
+```
+
+### Step 15: Progress Tracking
+
+```text
+Implement comprehensive progress tracking and statistics display for validation workflow.
+
+Requirements:
+- Display validation progress (validated/total with percentage)
+- Show correction rates (corrected/validated with percentage)
+- Provide split type breakdown statistics
+- Support real-time updates during validation
+- Add visual progress indicators
+
+Focus on:
+- Clear progress visualization
+- Real-time statistics updates
+- Accurate calculation of validation metrics
+- Visual indicators for progress
+- Proper state management for statistics
+
+Test requirements:
+- Unit tests for progress calculation
+- Real-time update tests
+- Accuracy tests for statistics
+- UI tests for progress indicators
+- Integration tests with validation workflow
+```
+
+### Step 16: Revalidation Mode
+
+```text
+Implement revalidation mode that allows editing previously validated entries while maintaining proper state tracking.
+
+Requirements:
+- Toggle to show all entries (including validated)
+- Different visual indicators for validated entries
+- Ability to edit validated entries directly
+- Track timestamp of last validation
+- Maintain validation history
+
+Focus on:
+- Clear visual distinction for validated entries
+- Proper state management for revalidation
+- Timestamp tracking for validation history
+- Intuitive toggle for revalidation mode
+- Consistent behavior with validation workflow
+
+Test requirements:
+- Unit tests for revalidation logic
+- UI tests for validated entry display
+- State management tests
+- Timestamp tracking tests
+- Integration tests with validation workflow
+```
+
+### Step 17: Route Integration
+
+```text
+Integrate the Brush Split Validator into the web UI navigation and routing system.
+
+Requirements:
+- Add route for /brush-split-validator
+- Integrate with existing navigation header
+- Ensure consistent styling with other tools
+- Add proper page title and metadata
+- Handle route-specific state management
+
+Focus on:
+- Consistent navigation experience
+- Proper route handling and state management
+- Consistent styling with existing components
+- SEO-friendly page titles and metadata
+- Proper integration with existing routing system
+
+Test requirements:
+- Route navigation tests
+- Navigation header integration tests
+- Styling consistency tests
+- State management tests
+- Integration tests with existing routing
+```
+
+### Step 18: Performance Optimization
+
+```text
+Optimize performance for large datasets and ensure smooth user experience with virtualized components.
+
+Requirements:
+- Optimize virtualized table rendering
+- Implement efficient data loading for large datasets
+- Add background processing for heavy operations
+- Optimize memory usage for large datasets
+- Add performance monitoring and metrics
+
+Focus on:
+- Smooth scrolling and rendering performance
+- Efficient memory usage for large datasets
+- Background processing to prevent UI blocking
+- Performance monitoring for optimization
+- User experience optimization
+
+Test requirements:
+- Performance tests for large datasets (1000+ entries)
+- Memory usage tests
+- Rendering performance tests
+- Background processing tests
+- User experience tests
+```
+
+### Step 19: Testing Suite
+
+```text
+Create comprehensive testing suite covering unit tests, integration tests, and performance tests.
+
+Requirements:
+- Unit tests for all core functionality
+- Integration tests for API endpoints
+- UI tests for user interactions
+- Performance tests for large datasets
+- Error handling and edge case tests
+
+Focus on:
+- Comprehensive test coverage
+- Realistic test data and scenarios
+- Performance testing for large datasets
+- Error handling and edge case coverage
+- Maintainable test structure
+
+Test requirements:
+- High test coverage (>90%)
+- Performance benchmarks for large datasets
+- Error scenario coverage
+- UI interaction tests
+- Integration test coverage
+```
+
+### Step 20: Documentation
+
+```text
+Create comprehensive documentation for the Brush Split Validator including API documentation, user guide, and technical documentation.
+
+Requirements:
+- API documentation for all endpoints
+- User guide for validation workflow
+- Technical documentation for YAML format
+- Integration guide for AI training applications
+- Code documentation and comments
+
+Focus on:
+- Clear and comprehensive documentation
+- User-friendly guides and tutorials
+- Technical accuracy and completeness
+- Integration examples and use cases
+- Maintainable documentation structure
+
+Test requirements:
+- Documentation accuracy tests
+- User guide usability tests
+- API documentation completeness tests
+- Integration example tests
+- Code documentation coverage tests
+```
+
+## 🧠 Critical Analysis
+
+### Plan Structure Assessment
+
+This TDD implementation plan follows a logical progression from core data infrastructure to user interface features, ensuring each step builds upon the previous one. The plan is structured to minimize dependencies and maximize testability.
+
+**Strengths:**
+- Clear separation of concerns between backend and frontend
+- Logical progression from data models to UI features
+- Comprehensive testing strategy at each step
+- Performance considerations built into the plan
+- Integration with existing components and patterns
+
+**Risk Mitigation:**
+- Early data model definition prevents downstream issues
+- Backend-first approach ensures API stability
+- Incremental UI development allows for early feedback
+- Performance testing integrated throughout the plan
+- Error handling addressed early in the process
+
+### Prompt Quality Analysis
+
+Each prompt is designed to be:
+- **Self-contained**: Includes all necessary context and requirements
+- **Testable**: Clear test requirements for each step
+- **Incremental**: Builds logically on previous steps
+- **Focused**: Addresses specific functionality without scope creep
+- **Actionable**: Provides clear implementation guidance
+
+### Implementation Safety
+
+The plan ensures:
+- No orphaned code through logical dependency chain
+- Comprehensive testing at each step
+- Performance considerations throughout
+- Error handling from the beginning
+- Integration with existing patterns and components
+
+### Buildability Assessment
+
+The plan is designed to be:
+- **Lean**: Each step is appropriately sized for implementation
+- **Safe**: Comprehensive testing prevents regressions
+- **Buildable**: Clear dependencies and logical progression
+- **Maintainable**: Follows established patterns and conventions
+
+This plan provides a solid foundation for implementing the Brush Split Validator using TDD methodology while ensuring high quality, performance, and maintainability.
+
+---
+
+*This implementation plan follows the TDD Project Planning template and is ready for systematic execution using the Tracked Implementation Development Process.*
+description:
+globs:
+alwaysApply: false
+---
