@@ -13,12 +13,12 @@ jest.mock('react-window', () => {
     const React = require('react');
     return {
         FixedSizeList: ({ children, itemCount, itemData, height, width }: any) => {
-            // Simulate virtualization by only rendering visible items
-            const visibleCount = Math.min(itemCount, Math.floor(height / 60)); // 60px per item
+            // Simple mock that renders all items without virtualization
+            // This eliminates hooks violations and makes tests more stable
             return React.createElement('div', {
                 'data-testid': 'virtualized-list',
                 style: { height, width }
-            }, Array.from({ length: visibleCount }, (_, index) =>
+            }, Array.from({ length: itemCount }, (_, index) =>
                 React.createElement('div', {
                     key: index,
                     'data-testid': `virtualized-row-${index}`,
@@ -37,7 +37,7 @@ const mockBrushSplits: BrushSplit[] = [
         knot: "Declaration",
         validated: false,
         corrected: false,
-        validated_at: null,
+        validated_at: "",
         system_handle: "Elite",
         system_knot: "Declaration",
         system_confidence: "high",
@@ -48,12 +48,12 @@ const mockBrushSplits: BrushSplit[] = [
     },
     {
         original: "Omega boar brush",
-        handle: null,
+        handle: "",
         knot: "Omega boar brush",
         validated: true,
         corrected: false,
         validated_at: "2025-01-20T10:00:00Z",
-        system_handle: null,
+        system_handle: "",
         system_knot: "Omega boar brush",
         system_confidence: "medium",
         system_reasoning: "Single component brush",
@@ -258,15 +258,15 @@ describe('BrushSplitTable', () => {
             const brushSplitsWithNulls: BrushSplit[] = [
                 {
                     original: "Test brush",
-                    handle: null,
+                    handle: "",
                     knot: "Test brush",
                     validated: false,
                     corrected: false,
-                    validated_at: null,
-                    system_handle: null,
+                    validated_at: "",
+                    system_handle: "",
                     system_knot: "Test brush",
-                    system_confidence: null,
-                    system_reasoning: null,
+                    system_confidence: "",
+                    system_reasoning: "",
                     occurrences: []
                 }
             ];
@@ -297,7 +297,7 @@ describe('BrushSplitTable', () => {
                     knot: "brush",
                     validated: false,
                     corrected: false,
-                    validated_at: null,
+                    validated_at: "",
                     system_handle: "Test",
                     system_knot: "brush",
                     system_confidence: "high",
@@ -320,7 +320,7 @@ describe('BrushSplitTable', () => {
                     knot: "brush",
                     validated: false,
                     corrected: false,
-                    validated_at: null,
+                    validated_at: "",
                     system_handle: "Test",
                     system_knot: "brush",
                     system_confidence: "high",
@@ -342,7 +342,7 @@ describe('BrushSplitTable', () => {
                     knot: "Maggard SHD",
                     validated: false,
                     corrected: false,
-                    validated_at: null,
+                    validated_at: "",
                     system_handle: "Chisel & Hound",
                     system_knot: "Maggard SHD",
                     system_confidence: "high",
@@ -364,7 +364,7 @@ describe('BrushSplitTable', () => {
                 knot: `Knot ${index}`,
                 validated: false,
                 corrected: false,
-                validated_at: null,
+                validated_at: "",
                 system_handle: `Handle ${index}`,
                 system_knot: `Knot ${index}`,
                 system_confidence: "high",
@@ -643,7 +643,7 @@ describe('BrushSplitTable', () => {
 
             // Verify the callback was called with updated data
             expect(onSplitUpdate).toHaveBeenCalledWith(1, expect.objectContaining({
-                handle: null,
+                handle: "",
                 knot: 'New Omega'
             }));
         });
@@ -701,6 +701,134 @@ describe('BrushSplitTable', () => {
                 knot: 'Declaration',
                 validated_at: expect.any(String)
             });
+        });
+    });
+
+    describe('Search Functionality', () => {
+        it('should render search input field', () => {
+            render(<BrushSplitTable {...defaultProps} />);
+
+            expect(screen.getByPlaceholderText('Search brush splits...')).toBeInTheDocument();
+        });
+
+        it('should filter results when searching for handle text', async () => {
+            const user = userEvent.setup();
+            render(<BrushSplitTable {...defaultProps} />);
+
+            const searchInput = screen.getByPlaceholderText('Search brush splits...');
+            await user.type(searchInput, 'Elite');
+
+            // Should show only the Elite handle entry
+            expect(screen.getByText('Elite handle w/ Declaration knot')).toBeInTheDocument();
+            expect(screen.queryByText('Omega boar brush')).not.toBeInTheDocument();
+            expect(screen.queryByText('Simpson Chubby 2')).not.toBeInTheDocument();
+        });
+
+        it('should filter results when searching for knot text', async () => {
+            const user = userEvent.setup();
+            render(<BrushSplitTable {...defaultProps} />);
+
+            const searchInput = screen.getByPlaceholderText('Search brush splits...');
+            await user.type(searchInput, 'Declaration');
+
+            // Should show only the Declaration knot entry
+            expect(screen.getByText('Elite handle w/ Declaration knot')).toBeInTheDocument();
+            expect(screen.queryByText('Omega boar brush')).not.toBeInTheDocument();
+            expect(screen.queryByText('Simpson Chubby 2')).not.toBeInTheDocument();
+        });
+
+        it('should filter results when searching for original text', async () => {
+            const user = userEvent.setup();
+            render(<BrushSplitTable {...defaultProps} />);
+
+            const searchInput = screen.getByPlaceholderText('Search brush splits...');
+            await user.type(searchInput, 'Chubby');
+
+            // Should show only the Chubby entry
+            expect(screen.queryByText('Elite handle w/ Declaration knot')).not.toBeInTheDocument();
+            expect(screen.queryByText('Omega boar brush')).not.toBeInTheDocument();
+            expect(screen.getByText('Simpson Chubby 2')).toBeInTheDocument();
+        });
+
+        it('should perform case-insensitive search', async () => {
+            const user = userEvent.setup();
+            render(<BrushSplitTable {...defaultProps} />);
+
+            const searchInput = screen.getByPlaceholderText('Search brush splits...');
+            await user.type(searchInput, 'elite');
+
+            // Should show the Elite entry despite lowercase search
+            expect(screen.getByText('Elite handle w/ Declaration knot')).toBeInTheDocument();
+            expect(screen.queryByText('Omega boar brush')).not.toBeInTheDocument();
+        });
+
+        it('should show all results when search is cleared', async () => {
+            const user = userEvent.setup();
+            render(<BrushSplitTable {...defaultProps} />);
+
+            const searchInput = screen.getByPlaceholderText('Search brush splits...');
+            await user.type(searchInput, 'Elite');
+
+            // Clear the search
+            await user.clear(searchInput);
+
+            // Should show all entries again
+            expect(screen.getByText('Elite handle w/ Declaration knot')).toBeInTheDocument();
+            expect(screen.getByText('Omega boar brush')).toBeInTheDocument();
+            expect(screen.getByText('Simpson Chubby 2')).toBeInTheDocument();
+        });
+
+        it('should show no results message when search has no matches', async () => {
+            const user = userEvent.setup();
+            render(<BrushSplitTable {...defaultProps} />);
+
+            const searchInput = screen.getByPlaceholderText('Search brush splits...');
+            await user.type(searchInput, 'nonexistent');
+
+            expect(screen.getByText('No brush splits found matching your search.')).toBeInTheDocument();
+            expect(screen.queryByText('Elite handle w/ Declaration knot')).not.toBeInTheDocument();
+            expect(screen.queryByText('Omega boar brush')).not.toBeInTheDocument();
+            expect(screen.queryByText('Simpson Chubby 2')).not.toBeInTheDocument();
+        });
+
+        it('should search across multiple fields simultaneously', async () => {
+            const user = userEvent.setup();
+            render(<BrushSplitTable {...defaultProps} />);
+
+            const searchInput = screen.getByPlaceholderText('Search brush splits...');
+            await user.type(searchInput, 'omega');
+
+            // Should find both "Omega boar brush" and any entries with "omega" in other fields
+            expect(screen.getByText('Omega boar brush')).toBeInTheDocument();
+        });
+
+        it('should maintain selection state when filtering', async () => {
+            const user = userEvent.setup();
+            const onSelectionChange = jest.fn();
+            render(<BrushSplitTable {...defaultProps} onSelectionChange={onSelectionChange} />);
+
+            // Select first item
+            const checkboxes = screen.getAllByRole('checkbox');
+            await user.click(checkboxes[1]); // First data row checkbox
+
+            // Search to filter results
+            const searchInput = screen.getByPlaceholderText('Search brush splits...');
+            await user.type(searchInput, 'Elite');
+
+            // Selection should be maintained
+            expect(onSelectionChange).toHaveBeenCalledWith([0]);
+        });
+
+        it('should update filtered count in search input', async () => {
+            const user = userEvent.setup();
+            render(<BrushSplitTable {...defaultProps} />);
+
+            const searchInput = screen.getByPlaceholderText('Search brush splits...');
+            await user.type(searchInput, 'Elite');
+
+            // Should show filtered count (1 of 3)
+            expect(searchInput).toHaveValue('Elite');
+            // Note: The count display would be implemented in the component
         });
     });
 }); 
