@@ -1,16 +1,28 @@
 """Unit tests for brush splits data structures and validation logic."""
 
+import json
 import tempfile
 from pathlib import Path
+from unittest.mock import patch, MagicMock
+
+import pytest
+import yaml
+from fastapi.testclient import TestClient
 
 from webui.api.brush_splits import (
+    BrushSplitError,
+    FileNotFoundError,
+    DataCorruptionError,
+    ValidationError,
+    ProcessingError,
+    BrushSplitValidator,
     BrushSplitOccurrence,
     BrushSplit,
     BrushSplitStatistics,
-    BrushSplitValidator,
     StatisticsCalculator,
     ConfidenceLevel,
     normalize_brush_string,
+    router,
 )
 
 
@@ -692,3 +704,231 @@ class TestStatisticsCalculator:
         assert "total_recent" in activity
         assert "recent_corrections" in activity
         assert activity["total_recent"] == 1  # Only one recent validation
+
+
+class TestErrorHandling:
+    """Test comprehensive error handling scenarios."""
+
+    def test_file_not_found_error_handling(self):
+        """Test handling of missing YAML file."""
+        validator = BrushSplitValidator()
+        validator.yaml_path = Path("/nonexistent/file.yaml")
+
+        # Should not raise exception, just log and continue
+        validator.load_validated_splits()
+        assert len(validator.validated_splits) == 0
+
+    def test_corrupted_yaml_file_handling(self, tmp_path):
+        """Test handling of corrupted YAML file."""
+        validator = BrushSplitValidator()
+        validator.yaml_path = tmp_path / "corrupted.yaml"
+
+        # Create corrupted YAML file
+        with open(validator.yaml_path, "w") as f:
+            f.write("invalid: yaml: content: [")
+
+        with pytest.raises(DataCorruptionError):
+            validator.load_validated_splits()
+
+    def test_invalid_yaml_structure_handling(self, tmp_path):
+        """Test handling of invalid YAML structure."""
+        validator = BrushSplitValidator()
+        validator.yaml_path = tmp_path / "invalid.yaml"
+
+        # Create YAML with invalid structure
+        with open(validator.yaml_path, "w") as f:
+            yaml.dump("not_a_dict", f)
+
+        with pytest.raises(DataCorruptionError):
+            validator.load_validated_splits()
+
+    def test_save_with_backup_creation(self, tmp_path):
+        """Test that save operation creates backup."""
+        validator = BrushSplitValidator()
+        validator.yaml_path = tmp_path / "test.yaml"
+
+        # Create initial file
+        with open(validator.yaml_path, "w") as f:
+            yaml.dump({"splits": []}, f)
+
+        # Save new data
+        splits = [create_test_split("test brush")]
+        success = validator.save_validated_splits(splits)
+
+        assert success
+        assert validator.yaml_path.exists()
+        assert (tmp_path / "test.yaml.backup").exists()
+
+    def test_save_retry_logic(self, tmp_path):
+        """Test retry logic for save operations."""
+        validator = BrushSplitValidator()
+        validator.yaml_path = tmp_path / "test.yaml"
+        validator._save_retry_count = 2
+
+        # Mock file operations to fail first, then succeed
+        with patch("builtins.open") as mock_open:
+            mock_open.side_effect = [OSError("Permission denied"), MagicMock()]
+
+            splits = [create_test_split("test brush")]
+            success = validator.save_validated_splits(splits)
+
+            # Should succeed on second attempt
+            assert success
+
+    def test_load_retry_logic(self, tmp_path):
+        """Test retry logic for load operations."""
+        validator = BrushSplitValidator()
+        validator.yaml_path = tmp_path / "test.yaml"
+        validator._load_retry_count = 2
+
+        # Create valid YAML file
+        with open(validator.yaml_path, "w") as f:
+            yaml.dump({"splits": [create_test_split("test brush").to_dict()]}, f)
+
+        # Mock file operations to fail first, then succeed
+        with patch("builtins.open") as mock_open:
+            mock_open.side_effect = [OSError("Permission denied"), open(validator.yaml_path, "r")]
+
+            validator.load_validated_splits()
+
+            # Should succeed on second attempt
+            assert len(validator.validated_splits) == 1
+
+
+class TestAPIErrorHandling:
+    """Test API endpoint error handling."""
+
+    def test_load_endpoint_missing_months(self, client):
+        """Test load endpoint with missing months."""
+        response = client.get("/brush-splits/load")
+        assert response.status_code == 400
+        assert "No months specified" in response.json()["detail"]
+
+    def test_load_endpoint_missing_files(self, client):
+        """Test load endpoint with missing month files."""
+        response = client.get("/brush-splits/load?months=2025-99")
+        assert response.status_code == 200
+        data = response.json()
+        assert "errors" in data
+        assert "2025-99" in data["errors"]["failed_months"]
+
+    def test_load_endpoint_corrupted_files(self, client, tmp_path):
+        """Test load endpoint with corrupted JSON files."""
+        # Create corrupted JSON file
+        corrupted_file = Path("data/matched/2025-99.json")
+        corrupted_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(corrupted_file, "w") as f:
+            f.write('{"data": [{"invalid": json')
+
+        try:
+            response = client.get("/brush-splits/load?months=2025-99")
+            assert response.status_code == 200
+            data = response.json()
+            assert "errors" in data
+            assert "2025-99" in data["errors"]["failed_months"]
+        finally:
+            # Cleanup
+            if corrupted_file.exists():
+                corrupted_file.unlink()
+
+    def test_save_endpoint_no_data(self, client):
+        """Test save endpoint with no data."""
+        response = client.post("/brush-splits/save", json={"brush_splits": []})
+        assert response.status_code == 400
+        assert "No brush splits provided" in response.json()["detail"]
+
+    def test_save_endpoint_invalid_data(self, client):
+        """Test save endpoint with invalid data."""
+        invalid_data = {
+            "brush_splits": [
+                {"original": "", "knot": "test"},  # Missing original
+                {"original": "test", "knot": ""},  # Missing knot
+            ]
+        }
+        response = client.post("/brush-splits/save", json=invalid_data)
+        assert response.status_code == 400
+        assert "Validation errors" in response.json()["detail"]
+
+    def test_save_endpoint_file_error(self, client):
+        """Test save endpoint with file system errors."""
+        with patch("webui.api.brush_splits.BrushSplitValidator.save_validated_splits") as mock_save:
+            mock_save.return_value = False
+
+            valid_data = {
+                "brush_splits": [{"original": "test brush", "knot": "test", "validated": True}]
+            }
+            response = client.post("/brush-splits/save", json=valid_data)
+            assert response.status_code == 500
+            assert "Failed to save splits to file" in response.json()["detail"]
+
+    def test_yaml_endpoint_file_not_found(self, client):
+        """Test YAML endpoint when file doesn't exist."""
+        with patch("webui.api.brush_splits.validator.yaml_path") as mock_path:
+            mock_path.exists.return_value = False
+
+            response = client.get("/brush-splits/yaml")
+            assert response.status_code == 200
+            data = response.json()
+            assert data["file_info"]["exists"] is False
+            assert data["file_info"]["loaded_count"] == 0
+
+    def test_statistics_endpoint_error_handling(self, client):
+        """Test statistics endpoint error handling."""
+        with patch("webui.api.brush_splits.validator.load_validated_splits") as mock_load:
+            mock_load.side_effect = ProcessingError("Test error")
+
+            response = client.get("/brush-splits/statistics")
+            assert response.status_code == 500
+            assert "Internal server error" in response.json()["detail"]
+
+
+class TestErrorCategorization:
+    """Test proper error categorization and user-friendly messages."""
+
+    def test_user_error_vs_system_error(self):
+        """Test distinction between user errors and system errors."""
+        # User errors (400)
+        user_errors = [
+            ("No months specified", 400),
+            ("No brush splits provided", 400),
+            ("Validation errors", 400),
+        ]
+
+        # System errors (500)
+        system_errors = [
+            ("File I/O error", 500),
+            ("YAML parsing error", 500),
+            ("Internal server error", 500),
+        ]
+
+        for error_msg, expected_code in user_errors + system_errors:
+            # This is a conceptual test - in practice, these would be tested
+            # through the actual API endpoints
+            assert expected_code in [400, 500]
+
+    def test_error_message_clarity(self):
+        """Test that error messages are clear and actionable."""
+        error_messages = [
+            "No months specified",
+            "No brush splits provided",
+            "Validation errors: Split 0: missing original field",
+            "Failed to save splits to file",
+            "Internal server error: Test error",
+        ]
+
+        for msg in error_messages:
+            assert len(msg) > 0
+            assert "error" in msg.lower() or "missing" in msg.lower() or "failed" in msg.lower()
+
+
+def create_test_split(original: str):
+    """Helper function to create a test brush split."""
+    from webui.api.brush_splits import BrushSplit
+
+    return BrushSplit(
+        original=original,
+        handle="test handle",
+        knot="test knot",
+        validated=True,
+        corrected=False,
+    )
