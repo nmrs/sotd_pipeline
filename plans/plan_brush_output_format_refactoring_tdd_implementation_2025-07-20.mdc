@@ -161,32 +161,42 @@ def _final_cleanup(self, match_dict):
 
 ### Phase 3: Downstream Phase Updates (MEDIUM PRIORITY) - ⏳ PENDING
 
-#### 3.1 Update Enrich Phase - ⏳ PENDING
-**Files**: `sotd/enrich/` (brush-related enrichers)
+#### 3.1 Update Enrich Phase - ✅ COMPLETE
+**Files**: `sotd/enrich/brush_enricher.py`
 **Objective**: Ensure enrich phase works with new brush format
 
-**Changes Required**:
-- [ ] Update any enrichers that access brush data
-- [ ] Ensure they can handle new section structure
-- [ ] Validate that fiber and size information is still accessible
+**Changes Completed**:
+- ✅ Updated `BrushEnricher.applies_to()` to check for either top-level brand (legacy) or knot section brand (new format)
+- ✅ Updated `BrushEnricher.enrich()` to get fiber and knot_size_mm from knot section instead of top-level fields
+- ✅ Added backward compatibility for legacy format while supporting new format
+- ✅ All brush enricher tests passing (33 tests)
 
-#### 3.2 Update Aggregate Phase - ⏳ PENDING
+#### 3.2 Update Aggregate Phase - ✅ COMPLETE
 **Files**: `sotd/aggregate/` (brush-related aggregators)
 **Objective**: Ensure aggregate phase works with new brush format
 
-**Changes Required**:
-- [ ] Update brush aggregators to use new section structure
-- [ ] Ensure handle maker and knot maker aggregation still works
-- [ ] Validate that fiber aggregation continues to function
+**Changes Completed**:
+- ✅ Updated `handle_maker_aggregator.py` to get handle maker from `handle.brand` instead of top-level `handle_maker`
+- ✅ Updated `knot_maker_aggregator.py` to get knot maker from `knot.brand` instead of top-level `brand`
+- ✅ Updated `fiber_aggregator.py` to get fiber from `knot.fiber` instead of top-level `fiber`
+- ✅ Updated `knot_size_aggregator.py` to get knot size from `knot.knot_size_mm` instead of top-level `knot_size_mm`
+- ✅ Updated `brush_aggregator.py` to handle composite brushes with null top-level brand/model and get fiber from knot section
+- ✅ Updated all test data to use new format with handle/knot sections
+- ✅ All aggregate tests passing (202 tests)
 
-#### 3.3 Update Report Phase - ⏳ PENDING
+#### 3.3 Update Report Phase - ✅ COMPLETE
 **Files**: `sotd/report/` (brush-related report generators)
 **Objective**: Ensure report phase works with new brush format
 
-**Changes Required**:
-- [ ] Update brush table generators to use new section structure
-- [ ] Ensure all brush statistics are still calculated correctly
-- [ ] Validate that handle/knot breakdowns are still available
+**Changes Completed**:
+- ✅ Report phase works with aggregated data (already updated in aggregate phase)
+- ✅ All brush table generators working correctly with new format
+- ✅ `BrushesTableGenerator` works with aggregated brush data
+- ✅ `BrushHandleMakersTableGenerator` works with `brush_handle_makers` data
+- ✅ `BrushKnotMakersTableGenerator` works with `brush_knot_makers` data
+- ✅ `BrushFibersTableGenerator` works with `brush_fibers` data
+- ✅ `BrushKnotSizesTableGenerator` works with `brush_knot_sizes` data
+- ✅ All report tests passing (283 tests)
 
 ### Phase 4: WebUI Updates (MEDIUM PRIORITY) - ⏳ PENDING
 

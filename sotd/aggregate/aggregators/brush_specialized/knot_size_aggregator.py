@@ -8,7 +8,7 @@ def aggregate_knot_sizes(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
     Returns a list of knot size aggregations sorted by shaves desc,
     unique_users desc. Each item includes position field for delta calculations.
-    Uses brush.matched.knot_size_mm with fallback to brush.enriched.knot_size_mm.
+    Uses brush.matched.knot.knot_size_mm with fallback to brush.enriched.knot_size_mm.
 
     Args:
         records: List of enriched comment records
@@ -31,8 +31,13 @@ def aggregate_knot_sizes(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         matched = matched if isinstance(matched, dict) else {}
         enriched = enriched if isinstance(enriched, dict) else {}
 
-        # Try matched.knot_size_mm first, then fallback to enriched.knot_size_mm
-        knot_size_mm = matched.get("knot_size_mm") or enriched.get("knot_size_mm")
+        # Get knot size from knot section (all brushes have consistent handle/knot sections)
+        knot_section = matched.get("knot", {})
+        knot_size_mm = None
+
+        if knot_section and isinstance(knot_section, dict):
+            # Try knot.knot_size_mm first, then fallback to enriched.knot_size_mm
+            knot_size_mm = knot_section.get("knot_size_mm") or enriched.get("knot_size_mm")
 
         # Skip if no knot size data
         if not knot_size_mm:

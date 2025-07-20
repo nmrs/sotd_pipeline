@@ -25,11 +25,20 @@ def aggregate_knot_makers(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]
         brush = record.get("brush", {})
         matched = brush.get("matched", {})
 
-        # Skip if no matched brush data or no brand (knot maker)
-        if not matched or not matched.get("brand"):
+        # Skip if no matched brush data
+        if not matched:
             continue
 
-        brand = matched.get("brand", "").strip()
+        # Get knot maker from knot section (all brushes have consistent handle/knot sections)
+        knot_section = matched.get("knot", {})
+        if not knot_section or not isinstance(knot_section, dict):
+            continue
+
+        brand = knot_section.get("brand")
+        if not brand:
+            continue
+
+        brand = brand.strip()
         author = record.get("author", "").strip()
 
         if brand and author:

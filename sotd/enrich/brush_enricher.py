@@ -18,7 +18,11 @@ class BrushEnricher(BaseEnricher):
             return False
         matched_data = brush_data.get("matched")
         if matched_data and isinstance(matched_data, dict):
-            return matched_data.get("brand") is not None
+            # Check for either top-level brand (legacy) or knot section brand (new format)
+            top_level_brand = matched_data.get("brand") is not None
+            knot_section = matched_data.get("knot", {})
+            knot_brand = knot_section.get("brand") if isinstance(knot_section, dict) else None
+            return top_level_brand or (knot_brand is not None)
         return False
 
     def enrich(self, field_data: dict, original_comment: str) -> Optional[dict]:
@@ -43,18 +47,23 @@ class BrushEnricher(BaseEnricher):
         user_knot_size = self._extract_knot_size(brush_extracted)
         user_fiber = self._extract_fiber(brush_extracted)
 
+        # Get catalog data from new format (knot section) or legacy format (top-level)
+        knot_section = field_data.get("knot", {})
+        catalog_knot_size = (
+            knot_section.get("knot_size_mm") if knot_section else field_data.get("knot_size_mm")
+        )
+        catalog_fiber = knot_section.get("fiber") if knot_section else field_data.get("fiber")
+
         # Start with catalog data (preserved from match phase)
         enriched_data = {
-            "knot_size_mm": field_data.get("knot_size_mm"),
-            "fiber": field_data.get("fiber"),
+            "knot_size_mm": catalog_knot_size,
+            "fiber": catalog_fiber,
             "_enriched_by": "BrushEnricher",
-            "_extraction_source": "catalog" if field_data.get("knot_size_mm") else "none",
+            "_extraction_source": "catalog" if catalog_knot_size else "none",
         }
 
         # Handle knot size merging
         if user_knot_size is not None:
-            catalog_knot_size = field_data.get("knot_size_mm")
-
             if catalog_knot_size is not None:
                 # Both catalog and user have knot size - check for conflicts
                 if abs(catalog_knot_size - user_knot_size) < 0.1:
@@ -73,8 +82,6 @@ class BrushEnricher(BaseEnricher):
 
         # Handle fiber conflict resolution (catalog fiber is preserved from match phase)
         if user_fiber is not None:
-            catalog_fiber = field_data.get("fiber")
-
             if catalog_fiber is not None:
                 if catalog_fiber.lower() == user_fiber.lower():
                     # Values match - use user value, mark as confirmed

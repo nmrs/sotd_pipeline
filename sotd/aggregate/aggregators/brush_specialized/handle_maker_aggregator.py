@@ -25,11 +25,20 @@ def aggregate_handle_makers(records: List[Dict[str, Any]]) -> List[Dict[str, Any
         brush = record.get("brush", {})
         matched = brush.get("matched", {})
 
-        # Skip if no matched brush data or no handle_maker
-        if not matched or not matched.get("handle_maker"):
+        # Skip if no matched brush data
+        if not matched:
             continue
 
-        handle_maker = matched.get("handle_maker", "").strip()
+        # Get handle maker from handle section (all brushes have consistent handle/knot sections)
+        handle_section = matched.get("handle", {})
+        if not handle_section or not isinstance(handle_section, dict):
+            continue
+
+        handle_maker = handle_section.get("brand")
+        if not handle_maker:
+            continue
+
+        handle_maker = handle_maker.strip()
         author = record.get("author", "").strip()
 
         if handle_maker and author:

@@ -8,7 +8,7 @@ def aggregate_fibers(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
     Returns a list of fiber aggregations sorted by shaves desc,
     unique_users desc. Each item includes position field for delta calculations.
-    Uses brush.matched.fiber with fallback to brush.enriched.fiber.
+    Uses brush.matched.knot.fiber with fallback to brush.enriched.fiber.
 
     Args:
         records: List of enriched comment records
@@ -31,8 +31,13 @@ def aggregate_fibers(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         matched = matched if isinstance(matched, dict) else {}
         enriched = enriched if isinstance(enriched, dict) else {}
 
-        # Try matched.fiber first, then fallback to enriched.fiber
-        fiber = matched.get("fiber") or enriched.get("fiber")
+        # Get fiber from knot section (all brushes have consistent handle/knot sections)
+        knot_section = matched.get("knot", {})
+        fiber = None
+
+        if knot_section and isinstance(knot_section, dict):
+            # Try knot.fiber first, then fallback to enriched.fiber
+            fiber = knot_section.get("fiber") or enriched.get("fiber")
 
         # Skip if no fiber data
         if not fiber:

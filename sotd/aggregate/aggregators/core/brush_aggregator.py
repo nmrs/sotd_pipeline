@@ -23,12 +23,46 @@ class BrushAggregator(BaseAggregator):
             matched = brush.get("matched", {})
 
             # Skip if no matched brush data
-            if not matched or not matched.get("brand") or not matched.get("model"):
+            if not matched:
                 continue
 
-            brand = matched.get("brand", "")
-            model = matched.get("model", "")
-            fiber = matched.get("fiber", "")
+            # Get brush info from new format
+            brand = matched.get("brand")  # Top-level brand (null for composite brushes)
+            model = matched.get("model")  # Top-level model (null for composite brushes)
+
+            # For composite brushes, try to get info from handle/knot sections
+            if not brand or not model:
+                handle_section = matched.get("handle", {})
+                knot_section = matched.get("knot", {})
+
+                if handle_section and isinstance(handle_section, dict):
+                    handle_brand = handle_section.get("brand")
+                    handle_model = handle_section.get("model")
+
+                    if knot_section and isinstance(knot_section, dict):
+                        knot_brand = knot_section.get("brand")
+                        knot_model = knot_section.get("model")
+
+                        # For composite brushes, use handle brand + knot model or vice versa
+                        if handle_brand and knot_model:
+                            brand = handle_brand
+                            model = knot_model
+                        elif knot_brand and handle_model:
+                            brand = knot_brand
+                            model = handle_model
+                        elif handle_brand and handle_model:
+                            brand = handle_brand
+                            model = handle_model
+                        elif knot_brand and knot_model:
+                            brand = knot_brand
+                            model = knot_model
+
+            # Get fiber from knot section (all brushes have consistent handle/knot sections)
+            fiber = ""
+            knot_section = matched.get("knot", {})
+            if knot_section and isinstance(knot_section, dict):
+                fiber = knot_section.get("fiber", "")
+
             author = record.get("author", "")
 
             # Handle None values and strip strings

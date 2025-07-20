@@ -113,8 +113,13 @@ class TestBrushAggregator:
                     "matched": {
                         "brand": "Semogue",
                         "model": "610",
-                        "fiber": "Boar",
-                        "knot_size_mm": 21,
+                        "handle": {"brand": "Semogue", "model": "610"},
+                        "knot": {
+                            "brand": "Semogue",
+                            "model": "610",
+                            "fiber": "Boar",
+                            "knot_size_mm": 21,
+                        },
                     }
                 },
             },
@@ -124,8 +129,13 @@ class TestBrushAggregator:
                     "matched": {
                         "brand": "Semogue",
                         "model": "610",
-                        "fiber": "Boar",
-                        "knot_size_mm": 21,
+                        "handle": {"brand": "Semogue", "model": "610"},
+                        "knot": {
+                            "brand": "Semogue",
+                            "model": "610",
+                            "fiber": "Boar",
+                            "knot_size_mm": 21,
+                        },
                     }
                 },
             },
@@ -135,8 +145,13 @@ class TestBrushAggregator:
                     "matched": {
                         "brand": "AP Shave Co",
                         "model": "MiG",
-                        "fiber": "Synthetic",
-                        "knot_size_mm": 24,
+                        "handle": {"brand": "AP Shave Co", "model": "MiG"},
+                        "knot": {
+                            "brand": "AP Shave Co",
+                            "model": "MiG",
+                            "fiber": "Synthetic",
+                            "knot_size_mm": 24,
+                        },
                     }
                 },
             },

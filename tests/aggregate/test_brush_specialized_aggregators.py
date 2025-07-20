@@ -10,9 +10,9 @@ from sotd.aggregate.aggregators.brush_specialized import (
 
 def test_aggregate_handle_makers():
     records = [
-        {"author": "user1", "brush": {"matched": {"handle_maker": "Semogue"}}},
-        {"author": "user2", "brush": {"matched": {"handle_maker": "Semogue"}}},
-        {"author": "user1", "brush": {"matched": {"handle_maker": "AP Shave Co"}}},
+        {"author": "user1", "brush": {"matched": {"handle": {"brand": "Semogue"}}}},
+        {"author": "user2", "brush": {"matched": {"handle": {"brand": "Semogue"}}}},
+        {"author": "user1", "brush": {"matched": {"handle": {"brand": "AP Shave Co"}}}},
     ]
     result = aggregate_handle_makers(records)
     assert len(result) == 2
@@ -28,9 +28,9 @@ def test_aggregate_handle_makers():
 
 def test_aggregate_knot_makers():
     records = [
-        {"author": "user1", "brush": {"matched": {"brand": "Declaration Grooming"}}},
-        {"author": "user2", "brush": {"matched": {"brand": "Declaration Grooming"}}},
-        {"author": "user1", "brush": {"matched": {"brand": "Semogue"}}},
+        {"author": "user1", "brush": {"matched": {"knot": {"brand": "Declaration Grooming"}}}},
+        {"author": "user2", "brush": {"matched": {"knot": {"brand": "Declaration Grooming"}}}},
+        {"author": "user1", "brush": {"matched": {"knot": {"brand": "Semogue"}}}},
     ]
     result = aggregate_knot_makers(records)
     assert len(result) == 2
@@ -46,9 +46,9 @@ def test_aggregate_knot_makers():
 
 def test_aggregate_fibers():
     records = [
-        {"author": "user1", "brush": {"matched": {"fiber": "Synthetic"}}},
-        {"author": "user2", "brush": {"matched": {"fiber": "Synthetic"}}},
-        {"author": "user1", "brush": {"matched": {"fiber": "Boar"}}},
+        {"author": "user1", "brush": {"matched": {"knot": {"fiber": "Synthetic"}}}},
+        {"author": "user2", "brush": {"matched": {"knot": {"fiber": "Synthetic"}}}},
+        {"author": "user1", "brush": {"matched": {"knot": {"fiber": "Boar"}}}},
     ]
     result = aggregate_fibers(records)
     assert len(result) == 2
@@ -64,9 +64,9 @@ def test_aggregate_fibers():
 
 def test_aggregate_knot_sizes():
     records = [
-        {"author": "user1", "brush": {"matched": {"knot_size_mm": 24}}},
-        {"author": "user2", "brush": {"matched": {"knot_size_mm": 24}}},
-        {"author": "user1", "brush": {"matched": {"knot_size_mm": 26}}},
+        {"author": "user1", "brush": {"matched": {"knot": {"knot_size_mm": 24}}}},
+        {"author": "user2", "brush": {"matched": {"knot": {"knot_size_mm": 24}}}},
+        {"author": "user1", "brush": {"matched": {"knot": {"knot_size_mm": 26}}}},
     ]
     result = aggregate_knot_sizes(records)
     assert len(result) == 2

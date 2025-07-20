@@ -54,9 +54,13 @@ class TestAggregateIntegration:
                     "matched": {
                         "brand": "Simpson",
                         "model": "Chubby 2",
-                        "handle_maker": "Simpson",
-                        "fiber": "Badger",
-                        "knot_size_mm": 27,
+                        "handle": {"brand": "Simpson", "model": "Chubby 2"},
+                        "knot": {
+                            "brand": "Simpson",
+                            "model": "Chubby 2",
+                            "fiber": "Badger",
+                            "knot_size_mm": 27,
+                        },
                         "match_type": "exact",
                     }
                 },
@@ -99,9 +103,13 @@ class TestAggregateIntegration:
                     "matched": {
                         "brand": "Declaration Grooming",
                         "model": "B15",
-                        "handle_maker": "Elite",
-                        "fiber": "Badger",
-                        "knot_size_mm": 26,
+                        "handle": {"brand": "Elite", "model": None},
+                        "knot": {
+                            "brand": "Declaration Grooming",
+                            "model": "B15",
+                            "fiber": "Badger",
+                            "knot_size_mm": 26,
+                        },
                         "match_type": "exact",
                     }
                 },
@@ -144,9 +152,13 @@ class TestAggregateIntegration:
                     "matched": {
                         "brand": "Stirling",
                         "model": "Badger",
-                        "handle_maker": "Stirling",
-                        "fiber": "Badger",
-                        "knot_size_mm": 24,
+                        "handle": {"brand": "Stirling", "model": "Badger"},
+                        "knot": {
+                            "brand": "Stirling",
+                            "model": "Badger",
+                            "fiber": "Badger",
+                            "knot_size_mm": 24,
+                        },
                         "match_type": "exact",
                     }
                 },
