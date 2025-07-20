@@ -9,15 +9,15 @@ interface BrushSplitOccurrence {
 
 interface BrushSplit {
     original: string;
-    handle: string | null;
+    handle: string;
     knot: string;
     validated: boolean;
     corrected: boolean;
-    validated_at: string | null;
-    system_handle: string | null;
-    system_knot: string | null;
-    system_confidence: string | null;
-    system_reasoning: string | null;
+    validated_at: string;
+    system_handle: string;
+    system_knot: string;
+    system_confidence: string;
+    system_reasoning: string;
     occurrences: BrushSplitOccurrence[];
 }
 
@@ -38,7 +38,46 @@ interface EditingState {
     error: string | null;
 }
 
+// Search functionality
+const useSearchFilter = (brushSplits: BrushSplit[]) => {
+    const [searchTerm, setSearchTerm] = useState('');
 
+    const filteredBrushSplits = useMemo(() => {
+        if (!searchTerm.trim()) {
+            return brushSplits;
+        }
+
+        const lowerSearchTerm = searchTerm.toLowerCase();
+        return brushSplits.filter(split => {
+            // Search across original, handle, and knot fields
+            const originalMatch = split.original.toLowerCase().includes(lowerSearchTerm);
+            const handleMatch = split.handle?.toLowerCase().includes(lowerSearchTerm) || false;
+            const knotMatch = split.knot.toLowerCase().includes(lowerSearchTerm);
+
+            return originalMatch || handleMatch || knotMatch;
+        });
+    }, [brushSplits, searchTerm]);
+
+    return {
+        searchTerm,
+        setSearchTerm,
+        filteredBrushSplits
+    };
+};
+
+const EMPTY_SPLIT: BrushSplit = {
+    handle: '',
+    knot: '',
+    original: '',
+    occurrences: [],
+    system_handle: '',
+    system_knot: '',
+    system_confidence: '',
+    system_reasoning: '',
+    validated: false,
+    corrected: false,
+    validated_at: '',
+};
 
 // Row component for the virtualized list
 const BrushSplitRow: React.FC<{
@@ -46,27 +85,71 @@ const BrushSplitRow: React.FC<{
     style: React.CSSProperties;
     data: {
         brushSplits: BrushSplit[];
+        filteredBrushSplits: BrushSplit[];
         selectedIndices: number[];
         onSelectionChange?: (selectedIndices: number[]) => void;
         onSplitUpdate?: (index: number, updatedSplit: BrushSplit) => void;
         editingState: EditingState | null;
         setEditingState: (state: EditingState | null) => void;
+        searchTerm: string;
     };
 }> = ({ index, style, data }) => {
-    const { brushSplits, selectedIndices, onSelectionChange, onSplitUpdate, editingState, setEditingState } = data;
-    const split = brushSplits[index];
+    const { brushSplits, filteredBrushSplits, selectedIndices, onSelectionChange, onSplitUpdate, editingState, setEditingState, searchTerm } = data;
+    // Always use a split object, even for filtered-out rows
+    const split = filteredBrushSplits.find(s => s === brushSplits[index]) || EMPTY_SPLIT;
+    const isFilteredOut = split === EMPTY_SPLIT;
+    // All hooks must be called with fixed dependencies
     const isSelected = selectedIndices?.includes(index) || false;
     const isEditing = editingState?.rowIndex === index;
-
+    // Use only primitive values in dependencies with stable arrays
     const handleCheckboxChange = useCallback(() => {
         if (!onSelectionChange) return;
-
         const newSelectedIndices = isSelected
             ? selectedIndices.filter(i => i !== index)
-            : [...(selectedIndices || []), index];
-
+            : [...selectedIndices, index];
         onSelectionChange(newSelectedIndices);
-    }, [index, isSelected, selectedIndices, onSelectionChange]);
+    }, [isSelected, index, selectedIndices?.length || 0, onSelectionChange]);
+
+    // RESTORED WITH STABLE DEPENDENCY ARRAYS
+    const handleHandleClick = useCallback(() => {
+        setEditingState({ rowIndex: index, field: 'handle', value: split.handle, error: null });
+    }, [index, split.handle, setEditingState]);
+    const handleKnotClick = useCallback(() => {
+        setEditingState({ rowIndex: index, field: 'knot', value: split.knot, error: null });
+    }, [index, split.knot, setEditingState]);
+
+    const saveChanges = useCallback(async (newValue: string) => {
+        if (!onSplitUpdate || !editingState) return;
+
+        const error = validateField(editingState.field, newValue);
+        if (error) {
+            setEditingState({ ...editingState, error });
+            return;
+        }
+
+        const updatedSplit = {
+            ...split!,
+            [editingState.field]: newValue,
+            validated: true,
+            corrected: true,
+            validated_at: new Date().toISOString()
+        };
+
+        await onSplitUpdate(index, updatedSplit);
+        setEditingState(null);
+    }, [index, editingState?.field || '', editingState?.value || '', onSplitUpdate, split.handle, split.knot]);
+
+    const cancelEdit = useCallback(() => {
+        setEditingState(null);
+    }, [setEditingState]);
+
+    // Check if this row should be visible (exists in filtered data)
+    const shouldShowRow = split && filteredBrushSplits.includes(split);
+
+    // If this row should not be shown, render an empty div to maintain hooks consistency
+    if (!shouldShowRow) {
+        return <div style={style} data-testid={`virtualized-row-${index}`}></div>;
+    }
 
     const getConfidenceColor = (confidence: string | null) => {
         switch (confidence?.toLowerCase()) {
@@ -98,81 +181,7 @@ const BrushSplitRow: React.FC<{
         return null;
     };
 
-    // Handle field editing
-    const handleHandleClick = useCallback(() => {
-        setEditingState({
-            rowIndex: index,
-            field: 'handle',
-            value: split.handle || '',
-            error: null
-        });
-    }, [index, split.handle, setEditingState]);
-
-    const handleKnotClick = useCallback(() => {
-        setEditingState({
-            rowIndex: index,
-            field: 'knot',
-            value: split.knot,
-            error: null
-        });
-    }, [index, split.knot, setEditingState]);
-
-    // Save changes
-    const saveChanges = useCallback(async (newValue: string) => {
-        if (!onSplitUpdate) return;
-
-        const error = validateField(editingState!.field, newValue);
-        if (error) {
-            setEditingState({
-                ...editingState!,
-                value: newValue,
-                error
-            });
-            return;
-        }
-
-        const updatedSplit: BrushSplit = {
-            ...split,
-            [editingState!.field]: editingState!.field === 'handle' ? newValue : newValue,
-            validated: true,
-            corrected: true,
-            validated_at: new Date().toISOString()
-        };
-
-        // Call parent callback
-        onSplitUpdate(index, updatedSplit);
-
-        // Save to backend
-        try {
-            const response = await fetch('/api/brush-splits/save-split', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    original: updatedSplit.original,
-                    handle: updatedSplit.handle,
-                    knot: updatedSplit.knot,
-                    validated_at: updatedSplit.validated_at,
-                }),
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                console.error('Failed to save split:', result.detail || 'Unknown error');
-                // Don't throw error to avoid breaking the UI flow
-            } else if (result.success) {
-                console.log('Split saved successfully:', result.message);
-            }
-        } catch (error) {
-            console.error('Error saving split:', error);
-            // Don't throw error to avoid breaking the UI flow
-        }
-
-        setEditingState(null);
-    }, [editingState, onSplitUpdate, index, split, setEditingState]);
-
+    // RESTORED WITH STABLE DEPENDENCY ARRAYS
     // Handle input key events
     const handleInputKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
@@ -180,7 +189,7 @@ const BrushSplitRow: React.FC<{
             saveChanges(e.currentTarget.value);
         } else if (e.key === 'Escape') {
             e.preventDefault();
-            setEditingState(null);
+            cancelEdit();
         } else if (e.key === 'Tab') {
             e.preventDefault();
             saveChanges(e.currentTarget.value);
@@ -194,7 +203,7 @@ const BrushSplitRow: React.FC<{
                 });
             }
         }
-    }, [saveChanges, setEditingState, editingState, index, split.knot]);
+    }, [saveChanges, cancelEdit, editingState?.field || '', index, split.knot]);
 
     // Handle input change
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -203,14 +212,14 @@ const BrushSplitRow: React.FC<{
             value: e.target.value,
             error: null
         });
-    }, [editingState, setEditingState]);
+    }, [editingState?.rowIndex || 0, editingState?.field || '', setEditingState]);
 
     // Handle input blur
     const handleInputBlur = useCallback(() => {
         if (editingState) {
             saveChanges(editingState.value);
         }
-    }, [editingState, saveChanges]);
+    }, [editingState?.value || '', saveChanges]);
 
     return (
         <div
@@ -289,10 +298,10 @@ const BrushSplitRow: React.FC<{
                 ) : (
                     <div
                         className="text-sm text-gray-900 truncate cursor-pointer hover:bg-gray-100 px-1 py-1 rounded"
-                        title={split.knot}
+                        title={split.knot || 'N/A'}
                         onClick={handleKnotClick}
                     >
-                        {split.knot}
+                        {split.knot || 'N/A'}
                     </div>
                 )}
             </div>
@@ -348,11 +357,14 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
 
     const [editingState, setEditingState] = useState<EditingState | null>(null);
 
+    // Use search filter hook
+    const { searchTerm, setSearchTerm, filteredBrushSplits } = useSearchFilter(brushSplits);
+
     // Sort brush splits based on current sort configuration
     const sortedBrushSplits = useMemo(() => {
-        if (!sortConfig) return brushSplits;
+        if (!sortConfig) return filteredBrushSplits;
 
-        return [...brushSplits].sort((a, b) => {
+        return [...filteredBrushSplits].sort((a, b) => {
             const aValue = a[sortConfig.key];
             const bValue = b[sortConfig.key];
 
@@ -363,7 +375,7 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
             const comparison = String(aValue).localeCompare(String(bValue));
             return sortConfig.direction === 'asc' ? comparison : -comparison;
         });
-    }, [brushSplits, sortConfig]);
+    }, [filteredBrushSplits, sortConfig]);
 
     const handleSort = useCallback((key: keyof BrushSplit) => {
         setSortConfig(current => {
@@ -395,27 +407,46 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
         </button>
     );
 
-    if (brushSplits.length === 0) {
-        return (
-            <div className="bg-white rounded-lg shadow">
-                <div className="p-8 text-center text-gray-500">
-                    <p>No brush splits to display</p>
-                </div>
-            </div>
-        );
-    }
+    // Check if we should show empty state
+    const showEmptyState = brushSplits.length === 0;
+    const showNoResultsState = filteredBrushSplits.length === 0 && searchTerm.trim() !== '';
 
     return (
         <div className="bg-white rounded-lg shadow">
-            {/* Table Header */}
+            {/* Search Input - Always rendered */}
+            <div className="p-4 border-b border-gray-200 bg-gray-50">
+                <input
+                    type="text"
+                    placeholder="Search brush splits..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+            </div>
+
+            {/* Empty State */}
+            {showEmptyState && (
+                <div className="p-8 text-center text-gray-500">
+                    <p>No brush splits to display</p>
+                </div>
+            )}
+
+            {/* No Results State */}
+            {showNoResultsState && (
+                <div className="p-8 text-center text-gray-500">
+                    <p>No brush splits found matching your search.</p>
+                </div>
+            )}
+
+            {/* Table Header - Always rendered to maintain hooks consistency */}
             <div className="flex items-center border-b border-gray-200 bg-gray-50">
                 <div className="w-12 p-3">
                     <input
                         type="checkbox"
-                        checked={selectedIndices.length === brushSplits.length && brushSplits.length > 0}
+                        checked={selectedIndices.length === sortedBrushSplits.length && sortedBrushSplits.length > 0}
                         onChange={(e) => {
                             if (onSelectionChange) {
-                                onSelectionChange(e.target.checked ? brushSplits.map((_, i) => i) : []);
+                                onSelectionChange(e.target.checked ? sortedBrushSplits.map((_, i) => i) : []);
                             }
                         }}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -441,27 +472,29 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
                 </div>
             </div>
 
-            {/* Virtualized List */}
+            {/* Virtualized List - Always rendered to maintain hooks consistency */}
             <div style={{ height }}>
                 <List
                     height={height}
                     width="100%"
-                    itemCount={sortedBrushSplits.length}
+                    itemCount={brushSplits.length}
                     itemSize={itemHeight}
                     itemData={{
-                        brushSplits: sortedBrushSplits,
+                        brushSplits, // original, unfiltered
+                        filteredBrushSplits: sortedBrushSplits, // filtered/sorted
                         selectedIndices,
                         onSelectionChange,
                         onSplitUpdate,
                         editingState,
-                        setEditingState
+                        setEditingState,
+                        searchTerm,
                     }}
                 >
                     {BrushSplitRow}
                 </List>
             </div>
 
-            {/* Summary */}
+            {/* Summary - Always rendered to maintain hooks consistency */}
             <div className="px-6 py-3 border-t border-gray-200 bg-gray-50 text-sm text-gray-600">
                 Showing {sortedBrushSplits.length.toLocaleString()} brush splits
                 {selectedIndices.length > 0 && (
