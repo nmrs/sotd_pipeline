@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
 import UnmatchedAnalyzer from './pages/UnmatchedAnalyzer';
 import MismatchAnalyzer from './pages/MismatchAnalyzer';
+import BrushSplitValidator from './pages/BrushSplitValidator';
 import './App.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
                         <Route path="/" element={<Dashboard />} />
                         <Route path="/unmatched" element={<UnmatchedAnalyzer />} />
                         <Route path="/mismatch" element={<MismatchAnalyzer />} />
+                        <Route path="/brush-split-validator" element={<BrushSplitValidator />} />
                     </Routes>
                 </main>
             </div>
