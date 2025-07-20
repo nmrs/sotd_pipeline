@@ -199,7 +199,7 @@ class TestBrushSplitsAPI:
 
         assert data["success"] is True
         assert data["saved_count"] == 1
-        assert "Saved 1 brush splits" in data["message"]
+        assert "Successfully saved 1 brush splits" in data["message"]
 
     @patch("webui.api.brush_splits.validator.save_validated_splits")
     def test_save_splits_failure(self, mock_save):

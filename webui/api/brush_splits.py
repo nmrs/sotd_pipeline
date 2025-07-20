@@ -1,13 +1,13 @@
 """
-Brush Split Validator API endpoints and data structures.
+Brush Split Validator API endpoints for loading, saving, and managing brush string splits.
 
-This module provides the backend API for the Brush Split Validator tool,
-including data loading, validation, and YAML file management.
+This module provides REST API endpoints for the Brush Split Validator web UI,
+including data loading, YAML file management, and statistics calculation.
 """
 
 import json
-import re
 import logging
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -218,8 +218,12 @@ class BrushSplitStatistics:
         """Calculate validation and correction percentages."""
         if self.total > 0:
             self.validation_percentage = (self.validated / self.total) * 100
+        else:
+            self.validation_percentage = 0.0
         if self.validated > 0:
             self.correction_percentage = (self.corrected / self.validated) * 100
+        else:
+            self.correction_percentage = 0.0
 
     def add_split(self, split: "BrushSplit", month: Optional[str] = None):
         """Add a split to the statistics."""
@@ -303,6 +307,12 @@ class LoadResponse(BaseModel):
 
     brush_splits: List[BrushSplitModel] = Field(..., description="List of brush splits")
     statistics: Dict[str, Any] = Field(..., description="Validation statistics")
+    processing_info: Optional[Dict[str, Any]] = Field(
+        None, description="Processing information and metrics"
+    )
+    errors: Optional[Dict[str, Any]] = Field(
+        None, description="Error information for failed months"
+    )
 
 
 class YAMLResponse(BaseModel):
@@ -474,61 +484,48 @@ class BrushSplitValidator:
     def __init__(self):
         self.yaml_path = Path("data/brush_splits.yaml")
         self.validated_splits: Dict[str, BrushSplit] = {}
-        self._load_retry_count = 3
-        self._save_retry_count = 3
 
     def load_validated_splits(self) -> None:
-        """Load validated splits from YAML file with error handling and retry logic."""
+        """Load validated splits from YAML file with fail-fast error handling."""
         if not self.yaml_path.exists():
             logger.info(f"YAML file not found: {self.yaml_path}")
             return
 
-        for attempt in range(self._load_retry_count):
-            try:
-                with open(self.yaml_path, "r", encoding="utf-8") as f:
-                    data = yaml.safe_load(f)
+        try:
+            with open(self.yaml_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
 
-                if not isinstance(data, dict):
-                    raise DataCorruptionError(
-                        f"Invalid YAML structure: expected dict, got {type(data)}"
-                    )
+            if not isinstance(data, dict):
+                raise DataCorruptionError(
+                    f"Invalid YAML structure: expected dict, got {type(data)}"
+                )
 
-                self.validated_splits.clear()
-                for split_data in data.get("splits", []):
-                    try:
-                        split = BrushSplit.from_dict(split_data)
-                        self.validated_splits[split.original] = split
-                    except (KeyError, ValueError) as e:
-                        logger.warning(f"Skipping invalid split data: {e}")
-                        continue
+            self.validated_splits.clear()
+            for split_data in data.get("splits", []):
+                try:
+                    split = BrushSplit.from_dict(split_data)
+                    self.validated_splits[split.original] = split
+                except (KeyError, ValueError) as e:
+                    logger.warning(f"Skipping invalid split data: {e}")
+                    continue
 
-                logger.info(f"Loaded {len(self.validated_splits)} validated splits")
-                return
+            logger.info(f"Loaded {len(self.validated_splits)} validated splits")
 
-            except yaml.YAMLError as e:
-                logger.error(f"YAML parsing error (attempt {attempt + 1}): {e}")
-                if attempt == self._load_retry_count - 1:
-                    raise DataCorruptionError(
-                        f"Failed to parse YAML file after {self._load_retry_count} attempts: {e}"
-                    )
-                continue
-            except (OSError, IOError) as e:
-                logger.error(f"File I/O error (attempt {attempt + 1}): {e}")
-                if attempt == self._load_retry_count - 1:
-                    raise FileNotFoundError(
-                        f"Failed to read YAML file after {self._load_retry_count} attempts: {e}"
-                    )
-                continue
-            except Exception as e:
-                logger.error(f"Unexpected error loading splits (attempt {attempt + 1}): {e}")
-                if attempt == self._load_retry_count - 1:
-                    raise ProcessingError(
-                        f"Failed to load validated splits after {self._load_retry_count} attempts: {e}"
-                    )
-                continue
+        except yaml.YAMLError as e:
+            logger.error(f"YAML parsing error: {e}")
+            raise DataCorruptionError(f"Failed to parse YAML file: {e}")
+        except (OSError, IOError) as e:
+            logger.error(f"File I/O error: {e}")
+            raise FileNotFoundError(f"Failed to read YAML file: {e}")
+        except DataCorruptionError:
+            # Re-raise data corruption errors immediately
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error loading splits: {e}")
+            raise ProcessingError(f"Failed to load validated splits: {e}")
 
     def save_validated_splits(self, splits: List[BrushSplit]) -> bool:
-        """Save validated splits to YAML file with error handling and retry logic."""
+        """Save validated splits to YAML file with fail-fast error handling."""
         try:
             # Create backup of existing file
             if self.yaml_path.exists():
@@ -544,41 +541,25 @@ class BrushSplitValidator:
             # Prepare data for saving
             data = {"splits": [split.to_dict() for split in splits]}
 
-            for attempt in range(self._save_retry_count):
-                try:
-                    # Ensure directory exists
-                    self.yaml_path.parent.mkdir(parents=True, exist_ok=True)
+            # Ensure directory exists
+            self.yaml_path.parent.mkdir(parents=True, exist_ok=True)
 
-                    # Write to temporary file first
-                    temp_path = self.yaml_path.with_suffix(".yaml.tmp")
-                    with open(temp_path, "w", encoding="utf-8") as f:
-                        yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
+            # Write to temporary file first
+            temp_path = self.yaml_path.with_suffix(".yaml.tmp")
+            with open(temp_path, "w", encoding="utf-8") as f:
+                yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
 
-                    # Atomic move
-                    temp_path.replace(self.yaml_path)
-                    logger.info(f"Saved {len(splits)} validated splits")
-                    return True
+            # Atomic move
+            temp_path.replace(self.yaml_path)
+            logger.info(f"Saved {len(splits)} validated splits")
+            return True
 
-                except (OSError, IOError) as e:
-                    logger.error(f"File I/O error saving splits (attempt {attempt + 1}): {e}")
-                    if attempt == self._save_retry_count - 1:
-                        raise ProcessingError(
-                            f"Failed to save validated splits after {self._save_retry_count} attempts: {e}"
-                        )
-                    continue
-                except Exception as e:
-                    logger.error(f"Unexpected error saving splits (attempt {attempt + 1}): {e}")
-                    if attempt == self._save_retry_count - 1:
-                        raise ProcessingError(
-                            f"Failed to save validated splits after {self._save_retry_count} attempts: {e}"
-                        )
-                    continue
-
-        except Exception as e:
-            logger.error(f"Failed to save validated splits: {e}")
+        except (OSError, IOError) as e:
+            logger.error(f"File I/O error saving splits: {e}")
             return False
-
-        return False  # Fallback return
+        except Exception as e:
+            logger.error(f"Unexpected error saving splits: {e}")
+            return False
 
     def calculate_confidence(
         self, original: str, handle: Optional[str], knot: str
@@ -731,7 +712,7 @@ calculator = StatisticsCalculator(validator)
 
 @router.get("/load", response_model=LoadResponse, summary="Load brush splits from selected months")
 async def load_brush_splits(months: List[str] = Query(..., description="Months to load data from")):
-    """Load brush strings from selected months.
+    """Load brush strings from selected months with enhanced data processing.
 
     Args:
         months: List of months in YYYY-MM format to load data from
@@ -750,22 +731,32 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
         try:
             validator.load_validated_splits()
         except (FileNotFoundError, DataCorruptionError, ProcessingError) as e:
-            logger.warning(f"Error loading validated splits: {e}")
-            # Continue with empty validated splits rather than failing completely
+            # Fail fast for internal errors - don't mask them
+            logger.error(f"Failed to load validated splits: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Failed to load validated splits: {str(e)}"
+            )
+        except Exception as e:
+            # Log but don't fail - this allows the endpoint to work even if YAML loading fails
+            logger.warning(f"Non-critical error loading validated splits: {e}")
 
-        # Load brush splits from matched data
+        # Enhanced data processing for actual dataset sizes (~2,500 records per month)
         brush_splits: Dict[str, Dict] = {}  # original -> split_data
         loaded_months = []
         failed_months = []
+        total_records_processed = 0
+        total_records_loaded = 0
 
         for month in months:
             file_path = Path(f"data/matched/{month}.json")
             if not file_path.exists():
-                logger.warning(f"Month file not found: {file_path}")
+                logger.error(f"Month file not found: {file_path}")
                 failed_months.append(month)
                 continue
 
             try:
+                # Enhanced file reading with progress tracking
+                logger.info(f"Loading data from {month}.json")
                 with open(file_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
 
@@ -774,7 +765,13 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
                     failed_months.append(month)
                     continue
 
-                for record in data.get("data", []):
+                # Process records efficiently for typical dataset sizes
+                month_records = data.get("data", [])
+                total_records_processed += len(month_records)
+
+                logger.info(f"Processing {len(month_records)} records from {month}")
+
+                for record in month_records:
                     brush_data = record.get("brush")
                     if brush_data and brush_data.get("original"):
                         original = brush_data["original"]
@@ -795,8 +792,13 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
                             brush_splits[normalized]["comment_ids"].append(
                                 record.get("comment_id", "")
                             )
+                            total_records_loaded += 1
 
                 loaded_months.append(month)
+                logger.info(
+                    f"Successfully processed {month}: {len(month_records)} records, "
+                    f"{len(brush_splits)} unique brush strings"
+                )
 
             except json.JSONDecodeError as e:
                 logger.error(f"JSON decode error in {month}.json: {e}")
@@ -811,8 +813,13 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
                 failed_months.append(month)
                 continue
 
-        # Convert to BrushSplit objects
+        # Always return 200, even if no months could be loaded
+        # This allows the frontend to handle partial failures gracefully
+
+        # Convert to BrushSplit objects with enhanced processing
         splits = []
+        logger.info(f"Converting {len(brush_splits)} unique brush strings to BrushSplit objects")
+
         for split_data in brush_splits.values():
             original = split_data["original"]
             handle = split_data["handle"]
@@ -844,21 +851,42 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
                 splits.append(split)
 
         # Calculate statistics with split type breakdown
+        logger.info(f"Calculating statistics for {len(splits)} brush splits")
         stats = calculator.calculate_comprehensive_statistics(splits, months)
 
-        # Add error information to response
+        # Enhanced response with processing information
         response_data = {
             "brush_splits": [split.to_dict() for split in splits],
             "statistics": stats.to_dict(),
         }
 
+        # Add processing information for user feedback
+        processing_info = {
+            "total_records_processed": total_records_processed,
+            "total_records_loaded": total_records_loaded,
+            "unique_brush_strings": len(brush_splits),
+            "processing_efficiency": (
+                (total_records_loaded / total_records_processed * 100)
+                if total_records_processed > 0
+                else 0.0
+            ),
+        }
+        response_data["processing_info"] = processing_info
+
         if failed_months:
             response_data["errors"] = {
                 "failed_months": failed_months,
                 "loaded_months": loaded_months,
-                "message": f"Successfully loaded {len(loaded_months)} months, failed to load {len(failed_months)} months",
+                "message": (
+                    f"Successfully loaded {len(loaded_months)} months, "
+                    f"failed to load {len(failed_months)} months"
+                ),
             }
 
+        logger.info(
+            f"Data processing complete: {len(splits)} splits, {len(loaded_months)} months loaded, "
+            f"{len(failed_months)} months failed"
+        )
         return response_data
 
     except HTTPException:
@@ -944,6 +972,7 @@ async def save_splits(data: SaveSplitsRequest):
                 validation_errors.append(f"Split {i}: unexpected error - {e}")
                 continue
 
+        # Fail fast for validation errors
         if validation_errors:
             raise HTTPException(
                 status_code=400, detail=f"Validation errors: {'; '.join(validation_errors)}"
