@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Any
 
 from sotd.utils.filtered_entries import load_filtered_entries, save_filtered_entries
 
@@ -47,34 +46,21 @@ def match_record(record: dict) -> dict:
     result = record.copy()
     filtered_manager = _get_filtered_entries_manager()
 
-    # Helper function to extract normalized text from structured data
-    def extract_text(input_data: Any) -> str:
-        if isinstance(input_data, dict) and "normalized" in input_data:
-            # Structured data from extraction phase - return only normalized string
-            return str(input_data["normalized"])
-        else:
-            # Fail fast - we expect structured data format
-            raise ValueError(
-                f"Expected structured data format with 'normalized' field, "
-                f"got: {type(input_data)}"
-            )
-
     # Match razor first (required for blade matching)
     if "razor" in result:
+        razor_text = result["razor"]
         # Check if razor is filtered
-        if filtered_manager.is_filtered("razor", result["razor"]):
+        if filtered_manager.is_filtered("razor", razor_text):
             # Mark as intentionally unmatched
             result["razor"] = {
-                "original": result["razor"],
+                "original": razor_text,
                 "matched": None,
                 "match_type": "intentionally_unmatched",
                 "pattern": None,
             }
         else:
-            # Extract normalized text
-            normalized_text = extract_text(result["razor"])
-            original_text = result["razor"]["original"]  # Get original from structured data
-            razor_result = razor_matcher.match(normalized_text, original_text)
+            # Match using normalized string only
+            razor_result = razor_matcher.match(razor_text)
             # Convert MatchResult to dict for consistency
             result["razor"] = {
                 "original": razor_result.original,
@@ -85,79 +71,43 @@ def match_record(record: dict) -> dict:
 
     # Blade matching requires razor context
     if "blade" in result:
+        blade_text = result["blade"]
         # Check if blade is filtered
-        if filtered_manager.is_filtered("blade", result["blade"]):
+        if filtered_manager.is_filtered("blade", blade_text):
             # Mark as intentionally unmatched
             result["blade"] = {
-                "original": result["blade"],
+                "original": blade_text,
                 "matched": None,
                 "match_type": "intentionally_unmatched",
                 "pattern": None,
             }
         else:
-            # Get razor result - handle both dict and MatchResult types
-            razor_result = result.get("razor", {})
-            if hasattr(razor_result, "matched"):
-                # It's a MatchResult object
-                razor_matched = razor_result.matched or {}
-            else:
-                # It's a dict
-                razor_matched = razor_result.get("matched", {})
+            # Match using normalized string only
+            blade_result = blade_matcher.match(blade_text)
+            # Convert MatchResult to dict for consistency
+            result["blade"] = {
+                "original": blade_result.original,
+                "matched": blade_result.matched,
+                "match_type": blade_result.match_type,
+                "pattern": blade_result.pattern,
+            }
 
-            # Extract normalized text
-            normalized_text = extract_text(result["blade"])
-            original_text = result["blade"]["original"]  # Get original from structured data
-
-            # If no razor context, match blade normally (fallback behavior)
-            if not razor_matched:
-                blade_result = blade_matcher.match(normalized_text, original_text)
-                result["blade"] = {
-                    "original": blade_result.original,
-                    "matched": blade_result.matched,
-                    "match_type": blade_result.match_type,
-                    "pattern": blade_result.pattern,
-                }
-            else:
-                razor_format = razor_matched.get("format", "").upper()
-
-                # Skip blade matching for formats where blade is irrelevant
-                irrelevant_formats = ["SHAVETTE (DISPOSABLE)", "CARTRIDGE", "STRAIGHT"]
-
-                if razor_format in irrelevant_formats:
-                    # Clear blade info since it's irrelevant for these razor formats
-                    result["blade"] = {
-                        "original": original_text,
-                        "matched": None,
-                        "match_type": None,
-                        "pattern": None,
-                    }
-                else:
-                    # For other formats, try context-aware matching
-                    blade_result = blade_matcher.match_with_context(
-                        normalized_text, razor_format, original_text
-                    )
-                    result["blade"] = {
-                        "original": blade_result.original,
-                        "matched": blade_result.matched,
-                        "match_type": blade_result.match_type,
-                        "pattern": blade_result.pattern,
-                    }
-
+    # Soap matching
     if "soap" in result:
+        soap_text = result["soap"]
         # Check if soap is filtered
-        if filtered_manager.is_filtered("soap", result["soap"]):
+        if filtered_manager.is_filtered("soap", soap_text):
             # Mark as intentionally unmatched
             result["soap"] = {
-                "original": result["soap"],
+                "original": soap_text,
                 "matched": None,
                 "match_type": "intentionally_unmatched",
                 "pattern": None,
             }
         else:
-            # Extract normalized text
-            normalized_text = extract_text(result["soap"])
-            original_text = result["soap"]["original"]  # Get original from structured data
-            soap_result = soap_matcher.match(normalized_text, original_text)
+            # Match using normalized string only
+            soap_result = soap_matcher.match(soap_text)
+            # Convert MatchResult to dict for consistency
             result["soap"] = {
                 "original": soap_result.original,
                 "matched": soap_result.matched,
@@ -165,21 +115,22 @@ def match_record(record: dict) -> dict:
                 "pattern": soap_result.pattern,
             }
 
+    # Brush matching
     if "brush" in result:
+        brush_text = result["brush"]
         # Check if brush is filtered
-        if filtered_manager.is_filtered("brush", result["brush"]):
+        if filtered_manager.is_filtered("brush", brush_text):
             # Mark as intentionally unmatched
             result["brush"] = {
-                "original": result["brush"],
+                "original": brush_text,
                 "matched": None,
                 "match_type": "intentionally_unmatched",
                 "pattern": None,
             }
         else:
-            # Extract normalized text
-            normalized_text = extract_text(result["brush"])
-            original_text = result["brush"]["original"]  # Get original from structured data
-            brush_result = brush_matcher.match(normalized_text, original_text)
+            # Match using normalized string only
+            brush_result = brush_matcher.match(brush_text)
+            # Convert MatchResult to dict for consistency
             result["brush"] = {
                 "original": brush_result.original,
                 "matched": brush_result.matched,

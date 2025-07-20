@@ -1,6 +1,4 @@
 import json
-import tempfile
-from pathlib import Path
 from sotd.match.tools.legacy.analyze_unmatched import main
 from io import StringIO
 import sys
@@ -42,6 +40,8 @@ def test_analyze_unmatched_razors_outputs_expected_counts(tmp_path):
                 "2025-04:2025-05",
                 "--out-dir",
                 str(tmp_path / "data"),
+                "--field",
+                "razor",
             ]
         )
     finally:

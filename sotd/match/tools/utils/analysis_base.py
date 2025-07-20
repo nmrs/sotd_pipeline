@@ -14,6 +14,30 @@ from sotd.cli_utils.base_parser import BaseCLIParser
 from sotd.cli_utils.date_span import month_span
 
 
+def extract_text(field_data: Any, field: str = "") -> str:
+    """Extract normalized text from field data.
+
+    Args:
+        field_data: Field data from record (can be string or dict)
+        field: Field name for context (optional)
+
+    Returns:
+        Normalized text string
+    """
+    if isinstance(field_data, str):
+        # Legacy format - already normalized
+        return field_data
+    elif isinstance(field_data, dict):
+        # New structured format - use normalized field
+        normalized = field_data.get("normalized", "")
+        if normalized:
+            return normalized
+        # Fallback to original if normalized is not available
+        return field_data.get("original", "")
+    else:
+        return ""
+
+
 class AnalysisTool(ABC):
     """Base class for analysis tools with common functionality."""
 
@@ -119,7 +143,8 @@ class AnalysisTool(ABC):
         for record in data:
             field_data = record.get(field)
             if isinstance(field_data, dict):
-                original = field_data.get("original", "")
+                # Use extract_text helper for consistency
+                original = extract_text(field_data, field)
                 pattern_val = field_data.get("pattern", "")
                 source_file = record.get("_source_file", "")
 

@@ -1,150 +1,75 @@
 #!/usr/bin/env python3
-"""Unmatched analysis tool for SOTD pipeline."""
+"""Analyze unmatched products in matched data."""
 
-import sys
 from collections import defaultdict
-from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List
 
-# Add project root to path for imports
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
+from sotd.match.tools.utils.analysis_base import AnalysisTool
 
-from sotd.cli_utils.base_parser import BaseCLIParser  # noqa: E402
-from sotd.match.tools.utils.analysis_base import AnalysisTool  # noqa: E402
-from sotd.match.tools.utils.cli_utils import BaseAnalysisCLI  # noqa: E402
-from sotd.utils.match_filter_utils import clear_competition_tags_cache  # noqa: E402
+
+def extract_text(field_data: Any, field: str = "") -> str:
+    """Extract normalized text from field data.
+
+    Args:
+        field_data: Field data from record (can be string or dict)
+        field: Field name for context (optional)
+
+    Returns:
+        Normalized text string
+    """
+    if isinstance(field_data, str):
+        # Legacy format - already normalized
+        return field_data
+    elif isinstance(field_data, dict):
+        # New structured format - use normalized field
+        normalized = field_data.get("normalized", "")
+        if normalized:
+            return normalized
+        # Fallback to original if normalized is not available
+        return field_data.get("original", "")
+    else:
+        return ""
 
 
 class UnmatchedAnalyzer(AnalysisTool):
-    """Analyzer for unmatched field values."""
+    """Analyze unmatched products in matched data."""
 
     def get_parser(self):
-        """Get CLI parser for unmatched analysis tool."""
+        """Get CLI parser for the unmatched analyzer."""
+        from sotd.cli_utils.base_parser import BaseCLIParser
+
         parser = BaseCLIParser(
-            description="Analyze unmatched field values (razor, blade, soap, brush) "
-            "for pattern and candidate discovery",
+            description="Analyze unmatched products in matched data",
             add_help=True,
         )
-        BaseAnalysisCLI.add_common_arguments(parser)
+        parser.add_argument(
+            "--field",
+            choices=["razor", "blade", "soap", "brush"],
+            default="blade",
+            help="Field to analyze (default: blade)",
+        )
+        parser.add_argument(
+            "--limit",
+            type=int,
+            default=50,
+            help="Limit number of results to show (default: 50)",
+        )
         return parser
 
     def run(self, args) -> None:
-        """Run the unmatched analysis tool."""
-        all_unmatched = defaultdict(list)
-
-        for record in self.load_matched_data(args):
-            self._process_field_unmatched(record, args.field, all_unmatched)
-
-        self._print_unmatched_results(all_unmatched, args.field, args.limit)
+        """Run the unmatched analyzer."""
+        results = self.analyze_unmatched(args)
+        self._print_unmatched_results(results, args.field, args.limit)
 
     def analyze_unmatched(self, args) -> dict:
-        """Analyze unmatched items and return structured results for API use."""
-        # Clear all caches to ensure fresh data
-        clear_competition_tags_cache()
-
-        # Clear other caches if available
-        try:
-            from sotd.match.base_matcher import clear_catalog_cache
-            from sotd.match.loaders import clear_yaml_cache
-
-            clear_yaml_cache()
-            clear_catalog_cache()
-        except ImportError:
-            pass  # Cache clearing functions might not be available
-
+        """Analyze unmatched products in matched data."""
+        data = self.load_matched_data(args)
         all_unmatched = defaultdict(list)
 
-        for record in self.load_matched_data(args):
+        for record in data:
             self._process_field_unmatched(record, args.field, all_unmatched)
 
-        # Convert to structured format for API
-        unmatched_items = []
-        # Sort alphabetically by value, then by file count descending (same as CLI)
-        sorted_items = sorted(all_unmatched.items(), key=lambda x: (x[0].lower(), -len(x[1])))[
-            : args.limit
-        ]
-
-        for original_text, file_infos in sorted_items:
-            # Extract examples from source files (limit to 3 for API response)
-            examples = []
-            comment_ids = []
-            for file_info in file_infos[:3]:  # Limit to 3 examples
-                if isinstance(file_info, dict):
-                    file_name = file_info.get("file", "")
-                    if file_name:
-                        examples.append(file_name)
-                    comment_id = file_info.get("comment_id", "")
-                    if comment_id:
-                        comment_ids.append(comment_id)
-                else:
-                    # Backward compatibility for string file_info
-                    examples.append(str(file_info))
-
-            if args.field == "brush":
-                # For brush field, return detailed structure with component information
-                # Extract component-level unmatched data from file_infos
-                handle_unmatched = None
-                knot_unmatched = None
-
-                # Look for component-level unmatched data in file_infos
-                for info in file_infos:
-                    if isinstance(info, dict) and "unmatched_components" in info:
-                        components = info["unmatched_components"]
-                        if components.get("handle") and not handle_unmatched:
-                            handle_unmatched = components["handle"]
-                        if components.get("knot") and not knot_unmatched:
-                            knot_unmatched = components["knot"]
-
-                # If we found component data, use it; otherwise use generic structure
-                if handle_unmatched or knot_unmatched:
-                    unmatched_items.append(
-                        {
-                            "item": original_text,
-                            "count": len(file_infos),
-                            "examples": examples,
-                            "comment_ids": comment_ids,
-                            "match_type": None,  # Unmatched items don't have match_type
-                            "matched": None,  # Unmatched items don't have matched data
-                            "unmatched": {
-                                "handle": handle_unmatched
-                                or {"text": original_text, "pattern": None},
-                                "knot": knot_unmatched or {"text": original_text, "pattern": None},
-                            },
-                        }
-                    )
-                else:
-                    # Use generic unmatched structure for brushes without component data
-                    unmatched_items.append(
-                        {
-                            "item": original_text,
-                            "count": len(file_infos),
-                            "examples": examples,
-                            "comment_ids": comment_ids,
-                            "match_type": None,  # Unmatched items don't have match_type
-                            "matched": None,  # Unmatched items don't have matched data
-                            "unmatched": {
-                                "handle": {"text": original_text, "pattern": None},
-                                "knot": {"text": original_text, "pattern": None},
-                            },
-                        }
-                    )
-            else:
-                # For other fields, return simple structure
-                unmatched_items.append(
-                    {
-                        "item": original_text,
-                        "count": len(file_infos),
-                        "examples": examples,
-                        "comment_ids": comment_ids,
-                    }
-                )
-
-        return {
-            "field": args.field,
-            "total_unmatched": len(all_unmatched),
-            "unmatched_items": unmatched_items,
-        }
+        return all_unmatched
 
     def _process_field_unmatched(self, record: Dict, field: str, all_unmatched: Dict) -> None:
         """Process unmatched field records."""
@@ -180,11 +105,8 @@ class UnmatchedAnalyzer(AnalysisTool):
             # Check if matched field is missing, empty, or doesn't contain valid match data
             matched = field_val.get("matched")
             if not matched or (isinstance(matched, dict) and not matched.get("brand")):
-                # Use normalized field from extraction as primary data
-                normalized = field_val.get("normalized", "")
-                if not normalized:
-                    # Fallback to original if normalized is not available
-                    normalized = field_val.get("original", "")
+                # Use extract_text helper for consistency
+                normalized = extract_text(field_val, field)
                 all_unmatched[normalized].append(file_info)
 
     def _process_brush_unmatched(self, record: Dict, all_unmatched: Dict) -> None:
@@ -194,7 +116,6 @@ class UnmatchedAnalyzer(AnalysisTool):
             return
 
         matched = brush.get("matched")
-        original = brush.get("original", "")
 
         file_info = {
             "file": record.get("_source_file", ""),
@@ -204,20 +125,14 @@ class UnmatchedAnalyzer(AnalysisTool):
 
         # If nothing matched at all, count as unmatched brush
         if matched is None:
-            # Use normalized field from extraction as primary data
-            normalized = brush.get("normalized", "")
-            if not normalized:
-                # Fallback to original if normalized is not available
-                normalized = original
+            # Use extract_text helper for consistency
+            normalized = extract_text(brush, "brush")
             all_unmatched[normalized].append(file_info)
             return
 
         if not isinstance(matched, dict):
-            # Use normalized field from extraction as primary data
-            normalized = brush.get("normalized", "")
-            if not normalized:
-                # Fallback to original if normalized is not available
-                normalized = original
+            # Use extract_text helper for consistency
+            normalized = extract_text(brush, "brush")
             all_unmatched[normalized].append(file_info)
             return
 
@@ -246,11 +161,8 @@ class UnmatchedAnalyzer(AnalysisTool):
 
         # If we have unmatched components, add to the list
         if handle_unmatched or knot_unmatched:
-            # Use normalized field from extraction as primary data
-            normalized = brush.get("normalized", "")
-            if not normalized:
-                # Fallback to original if normalized is not available
-                normalized = original
+            # Use extract_text helper for consistency
+            normalized = extract_text(brush, "brush")
             all_unmatched[normalized].append(
                 {
                     **file_info,
@@ -262,11 +174,8 @@ class UnmatchedAnalyzer(AnalysisTool):
             )
         # If neither handle nor knot issues, but still unmatched, show as general brush issue
         elif matched.get("brand") is None:
-            # Use normalized field from extraction as primary data
-            normalized = brush.get("normalized", "")
-            if not normalized:
-                # Fallback to original if normalized is not available
-                normalized = original
+            # Use extract_text helper for consistency
+            normalized = extract_text(brush, "brush")
             all_unmatched[normalized].append(file_info)
 
     def _strip_use_count(self, text: str) -> str:

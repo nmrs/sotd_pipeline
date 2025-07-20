@@ -100,8 +100,7 @@ def match_record(
         else:
             # Fail fast - we expect structured data format
             raise ValueError(
-                f"Expected structured data format with 'normalized' field, "
-                f"got: {type(input_data)}"
+                f"Expected structured data format with 'normalized' field, got: {type(input_data)}"
             )
 
     if "razor" in result:
