@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 """Analyze unmatched products in matched data."""
 
+import sys
 from collections import defaultdict
+from pathlib import Path
 from typing import Any, Dict, List
 
-from sotd.match.tools.utils.analysis_base import AnalysisTool
+# Add project root to Python path for importing SOTD modules
+project_root = Path(__file__).resolve().parents[4]
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from sotd.match.tools.utils.analysis_base import AnalysisTool  # noqa: E402
 
 
 def extract_text(field_data: Any, field: str = "") -> str:
