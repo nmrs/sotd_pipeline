@@ -149,7 +149,7 @@ class BrushSplit:
 
 @dataclass
 class BrushSplitStatistics:
-    """Statistics for brush split validation progress."""
+    """Enhanced statistics for brush split validation progress."""
 
     total: int = 0
     validated: int = 0
@@ -159,6 +159,11 @@ class BrushSplitStatistics:
     split_types: Dict[str, int] = field(
         default_factory=lambda: {"delimiter": 0, "fiber_hint": 0, "brand_context": 0, "no_split": 0}
     )
+    confidence_breakdown: Dict[str, int] = field(
+        default_factory=lambda: {"high": 0, "medium": 0, "low": 0}
+    )
+    month_breakdown: Dict[str, int] = field(default_factory=dict)
+    recent_activity: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
@@ -169,6 +174,9 @@ class BrushSplitStatistics:
             "validation_percentage": self.validation_percentage,
             "correction_percentage": self.correction_percentage,
             "split_types": self.split_types,
+            "confidence_breakdown": self.confidence_breakdown,
+            "month_breakdown": self.month_breakdown,
+            "recent_activity": self.recent_activity,
         }
 
     def calculate_percentages(self):
@@ -177,6 +185,42 @@ class BrushSplitStatistics:
             self.validation_percentage = (self.validated / self.total) * 100
         if self.validated > 0:
             self.correction_percentage = (self.corrected / self.validated) * 100
+
+    def add_split(self, split: "BrushSplit", month: Optional[str] = None):
+        """Add a split to the statistics."""
+        self.total += 1
+        if split.validated:
+            self.validated += 1
+        if split.corrected:
+            self.corrected += 1
+
+        # Update split type breakdown
+        if split.handle is None:
+            self.split_types["no_split"] += 1
+        else:
+            # This will be calculated by the validator when needed
+            pass
+
+        # Update month breakdown
+        if month:
+            self.month_breakdown[month] = self.month_breakdown.get(month, 0) + 1
+
+        # Update confidence breakdown for corrected splits
+        if split.corrected and split.system_confidence:
+            confidence = split.system_confidence.value
+            self.confidence_breakdown[confidence] = self.confidence_breakdown.get(confidence, 0) + 1
+
+    def reset(self):
+        """Reset all statistics to zero."""
+        self.total = 0
+        self.validated = 0
+        self.corrected = 0
+        self.validation_percentage = 0.0
+        self.correction_percentage = 0.0
+        self.split_types = {"delimiter": 0, "fiber_hint": 0, "brand_context": 0, "no_split": 0}
+        self.confidence_breakdown = {"high": 0, "medium": 0, "low": 0}
+        self.month_breakdown = {}
+        self.recent_activity = {}
 
 
 # Pydantic models for API request/response validation
@@ -242,6 +286,151 @@ class StatisticsResponse(BaseModel):
     validation_percentage: float = Field(..., description="Validation percentage")
     correction_percentage: float = Field(..., description="Correction percentage")
     split_types: Dict[str, int] = Field(..., description="Breakdown by split type")
+    confidence_breakdown: Dict[str, int] = Field(..., description="Breakdown by confidence level")
+    month_breakdown: Dict[str, int] = Field(..., description="Breakdown by month")
+    recent_activity: Dict[str, Any] = Field(..., description="Recent validation activity")
+
+
+class StatisticsCalculator:
+    """Enhanced statistics calculator for brush split validation."""
+
+    def __init__(self, validator: "BrushSplitValidator"):
+        self.validator = validator
+
+    def calculate_comprehensive_statistics(
+        self, splits: List[BrushSplit], months: Optional[List[str]] = None
+    ) -> BrushSplitStatistics:
+        """Calculate comprehensive statistics for brush splits."""
+        stats = BrushSplitStatistics()
+
+        # Process each split
+        for split in splits:
+            # Determine month from occurrences if not provided
+            month = None
+            if months and len(months) > 0:
+                month = months[0]  # Use first month as representative
+            elif split.occurrences:
+                # Extract month from first occurrence file
+                first_file = split.occurrences[0].file
+                if first_file.endswith(".json"):
+                    month = first_file.replace(".json", "")
+
+            stats.add_split(split, month)
+
+            # Calculate split type if not already done
+            if split.handle is not None:
+                confidence, reasoning = self.validator.calculate_confidence(
+                    split.original, split.handle, split.knot
+                )
+                if "delimiter" in reasoning.lower():
+                    stats.split_types["delimiter"] += 1
+                elif "fiber" in reasoning.lower():
+                    stats.split_types["fiber_hint"] += 1
+                elif "brand" in reasoning.lower():
+                    stats.split_types["brand_context"] += 1
+                else:
+                    stats.split_types["no_split"] += 1
+
+        # Calculate percentages
+        stats.calculate_percentages()
+
+        # Add recent activity information
+        stats.recent_activity = self._calculate_recent_activity(splits)
+
+        return stats
+
+    def calculate_filtered_statistics(
+        self, splits: List[BrushSplit], filters: Dict[str, Any]
+    ) -> BrushSplitStatistics:
+        """Calculate statistics with filters applied."""
+        filtered_splits = self._apply_filters(splits, filters)
+        return self.calculate_comprehensive_statistics(filtered_splits)
+
+    def _apply_filters(self, splits: List[BrushSplit], filters: Dict[str, Any]) -> List[BrushSplit]:
+        """Apply filters to splits."""
+        filtered = splits
+
+        # Filter by validation status
+        if "validated_only" in filters and filters["validated_only"]:
+            filtered = [s for s in filtered if s.validated]
+
+        # Filter by confidence level
+        if "confidence_level" in filters:
+            confidence = filters["confidence_level"]
+            filtered = [
+                s
+                for s in filtered
+                if s.corrected and s.system_confidence and s.system_confidence.value == confidence
+            ]
+
+        # Filter by split type
+        if "split_type" in filters:
+            split_type = filters["split_type"]
+            filtered = [s for s in filtered if self._get_split_type(s) == split_type]
+
+        # Filter by month
+        if "months" in filters and filters["months"]:
+            target_months = set(filters["months"])
+            filtered = [
+                s
+                for s in filtered
+                if any(occ.file.replace(".json", "") in target_months for occ in s.occurrences)
+            ]
+
+        return filtered
+
+    def _get_split_type(self, split: BrushSplit) -> str:
+        """Get the split type for a brush split."""
+        if split.handle is None:
+            return "no_split"
+
+        confidence, reasoning = self.validator.calculate_confidence(
+            split.original, split.handle, split.knot
+        )
+        if "delimiter" in reasoning.lower():
+            return "delimiter"
+        elif "fiber" in reasoning.lower():
+            return "fiber_hint"
+        elif "brand" in reasoning.lower():
+            return "brand_context"
+        else:
+            return "no_split"
+
+    def _calculate_recent_activity(self, splits: List[BrushSplit]) -> Dict[str, Any]:
+        """Calculate recent validation activity."""
+        recent_validations = []
+
+        # Get recent validations (last 7 days)
+        from datetime import datetime, timedelta
+
+        cutoff_date = datetime.now() - timedelta(days=7)
+
+        for split in splits:
+            if split.validated and split.validated_at:
+                try:
+                    # Handle both timezone-aware and timezone-naive datetimes
+                    validation_date_str = split.validated_at.replace("Z", "+00:00")
+                    validation_date = datetime.fromisoformat(validation_date_str)
+
+                    # Make cutoff_date timezone-aware for comparison
+                    cutoff_date_aware = cutoff_date.replace(tzinfo=validation_date.tzinfo)
+
+                    if validation_date > cutoff_date_aware:
+                        recent_validations.append(
+                            {
+                                "original": split.original,
+                                "validated_at": split.validated_at,
+                                "corrected": split.corrected,
+                            }
+                        )
+                except ValueError:
+                    continue
+
+        return {
+            "recent_validations": recent_validations[:10],  # Limit to 10 most recent
+            "total_recent": len(recent_validations),
+            "recent_corrections": len([v for v in recent_validations if v["corrected"]]),
+        }
 
 
 class BrushSplitValidator:
@@ -459,6 +648,7 @@ class BrushSplitValidator:
 
 # Global validator instance
 validator = BrushSplitValidator()
+calculator = StatisticsCalculator(validator)
 
 
 @router.get("/load", response_model=LoadResponse, summary="Load brush splits from selected months")
@@ -567,30 +757,7 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
                 splits.append(split)
 
         # Calculate statistics with split type breakdown
-        stats = BrushSplitStatistics()
-        stats.total = len(splits)
-        stats.validated = sum(1 for s in splits if s.validated)
-        stats.corrected = sum(1 for s in splits if s.corrected)
-
-        # Calculate split type breakdown
-        for split in splits:
-            if split.handle is None:
-                stats.split_types["no_split"] += 1
-            else:
-                # Determine split type based on confidence calculation
-                confidence, reasoning = validator.calculate_confidence(
-                    split.original, split.handle, split.knot
-                )
-                if "delimiter" in reasoning.lower():
-                    stats.split_types["delimiter"] += 1
-                elif "fiber" in reasoning.lower():
-                    stats.split_types["fiber_hint"] += 1
-                elif "brand" in reasoning.lower():
-                    stats.split_types["brand_context"] += 1
-                else:
-                    stats.split_types["no_split"] += 1
-
-        stats.calculate_percentages()
+        stats = calculator.calculate_comprehensive_statistics(splits, months)
 
         return {
             "brush_splits": [split.to_dict() for split in splits],
@@ -686,30 +853,62 @@ async def get_statistics():
     try:
         validator.load_validated_splits()
 
-        stats = BrushSplitStatistics()
-        stats.total = len(validator.validated_splits)
-        stats.validated = sum(1 for s in validator.validated_splits.values() if s.validated)
-        stats.corrected = sum(1 for s in validator.validated_splits.values() if s.corrected)
+        # Calculate comprehensive statistics
+        all_splits = list(validator.validated_splits.values())
+        stats = calculator.calculate_comprehensive_statistics(all_splits)
 
-        # Calculate split type breakdown for validated splits
-        for split in validator.validated_splits.values():
-            if split.handle is None:
-                stats.split_types["no_split"] += 1
-            else:
-                # Determine split type based on confidence calculation
-                confidence, reasoning = validator.calculate_confidence(
-                    split.original, split.handle, split.knot
-                )
-                if "delimiter" in reasoning.lower():
-                    stats.split_types["delimiter"] += 1
-                elif "fiber" in reasoning.lower():
-                    stats.split_types["fiber_hint"] += 1
-                elif "brand" in reasoning.lower():
-                    stats.split_types["brand_context"] += 1
-                else:
-                    stats.split_types["no_split"] += 1
+        return stats.to_dict()
 
-        stats.calculate_percentages()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get(
+    "/statistics/filtered",
+    response_model=StatisticsResponse,
+    summary="Get filtered validation statistics",
+)
+async def get_filtered_statistics(
+    validated_only: bool = Query(False, description="Filter to validated splits only"),
+    confidence_level: Optional[str] = Query(
+        None, description="Filter by confidence level (high/medium/low)"
+    ),
+    split_type: Optional[str] = Query(
+        None, description="Filter by split type (delimiter/fiber_hint/brand_context/no_split)"
+    ),
+    months: Optional[List[str]] = Query(None, description="Filter by specific months"),
+):
+    """Get filtered validation statistics.
+
+    Args:
+        validated_only: Filter to validated splits only
+        confidence_level: Filter by confidence level
+        split_type: Filter by split type
+        months: Filter by specific months
+
+    Returns:
+        StatisticsResponse containing filtered statistics
+
+    Raises:
+        HTTPException: If statistics calculation fails
+    """
+    try:
+        validator.load_validated_splits()
+
+        # Build filters
+        filters = {}
+        if validated_only:
+            filters["validated_only"] = True
+        if confidence_level:
+            filters["confidence_level"] = confidence_level
+        if split_type:
+            filters["split_type"] = split_type
+        if months:
+            filters["months"] = months
+
+        # Calculate filtered statistics
+        all_splits = list(validator.validated_splits.values())
+        stats = calculator.calculate_filtered_statistics(all_splits, filters)
 
         return stats.to_dict()
 
