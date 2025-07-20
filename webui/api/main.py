@@ -3,6 +3,7 @@
 
 import logging
 from typing import Any, Dict
+import os
 
 import uvicorn
 from analysis import router as analysis_router
@@ -33,7 +34,14 @@ app.include_router(filtered_router)
 # Add CORS middleware for local development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        # Allow all origins for test environment
+        "*" if os.getenv("ENVIRONMENT") == "test" else None,
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

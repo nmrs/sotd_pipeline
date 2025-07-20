@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = '/api';
+// Use different base URL for tests vs development
+const API_BASE_URL = process.env.NODE_ENV === 'test'
+    ? 'http://localhost:8000/api'  // Direct connection for tests
+    : '/api';  // Proxy for development
 
 // Create axios instance with default config
 const api = axios.create({
