@@ -9,6 +9,9 @@ def aggregate_knot_makers(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]
     Returns a list of knot maker aggregations sorted by shaves desc,
     unique_users desc. Each item includes position field for delta calculations.
 
+    For custom knots (different fiber/size from catalog), skips the record
+    since the actual knot maker is unknown.
+
     Args:
         records: List of enriched comment records
 
@@ -24,6 +27,7 @@ def aggregate_knot_makers(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]
     for record in records:
         brush = record.get("brush", {})
         matched = brush.get("matched", {})
+        enriched = brush.get("enriched", {})
 
         # Skip if no matched brush data
         if not matched:
@@ -36,6 +40,10 @@ def aggregate_knot_makers(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]
 
         brand = knot_section.get("brand")
         if not brand:
+            continue
+
+        # Skip custom knots - we don't know the actual knot maker
+        if enriched.get("_custom_knot"):
             continue
 
         brand = brand.strip()

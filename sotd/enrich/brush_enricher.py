@@ -107,7 +107,7 @@ class BrushEnricher(BaseEnricher):
                 enriched_data["fiber"] = user_fiber
                 enriched_data["_fiber_extraction_source"] = "user_comment"
 
-        # If custom knot detected, modify the brush data structure
+        # If custom knot detected, add metadata to enriched data
         if has_custom_knot:
             enriched_data["_custom_knot"] = True
             enriched_data["_custom_knot_reason"] = []
@@ -127,12 +127,6 @@ class BrushEnricher(BaseEnricher):
                 enriched_data["_custom_knot_reason"].append(
                     f"size_mismatch:{catalog_knot_size}->{user_knot_size}"
                 )
-
-            # For custom knots, we need to modify the brush data structure
-            # This will be handled by the enrich phase orchestrator
-            enriched_data["_modify_brush_structure"] = True
-            enriched_data["_custom_knot_brand"] = None
-            enriched_data["_custom_knot_model"] = None
 
         return enriched_data
 

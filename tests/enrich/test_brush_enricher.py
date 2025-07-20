@@ -404,7 +404,6 @@ class TestCustomKnotDetection:
         assert "size_mismatch:27.0->28.0" in result["_custom_knot_reason"]
         assert result["fiber"] == "Boar"  # User fiber takes precedence
         assert result["knot_size_mm"] == 28.0  # User size takes precedence
-        assert result["_modify_brush_structure"] is True
 
     def test_custom_knot_size_mismatch(self, enricher):
         """Test custom knot detection when size differs from catalog."""
@@ -428,7 +427,6 @@ class TestCustomKnotDetection:
         assert result["_custom_knot"] is True
         assert "size_mismatch:27.0->24.0" in result["_custom_knot_reason"]
         assert result["knot_size_mm"] == 24.0  # User size takes precedence
-        assert result["_modify_brush_structure"] is True
 
     def test_custom_knot_both_mismatch(self, enricher):
         """Test custom knot detection when both fiber and size differ from catalog."""
@@ -454,7 +452,6 @@ class TestCustomKnotDetection:
         assert "size_mismatch:27.0->24.0" in result["_custom_knot_reason"]
         assert result["fiber"] == "Synthetic"
         assert result["knot_size_mm"] == 24.0
-        assert result["_modify_brush_structure"] is True
 
     def test_no_custom_knot_when_matching(self, enricher):
         """Test that custom knot is not detected when user data matches catalog."""

@@ -99,24 +99,9 @@ class EnricherRegistry:
                 # Add enriched data to the product field
                 field_data["enriched"] = field_enriched_data
 
-                # Handle brush structure modification for custom knots
-                if field == "brush" and field_enriched_data.get("_modify_brush_structure"):
-                    # For custom knots, modify the knot section to indicate it's no longer factory
-                    if "matched" in field_data and "knot" in field_data["matched"]:
-                        field_data["matched"]["knot"]["brand"] = None
-                        field_data["matched"]["knot"]["model"] = None
-                        # Keep the fiber and knot_size_mm from enriched data
-                        if "fiber" in field_enriched_data:
-                            field_data["matched"]["knot"]["fiber"] = field_enriched_data["fiber"]
-                        if "knot_size_mm" in field_enriched_data:
-                            field_data["matched"]["knot"]["knot_size_mm"] = field_enriched_data[
-                                "knot_size_mm"
-                            ]
-                        # Add custom knot metadata
-                        field_data["matched"]["knot"]["_custom_knot"] = True
-                        field_data["matched"]["knot"]["_custom_knot_reason"] = (
-                            field_enriched_data.get("_custom_knot_reason", [])
-                        )
+                # For custom knots, just add the enriched data - don't modify matched structure
+                # This preserves the original matched data for auditability
+                # Aggregators will use enriched.fiber and enriched.knot_size_mm as canonical
 
                 enriched_record[field] = field_data
 
