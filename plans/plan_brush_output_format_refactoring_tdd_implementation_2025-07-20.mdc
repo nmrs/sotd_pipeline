@@ -494,6 +494,17 @@ export interface BrushMatcherOutput {
 - All tests passing: 75 brush-related tests, 202 aggregate tests, 283 report tests
 - Phase 3 complete - ready to continue with Phase 4 (WebUI Updates)
 
+### Session 3 (2025-07-20)
+- **REQUIREMENT CHANGE**: Implemented custom knot detection in brush enricher
+- **Custom Knot Logic**: When enrichment detects fiber type OR knot size differences from catalog defaults, mark as custom knot
+- **Implementation**: 
+  - Updated brush enricher to use centralized `fiber_utils.py` instead of hardcoded patterns
+  - Added custom knot detection when user fiber/size differs from catalog
+  - Updated enrich registry to modify brush structure for custom knots (set knot.brand/model to None)
+  - Added comprehensive tests for custom knot detection (4 new tests)
+- **Results**: All 67 brush-related tests passing (37 enricher, 4 aggregate, 25 report tests)
+- **Example**: "Simpson Chubby 2 28mm Boar" (catalog: 27mm Badger) → custom knot with knot.brand=None, knot.model=None
+
 ## Conclusion
 
 This TDD implementation plan provides a comprehensive approach to refactoring the brush output format while maintaining system stability and performance. The phased approach ensures that each component is thoroughly tested before moving to the next phase, minimizing risk and ensuring quality throughout the implementation.
