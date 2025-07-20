@@ -102,26 +102,32 @@ class SoapMatcher:
         brand_compiled = sorted(brand_compiled, key=lambda x: len(x["pattern"]), reverse=True)
         return scent_compiled, brand_compiled
 
-    def _match_with_regex(self, value: str) -> MatchResult:
+    def _match_with_regex(self, normalized_text: str, original_text: str) -> MatchResult:
         """Match using regex patterns with REGEX match type."""
         # Check cache first - ensure cache key is always a string
-        cache_key = str(value) if not isinstance(value, str) else value
+        cache_key = (
+            str(normalized_text) if not isinstance(normalized_text, str) else normalized_text
+        )
         if cache_key in self._match_cache:
             cached_result = self._match_cache[cache_key]
             # Convert cached dict to MatchResult for backward compatibility
             if isinstance(cached_result, dict):
                 return create_match_result(
-                    original=cached_result.get("original", value),
+                    original=cached_result.get("original", original_text),
                     matched=cached_result.get("matched"),
                     match_type=cached_result.get("match_type"),
                     pattern=cached_result.get("pattern"),
                 )
             return cached_result
 
-        original = value
-        normalized = re.sub(r"^[*_~]+|[*_~]+$", "", value.strip()) if isinstance(value, str) else ""
+        original = original_text
+        normalized = (
+            re.sub(r"^[*_~]+|[*_~]+$", "", normalized_text.strip())
+            if isinstance(normalized_text, str)
+            else ""
+        )
 
-        if not isinstance(value, str):
+        if not isinstance(normalized_text, str):
             result = create_match_result(
                 original=original,
                 matched=None,
@@ -236,14 +242,49 @@ class SoapMatcher:
             "is_sample": self._is_sample(original),
         }
 
-    def match(self, value: str, bypass_correct_matches: bool = False) -> MatchResult:
+    def _get_normalized_text(self, value: str) -> str:
+        """
+        Return normalized text directly.
+
+        Args:
+            value: Normalized text string
+
+        Returns:
+            Normalized text string
+        """
+        return value
+
+    def _get_original_text(self, value: str) -> str:
+        """
+        Return original text directly.
+
+        Args:
+            value: Original text string
+
+        Returns:
+            Original text string
+        """
+        return value
+
+    def match(
+        self, value: str, original: str | None = None, bypass_correct_matches: bool = False
+    ) -> MatchResult:
         """
         Main orchestration method for soap matching.
         Ensures 'maker' and 'scent' are always present in the 'matched' dict for all match types.
+
+        Args:
+            value: Normalized text string for matching
+            original: Original text string for debugging (defaults to value if not provided)
+            bypass_correct_matches: If True, skip correct matches check and go directly to regex
         """
-        if not isinstance(value, str):
+        # Use provided original text or default to normalized text
+        original_text = original if original is not None else value
+        normalized_text = value
+
+        if not normalized_text:
             return create_match_result(
-                original=value,
+                original=original_text,
                 matched=None,
                 match_type=None,
                 pattern=None,
@@ -251,10 +292,10 @@ class SoapMatcher:
 
         # Check correct matches first (EXACT)
         if not bypass_correct_matches:
-            correct = self._check_correct_matches(value)
+            correct = self._check_correct_matches(normalized_text)
             if correct:
                 result = create_match_result(
-                    original=value,
+                    original=original_text,
                     matched=correct,
                     match_type=MatchType.EXACT,
                     pattern=None,
@@ -268,7 +309,7 @@ class SoapMatcher:
                 return result
 
         # Fall back to regex/brand/alias matching
-        result = self._match_with_regex(value)
+        result = self._match_with_regex(normalized_text, original_text)
         if result and result.matched:
             if "maker" not in result.matched:
                 result.matched["maker"] = None

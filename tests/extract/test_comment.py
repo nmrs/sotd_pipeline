@@ -20,10 +20,10 @@ def test_parse_comment_all_fields():
             "* **Brush:** Simpson\n"
             "* **Soap:** Tabac"
         ),
-        "razor": "Blackbird",
-        "blade": "Feather",
-        "brush": "Simpson",
-        "soap": "Tabac",
+        "razor": {"original": "Blackbird", "normalized": "Blackbird"},
+        "blade": {"original": "Feather", "normalized": "Feather"},
+        "brush": {"original": "Simpson", "normalized": "Simpson"},
+        "soap": {"original": "Tabac", "normalized": "Tabac"},
     }
 
 
@@ -31,8 +31,8 @@ def test_parse_comment_partial():
     comment = {"body": "\n".join(["* **Brush:** Omega", "* **Soap:** Cella"])}
     assert parse_comment(comment) == {
         "body": "* **Brush:** Omega\n* **Soap:** Cella",
-        "brush": "Omega",
-        "soap": "Cella",
+        "brush": {"original": "Omega", "normalized": "Omega"},
+        "soap": {"original": "Cella", "normalized": "Cella"},
     }
 
 
@@ -61,9 +61,9 @@ def test_parse_comment_mixed_lines():
             "* **Blade:** Feather\n"
             "* **Soap:** Arko"
         ),
-        "razor": "Game Changer",
-        "blade": "Nacet",
-        "soap": "Arko",
+        "razor": {"original": "Game Changer", "normalized": "Game Changer"},
+        "blade": {"original": "Nacet", "normalized": "Nacet"},
+        "soap": {"original": "Arko", "normalized": "Arko"},
     }
 
 
@@ -115,8 +115,122 @@ def test_parse_comment_with_markdown_links():
             "* **Brush:** [Simpson](https://example.com/brush)\n"
             "* **Soap:** [Tabac](https://example.com/soap)"
         ),
-        "razor": "Blackland Blackbird",
-        "blade": "Feather",
-        "brush": "Simpson",
-        "soap": "Tabac",
+        "razor": {"original": "Blackland Blackbird", "normalized": "Blackland Blackbird"},
+        "blade": {"original": "Feather", "normalized": "Feather"},
+        "brush": {"original": "Simpson", "normalized": "Simpson"},
+        "soap": {"original": "Tabac", "normalized": "Tabac"},
+    }
+
+
+def test_parse_comment_with_competition_tags():
+    """Test that competition tags are normalized correctly."""
+    comment = {
+        "body": "\n".join(
+            [
+                "* **Razor:** Blackbird $DOORKNOB",
+                "* **Blade:** Feather (3x)",
+                "* **Brush:** Simpson",
+                "* **Soap:** Tabac (sample)",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result == {
+        "body": (
+            "* **Razor:** Blackbird $DOORKNOB\n"
+            "* **Blade:** Feather (3x)\n"
+            "* **Brush:** Simpson\n"
+            "* **Soap:** Tabac (sample)"
+        ),
+        "razor": {"original": "Blackbird $DOORKNOB", "normalized": "Blackbird"},
+        "blade": {"original": "Feather (3x)", "normalized": "Feather"},
+        "brush": {"original": "Simpson", "normalized": "Simpson"},
+        "soap": {"original": "Tabac (sample)", "normalized": "Tabac"},
+    }
+
+
+def test_parse_comment_with_usage_counts():
+    """Test that usage counts are normalized correctly."""
+    comment = {
+        "body": "\n".join(
+            [
+                "* **Razor:** Karve Overlander Nickel Plated Brass w/ 90mm Overlander handle",
+                "* **Blade:** Gillette Nacet (5)",
+                "* **Brush:** Elite handle w/ Declaration knot",
+                "* **Soap:** Barrister and Mann Seville",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result == {
+        "body": (
+            "* **Razor:** Karve Overlander Nickel Plated Brass w/ 90mm Overlander handle\n"
+            "* **Blade:** Gillette Nacet (5)\n"
+            "* **Brush:** Elite handle w/ Declaration knot\n"
+            "* **Soap:** Barrister and Mann Seville"
+        ),
+        "razor": {
+            "original": "Karve Overlander Nickel Plated Brass w/ 90mm Overlander handle",
+            "normalized": "Karve Overlander Nickel Plated Brass",
+        },
+        "blade": {"original": "Gillette Nacet (5)", "normalized": "Gillette Nacet"},
+        "brush": {
+            "original": "Elite handle w/ Declaration knot",
+            "normalized": "Elite handle w/ Declaration knot",
+        },
+        "soap": {
+            "original": "Barrister and Mann Seville",
+            "normalized": "Barrister and Mann Seville",
+        },
+    }
+
+
+def test_parse_comment_with_special_characters():
+    """Test that special characters are handled correctly."""
+    comment = {
+        "body": "\n".join(
+            [
+                "* **Razor:** Merkur 37c $ZAMAC $SLANT",
+                "* **Blade:** Personna Blue (new)",
+                "* **Brush:** Omega 10049",
+                "* **Soap:** Stirling Soap Co. Executive Man",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    assert result == {
+        "body": (
+            "* **Razor:** Merkur 37c $ZAMAC $SLANT\n"
+            "* **Blade:** Personna Blue (new)\n"
+            "* **Brush:** Omega 10049\n"
+            "* **Soap:** Stirling Soap Co. Executive Man"
+        ),
+        "razor": {"original": "Merkur 37c $ZAMAC $SLANT", "normalized": "Merkur 37c"},
+        "blade": {"original": "Personna Blue (new)", "normalized": "Personna Blue"},
+        "brush": {"original": "Omega 10049", "normalized": "Omega 10049"},
+        "soap": {
+            "original": "Stirling Soap Co. Executive Man",
+            "normalized": "Stirling Soap Co. Executive Man",
+        },
+    }
+
+
+def test_parse_comment_empty_strings():
+    """Test that empty strings are handled correctly."""
+    comment = {
+        "body": "\n".join(
+            [
+                "* **Razor:** ",
+                "* **Blade:** Feather",
+                "* **Brush:** ",
+                "* **Soap:** Tabac",
+            ]
+        )
+    }
+    result = parse_comment(comment)
+    # Should only include fields that have actual values (empty fields are excluded)
+    assert result == {
+        "body": ("* **Razor:**\n" "* **Blade:** Feather\n" "* **Brush:**\n" "* **Soap:** Tabac"),
+        "blade": {"original": "Feather", "normalized": "Feather"},
+        "soap": {"original": "Tabac", "normalized": "Tabac"},
     }

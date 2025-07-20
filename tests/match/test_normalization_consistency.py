@@ -68,6 +68,7 @@ class TestNormalizationConsistency:
                         for model, correct_matches in brand_data.items():
                             for correct_match in correct_matches:
                                 # Test that the matcher finds this as an exact match
+                                # Pass just the normalized string to matchers
                                 if field == "blade":
                                     # Use format-aware matching for blades
                                     result = matcher.match_with_context(correct_match, format_name)
@@ -117,6 +118,7 @@ class TestNormalizationConsistency:
                     for brand, models in list(brands.items())[:1]:
                         for model, correct_matches in list(models.items())[:1]:
                             for correct_match in correct_matches[:1]:
+                                # Pass just the normalized string to matchers
                                 result = matcher.match_with_context(correct_match, format_name)
                                 assert (
                                     result is not None
@@ -131,6 +133,7 @@ class TestNormalizationConsistency:
                 for brand, models in list(field_data.items())[:1]:
                     for model, correct_matches in list(models.items())[:1]:
                         for correct_match in correct_matches[:1]:
+                            # Pass just the normalized string to matchers
                             result = matcher.match(correct_match)
                             assert (
                                 result is not None
@@ -158,6 +161,7 @@ class TestNormalizationConsistency:
         for test_case in test_cases:
             results = {}
             for field, matcher in matchers.items():
+                # Pass just the normalized string to matchers
                 result = matcher.match(test_case)
                 result_dict = _convert_match_result_to_dict(result)
                 results[field] = result_dict

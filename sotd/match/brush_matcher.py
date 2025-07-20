@@ -265,7 +265,31 @@ class BrushMatcher:
             pattern=None,
         )
 
-    def match(self, value: str) -> "MatchResult":
+    def _get_normalized_text(self, value: str) -> str:
+        """
+        Return normalized text directly.
+
+        Args:
+            value: Normalized text string
+
+        Returns:
+            Normalized text string
+        """
+        return value
+
+    def _get_original_text(self, value: str) -> str:
+        """
+        Return original text directly.
+
+        Args:
+            value: Original text string
+
+        Returns:
+            Original text string
+        """
+        return value
+
+    def match(self, value: str, original: str | None = None) -> "MatchResult":
         """
         Main orchestration method for brush matching.
 
@@ -277,25 +301,31 @@ class BrushMatcher:
         5. Falling back to main strategy matching
         6. Post-processing results with fiber and handle information
         """
+        # Use provided original text or default to normalized text
+        original_text = original if original is not None else value
+        normalized_text = value
+
         handle_maker_name = None
         knot_maker_name = None
-        if not value:
+        if not normalized_text:
             from sotd.match.types import create_match_result
 
-            return create_match_result(original=value, matched=None, match_type=None, pattern=None)
+            return create_match_result(
+                original=original_text, matched=None, match_type=None, pattern=None
+            )
 
         # Step 1: Check correct matches first (highest priority)
-        correct_match = self._check_correct_matches(value)
+        correct_match = self._check_correct_matches(normalized_text)
         if correct_match:
             if correct_match.get("match_type") == "handle_knot_section":
                 # Handle combo brush/handle brushes with handle/knot sections
-                return self._process_handle_knot_correct_match(value, correct_match)
+                return self._process_handle_knot_correct_match(original_text, correct_match)
             else:
                 # Handle simple brushes with brush section (backward compatibility)
-                return self._process_brush_correct_match(value, correct_match)
+                return self._process_brush_correct_match(original_text, correct_match)
 
         # Step 2: Split input into components
-        handle, knot, _ = self.brush_splitter.split_handle_and_knot(value)
+        handle, knot, _ = self.brush_splitter.split_handle_and_knot(normalized_text)
         # (No fallback dicts here)
 
         # Step 2.5: Compare makers if both handle and knot are present
@@ -344,7 +374,7 @@ class BrushMatcher:
                 from sotd.match.types import create_match_result
 
                 result = create_match_result(
-                    original=value,
+                    original=original_text,
                     matched={
                         "brand": normalized_maker,
                         "model": None,
@@ -359,14 +389,14 @@ class BrushMatcher:
                 )
                 if self.debug:
                     print(f"DEBUG: Constructed result: {result}")
-                return self._post_process_match(result, value)
+                return self._post_process_match(result, original_text)
 
         # Step 3: Attempt priority-based matching
         if knot and self.knot_matcher.should_prioritize_knot(
-            value, self.brush_splitter.split_handle_and_knot
+            normalized_text, self.brush_splitter.split_handle_and_knot
         ):
             result = self.knot_matcher.match_knot_priority(
-                value, handle, knot, self._extract_match_dict, self._post_process_match
+                normalized_text, handle, knot, self._extract_match_dict, self._post_process_match
             )
             if result and result.matched:
                 # Update match type to REGEX for regex-based matches
@@ -381,11 +411,11 @@ class BrushMatcher:
             handle
             and knot
             and not self.knot_matcher.should_prioritize_knot(
-                value, self.brush_splitter.split_handle_and_knot
+                normalized_text, self.brush_splitter.split_handle_and_knot
             )
         ):
             result = self.knot_matcher.match_handle_priority(
-                value, handle, knot, self._extract_match_dict, self._post_process_match
+                normalized_text, handle, knot, self._extract_match_dict, self._post_process_match
             )
             if result and result.matched:
                 # Update match type to REGEX for regex-based matches
@@ -398,7 +428,7 @@ class BrushMatcher:
                 return result
 
         # Step 4: Fall back to main strategy matching
-        result = self._match_main_strategies(value)
+        result = self._match_main_strategies(normalized_text)
         if result and result.matched:
             for k in ("brand", "model", "fiber", "knot_size_mm", "fiber_strategy"):
                 if k not in result.matched:
@@ -434,7 +464,7 @@ class BrushMatcher:
             from sotd.match.types import create_match_result
 
             minimal = create_match_result(
-                original=value,
+                original=original_text,
                 matched={
                     "brand": None,
                     "model": None,
@@ -459,11 +489,13 @@ class BrushMatcher:
                 match_type=None,
                 pattern=None,
             )
-            return self._post_process_match(minimal, value)
+            return self._post_process_match(minimal, original_text)
 
         from sotd.match.types import create_match_result
 
-        return create_match_result(original=value, matched=None, match_type=None, pattern=None)
+        return create_match_result(
+            original=original_text, matched=None, match_type=None, pattern=None
+        )
 
     def _match_main_strategies(self, value: str) -> Optional["MatchResult"]:
         """Orchestrate matching using main brush strategies."""

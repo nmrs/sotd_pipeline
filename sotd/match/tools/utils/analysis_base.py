@@ -12,7 +12,6 @@ from rich.table import Table
 
 from sotd.cli_utils.base_parser import BaseCLIParser
 from sotd.cli_utils.date_span import month_span
-from sotd.utils.match_filter_utils import normalize_for_matching
 
 
 class AnalysisTool(ABC):
@@ -49,21 +48,8 @@ class AnalysisTool(ABC):
                     record["_source_file"] = f"{year:04d}-{month:02d}.json"
                     record["_source_line"] = "unknown"
 
-                    # Use normalized field if available, otherwise normalize original for backward compatibility
-                    for field in ["razor", "blade", "brush", "soap"]:
-                        if field in record and isinstance(record[field], dict):
-                            # Check if normalized field already exists
-                            if "normalized" not in record[field]:
-                                original = record[field].get("original", "")
-                                if isinstance(original, str):
-                                    # Normalize the original field using the standardized function
-                                    normalized = normalize_for_matching(original, field=field)
-                                    if original != normalized:
-                                        print(
-                                            f"DEBUG: Normalized {field} '{original}' -> "
-                                            f"'{normalized}'"
-                                        )
-                                    record[field]["normalized"] = normalized
+                    # Data is now pre-normalized from extraction, no need to re-normalize
+                    # The normalized field should already be present in the structured data
 
                 all_data.extend(data)
             else:

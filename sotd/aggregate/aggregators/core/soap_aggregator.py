@@ -44,7 +44,10 @@ class SoapAggregator(BaseAggregator):
         Returns:
             Series with composite names in "Maker - Scent" format
         """
-        return df["maker"] + " - " + df["scent"]
+        # Handle None values by converting to empty strings
+        maker = df["maker"].fillna("")
+        scent = df["scent"].fillna("")
+        return maker + " - " + scent
 
 
 # Legacy function interface for backward compatibility

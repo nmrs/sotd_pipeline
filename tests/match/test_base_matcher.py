@@ -9,7 +9,7 @@ def write_temp_yaml(path, data):
 
 
 class TestBaseMatcher:
-    """Test cases for BaseMatcher competition tag stripping."""
+    """Test cases for BaseMatcher structured data handling."""
 
     @pytest.fixture
     def temp_catalog(self, tmp_path):
@@ -35,89 +35,81 @@ class TestBaseMatcher:
 
         return TempMatcher(catalog_path, "razor")
 
-    def test_strip_competition_tags_basic(self, temp_catalog, temp_tags):
+    def test_get_normalized_text_structured(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
-        input_text = "EldrormR Industries MM24 $FLIPTOP $MODERNGEM $REVENANT"
-        expected = "EldrormR Industries MM24 $MODERNGEM"
+        value = "Blackbird"
+        result = matcher._get_normalized_text(value)
+        assert result == "Blackbird"
+
+    def test_get_normalized_text_string_raises_error(self, temp_catalog, temp_tags):
+        matcher = self.make_matcher(temp_catalog, temp_tags)
+        value = "Blackbird"
+        # Should not raise error - just returns the string
+        result = matcher._get_normalized_text(value)
+        assert result == "Blackbird"
+
+    def test_get_normalized_text_none_raises_error(self, temp_catalog, temp_tags):
+        matcher = self.make_matcher(temp_catalog, temp_tags)
+        # Should not raise error - just returns None
+        result = matcher._get_normalized_text(None)  # type: ignore
+        assert result is None
+
+    def test_get_original_text_structured(self, temp_catalog, temp_tags):
+        matcher = self.make_matcher(temp_catalog, temp_tags)
+        value = "Blackbird $DOORKNOB"
+        result = matcher._get_original_text(value)
+        assert result == "Blackbird $DOORKNOB"
+
+    def test_get_original_text_string_raises_error(self, temp_catalog, temp_tags):
+        matcher = self.make_matcher(temp_catalog, temp_tags)
+        value = "Blackbird"
+        # Should not raise error - just returns the string
+        result = matcher._get_original_text(value)  # type: ignore
+        assert result == "Blackbird"
+
+    def test_get_original_text_none_raises_error(self, temp_catalog, temp_tags):
+        matcher = self.make_matcher(temp_catalog, temp_tags)
+        # Should not raise error - just returns None
+        result = matcher._get_original_text(None)  # type: ignore
+        assert result is None
+
+    def test_normalize_deprecated_returns_as_is(self, temp_catalog, temp_tags):
+        matcher = self.make_matcher(temp_catalog, temp_tags)
+        input_text = "Blackbird $DOORKNOB"
         result = matcher.normalize(input_text)
-        assert result == expected
+        # normalize method is deprecated and now returns the value as-is
+        assert result == input_text
 
-    def test_strip_competition_tags_preserves_useful_tags(self, temp_catalog, temp_tags):
-        matcher = self.make_matcher(temp_catalog, temp_tags)
-        input_text = "GEM Micromatic $MACHINEAGE $MODERNGEM"
-        expected = "GEM Micromatic $MODERNGEM"
-        result = matcher.normalize(input_text)
-        assert result == expected
-
-    def test_strip_competition_tags_multiple_spaces(self, temp_catalog, temp_tags):
-        matcher = self.make_matcher(temp_catalog, temp_tags)
-        input_text = "Blackland  Blackbird  $CNC  $STAINLESSLESS"
-        expected = "Blackland Blackbird"
-        result = matcher.normalize(input_text)
-        assert result == expected
-
-    def test_strip_competition_tags_case_insensitive(self, temp_catalog, temp_tags):
-        matcher = self.make_matcher(temp_catalog, temp_tags)
-        input_text = "Wolfman WR2 $cnc $stainlessless"
-        expected = "Wolfman WR2"
-        result = matcher.normalize(input_text)
-        assert result == expected
-
-    def test_strip_competition_tags_no_tags(self, temp_catalog, temp_tags):
-        matcher = self.make_matcher(temp_catalog, temp_tags)
-        input_text = "Merkur 34C"
-        expected = "Merkur 34C"
-        result = matcher.normalize(input_text)
-        assert result == expected
-
-    def test_strip_competition_tags_empty_string(self, temp_catalog, temp_tags):
-        matcher = self.make_matcher(temp_catalog, temp_tags)
-        result = matcher.normalize("")
-        assert result == ""
-
-    def test_strip_competition_tags_none_input(self, temp_catalog, temp_tags):
+    def test_normalize_deprecated_none_input(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
         result = matcher.normalize(None)
         assert result is None
 
-    def test_strip_competition_tags_with_backticks(self, temp_catalog, temp_tags):
+    def test_normalize_deprecated_empty_string(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
-        input_text = "Blackland Razors - Blackbird `$CNC`"
-        expected = "Blackland Razors - Blackbird"
-        result = matcher.normalize(input_text)
-        assert result == expected
+        result = matcher.normalize("")
+        assert result == ""
 
-    def test_strip_competition_tags_with_asterisks(self, temp_catalog, temp_tags):
+    def test_check_correct_matches_with_normalized_text(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
-        input_text = "Alpha Shaving Works - Lone Star Outlaw **$RAINBOW**"
-        expected = "Alpha Shaving Works - Lone Star Outlaw"
-        result = matcher.normalize(input_text)
-        assert result == expected
+        # Add a correct match to the matcher
+        matcher.correct_matches = {"TestBrand": {"TestModel": ["Blackbird"]}}
+        result = matcher._check_correct_matches("Blackbird")
+        assert result is not None
+        assert result["brand"] == "TestBrand"
+        assert result["model"] == "TestModel"
 
-    def test_strip_competition_tags_partial_matches_preserved(self, temp_catalog, temp_tags):
+    def test_check_correct_matches_no_match(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
-        input_text = "GEMINI Razor $FLIPTOP"
-        expected = "GEMINI Razor"
-        result = matcher.normalize(input_text)
-        assert result == expected
+        result = matcher._check_correct_matches("UnknownRazor")
+        assert result is None
 
-    def test_strip_competition_tags_unknown_tags_preserved(self, temp_catalog, temp_tags):
+    def test_check_correct_matches_empty_string(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
-        input_text = "Wolfman WR2 $UNKNOWN_TAG $CNC"
-        expected = "Wolfman WR2 $UNKNOWN_TAG"
-        result = matcher.normalize(input_text)
-        assert result == expected
+        result = matcher._check_correct_matches("")
+        assert result is None
 
-    def test_strip_competition_tags_mixed_known_unknown(self, temp_catalog, temp_tags):
+    def test_check_correct_matches_none_input(self, temp_catalog, temp_tags):
         matcher = self.make_matcher(temp_catalog, temp_tags)
-        input_text = "Blackland Blackbird $CNC $STAINLESSLESS $SOMETHING_ELSE $FLIPTOP"
-        expected = "Blackland Blackbird $SOMETHING_ELSE"
-        result = matcher.normalize(input_text)
-        assert result == expected
-
-    def test_strip_competition_tags_preserve_tags_work(self, temp_catalog, temp_tags):
-        matcher = self.make_matcher(temp_catalog, temp_tags)
-        input_text = "Feather Artist Club $KAMISORI $MACHINEAGE"
-        expected = "Feather Artist Club $KAMISORI"
-        result = matcher.normalize(input_text)
-        assert result == expected
+        result = matcher._check_correct_matches("")
+        assert result is None

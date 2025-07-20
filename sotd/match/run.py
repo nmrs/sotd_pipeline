@@ -3,7 +3,7 @@ import subprocess
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from tqdm import tqdm
 
@@ -16,7 +16,6 @@ from sotd.match.soap_matcher import SoapMatcher
 from sotd.match.types import MatchResult
 from sotd.match.utils.performance import PerformanceMonitor
 from sotd.utils.filtered_entries import load_filtered_entries
-from sotd.utils.match_filter_utils import normalize_for_matching
 
 # Load filtered entries at module level for performance
 _filtered_entries_manager = None
@@ -93,30 +92,47 @@ def match_record(
     result = record.copy()
     filtered_manager = _get_filtered_entries_manager()
 
+    # Helper function to extract normalized text from structured data
+    def extract_text(input_data: Any) -> str:
+        if isinstance(input_data, dict) and "normalized" in input_data:
+            # Structured data from extraction phase - return only normalized string
+            return str(input_data["normalized"])
+        else:
+            # Fail fast - we expect structured data format
+            raise ValueError(
+                f"Expected structured data format with 'normalized' field, "
+                f"got: {type(input_data)}"
+            )
+
     if "razor" in result:
         start_time = time.time()
-        # Check if razor is filtered
-        if filtered_manager.is_filtered("razor", result["razor"]):
+        # Extract normalized and original text
+        normalized_text = extract_text(result["razor"])
+
+        # Check if razor is filtered (use normalized text)
+        if filtered_manager.is_filtered("razor", normalized_text):
             # Mark as intentionally unmatched
             result["razor"] = MatchResult(
-                original=result["razor"],
+                original=result["razor"]["original"],
                 matched=None,
                 match_type="filtered",
                 pattern=None,
             )
         else:
-            razor_result = razor_matcher.match(result["razor"])
+            razor_result = razor_matcher.match(normalized_text, result["razor"]["original"])
             result["razor"] = razor_result
         monitor.record_matcher_timing("razor", time.time() - start_time)
 
     if "blade" in result:
         start_time = time.time()
-        # Check if blade is filtered (normalize first to handle use counts)
-        normalized_blade = normalize_for_matching(result["blade"], field="blade")
-        if filtered_manager.is_filtered("blade", normalized_blade):
+        # Extract normalized and original text
+        normalized_text = extract_text(result["blade"])
+
+        # Check if blade is filtered (use normalized text)
+        if filtered_manager.is_filtered("blade", normalized_text):
             # Mark as intentionally unmatched
             result["blade"] = MatchResult(
-                original=result["blade"],
+                original=result["blade"]["original"],
                 matched=None,
                 match_type="filtered",
                 pattern=None,
@@ -131,14 +147,16 @@ def match_record(
                 if razor_format in irrelevant_formats:
                     # Clear blade info since it's irrelevant for these razor formats
                     result["blade"] = MatchResult(
-                        original=result["blade"],
+                        original=result["blade"]["original"],
                         matched=None,
                         match_type="irrelevant_razor_format",
                         pattern=None,
                     )
                 else:
                     # For other formats, use context-aware matching to ensure correct format
-                    blade_result = blade_matcher.match_with_context(result["blade"], razor_format)
+                    blade_result = blade_matcher.match_with_context(
+                        normalized_text, razor_format, result["blade"]["original"]
+                    )
                     result["blade"] = blade_result
             else:
                 # Handle legacy dict format for razor
@@ -154,7 +172,7 @@ def match_record(
                     if razor_format in irrelevant_formats:
                         # Clear blade info since it's irrelevant for these razor formats
                         result["blade"] = MatchResult(
-                            original=result["blade"],
+                            original=result["blade"]["original"],
                             matched=None,
                             match_type="irrelevant_razor_format",
                             pattern=None,
@@ -162,44 +180,50 @@ def match_record(
                     else:
                         # For other formats, use context-aware matching to ensure correct format
                         blade_result = blade_matcher.match_with_context(
-                            result["blade"], razor_format
+                            normalized_text, razor_format, result["blade"]["original"]
                         )
                         result["blade"] = blade_result
                 else:
                     # No razor context, match blade normally
-                    blade_result = blade_matcher.match(result["blade"])
+                    blade_result = blade_matcher.match(normalized_text, result["blade"]["original"])
                     result["blade"] = blade_result
         monitor.record_matcher_timing("blade", time.time() - start_time)
 
     if "soap" in result:
         start_time = time.time()
-        # Check if soap is filtered
-        if filtered_manager.is_filtered("soap", result["soap"]):
+        # Extract normalized and original text
+        normalized_text = extract_text(result["soap"])
+
+        # Check if soap is filtered (use normalized text)
+        if filtered_manager.is_filtered("soap", normalized_text):
             # Mark as intentionally unmatched
             result["soap"] = MatchResult(
-                original=result["soap"],
+                original=result["soap"]["original"],
                 matched=None,
                 match_type="filtered",
                 pattern=None,
             )
         else:
-            soap_result = soap_matcher.match(result["soap"])
+            soap_result = soap_matcher.match(normalized_text, result["soap"]["original"])
             result["soap"] = soap_result
         monitor.record_matcher_timing("soap", time.time() - start_time)
 
     if "brush" in result:
         start_time = time.time()
-        # Check if brush is filtered
-        if filtered_manager.is_filtered("brush", result["brush"]):
+        # Extract normalized and original text
+        normalized_text = extract_text(result["brush"])
+
+        # Check if brush is filtered (use normalized text)
+        if filtered_manager.is_filtered("brush", normalized_text):
             # Mark as intentionally unmatched
             result["brush"] = MatchResult(
-                original=result["brush"],
+                original=result["brush"]["original"],
                 matched=None,
                 match_type="filtered",
                 pattern=None,
             )
         else:
-            brush_result = brush_matcher.match(result["brush"])
+            brush_result = brush_matcher.match(normalized_text, result["brush"]["original"])
             result["brush"] = brush_result
         monitor.record_matcher_timing("brush", time.time() - start_time)
 
@@ -259,10 +283,18 @@ def process_month(
             converted_record = {}
             for key, value in matched_record.items():
                 if hasattr(value, "original"):  # Check if it's a MatchResult
-                    # Normalize the original text for clean display
-                    normalized_text = normalize_for_matching(value.original, field=key)
+                    # Preserve both original and normalized fields from extraction
+                    # The normalized field should come from the extraction data
+                    original_text = value.original
+                    normalized_text = value.original  # Default to original if no normalized field
+
+                    # If the original value was structured (from extraction), extract normalized
+                    if isinstance(original_text, dict) and "normalized" in original_text:
+                        normalized_text = original_text["normalized"]
+                        original_text = original_text["original"]
+
                     converted_record[key] = {
-                        "original": value.original,
+                        "original": original_text,
                         "normalized": normalized_text,
                         "matched": value.matched,
                         "match_type": value.match_type,

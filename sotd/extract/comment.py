@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from sotd.extract.fields import extract_field
+from sotd.utils.match_filter_utils import normalize_for_matching
 from sotd.utils.text import preprocess_body
 
 logger = logging.getLogger(__name__)
@@ -28,8 +29,9 @@ def parse_comment(comment: dict) -> Optional[dict]:
             if field not in seen_fields:
                 value = extract_field(line, field)
                 if value:
-                    # Preserve all extracted values - no filtering
-                    result[field] = value
+                    # Create structured format with original and normalized fields
+                    normalized_value = normalize_for_matching(value, field=field)
+                    result[field] = {"original": value, "normalized": normalized_value}
                     seen_fields.add(field)
 
     ordered_comment = OrderedDict()

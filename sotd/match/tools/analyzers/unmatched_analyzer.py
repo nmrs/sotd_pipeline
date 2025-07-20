@@ -13,10 +13,7 @@ sys.path.insert(0, str(project_root))
 from sotd.cli_utils.base_parser import BaseCLIParser  # noqa: E402
 from sotd.match.tools.utils.analysis_base import AnalysisTool  # noqa: E402
 from sotd.match.tools.utils.cli_utils import BaseAnalysisCLI  # noqa: E402
-from sotd.utils.match_filter_utils import (
-    clear_competition_tags_cache,
-    normalize_for_matching,
-)  # noqa: E402
+from sotd.utils.match_filter_utils import clear_competition_tags_cache  # noqa: E402
 
 
 class UnmatchedAnalyzer(AnalysisTool):
@@ -170,9 +167,8 @@ class UnmatchedAnalyzer(AnalysisTool):
         }
 
         if isinstance(field_val, str):
-            # Use standardized normalization for all fields
-            normalized = normalize_for_matching(field_val, field=field)
-            all_unmatched[normalized].append(file_info)
+            # Legacy format - use the string as-is since it should already be normalized
+            all_unmatched[field_val].append(file_info)
         elif isinstance(field_val, dict):
             # Skip intentionally skipped blades (now using match_type)
             if field == "blade" and field_val.get("match_type") in [
@@ -181,15 +177,15 @@ class UnmatchedAnalyzer(AnalysisTool):
             ]:
                 return
 
-                # Check if matched field is missing, empty, or doesn't contain valid match data
-                matched = field_val.get("matched")
-                if not matched or (isinstance(matched, dict) and not matched.get("brand")):
-                    # Use normalized field if available, otherwise normalize original
-                    normalized = field_val.get("normalized", "")
-                    if not normalized:
-                        original = field_val.get("original", "")
-                        normalized = normalize_for_matching(original, field=field)
-                    all_unmatched[normalized].append(file_info)
+            # Check if matched field is missing, empty, or doesn't contain valid match data
+            matched = field_val.get("matched")
+            if not matched or (isinstance(matched, dict) and not matched.get("brand")):
+                # Use normalized field from extraction as primary data
+                normalized = field_val.get("normalized", "")
+                if not normalized:
+                    # Fallback to original if normalized is not available
+                    normalized = field_val.get("original", "")
+                all_unmatched[normalized].append(file_info)
 
     def _process_brush_unmatched(self, record: Dict, all_unmatched: Dict) -> None:
         """Process unmatched brush records with handle/knot granularity."""
@@ -208,18 +204,20 @@ class UnmatchedAnalyzer(AnalysisTool):
 
         # If nothing matched at all, count as unmatched brush
         if matched is None:
-            # Use normalized field if available, otherwise normalize original
+            # Use normalized field from extraction as primary data
             normalized = brush.get("normalized", "")
             if not normalized:
-                normalized = normalize_for_matching(original, field="brush")
+                # Fallback to original if normalized is not available
+                normalized = original
             all_unmatched[normalized].append(file_info)
             return
 
         if not isinstance(matched, dict):
-            # Use normalized field if available, otherwise normalize original
+            # Use normalized field from extraction as primary data
             normalized = brush.get("normalized", "")
             if not normalized:
-                normalized = normalize_for_matching(original, field="brush")
+                # Fallback to original if normalized is not available
+                normalized = original
             all_unmatched[normalized].append(file_info)
             return
 
@@ -248,10 +246,11 @@ class UnmatchedAnalyzer(AnalysisTool):
 
         # If we have unmatched components, add to the list
         if handle_unmatched or knot_unmatched:
-            # Use normalized field if available, otherwise normalize original
+            # Use normalized field from extraction as primary data
             normalized = brush.get("normalized", "")
             if not normalized:
-                normalized = normalize_for_matching(original, field="brush")
+                # Fallback to original if normalized is not available
+                normalized = original
             all_unmatched[normalized].append(
                 {
                     **file_info,
@@ -263,19 +262,20 @@ class UnmatchedAnalyzer(AnalysisTool):
             )
         # If neither handle nor knot issues, but still unmatched, show as general brush issue
         elif matched.get("brand") is None:
-            # Use normalized field if available, otherwise normalize original
+            # Use normalized field from extraction as primary data
             normalized = brush.get("normalized", "")
             if not normalized:
-                normalized = normalize_for_matching(original, field="brush")
+                # Fallback to original if normalized is not available
+                normalized = original
             all_unmatched[normalized].append(file_info)
 
     def _strip_use_count(self, text: str) -> str:
-        """Strip use count from blade text using shared normalization logic.
+        """Strip use count from blade text.
 
-        This method uses the standardized normalize_for_matching function to ensure
-        consistency with other blade processing in the pipeline.
+        This method is deprecated since normalization now happens in extraction.
+        Returns the text as-is since it should already be normalized.
         """
-        return normalize_for_matching(text, field="blade")
+        return text
 
     def _print_unmatched_results(self, all_unmatched: Dict, field: str, limit: int) -> None:
         """Print unmatched analysis results."""

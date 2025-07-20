@@ -22,22 +22,28 @@ def sample_extracted_data():
         },
         "data": [
             {
-                "razor": "Karve CB",
-                "blade": "Feather (3)",
-                "brush": "Simpson Chubby 2",
-                "soap": "Barrister and Mann - Seville",
+                "razor": {"original": "Karve CB", "normalized": "Karve CB"},
+                "blade": {"original": "Feather (3)", "normalized": "Feather (3)"},
+                "brush": {"original": "Simpson Chubby 2", "normalized": "Simpson Chubby 2"},
+                "soap": {
+                    "original": "Barrister and Mann - Seville",
+                    "normalized": "Barrister and Mann - Seville",
+                },
             },
             {
-                "razor": "Merkur 34C",
-                "blade": "Astra SP",
-                "brush": "Declaration B3",
-                "soap": "House of Mammoth - Alive",
+                "razor": {"original": "Merkur 34C", "normalized": "Merkur 34C"},
+                "blade": {"original": "Astra SP", "normalized": "Astra SP"},
+                "brush": {"original": "Declaration B3", "normalized": "Declaration B3"},
+                "soap": {
+                    "original": "House of Mammoth - Alive",
+                    "normalized": "House of Mammoth - Alive",
+                },
             },
             {
-                "razor": "Unknown Razor",
-                "blade": "Unknown Blade",
-                "brush": "Unknown Brush",
-                "soap": "Unknown Soap",
+                "razor": {"original": "Unknown Razor", "normalized": "Unknown Razor"},
+                "blade": {"original": "Unknown Blade", "normalized": "Unknown Blade"},
+                "brush": {"original": "Unknown Brush", "normalized": "Unknown Brush"},
+                "soap": {"original": "Unknown Soap", "normalized": "Unknown Soap"},
             },
         ],
     }

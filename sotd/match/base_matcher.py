@@ -2,7 +2,6 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from sotd.utils.match_filter_utils import load_competition_tags, normalize_for_matching
 from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 
 from .types import MatchResult, create_match_result
@@ -26,7 +25,6 @@ class BaseMatcher:
         self.correct_matches_path = correct_matches_path or Path("data/correct_matches.yaml")
         self.catalog = self._load_catalog()
         self.correct_matches = self._load_correct_matches()
-        self.competition_tags = self._load_competition_tags()
 
         # Lazy-loaded caches for performance optimization
         self._correct_matches_lookup: Optional[Dict[str, Dict[str, Any]]] = None
@@ -55,29 +53,36 @@ class BaseMatcher:
             # If correct matches file is corrupted or can't be loaded, continue without it
             return {}
 
-    def _load_competition_tags(self) -> Dict[str, List[str]]:
-        """Load competition tags configuration."""
-        return load_competition_tags()
-
-    def _strip_competition_tags(self, value: str) -> str:
+    def _get_normalized_text(self, value: str) -> str:
         """
-        Strip competition tags from a string while preserving useful ones.
+        Return normalized text directly.
 
         Args:
-            value: Input string that may contain competition tags
+            value: Normalized text string
 
         Returns:
-            String with unwanted competition tags removed
+            Normalized text string
         """
-        # Use canonical normalization function for consistent behavior
-        return normalize_for_matching(value, self.competition_tags, self.field_type)
+        return value
+
+    def _get_original_text(self, value: str) -> str:
+        """
+        Return original text directly.
+
+        Args:
+            value: Original text string
+
+        Returns:
+            Original text string
+        """
+        return value
 
     def _build_correct_matches_lookup(self) -> Dict[str, Dict[str, Any]]:
         """
         Build a fast lookup dictionary from correct matches.
 
         Converts the nested structure to a flat dictionary for O(1) lookups.
-        Uses canonical normalize_for_matching function for consistent normalization.
+        Uses pre-normalized text from extraction.
         """
         lookup = {}
 
@@ -105,12 +110,9 @@ class BaseMatcher:
 
                 # Create lookup entries for each correct string
                 for correct_string in strings:
-                    # Use canonical normalization function with field-specific processing
-                    normalized = normalize_for_matching(
-                        correct_string, self.competition_tags, self.field_type
-                    )
-                    if normalized:
-                        lookup[normalized] = matched
+                    # Use the correct string as-is since it should already be normalized
+                    if correct_string:
+                        lookup[correct_string] = matched
 
         return lookup
 
@@ -180,27 +182,20 @@ class BaseMatcher:
         return self._compiled_patterns[pattern_text]
 
     def _check_correct_matches(self, value: str) -> Optional[Dict[str, Any]]:
-        # --- CANONICAL NORMALIZATION ---
-        # All correct match lookups must use normalize_for_matching
-        # See docs/product_matching_validation.md for details.
+        # Use pre-normalized text from extraction
         if not value or not self.correct_matches:
-            return None
-
-        # Use canonical normalization function with field-specific processing
-        normalized_value = normalize_for_matching(value, self.competition_tags, self.field_type)
-        if not normalized_value:
             return None
 
         # Use pre-built lookup dictionary for O(1) access
         lookup = self._get_correct_matches_lookup()
 
         # Try exact match first
-        result = lookup.get(normalized_value)
+        result = lookup.get(value)
         if result:
             return result
 
         # Fall back to case-insensitive lookup for backward compatibility
-        normalized_lower = normalized_value.lower()
+        normalized_lower = value.lower()
         for key, match_data in lookup.items():
             if key.lower() == normalized_lower:
                 return match_data
@@ -220,16 +215,13 @@ class BaseMatcher:
         """
         Normalize a string for comparison.
 
-        DEPRECATED: Use normalize_for_matching() directly for correct match lookups.
-        This method is kept for backward compatibility but should be replaced
-        with the canonical normalize_for_matching function.
+        DEPRECATED: Normalization now happens in extraction phase.
+        This method is kept for backward compatibility but should not be used.
         """
         if not isinstance(value, str):
             return None
-        # Use canonical normalization function for consistency
-        from sotd.utils.match_filter_utils import normalize_for_matching
-
-        return normalize_for_matching(value, self.competition_tags, self.field_type)
+        # Return the value as-is since normalization happens in extraction
+        return value
 
     def clear_caches(self) -> None:
         """Clear all caches (useful for testing or when files are updated)."""
@@ -237,7 +229,9 @@ class BaseMatcher:
         self._catalog_patterns = None
         self._compiled_patterns.clear()
 
-    def match(self, value: str, bypass_correct_matches: bool = False) -> MatchResult:
+    def match(
+        self, value: str, original: str | None = None, bypass_correct_matches: bool = False
+    ) -> MatchResult:
         """
         Enhanced match method with correct matches priority.
 
@@ -247,17 +241,20 @@ class BaseMatcher:
         3. Brand/alias fallbacks (lowest priority)
 
         Args:
-            value: Value to match
+            value: Normalized text string for matching
+            original: Original text string for debugging (defaults to value if not provided)
             bypass_correct_matches: If True, skip correct matches check and go directly to regex
         """
-        original = value
+        # Use provided original text or default to normalized text
+        original_text = original if original is not None else value
+        normalized_text = value
 
         # Step 1: Check correct matches first (highest priority) - unless bypassed
         if not bypass_correct_matches:
-            correct_match = self._check_correct_matches(value)
+            correct_match = self._check_correct_matches(normalized_text)
             if correct_match:
                 return create_match_result(
-                    original=original,
+                    original=original_text,
                     matched=correct_match,
                     match_type="exact",
                     pattern=None,
@@ -265,13 +262,17 @@ class BaseMatcher:
 
         # Step 2: Fall back to regex patterns (implemented by subclasses)
         # This should be implemented by each specific matcher
-        return self._match_with_regex(value)
+        return self._match_with_regex(normalized_text, original_text)
 
-    def _match_with_regex(self, value: str) -> MatchResult:
+    def _match_with_regex(self, normalized_text: str, original_text: str) -> MatchResult:
         """
         Match using regex patterns. To be implemented by subclasses.
 
         This method should return a MatchResult with match_type set to MatchType.REGEX
         for regex-based matches.
+
+        Args:
+            normalized_text: Normalized text string for matching
+            original_text: Original text string for debugging
         """
         raise NotImplementedError("Subclasses must implement _match_with_regex")

@@ -53,7 +53,10 @@ class BrushAggregator(BaseAggregator):
         Returns:
             Series with composite names in "Brand Model" format
         """
-        return df["brand"] + " " + df["model"]
+        # Handle None values by converting to empty strings
+        brand = df["brand"].fillna("")
+        model = df["model"].fillna("")
+        return brand + " " + model
 
     def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
         """Get columns to use for grouping.

@@ -76,16 +76,12 @@ class TestRealCatalogIntegration:
         ]
 
         for matcher, input_text, field, expected_value in test_cases:
+            # Pass just the normalized string to matchers
             result = matcher.match(input_text)
-            # Handle both MatchResult objects and dictionaries
-            if hasattr(result, "matched"):
-                matched = result.matched
-            else:
-                matched = result.get("matched")
-            if matched and field in matched:
-                assert (
-                    matched[field] == expected_value
-                ), f"Failed for {input_text}: expected {expected_value}, got {matched[field]}"
+            assert result.matched is not None, f"No match for: {input_text}"
+            assert (
+                result.matched[field] == expected_value
+            ), f"Expected {expected_value}, got {result.matched[field]}"
 
     def test_handle_knot_splitting_integration(self, brush_matcher):
         """Test handle/knot splitting with real catalog data."""
@@ -97,11 +93,23 @@ class TestRealCatalogIntegration:
         ]
 
         for input_text, expected_knot_brand, expected_handle_maker in test_cases:
+            # Pass just the normalized string to matchers
             result = brush_matcher.match(input_text)
-            # For now, just verify the match doesn't crash
-            # The exact structure may vary based on catalog data
-            assert result is not None
-            assert hasattr(result, "matched")
+            assert result.matched is not None, f"No match for: {input_text}"
+
+            # Check knot brand
+            if "knot" in result.matched and result.matched["knot"]:
+                knot_brand = result.matched["knot"].get("brand")
+                assert (
+                    knot_brand == expected_knot_brand
+                ), f"Expected knot brand {expected_knot_brand}, got {knot_brand}"
+
+            # Check handle maker
+            if "handle" in result.matched and result.matched["handle"]:
+                handle_maker = result.matched["handle"].get("brand")
+                assert (
+                    handle_maker == expected_handle_maker
+                ), f"Expected handle maker {expected_handle_maker}, got {handle_maker}"
 
     def test_soap_scent_matching(self, soap_matcher):
         """Test that soap scent patterns work with real catalog."""
@@ -112,7 +120,8 @@ class TestRealCatalogIntegration:
         ]
 
         for input_text, expected_scent in test_cases:
-            result = soap_matcher.match(input_text)
+            structured_data = {"original": input_text, "normalized": input_text}
+            result = soap_matcher.match(structured_data)
             # Handle both MatchResult objects and dictionaries
             if hasattr(result, "matched"):
                 matched = result.matched
@@ -126,10 +135,18 @@ class TestRealCatalogIntegration:
     def test_specific_integration_scenarios(self, brush_matcher):
         """Test specific integration scenarios that have caused issues."""
         # Test Declaration Grooming B2 bug fix
+        # Pass just the normalized string to matchers
         result = brush_matcher.match("Zenith B2 w/ Elite Handle")
-        # For now, just verify the match doesn't crash
-        assert result is not None
-        assert hasattr(result, "matched")
+        assert result.matched is not None, "No match for Zenith B2 w/ Elite Handle"
+
+        # Verify the match structure is correct
+        if "knot" in result.matched and result.matched["knot"]:
+            knot_brand = result.matched["knot"].get("brand")
+            assert knot_brand == "Zenith", f"Expected Zenith, got {knot_brand}"
+
+        if "handle" in result.matched and result.matched["handle"]:
+            handle_brand = result.matched["handle"].get("brand")
+            assert handle_brand == "Elite", f"Expected Elite, got {handle_brand}"
 
     def test_catalog_files_exist(self):
         """Test that all expected catalog files exist."""

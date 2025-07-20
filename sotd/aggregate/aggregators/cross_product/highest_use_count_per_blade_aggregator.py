@@ -53,6 +53,12 @@ def aggregate_highest_use_count_per_blade(records: List[Dict[str, Any]]) -> List
         # Get use_count from enriched data, default to 1 if not available
         use_count = blade_enriched.get("use_count", 1)
 
+        # Ensure use_count is an integer
+        try:
+            use_count = int(use_count) if use_count is not None else 1
+        except (ValueError, TypeError):
+            use_count = 1
+
         use_count_data.append(
             {
                 "blade_name": blade_name,

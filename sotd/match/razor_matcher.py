@@ -37,18 +37,38 @@ class RazorMatcher:
                     )
         return sorted(compiled, key=lambda x: len(x[3]), reverse=True)
 
-    def _match_with_regex(self, value: str) -> MatchResult:
-        cache_key = str(value) if not isinstance(value, str) else value
+    def _get_normalized_text(self, value: str) -> str:
+        """
+        Return normalized text directly.
+
+        Args:
+            value: Normalized text string
+
+        Returns:
+            Normalized text string
+        """
+        return value
+
+    def _get_original_text(self, value: str) -> str:
+        """
+        Return original text directly.
+
+        Args:
+            value: Original text string
+
+        Returns:
+            Original text string
+        """
+        return value
+
+    def _match_with_regex(self, normalized_text: str, original_text: str) -> MatchResult:
+        cache_key = str(normalized_text)
         if cache_key in self._match_cache:
             return self._match_cache[cache_key]
 
-        original = value
-        from sotd.utils.match_filter_utils import normalize_for_matching
-
-        normalized = normalize_for_matching(value, field="razor")
-        if not normalized:
+        if not normalized_text:
             result = create_match_result(
-                original=original,
+                original=original_text,
                 matched=None,
                 match_type=None,
                 pattern=None,
@@ -56,7 +76,7 @@ class RazorMatcher:
             self._match_cache[cache_key] = result
             return result
 
-        razor_text = normalized
+        razor_text = normalized_text
 
         for brand, model, fmt, raw_pattern, compiled, entry in self.patterns:
             if compiled.search(razor_text):
@@ -69,7 +89,7 @@ class RazorMatcher:
                     if key not in ["patterns", "format"]:
                         matched_data[key] = value
                 result = create_match_result(
-                    original=original,
+                    original=original_text,
                     matched=matched_data,
                     pattern=raw_pattern,
                     match_type=MatchType.REGEX,
@@ -78,7 +98,7 @@ class RazorMatcher:
                 return result
 
         result = create_match_result(
-            original=original,
+            original=original_text,
             matched=None,
             match_type=None,
             pattern=None,
@@ -86,17 +106,24 @@ class RazorMatcher:
         self._match_cache[cache_key] = result
         return result
 
-    def match(self, value: str, bypass_correct_matches: bool = False) -> MatchResult:
+    def match(
+        self, value: str, original: str | None = None, bypass_correct_matches: bool = False
+    ) -> MatchResult:
         """
         Match a razor value using correct matches first, then regex patterns.
 
         Args:
-            value: The razor value to match
+            value: Normalized text string for matching
+            original: Original text string for debugging (defaults to value if not provided)
             bypass_correct_matches: If True, skip correct_matches and use regex only
 
         Returns:
             MatchResult with match information
         """
+        # Use provided original text or default to normalized text
+        original_text = original if original is not None else value
+        normalized_text = value
+
         if not bypass_correct_matches:
             # Check correct matches first
             if self.correct_matches:
@@ -104,13 +131,13 @@ class RazorMatcher:
                     for model, entries in models.items():
                         if isinstance(entries, list):
                             # Simple string list format
-                            if value in entries:
+                            if normalized_text in entries:
                                 # Get format from catalog entry
                                 fmt = "DE"  # Default format
                                 if brand in self.catalog and model in self.catalog[brand]:
                                     fmt = self.catalog[brand][model].get("format", "DE")
                                 return create_match_result(
-                                    original=value,
+                                    original=original_text,
                                     matched={"brand": brand, "model": model, "format": fmt},
                                     match_type=MatchType.EXACT,
                                     pattern=None,
@@ -118,7 +145,7 @@ class RazorMatcher:
                         elif isinstance(entries, dict):
                             # Nested format with additional data
                             strings = entries.get("strings", [])
-                            if value in strings:
+                            if normalized_text in strings:
                                 # Get format from catalog entry
                                 fmt = "DE"  # Default format
                                 if brand in self.catalog and model in self.catalog[brand]:
@@ -129,10 +156,10 @@ class RazorMatcher:
                                     if key != "strings":
                                         matched_data[key] = val
                                 return create_match_result(
-                                    original=value,
+                                    original=original_text,
                                     matched=matched_data,
                                     match_type=MatchType.EXACT,
                                     pattern=None,
                                 )
         # Fall back to regex matching
-        return self._match_with_regex(value)
+        return self._match_with_regex(normalized_text, original_text)
