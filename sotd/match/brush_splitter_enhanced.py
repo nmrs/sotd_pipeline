@@ -133,21 +133,35 @@ class EnhancedBrushSplitter:
     ) -> tuple[Optional[str], Optional[str], Optional[str]]:
         """Content-based splitting for high-reliability delimiters.
 
-        Analyzes both sides to determine which is handle vs knot.
+        Analyzes both sides to determine which is handle vs knot using relative scoring.
         """
         parts = text.split(delimiter, 1)
         if len(parts) == 2:
             part1 = parts[0].strip()
             part2 = parts[1].strip()
             if part1 and part2:
-                # Score both parts to determine which is handle vs knot
+                # Score each part as both handle and knot
                 part1_handle_score = self._score_as_handle(part1)
+                part1_knot_score = self._score_as_knot(part1)
                 part2_handle_score = self._score_as_handle(part2)
+                part2_knot_score = self._score_as_knot(part2)
 
-                if part1_handle_score > part2_handle_score:
+                # Determine which part should be handle and which should be knot
+                # based on relative scoring
+                if part1_handle_score > part2_handle_score and part2_knot_score > part1_knot_score:
+                    # part1 is better handle, part2 is better knot
                     return part1, part2, delimiter_type
-                else:
+                elif (
+                    part2_handle_score > part1_handle_score and part1_knot_score > part2_knot_score
+                ):
+                    # part2 is better handle, part1 is better knot
                     return part2, part1, delimiter_type
+                else:
+                    # Fall back to handle score comparison (original logic)
+                    if part1_handle_score > part2_handle_score:
+                        return part1, part2, delimiter_type
+                    else:
+                        return part2, part1, delimiter_type
         return None, None, None
 
     def _split_by_delimiter_smart(
@@ -178,18 +192,33 @@ class EnhancedBrushSplitter:
             if not part1 or not part2:
                 continue
 
-            # Score each part as handle
+            # Score each part as both handle and knot
             part1_handle_score = self._score_as_handle(part1)
+            part1_knot_score = self._score_as_knot(part1)
             part2_handle_score = self._score_as_handle(part2)
+            part2_knot_score = self._score_as_knot(part2)
 
-            # Calculate the difference between the better handle score and the worse one
-            # This helps us find the split that creates the most distinct handle/knot separation
-            if part1_handle_score > part2_handle_score:
-                score_diff = part1_handle_score - part2_handle_score
+            # Calculate the score difference for the best handle/knot assignment
+            if part1_handle_score > part2_handle_score and part2_knot_score > part1_knot_score:
+                # part1 is better handle, part2 is better knot
+                score_diff = (part1_handle_score - part2_handle_score) + (
+                    part2_knot_score - part1_knot_score
+                )
                 potential_split = (part1, part2, delimiter_type)
-            else:
-                score_diff = part2_handle_score - part1_handle_score
+            elif part2_handle_score > part1_handle_score and part1_knot_score > part2_knot_score:
+                # part2 is better handle, part1 is better knot
+                score_diff = (part2_handle_score - part1_handle_score) + (
+                    part1_knot_score - part2_knot_score
+                )
                 potential_split = (part2, part1, delimiter_type)
+            else:
+                # Fall back to handle score comparison (original logic)
+                if part1_handle_score > part2_handle_score:
+                    score_diff = part1_handle_score - part2_handle_score
+                    potential_split = (part1, part2, delimiter_type)
+                else:
+                    score_diff = part2_handle_score - part1_handle_score
+                    potential_split = (part2, part1, delimiter_type)
 
             # Choose the split with the largest score difference
             if score_diff > best_score_diff:
@@ -283,6 +312,92 @@ class EnhancedBrushSplitter:
         # Chisel & Hound versioning patterns (knot indicators)
         if re.search(r"\bv\d{2}\b", text_lower):
             score -= 6
+
+        return score
+
+    def _score_as_knot(self, text: str) -> int:
+        """Score how likely a text is to be a knot (higher = more likely knot)."""
+        score = 0
+        text_lower = text.lower()
+
+        # Strong knot indicators
+        if "knot" in text_lower:
+            score += 10
+
+        # Test against brush strategies to see if this looks like a knot
+        knot_strategy_matches = 0
+        for strategy in self.strategies:
+            try:
+                result = strategy.match(text)
+                if result and (
+                    (isinstance(result, dict) and result.get("matched"))
+                    or (isinstance(result, dict) and result.get("brand"))
+                ):
+                    knot_strategy_matches += 1
+            except (AttributeError, KeyError, TypeError, re.error):
+                # Some strategies might fail on certain inputs due to regex errors,
+                # missing attributes, or type issues - skip and continue
+                continue
+
+        # If multiple strategies match this as a knot, increase knot score
+        if knot_strategy_matches >= 2:
+            score += 12
+        elif knot_strategy_matches == 1:
+            score += 8
+
+        # Knot-related terms
+        knot_terms = ["syn", "mm", "knot", "badger", "boar", "synthetic"]
+        for term in knot_terms:
+            if term in text_lower:
+                score += 3
+
+        # Fiber type patterns (strong knot indicators) - use fiber_utils
+        fiber_type = match_fiber(text)
+        if fiber_type:
+            score += 10
+
+        # Size patterns (knot indicators)
+        if re.search(r"\d{2}\s*mm", text_lower):
+            score += 8
+
+        # Chisel & Hound versioning patterns (knot indicators)
+        if re.search(r"\bv\d{2}\b", text_lower):
+            score += 8
+
+        # Declaration Grooming patterns (B2, B15, etc.)
+        if re.search(r"\bB\d{1,2}[A-Z]?\b", text_lower):
+            score += 10
+
+        # Handle indicators (negative score for knot likelihood)
+        handle_terms = [
+            "handle",
+            "stock",
+            "custom",
+            "artisan",
+            "turned",
+            "wood",
+            "resin",
+            "zebra",
+            "burl",
+        ]
+        for term in handle_terms:
+            if term in text_lower:
+                score -= 5
+
+        # Test against actual handle patterns from handles.yaml (negative for knot)
+        if self.handle_matcher:
+            handle_match = self.handle_matcher.match_handle_maker(text)
+            if handle_match:
+                # Found a handle pattern match - reduce knot score
+                section = handle_match.get("_matched_by_section", "")
+                if section == "artisan_handles":
+                    score -= 12  # Artisan handles are most specific
+                elif section == "manufacturer_handles":
+                    score -= 10
+                elif section == "other_handles":
+                    score -= 8
+                else:
+                    score -= 6
 
         return score
 
@@ -473,6 +588,23 @@ class EnhancedBrushSplitter:
             return None, None, None
 
         return handle_text, knot_text, "brand_context"
+
+    def _is_same_maker_split(self, handle: str, knot: str) -> bool:
+        """Check if the handle and knot are from the same maker brand."""
+        if not self.handle_matcher:
+            return False
+
+        handle_match = self.handle_matcher.match_handle_maker(handle)
+        knot_match = self.handle_matcher.match_handle_maker(knot)
+
+        if handle_match and knot_match:
+            handle_maker = handle_match.get("_matched_by_section", "")
+            knot_maker = knot_match.get("_matched_by_section", "")
+
+            # Check if both are from the same maker brand
+            return handle_maker == knot_maker
+
+        return False
 
     def _is_known_knot(self, text: str) -> bool:
         """Check if the text matches a known knot in the knots catalog."""

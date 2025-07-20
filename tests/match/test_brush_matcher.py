@@ -88,12 +88,42 @@ def test_handles_catalog():
     }
 
 
+@pytest.fixture(scope="session")
+def test_knots_catalog():
+    """Create test knots catalog matching real structure"""
+    return {
+        "known_knots": {
+            "Declaration Grooming": {
+                "fiber": "Badger",
+                "knot_size_mm": 28,
+                "B15": {"patterns": ["(declaration|\\bdg\\b).*\\bb15\\b", "b15"]},
+            },
+            "Chisel & Hound": {
+                "fiber": "Badger",
+                "knot_size_mm": 26,
+                "Zebra": {"patterns": ["zebra"]},
+            },
+        },
+        "other_knots": {
+            "Simpson": {
+                "default": "Badger",
+                "patterns": ["simpson"],
+            },
+            "Elite": {
+                "default": "Badger",
+                "patterns": ["elite"],
+            },
+        },
+    }
+
+
 @pytest.fixture
-def brush_matcher(test_catalog, test_handles_catalog, tmp_path):
+def brush_matcher(test_catalog, test_handles_catalog, test_knots_catalog, tmp_path):
     """Create brush matcher with test catalogs"""
     # Create temporary catalog files
     catalog_path = tmp_path / "brushes.yaml"
     handles_path = tmp_path / "handles.yaml"
+    knots_path = tmp_path / "knots.yaml"
     correct_matches_path = tmp_path / "correct_matches.yaml"
 
     # Remove 'other_brushes' from the known_brushes dict if present
@@ -106,6 +136,9 @@ def brush_matcher(test_catalog, test_handles_catalog, tmp_path):
 
     with handles_path.open("w", encoding="utf-8") as f:
         yaml.dump(test_handles_catalog, f)
+
+    with knots_path.open("w", encoding="utf-8") as f:
+        yaml.dump(test_knots_catalog, f)
 
     # Create correct matches file with test entries
     correct_matches_data = {
@@ -122,6 +155,7 @@ def brush_matcher(test_catalog, test_handles_catalog, tmp_path):
     return BrushMatcher(
         catalog_path=catalog_path,
         handles_path=handles_path,
+        knots_path=knots_path,
         correct_matches_path=correct_matches_path,
     )
 
@@ -300,9 +334,15 @@ class TestBrushMatcherPriorityOrder:
         # Both handle and knot are from the same maker (e.g., 'Simpson Chubby 2 w/ Simpson knot')
         # Should match as a complete brush, not as a handle/knot combo
         result = brush_matcher.match("Simpson Chubby 2 w/ Simpson knot")
-        # Should match as a complete brush (brand/model filled)
+        # Should match as a complete brush with shared brand but no global model
         assert result.matched["brand"] == "Simpson"
-        assert result.matched["model"] == "Chubby 2"
+        assert result.matched["model"] is None  # No global model for composite brushes
+        # Handle should have the specific model
+        assert result.matched["handle"]["brand"] == "Simpson"
+        assert result.matched["handle"]["model"] == "Chubby 2"
+        # Knot should have the shared brand but no specific model
+        assert result.matched["knot"]["brand"] == "Simpson"
+        assert result.matched["knot"]["model"] is None
 
     def test_different_maker_split_treated_as_handle_knot_combo(self, brush_matcher):
         result = brush_matcher.match("Elite handle w/ Declaration B15")

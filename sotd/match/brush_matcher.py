@@ -327,6 +327,29 @@ class BrushMatcher:
                 except Exception:
                     continue
 
+            # If no knot match found, check if it's a generic knot reference (e.g., "Simpson knot")
+            if not knot_match and knot_text:
+                # Check if knot text contains the same brand as the handle
+                handle_brand = handle_match.get("handle_maker") if handle_match else None
+                if handle_brand and handle_brand.lower() in knot_text.lower():
+                    # Generic knot reference - create a synthetic match
+                    from sotd.match.types import create_match_result
+
+                    knot_match = create_match_result(
+                        original=knot_text,
+                        matched={
+                            "brand": handle_brand,
+                            "model": None,  # Generic knot, no specific model
+                            "fiber": None,
+                            "knot_size_mm": None,
+                            "source_text": knot_text,
+                            "_matched_by": "GenericKnotReference",
+                            "_pattern": "generic_knot",
+                        },
+                        match_type="regex",
+                        pattern="generic_knot",
+                    )
+
             matched = {
                 "brand": None,  # Composite brush
                 "model": None,  # Composite brush
@@ -347,6 +370,30 @@ class BrushMatcher:
                     "_pattern": "split",
                 },
             }
+
+            # Apply the same fallback logic for unmatched handles
+            if not handle_match and handle_text:
+                # Extract the brand from handle_text if no match found
+                # This handles cases like "UnknownMaker handle" where UnknownMaker isn't in the
+                # catalog
+                handle_words = handle_text.lower().split()
+                if "handle" in handle_words:
+                    handle_words.remove("handle")
+                if handle_words:
+                    # Use the first word as the brand (e.g., "UnknownMaker")
+                    matched["handle"]["brand"] = handle_text.split()[0]  # Use original case
+                    matched["handle"]["_matched_by"] = "BrushSplitter"
+
+            # Extract model from handle text if not provided by handle matcher
+            if not matched["handle"]["model"] and handle_text:
+                matched["handle"]["model"] = self._extract_model_from_handle_text(handle_text)
+
+            # Check if both handle and knot are from the same maker - if so, set top-level
+            # brand/model
+            if self._is_same_maker_split(matched["handle"]["brand"], matched["knot"]["brand"]):
+                # Same maker - treat as complete brush with shared brand but no global model
+                matched["brand"] = matched["handle"]["brand"]
+                matched["model"] = None  # No global model for composite brushes
 
             from sotd.match.types import create_match_result
 
@@ -787,10 +834,27 @@ class BrushMatcher:
             # Add handle subsection if we have handle information
             if handle_text:
                 handle_match = self.handle_matcher.match_handle_maker(handle_text)
+                # Extract the brand from handle_text if no match found
+                # This handles cases like "UnknownMaker handle" where UnknownMaker isn't in the catalog
+                handle_brand = None
+                if handle_match:
+                    handle_brand = handle_match["handle_maker"]
+                else:
+                    # Try to extract brand from handle_text (e.g., "UnknownMaker handle" -> "UnknownMaker")
+                    # Remove common handle-related words to get the brand
+                    handle_words = handle_text.lower().split()
+                    if "handle" in handle_words:
+                        handle_words.remove("handle")
+                    if handle_words:
+                        # Use the first word as the brand (e.g., "UnknownMaker")
+                        handle_brand = handle_text.split()[0]  # Use original case
+
                 updated["handle"] = {
-                    "brand": handle_match["handle_maker"] if handle_match else None,
+                    "brand": handle_brand,
                     "model": None,  # Could be extracted from handle_text if needed
                     "source_text": handle_text,
+                    "_matched_by": "HandleMatcher" if handle_match else "BrushSplitter",
+                    "_pattern": "split",
                 }
         if ("knot" not in updated) or (updated["knot"] is None):
             if not ("knot" in updated and updated["knot"]):
@@ -961,3 +1025,26 @@ class BrushMatcher:
                     }
                     return True
         return False
+
+    def _is_same_maker_split(self, handle_brand: Optional[str], knot_brand: Optional[str]) -> bool:
+        """Check if handle and knot are from the same maker brand."""
+        if not handle_brand or not knot_brand:
+            return False
+        return handle_brand == knot_brand
+
+    def _extract_model_from_handle_text(self, handle_text: str) -> Optional[str]:
+        """Extract model from handle text (e.g., 'Simpson Chubby 2' -> 'Chubby 2')."""
+        if not handle_text:
+            return None
+
+        # Split into words and look for model patterns
+        words = handle_text.split()
+        if len(words) < 2:
+            return None
+
+        # Skip the first word (brand) and join the rest as the model
+        model_words = words[1:]
+        if model_words:
+            return " ".join(model_words)
+
+        return None

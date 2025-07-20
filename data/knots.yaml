@@ -800,6 +800,10 @@ other_knots:
     default: Synthetic
     patterns:
     - sawdust
+  Simpson:
+    default: Badger
+    patterns:
+    - simpson
   Strike Gold Shave:
     default: Synthetic
     patterns:
