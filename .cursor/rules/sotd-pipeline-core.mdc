@@ -73,6 +73,73 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 - **Development Server Background Mode**: **MANDATORY**: When starting development servers (Vite, npm run dev, uvicorn, etc.), ALWAYS use background mode to avoid blocking the conversation. Use `is_background: true` in run_terminal_cmd or start servers in background processes. This allows the conversation to continue while servers run. Monitor server status with `ps aux | grep -E "(vite|uvicorn|npm)" | grep -v grep` and test endpoints with `curl` commands.
 - **Playwright Test Background Mode**: **MANDATORY**: When running Playwright tests, ALWAYS use background mode to avoid blocking the conversation. Use `npm run test:e2e:background` or `./scripts/auto-test.sh` instead of direct `npx playwright test` commands. This ensures tests run in the background while allowing the conversation to continue. Monitor progress with `tail -f playwright-auto.log` and stop tests with `pkill -f playwright` if needed.
 
+## Testing Requirements for Plan Writing (MANDATORY)
+When creating implementation plans, you MUST follow the testing principles from `@testing-patterns.mdc`:
+
+### **MANDATORY**: Test Type Priority Hierarchy in Plans
+All implementation plans MUST specify testing requirements following the priority order from `@testing-patterns.mdc`:
+
+1. **Unit Tests** - Fast, isolated tests with mock dependencies (HIGHEST PRIORITY)
+   - **REQUIRED** - All plans must include unit test requirements
+   - Follow patterns from `@testing-patterns.mdc` for mock data and test structure
+
+2. **Integration Tests** - Tests using real production data (MEDIUM PRIORITY)
+   - **REQUIRED** - All plans must include integration test requirements
+   - Follow patterns from `@testing-patterns.mdc` for real data validation
+
+3. **End-to-End (E2E) Tests** - Full system tests (LOWEST PRIORITY)
+   - **OPTIONAL** - Only include when testing complete user workflows is necessary
+   - Follow patterns from `@testing-patterns.mdc` for E2E testing
+
+### **MANDATORY**: Plan Testing Requirements
+Every implementation plan MUST include:
+
+1. **Unit Test Specifications**:
+   - List specific functions/methods to be tested
+   - Specify edge cases and error conditions to test
+   - Define mock data requirements
+   - Include test file locations and naming conventions
+
+2. **Integration Test Specifications**:
+   - Specify real data files to use for testing
+   - Define end-to-end workflow test scenarios
+   - Include catalog validation requirements
+   - Specify test data management approach
+
+3. **Test Coverage Requirements**:
+   - Define minimum test coverage percentages
+   - Specify critical paths that must be tested
+   - Include performance testing requirements where applicable
+   - Define error handling test scenarios
+
+4. **WebUI Testing Requirements** (when applicable):
+   - React component unit tests with React Testing Library
+   - API integration tests with Jest mocks
+   - E2E tests with Playwright (only when necessary)
+   - Component rendering and user interaction tests
+
+### **MANDATORY**: Plan Testing Validation
+Before considering any plan complete, verify:
+
+1. **Unit tests are specified** for all new functionality
+2. **Integration tests are specified** for real data validation
+3. **Test coverage requirements** are clearly defined
+4. **Error handling scenarios** are included in test specifications
+5. **Performance testing** is specified where applicable
+6. **WebUI testing** is specified for React components
+7. **Test file locations** and naming conventions are defined
+8. **Mock data requirements** are specified for unit tests
+9. **Real data requirements** are specified for integration tests
+10. **Test execution commands** are included in the plan
+
+### Why Testing Requirements in Plans Matter
+- **Ensures comprehensive testing** from the start of development
+- **Prevents testing gaps** by requiring test specifications upfront
+- **Improves code quality** by defining testing requirements before implementation
+- **Facilitates TDD approach** by specifying tests before writing code
+- **Reduces technical debt** by ensuring all functionality is properly tested
+- **Enables faster development** by providing clear testing guidance
+
 ## Domain-Specific Rules
 - **Product Catalogs**: Maintain consistent structure in YAML files (`data/brushes.yaml`, `data/handles.yaml`, `data/razors.yaml`, `data/blades.yaml`, `data/soaps.yaml`)
 - **Brand Normalization**: Follow established patterns for product brand/model separation
