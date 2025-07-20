@@ -1,98 +1,119 @@
 from typing import Optional
 
+from sotd.match.types import MatchResult
+
 
 class KnotMatcher:
-    """Handles matching of brush knot makers from text input."""
+    """Knot matching functionality extracted from BrushMatcher."""
 
-    def __init__(self, catalog_data: dict):
-        self.catalog_data = catalog_data
+    def __init__(self, strategies: list):
+        self.strategies = strategies
 
-    def match_knot_priority(
-        self, value: str, handle: Optional[str], knot: Optional[str]
-    ) -> Optional[dict]:
-        """
-        Match brush with knot priority (when we have a clear handle/knot split).
-        This prioritizes finding the knot maker over the handle maker.
-        """
-        if not knot:
-            return None
+    def should_prioritize_knot(self, text: str, split_handle_and_knot_func) -> bool:
+        """Determine if knot maker should take precedence based on delimiter semantics."""
+        handle_primary_delimiters = [" in "]  # Handle takes precedence
 
-        # Try to match the knot part using all strategies
-        for strategy in self._get_strategies():
-            result = strategy.match(knot)
-            if result:
-                # Extract the match result
-                match_dict = self._extract_match_dict(
-                    result, strategy, matched_from="knot_priority", handle=handle, knot=knot
-                )
+        # Check for handle-primary delimiters
+        for delimiter in handle_primary_delimiters:
+            if delimiter in text:
+                return False
 
-                # Set handle_maker if we have a handle and it's not already set
-                if handle and not match_dict.get("handle_maker"):
-                    match_dict["handle_maker"] = handle
+        # For all other delimiters, let the smart analysis determine priority
+        # by checking if we successfully split and which part scored higher as handle
+        handle, knot, delimiter_type = split_handle_and_knot_func(text)
+        if handle and knot and delimiter_type == "smart_analysis":
+            # If smart analysis was used, trust its determination
+            # The smart analysis already put the handle first and knot second
+            return True  # Process knot part first since it's usually more distinctive
 
-                return match_dict
+        # Default behavior when no delimiters found
+        return True  # Default to knot priority for backward compatibility
 
-        return None
+    def is_known_handle_maker(self, brand: str) -> bool:
+        """Check if a brand is primarily known as a handle maker."""
+        # These brands are primarily handle makers
+        handle_maker_brands = {
+            "Chisel & Hound",
+            "Wolf Whiskers",
+            "Elite",
+            "Dogwood",
+            "Declaration Grooming",
+            "Grizzly Bay",
+            "Paladin",
+        }
+        return brand in handle_maker_brands
 
     def try_knot_maker_fallback(self, value: str, handle_result: dict) -> dict | None:
-        """
-        Try to find a knot maker when we have a handle match but no knot match.
-        This is a fallback strategy for cases where the handle is clear but the knot is ambiguous.
-        """
-        # Extract the handle maker from the handle result
-        handle_maker = handle_result.get("handle_maker")
-        if not handle_maker:
+        """Try to find a knot maker when full-text matching found a handle maker."""
+        if not self.is_known_handle_maker(handle_result.get("brand", "")):
             return None
 
-        # Look for knot makers that are commonly paired with this handle maker
-        # This is a simplified approach - in practice, you might have a mapping
-        # of common handle/knot combinations
+        # Try to find knot maker brands in the text
+        for strategy in self.strategies:
+            # Skip the strategy that already matched the handle
+            if strategy.__class__.__name__ == handle_result.get("_matched_by_strategy"):
+                continue
 
-        # For now, we'll try to match the full text again, but with lower confidence
-        for strategy in self._get_strategies():
             result = strategy.match(value)
-            if result:
-                match_dict = self._extract_match_dict(
-                    result, strategy, matched_from="knot_fallback"
-                )
-
-                # If we found a different brand than the handle maker, it might be the knot maker
-                brand = match_dict.get("brand", "").strip()
-                if brand and brand.lower() != handle_maker.lower():
-                    # This could be the knot maker
-                    match_dict["handle_maker"] = handle_maker
-                    match_dict["_confidence"] = "low"  # Mark as low confidence
-                    return match_dict
-
+            if result.matched:
+                knot_match = result.matched.copy()
+                # If we found a different brand, prioritize it as the knot maker
+                if knot_match.get("brand") != handle_result.get("brand"):
+                    knot_match["_matched_by_strategy"] = strategy.__class__.__name__
+                    knot_match["_pattern_used"] = result.pattern
+                    knot_match["_matched_from"] = "knot_fallback"
+                    knot_match["handle_maker"] = handle_result.get("brand")
+                    return knot_match
         return None
 
-    def _get_strategies(self):
-        """Get all available matching strategies."""
-        # This would be injected from the main BrushMatcher
-        # For now, return an empty list - this will be set up when integrating
-        return []
-
-    def _extract_match_dict(
+    def match_knot_priority(
         self,
-        result,
-        strategy,
-        matched_from: Optional[str] = None,
-        handle: Optional[str] = None,
-        knot: Optional[str] = None,
-    ):
-        """Extract match dictionary from strategy result."""
-        if hasattr(result, "to_dict"):
-            match_dict = result.to_dict()
-        else:
-            match_dict = dict(result)
+        value: str,
+        handle: Optional[str],
+        knot: Optional[str],
+        extract_match_dict_func,
+        post_process_match_func,
+    ) -> Optional["MatchResult"]:
+        """Match brush with knot priority (when we have a clear handle/knot split)."""
+        for strategy in self.strategies:
+            result = strategy.match(knot)
+            # All strategies now return MatchResult objects
+            if result.matched:
+                m = extract_match_dict_func(result, strategy, "knot_part", handle, knot)
+                if m:
+                    from sotd.match.types import create_match_result
 
-        # Add metadata
-        match_dict["_strategy"] = strategy.__class__.__name__
-        if matched_from:
-            match_dict["_matched_from"] = matched_from
-        if handle:
-            match_dict["_handle_part"] = handle
-        if knot:
-            match_dict["_knot_part"] = knot
+                    match_result = create_match_result(
+                        original=value,
+                        matched=m,
+                        match_type=result.match_type or "exact",
+                        pattern=result.pattern or "unknown",
+                    )
+                    return post_process_match_func(match_result, value)
+        return None
 
-        return match_dict
+    def match_handle_priority(
+        self,
+        value: str,
+        handle: Optional[str],
+        knot: Optional[str],
+        extract_match_dict_func,
+        post_process_match_func,
+    ) -> Optional["MatchResult"]:
+        """Match brush with handle priority (when we have a clear handle/knot split)."""
+        for strategy in self.strategies:
+            result = strategy.match(handle)
+            # All strategies now return MatchResult objects
+            if result.matched:
+                m = extract_match_dict_func(result, strategy, "handle_part", handle, knot)
+                if m:
+                    from sotd.match.types import create_match_result
+
+                    match_result = create_match_result(
+                        original=value,
+                        matched=m,
+                        match_type=result.match_type or "exact",
+                        pattern=result.pattern or "unknown",
+                    )
+                    return post_process_match_func(match_result, value)
+        return None

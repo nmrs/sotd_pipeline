@@ -2,8 +2,8 @@
 
 import pytest
 
-from sotd.match.brush_splitter_enhanced import EnhancedBrushSplitter
-from sotd.match.handle_matcher_enhanced import EnhancedHandleMatcher
+from sotd.match.brush_splitter import BrushSplitter
+from sotd.match.handle_matcher import HandleMatcher
 
 
 class TestBrushSplitterDelimiterClassification:
@@ -12,10 +12,10 @@ class TestBrushSplitterDelimiterClassification:
     @pytest.fixture
     def brush_splitter(self):
         """Create brush splitter with handle matcher and strategies."""
-        handle_matcher = EnhancedHandleMatcher()
+        handle_matcher = HandleMatcher()
         # Mock strategies for testing
         strategies = []
-        return EnhancedBrushSplitter(handle_matcher, strategies)
+        return BrushSplitter(handle_matcher, strategies)
 
     def test_high_reliability_delimiters_always_trigger_splitting(self, brush_splitter):
         """Test that high-reliability delimiters always trigger splitting."""

@@ -14,13 +14,13 @@ from sotd.match.brush_matching_strategies.other_brushes_strategy import (
 )
 from sotd.match.brush_matching_strategies.other_knot_strategy import OtherKnotMatchingStrategy
 from sotd.match.brush_matching_strategies.zenith_strategy import ZenithBrushMatchingStrategy
-from sotd.match.brush_splitter_enhanced import EnhancedBrushSplitter
+from sotd.match.brush_splitter import BrushSplitter
 from sotd.match.cache import MatchCache
 from sotd.match.config import BrushMatcherConfig
 from sotd.match.correct_matches import CorrectMatchesChecker
-from sotd.match.fiber_processor_enhanced import FiberProcessorEnhanced
-from sotd.match.handle_matcher_enhanced import EnhancedHandleMatcher
-from sotd.match.knot_matcher_enhanced import EnhancedKnotMatcher
+from sotd.match.fiber_processor import FiberProcessor
+from sotd.match.handle_matcher import HandleMatcher
+from sotd.match.knot_matcher import KnotMatcher
 from sotd.match.loaders import CatalogLoader
 from sotd.match.types import MatchResult
 
@@ -72,8 +72,8 @@ class BrushMatcher:
 
         # Initialize specialized components
         self.correct_matches_checker = CorrectMatchesChecker(config, self.correct_matches)
-        self.handle_matcher = EnhancedHandleMatcher(config.handles_path)
-        self.fiber_processor = FiberProcessorEnhanced()
+        self.handle_matcher = HandleMatcher(config.handles_path)
+        self.fiber_processor = FiberProcessor()
 
         # Register brush strategies in order of preference:
         # 1. Known brushes (catalog-driven, highest priority)
@@ -92,8 +92,8 @@ class BrushMatcher:
         ]
         # For handle/knot matching, use both sets of strategies
         self.strategies = self.brush_strategies + self.knot_strategies
-        self.knot_matcher = EnhancedKnotMatcher(self.strategies)
-        self.brush_splitter = EnhancedBrushSplitter(self.handle_matcher, self.strategies)
+        self.knot_matcher = KnotMatcher(self.strategies)
+        self.brush_splitter = BrushSplitter(self.handle_matcher, self.strategies)
         # Centralized cache for expensive operations
         self._cache = MatchCache(
             max_size=config.cache_max_size,

@@ -1,7 +1,7 @@
 import pytest
 
-from sotd.match.brush_splitter_enhanced import EnhancedBrushSplitter
-from sotd.match.handle_matcher_enhanced import EnhancedHandleMatcher
+from sotd.match.brush_splitter import BrushSplitter
+from sotd.match.handle_matcher import HandleMatcher
 from sotd.match.brush_matching_strategies.known_brush_strategy import KnownBrushMatchingStrategy
 from sotd.match.brush_matching_strategies.other_brushes_strategy import OtherBrushMatchingStrategy
 
@@ -12,13 +12,13 @@ class TestBrushSplitterSmartAnalysisEnhanced:
     @pytest.fixture
     def brush_splitter(self):
         """Create brush splitter with handle matcher and strategies."""
-        handle_matcher = EnhancedHandleMatcher()
+        handle_matcher = HandleMatcher()
         # Mock strategies for testing
         strategies = [
             KnownBrushMatchingStrategy({}),
             OtherBrushMatchingStrategy({}),
         ]
-        return EnhancedBrushSplitter(handle_matcher, strategies)
+        return BrushSplitter(handle_matcher, strategies)
 
     def test_plus_delimiter_handle_knot_combinations(self, brush_splitter):
         """Test that ' + ' delimiter handles handle/knot combinations correctly."""

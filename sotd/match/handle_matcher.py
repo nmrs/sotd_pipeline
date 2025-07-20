@@ -6,7 +6,7 @@ import yaml
 
 
 class HandleMatcher:
-    """Handles matching of brush handle makers from text input."""
+    """Handle matching functionality extracted from BrushMatcher."""
 
     def __init__(self, handles_path: Path = Path("data/handles.yaml")):
         self.handles_path = handles_path
@@ -150,3 +150,52 @@ class HandleMatcher:
                 if "_pattern_used" not in updated:
                     updated["_pattern_used"] = model_handle_result["_pattern_used"]
                 return
+
+    def score_as_handle(self, text: str) -> int:
+        """Score how likely a text is to be a handle (higher = more likely handle)."""
+        score = 0
+        text_lower = text.lower()
+
+        # Strong handle indicators
+        if "handle" in text_lower:
+            score += 10
+
+        # Test against actual handle patterns from handles.yaml
+        handle_match = self.match_handle_maker(text)
+        if handle_match:
+            # Found a handle pattern match - strong indicator this is a handle
+            section = handle_match.get("_matched_by_section", "")
+            if section == "artisan_handles":
+                score += 12  # Artisan handles are most specific
+            elif section == "manufacturer_handles":
+                score += 10
+            elif section == "other_handles":
+                score += 8
+            else:
+                score += 6
+
+        # Handle-related terms
+        handle_terms = ["stock", "custom", "artisan", "turned", "wood", "resin", "zebra", "burl"]
+        for term in handle_terms:
+            if term in text_lower:
+                score += 2
+
+        # Knot indicators (negative score for handle likelihood)
+        knot_terms = ["badger", "boar", "synthetic", "syn", "mm", "knot"]
+        for term in knot_terms:
+            if term in text_lower:
+                score -= 5
+
+        # Fiber type patterns (strong knot indicators)
+        if any(fiber in text_lower for fiber in ["badger", "boar", "synthetic"]):
+            score -= 8
+
+        # Size patterns (knot indicators)
+        if re.search(r"\d{2}\s*mm", text_lower):
+            score -= 6
+
+        # Chisel & Hound versioning patterns (knot indicators)
+        if re.search(r"\bv\d{2}\b", text_lower):
+            score -= 6
+
+        return score
