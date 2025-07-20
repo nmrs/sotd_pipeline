@@ -8,7 +8,8 @@ from pathlib import Path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
-from sotd.utils.filtered_entries import FilteredEntriesManager
+# Import after path setup
+from sotd.utils.filtered_entries import FilteredEntriesManager  # noqa: E402
 
 
 def test_add_entry():
