@@ -49,7 +49,6 @@ def test_catalog():
             "B15": {"patterns": ["(declaration|\\bdg\\b).*\\bb15\\b", "b15"]},
         },
         "other_brushes": {
-            "Elite": {"default": "Badger", "patterns": ["elite"]},
             "Alpha": {"default": "Synthetic", "patterns": ["alpha"]},
             "Groomatorium": {
                 "default": "Synthetic",
@@ -135,8 +134,9 @@ class TestBrushMatcher:
         result = brush_matcher.match("Simpson Chubby 2")
         assert result.matched["brand"] == "Simpson"
         assert result.matched["model"] == "Chubby 2"
-        assert result.matched["fiber"] == "Badger"
-        assert result.matched["knot_size_mm"] == 27
+        # Check fiber and knot_size_mm in knot section
+        assert result.matched["knot"]["fiber"] == "Badger"
+        assert result.matched["knot"]["knot_size_mm"] == 27
 
     def test_nested_knot_handle_structure(self, brush_matcher):
         """Test that brush matcher can handle nested knot and handle structures in catalog."""
@@ -156,8 +156,14 @@ class TestBrushMatcher:
     def test_other_brush_matching(self, brush_matcher):
         """Test matching of other brushes with defaults."""
         result = brush_matcher.match("Elite handle")
-        assert result.matched["brand"] == "Elite"
-        assert result.matched["fiber"] == "Badger"  # Default from catalog
+        # Should be treated as composite brush with handle-only information
+        assert result.matched["brand"] is None  # Composite brush
+        assert result.matched["model"] is None  # Composite brush
+        # Handle section should have Elite information
+        assert result.matched["handle"]["brand"] == "Elite"
+        # Knot section should have no information (unknown knot)
+        assert result.matched["knot"]["brand"] is None
+        assert result.matched["knot"]["fiber"] is None  # No knot information
 
     def test_handle_knot_splitting(self, brush_matcher):
         """Test handle/knot splitting functionality."""
@@ -176,25 +182,23 @@ class TestBrushMatcher:
         result = brush_matcher.match("Simpson Chubby 2")
         # The matcher may not set fiber_strategy anymore; just check for correct match
         assert result.matched["brand"] == "Simpson"
-        assert result.matched["fiber"] == "Badger"
+        # Check fiber in knot section
+        assert result.matched["knot"]["fiber"] == "Badger"
 
     def test_no_match_handling(self, brush_matcher):
         """Test handling of unmatched brushes."""
         result = brush_matcher.match("Unknown Brush 123")
-        assert result.matched is None
-        assert result.match_type is None
+        assert result is None
 
     def test_empty_input_handling(self, brush_matcher):
         """Test handling of empty input."""
         result = brush_matcher.match("")
-        assert result.matched is None
-        assert result.match_type is None
+        assert result is None
 
     def test_none_input_handling(self, brush_matcher):
         """Test handling of None input."""
         result = brush_matcher.match(None)
-        assert result.matched is None
-        assert result.match_type is None
+        assert result is None
 
 
 # Parameterized strategy/fiber tests
@@ -268,9 +272,7 @@ class TestBrushMatcherCorrectMatches:
         result = brush_matcher.match("Unknown Brush Brand")
 
         # Should not be an exact match
-        assert result.match_type != "exact"
-        # Should attempt regex matching
-        assert result.matched is None or result.match_type == "regex"
+        assert result is None or result.match_type != "exact"
 
     def test_handle_knot_section_priority(self, brush_matcher):
         """Test that handle/knot sections are checked before brush section."""

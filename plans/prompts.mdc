@@ -12,9 +12,9 @@ This file contains reusable development workflows and prompts for the SOTD Pipel
 ```
 Proceed through the remaining tasks in the current step one at a time. After completing each task:
 1. Update the implementation plan to reflect the completed work.
-2. Commit the changes with a clear message summarizing the task completed.
+2. Commit the changes with a clear message summarizing the task completed per .cursor/rules/git-and-cleanup.mdc
 3. Move to the next task.
-4. Run quality checks (for example "make format lint typecheck test" but use whatever is appropriae for the current work) only before commits, not after every task.
+4. Run quality checks (for example "make format lint typecheck test" but use whatever is appropriate for the current work) only before commits, not after every task.
 ```
 
 ### Tracked Implementation Development Process

@@ -1,8 +1,8 @@
-import re
 from typing import Optional
 
 from sotd.enrich.enricher import BaseEnricher
 from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
+from sotd.match.brush_matching_strategies.utils.pattern_utils import extract_knot_size
 
 
 class BrushEnricher(BaseEnricher):
@@ -45,7 +45,7 @@ class BrushEnricher(BaseEnricher):
         if not brush_extracted:
             return None
 
-        user_knot_size = self._extract_knot_size(brush_extracted)
+        user_knot_size = extract_knot_size(brush_extracted)
         user_fiber = match_fiber(brush_extracted)
 
         # Get catalog data from new format (knot section) or legacy format (top-level)
@@ -129,27 +129,3 @@ class BrushEnricher(BaseEnricher):
                 )
 
         return enriched_data
-
-    def _extract_knot_size(self, text: str) -> Optional[float]:
-        """Extract knot size in mm from text."""
-        if not text:
-            return None
-
-        # Look for standalone number with 'mm' (highest priority)
-        match = re.search(r"\b(\d+(?:\.\d+)?)\s*mm?\b", text, re.IGNORECASE)
-        if match:
-            return float(match.group(1))
-
-        # Look for patterns like '27x50' or '27.5x50' (take first number)
-        match = re.search(r"(\d+(?:\.\d+)?)\s*[x×]\s*\d+(?:\.\d+)?", text)
-        if match:
-            return float(match.group(1))
-
-        # Fallback: any number in the text (but be more conservative)
-        # Only match numbers that could reasonably be knot sizes (20-35mm range)
-        # Include decimals in the range
-        match = re.search(r"\b(2[0-9](?:\.\d+)?|3[0-5](?:\.\d+)?)\b", text)
-        if match:
-            return float(match.group(1))
-
-        return None

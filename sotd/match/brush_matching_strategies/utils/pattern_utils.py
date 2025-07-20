@@ -7,6 +7,7 @@ used across brush matching strategies to ensure consistency and maintainability.
 import re
 from typing import Any, Dict, List, Optional
 
+from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
 from sotd.match.types import MatchResult, create_match_result
 
 
@@ -278,3 +279,94 @@ def extract_pattern_metadata(
 
     # Remove None values
     return {k: v for k, v in metadata.items() if v is not None}
+
+
+def extract_knot_size(text: str) -> Optional[float]:
+    """Extract knot size in mm from text.
+
+    This is a shared utility used by both brush matcher and brush enricher.
+    """
+    if not text:
+        return None
+
+    # Look for standalone number with 'mm' (highest priority)
+    match = re.search(r"\b(\d+(?:\.\d+)?)\s*mm?\b", text, re.IGNORECASE)
+    if match:
+        return float(match.group(1))
+
+    # Look for patterns like '27x50' or '27.5x50' (take first number)
+    match = re.search(r"(\d+(?:\.\d+)?)\s*[x×]\s*\d+(?:\.\d+)?", text)
+    if match:
+        return float(match.group(1))
+
+    # Fallback: any number in the text (but be more conservative)
+    # Only match numbers that could reasonably be knot sizes (20-35mm range)
+    # Include decimals in the range
+    match = re.search(r"\b(2[0-9](?:\.\d+)?|3[0-5](?:\.\d+)?)\b", text)
+    if match:
+        return float(match.group(1))
+
+    return None
+
+
+def has_knot_indicators(text: str) -> bool:
+    """Check if text has indicators that suggest it's a knot rather than a handle."""
+    if not text:
+        return False
+
+    # Check for fiber types
+    if match_fiber(text):
+        return True
+
+    # Check for size patterns
+    if extract_knot_size(text):
+        return True
+
+    # Check for version patterns (V20, B15, etc.)
+    if re.search(r"\b[vb]\d+\b", text.lower()):
+        return True
+
+    return False
+
+
+def has_handle_indicators(text: str) -> bool:
+    """Check if text has indicators that suggest it's a handle rather than a knot."""
+    if not text:
+        return False
+
+    # Explicit handle keyword
+    if "handle" in text.lower():
+        return True
+
+    # Handle-specific terms
+    handle_terms = ["stock", "turned", "wood", "resin"]
+    for term in handle_terms:
+        if term in text.lower():
+            return True
+
+    return False
+
+
+def score_match_type(text: str, match_type: str, pattern_score: int) -> int:
+    """Score a potential match based on text indicators.
+
+    Args:
+        text: The text being matched
+        match_type: Either "handle" or "knot"
+        pattern_score: Base score from pattern matching
+
+    Returns:
+        Adjusted score - higher scores favor the match type
+    """
+    score = pattern_score
+
+    if match_type == "handle":
+        # Handle indicators increase score for handle matches
+        if has_handle_indicators(text):
+            score += 10
+    elif match_type == "knot":
+        # Knot indicators decrease score for handle matches (increase for knot matches)
+        if has_knot_indicators(text):
+            score -= 8
+
+    return score

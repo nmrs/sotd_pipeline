@@ -222,7 +222,7 @@ def match_record(
                 pattern=None,
             )
         else:
-            brush_result = brush_matcher.match(normalized_text, result["brush"]["original"])
+            brush_result = brush_matcher.match(normalized_text)
             result["brush"] = brush_result
         monitor.record_matcher_timing("brush", time.time() - start_time)
 

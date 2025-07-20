@@ -62,12 +62,20 @@ def match_record(record: dict) -> dict:
             # Match using normalized string only
             razor_result = razor_matcher.match(razor_text)
             # Convert MatchResult to dict for consistency
-            result["razor"] = {
-                "original": razor_result.original,
-                "matched": razor_result.matched,
-                "match_type": razor_result.match_type,
-                "pattern": razor_result.pattern,
-            }
+            if razor_result is not None:
+                result["razor"] = {
+                    "original": razor_result.original,
+                    "matched": razor_result.matched,
+                    "match_type": razor_result.match_type,
+                    "pattern": razor_result.pattern,
+                }
+            else:
+                result["razor"] = {
+                    "original": razor_text,
+                    "matched": None,
+                    "match_type": None,
+                    "pattern": None,
+                }
 
     # Blade matching requires razor context
     if "blade" in result:
@@ -85,12 +93,20 @@ def match_record(record: dict) -> dict:
             # Match using normalized string only
             blade_result = blade_matcher.match(blade_text)
             # Convert MatchResult to dict for consistency
-            result["blade"] = {
-                "original": blade_result.original,
-                "matched": blade_result.matched,
-                "match_type": blade_result.match_type,
-                "pattern": blade_result.pattern,
-            }
+            if blade_result is not None:
+                result["blade"] = {
+                    "original": blade_result.original,
+                    "matched": blade_result.matched,
+                    "match_type": blade_result.match_type,
+                    "pattern": blade_result.pattern,
+                }
+            else:
+                result["blade"] = {
+                    "original": blade_text,
+                    "matched": None,
+                    "match_type": None,
+                    "pattern": None,
+                }
 
     # Soap matching
     if "soap" in result:
@@ -108,12 +124,20 @@ def match_record(record: dict) -> dict:
             # Match using normalized string only
             soap_result = soap_matcher.match(soap_text)
             # Convert MatchResult to dict for consistency
-            result["soap"] = {
-                "original": soap_result.original,
-                "matched": soap_result.matched,
-                "match_type": soap_result.match_type,
-                "pattern": soap_result.pattern,
-            }
+            if soap_result is not None:
+                result["soap"] = {
+                    "original": soap_result.original,
+                    "matched": soap_result.matched,
+                    "match_type": soap_result.match_type,
+                    "pattern": soap_result.pattern,
+                }
+            else:
+                result["soap"] = {
+                    "original": soap_text,
+                    "matched": None,
+                    "match_type": None,
+                    "pattern": None,
+                }
 
     # Brush matching
     if "brush" in result:
@@ -131,11 +155,19 @@ def match_record(record: dict) -> dict:
             # Match using normalized string only
             brush_result = brush_matcher.match(brush_text)
             # Convert MatchResult to dict for consistency
-            result["brush"] = {
-                "original": brush_result.original,
-                "matched": brush_result.matched,
-                "match_type": brush_result.match_type,
-                "pattern": brush_result.pattern,
-            }
+            if brush_result is not None:
+                result["brush"] = {
+                    "original": brush_result.original,
+                    "matched": brush_result.matched,
+                    "match_type": brush_result.match_type,
+                    "pattern": brush_result.pattern,
+                }
+            else:
+                result["brush"] = {
+                    "original": brush_text,
+                    "matched": None,
+                    "match_type": None,
+                    "pattern": None,
+                }
 
     return result
