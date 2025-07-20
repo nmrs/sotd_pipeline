@@ -331,83 +331,46 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
             args = Args()
 
             try:
-                # Process this month
+                # Use the same logic as command line tool - call analyze_unmatched directly
                 result = analyzer.analyze_unmatched(args)
                 all_results.append(result)
-                logger.info(f"Processed {month}: {result['total_unmatched']} unmatched items")
+                logger.info(f"Processed {month}: {len(result)} unmatched items")
             except Exception as e:
                 logger.warning(f"Error processing month {month}: {e}")
                 continue
 
-        # Combine results from all months
-        if request.field == "brush":
-            # For brush field, preserve detailed structure
-            combined_unmatched = {}
-            for result in all_results:
-                for item in result["unmatched_items"]:
-                    key = item["item"]
-                    if key not in combined_unmatched:
-                        combined_unmatched[key] = {
-                            "examples": [],
-                            "comment_ids": [],
-                            "match_type": item.get("match_type"),
-                            "matched": item.get("matched"),
-                            "unmatched": item.get("unmatched"),
-                        }
-                    # Safely extend lists
-                    examples = item.get("examples", [])
-                    comment_ids = item.get("comment_ids", [])
-                    if examples:
-                        combined_unmatched[key]["examples"].extend(examples)
-                    if comment_ids:
-                        combined_unmatched[key]["comment_ids"].extend(comment_ids)
-        else:
-            # For other fields, use simple structure
-            combined_unmatched = defaultdict(lambda: {"examples": [], "comment_ids": []})
-            for result in all_results:
-                for item in result["unmatched_items"]:
-                    combined_unmatched[item["item"]]["examples"].extend(item.get("examples", []))
-                    combined_unmatched[item["item"]]["comment_ids"].extend(
-                        item.get("comment_ids", [])
-                    )
+        # Combine results from all months using the same logic as command line tool
+        combined_unmatched = defaultdict(list)
+        for result in all_results:
+            for item, file_infos in result.items():
+                combined_unmatched[item].extend(file_infos)
 
         # Convert to response format
         unmatched_items = []
-        # Sort alphabetically by value, then by count descending
-        sorted_items = sorted(
-            combined_unmatched.items(), key=lambda x: (x[0].lower(), -len(x[1]["examples"]))
-        )[: request.limit]
+        # Sort alphabetically by value, then by count descending (same as command line tool)
+        sorted_items = sorted(combined_unmatched.items(), key=lambda x: (x[0].lower(), -len(x[1])))[
+            : request.limit
+        ]
 
-        for original_text, data in sorted_items:
-            # Deduplicate examples and comment_ids and limit to 5
-            examples = data.get("examples", [])
-            comment_ids = data.get("comment_ids", [])
-            unique_examples = list(set(examples))[:5] if examples else []
+        for original_text, file_infos in sorted_items:
+            # Extract comment IDs and examples from file_infos (same as command line tool)
+            comment_ids = [
+                info.get("comment_id", "") for info in file_infos if info.get("comment_id")
+            ]
+            examples = [info.get("file", "") for info in file_infos]
+
+            # Deduplicate and limit to 5 (same as command line tool)
             unique_comment_ids = list(set(comment_ids))[:5] if comment_ids else []
+            unique_examples = list(set(examples))[:5] if examples else []
 
-            if request.field == "brush":
-                # For brush field, include detailed structure
-                unmatched_items.append(
-                    UnmatchedItem(
-                        item=original_text,
-                        count=len(examples) if examples else 0,
-                        examples=unique_examples,
-                        comment_ids=unique_comment_ids,
-                        match_type=data.get("match_type"),
-                        matched=data.get("matched"),
-                        unmatched=data.get("unmatched"),
-                    )
+            unmatched_items.append(
+                UnmatchedItem(
+                    item=original_text,
+                    count=len(file_infos),
+                    examples=unique_examples,
+                    comment_ids=unique_comment_ids,
                 )
-            else:
-                # For other fields, use simple structure
-                unmatched_items.append(
-                    UnmatchedItem(
-                        item=original_text,
-                        count=len(examples) if examples else 0,
-                        examples=unique_examples,
-                        comment_ids=unique_comment_ids,
-                    )
-                )
+            )
 
         total_unmatched = len(combined_unmatched)
         logger.info(f"Analysis complete. Found {total_unmatched} unmatched items across all months")
