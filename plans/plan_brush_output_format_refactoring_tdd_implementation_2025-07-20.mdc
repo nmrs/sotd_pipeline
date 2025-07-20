@@ -1,7 +1,7 @@
 # Brush Output Format Refactoring - TDD Implementation Plan
 
 **Date**: 2025-07-20  
-**Status**: IN PROGRESS - PHASE 1 & 2 COMPLETE  
+**Status**: IN PROGRESS - PHASE 1, 2, 3 & CUSTOM KNOT DETECTION COMPLETE  
 **Type**: Data Format Refactoring  
 **Priority**: HIGH  
 **Template**: TDD Project Planning  
@@ -13,7 +13,7 @@ This plan implements the brush output format refactoring specified in `plans/spe
 ## Session Notes
 
 ### 2025-07-20 Session 1: Core Implementation Complete
-**Status**: Phase 1 and Phase 2 COMPLETE
+**Status**: Phase 1, Phase 2, Phase 3, and Custom Knot Detection COMPLETE
 
 **Completed Work**:
 - ✅ **Phase 1.1**: Updated Brush Matcher Output Structure
@@ -30,14 +30,28 @@ This plan implements the brush output format refactoring specified in `plans/spe
   - Performance validation and data integrity preservation
   - All tests passing with new format
 
+- ✅ **Phase 3**: Downstream Phase Updates COMPLETE
+  - Updated enrich phase to work with new brush format
+  - Updated all brush specialized aggregators to use consistent handle/knot sections
+  - Updated report phase to work with new aggregated data
+  - All downstream phases working correctly with new format
+
+- ✅ **Custom Knot Detection**: Enhanced Brush Enricher COMPLETE
+  - Implemented custom knot detection when fiber/size differs from catalog
+  - Used enriched-as-canonical approach for better auditability
+  - Updated knot maker aggregator to skip custom knots (unknown actual maker)
+  - Added comprehensive tests for custom knot detection and aggregation
+  - Much simpler implementation with complete audit trail preservation
+
 **Key Achievements**:
 - All functional requirements (FR-1 through FR-6) implemented and tested
-- Non-functional requirements NFR-1 and NFR-2 validated
+- Non-functional requirements NFR-1, NFR-2, and NFR-3 validated
 - Comprehensive test coverage with 12 test cases
 - Performance validation completed
 - Strategy attribution working correctly for all brush types
+- Custom knot detection working with accurate aggregation statistics
 
-**Next Steps**: Phase 3 (Downstream Phase Updates) - validate enrich, aggregate, and report phases work with new format
+**Next Steps**: Phase 4 (WebUI Updates) - update TypeScript interfaces and data transformation for new format
 
 ## Problem Statement
 
@@ -504,6 +518,49 @@ export interface BrushMatcherOutput {
   - Added comprehensive tests for custom knot detection (4 new tests)
 - **Results**: All 67 brush-related tests passing (37 enricher, 4 aggregate, 25 report tests)
 - **Example**: "Simpson Chubby 2 28mm Boar" (catalog: 27mm Badger) → custom knot with knot.brand=None, knot.model=None
+
+### Session 4 (2025-07-20)
+- **MAJOR ARCHITECTURE IMPROVEMENT**: Simplified custom knot detection using enriched-as-canonical approach
+- **Problem Identified**: Complex data structure modification was unnecessary and reduced auditability
+- **Solution**: Use enriched block as canonical source for aggregation while preserving complete audit trail
+- **Implementation**:
+  - Removed complex brush structure modification logic from enrich registry
+  - Brush enricher always creates enriched data (even when no user override)
+  - Aggregators use existing fallback pattern: `matched.*` first, then `enriched.*`
+  - Updated knot maker aggregator to skip custom knots (unknown actual maker)
+  - Added test to verify custom knots are properly excluded from knot maker aggregation
+- **Benefits Achieved**:
+  - ✅ Complete audit trail preserved (`matched` = original factory data, `enriched` = user data)
+  - ✅ Simpler code with no special cases needed
+  - ✅ Aggregators work seamlessly with factory and custom knots
+  - ✅ No data structure modification needed
+  - ✅ Accurate statistics: custom knots excluded from knot maker aggregation
+- **Example Data Structure**:
+  ```json
+  {
+    "brush": {
+      "matched": {
+        "knot": {
+          "brand": "Simpson",        // Original factory
+          "fiber": "Badger",         // Original factory
+          "knot_size_mm": 27.0       // Original factory
+        }
+      },
+      "enriched": {
+        "fiber": "Boar",             // User's actual fiber
+        "knot_size_mm": 28.0,        // User's actual size
+        "_custom_knot": true,        // Custom knot detected
+        "_custom_knot_reason": ["fiber_mismatch:Badger->Boar", "size_mismatch:27.0->28.0"]
+      }
+    }
+  }
+  ```
+- **Aggregation Behavior**:
+  - Fiber Aggregation: Uses `enriched.fiber` (Boar) ✅
+  - Knot Size Aggregation: Uses `enriched.knot_size_mm` (28.0) ✅
+  - Knot Maker Aggregation: Skips record (unknown actual maker) ✅
+  - Handle Maker Aggregation: Uses `matched.handle.brand` (unaffected) ✅
+- **Results**: All 67 brush-related tests passing, much simpler implementation with better auditability
 
 ## Conclusion
 
