@@ -80,8 +80,18 @@ webui/playwright-report/
 webui/playwright-report-*/
 webui/.last-run.json
 webui/test-results/.last-run.json
+# Additional test artifacts and debug files
+webui/playwright-auto.log
+webui/debug-screenshot.png
+webui/debug-screenshot-*.png
+webui/*.debug.png
+webui/*.debug.jpg
+webui/*.debug.jpeg
+webui/test_brush_debug.js
+webui/test_*.js
+webui/debug_*.js
+webui/*_debug.js
 # WebUI server management files
 webui/.pids/
 webui/.pids/*.pid
 webui/.pids/*.log
-webui/test_brush_debug.js
