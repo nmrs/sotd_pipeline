@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel, Field
 
 # Create router for brush split endpoints
 router = APIRouter(prefix="/api/brush-splits", tags=["brush-splits"])
@@ -176,6 +177,71 @@ class BrushSplitStatistics:
             self.validation_percentage = (self.validated / self.total) * 100
         if self.validated > 0:
             self.correction_percentage = (self.corrected / self.validated) * 100
+
+
+# Pydantic models for API request/response validation
+class BrushSplitOccurrenceModel(BaseModel):
+    """Pydantic model for brush split occurrence."""
+
+    file: str = Field(..., description="File containing the occurrence")
+    comment_ids: List[str] = Field(default_factory=list, description="List of comment IDs")
+
+
+class BrushSplitModel(BaseModel):
+    """Pydantic model for brush split data."""
+
+    original: str = Field(..., description="Original brush string")
+    handle: Optional[str] = Field(None, description="Handle component")
+    knot: str = Field(..., description="Knot component")
+    validated: bool = Field(False, description="Whether this split has been validated")
+    corrected: bool = Field(False, description="Whether this split was corrected")
+    validated_at: Optional[str] = Field(None, description="ISO timestamp of validation")
+    system_handle: Optional[str] = Field(None, description="System-generated handle")
+    system_knot: Optional[str] = Field(None, description="System-generated knot")
+    system_confidence: Optional[str] = Field(None, description="System confidence level")
+    system_reasoning: Optional[str] = Field(None, description="System reasoning")
+    occurrences: List[BrushSplitOccurrenceModel] = Field(
+        default_factory=list, description="List of occurrences"
+    )
+
+
+class SaveSplitsRequest(BaseModel):
+    """Request model for saving brush splits."""
+
+    brush_splits: List[BrushSplitModel] = Field(..., description="List of brush splits to save")
+
+
+class SaveSplitsResponse(BaseModel):
+    """Response model for saving brush splits."""
+
+    success: bool = Field(..., description="Whether the save operation was successful")
+    message: str = Field(..., description="Human-readable message")
+    saved_count: int = Field(..., description="Number of splits saved")
+
+
+class LoadResponse(BaseModel):
+    """Response model for loading brush splits."""
+
+    brush_splits: List[BrushSplitModel] = Field(..., description="List of brush splits")
+    statistics: Dict[str, Any] = Field(..., description="Validation statistics")
+
+
+class YAMLResponse(BaseModel):
+    """Response model for YAML loading."""
+
+    brush_splits: List[BrushSplitModel] = Field(..., description="List of validated splits")
+    file_info: Dict[str, Any] = Field(..., description="File information")
+
+
+class StatisticsResponse(BaseModel):
+    """Response model for statistics."""
+
+    total: int = Field(..., description="Total number of splits")
+    validated: int = Field(..., description="Number of validated splits")
+    corrected: int = Field(..., description="Number of corrected splits")
+    validation_percentage: float = Field(..., description="Validation percentage")
+    correction_percentage: float = Field(..., description="Correction percentage")
+    split_types: Dict[str, int] = Field(..., description="Breakdown by split type")
 
 
 class BrushSplitValidator:
@@ -395,9 +461,19 @@ class BrushSplitValidator:
 validator = BrushSplitValidator()
 
 
-@router.get("/load")
+@router.get("/load", response_model=LoadResponse, summary="Load brush splits from selected months")
 async def load_brush_splits(months: List[str] = Query(..., description="Months to load data from")):
-    """Load brush strings from selected months."""
+    """Load brush strings from selected months.
+
+    Args:
+        months: List of months in YYYY-MM format to load data from
+
+    Returns:
+        LoadResponse containing brush splits and statistics
+
+    Raises:
+        HTTPException: If no months specified or data loading fails
+    """
     try:
         if not months:
             raise HTTPException(status_code=400, detail="No months specified")
@@ -490,11 +566,30 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
                 )
                 splits.append(split)
 
-        # Calculate statistics
+        # Calculate statistics with split type breakdown
         stats = BrushSplitStatistics()
         stats.total = len(splits)
         stats.validated = sum(1 for s in splits if s.validated)
         stats.corrected = sum(1 for s in splits if s.corrected)
+
+        # Calculate split type breakdown
+        for split in splits:
+            if split.handle is None:
+                stats.split_types["no_split"] += 1
+            else:
+                # Determine split type based on confidence calculation
+                confidence, reasoning = validator.calculate_confidence(
+                    split.original, split.handle, split.knot
+                )
+                if "delimiter" in reasoning.lower():
+                    stats.split_types["delimiter"] += 1
+                elif "fiber" in reasoning.lower():
+                    stats.split_types["fiber_hint"] += 1
+                elif "brand" in reasoning.lower():
+                    stats.split_types["brand_context"] += 1
+                else:
+                    stats.split_types["no_split"] += 1
+
         stats.calculate_percentages()
 
         return {
@@ -508,9 +603,18 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/yaml")
+@router.get(
+    "/yaml", response_model=YAMLResponse, summary="Load existing validated splits from YAML"
+)
 async def load_yaml():
-    """Load existing validated splits from YAML."""
+    """Load existing validated splits from YAML file.
+
+    Returns:
+        YAMLResponse containing validated splits and file information
+
+    Raises:
+        HTTPException: If YAML loading fails
+    """
     try:
         validator.load_validated_splits()
 
@@ -531,14 +635,27 @@ async def load_yaml():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/save")
-async def save_splits(data: dict):
-    """Save validated splits to YAML."""
-    try:
-        if not data or "brush_splits" not in data:
-            raise HTTPException(status_code=400, detail="Invalid request data")
+@router.post("/save", response_model=SaveSplitsResponse, summary="Save validated splits to YAML")
+async def save_splits(data: SaveSplitsRequest):
+    """Save validated splits to YAML file.
 
-        splits = [BrushSplit.from_dict(split_data) for split_data in data["brush_splits"]]
+    Args:
+        data: SaveSplitsRequest containing brush splits to save
+
+    Returns:
+        SaveSplitsResponse with save operation results
+
+    Raises:
+        HTTPException: If save operation fails
+    """
+    try:
+        # Convert Pydantic models to BrushSplit objects
+        splits = []
+        for split_model in data.brush_splits:
+            # Convert Pydantic model to dict, then to BrushSplit
+            split_dict = split_model.model_dump()
+            split = BrushSplit.from_dict(split_dict)
+            splits.append(split)
 
         success = validator.save_validated_splits(splits)
         if success:
@@ -556,9 +673,16 @@ async def save_splits(data: dict):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/statistics")
+@router.get("/statistics", response_model=StatisticsResponse, summary="Get validation statistics")
 async def get_statistics():
-    """Get validation statistics."""
+    """Get validation statistics for all validated splits.
+
+    Returns:
+        StatisticsResponse containing validation progress and split type breakdown
+
+    Raises:
+        HTTPException: If statistics calculation fails
+    """
     try:
         validator.load_validated_splits()
 
@@ -566,6 +690,25 @@ async def get_statistics():
         stats.total = len(validator.validated_splits)
         stats.validated = sum(1 for s in validator.validated_splits.values() if s.validated)
         stats.corrected = sum(1 for s in validator.validated_splits.values() if s.corrected)
+
+        # Calculate split type breakdown for validated splits
+        for split in validator.validated_splits.values():
+            if split.handle is None:
+                stats.split_types["no_split"] += 1
+            else:
+                # Determine split type based on confidence calculation
+                confidence, reasoning = validator.calculate_confidence(
+                    split.original, split.handle, split.knot
+                )
+                if "delimiter" in reasoning.lower():
+                    stats.split_types["delimiter"] += 1
+                elif "fiber" in reasoning.lower():
+                    stats.split_types["fiber_hint"] += 1
+                elif "brand" in reasoning.lower():
+                    stats.split_types["brand_context"] += 1
+                else:
+                    stats.split_types["no_split"] += 1
+
         stats.calculate_percentages()
 
         return stats.to_dict()
