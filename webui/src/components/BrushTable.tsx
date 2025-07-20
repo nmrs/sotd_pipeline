@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import VirtualizedTable from './VirtualizedTable';
+import { VirtualizedTable } from './VirtualizedTable';
 import FilteredEntryCheckbox from './FilteredEntryCheckbox';
 import { BrushData } from '../utils/brushDataTransformer';
 
@@ -7,8 +7,8 @@ export interface BrushTableProps {
     items: BrushData[];
     onBrushFilter: (itemName: string, isFiltered: boolean) => void;
     onComponentFilter: (componentName: string, isFiltered: boolean) => void;
-    filteredStatus: Record<string, boolean>;
-    pendingChanges: Record<string, boolean>;
+    filteredStatus?: Record<string, boolean>;
+    pendingChanges?: Record<string, boolean>;
     columnWidths: {
         filtered: number;
         brush: number;
@@ -23,7 +23,7 @@ export interface BrushTableProps {
 }
 
 // Flatten brush data for VirtualizedTable while preserving component information
-const flattenBrushData = (items: BrushData[], filteredStatus: Record<string, boolean>): Array<{
+const flattenBrushData = (items: BrushData[], filteredStatus: Record<string, boolean> = {}): Array<{
     main: BrushData['main'];
     components: BrushData['components'];
     type: 'main' | 'handle' | 'knot';
@@ -38,7 +38,7 @@ const flattenBrushData = (items: BrushData[], filteredStatus: Record<string, boo
         isParentFiltered?: boolean;
     }> = [];
 
-    items.forEach(item => {
+    items.forEach((item, index) => {
         const isMainFiltered = filteredStatus[item.main.text] || false;
 
         // Add main brush row
@@ -76,8 +76,8 @@ const BrushTable: React.FC<BrushTableProps> = ({
     items,
     onBrushFilter,
     onComponentFilter,
-    filteredStatus,
-    pendingChanges,
+    filteredStatus = {},
+    pendingChanges = {},
     columnWidths,
     onCommentClick,
     commentLoading = false
@@ -102,7 +102,6 @@ const BrushTable: React.FC<BrushTableProps> = ({
                     const hasPendingChange = item.main.text in pendingChanges;
                     const pendingValue = pendingChanges[item.main.text];
                     const displayValue = hasPendingChange ? pendingValue : isCurrentlyFiltered;
-                    console.log('Main brush:', item.main.text, 'isCurrentlyFiltered:', isCurrentlyFiltered, 'displayValue:', displayValue, 'filteredStatus keys:', Object.keys(filteredStatus));
 
                     return (
                         <FilteredEntryCheckbox
@@ -110,14 +109,13 @@ const BrushTable: React.FC<BrushTableProps> = ({
                             commentIds={item.main.comment_ids}
                             isFiltered={displayValue}
                             onStatusChange={(isFiltered) => onBrushFilter(item.main.text, isFiltered)}
+                            uniqueId="main"
                         />
                     );
                 } else if (item.type === 'handle' && item.components.handle) {
                     // Hide checkbox if parent is filtered
                     const isMainFiltered = filteredStatus[item.main.text] || false;
-                    console.log('Handle checkbox check:', item.components.handle.text, 'main.text:', item.main.text, 'isMainFiltered:', isMainFiltered, 'filteredStatus:', filteredStatus);
                     if (isMainFiltered) {
-                        console.log('Hiding handle checkbox for:', item.components.handle.text);
                         return <div style={{ width: '100%', height: '100%' }}></div>;
                     }
 
@@ -132,14 +130,13 @@ const BrushTable: React.FC<BrushTableProps> = ({
                             commentIds={item.main.comment_ids}
                             isFiltered={displayValue}
                             onStatusChange={(isFiltered) => onComponentFilter(item.components.handle.text, isFiltered)}
+                            uniqueId="handle"
                         />
                     );
                 } else if (item.type === 'knot' && item.components.knot) {
                     // Hide checkbox if parent is filtered
                     const isMainFiltered = filteredStatus[item.main.text] || false;
-                    console.log('Knot checkbox check:', item.components.knot.text, 'main.text:', item.main.text, 'isMainFiltered:', isMainFiltered, 'filteredStatus:', filteredStatus);
                     if (isMainFiltered) {
-                        console.log('Hiding knot checkbox for:', item.components.knot.text);
                         return <div style={{ width: '100%', height: '100%' }}></div>;
                     }
 
@@ -154,6 +151,7 @@ const BrushTable: React.FC<BrushTableProps> = ({
                             commentIds={item.main.comment_ids}
                             isFiltered={displayValue}
                             onStatusChange={(isFiltered) => onComponentFilter(item.components.knot.text, isFiltered)}
+                            uniqueId="knot"
                         />
                     );
                 }

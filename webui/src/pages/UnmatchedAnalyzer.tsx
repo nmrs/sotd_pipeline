@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { analyzeUnmatched, UnmatchedAnalysisResult, handleApiError, runMatchPhase, MatchPhaseRequest, getCommentDetail, CommentDetail } from '../services/api';
 import MonthSelector from '../components/MonthSelector';
 import LoadingSpinner from '../components/LoadingSpinner';
-import VirtualizedTable from '../components/VirtualizedTable';
+import { VirtualizedTable } from '../components/VirtualizedTable';
 import PerformanceMonitor from '../components/PerformanceMonitor';
 import CommentModal from '../components/CommentModal';
 import BrushTable from '../components/BrushTable';
@@ -153,29 +153,32 @@ const UnmatchedAnalyzer: React.FC = () => {
 
     // Transform API response data to BrushTable format
     const transformApiDataToBrushTable = (items: any[]): BrushData[] => {
-        console.log('Original API items:', items.map(item => item.item));
-        const result = items.map(item => ({
-            main: {
-                text: item.item,
-                count: item.count,
-                comment_ids: item.comment_ids || [],
-                examples: item.examples || [],
-                status: 'Unmatched' as const
-            },
-            components: {
-                handle: item.unmatched?.handle ? {
-                    text: item.unmatched.handle.text || item.item,
-                    status: 'Unmatched' as const,
-                    pattern: item.unmatched.handle.pattern
-                } : undefined,
-                knot: item.unmatched?.knot ? {
-                    text: item.unmatched.knot.text || item.item,
-                    status: 'Unmatched' as const,
-                    pattern: item.unmatched.knot.pattern
-                } : undefined
-            }
-        }));
-        console.log('Transformed brush names:', result.map(item => item.main.text));
+        const result = items.map(item => {
+            const transformed = {
+                main: {
+                    text: item.item,
+                    count: item.count,
+                    comment_ids: item.comment_ids || [],
+                    examples: item.examples || [],
+                    status: 'Unmatched' as const
+                },
+                components: {
+                    handle: item.unmatched?.handle ? {
+                        text: item.unmatched.handle.text,
+                        status: 'Unmatched' as const,
+                        pattern: item.unmatched.handle.pattern
+                    } : undefined,
+                    knot: item.unmatched?.knot ? {
+                        text: item.unmatched.knot.text,
+                        status: 'Unmatched' as const,
+                        pattern: item.unmatched.knot.pattern
+                    } : undefined
+                }
+            };
+
+            return transformed;
+        });
+
         return result;
     };
 
@@ -183,7 +186,6 @@ const UnmatchedAnalyzer: React.FC = () => {
     const transformedBrushData = useMemo(() => {
         if (selectedField === 'brush' && searchSort.filteredAndSortedItems) {
             const data = transformApiDataToBrushTable(searchSort.filteredAndSortedItems as any[]);
-            console.log('Transformed brush data:', data.map(item => ({ main: item.main.text, components: item.components })));
             return data;
         }
         return [];

@@ -363,12 +363,22 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
             unique_comment_ids = list(set(comment_ids))[:5] if comment_ids else []
             unique_examples = list(set(examples))[:5] if examples else []
 
+            # Extract unmatched components data for brush field
+            unmatched_components = None
+            if request.field == "brush" and file_infos:
+                # Check if any file_info has unmatched_components
+                for file_info in file_infos:
+                    if isinstance(file_info, dict) and "unmatched_components" in file_info:
+                        unmatched_components = file_info["unmatched_components"]
+                        break
+
             unmatched_items.append(
                 UnmatchedItem(
                     item=original_text,
                     count=len(file_infos),
                     examples=unique_examples,
                     comment_ids=unique_comment_ids,
+                    unmatched=unmatched_components,
                 )
             )
 

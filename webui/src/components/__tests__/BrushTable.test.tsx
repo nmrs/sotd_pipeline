@@ -3,21 +3,46 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import BrushTable from '../BrushTable';
 import { BrushData } from '../../utils/brushDataTransformer';
 
-// Mock the FilteredEntryCheckbox component
-jest.mock('../FilteredEntryCheckbox', () => {
-    return function MockFilteredEntryCheckbox(props: any) {
+// Mock the VirtualizedTable component (named export)
+jest.mock('../VirtualizedTable', () => ({
+    __esModule: true,
+    VirtualizedTable: function MockVirtualizedTable(props: any) {
         return (
-            <div data-testid={`checkbox-${props.itemName}`}>
+            <div data-testid="virtualized-table" style={{ height: props.height }}>
+                {props.data?.map((item: any, index: any) => (
+                    <div key={index} data-testid={`table-row-${index}`}>
+                        {props.columns?.map((column: any) => (
+                            <div key={column.key} data-testid={`cell-${column.key}-${index}`}>
+                                {column.render ? column.render(item) : item[column.key]}
+                            </div>
+                        ))}
+                    </div>
+                ))}
+            </div>
+        );
+    }
+}));
+
+// Mock the FilteredEntryCheckbox component
+jest.mock('../FilteredEntryCheckbox', () => ({
+    __esModule: true,
+    default: function MockFilteredEntryCheckbox(props: any) {
+        // Create unique test ID to match the new format
+        const testId = props.uniqueId ? `checkbox-${props.itemName}-${props.uniqueId}` : `checkbox-${props.itemName}`;
+        const inputTestId = props.uniqueId ? `checkbox-input-${props.itemName}-${props.uniqueId}` : `checkbox-input-${props.itemName}`;
+
+        return (
+            <div data-testid={testId}>
                 <input
                     type="checkbox"
                     checked={props.isFiltered}
                     onChange={(e: any) => props.onStatusChange?.(e.target.checked)}
-                    data-testid={`checkbox-input-${props.itemName}`}
+                    data-testid={inputTestId}
                 />
             </div>
         );
-    };
-});
+    }
+}));
 
 const mockBrushData: BrushData[] = [
     {
@@ -74,12 +99,12 @@ describe('BrushTable', () => {
         );
 
         // Check that the main brush checkbox is rendered
-        expect(screen.getByTestId('checkbox-Test Brush')).toBeInTheDocument();
-        expect(screen.getByTestId('checkbox-input-Test Brush')).toBeInTheDocument();
+        expect(screen.getByTestId('checkbox-Test Brush-main')).toBeInTheDocument();
+        expect(screen.getByTestId('checkbox-input-Test Brush-main')).toBeInTheDocument();
 
         // Check that component checkboxes are rendered
-        expect(screen.getByTestId('checkbox-Test Handle')).toBeInTheDocument();
-        expect(screen.getByTestId('checkbox-Test Knot')).toBeInTheDocument();
+        expect(screen.getByTestId('checkbox-Test Handle-handle')).toBeInTheDocument();
+        expect(screen.getByTestId('checkbox-Test Knot-knot')).toBeInTheDocument();
     });
 
     test('should pass correct isFiltered prop to checkboxes', () => {
@@ -101,15 +126,42 @@ describe('BrushTable', () => {
         );
 
         // Check that the main brush checkbox is checked
-        const mainCheckbox = screen.getByTestId('checkbox-input-Test Brush') as HTMLInputElement;
+        const mainCheckbox = screen.getByTestId('checkbox-input-Test Brush-main') as HTMLInputElement;
         expect(mainCheckbox.checked).toBe(true);
 
-        // Check that handle checkbox is unchecked
-        const handleCheckbox = screen.getByTestId('checkbox-input-Test Handle') as HTMLInputElement;
+        // When parent is filtered, component checkboxes should be hidden (not rendered)
+        // So we shouldn't expect to find them
+        expect(screen.queryByTestId('checkbox-input-Test Handle-handle')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('checkbox-input-Test Knot-knot')).not.toBeInTheDocument();
+    });
+
+    test('should show component checkboxes when parent is not filtered', () => {
+        const filteredStatus = {
+            'Test Brush': false,
+            'Test Handle': false,
+            'Test Knot': true
+        };
+
+        render(
+            <BrushTable
+                items={mockBrushData}
+                onBrushFilter={mockOnBrushFilter}
+                onComponentFilter={mockOnComponentFilter}
+                filteredStatus={filteredStatus}
+                pendingChanges={{}}
+                columnWidths={mockColumnWidths}
+            />
+        );
+
+        // Check that the main brush checkbox is unchecked
+        const mainCheckbox = screen.getByTestId('checkbox-input-Test Brush-main') as HTMLInputElement;
+        expect(mainCheckbox.checked).toBe(false);
+
+        // When parent is not filtered, component checkboxes should be visible
+        const handleCheckbox = screen.getByTestId('checkbox-input-Test Handle-handle') as HTMLInputElement;
         expect(handleCheckbox.checked).toBe(false);
 
-        // Check that knot checkbox is checked
-        const knotCheckbox = screen.getByTestId('checkbox-input-Test Knot') as HTMLInputElement;
+        const knotCheckbox = screen.getByTestId('checkbox-input-Test Knot-knot') as HTMLInputElement;
         expect(knotCheckbox.checked).toBe(true);
     });
 
@@ -125,7 +177,7 @@ describe('BrushTable', () => {
             />
         );
 
-        const mainCheckbox = screen.getByTestId('checkbox-input-Test Brush');
+        const mainCheckbox = screen.getByTestId('checkbox-input-Test Brush-main');
         fireEvent.click(mainCheckbox);
 
         expect(mockOnBrushFilter).toHaveBeenCalledWith('Test Brush', true);
@@ -143,9 +195,61 @@ describe('BrushTable', () => {
             />
         );
 
-        const handleCheckbox = screen.getByTestId('checkbox-input-Test Handle');
+        const handleCheckbox = screen.getByTestId('checkbox-input-Test Handle-handle');
         fireEvent.click(handleCheckbox);
 
         expect(mockOnComponentFilter).toHaveBeenCalledWith('Test Handle', true);
+    });
+
+    test('should not render component checkboxes when parent is filtered', () => {
+        const filteredStatus = {
+            'Test Brush': true
+        };
+
+        render(
+            <BrushTable
+                items={mockBrushData}
+                onBrushFilter={mockOnBrushFilter}
+                onComponentFilter={mockOnComponentFilter}
+                filteredStatus={filteredStatus}
+                pendingChanges={{}}
+                columnWidths={mockColumnWidths}
+            />
+        );
+
+        // Main checkbox should be visible and checked
+        expect(screen.getByTestId('checkbox-input-Test Brush-main')).toBeInTheDocument();
+
+        // Component checkboxes should not be rendered when parent is filtered
+        expect(screen.queryByTestId('checkbox-input-Test Handle-handle')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('checkbox-input-Test Knot-knot')).not.toBeInTheDocument();
+    });
+
+    test('should create subrows in flattened data', () => {
+        const { container } = render(
+            <BrushTable
+                items={mockBrushData}
+                onBrushFilter={mockOnBrushFilter}
+                onComponentFilter={mockOnComponentFilter}
+                filteredStatus={{}}
+                pendingChanges={{}}
+                columnWidths={mockColumnWidths}
+            />
+        );
+
+        // Check that we have 3 rows total (1 main + 1 handle + 1 knot)
+        const tableRows = container.querySelectorAll('[data-testid^="table-row-"]');
+        expect(tableRows).toHaveLength(3);
+
+        // Check that the subrows are rendered with proper indentation
+        const handleRow = container.querySelector('[data-testid="table-row-1"]');
+        const knotRow = container.querySelector('[data-testid="table-row-2"]');
+
+        expect(handleRow).toBeInTheDocument();
+        expect(knotRow).toBeInTheDocument();
+
+        // Check that handle and knot text are present
+        expect(screen.getByText('🔧 Handle: Test Handle')).toBeInTheDocument();
+        expect(screen.getByText('🧶 Knot: Test Knot')).toBeInTheDocument();
     });
 }); 

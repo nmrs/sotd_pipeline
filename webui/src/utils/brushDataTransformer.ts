@@ -201,6 +201,11 @@ function extractKnotComponent(matcherOutput: BrushMatcherOutput): ComponentData 
  * Validates required fields in brush matcher output
  */
 function validateMatcherOutput(matcherOutput: BrushMatcherOutput): void {
+    // Handle null/undefined input gracefully
+    if (!matcherOutput) {
+        throw new Error('Invalid matcher output: null or undefined');
+    }
+
     if (!matcherOutput.item || typeof matcherOutput.item !== 'string' || matcherOutput.item.trim() === '') {
         throw new Error('Invalid item value');
     }
@@ -225,40 +230,68 @@ function validateMatcherOutput(matcherOutput: BrushMatcherOutput): void {
  * @returns BrushData object suitable for BrushTable component
  * @throws Error if required fields are missing or invalid
  */
-export function transformBrushData(matcherOutput: BrushMatcherOutput): BrushData {
-    // Validate input
-    validateMatcherOutput(matcherOutput);
-
-    // Extract components
-    const handleComponent = extractHandleComponent(matcherOutput);
-    const knotComponent = extractKnotComponent(matcherOutput);
-
-    // Determine overall status
-    const overallStatus = determineBrushStatus(
-        handleComponent?.status,
-        knotComponent?.status,
-        matcherOutput.match_type
-    );
-
-    // Build components object
-    const components: BrushData['components'] = {};
-    if (handleComponent) {
-        components.handle = handleComponent;
-    }
-    if (knotComponent) {
-        components.knot = knotComponent;
+export function transformBrushData(matcherOutput: BrushMatcherOutput | null | undefined): BrushData {
+    // Handle null/undefined input gracefully
+    if (!matcherOutput) {
+        return {
+            main: {
+                text: '',
+                count: 0,
+                comment_ids: [],
+                examples: [],
+                status: 'Unmatched'
+            },
+            components: {}
+        };
     }
 
-    return {
-        main: {
-            text: matcherOutput.item,
-            count: matcherOutput.count,
-            comment_ids: matcherOutput.comment_ids,
-            examples: matcherOutput.examples,
-            status: overallStatus
-        },
-        components
-    };
+    try {
+        // Validate input
+        validateMatcherOutput(matcherOutput);
+
+        // Extract components
+        const handleComponent = extractHandleComponent(matcherOutput);
+        const knotComponent = extractKnotComponent(matcherOutput);
+
+        // Determine overall status
+        const overallStatus = determineBrushStatus(
+            handleComponent?.status,
+            knotComponent?.status,
+            matcherOutput.match_type
+        );
+
+        // Build components object
+        const components: BrushData['components'] = {};
+        if (handleComponent) {
+            components.handle = handleComponent;
+        }
+        if (knotComponent) {
+            components.knot = knotComponent;
+        }
+
+        return {
+            main: {
+                text: matcherOutput.item,
+                count: matcherOutput.count,
+                comment_ids: matcherOutput.comment_ids,
+                examples: matcherOutput.examples,
+                status: overallStatus
+            },
+            components
+        };
+    } catch (error) {
+        // Return default structure on validation errors
+        return {
+            main: {
+                text: matcherOutput.item || '',
+                count: matcherOutput.count || 0,
+                comment_ids: matcherOutput.comment_ids || [],
+                examples: matcherOutput.examples || [],
+                status: 'Unmatched'
+            },
+            components: {}
+        };
+    }
 }
 
 /**
