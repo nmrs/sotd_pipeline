@@ -433,11 +433,11 @@ class TestBrushSplitValidator:
         assert any(split.original == "Test2" for split in splits)
 
 
-class TestEnhancedBrushSplitStatistics:
-    """Test enhanced BrushSplitStatistics functionality."""
+class TestAdvancedBrushSplitStatistics:
+    """Test advanced BrushSplitStatistics functionality."""
 
-    def test_enhanced_statistics_creation(self):
-        """Test creating enhanced statistics."""
+    def test_advanced_statistics_creation(self):
+        """Test creating advanced statistics."""
         stats = BrushSplitStatistics()
         assert stats.split_types == {
             "delimiter": 0,
@@ -487,8 +487,8 @@ class TestEnhancedBrushSplitStatistics:
         assert stats.confidence_breakdown["high"] == 0
         assert stats.month_breakdown == {}
 
-    def test_enhanced_to_dict(self):
-        """Test converting enhanced statistics to dictionary."""
+    def test_advanced_to_dict(self):
+        """Test converting advanced statistics to dictionary."""
         stats = BrushSplitStatistics()
         stats.total = 100
         stats.validated = 50

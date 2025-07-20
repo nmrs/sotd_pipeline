@@ -25,8 +25,8 @@ from sotd.match.tools.utils.report_generator import (
 )
 
 
-class EnhancedAnalyzer(AnalysisTool):
-    """Enhanced analyzer for product matching performance."""
+class LegacyAnalyzer(AnalysisTool):
+    """Legacy analyzer for product matching performance."""
 
     def get_parser(self) -> BaseCLIParser:
         """Get CLI parser for enhanced analysis tool."""
@@ -95,14 +95,14 @@ class EnhancedAnalyzer(AnalysisTool):
 
 
 def get_parser() -> BaseCLIParser:
-    """Get CLI parser for enhanced analysis tool."""
-    analyzer = EnhancedAnalyzer()
+    """Get CLI parser for legacy analysis tool."""
+    analyzer = LegacyAnalyzer()
     return analyzer.get_parser()
 
 
 def run(args) -> None:
-    """Run the enhanced analysis tool."""
-    analyzer = EnhancedAnalyzer()
+    """Run the legacy analysis tool."""
+    analyzer = LegacyAnalyzer()
     analyzer.run(args)
 
 

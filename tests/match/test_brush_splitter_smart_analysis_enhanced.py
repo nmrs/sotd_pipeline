@@ -6,8 +6,8 @@ from sotd.match.brush_matching_strategies.known_brush_strategy import KnownBrush
 from sotd.match.brush_matching_strategies.other_brushes_strategy import OtherBrushMatchingStrategy
 
 
-class TestBrushSplitterSmartAnalysisEnhanced:
-    """Test enhanced smart analysis for medium-reliability delimiters."""
+class TestBrushSplitterSmartAnalysis:
+    """Test smart analysis for medium-reliability delimiters."""
 
     @pytest.fixture
     def brush_splitter(self):
@@ -97,9 +97,9 @@ class TestBrushSplitterSmartAnalysisEnhanced:
             }, f"Handle/knot mismatch for: {input_text}"
             assert delimiter_type == "smart_analysis", f"Wrong delimiter type for: {input_text}"
 
-    def test_minus_delimiter_enhanced_scoring(self, brush_splitter):
-        """Test that ' - ' delimiter uses enhanced scoring."""
-        # Enhanced scoring should prioritize handle vs knot based on content analysis
+    def test_minus_delimiter_advanced_scoring(self, brush_splitter):
+        """Test that ' - ' delimiter uses advanced scoring."""
+        # Advanced scoring should prioritize handle vs knot based on content analysis
         test_cases = [
             (
                 "Chisel & Hound - Rob's Finest - 25mm Synthetic",
@@ -181,8 +181,8 @@ class TestBrushSplitterSmartAnalysisEnhanced:
             assert knot.strip() == expected_knot, f"Knot mismatch for: {input_text}"
             assert delimiter_type == "smart_analysis", f"Wrong delimiter type for: {input_text}"
 
-    def test_enhanced_scoring_handle_indicators(self, brush_splitter):
-        """Test that enhanced scoring correctly identifies handle indicators."""
+    def test_advanced_scoring_handle_indicators(self, brush_splitter):
+        """Test that advanced scoring correctly identifies handle indicators."""
         # Test cases where handle indicators should score higher
         test_cases = [
             (
@@ -205,8 +205,8 @@ class TestBrushSplitterSmartAnalysisEnhanced:
             assert handle.strip() == expected_handle, f"Handle mismatch for: {input_text}"
             assert knot.strip() == expected_knot, f"Knot mismatch for: {input_text}"
 
-    def test_enhanced_scoring_knot_indicators(self, brush_splitter):
-        """Test that enhanced scoring correctly identifies knot indicators."""
+    def test_advanced_scoring_knot_indicators(self, brush_splitter):
+        """Test that advanced scoring correctly identifies knot indicators."""
         # Test cases where knot indicators should score lower as handle
         test_cases = [
             ("Elite + 26mm Badger", "Elite", "26mm Badger"),  # Size + fiber should be knot

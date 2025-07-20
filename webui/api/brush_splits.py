@@ -183,7 +183,7 @@ class BrushSplit:
 
 @dataclass
 class BrushSplitStatistics:
-    """Enhanced statistics for brush split validation progress."""
+    """Statistics for brush split validation progress."""
 
     total: int = 0
     validated: int = 0
@@ -355,7 +355,7 @@ class StatisticsResponse(BaseModel):
 
 
 class StatisticsCalculator:
-    """Enhanced statistics calculator for brush split validation."""
+    """Statistics calculator for brush split validation."""
 
     def __init__(self, validator: "BrushSplitValidator"):
         self.validator = validator
@@ -737,7 +737,7 @@ calculator = StatisticsCalculator(validator)
 
 @router.get("/load", response_model=LoadResponse, summary="Load brush splits from selected months")
 async def load_brush_splits(months: List[str] = Query(..., description="Months to load data from")):
-    """Load brush strings from selected months with enhanced data processing.
+    """Load brush strings from selected months with data processing.
 
     Args:
         months: List of months in YYYY-MM format to load data from
@@ -765,7 +765,7 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
             # Log but don't fail - this allows the endpoint to work even if YAML loading fails
             logger.warning(f"Non-critical error loading validated splits: {e}")
 
-        # Enhanced data processing for actual dataset sizes (~2,500 records per month)
+        # Data processing for actual dataset sizes (~2,500 records per month)
         brush_splits: Dict[str, Dict] = {}  # original -> split_data
         loaded_months = []
         failed_months = []
@@ -780,7 +780,7 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
                 continue
 
             try:
-                # Enhanced file reading with progress tracking
+                # File reading with progress tracking
                 logger.info(f"Loading data from {month}.json")
                 with open(file_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
@@ -841,7 +841,7 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
         # Always return 200, even if no months could be loaded
         # This allows the frontend to handle partial failures gracefully
 
-        # Convert to BrushSplit objects with enhanced processing
+        # Convert to BrushSplit objects with processing
         splits = []
         logger.info(f"Converting {len(brush_splits)} unique brush strings to BrushSplit objects")
 
@@ -879,7 +879,7 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
         logger.info(f"Calculating statistics for {len(splits)} brush splits")
         stats = calculator.calculate_comprehensive_statistics(splits, months)
 
-        # Enhanced response with processing information
+        # Response with processing information
         response_data = {
             "brush_splits": [split.to_dict() for split in splits],
             "statistics": stats.to_dict(),

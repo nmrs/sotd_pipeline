@@ -6,7 +6,7 @@ class FiberProcessor:
     """Fiber processing logic for brush matching."""
 
     def __init__(self):
-        """Initialize the enhanced fiber processor."""
+        """Initialize the fiber processor."""
         # Comprehensive fiber patterns for detection
         self._fiber_patterns = {
             "Synthetic": (
@@ -80,7 +80,7 @@ class FiberProcessor:
         return fiber_indices
 
     def extract_fiber_from_text(self, text: str) -> Optional[str]:
-        """Extract fiber type from text using enhanced patterns."""
+        """Extract fiber type from text using comprehensive patterns."""
         return self.match_fiber(text)
 
     def validate_fiber_strategy(self, fiber_strategy: str) -> bool:

@@ -126,9 +126,7 @@ class BrushSplitter:
             if delimiter in text:
                 # For " - " delimiter, be extra smart about brand aliases and logical grouping
                 if delimiter == " - ":
-                    return self._split_by_delimiter_smart_enhanced(
-                        text, delimiter, "smart_analysis"
-                    )
+                    return self._split_by_delimiter_smart(text, delimiter, "smart_analysis")
                 else:
                     return self._split_by_delimiter_smart(text, delimiter, "smart_analysis")
 
@@ -188,71 +186,7 @@ class BrushSplitter:
     def _split_by_delimiter_smart(
         self, text: str, delimiter: str, delimiter_type: str
     ) -> tuple[Optional[str], Optional[str], Optional[str]]:
-        """Smart splitting for ambiguous delimiters like 'w/' by analyzing content."""
-        # Find all occurrences of the delimiter
-        delimiter_positions = []
-        start = 0
-        while True:
-            pos = text.find(delimiter, start)
-            if pos == -1:
-                break
-            delimiter_positions.append(pos)
-            start = pos + len(delimiter)
-
-        if not delimiter_positions:
-            return None, None, None
-
-        # Try each split point and score the results
-        best_split = None
-        best_score_diff = -float("inf")
-
-        for pos in delimiter_positions:
-            part1 = text[:pos].strip()
-            part2 = text[pos + len(delimiter) :].strip()
-
-            if not part1 or not part2:
-                continue
-
-            # Score each part as both handle and knot
-            part1_handle_score = self._score_as_handle(part1)
-            part1_knot_score = self._score_as_knot(part1)
-            part2_handle_score = self._score_as_handle(part2)
-            part2_knot_score = self._score_as_knot(part2)
-
-            # Calculate the score difference for the best handle/knot assignment
-            if part1_handle_score > part2_handle_score and part2_knot_score > part1_knot_score:
-                # part1 is better handle, part2 is better knot
-                score_diff = (part1_handle_score - part2_handle_score) + (
-                    part2_knot_score - part1_knot_score
-                )
-                potential_split = (part1, part2, delimiter_type)
-            elif part2_handle_score > part1_handle_score and part1_knot_score > part2_knot_score:
-                # part2 is better handle, part1 is better knot
-                score_diff = (part2_handle_score - part1_handle_score) + (
-                    part1_knot_score - part2_knot_score
-                )
-                potential_split = (part2, part1, delimiter_type)
-            else:
-                # Fall back to handle score comparison (original logic)
-                if part1_handle_score > part2_handle_score:
-                    score_diff = part1_handle_score - part2_handle_score
-                    potential_split = (part1, part2, delimiter_type)
-                else:
-                    score_diff = part2_handle_score - part1_handle_score
-                    potential_split = (part2, part1, delimiter_type)
-
-            # Choose the split with the largest score difference
-            if score_diff > best_score_diff:
-                best_score_diff = score_diff
-                best_split = potential_split
-
-        return best_split if best_split else (None, None, None)
-
-    def _split_by_delimiter_smart_enhanced(
-        self, text: str, delimiter: str, delimiter_type: str
-    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
-        """Enhanced smart splitting for " - " delimiter that considers brand aliases and logical
-        grouping."""
+        """Smart splitting for ambiguous delimiters by analyzing content."""
         # Find all occurrences of the delimiter
         delimiter_positions = []
         start = 0
@@ -277,8 +211,8 @@ class BrushSplitter:
             if not part1 or not part2:
                 continue
 
-            # Check if part2 contains another delimiter
-            if " - " in part2:
+            # Check if part2 contains another delimiter (for " - " cases)
+            if delimiter == " - " and " - " in part2:
                 # This looks like "Brand - Alias - Size Fiber" or
                 # "Brand Handle - Size Fiber" pattern
                 sub_parts = part2.split(" - ", 1)
@@ -306,18 +240,50 @@ class BrushSplitter:
                             best_split = (combined_handle, size_fiber_part, delimiter_type)
             else:
                 # No second delimiter, check if part2 looks like a complete knot description
-                if self._looks_like_complete_knot(part2):
+                if delimiter == " - " and self._looks_like_complete_knot(part2):
                     # This looks like "Brand - Complete Knot Description"
                     score = self._score_split(part1, part2)
                     if score > best_score:
                         best_score = score
                         best_split = (part1, part2, delimiter_type)
+                else:
+                    # Regular smart analysis for other delimiters
+                    # Score each part as both handle and knot
+                    part1_handle_score = self._score_as_handle(part1)
+                    part1_knot_score = self._score_as_knot(part1)
+                    part2_handle_score = self._score_as_handle(part2)
+                    part2_knot_score = self._score_as_knot(part2)
 
-        # Return the best split found, or fall back to regular smart analysis
-        if best_split:
-            return best_split
-        else:
-            return self._split_by_delimiter_smart(text, delimiter, delimiter_type)
+                    # Calculate the score difference for the best handle/knot assignment
+                    if (
+                        part1_handle_score > part2_handle_score
+                        and part2_knot_score > part1_knot_score
+                    ):
+                        # part1 is better handle, part2 is better knot
+                        score = part1_handle_score + part2_knot_score
+                        potential_split = (part1, part2, delimiter_type)
+                    elif (
+                        part2_handle_score > part1_handle_score
+                        and part1_knot_score > part2_knot_score
+                    ):
+                        # part2 is better handle, part1 is better knot
+                        score = part2_handle_score + part1_knot_score
+                        potential_split = (part2, part1, delimiter_type)
+                    else:
+                        # Fall back to handle score comparison (original logic)
+                        if part1_handle_score > part2_handle_score:
+                            score = part1_handle_score
+                            potential_split = (part1, part2, delimiter_type)
+                        else:
+                            score = part2_handle_score
+                            potential_split = (part2, part1, delimiter_type)
+
+                    # Choose the split with the best score
+                    if score > best_score:
+                        best_score = score
+                        best_split = potential_split
+
+        return best_split if best_split else (None, None, None)
 
     def _score_split(self, handle: str, knot: str) -> float:
         """Score a potential handle/knot split."""

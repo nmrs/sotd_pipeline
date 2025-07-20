@@ -12,7 +12,7 @@ from sotd.match.tools.utils.cli_utils import BaseAnalysisCLI
 from sotd.cli_utils.base_parser import BaseCLIParser
 from sotd.match.tools.analyzers.unmatched_analyzer import UnmatchedAnalyzer
 from sotd.match.tools.analyzers.field_analyzer import FieldAnalyzer
-from sotd.match.tools.legacy.analyze_matched_enhanced import EnhancedAnalyzer
+from sotd.match.tools.legacy.analyze_matched_enhanced import LegacyAnalyzer
 
 
 class TestAnalysisToolsIntegration:
@@ -161,8 +161,8 @@ class TestAnalysisToolsIntegration:
         assert any(arg.dest == "pattern" for arg in parser._actions)
         assert any(arg.dest == "show_details" for arg in parser._actions)
 
-    def test_enhanced_analyzer_integration(self, tmp_path):
-        """Test EnhancedAnalyzer integration."""
+    def test_legacy_analyzer_integration(self, tmp_path):
+        """Test LegacyAnalyzer integration."""
         # Create test data
         out_dir = tmp_path / "data" / "matched"
         out_dir.mkdir(parents=True)
@@ -183,7 +183,7 @@ class TestAnalysisToolsIntegration:
         test_file.write_text(json.dumps(test_data))
 
         # Test analyzer
-        analyzer = EnhancedAnalyzer()
+        analyzer = LegacyAnalyzer()
         args = type(
             "Args",
             (),
