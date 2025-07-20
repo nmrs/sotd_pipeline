@@ -227,6 +227,10 @@ known_knots:
       patterns:
       - (declaration|\bdg\b).*\bb15\b
       - \bb15\b
+    B16:
+      patterns:
+      - (declaration|\bdg\b).*\bb16\b
+      - \bb16\b
   Oumo:
     Rorschach:
       fiber: Badger

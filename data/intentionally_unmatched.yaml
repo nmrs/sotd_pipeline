@@ -42,6 +42,12 @@ blade:
       source: user
     reason: garbage
 brush:
+  '>!REDACTED!<':
+    added_date: '2025-07-19'
+    comment_ids:
+    - file: 2025-06.json
+      id: mwl00zz
+      source: user
   Hands:
     added_date: '2025-07-19'
     comment_ids:

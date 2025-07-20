@@ -14,7 +14,7 @@ known_brushes:
       fiber: Synthetic
       patterns:
       - alpha.*outlaw
-    Aurora Grooming:
+  Aurora Grooming:
     default: Synthetic
     patterns:
     - aurora\s*grooming
@@ -212,6 +212,10 @@ known_brushes:
       patterns:
       - (declaration|\bdg\b).*\bb15\b
       - \bb15\b
+    B16:
+      patterns:
+      - (declaration|\bdg\b).*\bb16\b
+      - \bb16\b
   EldrormR Industries/Muninn Woodworks:
     BFM:
       # knot_size_mm: 50
@@ -810,6 +814,12 @@ known_brushes:
     - maor boar
 
 other_brushes:
+  AP Shave Co:
+    default: Synthetic
+    patterns:
+    - A\.? ?P\.? ?\s*shave\s*(co)?
+    - \bap\b
+    - \bapsc\b
   Chisel & Hound:
     default: Badger
     patterns:
@@ -820,3 +830,7 @@ other_brushes:
     default: Synthetic
     patterns:
     - gillette
+  Yaqi:
+    default: Synthetic
+    patterns:
+    - yaqi
