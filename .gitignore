@@ -84,3 +84,4 @@ webui/test-results/.last-run.json
 webui/.pids/
 webui/.pids/*.pid
 webui/.pids/*.log
+webui/test_brush_debug.js
