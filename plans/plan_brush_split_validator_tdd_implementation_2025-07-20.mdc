@@ -1,40 +1,115 @@
-# Brush Split Validator - TDD Implementation Plan
+# Brush Split Validator - TDD Implementation Plan (RESTART)
 
 ## 📘 Project Summary
 
-The Brush Split Validator is a web UI tool for validating and correcting brush string splits from the SOTD Pipeline. It provides a virtualized table interface for manual validation of brush splits, supporting inline editing, batch operations, and YAML output for AI model training. The tool integrates with existing brush matching algorithms and follows the established SOTD Pipeline patterns.
+**Date**: 2025-07-20  
+**Status**: 🔄 IN_PROGRESS - RESTARTING WITH STRICT TDD  
+**Approach**: Strict TDD - One test at a time, minimal implementation
 
-## 🧩 Component Steps
+The Brush Split Validator is broken and needs a complete restart with a proper TDD approach. We will build it incrementally, one test at a time, starting with the simplest possible functionality.
 
-### Phase 1: Core Data Infrastructure
-1. **✅ Brush Split Data Model** - Define TypeScript interfaces and Python data structures
-2. **✅ Brush String Loading** - API endpoint to load brush strings from matched data
-3. **✅ Split Validation Logic** - Core algorithms for confidence scoring and reasoning
-4. **✅ YAML File Management** - Load/save validated splits with proper structure
+## 🎯 TDD Methodology
 
-### Phase 2: Backend API Foundation
-5. **✅ API Endpoints** - REST endpoints for data loading and saving
-6. **✅ Statistics Calculation** - Progress tracking and validation metrics
-7. **Data Processing Pipeline** - Efficient handling of large datasets
-8. **✅ Error Handling** - Robust error management for file operations
+### Core Principles
+1. **Write ONE test first** - Never write multiple tests at once
+2. **Minimal implementation** - Only write code to make that ONE test pass
+3. **Incremental building** - Add one feature at a time
+4. **No premature optimization** - Keep it simple until proven necessary
+5. **Fail fast** - Let tests fail naturally, don't mask issues
 
-### Phase 3: Frontend Core Components
-9. **✅ Month Selector Integration** - Reuse existing month selection component
-10. **✅ Virtualized Table Foundation** - High-performance table with basic display
-11. **Inline Editing** - Editable handle/knot fields with validation
-12. **Confidence Display** - Visual indicators for split confidence levels
+### Implementation Pattern
+```
+1. Write ONE failing test
+2. Write minimal code to make test pass
+3. Refactor if needed (keep it simple)
+4. Write next test
+5. Repeat
+```
 
-### Phase 4: User Interface Features
-13. **Batch Operations** - Checkbox selection and bulk validation
-14. **Keyboard Shortcuts** - Navigation and quick validation shortcuts
-15. **Progress Tracking** - Statistics display and validation progress
-16. **Revalidation Mode** - Toggle for editing previously validated entries
+## 🧩 Component Steps (RESTARTED)
 
-### Phase 5: Integration and Polish
-17. **Route Integration** - Add to web UI navigation and routing
-18. **Performance Optimization** - Virtualization and large dataset handling
-19. **Testing Suite** - Comprehensive unit and integration tests
-20. **Documentation** - API docs and user guide
+### Phase 1: Foundation (Start Simple)
+
+#### Step 1.1: Basic Component Rendering ✅ COMPLETE
+**Test**: `BrushSplitValidator renders without crashing`
+- **Test File**: `webui/src/pages/__tests__/BrushSplitValidator.test.tsx`
+- **Implementation**: Minimal component that renders empty div
+- **Success Criteria**: Component renders without errors
+- **Status**: ✅ COMPLETE - 2025-07-20
+
+#### Step 1.2: Basic API Call ✅ COMPLETE
+**Test**: `BrushSplitValidator loads data when mounted`
+- **Test File**: `webui/src/pages/__tests__/BrushSplitValidator.test.tsx`
+- **Implementation**: Call API on mount, store data in state
+- **Success Criteria**: API called, data stored in state
+- **Status**: ✅ COMPLETE - 2025-07-20
+
+#### Step 1.3: Display Basic Data 🔄 IN_PROGRESS
+**Test**: `BrushSplitValidator displays brush strings`
+- **Test File**: `webui/src/pages/__tests__/BrushSplitValidator.test.tsx`
+- **Implementation**: Render brush strings in simple list
+- **Success Criteria**: Brush strings visible on screen
+- **Status**: 🔄 IN_PROGRESS - 2025-07-20
+
+### Phase 2: Core Functionality
+
+#### Step 2.1: Basic Table Structure
+**Test**: `BrushSplitValidator displays data in table format`
+- **Test File**: `webui/src/pages/__tests__/BrushSplitValidator.test.tsx`
+- **Implementation**: Simple table with columns for handle, knot, original
+- **Success Criteria**: Data displayed in table format
+
+#### Step 2.2: Basic Search Input
+**Test**: `BrushSplitValidator has search input field`
+- **Test File**: `webui/src/pages/__tests__/BrushSplitValidator.test.tsx`
+- **Implementation**: Add search input field
+- **Success Criteria**: Search input visible and functional
+
+#### Step 2.3: Search Functionality
+**Test**: `BrushSplitValidator filters data when search is used`
+- **Test File**: `webui/src/pages/__tests__/BrushSplitValidator.test.tsx`
+- **Implementation**: Filter data based on search input
+- **Success Criteria**: Data filters correctly when typing
+
+### Phase 3: Advanced Features
+
+#### Step 3.1: Row Selection
+**Test**: `BrushSplitValidator allows row selection`
+- **Test File**: `webui/src/pages/__tests__/BrushSplitValidator.test.tsx`
+- **Implementation**: Add checkboxes for row selection
+- **Success Criteria**: Rows can be selected/deselected
+
+#### Step 3.2: Inline Editing
+**Test**: `BrushSplitValidator allows editing handle field`
+- **Test File**: `webui/src/pages/__tests__/BrushSplitValidator.test.tsx`
+- **Implementation**: Click to edit handle field
+- **Success Criteria**: Handle field becomes editable on click
+
+#### Step 3.3: Save Individual Changes
+**Test**: `BrushSplitValidator saves individual changes`
+- **Test File**: `webui/src/pages/__tests__/BrushSplitValidator.test.tsx`
+- **Implementation**: Save button or auto-save for individual changes
+- **Success Criteria**: Changes are saved to backend
+
+### Phase 4: Polish and Integration
+
+#### Step 4.1: Loading States
+**Test**: `BrushSplitValidator shows loading state`
+- **Test File**: `webui/src/pages/__tests__/BrushSplitValidator.test.tsx`
+- **Implementation**: Show loading indicator while fetching data
+- **Success Criteria**: Loading state visible during API calls
+
+#### Step 4.2: Error Handling
+**Test**: `BrushSplitValidator handles API errors gracefully`
+- **Test File**: `webui/src/pages/__tests__/BrushSplitValidator.test.tsx`
+- **Implementation**: Display error messages for API failures
+- **Success Criteria**: Errors displayed clearly to user
+
+#### Step 4.3: Navigation Integration
+**Test**: `BrushSplitValidator integrates with navigation`
+- **Test File**: `webui/src/pages/__tests__/BrushSplitValidator.test.tsx`
+- **Implementation**: Add to navigation menu
+- **Success Criteria**: Accessible via navigation
 
 ## 🔁 Implementation Prompts
 
@@ -742,3 +817,72 @@ Ready to proceed with Step 14: Advanced Features and Polish
 
 ### Next Steps
 Begin with Phase 1: Search and Filtering implementation
+
+---
+
+## 🔄 RESTART SECTION - 2025-07-20
+
+### Why We Restarted
+The original implementation became too complex and had multiple issues:
+- React hooks violations causing test failures
+- Complex component structure that was hard to debug
+- Tests that were failing due to over-engineering
+- Need for a simpler, more incremental approach
+
+### New TDD Approach
+Following strict TDD principles:
+1. **ONE test at a time** - Never write multiple tests
+2. **Minimal implementation** - Only write code to make current test pass
+3. **Incremental building** - Add one feature at a time
+4. **Simple solutions** - Keep it simple until proven necessary
+
+### Current Progress (2025-07-20)
+
+#### ✅ Step 1.1: Basic Component Rendering - COMPLETE
+- **Test**: `BrushSplitValidator renders without crashing`
+- **Implementation**: Minimal component that renders empty div
+- **Status**: ✅ COMPLETE - Component renders without errors
+
+#### ✅ Step 1.2: Basic API Call - COMPLETE
+- **Test**: `BrushSplitValidator loads data when mounted`
+- **Implementation**: Call API on mount with error handling
+- **Status**: ✅ COMPLETE - API called successfully
+
+#### ✅ Step 1.3: Display Basic Data - COMPLETE
+- **Test**: `BrushSplitValidator displays brush strings`
+- **Implementation**: Render brush strings in simple list
+- **Status**: ✅ COMPLETE - Brush strings displayed successfully
+
+#### ✅ Step 2.1: Basic Table Structure - COMPLETE
+- **Test**: `BrushSplitValidator displays data in table format`
+- **Implementation**: Simple table with columns for handle, knot, original
+- **Status**: ✅ COMPLETE - Data displayed in table format
+
+#### ✅ Step 2.2: Basic Search Input - COMPLETE
+- **Test**: `BrushSplitValidator has search input field`
+- **Implementation**: Add search input field
+- **Status**: ✅ COMPLETE - Search input visible and functional
+
+#### ✅ Step 2.3: Search Functionality - COMPLETE
+- **Test**: `BrushSplitValidator filters data when search is used`
+- **Implementation**: Filter data based on search input
+- **Status**: ✅ COMPLETE - Data filters correctly when typing
+
+### Next Immediate Steps
+1. **Move to Step 3.1**: Add row selection functionality
+2. **Continue incrementally**: One test at a time
+
+### Lessons Learned from Restart
+- **Start simple**: Begin with the most basic functionality
+- **One test at a time**: Don't write multiple tests at once
+- **Minimal implementation**: Only write code to make current test pass
+- **Fail fast**: Let tests fail naturally, don't mask issues
+- **Keep it simple**: Avoid premature optimization and complexity
+
+### Success Metrics
+- [ ] All tests pass consistently
+- [ ] Component renders without errors
+- [ ] API calls work correctly
+- [ ] Data displays properly
+- [ ] No React hooks violations
+- [ ] Simple, maintainable code

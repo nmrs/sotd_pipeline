@@ -1,73 +1,38 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import BrushSplitValidator from '../BrushSplitValidator';
 
-// Mock the API calls
+// Mock fetch
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
-// Mock the MonthSelector component
-jest.mock('../../components/MonthSelector', () => {
-    return function MockMonthSelector({ selectedMonths, onMonthsChange }: any) {
-        return (
-            <div data-testid="month-selector">
-                <button onClick={() => onMonthsChange(['2024-01'])}>
-                    Select Month
-                </button>
-                <div>Selected: {selectedMonths.join(', ')}</div>
-            </div>
-        );
-    };
-});
-
-// Mock the LoadingSpinner component
-jest.mock('../../components/LoadingSpinner', () => {
-    return function MockLoadingSpinner({ message }: any) {
-        return <div data-testid="loading-spinner">{message}</div>;
-    };
-});
-
-// Mock the ErrorDisplay component
-jest.mock('../../components/ErrorDisplay', () => {
-    return function MockErrorDisplay({ error, onRetry }: any) {
-        return (
-            <div data-testid="error-display">
-                <div>{error}</div>
-                <button onClick={onRetry}>Retry</button>
-            </div>
-        );
-    };
-});
-
-const renderWithRouter = (component: React.ReactElement) => {
-    return render(
-        <BrowserRouter>
-            {component}
-        </BrowserRouter>
-    );
-};
+// Default mock for fetch to prevent errors in tests that don't set up specific mocks
+mockFetch.mockImplementation(() =>
+    Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ brush_splits: [], statistics: {} })
+    })
+);
 
 describe('BrushSplitValidator', () => {
     beforeEach(() => {
         mockFetch.mockClear();
+        // Reset to default mock
+        mockFetch.mockImplementation(() =>
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({ brush_splits: [], statistics: {} })
+            })
+        );
     });
 
-    it('renders the component with initial state', () => {
-        renderWithRouter(<BrushSplitValidator />);
-
+    it('renders without crashing', () => {
+        render(<BrushSplitValidator />);
+        expect(screen.getByTestId('brush-split-validator')).toBeInTheDocument();
         expect(screen.getByText('Brush Split Validator')).toBeInTheDocument();
-        expect(screen.getByText('Select Months')).toBeInTheDocument();
-        expect(screen.getByText('Select Months to Begin')).toBeInTheDocument();
     });
 
-    it('shows month selector', () => {
-        renderWithRouter(<BrushSplitValidator />);
-
-        expect(screen.getByTestId('month-selector')).toBeInTheDocument();
-    });
-
-    it('loads brush splits when months are selected', async () => {
+    it('loads data when mounted', async () => {
         const mockResponse = {
             brush_splits: [
                 {
@@ -102,88 +67,33 @@ describe('BrushSplitValidator', () => {
             json: async () => mockResponse
         });
 
-        renderWithRouter(<BrushSplitValidator />);
+        render(<BrushSplitValidator />);
 
-        // Click the month selector button to select a month
-        fireEvent.click(screen.getByText('Select Month'));
-
-        // Wait for the loading state
+        // Wait for the API call to be made
         await waitFor(() => {
-            expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+            expect(mockFetch).toHaveBeenCalledWith('/api/brush-splits/load');
         });
-
-        // Wait for the data to load
-        await waitFor(() => {
-            expect(screen.getByText('Brush Splits (1)')).toBeInTheDocument();
-        });
-
-        expect(mockFetch).toHaveBeenCalledWith(
-            expect.stringContaining('/api/brush-splits/load?months=2024-01')
-        );
     });
 
-    it('handles API errors gracefully', async () => {
-        mockFetch.mockResolvedValueOnce({
-            ok: false,
-            status: 500,
-            json: async () => ({ detail: 'Internal server error' })
-        });
-
-        renderWithRouter(<BrushSplitValidator />);
-
-        // Click the month selector button to select a month
-        fireEvent.click(screen.getByText('Select Month'));
-
-        // Wait for the error to be displayed
-        await waitFor(() => {
-            expect(screen.getByTestId('error-display')).toBeInTheDocument();
-        });
-
-        expect(screen.getByText('Server error: 500')).toBeInTheDocument();
-    });
-
-    it('shows statistics when data is loaded', async () => {
+    it('displays brush strings', async () => {
         const mockResponse = {
-            brush_splits: [],
+            brush_splits: [
+                {
+                    original: 'Test Brush',
+                    handle: 'Test Handle',
+                    knot: 'Test Knot',
+                    validated: false,
+                    corrected: false,
+                    validated_at: null,
+                    system_handle: null,
+                    system_knot: null,
+                    system_confidence: null,
+                    system_reasoning: null,
+                    occurrences: []
+                }
+            ],
             statistics: {
-                total: 100,
-                validated: 50,
-                corrected: 10,
-                validation_percentage: 50.0,
-                correction_percentage: 20.0,
-                split_types: { delimiter: 30, fiber_hint: 20 },
-                confidence_breakdown: { high: 40, medium: 30 },
-                month_breakdown: {},
-                recent_activity: {}
-            }
-        };
-
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockResponse
-        });
-
-        renderWithRouter(<BrushSplitValidator />);
-
-        // Click the month selector button to select a month
-        fireEvent.click(screen.getByText('Select Month'));
-
-        // Wait for the statistics to be displayed
-        await waitFor(() => {
-            expect(screen.getByText('Validation Statistics')).toBeInTheDocument();
-        });
-
-        expect(screen.getByText('100')).toBeInTheDocument(); // Total
-        expect(screen.getByText('50')).toBeInTheDocument(); // Validated
-        expect(screen.getByText('20.0%')).toBeInTheDocument(); // Correction rate
-        expect(screen.getByText('50.0%')).toBeInTheDocument(); // Validation progress
-    });
-
-    it('shows empty state when no brush splits are found', async () => {
-        const mockResponse = {
-            brush_splits: [],
-            statistics: {
-                total: 0,
+                total: 1,
                 validated: 0,
                 corrected: 0,
                 validation_percentage: 0,
@@ -200,14 +110,182 @@ describe('BrushSplitValidator', () => {
             json: async () => mockResponse
         });
 
-        renderWithRouter(<BrushSplitValidator />);
+        render(<BrushSplitValidator />);
 
-        // Click the month selector button to select a month
-        fireEvent.click(screen.getByText('Select Month'));
-
-        // Wait for the empty state to be displayed
+        // Wait for the brush string to be displayed
         await waitFor(() => {
-            expect(screen.getByText('No Brush Splits Found')).toBeInTheDocument();
+            expect(screen.getByText('Test Brush')).toBeInTheDocument();
         });
+    });
+
+    it('displays data in table format', async () => {
+        const mockResponse = {
+            brush_splits: [
+                {
+                    original: 'Test Brush',
+                    handle: 'Test Handle',
+                    knot: 'Test Knot',
+                    validated: false,
+                    corrected: false,
+                    validated_at: null,
+                    system_handle: null,
+                    system_knot: null,
+                    system_confidence: null,
+                    system_reasoning: null,
+                    occurrences: []
+                }
+            ],
+            statistics: {
+                total: 1,
+                validated: 0,
+                corrected: 0,
+                validation_percentage: 0,
+                correction_percentage: 0,
+                split_types: {},
+                confidence_breakdown: {},
+                month_breakdown: {},
+                recent_activity: {}
+            }
+        };
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockResponse
+        });
+
+        render(<BrushSplitValidator />);
+
+        // Wait for the table to be displayed
+        await waitFor(() => {
+            expect(screen.getByRole('table')).toBeInTheDocument();
+        });
+
+        // Check for table headers
+        expect(screen.getByText('Handle')).toBeInTheDocument();
+        expect(screen.getByText('Knot')).toBeInTheDocument();
+        expect(screen.getByText('Original')).toBeInTheDocument();
+    });
+
+    it('has search input field', () => {
+        render(<BrushSplitValidator />);
+        expect(screen.getByPlaceholderText('Search brush splits...')).toBeInTheDocument();
+    });
+
+    it('filters data when search is used', async () => {
+        const mockResponse = {
+            brush_splits: [
+                {
+                    original: 'Test Brush',
+                    handle: 'Test Handle',
+                    knot: 'Test Knot',
+                    validated: false,
+                    corrected: false,
+                    validated_at: null,
+                    system_handle: null,
+                    system_knot: null,
+                    system_confidence: null,
+                    system_reasoning: null,
+                    occurrences: []
+                },
+                {
+                    original: 'Another Brush',
+                    handle: 'Another Handle',
+                    knot: 'Another Knot',
+                    validated: false,
+                    corrected: false,
+                    validated_at: null,
+                    system_handle: null,
+                    system_knot: null,
+                    system_confidence: null,
+                    system_reasoning: null,
+                    occurrences: []
+                }
+            ],
+            statistics: {
+                total: 2,
+                validated: 0,
+                corrected: 0,
+                validation_percentage: 0,
+                correction_percentage: 0,
+                split_types: {},
+                confidence_breakdown: {},
+                month_breakdown: {},
+                recent_activity: {}
+            }
+        };
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockResponse
+        });
+
+        render(<BrushSplitValidator />);
+
+        // Wait for data to load
+        await waitFor(() => {
+            expect(screen.getByText('Test Brush')).toBeInTheDocument();
+            expect(screen.getByText('Another Brush')).toBeInTheDocument();
+        });
+
+        // Type in search field
+        const searchInput = screen.getByPlaceholderText('Search brush splits...');
+        fireEvent.change(searchInput, { target: { value: 'Test' } });
+
+        // Check that only matching data is displayed
+        expect(screen.getByText('Test Brush')).toBeInTheDocument();
+        expect(screen.queryByText('Another Brush')).not.toBeInTheDocument();
+    });
+
+    it('allows row selection', async () => {
+        const mockResponse = {
+            brush_splits: [
+                {
+                    original: 'Test Brush',
+                    handle: 'Test Handle',
+                    knot: 'Test Knot',
+                    validated: false,
+                    corrected: false,
+                    validated_at: null,
+                    system_handle: null,
+                    system_knot: null,
+                    system_confidence: null,
+                    system_reasoning: null,
+                    occurrences: []
+                }
+            ],
+            statistics: {
+                total: 1,
+                validated: 0,
+                corrected: 0,
+                validation_percentage: 0,
+                correction_percentage: 0,
+                split_types: {},
+                confidence_breakdown: {},
+                month_breakdown: {},
+                recent_activity: {}
+            }
+        };
+
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockResponse
+        });
+
+        render(<BrushSplitValidator />);
+
+        // Wait for data to load
+        await waitFor(() => {
+            expect(screen.getByText('Test Brush')).toBeInTheDocument();
+        });
+
+        // Check for checkbox in the first row
+        const checkbox = screen.getByRole('checkbox');
+        expect(checkbox).toBeInTheDocument();
+
+        // Click the checkbox
+        fireEvent.click(checkbox);
+
+        // Check that the checkbox is now checked
+        expect(checkbox).toBeChecked();
     });
 }); 
