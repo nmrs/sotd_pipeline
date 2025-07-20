@@ -186,23 +186,41 @@ class BrushSplitValidator:
         self.yaml_path = Path("data/brush_splits.yaml")
 
     def load_validated_splits(self) -> None:
-        """Load validated splits from YAML file."""
+        """Load validated splits from YAML file with enhanced error handling."""
         if not self.yaml_path.exists():
+            print(f"YAML file not found: {self.yaml_path}")
             return
 
         try:
             with open(self.yaml_path, "r", encoding="utf-8") as f:
                 data = yaml.safe_load(f)
 
-            if data and "brush_splits" in data:
-                for split_data in data["brush_splits"]:
+            if not data:
+                print("YAML file is empty or invalid")
+                return
+
+            if "brush_splits" not in data:
+                print("YAML file missing 'brush_splits' key")
+                return
+
+            loaded_count = 0
+            for split_data in data["brush_splits"]:
+                try:
                     split = BrushSplit.from_dict(split_data)
                     self.validated_splits[split.original] = split
+                    loaded_count += 1
+                except Exception as e:
+                    print(f"Error loading split {split_data.get('original', 'unknown')}: {e}")
+                    continue
+
+            print(f"Loaded {loaded_count} validated splits from {self.yaml_path}")
+        except yaml.YAMLError as e:
+            print(f"YAML parsing error: {e}")
         except Exception as e:
             print(f"Error loading validated splits: {e}")
 
     def save_validated_splits(self, splits: List[BrushSplit]) -> bool:
-        """Save validated splits to YAML file."""
+        """Save validated splits to YAML file with atomic operations."""
         try:
             # Ensure directory exists
             self.yaml_path.parent.mkdir(parents=True, exist_ok=True)
@@ -210,12 +228,23 @@ class BrushSplitValidator:
             # Convert to YAML format
             yaml_data = {"brush_splits": [split.to_dict() for split in splits]}
 
-            with open(self.yaml_path, "w", encoding="utf-8") as f:
+            # Create temporary file for atomic write
+            temp_path = self.yaml_path.with_suffix(".tmp")
+
+            with open(temp_path, "w", encoding="utf-8") as f:
                 yaml.dump(yaml_data, f, default_flow_style=False, indent=2)
 
+            # Atomic move to final location
+            temp_path.replace(self.yaml_path)
+
+            print(f"Saved {len(splits)} validated splits to {self.yaml_path}")
             return True
         except Exception as e:
             print(f"Error saving validated splits: {e}")
+            # Clean up temp file if it exists
+            temp_path = self.yaml_path.with_suffix(".tmp")
+            if temp_path.exists():
+                temp_path.unlink(missing_ok=True)
             return False
 
     def calculate_confidence(
@@ -324,6 +353,42 @@ class BrushSplitValidator:
             system_reasoning=system_reasoning if corrected else None,
             occurrences=existing.occurrences if existing else [],
         )
+
+    def merge_occurrences(self, original: str, new_occurrences: List[BrushSplitOccurrence]) -> None:
+        """Merge new occurrences with existing validated entries."""
+        if original not in self.validated_splits:
+            return
+
+        existing_split = self.validated_splits[original]
+
+        # Create a set of existing file/comment_id combinations for efficient lookup
+        existing_combinations = set()
+        for occ in existing_split.occurrences:
+            for comment_id in occ.comment_ids:
+                existing_combinations.add((occ.file, comment_id))
+
+        # Add new occurrences that don't already exist
+        for new_occ in new_occurrences:
+            for comment_id in new_occ.comment_ids:
+                if (new_occ.file, comment_id) not in existing_combinations:
+                    # Find existing occurrence for this file or create new one
+                    existing_file_occ = None
+                    for occ in existing_split.occurrences:
+                        if occ.file == new_occ.file:
+                            existing_file_occ = occ
+                            break
+
+                    if existing_file_occ:
+                        existing_file_occ.comment_ids.append(comment_id)
+                    else:
+                        existing_split.occurrences.append(
+                            BrushSplitOccurrence(file=new_occ.file, comment_ids=[comment_id])
+                        )
+                    existing_combinations.add((new_occ.file, comment_id))
+
+    def get_all_validated_splits(self) -> List[BrushSplit]:
+        """Get all validated splits as a list."""
+        return list(self.validated_splits.values())
 
 
 # Global validator instance
@@ -448,7 +513,20 @@ async def load_yaml():
     """Load existing validated splits from YAML."""
     try:
         validator.load_validated_splits()
-        return {"brush_splits": [split.to_dict() for split in validator.validated_splits.values()]}
+
+        # Get file information
+        yaml_exists = validator.yaml_path.exists()
+        yaml_size = validator.yaml_path.stat().st_size if yaml_exists else 0
+
+        return {
+            "brush_splits": [split.to_dict() for split in validator.validated_splits.values()],
+            "file_info": {
+                "exists": yaml_exists,
+                "path": str(validator.yaml_path),
+                "size_bytes": yaml_size,
+                "loaded_count": len(validator.validated_splits),
+            },
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
