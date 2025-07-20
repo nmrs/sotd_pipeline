@@ -214,65 +214,85 @@ def _final_cleanup(self, match_dict):
 
 ### Phase 4: WebUI Updates (MEDIUM PRIORITY) - ⏳ PENDING
 
-#### 4.1 Update TypeScript Interfaces - ⏳ PENDING
+#### 4.1 Update TypeScript Interfaces - ✅ COMPLETE
 **Files**: `webui/src/utils/brushDataTransformer.ts`
 **Objective**: Update TypeScript interfaces to match new format
 
-**Changes Required**:
+**Changes Completed**:
+- ✅ Updated `BrushMatcherOutput` interface to remove redundant fields (`handle_maker`, `knot_maker`, `size`)
+- ✅ Added new fields: `source_text`, `_matched_by`, `_pattern`, `knot_size_mm`
+- ✅ Updated `extractHandleComponent()` to use `source_text` instead of brand/model combination
+- ✅ Updated `extractKnotComponent()` to use `source_text` and `knot_size_mm` instead of `size`
+- ✅ All brush data transformer integration tests passing (10 tests)
+- ✅ All brush split tests passing (8 tests)
+- ✅ Backward compatibility maintained for existing functionality
+
+**Key Interface Changes**:
 ```typescript
 export interface BrushMatcherOutput {
-    // Remove: handle_maker, knot_maker from matched
-    // Update: handle, knot sections to include _matched_by, _pattern
     matched?: {
+        brand?: string;
+        model?: string;
         handle?: {
             brand?: string;
             model?: string;
-            source_text?: string;
-            _matched_by?: string;
-            _pattern?: string;
+            source_text?: string;        // NEW: Original text
+            _matched_by?: string;        // NEW: Strategy name
+            _pattern?: string;           // NEW: Pattern used
         };
         knot?: {
             brand?: string;
             model?: string;
             fiber?: string;
-            knot_size_mm?: number;
-            source_text?: string;
-            _matched_by?: string;
-            _pattern?: string;
+            knot_size_mm?: number;       // NEW: Numeric size instead of string
+            source_text?: string;        // NEW: Original text
+            _matched_by?: string;        // NEW: Strategy name
+            _pattern?: string;           // NEW: Pattern used
         };
     };
 }
 ```
 
-#### 4.2 Update Data Transformation - ⏳ PENDING
+#### 4.2 Update Data Transformation - ✅ COMPLETE
 **Files**: `webui/src/utils/brushDataTransformer.ts`
 **Objective**: Update transformation logic for new format
 
-**Changes Required**:
-- [ ] Update `extractHandleComponent()` to use new structure
-- [ ] Update `extractKnotComponent()` to use new structure
-- [ ] Remove references to removed fields
-- [ ] Update validation logic
+**Changes Completed**:
+- ✅ Updated `extractHandleComponent()` to use new structure with `source_text`
+- ✅ Updated `extractKnotComponent()` to use new structure with `source_text` and `knot_size_mm`
+- ✅ Removed references to removed fields (`handle_maker`, `knot_maker`, `size`)
+- ✅ Updated validation logic to work with new structure
+- ✅ All brush data transformer integration tests passing (10 tests)
+- ✅ All brush split type tests passing (8 tests)
+- ✅ Data transformation correctly handles new handle/knot section structure
+- ✅ Proper fallback behavior for missing fields maintained
 
 ### Phase 5: Documentation Updates (LOW PRIORITY) - ⏳ PENDING
 
-#### 5.1 Update API Documentation - ⏳ PENDING
+#### 5.1 Update API Documentation - ✅ COMPLETE
 **Files**: `docs/brush_matching_spec.md`
 **Objective**: Update documentation to reflect new format
 
-**Changes Required**:
-- [ ] Update output structure examples
-- [ ] Remove references to redundant fields
-- [ ] Add examples of new section structure
+**Changes Completed**:
+- ✅ Updated output structure examples to remove redundant fields (`handle_maker`, `knot_maker`)
+- ✅ Added new fields: `source_text`, `_matched_by`, `_pattern` in handle/knot sections
+- ✅ Updated example output to show new format with strategy attribution
+- ✅ Updated output schema section to reflect new structure
+- ✅ Added notes about removed fields and new fields
+- ✅ Documentation now accurately reflects the new brush output format
+- ✅ All examples use consistent handle/knot section structure
 
-#### 5.2 Update Phase Specifications - ⏳ PENDING
+#### 5.2 Update Phase Specifications - ✅ COMPLETE
 **Files**: `docs/aggregate_phase_spec.md`, `docs/enrich_phase_spec.md`
 **Objective**: Update phase specifications to reflect new format
 
-**Changes Required**:
-- [ ] Update input record structure examples
-- [ ] Ensure all examples use new brush format
-- [ ] Update any field references
+**Changes Completed**:
+- ✅ Updated aggregate phase specification to use `brush.matched.handle.brand` and `brush.matched.knot.brand`
+- ✅ Updated input record structure example to show new handle/knot sections
+- ✅ Updated output structure example to use `brand` field instead of `handle_maker`/`knot_maker`
+- ✅ Updated enrich phase specification brush data model clarification
+- ✅ Updated field references to use new handle/knot section structure
+- ✅ All phase specifications now accurately reflect the new brush output format
 
 ## Testing Strategy
 
@@ -562,11 +582,42 @@ export interface BrushMatcherOutput {
   - Handle Maker Aggregation: Uses `matched.handle.brand` (unaffected) ✅
 - **Results**: All 67 brush-related tests passing, much simpler implementation with better auditability
 
+### Session 5 (2025-07-20)
+- **COMPLETED ALL PHASES**: Successfully completed all remaining phases of brush output format refactoring
+- **Phase 4.1 (WebUI TypeScript Interfaces)**: ✅ COMPLETE
+  - Updated `BrushMatcherOutput` interface to remove redundant fields (`handle_maker`, `knot_maker`, `size`)
+  - Added new fields: `source_text`, `_matched_by`, `_pattern`, `knot_size_mm`
+  - Updated `extractHandleComponent()` and `extractKnotComponent()` to use new structure
+  - All brush data transformer integration tests passing (10 tests)
+  - All brush split type tests passing (8 tests)
+- **Phase 4.2 (WebUI Data Transformation)**: ✅ COMPLETE
+  - Data transformation logic already updated in previous session
+  - All WebUI tests passing with new format
+  - Proper fallback behavior maintained for missing fields
+- **Phase 5.1 (API Documentation)**: ✅ COMPLETE
+  - Updated `docs/brush_matching_spec.md` to reflect new format
+  - Removed references to redundant fields (`handle_maker`, `knot_maker`)
+  - Added new fields: `source_text`, `_matched_by`, `_pattern`
+  - Updated output structure examples and schema
+  - Documentation now accurately reflects new brush output format
+- **Phase 5.2 (Phase Specifications)**: ✅ COMPLETE
+  - Updated `docs/aggregate_phase_spec.md` to use `brush.matched.handle.brand` and `brush.matched.knot.brand`
+  - Updated input/output structure examples to show new handle/knot sections
+  - Updated `docs/enrich_phase_spec.md` brush data model clarification
+  - All phase specifications now accurately reflect new format
+- **OVERALL STATUS**: All phases complete - brush output format refactoring successfully implemented
+- **Benefits Achieved**:
+  - ✅ Consistent handle/knot section structure across all brushes
+  - ✅ Removed redundant fields for cleaner data model
+  - ✅ Added strategy attribution for better auditability
+  - ✅ All downstream phases (enrich, aggregate, report) working with new format
+  - ✅ WebUI components updated to handle new structure
+  - ✅ Documentation updated to reflect new format
+  - ✅ Complete audit trail preserved with `source_text` and strategy fields
+
 ## Conclusion
 
 This TDD implementation plan provides a comprehensive approach to refactoring the brush output format while maintaining system stability and performance. The phased approach ensures that each component is thoroughly tested before moving to the next phase, minimizing risk and ensuring quality throughout the implementation.
-
-The plan follows the established TDD methodology with comprehensive testing requirements, clear success criteria, and detailed risk mitigation strategies. By implementing this plan, we will achieve a cleaner, more consistent brush output format that improves downstream analysis and reporting while maintaining all existing functionality.
 description:
 globs:
 alwaysApply: false

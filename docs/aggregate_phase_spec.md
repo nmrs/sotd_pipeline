@@ -25,8 +25,8 @@ The Aggregate phase processes enriched SOTD data to generate statistical summari
 - **Blades**: Individual blade models with brand/model/format  
 - **Blade Manufacturers**: Brand-level aggregation from `blade.matched.brand`
 - **Brushes**: Individual brush models with brand/model/fiber
-- **Brush Handle Makers**: Handle maker aggregation from `brush.matched.handle_maker`
-- **Brush Knot Makers**: Knot maker aggregation from `brush.matched.knot_maker`
+- **Brush Handle Makers**: Handle maker aggregation from `brush.matched.handle.brand`
+- **Brush Knot Makers**: Knot maker aggregation from `brush.matched.knot.brand`
 - **Brush Fibers**: Fiber type aggregation from `brush.matched.fiber` or `brush.enriched.fiber`
 - **Brush Knot Sizes**: Knot size aggregation from `brush.matched.knot_size_mm` or `brush.enriched.knot_size_mm`
 
@@ -126,8 +126,22 @@ All aggregations must be sorted according to the following rules:
       "model": "610",
       "fiber": "Boar",
       "knot_size_mm": 21,
-      "handle_maker": "Semogue",
-      "knot_maker": null
+      "handle": {
+        "brand": "Semogue",
+        "model": "610",
+        "source_text": "Semogue 610 21mm Boar",
+        "_matched_by": "OmegaSemogueBrushMatchingStrategy",
+        "_pattern": "\\bsemogue\\b.*\\b610\\b"
+      },
+      "knot": {
+        "brand": "Semogue",
+        "model": "610",
+        "fiber": "Boar",
+        "knot_size_mm": 21,
+        "source_text": "Semogue 610 21mm Boar",
+        "_matched_by": "OmegaSemogueBrushMatchingStrategy",
+        "_pattern": "\\bsemogue\\b.*\\b610\\b"
+      }
     },
     "enriched": {
       "knot_size_mm": 21.0,
@@ -179,8 +193,8 @@ All aggregations must be sorted according to the following rules:
       {"position": 2, "name": "AP Shave Co MiG", "shaves": 25, "unique_users": 8}
     ],
     "brush_handle_makers": [
-      {"position": 1, "handle_maker": "Semogue", "shaves": 150, "unique_users": 30},
-      {"position": 2, "handle_maker": "AP Shave Co", "shaves": 100, "unique_users": 20}
+      {"position": 1, "brand": "Semogue", "shaves": 150, "unique_users": 30},
+      {"position": 2, "brand": "AP Shave Co", "shaves": 100, "unique_users": 20}
     ],
     "brush_knot_makers": [
       {"position": 1, "brand": "Declaration Grooming", "shaves": 80, "unique_users": 15},

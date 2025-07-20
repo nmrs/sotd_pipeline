@@ -11,17 +11,23 @@ export interface BrushMatcherOutput {
     examples: string[];
     match_type?: string;
     matched?: {
+        brand?: string;
+        model?: string;
         handle?: {
             brand?: string;
             model?: string;
-            maker?: string;
+            source_text?: string;
+            _matched_by?: string;
+            _pattern?: string;
         };
         knot?: {
             brand?: string;
             model?: string;
-            maker?: string;
             fiber?: string;
-            size?: string;
+            knot_size_mm?: number;
+            source_text?: string;
+            _matched_by?: string;
+            _pattern?: string;
         };
     };
     unmatched?: {
@@ -142,9 +148,9 @@ function extractHandleComponent(matcherOutput: BrushMatcherOutput): ComponentDat
     const status = determineComponentStatus(matched?.handle, unmatched?.handle, matcherOutput.match_type);
 
     if (matched?.handle) {
-        // Extract text from matched handle
-        const { brand, model } = matched.handle;
-        const text = brand && model ? `${brand} ${model}` : brand || model || 'Unknown handle';
+        // Extract text from matched handle using source_text or brand/model combination
+        const { brand, model, source_text } = matched.handle;
+        const text = source_text || (brand && model ? `${brand} ${model}` : brand || model || 'Unknown handle');
 
         return {
             text,
@@ -176,9 +182,9 @@ function extractKnotComponent(matcherOutput: BrushMatcherOutput): ComponentData 
     const status = determineComponentStatus(matched?.knot, unmatched?.knot, matcherOutput.match_type);
 
     if (matched?.knot) {
-        // Extract text from matched knot
-        const { brand, model } = matched.knot;
-        const text = brand && model ? `${brand} ${model}` : brand || model || 'Unknown knot';
+        // Extract text from matched knot using source_text or brand/model combination
+        const { brand, model, source_text } = matched.knot;
+        const text = source_text || (brand && model ? `${brand} ${model}` : brand || model || 'Unknown knot');
 
         return {
             text,
