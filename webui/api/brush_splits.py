@@ -302,6 +302,27 @@ class SaveSplitsResponse(BaseModel):
     saved_count: int = Field(..., description="Number of splits saved")
 
 
+class SaveSplitRequest(BaseModel):
+    """Request model for saving a single brush split correction."""
+
+    original: str = Field(..., description="Original brush string")
+    handle: Optional[str] = Field(None, description="Corrected handle component")
+    knot: str = Field(..., description="Corrected knot component")
+    validated_at: Optional[str] = Field(None, description="ISO timestamp of validation")
+
+
+class SaveSplitResponse(BaseModel):
+    """Response model for saving a single brush split."""
+
+    success: bool = Field(..., description="Whether the save operation was successful")
+    message: str = Field(..., description="Human-readable message")
+    corrected: bool = Field(..., description="Whether this was a correction of an existing split")
+    system_handle: Optional[str] = Field(None, description="Previous system-generated handle")
+    system_knot: Optional[str] = Field(None, description="Previous system-generated knot")
+    system_confidence: Optional[str] = Field(None, description="System confidence level")
+    system_reasoning: Optional[str] = Field(None, description="System reasoning")
+
+
 class LoadResponse(BaseModel):
     """Response model for loading brush splits."""
 
@@ -310,9 +331,7 @@ class LoadResponse(BaseModel):
     processing_info: Optional[Dict[str, Any]] = Field(
         None, description="Processing information and metrics"
     )
-    errors: Optional[Dict[str, Any]] = Field(
-        None, description="Error information for failed months"
-    )
+    errors: Optional[Dict[str, Any]] = Field(None, description="Error information if any")
 
 
 class YAMLResponse(BaseModel):
@@ -999,6 +1018,68 @@ async def save_splits(data: SaveSplitsRequest):
     except Exception as e:
         logger.error(f"Unexpected error in save_splits: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.post(
+    "/save-split", response_model=SaveSplitResponse, summary="Save a single brush split correction"
+)
+async def save_single_split(data: SaveSplitRequest):
+    """Save a single brush split correction to YAML file.
+
+    This endpoint is used when a user corrects an AI-generated split in the validator.
+    It saves the correction to the YAML file and tracks what was changed.
+
+    Args:
+        data: SaveSplitRequest containing the corrected split data
+
+    Returns:
+        SaveSplitResponse with success status and correction details
+    """
+    try:
+        # Load existing validated splits
+        validator.load_validated_splits()
+
+        # Create the validated split
+        split = validator.validate_split(
+            original=data.original,
+            handle=data.handle,
+            knot=data.knot,
+            validated_at=data.validated_at,
+        )
+
+        # Save the updated splits
+        success = validator.save_validated_splits([split])
+
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to save brush split")
+
+        # Determine if this was a correction
+        corrected = split.corrected
+        system_handle = split.system_handle if corrected else None
+        system_knot = split.system_knot if corrected else None
+        system_confidence = (
+            split.system_confidence.value if corrected and split.system_confidence else None
+        )
+        system_reasoning = split.system_reasoning if corrected else None
+
+        return SaveSplitResponse(
+            success=True,
+            message=f"Successfully saved brush split: {data.original}",
+            corrected=corrected,
+            system_handle=system_handle,
+            system_knot=system_knot,
+            system_confidence=system_confidence,
+            system_reasoning=system_reasoning,
+        )
+
+    except (FileNotFoundError, DataCorruptionError, ProcessingError) as e:
+        logger.error(f"Failed to save brush split: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save brush split: {str(e)}")
+    except Exception as e:
+        logger.error(f"Unexpected error saving brush split: {e}")
+        raise HTTPException(
+            status_code=500, detail="An unexpected error occurred while saving the brush split"
+        )
 
 
 @router.get("/statistics", response_model=StatisticsResponse, summary="Get validation statistics")

@@ -1039,6 +1039,100 @@ class TestErrorCategorization:
             assert "2025-01.json" in str(e)
 
 
+class TestSaveSplitEndpoint:
+    """Test the save-split endpoint for individual corrections."""
+
+    def test_save_single_split_endpoint(self, client, tmp_path):
+        """Test saving a single brush split correction."""
+        # Create test data directory
+        data_dir = tmp_path / "data"
+        data_dir.mkdir()
+
+        # Create brush_splits.yaml file
+        yaml_file = data_dir / "brush_splits.yaml"
+        yaml_file.write_text("brush_splits: []")
+
+        # Mock the file path
+        with patch("webui.api.brush_splits.Path") as mock_path:
+            mock_path.return_value = yaml_file
+
+            # Test data
+            test_data = {
+                "original": "Declaration B15 w/ Chisel & Hound Zebra",
+                "handle": "Chisel & Hound Zebra",
+                "knot": "Declaration B15",
+                "validated_at": "2025-01-27T14:30:00Z",
+            }
+
+            # Make request
+            response = client.post("/api/brush-splits/save-split", json=test_data)
+
+            # Verify response
+            assert response.status_code == 200
+            data = response.json()
+            assert data["success"] is True
+            assert "Successfully saved brush split" in data["message"]
+            assert data["corrected"] is False  # First time saving, not a correction
+            assert data["system_handle"] is None
+            assert data["system_knot"] is None
+
+    def test_save_single_split_correction(self, client, tmp_path):
+        """Test saving a correction of an existing split."""
+        # Create test data directory
+        data_dir = tmp_path / "data"
+        data_dir.mkdir()
+
+        # Create brush_splits.yaml file with existing data
+        yaml_content = """
+brush_splits:
+  - original: "Declaration B15 w/ Chisel & Hound Zebra"
+    handle: "Declaration B15"
+    knot: "Chisel & Hound Zebra"
+    validated: true
+    corrected: false
+    validated_at: "2025-01-27T14:30:00Z"
+    occurrences: []
+"""
+        yaml_file = data_dir / "brush_splits.yaml"
+        yaml_file.write_text(yaml_content)
+
+        # Mock the file path
+        with patch("webui.api.brush_splits.Path") as mock_path:
+            mock_path.return_value = yaml_file
+
+            # Test correction data (swapped handle and knot)
+            test_data = {
+                "original": "Declaration B15 w/ Chisel & Hound Zebra",
+                "handle": "Chisel & Hound Zebra",
+                "knot": "Declaration B15",
+                "validated_at": "2025-01-27T15:30:00Z",
+            }
+
+            # Make request
+            response = client.post("/api/brush-splits/save-split", json=test_data)
+
+            # Verify response
+            assert response.status_code == 200
+            data = response.json()
+            assert data["success"] is True
+            assert "Successfully saved brush split" in data["message"]
+            assert data["corrected"] is True  # This was a correction
+            assert data["system_handle"] == "Declaration B15"  # Previous value
+            assert data["system_knot"] == "Chisel & Hound Zebra"  # Previous value
+
+    def test_save_single_split_error_handling(self, client):
+        """Test error handling for save-split endpoint."""
+        # Test with invalid data
+        test_data = {"original": "", "handle": "Test", "knot": "Test"}  # Invalid empty original
+
+        response = client.post("/api/brush-splits/save-split", json=test_data)
+
+        # Should return 500 for internal error
+        assert response.status_code == 500
+        data = response.json()
+        assert "Failed to save brush split" in data["detail"]
+
+
 def create_test_split(original: str):
     """Helper function to create test brush splits."""
     return BrushSplit(original=original, handle=original, knot=original)

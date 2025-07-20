@@ -655,6 +655,55 @@ export interface BrushMatcherOutput {
   - ✅ Documentation updated to reflect new format
   - ✅ Complete audit trail preserved with `source_text` and strategy fields
 
+### 2025-07-20 Session 2: Test Fixes and Same-Maker Detection Complete
+**Status**: All test failures fixed, same-maker detection implemented
+
+**Completed Work**:
+- ✅ **Same-Maker Split Detection**: Implemented logic to detect when handle and knot are from the same maker
+  - Added `_is_same_maker_split()` helper method to compare handle and knot brands
+  - Added `_extract_model_from_handle_text()` helper method to extract model from handle text
+  - Updated brush matcher to set top-level brand when same maker detected, but model remains null for composite brushes
+  - Fixed test expectations to reflect correct structure: shared brand, null model, handle has specific model, knot has null model
+
+- ✅ **Test Catalog Structure**: Fixed test data to match real catalog structure
+  - Added `test_knots_catalog` fixture with proper `known_knots` and `other_knots` sections
+  - Added Simpson to `other_knots` section to match real `knots.yaml` structure
+  - Updated brush_matcher fixture to include knots_path parameter
+  - Fixed test expectations for "Simpson Chubby 2 w/ Simpson knot" to show correct composite structure
+
+- ✅ **Generic Knot Reference Handling**: Improved knot matching for generic references
+  - Added logic to detect generic knot references like "Simpson knot" when knot text contains handle brand
+  - Created synthetic match for generic knot references with shared brand but null model
+  - Properly handles cases where knot is generic reference to same maker
+
+- ✅ **All Tests Passing**: Fixed remaining test failures
+  - All 20 brush matcher tests now passing
+  - Same-maker split detection working correctly
+  - Test catalog structure matches real data
+  - Generic knot references handled properly
+
+**Key Technical Insights**:
+- Same-maker splits should have shared brand at top level but null model (composite brush)
+- Handle section gets specific model (e.g., "Chubby 2"), knot section gets null model (generic)
+- Test catalogs must match real catalog structure for accurate testing
+- Generic knot references need special handling when knot text contains handle brand
+
+**Implementation Details**:
+```python
+# Same-maker detection logic
+if self._is_same_maker_split(matched["handle"]["brand"], matched["knot"]["brand"]):
+    matched["brand"] = matched["handle"]["brand"]  # Shared brand
+    matched["model"] = None  # No global model for composite brushes
+
+# Generic knot reference handling
+if not knot_match and knot_text:
+    handle_brand = handle_match.get("handle_maker") if handle_match else None
+    if handle_brand and handle_brand.lower() in knot_text.lower():
+        # Create synthetic match for generic knot reference
+```
+
+**Next Steps**: All core functionality complete, ready for production use
+
 ## Conclusion
 
 This TDD implementation plan provides a comprehensive approach to refactoring the brush output format while maintaining system stability and performance. The phased approach ensures that each component is thoroughly tested before moving to the next phase, minimizing risk and ensuring quality throughout the implementation.

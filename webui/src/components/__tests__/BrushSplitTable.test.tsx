@@ -1,7 +1,12 @@
-import { render, screen, act } from '@testing-library/react';
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { act } from 'react-dom/test-utils';
 import '@testing-library/jest-dom';
 import BrushSplitTable, { BrushSplit } from '../BrushSplitTable';
+
+// Mock fetch for backend integration tests
+global.fetch = jest.fn();
 
 // Mock react-window with proper virtualization simulation
 jest.mock('react-window', () => {
@@ -359,6 +364,362 @@ describe('BrushSplitTable', () => {
             // This would be called when inline editing is implemented
             // For now, just verify the prop is passed through
             expect(onSplitUpdate).toBeDefined();
+        });
+    });
+
+    describe('Inline Editing', () => {
+        it('should render handle field as editable input when clicked', async () => {
+            const user = userEvent.setup();
+            const onSplitUpdate = jest.fn();
+            render(<BrushSplitTable {...defaultProps} onSplitUpdate={onSplitUpdate} />);
+
+            // Find the handle field and click it to enter edit mode
+            const handleField = screen.getByText('Elite');
+            await user.click(handleField);
+
+            // Should now show an input field
+            const handleInput = screen.getByDisplayValue('Elite');
+            expect(handleInput).toBeInTheDocument();
+            expect(handleInput).toHaveAttribute('type', 'text');
+        });
+
+        it('should render knot field as editable input when clicked', async () => {
+            const user = userEvent.setup();
+            const onSplitUpdate = jest.fn();
+            render(<BrushSplitTable {...defaultProps} onSplitUpdate={onSplitUpdate} />);
+
+            // Find the knot field and click it to enter edit mode
+            const knotField = screen.getByText('Declaration');
+            await user.click(knotField);
+
+            // Should now show an input field
+            const knotInput = screen.getByDisplayValue('Declaration');
+            expect(knotInput).toBeInTheDocument();
+            expect(knotInput).toHaveAttribute('type', 'text');
+        });
+
+        it('should save changes when Enter is pressed', async () => {
+            const user = userEvent.setup();
+            const onSplitUpdate = jest.fn();
+            render(<BrushSplitTable {...defaultProps} onSplitUpdate={onSplitUpdate} />);
+
+            // Click handle field to enter edit mode
+            const handleField = screen.getByText('Elite');
+            await user.click(handleField);
+
+            // Type new value and press Enter
+            const handleInput = screen.getByDisplayValue('Elite');
+            await user.clear(handleInput);
+            await user.type(handleInput, 'New Handle');
+            await user.keyboard('{Enter}');
+
+            // Should call onSplitUpdate with updated data
+            expect(onSplitUpdate).toHaveBeenCalledWith(0, expect.objectContaining({
+                handle: 'New Handle',
+                validated: true,
+                corrected: true,
+                validated_at: expect.any(String)
+            }));
+        });
+
+        it('should save changes when Tab is pressed', async () => {
+            const user = userEvent.setup();
+            const onSplitUpdate = jest.fn();
+            render(<BrushSplitTable {...defaultProps} onSplitUpdate={onSplitUpdate} />);
+
+            // Click handle field to enter edit mode
+            const handleField = screen.getByText('Elite');
+            await user.click(handleField);
+
+            // Type new value and press Tab
+            const handleInput = screen.getByDisplayValue('Elite');
+            await user.clear(handleInput);
+            await user.type(handleInput, 'New Handle');
+            await user.keyboard('{Tab}');
+
+            // Should call onSplitUpdate with updated data
+            expect(onSplitUpdate).toHaveBeenCalledWith(0, expect.objectContaining({
+                handle: 'New Handle',
+                validated: true,
+                corrected: true,
+                validated_at: expect.any(String)
+            }));
+        });
+
+        it('should cancel editing when Escape is pressed', async () => {
+            const user = userEvent.setup();
+            const onSplitUpdate = jest.fn();
+            render(<BrushSplitTable {...defaultProps} onSplitUpdate={onSplitUpdate} />);
+
+            // Click handle field to enter edit mode
+            const handleField = screen.getByText('Elite');
+            await user.click(handleField);
+
+            // Type new value and press Escape
+            const input = screen.getByDisplayValue('Elite');
+            await user.clear(input);
+            await user.type(input, 'New Handle');
+            await user.keyboard('{Escape}');
+
+            // Should not call onSplitUpdate
+            expect(onSplitUpdate).not.toHaveBeenCalled();
+
+            // Should return to display mode
+            expect(screen.getByText('Elite')).toBeInTheDocument();
+        });
+
+        it('should handle single-component brush editing correctly', async () => {
+            const user = userEvent.setup();
+            const onSplitUpdate = jest.fn();
+
+            render(
+                <BrushSplitTable
+                    brushSplits={mockBrushSplits}
+                    onSplitUpdate={onSplitUpdate}
+                />
+            );
+
+            // Find the single-component brush (Omega boar brush)
+            // Use a more specific selector to target the knot field specifically
+            const knotFields = screen.getAllByText('Omega boar brush');
+            const knotField = knotFields[1]; // The second occurrence is in the knot column
+            await user.click(knotField);
+
+            // Should show input for the knot field
+            const input = screen.getByDisplayValue('Omega boar brush');
+            expect(input).toBeInTheDocument();
+
+            // Edit the value
+            await user.clear(input);
+            await user.type(input, 'Omega Pro');
+
+            // Save the changes
+            await user.keyboard('{Enter}');
+
+            // Should call onSplitUpdate with the new value
+            expect(onSplitUpdate).toHaveBeenCalledWith(1, expect.objectContaining({
+                knot: 'Omega Pro',
+                validated: true,
+                corrected: true
+            }));
+        });
+
+        it('should show validation feedback for empty values', async () => {
+            const user = userEvent.setup();
+            const onSplitUpdate = jest.fn();
+            render(<BrushSplitTable {...defaultProps} onSplitUpdate={onSplitUpdate} />);
+
+            // Click handle field to enter edit mode
+            const handleField = screen.getByText('Elite');
+            await user.click(handleField);
+
+            // Clear the value and try to save
+            const input = screen.getByDisplayValue('Elite');
+            await user.clear(input);
+            await user.keyboard('{Enter}');
+
+            // Should show validation error
+            expect(screen.getByText('Handle cannot be empty')).toBeInTheDocument();
+            expect(input).toHaveClass('border-red-500');
+        });
+
+        it('should show validation feedback for very short values', async () => {
+            const user = userEvent.setup();
+            const onSplitUpdate = jest.fn();
+            render(<BrushSplitTable {...defaultProps} onSplitUpdate={onSplitUpdate} />);
+
+            // Click handle field to enter edit mode
+            const handleField = screen.getByText('Elite');
+            await user.click(handleField);
+
+            // Type a very short value
+            const input = screen.getByDisplayValue('Elite');
+            await user.clear(input);
+            await user.type(input, 'A');
+            await user.keyboard('{Enter}');
+
+            // Should show validation error
+            expect(screen.getByText('Handle must be at least 2 characters')).toBeInTheDocument();
+            expect(input).toHaveClass('border-red-500');
+        });
+
+        it('should navigate between fields with Tab key', async () => {
+            const user = userEvent.setup();
+            const onSplitUpdate = jest.fn();
+
+            render(
+                <BrushSplitTable
+                    brushSplits={mockBrushSplits}
+                    onSplitUpdate={onSplitUpdate}
+                />
+            );
+
+            // Click on handle field to start editing
+            const handleField = screen.getByText('Elite');
+            await act(async () => {
+                await user.click(handleField);
+            });
+
+            // Should now be editing the handle field
+            const handleInput = screen.getByDisplayValue('Elite');
+            expect(handleInput).toHaveFocus();
+
+            // Press Tab to move to knot field
+            await act(async () => {
+                await user.keyboard('{Tab}');
+            });
+
+            // Should now be editing the knot field
+            const knotInput = screen.getByDisplayValue('Declaration');
+            expect(knotInput).toHaveFocus();
+        });
+
+        it('should handle null handle values correctly', async () => {
+            const user = userEvent.setup();
+            const onSplitUpdate = jest.fn();
+            render(<BrushSplitTable {...defaultProps} onSplitUpdate={onSplitUpdate} />);
+
+            // Find the row with null handle (Omega boar brush)
+            const handleField = screen.getByText('N/A');
+            await user.click(handleField);
+
+            // Should show empty input field
+            const handleInput = screen.getByDisplayValue('');
+            expect(handleInput).toBeInTheDocument();
+
+            // Type a value and save
+            await user.type(handleInput, 'New Handle');
+            await user.keyboard('{Enter}');
+
+            // Should call onSplitUpdate with the new handle
+            expect(onSplitUpdate).toHaveBeenCalledWith(1, expect.objectContaining({
+                handle: 'New Handle',
+                validated: true,
+                corrected: true,
+                validated_at: expect.any(String)
+            }));
+        });
+
+        it('should show visual indicators for validation state', async () => {
+            const user = userEvent.setup();
+            const onSplitUpdate = jest.fn();
+            render(<BrushSplitTable {...defaultProps} onSplitUpdate={onSplitUpdate} />);
+
+            // Click handle field to enter edit mode
+            const handleField = screen.getByText('Elite');
+            await user.click(handleField);
+
+            const handleInput = screen.getByDisplayValue('Elite');
+
+            // Initially should have default styling
+            expect(handleInput).toHaveClass('border-gray-300');
+
+            // Type a valid value
+            await user.clear(handleInput);
+            await user.type(handleInput, 'Valid Handle');
+            await user.keyboard('{Enter}');
+
+            // Should call onSplitUpdate and return to display mode
+            expect(onSplitUpdate).toHaveBeenCalled();
+        });
+
+        it('should handle editing validated entries correctly', async () => {
+            const user = userEvent.setup();
+            const onSplitUpdate = jest.fn();
+
+            render(
+                <BrushSplitTable
+                    brushSplits={mockBrushSplits}
+                    onSplitUpdate={onSplitUpdate}
+                />
+            );
+
+            // Find a validated entry (Omega boar brush is validated)
+            const validatedEntry = screen.getByText('Omega boar brush');
+            await act(async () => {
+                await user.click(validatedEntry);
+            });
+
+            // Verify the input field appears
+            const input = screen.getByDisplayValue('Omega boar brush');
+            expect(input).toBeInTheDocument();
+
+            // Change the value
+            await act(async () => {
+                await user.clear(input);
+                await user.type(input, 'New Omega');
+            });
+
+            // Press Enter to save
+            await act(async () => {
+                await user.keyboard('{Enter}');
+            });
+
+            // Verify the callback was called with updated data
+            expect(onSplitUpdate).toHaveBeenCalledWith(1, expect.objectContaining({
+                handle: null,
+                knot: 'New Omega'
+            }));
+        });
+
+        it('should call backend API when saving changes', async () => {
+            const user = userEvent.setup();
+            const onSplitUpdate = jest.fn();
+
+            // Mock successful API response
+            (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    success: true,
+                    message: 'Split saved successfully',
+                    corrected: true
+                })
+            });
+
+            render(
+                <BrushSplitTable
+                    brushSplits={mockBrushSplits}
+                    onSplitUpdate={onSplitUpdate}
+                />
+            );
+
+            // Click on handle field to edit
+            const handleField = screen.getByText('Elite');
+            await act(async () => {
+                await user.click(handleField);
+            });
+
+            // Change the value
+            const input = screen.getByDisplayValue('Elite');
+            await act(async () => {
+                await user.clear(input);
+                await user.type(input, 'New Elite');
+            });
+
+            // Press Enter to save
+            await act(async () => {
+                await user.keyboard('{Enter}');
+            });
+
+            // Verify fetch was called with correct data
+            expect(global.fetch).toHaveBeenCalledWith('/api/brush-splits/save-split', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    original: 'Elite handle w/ Declaration knot',
+                    handle: 'New Elite',
+                    knot: 'Declaration',
+                    validated_at: expect.any(String)
+                })
+            });
+
+            // Verify parent callback was called
+            expect(onSplitUpdate).toHaveBeenCalledWith(0, expect.objectContaining({
+                handle: 'New Elite',
+                knot: 'Declaration G5A'
+            }));
         });
     });
 }); 

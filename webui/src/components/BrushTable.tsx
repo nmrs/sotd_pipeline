@@ -38,7 +38,7 @@ const flattenBrushData = (items: BrushData[], filteredStatus: Record<string, boo
         isParentFiltered?: boolean;
     }> = [];
 
-    items.forEach((item, index) => {
+    items.forEach((item) => {
         const isMainFiltered = filteredStatus[item.main.text] || false;
 
         // Add main brush row

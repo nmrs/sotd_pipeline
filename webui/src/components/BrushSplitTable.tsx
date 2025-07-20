@@ -30,6 +30,16 @@ interface BrushSplitTableProps {
     itemHeight?: number;
 }
 
+// Editing state interface
+interface EditingState {
+    rowIndex: number;
+    field: 'handle' | 'knot';
+    value: string;
+    error: string | null;
+}
+
+
+
 // Row component for the virtualized list
 const BrushSplitRow: React.FC<{
     index: number;
@@ -39,11 +49,14 @@ const BrushSplitRow: React.FC<{
         selectedIndices: number[];
         onSelectionChange?: (selectedIndices: number[]) => void;
         onSplitUpdate?: (index: number, updatedSplit: BrushSplit) => void;
+        editingState: EditingState | null;
+        setEditingState: (state: EditingState | null) => void;
     };
 }> = ({ index, style, data }) => {
-    const { brushSplits, selectedIndices, onSelectionChange } = data;
+    const { brushSplits, selectedIndices, onSelectionChange, onSplitUpdate, editingState, setEditingState } = data;
     const split = brushSplits[index];
     const isSelected = selectedIndices?.includes(index) || false;
+    const isEditing = editingState?.rowIndex === index;
 
     const handleCheckboxChange = useCallback(() => {
         if (!onSelectionChange) return;
@@ -74,6 +87,131 @@ const BrushSplitRow: React.FC<{
         return 'text-gray-600 bg-gray-50';
     };
 
+    // Validation functions
+    const validateField = (field: 'handle' | 'knot', value: string): string | null => {
+        if (value.trim() === '') {
+            return `${field === 'handle' ? 'Handle' : 'Knot'} cannot be empty`;
+        }
+        if (value.trim().length < 2) {
+            return `${field === 'handle' ? 'Handle' : 'Knot'} must be at least 2 characters`;
+        }
+        return null;
+    };
+
+    // Handle field editing
+    const handleHandleClick = useCallback(() => {
+        setEditingState({
+            rowIndex: index,
+            field: 'handle',
+            value: split.handle || '',
+            error: null
+        });
+    }, [index, split.handle, setEditingState]);
+
+    const handleKnotClick = useCallback(() => {
+        setEditingState({
+            rowIndex: index,
+            field: 'knot',
+            value: split.knot,
+            error: null
+        });
+    }, [index, split.knot, setEditingState]);
+
+    // Save changes
+    const saveChanges = useCallback(async (newValue: string) => {
+        if (!onSplitUpdate) return;
+
+        const error = validateField(editingState!.field, newValue);
+        if (error) {
+            setEditingState({
+                ...editingState!,
+                value: newValue,
+                error
+            });
+            return;
+        }
+
+        const updatedSplit: BrushSplit = {
+            ...split,
+            [editingState!.field]: editingState!.field === 'handle' ? newValue : newValue,
+            validated: true,
+            corrected: true,
+            validated_at: new Date().toISOString()
+        };
+
+        // Call parent callback
+        onSplitUpdate(index, updatedSplit);
+
+        // Save to backend
+        try {
+            const response = await fetch('/api/brush-splits/save-split', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    original: updatedSplit.original,
+                    handle: updatedSplit.handle,
+                    knot: updatedSplit.knot,
+                    validated_at: updatedSplit.validated_at,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                console.error('Failed to save split:', result.detail || 'Unknown error');
+                // Don't throw error to avoid breaking the UI flow
+            } else if (result.success) {
+                console.log('Split saved successfully:', result.message);
+            }
+        } catch (error) {
+            console.error('Error saving split:', error);
+            // Don't throw error to avoid breaking the UI flow
+        }
+
+        setEditingState(null);
+    }, [editingState, onSplitUpdate, index, split, setEditingState]);
+
+    // Handle input key events
+    const handleInputKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveChanges(e.currentTarget.value);
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            setEditingState(null);
+        } else if (e.key === 'Tab') {
+            e.preventDefault();
+            saveChanges(e.currentTarget.value);
+            // Move to next field or row
+            if (editingState?.field === 'handle') {
+                setEditingState({
+                    rowIndex: index,
+                    field: 'knot',
+                    value: split.knot,
+                    error: null
+                });
+            }
+        }
+    }, [saveChanges, setEditingState, editingState, index, split.knot]);
+
+    // Handle input change
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setEditingState({
+            ...editingState!,
+            value: e.target.value,
+            error: null
+        });
+    }, [editingState, setEditingState]);
+
+    // Handle input blur
+    const handleInputBlur = useCallback(() => {
+        if (editingState) {
+            saveChanges(editingState.value);
+        }
+    }, [editingState, saveChanges]);
+
     return (
         <div
             style={style}
@@ -99,16 +237,64 @@ const BrushSplitRow: React.FC<{
 
             {/* Handle */}
             <div className="w-32 p-3 min-w-0">
-                <div className="text-sm text-gray-900 truncate" title={split.handle || 'N/A'}>
-                    {split.handle || 'N/A'}
-                </div>
+                {isEditing && editingState?.field === 'handle' ? (
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={editingState.value}
+                            onChange={handleInputChange}
+                            onKeyDown={handleInputKeyDown}
+                            onBlur={handleInputBlur}
+                            className={`w-full text-sm px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${editingState.error ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            autoFocus
+                        />
+                        {editingState.error && (
+                            <div className="absolute top-full left-0 mt-1 text-xs text-red-600 bg-red-50 px-2 py-1 rounded z-10">
+                                {editingState.error}
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div
+                        className="text-sm text-gray-900 truncate cursor-pointer hover:bg-gray-100 px-1 py-1 rounded"
+                        title={split.handle || 'N/A'}
+                        onClick={handleHandleClick}
+                    >
+                        {split.handle || 'N/A'}
+                    </div>
+                )}
             </div>
 
             {/* Knot */}
             <div className="w-32 p-3 min-w-0">
-                <div className="text-sm text-gray-900 truncate" title={split.knot}>
-                    {split.knot}
-                </div>
+                {isEditing && editingState?.field === 'knot' ? (
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={editingState.value}
+                            onChange={handleInputChange}
+                            onKeyDown={handleInputKeyDown}
+                            onBlur={handleInputBlur}
+                            className={`w-full text-sm px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${editingState.error ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            autoFocus
+                        />
+                        {editingState.error && (
+                            <div className="absolute top-full left-0 mt-1 text-xs text-red-600 bg-red-50 px-2 py-1 rounded z-10">
+                                {editingState.error}
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div
+                        className="text-sm text-gray-900 truncate cursor-pointer hover:bg-gray-100 px-1 py-1 rounded"
+                        title={split.knot}
+                        onClick={handleKnotClick}
+                    >
+                        {split.knot}
+                    </div>
+                )}
             </div>
 
             {/* Confidence */}
@@ -147,6 +333,8 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
         key: keyof BrushSplit;
         direction: 'asc' | 'desc';
     } | null>(null);
+
+    const [editingState, setEditingState] = useState<EditingState | null>(null);
 
     // Sort brush splits based on current sort configuration
     const sortedBrushSplits = useMemo(() => {
@@ -252,7 +440,9 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
                         brushSplits: sortedBrushSplits,
                         selectedIndices,
                         onSelectionChange,
-                        onSplitUpdate
+                        onSplitUpdate,
+                        editingState,
+                        setEditingState
                     }}
                 >
                     {BrushSplitRow}
