@@ -33,9 +33,7 @@ def temp_data_dir():
         "razor": {
             "Hot Wheels Play Razor": {
                 "added_date": "2025-01-27",
-                "comment_ids": [
-                    {"file": "data/comments/2025-01.json", "id": "abc123", "source": "user"}
-                ],
+                "comment_ids": [{"file": "2025-01.json", "id": "abc123", "source": "user"}],
             }
         },
         "brush": {},
@@ -113,7 +111,7 @@ class TestUpdateFilteredEntries:
                     "name": "Test Razor",
                     "action": "add",
                     "comment_id": "def456",
-                    "file_path": "data/comments/2025-01.json",
+                    "month": "2025-01",
                     "source": "user",
                 }
             ],
@@ -145,7 +143,7 @@ class TestUpdateFilteredEntries:
                     "name": "Hot Wheels Play Razor",
                     "action": "remove",
                     "comment_id": "abc123",
-                    "file_path": "data/comments/2025-01.json",
+                    "month": "2025-01",
                 }
             ],
         }
@@ -176,19 +174,19 @@ class TestUpdateFilteredEntries:
                     "name": "Test Razor 1",
                     "action": "add",
                     "comment_id": "def456",
-                    "file_path": "data/comments/2025-01.json",
+                    "month": "2025-01",
                 },
                 {
                     "name": "Test Razor 2",
                     "action": "add",
                     "comment_id": "ghi789",
-                    "file_path": "data/comments/2025-01.json",
+                    "month": "2025-01",
                 },
                 {
                     "name": "Hot Wheels Play Razor",
                     "action": "remove",
                     "comment_id": "abc123",
-                    "file_path": "data/comments/2025-01.json",
+                    "month": "2025-01",
                 },
             ],
         }
@@ -211,7 +209,7 @@ class TestUpdateFilteredEntries:
                     "name": "Test Razor",
                     "action": "add",
                     "comment_id": "def456",
-                    "file_path": "data/comments/2025-01.json",
+                    "month": "2025-01",
                 }
             ]
         }
@@ -249,7 +247,7 @@ class TestUpdateFilteredEntries:
                     "name": "Test Razor",
                     "action": "invalid",
                     "comment_id": "def456",
-                    "file_path": "data/comments/2025-01.json",
+                    "month": "2025-01",
                 }
             ],
         }
@@ -287,7 +285,7 @@ class TestUpdateFilteredEntries:
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is False
-        assert "comment_id and file_path are required" in data["errors"][0]
+        assert "Month is required for each entry" in data["errors"][0]
 
 
 class TestGetFilteredEntriesByCategory:
