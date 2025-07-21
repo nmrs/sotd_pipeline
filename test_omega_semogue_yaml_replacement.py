@@ -4,9 +4,6 @@ Test script to verify that the YAML approach can replicate the Omega/Semogue str
 """
 
 import re
-from pathlib import Path
-
-import yaml
 
 
 def test_omega_semogue_yaml_coverage():
@@ -36,29 +33,53 @@ def test_omega_semogue_yaml_coverage():
         "semogue c100",  # C with 3 digits
     ]
 
-    # Load the generated YAML to check patterns
-    yaml_file = Path("data/brushes.post.yaml")
-    if not yaml_file.exists():
-        print("❌ brushes.post.yaml not found. Run the preprocessor first.")
-        return
-
-    with open(yaml_file, "r") as f:
-        catalog_data = yaml.safe_load(f)
+    # Mock catalog data instead of reading from production file
+    mock_catalog_data = {
+        "known_brushes": {
+            "Omega": {
+                "10049": {
+                    "fiber": "Boar",
+                    "knot_size_mm": 24,
+                    "patterns": ["omega\\s*10049", "10049"],
+                },
+                "10005": {
+                    "fiber": "Boar",
+                    "knot_size_mm": 22,
+                    "patterns": ["omega\\s*10005", "10005"],
+                },
+                "46206": {
+                    "fiber": "Boar",
+                    "knot_size_mm": 25,
+                    "patterns": ["omega\\s*46206", "46206"],
+                },
+                "80005": {
+                    "fiber": "Boar",
+                    "knot_size_mm": 24,
+                    "patterns": ["omega\\s*80005", "80005"],
+                },
+            },
+            "Semogue": {
+                "C3": {"fiber": "Boar", "knot_size_mm": 22, "patterns": ["semogue\\s*c3", "c3"]},
+                "C1": {"fiber": "Boar", "knot_size_mm": 20, "patterns": ["semogue\\s*c1", "c1"]},
+                "C5": {"fiber": "Boar", "knot_size_mm": 24, "patterns": ["semogue\\s*c5", "c5"]},
+            },
+        }
+    }
 
     # Extract Omega and Semogue patterns
     omega_patterns = []
     semogue_patterns = []
 
     # Extract Omega patterns
-    if "known_brushes" in catalog_data and "Omega" in catalog_data["known_brushes"]:
-        omega_section = catalog_data["known_brushes"]["Omega"]
+    if "known_brushes" in mock_catalog_data and "Omega" in mock_catalog_data["known_brushes"]:
+        omega_section = mock_catalog_data["known_brushes"]["Omega"]
         for model_name, model_data in omega_section.items():
             if isinstance(model_data, dict) and "patterns" in model_data:
                 omega_patterns.extend(model_data["patterns"])
 
     # Extract Semogue patterns
-    if "known_brushes" in catalog_data and "Semogue" in catalog_data["known_brushes"]:
-        semogue_section = catalog_data["known_brushes"]["Semogue"]
+    if "known_brushes" in mock_catalog_data and "Semogue" in mock_catalog_data["known_brushes"]:
+        semogue_section = mock_catalog_data["known_brushes"]["Semogue"]
         for model_name, model_data in semogue_section.items():
             if isinstance(model_data, dict) and "patterns" in model_data:
                 semogue_patterns.extend(model_data["patterns"])
