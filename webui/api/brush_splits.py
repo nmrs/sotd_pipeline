@@ -550,13 +550,34 @@ class BrushSplitValidator:
                 )
 
             self.validated_splits.clear()
-            for split_data in data.get("splits", []):
-                try:
-                    split = BrushSplit.from_dict(split_data)
-                    self.validated_splits[split.original] = split
-                except (KeyError, ValueError) as e:
-                    logger.warning(f"Skipping invalid split data: {e}")
-                    continue
+            splits_data = data.get("splits", {})
+
+            # Handle new structure: splits is a dict with brush names as keys
+            if isinstance(splits_data, dict):
+                for brush_name, entries in splits_data.items():
+                    if isinstance(entries, list):
+                        for split_data in entries:
+                            try:
+                                split = BrushSplit.from_dict(split_data)
+                                self.validated_splits[split.original] = split
+                            except (KeyError, ValueError) as e:
+                                logger.warning(f"Skipping invalid split data for {brush_name}: {e}")
+                                continue
+                    else:
+                        logger.warning(
+                            f"Invalid entries format for {brush_name}: "
+                            f"expected list, got {type(entries)}"
+                        )
+
+            # Handle old structure: splits is a list (backward compatibility)
+            elif isinstance(splits_data, list):
+                for split_data in splits_data:
+                    try:
+                        split = BrushSplit.from_dict(split_data)
+                        self.validated_splits[split.original] = split
+                    except (KeyError, ValueError) as e:
+                        logger.warning(f"Skipping invalid split data: {e}")
+                        continue
 
             logger.info(f"Loaded {len(self.validated_splits)} validated splits")
 
@@ -578,8 +599,20 @@ class BrushSplitValidator:
         from webui.api.utils.yaml_utils import save_yaml_file
 
         try:
-            # Prepare data for saving
-            data = {"splits": [split.to_dict() for split in splits]}
+            # Group splits by original brush name (case-insensitive)
+            organized_splits = {}
+            for split in splits:
+                key = split.original.lower()
+                if key not in organized_splits:
+                    organized_splits[key] = []
+                organized_splits[key].append(split.to_dict())
+
+            # Create new structure with alphabetical organization
+            data = {"splits": {}}
+            for key in sorted(organized_splits.keys()):
+                # Use the first entry's original as the display name
+                display_name = organized_splits[key][0]["original"]
+                data["splits"][display_name] = organized_splits[key]
 
             # Ensure directory exists
             self.yaml_path.parent.mkdir(parents=True, exist_ok=True)
@@ -587,7 +620,7 @@ class BrushSplitValidator:
             # Use the new YAML utility for atomic write
             save_yaml_file(data, self.yaml_path)
 
-            logger.info(f"Saved {len(splits)} validated splits")
+            logger.info(f"Saved {len(splits)} validated splits in new organized structure")
             return True
 
         except (OSError, IOError) as e:
