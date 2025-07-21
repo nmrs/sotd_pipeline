@@ -117,6 +117,7 @@ class BrushSplit:
     original: str
     handle: Optional[str]
     knot: str
+    match_type: Optional[str] = None
     validated: bool = False
     corrected: bool = False
     validated_at: Optional[str] = None  # ISO timestamp
@@ -132,6 +133,7 @@ class BrushSplit:
             "original": self.original,
             "handle": self.handle,
             "knot": self.knot,
+            "match_type": self.match_type,
             "validated": self.validated,
             "corrected": self.corrected,
             "validated_at": self.validated_at,
@@ -168,6 +170,7 @@ class BrushSplit:
             original=data["original"],
             handle=data["handle"],
             knot=data["knot"],
+            match_type=data.get("match_type"),
             validated=data.get("validated", False),
             corrected=data.get("corrected", False),
             validated_at=data.get("validated_at"),
@@ -275,6 +278,7 @@ class BrushSplitModel(BaseModel):
     original: str = Field(..., description="Original brush string")
     handle: Optional[str] = Field(None, description="Handle component")
     knot: str = Field(..., description="Knot component")
+    match_type: Optional[str] = Field(None, description="Match type from brush matcher")
     validated: bool = Field(False, description="Whether this split has been validated")
     corrected: bool = Field(False, description="Whether this split was corrected")
     validated_at: Optional[str] = Field(None, description="ISO timestamp of validation")
@@ -803,15 +807,61 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
                         normalized = normalize_brush_string(original)
                         if normalized:
                             # Extract split information from matched data
-                            matched = brush_data.get("matched", {})
-                            handle = matched.get("_original_handle_text")
-                            knot = matched.get("_original_knot_text")
+                            matched = brush_data.get("matched")
+                            if matched is None:
+                                # Unmatched brush - use normalized as original, no handle/knot split
+                                handle = None
+                                knot = normalized  # Use normalized as knot for unmatched brushes
+                                match_type = brush_data.get("match_type")
+                            else:
+                                # Matched brush - extract handle and knot
+                                try:
+                                    handle_obj = matched.get("handle")
+                                    knot_obj = matched.get("knot")
+                                    handle = (
+                                        handle_obj.get("source_text")
+                                        if handle_obj and isinstance(handle_obj, dict)
+                                        else None
+                                    )
+                                    knot = (
+                                        knot_obj.get("source_text")
+                                        if knot_obj and isinstance(knot_obj, dict)
+                                        else None
+                                    )
+                                    match_type = brush_data.get("match_type")
+
+                                    # Handle cases where handle or knot is null in matched data
+                                    if handle is None and knot is None:
+                                        # No split available - use original as knot, no handle
+                                        handle = None
+                                        knot = normalized
+                                    elif handle is None:
+                                        # Only knot available - use original as handle
+                                        handle = normalized
+                                        knot = knot or normalized
+                                    elif knot is None:
+                                        # Only handle available - use original as knot
+                                        handle = handle
+                                        knot = normalized
+                                    else:
+                                        # Both handle and knot available
+                                        handle = handle
+                                        knot = knot
+                                except Exception as e:
+                                    # Fallback for any errors in extraction
+                                    logger.warning(
+                                        f"Error extracting handle/knot from {original}: {e}"
+                                    )
+                                    handle = None
+                                    knot = normalized
+                                    match_type = brush_data.get("match_type")
 
                             if normalized not in brush_splits:
                                 brush_splits[normalized] = {
                                     "original": normalized,
                                     "handle": handle,
-                                    "knot": knot or normalized,
+                                    "knot": knot,
+                                    "match_type": match_type,
                                     "comment_ids": [],
                                 }
                             brush_splits[normalized]["comment_ids"].append(
@@ -849,6 +899,7 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
             original = split_data["original"]
             handle = split_data["handle"]
             knot = split_data["knot"]
+            match_type = split_data.get("match_type")
             comment_ids = split_data["comment_ids"]
 
             # Check if already validated
@@ -867,6 +918,7 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
                     original=original,
                     handle=handle,
                     knot=knot,
+                    match_type=match_type,
                     validated=False,
                     corrected=False,
                     occurrences=[
