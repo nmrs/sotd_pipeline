@@ -1,7 +1,7 @@
 # WebUI & API DRY Refactor - TDD Implementation Plan
 
 **Date**: 2025-07-21  
-**Status**: DRAFT  
+**Status**: IN_PROGRESS  
 **Type**: Refactoring  
 **Template**: TDD Project Planning  
 
@@ -11,11 +11,59 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
 
 ---
 
+## 📊 Progress Summary
+
+**Current Status**: Phase 1, Step 3 (YAML/Data File Utility Module) ✅ COMPLETE  
+**Next Step**: Phase 0, Step 1 (Fix WebUI Test Mocking Strategy) ⏳ PENDING  
+**Overall Progress**: 1/11 steps complete (9%)  
+**Blocking Issues**: 3 failing webui tests (pre-existing, not caused by our refactoring)
+
+**Completed Work**:
+- ✅ Phase 1, Step 3: YAML/Data File Utility Module
+  - Created comprehensive YAML utilities with 18 unit tests
+  - Refactored brush_splits.py to use new utilities
+  - Added 6 integration tests
+  - All Python tests passing (1,724 tests)
+
+**Immediate Next Steps**:
+- ⏳ Phase 0, Step 1: Fix WebUI Test Mocking Strategy
+  - Fix 3 failing webui tests with proper axios mocking
+  - Separate unit tests from integration tests
+  - Ensure all webui tests pass
+
+---
+
 ## 🧩 Component Steps
+
+### Phase 0: WebUI Test Infrastructure Fixes (Pre-Refactoring)
+
+1. **Fix WebUI Test Mocking Strategy** ⏳ PENDING
+   - **Issue**: Integration tests are hitting real API instead of using proper mocks
+   - **Problem**: Tests expect specific data (2 items) but get real data (592 items)
+   - **Solution**: Implement proper axios mocking for unit tests
+   - **Implementation**:
+     - Mock axios instead of fetch for API service tests
+     - Separate unit tests (mocked) from integration tests (real API)
+     - Fix `should_not_split` tests to use proper mocks
+   - **Tests**: Ensure all webui tests pass (currently 3 failing)
+   - **Quality**: Fast, reliable tests that don't depend on real API data
+
+2. **Establish Test Data Isolation Strategy** ⏳ PENDING
+   - **Issue**: Integration tests depend on changing production data
+   - **Problem**: Tests fail when real data changes (592 items vs expected 2)
+   - **Solution**: Create test-specific API endpoints with isolated data
+   - **Implementation**:
+     - Create test YAML files with predictable, small datasets
+     - Add test-specific API endpoints that use isolated data
+     - Update integration tests to use test endpoints
+   - **Tests**: Integration tests that are fast and reliable
+   - **Quality**: Tests that don't break when production data changes
+
+---
 
 ### Phase 1: Shared Utilities for API (Python)
 
-1. **YAML/Data File Utility Module** ✅ COMPLETE
+3. **YAML/Data File Utility Module** ✅ COMPLETE
    - Create a shared utility for loading, saving, and validating YAML/data files.
    - Refactor all API modules to use these utilities for file I/O and validation.
    - **Implementation**: Created `webui/api/utils/yaml_utils.py` with comprehensive functions:
@@ -28,11 +76,11 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
    - **Integration Tests**: 6 tests verifying the refactored module works correctly
    - **Quality**: All tests passing (24 total), linting clean, committed with clear message
 
-2. **Centralized Error Handling**
+4. **Centralized Error Handling**
    - Implement a decorator/context manager for API error handling.
    - Refactor endpoints to use this for consistent error responses.
 
-3. **Base Validator Class**
+5. **Base Validator Class**
    - Create a base validator for product-type validation logic.
    - Refactor product-specific validators to inherit from this.
 
@@ -40,38 +88,58 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
 
 ### Phase 2: WebUI DRY Refactoring (React/TypeScript)
 
-4. **Remove Manual Cache-Busting**
+6. **Remove Manual Cache-Busting**
    - Ensure all cache-busting is handled by the Axios interceptor.
    - Remove manual timestamp query params from API calls.
 
-5. **Generic DataTable Component**
+7. **Generic DataTable Component**
    - Create a generic, configurable DataTable component.
    - Refactor all table/grid components to use this.
 
-6. **Shared Form Field Components**
+8. **Shared Form Field Components**
    - Create generic CheckboxField, SelectField, and InputField components.
    - Refactor forms to use these shared components.
 
-7. **Generalize Data Transformers**
+9. **Generalize Data Transformers**
    - If multiple product types need transformation, create a generic transformer pattern.
 
 ---
 
 ### Phase 3: Testing and Documentation
 
-8. **Test Utilities for Mocks**
-   - Create test utilities for common mocks (API, fetch, months).
-   - Refactor tests to use these utilities.
+10. **Test Utilities for Mocks**
+    - Create test utilities for common mocks (API, fetch, months).
+    - Refactor tests to use these utilities.
 
-9. **Documentation**
-   - Document all shared utilities and DRY patterns.
-   - Update onboarding/contribution guides.
+11. **Documentation**
+    - Document all shared utilities and DRY patterns.
+    - Update onboarding/contribution guides.
 
 ---
 
 ## 🔁 TDD Prompts for Each Step
 
-### Step 1: YAML/Data File Utility Module
+### Step 1: Fix WebUI Test Mocking Strategy
+
+```text
+Fix the failing webui tests by implementing proper axios mocking instead of fetch mocking.
+- Write unit tests that properly mock axios responses for API service functions.
+- Separate unit tests (mocked) from integration tests (real API).
+- Fix the should_not_split tests to use proper mocks and expect correct data.
+- Ensure all webui tests pass (currently 3 failing tests).
+```
+
+### Step 2: Establish Test Data Isolation Strategy
+
+```text
+Create test-specific API endpoints and data files for isolated testing.
+- Create test YAML files with predictable, small datasets.
+- Add test-specific API endpoints that use isolated data.
+- Update integration tests to use test endpoints instead of production data.
+- Ensure tests are fast, reliable, and don't depend on changing production data.
+```
+
+### Step 3: YAML/Data File Utility Module
 
 ```text
 Create a Python module (e.g., `webui/api/utils/yaml_utils.py`) with functions for loading, saving, and validating YAML/data files.  
@@ -80,7 +148,7 @@ Create a Python module (e.g., `webui/api/utils/yaml_utils.py`) with functions fo
 - Ensure all tests pass and error handling is consistent.
 ```
 
-### Step 2: Centralized Error Handling
+### Step 4: Centralized Error Handling
 
 ```text
 Implement a decorator or context manager for API error handling in Python.  
@@ -89,7 +157,7 @@ Implement a decorator or context manager for API error handling in Python.
 - Ensure error responses are consistent and tests pass.
 ```
 
-### Step 3: Base Validator Class
+### Step 5: Base Validator Class
 
 ```text
 Create a base validator class for product-type validation logic in Python.  
@@ -98,7 +166,7 @@ Create a base validator class for product-type validation logic in Python.
 - Ensure all tests pass and logic is DRY.
 ```
 
-### Step 4: Remove Manual Cache-Busting
+### Step 6: Remove Manual Cache-Busting
 
 ```text
 Audit all API calls in the webui for manual cache-busting query params.  
@@ -107,7 +175,7 @@ Audit all API calls in the webui for manual cache-busting query params.
 - Ensure all tests pass and no manual cache-busting remains.
 ```
 
-### Step 5: Generic DataTable Component
+### Step 7: Generic DataTable Component
 
 ```text
 Create a generic DataTable React component that accepts columns, data, and row renderers as props.  
@@ -116,7 +184,7 @@ Create a generic DataTable React component that accepts columns, data, and row r
 - Ensure all tests pass and UI is unchanged.
 ```
 
-### Step 6: Shared Form Field Components
+### Step 8: Shared Form Field Components
 
 ```text
 Create generic CheckboxField, SelectField, and InputField React components.  
@@ -125,7 +193,7 @@ Create generic CheckboxField, SelectField, and InputField React components.
 - Ensure all tests pass and form behavior is unchanged.
 ```
 
-### Step 7: Generalize Data Transformers
+### Step 9: Generalize Data Transformers
 
 ```text
 If multiple product types require data transformation, create a generic transformer pattern in TypeScript.  
@@ -134,7 +202,7 @@ If multiple product types require data transformation, create a generic transfor
 - Ensure all tests pass and data is transformed correctly.
 ```
 
-### Step 8: Test Utilities for Mocks
+### Step 10: Test Utilities for Mocks
 
 ```text
 Create test utility functions for common mocks (API, fetch, months) in the webui.  
@@ -143,7 +211,7 @@ Create test utility functions for common mocks (API, fetch, months) in the webui
 - Ensure all tests pass and mocking is consistent.
 ```
 
-### Step 9: Documentation
+### Step 11: Documentation
 
 ```text
 Document all shared utilities and DRY patterns in the codebase.  
