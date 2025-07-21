@@ -13,17 +13,22 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
 
 ## 📊 Progress Summary
 
-**Current Status**: Phase 1, Step 4 (YAML/Data File Utility Module) ✅ COMPLETE  
+**Current Status**: Phase 0, Step 3 (Improve Brush Splits Data Structure) ✅ COMPLETE  
 **Next Step**: Phase 0, Step 1 (Fix WebUI Test Mocking Strategy) ⏳ PENDING  
-**Overall Progress**: 1/12 steps complete (8%)  
+**Overall Progress**: 2/12 steps complete (17%)  
 **Blocking Issues**: 3 failing webui tests (pre-existing, not caused by our refactoring)
 
 **Completed Work**:
-- ✅ Phase 1, Step 3: YAML/Data File Utility Module
+- ✅ Phase 1, Step 4: YAML/Data File Utility Module
   - Created comprehensive YAML utilities with 18 unit tests
   - Refactored brush_splits.py to use new utilities
   - Added 6 integration tests
   - All Python tests passing (1,724 tests)
+- ✅ Phase 0, Step 3: Improve Brush Splits Data Structure
+  - Fixed data consistency: knot is null when should_not_split is true
+  - Reorganized alphabetically by original brush name (case-insensitive)
+  - Removed redundant validated field
+  - New structure: splits: {original: [entries]}
 
 **Immediate Next Steps**:
 - ⏳ Phase 0, Step 1: Fix WebUI Test Mocking Strategy
@@ -59,7 +64,7 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
    - **Tests**: Integration tests that are fast and reliable
    - **Quality**: Tests that don't break when production data changes
 
-3. **Improve Brush Splits Data Structure** ⏳ PENDING
+3. **Improve Brush Splits Data Structure** ✅ COMPLETE
    - **Issue**: Current data structure has inconsistencies and poor organization
    - **Problems**:
      - `knot` should be `null` when `should_not_split` is `true`
@@ -67,11 +72,11 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
      - Redundant `validated` field when `validated_at` exists
    - **Solution**: Reorganize data structure for better consistency and organization
    - **Implementation**:
-     - Fix data consistency: set `knot: null` for `should_not_split: true`
-     - Reorganize alphabetically by original brush name
-     - Remove redundant `validated` field
-     - Update API code to handle new structure
-     - Update tests to expect new data format
+     - ✅ Fix data consistency: set `knot: null` for `should_not_split: true`
+     - ✅ Reorganize alphabetically by original brush name (case-insensitive)
+     - ✅ Remove redundant `validated` field
+     - ⏳ Update API code to handle new structure
+     - ⏳ Update tests to expect new data format
    - **New Structure**:
      ```yaml
      splits:
