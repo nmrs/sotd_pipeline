@@ -103,6 +103,10 @@ class BrushSplitter:
                 return self._split_by_delimiter_simple(text, delimiter, "high_reliability")
 
         # Special handling for `/` as high-reliability delimiter (any spaces, not part of 'w/')
+        # But first check if `/` is part of a specification rather than a delimiter
+        if self._is_specification_slash(text):
+            return None, None, None
+
         slash_match = re.search(r"(.+?)(?<!w)\s*/\s*(.+)", text)
         if slash_match:
             part1 = slash_match.group(1).strip()
@@ -528,6 +532,10 @@ class BrushSplitter:
 
     def _split_by_fiber_hint(self, text: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
         """Split text using fiber words as hints for knot identification."""
+        # Check if `/` is part of a specification rather than a delimiter
+        if self._is_specification_slash(text):
+            return None, None, None
+
         all_fiber_patterns = [pattern.strip("()") for pattern in _FIBER_PATTERNS.values()]
         combined_fiber_pattern = "|".join(all_fiber_patterns)
         fiber_matches = list(re.finditer(f"({combined_fiber_pattern})", text, re.IGNORECASE))
@@ -713,6 +721,30 @@ class BrushSplitter:
             return None, None, None
 
         return handle_text, knot_text, "brand_context"
+
+    def _is_specification_slash(self, text: str) -> bool:
+        """Check if `/` is part of a specification rather than a delimiter.
+
+        Examples of specifications that should NOT be split:
+        - "50/50" (50% horse mane, 50% horse tail)
+        - "70/30" (70% badger, 30% boar)
+        - "80/20" (80% synthetic, 20% badger)
+        - "25/75" (25% horse, 75% badger)
+        """
+        # Look for percentage specifications like "50/50", "70/30", etc.
+        # These are typically found in parentheses or as part of fiber descriptions
+        percentage_patterns = [
+            r"\(\s*\d{1,2}/\d{1,2}\s*\)",  # (50/50), (70/30)
+            r"\b\d{1,2}/\d{1,2}\b",  # 50/50, 70/30
+            r"\d{1,2}/\d{1,2}\s*(?:horse|badger|boar|synthetic)",  # 50/50 horse mane
+            r"(?:horse|badger|boar|synthetic).*?\d{1,2}/\d{1,2}",  # horse mane/tail 50/50
+        ]
+
+        for pattern in percentage_patterns:
+            if re.search(pattern, text, re.IGNORECASE):
+                return True
+
+        return False
 
     def _is_same_maker_split(self, handle: str, knot: str) -> bool:
         """Check if the handle and knot are from the same maker brand."""
