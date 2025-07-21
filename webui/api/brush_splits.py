@@ -126,6 +126,7 @@ class BrushSplit:
     system_confidence: Optional[ConfidenceLevel] = None
     system_reasoning: Optional[str] = None
     occurrences: List[BrushSplitOccurrence] = field(default_factory=list)
+    should_not_split: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
@@ -137,6 +138,7 @@ class BrushSplit:
             "validated": self.validated,
             "corrected": self.corrected,
             "validated_at": self.validated_at,
+            "should_not_split": self.should_not_split,
             "occurrences": [occ.to_dict() for occ in self.occurrences],
         }
 
@@ -178,6 +180,7 @@ class BrushSplit:
             system_knot=data.get("system_knot"),
             system_confidence=system_confidence,
             system_reasoning=data.get("system_reasoning"),
+            should_not_split=data.get("should_not_split", False),
             occurrences=[
                 BrushSplitOccurrence.from_dict(occ) for occ in data.get("occurrences", [])
             ],
@@ -286,6 +289,7 @@ class BrushSplitModel(BaseModel):
     system_knot: Optional[str] = Field(None, description="System-generated knot")
     system_confidence: Optional[str] = Field(None, description="System confidence level")
     system_reasoning: Optional[str] = Field(None, description="System reasoning")
+    should_not_split: bool = Field(False, description="Whether this brush should not be split")
     occurrences: List[BrushSplitOccurrenceModel] = Field(
         default_factory=list, description="List of occurrences"
     )
@@ -312,6 +316,7 @@ class SaveSplitRequest(BaseModel):
     handle: Optional[str] = Field(None, description="Corrected handle component")
     knot: str = Field(..., description="Corrected knot component")
     validated_at: Optional[str] = Field(None, description="ISO timestamp of validation")
+    should_not_split: bool = Field(False, description="Whether this brush should not be split")
 
 
 class SaveSplitResponse(BaseModel):
@@ -528,15 +533,18 @@ class BrushSplitValidator:
 
     def load_validated_splits(self) -> None:
         """Load validated splits from YAML file with fail-fast error handling."""
+        from webui.api.utils.yaml_utils import load_yaml_file, validate_yaml_structure
+
         if not self.yaml_path.exists():
             logger.info(f"YAML file not found: {self.yaml_path}")
             return
 
         try:
-            with open(self.yaml_path, "r", encoding="utf-8") as f:
-                data = yaml.safe_load(f)
+            # Use the new YAML utility
+            data = load_yaml_file(self.yaml_path)
 
-            if not isinstance(data, dict):
+            # Validate the structure using the utility
+            if not validate_yaml_structure(data, dict):
                 raise DataCorruptionError(
                     f"Invalid YAML structure: expected dict, got {type(data)}"
                 )
@@ -552,12 +560,12 @@ class BrushSplitValidator:
 
             logger.info(f"Loaded {len(self.validated_splits)} validated splits")
 
+        except FileNotFoundError as e:
+            logger.error(f"YAML file not found: {e}")
+            raise FileNotFoundError(f"Failed to read YAML file: {e}")
         except yaml.YAMLError as e:
             logger.error(f"YAML parsing error: {e}")
             raise DataCorruptionError(f"Failed to parse YAML file: {e}")
-        except (OSError, IOError) as e:
-            logger.error(f"File I/O error: {e}")
-            raise FileNotFoundError(f"Failed to read YAML file: {e}")
         except DataCorruptionError:
             # Re-raise data corruption errors immediately
             raise
@@ -567,6 +575,8 @@ class BrushSplitValidator:
 
     def save_validated_splits(self, splits: List[BrushSplit]) -> bool:
         """Save validated splits to YAML file with fail-fast error handling."""
+        from webui.api.utils.yaml_utils import save_yaml_file
+
         try:
             # Prepare data for saving
             data = {"splits": [split.to_dict() for split in splits]}
@@ -574,13 +584,9 @@ class BrushSplitValidator:
             # Ensure directory exists
             self.yaml_path.parent.mkdir(parents=True, exist_ok=True)
 
-            # Write to temporary file first
-            temp_path = self.yaml_path.with_suffix(".yaml.tmp")
-            with open(temp_path, "w", encoding="utf-8") as f:
-                yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
+            # Use the new YAML utility for atomic write
+            save_yaml_file(data, self.yaml_path)
 
-            # Atomic move
-            temp_path.replace(self.yaml_path)
             logger.info(f"Saved {len(splits)} validated splits")
             return True
 
@@ -665,9 +671,19 @@ class BrushSplitValidator:
             return ConfidenceLevel.LOW, "Unknown split type with poor component quality"
 
     def validate_split(
-        self, original: str, handle: Optional[str], knot: str, validated_at: Optional[str] = None
+        self,
+        original: str,
+        handle: Optional[str],
+        knot: str,
+        validated_at: Optional[str] = None,
+        should_not_split: bool = False,
     ) -> BrushSplit:
         """Create a validated brush split."""
+        # If should_not_split is True, override the handle and knot
+        if should_not_split:
+            handle = None
+            knot = original  # Use the original string as the knot
+
         # Calculate system confidence and reasoning
         system_confidence, system_reasoning = self.calculate_confidence(original, handle, knot)
 
@@ -678,7 +694,11 @@ class BrushSplitValidator:
         system_knot = None
 
         if existing:
-            corrected = existing.handle != handle or existing.knot != knot
+            corrected = (
+                existing.handle != handle
+                or existing.knot != knot
+                or existing.should_not_split != should_not_split
+            )
             if corrected:
                 system_handle = existing.handle
                 system_knot = existing.knot
@@ -694,6 +714,7 @@ class BrushSplitValidator:
             system_knot=system_knot,
             system_confidence=system_confidence if corrected else None,
             system_reasoning=system_reasoning if corrected else None,
+            should_not_split=should_not_split,
             occurrences=existing.occurrences if existing else [],
         )
 
@@ -1107,6 +1128,7 @@ async def save_single_split(data: SaveSplitRequest):
             handle=data.handle,
             knot=data.knot,
             validated_at=data.validated_at,
+            should_not_split=data.should_not_split,
         )
 
         # Save the updated splits
