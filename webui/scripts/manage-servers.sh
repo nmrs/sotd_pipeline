@@ -107,9 +107,10 @@ start_backend() {
     
     print_status $BLUE "Starting backend server (FastAPI) on port $BACKEND_PORT..."
     
-    cd "$BACKEND_DIR"
+    # Run from project root with proper PYTHONPATH
+    cd "$FRONTEND_DIR/.."
     # Set test environment for CORS to allow all origins during testing
-    ENVIRONMENT=test python -m uvicorn main:app --host 0.0.0.0 --port $BACKEND_PORT --reload > "$BACKEND_LOG_FILE" 2>&1 &
+    ENVIRONMENT=test PYTHONPATH=. python -m uvicorn webui.api.main:app --host 0.0.0.0 --port $BACKEND_PORT --reload > "$BACKEND_LOG_FILE" 2>&1 &
     local pid=$!
     echo $pid > "$BACKEND_PID_FILE"
     
