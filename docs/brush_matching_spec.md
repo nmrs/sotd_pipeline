@@ -31,6 +31,32 @@ A single `brush` string provided by the extraction phase. This string may contai
 2. **Regex Patterns**: If not found in the correct matches file, regex patterns from the YAML catalogs are used. These matches have `match_type: regex` and also include all catalog fields.
 3. **Fallbacks**: Brand/alias/other fallback strategies as before.
 
+### Enhanced Correct Matches Integration
+
+The system now checks correct matches at multiple levels:
+
+#### **Step 0: Full String Correct Matches**
+- Check the entire input string against `brush` section in correct_matches.yaml
+- Highest priority for complete brush matches
+
+#### **Step 1: Split Component Correct Matches** 
+- After splitting into handle and knot components, check each component individually
+- Handle component checked against `handle` section in correct_matches.yaml
+- Knot component checked against `knot` section in correct_matches.yaml
+- Correct matches take priority over strategy-based matching for individual components
+
+#### **Step 3: Dual Component Fallback Correct Matches**
+- When attempting dual component matching on the entire string
+- Check handle component against `handle` section in correct_matches.yaml
+- Check knot component against `knot` section in correct_matches.yaml
+- Correct matches take priority over strategy-based matching for individual components
+
+### Correct Matches Priority Hierarchy
+1. **Full String Correct Match** (Step 0) - Highest priority
+2. **Split Component Correct Matches** (Step 1) - Component-level validation
+3. **Dual Component Fallback Correct Matches** (Step 3) - Component-level validation
+4. **Strategy-Based Matching** - Fallback when correct matches not found
+
 ## Output Structure
 
 ```python
@@ -58,6 +84,7 @@ A single `brush` string provided by the extraction phase. This string may contai
             "_matched_by": str | None,  # Strategy attribution
             "_pattern": str | None       # Pattern used for matching
         } | None,
+        "user_intent": str | None,      # "handle_primary" | "knot_primary" | None
     } | None,
     "match_type": "exact|regex|alias|brand|fiber|knot|artisan|unmatched" | None,
     "pattern": str | None
@@ -143,9 +170,23 @@ A single `brush` string provided by the extraction phase. This string may contai
 
 The system uses a **Strategy Pattern** with multiple specialized matching strategies tried in priority order, combined with intelligent handle/knot splitting and content analysis.
 
-### Strategy Priority Order (Most to Least Specific)
+### Matching Steps (Sequential Processing)
 
-1. **Correct Matches File** (see above)
+1. **Step 0: Correct Matches Check** - Check entire input against `brush` section in correct_matches.yaml
+2. **Step 1: Composite Brush Splitting** - Split input into handle and knot components using delimiters
+   - Check handle component against `handle` section in correct_matches.yaml
+   - Check knot component against `knot` section in correct_matches.yaml
+   - Fall back to strategy-based matching for individual components
+3. **Step 2: Complete Brush Matching** - Apply brush-specific strategies to full string
+4. **Step 3: Dual Component Fallback** - Run handle and knot matchers on entire string
+   - Check handle component against `handle` section in correct_matches.yaml
+   - Check knot component against `knot` section in correct_matches.yaml
+   - Fall back to strategy-based matching for individual components
+   - Create composite brush if both components match
+
+### Strategy Priority Order (Within Each Step)
+
+1. **Correct Matches File** (highest priority within each step)
 2. **KnownBrushMatchingStrategy** - Exact catalog matches from `known_brushes` section
 3. **DeclarationGroomingBrushMatchingStrategy** - DG-specific patterns with smart brand detection
 4. **ChiselAndHoundBrushMatchingStrategy** - C&H versioned knots (V10-V27)
@@ -161,6 +202,30 @@ The system recognizes various delimiters and applies semantic understanding:
 - **`" w/ "`, `" with "`** - Knot-ambiguous delimiters (requires content analysis)
 - **`" in "`** - Handle-primary delimiter  
 - **`" / "`, `"/"`, `" - "`** - Neutral delimiters
+
+### Dual Component Fallback Enhancement
+
+When splitting fails or no clear delimiter is present, the system now includes an enhanced fallback mechanism:
+
+#### **Step 3: Dual Component Fallback**
+- **Purpose**: Handle cases where both handle and knot components are present without clear delimiters
+- **Example**: `"Rad Dinosaur G5C"` (Rad Dinosaur handle + AP Shave Co G5C knot)
+- **Process**: 
+  1. Run handle matcher on entire string
+  2. Run knot matcher on entire string  
+  3. If both return valid matches, create composite brush structure
+  4. Detect user intent based on component order in original string
+
+#### **User Intent Tracking**
+- **`"handle_primary"`**: Handle component appears first in input string
+- **`"knot_primary"`**: Knot component appears first in input string
+- **Application**: Tracks user's primary focus for both split and fallback scenarios
+- **Example**: `"G5C Rad Dinosaur"` → `"knot_primary"`, `"Rad Dinosaur G5C"` → `"handle_primary"`
+
+#### **Dual Component Validation**
+- **Same-brand makers**: Valid dual component matches (e.g., "Zenith Boar" with Zenith handle and knot)
+- **Different-brand makers**: Standard dual component validation
+- **Priority**: Dual component matches always take priority over single component matches in fallback
 
 ### Content Analysis Scoring
 Uses `_score_as_handle()` to determine which part is likely the handle:
@@ -238,6 +303,7 @@ knot:                                   # Knot subsection (if available)
   source_text: string | null            # Original text that was matched
   _matched_by: string | null           # Strategy that produced the match
   _pattern: string | null              # Regex pattern that matched
+user_intent: "handle_primary" | "knot_primary" | null  # User's primary focus
 fiber_strategy: "user_input" | "yaml" | "default"    # Source of fiber information
 match_type: "exact" | "regex" | "alias" | "brand" | "fiber" | "knot" | "artisan" | "unmatched"
 pattern: string | null                  # Overall pattern that matched

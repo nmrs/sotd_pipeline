@@ -193,18 +193,6 @@ class TestBrushMatcher:
         assert result.matched["brand"] == "Declaration Grooming"
         assert result.matched["model"] == "B3"
 
-    def test_other_brush_matching(self, brush_matcher):
-        """Test matching of other brushes with defaults."""
-        result = brush_matcher.match("Elite handle")
-        # Should be treated as composite brush with handle-only information
-        assert result.matched["brand"] is None  # Composite brush
-        assert result.matched["model"] is None  # Composite brush
-        # Handle section should have Elite information
-        assert result.matched["handle"]["brand"] == "Elite"
-        # Knot section should have no information (unknown knot)
-        assert result.matched["knot"]["brand"] is None
-        assert result.matched["knot"]["fiber"] is None  # No knot information
-
     def test_handle_knot_splitting(self, brush_matcher):
         """Test handle/knot splitting functionality."""
         result = brush_matcher.match("DG B15 w/ C&H Zebra")

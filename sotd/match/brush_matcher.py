@@ -92,7 +92,7 @@ class BrushMatcher:
         ]
         # For handle/knot matching, use both sets of strategies
         self.strategies = self.brush_strategies + self.knot_strategies
-        self.knot_matcher = KnotMatcher(self.strategies)
+        self.knot_matcher = KnotMatcher(self.knot_strategies)
         self.brush_splitter = BrushSplitter(self.handle_matcher, self.strategies)
         # Centralized cache for expensive operations
         self._cache = MatchCache(
@@ -317,18 +317,53 @@ class BrushMatcher:
         if handle_text and knot_text:
             # Handle split result - create composite brush structure
             # Match handle and knot separately
-            handle_match = self.handle_matcher.match_handle_maker(handle_text)
-            knot_match = None
 
-            # Try to match knot with strategies
-            for strategy in self.strategies:
-                try:
-                    result = strategy.match(knot_text)
-                    if result and hasattr(result, "matched") and result.matched:
-                        knot_match = result
-                        break
-                except Exception:
-                    continue
+            # Check correct matches for handle component first
+            handle_correct_match = self.correct_matches_checker.check(handle_text)
+            if handle_correct_match:
+                # Use correct match for handle
+                handle_match = {
+                    "handle_maker": handle_correct_match.handle_maker,
+                    "handle_model": handle_correct_match.handle_model,
+                    "_matched_by": "CorrectMatches",
+                    "_pattern": "correct_matches_handle",
+                }
+            else:
+                # Fall back to handle matcher
+                handle_match = self.handle_matcher.match_handle_maker(handle_text)
+
+            # Check correct matches for knot component first
+            knot_correct_match = self.correct_matches_checker.check(knot_text)
+            if knot_correct_match:
+                # Use correct match for knot
+                from sotd.match.types import create_match_result
+
+                # Extract knot info safely
+                knot_info = knot_correct_match.knot_info or {}
+                knot_match = create_match_result(
+                    original=knot_text,
+                    matched={
+                        "brand": knot_info.get("brand"),
+                        "model": knot_info.get("model"),
+                        "fiber": knot_info.get("fiber"),
+                        "knot_size_mm": knot_info.get("knot_size_mm"),
+                        "_matched_by": "CorrectMatches",
+                        "_pattern": "correct_matches_knot",
+                    },
+                    match_type="exact",
+                    pattern="correct_matches_knot",
+                )
+            else:
+                # Fall back to knot matcher strategies
+                knot_match = None
+                for strategy in self.strategies:
+                    try:
+                        result = strategy.match(knot_text)
+                        if result and hasattr(result, "matched") and result.matched:
+                            knot_match = result
+                            break
+                    except Exception:
+                        continue
 
             # If no knot match found, check if it's a generic knot reference (e.g., "Simpson knot")
             if not knot_match and knot_text:
@@ -447,7 +482,23 @@ class BrushMatcher:
                 print(f"Strategy {strategy.__class__.__name__} failed: {e}")
                 continue
 
-        # Step 3: Try both knot and handle matching, pick higher score
+        # Step 3: Try dual component matching (both handle and knot)
+        dual_result = self._try_dual_component_match(value)
+        if dual_result is not None:
+            handle_match, knot_match = dual_result
+
+            # Detect user intent based on component order in original string
+            handle_text = handle_match.get("handle_maker", "") if handle_match else ""
+            knot_text = (
+                knot_match.matched.get("model", "") if knot_match and knot_match.matched else ""
+            )
+            user_intent = self.detect_user_intent(value, handle_text, knot_text)
+
+            # Create dual component result
+            result = self.create_dual_component_result(handle_match, knot_match, value, user_intent)
+            return result
+
+        # Step 3b: Try single component fallback (handle or knot only)
         from sotd.match.brush_matching_strategies.utils.pattern_utils import score_match_type
 
         best_match = None
@@ -1073,3 +1124,172 @@ class BrushMatcher:
             return " ".join(model_words)
 
         return None
+
+    def _try_dual_component_match(self, value: str) -> Optional[tuple]:
+        """
+        Try to match both handle and knot components in the input string.
+
+        Returns:
+            Optional[tuple]: (handle_match, knot_match) if both found, None otherwise
+        """
+        if not value or not isinstance(value, str):
+            return None
+
+        try:
+            # Try handle matching on the entire string
+            # Check correct matches first, then fall back to handle matcher
+            handle_correct_match = self.correct_matches_checker.check(value)
+            if handle_correct_match and handle_correct_match.handle_maker:
+                # Use correct match for handle
+                handle_match = {
+                    "handle_maker": handle_correct_match.handle_maker,
+                    "handle_model": handle_correct_match.handle_model,
+                    "_matched_by": "CorrectMatches",
+                    "_pattern": "correct_matches_handle",
+                }
+            else:
+                # Fall back to handle matcher
+                handle_match = self.handle_matcher.match_handle_maker(value)
+
+            # Try knot matching on the entire string
+            # Check correct matches first, then fall back to knot matcher
+            knot_correct_match = self.correct_matches_checker.check(value)
+            if knot_correct_match and knot_correct_match.knot_info:
+                # Use correct match for knot
+                from sotd.match.types import create_match_result
+
+                knot_info = knot_correct_match.knot_info
+                knot_match = create_match_result(
+                    original=value,
+                    matched={
+                        "brand": knot_info.get("brand"),
+                        "model": knot_info.get("model"),
+                        "fiber": knot_info.get("fiber"),
+                        "knot_size_mm": knot_info.get("knot_size_mm"),
+                        "_matched_by": "CorrectMatches",
+                        "_pattern": "correct_matches_knot",
+                    },
+                    match_type="exact",
+                    pattern="correct_matches_knot",
+                )
+            else:
+                # Fall back to knot matcher
+                knot_match = self.knot_matcher.match(value)
+
+            # Validate dual component match
+            if self._validate_dual_component_match(handle_match, knot_match):
+                return (handle_match, knot_match)
+
+            return None
+
+        except Exception as e:
+            if self.debug:
+                print(f"Dual component match failed for '{value}': {e}")
+            return None
+
+    def detect_user_intent(self, value: str, handle_text: str, knot_text: str) -> str:
+        """
+        Detect user intent based on component order in the original string.
+
+        Args:
+            value: Original input string
+            handle_text: Extracted handle text
+            knot_text: Extracted knot text
+
+        Returns:
+            str: "handle_primary" or "knot_primary"
+        """
+        if not value or not handle_text or not knot_text:
+            return "handle_primary"  # Default behavior
+
+        # Find positions of handle and knot text in original string
+        handle_pos = value.find(handle_text)
+        knot_pos = value.find(knot_text)
+
+        # If either component not found, default to handle_primary
+        if handle_pos == -1 or knot_pos == -1:
+            return "handle_primary"
+
+        # If positions are identical (same text), default to handle_primary
+        if handle_pos == knot_pos:
+            return "handle_primary"
+
+        # Return based on which component appears first
+        return "handle_primary" if handle_pos < knot_pos else "knot_primary"
+
+    def _validate_dual_component_match(
+        self, handle_match: Optional[dict], knot_match: Optional["MatchResult"]
+    ) -> bool:
+        """
+        Validate that a dual component match is valid.
+
+        Args:
+            handle_match: Handle match result or None
+            knot_match: Knot match result or None
+
+        Returns:
+            bool: True if valid dual component match, False otherwise
+        """
+        # Both components must be found
+        if not handle_match or not knot_match:
+            return False
+
+        # Handle match must have handle_maker
+        if not handle_match.get("handle_maker"):
+            return False
+
+        # Knot match must have valid matched data
+        if not knot_match.matched or not knot_match.matched.get("brand"):
+            return False
+
+        # Same brand is valid for makers that are both handle and knot makers (e.g., Zenith)
+        # We don't reject same-brand matches as they can be legitimate dual component scenarios
+
+        return True
+
+    def create_dual_component_result(
+        self, handle_match: dict, knot_match: "MatchResult", value: str, user_intent: str
+    ) -> "MatchResult":
+        """
+        Create a dual component result with composite brush structure.
+
+        Args:
+            handle_match: Handle match result
+            knot_match: Knot match result
+            value: Original input string
+            user_intent: User intent ("handle_primary" or "knot_primary")
+
+        Returns:
+            MatchResult: Composite brush result
+        """
+        from sotd.match.types import create_match_result
+
+        # Create composite brush structure
+        matched = {
+            "brand": None,  # Composite brush
+            "model": None,  # Composite brush
+            "user_intent": user_intent,
+            "handle": {
+                "brand": handle_match.get("handle_maker"),
+                "model": handle_match.get("handle_model"),
+                "source_text": value,
+                "_matched_by": "HandleMatcher",
+                "_pattern": "dual_component_fallback",
+            },
+            "knot": {
+                "brand": knot_match.matched.get("brand"),
+                "model": knot_match.matched.get("model"),
+                "fiber": knot_match.matched.get("fiber"),
+                "knot_size_mm": knot_match.matched.get("knot_size_mm"),
+                "source_text": value,
+                "_matched_by": "KnotMatcher",
+                "_pattern": "dual_component_fallback",
+            },
+        }
+
+        return create_match_result(
+            original=value,
+            matched=matched,
+            match_type="regex",
+            pattern="dual_component_fallback",
+        )

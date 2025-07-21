@@ -953,3 +953,7 @@ other_knots:
     default: Synthetic
     patterns:
     - yaqu*i
+  Zenith:
+    default: Boar
+    patterns:
+    - zenith

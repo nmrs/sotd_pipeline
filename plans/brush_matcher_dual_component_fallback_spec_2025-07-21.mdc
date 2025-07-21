@@ -1,0 +1,163 @@
+# Brush Matcher Dual Component Fallback Enhancement Specification
+
+**Date**: 2025-07-21  
+**Status**: DRAFT  
+**Type**: Feature Specification  
+
+## 📋 Problem Statement
+
+The current brush matching algorithm's Step 3 fallback logic has a limitation: it only picks the **best single match** (either knot OR handle) instead of attempting to **match both components simultaneously** when there's no clear delimiter.
+
+**Current Behavior Example:**
+- Input: `"Rad Dinosaur G5C"`
+- Expected: Rad Dinosaur handle + AP Shave Co G5C knot
+- Actual: Only matches one component (handle OR knot, not both)
+
+**Root Cause:**
+- Step 3 tries knot matching, then handle matching
+- Picks the higher-scoring single match
+- Never attempts to match both components simultaneously
+- Misses cases where both components are identifiable from catalog knowledge
+
+## 🎯 Proposed Solution
+
+Enhance Step 3 to implement **dual component fallback matching** that attempts to identify both handle and knot components simultaneously when no clear delimiter exists.
+
+## 🔍 Current Step 3 Logic Analysis
+
+```python
+# Current Step 3: Single Component Selection
+best_match = None
+best_score = -1
+best_match_type = None
+
+# Try knot matching (pick best knot)
+for strategy in self.strategies:
+    result = strategy.match(value)
+    if result and result.matched:
+        score = score_match_type(value, "knot", 5)
+        if score > best_score:
+            best_score = score
+            best_match = result
+            best_match_type = "knot"
+
+# Try handle matching (pick best handle)
+handle_match = self.handle_matcher.match_handle_maker(value)
+if handle_match and handle_match.get("handle_maker"):
+    handle_score = score_match_type(value, "handle", 5)
+    if handle_score > best_score:
+        best_score = handle_score
+        best_match = handle_match
+        best_match_type = "handle"
+
+# Return only the best single match
+return best_match
+```
+
+## 🚀 Proposed Enhanced Step 3 Logic
+
+```python
+# Enhanced Step 3: Dual Component Attempt
+def step3_dual_component_fallback(self, value: str):
+    # Phase 1: Try dual component matching
+    dual_match = self._try_dual_component_match(value)
+    if dual_match:
+        return dual_match
+    
+    # Phase 2: Fall back to current single-component logic
+    return self._current_step3_logic(value)
+```
+
+## ✅ Resolved Design Decisions
+
+### 1. Dual Component Detection Strategy
+**Approach**: Run both handle matcher and knot matcher on the entire input string
+```python
+handle_match = self.handle_matcher.match_handle_maker(value)
+knot_match = self.knot_matcher.match(value)  # Try all knot strategies
+```
+
+### 2. Dual Component Validation
+**Criteria**: Accept as dual component match if both matchers return non-None results
+```python
+if handle_match and knot_match:
+    return dual_component_result
+else:
+    return current_step3_logic()
+```
+
+### 3. Fallback Priority
+**Logic**: Dual component match takes priority over single component match when both matchers return results
+- If both handle AND knot matchers return results → use dual component match
+- If only handle matcher returns result → use single component handle match  
+- If only knot matcher returns result → use single component knot match
+- If neither returns result → return no match
+- No scoring comparison needed - dual wins when both components are found
+
+### 4. Implementation Scope
+**Approach**: Step 3 enhancement - add dual component logic to existing Step 3
+```python
+def step3_dual_component_fallback(self, value: str):
+    # Try dual component matching first
+    handle_match = self.handle_matcher.match_handle_maker(value)
+    knot_match = self.knot_matcher.match(value)
+    
+    if handle_match and knot_match:
+        return create_dual_component_result(handle_match, knot_match, value)
+    
+    # Fall back to current single-component logic
+    return self._current_step3_logic(value)
+```
+
+### 5. User Intent Tracking
+**Logic**: Track which component appears first in the original string
+```python
+def detect_user_intent(value: str, handle_text: str, knot_text: str):
+    handle_pos = value.find(handle_text)
+    knot_pos = value.find(knot_text)
+    return "handle_primary" if handle_pos < knot_pos else "knot_primary"
+```
+
+**Applies to both:**
+- **Delimiter splits**: `"Wolf Whiskers w/ G5C"` → `"handle_primary"`
+- **Dual component fallback**: `"Rad Dinosaur G5C"` → `"handle_primary"`
+
+### 6. Output Structure
+**Format**: Follow existing composite brush structure with user intent metadata
+```python
+{
+    "brand": None,  # Composite brush
+    "model": None,  # Composite brush
+    "user_intent": "handle_primary",  # or "knot_primary"
+    "handle": {
+        "brand": "Rad Dinosaur",
+        "model": None,
+        "source_text": value,
+        "_matched_by": "HandleMatcher",
+        "_pattern": "dual_component_fallback"
+    },
+    "knot": {
+        "brand": "AP Shave Co",
+        "model": "G5C", 
+        "source_text": value,
+        "_matched_by": "KnotMatcher",
+        "_pattern": "dual_component_fallback"
+    }
+}
+```
+
+## 📝 Next Steps
+
+Once these questions are resolved, we'll create:
+1. Detailed implementation specification
+2. Test cases covering all scenarios
+3. Implementation plan with TDD approach
+4. Integration plan with existing brush matching logic
+
+---
+
+**Note**: This specification follows the Idea Honing prompt format to ensure thorough understanding before implementation.
+description:
+globs:
+alwaysApply: false
+---

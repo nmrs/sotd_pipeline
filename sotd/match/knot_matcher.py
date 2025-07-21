@@ -9,6 +9,30 @@ class KnotMatcher:
     def __init__(self, strategies: list):
         self.strategies = strategies
 
+    def match(self, value: str) -> Optional["MatchResult"]:
+        """
+        Match knot patterns in the given text using all available strategies.
+
+        Args:
+            value: Text to match against
+
+        Returns:
+            MatchResult if a match is found, None otherwise
+        """
+        if not value or not isinstance(value, str):
+            return None
+
+        for strategy in self.strategies:
+            try:
+                result = strategy.match(value)
+                if result and result.matched:
+                    return result
+            except Exception:
+                # Continue to next strategy if one fails
+                continue
+
+        return None
+
     def should_prioritize_knot(self, text: str, split_handle_and_knot_func) -> bool:
         """Determine if knot maker should take precedence based on delimiter semantics."""
         handle_primary_delimiters = [" in "]  # Handle takes precedence

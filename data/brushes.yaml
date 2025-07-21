@@ -1,0 +1,820 @@
+known_brushes:
+  Alpha:
+    Amber:
+      fiber: Synthetic
+      knot_size_mm: 28
+      patterns:
+      - alpha.*amber
+    Bulldog:
+      fiber: Synthetic
+      knot_size_mm: 28
+      patterns:
+      - alpha.*bulldog
+    Outlaw:
+      fiber: Synthetic
+      patterns:
+      - alpha.*outlaw
+  Aurora Grooming:
+    default: Synthetic
+    patterns:
+    - aurora\s*grooming
+    LG24:
+      fiber: Synthetic
+      knot_size_mm: 24
+      patterns:
+      - aurora.*lg ?(20)?24
+      - aurora.*lather.*24
+      - aurora.*24.*lg
+  Badger & Blade:
+    Essential:
+      fiber: Boar
+      handle_maker: Omega
+      knot_maker: Omega
+      knot_size_mm: 22
+      patterns:
+      - badger.*blade.*essential
+  Century:
+    Pure Bristle:
+      fiber: Boar
+      patterns:
+      - century.*pure.*bristle
+  Chisel & Hound:
+    fiber: Badger
+    knot_size_mm: 26
+    v10:
+      patterns:
+      - chis.*[fh]ou.*v10
+      - \bc(?:\&|and|\+)h\b.*v10
+      - \bch\b.*v10
+    v11:
+      patterns:
+      - chis.*[fh]ou.*v11
+      - \bc(?:\&|and|\+)h\b.*v11
+      - \bch\b.*v11
+    v12:
+      patterns:
+      - chis.*[fh]ou.*v12
+      - \bc(?:\&|and|\+)h\b.*v12
+      - \bch\b.*v12
+    v13:
+      patterns:
+      - chis.*[fh]ou.*v13
+      - \bc(?:\&|and|\+)h\b.*v13
+      - \bch\b.*v13
+    v14:
+      patterns:
+      - chis.*[fh]ou.*v14
+      - \bc(?:\&|and|\+)h\b.*v14
+      - \bch\b.*v14
+    v15:
+      patterns:
+      - chis.*[fh]ou.*v15
+      - \bc(?:\&|and|\+)h\b.*v15
+      - \bch\b.*v15
+    v16:
+      patterns:
+      - chis.*[fh]ou.*v16
+      - \bc(?:\&|and|\+)h\b.*v16
+      - \bch\b.*v16
+    v17:
+      patterns:
+      - chis.*[fh]ou.*v17
+      - \bc(?:\&|and|\+)h\b.*v17
+      - \bch\b.*v17
+    v18:
+      patterns:
+      - chis.*[fh]ou.*v18
+      - \bc(?:\&|and|\+)h\b.*v18
+      - \bch\b.*v18
+    v19:
+      patterns:
+      - chis.*[fh]ou.*v19
+      - \bc(?:\&|and|\+)h\b.*v19
+      - \bch\b.*v19
+    v20:
+      patterns:
+      - chis.*[fh]ou.*v20
+      - \bc(?:\&|and|\+)h\b.*v20
+      - \bch\b.*v20
+    v21:
+      patterns:
+      - chis.*[fh]ou.*v21
+      - \bc(?:\&|and|\+)h\b.*v21
+      - \bch\b.*v21
+    v22:
+      patterns:
+      - chis.*[fh]ou.*v22
+      - \bc(?:\&|and|\+)h\b.*v22
+      - \bch\b.*v22
+    v23:
+      patterns:
+      - chis.*[fh]ou.*v23
+      - \bc(?:\&|and|\+)h\b.*v23
+      - \bch\b.*v23
+    v24:
+      patterns:
+      - chis.*[fh]ou.*v24
+      - \bc(?:\&|and|\+)h\b.*v24
+      - \bch\b.*v24
+    v25:
+      patterns:
+      - chis.*[fh]ou.*v25
+      - \bc(?:\&|and|\+)h\b.*v25
+      - \bch\b.*v25
+    v26:
+      patterns:
+      - chis.*[fh]ou.*v26
+      - \bc(?:\&|and|\+)h\b.*v26
+      - \bch\b.*v26
+    v27:
+      patterns:
+      - chis.*[fh]ou.*v27
+      - \bc(?:\&|and|\+)h\b.*v27
+      - \bch\b.*v27
+    v28:
+      patterns:
+      - chis.*[fh]ou.*v28
+      - \bc(?:\&|and|\+)h\b.*v28
+      - \bch\b.*v28
+  Clubman:
+    Pinaud:
+      fiber: Synthetic
+      knot_size_mm: 23
+      patterns:
+      - clubman pinaud
+  Cornfed Viking:
+    Odin's Beard:
+      fiber: Badger
+      patterns:
+      - odin'?s.*beard
+  Declaration Grooming:
+    knot_size_mm: 28
+    fiber: Badger
+    B1:
+      patterns:
+      - (declaration|\bdg\b).*\bb1\b
+      - \bb1\b
+    B2:
+      patterns:
+      - (declaration|\bdg\b).*\bb2\b
+      - \bb2\b
+    B3:
+      patterns:
+      - (declaration|\bdg\b).*\bb3\b
+      - \bb3\b
+    B4:
+      patterns:
+      - (declaration|\bdg\b).*\bb4\b
+      - \bb4\b
+    B5:
+      patterns:
+      - (declaration|\bdg\b).*\bb5\b
+      - \bb5\b
+    B6:
+      patterns:
+      - (declaration|\bdg\b).*\bb6\b
+      - \bb6\b
+    B7:
+      patterns:
+      - (declaration|\bdg\b).*\bb7\b
+      - \bb7\b
+    B8:
+      patterns:
+      - (declaration|\bdg\b).*\bb8\b
+      - \bb8\b
+    B9A:
+        patterns:
+        - (declaration|\bdg\b)?.*\bb9a\+?\b
+    B9B:
+      patterns:
+      - (declaration|\bdg\b)?.*\bb9b\+?\b
+    B10:
+      patterns:
+      - (declaration|\bdg\b).*\bb10\b
+      - \bb10\b
+    B11:
+      patterns:
+      - (declaration|\bdg\b).*\bb11\b
+      - \bb11\b
+    B12:
+      patterns:
+      - (declaration|\bdg\b).*\bb12\b
+      - \bb12\b
+    B13:
+      patterns:
+      - (declaration|\bdg\b).*\bb13\b
+      - \bb13\b
+    B14:
+      patterns:
+      - (declaration|\bdg\b).*\bb14\b
+      - \bb14\b
+    B15:
+      patterns:
+      - (declaration|\bdg\b).*\bb15\b
+      - \bb15\b
+    B16:
+      patterns:
+      - (declaration|\bdg\b).*\bb16\b
+      - \bb16\b
+  EldrormR Industries/Muninn Woodworks:
+    BFM:
+      # knot_size_mm: 50
+      patterns:
+      - \bbfm\b(.*50mm)?
+      knot:
+        brand: Moti
+        fiber: Synthetic
+        knot_size_mm: 50
+        model: Motherlode
+      handle:
+        brand: Muninn Woodworks
+  Kent:
+    INF1:
+      fiber: Synthetic
+      knot_size_mm: 22
+      patterns:
+      - kent.*inf1
+  Mühle:
+    Hexagon:
+      knot_size_mm: 21
+      patterns:
+      - m[uü]hle.*hexagon
+    Purist:
+      knot_size_mm: 21
+      patterns:
+      - m[uü]hle.*purist
+    Vivo:
+      knot_size_mm: 21
+      patterns:
+      - m[uü]hle.*vivo
+  OKU:
+    Caceres:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+      - c[aá]ceres
+  Omega:
+    fiber: Boar
+    '10005':
+      knot_size_mm: 24
+      patterns:
+      - omega.*10005
+    '10029':
+      knot_size_mm: 24
+      patterns:
+      - omega.*10029
+    '10048':
+      knot_size_mm: 28
+      patterns:
+      - omega.*(pro)*.*48
+    '10049':
+      knot_size_mm: 26
+      patterns:
+      - omega.*(pro)*.*49
+    '10077':
+      knot_size_mm: 23
+      patterns:
+      - omega.*10077
+    '10098':
+      knot_size_mm: 27
+      patterns:
+      - '10098'
+    '11047':
+      fiber: Mixed Badger/Boar
+      knot_size_mm: 22
+      patterns:
+      - '11047'
+    '11126':
+      knot_size_mm: 24
+      patterns:
+      - '11126'
+    '11137':
+      knot_size_mm: 24
+      patterns:
+      - '11137'
+    '20102':
+      knot_size_mm: 28
+      patterns:
+      - '20102'
+    '20106':
+      knot_size_mm: 28
+      patterns:
+      - '20106'
+    '46206':
+      fiber: Synthetic
+      knot_size_mm: 25
+      patterns:
+      - omega.*46206
+    '80005':
+      knot_size_mm: 24
+      patterns:
+      - '80005'
+    EVO Sythetic:
+      fiber: Synthetic
+      patterns:
+      - omega.*evo
+      - evo.*omega
+    Hi-Brush Synthetic:
+      fiber: Synthetic
+      patterns:
+      - hi-*brush
+      - omega.*syn
+    Proraso Professional:
+      knot_maker: Omega
+      knot_size_mm: 28
+      patterns:
+      - proraso.*(pro)?
+      - omega.*proraso
+      - proraso.*omega
+    Special Veteran - E1860:
+      fiber: Synthetic
+      knot_size_mm: 28
+      patterns:
+      - omega.*evo.*e1860
+      - e1860
+  Parker:
+    Arctic Storm:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+      - arctic storm
+  Pearl:
+    SBB-97:
+      fiber: Synthetic
+      knot_size_mm: 30
+      patterns:
+      - pearl.*sbb( |-)?97
+  RazoRock:
+    Big Bruce:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+      - razo.*big.*bruce
+    Bruce:
+      fiber: Synthetic
+      knot_size_mm: 24
+      patterns:
+      - razo.*bruce
+    Monster:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+      - razo.*monster
+  Rich Man Shaving:
+    Mojo Maker:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+      - rich.*man.*mojo*
+    Ultralux:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+      - rich.*man.*ultraluxe*
+  Semogue:
+    fiber: Boar
+    '1250':
+      knot_size_mm: 22
+      patterns:
+      - semogue.*1250
+    '1305':
+      knot_size_mm: 21
+      patterns:
+      - semogue.*1305
+    '1438':
+      knot_size_mm: 21
+      patterns:
+      - semogue.*1438
+    '1800':
+      knot_size_mm: 22
+      patterns:
+      - semogue.*1800
+    '2000':
+      knot_size_mm: 24
+      patterns:
+      - semogue.*2000
+    '2015':
+      knot_size_mm: 22
+      patterns:
+      - semogue.*2015
+    '2020':
+      knot_size_mm: 22
+      patterns:
+      - semogue.*2020
+    '610':
+      knot_size_mm: 21
+      patterns:
+      - semogue\s*610
+    '620':
+      knot_size_mm: 21
+      patterns:
+      - semogue\s*620
+    '820':
+      knot_size_mm: 22
+      patterns:
+      - semogue\s*820
+    '830':
+      knot_size_mm: 22
+      patterns:
+      - semogue.*830
+    Galahad C3:
+      knot_size_mm: 22
+      patterns:
+      - galahad
+    Pharos C3:
+      fiber: Synthetic
+      knot_size_mm: 21
+      patterns:
+      - pharos
+    SOC Badger:
+      fiber: Badger
+      knot_size_mm: 24
+      patterns:
+      - (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*badger
+    SOC Boar:
+      knot_size_mm: 24
+      patterns:
+      - (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*boar
+      - (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*)
+      - owner.*club
+    SOC Mixed Badger/Boar:
+      fiber: Mixed Badger/Boar
+      knot_size_mm: 24
+      patterns:
+      - (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*badg.*boar
+      - (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*boar.*badg
+      - (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*mi[sx]t
+      - semogue.*mist
+    Shave Nook 2012 LE:
+      fiber: Mixed Badger/Boar
+      knot_size_mm: 22
+      patterns:
+      - semogue.*2012
+    Shave Nook Final Edition:
+      knot_size_mm: 26.5
+      patterns:
+      - semogue.*bullgoose
+      - semogue.*shave.*nook
+    Torga C5 Boar:
+      knot_size_mm: 24
+      patterns:
+      - torga.*c5
+    r/wetshaving Brushbutt Boar:
+      knot_size_mm: 22
+      patterns:
+      - brushbutt
+      - 2017 ws
+  Simpson:
+    Captain 2:
+      fiber: Badger
+      knot_size_mm: 24
+      patterns:
+      - captain\s*2
+    Chubby 1:
+      fiber: Badger
+      knot_size_mm: 22
+      patterns:
+      - simp.*chubby\s*1
+      - simp.*ch1
+    Chubby 2:
+      fiber: Badger
+      knot_size_mm: 27
+      patterns:
+      - simp.*chubby\s*2\b
+      - simp.*ch2\b
+    Chubby 3:
+      fiber: Badger
+      knot_size_mm: 29
+      patterns:
+      - simp.*chubby\s*3
+      - simp.*ch3
+    Colonel X2L:
+      fiber: Badger
+      knot_size_mm: 21
+      patterns:
+      - sim.*colonel
+    Trafalgar T1:
+      fiber: Synthetic
+      knot_size_mm: 23
+      patterns:
+      - simp(?:.*traf)?.*t?1
+    Trafalgar T2:
+      fiber: Synthetic
+      knot_size_mm: 24
+      patterns:
+      - simp.*traf.*t2
+      - trafalgar.*t2
+    Trafalgar T3:
+      fiber: Synthetic
+      knot_size_mm: 28
+      patterns:
+      - simp(?:.*traf)?.*t?3
+    Tulip T1:
+      fiber: Synthetic
+      knot_size_mm: 19
+      patterns:
+      - simp.*tulip.*t1
+    Tulip T2:
+      fiber: Synthetic
+      knot_size_mm: 20
+      patterns:
+      - simp.*tulip.*t2
+    Tulip T3:
+      fiber: Synthetic
+      knot_size_mm: 22
+      patterns:
+      - simp.*tulip.*t3
+  Stirling:
+    2-Band Synthetic:
+      fibether: Synthetic
+      knot_size_mm: 24
+      patterns:
+      - stirl.*(?:2|two)(?:-|\s)+band
+    Li'l Bridder:
+      fiber: Synthetic
+      knot_size_mm: 22
+      patterns:
+      - brudder
+    Synthetic:
+      fiber: Synthetic
+      patterns:
+      - st(i|e)rling.*kong
+  Stirling/Zenith:
+    28mmx50mm Boar (510SE):
+      fiber: Boar
+      knot_maker: Zenith
+      knot_size_mm: 28
+      patterns:
+      - (510(\s*|-*)se|jhdsajkghjkdhagkgkjgkhagdkjagdassd)
+      - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*28).*
+    31mmx50mm Boar (510SE-XL):
+      fiber: Boar
+      knot_maker: Zenith
+      knot_size_mm: 31
+      patterns:
+      - (510(\s*|-*)se(\s*|-*)xl|jhdsajkghjkdhagkgkjgkhagdkjagdassd)
+      - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*31).*
+    Boar:
+      fiber: Boar
+      handle_maker: Stirling
+      knot_maker: Zenith
+      patterns:
+      - ^(?=.*zenith)(?=.*st(i|e)rling).*
+  Tatara:
+    Masamune Finest Badger:
+      fiber: Badger
+      knot_size_mm: 24
+      patterns:
+      - tatara
+      - masamune
+    BoBa (50/50 Boar Badger):
+      fiber: Mixed Badger/Boar
+      patterns:
+      - turn.{1,5}shave.*boba
+      - tns.*mix
+      - tns.*boba
+  Truefitt & Hill:
+    Wellington:
+      fiber: Badger
+      knot_size_mm: 24
+      patterns:
+      - wellington
+  Turn-N-Shave:
+    BoBa (50/50 Boar Badger):
+      fiber: Mixed Badger/Boar
+      patterns:
+      - turn.{1,5}shave.*boba
+      - t[&n]s.*mix
+      - t[&n]s.*boba
+    High Density Badger (H*):
+      fiber: Badger
+      patterns:
+      - turn.{1,5}shave.*h\d
+      - t[&n]s.*h\d
+    Low Density Badger (L*):
+      fiber: Badger
+      patterns:
+      - turn.{1,5}shave.*l\d
+      - t[&n]s.*l\d
+    Medium Density Badger (M*):
+      fiber: Badger
+      patterns:
+      - turn.{1,5}shave.*m\d
+      - t[&n]s.*m\d
+  Wald:
+    A1:
+      fiber: Synthetic
+      knot_size_mm: 29
+      patterns:
+      - wald.*a1
+    Calyx:
+      fiber: Synthetic
+      knot_size_mm: 27
+      patterns:
+      - (?:wald.*)?calyx
+    J1:
+      fiber: Badger
+      knot_size_mm: 27
+      patterns:
+      - wald.*j1
+    J2:
+      fiber: Badger
+      knot_size_mm: 27
+      patterns:
+      - wald.*j2
+    J3:
+      fiber: Badger
+      knot_size_mm: 27
+      patterns:
+      - wald.*j3
+    J4:
+      fiber: Badger
+      knot_size_mm: 27
+      patterns:
+      - wald.*j4
+  Walfront:
+    Travel Brush:
+      fiber: Synthetic
+      patterns:
+      - walfront.*travel
+  Yaqi:
+    Cashmere:
+      fiber: Synthetic
+      patterns:
+      - yaqi.*cashmere
+    Synbad:
+      fiber: Synthetic
+      patterns:
+      - yaqi.*synbad
+  Zenith:
+    2006 XSE:
+      fiber: Boar
+      knot_size_mm: 21
+      patterns:
+      - 'zenith.*\b2006(?:\s?xse)?\b'
+    502B XSE:
+      fiber: Boar
+      knot_size_mm: 26
+      patterns:
+      - 502B
+    505BC SE:
+      fiber: Boar
+      knot_size_mm: 28
+      patterns:
+      - 505BC
+    506U SE:
+      fiber: Boar
+      knot_size_mm: 27
+      patterns:
+      - 506u
+    506U N:
+      fiber: Horse
+      knot_size_mm: 27
+      patterns:
+      - 506.*u.*nthi
+    506N XS:
+      fiber: Horse
+      knot_size_mm: 27
+      patterns:
+      - 506\s?n.*xs
+    507U:
+      fiber: Boar
+      knot_size_mm: 27
+      patterns:
+      - 507U
+    507N XSE:
+      fiber: Boar
+      knot_size_mm: 27
+      patterns:
+      - 507N
+    B1:
+      fiber: Boar
+      knot_size_mm: 26
+      knot_loft_mm: 64
+      patterns:
+      - zenith.*\bb1\b
+      - b02-a28
+    B2:
+      fiber: Boar
+      knot_size_mm: 26
+      knot_loft_mm: 57
+      patterns:
+      - zenith.*\bb2\b
+      - b03-a26
+    B3:
+      fiber: Boar
+      knot_size_mm: 26
+      knot_loft_mm: 64
+      patterns:
+      - zenith.*\bb3\b
+      - b06-80e
+    B7:
+      fiber: Boar
+      knot_size_mm: 24
+      knot_loft_mm: 57
+      patterns:
+      - zenith.*\bb7\b
+    B8:
+      fiber: Boar
+      knot_size_mm: 28
+      knot_loft_mm: 57
+      patterns:
+      - zenith.*\bb8\b
+      - b03-a26-l-28
+    B10:
+      fiber: Boar
+      knot_size_mm: 24
+      knot_loft_mm: 57
+      patterns:
+      - zenith.*\bb10\b
+      - b07-euro
+    B14:
+      fiber: Boar
+      knot_size_mm: 28
+      knot_loft_mm: 57
+      patterns:
+      - zenith.*\bb14\b
+      - b03-a26-l
+    B15:
+      fiber: Boar
+      knot_size_mm: 27.5
+      knot_loft_mm: 57
+      patterns:
+      - zenith.*\bb15\b
+      - b506.*olive
+    B17:
+      fiber: Boar
+      knot_size_mm: 24
+      knot_loft_mm: 48
+      patterns:
+      - zenith.*\bb17\b
+    B26:
+      fiber: Boar
+      knot_size_mm: 27
+      knot_loft_mm: 57
+      patterns:
+      - zenith.*\bb26\b
+      - 507mc/l
+    B28:
+      fiber: Boar
+      knot_size_mm: 28
+      knot_loft_mm: 57
+      patterns:
+      - zenith.*\bb28\b
+    B29:
+      fiber: Boar
+      knot_size_mm: 27
+      knot_loft_mm: 57
+      patterns:
+      - zenith.*\bb29\b
+      - 507bluel
+    B30:
+      fiber: Boar
+      knot_size_mm: 26
+      knot_loft_mm: 57
+      patterns:
+      - zenith.*\bb30\b
+      - 506.*short.*retro
+    B33:
+      fiber: Boar
+      knot_size_mm: 27
+      knot_loft_mm: 57
+      patterns:
+      - zenith.*\bb33\b
+      - 506.*copper
+    B35:
+      fiber: Boar
+      knot_size_mm: 31
+      knot_loft_mm: 57
+      patterns:
+      - zenith.*\bb35\b
+      - 508a
+    Butterscotch Chubby (B34):
+      fiber: Boar
+      knot_size_mm: 28
+      knot_loft_mm: 57
+      patterns:
+      - zenith.*\bb34\b
+      - (zenith|505).*butter
+    Copper Scrubby (B36):
+      fiber: Boar
+      knot_size_mm: 28
+      knot_loft_mm: 50
+      patterns:
+      - zenith.*\bb36\b
+      - copper.*scrubby
+    r/wetshaving MOAR BOAR:
+    fiber: Boar
+    knot_size_mm: 31
+    name: r/wetshaving MOAR BOAR
+    patterns:
+    - moar(.*boar)?
+    - 508\s*xl
+    - wetshaving.*exc
+    - maor boar
+
+other_brushes:
+  Gilette:
+    default: Synthetic
+    patterns:
+    - gillette
