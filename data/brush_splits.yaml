@@ -1,10 +1,1 @@
-splits:
-  Test Brush:
-  - corrected: false
-    handle: null
-    knot: null
-    match_type: null
-    occurrences: []
-    original: Test Brush
-    should_not_split: true
-    validated_at: '2025-07-21T21:19:13.117Z'
+splits: {}
