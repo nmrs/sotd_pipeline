@@ -94,7 +94,7 @@ describe('BrushSplitTable (TDD)', () => {
         expect(input).toHaveValue('New Knot');
     });
 
-    it('saves individual changes when editing is complete', () => {
+    it('saves individual changes when save button is clicked', () => {
         const data = [
             { original: 'Elite handle w/ Declaration knot', handle: 'Elite', knot: 'Declaration' }
         ];
@@ -104,8 +104,30 @@ describe('BrushSplitTable (TDD)', () => {
         fireEvent.click(handleElement);
         const input = screen.getByDisplayValue('Elite');
         fireEvent.change(input, { target: { value: 'New Handle' } });
-        fireEvent.keyDown(input, { key: 'Enter' });
+        const saveButton = screen.getByText('Save');
+        fireEvent.click(saveButton);
         expect(onSave).toHaveBeenCalledWith(0, { original: 'Elite handle w/ Declaration knot', handle: 'New Handle', knot: 'Declaration' });
+    });
+
+    it('cancels editing when cancel button is clicked', () => {
+        const data = [
+            { original: 'Elite handle w/ Declaration knot', handle: 'Elite', knot: 'Declaration' }
+        ];
+        const onSave = jest.fn();
+        render(<BrushSplitTable brushSplits={data} onSave={onSave} />);
+        const handleElement = screen.getByText('Elite');
+        fireEvent.click(handleElement);
+        const input = screen.getByDisplayValue('Elite');
+        fireEvent.change(input, { target: { value: 'New Handle' } });
+        const cancelButton = screen.getByText('Cancel');
+        fireEvent.click(cancelButton);
+
+        // Should not call onSave
+        expect(onSave).not.toHaveBeenCalled();
+
+        // Should return to display mode with original value
+        expect(screen.getByText('Elite')).toBeInTheDocument();
+        expect(screen.queryByDisplayValue('New Handle')).not.toBeInTheDocument();
     });
 
     it('includes a search input that filters rows by handle, knot, or original text', () => {
@@ -168,10 +190,126 @@ describe('BrushSplitTable (TDD)', () => {
         ];
         render(<BrushSplitTable brushSplits={data} />);
         const handleElement = screen.getByText('Elite');
-        handleElement.focus();
         fireEvent.keyDown(handleElement, { key: 'Enter' });
-        // Should start editing the handle field
         const input = screen.getByDisplayValue('Elite');
         expect(input).toBeInTheDocument();
+    });
+
+    it('displays match_type column with color-coded badges', () => {
+        const data = [
+            {
+                original: 'Elite handle w/ Declaration knot',
+                handle: 'Elite',
+                knot: 'Declaration',
+                match_type: 'regex'
+            },
+            {
+                original: 'Unmatched brush',
+                handle: null,
+                knot: 'Unmatched brush',
+                match_type: undefined
+            }
+        ];
+        render(<BrushSplitTable brushSplits={data} />);
+
+        // Check that match_type badges are displayed
+        expect(screen.getByText('regex')).toBeInTheDocument();
+        expect(screen.getByText('none')).toBeInTheDocument();
+
+        // Check that status badges are displayed
+        expect(screen.getByText('split')).toBeInTheDocument();
+        expect(screen.getByText('unmatched')).toBeInTheDocument();
+    });
+
+    it('handles null handle values correctly', () => {
+        const data = [
+            {
+                original: 'Unmatched brush',
+                handle: null,
+                knot: 'Unmatched brush',
+                match_type: undefined
+            }
+        ];
+        render(<BrushSplitTable brushSplits={data} />);
+
+        // Check that empty handle is displayed as "(empty)"
+        expect(screen.getByText('(empty)')).toBeInTheDocument();
+
+        // Check that unmatched status is shown
+        expect(screen.getByText('unmatched')).toBeInTheDocument();
+    });
+
+    it('shows visual indicator for unsaved edits', () => {
+        const data = [
+            {
+                original: 'Elite handle w/ Declaration knot',
+                handle: 'Elite',
+                knot: 'Declaration',
+                match_type: 'regex'
+            }
+        ];
+        render(<BrushSplitTable brushSplits={data} />);
+
+        // Click on handle to start editing
+        const handleElement = screen.getByText('Elite');
+        fireEvent.click(handleElement);
+
+        // Should show edit indicator (yellow background or asterisk)
+        const input = screen.getByDisplayValue('Elite');
+        expect(input).toBeInTheDocument();
+
+        // The row should have a visual indicator for unsaved edits
+        const row = input.closest('div')?.parentElement;
+        expect(row).toHaveStyle('background-color: #fff3cd');
+    });
+
+    it('shows search input prominently and filters data', () => {
+        const data = [
+            {
+                original: 'Elite handle w/ Declaration knot',
+                handle: 'Elite',
+                knot: 'Declaration',
+                match_type: 'regex'
+            },
+            {
+                original: 'Omega boar brush',
+                handle: null,
+                knot: 'Omega boar brush',
+                match_type: undefined
+            }
+        ];
+        render(<BrushSplitTable brushSplits={data} />);
+
+        // Should show search input with proper styling
+        const searchInput = screen.getByPlaceholderText('Search...');
+        expect(searchInput).toBeInTheDocument();
+        expect(searchInput).toHaveStyle('width: 100%');
+
+        // Should show both items initially
+        expect(screen.getByText('Elite handle w/ Declaration knot')).toBeInTheDocument();
+        expect(screen.getAllByText('Omega boar brush')).toHaveLength(2); // Original and knot columns
+
+        // Type in search to filter
+        fireEvent.change(searchInput, { target: { value: 'Elite' } });
+
+        // Should only show Elite item
+        expect(screen.getByText('Elite handle w/ Declaration knot')).toBeInTheDocument();
+        expect(screen.queryAllByText('Omega boar brush')).toHaveLength(0);
+    });
+
+    it('shows filter buttons for match type and status', () => {
+        const data = [
+            {
+                original: 'Elite handle w/ Declaration knot',
+                handle: 'Elite',
+                knot: 'Declaration',
+                match_type: 'regex'
+            }
+        ];
+        render(<BrushSplitTable brushSplits={data} />);
+
+        // Should show filter buttons by default
+        expect(screen.getByText('Filter Match Type')).toBeInTheDocument();
+        expect(screen.getByText('Filter Status')).toBeInTheDocument();
     });
 }); 
