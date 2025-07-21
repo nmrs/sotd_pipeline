@@ -75,8 +75,8 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
      - ✅ Fix data consistency: set `knot: null` for `should_not_split: true`
      - ✅ Reorganize alphabetically by original brush name (case-insensitive)
      - ✅ Remove redundant `validated` field
-     - ⏳ Update API code to handle new structure
-     - ⏳ Update tests to expect new data format
+     - ✅ Update API code to handle new structure
+     - ✅ Update tests to expect new data format
    - **New Structure**:
      ```yaml
      splits:
@@ -89,8 +89,9 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
            should_not_split: true
            validated_at: '2025-07-21T21:19:13.117Z'
      ```
-   - **Tests**: Update all brush split tests to expect new structure
+   - **Tests**: ✅ All integration tests passing (6/6)
    - **Quality**: Consistent, organized, and logical data structure
+   - **Backward Compatibility**: ✅ Supports both old and new YAML formats
 
 ---
 
