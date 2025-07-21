@@ -61,6 +61,8 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
      - Create test YAML files with predictable, small datasets
      - Add test-specific API endpoints that use isolated data
      - Update integration tests to use test endpoints
+     - **MANDATORY**: All tests MUST use temporary files (tmp_path) or test-specific data
+     - **NEVER write to production data files** during testing or development
    - **Tests**: Integration tests that are fast and reliable
    - **Quality**: Tests that don't break when production data changes
 
@@ -279,6 +281,12 @@ Document all shared utilities and DRY patterns in the codebase.
 - **Test File Locations**: Mirror source structure (e.g., `tests/api/test_yaml_utils.py`, `src/components/__tests__/DataTable.test.tsx`).
 - **Mock Data**: Define and use mock data for all unit tests. Specify requirements in each step.
 - **Test Execution**: Use `make format lint typecheck test` before commits. E2E: `npm run test:e2e:background` if needed.
+- **MANDATORY - Production Data Protection**: 
+  - **NEVER write to production data files** during testing or development
+  - **ALWAYS use temporary files (tmp_path)** for file-writing tests
+  - **ALWAYS use test-specific data** for integration tests
+  - **NEVER modify data/brush_splits.yaml, data/brushes.yaml, etc.** in tests
+  - **ALWAYS verify test isolation** before committing any test changes
 
 ---
 

@@ -555,6 +555,34 @@ class TestRealCatalogIntegration:
 
 ## Test Data Management
 
+### **MANDATORY - Production Data Protection**
+**NEVER write to production data files during testing or development.**
+
+- **ALWAYS use temporary files (tmp_path)** for file-writing tests
+- **ALWAYS use test-specific data** for integration tests  
+- **NEVER modify data/brush_splits.yaml, data/brushes.yaml, etc.** in tests
+- **ALWAYS verify test isolation** before committing any test changes
+- **ALWAYS use pytest tmp_path fixture** for any file operations in tests
+- **NEVER assume test data is safe** - always use isolated test environments
+
+### Test Data Isolation Examples
+```python
+# ✅ CORRECT - Use temporary files
+def test_save_and_load_yaml(tmp_path):
+    """Test saving and loading YAML file."""
+    validator = BrushSplitValidator()
+    validator.yaml_path = tmp_path / "test_brush_splits.yaml"  # Temporary file
+    # ... test logic
+
+# ❌ WRONG - Never use production files
+def test_save_and_load_yaml():
+    """Test saving and loading YAML file."""
+    validator = BrushSplitValidator()
+    validator.yaml_path = Path("data/brush_splits.yaml")  # Production file!
+    # ... test logic - DANGEROUS!
+```
+
+### Test Data Realism
 > **Test Data Realism:**
 > All enrich phase tests **must** use realistic, user-like extracted strings for the `extracted_field` argument (e.g., `"Astra SP (3)", "Simpson Chubby 2 26mm boar"`). In registry and integration tests, all `*_extracted` fields **must** be strings, not booleans. Assertions should be updated to match the expected enrichment output for the new, realistic extracted values.
 
