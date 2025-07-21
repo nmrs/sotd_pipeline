@@ -124,6 +124,37 @@ export const clearAllCaches = (): void => {
     fileCache.clear();
 };
 
+// Clear all caches including global caches
+export const clearAllCachesComprehensive = (): void => {
+    // Clear the utility caches
+    clearAllCaches();
+
+    // Clear global months cache
+    // @ts-ignore - accessing global cache for clearing
+    if (typeof window !== 'undefined' && window.monthsCache !== undefined) {
+        // @ts-ignore
+        window.monthsCache = null;
+    }
+
+    // Clear any localStorage caches
+    try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith('cache:') || key.includes('cache'))) {
+                keysToRemove.push(key);
+            }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+    } catch (error) {
+        console.warn('Failed to clear localStorage caches:', error);
+    }
+
+    // Force browser cache refresh by adding timestamp to all API calls
+    // This will be handled by the API interceptor
+    console.log('All caches cleared at:', new Date().toISOString());
+};
+
 export const getCacheStats = () => {
     return {
         analysis: analysisCache.getStats(),
