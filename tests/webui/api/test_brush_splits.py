@@ -1039,10 +1039,8 @@ class TestSaveSplitEndpoint:
         yaml_file = data_dir / "brush_splits.yaml"
         yaml_file.write_text("brush_splits: []")
 
-        # Mock the file path
-        with patch("webui.api.brush_splits.Path") as mock_path:
-            mock_path.return_value = yaml_file
-
+        # Mock the validator's yaml_path to prevent writing to production
+        with patch("webui.api.brush_splits.validator.yaml_path", yaml_file):
             # Test data
             test_data = {
                 "original": "Declaration B15 w/ Chisel & Hound Zebra",
@@ -1065,24 +1063,48 @@ class TestSaveSplitEndpoint:
 
     def test_save_single_split_correction(self, client, tmp_path):
         """Test saving a correction of an existing split."""
-        # Test that the endpoint works correctly
-        # The correction detection logic is tested in the validator tests
-        test_data = {
-            "original": "Declaration B15 w/ Chisel & Hound Zebra",
-            "handle": "Chisel & Hound Zebra",
-            "knot": "Declaration B15",
-            "validated_at": "2025-01-27T15:30:00Z",
+        # Create test data directory
+        data_dir = tmp_path / "data"
+        data_dir.mkdir()
+
+        # Create brush_splits.yaml file with existing data
+        yaml_file = data_dir / "brush_splits.yaml"
+        existing_data = {
+            "splits": {
+                "Declaration B15 w/ Chisel & Hound Zebra": [
+                    {
+                        "original": "Declaration B15 w/ Chisel & Hound Zebra",
+                        "handle": "Previous Handle",
+                        "knot": "Previous Knot",
+                        "validated_at": "2025-01-27T14:30:00Z",
+                        "corrected": False,
+                        "match_type": None,
+                        "occurrences": [],
+                    }
+                ]
+            }
         }
+        yaml_file.write_text(yaml.dump(existing_data))
 
-        # Make request
-        response = client.post("/api/brush-splits/save-split", json=test_data)
+        # Mock the file path at the module level to prevent writing to production
+        with patch("webui.api.brush_splits.validator.yaml_path", yaml_file):
+            # Test data for correction
+            test_data = {
+                "original": "Declaration B15 w/ Chisel & Hound Zebra",
+                "handle": "Chisel & Hound Zebra",
+                "knot": "Declaration B15",
+                "validated_at": "2025-01-27T15:30:00Z",
+            }
 
-        # Verify response
-        assert response.status_code == 200
-        data = response.json()
-        assert data["success"] is True
-        assert "Successfully saved brush split" in data["message"]
-        # Note: correction detection is tested in validator tests
+            # Make request
+            response = client.post("/api/brush-splits/save-split", json=test_data)
+
+            # Verify response
+            assert response.status_code == 200
+            data = response.json()
+            assert data["success"] is True
+            assert "Successfully saved brush split" in data["message"]
+            # Note: correction detection is tested in validator tests
 
     def test_save_single_split_error_handling(self, client):
         """Test error handling for save-split endpoint."""
