@@ -116,7 +116,7 @@ class BrushSplit:
 
     original: str
     handle: Optional[str]
-    knot: str
+    knot: Optional[str]  # Can be None when should_not_split is True
     match_type: Optional[str] = None
     validated: bool = False
     corrected: bool = False
@@ -280,7 +280,9 @@ class BrushSplitModel(BaseModel):
 
     original: str = Field(..., description="Original brush string")
     handle: Optional[str] = Field(None, description="Handle component")
-    knot: str = Field(..., description="Knot component")
+    knot: Optional[str] = Field(
+        None, description="Knot component (null when should_not_split is true)"
+    )
     match_type: Optional[str] = Field(None, description="Match type from brush matcher")
     validated: bool = Field(False, description="Whether this split has been validated")
     corrected: bool = Field(False, description="Whether this split was corrected")
@@ -314,7 +316,9 @@ class SaveSplitRequest(BaseModel):
 
     original: str = Field(..., description="Original brush string")
     handle: Optional[str] = Field(None, description="Corrected handle component")
-    knot: str = Field(..., description="Corrected knot component")
+    knot: Optional[str] = Field(
+        None, description="Corrected knot component (null when should_not_split is true)"
+    )
     validated_at: Optional[str] = Field(None, description="ISO timestamp of validation")
     should_not_split: bool = Field(False, description="Whether this brush should not be split")
 
@@ -631,11 +635,11 @@ class BrushSplitValidator:
             return False
 
     def calculate_confidence(
-        self, original: str, handle: Optional[str], knot: str
+        self, original: str, handle: Optional[str], knot: Optional[str]
     ) -> tuple[ConfidenceLevel, str]:
         """Calculate confidence level and reasoning for a brush split."""
         # Check for empty components first
-        if handle is None or not handle.strip() or not knot.strip():
+        if handle is None or not handle.strip() or knot is None or not knot.strip():
             if handle is None:
                 return ConfidenceLevel.HIGH, "Single component brush"
             return ConfidenceLevel.LOW, "Warning: empty component detected"
