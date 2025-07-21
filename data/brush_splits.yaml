@@ -1,9 +1,9 @@
 splits:
 - corrected: false
-  handle: Chisel & Hound Zebra
-  knot: Declaration B15
+  handle: null
+  knot: Test Brush
   match_type: null
   occurrences: []
-  original: Declaration B15 w/ Chisel & Hound Zebra
+  original: Test Brush
   validated: true
-  validated_at: '2025-01-27T15:30:00Z'
+  validated_at: '2025-07-21T21:17:49.299Z'

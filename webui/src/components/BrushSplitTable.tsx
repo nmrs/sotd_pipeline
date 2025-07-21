@@ -8,6 +8,7 @@ interface BrushSplit {
     match_type?: string;
     validated?: boolean;
     corrected?: boolean;
+    should_not_split?: boolean;
 }
 
 interface BrushSplitTableProps {
@@ -84,6 +85,20 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
         if (onSelectionChange) onSelectionChange(newSelected);
     };
 
+    const handleShouldNotSplitChange = (idx: number, value: boolean) => {
+        if (onSave) {
+            const updatedData = { ...brushSplits[idx] };
+            updatedData.should_not_split = value;
+            onSave(idx, updatedData);
+            // Clear unsaved edit for this row
+            setUnsavedEdits(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(idx);
+                return newSet;
+            });
+        }
+    };
+
     const handleHandleClick = (idx: number, currentValue: string) => {
         setEditingHandle(idx);
         setEditedHandleValue(currentValue);
@@ -147,7 +162,7 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
         return (
             <div key={idx} style={{
                 display: 'grid',
-                gridTemplateColumns: 'auto 1fr 1fr 1fr auto auto',
+                gridTemplateColumns: 'auto auto 1fr 1fr 1fr auto auto',
                 gap: '8px',
                 alignItems: 'center',
                 padding: '4px',
@@ -162,6 +177,14 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
                     checked={selectedIndices.includes(idx)}
                     onChange={() => handleCheckboxChange(idx)}
                 />
+                <input
+                    type="checkbox"
+                    role="checkbox"
+                    tabIndex={0}
+                    checked={split.should_not_split || false}
+                    onChange={() => handleShouldNotSplitChange(idx, !split.should_not_split)}
+                    title="Mark as should not split"
+                />
                 <span title={split.original}>{split.original}</span>
                 {editingHandle === idx ? (
                     <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
@@ -170,6 +193,7 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
                             onChange={(e) => setEditedHandleValue(e.target.value)}
                             autoFocus
                             style={{ flex: 1 }}
+                            disabled={split.should_not_split}
                         />
                         <button
                             onClick={() => handleSave(idx, 'handle')}
@@ -182,6 +206,7 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
                                 borderRadius: '3px',
                                 cursor: 'pointer'
                             }}
+                            disabled={split.should_not_split}
                         >
                             Save
                         </button>
@@ -211,11 +236,14 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
                 ) : (
                     <span
                         tabIndex={0}
-                        onClick={() => handleHandleClick(idx, split.handle || '')}
-                        onKeyDown={(e) => handleSpanKeyDown(idx, 'handle', split.handle || '', e)}
-                        style={{ color: split.handle ? 'inherit' : '#999', cursor: 'pointer' }}
+                        onClick={() => !split.should_not_split && handleHandleClick(idx, split.handle || '')}
+                        onKeyDown={(e) => !split.should_not_split && handleSpanKeyDown(idx, 'handle', split.handle || '', e)}
+                        style={{
+                            color: split.should_not_split ? '#ccc' : (split.handle ? 'inherit' : '#999'),
+                            cursor: split.should_not_split ? 'not-allowed' : 'pointer'
+                        }}
                     >
-                        {split.handle || '(empty)'}
+                        {split.should_not_split ? '(disabled)' : (split.handle || '(empty)')}
                     </span>
                 )}
                 {editingKnot === idx ? (
@@ -225,6 +253,7 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
                             onChange={(e) => setEditedKnotValue(e.target.value)}
                             autoFocus
                             style={{ flex: 1 }}
+                            disabled={split.should_not_split}
                         />
                         <button
                             onClick={() => handleSave(idx, 'knot')}
@@ -237,6 +266,7 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
                                 borderRadius: '3px',
                                 cursor: 'pointer'
                             }}
+                            disabled={split.should_not_split}
                         >
                             Save
                         </button>
@@ -266,11 +296,14 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
                 ) : (
                     <span
                         tabIndex={0}
-                        onClick={() => handleKnotClick(idx, split.knot)}
-                        onKeyDown={(e) => handleSpanKeyDown(idx, 'knot', split.knot, e)}
-                        style={{ cursor: 'pointer' }}
+                        onClick={() => !split.should_not_split && handleKnotClick(idx, split.knot)}
+                        onKeyDown={(e) => !split.should_not_split && handleSpanKeyDown(idx, 'knot', split.knot, e)}
+                        style={{
+                            cursor: split.should_not_split ? 'not-allowed' : 'pointer',
+                            color: split.should_not_split ? '#ccc' : 'inherit'
+                        }}
                     >
-                        {split.knot}
+                        {split.should_not_split ? '(disabled)' : split.knot}
                     </span>
                 )}
                 <span style={{
@@ -292,10 +325,10 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
                     fontSize: '12px',
                     padding: '2px 6px',
                     borderRadius: '4px',
-                    backgroundColor: !split.handle ? '#ffe6e6' : '#e6ffe6',
-                    color: !split.handle ? '#cc0000' : '#006600'
+                    backgroundColor: split.should_not_split ? '#ffe6cc' : (!split.handle ? '#ffe6e6' : '#e6ffe6'),
+                    color: split.should_not_split ? '#cc6600' : (!split.handle ? '#cc0000' : '#006600')
                 }}>
-                    {!split.handle ? 'unmatched' : 'split'}
+                    {split.should_not_split ? 'no-split' : (!split.handle ? 'unmatched' : 'split')}
                 </span>
             </div>
         );
@@ -346,7 +379,7 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
             </div>
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'auto 1fr 1fr 1fr auto auto',
+                gridTemplateColumns: 'auto auto 1fr 1fr 1fr auto auto',
                 gap: '8px',
                 alignItems: 'center',
                 padding: '4px',
@@ -355,6 +388,7 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
                 marginBottom: '4px'
             }}>
                 <span>Select</span>
+                <span>Should Not Split</span>
                 <span>Original</span>
                 <span>Handle</span>
                 <span>Knot</span>

@@ -12,6 +12,10 @@
  */
 
 import { getAvailableMonths, checkHealth, getCatalogs } from '../api';
+import { saveBrushSplit, loadBrushSplits } from '../api';
+
+// Mock fetch globally
+global.fetch = jest.fn();
 
 describe('API Integration (Real Endpoints)', () => {
     console.log('🔍 API Integration test suite starting...');
@@ -54,4 +58,123 @@ describe('API Integration (Real Endpoints)', () => {
             expect(error).toBeInstanceOf(Error);
         }
     }, 10000);
+});
+
+describe('API Integration - Should Not Split Feature', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    test('saveBrushSplit includes should_not_split field in request', async () => {
+        const mockResponse = {
+            success: true,
+            message: 'Successfully saved brush split',
+            corrected: false,
+            system_handle: null,
+            system_knot: null,
+            system_confidence: null,
+            system_reasoning: null
+        };
+
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockResponse
+        });
+
+        const brushSplit = {
+            original: 'Test Brush',
+            handle: null,
+            knot: 'Test Brush',
+            should_not_split: true
+        };
+
+        await saveBrushSplit(brushSplit);
+
+        expect(global.fetch).toHaveBeenCalledWith(
+            '/api/brush-splits/save-split',
+            expect.objectContaining({
+                method: 'POST',
+                headers: expect.objectContaining({
+                    'Content-Type': 'application/json'
+                }),
+                body: JSON.stringify({
+                    original: 'Test Brush',
+                    handle: null,
+                    knot: 'Test Brush',
+                    should_not_split: true,
+                    validated_at: expect.any(String)
+                })
+            })
+        );
+    });
+
+    test('loadBrushSplits handles should_not_split field in response', async () => {
+        const mockResponse = {
+            brush_splits: [
+                {
+                    original: 'Test Brush 1',
+                    handle: 'Test Handle',
+                    knot: 'Test Knot',
+                    should_not_split: false,
+                    match_type: 'regex'
+                },
+                {
+                    original: 'Test Brush 2',
+                    handle: null,
+                    knot: 'Test Brush 2',
+                    should_not_split: true,
+                    match_type: 'none'
+                }
+            ],
+            statistics: {
+                total: 2,
+                validated: 0,
+                corrected: 0
+            }
+        };
+
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockResponse
+        });
+
+        const result = await loadBrushSplits(['2025-01']);
+
+        expect(result.brush_splits).toHaveLength(2);
+        expect(result.brush_splits[0].should_not_split).toBe(false);
+        expect(result.brush_splits[1].should_not_split).toBe(true);
+        expect(result.brush_splits[1].handle).toBe(null);
+        expect(result.brush_splits[1].knot).toBe('Test Brush 2');
+    });
+
+    test('saveBrushSplit handles should_not_split field correctly', async () => {
+        const mockResponse = {
+            success: true,
+            message: 'Successfully saved brush split',
+            corrected: true,
+            system_handle: 'Previous Handle',
+            system_knot: 'Previous Knot',
+            system_confidence: 'medium',
+            system_reasoning: 'Previous reasoning'
+        };
+
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockResponse
+        });
+
+        const brushSplit = {
+            original: 'Test Brush',
+            handle: null,
+            knot: 'Test Brush',
+            should_not_split: true
+        };
+
+        const result = await saveBrushSplit(brushSplit);
+
+        expect(result.success).toBe(true);
+        expect(result.corrected).toBe(true);
+        expect(result.system_handle).toBe('Previous Handle');
+        expect(result.system_knot).toBe('Previous Knot');
+    });
 }); 

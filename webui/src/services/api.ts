@@ -180,6 +180,72 @@ export const runMatchPhase = async (
     }
 };
 
+// Brush split operations
+export interface BrushSplit {
+    original: string;
+    handle: string | null;
+    knot: string;
+    match_type?: string;
+    validated?: boolean;
+    corrected?: boolean;
+    validated_at?: string | null;
+    system_handle?: string | null;
+    system_knot?: string | null;
+    system_confidence?: string | null;
+    system_reasoning?: string | null;
+    occurrences?: any[];
+    should_not_split?: boolean;
+}
+
+export interface LoadBrushSplitsResponse {
+    brush_splits: BrushSplit[];
+    statistics: any;
+    processing_info?: any;
+    errors?: any;
+}
+
+export interface SaveBrushSplitRequest {
+    original: string;
+    handle: string | null;
+    knot: string;
+    validated_at?: string;
+    should_not_split?: boolean;
+}
+
+export interface SaveBrushSplitResponse {
+    success: boolean;
+    message: string;
+    corrected: boolean;
+    system_handle?: string | null;
+    system_knot?: string | null;
+    system_confidence?: string | null;
+    system_reasoning?: string | null;
+}
+
+export const loadBrushSplits = async (months: string[]): Promise<LoadBrushSplitsResponse> => {
+    try {
+        const queryParams = months.map(month => `months=${encodeURIComponent(month)}`).join('&');
+        const response = await api.get(`/brush-splits/load?${queryParams}`);
+        return response.data;
+    } catch (error) {
+        console.error('Failed to load brush splits:', error);
+        throw error;
+    }
+};
+
+export const saveBrushSplit = async (brushSplit: SaveBrushSplitRequest): Promise<SaveBrushSplitResponse> => {
+    try {
+        const response = await api.post('/brush-splits/save-split', {
+            ...brushSplit,
+            validated_at: brushSplit.validated_at || new Date().toISOString()
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to save brush split:', error);
+        throw error;
+    }
+};
+
 // Error handling utility
 export const handleApiError = (error: any): string => {
     if (error.response) {

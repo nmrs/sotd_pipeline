@@ -15,6 +15,7 @@ interface BrushSplit {
     system_confidence?: string | null;
     system_reasoning?: string | null;
     occurrences?: any[];
+    should_not_split?: boolean;
 }
 
 interface LoadResponse {

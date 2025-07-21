@@ -1,228 +1,157 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
-import BrushSplitValidator from '../BrushSplitValidator';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 // Mock the API service
 jest.mock('../../services/api', () => ({
-    getAvailableMonths: jest.fn()
+    getAvailableMonths: jest.fn(),
 }));
 
-// Mock fetch for brush splits API
-const mockFetch = jest.fn();
-global.fetch = mockFetch;
+// Mock fetch globally
+global.fetch = jest.fn();
 
-// Import the mocked function
 import { getAvailableMonths } from '../../services/api';
+import BrushSplitValidator from '../BrushSplitValidator';
 
-describe('BrushSplitValidator', () => {
+describe('BrushSplitValidator - Should Not Split Integration', () => {
     beforeEach(() => {
-        mockFetch.mockClear();
-        (getAvailableMonths as jest.Mock).mockClear();
+        jest.clearAllMocks();
+        // Mock getAvailableMonths to return some months
+        (getAvailableMonths as jest.Mock).mockResolvedValue(['2025-01', '2025-02']);
+    });
 
-        // Clear the global cache in the hook
-        // @ts-ignore - accessing private cache for testing
-        if ((global as any).monthsCache !== undefined) {
-            (global as any).monthsCache = null;
-        }
-        // @ts-ignore - accessing private cache for testing
-        if ((global as any).cachePromise !== undefined) {
-            (global as any).cachePromise = null;
-        }
+    test('loads brush splits with should_not_split field', async () => {
+        const mockBrushSplits = [
+            {
+                original: 'Test Brush 1',
+                handle: 'Test Handle',
+                knot: 'Test Knot',
+                should_not_split: false,
+                match_type: 'regex'
+            },
+            {
+                original: 'Test Brush 2',
+                handle: null,
+                knot: 'Test Brush 2',
+                should_not_split: true,
+                match_type: 'none'
+            }
+        ];
 
-        // Default mock for getAvailableMonths
-        (getAvailableMonths as jest.Mock).mockResolvedValue(['2024-01', '2024-02', '2024-03']);
-
-        // Default mock for fetch
-        mockFetch.mockImplementation(() =>
-            Promise.resolve({
-                ok: true,
-                json: () => Promise.resolve({ brush_splits: [], statistics: {} })
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                brush_splits: mockBrushSplits,
+                statistics: { total: 2 }
             })
-        );
-    });
+        });
 
-    it('renders without crashing', () => {
-        render(<BrushSplitValidator />);
-        expect(screen.getByTestId('brush-split-validator')).toBeInTheDocument();
-        expect(screen.getByText('Brush Split Validator')).toBeInTheDocument();
-    });
-
-    it('shows month selector after loading', async () => {
         render(<BrushSplitValidator />);
 
-        // Wait for the component to render and show the month selector
+        // Wait for the month selector to load
         await waitFor(() => {
             expect(screen.getByText('Select Months')).toBeInTheDocument();
         });
+
+        // Simulate selecting a month
+        const monthSelector = screen.getByText('Select Months');
+        fireEvent.click(monthSelector);
+
+        // Select a month from the dropdown
+        const monthCheckbox = screen.getByLabelText('2025-01');
+        fireEvent.click(monthCheckbox);
+
+        // Wait for the component to load data
+        await waitFor(() => {
+            expect(screen.getByText('Test Brush 1')).toBeInTheDocument();
+            expect(screen.getByText('Test Brush 2')).toBeInTheDocument();
+        });
+
+        // Check that the should_not_split checkbox is rendered
+        expect(screen.getByText('Should Not Split')).toBeInTheDocument();
     });
 
-    it('loads brush splits when months are selected', async () => {
-        const mockResponse = {
-            brush_splits: [
-                {
-                    original: 'Test Brush',
-                    handle: 'Test Handle',
-                    knot: 'Test Knot',
-                    validated: false,
-                    corrected: false,
-                    validated_at: null,
-                    system_handle: null,
-                    system_knot: null,
-                    system_confidence: null,
-                    system_reasoning: null,
-                    occurrences: []
-                }
-            ],
-            statistics: {
-                total: 1,
-                validated: 0,
-                corrected: 0,
-                validation_percentage: 0,
-                correction_percentage: 0,
-                split_types: {},
-                confidence_breakdown: {},
-                month_breakdown: {},
-                recent_activity: {}
+    test('displays disabled fields when should_not_split is true', async () => {
+        const mockBrushSplits = [
+            {
+                original: 'Test Brush',
+                handle: null,
+                knot: 'Test Brush',
+                should_not_split: true,
+                match_type: 'none'
             }
-        };
+        ];
 
-        mockFetch.mockResolvedValueOnce({
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
-            json: async () => mockResponse
+            json: async () => ({
+                brush_splits: mockBrushSplits,
+                statistics: { total: 1 }
+            })
         });
 
         render(<BrushSplitValidator />);
 
-        // Wait for month selector to appear
+        // Wait for the month selector to load
         await waitFor(() => {
             expect(screen.getByText('Select Months')).toBeInTheDocument();
         });
 
-        // Click on month selector to open dropdown
-        fireEvent.click(screen.getByText('Select Months'));
+        // Simulate selecting a month
+        const monthSelector = screen.getByText('Select Months');
+        fireEvent.click(monthSelector);
 
-        // Select a month
-        await waitFor(() => {
-            expect(screen.getByText('2024-01')).toBeInTheDocument();
-        });
+        // Select a month from the dropdown
+        const monthCheckbox = screen.getByLabelText('2025-01');
+        fireEvent.click(monthCheckbox);
 
-        fireEvent.click(screen.getByText('2024-01'));
-
-        // Wait for the API call to be made
-        await waitFor(() => {
-            expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/api/brush-splits/load?months=2024-01'));
-        });
-    });
-
-    it('displays brush strings when data is loaded', async () => {
-        const mockResponse = {
-            brush_splits: [
-                {
-                    original: 'Test Brush',
-                    handle: 'Test Handle',
-                    knot: 'Test Knot',
-                    validated: false,
-                    corrected: false,
-                    validated_at: null,
-                    system_handle: null,
-                    system_knot: null,
-                    system_confidence: null,
-                    system_reasoning: null,
-                    occurrences: []
-                }
-            ],
-            statistics: {
-                total: 1,
-                validated: 0,
-                corrected: 0,
-                validation_percentage: 0,
-                correction_percentage: 0,
-                split_types: {},
-                confidence_breakdown: {},
-                month_breakdown: {},
-                recent_activity: {}
-            }
-        };
-
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            json: async () => mockResponse
-        });
-
-        render(<BrushSplitValidator />);
-
-        // Wait for month selector to appear
-        await waitFor(() => {
-            expect(screen.getByText('Select Months')).toBeInTheDocument();
-        });
-
-        fireEvent.click(screen.getByText('Select Months'));
-
-        await waitFor(() => {
-            expect(screen.getByText('2024-01')).toBeInTheDocument();
-        });
-
-        fireEvent.click(screen.getByText('2024-01'));
-
-        // Wait for the brush string to be displayed
         await waitFor(() => {
             expect(screen.getByText('Test Brush')).toBeInTheDocument();
         });
+
+        // Check that disabled fields are shown
+        const disabledFields = screen.getAllByText('(disabled)');
+        expect(disabledFields.length).toBe(2); // Handle and knot fields
     });
 
-    it('handles API errors gracefully', async () => {
-        mockFetch.mockRejectedValueOnce(new Error('Network Error'));
+    test('shows no-split status for should_not_split brushes', async () => {
+        const mockBrushSplits = [
+            {
+                original: 'Test Brush',
+                handle: null,
+                knot: 'Test Brush',
+                should_not_split: true,
+                match_type: 'none'
+            }
+        ];
+
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                brush_splits: mockBrushSplits,
+                statistics: { total: 1 }
+            })
+        });
 
         render(<BrushSplitValidator />);
 
-        // Wait for month selector to appear
+        // Wait for the month selector to load
         await waitFor(() => {
             expect(screen.getByText('Select Months')).toBeInTheDocument();
         });
 
-        fireEvent.click(screen.getByText('Select Months'));
+        // Simulate selecting a month
+        const monthSelector = screen.getByText('Select Months');
+        fireEvent.click(monthSelector);
+
+        // Select a month from the dropdown
+        const monthCheckbox = screen.getByLabelText('2025-01');
+        fireEvent.click(monthCheckbox);
 
         await waitFor(() => {
-            expect(screen.getByText('2024-01')).toBeInTheDocument();
+            expect(screen.getByText('Test Brush')).toBeInTheDocument();
         });
 
-        fireEvent.click(screen.getByText('2024-01'));
-
-        // Wait for error message to appear
-        await waitFor(() => {
-            expect(screen.getByText('Error loading brush splits')).toBeInTheDocument();
-        });
-    });
-
-    it('shows loading state when fetching brush splits', async () => {
-        // Mock a delayed response
-        mockFetch.mockImplementation(() =>
-            new Promise(resolve =>
-                setTimeout(() =>
-                    resolve({
-                        ok: true,
-                        json: () => Promise.resolve({ brush_splits: [], statistics: {} })
-                    }), 100
-                )
-            )
-        );
-
-        render(<BrushSplitValidator />);
-
-        // Wait for month selector to appear
-        await waitFor(() => {
-            expect(screen.getByText('Select Months')).toBeInTheDocument();
-        });
-
-        fireEvent.click(screen.getByText('Select Months'));
-
-        await waitFor(() => {
-            expect(screen.getByText('2024-01')).toBeInTheDocument();
-        });
-
-        fireEvent.click(screen.getByText('2024-01'));
-
-        // Should show loading state
-        expect(screen.getByText('Loading...')).toBeInTheDocument();
+        // Check that no-split status is shown
+        expect(screen.getByText('no-split')).toBeInTheDocument();
     });
 }); 

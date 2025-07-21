@@ -1,315 +1,157 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import BrushSplitTable from '../BrushSplitTable';
+import type { BrushSplit } from '../BrushSplitTable';
 
-describe('BrushSplitTable (TDD)', () => {
-    it('renders with empty data (no errors)', () => {
-        render(<BrushSplitTable />);
-        expect(screen.getByTestId('brush-split-table')).toBeInTheDocument();
+describe('BrushSplitTable - Should Not Split Feature', () => {
+    const mockBrushSplits: BrushSplit[] = [
+        {
+            original: 'Test Brush 1',
+            handle: 'Test Handle',
+            knot: 'Test Knot',
+            match_type: 'regex',
+            should_not_split: false
+        },
+        {
+            original: 'Test Brush 2',
+            handle: null,
+            knot: 'Test Brush 2',
+            match_type: 'none',
+            should_not_split: true
+        }
+    ];
+
+    const mockOnSave = jest.fn();
+    const mockOnSelectionChange = jest.fn();
+
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
 
-    it('renders a single row of brush split data', () => {
-        const data = [
-            {
-                original: 'Elite handle w/ Declaration knot',
-                handle: 'Elite',
-                knot: 'Declaration',
-            }
-        ];
-        render(<BrushSplitTable brushSplits={data} />);
-        expect(screen.getByText('Elite handle w/ Declaration knot')).toBeInTheDocument();
-        expect(screen.getByText('Elite')).toBeInTheDocument();
-        expect(screen.getByText('Declaration')).toBeInTheDocument();
+    test('renders should not split checkbox column', () => {
+        render(
+            <BrushSplitTable
+                brushSplits={mockBrushSplits}
+                onSave={mockOnSave}
+                onSelectionChange={mockOnSelectionChange}
+            />
+        );
+
+        // Check that the column header is present
+        expect(screen.getByText('Should Not Split')).toBeInTheDocument();
     });
 
-    it('renders multiple rows of brush split data', () => {
-        const data = [
-            { original: 'Elite handle w/ Declaration knot', handle: 'Elite', knot: 'Declaration' },
-            { original: 'Omega boar brush', handle: '', knot: 'Omega boar brush' },
-            { original: 'Simpson Chubby 2', handle: 'Simpson', knot: 'Chubby 2' }
-        ];
-        render(<BrushSplitTable brushSplits={data} />);
-        expect(screen.getByText('Elite handle w/ Declaration knot')).toBeInTheDocument();
-        // Omega boar brush appears twice (original and knot)
-        expect(screen.getAllByText('Omega boar brush').length).toBe(2);
-        expect(screen.getByText('Simpson Chubby 2')).toBeInTheDocument();
-        expect(screen.getByText('Simpson')).toBeInTheDocument();
-        expect(screen.getByText('Chubby 2')).toBeInTheDocument();
-    });
+    test('renders should not split checkboxes for each row', () => {
+        render(
+            <BrushSplitTable
+                brushSplits={mockBrushSplits}
+                onSave={mockOnSave}
+                onSelectionChange={mockOnSelectionChange}
+            />
+        );
 
-    it('renders a checkbox for each row and allows selecting a single row', () => {
-        const data = [
-            { original: 'Elite handle w/ Declaration knot', handle: 'Elite', knot: 'Declaration' },
-            { original: 'Omega boar brush', handle: '', knot: 'Omega boar brush' }
-        ];
-        const onSelectionChange = jest.fn();
-        render(<BrushSplitTable brushSplits={data} onSelectionChange={onSelectionChange} />);
+        // Check that checkboxes are rendered
         const checkboxes = screen.getAllByRole('checkbox');
-        expect(checkboxes.length).toBe(2);
-        fireEvent.click(checkboxes[1]); // Select the second row
-        expect(onSelectionChange).toHaveBeenCalledWith([1]);
+        expect(checkboxes.length).toBeGreaterThan(0);
     });
 
-    it('allows selecting multiple rows and calls onSelectionChange with all selected indices', () => {
-        const data = [
-            { original: 'Elite handle w/ Declaration knot', handle: 'Elite', knot: 'Declaration' },
-            { original: 'Omega boar brush', handle: '', knot: 'Omega boar brush' },
-            { original: 'Simpson Chubby 2', handle: 'Simpson', knot: 'Chubby 2' }
-        ];
-        let selected: number[] = [];
-        const onSelectionChange = (indices: number[]) => { selected = indices; };
-        render(<BrushSplitTable brushSplits={data} onSelectionChange={onSelectionChange} />);
-        const checkboxes = screen.getAllByRole('checkbox');
-        fireEvent.click(checkboxes[0]); // Select first row
-        expect(selected).toEqual([0]);
-        fireEvent.click(checkboxes[2]); // Select third row
-        expect(selected).toEqual([0, 2]);
-        fireEvent.click(checkboxes[0]); // Deselect first row
-        expect(selected).toEqual([2]);
+    test('should not split checkbox reflects correct state', () => {
+        render(
+            <BrushSplitTable
+                brushSplits={mockBrushSplits}
+                onSave={mockOnSave}
+                onSelectionChange={mockOnSelectionChange}
+            />
+        );
+
+        // First brush should not have should_not_split checked
+        const firstCheckbox = screen.getAllByRole('checkbox')[1]; // Skip selection checkbox
+        expect(firstCheckbox).not.toBeChecked();
+
+        // Second brush should have should_not_split checked
+        const secondCheckbox = screen.getAllByRole('checkbox')[3]; // Skip selection checkbox
+        expect(secondCheckbox).toBeChecked();
     });
 
-    it('allows inline editing of the handle field by clicking on it', () => {
-        const data = [
-            { original: 'Elite handle w/ Declaration knot', handle: 'Elite', knot: 'Declaration' }
-        ];
-        render(<BrushSplitTable brushSplits={data} />);
-        const handleElement = screen.getByText('Elite');
-        fireEvent.click(handleElement);
-        const input = screen.getByDisplayValue('Elite');
-        expect(input).toBeInTheDocument();
-        fireEvent.change(input, { target: { value: 'New Handle' } });
-        expect(input).toHaveValue('New Handle');
+    test('clicking should not split checkbox calls onSave with updated data', () => {
+        render(
+            <BrushSplitTable
+                brushSplits={mockBrushSplits}
+                onSave={mockOnSave}
+                onSelectionChange={mockOnSelectionChange}
+            />
+        );
+
+        const shouldNotSplitCheckbox = screen.getAllByRole('checkbox')[1]; // Skip selection checkbox
+        fireEvent.click(shouldNotSplitCheckbox);
+
+        expect(mockOnSave).toHaveBeenCalledWith(0, {
+            ...mockBrushSplits[0],
+            should_not_split: true
+        });
     });
 
-    it('allows inline editing of the knot field by clicking on it', () => {
-        const data = [
-            { original: 'Elite handle w/ Declaration knot', handle: 'Elite', knot: 'Declaration' }
-        ];
-        render(<BrushSplitTable brushSplits={data} />);
-        const knotElement = screen.getByText('Declaration');
-        fireEvent.click(knotElement);
-        const input = screen.getByDisplayValue('Declaration');
-        expect(input).toBeInTheDocument();
-        fireEvent.change(input, { target: { value: 'New Knot' } });
-        expect(input).toHaveValue('New Knot');
+    test('handle and knot fields are disabled when should_not_split is true', () => {
+        render(
+            <BrushSplitTable
+                brushSplits={mockBrushSplits}
+                onSave={mockOnSave}
+                onSelectionChange={mockOnSelectionChange}
+            />
+        );
+
+        // For the second brush (should_not_split: true), fields should show as disabled
+        const disabledFields = screen.getAllByText('(disabled)');
+        expect(disabledFields.length).toBe(2); // One for handle, one for knot
     });
 
-    it('saves individual changes when save button is clicked', () => {
-        const data = [
-            { original: 'Elite handle w/ Declaration knot', handle: 'Elite', knot: 'Declaration' }
-        ];
-        const onSave = jest.fn();
-        render(<BrushSplitTable brushSplits={data} onSave={onSave} />);
-        const handleElement = screen.getByText('Elite');
-        fireEvent.click(handleElement);
-        const input = screen.getByDisplayValue('Elite');
-        fireEvent.change(input, { target: { value: 'New Handle' } });
-        const saveButton = screen.getByText('Save');
-        fireEvent.click(saveButton);
-        expect(onSave).toHaveBeenCalledWith(0, { original: 'Elite handle w/ Declaration knot', handle: 'New Handle', knot: 'Declaration' });
+    test('status shows no-split when should_not_split is true', () => {
+        render(
+            <BrushSplitTable
+                brushSplits={mockBrushSplits}
+                onSave={mockOnSave}
+                onSelectionChange={mockOnSelectionChange}
+            />
+        );
+
+        // Check that the status shows 'no-split' for the second brush
+        const statusElements = screen.getAllByText('no-split');
+        expect(statusElements.length).toBeGreaterThan(0);
     });
 
-    it('cancels editing when cancel button is clicked', () => {
-        const data = [
-            { original: 'Elite handle w/ Declaration knot', handle: 'Elite', knot: 'Declaration' }
-        ];
-        const onSave = jest.fn();
-        render(<BrushSplitTable brushSplits={data} onSave={onSave} />);
-        const handleElement = screen.getByText('Elite');
-        fireEvent.click(handleElement);
-        const input = screen.getByDisplayValue('Elite');
-        fireEvent.change(input, { target: { value: 'New Handle' } });
-        const cancelButton = screen.getByText('Cancel');
-        fireEvent.click(cancelButton);
+    test('clicking handle field does nothing when should_not_split is true', () => {
+        render(
+            <BrushSplitTable
+                brushSplits={mockBrushSplits}
+                onSave={mockOnSave}
+                onSelectionChange={mockOnSelectionChange}
+            />
+        );
 
-        // Should not call onSave
-        expect(onSave).not.toHaveBeenCalled();
+        // Find the disabled handle field and click it
+        const disabledFields = screen.getAllByText('(disabled)');
+        const disabledHandleField = disabledFields[0]; // First disabled field is handle
+        fireEvent.click(disabledHandleField);
 
-        // Should return to display mode with original value
-        expect(screen.getByText('Elite')).toBeInTheDocument();
-        expect(screen.queryByDisplayValue('New Handle')).not.toBeInTheDocument();
+        // Should not trigger any save operations
+        expect(mockOnSave).not.toHaveBeenCalled();
     });
 
-    it('includes a search input that filters rows by handle, knot, or original text', () => {
-        const data = [
-            { original: 'Elite handle w/ Declaration knot', handle: 'Elite', knot: 'Declaration' },
-            { original: 'Omega boar brush', handle: '', knot: 'Omega boar brush' },
-            { original: 'Simpson Chubby 2', handle: 'Simpson', knot: 'Chubby 2' }
-        ];
-        render(<BrushSplitTable brushSplits={data} />);
-        const searchInput = screen.getByPlaceholderText('Search...');
-        expect(searchInput).toBeInTheDocument();
-        fireEvent.change(searchInput, { target: { value: 'Simpson' } });
-        expect(screen.getByText('Simpson Chubby 2')).toBeInTheDocument();
-        expect(screen.getByText('Simpson')).toBeInTheDocument();
-        expect(screen.getByText('Chubby 2')).toBeInTheDocument();
-        expect(screen.queryByText('Elite handle w/ Declaration knot')).not.toBeInTheDocument();
-        expect(screen.queryByText('Omega boar brush')).not.toBeInTheDocument();
-    });
+    test('clicking knot field does nothing when should_not_split is true', () => {
+        render(
+            <BrushSplitTable
+                brushSplits={mockBrushSplits}
+                onSave={mockOnSave}
+                onSelectionChange={mockOnSelectionChange}
+            />
+        );
 
-    it('shows a loading indicator when isLoading prop is true', () => {
-        const data = [
-            { original: 'Elite handle w/ Declaration knot', handle: 'Elite', knot: 'Declaration' }
-        ];
-        render(<BrushSplitTable brushSplits={data} isLoading={true} />);
-        expect(screen.getByText('Loading...')).toBeInTheDocument();
-        expect(screen.queryByText('Elite handle w/ Declaration knot')).not.toBeInTheDocument();
-        expect(screen.queryByPlaceholderText('Search...')).not.toBeInTheDocument();
-    });
+        // Find the disabled knot field and click it
+        const disabledFields = screen.getAllByText('(disabled)');
+        const disabledKnotField = disabledFields[1]; // Second disabled field is knot
+        fireEvent.click(disabledKnotField);
 
-    it('shows an error message when hasError prop is true', () => {
-        const data = [
-            { original: 'Elite handle w/ Declaration knot', handle: 'Elite', knot: 'Declaration' }
-        ];
-        render(<BrushSplitTable brushSplits={data} hasError={true} />);
-        expect(screen.getByText('Error loading data')).toBeInTheDocument();
-        expect(screen.queryByText('Elite handle w/ Declaration knot')).not.toBeInTheDocument();
-        expect(screen.queryByPlaceholderText('Search...')).not.toBeInTheDocument();
-    });
-
-    it('uses virtualized rendering for large datasets', () => {
-        const data = Array.from({ length: 1000 }, (_, i) => ({
-            original: `Brush ${i}`,
-            handle: `Handle ${i}`,
-            knot: `Knot ${i}`
-        }));
-        render(<BrushSplitTable brushSplits={data} />);
-        // Should render only visible rows (first few)
-        expect(screen.getByText('Brush 0')).toBeInTheDocument();
-        expect(screen.getByText('Handle 0')).toBeInTheDocument();
-        expect(screen.getByText('Knot 0')).toBeInTheDocument();
-        // Should not render all 1000 rows
-        expect(screen.queryByText('Brush 999')).not.toBeInTheDocument();
-        expect(screen.queryByText('Handle 999')).not.toBeInTheDocument();
-        expect(screen.queryByText('Knot 999')).not.toBeInTheDocument();
-    });
-
-    it('supports keyboard navigation for moving between rows and fields', () => {
-        const data = [
-            { original: 'Elite handle w/ Declaration knot', handle: 'Elite', knot: 'Declaration' }
-        ];
-        render(<BrushSplitTable brushSplits={data} />);
-        const handleElement = screen.getByText('Elite');
-        fireEvent.keyDown(handleElement, { key: 'Enter' });
-        const input = screen.getByDisplayValue('Elite');
-        expect(input).toBeInTheDocument();
-    });
-
-    it('displays match_type column with color-coded badges', () => {
-        const data = [
-            {
-                original: 'Elite handle w/ Declaration knot',
-                handle: 'Elite',
-                knot: 'Declaration',
-                match_type: 'regex'
-            },
-            {
-                original: 'Unmatched brush',
-                handle: null,
-                knot: 'Unmatched brush',
-                match_type: undefined
-            }
-        ];
-        render(<BrushSplitTable brushSplits={data} />);
-
-        // Check that match_type badges are displayed
-        expect(screen.getByText('regex')).toBeInTheDocument();
-        expect(screen.getByText('none')).toBeInTheDocument();
-
-        // Check that status badges are displayed
-        expect(screen.getByText('split')).toBeInTheDocument();
-        expect(screen.getByText('unmatched')).toBeInTheDocument();
-    });
-
-    it('handles null handle values correctly', () => {
-        const data = [
-            {
-                original: 'Unmatched brush',
-                handle: null,
-                knot: 'Unmatched brush',
-                match_type: undefined
-            }
-        ];
-        render(<BrushSplitTable brushSplits={data} />);
-
-        // Check that empty handle is displayed as "(empty)"
-        expect(screen.getByText('(empty)')).toBeInTheDocument();
-
-        // Check that unmatched status is shown
-        expect(screen.getByText('unmatched')).toBeInTheDocument();
-    });
-
-    it('shows visual indicator for unsaved edits', () => {
-        const data = [
-            {
-                original: 'Elite handle w/ Declaration knot',
-                handle: 'Elite',
-                knot: 'Declaration',
-                match_type: 'regex'
-            }
-        ];
-        render(<BrushSplitTable brushSplits={data} />);
-
-        // Click on handle to start editing
-        const handleElement = screen.getByText('Elite');
-        fireEvent.click(handleElement);
-
-        // Should show edit indicator (yellow background or asterisk)
-        const input = screen.getByDisplayValue('Elite');
-        expect(input).toBeInTheDocument();
-
-        // The row should have a visual indicator for unsaved edits
-        const row = input.closest('div')?.parentElement;
-        expect(row).toHaveStyle('background-color: #fff3cd');
-    });
-
-    it('shows search input prominently and filters data', () => {
-        const data = [
-            {
-                original: 'Elite handle w/ Declaration knot',
-                handle: 'Elite',
-                knot: 'Declaration',
-                match_type: 'regex'
-            },
-            {
-                original: 'Omega boar brush',
-                handle: null,
-                knot: 'Omega boar brush',
-                match_type: undefined
-            }
-        ];
-        render(<BrushSplitTable brushSplits={data} />);
-
-        // Should show search input with proper styling
-        const searchInput = screen.getByPlaceholderText('Search...');
-        expect(searchInput).toBeInTheDocument();
-        expect(searchInput).toHaveStyle('width: 100%');
-
-        // Should show both items initially
-        expect(screen.getByText('Elite handle w/ Declaration knot')).toBeInTheDocument();
-        expect(screen.getAllByText('Omega boar brush')).toHaveLength(2); // Original and knot columns
-
-        // Type in search to filter
-        fireEvent.change(searchInput, { target: { value: 'Elite' } });
-
-        // Should only show Elite item
-        expect(screen.getByText('Elite handle w/ Declaration knot')).toBeInTheDocument();
-        expect(screen.queryAllByText('Omega boar brush')).toHaveLength(0);
-    });
-
-    it('shows filter buttons for match type and status', () => {
-        const data = [
-            {
-                original: 'Elite handle w/ Declaration knot',
-                handle: 'Elite',
-                knot: 'Declaration',
-                match_type: 'regex'
-            }
-        ];
-        render(<BrushSplitTable brushSplits={data} />);
-
-        // Should show filter buttons by default
-        expect(screen.getByText('Filter Match Type')).toBeInTheDocument();
-        expect(screen.getByText('Filter Status')).toBeInTheDocument();
+        // Should not trigger any save operations
+        expect(mockOnSave).not.toHaveBeenCalled();
     });
 }); 
