@@ -165,6 +165,7 @@ Fix the failing webui tests by implementing proper axios mocking instead of fetc
 - Separate unit tests (mocked) from integration tests (real API).
 - Fix the should_not_split tests to use proper mocks and expect correct data.
 - Ensure all webui tests pass (currently 3 failing tests).
+- **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
 
 ### Step 2: Establish Test Data Isolation Strategy
@@ -175,6 +176,8 @@ Create test-specific API endpoints and data files for isolated testing.
 - Add test-specific API endpoints that use isolated data.
 - Update integration tests to use test endpoints instead of production data.
 - Ensure tests are fast, reliable, and don't depend on changing production data.
+- **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
+- **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
 
 ### Step 3: Improve Brush Splits Data Structure
@@ -187,6 +190,8 @@ Fix data structure inconsistencies and improve organization in brush_splits.yaml
 - Update API code to handle new structure
 - Update all tests to expect new data format
 - Ensure data structure is consistent and logical
+- **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
+- **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
 
 ### Step 4: YAML/Data File Utility Module
@@ -196,6 +201,8 @@ Create a Python module (e.g., `webui/api/utils/yaml_utils.py`) with functions fo
 - Write unit tests for all utility functions (load, save, validate, error cases).
 - Refactor one API module (e.g., `brush_splits.py`) to use the new utility.
 - Ensure all tests pass and error handling is consistent.
+- **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
+- **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
 
 ### Step 5: Centralized Error Handling
@@ -205,6 +212,8 @@ Implement a decorator or context manager for API error handling in Python.
 - Write unit tests for the decorator/context manager (test various error types and responses).
 - Refactor one endpoint to use the decorator.
 - Ensure error responses are consistent and tests pass.
+- **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
+- **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
 
 ### Step 6: Base Validator Class
@@ -214,6 +223,8 @@ Create a base validator class for product-type validation logic in Python.
 - Write unit tests for the base class (test required field validation, error cases).
 - Refactor one product-specific validator to inherit from the base.
 - Ensure all tests pass and logic is DRY.
+- **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
+- **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
 
 ### Step 7: Remove Manual Cache-Busting
@@ -223,6 +234,8 @@ Audit all API calls in the webui for manual cache-busting query params.
 - Write a test that fails if manual `_t=` params are present in API calls.
 - Refactor code to rely solely on the Axios interceptor.
 - Ensure all tests pass and no manual cache-busting remains.
+- **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
+- **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
 
 ### Step 8: Generic DataTable Component
@@ -232,6 +245,8 @@ Create a generic DataTable React component that accepts columns, data, and row r
 - Write unit tests for the DataTable (renders columns, rows, handles empty data, etc.).
 - Refactor one table component (e.g., `BrushSplitTable`) to use the generic DataTable.
 - Ensure all tests pass and UI is unchanged.
+- **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
+- **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
 
 ### Step 9: Shared Form Field Components
@@ -241,6 +256,8 @@ Create generic CheckboxField, SelectField, and InputField React components.
 - Write unit tests for each field component (renders, handles input, error states).
 - Refactor one form to use the shared components.
 - Ensure all tests pass and form behavior is unchanged.
+- **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
+- **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
 
 ### Step 10: Generalize Data Transformers
@@ -250,6 +267,8 @@ If multiple product types require data transformation, create a generic transfor
 - Write unit tests for the generic transformer (handles various product types, error cases).
 - Refactor one transformer to use the generic pattern.
 - Ensure all tests pass and data is transformed correctly.
+- **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
+- **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
 
 ### Step 11: Test Utilities for Mocks
@@ -259,6 +278,8 @@ Create test utility functions for common mocks (API, fetch, months) in the webui
 - Write unit tests for the utilities.
 - Refactor one test file to use the utilities.
 - Ensure all tests pass and mocking is consistent.
+- **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
+- **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
 
 ### Step 12: Documentation
@@ -268,12 +289,26 @@ Document all shared utilities and DRY patterns in the codebase.
 - Add or update documentation in `docs/` and code comments.
 - Update onboarding/contribution guides to reference shared patterns.
 - Ensure documentation is clear and up to date.
+- **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
+- **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
 
 ---
 
 ## 🧪 Testing Requirements (per @sotd-pipeline-core.mdc)
 
+### **MANDATORY - Full Test Success Required for Step Completion**
+- **ALL steps require complete test success** before marking as complete
+- **Test Suite**: Run `make test-all` (Python + React + E2E) for comprehensive validation
+- **Individual Test Types**:
+  - Python: `make test-python` (1,724 tests)
+  - React: `make test-react` (97 tests) 
+  - E2E: `make test-e2e` (if configured)
+- **Quality Checks**: `make format lint typecheck` must pass
+- **Step Completion Criteria**: All test suites must pass with zero failures
+- **Test Isolation**: Each step must be tested in isolation without affecting other steps
+
+### **Test Type Requirements**
 - **Unit Tests**: Required for all new utilities, components, and refactored logic. List specific functions/components to be tested in each step.
 - **Integration Tests**: Required for all refactored API endpoints and major UI flows. Specify real data files and workflow scenarios.
 - **E2E Tests**: Optional, only for full user workflows (e.g., Playwright for UI, API integration for backend).
@@ -282,13 +317,17 @@ Document all shared utilities and DRY patterns in the codebase.
 - **Performance**: Add performance tests for utilities/components that may impact load time or throughput.
 - **Test File Locations**: Mirror source structure (e.g., `tests/api/test_yaml_utils.py`, `src/components/__tests__/DataTable.test.tsx`).
 - **Mock Data**: Define and use mock data for all unit tests. Specify requirements in each step.
-- **Test Execution**: Use `make format lint typecheck test` before commits. E2E: `npm run test:e2e:background` if needed.
-- **MANDATORY - Production Data Protection**: 
-  - **NEVER write to production data files** during testing or development
-  - **ALWAYS use temporary files (tmp_path)** for file-writing tests
-  - **ALWAYS use test-specific data** for integration tests
-  - **NEVER modify data/brush_splits.yaml, data/brushes.yaml, etc.** in tests
-  - **ALWAYS verify test isolation** before committing any test changes
+
+### **MANDATORY - Production Data Protection** 
+- **NEVER write to production data files** during testing or development
+- **ALWAYS use temporary files (tmp_path)** for file-writing tests
+- **ALWAYS use test-specific data** for integration tests
+- **NEVER modify data/brush_splits.yaml, data/brushes.yaml, etc.** in tests
+- **ALWAYS verify test isolation** before committing any test changes
+- **Test Data Isolation**: All tests must use isolated test data that cannot affect production files
+- **API Test Endpoints**: Create test-specific API endpoints that use isolated data files
+- **File System Isolation**: Use `tmp_path` fixture for all file operations in tests
+- **Data Validation**: Verify that tests cannot accidentally write to production files
 
 ---
 
