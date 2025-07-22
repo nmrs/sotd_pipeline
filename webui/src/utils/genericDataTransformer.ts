@@ -208,26 +208,38 @@ export function createBrushTransformer(): DataTransformer<any> {
       count: data.count || 0,
       comment_ids: data.comment_ids || [],
       examples: data.examples || [],
-      status: 'Unmatched',
+      status: 'Unmatched', // Will be overridden by determineStatus
     }),
     extractComponents: (data: any) => {
       const components: Record<string, any> = {};
 
-      // Extract handle component if present
-      if (data.components?.handle) {
+      // Extract handle component from matched data
+      if (data.matched?.handle) {
         components.handle = {
-          text: data.components.handle.text || '',
-          status: data.components.handle.status || 'Unmatched',
-          pattern: data.components.handle.pattern || '',
+          text: data.matched.handle.source_text || `${data.matched.handle.brand} ${data.matched.handle.model}`,
+          status: 'Matched',
+          pattern: data.matched.handle._pattern || 'exact',
+        };
+      } else if (data.unmatched?.handle) {
+        components.handle = {
+          text: data.unmatched.handle.text || '',
+          status: 'Unmatched',
+          pattern: data.unmatched.handle.pattern || '',
         };
       }
 
-      // Extract knot component if present
-      if (data.components?.knot) {
+      // Extract knot component from matched data
+      if (data.matched?.knot) {
         components.knot = {
-          text: data.components.knot.text || '',
-          status: data.components.knot.status || 'Unmatched',
-          pattern: data.components.knot.pattern || '',
+          text: data.matched.knot.source_text || `${data.matched.knot.brand} ${data.matched.knot.model}`,
+          status: 'Matched',
+          pattern: data.matched.knot._pattern || 'exact',
+        };
+      } else if (data.unmatched?.knot) {
+        components.knot = {
+          text: data.unmatched.knot.text || '',
+          status: 'Unmatched',
+          pattern: data.unmatched.knot.pattern || '',
         };
       }
 
@@ -235,17 +247,15 @@ export function createBrushTransformer(): DataTransformer<any> {
     },
     determineStatus: (data: any) => {
       // Determine overall status based on component statuses
-      const handleStatus = data.components?.handle?.status;
-      const knotStatus = data.components?.knot?.status;
+      const handleStatus = data.matched?.handle ? 'Matched' : (data.unmatched?.handle ? 'Unmatched' : undefined);
+      const knotStatus = data.matched?.knot ? 'Matched' : (data.unmatched?.knot ? 'Unmatched' : undefined);
 
+      // If any component is matched, overall status is matched
       if (handleStatus === 'Matched' || knotStatus === 'Matched') {
         return 'Matched';
       }
 
-      if (handleStatus === 'Filtered' || knotStatus === 'Filtered') {
-        return 'Filtered';
-      }
-
+      // Default to unmatched
       return 'Unmatched';
     },
   });
