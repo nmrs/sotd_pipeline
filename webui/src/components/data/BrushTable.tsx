@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { VirtualizedTable } from './VirtualizedTable';
+import { ColumnDef } from '@tanstack/react-table';
+import { DataTable } from '@/components/ui/data-table';
 import FilteredEntryCheckbox from '../forms/FilteredEntryCheckbox';
 import { BrushData } from '../../utils/brushDataTransformer';
 
@@ -22,7 +23,7 @@ export interface BrushTableProps {
   commentLoading?: boolean;
 }
 
-// Flatten brush data for VirtualizedTable while preserving component information
+// Flatten brush data for DataTable while preserving component information
 const flattenBrushData = (
   items: BrushData[],
   filteredStatus: Record<string, boolean> = {}
@@ -88,292 +89,211 @@ const BrushTable: React.FC<BrushTableProps> = ({
   // Handle null/undefined items gracefully
   const safeItems = useMemo(() => items || [], [items]);
 
-  // Flatten brush data for virtualization
+  // Flatten brush data for DataTable
   const flattenedData = useMemo(() => {
     return flattenBrushData(safeItems, filteredStatus);
   }, [safeItems, filteredStatus]);
 
-  // Create columns for VirtualizedTable
-  const columns = useMemo(
+  // Create columns for DataTable using TanStack Table ColumnDef
+  const columns: ColumnDef<ReturnType<typeof flattenBrushData>[0]>[] = useMemo(
     () => [
       {
-        key: 'filtered',
+        accessorKey: 'filtered',
         header: 'Filtered',
-        width: columnWidths.filtered,
-        render: (item: any) => {
-          if (item.type === 'main') {
-            const isCurrentlyFiltered = filteredStatus[item.main.text] || false;
-            const hasPendingChange = item.main.text in pendingChanges;
-            const pendingValue = pendingChanges[item.main.text];
-            const displayValue = hasPendingChange ? pendingValue : isCurrentlyFiltered;
+        cell: ({ row }) => {
+          const item = row.original;
+          const isMain = item.type === 'main';
+          const text = isMain ? item.main.text : item.parentText || '';
+          const isFiltered = filteredStatus[text] || false;
+          const isPending = pendingChanges[text] || false;
 
-            return (
+          return (
+            <div className='flex items-center justify-center'>
               <FilteredEntryCheckbox
-                itemName={item.main.text}
-                commentIds={item.main.comment_ids}
-                isFiltered={displayValue}
-                onStatusChange={isFiltered => onBrushFilter(item.main.text, isFiltered)}
-                uniqueId='main'
+                itemName={text}
+                commentIds={item.main.comment_ids || []}
+                isFiltered={isFiltered}
+                onStatusChange={checked => {
+                  if (isMain) {
+                    onBrushFilter(text, checked);
+                  } else {
+                    onComponentFilter(text, checked);
+                  }
+                }}
+                uniqueId={isMain ? 'main' : item.type}
               />
-            );
-          } else if (item.type === 'handle' && item.components.handle) {
-            // Hide checkbox if parent is filtered
-            const isMainFiltered = filteredStatus[item.main.text] || false;
-            if (isMainFiltered) {
-              return <div style={{ width: '100%', height: '100%' }}></div>;
-            }
-
-            const isCurrentlyFiltered = filteredStatus[item.components.handle.text] || false;
-            const hasPendingChange = item.components.handle.text in pendingChanges;
-            const pendingValue = pendingChanges[item.components.handle.text];
-            const displayValue = hasPendingChange ? pendingValue : isCurrentlyFiltered;
-
-            return (
-              <FilteredEntryCheckbox
-                itemName={item.components.handle.text}
-                commentIds={item.main.comment_ids}
-                isFiltered={displayValue}
-                onStatusChange={isFiltered =>
-                  onComponentFilter(item.components.handle.text, isFiltered)
-                }
-                uniqueId='handle'
-              />
-            );
-          } else if (item.type === 'knot' && item.components.knot) {
-            // Hide checkbox if parent is filtered
-            const isMainFiltered = filteredStatus[item.main.text] || false;
-            if (isMainFiltered) {
-              return <div style={{ width: '100%', height: '100%' }}></div>;
-            }
-
-            const isCurrentlyFiltered = filteredStatus[item.components.knot.text] || false;
-            const hasPendingChange = item.components.knot.text in pendingChanges;
-            const pendingValue = pendingChanges[item.components.knot.text];
-            const displayValue = hasPendingChange ? pendingValue : isCurrentlyFiltered;
-
-            return (
-              <FilteredEntryCheckbox
-                itemName={item.components.knot.text}
-                commentIds={item.main.comment_ids}
-                isFiltered={displayValue}
-                onStatusChange={isFiltered =>
-                  onComponentFilter(item.components.knot.text, isFiltered)
-                }
-                uniqueId='knot'
-              />
-            );
-          }
-          return null;
+            </div>
+          );
         },
       },
       {
-        key: 'brush',
+        accessorKey: 'brush',
         header: 'Brush',
-        width: columnWidths.brush,
-        render: (item: any) => {
-          const isMainFiltered = filteredStatus[item.main.text] || false;
+        cell: ({ row }) => {
+          const item = row.original;
+          const isMain = item.type === 'main';
+          const text = isMain ? item.main.text : item.parentText || '';
+          const isParentFiltered = item.isParentFiltered;
 
-          if (item.type === 'main') {
-            return (
-              <div className='flex items-center'>
-                <span
-                  className={`font-medium text-sm ${isMainFiltered ? 'text-gray-400 line-through' : 'text-gray-900'}`}
-                >
-                  {item.main.text}
-                  {isMainFiltered && (
-                    <span className='ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded'>
-                      Filtered
-                    </span>
-                  )}
-                </span>
-              </div>
-            );
-          } else if (item.type === 'handle' && item.components.handle) {
-            const isMainFiltered = filteredStatus[item.main.text] || false;
-            return (
-              <div className='flex items-center pl-4' style={{ opacity: isMainFiltered ? 0.5 : 1 }}>
-                <span
-                  className={`text-sm ${item.components.handle.status === 'Matched' ? 'text-gray-400' : 'text-gray-700'}`}
-                >
-                  🔧 Handle: {item.components.handle.text}
-                  {item.components.handle.status === 'Matched' && (
-                    <span className='ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded'>
-                      Matched
-                    </span>
-                  )}
-                  {item.components.handle.status === 'Unmatched' && (
-                    <span className='ml-2 text-xs text-red-600 bg-red-100 px-2 py-1 rounded'>
-                      Unmatched
-                    </span>
-                  )}
-                </span>
-              </div>
-            );
-          } else if (item.type === 'knot' && item.components.knot) {
-            const isMainFiltered = filteredStatus[item.main.text] || false;
-            return (
-              <div className='flex items-center pl-4' style={{ opacity: isMainFiltered ? 0.5 : 1 }}>
-                <span
-                  className={`text-sm ${item.components.knot.status === 'Matched' ? 'text-gray-400' : 'text-gray-700'}`}
-                >
-                  🧶 Knot: {item.components.knot.text}
-                  {item.components.knot.status === 'Matched' && (
-                    <span className='ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded'>
-                      Matched
-                    </span>
-                  )}
-                  {item.components.knot.status === 'Unmatched' && (
-                    <span className='ml-2 text-xs text-red-600 bg-red-100 px-2 py-1 rounded'>
-                      Unmatched
-                    </span>
-                  )}
-                </span>
-              </div>
-            );
-          }
-          return null;
+          return (
+            <div className={`${isParentFiltered ? 'text-gray-400' : ''} ${!isMain ? 'ml-6' : ''}`}>
+              {text}
+            </div>
+          );
         },
       },
       {
-        key: 'count',
+        accessorKey: 'handle',
+        header: 'Handle',
+        cell: ({ row }) => {
+          const item = row.original;
+          const isMain = item.type === 'main';
+          const handle = item.components.handle;
+          const isParentFiltered = item.isParentFiltered;
+
+          if (isMain) {
+            return (
+              <div className={isParentFiltered ? 'text-gray-400' : ''}>
+                {typeof handle === 'string' ? handle : handle?.text || '-'}
+              </div>
+            );
+          }
+
+          if (item.type === 'handle') {
+            return (
+              <div className={`${isParentFiltered ? 'text-gray-400' : ''} ml-6`}>
+                {typeof handle === 'string' ? handle : handle?.text || '-'}
+              </div>
+            );
+          }
+
+          return <div className='ml-6'>-</div>;
+        },
+      },
+      {
+        accessorKey: 'knot',
+        header: 'Knot',
+        cell: ({ row }) => {
+          const item = row.original;
+          const isMain = item.type === 'main';
+          const knot = item.components.knot;
+          const isParentFiltered = item.isParentFiltered;
+
+          if (isMain) {
+            return (
+              <div className={isParentFiltered ? 'text-gray-400' : ''}>
+                {typeof knot === 'string' ? knot : knot?.text || '-'}
+              </div>
+            );
+          }
+
+          if (item.type === 'knot') {
+            return (
+              <div className={`${isParentFiltered ? 'text-gray-400' : ''} ml-6`}>
+                {typeof knot === 'string' ? knot : knot?.text || '-'}
+              </div>
+            );
+          }
+
+          return <div className='ml-6'>-</div>;
+        },
+      },
+      {
+        accessorKey: 'count',
         header: 'Count',
-        width: columnWidths.count,
-        render: (item: any) => {
-          if (item.type === 'main') {
-            return <span className='text-gray-500 text-sm'>{item.main.count}</span>;
+        cell: ({ row }) => {
+          const item = row.original;
+          const isMain = item.type === 'main';
+          const count = item.main.count;
+          const isParentFiltered = item.isParentFiltered;
+
+          if (isMain) {
+            return <div className={isParentFiltered ? 'text-gray-400' : ''}>{count}</div>;
           }
-          const isMainFiltered = filteredStatus[item.main.text] || false;
-          return (
-            <span className='text-gray-400 text-sm' style={{ opacity: isMainFiltered ? 0.5 : 1 }}>
-              -
-            </span>
-          );
+
+          return <div className='ml-6'>-</div>;
         },
       },
       {
-        key: 'comment_ids',
+        accessorKey: 'comment_ids',
         header: 'Comment IDs',
-        width: columnWidths.comment_ids,
-        render: (item: any) => {
-          if (item.type === 'main') {
+        cell: ({ row }) => {
+          const item = row.original;
+          const isMain = item.type === 'main';
+          const commentIds = item.main.comment_ids;
+          const isParentFiltered = item.isParentFiltered;
+
+          if (isMain && commentIds && commentIds.length > 0) {
             return (
-              <div className='text-sm'>
-                {item.main.comment_ids && item.main.comment_ids.length > 0 ? (
-                  <div className='flex flex-wrap gap-1'>
-                    {item.main.comment_ids.slice(0, 3).map((commentId: string, index: number) => (
-                      <button
-                        key={index}
-                        onClick={() => onCommentClick?.(commentId)}
-                        disabled={commentLoading}
-                        className='text-blue-600 hover:text-blue-800 underline text-xs bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed'
-                      >
-                        {commentLoading ? 'Loading...' : commentId}
-                      </button>
-                    ))}
-                    {item.main.comment_ids.length > 3 && (
-                      <span className='text-gray-500 text-xs'>
-                        +{item.main.comment_ids.length - 3} more
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <span className='text-gray-400 text-xs'>No comment IDs</span>
-                )}
+              <div className={isParentFiltered ? 'text-gray-400' : ''}>
+                <div className='flex flex-wrap gap-1'>
+                  {commentIds.slice(0, 3).map(id => (
+                    <button
+                      key={id}
+                      onClick={() => onCommentClick?.(id)}
+                      disabled={commentLoading}
+                      className='px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200 disabled:opacity-50'
+                    >
+                      {id}
+                    </button>
+                  ))}
+                  {commentIds.length > 3 && (
+                    <span className='text-xs text-gray-500'>+{commentIds.length - 3} more</span>
+                  )}
+                </div>
               </div>
             );
           }
-          const isMainFiltered = filteredStatus[item.main.text] || false;
-          return (
-            <span className='text-gray-400 text-sm' style={{ opacity: isMainFiltered ? 0.5 : 1 }}>
-              -
-            </span>
-          );
+
+          return <div className='ml-6'>-</div>;
         },
       },
       {
-        key: 'examples',
+        accessorKey: 'examples',
         header: 'Examples',
-        width: columnWidths.examples,
-        render: (item: any) => {
-          if (item.type === 'main') {
-            return <span className='text-gray-500 text-sm'>{item.main.examples.join(', ')}</span>;
+        cell: ({ row }) => {
+          const item = row.original;
+          const isMain = item.type === 'main';
+          const examples = item.main.examples;
+          const isParentFiltered = item.isParentFiltered;
+
+          if (isMain && examples && examples.length > 0) {
+            return (
+              <div className={isParentFiltered ? 'text-gray-400' : ''}>
+                <div className='text-sm text-gray-600'>
+                  {examples.slice(0, 2).join(', ')}
+                  {examples.length > 2 && ` +${examples.length - 2} more`}
+                </div>
+              </div>
+            );
           }
-          const isMainFiltered = filteredStatus[item.main.text] || false;
-          return (
-            <span className='text-gray-400 text-sm' style={{ opacity: isMainFiltered ? 0.5 : 1 }}>
-              -
-            </span>
-          );
+
+          return <div className='ml-6'>-</div>;
         },
       },
     ],
     [
-      columnWidths,
-      onBrushFilter,
-      onComponentFilter,
       filteredStatus,
       pendingChanges,
+      onBrushFilter,
+      onComponentFilter,
       onCommentClick,
       commentLoading,
     ]
   );
 
   return (
-    <div className='brush-table'>
-      {safeItems.length === 0 ? (
-        <div className='border border-gray-200 rounded-lg overflow-hidden'>
-          {/* Header */}
-          <div
-            style={{
-              display: 'flex',
-              backgroundColor: '#f9fafb',
-              borderBottom: '2px solid #e5e7eb',
-              fontWeight: 600,
-              fontSize: '14px',
-            }}
-          >
-            {columns.map(column => (
-              <div
-                key={column.key}
-                style={{
-                  width: columnWidths[column.key as keyof typeof columnWidths],
-                  padding: '12px',
-                }}
-              >
-                {column.header}
-              </div>
-            ))}
-          </div>
-
-          {/* Empty state message */}
-          <div
-            style={{
-              height: 400,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#f9fafb',
-              color: '#6b7280',
-              fontSize: '14px',
-            }}
-          >
-            No unmatched brushes found for the selected criteria.
-          </div>
-
-          {/* Footer */}
-          <div className='bg-gray-50 px-4 py-2 text-sm text-gray-600 border-t border-gray-200'>
-            Showing 0 of 0 items
-          </div>
-        </div>
-      ) : (
-        <VirtualizedTable
-          data={flattenedData}
-          columns={columns}
-          height={400}
-          rowHeight={48}
-          resizable={true}
-        />
-      )}
+    <div className='space-y-4'>
+      {/* DataTable with ShadCN foundation */}
+      <DataTable
+        columns={columns}
+        data={flattenedData}
+        height={400}
+        itemSize={48}
+        resizable={true}
+        showColumnVisibility={true}
+        searchKey='brush'
+      />
     </div>
   );
 };

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GenericDataTable, DataTableColumn } from './GenericDataTable';
-import { GenericDataTableOptimized } from './GenericDataTableOptimized';
+import { PerformanceDataTable } from './PerformanceDataTable';
 
 interface TestData {
   id: number;
@@ -33,14 +32,6 @@ const PerformanceTest: React.FC = () => {
     setTestData(data);
   }, [dataSize]);
 
-  const columns: DataTableColumn<TestData>[] = [
-    { key: 'id', header: 'ID', width: 80 },
-    { key: 'name', header: 'Name', width: 200 },
-    { key: 'email', header: 'Email', width: 250 },
-    { key: 'status', header: 'Status', width: 120 },
-    { key: 'date', header: 'Date', width: 150 },
-  ];
-
   const handleSort = (column: string) => {
     const start = performance.now();
     if (sortColumn === column) {
@@ -53,7 +44,6 @@ const PerformanceTest: React.FC = () => {
     console.log(`Sort operation took ${end - start}ms`);
   };
 
-  const TableComponent = useOptimized ? GenericDataTableOptimized : GenericDataTable;
   const tableLabel = useOptimized ? 'Optimized' : 'Baseline';
 
   return (
@@ -128,9 +118,8 @@ const PerformanceTest: React.FC = () => {
         </div>
       </div>
 
-      <TableComponent
+      <PerformanceDataTable
         data={testData}
-        columns={columns}
         onSort={handleSort}
         sortColumn={sortColumn}
         sortDirection={sortDirection}
