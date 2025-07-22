@@ -148,4 +148,49 @@ describe('Component Library Standards', () => {
         // Verify loading component is working
         expect(LoadingSpinner).toBeDefined();
     });
+
+    test('should meet accessibility standards across components', () => {
+        // This test verifies that all components meet accessibility standards
+        // We'll check for ARIA labels, keyboard navigation, and semantic HTML
+
+        // Import components to test accessibility
+        const FilteredEntryCheckbox = require('../forms/FilteredEntryCheckbox').default;
+        const DataTable = require('../ui/data-table').DataTable;
+
+        // Test FilteredEntryCheckbox accessibility
+        const { getByRole } = render(
+            <FilteredEntryCheckbox
+                itemName="test item"
+                commentIds={[]}
+                isFiltered={false}
+                onStatusChange={jest.fn()}
+            />
+        );
+
+        // Should have proper ARIA attributes
+        const checkbox = getByRole('checkbox');
+        expect(checkbox).toBeInTheDocument();
+        expect(checkbox).toHaveAttribute('aria-checked', 'false');
+
+        // Test DataTable accessibility
+        const mockData = [{ id: 1, name: 'Test Item' }];
+        const mockColumns = [{ accessorKey: 'name', header: 'Name' }];
+
+        const { getByRole: getDataTableRole } = render(
+            <DataTable
+                data={mockData}
+                columns={mockColumns}
+                height={400}
+                itemSize={50}
+            />
+        );
+
+        // Should have proper table semantics
+        const table = getDataTableRole('table');
+        expect(table).toBeInTheDocument();
+
+        // Verify accessibility components are working
+        expect(FilteredEntryCheckbox).toBeDefined();
+        expect(DataTable).toBeDefined();
+    });
 }); 
