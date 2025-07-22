@@ -14,9 +14,9 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
 ## 📊 Progress Summary
 
 **Current Status**: Phase 1, Step 5 (Centralized Error Handling) ✅ COMPLETE  
-**Next Step**: Phase 1, Step 6 (Base Validator Class) ⏳ PENDING  
+**Next Step**: **URGENT** - Fix React Performance Test Failure  
 **Overall Progress**: 5/12 steps complete (42%)  
-**Blocking Issues**: None - all Python tests passing (1,739 tests), React performance test known issue
+**Blocking Issues**: React performance test failing (441ms vs 150ms threshold) - needs immediate attention
 
 **Completed Work**:
 - ✅ Phase 1, Step 4: YAML/Data File Utility Module
@@ -31,10 +31,14 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
   - New structure: splits: {original: [entries]}
 
 **Immediate Next Steps**:
-- ⏳ Phase 0, Step 2: Establish Test Data Isolation Strategy
-  - Create test-specific API endpoints with isolated data
-  - Implement proper test data isolation for integration tests
-  - Ensure tests don't depend on changing production data
+- ⏳ **URGENT**: Fix React Performance Test Failure
+  - Investigate BrushTable performance regression (441ms vs 150ms threshold)
+  - Optimize rendering for large datasets (100 items)
+  - Fix virtualization or excessive re-renders
+  - Ensure all React tests pass (currently 96/97)
+- ⏳ Phase 1, Step 6: Base Validator Class
+  - Create a base validator for product-type validation logic
+  - Refactor product-specific validators to inherit from this
 
 ---
 
@@ -132,7 +136,24 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
    - **Quality**: Tests that verify consistent error responses across all endpoints
    - **Coverage**: Tests decorator functionality, context managers, logging, and integration
 
-6. **Base Validator Class**
+6. **Fix React Performance Test Failure** ⏳ **URGENT**
+   - **Issue**: BrushTable performance regression in React tests
+   - **Problem**: Performance test failing (441ms vs 150ms threshold for 100 items)
+   - **Impact**: Potential user experience issues with large datasets in production
+   - **Solution**: Investigate and optimize BrushTable rendering performance
+   - **Implementation**:
+     - 🔍 Investigate BrushTable component for performance bottlenecks
+     - 🔍 Check for recent changes that introduced performance regression
+     - 🔍 Analyze virtualization implementation for large datasets
+     - 🔍 Identify excessive re-renders or inefficient rendering logic
+     - 🔍 Optimize rendering performance to meet 150ms threshold
+     - 🔍 Test with realistic large datasets (100+ items)
+     - 🔍 Ensure all React tests pass (currently 96/97)
+   - **Tests**: Fix failing performance test in `src/components/__tests__/BrushTable.unit.test.tsx`
+   - **Quality**: Ensure BrushTable remains performant for large datasets
+   - **Priority**: **URGENT** - blocking test suite completion
+
+7. **Base Validator Class**
    - Create a base validator for product-type validation logic.
    - Refactor product-specific validators to inherit from this.
 
