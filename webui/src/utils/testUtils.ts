@@ -1,22 +1,59 @@
-// Test utility functions for common mocks
+/**
+ * Test utility functions for common mocks
+ * 
+ * This module provides reusable mock functions and utilities for testing
+ * the SOTD Pipeline WebUI. It includes mocks for API calls, fetch requests,
+ * and common data structures used throughout the application.
+ * 
+ * @module TestUtils
+ */
 
+/**
+ * Configuration for mock API responses and errors
+ */
 export interface MockApiConfig {
     responses?: Record<string, any>;
     errors?: Record<string, Error>;
 }
 
+/**
+ * Mock fetch response structure
+ */
 export interface MockFetchResponse {
     status: number;
     data?: any;
     error?: string;
 }
 
+/**
+ * Configuration for mock fetch responses by URL
+ */
 export interface MockFetchConfig {
     [url: string]: MockFetchResponse;
 }
 
 /**
  * Creates a mock API object with configurable responses and errors
+ * 
+ * This function creates a comprehensive mock API that can be used
+ * in tests to simulate various API scenarios including success responses,
+ * errors, and different data structures.
+ * 
+ * @param config - Optional configuration for custom responses and errors
+ * @returns Mock API object with jest.Mock functions for all API methods
+ * 
+ * @example
+ * ```typescript
+ * const mockApi = createMockApi({
+ *   responses: {
+ *     getAvailableMonths: ['2024-01', '2024-02'],
+ *     analyzeUnmatched: { total_unmatched: 5 }
+ *   },
+ *   errors: {
+ *     getMonthData: new Error('Network error')
+ *   }
+ * });
+ * ```
  */
 export function createMockApi(config?: MockApiConfig) {
     const defaultResponses = {
@@ -99,7 +136,17 @@ export function createMockApi(config?: MockApiConfig) {
 }
 
 /**
- * Creates an array of mock months with configurable count and start date
+ * Creates an array of mock month strings
+ * 
+ * @param count - Number of months to generate (default: 6)
+ * @param startDate - Starting date in YYYY-MM format (default: '2024-01')
+ * @returns Array of month strings
+ * 
+ * @example
+ * ```typescript
+ * const months = createMockMonths(3, '2024-01');
+ * // Returns: ['2024-01', '2024-02', '2024-03']
+ * ```
  */
 export function createMockMonths(count: number = 6, startDate: string = '2024-01'): string[] {
     const months: string[] = [];
@@ -110,10 +157,7 @@ export function createMockMonths(count: number = 6, startDate: string = '2024-01
         const currentYear = year + Math.floor((currentMonth - 1) / 12);
         const adjustedMonth = ((currentMonth - 1) % 12) + 1;
 
-        const monthStr = adjustedMonth.toString().padStart(2, '0');
-        const yearStr = currentYear.toString();
-
-        months.push(`${yearStr}-${monthStr}`);
+        months.push(`${currentYear}-${adjustedMonth.toString().padStart(2, '0')}`);
     }
 
     return months;
@@ -121,18 +165,21 @@ export function createMockMonths(count: number = 6, startDate: string = '2024-01
 
 /**
  * Creates a mock fetch function with configurable responses
+ * 
+ * @param config - Configuration object mapping URLs to responses
+ * @returns Jest mock function that simulates fetch behavior
+ * 
+ * @example
+ * ```typescript
+ * const mockFetch = createMockFetch({
+ *   '/api/months': { status: 200, data: ['2024-01', '2024-02'] },
+ *   '/api/analysis': { status: 500, error: 'Server error' }
+ * });
+ * ```
  */
 export function createMockFetch(config?: MockFetchConfig): jest.Mock {
-    const defaultResponses: MockFetchConfig = {
-        '/api/health': { status: 200, data: { status: 'ok' } },
-        '/api/files/available-months': { status: 200, data: { months: ['2024-01', '2024-02'] } },
-        '/api/analyze/unmatched': { status: 200, data: { field: 'brush', unmatched_items: [] } }
-    };
-
-    const responses = { ...defaultResponses, ...config };
-
-    return jest.fn().mockImplementation((url: string, options?: any) => {
-        const response = responses[url];
+    return jest.fn().mockImplementation((url: string) => {
+        const response = config?.[url];
 
         if (!response) {
             return Promise.resolve({
@@ -160,79 +207,102 @@ export function createMockFetch(config?: MockFetchConfig): jest.Mock {
 
 /**
  * Creates a mock axios instance with configurable responses
+ * 
+ * @param config - Configuration for API responses and errors
+ * @returns Mock axios object with jest.Mock functions
+ * 
+ * @example
+ * ```typescript
+ * const mockAxios = createMockAxios({
+ *   responses: {
+ *     get: { data: { months: ['2024-01'] } },
+ *     post: { data: { success: true } }
+ *   }
+ * });
+ * ```
  */
 export function createMockAxios(config?: MockApiConfig) {
-    const mockApi = createMockApi(config);
-
-    return {
-        get: jest.fn().mockImplementation((url: string) => {
-            if (url.includes('available-months')) {
-                return Promise.resolve({ data: { months: mockApi.getAvailableMonths() } });
-            }
-            if (url.includes('month/')) {
-                return Promise.resolve({ data: mockApi.getMonthData() });
-            }
-            return Promise.resolve({ data: null });
-        }),
-        post: jest.fn().mockImplementation((url: string, data: any) => {
-            if (url.includes('analyze/unmatched')) {
-                return Promise.resolve({ data: mockApi.analyzeUnmatched(data) });
-            }
-            if (url.includes('brush-splits/save')) {
-                return Promise.resolve({ data: mockApi.saveBrushSplit(data) });
-            }
-            return Promise.resolve({ data: null });
-        }),
-        interceptors: {
-            request: {
-                use: jest.fn()
-            },
-            response: {
-                use: jest.fn()
-            }
-        }
+    const defaultResponses = {
+        get: { data: { months: ['2024-01', '2024-02'] } },
+        post: { data: { success: true } },
+        put: { data: { success: true } },
+        delete: { data: { success: true } }
     };
+
+    const responses: Record<string, any> = { ...defaultResponses, ...config?.responses };
+    const errors: Record<string, Error> = config?.errors || {};
+
+    const mockAxios: Record<string, jest.Mock> = {};
+
+    ['get', 'post', 'put', 'delete'].forEach(method => {
+        if (errors[method]) {
+            mockAxios[method] = jest.fn().mockRejectedValue(errors[method]);
+        } else if (responses[method]) {
+            mockAxios[method] = jest.fn().mockResolvedValue(responses[method]);
+        } else {
+            mockAxios[method] = jest.fn().mockResolvedValue({ data: null });
+        }
+    });
+
+    return mockAxios;
 }
 
 /**
  * Creates mock brush data for testing
+ * 
+ * @param count - Number of brush items to generate (default: 3)
+ * @returns Array of mock brush data objects
+ * 
+ * @example
+ * ```typescript
+ * const brushData = createMockBrushData(2);
+ * // Returns array with 2 mock brush items
+ * ```
  */
 export function createMockBrushData(count: number = 3) {
     return Array.from({ length: count }, (_, i) => ({
-        main: {
-            text: `Test Brush ${i + 1}`,
-            count: Math.floor(Math.random() * 10) + 1,
-            comment_ids: [`comment_${i + 1}_1`, `comment_${i + 1}_2`],
-            examples: [`example_${i + 1}_1.json`, `example_${i + 1}_2.json`],
-            status: 'Unmatched'
-        },
-        components: {
-            handle: {
-                text: `Test Handle ${i + 1}`,
-                status: 'Unmatched',
-                pattern: 'handle_pattern'
-            },
-            knot: {
-                text: `Test Knot ${i + 1}`,
-                status: 'Unmatched',
-                pattern: 'knot_pattern'
-            }
-        }
+        id: `brush-${i + 1}`,
+        original: `Test Brush ${i + 1}`,
+        handle: `Test Handle ${i + 1}`,
+        knot: `Test Knot ${i + 1}`,
+        match_type: 'exact',
+        validated: false,
+        corrected: false,
+        should_not_split: false,
+        comment_ids: [`comment-${i + 1}-1`, `comment-${i + 1}-2`],
+        examples: [`Example ${i + 1} A`, `Example ${i + 1} B`]
     }));
 }
 
 /**
- * Creates mock brush split data for testing
+ * Creates mock brush splits data for testing
+ * 
+ * @param count - Number of brush splits to generate (default: 3)
+ * @returns Mock brush splits data structure
+ * 
+ * @example
+ * ```typescript
+ * const brushSplits = createMockBrushSplits(2);
+ * // Returns object with brush_splits array and statistics
+ * ```
  */
 export function createMockBrushSplits(count: number = 3) {
-    return Array.from({ length: count }, (_, i) => ({
+    const brush_splits = Array.from({ length: count }, (_, i) => ({
         original: `Test Brush ${i + 1}`,
-        handle: i % 2 === 0 ? `Test Handle ${i + 1}` : null,
+        handle: `Test Handle ${i + 1}`,
         knot: `Test Knot ${i + 1}`,
-        match_type: ['exact', 'regex', 'alias', 'brand'][i % 4],
-        validated: i % 3 === 0,
-        corrected: i % 4 === 0,
-        should_not_split: i % 5 === 0,
-        validated_at: i % 2 === 0 ? new Date().toISOString() : null
+        match_type: 'exact',
+        validated: false,
+        corrected: false,
+        should_not_split: false
     }));
+
+    return {
+        brush_splits,
+        statistics: {
+            total: count,
+            validated: 0,
+            corrected: 0
+        }
+    };
 } 
