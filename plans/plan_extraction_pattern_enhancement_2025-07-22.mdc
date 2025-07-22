@@ -1,382 +1,458 @@
-# Extraction Pattern Enhancement - TDD Implementation Plan
+# SOTD Pipeline - Extraction Pattern Enhancement Plan
+
+**Date**: 2025-07-22  
+**Status**: TODO  
+**Type**: Feature Implementation  
+**Priority**: Medium  
 
 ## 📘 Project Summary
 
-Enhance the SOTD Pipeline extraction phase to support additional product mention formats that were identified through analysis of 10+ years of skipped comments. This will capture an additional 196 high-quality extractions (28 checkmark format + 168 emoji bold format) while maintaining data quality through clear field identification.
+Enhance the SOTD pipeline's extraction phase to support two high-value patterns identified through data-driven analysis:
 
-**Key Requirements:**
-- Add support for checkmark format: `✓Field: Value`
-- Add support for emoji bold format: `* **Field** Value`
-- Maintain existing extraction quality and field identification
-- Ensure backward compatibility with current patterns
-- Comprehensive test coverage for new patterns
+1. **Checkmark Format** (28 occurrences) - `✓Field: Value`
+2. **Emoji Bold Format** (168 occurrences) - `* **Field** Value`
 
-**Analysis Results:**
-- **Checkmark Format**: 28 occurrences, 80% field identification success
-- **Emoji Bold Format**: 168 occurrences, 75% field identification success
-- **Total Potential Gain**: 196 additional extractions (2.3% of skipped comments)
-- **High Confidence**: Both patterns have clear field identification
+These patterns represent clear, unambiguous field identification that can reliably extract core products (razor, blade, brush, soap) with high confidence. The analysis showed these patterns are significantly more valuable than implicit product extraction or international patterns.
 
 ## 🧩 Component Steps
 
-### Phase 1: Pattern Analysis and Design
-1. **Pattern Specification** - Define exact regex patterns for new formats
-2. **Field Mapping** - Establish field identification logic for new patterns
-3. **Test Data Preparation** - Create comprehensive test cases
+### Phase 1: Test Infrastructure
+- [ ] **Step 1.1**: Add test data for checkmark and emoji bold patterns
+- [ ] **Step 1.2**: Create unit tests for new regex patterns
+- [ ] **Step 1.3**: Create integration tests with real examples
 
-### Phase 2: Implementation
-4. **Regex Pattern Addition** - Add new patterns to `sotd/extract/fields.py`
-5. **Field Identification Enhancement** - Update field mapping logic
-6. **Integration Testing** - Test with real skipped comments
+### Phase 2: Pattern Implementation  
+- [ ] **Step 2.1**: Implement checkmark format regex patterns
+- [ ] **Step 2.2**: Implement emoji bold format regex patterns
+- [ ] **Step 2.3**: Add field mapping logic for new patterns
 
-### Phase 3: Validation and Polish
-7. **Performance Testing** - Ensure no performance regression
-8. **Backward Compatibility** - Verify existing patterns unchanged
-9. **Documentation Update** - Update extraction phase documentation
-10. **Real Data Validation** - Test with actual pipeline data
+### Phase 3: Integration and Validation
+- [ ] **Step 3.1**: Integrate new patterns into extraction pipeline
+- [ ] **Step 3.2**: Validate against existing test suite
+- [ ] **Step 3.3**: Test with real data samples
+
+### Phase 4: Quality Assurance
+- [ ] **Step 4.1**: Performance testing with large datasets
+- [ ] **Step 4.2**: Edge case validation
+- [ ] **Step 4.3**: Documentation updates
 
 ## 🔁 Implementation Prompts
 
-### Step 1: Pattern Specification
+### Step 1.1: Add Test Data for New Patterns
 
 ```text
-Define the exact regex patterns for the two new extraction formats identified in the analysis.
+Create comprehensive test data for the two new extraction patterns identified in the analysis.
 
 Requirements:
-1. Checkmark Format: `✓Field: Value` or `✓ Field: Value`
-   - Must match: `✓Brush: Kent Infinity`, `✓Razor: Kopparkant +`
-   - Must handle optional space after checkmark
-   - Must capture field name and value separately
+1. Checkmark Format Test Data:
+   - Valid examples: `✓Brush: Kent Infinity`, `✓Razor: Kopparkant +`, `✓Blade: feather (1)`, `✓Lather: Cremo Citrus`
+   - Edge cases: `✓ Brush: Kent Infinity` (space after checkmark), `✓Razor: Kopparkant +` (special chars)
+   - Invalid examples: `✓Brush Kent Infinity` (no colon), `Brush: Kent Infinity` (no checkmark)
 
-2. Emoji Bold Format: `* **Field** Value`
-   - Must match: `* **Straight Razor** - Fontani Scarperia`, `* **Shaving Brush** - Leonidam`
-   - Must handle field names with spaces: `* **Shaving Soap** - Brand`
-   - Must capture field name and value separately
+2. Emoji Bold Format Test Data:
+   - Valid examples: `* **Straight Razor** - Fontani Scarperia`, `* **Shaving Brush** - Leonidam`, `* **Shaving Soap** - Saponificio Varesino`
+   - Edge cases: `* **Straight Razor** Fontani Scarperia` (no dash), `* **Shaving Brush** - Leonidam - 26mm Fan`
+   - Invalid examples: `* Straight Razor - Fontani Scarperia` (no bold), `**Straight Razor** - Fontani Scarperia` (no asterisk)
 
-3. Field Mapping:
-   - Checkmark: Extract field name before colon, map to standard fields
-   - Emoji Bold: Extract field name between `**`, map to standard fields
-   - Map variations: "Lather" → "soap", "Straight Razor" → "razor", "Shaving Brush" → "brush"
+3. Field Mapping Validation:
+   - Map "Lather" → "soap"
+   - Map "Straight Razor" → "razor" 
+   - Map "Shaving Brush" → "brush"
+   - Map "Shaving Soap" → "soap"
 
-Write comprehensive unit tests for these patterns including:
-- Valid checkmark format variations
-- Valid emoji bold format variations
-- Invalid formats that should not match
-- Edge cases (extra spaces, special characters)
-- Field mapping validation
+Create test files in `tests/extract/test_new_patterns.py` with comprehensive test cases covering all scenarios.
 ```
 
-### Step 2: Field Mapping Logic
+### Step 1.2: Create Unit Tests for Regex Patterns
 
 ```text
-Enhance the field identification logic to handle the new patterns.
+Implement unit tests for the new regex patterns in the extraction phase.
 
 Requirements:
-1. Update `identify_field()` function in extraction logic to handle:
-   - Checkmark format field extraction
-   - Emoji bold format field extraction
-   - Field name normalization and mapping
+1. Test Checkmark Pattern Regex:
+   - Pattern: `^✓\s*(\w+(?:\s+\w+)*)\s*[-:]\s*(.+)$`
+   - Test field extraction: `✓Brush: Kent Infinity` → field="Brush", value="Kent Infinity"
+   - Test optional space: `✓ Brush: Kent Infinity` → field="Brush", value="Kent Infinity"
+   - Test special characters: `✓Razor: Kopparkant +` → field="Razor", value="Kopparkant +"
 
-2. Field Mapping Rules:
-   - "Brush" → "brush"
-   - "Razor" → "razor" 
-   - "Blade" → "blade"
+2. Test Emoji Bold Pattern Regex:
+   - Pattern: `^\*\s*\*\*(\w+(?:\s+\w+)*)\*\*\s*[-:]\s*(.+)$`
+   - Test field extraction: `* **Straight Razor** - Fontani Scarperia` → field="Straight Razor", value="Fontani Scarperia"
+   - Test multi-word fields: `* **Shaving Brush** - Leonidam` → field="Shaving Brush", value="Leonidam"
+   - Test without dash: `* **Shaving Soap** Saponificio Varesino` → field="Shaving Soap", value="Saponificio Varesino"
+
+3. Test Field Mapping Logic:
    - "Lather" → "soap"
+   - "Straight Razor" → "razor"
+   - "Shaving Brush" → "brush" 
+   - "Shaving Soap" → "soap"
+   - Unknown fields → skip
+
+Create comprehensive unit tests in `tests/extract/test_new_patterns.py` with 100% coverage of edge cases.
+```
+
+### Step 1.3: Create Integration Tests
+
+```text
+Create integration tests using real examples from the analysis data.
+
+Requirements:
+1. Real Data Integration Tests:
+   - Use actual examples from `skipped_patterns_analysis.json`
+   - Test checkmark format: `✓Brush: Kent Infinity`, `✓Razor: Kopparkant +`, `✓Blade: feather (1)`, `✓Lather: Cremo Citrus`
+   - Test emoji bold format: `* **Straight Razor** - Fontani Scarperia`, `* **Shaving Brush** - Leonidam`, `* **Shaving Soap** - Saponificio Varesino`
+
+2. End-to-End Pipeline Tests:
+   - Test complete extraction → match → enrich flow with new patterns
+   - Verify extracted data structure matches existing format
+   - Ensure no regression in existing extraction patterns
+
+3. Performance Tests:
+   - Test with large comment datasets
+   - Verify extraction speed remains acceptable (<5s for 1000 comments)
+   - Memory usage validation
+
+Create integration tests in `tests/extract/test_integration_new_patterns.py` using pytest fixtures and real data samples.
+```
+
+### Step 2.1: Implement Checkmark Format Patterns
+
+```text
+Add checkmark format regex patterns to the extraction phase.
+
+Requirements:
+1. Update `sotd/extract/fields.py`:
+   - Add checkmark pattern to `get_patterns()` function
+   - Pattern: `^✓\s*(\w+(?:\s+\w+)*)\s*[-:]\s*(.+)$`
+   - Handle optional space after checkmark
+   - Extract field name and value separately
+
+2. Update `sotd/extract/comment.py`:
+   - Add checkmark pattern detection in `parse_comment()`
+   - Map extracted fields to standard field names
+   - Preserve original text in output structure
+
+3. Field Mapping:
+   - "Lather" → "soap"
+   - "Razor" → "razor"
+   - "Blade" → "blade"
+   - "Brush" → "brush"
+   - Unknown fields → skip
+
+4. Error Handling:
+   - Graceful handling of malformed checkmark patterns
+   - Log warnings for unrecognized field names
+   - Maintain backward compatibility
+
+Implement with comprehensive error handling and logging. Ensure all existing tests continue to pass.
+```
+
+### Step 2.2: Implement Emoji Bold Format Patterns
+
+```text
+Add emoji bold format regex patterns to the extraction phase.
+
+Requirements:
+1. Update `sotd/extract/fields.py`:
+   - Add emoji bold pattern to `get_patterns()` function
+   - Pattern: `^\*\s*\*\*(\w+(?:\s+\w+)*)\*\*\s*[-:]\s*(.+)$`
+   - Handle multi-word field names (e.g., "Straight Razor", "Shaving Brush")
+   - Extract field name between `**` markers and value separately
+
+2. Update `sotd/extract/comment.py`:
+   - Add emoji bold pattern detection in `parse_comment()`
+   - Map extracted fields to standard field names
+   - Preserve original text in output structure
+
+3. Field Mapping:
    - "Straight Razor" → "razor"
    - "Shaving Brush" → "brush"
    - "Shaving Soap" → "soap"
-   - Skip non-core fields: "Prep", "Post", "After-Shave"
+   - Unknown fields → skip
 
-3. Validation:
-   - Only extract core fields: razor, blade, brush, soap
-   - Skip ambiguous or non-product fields
-   - Maintain existing field identification accuracy
+4. Edge Case Handling:
+   - Handle patterns without dash separator
+   - Handle patterns with extra whitespace
+   - Handle patterns with special characters in values
 
-Write unit tests for field mapping including:
-- All valid field mappings
-- Invalid field rejection
-- Edge case handling
-- Performance with large datasets
+Implement with comprehensive error handling and logging. Ensure all existing tests continue to pass.
 ```
 
-### Step 3: Test Data Preparation
+### Step 2.3: Add Field Mapping Logic
 
 ```text
-Create comprehensive test data for the new extraction patterns.
+Implement robust field mapping logic for the new patterns.
 
 Requirements:
-1. Create test fixtures with real examples from the analysis:
-   - Checkmark format examples from actual skipped comments
-   - Emoji bold format examples from actual skipped comments
-   - Mixed format examples to test integration
+1. Create Field Mapping Function:
+   - Function: `map_field_name(field_name: str) -> Optional[str]`
+   - Map checkmark fields: "Lather" → "soap", "Razor" → "razor", etc.
+   - Map emoji bold fields: "Straight Razor" → "razor", "Shaving Brush" → "brush", etc.
+   - Return None for unrecognized fields
 
-2. Test Data Structure:
-   - Valid checkmark examples: `✓Brush: Kent Infinity`, `✓Razor: Kopparkant +`
-   - Valid emoji bold examples: `* **Straight Razor** - Fontani Scarperia`
-   - Invalid examples that should be rejected
-   - Edge cases with special characters and formatting
+2. Update `sotd/extract/comment.py`:
+   - Integrate field mapping into `parse_comment()`
+   - Skip lines with unrecognized field names
+   - Log warnings for unmapped fields
 
-3. Integration Test Data:
-   - Full comment examples with mixed formats
-   - Comments that combine new and existing patterns
-   - Comments that should be partially extracted
+3. Field Mapping Rules:
+   - Case-insensitive matching
+   - Handle variations: "Lather"/"lather" → "soap"
+   - Handle multi-word fields: "Straight Razor" → "razor"
+   - Preserve original field name in output for debugging
 
-Write test fixtures and validation functions to ensure:
-- Pattern matching accuracy
-- Field extraction correctness
-- Integration with existing extraction logic
-- Performance characteristics
+4. Validation:
+   - Ensure mapped fields are valid core fields (razor, blade, brush, soap)
+   - Prevent duplicate field extraction
+   - Maintain field order consistency
+
+Implement with comprehensive logging and validation. Add unit tests for field mapping logic.
 ```
 
-### Step 4: Regex Pattern Addition
+### Step 3.1: Integrate New Patterns into Pipeline
 
 ```text
-Add the new regex patterns to the extraction field logic in `sotd/extract/fields.py`.
+Integrate the new extraction patterns into the main extraction pipeline.
 
 Requirements:
-1. Update `get_patterns()` function to include:
-   - Checkmark format patterns
-   - Emoji bold format patterns
-   - Maintain existing pattern priority order
+1. Update `sotd/extract/run.py`:
+   - Ensure new patterns are included in extraction process
+   - Add logging for new pattern matches
+   - Update progress reporting to include new patterns
 
-2. Pattern Implementation:
-   - Add patterns to the existing list in `get_patterns()`
-   - Ensure patterns are case-insensitive
-   - Handle optional whitespace variations
-   - Maintain capture group structure for field/value extraction
+2. Update `sotd/extract/comment.py`:
+   - Integrate checkmark and emoji bold patterns into main parsing logic
+   - Ensure proper field ordering (razor, blade, brush, soap)
+   - Maintain existing output format compatibility
 
-3. Integration:
-   - Ensure new patterns work with existing field extraction logic
-   - Maintain backward compatibility with current patterns
-   - Preserve existing performance characteristics
+3. Performance Optimization:
+   - Compile regex patterns once at module level
+   - Optimize field mapping lookups
+   - Minimize memory allocations
 
-Write comprehensive tests for the updated `get_patterns()` function:
-- All new patterns match correctly
-- Existing patterns still work
-- Performance is not degraded
-- Edge cases are handled properly
+4. Error Handling:
+   - Graceful handling of malformed patterns
+   - Detailed logging for debugging
+   - Maintain pipeline stability
+
+Ensure all existing functionality remains intact and performance is acceptable.
 ```
 
-### Step 5: Field Identification Enhancement
+### Step 3.2: Validate Against Existing Test Suite
 
 ```text
-Enhance the field identification logic to properly handle the new patterns.
+Run comprehensive validation against the existing test suite.
 
 Requirements:
-1. Update field extraction logic to:
-   - Extract field names from checkmark format
-   - Extract field names from emoji bold format
-   - Map field names to standard fields
-   - Validate field names before extraction
+1. Run All Existing Tests:
+   - `make test` - ensure all existing tests pass
+   - `make test-extract` - focus on extraction tests
+   - `make test-integration` - integration tests
 
-2. Field Name Processing:
-   - Strip markdown formatting (`**` from emoji bold)
-   - Normalize field names (case-insensitive)
-   - Map variations to standard fields
-   - Reject invalid or ambiguous fields
+2. Performance Validation:
+   - Test extraction speed with large datasets
+   - Verify memory usage remains acceptable
+   - Check for any performance regressions
 
-3. Integration:
-   - Work with existing `extract_field()` function
-   - Maintain existing field validation logic
-   - Preserve current extraction performance
+3. Backward Compatibility:
+   - Ensure existing extraction patterns still work
+   - Verify output format remains unchanged
+   - Test with existing data files
 
-Write unit tests for field identification enhancement:
-- Field name extraction from new patterns
-- Field name normalization and mapping
-- Invalid field rejection
-- Integration with existing extraction logic
+4. Quality Checks:
+   - `make format` - code formatting
+   - `make lint` - linting rules
+   - `make typecheck` - type checking
+
+Fix any issues found and ensure all quality checks pass before proceeding.
 ```
 
-### Step 6: Integration Testing
+### Step 3.3: Test with Real Data Samples
 
 ```text
-Test the enhanced extraction logic with real skipped comments from the analysis.
-
-Requirements:
-1. Create integration tests using actual skipped comments:
-   - Test checkmark format comments from analysis
-   - Test emoji bold format comments from analysis
-   - Test mixed format comments
-   - Test edge cases and invalid formats
-
-2. Validation Criteria:
-   - Correct field identification for valid patterns
-   - Proper rejection of invalid patterns
-   - No regression in existing extraction
-   - Performance characteristics maintained
-
-3. Real Data Testing:
-   - Test with actual skipped comments from 2025-06
-   - Verify field extraction accuracy
-   - Confirm no false positives
-   - Validate data quality
-
-Write integration tests that:
-- Use real skipped comment examples
-- Validate extraction accuracy
-- Test performance impact
-- Ensure backward compatibility
-```
-
-### Step 7: Performance Testing
-
-```text
-Validate that the new patterns don't impact extraction performance.
-
-Requirements:
-1. Performance Benchmarking:
-   - Test extraction speed with new patterns
-   - Compare against existing pattern performance
-   - Ensure no significant performance regression
-   - Test with large datasets
-
-2. Memory Usage:
-   - Monitor memory usage with new patterns
-   - Ensure no memory leaks or excessive usage
-   - Test with large comment datasets
-
-3. Scalability:
-   - Test with various comment sizes
-   - Test with different pattern densities
-   - Ensure performance scales appropriately
-
-Write performance tests that:
-- Benchmark extraction speed
-- Monitor memory usage
-- Test scalability characteristics
-- Compare against baseline performance
-```
-
-### Step 8: Backward Compatibility
-
-```text
-Ensure the new patterns don't break existing extraction functionality.
-
-Requirements:
-1. Existing Pattern Validation:
-   - All existing patterns still work correctly
-   - No changes to current extraction behavior
-   - Existing test suite still passes
-   - No performance regression
-
-2. Data Quality Validation:
-   - Existing extractions maintain same quality
-   - No false positives from new patterns
-   - No interference with current patterns
-   - Field identification accuracy maintained
-
-3. Integration Testing:
-   - Test with existing pipeline data
-   - Verify no changes to current output
-   - Ensure seamless integration
-
-Write comprehensive backward compatibility tests:
-- All existing extraction patterns
-- Current pipeline integration
-- Data quality validation
-- Performance regression testing
-```
-
-### Step 9: Documentation Update
-
-```text
-Update extraction phase documentation to include the new patterns.
-
-Requirements:
-1. Update relevant documentation files:
-   - `docs/SOTD_Pipeline_Spec.md` (extraction phase section)
-   - `sotd/extract/README.md` (if exists)
-   - Add inline documentation to new functions
-   - Update any CLI help text
-
-2. Documentation Content:
-   - Explain new supported formats
-   - Provide examples of valid patterns
-   - Document field mapping rules
-   - Explain integration with existing patterns
-
-3. User Guidance:
-   - Clear examples of supported formats
-   - Explanation of field identification
-   - Troubleshooting for common issues
-   - Performance considerations
-
-Write comprehensive documentation updates:
-- Clear pattern examples
-- Field mapping explanations
-- Integration guidelines
-- Troubleshooting information
-```
-
-### Step 10: Real Data Validation
-
-```text
-Test the enhanced extraction with actual pipeline data to validate real-world performance.
+Test the new extraction patterns with real data samples from the analysis.
 
 Requirements:
 1. Real Data Testing:
-   - Test with actual 2025-06 extracted data
-   - Verify new patterns work with real comments
-   - Validate field extraction accuracy
-   - Confirm no false positives
+   - Use actual examples from `skipped_patterns_analysis.json`
+   - Test checkmark format examples: `✓Brush: Kent Infinity`, `✓Razor: Kopparkant +`
+   - Test emoji bold format examples: `* **Straight Razor** - Fontani Scarperia`
 
-2. Pipeline Integration:
-   - Test full pipeline with enhanced extraction
-   - Verify data flows correctly through all phases
-   - Ensure no downstream issues
-   - Validate data quality at each phase
+2. End-to-End Testing:
+   - Test complete pipeline: extract → match → enrich
+   - Verify extracted data flows correctly through all phases
+   - Check that matched products are correctly identified
 
-3. Validation Metrics:
-   - Count of additional extractions captured
-   - Field identification accuracy
-   - Performance impact on pipeline
-   - Data quality metrics
+3. Validation:
+   - Verify field mapping works correctly
+   - Check that product types are correctly identified
+   - Ensure no false positives or negatives
 
-Write validation tests that:
-- Use real pipeline data
-- Validate extraction accuracy
-- Test full pipeline integration
-- Measure improvement metrics
+4. Documentation:
+   - Update extraction phase documentation
+   - Add examples of new patterns
+   - Document field mapping rules
+
+Create test scripts to validate real data processing and document results.
+```
+
+### Step 4.1: Performance Testing
+
+```text
+Conduct comprehensive performance testing with large datasets.
+
+Requirements:
+1. Large Dataset Testing:
+   - Test with 10,000+ comment samples
+   - Measure extraction time per comment
+   - Monitor memory usage during processing
+
+2. Performance Benchmarks:
+   - Baseline: existing extraction patterns only
+   - Enhanced: with new checkmark and emoji bold patterns
+   - Compare performance impact
+
+3. Optimization:
+   - Profile regex pattern performance
+   - Optimize field mapping lookups
+   - Minimize memory allocations
+
+4. Thresholds:
+   - Extraction time: <5ms per comment
+   - Memory usage: <100MB for 10,000 comments
+   - No more than 10% performance regression
+
+Create performance test scripts and document results with benchmarks.
+```
+
+### Step 4.2: Edge Case Validation
+
+```text
+Validate edge cases and error conditions for the new patterns.
+
+Requirements:
+1. Edge Case Testing:
+   - Malformed checkmark patterns: `✓Brush Kent Infinity` (no colon)
+   - Malformed emoji bold patterns: `* **Straight Razor** Fontani Scarperia` (no separator)
+   - Mixed patterns: `✓Brush: Kent Infinity * **Razor** - Kopparkant`
+
+2. Error Handling:
+   - Graceful handling of regex failures
+   - Proper logging of parsing errors
+   - No pipeline crashes on malformed input
+
+3. Boundary Conditions:
+   - Very long field names or values
+   - Special characters in field names or values
+   - Unicode characters and emojis
+
+4. Stress Testing:
+   - High-frequency pattern matching
+   - Memory pressure scenarios
+   - Concurrent processing
+
+Create comprehensive edge case tests and ensure robust error handling.
+```
+
+### Step 4.3: Documentation Updates
+
+```text
+Update all relevant documentation to reflect the new extraction patterns.
+
+Requirements:
+1. Update Extraction Phase Documentation:
+   - Document new checkmark format: `✓Field: Value`
+   - Document new emoji bold format: `* **Field** Value`
+   - Add examples and field mapping rules
+
+2. Update API Documentation:
+   - Document new regex patterns
+   - Update field mapping function documentation
+   - Add performance characteristics
+
+3. Update User Documentation:
+   - Add examples of supported formats
+   - Document field mapping rules
+   - Provide troubleshooting guide
+
+4. Update Development Documentation:
+   - Update extraction phase specification
+   - Document testing approach
+   - Add performance benchmarks
+
+Ensure all documentation is clear, accurate, and helpful for future development.
 ```
 
 ## 🧠 Critical Analysis
 
-### **Strengths of This Plan:**
+### Design Decisions
 
-1. **Incremental Approach**: Each step builds logically on the previous one
-2. **Test-First**: Every step includes comprehensive testing requirements
-3. **Data-Driven**: Based on actual analysis of 10+ years of skipped comments
-4. **High Confidence**: Only implementing patterns with clear field identification
-5. **Backward Compatibility**: Ensures existing functionality is preserved
-6. **Performance Focus**: Validates no performance regression
+**Pattern Selection**: The data-driven analysis clearly identified checkmark and emoji bold formats as the highest-value patterns to implement. These patterns have:
+- **Clear field identification** (28 + 168 = 196 total occurrences)
+- **High confidence mapping** to core products
+- **Consistent structure** that can be reliably parsed
 
-### **Risk Mitigation:**
+**Rejection of Alternatives**: The analysis correctly rejected:
+- **Implicit product extraction** (only 1 successful match in 10+ years)
+- **International patterns** (only 1 French example found)
+- **Other ambiguous patterns** (mostly pre/post-shave products)
 
-1. **Pattern Validation**: Only implementing patterns with >75% field identification success
-2. **Incremental Testing**: Each step includes comprehensive testing
-3. **Backward Compatibility**: Extensive testing to ensure no regressions
-4. **Performance Monitoring**: Explicit performance testing at each step
+### Implementation Strategy
 
-### **Implementation Notes:**
+**Incremental Approach**: The plan follows TDD principles with:
+- **Test-first development** for each pattern
+- **Comprehensive test coverage** including edge cases
+- **Integration testing** with real data samples
+- **Performance validation** to ensure no regressions
 
-- **Pattern Priority**: Checkmark format first (simpler), then emoji bold format
-- **Field Mapping**: Strict mapping to core fields (razor, blade, brush, soap) only
-- **Quality Focus**: Reject ambiguous patterns to maintain data quality
-- **Performance**: Monitor for any performance impact
+**Risk Mitigation**: The implementation minimizes risk by:
+- **Maintaining backward compatibility** with existing patterns
+- **Comprehensive error handling** for malformed input
+- **Performance monitoring** to prevent regressions
+- **Gradual rollout** with extensive testing
 
-### **Success Criteria:**
+### Success Criteria
 
-- ✅ New patterns correctly extract 196 additional high-quality records
-- ✅ Field identification accuracy >90% for new patterns
-- ✅ No performance regression in extraction phase
-- ✅ Existing extraction functionality unchanged
-- ✅ Comprehensive test coverage for new patterns
-- ✅ Real data validation confirms improvement
+**Functional Requirements**:
+- ✅ Checkmark format extraction works correctly
+- ✅ Emoji bold format extraction works correctly  
+- ✅ Field mapping to core products is accurate
+- ✅ No regression in existing extraction patterns
 
-This plan provides a safe, incremental approach to enhancing extraction patterns while maintaining data quality and system performance. The focus on high-confidence patterns ensures we capture meaningful additional data without introducing errors or ambiguity.
+**Performance Requirements**:
+- ✅ Extraction time remains <5ms per comment
+- ✅ Memory usage remains acceptable
+- ✅ No more than 10% performance regression
 
-Model: Claude-3.5-Sonnet
-description:
-globs:
-alwaysApply: false
+**Quality Requirements**:
+- ✅ All existing tests continue to pass
+- ✅ New tests provide comprehensive coverage
+- ✅ Code quality standards maintained
+- ✅ Documentation is complete and accurate
+
+### Expected Impact
+
+**Data Quality Improvement**: The new patterns should capture an additional 196 high-confidence product mentions across 10+ years of data, representing a meaningful improvement in extraction coverage.
+
+**Maintainability**: The implementation follows established patterns and maintains code quality standards, ensuring long-term maintainability.
+
+**Future Extensibility**: The field mapping approach provides a foundation for adding additional patterns in the future if needed.
+
+## 📋 Success Criteria
+
+- [ ] Checkmark format extraction works for all test cases
+- [ ] Emoji bold format extraction works for all test cases  
+- [ ] Field mapping correctly identifies core products
+- [ ] No regression in existing extraction patterns
+- [ ] Performance remains within acceptable thresholds
+- [ ] All quality checks pass (format, lint, typecheck, test)
+- [ ] Documentation is complete and accurate
+- [ ] Real data validation shows expected improvements
+
+## 📝 Session Notes
+
+*To be updated during implementation*
+
 ---
+
+**Next Steps**: Begin with Step 1.1 (Add Test Data for New Patterns) and proceed incrementally through each step, running quality checks before each commit.
