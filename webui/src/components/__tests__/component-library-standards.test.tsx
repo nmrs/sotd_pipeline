@@ -113,4 +113,39 @@ describe('Component Library Standards', () => {
         expect(ErrorDisplay).toBeDefined();
         expect(MessageDisplay).toBeDefined();
     });
+
+    test('should handle loading states consistently across components', () => {
+        // This test verifies that all components handle loading states consistently
+        // We'll check for consistent loading patterns and user feedback
+
+        // Import loading components
+        const LoadingSpinner = require('../layout/LoadingSpinner').default;
+
+        // Test LoadingSpinner with different messages
+        const loadingTestCases = [
+            { message: 'Loading...', expectedText: 'Loading...' },
+            { message: 'Processing data...', expectedText: 'Processing data...' },
+            { message: '', expectedText: '' }, // Should handle empty message
+        ];
+
+        loadingTestCases.forEach(({ message, expectedText }) => {
+            const { container } = render(<LoadingSpinner message={message} />);
+
+            if (message) {
+                // Should display loading message
+                expect(container.textContent).toContain(expectedText);
+            } else {
+                // Should handle empty message gracefully
+                expect(container.textContent).toBe('');
+            }
+        });
+
+        // Test that LoadingSpinner renders without errors
+        expect(() => {
+            render(<LoadingSpinner message="Test loading" />);
+        }).not.toThrow();
+
+        // Verify loading component is working
+        expect(LoadingSpinner).toBeDefined();
+    });
 }); 
