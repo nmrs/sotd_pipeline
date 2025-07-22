@@ -129,7 +129,9 @@ def _process_month(
 
     # comment records with parallel processing
     print(f"[INFO] Fetching comments for {len(threads)} threads using parallel processing...")
-    comment_results = fetch_top_level_comments_parallel(threads, max_workers=3, return_metrics=True)
+    comment_results = fetch_top_level_comments_parallel(
+        threads, max_workers=10, return_metrics=True
+    )
 
     if isinstance(comment_results, tuple):
         new_comment_records, metrics = comment_results
