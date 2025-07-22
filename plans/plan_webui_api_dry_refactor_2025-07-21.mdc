@@ -13,9 +13,9 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
 
 ## 📊 Progress Summary
 
-**Current Status**: Phase 1, Step 9 (Generic DataTable Component) ✅ COMPLETE  
-**Next Step**: Phase 1, Step 10 (Shared Form Field Components) ⏳ PENDING  
-**Overall Progress**: 9/13 steps complete (69%)  
+**Current Status**: Phase 1, Step 8 (Generic DataTable Component) ✅ COMPLETE  
+**Next Step**: Phase 1, Step 9 (Test Utilities for Mocks) ⏳ PENDING  
+**Overall Progress**: 8/12 steps complete (67%)  
 **Blocking Issues**: None - All tests passing (110/110 React tests)
 
 **Completed Work**:
@@ -31,12 +31,11 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
   - New structure: splits: {original: [entries]}
 
 **Immediate Next Steps**:
-- ⏳ Phase 1, Step 9: Generic DataTable Component
-  - Create a generic, configurable DataTable component
-  - Refactor all table/grid components to use this
-- ⏳ Phase 1, Step 10: Shared Form Field Components
-  - Create generic CheckboxField, SelectField, and InputField components
-  - Refactor forms to use these shared components
+- ⏳ Phase 1, Step 9: Test Utilities for Mocks
+  - Create test utility functions for common mocks (API, fetch, months)
+  - Refactor tests to use these utilities
+- ⏳ Phase 1, Step 10: Generalize Data Transformers
+  - Create a generic transformer pattern for multiple product types
 
 ---
 
@@ -203,30 +202,22 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
    - ✅ Maintained inline editing, checkboxes, virtualization, and custom styling
    - ✅ All tests passing (110/110 React tests)
 
-9. **Shared Form Field Components**
-   - Create generic CheckboxField, SelectField, and InputField components.
-   - Refactor forms to use these shared components.
+9. **Test Utilities for Mocks**
+   - Create test utilities for common mocks (API, fetch, months).
+   - Refactor tests to use these utilities.
 
 10. **Generalize Data Transformers**
    - If multiple product types need transformation, create a generic transformer pattern.
 
----
-
-### Phase 3: Testing and Documentation
-
-11. **Test Utilities for Mocks**
-    - Create test utilities for common mocks (API, fetch, months).
-    - Refactor tests to use these utilities.
+11. **Migrate to ShadCN UI Components**
+   - Install and configure ShadCN UI library.
+   - Replace existing form components with ShadCN equivalents.
+   - Update styling to use ShadCN design system.
+   - Ensure all components maintain functionality and accessibility.
 
 12. **Documentation**
-    - Document all shared utilities and DRY patterns.
-    - Update onboarding/contribution guides.
-
-13. **Migrate to ShadCN UI Components**
-    - Install and configure ShadCN UI library.
-    - Replace custom form components with ShadCN equivalents.
-    - Update styling to use ShadCN design system.
-    - Ensure all components maintain functionality and accessibility.
+   - Document all shared utilities and DRY patterns.
+   - Update onboarding/contribution guides.
 
 ---
 
@@ -332,13 +323,13 @@ Create a generic DataTable React component that accepts columns, data, and row r
 - ✅ No production data file writes during testing
 - ✅ Component preserves all original functionality including complex features like inline editing
 
-### Step 9: Shared Form Field Components
+### Step 9: Test Utilities for Mocks
 
 ```text
-Create generic CheckboxField, SelectField, and InputField React components.  
-- Write unit tests for each field component (renders, handles input, error states).
-- Refactor one form to use the shared components.
-- Ensure all tests pass and form behavior is unchanged.
+Create test utility functions for common mocks (API, fetch, months) in the webui.  
+- Write unit tests for the utilities.
+- Refactor one test file to use the utilities.
+- Ensure all tests pass and mocking is consistent.
 - **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
 - **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
@@ -354,13 +345,15 @@ If multiple product types require data transformation, create a generic transfor
 - **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
 
-### Step 11: Test Utilities for Mocks
+### Step 11: Migrate to ShadCN UI Components
 
 ```text
-Create test utility functions for common mocks (API, fetch, months) in the webui.  
-- Write unit tests for the utilities.
-- Refactor one test file to use the utilities.
-- Ensure all tests pass and mocking is consistent.
+Install and configure ShadCN UI library for consistent, accessible components.
+- Install ShadCN UI and configure with project's design system.
+- Write unit tests for ShadCN component integration (renders, accessibility, interactions).
+- Replace existing form components with ShadCN equivalents.
+- Update styling to use ShadCN design system while maintaining functionality.
+- Ensure all components maintain accessibility and existing behavior.
 - **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
 - **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
@@ -372,19 +365,6 @@ Document all shared utilities and DRY patterns in the codebase.
 - Add or update documentation in `docs/` and code comments.
 - Update onboarding/contribution guides to reference shared patterns.
 - Ensure documentation is clear and up to date.
-- **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
-- **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
-```
-
-### Step 13: Migrate to ShadCN UI Components
-
-```text
-Install and configure ShadCN UI library for consistent, accessible components.
-- Install ShadCN UI and configure with project's design system.
-- Write unit tests for ShadCN component integration (renders, accessibility, interactions).
-- Replace custom form components (CheckboxField, SelectField, InputField) with ShadCN equivalents.
-- Update styling to use ShadCN design system while maintaining functionality.
-- Ensure all components maintain accessibility and existing behavior.
 - **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
 - **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
