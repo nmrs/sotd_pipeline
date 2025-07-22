@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+dist/
+build/
+coverage/
+
+# Generated files
+*.min.js
+*.bundle.js
+
+# Configuration files
+*.config.js
+*.config.ts
+*.config.cjs
+vite.config.ts
+tailwind.config.cjs
+postcss.config.cjs
+jest.config.js
+playwright.config.ts
+
+# Test reports
+playwright-report/
+test-results/
+
+# Logs
+*.log
+
+# Package files
+package-lock.json
+yarn.lock
+
+# Environment files
+.env*
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md 
