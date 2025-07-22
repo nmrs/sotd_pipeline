@@ -15,7 +15,7 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
 
 **Current Status**: Phase 1, Step 9 (Generic DataTable Component) ✅ COMPLETE  
 **Next Step**: Phase 1, Step 10 (Shared Form Field Components) ⏳ PENDING  
-**Overall Progress**: 9/12 steps complete (75%)  
+**Overall Progress**: 9/13 steps complete (69%)  
 **Blocking Issues**: None - All tests passing (110/110 React tests)
 
 **Completed Work**:
@@ -222,6 +222,12 @@ Refactor the SOTD Pipeline webui and API to eliminate code duplication, centrali
     - Document all shared utilities and DRY patterns.
     - Update onboarding/contribution guides.
 
+13. **Migrate to ShadCN UI Components**
+    - Install and configure ShadCN UI library.
+    - Replace custom form components with ShadCN equivalents.
+    - Update styling to use ShadCN design system.
+    - Ensure all components maintain functionality and accessibility.
+
 ---
 
 ## 🔁 TDD Prompts for Each Step
@@ -366,6 +372,19 @@ Document all shared utilities and DRY patterns in the codebase.
 - Add or update documentation in `docs/` and code comments.
 - Update onboarding/contribution guides to reference shared patterns.
 - Ensure documentation is clear and up to date.
+- **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
+- **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
+```
+
+### Step 13: Migrate to ShadCN UI Components
+
+```text
+Install and configure ShadCN UI library for consistent, accessible components.
+- Install ShadCN UI and configure with project's design system.
+- Write unit tests for ShadCN component integration (renders, accessibility, interactions).
+- Replace custom form components (CheckboxField, SelectField, InputField) with ShadCN equivalents.
+- Update styling to use ShadCN design system while maintaining functionality.
+- Ensure all components maintain accessibility and existing behavior.
 - **MANDATORY**: Verify tests use `tmp_path` and never write to production files.
 - **MANDATORY**: Run `make test-all` and verify all test suites pass before marking complete.
 ```
