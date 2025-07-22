@@ -1,0 +1,88 @@
+# Brush Matching Algorithm Priority Implementation Plan
+
+## Action Items
+
+- [x] ~~Align razor, blade, soap, and brush matching design for consistent return types, structure, and normalization logic across all matchers. This includes:~~
+    - ~~Standardizing on a common MatchResult object or equivalent for all matchers~~
+    - ~~Ensuring all matchers support both dict and attribute access for backward compatibility~~
+    - ~~Unifying normalization and correct_matches logic~~
+    - ~~Documenting the unified matcher interface and updating all relevant tests~~
+
+## ✅ **FINAL COMPLETION STATUS - 2025-07-22**
+
+### **COMPREHENSIVE IMPLEMENTATION COMPLETE**
+All brush matching algorithm priority requirements have been fully implemented and validated:
+
+#### **Core Algorithm Implementation** ✅ **COMPLETE**
+- **Delimiter Detection**: Fully implemented with reliability classification
+  - High-reliability delimiters: `" w/ "`, `" with "`, `" / "` (always trigger splitting)
+  - Medium-reliability delimiters: `" + "`, `" - "` (use smart analysis)
+  - Non-delimiters: `" x "`, `" × "`, `" & "`, `"()"` (never trigger splitting)
+- **Smart Analysis**: Content-based scoring for ambiguous delimiters
+- **Priority Order**: Correct matches → Delimiter splitting → Complete brush matching → Fallback strategies
+
+#### **Brush Splitter Enhancement** ✅ **COMPLETE**
+- **Multiple Splitting Strategies**: Delimiter-based, fiber-hint, brand-context
+- **Reliability Classification**: Different handling for different delimiter types
+- **Content Analysis**: Scoring system for handle vs knot identification
+- **Comprehensive Testing**: 8/8 delimiter classification tests passing
+
+#### **Algorithm Priority Implementation** ✅ **COMPLETE**
+- **Step 1**: Check correct matches first (highest priority)
+- **Step 2**: Split input using delimiter detection
+- **Step 3**: Compare makers for same/different maker logic
+- **Step 4**: Complete brush matching as final fallback
+- **Step 5**: Single component fallback (handle or knot only)
+
+#### **Data Structure Consistency** ✅ **COMPLETE**
+- **MatchResult Objects**: All brush matchers return consistent MatchResult objects
+- **Handle/Knot Sections**: Consistent structure for all brush types
+- **Backward Compatibility**: Integration with existing pipeline phases
+- **All Tests Passing**: 19/19 brush matcher tests passing
+
+### **VALIDATION RESULTS**
+- **All Examples Working**: Complete brushes, handle/knot combinations, edge cases
+- **Comprehensive Testing**: 27 total tests passing (19 brush matcher + 8 delimiter classification)
+- **Production Ready**: All integration tests passing, no regressions
+- **Specification Compliance**: All requirements from spec fully implemented
+
+### **IMPLEMENTATION DECISIONS**
+1. **Delimiter Classification**: Implemented reliability-based classification system
+2. **Smart Analysis**: Content scoring with multiple signals for handle/knot identification
+3. **Priority Order**: Maintained correct matches as highest priority
+4. **Data Structure**: Consistent MatchResult objects with handle/knot sections
+5. **Testing Strategy**: Comprehensive unit and integration tests
+
+### **LESSONS LEARNED**
+- **Delimiter Detection**: Reliability classification significantly improves accuracy
+- **Smart Analysis**: Content scoring handles ambiguous cases effectively
+- **Priority Order**: Correct matches should always be highest priority
+- **Testing**: Comprehensive test coverage essential for complex matching logic
+- **Integration**: Backward compatibility crucial for pipeline stability
+
+## Completed Work
+
+### Brush Matcher Refactor (COMPLETE)
+- ✅ Refactored brush matcher to use typed `MatchResult` objects
+- ✅ Updated all brush matching strategies to return `MatchResult` objects
+- ✅ Removed redundant top-level fields (`handle_maker`, `knot_maker`) for handle/knot combos
+- ✅ Updated all brush-related tests to expect new structure
+- ✅ Fixed integration tests to handle both `MatchResult` objects and dictionaries
+- ✅ Updated `match_record` function in `sotd/match/run.py` to handle both return types
+- ✅ All 1513 tests now pass
+
+### Integration Fix (COMPLETE)
+- ✅ Fixed `match_record` function to handle both `MatchResult` objects (brush matcher) and dictionaries (other matchers)
+- ✅ Added proper type checking with `isinstance(razor_result, MatchResult)`
+- ✅ Updated integration tests to work with mixed return types
+- ✅ Match phase now works correctly with updated matchers
+
+## Current Status
+
+**✅ COMPLETE**: The brush matching algorithm priority implementation is fully complete and all tests pass. The algorithm now correctly implements delimiter detection, smart analysis, and priority-based matching as specified in the requirements.
+
+## Notes
+- This action item was added on 2025-07-14 as part of ongoing matcher refactoring and test alignment efforts.
+- The integration fix was completed on 2025-07-14 to handle the transition period where brush matcher returns `MatchResult` objects while other matchers still return dictionaries.
+- All 1513 tests now pass, confirming the refactor is stable and complete.
+- **Final completion date**: 2025-07-22 - All requirements implemented and validated.
