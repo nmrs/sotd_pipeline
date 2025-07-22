@@ -1,0 +1,371 @@
+---
+description: Design system guidelines for SOTD Pipeline WebUI development
+globs:
+  - "webui/**/*"
+alwaysApply: False
+---
+
+# Design System Guidelines
+
+This document outlines the design system guidelines for the SOTD Pipeline WebUI, based on ShadCN UI components and Tailwind CSS.
+
+---
+
+**Note**: This document should be referenced when working on any webui components to ensure consistent design patterns and styling.
+
+---
+
+## Color Palette
+
+### Primary Colors
+- **Blue**: `blue-600` (#2563eb) - Primary actions, links
+- **Blue Hover**: `blue-700` (#1d4ed8) - Hover states
+- **Blue Light**: `blue-50` (#eff6ff) - Backgrounds, highlights
+
+### Neutral Colors
+- **Gray 50**: `gray-50` (#f9fafb) - Table headers, backgrounds
+- **Gray 100**: `gray-100` (#f3f4f6) - Borders, dividers
+- **Gray 200**: `gray-200` (#e5e7eb) - Borders, disabled states
+- **Gray 500**: `gray-500` (#6b7280) - Secondary text
+- **Gray 600**: `gray-600` (#4b5563) - Body text
+- **Gray 700**: `gray-700` (#374151) - Headers, emphasis
+- **Gray 900**: `gray-900` (#111827) - Primary text
+
+### Status Colors
+- **Success Green**: `green-600` (#16a34a) - Success states, matched items
+- **Success Light**: `green-100` (#dcfce7) - Success backgrounds
+- **Error Red**: `red-600` (#dc2626) - Error states, unmatched items
+- **Error Light**: `red-100` (#fee2e2) - Error backgrounds
+- **Warning Yellow**: `yellow-600` (#ca8a04) - Warning states
+- **Warning Light**: `yellow-100` (#fef3c7) - Warning backgrounds
+
+### Interactive Colors
+- **Hover Blue**: `hover:bg-blue-50` - Row hover states
+- **Focus Blue**: `focus:ring-blue-500` - Focus indicators
+- **Active Blue**: `active:bg-blue-100` - Active states
+
+## Typography
+
+### Font Sizes
+- **xs**: `text-xs` (12px) - Small labels, metadata
+- **sm**: `text-sm` (14px) - Body text, table content
+- **base**: `text-base` (16px) - Default text size
+- **lg**: `text-lg` (18px) - Headers, emphasis
+- **xl**: `text-xl` (20px) - Page titles
+- **2xl**: `text-2xl` (24px) - Section headers
+
+### Font Weights
+- **Normal**: `font-normal` (400) - Body text
+- **Medium**: `font-medium` (500) - Headers, emphasis
+- **Semibold**: `font-semibold` (600) - Strong emphasis
+- **Bold**: `font-bold` (700) - Page titles
+
+### Text Colors
+- **Primary**: `text-gray-900` - Main text
+- **Secondary**: `text-gray-600` - Secondary text
+- **Muted**: `text-gray-500` - Disabled, metadata
+- **Inverted**: `text-white` - Text on dark backgrounds
+
+## Spacing
+
+### Padding
+- **xs**: `p-1` (4px) - Tight spacing
+- **sm**: `p-2` (8px) - Small spacing
+- **md**: `p-3` (12px) - Standard spacing
+- **lg**: `p-4` (16px) - Large spacing
+- **xl**: `p-6` (24px) - Extra large spacing
+
+### Margins
+- **xs**: `m-1` (4px) - Tight margins
+- **sm**: `m-2` (8px) - Small margins
+- **md**: `m-3` (12px) - Standard margins
+- **lg**: `m-4` (16px) - Large margins
+- **xl**: `m-6` (24px) - Extra large margins
+
+### Gaps
+- **xs**: `gap-1` (4px) - Tight gaps
+- **sm**: `gap-2` (8px) - Small gaps
+- **md**: `gap-3` (12px) - Standard gaps
+- **lg**: `gap-4` (16px) - Large gaps
+- **xl**: `gap-6` (24px) - Extra large gaps
+
+## Component Patterns
+
+### Tables
+
+#### Basic Table Structure
+```tsx
+<div className="border rounded-lg">
+  <div className="overflow-auto">
+    <table className="w-full border-collapse">
+      <thead className="bg-gray-50">
+        <tr className="border-b">
+          <th className="p-3 text-left font-medium text-gray-900">
+            Header
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr className="border-b hover:bg-gray-50">
+          <td className="p-3">Content</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+```
+
+#### Sticky Headers
+```tsx
+<thead style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'white' }}>
+```
+
+#### Interactive Rows
+```tsx
+<tr className="border-b hover:bg-gray-50 cursor-pointer">
+```
+
+### Buttons
+
+#### Primary Button
+```tsx
+<button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+  Primary Action
+</button>
+```
+
+#### Secondary Button
+```tsx
+<button className="bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 py-2 rounded-lg font-medium">
+  Secondary Action
+</button>
+```
+
+#### Small Button
+```tsx
+<button className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-sm">
+  Small Action
+</button>
+```
+
+### Inputs
+
+#### Text Input
+```tsx
+<input 
+  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+  placeholder="Enter text..."
+/>
+```
+
+#### Checkbox
+```tsx
+<input 
+  type="checkbox"
+  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+/>
+```
+
+### Status Indicators
+
+#### Success Badge
+```tsx
+<span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
+  Matched
+</span>
+```
+
+#### Error Badge
+```tsx
+<span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded">
+  Unmatched
+</span>
+```
+
+#### Warning Badge
+```tsx
+<span className="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded">
+  Pending
+</span>
+```
+
+## Layout Patterns
+
+### Page Structure
+```tsx
+<div className="min-h-screen bg-gray-50">
+  <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
+    <div className="max-w-7xl mx-auto px-4 py-4">
+      <h1 className="text-xl font-semibold text-gray-900">Page Title</h1>
+    </div>
+  </header>
+  
+  <main className="max-w-7xl mx-auto px-4 py-6">
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      {/* Page content */}
+    </div>
+  </main>
+</div>
+```
+
+### Card Layout
+```tsx
+<div className="bg-white rounded-lg border border-gray-200 p-6">
+  <h2 className="text-lg font-semibold text-gray-900 mb-4">Card Title</h2>
+  <div className="space-y-4">
+    {/* Card content */}
+  </div>
+</div>
+```
+
+### Form Layout
+```tsx
+<form className="space-y-6">
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Label
+    </label>
+    <input className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+  </div>
+</form>
+```
+
+## Interactive States
+
+### Hover States
+- **Rows**: `hover:bg-gray-50`
+- **Buttons**: `hover:bg-blue-700` (primary), `hover:bg-gray-200` (secondary)
+- **Links**: `hover:text-blue-700`
+
+### Focus States
+- **Inputs**: `focus:ring-2 focus:ring-blue-500 focus:border-blue-500`
+- **Buttons**: `focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`
+- **Links**: `focus:outline-none focus:ring-2 focus:ring-blue-500`
+
+### Active States
+- **Buttons**: `active:bg-blue-800` (primary), `active:bg-gray-300` (secondary)
+- **Rows**: `active:bg-gray-100`
+
+### Disabled States
+- **Inputs**: `disabled:opacity-50 disabled:cursor-not-allowed`
+- **Buttons**: `disabled:opacity-50 disabled:cursor-not-allowed`
+
+## Accessibility Guidelines
+
+### ARIA Labels
+```tsx
+<button aria-label="Sort by name">
+  Name ↑
+</button>
+```
+
+### Keyboard Navigation
+```tsx
+<button 
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      handleClick();
+    }
+  }}
+>
+  Clickable Element
+</button>
+```
+
+### Focus Management
+```tsx
+<div tabIndex={0} onFocus={handleFocus} onBlur={handleBlur}>
+  Focusable Content
+</div>
+```
+
+### Screen Reader Support
+```tsx
+<span className="sr-only">Hidden text for screen readers</span>
+```
+
+## Performance Guidelines
+
+### CSS Classes
+- Use Tailwind utility classes for consistent styling
+- Avoid custom CSS when possible
+- Use responsive prefixes (`sm:`, `md:`, `lg:`) for responsive design
+
+### Component Optimization
+- Use `React.memo` for expensive components
+- Use `useMemo` and `useCallback` for expensive calculations
+- Implement virtualization for large datasets
+
+### Loading States
+```tsx
+{loading ? (
+  <div className="flex items-center justify-center p-8">
+    <div className="text-gray-500">Loading...</div>
+  </div>
+) : (
+  // Content
+)}
+```
+
+### Empty States
+```tsx
+{data.length === 0 ? (
+  <div className="flex items-center justify-center p-8">
+    <div className="text-gray-500">No data available</div>
+  </div>
+) : (
+  // Content
+)}
+```
+
+## Responsive Design
+
+### Breakpoints
+- **sm**: 640px - Small screens
+- **md**: 768px - Medium screens
+- **lg**: 1024px - Large screens
+- **xl**: 1280px - Extra large screens
+- **2xl**: 1536px - 2X large screens
+
+### Responsive Patterns
+```tsx
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  {/* Responsive grid */}
+</div>
+
+<div className="text-sm md:text-base lg:text-lg">
+  {/* Responsive typography */}
+</div>
+
+<div className="p-4 md:p-6 lg:p-8">
+  {/* Responsive spacing */}
+</div>
+```
+
+## Best Practices
+
+### Naming Conventions
+- Use descriptive class names
+- Group related styles together
+- Use consistent naming patterns
+
+### Code Organization
+- Keep components focused and single-purpose
+- Use consistent file structure
+- Document complex logic
+
+### Testing
+- Test all interactive states
+- Test accessibility features
+- Test responsive behavior
+- Test performance with large datasets
+
+### Maintenance
+- Keep design system up to date
+- Document changes and decisions
+- Review and refactor regularly
+- Monitor performance metrics
+
+---
+
+**Note**: This document should be updated as new design patterns emerge and lessons are learned. All webui development should follow these established design system guidelines.

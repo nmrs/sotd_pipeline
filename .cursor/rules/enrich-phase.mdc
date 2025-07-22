@@ -1,6 +1,6 @@
 ---
 description: 
-globs: 
+globs: ["sotd/enrich/**/*"]
 alwaysApply: false
 ---
 # Enrich Phase Architecture Rules for SOTD Pipeline

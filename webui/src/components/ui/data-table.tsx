@@ -130,19 +130,20 @@ export function DataTable<TData, TValue>({
         if (!row) return null
 
         return (
-            <TableRow
-                data-state={row.getIsSelected() && "selected"}
+            <div
+                className="flex border-b"
                 style={style}
             >
                 {row.getVisibleCells().map((cell) => (
-                    <TableCell
+                    <div
                         key={cell.id}
+                        className="flex-1 px-4 py-2"
                         style={columnWidths[cell.column.id] ? { width: columnWidths[cell.column.id] } : undefined}
                     >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+                    </div>
                 ))}
-            </TableRow>
+            </div>
         )
     }
 
@@ -223,17 +224,19 @@ export function DataTable<TData, TValue>({
                             </TableRow>
                         ))}
                     </TableHeader>
-                    <TableBody>
-                        <List
-                            height={height}
-                            itemCount={rows.length}
-                            itemSize={itemSize}
-                            width="100%"
-                        >
-                            {Row}
-                        </List>
-                    </TableBody>
                 </Table>
+
+                {/* Virtualized Body - Outside of table to avoid DOM nesting issues */}
+                <div className="relative" style={{ height }}>
+                    <List
+                        height={height}
+                        itemCount={rows.length}
+                        itemSize={itemSize}
+                        width="100%"
+                    >
+                        {Row}
+                    </List>
+                </div>
             </div>
 
             {/* Pagination */}

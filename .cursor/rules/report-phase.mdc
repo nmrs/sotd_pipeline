@@ -1,6 +1,6 @@
 ---
 description: 
-globs: 
+globs: ["sotd/report/**/*"]
 alwaysApply: false
 ---
 # Report Phase Rules

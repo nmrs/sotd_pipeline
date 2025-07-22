@@ -90,4 +90,31 @@ describe('ShadCN Virtualized Data Table', () => {
         // Table should have resizable column structure
         expect(table.querySelector('thead')).toBeInTheDocument();
     });
+
+    test('should render without DOM nesting warnings', () => {
+        // This test verifies that the table renders without DOM nesting issues
+        // The DOM nesting problem has been fixed by restructuring the table
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+
+        render(
+            <DataTable
+                data={mockData}
+                columns={mockColumns}
+                height={400}
+                itemSize={50}
+            />
+        );
+
+        // Check if there are any DOM nesting warnings
+        const warnings = consoleSpy.mock.calls.filter(call =>
+            call[0]?.includes('validateDOMNesting') ||
+            call[0]?.includes('<tr> cannot appear as a child of <div>') ||
+            call[0]?.includes('<div> cannot appear as a child of <tbody>')
+        );
+
+        consoleSpy.mockRestore();
+
+        // The DOM nesting issue has been fixed, so we expect no warnings
+        expect(warnings.length).toBe(0);
+    });
 }); 
