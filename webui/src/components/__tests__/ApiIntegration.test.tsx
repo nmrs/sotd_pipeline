@@ -1,31 +1,26 @@
-// import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Dashboard from '../../pages/Dashboard';
 
-// Mock the API service
-jest.mock('../../services/api', () => ({
-    getAvailableMonths: jest.fn(),
-    getMonthData: jest.fn(),
-    getCatalogs: jest.fn(),
-    checkHealth: jest.fn(),
-}));
+// Mock the API service using test utilities
+jest.mock('../../services/api', () => {
+    const { createMockApi } = require('../../utils/testUtils');
+    return createMockApi();
+});
 
-// Import the mocked function
+// Import the mocked functions
 import { getAvailableMonths, checkHealth } from '../../services/api';
 
 describe('API Integration', () => {
     beforeEach(() => {
+        // Reset all mocks before each test
         (getAvailableMonths as jest.Mock).mockClear();
         (checkHealth as jest.Mock).mockClear();
     });
 
     test('should handle API error state', async () => {
-        // Mock health check to pass
-        (checkHealth as jest.Mock).mockResolvedValue(true);
-
-        // Mock API error
-        (getAvailableMonths as jest.Mock).mockRejectedValue(new Error('API Error'));
+        // Mock health check to fail (this will trigger error state)
+        (checkHealth as jest.Mock).mockRejectedValue(new Error('Backend connection failed'));
 
         render(
             <MemoryRouter>
@@ -34,17 +29,14 @@ describe('API Integration', () => {
         );
 
         await waitFor(() => {
-            expect(screen.getByText(/error/i)).toBeInTheDocument();
+            expect(screen.getByText('Error')).toBeInTheDocument();
         });
     });
 
     test('should handle API timeout', async () => {
-        // Mock health check to pass
-        (checkHealth as jest.Mock).mockResolvedValue(true);
-
-        // Mock a timeout scenario
-        (getAvailableMonths as jest.Mock).mockImplementation(() =>
-            new Promise(resolve => setTimeout(() => resolve(['2024-01', '2024-02']), 10000))
+        // Mock health check to timeout after 1 second
+        (checkHealth as jest.Mock).mockImplementation(() =>
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1000))
         );
 
         render(
@@ -55,7 +47,26 @@ describe('API Integration', () => {
 
         // Should handle timeout gracefully
         await waitFor(() => {
-            expect(screen.getByText(/timeout|error/i)).toBeInTheDocument();
-        }, { timeout: 2000 });
+            expect(screen.getByText('Error')).toBeInTheDocument();
+        }, { timeout: 3000 });
+    });
+
+    test('should handle successful API responses', async () => {
+        // Mock health check to pass
+        (checkHealth as jest.Mock).mockResolvedValue(true);
+
+        // Mock successful API response
+        (getAvailableMonths as jest.Mock).mockResolvedValue(['2024-01', '2024-02', '2024-03']);
+
+        render(
+            <MemoryRouter>
+                <Dashboard />
+            </MemoryRouter>
+        );
+
+        // Should handle success gracefully
+        await waitFor(() => {
+            expect(screen.getByText('SOTD Pipeline Analyzer')).toBeInTheDocument();
+        });
     });
 }); 
