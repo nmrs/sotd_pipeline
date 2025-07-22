@@ -1,19 +1,51 @@
 ---
-description: Design system guidelines for SOTD Pipeline WebUI development
-globs:
-  - "webui/**/*"
-alwaysApply: False
+description: This document outlines the design system guidelines for the SOTD Pipeline WebUI, based on ShadCN UI components and Tailwind CSS.
+alwaysApply: false
 ---
+## Foundation Philosophy
 
-# Design System Guidelines
+### **MANDATORY**: ShadCN + Tailwind First
+- **ALWAYS** use ShadCN components as the foundation for all UI development
+- **ALWAYS** use Tailwind CSS for all styling and layout
+- **NEVER** create custom components that duplicate ShadCN functionality
+- **NEVER** use inline styles or custom CSS when Tailwind classes are available
+- **STANDARDIZE** on ShadCN patterns and Tailwind utility classes
 
-This document outlines the design system guidelines for the SOTD Pipeline WebUI, based on ShadCN UI components and Tailwind CSS.
+### Component Development Hierarchy
+1. **Use ShadCN components** (Button, Input, Table, DataTable, etc.)
+2. **Use Tailwind utilities** for layout, spacing, colors, and styling
+3. **Extend ShadCN components** with props/variants when needed
+4. **Create custom components** only when ShadCN doesn't provide the functionality
+5. **Document any deviations** from ShadCN/Tailwind patterns
 
----
+### ShadCN Component Usage
+```typescript
+// ✅ CORRECT - Use ShadCN components
+import { Button } from '@/components/ui/button';
+import { DataTable } from '@/components/ui/data-table';
+import { Input } from '@/components/ui/input';
 
-**Note**: This document should be referenced when working on any webui components to ensure consistent design patterns and styling.
+// ✅ CORRECT - Extend ShadCN with variants
+<Button variant="destructive" size="lg">Delete</Button>
+<DataTable columns={columns} data={data} resizable={true} />
 
----
+// ❌ WRONG - Don't create custom components that duplicate ShadCN
+// Don't create CustomButton when ShadCN Button exists
+// Don't create CustomTable when ShadCN DataTable exists
+```
+
+### Tailwind CSS Usage
+```typescript
+// ✅ CORRECT - Use Tailwind utilities
+<div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm">
+  <h2 className="text-lg font-semibold text-gray-900">Title</h2>
+  <Button className="bg-blue-600 hover:bg-blue-700">Action</Button>
+</div>
+
+// ❌ WRONG - Don't use inline styles or custom CSS
+// Don't use style={{ display: 'flex', padding: '16px' }}
+// Don't create custom CSS classes when Tailwind provides utilities
+```
 
 ## Color Palette
 
@@ -89,11 +121,69 @@ This document outlines the design system guidelines for the SOTD Pipeline WebUI,
 - **lg**: `gap-4` (16px) - Large gaps
 - **xl**: `gap-6` (24px) - Extra large gaps
 
-## Component Patterns
+## Component Reuse Philosophy
 
-### Tables
+### **MANDATORY**: Component Reuse First
+- **ALWAYS** check existing components before creating new ones
+- **PREFER** extending existing components over creating new ones
+- **REQUIRE** justification for any new component that duplicates existing functionality
+- **STANDARDIZE** on existing patterns rather than creating new ones
 
-#### Basic Table Structure
+### Component Reuse Hierarchy
+1. **Use existing ShadCN components** (Button, Input, Table, DataTable, etc.)
+2. **Use existing custom components** (check what's already built)
+3. **Extend existing components** with props/variants when possible
+4. **Create new components** only when no suitable existing component exists
+5. **Document reuse decisions** in component comments
+
+### Reuse Decision Framework
+Before creating any new component, ask:
+- Does a ShadCN component handle this use case?
+- Does an existing custom component handle this use case?
+- Can an existing component be extended with props/variants?
+- Is the new component significantly different from existing ones?
+- Will this component be used in multiple places?
+- Have I checked all existing components in the codebase?
+
+## Table Component Standards
+
+### **MANDATORY**: Use ShadCN DataTable
+- **ALWAYS** use ShadCN DataTable as the foundation for all table components
+- **NEVER** create custom table implementations that duplicate DataTable functionality
+- **EXTEND** DataTable with specialized features (editing, subrows) when needed
+- **LEVERAGE** TanStack Table features (sorting, filtering, resizing, virtualization)
+
+### Table Component Architecture
+```typescript
+// ✅ CORRECT - Use ShadCN DataTable as foundation
+import { DataTable } from '@/components/ui/data-table';
+
+// Specialized table with editing features
+const BrushSplitTable = (props) => {
+  return <DataTable {...props} />; // Add editing logic on top
+};
+
+// Specialized table with subrow features  
+const BrushTable = (props) => {
+  return <DataTable {...props} />; // Add subrow logic on top
+};
+
+// ❌ WRONG - Don't create custom table implementations
+// Don't create VirtualizedTable when DataTable supports virtualization
+// Don't create GenericDataTable when DataTable provides all features
+```
+
+### ShadCN DataTable Features
+- ✅ **Sorting** - Built-in column sorting
+- ✅ **Filtering** - Global and column-specific filters  
+- ✅ **Resizable columns** - Column width adjustment
+- ✅ **Column visibility** - Show/hide columns
+- ✅ **Row selection** - Checkbox selection
+- ✅ **Virtualization** - For large datasets
+- ✅ **Accessibility** - Built-in ARIA support
+- ✅ **Performance** - Optimized with TanStack Table
+
+### Basic Table Structure (for custom tables when needed)
 ```tsx
 <div className="border rounded-lg">
   <div className="overflow-auto">
@@ -115,81 +205,114 @@ This document outlines the design system guidelines for the SOTD Pipeline WebUI,
 </div>
 ```
 
-#### Sticky Headers
-```tsx
-<thead style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'white' }}>
+## Form Component Standards
+
+### **MANDATORY**: Use ShadCN Form Components
+- **ALWAYS** use ShadCN Input, Select, Checkbox, etc.
+- **NEVER** create custom form components that duplicate ShadCN
+- **EXTEND** ShadCN form components with validation and error handling
+- **CONSISTENT** form patterns across all pages
+
+### Form Patterns
+```typescript
+// ✅ CORRECT - Use ShadCN form components
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+
+<form className="space-y-4">
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Name
+    </label>
+    <Input 
+      type="text" 
+      placeholder="Enter your name"
+      className="w-full"
+    />
+  </div>
+  
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Category
+    </label>
+    <Select>
+      <SelectTrigger>
+        <SelectValue placeholder="Select a category" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="option1">Option 1</SelectItem>
+        <SelectItem value="option2">Option 2</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+</form>
 ```
 
-#### Interactive Rows
+### Button Patterns
 ```tsx
-<tr className="border-b hover:bg-gray-50 cursor-pointer">
-```
-
-### Buttons
-
-#### Primary Button
-```tsx
+// Primary Button
 <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
   Primary Action
 </button>
-```
 
-#### Secondary Button
-```tsx
+// Secondary Button
 <button className="bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 py-2 rounded-lg font-medium">
   Secondary Action
 </button>
-```
 
-#### Small Button
-```tsx
+// Small Button
 <button className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-sm">
   Small Action
 </button>
 ```
 
-### Inputs
-
-#### Text Input
+### Input Patterns
 ```tsx
+// Text Input
 <input 
   className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
   placeholder="Enter text..."
 />
-```
 
-#### Checkbox
-```tsx
+// Checkbox
 <input 
   type="checkbox"
   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 />
 ```
 
-### Status Indicators
+## Layout Component Standards
 
-#### Success Badge
-```tsx
-<span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
-  Matched
-</span>
+### **MANDATORY**: Use Tailwind Layout Utilities
+- **ALWAYS** use Tailwind flexbox and grid utilities
+- **NEVER** create custom layout components when Tailwind provides utilities
+- **CONSISTENT** layout patterns across all pages
+- **RESPONSIVE** design using Tailwind's responsive utilities
+
+### Layout Patterns
+```typescript
+// ✅ CORRECT - Use Tailwind layout utilities
+<div className="min-h-screen bg-gray-50">
+  <div className="max-w-6xl mx-auto p-6">
+    <header className="mb-8">
+      <h1 className="text-3xl font-bold text-gray-900">Page Title</h1>
+    </header>
+    
+    <main className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h2 className="text-xl font-semibold mb-4">Section Title</h2>
+        <p className="text-gray-600">Content here</p>
+      </div>
+      
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h2 className="text-xl font-semibold mb-4">Another Section</h2>
+        <p className="text-gray-600">More content</p>
+      </div>
+    </main>
+  </div>
+</div>
 ```
-
-#### Error Badge
-```tsx
-<span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded">
-  Unmatched
-</span>
-```
-
-#### Warning Badge
-```tsx
-<span className="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded">
-  Pending
-</span>
-```
-
-## Layout Patterns
 
 ### Page Structure
 ```tsx
@@ -218,16 +341,27 @@ This document outlines the design system guidelines for the SOTD Pipeline WebUI,
 </div>
 ```
 
-### Form Layout
+## Status Indicators
+
+### Success Badge
 ```tsx
-<form className="space-y-6">
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-2">
-      Label
-    </label>
-    <input className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-  </div>
-</form>
+<span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
+  Matched
+</span>
+```
+
+### Error Badge
+```tsx
+<span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded">
+  Unmatched
+</span>
+```
+
+### Warning Badge
+```tsx
+<span className="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded">
+  Pending
+</span>
 ```
 
 ## Interactive States
@@ -250,7 +384,37 @@ This document outlines the design system guidelines for the SOTD Pipeline WebUI,
 - **Inputs**: `disabled:opacity-50 disabled:cursor-not-allowed`
 - **Buttons**: `disabled:opacity-50 disabled:cursor-not-allowed`
 
-## Accessibility Guidelines
+## Accessibility Standards
+
+### **MANDATORY**: Follow WCAG 2.1 AA Guidelines
+- **ALWAYS** use semantic HTML elements
+- **ALWAYS** provide proper ARIA labels and descriptions
+- **ALWAYS** ensure keyboard navigation works
+- **ALWAYS** maintain proper color contrast ratios
+- **ALWAYS** test with screen readers
+
+### Accessibility Patterns
+```typescript
+// ✅ CORRECT - Accessible components
+<Button 
+  aria-label="Delete item"
+  aria-describedby="delete-description"
+  onClick={handleDelete}
+>
+  Delete
+</Button>
+<span id="delete-description" className="sr-only">
+  Permanently delete this item from the system
+</span>
+
+// ✅ CORRECT - Semantic HTML
+<main role="main" aria-label="Main content">
+  <section aria-labelledby="section-title">
+    <h2 id="section-title">Section Title</h2>
+    <p>Content here</p>
+  </section>
+</main>
+```
 
 ### ARIA Labels
 ```tsx
@@ -284,17 +448,38 @@ This document outlines the design system guidelines for the SOTD Pipeline WebUI,
 <span className="sr-only">Hidden text for screen readers</span>
 ```
 
-## Performance Guidelines
+## Performance Standards
 
-### CSS Classes
-- Use Tailwind utility classes for consistent styling
-- Avoid custom CSS when possible
-- Use responsive prefixes (`sm:`, `md:`, `lg:`) for responsive design
+### **MANDATORY**: Optimize for Performance
+- **ALWAYS** use React.memo for expensive components
+- **ALWAYS** use useMemo and useCallback for expensive operations
+- **ALWAYS** implement proper loading states
+- **ALWAYS** handle error states gracefully
+- **ALWAYS** optimize bundle size
 
-### Component Optimization
-- Use `React.memo` for expensive components
-- Use `useMemo` and `useCallback` for expensive calculations
-- Implement virtualization for large datasets
+### Performance Patterns
+```typescript
+// ✅ CORRECT - Optimized components
+const ExpensiveComponent = React.memo(({ data }) => {
+  const processedData = useMemo(() => {
+    return data.map(item => ({ ...item, processed: true }));
+  }, [data]);
+
+  const handleClick = useCallback((id) => {
+    // Handle click
+  }, []);
+
+  return (
+    <div>
+      {processedData.map(item => (
+        <div key={item.id} onClick={() => handleClick(item.id)}>
+          {item.name}
+        </div>
+      ))}
+    </div>
+  );
+});
+```
 
 ### Loading States
 ```tsx
@@ -342,6 +527,40 @@ This document outlines the design system guidelines for the SOTD Pipeline WebUI,
 </div>
 ```
 
+## Development Workflow
+
+### **MANDATORY**: Follow Component Reuse Process
+1. **Check ShadCN** - Does ShadCN provide this component?
+2. **Check existing custom components** - Does something similar exist?
+3. **Extend existing component** - Can I add props/variants?
+4. **Create new component** - Only if no suitable option exists
+5. **Document decision** - Why was this component created?
+
+### Code Review Checklist
+- [ ] Uses ShadCN components where available
+- [ ] Uses Tailwind utilities for styling
+- [ ] Follows accessibility guidelines
+- [ ] Implements proper error handling
+- [ ] Includes comprehensive tests
+- [ ] Documents component usage
+- [ ] Optimizes for performance
+
+## Migration Guidelines
+
+### **MANDATORY**: Migrate to ShadCN + Tailwind
+- **IMMEDIATE**: Replace custom table implementations with ShadCN DataTable
+- **IMMEDIATE**: Replace inline styles with Tailwind utilities
+- **IMMEDIATE**: Replace custom form components with ShadCN form components
+- **GRADUAL**: Update existing components to use ShadCN patterns
+- **ONGOING**: Maintain consistency with ShadCN + Tailwind standards
+
+### Migration Priority
+1. **High Priority**: Table components (migrate to ShadCN DataTable)
+2. **High Priority**: Form components (migrate to ShadCN form components)
+3. **Medium Priority**: Layout components (use Tailwind utilities)
+4. **Medium Priority**: Button and input components (use ShadCN)
+5. **Low Priority**: Specialized components (extend ShadCN when possible)
+
 ## Best Practices
 
 ### Naming Conventions
@@ -364,6 +583,12 @@ This document outlines the design system guidelines for the SOTD Pipeline WebUI,
 - Keep design system up to date
 - Document changes and decisions
 - Review and refactor regularly
+- Monitor performance metrics
+
+---
+
+**Note**: This document should be updated as new design patterns emerge and lessons are learned. All webui development should follow these established design system guidelines, with ShadCN + Tailwind as the primary foundation.
+
 - Monitor performance metrics
 
 ---
