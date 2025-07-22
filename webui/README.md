@@ -38,8 +38,48 @@ src/
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
-- `npm run lint` - Run ESLint
+- `npm run lint` - Run ESLint with error reporting
+- `npm run lint:fix` - Run ESLint with auto-fix
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting with Prettier
 - `npm run preview` - Preview production build
+
+## Code Quality & Linting
+
+This project uses ESLint and Prettier for code quality and formatting:
+
+### ESLint Configuration
+- **TypeScript**: Full TypeScript support with strict rules
+- **React**: React-specific linting rules and best practices
+- **Hooks**: React Hooks linting rules
+- **Prettier Integration**: ESLint works with Prettier for consistent formatting
+
+### Prettier Configuration
+- **Formatting**: Consistent code formatting across the project
+- **Line Length**: 100 characters
+- **Quotes**: Single quotes
+- **Semicolons**: Always included
+- **Trailing Commas**: ES5 style
+
+### Running Linting
+```bash
+# Check for linting errors
+npm run lint
+
+# Auto-fix linting errors
+npm run lint:fix
+
+# Format code with Prettier
+npm run format
+
+# Check formatting without making changes
+npm run format:check
+```
+
+### Current Status
+- **Formatting**: ✅ All files are properly formatted
+- **Linting**: ⚠️ 286 issues remaining (mostly TypeScript `any` types and React imports)
+- **Auto-fix**: Most formatting issues can be auto-fixed
 
 ## Backend Integration
 

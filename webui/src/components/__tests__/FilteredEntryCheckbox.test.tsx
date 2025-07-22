@@ -3,116 +3,116 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import FilteredEntryCheckbox from '../forms/FilteredEntryCheckbox';
 
 describe('FilteredEntryCheckbox', () => {
-    const mockOnStatusChange = jest.fn();
+  const mockOnStatusChange = jest.fn();
 
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    test('should render checkbox with correct initial state', () => {
-        render(
-            <FilteredEntryCheckbox
-                itemName="test-item"
-                commentIds={['comment1', 'comment2']}
-                isFiltered={false}
-                onStatusChange={mockOnStatusChange}
-            />
-        );
+  test('should render checkbox with correct initial state', () => {
+    render(
+      <FilteredEntryCheckbox
+        itemName='test-item'
+        commentIds={['comment1', 'comment2']}
+        isFiltered={false}
+        onStatusChange={mockOnStatusChange}
+      />
+    );
 
-        const checkbox = screen.getByRole('checkbox');
-        expect(checkbox).toBeInTheDocument();
-        expect(checkbox).not.toBeChecked();
-    });
+    const checkbox = screen.getByRole('checkbox');
+    expect(checkbox).toBeInTheDocument();
+    expect(checkbox).not.toBeChecked();
+  });
 
-    test('should render checked checkbox when isFiltered is true', () => {
-        render(
-            <FilteredEntryCheckbox
-                itemName="test-item"
-                commentIds={['comment1', 'comment2']}
-                isFiltered={true}
-                onStatusChange={mockOnStatusChange}
-            />
-        );
+  test('should render checked checkbox when isFiltered is true', () => {
+    render(
+      <FilteredEntryCheckbox
+        itemName='test-item'
+        commentIds={['comment1', 'comment2']}
+        isFiltered={true}
+        onStatusChange={mockOnStatusChange}
+      />
+    );
 
-        const checkbox = screen.getByRole('checkbox');
-        expect(checkbox).toBeChecked();
-    });
+    const checkbox = screen.getByRole('checkbox');
+    expect(checkbox).toBeChecked();
+  });
 
-    test('should call onStatusChange when checkbox is clicked', () => {
-        render(
-            <FilteredEntryCheckbox
-                itemName="test-item"
-                commentIds={['comment1', 'comment2']}
-                isFiltered={false}
-                onStatusChange={mockOnStatusChange}
-            />
-        );
+  test('should call onStatusChange when checkbox is clicked', () => {
+    render(
+      <FilteredEntryCheckbox
+        itemName='test-item'
+        commentIds={['comment1', 'comment2']}
+        isFiltered={false}
+        onStatusChange={mockOnStatusChange}
+      />
+    );
 
-        const checkbox = screen.getByRole('checkbox');
-        fireEvent.click(checkbox);
+    const checkbox = screen.getByRole('checkbox');
+    fireEvent.click(checkbox);
 
-        expect(mockOnStatusChange).toHaveBeenCalledWith(true);
-    });
+    expect(mockOnStatusChange).toHaveBeenCalledWith(true);
+  });
 
-    test('should call onStatusChange with false when checked checkbox is clicked', () => {
-        render(
-            <FilteredEntryCheckbox
-                itemName="test-item"
-                commentIds={['comment1', 'comment2']}
-                isFiltered={true}
-                onStatusChange={mockOnStatusChange}
-            />
-        );
+  test('should call onStatusChange with false when checked checkbox is clicked', () => {
+    render(
+      <FilteredEntryCheckbox
+        itemName='test-item'
+        commentIds={['comment1', 'comment2']}
+        isFiltered={true}
+        onStatusChange={mockOnStatusChange}
+      />
+    );
 
-        const checkbox = screen.getByRole('checkbox');
-        fireEvent.click(checkbox);
+    const checkbox = screen.getByRole('checkbox');
+    fireEvent.click(checkbox);
 
-        expect(mockOnStatusChange).toHaveBeenCalledWith(false);
-    });
+    expect(mockOnStatusChange).toHaveBeenCalledWith(false);
+  });
 
-    test('should be disabled when disabled prop is true', () => {
-        render(
-            <FilteredEntryCheckbox
-                itemName="test-item"
-                commentIds={['comment1', 'comment2']}
-                isFiltered={false}
-                onStatusChange={mockOnStatusChange}
-                disabled={true}
-            />
-        );
+  test('should be disabled when disabled prop is true', () => {
+    render(
+      <FilteredEntryCheckbox
+        itemName='test-item'
+        commentIds={['comment1', 'comment2']}
+        isFiltered={false}
+        onStatusChange={mockOnStatusChange}
+        disabled={true}
+      />
+    );
 
-        const checkbox = screen.getByRole('checkbox');
-        expect(checkbox).toBeDisabled();
-    });
+    const checkbox = screen.getByRole('checkbox');
+    expect(checkbox).toBeDisabled();
+  });
 
-    test('should be disabled when commentIds is empty', () => {
-        render(
-            <FilteredEntryCheckbox
-                itemName="test-item"
-                commentIds={[]}
-                isFiltered={false}
-                onStatusChange={mockOnStatusChange}
-            />
-        );
+  test('should be disabled when commentIds is empty', () => {
+    render(
+      <FilteredEntryCheckbox
+        itemName='test-item'
+        commentIds={[]}
+        isFiltered={false}
+        onStatusChange={mockOnStatusChange}
+      />
+    );
 
-        const checkbox = screen.getByRole('checkbox');
-        expect(checkbox).toBeDisabled();
-    });
+    const checkbox = screen.getByRole('checkbox');
+    expect(checkbox).toBeDisabled();
+  });
 
-    test('should not call onStatusChange when disabled', () => {
-        render(
-            <FilteredEntryCheckbox
-                itemName="test-item"
-                commentIds={['comment1', 'comment2']}
-                isFiltered={false}
-                onStatusChange={mockOnStatusChange}
-                disabled={true}
-            />
-        );
+  test('should not call onStatusChange when disabled', () => {
+    render(
+      <FilteredEntryCheckbox
+        itemName='test-item'
+        commentIds={['comment1', 'comment2']}
+        isFiltered={false}
+        onStatusChange={mockOnStatusChange}
+        disabled={true}
+      />
+    );
 
-        const checkbox = screen.getByRole('checkbox');
-        fireEvent.click(checkbox);
+    const checkbox = screen.getByRole('checkbox');
+    fireEvent.click(checkbox);
 
-        expect(mockOnStatusChange).not.toHaveBeenCalled();
-    });
-}); 
+    expect(mockOnStatusChange).not.toHaveBeenCalled();
+  });
+});
