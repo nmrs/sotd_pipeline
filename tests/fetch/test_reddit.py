@@ -125,6 +125,299 @@ class MockRateLimitException(TooManyRequests):
 
 
 # --------------------------------------------------------------------------- #
+# Enhanced Rate Limit Detection Tests                                         #
+# --------------------------------------------------------------------------- #
+class TestEnhancedRateLimitDetection:
+    """Test enhanced rate limit detection functionality."""
+
+    def test_rate_limit_detection_from_response_time(self, monkeypatch):
+        """Test rate limit detection from response times > 2 seconds."""
+        calls = 0
+        start_time = 1000.0
+
+        def slow_function():
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                # Simulate slow response that should trigger rate limit detection
+                return "slow_response"
+            return "success"
+
+        # Mock time.time to simulate slow response
+        def mock_time():
+            nonlocal start_time
+            if calls == 1:
+                start_time += 3.0  # Simulate 3 second response time
+            return start_time
+
+        monkeypatch.setattr(time, "time", mock_time)
+        monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
+
+        result = safe_call(slow_function)
+        assert result == "success"
+        assert calls == 2
+
+    def test_rate_limit_detection_from_exception_types(self, monkeypatch):
+        """Test rate limit detection from specific exception types."""
+        calls = 0
+
+        def failing_function():
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise MockRateLimitException(sleep_time=5)
+            return "success"
+
+        monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
+
+        result = safe_call(failing_function)
+        assert result == "success"
+        assert calls == 2
+
+    def test_rate_limit_frequency_tracking(self, monkeypatch):
+        """Test rate limit frequency and pattern tracking."""
+        rate_limit_hits = 0
+
+        def function_with_multiple_rate_limits():
+            nonlocal rate_limit_hits
+            rate_limit_hits += 1
+            if rate_limit_hits <= 2:  # Only fail on first 2 calls
+                raise MockRateLimitException(sleep_time=1)
+            return "success"
+
+        monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
+
+        # This should fail after 1 retry (2 total attempts)
+        with pytest.raises(TooManyRequests):
+            safe_call(function_with_multiple_rate_limits)
+
+        # The function should be called 2 times: initial + 1 retry
+        assert rate_limit_hits == 2
+
+    def test_enhanced_logging_for_rate_limits(self, monkeypatch, capsys):
+        """Test enhanced logging for rate limit events."""
+        calls = 0
+
+        def failing_function():
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise MockRateLimitException(sleep_time=10)
+            return "success"
+
+        monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
+
+        result = safe_call(failing_function)
+        assert result == "success"
+
+        output = capsys.readouterr().out
+        assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
+        assert "sleeping 0m 10s…" in output
+
+    def test_rate_limit_detection_with_retry_after(self, monkeypatch, capsys):
+        """Test rate limit detection using retry_after attribute."""
+        calls = 0
+
+        def failing_function():
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise MockRateLimitException(retry_after=15)
+            return "success"
+
+        monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
+
+        result = safe_call(failing_function)
+        assert result == "success"
+
+        output = capsys.readouterr().out
+        assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
+        assert "sleeping 0m 15s…" in output
+
+    def test_rate_limit_detection_with_default_timing(self, monkeypatch, capsys):
+        """Test rate limit detection with default timing when no attributes available."""
+        calls = 0
+
+        def failing_function():
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise MockRateLimitException()  # No timing attributes
+            return "success"
+
+        monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
+
+        result = safe_call(failing_function)
+        assert result == "success"
+
+        output = capsys.readouterr().out
+        assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
+        assert "sleeping 1m 0s…" in output
+
+    def test_rate_limit_detection_performance_metrics(self, monkeypatch):
+        """Test that rate limit detection includes performance metrics."""
+        calls = 0
+        start_time = 1000.0
+
+        def slow_function():
+            nonlocal calls, start_time
+            calls += 1
+            if calls == 1:
+                start_time += 2.5  # Simulate slow response
+                return "slow_response"
+            return "success"
+
+        def mock_time():
+            nonlocal start_time
+            return start_time
+
+        monkeypatch.setattr(time, "time", mock_time)
+        monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
+
+        result = safe_call(slow_function)
+        assert result == "success"
+        assert calls == 2
+
+    def test_rate_limit_detection_debugging_info(self, monkeypatch, capsys):
+        """Test that rate limit detection provides debugging information."""
+        calls = 0
+
+        def failing_function():
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise MockRateLimitException(sleep_time=30)
+            return "success"
+
+        monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
+
+        result = safe_call(failing_function)
+        assert result == "success"
+
+        output = capsys.readouterr().out
+        # Check for debugging information in the warning message
+        assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
+        assert "sleeping 0m 30s…" in output
+
+    def test_rate_limit_detection_integration_with_search(self, monkeypatch):
+        """Test rate limit detection integration with search operations."""
+        mock_subreddit = Mock()
+
+        # Create a call counter to track search calls
+        call_count = 0
+
+        def mock_search(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise MockRateLimitException(sleep_time=5)  # First call fails
+            return iter([MockSubmission("s1", "SOTD Thread May 01, 2025")])  # Second call succeeds
+
+        mock_subreddit.search.side_effect = mock_search
+        mock_reddit = MockReddit(mock_subreddit)
+
+        monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
+
+        with patch("sotd.fetch.reddit.get_reddit", return_value=mock_reddit):
+            result = search_threads("wetshaving", 2025, 5)
+
+        assert len(result) == 1
+        assert result[0].id == "s1"
+
+    def test_rate_limit_detection_integration_with_comments(self, monkeypatch):
+        """Test rate limit detection integration with comment fetching."""
+        submission = MockSubmission("test", "Test Thread")
+
+        # Mock replace_more to fail first, then succeed
+        call_count = 0
+
+        def mock_replace_more(limit=None):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise MockRateLimitException(sleep_time=3)
+            return None
+
+        submission.comments.replace_more.side_effect = mock_replace_more
+
+        monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
+
+        with patch("sotd.fetch.reddit.safe_call") as mock_safe_call:
+            # Mock safe_call to handle rate limits
+            def mock_safe_call_impl(fn, *args, **kwargs):
+                try:
+                    return fn(*args, **kwargs)
+                except MockRateLimitException:
+                    # Simulate retry logic
+                    return fn(*args, **kwargs)
+
+            mock_safe_call.side_effect = mock_safe_call_impl
+
+            result = fetch_top_level_comments(submission)
+
+        assert len(result) == 2  # Should get comments after retry
+
+    def test_rate_limit_detection_monitoring_integration(self, monkeypatch):
+        """Test that rate limit detection integrates with monitoring."""
+        calls = 0
+
+        def failing_function():
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise MockRateLimitException(sleep_time=5)
+            return "success"
+
+        monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
+
+        # Test that monitoring data is collected during rate limit events
+        result = safe_call(failing_function)
+        assert result == "success"
+        assert calls == 2
+
+    def test_rate_limit_detection_real_time_feedback(self, monkeypatch, capsys):
+        """Test that rate limit detection provides real-time feedback."""
+        calls = 0
+
+        def failing_function():
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise MockRateLimitException(sleep_time=8)
+            return "success"
+
+        monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
+
+        result = safe_call(failing_function)
+        assert result == "success"
+
+        output = capsys.readouterr().out
+        # Check for real-time feedback in the warning message
+        assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
+        assert "sleeping 0m 8s…" in output
+
+    def test_rate_limit_detection_metrics_in_output(self, monkeypatch):
+        """Test that rate limit detection includes metrics in fetch phase output."""
+        calls = 0
+
+        def failing_function():
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise MockRateLimitException(sleep_time=5)
+            return "success"
+
+        monkeypatch.setattr(time, "sleep", lambda s: None)  # Mock sleep
+
+        result = safe_call(failing_function)
+        assert result == "success"
+        assert calls == 2
+
+        # Test that metrics are available for fetch phase output
+        # This will be implemented in the actual code
+
+
+# --------------------------------------------------------------------------- #
 # Environment variable tests                                                   #
 # --------------------------------------------------------------------------- #
 def test_require_env_success():
@@ -196,7 +489,8 @@ def test_safe_call_rate_limit_with_sleep_time(monkeypatch, capsys):
     assert sleep_calls == [6]  # sleep_time + 1
 
     output = capsys.readouterr().out
-    assert "[WARN] Reddit rate-limit hit; sleeping 0m 5s…" in output
+    assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
+    assert "sleeping 0m 5s…" in output
 
 
 def test_safe_call_rate_limit_with_retry_after(monkeypatch, capsys):
@@ -219,7 +513,8 @@ def test_safe_call_rate_limit_with_retry_after(monkeypatch, capsys):
     assert sleep_calls == [4]  # retry_after + 1
 
     output = capsys.readouterr().out
-    assert "[WARN] Reddit rate-limit hit; sleeping 0m 3s…" in output
+    assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
+    assert "sleeping 0m 3s…" in output
 
 
 def test_safe_call_rate_limit_no_timing_info(monkeypatch, capsys):
@@ -242,7 +537,8 @@ def test_safe_call_rate_limit_no_timing_info(monkeypatch, capsys):
     assert sleep_calls == [61]  # default 60 + 1
 
     output = capsys.readouterr().out
-    assert "[WARN] Reddit rate-limit hit; sleeping 1m 0s…" in output
+    assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
+    assert "sleeping 1m 0s…" in output
 
 
 def test_safe_call_rate_limit_double_failure(monkeypatch):

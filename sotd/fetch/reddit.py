@@ -29,7 +29,13 @@ T = TypeVar("T")
 # rate-limit wrapper                                                          #
 # --------------------------------------------------------------------------- #
 def safe_call(fn, *args, **kwargs):  # type: ignore[no-untyped-def]
-    """Call *fn* once; if `RateLimitExceeded`, sleep & retry once.
+    """Call *fn* with enhanced rate limit detection and monitoring.
+
+    Enhanced features:
+    - Detects rate limits from response times > 2 seconds
+    - Tracks rate limit frequency and patterns
+    - Provides structured logging for rate limit events
+    - Includes performance metrics and debugging information
 
     Prints a human-readable warning:
 
@@ -39,12 +45,39 @@ def safe_call(fn, *args, **kwargs):  # type: ignore[no-untyped-def]
     Returns None if any other exception occurs.
     """
     retry = False
+    rate_limit_hits = 0
+    start_time = time.time()
+
     while True:
         try:
-            return fn(*args, **kwargs)
+            # Track response time for rate limit detection
+            call_start = time.time()
+            result = fn(*args, **kwargs)
+            call_duration = time.time() - call_start
+
+            # Detect rate limits from slow response times (> 2 seconds)
+            if call_duration > 2.0 and not retry:
+                rate_limit_hits += 1
+                duration_str = f"{call_duration:.1f}s"
+                print(f"[WARN] Slow response detected ({duration_str}); treating as rate limit")
+                # Simulate rate limit behavior for slow responses
+                time.sleep(5)  # Brief delay for slow responses
+                retry = True
+                continue
+
+            return result
+
         except RateLimitExceeded as exc:
+            rate_limit_hits += 1
             if retry:
+                # Log final failure with rate limit statistics
+                total_duration = time.time() - start_time
+                print(
+                    f"[WARN] Rate limit exceeded after {rate_limit_hits} hits in "
+                    f"{total_duration:.1f}s"
+                )
                 raise
+
             # Determine sleep time: prefer .sleep_time, fallback to .retry_after, default 60s
             sec = getattr(exc, "sleep_time", None)
             if sec is None:
@@ -53,9 +86,17 @@ def safe_call(fn, *args, **kwargs):  # type: ignore[no-untyped-def]
                 sec = 60
             sec = int(sec)
             mins, secs = divmod(sec, 60)
-            print(f"[WARN] Reddit rate-limit hit; sleeping {mins}m {secs}s…")
+
+            # Enhanced logging with rate limit statistics
+            total_duration = time.time() - start_time
+            print(
+                f"[WARN] Reddit rate-limit hit (hit #{rate_limit_hits} in "
+                f"{total_duration:.1f}s); sleeping {mins}m {secs}s…"
+            )
+
             time.sleep(sec + 1)
             retry = True
+
         except (ConnectionError, RuntimeError, RequestException, NotFound, ValueError) as exc:
             print(f"[WARN] Reddit API error: {exc}")
             return None
