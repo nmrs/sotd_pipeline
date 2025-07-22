@@ -350,7 +350,9 @@ def test_partial_failure_recovery():
 
     with patch("sotd.fetch.run.search_threads") as mock_search:
         with patch("sotd.fetch.run.apply_overrides") as mock_apply:
-            with patch("sotd.fetch.run.fetch_top_level_comments") as mock_fetch_comments:
+            with patch(
+                "sotd.fetch.reddit.fetch_top_level_comments_parallel"
+            ) as mock_fetch_comments:
                 with patch("sotd.fetch.run.load_month_file", return_value=None):
                     with patch("sotd.fetch.run.write_month_file"):
 
@@ -372,16 +374,19 @@ def test_partial_failure_recovery():
                         # This broad Exception is intentional for test simulation
                         mock_fetch_comments.side_effect = Exception("Reddit API error")
 
-                        # Should propagate the error
-                        with pytest.raises(Exception, match="Reddit API error"):
-                            _process_month(
-                                2025,
-                                5,
-                                args,
-                                reddit=Mock(),
-                                include_overrides={},
-                                exclude_overrides={},
-                            )
+                        # Should handle the error gracefully and continue
+                        result = _process_month(
+                            2025,
+                            5,
+                            args,
+                            reddit=Mock(),
+                            include_overrides={},
+                            exclude_overrides={},
+                        )
+
+                        # Should return result with 0 comments due to error
+                        assert result["threads"] == 1
+                        assert result["comments"] == 0
 
 
 def test_graceful_degradation_no_comments():
@@ -393,7 +398,9 @@ def test_graceful_degradation_no_comments():
 
     with patch("sotd.fetch.run.search_threads") as mock_search:
         with patch("sotd.fetch.run.apply_overrides") as mock_apply:
-            with patch("sotd.fetch.run.fetch_top_level_comments") as mock_fetch_comments:
+            with patch(
+                "sotd.fetch.reddit.fetch_top_level_comments_parallel"
+            ) as mock_fetch_comments:
                 with patch("sotd.fetch.run.load_month_file", return_value=None):
                     with patch("sotd.fetch.run.write_month_file"):
 

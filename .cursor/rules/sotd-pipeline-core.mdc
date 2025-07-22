@@ -23,6 +23,7 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 ## Development Environment
 - **Python Version**: 3.11 (enforced by pyrightconfig.json)
 - **Virtual Environment**: Use `.venv` directory
+- **Virtual Environment Activation (MANDATORY)**: **ALWAYS activate the virtual environment before installing any packages or running any commands.** Use `source .venv/bin/activate` or ensure the virtual environment is active before any pip install, make commands, or development operations. This prevents package conflicts and ensures consistent development environment.
 - **Package Manager**: pip with requirements.txt/requirements-dev.txt
 - **Code Style**: Black (100 char line length)
 - **Linting**: Ruff (E, F, I rules)

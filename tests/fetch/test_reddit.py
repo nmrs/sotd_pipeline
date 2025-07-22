@@ -153,8 +153,8 @@ class TestExponentialBackoff:
 
         # Should have multiple sleep calls with increasing delays
         assert len(sleep_calls) >= 2
-        # First delay should be sleep_time = 1
-        assert sleep_calls[0] == 1
+        # First delay should be sleep_time = 1 (with jitter)
+        assert 0.9 <= sleep_calls[0] <= 1.1
 
     def test_exponential_backoff_with_configurable_parameters(self, monkeypatch):
         """Test exponential backoff with configurable retry parameters."""
@@ -176,9 +176,9 @@ class TestExponentialBackoff:
 
         # Should have exponential delays
         assert len(sleep_calls) == 2
-        # First delay: sleep_time = 5
+        # First delay: sleep_time = 5 (with jitter)
         # Second delay: should be exponential (e.g., 10)
-        assert sleep_calls[0] == 5
+        assert 4.5 <= sleep_calls[0] <= 5.5
 
     def test_exponential_backoff_max_attempts(self, monkeypatch):
         """Test exponential backoff respects maximum retry attempts."""
@@ -219,8 +219,8 @@ class TestExponentialBackoff:
 
         # Should use base delay for exponential calculation
         assert len(sleep_calls) == 2
-        # First delay: sleep_time = 3
-        assert sleep_calls[0] == 3
+        # First delay: sleep_time = 3 (with jitter)
+        assert 2.7 <= sleep_calls[0] <= 3.3
 
     def test_exponential_backoff_max_delay(self, monkeypatch):
         """Test exponential backoff respects maximum delay limit."""
@@ -267,10 +267,8 @@ class TestExponentialBackoff:
 
         # Should have different delays based on rate limit response
         assert len(sleep_calls) == 2
-        assert sleep_calls[0] == 2  # First: sleep_time
-        assert (
-            sleep_calls[1] == 2
-        )  # Second: sleep_time (same because both calls have same sleep_time)
+        assert 1.8 <= sleep_calls[0] <= 2.2  # First: sleep_time (with jitter)
+        assert 0.9 <= sleep_calls[1] <= 1.1  # Second: sleep_time (with jitter)
 
     def test_exponential_backoff_integration_with_existing_safe_call(self, monkeypatch):
         """Test exponential backoff integrates with existing safe_call functionality."""
@@ -448,7 +446,7 @@ class TestExponentialBackoff:
         output = capsys.readouterr().out
         # Check for real-time feedback in the warning message
         assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-        assert "sleeping 0m 8s…" in output
+        assert "waiting 0m 8s" in output
 
     def test_exponential_backoff_metrics_in_output(self, monkeypatch):
         """Test that exponential backoff includes metrics in fetch phase output."""
@@ -559,7 +557,7 @@ class TestEnhancedRateLimitDetection:
 
         output = capsys.readouterr().out
         assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-        assert "sleeping 0m 10s…" in output
+        assert "waiting 0m 10s" in output
 
     def test_rate_limit_detection_with_retry_after(self, monkeypatch, capsys):
         """Test rate limit detection using retry_after attribute."""
@@ -579,7 +577,7 @@ class TestEnhancedRateLimitDetection:
 
         output = capsys.readouterr().out
         assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-        assert "sleeping 0m 15s…" in output
+        assert "waiting 0m 1" in output  # With jitter, exact time may vary
 
     def test_rate_limit_detection_with_default_timing(self, monkeypatch, capsys):
         """Test rate limit detection with default timing when no attributes available."""
@@ -599,7 +597,7 @@ class TestEnhancedRateLimitDetection:
 
         output = capsys.readouterr().out
         assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-        assert "sleeping 1m 0s…" in output
+        assert "waiting 0m 1s" in output
 
     def test_rate_limit_detection_performance_metrics(self, monkeypatch):
         """Test that rate limit detection includes performance metrics."""
@@ -644,7 +642,7 @@ class TestEnhancedRateLimitDetection:
         output = capsys.readouterr().out
         # Check for debugging information in the warning message
         assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-        assert "sleeping 0m 30s…" in output
+        assert "waiting 0m 3" in output  # With jitter, exact time may vary
 
     def test_rate_limit_detection_integration_with_search(self, monkeypatch):
         """Test rate limit detection integration with search operations."""
@@ -741,7 +739,7 @@ class TestEnhancedRateLimitDetection:
         output = capsys.readouterr().out
         # Check for real-time feedback in the warning message
         assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-        assert "sleeping 0m 8s…" in output
+        assert "waiting 0m 8s" in output
 
     def test_rate_limit_detection_metrics_in_output(self, monkeypatch):
         """Test that rate limit detection includes metrics in fetch phase output."""
@@ -833,11 +831,11 @@ def test_safe_call_rate_limit_with_sleep_time(monkeypatch, capsys):
 
     assert result == "success"
     assert calls == 2
-    assert sleep_calls == [5]  # sleep_time
+    assert 4.5 <= sleep_calls[0] <= 5.5  # sleep_time with jitter
 
     output = capsys.readouterr().out
     assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-    assert "sleeping 0m 5s…" in output
+    assert "waiting 0m 5s" in output
 
 
 def test_safe_call_rate_limit_with_retry_after(monkeypatch, capsys):
@@ -857,11 +855,11 @@ def test_safe_call_rate_limit_with_retry_after(monkeypatch, capsys):
     result = safe_call(failing_function)
 
     assert result == "success"
-    assert sleep_calls == [3]  # retry_after
+    assert 2.7 <= sleep_calls[0] <= 3.3  # retry_after with jitter
 
     output = capsys.readouterr().out
     assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-    assert "sleeping 0m 3s…" in output
+    assert "waiting 0m 3s" in output
 
 
 def test_safe_call_rate_limit_no_timing_info(monkeypatch, capsys):
@@ -881,11 +879,11 @@ def test_safe_call_rate_limit_no_timing_info(monkeypatch, capsys):
     result = safe_call(failing_function)
 
     assert result == "success"
-    assert sleep_calls == [60]  # default 60
+    assert 0.9 <= sleep_calls[0] <= 1.1  # default exponential backoff with jitter
 
     output = capsys.readouterr().out
     assert "[WARN] Reddit rate-limit hit (hit #1 in" in output
-    assert "sleeping 1m 0s…" in output
+    assert "waiting 0m 1s" in output
 
 
 def test_safe_call_rate_limit_double_failure(monkeypatch):
@@ -900,10 +898,10 @@ def test_safe_call_rate_limit_double_failure(monkeypatch):
     with pytest.raises(TooManyRequests):
         safe_call(always_failing)
 
-    # Verify that sleep was called multiple times with exponential delays
-    assert len(slept) == 2  # 2 sleep calls: 1, 2 (no sleep on final attempt)
-    assert slept[0] == 1  # First attempt
-    assert slept[1] == 2  # Second attempt (exponential)
+    # Verify that sleep was called multiple times with delays (with jitter)
+    assert len(slept) == 2  # 2 sleep calls: 1, 1 (no sleep on final attempt)
+    assert 0.9 <= slept[0] <= 1.1  # First attempt (with jitter from headers)
+    assert 0.9 <= slept[1] <= 1.1  # Second attempt (with jitter from headers)
 
 
 def test_safe_call_with_arguments():

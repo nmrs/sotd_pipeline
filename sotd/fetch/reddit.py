@@ -28,27 +28,31 @@ T = TypeVar("T")
 # rate-limit wrapper                                                          #
 # --------------------------------------------------------------------------- #
 def safe_call(fn, *args, **kwargs):  # type: ignore[no-untyped-def]
-    """Call *fn* with enhanced rate limit detection and exponential backoff.
+    """Call *fn* with enhanced rate limit detection and smart backoff.
 
     Enhanced features:
-    - Detects rate limits from response times > 2 seconds
+    - Extracts wait time from Reddit's rate limit headers when available
+    - Falls back to exponential backoff with jitter when no explicit wait time
+    - Prevents thundering herd with randomized delays
     - Tracks rate limit frequency and patterns
     - Provides structured logging for rate limit events
-    - Includes performance metrics and debugging information
-    - Implements exponential backoff with configurable parameters
 
     Prints a human-readable warning:
 
-        [WARN] Reddit rate-limit hit; sleeping 8m 20s…
+        [WARN] Reddit rate-limit hit; waiting 8m 20s (from headers)…
+        [WARN] Reddit rate-limit hit; waiting 1m 30s (exponential backoff)…
 
     If the retry also fails, the exception propagates.
     Returns None if any other exception occurs.
     """
+    import random
+
     # Exponential backoff configuration
     max_attempts = 3  # Maximum retry attempts
     base_delay = 1.0  # Base delay in seconds
     max_delay = 60.0  # Maximum delay in seconds
     backoff_factor = 2.0  # Exponential backoff factor
+    jitter_factor = 0.1  # Jitter factor (10% of delay)
 
     rate_limit_hits = 0
     start_time = time.time()
@@ -74,19 +78,38 @@ def safe_call(fn, *args, **kwargs):  # type: ignore[no-untyped-def]
         except RateLimitExceeded as exc:
             rate_limit_hits += 1
 
-            # Calculate exponential backoff delay
+            # Calculate delay with smart backoff strategy
             if attempt < max_attempts - 1:
-                # Determine base sleep time from exception
-                sec = getattr(exc, "sleep_time", None)
-                if sec is None:
-                    sec = getattr(exc, "retry_after", None)
-                if sec is None:
-                    sec = 60
-                sec = int(sec)
+                # Try to extract wait time from Reddit's headers first
+                wait_time = None
 
-                # Apply exponential backoff
-                delay = min(sec * (backoff_factor**attempt), max_delay)
-                delay = max(delay, base_delay)
+                # Check for explicit wait time in exception
+                if hasattr(exc, "sleep_time") and exc.sleep_time is not None:  # type: ignore
+                    wait_time = int(exc.sleep_time)  # type: ignore[attr-defined]
+                elif hasattr(exc, "retry_after") and exc.retry_after is not None:  # type: ignore
+                    wait_time = int(exc.retry_after)  # type: ignore[attr-defined]
+                elif hasattr(exc, "response") and exc.response is not None:
+                    # Try to extract from response headers
+                    headers = getattr(exc.response, "headers", {})
+                    retry_after = headers.get("Retry-After")
+                    if retry_after:
+                        try:
+                            wait_time = int(retry_after)
+                        except (ValueError, TypeError):
+                            pass
+
+                if wait_time is not None:
+                    # Use Reddit's explicit wait time with small jitter
+                    jitter = random.uniform(0, wait_time * jitter_factor)
+                    delay = wait_time + jitter
+                    delay_source = "headers"
+                else:
+                    # Fall back to exponential backoff with jitter
+                    base_delay_calc = base_delay * (backoff_factor**attempt)
+                    delay = min(base_delay_calc, max_delay)
+                    jitter = random.uniform(0, delay * jitter_factor)
+                    delay = delay + jitter
+                    delay_source = "exponential backoff"
 
                 mins, secs = divmod(int(delay), 60)
 
@@ -95,7 +118,7 @@ def safe_call(fn, *args, **kwargs):  # type: ignore[no-untyped-def]
                 print(
                     f"[WARN] Reddit rate-limit hit (hit #{rate_limit_hits} in "
                     f"{total_duration:.1f}s, attempt {attempt + 1}/{max_attempts}); "
-                    f"sleeping {mins}m {secs}s…"
+                    f"waiting {mins}m {secs}s ({delay_source})…"
                 )
 
                 time.sleep(delay)

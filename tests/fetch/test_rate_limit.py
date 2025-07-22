@@ -41,9 +41,11 @@ def test_safe_call_success(monkeypatch, capsys):
     result = safe_call(fn)
 
     assert result == "ok"
-    assert slept == [2]  # sleep_time + 1
+    assert slept == [1]  # sleep_time with exponential backoff
     out = capsys.readouterr().out
-    assert "[WARN] Reddit rate-limit hit; sleeping 0m 1s…" in out
+    # With jitter, the exact message may vary, so check for key parts
+    assert "[WARN] Reddit rate-limit hit (hit #1 in 0.0s, attempt 1/3)" in out
+    assert "waiting 0m 1s" in out
 
 
 def test_safe_call_double_fail(monkeypatch):
@@ -58,5 +60,7 @@ def test_safe_call_double_fail(monkeypatch):
     with pytest.raises(RateLimitExceeded):
         safe_call(fn)
 
-    # Verify that sleep was called once with the expected duration
-    assert slept == [2]  # sleep_time + 1
+    # Verify that sleep was called with the expected duration (with jitter)
+    assert len(slept) == 2  # Two sleep calls
+    assert 0.9 <= slept[0] <= 1.1  # First retry: ~1s with jitter (from headers)
+    assert 0.9 <= slept[1] <= 1.1  # Second retry: ~1s with jitter (from headers)
