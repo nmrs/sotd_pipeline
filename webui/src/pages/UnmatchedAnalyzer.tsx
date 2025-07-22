@@ -11,7 +11,7 @@ import {
 import MonthSelector from '../components/forms/MonthSelector';
 import LoadingSpinner from '../components/layout/LoadingSpinner';
 import ErrorDisplay from '../components/feedback/ErrorDisplay';
-import { VirtualizedTable } from '../components/data/VirtualizedTable';
+import { UnmatchedAnalyzerDataTable } from '../components/data/UnmatchedAnalyzerDataTable';
 import PerformanceMonitor from '../components/domain/PerformanceMonitor';
 import CommentModal from '../components/domain/CommentModal';
 import BrushTable from '../components/data/BrushTable';
@@ -721,464 +721,52 @@ const UnmatchedAnalyzer: React.FC = () => {
                         );
                       })()
                     ) : selectedField === 'razor' ? (
-                      // Render VirtualizedTable for razor field
-                      <VirtualizedTable
+                      // Render UnmatchedAnalyzerDataTable for razor field
+                      <UnmatchedAnalyzerDataTable
                         data={searchSort.filteredAndSortedItems}
-                        columns={[
-                          {
-                            key: 'filtered',
-                            header: 'Filtered',
-                            width: productColumnWidths.filtered,
-                            render: item => {
-                              const isCurrentlyFiltered = filteredStatus[item.item] || false;
-                              const hasPendingChange = item.item in pendingChanges;
-                              const pendingValue = pendingChanges[item.item];
-                              const displayValue = hasPendingChange
-                                ? pendingValue
-                                : isCurrentlyFiltered;
-
-                              return (
-                                <div className='flex items-center'>
-                                  <input
-                                    type='checkbox'
-                                    checked={displayValue}
-                                    onChange={e =>
-                                      handleFilteredStatusChange(item.item, e.target.checked)
-                                    }
-                                    disabled={commentLoading}
-                                    className='rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
-                                    title={
-                                      displayValue
-                                        ? 'Mark as unfiltered'
-                                        : 'Mark as intentionally unmatched'
-                                    }
-                                  />
-                                  {hasPendingChange && (
-                                    <div className='ml-1'>
-                                      <div className='w-2 h-2 bg-blue-600 rounded-full'></div>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            },
-                          },
-                          {
-                            key: 'item',
-                            header: 'Razor',
-                            width: productColumnWidths.item,
-                            render: item => (
-                              <span
-                                className={`font-medium text-sm ${
-                                  filteredStatus[item.item]
-                                    ? 'text-gray-400 line-through'
-                                    : 'text-gray-900'
-                                }`}
-                              >
-                                {item.item}
-                                {filteredStatus[item.item] && (
-                                  <span className='ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded'>
-                                    Filtered
-                                  </span>
-                                )}
-                              </span>
-                            ),
-                          },
-                          {
-                            key: 'count',
-                            header: 'Count',
-                            width: productColumnWidths.count,
-                            render: item => (
-                              <span className='text-gray-500 text-sm'>{item.count}</span>
-                            ),
-                          },
-                          {
-                            key: 'comment_ids',
-                            header: 'Comment IDs',
-                            width: productColumnWidths.comment_ids,
-                            render: item => (
-                              <div className='text-sm'>
-                                {item.comment_ids && item.comment_ids.length > 0 ? (
-                                  <div className='flex flex-wrap gap-1'>
-                                    {item.comment_ids.slice(0, 3).map((commentId, index) => (
-                                      <button
-                                        key={index}
-                                        onClick={() => handleCommentClick(commentId)}
-                                        disabled={commentLoading}
-                                        className='text-blue-600 hover:text-blue-800 underline text-xs bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed'
-                                      >
-                                        {commentLoading ? 'Loading...' : commentId}
-                                      </button>
-                                    ))}
-                                    {item.comment_ids.length > 3 && (
-                                      <span className='text-gray-500 text-xs'>
-                                        +{item.comment_ids.length - 3} more
-                                      </span>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className='text-gray-400 text-xs'>No comment IDs</span>
-                                )}
-                              </div>
-                            ),
-                          },
-                          {
-                            key: 'examples',
-                            header: 'Examples',
-                            width: productColumnWidths.examples,
-                            render: item => (
-                              <span className='text-gray-500 text-sm'>
-                                {formatExamples(item.examples || [])}
-                              </span>
-                            ),
-                          },
-                        ]}
-                        height={350}
-                        rowHeight={40}
+                        filteredStatus={filteredStatus}
+                        pendingChanges={pendingChanges}
+                        onFilteredStatusChange={handleFilteredStatusChange}
+                        onCommentClick={handleCommentClick}
+                        commentLoading={commentLoading}
+                        fieldType='razor'
+                        columnWidths={productColumnWidths}
                       />
                     ) : selectedField === 'blade' ? (
-                      // Render VirtualizedTable for blade field
-                      <VirtualizedTable
+                      // Render UnmatchedAnalyzerDataTable for blade field
+                      <UnmatchedAnalyzerDataTable
                         data={searchSort.filteredAndSortedItems}
-                        columns={[
-                          {
-                            key: 'filtered',
-                            header: 'Filtered',
-                            width: productColumnWidths.filtered,
-                            render: item => {
-                              const isCurrentlyFiltered = filteredStatus[item.item] || false;
-                              const hasPendingChange = item.item in pendingChanges;
-                              const pendingValue = pendingChanges[item.item];
-                              const displayValue = hasPendingChange
-                                ? pendingValue
-                                : isCurrentlyFiltered;
-
-                              return (
-                                <div className='flex items-center'>
-                                  <input
-                                    type='checkbox'
-                                    checked={displayValue}
-                                    onChange={e =>
-                                      handleFilteredStatusChange(item.item, e.target.checked)
-                                    }
-                                    disabled={commentLoading}
-                                    className='rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
-                                    title={
-                                      displayValue
-                                        ? 'Mark as unfiltered'
-                                        : 'Mark as intentionally unmatched'
-                                    }
-                                  />
-                                  {hasPendingChange && (
-                                    <div className='ml-1'>
-                                      <div className='w-2 h-2 bg-blue-600 rounded-full'></div>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            },
-                          },
-                          {
-                            key: 'item',
-                            header: 'Blade',
-                            width: productColumnWidths.item,
-                            render: item => (
-                              <span
-                                className={`font-medium text-sm ${
-                                  filteredStatus[item.item]
-                                    ? 'text-gray-400 line-through'
-                                    : 'text-gray-900'
-                                }`}
-                              >
-                                {item.item}
-                                {filteredStatus[item.item] && (
-                                  <span className='ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded'>
-                                    Filtered
-                                  </span>
-                                )}
-                              </span>
-                            ),
-                          },
-                          {
-                            key: 'count',
-                            header: 'Count',
-                            width: productColumnWidths.count,
-                            render: item => (
-                              <span className='text-gray-500 text-sm'>{item.count}</span>
-                            ),
-                          },
-                          {
-                            key: 'comment_ids',
-                            header: 'Comment IDs',
-                            width: productColumnWidths.comment_ids,
-                            render: item => (
-                              <div className='text-sm'>
-                                {item.comment_ids && item.comment_ids.length > 0 ? (
-                                  <div className='flex flex-wrap gap-1'>
-                                    {item.comment_ids.slice(0, 3).map((commentId, index) => (
-                                      <button
-                                        key={index}
-                                        onClick={() => handleCommentClick(commentId)}
-                                        disabled={commentLoading}
-                                        className='text-blue-600 hover:text-blue-800 underline text-xs bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed'
-                                      >
-                                        {commentLoading ? 'Loading...' : commentId}
-                                      </button>
-                                    ))}
-                                    {item.comment_ids.length > 3 && (
-                                      <span className='text-gray-500 text-xs'>
-                                        +{item.comment_ids.length - 3} more
-                                      </span>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className='text-gray-400 text-xs'>No comment IDs</span>
-                                )}
-                              </div>
-                            ),
-                          },
-                          {
-                            key: 'examples',
-                            header: 'Examples',
-                            width: productColumnWidths.examples,
-                            render: item => (
-                              <span className='text-gray-500 text-sm'>
-                                {formatExamples(item.examples || [])}
-                              </span>
-                            ),
-                          },
-                        ]}
-                        height={350}
-                        rowHeight={40}
+                        filteredStatus={filteredStatus}
+                        pendingChanges={pendingChanges}
+                        onFilteredStatusChange={handleFilteredStatusChange}
+                        onCommentClick={handleCommentClick}
+                        commentLoading={commentLoading}
+                        fieldType='blade'
+                        columnWidths={productColumnWidths}
                       />
                     ) : selectedField === 'soap' ? (
-                      // Render VirtualizedTable for soap field
-                      <VirtualizedTable
+                      // Render UnmatchedAnalyzerDataTable for soap field
+                      <UnmatchedAnalyzerDataTable
                         data={searchSort.filteredAndSortedItems}
-                        columns={[
-                          {
-                            key: 'filtered',
-                            header: 'Filtered',
-                            width: productColumnWidths.filtered,
-                            render: item => {
-                              const isCurrentlyFiltered = filteredStatus[item.item] || false;
-                              const hasPendingChange = item.item in pendingChanges;
-                              const pendingValue = pendingChanges[item.item];
-                              const displayValue = hasPendingChange
-                                ? pendingValue
-                                : isCurrentlyFiltered;
-
-                              return (
-                                <div className='flex items-center'>
-                                  <input
-                                    type='checkbox'
-                                    checked={displayValue}
-                                    onChange={e =>
-                                      handleFilteredStatusChange(item.item, e.target.checked)
-                                    }
-                                    disabled={commentLoading}
-                                    className='rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
-                                    title={
-                                      displayValue
-                                        ? 'Mark as unfiltered'
-                                        : 'Mark as intentionally unmatched'
-                                    }
-                                  />
-                                  {hasPendingChange && (
-                                    <div className='ml-1'>
-                                      <div className='w-2 h-2 bg-blue-600 rounded-full'></div>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            },
-                          },
-                          {
-                            key: 'item',
-                            header: 'Soap',
-                            width: productColumnWidths.item,
-                            render: item => (
-                              <span
-                                className={`font-medium text-sm ${
-                                  filteredStatus[item.item]
-                                    ? 'text-gray-400 line-through'
-                                    : 'text-gray-900'
-                                }`}
-                              >
-                                {item.item}
-                                {filteredStatus[item.item] && (
-                                  <span className='ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded'>
-                                    Filtered
-                                  </span>
-                                )}
-                              </span>
-                            ),
-                          },
-                          {
-                            key: 'count',
-                            header: 'Count',
-                            width: productColumnWidths.count,
-                            render: item => (
-                              <span className='text-gray-500 text-sm'>{item.count}</span>
-                            ),
-                          },
-                          {
-                            key: 'comment_ids',
-                            header: 'Comment IDs',
-                            width: productColumnWidths.comment_ids,
-                            render: item => (
-                              <div className='text-sm'>
-                                {item.comment_ids && item.comment_ids.length > 0 ? (
-                                  <div className='flex flex-wrap gap-1'>
-                                    {item.comment_ids.slice(0, 3).map((commentId, index) => (
-                                      <button
-                                        key={index}
-                                        onClick={() => handleCommentClick(commentId)}
-                                        disabled={commentLoading}
-                                        className='text-blue-600 hover:text-blue-800 underline text-xs bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed'
-                                      >
-                                        {commentLoading ? 'Loading...' : commentId}
-                                      </button>
-                                    ))}
-                                    {item.comment_ids.length > 3 && (
-                                      <span className='text-gray-500 text-xs'>
-                                        +{item.comment_ids.length - 3} more
-                                      </span>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className='text-gray-400 text-xs'>No comment IDs</span>
-                                )}
-                              </div>
-                            ),
-                          },
-                          {
-                            key: 'examples',
-                            header: 'Examples',
-                            width: productColumnWidths.examples,
-                            render: item => (
-                              <span className='text-gray-500 text-sm'>
-                                {formatExamples(item.examples || [])}
-                              </span>
-                            ),
-                          },
-                        ]}
-                        height={350}
-                        rowHeight={40}
+                        filteredStatus={filteredStatus}
+                        pendingChanges={pendingChanges}
+                        onFilteredStatusChange={handleFilteredStatusChange}
+                        onCommentClick={handleCommentClick}
+                        commentLoading={commentLoading}
+                        fieldType='soap'
+                        columnWidths={productColumnWidths}
                       />
                     ) : (
-                      // Render regular VirtualizedTable for other fields
-                      <VirtualizedTable
+                      // Render UnmatchedAnalyzerDataTable for other fields
+                      <UnmatchedAnalyzerDataTable
                         data={searchSort.filteredAndSortedItems}
-                        columns={[
-                          {
-                            key: 'filtered',
-                            header: 'Filtered',
-                            width: productColumnWidths.filtered,
-                            render: item => {
-                              const isCurrentlyFiltered = filteredStatus[item.item] || false;
-                              const hasPendingChange = item.item in pendingChanges;
-                              const pendingValue = pendingChanges[item.item];
-                              const displayValue = hasPendingChange
-                                ? pendingValue
-                                : isCurrentlyFiltered;
-
-                              return (
-                                <div className='flex items-center'>
-                                  <input
-                                    type='checkbox'
-                                    checked={displayValue}
-                                    onChange={e =>
-                                      handleFilteredStatusChange(item.item, e.target.checked)
-                                    }
-                                    disabled={commentLoading}
-                                    className='rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
-                                    title={
-                                      displayValue
-                                        ? 'Mark as unfiltered'
-                                        : 'Mark as intentionally unmatched'
-                                    }
-                                  />
-                                  {hasPendingChange && (
-                                    <div className='ml-1'>
-                                      <div className='w-2 h-2 bg-blue-600 rounded-full'></div>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            },
-                          },
-                          {
-                            key: 'item',
-                            header: 'Item',
-                            width: productColumnWidths.item,
-                            render: item => (
-                              <span
-                                className={`font-medium text-sm ${
-                                  filteredStatus[item.item]
-                                    ? 'text-gray-400 line-through'
-                                    : 'text-gray-900'
-                                }`}
-                              >
-                                {item.item}
-                                {filteredStatus[item.item] && (
-                                  <span className='ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded'>
-                                    Filtered
-                                  </span>
-                                )}
-                              </span>
-                            ),
-                          },
-                          {
-                            key: 'count',
-                            header: 'Count',
-                            width: productColumnWidths.count,
-                            render: item => (
-                              <span className='text-gray-500 text-sm'>{item.count}</span>
-                            ),
-                          },
-                          {
-                            key: 'comment_ids',
-                            header: 'Comment IDs',
-                            width: productColumnWidths.comment_ids,
-                            render: item => (
-                              <div className='text-sm'>
-                                {item.comment_ids && item.comment_ids.length > 0 ? (
-                                  <div className='flex flex-wrap gap-1'>
-                                    {item.comment_ids.slice(0, 3).map((commentId, index) => (
-                                      <button
-                                        key={index}
-                                        onClick={() => handleCommentClick(commentId)}
-                                        disabled={commentLoading}
-                                        className='text-blue-600 hover:text-blue-800 underline text-xs bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed'
-                                      >
-                                        {commentLoading ? 'Loading...' : commentId}
-                                      </button>
-                                    ))}
-                                    {item.comment_ids.length > 3 && (
-                                      <span className='text-gray-500 text-xs'>
-                                        +{item.comment_ids.length - 3} more
-                                      </span>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className='text-gray-400 text-xs'>No comment IDs</span>
-                                )}
-                              </div>
-                            ),
-                          },
-                          {
-                            key: 'examples',
-                            header: 'Examples',
-                            width: productColumnWidths.examples,
-                            render: item => (
-                              <span className='text-gray-500 text-sm'>
-                                {formatExamples(item.examples || [])}
-                              </span>
-                            ),
-                          },
-                        ]}
-                        height={350}
-                        rowHeight={40}
+                        filteredStatus={filteredStatus}
+                        pendingChanges={pendingChanges}
+                        onFilteredStatusChange={handleFilteredStatusChange}
+                        onCommentClick={handleCommentClick}
+                        commentLoading={commentLoading}
+                        fieldType='brush'
+                        columnWidths={productColumnWidths}
                       />
                     )}
                   </div>

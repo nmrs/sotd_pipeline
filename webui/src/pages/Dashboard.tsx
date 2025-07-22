@@ -3,6 +3,13 @@ import { Link } from 'react-router-dom';
 import { checkHealth, getAvailableMonths, getCatalogs } from '../services/api';
 import LoadingSpinner from '../components/layout/LoadingSpinner';
 import ErrorDisplay from '../components/feedback/ErrorDisplay';
+import {
+  PageLayout,
+  SectionLayout,
+  GridLayout,
+  StatusCard,
+  LoadingContainer,
+} from '../components/ui/reusable-layout';
 
 interface SystemStatus {
   backend: boolean;
@@ -65,141 +72,110 @@ const Dashboard: React.FC = () => {
     },
   ];
 
-  if (loading) {
-    return (
-      <div className='max-w-6xl mx-auto p-6'>
-        <LoadingSpinner message='Checking system status...' />
-      </div>
-    );
-  }
-
   if (error) {
     return (
-      <div className='max-w-6xl mx-auto p-6'>
+      <PageLayout>
         <ErrorDisplay error={error} onRetry={() => window.location.reload()} />
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className='max-w-6xl mx-auto p-6'>
-      <div className='mb-8'>
-        <h1 className='text-3xl font-bold text-gray-900 mb-2'>SOTD Pipeline Analyzer</h1>
-        <p className='text-gray-600'>
-          Web-based analysis tools for the Shave of the Day data processing pipeline.
-        </p>
-      </div>
+    <PageLayout>
+      <LoadingContainer loading={loading} message='Checking system status...'>
+        <SectionLayout
+          title='SOTD Pipeline Analyzer'
+          subtitle='Web-based analysis tools for the Shave of the Day data processing pipeline.'
+        >
+          {/* System Status */}
+          {status && (
+            <SectionLayout title='System Status'>
+              <GridLayout cols={3}>
+                <StatusCard
+                  title='Backend Health'
+                  value={status.backend ? 'Online' : 'Offline'}
+                  status={status.backend ? 'success' : 'error'}
+                  icon={status.backend ? '🟢' : '🔴'}
+                />
+                <StatusCard
+                  title='Available Months'
+                  value={status.months.toString()}
+                  status='info'
+                  icon='📅'
+                />
+                <StatusCard
+                  title='Product Catalogs'
+                  value={status.catalogs.toString()}
+                  status='info'
+                  icon='📚'
+                />
+              </GridLayout>
+            </SectionLayout>
+          )}
 
-      {/* System Status */}
-      {status && (
-        <div className='mb-8'>
-          <h2 className='text-xl font-semibold text-gray-900 mb-4'>System Status</h2>
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-            <div
-              className={`bg-white rounded-lg shadow p-4 border-l-4 ${
-                status.backend ? 'border-green-500' : 'border-red-500'
-              }`}
-            >
-              <div className='flex items-center'>
+          {/* Analyzer Cards */}
+          <SectionLayout title='Analysis Tools'>
+            <GridLayout cols={2}>
+              {analyzerCards.map(card => (
                 <div
-                  className={`w-3 h-3 rounded-full mr-3 ${
-                    status.backend ? 'bg-green-500' : 'bg-red-500'
-                  }`}
-                ></div>
-                <div>
-                  <p className='text-sm font-medium text-gray-900'>Backend API</p>
-                  <p className='text-xs text-gray-500'>
-                    {status.backend ? 'Connected' : 'Disconnected'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className='bg-white rounded-lg shadow p-4 border-l-4 border-blue-500'>
-              <div className='flex items-center'>
-                <div className='w-3 h-3 rounded-full bg-blue-500 mr-3'></div>
-                <div>
-                  <p className='text-sm font-medium text-gray-900'>Available Months</p>
-                  <p className='text-xs text-gray-500'>{status.months} months</p>
-                </div>
-              </div>
-            </div>
-
-            <div className='bg-white rounded-lg shadow p-4 border-l-4 border-purple-500'>
-              <div className='flex items-center'>
-                <div className='w-3 h-3 rounded-full bg-purple-500 mr-3'></div>
-                <div>
-                  <p className='text-sm font-medium text-gray-900'>Product Catalogs</p>
-                  <p className='text-xs text-gray-500'>{status.catalogs} catalogs</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Analyzer Cards */}
-      <div className='mb-8'>
-        <h2 className='text-xl font-semibold text-gray-900 mb-4'>Analysis Tools</h2>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          {analyzerCards.map(card => (
-            <Link
-              key={card.path}
-              to={card.path}
-              className='block bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-200'
-            >
-              <div className='p-6'>
-                <div className='flex items-center mb-4'>
-                  <span className='text-3xl mr-3'>{card.icon}</span>
-                  <h3 className='text-lg font-semibold text-gray-900'>{card.title}</h3>
-                </div>
-                <p className='text-gray-600 text-sm'>{card.description}</p>
-                <div className='mt-4 flex items-center text-blue-600 text-sm font-medium'>
-                  Open Tool
-                  <svg
-                    className='ml-1 w-4 h-4'
-                    fill='none'
-                    stroke='currentColor'
-                    viewBox='0 0 24 24'
+                  key={card.path}
+                  className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200'
+                >
+                  <div className='flex items-center space-x-3 mb-4'>
+                    <span className='text-2xl'>{card.icon}</span>
+                    <h3 className='text-lg font-semibold text-gray-900'>{card.title}</h3>
+                  </div>
+                  <p className='text-gray-600 mb-4'>{card.description}</p>
+                  <Link
+                    to={card.path}
+                    className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                      card.color === 'blue'
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-green-600 text-white hover:bg-green-700'
+                    }`}
                   >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M9 5l7 7-7 7'
-                    />
-                  </svg>
+                    Open Tool
+                    <svg
+                      className='ml-2 h-4 w-4'
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M9 5l7 7-7 7'
+                      />
+                    </svg>
+                  </Link>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
+              ))}
+            </GridLayout>
+          </SectionLayout>
 
-      {/* Quick Actions */}
-      <div className='bg-gray-50 rounded-lg p-6'>
-        <h2 className='text-lg font-semibold text-gray-900 mb-4'>Quick Actions</h2>
-        <div className='space-y-3'>
-          <div className='flex items-center justify-between'>
-            <span className='text-sm text-gray-600'>Check backend health</span>
-            <button
-              onClick={() => window.location.reload()}
-              className='text-sm text-blue-600 hover:text-blue-800 font-medium'
-            >
-              Refresh Status
-            </button>
-          </div>
-          <div className='flex items-center justify-between'>
-            <span className='text-sm text-gray-600'>View available data</span>
-            <span className='text-sm text-gray-500'>{status?.months || 0} months available</span>
-          </div>
-          <div className='flex items-center justify-between'>
-            <span className='text-sm text-gray-600'>Product catalogs</span>
-            <span className='text-sm text-gray-500'>{status?.catalogs || 0} catalogs loaded</span>
-          </div>
-        </div>
-      </div>
-    </div>
+          {/* Quick Actions */}
+          <SectionLayout title='Quick Actions'>
+            <div className='space-y-4'>
+              <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
+                <h4 className='font-semibold text-blue-900 mb-2'>Getting Started</h4>
+                <p className='text-blue-800 text-sm'>
+                  Use the analysis tools above to examine your SOTD data. Start with the Unmatched
+                  Analyzer to identify potential catalog additions.
+                </p>
+              </div>
+              <div className='bg-green-50 border border-green-200 rounded-lg p-4'>
+                <h4 className='font-semibold text-green-900 mb-2'>Data Management</h4>
+                <p className='text-green-800 text-sm'>
+                  All data is cached locally for performance. Use the "Clear Cache" button in the
+                  header to refresh data after pipeline runs.
+                </p>
+              </div>
+            </div>
+          </SectionLayout>
+        </SectionLayout>
+      </LoadingContainer>
+    </PageLayout>
   );
 };
 

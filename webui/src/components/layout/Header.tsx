@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { clearAllCachesComprehensive } from '../../utils/cache';
 import { useMessaging } from '../../hooks/useMessaging';
+import { DangerButton } from '../ui/reusable-buttons';
 
 const Header: React.FC = () => {
   const location = useLocation();
@@ -60,15 +61,15 @@ const Header: React.FC = () => {
             ))}
 
             {/* Cache Expiration Button */}
-            <button
+            <DangerButton
               onClick={handleClearCache}
               disabled={cacheClearing}
-              className='flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed'
-              title='Clear all caches (useful after pipeline reruns)'
+              loading={cacheClearing}
+              className='flex items-center space-x-1 px-3 py-2 text-sm'
             >
               <span>🗑️</span>
               <span>{cacheClearing ? 'Clearing...' : 'Clear Cache'}</span>
-            </button>
+            </DangerButton>
           </nav>
         </div>
       </div>

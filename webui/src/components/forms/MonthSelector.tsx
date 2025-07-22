@@ -11,6 +11,8 @@ import {
 import { useAvailableMonths } from '../../hooks/useAvailableMonths';
 import LoadingSpinner from '../layout/LoadingSpinner';
 import ErrorDisplay from '../feedback/ErrorDisplay';
+import { SelectInput, FormField } from '../ui/reusable-forms';
+import { SecondaryButton } from '../ui/reusable-buttons';
 
 interface MonthSelectorProps {
   selectedMonths: string[];
@@ -85,26 +87,20 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
   }
 
   if (!multiple) {
-    // Single select mode using ShadCN Select
+    // Single select mode using reusable SelectInput
+    const options = availableMonths.map(month => ({
+      value: month,
+      label: month,
+    }));
+
     return (
-      <div className='flex items-center space-x-2'>
-        {label && <label className='text-sm font-medium text-gray-700'>{label}:</label>}
-        <Select
-          value={selectedMonths[0] || ''}
-          onValueChange={value => onMonthsChange(value ? [value] : [])}
-        >
-          <SelectTrigger className='w-[200px]'>
-            <SelectValue placeholder='Select a month' />
-          </SelectTrigger>
-          <SelectContent>
-            {availableMonths.map(month => (
-              <SelectItem key={month} value={month}>
-                {month}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <SelectInput
+        value={selectedMonths[0] || ''}
+        onChange={value => onMonthsChange(value ? [value] : [])}
+        options={options}
+        label={label}
+        placeholder='Select a month'
+      />
     );
   }
 
@@ -113,8 +109,7 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
     <div className='relative' ref={dropdownRef}>
       <div className='flex items-center space-x-2'>
         {label && <label className='text-sm font-medium text-gray-700'>{label}:</label>}
-        <Button
-          variant='outline'
+        <SecondaryButton
           onClick={() => setIsOpen(!isOpen)}
           className='min-w-[200px] justify-between'
         >
@@ -127,19 +122,19 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
           >
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 9l-7 7-7-7' />
           </svg>
-        </Button>
+        </SecondaryButton>
       </div>
 
       {isOpen && (
         <div className='absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto'>
           <div className='p-2'>
             <div className='flex justify-between items-center mb-2 pb-2 border-b border-gray-200'>
-              <Button variant='ghost' size='sm' onClick={selectAll} className='text-xs'>
+              <SecondaryButton onClick={selectAll} className='text-xs'>
                 Select All
-              </Button>
-              <Button variant='ghost' size='sm' onClick={clearAll} className='text-xs'>
+              </SecondaryButton>
+              <SecondaryButton onClick={clearAll} className='text-xs'>
                 Clear All
-              </Button>
+              </SecondaryButton>
             </div>
 
             {availableMonths.length === 0 ? (
