@@ -19,10 +19,27 @@ This document outlines the design system guidelines for the SOTD Pipeline WebUI,
 
 ### Component Development Hierarchy
 1. **Use ShadCN components** (Button, Input, Table, DataTable, etc.)
-2. **Use Tailwind utilities** for layout, spacing, colors, and styling
-3. **Extend ShadCN components** with props/variants when needed
-4. **Create custom components** only when ShadCN doesn't provide the functionality
-5. **Document any deviations** from ShadCN/Tailwind patterns
+2. **Use existing reusable components** from our component library
+3. **Use Tailwind utilities** for layout, spacing, colors, and styling
+4. **Extend ShadCN components** with props/variants when needed
+5. **Extend existing reusable components** with additional functionality
+6. **Create custom components** only when ShadCN doesn't provide the functionality
+7. **Document any deviations** from ShadCN/Tailwind patterns
+
+### Component Reuse Standards
+**MANDATORY**: Follow this hierarchy for all component development:
+
+1. **Check ShadCN first** - Does ShadCN provide this component?
+2. **Check existing reusable components** - Does our component library have something similar?
+3. **Extend existing components** - Can I add props/variants to existing components?
+4. **Create new reusable components** - Only when no suitable option exists
+5. **Document new components** - Include usage examples and prop documentation
+
+**Decision Framework:**
+- ✅ **Create new component when**: ShadCN doesn't provide functionality, no existing component matches, component will be used in multiple places
+- ❌ **Don't create new component when**: ShadCN already provides it, existing component can be extended, component is only used in one place
+
+**Reference**: See `component-library.md` for comprehensive documentation of all reusable components.
 
 ### ShadCN Component Usage
 ```typescript

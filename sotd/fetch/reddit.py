@@ -208,8 +208,9 @@ def search_threads(
 def filter_valid_threads(
     threads: Sequence[Submission], year: int, month: int, *, debug: bool = False
 ) -> List[Submission]:
-    from sotd.utils import parse_thread_date
     from datetime import datetime
+
+    from sotd.utils import parse_thread_date
 
     kept: List[Submission] = []
     for sub in threads:
@@ -438,6 +439,7 @@ def load_thread_overrides(month: str) -> List[str]:
         yaml.YAMLError: If YAML file is malformed
     """
     from pathlib import Path
+
     from sotd.utils.yaml_loader import load_yaml_with_nfc
 
     override_path = Path("data/thread_overrides.yaml")
@@ -501,6 +503,7 @@ def process_thread_overrides(month: str, reddit, debug: bool = False) -> List[Su
     # from datetime import datetime  # Not needed, remove
     # --- CHANGED: Load mapping of date_key -> list of URLs ---
     from pathlib import Path
+
     from sotd.utils.yaml_loader import load_yaml_with_nfc
 
     override_path = Path("data/thread_overrides.yaml")
