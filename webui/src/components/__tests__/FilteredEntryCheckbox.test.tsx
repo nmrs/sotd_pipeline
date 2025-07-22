@@ -1,6 +1,6 @@
 // import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import FilteredEntryCheckbox from '../FilteredEntryCheckbox';
+import FilteredEntryCheckbox from '../forms/FilteredEntryCheckbox';
 
 describe('FilteredEntryCheckbox', () => {
     const mockOnStatusChange = jest.fn();

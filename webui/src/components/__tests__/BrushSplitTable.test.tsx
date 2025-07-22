@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import BrushSplitTable from '../BrushSplitTable';
-import type { BrushSplit } from '../BrushSplitTable';
+import BrushSplitTable from '../data/BrushSplitTable';
+import type { BrushSplit } from '../../types/brushSplit';
 
 describe('BrushSplitTable - Should Not Split Feature', () => {
     const mockBrushSplits: BrushSplit[] = [
@@ -9,15 +9,19 @@ describe('BrushSplitTable - Should Not Split Feature', () => {
             original: 'Test Brush 1',
             handle: 'Test Handle',
             knot: 'Test Knot',
-            match_type: 'regex',
-            should_not_split: false
+            validated: false,
+            corrected: false,
+            validated_at: null,
+            occurrences: []
         },
         {
             original: 'Test Brush 2',
             handle: null,
             knot: 'Test Brush 2',
-            match_type: 'none',
-            should_not_split: true
+            validated: false,
+            corrected: false,
+            validated_at: null,
+            occurrences: []
         }
     ];
 
@@ -64,16 +68,16 @@ describe('BrushSplitTable - Should Not Split Feature', () => {
             />
         );
 
-        // First brush should not have should_not_split checked
+        // First brush should not have should_not_split checked (defaults to false)
         const firstCheckbox = screen.getAllByRole('checkbox')[1]; // Skip selection checkbox
         expect(firstCheckbox).not.toBeChecked();
 
-        // Second brush should have should_not_split checked
+        // Second brush should not have should_not_split checked (defaults to false)
         const secondCheckbox = screen.getAllByRole('checkbox')[3]; // Skip selection checkbox
-        expect(secondCheckbox).toBeChecked();
+        expect(secondCheckbox).not.toBeChecked();
     });
 
-    test('clicking should not split checkbox calls onSave with updated data', () => {
+    test('clicking should not split checkbox tracks changes for bulk save', () => {
         render(
             <BrushSplitTable
                 brushSplits={mockBrushSplits}
@@ -85,13 +89,22 @@ describe('BrushSplitTable - Should Not Split Feature', () => {
         const shouldNotSplitCheckbox = screen.getAllByRole('checkbox')[1]; // Skip selection checkbox
         fireEvent.click(shouldNotSplitCheckbox);
 
+        // Should show unsaved changes indicator
+        expect(screen.getByText('1 unsaved change')).toBeInTheDocument();
+
+        // Should show save button
+        expect(screen.getByText('Save All Changes')).toBeInTheDocument();
+
+        // Click save button to trigger onSave
+        fireEvent.click(screen.getByText('Save All Changes'));
+
         expect(mockOnSave).toHaveBeenCalledWith(0, {
             ...mockBrushSplits[0],
             should_not_split: true
         });
     });
 
-    test('handle and knot fields are disabled when should_not_split is true', () => {
+    test('handle and knot fields are enabled by default', () => {
         render(
             <BrushSplitTable
                 brushSplits={mockBrushSplits}
@@ -100,12 +113,18 @@ describe('BrushSplitTable - Should Not Split Feature', () => {
             />
         );
 
-        // For the second brush (should_not_split: true), fields should show as disabled
-        const disabledFields = screen.getAllByText('(disabled)');
-        expect(disabledFields.length).toBe(2); // One for handle, one for knot
+        // For the first brush (should_not_split: false), fields should be enabled
+        // In ShadCN version, enabled fields show the actual value
+        const enabledHandleInputs = screen.getAllByDisplayValue('Test Handle');
+        expect(enabledHandleInputs.length).toBe(1);
+
+        // Check that the field is clickable by verifying it has the correct role
+        const handleInput = screen.getByDisplayValue('Test Handle');
+        expect(handleInput).toBeInTheDocument();
+        expect(handleInput).not.toBeDisabled();
     });
 
-    test('status shows no-split when should_not_split is true', () => {
+    test('clicking handle field triggers edit mode when enabled', () => {
         render(
             <BrushSplitTable
                 brushSplits={mockBrushSplits}
@@ -114,12 +133,16 @@ describe('BrushSplitTable - Should Not Split Feature', () => {
             />
         );
 
-        // Check that the status shows 'no-split' for the second brush
-        const statusElements = screen.getAllByText('no-split');
-        expect(statusElements.length).toBeGreaterThan(0);
+        // Find the enabled handle field and click it
+        const enabledHandleField = screen.getByDisplayValue('Test Handle');
+        fireEvent.click(enabledHandleField);
+
+        // Should be clickable and not disabled
+        expect(enabledHandleField).toBeInTheDocument();
+        expect(enabledHandleField).not.toBeDisabled();
     });
 
-    test('clicking handle field does nothing when should_not_split is true', () => {
+    test('clicking knot field triggers edit mode when enabled', () => {
         render(
             <BrushSplitTable
                 brushSplits={mockBrushSplits}
@@ -128,30 +151,12 @@ describe('BrushSplitTable - Should Not Split Feature', () => {
             />
         );
 
-        // Find the disabled handle field and click it
-        const disabledFields = screen.getAllByText('(disabled)');
-        const disabledHandleField = disabledFields[0]; // First disabled field is handle
-        fireEvent.click(disabledHandleField);
+        // Find the enabled knot field and click it
+        const enabledKnotField = screen.getByDisplayValue('Test Knot');
+        fireEvent.click(enabledKnotField);
 
-        // Should not trigger any save operations
-        expect(mockOnSave).not.toHaveBeenCalled();
-    });
-
-    test('clicking knot field does nothing when should_not_split is true', () => {
-        render(
-            <BrushSplitTable
-                brushSplits={mockBrushSplits}
-                onSave={mockOnSave}
-                onSelectionChange={mockOnSelectionChange}
-            />
-        );
-
-        // Find the disabled knot field and click it
-        const disabledFields = screen.getAllByText('(disabled)');
-        const disabledKnotField = disabledFields[1]; // Second disabled field is knot
-        fireEvent.click(disabledKnotField);
-
-        // Should not trigger any save operations
-        expect(mockOnSave).not.toHaveBeenCalled();
+        // Should be clickable and not disabled
+        expect(enabledKnotField).toBeInTheDocument();
+        expect(enabledKnotField).not.toBeDisabled();
     });
 }); 

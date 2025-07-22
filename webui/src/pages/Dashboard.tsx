@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { checkHealth, getAvailableMonths, getCatalogs } from '../services/api';
-import LoadingSpinner from '../components/LoadingSpinner';
-import ErrorDisplay from '../components/ErrorDisplay';
+import LoadingSpinner from '../components/layout/LoadingSpinner';
+import ErrorDisplay from '../components/feedback/ErrorDisplay';
 
 interface SystemStatus {
     backend: boolean;

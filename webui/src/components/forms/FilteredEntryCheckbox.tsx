@@ -1,12 +1,13 @@
 import React from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface FilteredEntryCheckboxProps {
     itemName: string;
     commentIds: string[];
     isFiltered: boolean;
-    onStatusChange?: (isFiltered: boolean) => void;
+    onStatusChange?: (filtered: boolean) => void;
     disabled?: boolean;
-    uniqueId?: string; // Add unique identifier to prevent duplicate test IDs
+    uniqueId?: string;
 }
 
 const FilteredEntryCheckbox: React.FC<FilteredEntryCheckboxProps> = ({
@@ -29,12 +30,10 @@ const FilteredEntryCheckbox: React.FC<FilteredEntryCheckboxProps> = ({
 
     return (
         <div className="flex items-center">
-            <input
-                type="checkbox"
+            <Checkbox
                 checked={isFiltered}
-                onChange={(e) => handleCheckboxChange(e.target.checked)}
+                onCheckedChange={handleCheckboxChange}
                 disabled={disabled || commentIds.length === 0}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 title={isFiltered ? 'Mark as unfiltered' : 'Mark as intentionally unmatched'}
                 data-testid={testId}
             />

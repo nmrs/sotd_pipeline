@@ -1,22 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import MonthSelector from '../components/MonthSelector';
-import BrushSplitTable from '../components/BrushSplitTable';
-
-interface BrushSplit {
-    original: string;
-    handle: string | null;
-    knot: string;
-    match_type?: string;
-    validated?: boolean;
-    corrected?: boolean;
-    validated_at?: string | null;
-    system_handle?: string | null;
-    system_knot?: string | null;
-    system_confidence?: string | null;
-    system_reasoning?: string | null;
-    occurrences?: any[];
-    should_not_split?: boolean;
-}
+import MonthSelector from '../components/forms/MonthSelector';
+import BrushSplitTable from '../components/data/BrushSplitTable';
+import { BrushSplit } from '../types/brushSplit';
 
 interface LoadResponse {
     brush_splits: BrushSplit[];
@@ -62,50 +47,62 @@ const BrushSplitValidator: React.FC = () => {
     }, [selectedMonths]);
 
     return (
-        <div data-testid="brush-split-validator">
-            <div>Brush Split Validator</div>
+        <div data-testid="brush-split-validator" className="h-screen flex flex-col">
+            {/* Sticky Header */}
+            <div className="sticky top-0 z-20 bg-white border-b border-gray-200 p-4 shadow-sm">
+                <h1 className="text-2xl font-bold text-gray-900 mb-4">Brush Split Validator</h1>
 
-            {/* Month Selection */}
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Select Months to Analyze:
-                </label>
-                <MonthSelector
-                    selectedMonths={selectedMonths}
-                    onMonthsChange={setSelectedMonths}
-                    multiple={true}
-                />
-            </div>
-
-            {loading ? (
-                <div>Loading...</div>
-            ) : error ? (
-                <div>{error}</div>
-            ) : selectedMonths.length === 0 ? (
-                <div>Please select at least one month to analyze brush splits.</div>
-            ) : (
-                <>
-                    <BrushSplitTable
-                        brushSplits={brushSplits}
-                        onSelectionChange={(selectedIndices) => {
-                            setSelectedRows(new Set(selectedIndices));
-                        }}
-                        onSave={(index, updatedData) => {
-                            const newSplits = [...brushSplits];
-                            newSplits[index] = { ...newSplits[index], ...updatedData };
-                            setBrushSplits(newSplits);
-                        }}
-                        isLoading={loading}
-                        hasError={!!error}
-                        height={600}
+                {/* Month Selection */}
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Select Months to Analyze:
+                    </label>
+                    <MonthSelector
+                        selectedMonths={selectedMonths}
+                        onMonthsChange={setSelectedMonths}
+                        multiple={true}
                     />
+                </div>
 
-                    <div className="mt-4">
+                {/* Status Information */}
+                {selectedMonths.length > 0 && (
+                    <div className="text-sm text-gray-600">
                         <p>Total brush splits: {brushSplits.length}</p>
                         <p>Selected months: {selectedMonths.join(', ')}</p>
                     </div>
-                </>
-            )}
+                )}
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-hidden">
+                {loading ? (
+                    <div className="flex items-center justify-center h-full">
+                        <div className="text-lg text-gray-600">Loading...</div>
+                    </div>
+                ) : error ? (
+                    <div className="flex items-center justify-center h-full">
+                        <div className="text-lg text-red-600">{error}</div>
+                    </div>
+                ) : selectedMonths.length === 0 ? (
+                    <div className="flex items-center justify-center h-full">
+                        <div className="text-lg text-gray-600">Please select at least one month to analyze brush splits.</div>
+                    </div>
+                ) : (
+                    <div className="h-full p-4">
+                        <BrushSplitTable
+                            brushSplits={brushSplits}
+                            onSelectionChange={(selectedIndices) => {
+                                setSelectedRows(new Set(selectedIndices));
+                            }}
+                            onSave={(index, updatedData) => {
+                                const newSplits = [...brushSplits];
+                                newSplits[index] = { ...newSplits[index], ...updatedData };
+                                setBrushSplits(newSplits);
+                            }}
+                        />
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

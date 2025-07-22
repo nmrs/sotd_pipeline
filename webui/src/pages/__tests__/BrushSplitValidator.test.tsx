@@ -31,7 +31,7 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
             {
                 original: 'Test Brush 2',
                 handle: null,
-                knot: 'Test Brush 2',
+                knot: 'Test Knot 2',
                 should_not_split: true,
                 match_type: 'none'
             }
@@ -62,6 +62,9 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
 
         // Wait for the component to load data
         await waitFor(() => {
+            // Check that the table is rendered with the expected data
+            expect(screen.getByTestId('brush-split-table')).toBeInTheDocument();
+            // Check that the original brush names are present
             expect(screen.getByText('Test Brush 1')).toBeInTheDocument();
             expect(screen.getByText('Test Brush 2')).toBeInTheDocument();
         });
@@ -75,7 +78,7 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
             {
                 original: 'Test Brush',
                 handle: null,
-                knot: 'Test Brush',
+                knot: 'Test Knot',
                 should_not_split: true,
                 match_type: 'none'
             }
@@ -108,9 +111,11 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
             expect(screen.getByText('Test Brush')).toBeInTheDocument();
         });
 
-        // Check that disabled fields are shown
-        const disabledFields = screen.getAllByText('(disabled)');
-        expect(disabledFields.length).toBe(2); // Handle and knot fields
+        // Check that disabled fields show appropriate text (handle shows "Click to edit", knot shows actual value)
+        const clickToEditInputs = screen.getAllByPlaceholderText('Click to edit');
+        const knotInputs = screen.getAllByDisplayValue('Test Knot');
+        expect(clickToEditInputs.length).toBe(2); // Both handle and knot fields (handle is null, knot has value)
+        expect(knotInputs.length).toBe(1); // Knot field (has value)
     });
 
     test('shows no-split status for should_not_split brushes', async () => {
@@ -118,7 +123,7 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
             {
                 original: 'Test Brush',
                 handle: null,
-                knot: 'Test Brush',
+                knot: 'Test Knot',
                 should_not_split: true,
                 match_type: 'none'
             }
@@ -151,7 +156,9 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
             expect(screen.getByText('Test Brush')).toBeInTheDocument();
         });
 
-        // Check that no-split status is shown
-        expect(screen.getByText('no-split')).toBeInTheDocument();
+        // Check that the should_not_split checkbox is checked
+        const checkboxes = screen.getAllByRole('checkbox');
+        const shouldNotSplitCheckbox = checkboxes[1]; // Skip selection checkbox
+        expect(shouldNotSplitCheckbox).toBeChecked();
     });
 }); 

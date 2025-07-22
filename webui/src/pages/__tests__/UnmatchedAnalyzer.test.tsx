@@ -12,7 +12,7 @@ jest.mock('../../services/api', () => ({
 }));
 
 // Mock the BrushTable component to verify it receives correct data
-jest.mock('../../components/BrushTable', () => ({
+jest.mock('../../components/data/BrushTable', () => ({
     __esModule: true,
     default: function MockBrushTable(props: any) {
         // Log the data structure to help debug
@@ -37,7 +37,7 @@ jest.mock('../../components/BrushTable', () => ({
 }));
 
 // Mock the VirtualizedTable component
-jest.mock('../../components/VirtualizedTable', () => ({
+jest.mock('../../components/data/VirtualizedTable', () => ({
     VirtualizedTable: function MockVirtualizedTable(props: any) {
         return (
             <div data-testid="virtualized-table">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import MonthSelector from '../components/MonthSelector';
-import LoadingSpinner from '../components/LoadingSpinner';
-import ErrorDisplay from '../components/ErrorDisplay';
+import MonthSelector from '../components/forms/MonthSelector';
+import LoadingSpinner from '../components/layout/LoadingSpinner';
+import ErrorDisplay from '../components/feedback/ErrorDisplay';
 
 const MismatchAnalyzer: React.FC = () => {
     const [selectedMonths, setSelectedMonths] = useState<string[]>([]);

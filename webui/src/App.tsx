@@ -1,11 +1,12 @@
 
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
-import UnmatchedAnalyzer from './pages/UnmatchedAnalyzer';
-import MismatchAnalyzer from './pages/MismatchAnalyzer';
 import BrushSplitValidator from './pages/BrushSplitValidator';
-import MessageDisplay from './components/MessageDisplay';
+import UnmatchedAnalyzer from './pages/UnmatchedAnalyzer';
+import PerformanceTest from './components/data/PerformanceTest';
+import Header from './components/layout/Header';
+import MessageDisplay from './components/feedback/MessageDisplay';
 import { useMessaging } from './hooks/useMessaging';
 import './App.css';
 
@@ -14,14 +15,14 @@ function App() {
 
     return (
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <div className="App">
+            <div className="h-screen flex flex-col">
                 <Header />
-                <main className="min-h-screen bg-gray-50">
+                <main className="flex-1 overflow-hidden">
                     <Routes>
                         <Route path="/" element={<Dashboard />} />
-                        <Route path="/unmatched" element={<UnmatchedAnalyzer />} />
-                        <Route path="/mismatch" element={<MismatchAnalyzer />} />
                         <Route path="/brush-split-validator" element={<BrushSplitValidator />} />
+                        <Route path="/unmatched-analyzer" element={<UnmatchedAnalyzer />} />
+                        <Route path="/performance-test" element={<PerformanceTest />} />
                     </Routes>
                 </main>
                 <MessageDisplay

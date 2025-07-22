@@ -1,6 +1,6 @@
 // import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import FilteredEntryCheckbox from '../FilteredEntryCheckbox';
+import FilteredEntryCheckbox from '../forms/FilteredEntryCheckbox';
 
 // Mock the API functions to verify they're not called
 jest.mock('../../services/api', () => ({

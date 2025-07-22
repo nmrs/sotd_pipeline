@@ -1,150 +1,136 @@
-# Playwright E2E Tests
+# WebUI E2E Tests
 
-This directory contains end-to-end tests for the SOTD WebUI using Playwright.
+## Overview
 
-## Test Structure
+This directory contains simplified E2E tests that focus on **Safari browser compatibility** and basic app functionality. The tests are designed to be fast, reliable, and focused on what matters most.
 
-- `navigation.spec.ts` - Tests for basic navigation and routing
-- `api-integration.spec.ts` - Tests for API integration and error handling
-- `ui-components.spec.ts` - Tests for UI components, forms, and accessibility
+## Test Strategy
+
+### Safari-First Approach
+- **Primary Target**: Safari (webkit) browser
+- **Focus**: Basic app functionality, navigation, and form interactions
+- **Scope**: Core user workflows only
+- **Speed**: Fast, focused tests that run quickly
+
+### What We Test
+- ✅ App loading and basic structure
+- ✅ Navigation between pages
+- ✅ Form interactions and accessibility
+- ✅ Basic user workflows
+
+### What We Don't Test
+- ❌ Complex browser-specific features
+- ❌ Performance benchmarks
+- ❌ Edge cases that don't matter for Safari
+- ❌ Multiple browser compatibility (Chrome, Firefox, etc.)
 
 ## Running Tests
 
-### Quick Start
+### Quick Safari Test
 ```bash
-# Run all tests
+npm run test:e2e:safari
+```
+
+### All E2E Tests (Safari only)
+```bash
 npm run test:e2e
-
-# Run tests with UI mode (interactive)
-npm run test:e2e:ui
-
-# Run tests in headed mode (see browser)
-npm run test:e2e:headed
-
-# Run tests in debug mode
-npm run test:e2e:debug
-```
-
-### Specific Test Files
-```bash
-# Run specific test file
-npx playwright test navigation.spec.ts
-
-# Run tests matching a pattern
-npx playwright test --grep "navigation"
-```
-
-### Browser-Specific Tests
-```bash
-# Run tests in specific browser
-npx playwright test --project=chromium
-npx playwright test --project=firefox
-npx playwright test --project=webkit
-```
-
-## Test Features
-
-### Automatic Screenshots and Videos
-- Screenshots are taken on test failures
-- Videos are recorded for failed tests
-- Trace files are generated for debugging
-
-### Cross-Browser Testing
-- Chrome (Chromium)
-- Firefox
-- Safari (WebKit)
-- Mobile Chrome
-- Mobile Safari
-
-### Network Interception
-Tests can mock API responses to test error scenarios:
-```typescript
-await page.route('**/api/**', route => {
-  route.fulfill({
-    status: 500,
-    contentType: 'application/json',
-    body: JSON.stringify({ error: 'Test error' })
-  });
-});
-```
-
-### Responsive Testing
-Tests automatically run on different viewport sizes:
-- Desktop (1280x720)
-- Mobile (375x667)
-- Tablet (768x1024)
-
-## Debugging
-
-### View Test Results
-```bash
-# Open HTML report
-npx playwright show-report
 ```
 
 ### Debug Mode
 ```bash
-# Run in debug mode with step-by-step execution
 npm run test:e2e:debug
 ```
 
-### UI Mode
+### UI Mode (Interactive)
 ```bash
-# Interactive test runner
 npm run test:e2e:ui
 ```
 
-## Writing New Tests
+## Test Files
 
-### Test Structure
-```typescript
-import { test, expect } from '@playwright/test';
-
-test.describe('Feature Name', () => {
-  test('should do something', async ({ page }) => {
-    await page.goto('/');
-    // Test implementation
-  });
-});
-```
-
-### Best Practices
-1. Use descriptive test names
-2. Test one thing per test
-3. Use page objects for complex interactions
-4. Mock external dependencies
-5. Test error scenarios
-6. Include accessibility tests
-
-### Locators
-Use semantic selectors when possible:
-```typescript
-// Good - semantic
-await page.locator('[role="button"]').click();
-
-// Good - accessible
-await page.locator('[aria-label="Close"]').click();
-
-// Avoid - fragile
-await page.locator('.btn-primary').click();
-```
+### `safari-basic.spec.ts`
+- **Purpose**: Basic Safari functionality verification
+- **Tests**:
+  - App loading and structure
+  - Navigation between pages
+  - Form interactions
+- **Duration**: ~30 seconds
+- **Reliability**: High (mocked API calls)
 
 ## Configuration
 
-The Playwright configuration is in `playwright.config.ts` and includes:
-- Automatic dev server startup
-- Cross-browser testing
-- Screenshot and video capture
-- Trace file generation
-- Mobile viewport testing
+### Playwright Config (`playwright.config.ts`)
+- **Browser**: Safari (webkit) only
+- **Parallel**: Enabled for faster execution
+- **Retries**: 2 on CI, 0 locally
+- **Timeout**: 30 seconds per test
+- **Screenshots**: On failure only
+- **Video**: On failure only
 
-## CI/CD Integration
+### Test Environment
+- **Base URL**: `http://localhost:3000`
+- **API Mocking**: All API calls are mocked
+- **Network**: Simulated network conditions
+- **Viewport**: Desktop Safari resolution
 
-Tests can be run in CI environments:
+## Best Practices
+
+### Test Design
+- **Keep tests simple** - focus on user workflows
+- **Mock external dependencies** - avoid real API calls
+- **Test behavior, not implementation** - verify user experience
+- **Fast execution** - tests should run quickly
+
+### Maintenance
+- **Update tests when UI changes** - keep tests in sync
+- **Remove obsolete tests** - don't maintain unused tests
+- **Focus on Safari** - don't add browser-specific workarounds
+- **Document changes** - update this README when needed
+
+## Troubleshooting
+
+### Common Issues
+1. **Tests fail on CI but pass locally**
+   - Check network timeouts
+   - Verify API mocking is working
+   - Check for race conditions
+
+2. **Tests are slow**
+   - Reduce test scope
+   - Optimize API mocking
+   - Check for unnecessary waits
+
+3. **Tests are flaky**
+   - Add proper waits
+   - Improve test isolation
+   - Check for timing issues
+
+### Debug Commands
 ```bash
-# Install browsers for CI
-npx playwright install --with-deps
+# Run with debug output
+npm run test:e2e:debug
 
-# Run tests
-npx playwright test
-``` 
+# Run with UI for visual debugging
+npm run test:e2e:ui
+
+# Run specific test file
+npx playwright test safari-basic.spec.ts
+```
+
+## Future Improvements
+
+### Potential Enhancements
+- Add more specific user workflow tests
+- Improve test data management
+- Add visual regression tests
+- Optimize test execution time
+
+### When to Add Tests
+- New user workflows are added
+- Critical functionality changes
+- Safari-specific issues are found
+- Performance regressions occur
+
+---
+
+**Note**: This simplified approach focuses on what matters most - ensuring the app works correctly in Safari with fast, reliable tests. 

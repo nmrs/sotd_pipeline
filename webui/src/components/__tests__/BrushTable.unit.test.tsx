@@ -1,19 +1,19 @@
 // import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import BrushTable from '../BrushTable';
+import BrushTable from '../data/BrushTable';
 import { BrushData } from '../../utils/brushDataTransformer';
 
 // Mock the VirtualizedTable component (named export)
-jest.mock('../VirtualizedTable', () => ({
+jest.mock('../data/VirtualizedTable', () => ({
     __esModule: true,
     VirtualizedTable: function MockVirtualizedTable(props: any) {
         return (
             <div data-testid="virtualized-table" style={{ height: props.height }}>
-                {props.data?.map((item: any, index: number) => (
+                {props.data?.map((item: any, index: any) => (
                     <div key={index} data-testid={`table-row-${index}`}>
                         {props.columns?.map((column: any) => (
-                            <div key={column.key} data-testid={`cell-${column.key}-${index}}`}>
+                            <div key={column.key} data-testid={`cell-${column.key}-${index}`}>
                                 {column.render ? column.render(item) : item[column.key]}
                             </div>
                         ))}
@@ -25,7 +25,7 @@ jest.mock('../VirtualizedTable', () => ({
 }));
 
 // Mock the FilteredEntryCheckbox component (ESM default export)
-jest.mock('../FilteredEntryCheckbox', () => ({
+jest.mock('../forms/FilteredEntryCheckbox', () => ({
     __esModule: true,
     default: function MockFilteredEntryCheckbox(props: any) {
         // Create unique test ID to match the new format

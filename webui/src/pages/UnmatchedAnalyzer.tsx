@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { analyzeUnmatched, UnmatchedAnalysisResult, handleApiError, runMatchPhase, MatchPhaseRequest, getCommentDetail, CommentDetail } from '../services/api';
-import MonthSelector from '../components/MonthSelector';
-import LoadingSpinner from '../components/LoadingSpinner';
-import { VirtualizedTable } from '../components/VirtualizedTable';
-import PerformanceMonitor from '../components/PerformanceMonitor';
-import CommentModal from '../components/CommentModal';
-import BrushTable from '../components/BrushTable';
+import MonthSelector from '../components/forms/MonthSelector';
+import LoadingSpinner from '../components/layout/LoadingSpinner';
+import ErrorDisplay from '../components/feedback/ErrorDisplay';
+import { VirtualizedTable } from '../components/data/VirtualizedTable';
+import PerformanceMonitor from '../components/domain/PerformanceMonitor';
+import CommentModal from '../components/domain/CommentModal';
+import BrushTable from '../components/data/BrushTable';
 
 import { BrushData } from '../utils/brushDataTransformer';
 
@@ -14,7 +15,7 @@ import { BrushData } from '../utils/brushDataTransformer';
 import { useViewState } from '../hooks/useViewState';
 import { useSearchSort } from '../hooks/useSearchSort';
 import { useMessaging } from '../hooks/useMessaging';
-import MessageDisplay from '../components/MessageDisplay';
+import MessageDisplay from '../components/feedback/MessageDisplay';
 import { checkFilteredStatus } from '../services/api';
 
 

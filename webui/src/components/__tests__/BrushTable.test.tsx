@@ -1,10 +1,10 @@
 // import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import BrushTable from '../BrushTable';
+import BrushTable from '../data/BrushTable';
 import { BrushData } from '../../utils/brushDataTransformer';
 
 // Mock the VirtualizedTable component (named export)
-jest.mock('../VirtualizedTable', () => ({
+jest.mock('../data/VirtualizedTable', () => ({
     __esModule: true,
     VirtualizedTable: function MockVirtualizedTable(props: any) {
         return (
@@ -24,7 +24,7 @@ jest.mock('../VirtualizedTable', () => ({
 }));
 
 // Mock the FilteredEntryCheckbox component
-jest.mock('../FilteredEntryCheckbox', () => ({
+jest.mock('../forms/FilteredEntryCheckbox', () => ({
     __esModule: true,
     default: function MockFilteredEntryCheckbox(props: any) {
         // Create unique test ID to match the new format

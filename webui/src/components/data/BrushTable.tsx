@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { VirtualizedTable } from './VirtualizedTable';
-import FilteredEntryCheckbox from './FilteredEntryCheckbox';
-import { BrushData } from '../utils/brushDataTransformer';
+import FilteredEntryCheckbox from '../forms/FilteredEntryCheckbox';
+import { BrushData } from '../../utils/brushDataTransformer';
 
 export interface BrushTableProps {
     items: BrushData[];

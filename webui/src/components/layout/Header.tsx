@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { clearAllCachesComprehensive } from '../utils/cache';
-import { useMessaging } from '../hooks/useMessaging';
+import { clearAllCachesComprehensive } from '../../utils/cache';
+import { useMessaging } from '../../hooks/useMessaging';
 
 const Header: React.FC = () => {
     const location = useLocation();
@@ -27,9 +27,9 @@ const Header: React.FC = () => {
 
     const navItems = [
         { path: '/', label: 'Dashboard', icon: '🏠' },
-        { path: '/unmatched', label: 'Unmatched', icon: '🔍' },
-        { path: '/mismatch', label: 'Mismatch', icon: '⚠️' },
+        { path: '/unmatched-analyzer', label: 'Unmatched', icon: '🔍' },
         { path: '/brush-split-validator', label: 'Brush Validator', icon: '🪒' },
+        { path: '/performance-test', label: 'Performance Test', icon: '⚡' },
     ];
 
     return (

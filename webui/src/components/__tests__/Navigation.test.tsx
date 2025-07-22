@@ -1,7 +1,7 @@
-// import React from 'react';
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Header from '../../components/Header';
+import Header from '../../components/layout/Header';
 
 describe('Navigation', () => {
     test('should render navigation links', () => {
