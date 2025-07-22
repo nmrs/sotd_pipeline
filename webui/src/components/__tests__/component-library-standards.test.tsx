@@ -64,4 +64,53 @@ describe('Component Library Standards', () => {
         // Verify we have a good number of components to test
         expect(Object.keys(components).length).toBeGreaterThan(0);
     });
+
+    test('should handle errors consistently across components', () => {
+        // This test verifies that all components handle errors consistently
+        // We'll check for consistent error states and user feedback
+
+        // Import error-handling components
+        const ErrorDisplay = require('../feedback/ErrorDisplay').default;
+        const MessageDisplay = require('../feedback/MessageDisplay').default;
+
+        // Test ErrorDisplay with different error types
+        const errorTestCases = [
+            { error: 'Simple error message', expectedText: 'Simple error message' },
+            { error: 'Error object message', expectedText: 'Error object message' },
+            { error: '', expectedText: '' }, // Should handle empty string gracefully
+        ];
+
+        errorTestCases.forEach(({ error, expectedText }) => {
+            const { container } = render(<ErrorDisplay error={error} />);
+
+            if (error) {
+                // Should display error message
+                expect(container.textContent).toContain(expectedText);
+            } else {
+                // Should handle empty string gracefully - still shows "Error" title
+                expect(container.textContent).toContain('Error');
+            }
+        });
+
+        // Test MessageDisplay with error messages
+        const errorMessages = [
+            { id: '1', message: 'Error message', type: 'error' as const },
+            { id: '2', message: 'Another error', type: 'error' as const },
+        ];
+
+        const { container } = render(
+            <MessageDisplay
+                messages={errorMessages}
+                onRemoveMessage={jest.fn()}
+            />
+        );
+
+        // Should display error messages
+        expect(container.textContent).toContain('Error message');
+        expect(container.textContent).toContain('Another error');
+
+        // Verify error handling components are working
+        expect(ErrorDisplay).toBeDefined();
+        expect(MessageDisplay).toBeDefined();
+    });
 }); 
