@@ -144,8 +144,7 @@ export const analyzeUnmatched = async (
     request: UnmatchedAnalysisRequest
 ): Promise<UnmatchedAnalysisResult> => {
     try {
-        // Add cache-busting timestamp to prevent browser caching
-        const response = await api.post(`/analyze/unmatched?_t=${Date.now()}`, request);
+        const response = await api.post('/analyze/unmatched', request);
         return response.data;
     } catch (error) {
         console.error('Failed to analyze unmatched items:', error);
@@ -333,8 +332,7 @@ export const checkFilteredStatus = async (
     request: FilteredStatusRequest
 ): Promise<FilteredStatusResponse> => {
     try {
-        // Add cache-busting timestamp to prevent browser caching
-        const response = await api.post(`/filtered/check?_t=${Date.now()}`, request);
+        const response = await api.post('/filtered/check', request);
         return response.data;
     } catch (error) {
         console.error('Failed to check filtered status:', error);

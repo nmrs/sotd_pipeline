@@ -121,8 +121,8 @@ const UnmatchedAnalyzer: React.FC = () => {
             setResults(null);
             setOperationCount(prev => prev + 1);
 
-            // Force cache busting by adding timestamp
-            console.log('Analyzing with cache-busting timestamp:', Date.now());
+            // Analyze unmatched items
+            console.log('Analyzing unmatched items...');
 
             const result = await analyzeUnmatched({
                 field: selectedField,
