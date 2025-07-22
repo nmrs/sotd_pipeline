@@ -26,6 +26,12 @@ def _extract_field_line(line: str, field: str) -> Optional[str]:
 
 def get_patterns(alias: str) -> list[str]:
     return [
+        # Checkmark format: ✓Field: Value
+        rf"^✓\s*{alias}\s*[-:]\s*(.+)$",  # ✓Field: Value
+        rf"^✓\s*{alias}\s*[-:]\s*(.+)$",  # ✓ Field: Value (with space)
+        # Emoji bold format: * **Field** Value
+        rf"^\*\s*\*\*{alias}\*\*\s*[-:]\s*(.+)$",  # * **Field** - Value
+        rf"^\*\s*\*\*{alias}\*\*\s*(.+)$",  # * **Field** Value (no separator)
         # common more generic cases
         rf"^(?:[-*]\s*)?\*\*{alias}\*\*\s*[-:]?\s*(.+)$",  # * **alias**: value
         rf"^(?:[-*]\s*)?\*\*{alias}\s*[-:]?\*\*\s*(.+)$",  # * **alias:** value
