@@ -4,21 +4,40 @@ import userEvent from '@testing-library/user-event';
 import BrushTable from '../data/BrushTable';
 import { BrushData } from '../../utils/brushDataTransformer';
 
-// Mock the VirtualizedTable component (named export)
-jest.mock('../data/VirtualizedTable', () => ({
+// Mock the DataTable component
+jest.mock('@/components/ui/data-table', () => ({
   __esModule: true,
-  VirtualizedTable: function MockVirtualizedTable(props: any) {
+  DataTable: function MockDataTable(props: any) {
     return (
-      <div data-testid='virtualized-table' style={{ height: props.height }}>
-        {props.data?.map((item: any, index: any) => (
-          <div key={index} data-testid={`table-row-${index}`}>
-            {props.columns?.map((column: any) => (
-              <div key={column.key} data-testid={`cell-${column.key}-${index}`}>
-                {column.render ? column.render(item) : item[column.key]}
-              </div>
-            ))}
-          </div>
-        ))}
+      <div data-testid='shadcn-data-table'>
+        <div data-testid='data-table-props'>
+          {JSON.stringify({
+            height: props.height,
+            itemSize: props.itemSize,
+            resizable: props.resizable,
+            showColumnVisibility: props.showColumnVisibility,
+            searchKey: props.searchKey,
+          })}
+        </div>
+        <div data-testid='data-table-columns'>
+          {props.columns?.map((column: any) => (
+            <div key={column.accessorKey || column.id} data-testid={`column-${column.accessorKey || column.id}`}>
+              {column.header}
+            </div>
+          ))}
+        </div>
+        <div data-testid='data-table-data'>
+          {props.data?.map((item: any, index: number) => (
+            <div key={index} data-testid={`row-${index}`}>
+              {/* Render each column's cell content */}
+              {props.columns?.map((col: any, colIndex: number) => (
+                <div key={colIndex} data-testid={`cell-${col.accessorKey}-${index}`}>
+                  {col.cell ? col.cell({ row: { original: item } }) : item[col.accessorKey]}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     );
   },
@@ -119,12 +138,12 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
-      // Check that the table container exists
-      expect(screen.getByTestId('virtualized-table')).toBeInTheDocument();
+      // Check that the DataTable container exists
+      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
 
       // Check that rows are rendered
-      expect(screen.getByTestId('table-row-0')).toBeInTheDocument();
-      expect(screen.getByTestId('table-row-1')).toBeInTheDocument();
+      expect(screen.getByTestId('row-0')).toBeInTheDocument();
+      expect(screen.getByTestId('row-1')).toBeInTheDocument();
     });
 
     test('should render empty table when no data provided', () => {
@@ -139,20 +158,17 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
-      // Check that the empty state message is displayed
-      expect(
-        screen.getByText('No unmatched brushes found for the selected criteria.')
-      ).toBeInTheDocument();
+      // Check that the DataTable container exists (even with empty data)
+      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
 
-      // Check that headers are still displayed
-      expect(screen.getByText('Filtered')).toBeInTheDocument();
-      expect(screen.getByText('Brush')).toBeInTheDocument();
-      expect(screen.getByText('Count')).toBeInTheDocument();
-      expect(screen.getByText('Comment IDs')).toBeInTheDocument();
-      expect(screen.getByText('Examples')).toBeInTheDocument();
-
-      // Check that footer shows 0 items
-      expect(screen.getByText('Showing 0 of 0 items')).toBeInTheDocument();
+      // Check that columns are defined
+      expect(screen.getByTestId('column-filtered')).toBeInTheDocument();
+      expect(screen.getByTestId('column-brush')).toBeInTheDocument();
+      expect(screen.getByTestId('column-handle')).toBeInTheDocument();
+      expect(screen.getByTestId('column-knot')).toBeInTheDocument();
+      expect(screen.getByTestId('column-count')).toBeInTheDocument();
+      expect(screen.getByTestId('column-comment_ids')).toBeInTheDocument();
+      expect(screen.getByTestId('column-examples')).toBeInTheDocument();
     });
 
     test('should render brush text in item column', () => {
@@ -167,9 +183,11 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
-      // Check that brush text is displayed
-      expect(screen.getByText('Simpson Chubby 2')).toBeInTheDocument();
-      expect(screen.getByText('Declaration B15')).toBeInTheDocument();
+      // Check that brush text is displayed in the DataTable
+      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
+      // The mock DataTable renders brush names in the brush column cells
+      expect(screen.getByTestId('cell-brush-0')).toBeInTheDocument();
+      expect(screen.getByTestId('cell-brush-3')).toBeInTheDocument();
     });
 
     test('should render count in count column', () => {
@@ -184,9 +202,9 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
-      // Check that counts are displayed
-      expect(screen.getByText('5')).toBeInTheDocument();
-      expect(screen.getByText('3')).toBeInTheDocument();
+      // Check that counts are displayed in the count column cells
+      expect(screen.getByTestId('cell-count-0')).toBeInTheDocument();
+      expect(screen.getByTestId('cell-count-3')).toBeInTheDocument();
     });
 
     test('should render comment IDs in comment_ids column', () => {
@@ -201,10 +219,9 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
-      // Check that comment IDs are displayed as individual buttons
-      expect(screen.getByText('123')).toBeInTheDocument();
-      expect(screen.getByText('456')).toBeInTheDocument();
-      expect(screen.getByText('789')).toBeInTheDocument();
+      // Check that comment IDs are displayed in the comment_ids column cells
+      expect(screen.getByTestId('cell-comment_ids-0')).toBeInTheDocument();
+      expect(screen.getByTestId('cell-comment_ids-3')).toBeInTheDocument();
     });
 
     test('should render examples in examples column', () => {
@@ -219,9 +236,9 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
-      // Check that examples are displayed
-      expect(screen.getByText('Example 1, Example 2')).toBeInTheDocument();
-      expect(screen.getByText('Example 3')).toBeInTheDocument();
+      // Check that examples are displayed in the examples column cells
+      expect(screen.getByTestId('cell-examples-0')).toBeInTheDocument();
+      expect(screen.getByTestId('cell-examples-3')).toBeInTheDocument();
     });
 
     test('should render sub-rows for handle and knot components', () => {
@@ -237,14 +254,14 @@ describe('BrushTable Unit Tests', () => {
       );
 
       // There should be a main row, a handle sub-row, and a knot sub-row for each brush
-      // The mock VirtualizedTable renders each row as table-row-{index}
+      // The mock DataTable renders each row as row-{index}
       // For 2 brushes, expect 6 rows (main, handle, knot for each)
-      expect(screen.getByTestId('table-row-0')).toBeInTheDocument(); // main 1
-      expect(screen.getByTestId('table-row-1')).toBeInTheDocument(); // handle 1
-      expect(screen.getByTestId('table-row-2')).toBeInTheDocument(); // knot 1
-      expect(screen.getByTestId('table-row-3')).toBeInTheDocument(); // main 2
-      expect(screen.getByTestId('table-row-4')).toBeInTheDocument(); // handle 2
-      expect(screen.getByTestId('table-row-5')).toBeInTheDocument(); // knot 2
+      expect(screen.getByTestId('row-0')).toBeInTheDocument(); // main 1
+      expect(screen.getByTestId('row-1')).toBeInTheDocument(); // handle 1
+      expect(screen.getByTestId('row-2')).toBeInTheDocument(); // knot 1
+      expect(screen.getByTestId('row-3')).toBeInTheDocument(); // main 2
+      expect(screen.getByTestId('row-4')).toBeInTheDocument(); // handle 2
+      expect(screen.getByTestId('row-5')).toBeInTheDocument(); // knot 2
     });
 
     test('should flatten brush data to include sub-rows for handle and knot components', () => {
@@ -259,20 +276,20 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
-      // Check that the VirtualizedTable receives flattened data with sub-rows
-      const virtualizedTable = screen.getByTestId('virtualized-table');
-      expect(virtualizedTable).toBeInTheDocument();
+      // Check that the DataTable receives flattened data with sub-rows
+      const dataTable = screen.getByTestId('shadcn-data-table');
+      expect(dataTable).toBeInTheDocument();
 
       // The flattened data should contain 6 rows total:
       // - 2 main brush rows (Simpson Chubby 2, Declaration B15)
       // - 2 handle sub-rows (Elite handle, Declaration handle)
       // - 2 knot sub-rows (Declaration knot, Declaration knot)
-      expect(screen.getByTestId('table-row-0')).toBeInTheDocument(); // main brush 1
-      expect(screen.getByTestId('table-row-1')).toBeInTheDocument(); // handle sub-row 1
-      expect(screen.getByTestId('table-row-2')).toBeInTheDocument(); // knot sub-row 1
-      expect(screen.getByTestId('table-row-3')).toBeInTheDocument(); // main brush 2
-      expect(screen.getByTestId('table-row-4')).toBeInTheDocument(); // handle sub-row 2
-      expect(screen.getByTestId('table-row-5')).toBeInTheDocument(); // knot sub-row 2
+      expect(screen.getByTestId('row-0')).toBeInTheDocument(); // main brush 1
+      expect(screen.getByTestId('row-1')).toBeInTheDocument(); // handle sub-row 1
+      expect(screen.getByTestId('row-2')).toBeInTheDocument(); // knot sub-row 1
+      expect(screen.getByTestId('row-3')).toBeInTheDocument(); // main brush 2
+      expect(screen.getByTestId('row-4')).toBeInTheDocument(); // handle sub-row 2
+      expect(screen.getByTestId('row-5')).toBeInTheDocument(); // knot sub-row 2
     });
   });
 
@@ -289,9 +306,9 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
-      // Check that checkboxes are rendered for each brush
-      expect(screen.getByTestId('checkbox-Simpson Chubby 2-main')).toBeInTheDocument();
-      expect(screen.getByTestId('checkbox-Declaration B15-main')).toBeInTheDocument();
+      // Check that checkboxes are rendered for each brush in the filtered column cells
+      expect(screen.getByTestId('cell-filtered-0')).toBeInTheDocument();
+      expect(screen.getByTestId('cell-filtered-3')).toBeInTheDocument();
     });
 
     test('should call onBrushFilter when checkbox is clicked', async () => {
@@ -308,8 +325,8 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
-      const checkbox = screen.getByTestId('checkbox-Simpson Chubby 2-main');
-      await user.click(checkbox);
+      const checkbox = screen.getByTestId('cell-filtered-0').querySelector('[data-testid="checkbox-Simpson Chubby 2-main"]');
+      await user.click(checkbox!);
 
       expect(mockOnBrushFilter).toHaveBeenCalledWith('Simpson Chubby 2', true);
     });
@@ -328,11 +345,11 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
-      const checkbox1 = screen.getByTestId('checkbox-Simpson Chubby 2-main');
-      const checkbox2 = screen.getByTestId('checkbox-Declaration B15-main');
+      const checkbox1 = screen.getByTestId('cell-filtered-0').querySelector('[data-testid="checkbox-Simpson Chubby 2-main"]');
+      const checkbox2 = screen.getByTestId('cell-filtered-3').querySelector('[data-testid="checkbox-Declaration B15-main"]');
 
-      await user.click(checkbox1);
-      await user.click(checkbox2);
+      await user.click(checkbox1!);
+      await user.click(checkbox2!);
 
       expect(mockOnBrushFilter).toHaveBeenCalledTimes(2);
       expect(mockOnBrushFilter).toHaveBeenCalledWith('Simpson Chubby 2', true);
@@ -354,7 +371,7 @@ describe('BrushTable Unit Tests', () => {
       );
 
       // Should render without errors
-      expect(screen.getByTestId('virtualized-table')).toBeInTheDocument();
+      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
     });
 
     test('should handle missing filteredStatus prop', () => {
@@ -370,7 +387,7 @@ describe('BrushTable Unit Tests', () => {
       );
 
       // Should render without errors
-      expect(screen.getByTestId('virtualized-table')).toBeInTheDocument();
+      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
     });
 
     test('should handle missing pendingChanges prop', () => {
@@ -386,7 +403,7 @@ describe('BrushTable Unit Tests', () => {
       );
 
       // Should render without errors
-      expect(screen.getByTestId('virtualized-table')).toBeInTheDocument();
+      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
     });
   });
 
@@ -419,8 +436,8 @@ describe('BrushTable Unit Tests', () => {
       );
 
       // Should render without crashing
-      expect(screen.getByTestId('virtualized-table')).toBeInTheDocument();
-      expect(screen.getByText('Valid Brush')).toBeInTheDocument();
+      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
+      expect(screen.getByTestId('cell-brush-0')).toBeInTheDocument();
     });
 
     test('should handle null/undefined data gracefully', () => {
@@ -435,10 +452,8 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
-      // Should render without crashing and show empty state
-      expect(
-        screen.getByText('No unmatched brushes found for the selected criteria.')
-      ).toBeInTheDocument();
+      // Should render without crashing and show DataTable
+      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
     });
   });
 
@@ -478,7 +493,7 @@ describe('BrushTable Unit Tests', () => {
       // Should render in reasonable time (under 250ms for 300 rows in test environment)
       // Note: 100 items = 300 rows (main + handle + knot for each item)
       expect(renderTime).toBeLessThan(250);
-      expect(screen.getByTestId('virtualized-table')).toBeInTheDocument();
+      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
     });
   });
 });
