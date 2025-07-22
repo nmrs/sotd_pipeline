@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { FixedSizeList as List } from 'react-window';
+import { GenericDataTable, DataTableColumn } from './GenericDataTable';
 
 interface BrushSplit {
     original: string;
@@ -141,6 +142,233 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
         }
     };
 
+    // Create columns for GenericDataTable
+    const columns: DataTableColumn<BrushSplit & { index: number }>[] = [
+        {
+            key: 'select',
+            header: 'Select',
+            width: 60,
+            render: (_, row) => (
+                <input
+                    type="checkbox"
+                    role="checkbox"
+                    tabIndex={0}
+                    checked={selectedIndices.includes(row.index)}
+                    onChange={() => handleCheckboxChange(row.index)}
+                />
+            )
+        },
+        {
+            key: 'should_not_split',
+            header: 'Should Not Split',
+            width: 120,
+            render: (_, row) => (
+                <input
+                    type="checkbox"
+                    role="checkbox"
+                    tabIndex={0}
+                    checked={row.should_not_split || false}
+                    onChange={() => handleShouldNotSplitChange(row.index, !row.should_not_split)}
+                    title="Mark as should not split"
+                />
+            )
+        },
+        {
+            key: 'original',
+            header: 'Original',
+            render: (value, row) => (
+                <span title={value} style={{ color: unsavedEdits.has(row.index) ? '#856404' : 'inherit' }}>
+                    {value}
+                </span>
+            )
+        },
+        {
+            key: 'handle',
+            header: 'Handle',
+            render: (value, row) => {
+                if (editingHandle === row.index) {
+                    return (
+                        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                            <input
+                                value={editedHandleValue}
+                                onChange={(e) => setEditedHandleValue(e.target.value)}
+                                autoFocus
+                                style={{ flex: 1 }}
+                                disabled={row.should_not_split}
+                            />
+                            <button
+                                onClick={() => handleSave(row.index, 'handle')}
+                                style={{
+                                    padding: '2px 6px',
+                                    fontSize: '12px',
+                                    backgroundColor: '#28a745',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '3px',
+                                    cursor: 'pointer'
+                                }}
+                                disabled={row.should_not_split}
+                            >
+                                Save
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setEditingHandle(null);
+                                    setEditedHandleValue('');
+                                    setUnsavedEdits(prev => {
+                                        const newSet = new Set(prev);
+                                        newSet.delete(row.index);
+                                        return newSet;
+                                    });
+                                }}
+                                style={{
+                                    padding: '2px 6px',
+                                    fontSize: '12px',
+                                    backgroundColor: '#dc3545',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '3px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    );
+                }
+                return (
+                    <span
+                        tabIndex={0}
+                        onClick={() => !row.should_not_split && handleHandleClick(row.index, value || '')}
+                        onKeyDown={(e) => !row.should_not_split && handleSpanKeyDown(row.index, 'handle', value || '', e)}
+                        style={{
+                            color: row.should_not_split ? '#ccc' : (value ? 'inherit' : '#999'),
+                            cursor: row.should_not_split ? 'not-allowed' : 'pointer'
+                        }}
+                    >
+                        {row.should_not_split ? '(disabled)' : (value || '(empty)')}
+                    </span>
+                );
+            }
+        },
+        {
+            key: 'knot',
+            header: 'Knot',
+            render: (value, row) => {
+                if (editingKnot === row.index) {
+                    return (
+                        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                            <input
+                                value={editedKnotValue}
+                                onChange={(e) => setEditedKnotValue(e.target.value)}
+                                autoFocus
+                                style={{ flex: 1 }}
+                                disabled={row.should_not_split}
+                            />
+                            <button
+                                onClick={() => handleSave(row.index, 'knot')}
+                                style={{
+                                    padding: '2px 6px',
+                                    fontSize: '12px',
+                                    backgroundColor: '#28a745',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '3px',
+                                    cursor: 'pointer'
+                                }}
+                                disabled={row.should_not_split}
+                            >
+                                Save
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setEditingKnot(null);
+                                    setEditedKnotValue('');
+                                    setUnsavedEdits(prev => {
+                                        const newSet = new Set(prev);
+                                        newSet.delete(row.index);
+                                        return newSet;
+                                    });
+                                }}
+                                style={{
+                                    padding: '2px 6px',
+                                    fontSize: '12px',
+                                    backgroundColor: '#dc3545',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '3px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    );
+                }
+                return (
+                    <span
+                        tabIndex={0}
+                        onClick={() => !row.should_not_split && handleKnotClick(row.index, value)}
+                        onKeyDown={(e) => !row.should_not_split && handleSpanKeyDown(row.index, 'knot', value, e)}
+                        style={{
+                            cursor: row.should_not_split ? 'not-allowed' : 'pointer',
+                            color: row.should_not_split ? '#ccc' : 'inherit'
+                        }}
+                    >
+                        {row.should_not_split ? '(disabled)' : value}
+                    </span>
+                );
+            }
+        },
+        {
+            key: 'match_type',
+            header: 'Match Type',
+            width: 100,
+            render: (value, row) => (
+                <span style={{
+                    fontSize: '12px',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    backgroundColor: value === 'exact' ? '#e6f3ff' :
+                        value === 'regex' ? '#fff3e6' :
+                            value === 'alias' ? '#f0e6ff' :
+                                value === 'brand' ? '#e6ffe6' : '#f5f5f5',
+                    color: value === 'exact' ? '#0066cc' :
+                        value === 'regex' ? '#cc6600' :
+                            value === 'alias' ? '#6600cc' :
+                                value === 'brand' ? '#006600' : '#666'
+                }}>
+                    {value || 'none'}
+                </span>
+            )
+        },
+        {
+            key: 'status',
+            header: 'Status',
+            width: 100,
+            render: (_, row) => {
+                const status = row.should_not_split ? 'no-split' : (!row.handle ? 'unmatched' : 'split');
+                return (
+                    <span style={{
+                        fontSize: '12px',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        backgroundColor: row.should_not_split ? '#ffe6cc' : (!row.handle ? '#ffe6e6' : '#e6ffe6'),
+                        color: row.should_not_split ? '#cc6600' : (!row.handle ? '#cc0000' : '#006600')
+                    }}>
+                        {status}
+                    </span>
+                );
+            }
+        }
+    ];
+
+    // Prepare data with index for GenericDataTable
+    const tableData = filteredBrushSplits.map((split, index) => ({
+        ...split,
+        index
+    }));
+
     if (isLoading) {
         return (
             <div data-testid="brush-split-table">
@@ -156,183 +384,6 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
             </div>
         );
     }
-
-    const renderRow = (split: BrushSplit, idx: number) => {
-        const hasUnsavedEdits = unsavedEdits.has(idx);
-        return (
-            <div key={idx} style={{
-                display: 'grid',
-                gridTemplateColumns: 'auto auto 1fr 1fr 1fr auto auto',
-                gap: '8px',
-                alignItems: 'center',
-                padding: '4px',
-                backgroundColor: hasUnsavedEdits ? '#fff3cd' : 'transparent',
-                border: hasUnsavedEdits ? '1px solid #ffc107' : 'none',
-                borderRadius: hasUnsavedEdits ? '4px' : '0'
-            }}>
-                <input
-                    type="checkbox"
-                    role="checkbox"
-                    tabIndex={0}
-                    checked={selectedIndices.includes(idx)}
-                    onChange={() => handleCheckboxChange(idx)}
-                />
-                <input
-                    type="checkbox"
-                    role="checkbox"
-                    tabIndex={0}
-                    checked={split.should_not_split || false}
-                    onChange={() => handleShouldNotSplitChange(idx, !split.should_not_split)}
-                    title="Mark as should not split"
-                />
-                <span title={split.original}>{split.original}</span>
-                {editingHandle === idx ? (
-                    <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                        <input
-                            value={editedHandleValue}
-                            onChange={(e) => setEditedHandleValue(e.target.value)}
-                            autoFocus
-                            style={{ flex: 1 }}
-                            disabled={split.should_not_split}
-                        />
-                        <button
-                            onClick={() => handleSave(idx, 'handle')}
-                            style={{
-                                padding: '2px 6px',
-                                fontSize: '12px',
-                                backgroundColor: '#28a745',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '3px',
-                                cursor: 'pointer'
-                            }}
-                            disabled={split.should_not_split}
-                        >
-                            Save
-                        </button>
-                        <button
-                            onClick={() => {
-                                setEditingHandle(null);
-                                setEditedHandleValue('');
-                                setUnsavedEdits(prev => {
-                                    const newSet = new Set(prev);
-                                    newSet.delete(idx);
-                                    return newSet;
-                                });
-                            }}
-                            style={{
-                                padding: '2px 6px',
-                                fontSize: '12px',
-                                backgroundColor: '#dc3545',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '3px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                ) : (
-                    <span
-                        tabIndex={0}
-                        onClick={() => !split.should_not_split && handleHandleClick(idx, split.handle || '')}
-                        onKeyDown={(e) => !split.should_not_split && handleSpanKeyDown(idx, 'handle', split.handle || '', e)}
-                        style={{
-                            color: split.should_not_split ? '#ccc' : (split.handle ? 'inherit' : '#999'),
-                            cursor: split.should_not_split ? 'not-allowed' : 'pointer'
-                        }}
-                    >
-                        {split.should_not_split ? '(disabled)' : (split.handle || '(empty)')}
-                    </span>
-                )}
-                {editingKnot === idx ? (
-                    <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                        <input
-                            value={editedKnotValue}
-                            onChange={(e) => setEditedKnotValue(e.target.value)}
-                            autoFocus
-                            style={{ flex: 1 }}
-                            disabled={split.should_not_split}
-                        />
-                        <button
-                            onClick={() => handleSave(idx, 'knot')}
-                            style={{
-                                padding: '2px 6px',
-                                fontSize: '12px',
-                                backgroundColor: '#28a745',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '3px',
-                                cursor: 'pointer'
-                            }}
-                            disabled={split.should_not_split}
-                        >
-                            Save
-                        </button>
-                        <button
-                            onClick={() => {
-                                setEditingKnot(null);
-                                setEditedKnotValue('');
-                                setUnsavedEdits(prev => {
-                                    const newSet = new Set(prev);
-                                    newSet.delete(idx);
-                                    return newSet;
-                                });
-                            }}
-                            style={{
-                                padding: '2px 6px',
-                                fontSize: '12px',
-                                backgroundColor: '#dc3545',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '3px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                ) : (
-                    <span
-                        tabIndex={0}
-                        onClick={() => !split.should_not_split && handleKnotClick(idx, split.knot)}
-                        onKeyDown={(e) => !split.should_not_split && handleSpanKeyDown(idx, 'knot', split.knot, e)}
-                        style={{
-                            cursor: split.should_not_split ? 'not-allowed' : 'pointer',
-                            color: split.should_not_split ? '#ccc' : 'inherit'
-                        }}
-                    >
-                        {split.should_not_split ? '(disabled)' : split.knot}
-                    </span>
-                )}
-                <span style={{
-                    fontSize: '12px',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    backgroundColor: split.match_type === 'exact' ? '#e6f3ff' :
-                        split.match_type === 'regex' ? '#fff3e6' :
-                            split.match_type === 'alias' ? '#f0e6ff' :
-                                split.match_type === 'brand' ? '#e6ffe6' : '#f5f5f5',
-                    color: split.match_type === 'exact' ? '#0066cc' :
-                        split.match_type === 'regex' ? '#cc6600' :
-                            split.match_type === 'alias' ? '#6600cc' :
-                                split.match_type === 'brand' ? '#006600' : '#666'
-                }}>
-                    {split.match_type || 'none'}
-                </span>
-                <span style={{
-                    fontSize: '12px',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    backgroundColor: split.should_not_split ? '#ffe6cc' : (!split.handle ? '#ffe6e6' : '#e6ffe6'),
-                    color: split.should_not_split ? '#cc6600' : (!split.handle ? '#cc0000' : '#006600')
-                }}>
-                    {split.should_not_split ? 'no-split' : (!split.handle ? 'unmatched' : 'split')}
-                </span>
-            </div>
-        );
-    };
 
     return (
         <div data-testid="brush-split-table">
@@ -377,39 +428,76 @@ const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
                     Filter Status
                 </button>
             </div>
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'auto auto 1fr 1fr 1fr auto auto',
-                gap: '8px',
-                alignItems: 'center',
-                padding: '4px',
-                fontWeight: 'bold',
-                borderBottom: '1px solid #ccc',
-                marginBottom: '4px'
-            }}>
-                <span>Select</span>
-                <span>Should Not Split</span>
-                <span>Original</span>
-                <span>Handle</span>
-                <span>Knot</span>
-                <span>Match Type</span>
-                <span>Status</span>
-            </div>
+
             {shouldUseVirtualization ? (
-                <List
-                    height={height - 60}
-                    itemCount={filteredBrushSplits.length}
-                    itemSize={50}
-                    width="100%"
-                >
-                    {({ index, style }) => (
-                        <div style={style}>
-                            {renderRow(filteredBrushSplits[index], index)}
-                        </div>
-                    )}
-                </List>
+                <div style={{ height: height - 60 }}>
+                    <List
+                        height={height - 60}
+                        itemCount={tableData.length}
+                        itemSize={50}
+                        width="100%"
+                    >
+                        {({ index, style }) => (
+                            <div style={style}>
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'auto auto 1fr 1fr 1fr auto auto',
+                                    gap: '8px',
+                                    alignItems: 'center',
+                                    padding: '4px',
+                                    backgroundColor: unsavedEdits.has(tableData[index].index) ? '#fff3cd' : 'transparent',
+                                    border: unsavedEdits.has(tableData[index].index) ? '1px solid #ffc107' : 'none',
+                                    borderRadius: unsavedEdits.has(tableData[index].index) ? '4px' : '0'
+                                }}>
+                                    {columns.map(column => (
+                                        <div key={column.key} style={{ width: column.width }}>
+                                            {column.render?.(tableData[index][column.key as keyof (typeof tableData[0])], tableData[index]) ||
+                                                String(tableData[index][column.key as keyof (typeof tableData[0])] || '')}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </List>
+                </div>
             ) : (
-                filteredBrushSplits.map((split, idx) => renderRow(split, idx))
+                <>
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'auto auto 1fr 1fr 1fr auto auto',
+                        gap: '8px',
+                        alignItems: 'center',
+                        padding: '4px',
+                        fontWeight: 'bold',
+                        borderBottom: '1px solid #ccc',
+                        marginBottom: '4px'
+                    }}>
+                        {columns.map(column => (
+                            <span key={column.key}>{column.header}</span>
+                        ))}
+                    </div>
+                    <div>
+                        {tableData.map((row) => (
+                            <div key={row.index} style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'auto auto 1fr 1fr 1fr auto auto',
+                                gap: '8px',
+                                alignItems: 'center',
+                                padding: '4px',
+                                backgroundColor: unsavedEdits.has(row.index) ? '#fff3cd' : 'transparent',
+                                border: unsavedEdits.has(row.index) ? '1px solid #ffc107' : 'none',
+                                borderRadius: unsavedEdits.has(row.index) ? '4px' : '0'
+                            }}>
+                                {columns.map(column => (
+                                    <div key={column.key} style={{ width: column.width }}>
+                                        {column.render?.(row[column.key as keyof typeof row], row) ||
+                                            String(row[column.key as keyof typeof row] || '')}
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                </>
             )}
         </div>
     );
