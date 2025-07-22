@@ -174,7 +174,9 @@ describe('BrushTable', () => {
       expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
 
       // Find the checkbox in the filtered column cell for the main row (row 0)
-      const checkbox = screen.getByTestId('cell-filtered-0').querySelector('[data-testid="checkbox-input-Test Brush 1"]');
+      const checkbox = screen
+        .getByTestId('cell-filtered-0')
+        .querySelector('[data-testid="checkbox-input-Test Brush 1"]');
       fireEvent.click(checkbox!);
 
       expect(onBrushFilter).toHaveBeenCalledWith('Test Brush 1', true);

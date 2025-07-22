@@ -200,7 +200,7 @@ describe('BrushSplitDataTable', () => {
     it('handles empty brush splits array', () => {
       render(<BrushSplitDataTable brushSplits={[]} />);
 
-      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
+      expect(screen.getByText('No brush splits to display')).toBeInTheDocument();
     });
 
     it('handles malformed brush split data', () => {

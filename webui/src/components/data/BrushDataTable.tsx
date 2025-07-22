@@ -1,14 +1,13 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
-import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 // Interface for brush data with subrows
 interface BrushData {
-  id: string;
   brand: string;
   model: string;
   handle_maker?: string;
@@ -16,178 +15,265 @@ interface BrushData {
   fiber?: string;
   knot_size?: string;
   subrows?: BrushData[];
-  expanded?: boolean;
 }
 
 interface BrushDataTableProps {
   brushData: BrushData[];
-  onRowClick?: (brush: BrushData) => void;
-  onSubrowToggle?: (brushId: string, expanded: boolean) => void;
-  showSubrows?: boolean;
+  /** Enable performance logging */
+  enablePerformanceLogging?: boolean;
+  /** Test ID for testing */
+  testId?: string;
 }
 
-export function BrushDataTable({
-  brushData,
-  onRowClick,
-  onSubrowToggle,
-  showSubrows = true,
-}: BrushDataTableProps) {
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+// Memoized expand/collapse button component
+const MemoizedExpandButton = memo<{
+  isExpanded: boolean;
+  onClick: () => void;
+  hasSubrows: boolean;
+  'aria-label': string;
+}>(({ isExpanded, onClick, hasSubrows, 'aria-label': ariaLabel }) => {
+  if (!hasSubrows) return null;
 
-  // Handle subrow toggle
-  const handleSubrowToggle = useCallback(
-    (brushId: string) => {
-      const newExpanded = new Set(expandedRows);
-      if (newExpanded.has(brushId)) {
-        newExpanded.delete(brushId);
-      } else {
-        newExpanded.add(brushId);
-      }
-      setExpandedRows(newExpanded);
-
-      if (onSubrowToggle) {
-        onSubrowToggle(brushId, newExpanded.has(brushId));
-      }
-    },
-    [expandedRows, onSubrowToggle]
+  return (
+    <Button
+      variant='ghost'
+      size='sm'
+      onClick={onClick}
+      className='p-1 h-6 w-6'
+      aria-label={ariaLabel}
+    >
+      {isExpanded ? (
+        <ChevronDownIcon className='h-4 w-4' />
+      ) : (
+        <ChevronRightIcon className='h-4 w-4' />
+      )}
+    </Button>
   );
+});
 
-  // Handle row click
-  const handleRowClick = useCallback(
-    (brush: BrushData) => {
-      if (onRowClick) {
-        onRowClick(brush);
-      }
-    },
-    [onRowClick]
-  );
+MemoizedExpandButton.displayName = 'MemoizedExpandButton';
 
-  // Transform data to include expanded state and flatten subrows
-  const transformedData = brushData.flatMap(brush => {
-    // Skip null or undefined entries
-    if (!brush) {
-      return [];
-    }
+// Memoized cell component for better performance
+const MemoizedCell = memo<{
+  children: React.ReactNode;
+  className?: string;
+  'aria-label'?: string;
+}>(({ children, className, 'aria-label': ariaLabel }) => (
+  <div className={className} role='cell' aria-label={ariaLabel}>
+    {children}
+  </div>
+));
 
-    const rows = [{ ...brush, isMainRow: true }];
+MemoizedCell.displayName = 'MemoizedCell';
 
-    if (brush.subrows && expandedRows.has(brush.id)) {
-      rows.push(
-        ...brush.subrows.map(subrow => ({ ...subrow, isMainRow: false, parentId: brush.id }))
+export const BrushDataTable = memo<BrushDataTableProps>(
+  ({ brushData, enablePerformanceLogging = false, testId = 'brush-data-table' }) => {
+    const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+
+    // Performance logging
+    const logPerformance = useCallback(
+      (operation: string, startTime: number) => {
+        if (enablePerformanceLogging) {
+          const endTime = performance.now();
+          console.log(`BrushDataTable ${operation}: ${endTime - startTime}ms`);
+        }
+      },
+      [enablePerformanceLogging]
+    );
+
+    // Handle row toggle with performance logging
+    const handleRowToggle = useCallback(
+      (rowId: string) => {
+        const startTime = performance.now();
+
+        setExpandedRows(prev => {
+          const newSet = new Set(prev);
+          if (newSet.has(rowId)) {
+            newSet.delete(rowId);
+          } else {
+            newSet.add(rowId);
+          }
+          return newSet;
+        });
+
+        logPerformance('row toggle', startTime);
+      },
+      [logPerformance]
+    );
+
+    // Memoize flattened data with subrows
+    const flattenedData = useMemo(() => {
+      const startTime = performance.now();
+
+      const flattenData = (
+        data: BrushData[],
+        level = 0
+      ): Array<BrushData & { level: number; rowId: string; hasSubrows: boolean }> => {
+        const result: Array<BrushData & { level: number; rowId: string; hasSubrows: boolean }> = [];
+
+        data.forEach((item, index) => {
+          // Skip null or undefined items
+          if (!item) return;
+
+          const rowId = `${level}-${index}`;
+          const hasSubrows = !!(item.subrows && item.subrows.length > 0);
+
+          result.push({
+            ...item,
+            level,
+            rowId,
+            hasSubrows,
+          });
+
+          // Add subrows if expanded
+          if (hasSubrows && expandedRows.has(rowId)) {
+            const subrows = flattenData(item.subrows!, level + 1);
+            result.push(...subrows);
+          }
+        });
+
+        return result;
+      };
+
+      const result = flattenData(brushData);
+      logPerformance('data flattening', startTime);
+      return result;
+    }, [brushData, expandedRows, logPerformance]);
+
+    // Memoize columns to prevent unnecessary re-renders
+    const columns: ColumnDef<BrushData & { level: number; rowId: string; hasSubrows: boolean }>[] =
+      useMemo(
+        () => [
+          {
+            accessorKey: 'expand',
+            header: '',
+            cell: ({ row }) => {
+              const { rowId, hasSubrows, level } = row.original;
+              const isExpanded = expandedRows.has(rowId);
+
+              return (
+                <div className='flex items-center'>
+                  <div style={{ marginLeft: `${level * 20}px` }} />
+                  <MemoizedExpandButton
+                    isExpanded={isExpanded}
+                    onClick={() => handleRowToggle(rowId)}
+                    hasSubrows={hasSubrows}
+                    aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
+                  />
+                </div>
+              );
+            },
+          },
+          {
+            accessorKey: 'brand',
+            header: 'Brand',
+            cell: ({ row }) => (
+              <MemoizedCell
+                className='font-medium text-gray-900'
+                aria-label={`Brand: ${row.original.brand}`}
+              >
+                {row.original.brand}
+              </MemoizedCell>
+            ),
+          },
+          {
+            accessorKey: 'model',
+            header: 'Model',
+            cell: ({ row }) => (
+              <MemoizedCell
+                className='text-sm text-gray-600'
+                aria-label={`Model: ${row.original.model}`}
+              >
+                {row.original.model}
+              </MemoizedCell>
+            ),
+          },
+          {
+            accessorKey: 'handle_maker',
+            header: 'Handle Maker',
+            cell: ({ row }) => (
+              <MemoizedCell
+                className='text-sm text-gray-600'
+                aria-label={`Handle maker: ${row.original.handle_maker || 'Not specified'}`}
+              >
+                {row.original.handle_maker || 'N/A'}
+              </MemoizedCell>
+            ),
+          },
+          {
+            accessorKey: 'knot_maker',
+            header: 'Knot Maker',
+            cell: ({ row }) => (
+              <MemoizedCell
+                className='text-sm text-gray-600'
+                aria-label={`Knot maker: ${row.original.knot_maker || 'Not specified'}`}
+              >
+                {row.original.knot_maker || 'N/A'}
+              </MemoizedCell>
+            ),
+          },
+          {
+            accessorKey: 'fiber',
+            header: 'Fiber',
+            cell: ({ row }) => (
+              <MemoizedCell
+                className='text-sm text-gray-600'
+                aria-label={`Fiber: ${row.original.fiber || 'Not specified'}`}
+              >
+                {row.original.fiber || 'N/A'}
+              </MemoizedCell>
+            ),
+          },
+          {
+            accessorKey: 'knot_size',
+            header: 'Knot Size',
+            cell: ({ row }) => (
+              <MemoizedCell
+                className='text-sm text-gray-600'
+                aria-label={`Knot size: ${row.original.knot_size || 'Not specified'}`}
+              >
+                {row.original.knot_size || 'N/A'}
+              </MemoizedCell>
+            ),
+          },
+        ],
+        [expandedRows, handleRowToggle]
+      );
+
+    // Handle empty data gracefully
+    if (!brushData || brushData.length === 0) {
+      return (
+        <div
+          className='flex items-center justify-center p-8 text-gray-500'
+          role='status'
+          aria-live='polite'
+          data-testid={testId}
+        >
+          <p>No brush data to display</p>
+        </div>
       );
     }
 
-    return rows;
-  });
+    return (
+      <div
+        className='space-y-4'
+        data-testid={testId}
+        role='region'
+        aria-label='Brush data table with hierarchical structure'
+      >
+        {/* DataTable with ShadCN foundation */}
+        <DataTable
+          columns={columns}
+          data={flattenedData}
+          height={400}
+          itemSize={48}
+          resizable={true}
+          showColumnVisibility={true}
+          searchKey='brand'
+        />
+      </div>
+    );
+  }
+);
 
-  // Define columns using TanStack Table ColumnDef
-  const columns: ColumnDef<BrushData & { isMainRow?: boolean; parentId?: string }>[] = [
-    {
-      accessorKey: 'brand',
-      header: 'Brand',
-      cell: ({ row }) => (
-        <div
-          className='flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded'
-          onClick={() => handleRowClick(row.original)}
-        >
-          {row.original.isMainRow &&
-            showSubrows &&
-            row.original.subrows &&
-            row.original.subrows.length > 0 && (
-              <Button
-                variant='ghost'
-                size='sm'
-                onClick={e => {
-                  e.stopPropagation();
-                  handleSubrowToggle(row.original.id);
-                }}
-                className='p-0 h-4 w-4'
-              >
-                {expandedRows.has(row.original.id) ? (
-                  <ChevronDown className='h-3 w-3' />
-                ) : (
-                  <ChevronRight className='h-3 w-3' />
-                )}
-              </Button>
-            )}
-          <span className={!row.original.isMainRow ? 'ml-6' : ''}>{row.original.brand}</span>
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'model',
-      header: 'Model',
-      cell: ({ row }) => (
-        <div
-          className={`${!row.original.isMainRow ? 'ml-6' : ''} cursor-pointer hover:bg-gray-50 p-1 rounded`}
-          onClick={() => handleRowClick(row.original)}
-        >
-          {row.original.model}
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'handle_maker',
-      header: 'Handle Maker',
-      cell: ({ row }) => (
-        <div
-          className={`${!row.original.isMainRow ? 'ml-6' : ''} cursor-pointer hover:bg-gray-50 p-1 rounded`}
-          onClick={() => handleRowClick(row.original)}
-        >
-          {row.original.handle_maker || '-'}
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'knot_maker',
-      header: 'Knot Maker',
-      cell: ({ row }) => (
-        <div
-          className={`${!row.original.isMainRow ? 'ml-6' : ''} cursor-pointer hover:bg-gray-50 p-1 rounded`}
-          onClick={() => handleRowClick(row.original)}
-        >
-          {row.original.knot_maker || '-'}
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'fiber',
-      header: 'Fiber',
-      cell: ({ row }) => (
-        <div
-          className={`${!row.original.isMainRow ? 'ml-6' : ''} cursor-pointer hover:bg-gray-50 p-1 rounded`}
-          onClick={() => handleRowClick(row.original)}
-        >
-          {row.original.fiber || '-'}
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'knot_size',
-      header: 'Knot Size',
-      cell: ({ row }) => (
-        <div
-          className={`${!row.original.isMainRow ? 'ml-6' : ''} cursor-pointer hover:bg-gray-50 p-1 rounded`}
-          onClick={() => handleRowClick(row.original)}
-        >
-          {row.original.knot_size || '-'}
-        </div>
-      ),
-    },
-  ];
-
-  return (
-    <div className='space-y-4'>
-      {/* DataTable with ShadCN foundation */}
-      <DataTable
-        columns={columns}
-        data={transformedData}
-        height={400}
-        itemSize={48}
-        resizable={true}
-        showColumnVisibility={true}
-        searchKey='brand'
-      />
-    </div>
-  );
-}
+BrushDataTable.displayName = 'BrushDataTable';

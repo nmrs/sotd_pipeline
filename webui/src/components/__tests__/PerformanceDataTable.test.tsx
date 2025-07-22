@@ -38,21 +38,21 @@ jest.mock('@/components/ui/data-table', () => ({
 // Test data
 const mockData = [
   {
-    id: 1,
+    id: '1',
     name: 'John Doe',
     email: 'john@example.com',
     status: 'active',
     date: '2025-01-15T10:30:00Z',
   },
   {
-    id: 2,
+    id: '2',
     name: 'Jane Smith',
     email: 'jane@example.com',
     status: 'inactive',
     date: '2025-01-14T15:45:00Z',
   },
   {
-    id: 3,
+    id: '3',
     name: 'Bob Johnson',
     email: 'bob@example.com',
     status: 'pending',
@@ -181,7 +181,7 @@ describe('PerformanceDataTable', () => {
     it('handles empty data array', () => {
       render(<PerformanceDataTable data={[]} testId='performance-test' />);
 
-      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
+      expect(screen.getByText('No performance data to display')).toBeInTheDocument();
     });
   });
 
@@ -189,7 +189,7 @@ describe('PerformanceDataTable', () => {
     it('handles malformed data gracefully', () => {
       const malformedData = [
         {
-          id: 1,
+          id: '1',
           name: 'Valid User',
           email: 'valid@example.com',
           status: 'active',
@@ -197,7 +197,7 @@ describe('PerformanceDataTable', () => {
         },
         null, // Malformed entry
         {
-          id: 3,
+          id: '3',
           name: 'Another Valid User',
           email: 'another@example.com',
           status: 'inactive',
@@ -214,7 +214,7 @@ describe('PerformanceDataTable', () => {
   describe('Performance', () => {
     it('handles large datasets efficiently', () => {
       const largeData = Array.from({ length: 100 }, (_, i) => ({
-        id: i + 1,
+        id: `${i + 1}`,
         name: `User ${i + 1}`,
         email: `user${i + 1}@example.com`,
         status: i % 3 === 0 ? 'active' : i % 3 === 1 ? 'inactive' : 'pending',

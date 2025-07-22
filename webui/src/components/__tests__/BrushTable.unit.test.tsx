@@ -21,7 +21,10 @@ jest.mock('@/components/ui/data-table', () => ({
         </div>
         <div data-testid='data-table-columns'>
           {props.columns?.map((column: any) => (
-            <div key={column.accessorKey || column.id} data-testid={`column-${column.accessorKey || column.id}`}>
+            <div
+              key={column.accessorKey || column.id}
+              data-testid={`column-${column.accessorKey || column.id}`}
+            >
               {column.header}
             </div>
           ))}
@@ -325,7 +328,9 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
-      const checkbox = screen.getByTestId('cell-filtered-0').querySelector('[data-testid="checkbox-Simpson Chubby 2-main"]');
+      const checkbox = screen
+        .getByTestId('cell-filtered-0')
+        .querySelector('[data-testid="checkbox-Simpson Chubby 2-main"]');
       await user.click(checkbox!);
 
       expect(mockOnBrushFilter).toHaveBeenCalledWith('Simpson Chubby 2', true);
@@ -345,8 +350,12 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
-      const checkbox1 = screen.getByTestId('cell-filtered-0').querySelector('[data-testid="checkbox-Simpson Chubby 2-main"]');
-      const checkbox2 = screen.getByTestId('cell-filtered-3').querySelector('[data-testid="checkbox-Declaration B15-main"]');
+      const checkbox1 = screen
+        .getByTestId('cell-filtered-0')
+        .querySelector('[data-testid="checkbox-Simpson Chubby 2-main"]');
+      const checkbox2 = screen
+        .getByTestId('cell-filtered-3')
+        .querySelector('[data-testid="checkbox-Declaration B15-main"]');
 
       await user.click(checkbox1!);
       await user.click(checkbox2!);

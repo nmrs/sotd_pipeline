@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 
 // Interface for performance test data
-interface TestData {
-  id: number;
+interface PerformanceItem {
+  id: string;
   name: string;
   email: string;
   status: string;
@@ -14,129 +14,207 @@ interface TestData {
 }
 
 interface PerformanceDataTableProps {
-  data: TestData[];
-  onSort?: (column: string) => void;
-  sortColumn?: string;
-  sortDirection?: 'asc' | 'desc';
+  data: PerformanceItem[];
+  /** Enable performance logging */
   enablePerformanceLogging?: boolean;
+  /** Callback for sort operations */
+  onSort?: (column: string, direction: 'asc' | 'desc') => void;
+  /** Test ID for testing */
   testId?: string;
 }
 
-export function PerformanceDataTable({
-  data,
-  onSort,
-  sortColumn,
-  sortDirection = 'asc',
-  enablePerformanceLogging = false,
-  testId,
-}: PerformanceDataTableProps) {
-  // Performance monitoring
-  const [performanceMetrics, setPerformanceMetrics] = useState({
-    sortOperations: 0,
-    totalSortTime: 0,
-    averageSortTime: 0,
-  });
+// Memoized cell component for better performance
+const MemoizedCell = memo<{
+  children: React.ReactNode;
+  className?: string;
+  'aria-label'?: string;
+}>(({ children, className, 'aria-label': ariaLabel }) => (
+  <div className={className} role='cell' aria-label={ariaLabel}>
+    {children}
+  </div>
+));
 
-  // Handle sort with performance monitoring
-  const handleSort = useCallback(
-    (column: string) => {
-      if (!onSort) return;
+MemoizedCell.displayName = 'MemoizedCell';
 
-      const start = performance.now();
-      onSort(column);
-      const end = performance.now();
-      const sortTime = end - start;
+export const PerformanceDataTable = memo<PerformanceDataTableProps>(
+  ({ data, enablePerformanceLogging = false, onSort, testId = 'performance-data-table' }) => {
+    // Performance logging
+    const logPerformance = useCallback(
+      (operation: string, startTime: number) => {
+        if (enablePerformanceLogging) {
+          const endTime = performance.now();
+          console.log(`PerformanceDataTable ${operation}: ${endTime - startTime}ms`);
+        }
+      },
+      [enablePerformanceLogging]
+    );
 
-      if (enablePerformanceLogging) {
-        console.log(`Sort operation on column '${column}' took ${sortTime}ms`);
-      }
+    // Memoize columns to prevent unnecessary re-renders
+    const columns: ColumnDef<PerformanceItem>[] = useMemo(
+      () => [
+        {
+          accessorKey: 'id',
+          header: 'ID',
+          cell: ({ row }) => (
+            <MemoizedCell
+              className='font-mono text-sm text-gray-600'
+              aria-label={`ID: ${row.original.id}`}
+            >
+              {row.original.id}
+            </MemoizedCell>
+          ),
+        },
+        {
+          accessorKey: 'name',
+          header: 'Name',
+          cell: ({ row }) => (
+            <MemoizedCell
+              className='font-medium text-gray-900'
+              aria-label={`Name: ${row.original.name}`}
+            >
+              {row.original.name}
+            </MemoizedCell>
+          ),
+        },
+        {
+          accessorKey: 'email',
+          header: 'Email',
+          cell: ({ row }) => (
+            <MemoizedCell
+              className='text-sm text-gray-600'
+              aria-label={`Email: ${row.original.email}`}
+            >
+              {row.original.email}
+            </MemoizedCell>
+          ),
+        },
+        {
+          accessorKey: 'status',
+          header: 'Status',
+          cell: ({ row }) => {
+            const status = row.original.status;
+            const statusColor =
+              status === 'active'
+                ? 'text-green-600'
+                : status === 'inactive'
+                  ? 'text-red-600'
+                  : 'text-gray-600';
 
-      setPerformanceMetrics(prev => {
-        const newSortOperations = prev.sortOperations + 1;
-        const newTotalSortTime = prev.totalSortTime + sortTime;
-        const newAverageSortTime = newTotalSortTime / newSortOperations;
+            return (
+              <MemoizedCell
+                className={`text-sm font-medium ${statusColor}`}
+                aria-label={`Status: ${status}`}
+              >
+                {status}
+              </MemoizedCell>
+            );
+          },
+        },
+        {
+          accessorKey: 'date',
+          header: 'Date',
+          cell: ({ row }) => (
+            <MemoizedCell
+              className='text-sm text-gray-500'
+              aria-label={`Date: ${row.original.date}`}
+            >
+              {row.original.date}
+            </MemoizedCell>
+          ),
+        },
+      ],
+      []
+    );
 
-        return {
-          sortOperations: newSortOperations,
-          totalSortTime: newTotalSortTime,
-          averageSortTime: newAverageSortTime,
-        };
-      });
-    },
-    [onSort, enablePerformanceLogging]
-  );
+    // Handle sort operations with performance logging
+    const handleSort = useCallback(
+      (column: string, direction: 'asc' | 'desc') => {
+        const startTime = performance.now();
 
-  // Define columns using TanStack Table ColumnDef
-  const columns: ColumnDef<TestData>[] = [
-    {
-      accessorKey: 'id',
-      header: 'ID',
-      cell: ({ row }) => <div className='text-sm font-medium'>{row.original.id}</div>,
-    },
-    {
-      accessorKey: 'name',
-      header: 'Name',
-      cell: ({ row }) => <div className='text-sm'>{row.original.name}</div>,
-    },
-    {
-      accessorKey: 'email',
-      header: 'Email',
-      cell: ({ row }) => <div className='text-sm'>{row.original.email}</div>,
-    },
-    {
-      accessorKey: 'status',
-      header: 'Status',
-      cell: ({ row }) => (
-        <div className='text-sm'>
-          <span
-            className={`px-2 py-1 rounded text-xs ${
-              row.original.status === 'active'
-                ? 'bg-green-100 text-green-800'
-                : row.original.status === 'inactive'
-                  ? 'bg-red-100 text-red-800'
-                  : 'bg-yellow-100 text-yellow-800'
-            }`}
-          >
-            {row.original.status}
-          </span>
+        if (onSort) {
+          onSort(column, direction);
+        }
+
+        logPerformance('sort operation', startTime);
+      },
+      [onSort, logPerformance]
+    );
+
+    // Handle empty data gracefully
+    if (!data || data.length === 0) {
+      return (
+        <div
+          className='flex items-center justify-center p-8 text-gray-500'
+          role='status'
+          aria-live='polite'
+          data-testid={testId}
+        >
+          <p>No performance data to display</p>
         </div>
-      ),
-    },
-    {
-      accessorKey: 'date',
-      header: 'Date',
-      cell: ({ row }) => (
-        <div className='text-sm text-gray-500'>
-          {new Date(row.original.date).toLocaleDateString()}
-        </div>
-      ),
-    },
-  ];
+      );
+    }
 
-  return (
-    <div className='space-y-4' data-testid={testId}>
-      {/* Performance Metrics Display */}
-      {enablePerformanceLogging && performanceMetrics.sortOperations > 0 && (
-        <div className='bg-blue-50 border border-blue-200 rounded p-3'>
-          <h4 className='font-semibold text-blue-900 mb-2'>Performance Metrics:</h4>
-          <div className='text-sm text-blue-800 space-y-1'>
-            <p>• Sort operations: {performanceMetrics.sortOperations}</p>
-            <p>• Total sort time: {performanceMetrics.totalSortTime.toFixed(2)}ms</p>
-            <p>• Average sort time: {performanceMetrics.averageSortTime.toFixed(2)}ms</p>
+    // Performance metrics display
+    const performanceMetrics = useMemo(() => {
+      if (!enablePerformanceLogging) return null;
+
+      const startTime = performance.now();
+      const metrics = {
+        totalRows: data.length,
+        uniqueStatuses: new Set(data.map(item => item.status)).size,
+        activeUsers: data.filter(item => item.status === 'active').length,
+      };
+
+      logPerformance('metrics calculation', startTime);
+
+      return (
+        <div
+          className='mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg'
+          role='region'
+          aria-label='Performance metrics'
+        >
+          <h3 className='text-sm font-medium text-gray-700 mb-2'>Performance Metrics</h3>
+          <div className='grid grid-cols-3 gap-4 text-xs'>
+            <div>
+              <span className='text-gray-500'>Total Rows:</span>
+              <span className='ml-1 font-medium'>{metrics.totalRows}</span>
+            </div>
+            <div>
+              <span className='text-gray-500'>Unique Statuses:</span>
+              <span className='ml-1 font-medium'>{metrics.uniqueStatuses}</span>
+            </div>
+            <div>
+              <span className='text-gray-500'>Active Users:</span>
+              <span className='ml-1 font-medium'>{metrics.activeUsers}</span>
+            </div>
           </div>
         </div>
-      )}
+      );
+    }, [data, enablePerformanceLogging, logPerformance]);
 
-      {/* DataTable with ShadCN foundation */}
-      <DataTable
-        columns={columns}
-        data={data}
-        height={400}
-        itemSize={48}
-        resizable={true}
-        showColumnVisibility={true}
-        searchKey='name'
-      />
-    </div>
-  );
-}
+    return (
+      <div
+        className='space-y-4'
+        data-testid={testId}
+        role='region'
+        aria-label='Performance data table'
+      >
+        {/* Performance Metrics */}
+        {performanceMetrics}
+
+        {/* DataTable with ShadCN foundation */}
+        <DataTable
+          columns={columns}
+          data={data}
+          height={400}
+          itemSize={48}
+          resizable={true}
+          showColumnVisibility={true}
+          searchKey='name'
+        />
+      </div>
+    );
+  }
+);
+
+PerformanceDataTable.displayName = 'PerformanceDataTable';

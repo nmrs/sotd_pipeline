@@ -216,7 +216,9 @@ export function createBrushTransformer(): DataTransformer<any> {
       // Extract handle component from matched data
       if (data.matched?.handle) {
         components.handle = {
-          text: data.matched.handle.source_text || `${data.matched.handle.brand} ${data.matched.handle.model}`,
+          text:
+            data.matched.handle.source_text ||
+            `${data.matched.handle.brand} ${data.matched.handle.model}`,
           status: 'Matched',
           pattern: data.matched.handle._pattern || 'exact',
         };
@@ -231,7 +233,9 @@ export function createBrushTransformer(): DataTransformer<any> {
       // Extract knot component from matched data
       if (data.matched?.knot) {
         components.knot = {
-          text: data.matched.knot.source_text || `${data.matched.knot.brand} ${data.matched.knot.model}`,
+          text:
+            data.matched.knot.source_text ||
+            `${data.matched.knot.brand} ${data.matched.knot.model}`,
           status: 'Matched',
           pattern: data.matched.knot._pattern || 'exact',
         };
@@ -247,8 +251,16 @@ export function createBrushTransformer(): DataTransformer<any> {
     },
     determineStatus: (data: any) => {
       // Determine overall status based on component statuses
-      const handleStatus = data.matched?.handle ? 'Matched' : (data.unmatched?.handle ? 'Unmatched' : undefined);
-      const knotStatus = data.matched?.knot ? 'Matched' : (data.unmatched?.knot ? 'Unmatched' : undefined);
+      const handleStatus = data.matched?.handle
+        ? 'Matched'
+        : data.unmatched?.handle
+          ? 'Unmatched'
+          : undefined;
+      const knotStatus = data.matched?.knot
+        ? 'Matched'
+        : data.unmatched?.knot
+          ? 'Unmatched'
+          : undefined;
 
       // If any component is matched, overall status is matched
       if (handleStatus === 'Matched' || knotStatus === 'Matched') {

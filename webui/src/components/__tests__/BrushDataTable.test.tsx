@@ -27,7 +27,7 @@ jest.mock('@/components/ui/data-table', () => ({
       <div data-testid='data-table-data'>
         {data.map((item: any, index: number) => (
           <div key={index} data-testid={`row-${index}`}>
-            {item.brand} - {item.model} - {item.isMainRow ? 'main' : 'subrow'}
+            {item.brand} - {item.model} - {item.level === 0 ? 'main' : 'subrow'}
           </div>
         ))}
       </div>
@@ -151,7 +151,7 @@ describe('BrushDataTable', () => {
     it('handles subrow toggle callbacks', () => {
       const onSubrowToggle = jest.fn();
 
-      render(<BrushDataTable brushData={mockBrushData} onSubrowToggle={onSubrowToggle} />);
+      render(<BrushDataTable brushData={mockBrushData} />);
 
       // Subrow toggle is handled internally by the component
       // The callback is passed through to the toggle handler
@@ -171,7 +171,7 @@ describe('BrushDataTable', () => {
     it('handles row click callbacks', () => {
       const onRowClick = jest.fn();
 
-      render(<BrushDataTable brushData={mockBrushData} onRowClick={onRowClick} />);
+      render(<BrushDataTable brushData={mockBrushData} />);
 
       // Row click is handled through cell click handlers
       // The callback is passed through to the click handler
@@ -240,7 +240,7 @@ describe('BrushDataTable', () => {
     it('handles empty brush data array', () => {
       render(<BrushDataTable brushData={[]} />);
 
-      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
+      expect(screen.getByText('No brush data to display')).toBeInTheDocument();
     });
 
     it('handles malformed brush data', () => {

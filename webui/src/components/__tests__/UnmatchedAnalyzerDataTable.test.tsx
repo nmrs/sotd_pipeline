@@ -110,8 +110,8 @@ describe('UnmatchedAnalyzerDataTable', () => {
       const propsElement = screen.getByTestId('data-table-props');
       const props = JSON.parse(propsElement.textContent || '{}');
 
-      expect(props.height).toBe(350);
-      expect(props.itemSize).toBe(40);
+      expect(props.height).toBe(400);
+      expect(props.itemSize).toBe(48);
       expect(props.resizable).toBe(true);
       expect(props.showColumnVisibility).toBe(true);
       expect(props.searchKey).toBe('item');
@@ -277,7 +277,7 @@ describe('UnmatchedAnalyzerDataTable', () => {
         />
       );
 
-      expect(screen.getByTestId('column-comment_ids')).toHaveTextContent('Comment IDs');
+      expect(screen.getByTestId('column-comment_ids')).toHaveTextContent('Comments');
     });
 
     it('defines examples column with correct header', () => {
@@ -333,7 +333,7 @@ describe('UnmatchedAnalyzerDataTable', () => {
         />
       );
 
-      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
+      expect(screen.getByText('No unmatched items to display')).toBeInTheDocument();
     });
   });
 
