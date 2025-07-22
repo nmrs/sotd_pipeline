@@ -20,7 +20,6 @@ try:
 except ImportError:  # pragma: no cover
     from prawcore.exceptions import TooManyRequests as RateLimitExceeded  # type: ignore
 
-from sotd.utils import parse_thread_date
 
 T = TypeVar("T")
 
@@ -163,6 +162,22 @@ def search_threads(
     if debug:
         print(f"[DEBUG] Combined raw results (deduped): {len(combined)}")
 
+    # Process thread overrides
+    month_str = f"{year:04d}-{month:02d}"
+    override_threads = process_thread_overrides(month_str, reddit, debug=debug)
+
+    # Add override threads to results (existing deduplication will handle duplicates)
+    for override_thread in override_threads:
+        all_results[override_thread.id] = override_thread
+
+    if debug and override_threads:
+        print(f"[DEBUG] Added {len(override_threads)} override threads")
+
+    # Re-combine and filter
+    combined = list(all_results.values())
+    if debug:
+        print(f"[DEBUG] Combined results with overrides: {len(combined)}")
+
     valid = filter_valid_threads(combined, year, month, debug=debug)
     return valid
 
@@ -170,9 +185,18 @@ def search_threads(
 def filter_valid_threads(
     threads: Sequence[Submission], year: int, month: int, *, debug: bool = False
 ) -> List[Submission]:
+    from sotd.utils import parse_thread_date
+    from datetime import datetime
+
     kept: List[Submission] = []
     for sub in threads:
         d = parse_thread_date(sub.title, year)
+        # --- CHANGED: Fallback to _override_date if present and title is unparsable ---
+        if d is None and hasattr(sub, "_override_date"):
+            try:
+                d = datetime.strptime(sub._override_date, "%Y-%m-%d").date()
+            except Exception:
+                d = None
         if d is None:
             if debug:
                 print(f"[DEBUG] Skip (no-date) {sub.title}")
@@ -183,7 +207,17 @@ def filter_valid_threads(
             continue
         kept.append(sub)
 
-    kept.sort(key=lambda s: parse_thread_date(s.title, year) or _date.min)
+    # --- CHANGED: Sort using fallback date if present ---
+    def sort_key(s):
+        d = parse_thread_date(s.title, year)
+        if d is None and hasattr(s, "_override_date"):
+            try:
+                d = datetime.strptime(s._override_date, "%Y-%m-%d").date()
+            except Exception:
+                d = None
+        return d or _date.min
+
+    kept.sort(key=sort_key)
     if debug:
         print(f"[DEBUG] Valid threads:     {len(kept)}")
     return kept
@@ -361,3 +395,147 @@ def fetch_top_level_comments_parallel(
         return final_results, metrics
 
     return final_results
+
+
+# --------------------------------------------------------------------------- #
+# thread override functionality                                               #
+# --------------------------------------------------------------------------- #
+
+
+def load_thread_overrides(month: str) -> List[str]:
+    """Load manual thread overrides from YAML file.
+
+    Args:
+        month: Month in YYYY-MM format (e.g., "2025-06")
+
+    Returns:
+        List of Reddit URLs for manual override threads
+
+    Raises:
+        yaml.YAMLError: If YAML file is malformed
+    """
+    from pathlib import Path
+    from sotd.utils.yaml_loader import load_yaml_with_nfc
+
+    override_path = Path("data/thread_overrides.yaml")
+
+    if not override_path.exists():
+        return []
+
+    try:
+        data = load_yaml_with_nfc(override_path)
+        if not data:
+            return []
+
+        # Extract URLs for the specified month
+        urls = []
+        for date_key, url_list in data.items():
+            # Convert date_key to string (handle datetime.date or str)
+            if hasattr(date_key, "isoformat"):
+                date_str = date_key.isoformat()
+            else:
+                date_str = str(date_key)
+            if date_str.startswith(month):
+                if isinstance(url_list, list):
+                    urls.extend(url_list)
+                else:
+                    # Handle single URL case
+                    urls.append(url_list)
+
+        return urls
+    except Exception as e:
+        # Handle YAML errors gracefully
+        print(f"[WARN] Failed to load thread overrides: {e}")
+        return []
+
+
+def validate_thread_override(url: str, reddit) -> Submission:
+    """Validate a thread override URL with PRAW.
+
+    Args:
+        url: Reddit thread URL
+        reddit: PRAW Reddit instance
+
+    Returns:
+        Submission object if valid
+
+    Raises:
+        ValueError: If thread is not found or not accessible
+    """
+    try:
+        submission = reddit.submission(url=url)
+
+        # Basic validation that thread exists and is accessible
+        if not submission.title or submission.author is None:
+            raise ValueError(f"Thread not accessible: {url}")
+
+        return submission
+    except Exception as e:
+        raise ValueError(f"Failed to fetch thread override: {url} - {e}")
+
+
+def process_thread_overrides(month: str, reddit, debug: bool = False) -> List[Submission]:
+    # from datetime import datetime  # Not needed, remove
+    # --- CHANGED: Load mapping of date_key -> list of URLs ---
+    from pathlib import Path
+    from sotd.utils.yaml_loader import load_yaml_with_nfc
+
+    override_path = Path("data/thread_overrides.yaml")
+    if not override_path.exists():
+        if debug:
+            print(f"[DEBUG] No thread overrides found for {month}")
+        return []
+    try:
+        data = load_yaml_with_nfc(override_path)
+        if not data:
+            if debug:
+                print(f"[DEBUG] No thread overrides found for {month}")
+            return []
+    except Exception as e:
+        print(f"[WARN] Failed to load thread overrides: {e}")
+        return []
+
+    # Build list of (date_key, url) for the month
+    url_date_pairs = []
+    for date_key, url_list in data.items():
+        # Convert date_key to string (handle datetime.date or str)
+        if hasattr(date_key, "isoformat"):
+            date_str = date_key.isoformat()
+        else:
+            date_str = str(date_key)
+        if date_str.startswith(month):
+            if isinstance(url_list, list):
+                for url in url_list:
+                    url_date_pairs.append((date_str, url))
+            else:
+                url_date_pairs.append((date_str, url_list))
+
+    if not url_date_pairs:
+        if debug:
+            print(f"[DEBUG] No thread overrides found for {month}")
+        return []
+
+    if debug:
+        print(f"[DEBUG] Processing {len(url_date_pairs)} thread overrides for {month}")
+
+    valid_submissions = []
+
+    for date_str, url in url_date_pairs:
+        try:
+            submission = validate_thread_override(url, reddit)
+            # Attach the YAML date as _override_date for fallback
+            setattr(submission, "_override_date", date_str)
+            valid_submissions.append(submission)
+            if debug:
+                print(f"[DEBUG] Validated override: {submission.title}")
+        except ValueError as e:
+            print(f"[WARN] Failed to fetch thread override: {url} - {e}")
+            continue
+
+    if debug:
+        print(
+            f"[DEBUG] Successfully processed {len(valid_submissions)}/"
+            f"{len(url_date_pairs)} overrides"
+        )
+
+    return valid_submissions

@@ -1,0 +1,318 @@
+# Thread Override Fetch Enhancement - TDD Implementation Plan
+
+## 📘 Project Summary
+
+Add manual thread override support to the SOTD Pipeline fetch phase to handle threads that don't match standard search patterns. This will allow users to manually specify Reddit threads (like the missing June 25, 2025 thread) that the automated search misses due to non-standard title formats.
+
+**Key Requirements:**
+- YAML-based override system: `data/thread_overrides.yaml`
+- Post-validation with PRAW (error if thread not found)
+- Skip with warning if override fails, continue processing
+- Integration in `search_threads()` function
+- Manual YAML editing only
+
+## 🧩 Component Steps
+
+### Phase 1: Core Infrastructure
+1. **Override File Loading** - Load and parse YAML override file
+2. **Thread Validation** - Validate override URLs with PRAW
+3. **Error Handling** - Implement skip-with-warning logic
+
+### Phase 2: Integration
+4. **Search Integration** - Integrate overrides into `search_threads()`
+5. **Deduplication** - Ensure existing deduplication handles overrides
+6. **Testing** - Comprehensive test coverage
+
+### Phase 3: Validation & Polish
+7. **Edge Case Handling** - Handle various error scenarios
+8. **Documentation** - Update fetch phase documentation
+9. **Integration Testing** - Test with real missing thread
+10. **YAML Date Fallback for Overrides** - If a thread from `thread_overrides.yaml` cannot have its date parsed from the title, fallback to the YAML date key for that thread. This fallback only applies to override threads, not search results.
+
+## 🔁 Implementation Prompts
+
+### Step 1: Override File Loading
+
+```text
+Add thread override file loading functionality to the fetch phase. Create a new function `load_thread_overrides(month: str) -> List[str]` in `sotd/fetch/reddit.py` that:
+
+1. Loads `data/thread_overrides.yaml` if it exists
+2. Extracts URLs for the specified month (format: YYYY-MM)
+3. Returns a list of Reddit URLs for manual override threads
+4. Handles missing file gracefully (return empty list)
+5. Validates YAML structure (month -> date -> list of URLs)
+
+Requirements:
+- Use existing YAML loading utilities from the project
+- Handle missing override file gracefully
+- Support format: `2025-06-25: ["https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/"]`
+- Return empty list if no overrides for specified month
+
+Write comprehensive unit tests for this function including:
+- Normal case with valid overrides
+- Missing override file
+- Empty overrides for month
+- Invalid YAML structure
+- Multiple overrides for same day
+```
+
+### Step 2: Thread Validation
+
+```text
+Add thread validation functionality to validate override URLs with PRAW. Create a function `validate_thread_override(url: str, reddit) -> Submission` that:
+
+1. Takes a Reddit URL and PRAW instance
+2. Attempts to fetch the thread using PRAW
+3. Validates the thread exists and is accessible
+4. Returns the Submission object if valid
+5. Raises ValueError with clear error message if invalid
+
+Requirements:
+- Use PRAW to fetch thread by URL
+- Validate thread has title and author (basic accessibility check)
+- Handle PRAW exceptions gracefully
+- Provide clear error messages for different failure types
+- Return the actual Submission object for further processing
+
+Write unit tests with mocked PRAW responses for:
+- Valid thread
+- Non-existent thread
+- Deleted thread
+- Private/inaccessible thread
+- Network errors
+```
+
+### Step 3: Error Handling
+
+```text
+Implement error handling for thread overrides that follows the "skip with warning" approach. Create a function `process_thread_overrides(month: str, reddit, debug: bool = False) -> List[Submission]` that:
+
+1. Loads overrides for the specified month
+2. Validates each override URL with PRAW
+3. Skips invalid overrides with warning messages
+4. Returns list of valid Submission objects
+5. Continues processing even if some overrides fail
+
+Requirements:
+- Use the load_thread_overrides() function from Step 1
+- Use the validate_thread_override() function from Step 2
+- Log warnings for failed overrides but don't stop processing
+- Return only valid threads
+- Support debug mode for detailed logging
+
+Write integration tests for:
+- All overrides valid
+- Some overrides invalid
+- All overrides invalid
+- No overrides
+- Debug mode output
+```
+
+### Step 4: Search Integration
+
+```text
+Integrate thread overrides into the existing `search_threads()` function. Modify the function to:
+
+1. Call process_thread_overrides() to get override threads
+2. Combine override threads with search results
+3. Let existing deduplication logic handle duplicates
+4. Maintain existing function signature and behavior
+
+Requirements:
+- Add override processing to search_threads()
+- Combine results before deduplication
+- Preserve existing search logic
+- Maintain backward compatibility
+- Handle debug mode properly
+
+Update existing tests to ensure:
+- Override threads are included in results
+- Deduplication works correctly
+- Existing search functionality unchanged
+- Debug output includes override information
+```
+
+### Step 5: Deduplication Testing
+
+```text
+Ensure existing deduplication logic properly handles override threads. Test scenarios where:
+
+1. Override thread is also found by search
+2. Override thread is unique (not found by search)
+3. Multiple overrides for same thread ID
+4. Override thread has different ID than search results
+
+Requirements:
+- Verify existing deduplication by thread ID works
+- Test edge cases with duplicate thread IDs
+- Ensure no duplicate threads in final results
+- Maintain existing deduplication behavior
+
+Write comprehensive tests for:
+- Override + search same thread
+- Override + search different threads
+- Multiple overrides for same day
+- No conflicts between overrides and search
+```
+
+### Step 6: Comprehensive Testing
+
+```text
+Create comprehensive test suite for the thread override functionality. Add tests to `tests/fetch/test_reddit.py` that cover:
+
+1. Unit tests for each new function
+2. Integration tests for the complete flow
+3. Edge case testing
+4. Error scenario testing
+5. Performance testing with multiple overrides
+
+Requirements:
+- Test all new functions with various inputs
+- Test integration with existing search logic
+- Test error handling and recovery
+- Test performance with realistic data
+- Ensure 100% code coverage for new functionality
+
+Test scenarios:
+- Normal operation with valid overrides
+- Error handling with invalid overrides
+- Integration with existing search
+- Performance with large override lists
+- Edge cases (empty files, malformed YAML, etc.)
+```
+
+### Step 7: Edge Case Handling
+
+```text
+Add robust edge case handling for thread overrides. Enhance the implementation to handle:
+
+1. Malformed YAML files
+2. Invalid URL formats
+3. Network timeouts during validation
+4. Rate limiting during validation
+5. Threads that exist but are inaccessible
+6. **Override fallback date**: If a thread from the override YAML cannot have its date parsed from the title, ensure the YAML date is used as a fallback (and test this case)
+
+Requirements:
+- Graceful handling of all error types
+- Clear error messages for debugging
+- No crashes or unhandled exceptions
+- Proper logging for all scenarios
+- Recovery mechanisms for transient failures
+
+Add tests for:
+- Malformed YAML structure
+- Invalid URL formats
+- Network timeouts
+- Rate limiting scenarios
+- Access permission issues
+- **Override fallback date logic**
+```
+
+### Step 8: Documentation Update
+
+```text
+Update fetch phase documentation to include thread override functionality. Update relevant documentation files to explain:
+
+1. How to use thread overrides
+2. YAML file format and structure
+3. Error handling and troubleshooting
+4. Integration with existing search logic
+
+Requirements:
+- Update fetch phase specification
+- Add examples of override file format
+- Document error messages and meanings
+- Explain integration with existing search
+- Provide troubleshooting guide
+
+Documentation to update:
+- `docs/SOTD_Pipeline_Spec.md` (fetch phase section)
+- `sotd/fetch/README.md` (if exists)
+- Add inline documentation to new functions
+- Update any CLI help text
+```
+
+### Step 9: Integration Testing
+
+```text
+Test the complete thread override functionality with the real missing June 25, 2025 thread. Verify that:
+
+1. The override file loads correctly
+2. The thread is validated and fetched
+3. It's properly integrated with search results
+4. The complete fetch process works end-to-end
+
+Requirements:
+- Test with actual Reddit thread
+- Verify thread is included in results
+- Check that deduplication works
+- Validate the complete data flow
+- Ensure no regressions in existing functionality
+
+Test steps:
+- Run fetch for 2025-06 with override
+- Verify thread count includes override
+- Check that thread data is correct
+- Validate integration with rest of pipeline
+```
+
+### Step 10: YAML Date Fallback for Overrides
+
+```text
+Enhance the override thread processing so that if a thread loaded from `thread_overrides.yaml` cannot have its date parsed from the thread title, the date from the YAML key is used as the canonical date for that thread. This fallback should only apply to override threads, not to threads found via search.
+
+Requirements:
+- When processing overrides, keep track of the YAML date key for each override URL
+- If the thread's date cannot be parsed from its title, assign the date from the YAML key
+- Ensure this date is used downstream for all filtering and metadata
+- Do not apply this fallback to threads found via search
+
+Testing:
+- Add/modify tests to ensure that:
+  - If a thread from the override YAML has a non-standard title, the date from the YAML is used
+  - Threads found via search still require a parsable date in the title
+  - Edge cases: malformed YAML, multiple overrides for the same day, etc.
+```
+
+## 🧠 Critical Analysis
+
+### **Strengths of This Plan:**
+
+1. **Incremental Approach**: Each step builds logically on the previous one
+2. **Test-First**: Every step includes comprehensive testing requirements
+3. **Error Handling**: Robust error handling from the start
+4. **Integration**: Proper integration with existing systems
+5. **Validation**: Post-validation with PRAW ensures reliability
+6. **Override Date Fallback**: Ensures that even non-standard thread titles in overrides are handled correctly, preventing missing threads due to title format issues.
+
+### **Risk Mitigation:**
+
+1. **Backward Compatibility**: Existing search logic unchanged
+2. **Graceful Degradation**: Override failures don't break main functionality
+3. **Clear Error Messages**: Easy debugging for users
+4. **Comprehensive Testing**: Prevents regressions
+
+### **Implementation Notes:**
+
+- **File Location**: `data/thread_overrides.yaml` for consistency
+- **Error Strategy**: Skip with warning, continue processing
+- **Integration Point**: `search_threads()` function
+- **Deduplication**: Leverage existing logic
+- **Validation**: Post-validation with PRAW
+
+### **Success Criteria:**
+
+- ✅ Override file loads and parses correctly
+- ✅ Invalid overrides are skipped with warnings
+- ✅ Valid overrides are included in search results
+- ✅ Existing functionality unchanged
+- ✅ Comprehensive test coverage
+- ✅ Real missing thread is successfully fetched
+- ✅ **Override fallback date is used when thread title cannot be parsed, ensuring no missing threads due to title format**
+
+This plan provides a safe, incremental approach to adding thread override functionality while maintaining the reliability and simplicity of the existing fetch system.
+description:
+globs:
+alwaysApply: false
+---

@@ -1,0 +1,6 @@
+# Manual thread overrides for threads that don't match standard search patterns
+# Format: YYYY-MM-DD: [list of Reddit URLs]
+# Example: 2025-06-25: ["https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/"]
+
+2025-06-25:
+  - "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/" 
