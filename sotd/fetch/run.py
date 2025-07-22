@@ -31,7 +31,7 @@ from sotd.fetch.cli import get_parser
 from sotd.fetch.merge import merge_records
 from sotd.fetch.overrides import apply_overrides, load_overrides
 from sotd.fetch.reddit import (
-    fetch_top_level_comments,
+    fetch_top_level_comments_parallel,
     get_reddit,
     search_threads,
 )
@@ -127,17 +127,22 @@ def _process_month(
             "missing_days": [d.isoformat() for d in missing],
         }
 
-    # comment records with inner progress bar
-    new_comment_records: List[dict] = []
-    for sub in tqdm(
-        threads,
-        desc=f"Comments {year}-{month:02d}",
-        unit="thread",
-        disable=False,
-        leave=False,
-    ):
-        for c in fetch_top_level_comments(sub):
-            new_comment_records.append(
+    # comment records with parallel processing
+    print(f"[INFO] Fetching comments for {len(threads)} threads using parallel processing...")
+    comment_results = fetch_top_level_comments_parallel(threads, max_workers=3, return_metrics=True)
+
+    if isinstance(comment_results, tuple):
+        new_comment_records, metrics = comment_results
+        print(f"[INFO] Parallel processing metrics: {metrics}")
+    else:
+        new_comment_records = comment_results
+
+    # Convert comment results to records
+    comment_records = []
+    for i, comments in enumerate(new_comment_records):
+        sub = threads[i]
+        for c in comments:
+            comment_records.append(
                 {
                     "id": c.id,
                     "thread_id": sub.id,
@@ -154,9 +159,9 @@ def _process_month(
 
     existing_c = None if args.force else load_month_file(comments_path)
     merged_comments = (
-        merge_records(existing_c[1], new_comment_records)
+        merge_records(existing_c[1], comment_records)
         if existing_c is not None
-        else sorted(new_comment_records, key=lambda r: r["created_utc"])
+        else sorted(comment_records, key=lambda r: r["created_utc"])
     )
 
     # metadata + write

@@ -1,10 +1,10 @@
 """Brush Split Validator that inherits from BaseValidator."""
 
-from pathlib import Path
-from typing import Dict, Any, List, Optional
+import re
 from dataclasses import dataclass, field
 from enum import Enum
-import re
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from webui.api.validators.base_validator import BaseValidator, ValidationResult
 

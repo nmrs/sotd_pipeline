@@ -1,9 +1,10 @@
 """Base validator class for product-type validation logic."""
 
-from pathlib import Path
-from typing import Dict, Any, List, Optional
-import yaml
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import yaml
 
 
 @dataclass
