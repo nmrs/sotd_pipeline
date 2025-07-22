@@ -33,14 +33,12 @@ describe('BrushData Transformer Integration Tests', () => {
           handle: {
             brand: 'Elite',
             model: 'handle',
-            maker: 'Elite',
           },
           knot: {
             brand: 'Declaration',
             model: 'knot',
-            maker: 'Declaration',
             fiber: 'badger',
-            size: '24mm',
+            knot_size_mm: 24,
           },
         },
       };
@@ -121,14 +119,12 @@ describe('BrushData Transformer Integration Tests', () => {
             handle: {
               brand: 'Simpson',
               model: 'Chubby 2',
-              maker: 'Simpson',
             },
             knot: {
               brand: 'Simpson',
               model: 'Badger',
-              maker: 'Simpson',
               fiber: 'badger',
-              size: '27mm',
+              knot_size_mm: 27,
             },
           },
         },
@@ -181,7 +177,6 @@ describe('BrushData Transformer Integration Tests', () => {
           handle: {
             brand: 'Elite',
             model: 'handle',
-            maker: 'Elite',
           },
         },
       };
@@ -212,9 +207,8 @@ describe('BrushData Transformer Integration Tests', () => {
           knot: {
             brand: 'Declaration',
             model: 'knot',
-            maker: 'Declaration',
             fiber: 'badger',
-            size: '24mm',
+            knot_size_mm: 24,
           },
         },
       };
@@ -244,7 +238,6 @@ describe('BrushData Transformer Integration Tests', () => {
           handle: {
             brand: 'Elite',
             model: 'handle',
-            maker: 'Elite',
           },
         },
         unmatched: {
@@ -257,9 +250,9 @@ describe('BrushData Transformer Integration Tests', () => {
 
       const brushData: BrushData = transformBrushData(mixedOutput);
 
-      // Validate main structure (should be unmatched due to mixed status)
+      // Validate main structure (should be matched since handle is matched)
       expect(brushData.main.text).toBe('Elite handle w/ Unknown knot');
-      expect(brushData.main.status).toBe('Unmatched');
+      expect(brushData.main.status).toBe('Matched');
 
       // Validate handle component (matched)
       expect(brushData.components.handle!.text).toBe('Elite handle');
