@@ -105,7 +105,7 @@ def save_overrides(overrides, filename="data/thread_overrides.yaml"):
                     f.write(f"  - {url}\n")
                 f.write("\n")
             else:
-                f.write(f"{date}: null\n\n")
+                f.write(f"{date}:\n\n")
 
 
 def main():
