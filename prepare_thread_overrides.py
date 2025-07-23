@@ -110,15 +110,27 @@ def load_missing_dates():
 
 def merge_overrides(existing_overrides, new_overrides, all_missing_dates):
     """Merge existing overrides with new ones, ensuring all missing dates are included."""
-    merged = {}
+    merged = existing_overrides.copy()
 
-    # Start with all missing dates as empty entries
+    # Add all missing dates first (with empty values if not found)
     for date in all_missing_dates:
-        merged[date] = None  # Will be converted to empty entry with comment
+        if date not in merged:
+            merged[date] = None  # Will be converted to empty entry with comment
 
-    # Add only valid new overrides
+    # Add new overrides (these will override empty entries if found)
     for date, thread_info in new_overrides.items():
-        merged[date] = [thread_info["url"]]
+        if date in merged and merged[date] is not None:
+            # Convert to list if it's not already
+            existing_value = merged[date]
+            if isinstance(existing_value, list):
+                # Check if URL already exists to avoid duplicates
+                if thread_info["url"] not in existing_value:
+                    merged[date] = existing_value + [thread_info["url"]]
+            else:
+                # Convert existing value to list and add new URL
+                merged[date] = [str(existing_value), thread_info["url"]]
+        else:
+            merged[date] = [thread_info["url"]]
 
     return merged
 
