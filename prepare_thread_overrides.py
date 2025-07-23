@@ -59,25 +59,37 @@ def load_existing_overrides():
         return {}
 
 
-def merge_overrides(existing_overrides, new_overrides):
-    """Merge new overrides with existing ones, avoiding duplicates."""
+def load_missing_dates():
+    """Load the list of all missing dates from the analysis."""
+    try:
+        with open("missing_dates_analysis.json", "r") as f:
+            data = json.load(f)
+            return data.get("missing_dates", [])
+    except FileNotFoundError:
+        print("Warning: missing_dates_analysis.json not found")
+        return []
+
+
+def merge_overrides(existing_overrides, new_overrides, all_missing_dates):
+    """Merge existing overrides with new ones, ensuring all missing dates are included."""
     merged = existing_overrides.copy()
 
-    for date, thread_info in new_overrides.items():
+    # Add all missing dates first (with empty values if not found)
+    for date in all_missing_dates:
         if date not in merged:
-            merged[date] = [thread_info["url"]]
-        else:
-            # Handle case where existing value might be None or not a list
+            merged[date] = None  # Will be converted to empty entry with comment
+
+    # Add new overrides (these will override empty entries if found)
+    for date, thread_info in new_overrides.items():
+        if date in merged and merged[date] is not None:
+            # Convert to list if it's not already
             existing_value = merged[date]
-            if existing_value is None:
-                merged[date] = [thread_info["url"]]
-            elif isinstance(existing_value, list):
-                # Check if URL already exists
-                if thread_info["url"] not in existing_value:
-                    existing_value.append(thread_info["url"])
+            if isinstance(existing_value, list):
+                merged[date] = existing_value + [thread_info["url"]]
             else:
-                # Convert to list if it's not already
                 merged[date] = [str(existing_value), thread_info["url"]]
+        else:
+            merged[date] = [thread_info["url"]]
 
     return merged
 
@@ -99,13 +111,15 @@ def save_overrides(overrides, filename="data/thread_overrides.yaml"):
 
         for date in sorted(sorted_overrides.keys()):
             urls = sorted_overrides[date]
-            if urls and isinstance(urls, list):
+            if urls and isinstance(urls, list) and len(urls) > 0:
                 f.write(f"{date}:\n")
                 for url in urls:
                     f.write(f"  - {url}\n")
                 f.write("\n")
             else:
-                f.write(f"{date}:\n\n")
+                f.write(f"{date}:\n")
+                f.write("  # No threads found for this date\n")
+                f.write("\n")
 
 
 def main():
@@ -126,8 +140,12 @@ def main():
     existing_overrides = load_existing_overrides()
     print(f"Existing overrides: {len(existing_overrides)} dates")
 
+    # Load all missing dates
+    all_missing_dates = load_missing_dates()
+    print(f"All missing dates: {len(all_missing_dates)}")
+
     # Merge with existing overrides
-    merged_overrides = merge_overrides(existing_overrides, best_matches)
+    merged_overrides = merge_overrides(existing_overrides, best_matches, all_missing_dates)
     print(f"Total overrides after merge: {len(merged_overrides)} dates")
 
     # Save updated overrides
