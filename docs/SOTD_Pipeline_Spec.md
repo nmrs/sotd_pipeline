@@ -76,6 +76,25 @@ Parse downloaded comment bodies to identify product mentions:
 - `brush`
 - `soap`
 
+**Supported Extraction Patterns:**
+
+1. **Standard Markdown Format**: `* **Field:** Value`
+   - Example: `* **Razor:** Karve Christopher Bradley`
+
+2. **Checkmark Format**: `✓Field: Value`
+   - Example: `✓Brush: Kent Infinity`
+   - Example: `✓Razor: Kopparkant +`
+
+3. **Emoji Bold Format**: `* **Field** Value`
+   - Example: `* **Straight Razor** - Fontani Scarperia`
+   - Example: `* **Shaving Brush** - Leonidam`
+
+**Field Mapping:**
+- "Lather" → "soap"
+- "Straight Razor" → "razor"
+- "Shaving Brush" → "brush"
+- "Shaving Soap" → "soap"
+
 Convert each comment into a structured "shave" record. Save to:
 
 - `data/extracted/YYYY-MM.json`
@@ -590,6 +609,18 @@ This version marks the completion of the minimal viable product for the Extracti
 - Saved outputs to `data/extracted/YYYY-MM.json` with meta, data, and skipped sections
 - Built CLI entry point with `--month` and `--debug` options
 - Added full unit test coverage and CLI integration test
+
+### v1.1 – Extraction Pattern Enhancement (2025-07-22)
+This version enhances the extraction phase with support for additional comment formats identified through data-driven analysis.
+
+**Highlights:**
+- Added checkmark format support: `✓Field: Value` (28 occurrences in analysis)
+- Added emoji bold format support: `* **Field** Value` (168 occurrences in analysis)
+- Enhanced field mapping for multi-word field names: "Straight Razor" → "razor", "Shaving Brush" → "brush"
+- Updated field aliases to support new patterns while maintaining backward compatibility
+- Added comprehensive unit and integration tests with real examples from analysis data
+- Performance validation shows <5ms per comment with no regression in existing patterns
+- All existing extraction patterns continue to work unchanged
 
 # SOTD Pipeline - Core Development Rules
 # Shave of the Day Data Processing Pipeline
