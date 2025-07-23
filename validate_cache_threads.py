@@ -20,18 +20,17 @@ def validate_thread_for_missing_date(thread, missing_date):
     if thread_date_only == missing_date:
         return True, "Exact date match"
 
-    # Check if thread is on adjacent dates (day before/after)
+    # Check if thread is on the same date (timezone differences)
     try:
         missing_dt = datetime.strptime(missing_date, "%Y-%m-%d")
         thread_dt = datetime.strptime(thread_date_only, "%Y-%m-%d")
         date_diff = abs((thread_dt - missing_dt).days)
 
-        if date_diff == 1:
-            return True, f"Adjacent date ({date_diff} day difference)"
-        elif date_diff <= 3:
-            return True, f"Nearby date ({date_diff} days difference)"
+        # Only accept exact matches or same-day threads (timezone differences)
+        if date_diff == 0:
+            return True, "Same date (timezone difference)"
         else:
-            return False, f"Too far from missing date ({date_diff} days)"
+            return False, f"Date mismatch ({date_diff} days difference)"
     except ValueError:
         return False, "Invalid date format"
 
