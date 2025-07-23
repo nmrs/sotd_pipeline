@@ -70,7 +70,7 @@ class BrushSplitter:
         - Non-delimiters like " x ", " × ", " & ", "()" are NOT treated as delimiters.
         """
         # High-reliability delimiters (always trigger splitting with simple logic)
-        high_reliability_delimiters = [" w/ ", " with "]
+        high_reliability_delimiters = [" w/ ", " w/", " with "]
         # Handle-primary delimiters (first part is handle)
         handle_primary_delimiters = [" in "]
         # Medium-reliability delimiters (need smart analysis)
