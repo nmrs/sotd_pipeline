@@ -44,18 +44,37 @@ def extract_best_matches(validation_results):
     return best_matches
 
 
+def deduplicate_overrides(overrides):
+    """Remove duplicate URLs from overrides."""
+    deduplicated = {}
+    for date, urls in overrides.items():
+        if urls and isinstance(urls, list):
+            # Remove duplicates while preserving order
+            seen = set()
+            unique_urls = []
+            for url in urls:
+                if url not in seen:
+                    seen.add(url)
+                    unique_urls.append(url)
+            deduplicated[date] = unique_urls
+        else:
+            deduplicated[date] = urls
+    return deduplicated
+
+
 def load_existing_overrides():
-    """Load existing thread_overrides.yaml file."""
-    overrides_file = Path("data/thread_overrides.yaml")
-    if overrides_file.exists():
-        with open(overrides_file, "r") as f:
-            raw_overrides = yaml.safe_load(f)
-            # Convert all keys to strings to avoid sorting issues
+    """Load existing overrides from YAML file."""
+    try:
+        with open("data/thread_overrides.yaml", "r") as f:
+            data = yaml.safe_load(f)
+            if data is None:
+                return {}
+            # Convert all keys to strings and deduplicate
             overrides = {}
-            for key, value in raw_overrides.items():
+            for key, value in data.items():
                 overrides[str(key)] = value
-            return overrides
-    else:
+            return deduplicate_overrides(overrides)
+    except FileNotFoundError:
         return {}
 
 
@@ -85,8 +104,11 @@ def merge_overrides(existing_overrides, new_overrides, all_missing_dates):
             # Convert to list if it's not already
             existing_value = merged[date]
             if isinstance(existing_value, list):
-                merged[date] = existing_value + [thread_info["url"]]
+                # Check if URL already exists to avoid duplicates
+                if thread_info["url"] not in existing_value:
+                    merged[date] = existing_value + [thread_info["url"]]
             else:
+                # Convert existing value to list and add new URL
                 merged[date] = [str(existing_value), thread_info["url"]]
         else:
             merged[date] = [thread_info["url"]]
