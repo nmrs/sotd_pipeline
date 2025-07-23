@@ -44,11 +44,23 @@ from sotd.utils import parse_thread_date
 
 def _calc_missing(year: int, month: int, threads) -> List[_date]:
     """Return any calendar days in *month* that lack a thread title date."""
+    from datetime import datetime
+
     last_day = calendar.monthrange(year, month)[1]
     expected: Set[_date] = {_date(year, month, d) for d in range(1, last_day + 1)}
-    present: Set[_date] = {
-        d for t in threads if (d := parse_thread_date(t.title, year)) is not None
-    }
+
+    present: Set[_date] = set()
+    for t in threads:
+        d = parse_thread_date(t.title, year)
+        # --- CHANGED: Fallback to _override_date if present and title is unparsable ---
+        if d is None and hasattr(t, "_override_date"):
+            try:
+                d = datetime.strptime(t._override_date, "%Y-%m-%d").date()
+            except Exception:
+                d = None
+        if d is not None:
+            present.add(d)
+
     return sorted(expected - present)
 
 

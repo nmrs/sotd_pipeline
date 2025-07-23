@@ -1,0 +1,269 @@
+# Plan: Missing SOTD Thread URL Recovery
+# Date: 2025-07-22
+# Status: RESTARTING
+
+## Project Summary
+This plan documents the process for researching and recovering missing Reddit SOTD thread URLs for days identified as missing in the SOTD pipeline's `data/comments/` folder. The goal is to improve data completeness by finding and adding thread URLs to `thread_overrides.yaml` for dates with missing threads.
+
+## Implementation Strategy: Cache-First Approach
+
+### Phase 1: Cache Analysis (Primary Strategy)
+1. ✅ **COMPLETE**: Generate comprehensive list of missing dates from `data/comments/` metadata
+   - **Results**: Found 58 total unique missing dates across 111 comment files
+   - **Date range**: 2016-05-02 to 2025-07-31
+   - **Breakdown by year**:
+     - 2016: 3 missing dates (2016-05-02, 2016-05-03, 2016-08-01)
+     - 2018: 7 missing dates (2018-02-15, 2018-07-11, 2018-11-01, 2018-12-06, 2018-12-13, 2018-12-20, 2018-12-27)
+     - 2019: 3 missing dates (2019-07-29, 2019-09-02, 2019-11-04)
+     - 2020: 4 missing dates (2020-02-24, 2020-03-02, 2020-03-04, 2020-04-04)
+     - 2021: 4 missing dates (2021-01-22, 2021-01-23, 2021-01-24, 2021-09-01)
+     - 2022: 23 missing dates (2022-04-09 to 2022-04-30, 2022-05-08, 2022-05-12)
+     - 2025: 14 missing dates (2025-07-18 to 2025-07-31)
+   - **Analysis saved to**: missing_dates_analysis.json
+2. ✅ **COMPLETE**: Analyze cache file structure in both cache directories:
+   - **Threads cache**: `/Users/jmoore/Documents/Projects/sotd-report/cache/threads/`
+   - **Comments cache**: `/Users/jmoore/Documents/Projects/sotd-report/cache/comments/`
+   - **Results**: Found 110 threads cache files and 113 comments cache files
+   - **Date range**: 201605 to 202505 (threads), 201605 to 202505 (comments)
+   - **Cache search success rate**: 70.7% (41/58 missing dates found)
+   - **Found threads**: 41 dates with valid SOTD threads in cache
+   - **Analysis saved to**: cache_search_results.json
+3. ✅ **COMPLETE**: For each missing date, search cache files systematically:
+   - Check threads cache files for exact date matches
+   - Check comments cache files for thread references on missing dates
+   - Look for date variations (day before/after, different formats)
+   - Search for thread title variations in cache data
+   - Identify threads with comment activity on missing dates
+   - **Results**: Found 41 valid SOTD threads for missing dates
+   - **Validation success rate**: 100% (all found threads were valid)
+   - **Total threads checked**: 99 threads across 41 missing dates
+   - **Analysis saved to**: thread_validation_results.json
+4. ✅ **COMPLETE**: Validate found cache threads by checking:
+   - Thread title relevance to SOTD
+   - Comment activity levels and patterns
+   - Date accuracy and context
+   - Thread content and community engagement
+   - **Record ALL findings**: Include both valid and rejected threads with reasons
+   - **Results**: 100% validation success rate (99/99 threads valid)
+   - **Validation saved to**: thread_validation_results.json
+5. ✅ **COMPLETE**: Record all cache-found URLs with metadata (date, source, validation status, rejection reasons if applicable)
+   - **Results**: 41 best matches extracted with full metadata
+   - **Metadata includes**: URL, title, author, created_utc, source, validation_status
+   - **Preparation saved to**: thread_overrides_preparation.json
+6. ✅ **COMPLETE**: Update `thread_overrides.yaml` with validated cache results
+   - **Results**: Added 20 new dates to thread_overrides.yaml
+   - **Total overrides**: 60 dates (40 existing + 20 new)
+   - **New additions**: All 2022-04 missing dates (2022-04-10 to 2022-04-30)
+   - **File updated**: data/thread_overrides.yaml
+7. ✅ **COMPLETE**: Calculate cache recovery success rate
+   - **Total missing dates**: 58 dates
+   - **Dates with threads found in cache**: 41 dates
+   - **Cache recovery success rate**: 70.7% (41/58)
+   - **Dates with valid threads**: 41 dates
+   - **Validation success rate**: 100% (all found threads were valid)
+   - **Final recovery rate**: 70.7% of missing dates recovered from cache
+
+### Phase 2: External Search (Secondary Strategy - Only if Needed)
+8. 🔄 **TODO**: For remaining missing dates after cache analysis, execute external searches:
+   - **Standard Reddit search patterns**: flair:SOTD, date-based searches
+   - **Alternative title formats**: "SOTD Thread", "Shave of the Day", "Daily SOTD", etc.
+   - **Date format variations**: MM/DD, MM-DD, DD/MM, ISO formats
+   - **Broader searches**: Without flair restrictions, by author, by time period
+   - **External resources**: Djudge Portal, DamnFineShave, other wetshaving forums
+   - **Archive searches**: Wayback Machine, Reddit archives, Google site searches
+   - **Cross-reference validation**: Check if threads exist with different titles or flairs
+9. 🔄 **TODO**: Validate found external threads by checking:
+   - Thread title relevance to SOTD
+   - Comment activity levels and patterns
+   - Date accuracy and context
+   - Thread content and community engagement
+   - **Record ALL findings**: Include both valid and rejected threads with reasons
+10. 🔄 **TODO**: Record all external-found URLs with metadata (date, source, validation status, rejection reasons if applicable)
+11. 🔄 **TODO**: Update `thread_overrides.yaml` with validated external search results
+12. 🔄 **TODO**: Calculate external search recovery success rate
+
+### Phase 3: Validation and Integration
+13. 🔄 **TODO**: Validate all found threads (cache + external) by checking:
+   - Thread title relevance
+   - Comment activity levels
+   - Date accuracy
+   - Thread content quality
+   - **Record ALL findings**: Include both valid and rejected threads with detailed rejection reasons
+14. 🔄 **TODO**: Prepare final thread_overrides.yaml updates
+15. 🔄 **TODO**: Test pipeline with updated overrides to verify recovery
+16. 🔄 **TODO**: Document search process and results for each missing date
+
+### Phase 4: Documentation and Analysis
+17. 🔄 **TODO**: Calculate overall recovery success rate and statistics
+18. 🔄 **TODO**: Document lessons learned and search strategy effectiveness
+19. 🔄 **TODO**: Provide recommendations for future missing thread recovery
+20. 🔄 **TODO**: Update pipeline search patterns based on discoveries
+
+## Cache-First Search Strategy
+
+### Cache Analysis Priority Order
+1. **Direct Date Match**: Search for exact date in cache files
+2. **Date Variation Search**: Look for threads posted day before/after missing date
+3. **Title Pattern Search**: Search for SOTD thread title patterns in cache
+4. **Comment Activity Analysis**: Identify threads with comments on missing dates
+5. **Author Pattern Search**: Look for both AutoModerator and human-posted threads
+
+### Cache Validation Criteria
+- **Thread Relevance**: Must be a genuine SOTD thread
+- **Comment Activity**: Should have substantial community engagement
+- **Date Accuracy**: Thread date should match missing date (or be adjacent)
+- **Title Consistency**: Should follow SOTD thread naming patterns
+- **Content Quality**: Thread should contain SOTD-related content and community discussion
+
+### Cache File Structure Analysis
+- **Threads Cache Location**: `/Users/jmoore/Documents/Projects/sotd-report/cache/threads/`
+- **Comments Cache Location**: `/Users/jmoore/Documents/Projects/sotd-report/cache/comments/`
+- **Threads Cache Format**: JSON files by year/month (e.g., `202205.json`)
+- **Comments Cache Format**: JSON files by year/month (e.g., `202205.json`)
+- **Threads Cache Content**: Thread metadata and basic thread information
+- **Comments Cache Content**: Comment data with thread references and activity
+- **Coverage**: Complete thread history with comment activity from both sources
+
+## Documentation Format for Found Threads
+
+### When documenting found threads, include:
+- **Date**: YYYY-MM-DD format
+- **URL**: Complete Reddit thread URL
+- **Title**: Thread title for context
+- **Author**: AutoModerator or human username (for reference only)
+- **Comment Count**: Number of comments for validation
+- **Source**: Cache file or external search method
+- **Validation Status**: Valid SOTD thread, Rejected, or Under Review
+- **Rejection Reasons**: Detailed explanation if thread was rejected
+
+### Example Documentation Format:
+```
+2022-05-01: 
+  URL: "https://www.reddit.com/r/Wetshaving/comments/ufshnb/sunday_sotd_thread_may_01_2022/"
+  Title: "Sunday SOTD Thread - May 01, 2022"
+  Author: AutoModerator
+  Comments: 47
+  Source: Cache file 202205.json
+  Status: Valid SOTD thread
+
+2022-05-08:
+  URL: "https://www.reddit.com/r/Wetshaving/comments/example/random_thread/"
+  Title: "Random Discussion Thread"
+  Author: HumanUser
+  Comments: 12
+  Source: Cache file 202205.json
+  Status: Rejected
+  Rejection Reasons: 
+    - Thread title not SOTD-related
+    - Low comment activity (12 comments)
+    - Content focused on general discussion, not shaving
+```
+
+### Historical Record Requirements
+- **Record ALL threads found**: Valid, rejected, and under review
+- **Include rejection reasons**: Detailed explanation for why threads were rejected
+- **Document search process**: What search strategies were used for each date
+- **Track validation decisions**: Maintain audit trail of all validation choices
+- **Note edge cases**: Document unusual or borderline cases for future reference
+
+## Previous Attempt Results (Reference)
+
+### Major Discovery from Previous Attempt
+**Cache files contain missing threads**: Found missing threads in `/Users/jmoore/Documents/Projects/sotd-report/cache/threads/`
+
+### Previous Recovery Statistics
+- **Total missing dates**: 39
+- **Dates resolved with overrides**: 31 (79.5%)
+- **Genuinely missing dates**: 8 (20.5%)
+- **Recovery success rate**: 79.5%
+
+### Previous Thread Overrides Found (with URLs)
+- **2016**: 1 thread (May 3)
+  - 2016-05-03: "https://www.reddit.com/r/Wetshaving/comments/4htj81/wednesday_sotd_thread_may_04_2016/"
+- **2018**: 5 threads (Feb 15, Jul 11, Dec 6, 13, 20, 27)
+  - 2018-02-15: "https://www.reddit.com/r/Wetshaving/comments/7xgt5c/wednesday_sotd_thread_feb_14_2018/"
+  - 2018-07-11: "https://www.reddit.com/r/Wetshaving/comments/8xmwcr/tuesday_sotd_thread_jul_10_2018/"
+  - 2018-12-06: "https://www.reddit.com/r/Wetshaving/comments/a3mv6j/theme_thursday_sotd_thread_dec_06_2018/"
+  - 2018-12-13: "https://www.reddit.com/r/Wetshaving/comments/a5rz08/theme_thursday_sotd_thread_dec_13_2018/"
+  - 2018-12-20: "https://www.reddit.com/r/Wetshaving/comments/a7wvmh/theme_thursday_sotd_thread_dec_20_2018/"
+  - 2018-12-27: "https://www.reddit.com/r/Wetshaving/comments/a9yagr/theme_thursday_sotd_thread_dec_27_2018/"
+- **2019**: 3 threads (Jul 29, Sep 2, Nov 4)
+  - 2019-07-29: "https://www.reddit.com/r/Wetshaving/comments/citdz5/sunday_sotd_thread_jul_28_2019/"
+  - 2019-09-02: "https://www.reddit.com/r/Wetshaving/comments/cy7g0g/sunday_sotd_thread_sep_01_2019/"
+  - 2019-11-04: "https://www.reddit.com/r/Wetshaving/comments/dqx576/sunday_sotd_thread_nov_03_2019/"
+- **2020**: 4 threads (Feb 24, Mar 2, 4, Apr 4)
+  - 2020-02-24: "https://www.reddit.com/r/Wetshaving/comments/f867px/sunday_sotd_thread_feb_23_2020/"
+  - 2020-03-02: "https://www.reddit.com/r/Wetshaving/comments/fbqlow/sunday_sotd_thread_mar_01_2020/"
+  - 2020-03-04: "https://www.reddit.com/r/Wetshaving/comments/fcqyus/tuesday_sotd_thread_mar_03_2020/"
+  - 2020-04-04: "https://www.reddit.com/r/Wetshaving/comments/fu3t2j/friday_sotd_thread_apr_03_2020/"
+- **2021**: 1 thread (Jan 22)
+  - 2021-01-22: "https://www.reddit.com/r/Wetshaving/comments/l1t72g/theme_thursday_sotd_thread_jan_21_2021/"
+- **2022**: 14 threads (Apr 9, May 1-7, 9-11, 13-15)
+  - 2022-04-09: "https://www.reddit.com/r/Wetshaving/comments/tyws9z/friday_sotd_thread_apr_08_2022/"
+  - 2022-05-01: "https://www.reddit.com/r/Wetshaving/comments/ufshnb/sunday_sotd_thread_may_01_2022/"
+  - 2022-05-02: "https://www.reddit.com/r/Wetshaving/comments/ugiw6g/monday_sotd_thread_may_02_2022/"
+  - 2022-05-03: "https://www.reddit.com/r/Wetshaving/comments/uh9ikx/tuesday_sotd_thread_may_03_2022/"
+  - 2022-05-04: "https://www.reddit.com/r/Wetshaving/comments/uhzxje/wednesday_sotd_thread_may_04_2022/"
+  - 2022-05-05: "https://www.reddit.com/r/Wetshaving/comments/uiqr93/thursday_sotd_thread_may_05_2022/"
+  - 2022-05-06: "https://www.reddit.com/r/Wetshaving/comments/ujgsnp/friday_sotd_thread_may_06_2022/"
+  - 2022-05-07: "https://www.reddit.com/r/Wetshaving/comments/uk6ttd/saturday_sotd_thread_may_07_2022/"
+  - 2022-05-09: "https://www.reddit.com/r/Wetshaving/comments/ulkjbp/monday_sotd_thread_may_09_2022/"
+  - 2022-05-10: "https://www.reddit.com/r/Wetshaving/comments/umbr1l/tuesday_sotd_thread_may_10_2022/"
+  - 2022-05-11: "https://www.reddit.com/r/Wetshaving/comments/un2vem/wednesday_sotd_thread_may_11_2022/"
+  - 2022-05-13: "https://www.reddit.com/r/Wetshaving/comments/uol1zo/friday_sotd_thread_may_13_2022/"
+  - 2022-05-14: "https://www.reddit.com/r/Wetshaving/comments/upasru/saturday_sotd_thread_may_14_2022/"
+  - 2022-05-15: "https://www.reddit.com/r/Wetshaving/comments/upyp4x/sunday_sotd_thread_may_15_2022/"
+- **2025**: 2 threads (Apr 1, Jun 25)
+  - 2025-04-01: "https://www.reddit.com/r/Wetshaving/comments/1jooo62/tuesday_motd_thread_apr_01_2025/"
+  - 2025-06-25: "https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/"
+
+### Previous Remaining Missing Dates (8)
+- **2016-05-01, 2016-05-02**: Early community days, likely no threads
+- **2016-08-01**: Early community days, likely no threads
+- **2018-11-01**: Likely genuinely missing
+- **2021-01-23, 2021-01-24**: Likely genuinely missing
+- **2021-09-01**: Likely genuinely missing
+- **2022-05-08, 2022-05-12**: No dedicated threads existed
+
+### Previous Key Insights
+1. **Cache files are the gold standard**: More complete data than pipeline results
+2. **Comments cache provides accurate picture**: Shows actual thread activity
+3. **Three types of missing threads**:
+   - Pipeline misses with comment activity
+   - Pipeline misses without comment activity
+   - Truly missing threads
+4. **Pattern recognition**: Missing threads often cluster in specific time periods
+5. **Mixed authorship**: Both AutoModerator and human users post valid SOTD threads
+6. **Title/date format variations**: Human posts use different formats than AutoModerator
+
+## Current Status
+- **Plan Status**: Restarting implementation with cache-first approach
+- **Previous Success Rate**: 79.5% (31/39 dates recovered)
+- **Remaining Challenge**: 8 genuinely missing dates
+- **Primary Focus**: Systematic cache analysis before external searches
+- **Secondary Focus**: External searches only for cache-missed dates
+
+## Success Criteria
+- [ ] Complete systematic cache analysis of all missing dates
+- [ ] Achieve cache recovery rate of 75% or higher
+- [ ] Only use external searches for cache-missed dates
+- [ ] Validate all found threads before adding to overrides
+- [ ] Document comprehensive cache search strategies with URLs
+- [ ] Provide actionable recommendations for pipeline improvements
+- [ ] Maintain complete historical record of all findings (valid and rejected)
+
+## Implementation Priority
+1. **Cache Analysis First**: Exhaust all cache search possibilities
+2. **Save Cache Results**: Update `thread_overrides.yaml` with cache findings
+3. **External Search Only if Needed**: Only search externally for dates not found in cache
+4. **Validate Everything**: Ensure all threads meet quality criteria
+5. **Document URLs**: Always include the actual Reddit URLs when documenting found threads
+6. **Record Rejections**: Document all rejected threads with detailed reasons for historical record
+
+---
+
+## Implementation Chunks
+
+description: Missing SOTD Thread URL Recovery - Cache-First Implementation
+globs: ["data/thread_overrides.yaml", "data/comments/"]
+alwaysApply: false

@@ -219,6 +219,8 @@ def filter_valid_threads(
         if d is None and hasattr(sub, "_override_date"):
             try:
                 d = datetime.strptime(sub._override_date, "%Y-%m-%d").date()
+                if debug:
+                    print(f"[DEBUG] Used fallback date for {sub.title}: {d}")
             except Exception:
                 d = None
         if d is None:

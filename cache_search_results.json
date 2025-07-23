@@ -1,0 +1,2073 @@
+{
+  "cache_file_stats": {
+    "threads_cache": {
+      "201605": {
+        "size": 10061,
+        "thread_count": 28,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201605.json"
+      },
+      "201606": {
+        "size": 14881,
+        "thread_count": 37,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201606.json"
+      },
+      "201607": {
+        "size": 10458,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201607.json"
+      },
+      "201609": {
+        "size": 10124,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201609.json"
+      },
+      "201610": {
+        "size": 10458,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201610.json"
+      },
+      "201611": {
+        "size": 10130,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201611.json"
+      },
+      "201612": {
+        "size": 10464,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201612.json"
+      },
+      "201701": {
+        "size": 10471,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201701.json"
+      },
+      "201702": {
+        "size": 9450,
+        "thread_count": 28,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201702.json"
+      },
+      "201703": {
+        "size": 10467,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201703.json"
+      },
+      "201704": {
+        "size": 10124,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201704.json"
+      },
+      "201705": {
+        "size": 10464,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201705.json"
+      },
+      "201706": {
+        "size": 25548,
+        "thread_count": 60,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201706.json"
+      },
+      "201707": {
+        "size": 10973,
+        "thread_count": 32,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201707.json"
+      },
+      "201708": {
+        "size": 20493,
+        "thread_count": 58,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201708.json"
+      },
+      "201709": {
+        "size": 10124,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201709.json"
+      },
+      "201710": {
+        "size": 10455,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201710.json"
+      },
+      "201711": {
+        "size": 10133,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201711.json"
+      },
+      "201712": {
+        "size": 10458,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201712.json"
+      },
+      "201801": {
+        "size": 10464,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201801.json"
+      },
+      "201802": {
+        "size": 9110,
+        "thread_count": 27,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201802.json"
+      },
+      "201803": {
+        "size": 10500,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201803.json"
+      },
+      "201804": {
+        "size": 10166,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201804.json"
+      },
+      "201805": {
+        "size": 11864,
+        "thread_count": 32,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201805.json"
+      },
+      "201806": {
+        "size": 33780,
+        "thread_count": 60,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201806.json"
+      },
+      "201807": {
+        "size": 11082,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201807.json"
+      },
+      "201808": {
+        "size": 20651,
+        "thread_count": 57,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201808.json"
+      },
+      "201809": {
+        "size": 10351,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201809.json"
+      },
+      "201810": {
+        "size": 10815,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201810.json"
+      },
+      "201811": {
+        "size": 10126,
+        "thread_count": 29,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201811.json"
+      },
+      "201812": {
+        "size": 10812,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201812.json"
+      },
+      "201901": {
+        "size": 10938,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201901.json"
+      },
+      "201902": {
+        "size": 9952,
+        "thread_count": 28,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201902.json"
+      },
+      "201903": {
+        "size": 10996,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201903.json"
+      },
+      "201904": {
+        "size": 10705,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201904.json"
+      },
+      "201905": {
+        "size": 11085,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201905.json"
+      },
+      "201906": {
+        "size": 29911,
+        "thread_count": 59,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201906.json"
+      },
+      "201907": {
+        "size": 10747,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201907.json"
+      },
+      "201908": {
+        "size": 21164,
+        "thread_count": 59,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201908.json"
+      },
+      "201909": {
+        "size": 10490,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201909.json"
+      },
+      "201910": {
+        "size": 11102,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201910.json"
+      },
+      "201911": {
+        "size": 10282,
+        "thread_count": 29,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201911.json"
+      },
+      "201912": {
+        "size": 10469,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/201912.json"
+      },
+      "202001": {
+        "size": 10818,
+        "thread_count": 32,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202001.json"
+      },
+      "202002": {
+        "size": 10668,
+        "thread_count": 28,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202002.json"
+      },
+      "202003": {
+        "size": 10781,
+        "thread_count": 29,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202003.json"
+      },
+      "202004": {
+        "size": 11792,
+        "thread_count": 29,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202004.json"
+      },
+      "202005": {
+        "size": 10386,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202005.json"
+      },
+      "202006": {
+        "size": 49155,
+        "thread_count": 60,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202006.json"
+      },
+      "202007": {
+        "size": 10404,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202007.json"
+      },
+      "202008": {
+        "size": 22185,
+        "thread_count": 62,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202008.json"
+      },
+      "202009": {
+        "size": 11575,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202009.json"
+      },
+      "202010": {
+        "size": 12783,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202010.json"
+      },
+      "202011": {
+        "size": 12798,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202011.json"
+      },
+      "202012": {
+        "size": 12561,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202012.json"
+      },
+      "202101": {
+        "size": 10964,
+        "thread_count": 28,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202101.json"
+      },
+      "202102": {
+        "size": 22299,
+        "thread_count": 35,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202102.json"
+      },
+      "202103": {
+        "size": 12296,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202103.json"
+      },
+      "202104": {
+        "size": 13707,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202104.json"
+      },
+      "202105": {
+        "size": 10396,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202105.json"
+      },
+      "202106": {
+        "size": 77852,
+        "thread_count": 60,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202106.json"
+      },
+      "202107": {
+        "size": 10402,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202107.json"
+      },
+      "202108": {
+        "size": 23308,
+        "thread_count": 62,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202108.json"
+      },
+      "202109": {
+        "size": 11727,
+        "thread_count": 29,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202109.json"
+      },
+      "202110": {
+        "size": 11724,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202110.json"
+      },
+      "202111": {
+        "size": 11409,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202111.json"
+      },
+      "202112": {
+        "size": 12038,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202112.json"
+      },
+      "202201": {
+        "size": 11244,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202201.json"
+      },
+      "202202": {
+        "size": 18256,
+        "thread_count": 35,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202202.json"
+      },
+      "202203": {
+        "size": 11729,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202203.json"
+      },
+      "202204": {
+        "size": 11018,
+        "thread_count": 29,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202204.json"
+      },
+      "202205": {
+        "size": 9723,
+        "thread_count": 29,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202205.json"
+      },
+      "202206": {
+        "size": 63332,
+        "thread_count": 60,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202206.json"
+      },
+      "202207": {
+        "size": 10396,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202207.json"
+      },
+      "202208": {
+        "size": 23140,
+        "thread_count": 63,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202208.json"
+      },
+      "202209": {
+        "size": 11588,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202209.json"
+      },
+      "202210": {
+        "size": 11677,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202210.json"
+      },
+      "202211": {
+        "size": 11332,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202211.json"
+      },
+      "202212": {
+        "size": 12191,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202212.json"
+      },
+      "202301": {
+        "size": 11414,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202301.json"
+      },
+      "202302": {
+        "size": 18554,
+        "thread_count": 36,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202302.json"
+      },
+      "202303": {
+        "size": 11533,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202303.json"
+      },
+      "202304": {
+        "size": 10911,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202304.json"
+      },
+      "202305": {
+        "size": 10464,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202305.json"
+      },
+      "202306": {
+        "size": 10124,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202306.json"
+      },
+      "202307": {
+        "size": 74756,
+        "thread_count": 61,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202307.json"
+      },
+      "202308": {
+        "size": 22325,
+        "thread_count": 63,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202308.json"
+      },
+      "202309": {
+        "size": 10993,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202309.json"
+      },
+      "202310": {
+        "size": 11768,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202310.json"
+      },
+      "202311": {
+        "size": 11462,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202311.json"
+      },
+      "202312": {
+        "size": 11743,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202312.json"
+      },
+      "202401": {
+        "size": 11451,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202401.json"
+      },
+      "202402": {
+        "size": 11246,
+        "thread_count": 29,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202402.json"
+      },
+      "202403": {
+        "size": 14812,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202403.json"
+      },
+      "202404": {
+        "size": 10953,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202404.json"
+      },
+      "202405": {
+        "size": 12003,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202405.json"
+      },
+      "202406": {
+        "size": 80315,
+        "thread_count": 60,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202406.json"
+      },
+      "202407": {
+        "size": 10464,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202407.json"
+      },
+      "202408": {
+        "size": 23817,
+        "thread_count": 64,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202408.json"
+      },
+      "202409": {
+        "size": 13234,
+        "thread_count": 32,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202409.json"
+      },
+      "202410 2": {
+        "size": 12944,
+        "thread_count": 32,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202410 2.json"
+      },
+      "202410": {
+        "size": 12944,
+        "thread_count": 32,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202410.json"
+      },
+      "202411": {
+        "size": 11110,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202411.json"
+      },
+      "202412": {
+        "size": 11722,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202412.json"
+      },
+      "202501": {
+        "size": 12035,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202501.json"
+      },
+      "202502": {
+        "size": 10324,
+        "thread_count": 28,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202502.json"
+      },
+      "202503": {
+        "size": 11500,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202503.json"
+      },
+      "202504": {
+        "size": 10949,
+        "thread_count": 30,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202504.json"
+      },
+      "202505": {
+        "size": 11813,
+        "thread_count": 31,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/202505.json"
+      },
+      "manual": {
+        "size": 10199,
+        "thread_count": 46,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/threads/manual.json"
+      }
+    },
+    "comments_cache": {
+      "201605": {
+        "size": 943496,
+        "comment_count": 1090,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201605.json"
+      },
+      "201606": {
+        "size": 389015,
+        "comment_count": 450,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201606.json"
+      },
+      "201607": {
+        "size": 761471,
+        "comment_count": 933,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201607.json"
+      },
+      "201608": {
+        "size": 296020,
+        "comment_count": 401,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201608.json"
+      },
+      "201609": {
+        "size": 1497502,
+        "comment_count": 3014,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201609.json"
+      },
+      "201610": {
+        "size": 1624537,
+        "comment_count": 3374,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201610.json"
+      },
+      "201611": {
+        "size": 1546867,
+        "comment_count": 3121,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201611.json"
+      },
+      "201612": {
+        "size": 1504035,
+        "comment_count": 2980,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201612.json"
+      },
+      "201701": {
+        "size": 2082788,
+        "comment_count": 4179,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201701.json"
+      },
+      "201702": {
+        "size": 2061818,
+        "comment_count": 4169,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201702.json"
+      },
+      "201703": {
+        "size": 2353049,
+        "comment_count": 4661,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201703.json"
+      },
+      "201704": {
+        "size": 2096271,
+        "comment_count": 4162,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201704.json"
+      },
+      "201705": {
+        "size": 1889667,
+        "comment_count": 3876,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201705.json"
+      },
+      "201706": {
+        "size": 2776040,
+        "comment_count": 4919,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201706.json"
+      },
+      "201707": {
+        "size": 1686354,
+        "comment_count": 3285,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201707.json"
+      },
+      "201708": {
+        "size": 2008686,
+        "comment_count": 3911,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201708.json"
+      },
+      "201709": {
+        "size": 1243297,
+        "comment_count": 2268,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201709.json"
+      },
+      "201710": {
+        "size": 1282490,
+        "comment_count": 2285,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201710.json"
+      },
+      "201711": {
+        "size": 1287643,
+        "comment_count": 2291,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201711.json"
+      },
+      "201712": {
+        "size": 1243250,
+        "comment_count": 2256,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201712.json"
+      },
+      "201801": {
+        "size": 1334563,
+        "comment_count": 2425,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201801.json"
+      },
+      "201802": {
+        "size": 1240352,
+        "comment_count": 2197,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201802.json"
+      },
+      "201803": {
+        "size": 1399523,
+        "comment_count": 2459,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201803.json"
+      },
+      "201804": {
+        "size": 1360129,
+        "comment_count": 2352,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201804.json"
+      },
+      "201805": {
+        "size": 1504981,
+        "comment_count": 2599,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201805.json"
+      },
+      "201806": {
+        "size": 2736362,
+        "comment_count": 4043,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201806.json"
+      },
+      "201807": {
+        "size": 1167461,
+        "comment_count": 1910,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201807.json"
+      },
+      "201808": {
+        "size": 1729309,
+        "comment_count": 2733,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201808.json"
+      },
+      "201809": {
+        "size": 1635127,
+        "comment_count": 2513,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201809.json"
+      },
+      "201810": {
+        "size": 1366034,
+        "comment_count": 2257,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201810.json"
+      },
+      "201811": {
+        "size": 1084942,
+        "comment_count": 1737,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201811.json"
+      },
+      "201812": {
+        "size": 1253088,
+        "comment_count": 2131,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201812.json"
+      },
+      "201901": {
+        "size": 1825657,
+        "comment_count": 3252,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201901.json"
+      },
+      "201902": {
+        "size": 1719109,
+        "comment_count": 2886,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201902.json"
+      },
+      "201903": {
+        "size": 2183925,
+        "comment_count": 3638,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201903.json"
+      },
+      "201904": {
+        "size": 2065816,
+        "comment_count": 3431,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201904.json"
+      },
+      "201905": {
+        "size": 2114942,
+        "comment_count": 3270,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201905.json"
+      },
+      "201906": {
+        "size": 5809643,
+        "comment_count": 7029,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201906.json"
+      },
+      "201907": {
+        "size": 1995442,
+        "comment_count": 3029,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201907.json"
+      },
+      "201908": {
+        "size": 2991659,
+        "comment_count": 4641,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201908.json"
+      },
+      "201909": {
+        "size": 2225421,
+        "comment_count": 3465,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201909.json"
+      },
+      "201910": {
+        "size": 2348775,
+        "comment_count": 3520,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201910.json"
+      },
+      "201911": {
+        "size": 2092216,
+        "comment_count": 3219,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201911.json"
+      },
+      "201912": {
+        "size": 2235520,
+        "comment_count": 3323,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/201912.json"
+      },
+      "202001": {
+        "size": 2427724,
+        "comment_count": 3856,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202001.json"
+      },
+      "202002": {
+        "size": 1892456,
+        "comment_count": 2757,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202002.json"
+      },
+      "202003": {
+        "size": 2017685,
+        "comment_count": 2885,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202003.json"
+      },
+      "202004": {
+        "size": 2594952,
+        "comment_count": 3746,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202004.json"
+      },
+      "202005": {
+        "size": 2880561,
+        "comment_count": 4032,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202005.json"
+      },
+      "202006": {
+        "size": 11729187,
+        "comment_count": 12346,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202006.json"
+      },
+      "202007": {
+        "size": 3270852,
+        "comment_count": 4190,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202007.json"
+      },
+      "202008": {
+        "size": 3927218,
+        "comment_count": 4808,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202008.json"
+      },
+      "202009": {
+        "size": 2464038,
+        "comment_count": 3245,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202009.json"
+      },
+      "202010": {
+        "size": 2392199,
+        "comment_count": 3118,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202010.json"
+      },
+      "202011": {
+        "size": 2202338,
+        "comment_count": 2930,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202011.json"
+      },
+      "202012": {
+        "size": 2812430,
+        "comment_count": 3977,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202012.json"
+      },
+      "202101": {
+        "size": 2768893,
+        "comment_count": 3954,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202101.json"
+      },
+      "202102": {
+        "size": 3067540,
+        "comment_count": 4454,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202102.json"
+      },
+      "202103": {
+        "size": 3138006,
+        "comment_count": 4342,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202103.json"
+      },
+      "202104": {
+        "size": 2831728,
+        "comment_count": 3816,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202104.json"
+      },
+      "202105": {
+        "size": 2924697,
+        "comment_count": 4077,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202105.json"
+      },
+      "202106": {
+        "size": 10731471,
+        "comment_count": 9941,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202106.json"
+      },
+      "202107": {
+        "size": 2706349,
+        "comment_count": 3572,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202107.json"
+      },
+      "202108": {
+        "size": 5307503,
+        "comment_count": 6501,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202108.json"
+      },
+      "202109": {
+        "size": 2534496,
+        "comment_count": 3271,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202109.json"
+      },
+      "202110": {
+        "size": 2397084,
+        "comment_count": 3111,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202110.json"
+      },
+      "202111": {
+        "size": 2441206,
+        "comment_count": 3601,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202111.json"
+      },
+      "202112": {
+        "size": 2452772,
+        "comment_count": 3481,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202112.json"
+      },
+      "202201": {
+        "size": 2937052,
+        "comment_count": 4264,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202201.json"
+      },
+      "202202": {
+        "size": 2493376,
+        "comment_count": 3513,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202202.json"
+      },
+      "202203": {
+        "size": 2702026,
+        "comment_count": 3923,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202203.json"
+      },
+      "202204": {
+        "size": 2554848,
+        "comment_count": 3958,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202204.json"
+      },
+      "202205": {
+        "size": 2258240,
+        "comment_count": 3193,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202205.json"
+      },
+      "202206": {
+        "size": 9098710,
+        "comment_count": 8248,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202206.json"
+      },
+      "202207": {
+        "size": 2446340,
+        "comment_count": 3511,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202207.json"
+      },
+      "202208": {
+        "size": 5191250,
+        "comment_count": 6091,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202208.json"
+      },
+      "202209": {
+        "size": 2293282,
+        "comment_count": 3090,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202209.json"
+      },
+      "202210": {
+        "size": 2276775,
+        "comment_count": 3332,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202210.json"
+      },
+      "202211": {
+        "size": 2136696,
+        "comment_count": 3165,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202211.json"
+      },
+      "202212": {
+        "size": 2030556,
+        "comment_count": 2883,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202212.json"
+      },
+      "202301": {
+        "size": 1822715,
+        "comment_count": 2199,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202301.json"
+      },
+      "202302": {
+        "size": 1858567,
+        "comment_count": 2249,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202302.json"
+      },
+      "202303": {
+        "size": 2006450,
+        "comment_count": 2461,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202303.json"
+      },
+      "202304": {
+        "size": 1740583,
+        "comment_count": 2170,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202304.json"
+      },
+      "202305": {
+        "size": 1623708,
+        "comment_count": 2159,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202305.json"
+      },
+      "202306": {
+        "size": 1246197,
+        "comment_count": 1611,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202306.json"
+      },
+      "202307": {
+        "size": 4540865,
+        "comment_count": 2669,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202307.json"
+      },
+      "202308": {
+        "size": 2154756,
+        "comment_count": 2334,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202308.json"
+      },
+      "202309": {
+        "size": 1490016,
+        "comment_count": 1758,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202309.json"
+      },
+      "202310": {
+        "size": 1305319,
+        "comment_count": 1624,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202310.json"
+      },
+      "202311": {
+        "size": 1388796,
+        "comment_count": 1770,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202311.json"
+      },
+      "202312": {
+        "size": 1337270,
+        "comment_count": 1661,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202312.json"
+      },
+      "202401 2": {
+        "size": 396537,
+        "comment_count": 495,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202401 2.json"
+      },
+      "202401.bk": {
+        "size": 1174604,
+        "comment_count": 1913,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202401.bk.json"
+      },
+      "202401": {
+        "size": 1334462,
+        "comment_count": 1696,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202401.json"
+      },
+      "202402": {
+        "size": 1418070,
+        "comment_count": 1797,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202402.json"
+      },
+      "202403": {
+        "size": 2019484,
+        "comment_count": 2449,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202403.json"
+      },
+      "202404": {
+        "size": 1373169,
+        "comment_count": 1793,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202404.json"
+      },
+      "202405": {
+        "size": 1412115,
+        "comment_count": 1743,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202405.json"
+      },
+      "202406.bk": {
+        "size": 4669150,
+        "comment_count": 2695,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202406.bk.json"
+      },
+      "202406": {
+        "size": 4669150,
+        "comment_count": 2695,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202406.json"
+      },
+      "202407": {
+        "size": 1368624,
+        "comment_count": 1647,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202407.json"
+      },
+      "202408": {
+        "size": 2286728,
+        "comment_count": 2524,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202408.json"
+      },
+      "202409": {
+        "size": 1323179,
+        "comment_count": 1597,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202409.json"
+      },
+      "202410 2": {
+        "size": 1354911,
+        "comment_count": 1686,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202410 2.json"
+      },
+      "202410": {
+        "size": 1357993,
+        "comment_count": 1689,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202410.json"
+      },
+      "202411": {
+        "size": 1361348,
+        "comment_count": 1617,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202411.json"
+      },
+      "202412": {
+        "size": 1273054,
+        "comment_count": 1593,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202412.json"
+      },
+      "202501": {
+        "size": 1217787,
+        "comment_count": 1549,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202501.json"
+      },
+      "202502": {
+        "size": 1259808,
+        "comment_count": 1536,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202502.json"
+      },
+      "202503": {
+        "size": 1590737,
+        "comment_count": 2119,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202503.json"
+      },
+      "202504": {
+        "size": 1376178,
+        "comment_count": 1720,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202504.json"
+      },
+      "202505": {
+        "size": 1287033,
+        "comment_count": 1626,
+        "path": "/Users/jmoore/Documents/Projects/sotd-report/cache/comments/202505.json"
+      }
+    }
+  },
+  "found_threads": {
+    "2016-05-03": [
+      {
+        "author": "AutoModerator",
+        "body": "A place to share all your shaves of the day (SOTD) for Wednesday\n",
+        "created_utc": "2016-05-04 03:06:45",
+        "id": "4htj81",
+        "title": "Wednesday SOTD Thread - May 04, 2016",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/4htj81/wednesday_sotd_thread_may_04_2016/"
+      }
+    ],
+    "2018-02-15": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Wednesday!\n",
+        "created_utc": "2018-02-14 03:12:14",
+        "id": "7xgt5c",
+        "title": "Wednesday SOTD Thread - Feb 14, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/7xgt5c/wednesday_sotd_thread_feb_14_2018/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!\n",
+        "created_utc": "2018-02-16 03:12:37",
+        "id": "7xxkyh",
+        "title": "Friday SOTD Thread - Feb 16, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/7xxkyh/friday_sotd_thread_feb_16_2018/"
+      }
+    ],
+    "2018-07-11": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!\n",
+        "created_utc": "2018-07-10 03:13:56",
+        "id": "8xmwcr",
+        "title": "Tuesday SOTD Thread - Jul 10, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/8xmwcr/tuesday_sotd_thread_jul_10_2018/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Check the sidebar for the Thursday theme!\n",
+        "created_utc": "2018-07-12 03:12:24",
+        "id": "8y7uy5",
+        "title": "Theme Thursday SOTD Thread - Jul 12, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/8y7uy5/theme_thursday_sotd_thread_jul_12_2018/"
+      }
+    ],
+    "2018-11-01": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!\n",
+        "created_utc": "2018-11-02 03:14:30",
+        "id": "9ti503",
+        "title": "Friday SOTD Thread - Nov 02, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/9ti503/friday_sotd_thread_nov_02_2018/"
+      }
+    ],
+    "2018-12-06": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Wednesday!\n",
+        "created_utc": "2018-12-05 02:13:23",
+        "id": "a3acs7",
+        "title": "Wednesday SOTD Thread - Dec 05, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/a3acs7/wednesday_sotd_thread_dec_05_2018/"
+      },
+      {
+        "author": "MadDingersYo",
+        "body": "Share your shave of the day for Thursday!\n\nToday's Theme: Bought On Black Friday. Suggested By: /u/shredsofmetal",
+        "created_utc": "2018-12-06 04:39:15",
+        "id": "a3mv6j",
+        "title": "Theme Thursday SOTD Thread - Dec. 06, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/a3mv6j/theme_thursday_sotd_thread_dec_06_2018/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!\n",
+        "created_utc": "2018-12-07 02:14:25",
+        "id": "a3xydt",
+        "title": "Friday SOTD Thread - Dec 07, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/a3xydt/friday_sotd_thread_dec_07_2018/"
+      }
+    ],
+    "2018-12-13": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Wednesday!\n",
+        "created_utc": "2018-12-12 02:13:08",
+        "id": "a5g8yp",
+        "title": "Wednesday SOTD Thread - Dec 12, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/a5g8yp/wednesday_sotd_thread_dec_12_2018/"
+      },
+      {
+        "author": "MadDingersYo",
+        "body": "Share your shave of the day for Thursday!\n\nToday's Theme: \"Second Chances.\" Suggested By: /u/tiny_nova",
+        "created_utc": "2018-12-13 03:19:27",
+        "id": "a5rz08",
+        "title": "Theme Thursday SOTD Thread - Dec. 13, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/a5rz08/theme_thursday_sotd_thread_dec_13_2018/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!\n",
+        "created_utc": "2018-12-14 02:14:33",
+        "id": "a62y5g",
+        "title": "Friday SOTD Thread - Dec 14, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/a62y5g/friday_sotd_thread_dec_14_2018/"
+      }
+    ],
+    "2018-12-20": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Wednesday!\n",
+        "created_utc": "2018-12-19 02:12:48",
+        "id": "a7ki4c",
+        "title": "Wednesday SOTD Thread - Dec 19, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/a7ki4c/wednesday_sotd_thread_dec_19_2018/"
+      },
+      {
+        "author": "MadDingersYo",
+        "body": "Share your shave of the day for Thursday!\n\nToday's Theme: \"I Wish It Was Summer Again.\" Suggested By: /u/MadDingersYo. (Who is incredibly good-looking.)",
+        "created_utc": "2018-12-20 05:11:25",
+        "id": "a7wvmh",
+        "title": "Theme Thursday SOTD Thread - Dec. 20, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/a7wvmh/theme_thursday_sotd_thread_dec_20_2018/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!\n",
+        "created_utc": "2018-12-21 02:14:26",
+        "id": "a87wjz",
+        "title": "Friday SOTD Thread - Dec 21, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/a87wjz/friday_sotd_thread_dec_21_2018/"
+      }
+    ],
+    "2018-12-27": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Wednesday!\n",
+        "created_utc": "2018-12-26 02:13:24",
+        "id": "a9muqi",
+        "title": "Wednesday SOTD Thread - Dec 26, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/a9muqi/wednesday_sotd_thread_dec_26_2018/"
+      },
+      {
+        "author": "MadDingersYo",
+        "body": "Share your shave of the day for Thursday!\n\nToday's Theme: \"Comfort Scents.\" Suggested By: /u/Ugmug",
+        "created_utc": "2018-12-27 04:56:06",
+        "id": "a9yagr",
+        "title": "Theme Thursday SOTD Thread - Dec. 27, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/a9yagr/theme_thursday_sotd_thread_dec_27_2018/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!\n",
+        "created_utc": "2018-12-28 02:15:15",
+        "id": "aa8get",
+        "title": "Friday SOTD Thread - Dec 28, 2018",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/aa8get/friday_sotd_thread_dec_28_2018/"
+      }
+    ],
+    "2019-07-29": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2019-07-28 03:17:12",
+        "id": "citdz5",
+        "title": "Sunday SOTD Thread - Jul 28, 2019",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/citdz5/sunday_sotd_thread_jul_28_2019/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!",
+        "created_utc": "2019-07-30 03:17:48",
+        "id": "cjoq6j",
+        "title": "Tuesday SOTD Thread - Jul 30, 2019",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/cjoq6j/tuesday_sotd_thread_jul_30_2019/"
+      }
+    ],
+    "2019-09-02": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2019-09-01 03:18:04",
+        "id": "cy7g0g",
+        "title": "Sunday SOTD Thread - Sep 01, 2019",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/cy7g0g/sunday_sotd_thread_sep_01_2019/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!",
+        "created_utc": "2019-09-03 03:15:14",
+        "id": "cz1y3u",
+        "title": "Tuesday SOTD Thread - Sep 03, 2019",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/cz1y3u/tuesday_sotd_thread_sep_03_2019/"
+      }
+    ],
+    "2019-11-04": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2019-11-03 01:12:06",
+        "id": "dqx576",
+        "title": "Sunday SOTD Thread - Nov 03, 2019",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/dqx576/sunday_sotd_thread_nov_03_2019/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!",
+        "created_utc": "2019-11-05 01:11:15",
+        "id": "drvqni",
+        "title": "Tuesday SOTD Thread - Nov 05, 2019",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/drvqni/tuesday_sotd_thread_nov_05_2019/"
+      }
+    ],
+    "2020-02-24": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2020-02-23 01:13:32",
+        "id": "f867px",
+        "title": "Sunday SOTD Thread - Feb 23, 2020",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/f867px/sunday_sotd_thread_feb_23_2020/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!",
+        "created_utc": "2020-02-25 01:11:16",
+        "id": "f96guy",
+        "title": "Tuesday SOTD Thread - Feb 25, 2020",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/f96guy/tuesday_sotd_thread_feb_25_2020/"
+      }
+    ],
+    "2020-03-02": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2020-03-01 01:15:44",
+        "id": "fbqlow",
+        "title": "Sunday SOTD Thread - Mar 01, 2020",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/fbqlow/sunday_sotd_thread_mar_01_2020/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!",
+        "created_utc": "2020-03-03 01:10:47",
+        "id": "fcqyus",
+        "title": "Tuesday SOTD Thread - Mar 03, 2020",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/fcqyus/tuesday_sotd_thread_mar_03_2020/"
+      }
+    ],
+    "2020-03-04": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!",
+        "created_utc": "2020-03-03 01:10:47",
+        "id": "fcqyus",
+        "title": "Tuesday SOTD Thread - Mar 03, 2020",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/fcqyus/tuesday_sotd_thread_mar_03_2020/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Theme Thursday!\n\n**Today's Theme:** TBD\n\n**Suggested By:** u/AutoModerator",
+        "created_utc": "2020-03-05 01:10:41",
+        "id": "fdrlqa",
+        "title": "Theme Thursday SOTD Thread - Mar 05, 2020",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/fdrlqa/theme_thursday_sotd_thread_mar_05_2020/"
+      }
+    ],
+    "2020-04-04": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!",
+        "created_utc": "2020-04-03 02:16:16",
+        "id": "fu3t2j",
+        "title": "Friday SOTD Thread - Apr 03, 2020",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/fu3t2j/friday_sotd_thread_apr_03_2020/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2020-04-05 02:14:46",
+        "id": "fv9s6p",
+        "title": "Sunday SOTD Thread - Apr 05, 2020",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/fv9s6p/sunday_sotd_thread_apr_05_2020/"
+      }
+    ],
+    "2021-01-22": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Theme Thursday!\n\n**Today's Theme:** January Freeze - Embrace the cold!  Shave with your chilliest soaps and your most mentholated aftershaves.  Show Frosty who's boss!\n\n**Suggested By:** u/MrLamper1",
+        "created_utc": "2021-01-21 01:00:14",
+        "id": "l1t72g",
+        "title": "Theme Thursday SOTD Thread - Jan 21, 2021",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/l1t72g/theme_thursday_sotd_thread_jan_21_2021/"
+      }
+    ],
+    "2021-01-24": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Monday!",
+        "created_utc": "2021-01-25 01:00:24",
+        "id": "l4ia3m",
+        "title": "Monday SOTD Thread - Jan 25, 2021",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/l4ia3m/monday_sotd_thread_jan_25_2021/"
+      }
+    ],
+    "2021-09-01": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Theme Thursday!\n\n**Today's Theme:** Back to School Day\n\n**Suggested By:** u/[guy\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_](https://www.reddit.com/user/guy___________/)\n\nThe coming holiday weekend  (at least in the US) typically signals the end of summer and the return  to school.  Shave with something that reminds you of your school days.",
+        "created_utc": "2021-09-02 01:00:13",
+        "id": "pgbx73",
+        "title": "Theme Thursday SOTD Thread - Sep 2, 2021",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/pgbx73/theme_thursday_sotd_thread_sep_2_2021/"
+      }
+    ],
+    "2022-04-09": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!",
+        "created_utc": "2022-04-08 01:00:09",
+        "id": "tyws9z",
+        "title": "Friday SOTD Thread - Apr 08, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/tyws9z/friday_sotd_thread_apr_08_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2022-04-10 00:00:10",
+        "id": "u0aide",
+        "title": "Sunday SOTD Thread - Apr 10, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u0aide/sunday_sotd_thread_apr_10_2022/"
+      }
+    ],
+    "2022-04-10": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2022-04-10 00:00:10",
+        "id": "u0aide",
+        "title": "Sunday SOTD Thread - Apr 10, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u0aide/sunday_sotd_thread_apr_10_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Monday!",
+        "created_utc": "2022-04-11 01:00:11",
+        "id": "u10srx",
+        "title": "Monday SOTD Thread - Apr 11, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u10srx/monday_sotd_thread_apr_11_2022/"
+      }
+    ],
+    "2022-04-11": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2022-04-10 00:00:10",
+        "id": "u0aide",
+        "title": "Sunday SOTD Thread - Apr 10, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u0aide/sunday_sotd_thread_apr_10_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Monday!",
+        "created_utc": "2022-04-11 01:00:11",
+        "id": "u10srx",
+        "title": "Monday SOTD Thread - Apr 11, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u10srx/monday_sotd_thread_apr_11_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!",
+        "created_utc": "2022-04-12 01:00:09",
+        "id": "u1rnii",
+        "title": "Tuesday SOTD Thread - Apr 12, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u1rnii/tuesday_sotd_thread_apr_12_2022/"
+      }
+    ],
+    "2022-04-12": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Monday!",
+        "created_utc": "2022-04-11 01:00:11",
+        "id": "u10srx",
+        "title": "Monday SOTD Thread - Apr 11, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u10srx/monday_sotd_thread_apr_11_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!",
+        "created_utc": "2022-04-12 01:00:09",
+        "id": "u1rnii",
+        "title": "Tuesday SOTD Thread - Apr 12, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u1rnii/tuesday_sotd_thread_apr_12_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Wednesday!\n\nTomorrow's theme is: Pesach sameach (Happy Passover)",
+        "created_utc": "2022-04-13 01:00:14",
+        "id": "u2jjjm",
+        "title": "Wednesday SOTD Thread - Apr 13, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u2jjjm/wednesday_sotd_thread_apr_13_2022/"
+      }
+    ],
+    "2022-04-13": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!",
+        "created_utc": "2022-04-12 01:00:09",
+        "id": "u1rnii",
+        "title": "Tuesday SOTD Thread - Apr 12, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u1rnii/tuesday_sotd_thread_apr_12_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Wednesday!\n\nTomorrow's theme is: Pesach sameach (Happy Passover)",
+        "created_utc": "2022-04-13 01:00:14",
+        "id": "u2jjjm",
+        "title": "Wednesday SOTD Thread - Apr 13, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u2jjjm/wednesday_sotd_thread_apr_13_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Theme Thursday!\n\n**Today's Theme:** Pesach sameach (Happy Passover)\n\n**Suggested By:** u/oswald_heist\n\nThe Jewish holiday of  Passover starts April 15th. Neither matzah, horseradish, nor brisket are  especially appetizing notes for a shave soap, but charoset would work.  So for the Passover shave use a soap that has notes of apple, spices,  red wine, cinnamon or nuts. For a bonus, pass over the first pass and go  right to your second pass.",
+        "created_utc": "2022-04-14 01:00:10",
+        "id": "u3ahot",
+        "title": "Theme Thursday SOTD Thread - Apr 14, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u3ahot/theme_thursday_sotd_thread_apr_14_2022/"
+      }
+    ],
+    "2022-04-14": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Wednesday!\n\nTomorrow's theme is: Pesach sameach (Happy Passover)",
+        "created_utc": "2022-04-13 01:00:14",
+        "id": "u2jjjm",
+        "title": "Wednesday SOTD Thread - Apr 13, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u2jjjm/wednesday_sotd_thread_apr_13_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Theme Thursday!\n\n**Today's Theme:** Pesach sameach (Happy Passover)\n\n**Suggested By:** u/oswald_heist\n\nThe Jewish holiday of  Passover starts April 15th. Neither matzah, horseradish, nor brisket are  especially appetizing notes for a shave soap, but charoset would work.  So for the Passover shave use a soap that has notes of apple, spices,  red wine, cinnamon or nuts. For a bonus, pass over the first pass and go  right to your second pass.",
+        "created_utc": "2022-04-14 01:00:10",
+        "id": "u3ahot",
+        "title": "Theme Thursday SOTD Thread - Apr 14, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u3ahot/theme_thursday_sotd_thread_apr_14_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!",
+        "created_utc": "2022-04-15 01:00:10",
+        "id": "u41c2x",
+        "title": "Friday SOTD Thread - Apr 15, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u41c2x/friday_sotd_thread_apr_15_2022/"
+      }
+    ],
+    "2022-04-15": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Theme Thursday!\n\n**Today's Theme:** Pesach sameach (Happy Passover)\n\n**Suggested By:** u/oswald_heist\n\nThe Jewish holiday of  Passover starts April 15th. Neither matzah, horseradish, nor brisket are  especially appetizing notes for a shave soap, but charoset would work.  So for the Passover shave use a soap that has notes of apple, spices,  red wine, cinnamon or nuts. For a bonus, pass over the first pass and go  right to your second pass.",
+        "created_utc": "2022-04-14 01:00:10",
+        "id": "u3ahot",
+        "title": "Theme Thursday SOTD Thread - Apr 14, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u3ahot/theme_thursday_sotd_thread_apr_14_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!",
+        "created_utc": "2022-04-15 01:00:10",
+        "id": "u41c2x",
+        "title": "Friday SOTD Thread - Apr 15, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u41c2x/friday_sotd_thread_apr_15_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Saturday!",
+        "created_utc": "2022-04-16 01:00:09",
+        "id": "u4rbi0",
+        "title": "Saturday SOTD Thread - Apr 16, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u4rbi0/saturday_sotd_thread_apr_16_2022/"
+      }
+    ],
+    "2022-04-16": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!",
+        "created_utc": "2022-04-15 01:00:10",
+        "id": "u41c2x",
+        "title": "Friday SOTD Thread - Apr 15, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u41c2x/friday_sotd_thread_apr_15_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Saturday!",
+        "created_utc": "2022-04-16 01:00:09",
+        "id": "u4rbi0",
+        "title": "Saturday SOTD Thread - Apr 16, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u4rbi0/saturday_sotd_thread_apr_16_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2022-04-17 00:00:09",
+        "id": "u5fu3c",
+        "title": "Sunday SOTD Thread - Apr 17, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u5fu3c/sunday_sotd_thread_apr_17_2022/"
+      }
+    ],
+    "2022-04-17": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Saturday!",
+        "created_utc": "2022-04-16 01:00:09",
+        "id": "u4rbi0",
+        "title": "Saturday SOTD Thread - Apr 16, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u4rbi0/saturday_sotd_thread_apr_16_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2022-04-17 00:00:09",
+        "id": "u5fu3c",
+        "title": "Sunday SOTD Thread - Apr 17, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u5fu3c/sunday_sotd_thread_apr_17_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Monday!",
+        "created_utc": "2022-04-18 01:00:09",
+        "id": "u662s2",
+        "title": "Monday SOTD Thread - Apr 18, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u662s2/monday_sotd_thread_apr_18_2022/"
+      }
+    ],
+    "2022-04-18": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2022-04-17 00:00:09",
+        "id": "u5fu3c",
+        "title": "Sunday SOTD Thread - Apr 17, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u5fu3c/sunday_sotd_thread_apr_17_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Monday!",
+        "created_utc": "2022-04-18 01:00:09",
+        "id": "u662s2",
+        "title": "Monday SOTD Thread - Apr 18, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u662s2/monday_sotd_thread_apr_18_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!",
+        "created_utc": "2022-04-19 01:00:08",
+        "id": "u6y2ii",
+        "title": "Tuesday SOTD Thread - Apr 19, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u6y2ii/tuesday_sotd_thread_apr_19_2022/"
+      }
+    ],
+    "2022-04-19": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Monday!",
+        "created_utc": "2022-04-18 01:00:09",
+        "id": "u662s2",
+        "title": "Monday SOTD Thread - Apr 18, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u662s2/monday_sotd_thread_apr_18_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!",
+        "created_utc": "2022-04-19 01:00:08",
+        "id": "u6y2ii",
+        "title": "Tuesday SOTD Thread - Apr 19, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u6y2ii/tuesday_sotd_thread_apr_19_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Wednesday!\n\nTomorrow's theme is: National Tea Day",
+        "created_utc": "2022-04-20 01:00:12",
+        "id": "u7poho",
+        "title": "Wednesday SOTD Thread - Apr 20, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u7poho/wednesday_sotd_thread_apr_20_2022/"
+      }
+    ],
+    "2022-04-21": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Wednesday!\n\nTomorrow's theme is: National Tea Day",
+        "created_utc": "2022-04-20 01:00:12",
+        "id": "u7poho",
+        "title": "Wednesday SOTD Thread - Apr 20, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u7poho/wednesday_sotd_thread_apr_20_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Theme Thursday!\n\n**Today's Theme:** National Tea Day\n\n**Suggested By:** u/sahenders\n\nShave with your favorite tea inspired scents. Optionally, use your best razor that was made in England.",
+        "created_utc": "2022-04-21 01:00:13",
+        "id": "u8goq7",
+        "title": "Theme Thursday SOTD Thread - Apr 21, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u8goq7/theme_thursday_sotd_thread_apr_21_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!",
+        "created_utc": "2022-04-22 01:00:10",
+        "id": "u97lbf",
+        "title": "Friday SOTD Thread - Apr 22, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u97lbf/friday_sotd_thread_apr_22_2022/"
+      }
+    ],
+    "2022-04-22": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Theme Thursday!\n\n**Today's Theme:** National Tea Day\n\n**Suggested By:** u/sahenders\n\nShave with your favorite tea inspired scents. Optionally, use your best razor that was made in England.",
+        "created_utc": "2022-04-21 01:00:13",
+        "id": "u8goq7",
+        "title": "Theme Thursday SOTD Thread - Apr 21, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u8goq7/theme_thursday_sotd_thread_apr_21_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!",
+        "created_utc": "2022-04-22 01:00:10",
+        "id": "u97lbf",
+        "title": "Friday SOTD Thread - Apr 22, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u97lbf/friday_sotd_thread_apr_22_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Saturday!",
+        "created_utc": "2022-04-23 01:00:09",
+        "id": "u9yphd",
+        "title": "Saturday SOTD Thread - Apr 23, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u9yphd/saturday_sotd_thread_apr_23_2022/"
+      }
+    ],
+    "2022-04-23": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!",
+        "created_utc": "2022-04-22 01:00:10",
+        "id": "u97lbf",
+        "title": "Friday SOTD Thread - Apr 22, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u97lbf/friday_sotd_thread_apr_22_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Saturday!",
+        "created_utc": "2022-04-23 01:00:09",
+        "id": "u9yphd",
+        "title": "Saturday SOTD Thread - Apr 23, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u9yphd/saturday_sotd_thread_apr_23_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2022-04-24 00:00:10",
+        "id": "uan7mq",
+        "title": "Sunday SOTD Thread - Apr 24, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/uan7mq/sunday_sotd_thread_apr_24_2022/"
+      }
+    ],
+    "2022-04-24": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Saturday!",
+        "created_utc": "2022-04-23 01:00:09",
+        "id": "u9yphd",
+        "title": "Saturday SOTD Thread - Apr 23, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/u9yphd/saturday_sotd_thread_apr_23_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2022-04-24 00:00:10",
+        "id": "uan7mq",
+        "title": "Sunday SOTD Thread - Apr 24, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/uan7mq/sunday_sotd_thread_apr_24_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Monday!",
+        "created_utc": "2022-04-25 01:00:10",
+        "id": "ube5cp",
+        "title": "Monday SOTD Thread - Apr 25, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/ube5cp/monday_sotd_thread_apr_25_2022/"
+      }
+    ],
+    "2022-04-25": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Sunday!",
+        "created_utc": "2022-04-24 00:00:10",
+        "id": "uan7mq",
+        "title": "Sunday SOTD Thread - Apr 24, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/uan7mq/sunday_sotd_thread_apr_24_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Monday!",
+        "created_utc": "2022-04-25 01:00:10",
+        "id": "ube5cp",
+        "title": "Monday SOTD Thread - Apr 25, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/ube5cp/monday_sotd_thread_apr_25_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!",
+        "created_utc": "2022-04-26 01:00:10",
+        "id": "uc5qxk",
+        "title": "Tuesday SOTD Thread - Apr 26, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/uc5qxk/tuesday_sotd_thread_apr_26_2022/"
+      }
+    ],
+    "2022-04-26": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Monday!",
+        "created_utc": "2022-04-25 01:00:10",
+        "id": "ube5cp",
+        "title": "Monday SOTD Thread - Apr 25, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/ube5cp/monday_sotd_thread_apr_25_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!",
+        "created_utc": "2022-04-26 01:00:10",
+        "id": "uc5qxk",
+        "title": "Tuesday SOTD Thread - Apr 26, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/uc5qxk/tuesday_sotd_thread_apr_26_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Wednesday!\n\nTomorrow's theme is: Mutiny Day",
+        "created_utc": "2022-04-27 01:00:12",
+        "id": "ucwnwg",
+        "title": "Wednesday SOTD Thread - Apr 27, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/ucwnwg/wednesday_sotd_thread_apr_27_2022/"
+      }
+    ],
+    "2022-04-27": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Tuesday!",
+        "created_utc": "2022-04-26 01:00:10",
+        "id": "uc5qxk",
+        "title": "Tuesday SOTD Thread - Apr 26, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/uc5qxk/tuesday_sotd_thread_apr_26_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Wednesday!\n\nTomorrow's theme is: Mutiny Day",
+        "created_utc": "2022-04-27 01:00:12",
+        "id": "ucwnwg",
+        "title": "Wednesday SOTD Thread - Apr 27, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/ucwnwg/wednesday_sotd_thread_apr_27_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Theme Thursday!\n\n**Today's Theme:** Mutiny Day\n\n**Suggested By:** u/Enndeegee\n\nOn the 28th of April 1789 the crew of the Bounty mutineed.  Shave with something chocolatey, coconut-y, or piratical.",
+        "created_utc": "2022-04-28 01:00:11",
+        "id": "udo7c4",
+        "title": "Theme Thursday SOTD Thread - Apr 28, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/udo7c4/theme_thursday_sotd_thread_apr_28_2022/"
+      }
+    ],
+    "2022-04-28": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Wednesday!\n\nTomorrow's theme is: Mutiny Day",
+        "created_utc": "2022-04-27 01:00:12",
+        "id": "ucwnwg",
+        "title": "Wednesday SOTD Thread - Apr 27, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/ucwnwg/wednesday_sotd_thread_apr_27_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Theme Thursday!\n\n**Today's Theme:** Mutiny Day\n\n**Suggested By:** u/Enndeegee\n\nOn the 28th of April 1789 the crew of the Bounty mutineed.  Shave with something chocolatey, coconut-y, or piratical.",
+        "created_utc": "2022-04-28 01:00:11",
+        "id": "udo7c4",
+        "title": "Theme Thursday SOTD Thread - Apr 28, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/udo7c4/theme_thursday_sotd_thread_apr_28_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!",
+        "created_utc": "2022-04-29 01:00:11",
+        "id": "uefaze",
+        "title": "Friday SOTD Thread - Apr 29, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/uefaze/friday_sotd_thread_apr_29_2022/"
+      }
+    ],
+    "2022-04-29": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Theme Thursday!\n\n**Today's Theme:** Mutiny Day\n\n**Suggested By:** u/Enndeegee\n\nOn the 28th of April 1789 the crew of the Bounty mutineed.  Shave with something chocolatey, coconut-y, or piratical.",
+        "created_utc": "2022-04-28 01:00:11",
+        "id": "udo7c4",
+        "title": "Theme Thursday SOTD Thread - Apr 28, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/udo7c4/theme_thursday_sotd_thread_apr_28_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!",
+        "created_utc": "2022-04-29 01:00:11",
+        "id": "uefaze",
+        "title": "Friday SOTD Thread - Apr 29, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/uefaze/friday_sotd_thread_apr_29_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Saturday!",
+        "created_utc": "2022-04-30 01:02:13",
+        "id": "uf4zdo",
+        "title": "Saturday SOTD Thread - Apr 30, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/uf4zdo/saturday_sotd_thread_apr_30_2022/"
+      }
+    ],
+    "2022-04-30": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!",
+        "created_utc": "2022-04-29 01:00:11",
+        "id": "uefaze",
+        "title": "Friday SOTD Thread - Apr 29, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/uefaze/friday_sotd_thread_apr_29_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Saturday!",
+        "created_utc": "2022-04-30 01:02:13",
+        "id": "uf4zdo",
+        "title": "Saturday SOTD Thread - Apr 30, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/uf4zdo/saturday_sotd_thread_apr_30_2022/"
+      }
+    ],
+    "2022-05-08": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Saturday!",
+        "created_utc": "2022-05-07 01:00:08",
+        "id": "uk6ttd",
+        "title": "Saturday SOTD Thread - May 07, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/uk6ttd/saturday_sotd_thread_may_07_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Monday!",
+        "created_utc": "2022-05-09 01:00:10",
+        "id": "ulkjbp",
+        "title": "Monday SOTD Thread - May 09, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/ulkjbp/monday_sotd_thread_may_09_2022/"
+      }
+    ],
+    "2022-05-12": [
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Wednesday!",
+        "created_utc": "2022-05-11 01:00:10",
+        "id": "un2vem",
+        "title": "Wednesday SOTD Thread - May 11, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/un2vem/wednesday_sotd_thread_may_11_2022/"
+      },
+      {
+        "author": "AutoModerator",
+        "body": "Share your shave of the day for Friday!",
+        "created_utc": "2022-05-13 01:00:09",
+        "id": "uol1zo",
+        "title": "Friday SOTD Thread - May 13, 2022",
+        "url": "https://www.reddit.com/r/Wetshaving/comments/uol1zo/friday_sotd_thread_may_13_2022/"
+      }
+    ]
+  },
+  "cache_coverage": {
+    "201605": [
+      "2016-05-03"
+    ],
+    "201802": [
+      "2018-02-15"
+    ],
+    "201807": [
+      "2018-07-11"
+    ],
+    "201811": [
+      "2018-11-01"
+    ],
+    "201812": [
+      "2018-12-06",
+      "2018-12-13",
+      "2018-12-20",
+      "2018-12-27"
+    ],
+    "201907": [
+      "2019-07-29"
+    ],
+    "201909": [
+      "2019-09-02"
+    ],
+    "201911": [
+      "2019-11-04"
+    ],
+    "202002": [
+      "2020-02-24"
+    ],
+    "202003": [
+      "2020-03-02",
+      "2020-03-04"
+    ],
+    "202004": [
+      "2020-04-04"
+    ],
+    "202101": [
+      "2021-01-22",
+      "2021-01-24"
+    ],
+    "202109": [
+      "2021-09-01"
+    ],
+    "202204": [
+      "2022-04-09",
+      "2022-04-10",
+      "2022-04-11",
+      "2022-04-12",
+      "2022-04-13",
+      "2022-04-14",
+      "2022-04-15",
+      "2022-04-16",
+      "2022-04-17",
+      "2022-04-18",
+      "2022-04-19",
+      "2022-04-21",
+      "2022-04-22",
+      "2022-04-23",
+      "2022-04-24",
+      "2022-04-25",
+      "2022-04-26",
+      "2022-04-27",
+      "2022-04-28",
+      "2022-04-29",
+      "2022-04-30"
+    ],
+    "202205": [
+      "2022-05-08",
+      "2022-05-12"
+    ]
+  },
+  "search_timestamp": "2025-07-22T20:41:18.589390"
+}
