@@ -15,6 +15,7 @@ from sotd.match.brush_matching_strategies.other_brushes_strategy import (
 from sotd.match.brush_matching_strategies.other_knot_strategy import OtherKnotMatchingStrategy
 from sotd.match.brush_matching_strategies.zenith_strategy import ZenithBrushMatchingStrategy
 from sotd.match.brush_splitter import BrushSplitter
+from sotd.match.brush_splits_loader import BrushSplitsLoader
 from sotd.match.cache import MatchCache
 from sotd.match.config import BrushMatcherConfig
 from sotd.match.correct_matches import CorrectMatchesChecker
@@ -99,6 +100,9 @@ class BrushMatcher:
             max_size=config.cache_max_size,
             enabled=config.cache_enabled,
         )
+
+        # Load human-curated brush splits
+        self.brush_splits_loader = BrushSplitsLoader()
 
     def _check_correct_matches(self, value: str) -> Optional[Dict[str, Any]]:
         """
@@ -289,7 +293,7 @@ class BrushMatcher:
         if not value:
             return None
 
-        # Check correct matches first
+            # Check correct matches first
         correct_match = self.correct_matches_checker.check(value)
         if correct_match:
             # Convert CorrectMatchData to dict if needed
@@ -312,8 +316,22 @@ class BrushMatcher:
             else:
                 return self._process_regular_correct_match(value, correct_match_dict)
 
-        # Step 1: Try splitting first (composite brush)
-        handle_text, knot_text, delimiter_type = self.brush_splitter.split_handle_and_knot(value)
+        # Step 1: Check if this brush should not be split (human-curated decision)
+        if self.brush_splits_loader.should_not_split(value):
+            # Treat as complete brush, skip splitting
+            handle_text, knot_text, delimiter_type = None, None, None
+        else:
+            # Step 2: Check human-curated brush splits first (highest priority)
+            curated_split = self.brush_splits_loader.get_handle_and_knot(value)
+            if curated_split:
+                handle_text, knot_text = curated_split
+                delimiter_type = "curated_split"
+            else:
+                # Step 3: Try automated splitting (fallback)
+                handle_text, knot_text, delimiter_type = self.brush_splitter.split_handle_and_knot(
+                    value
+                )
+
         if handle_text and knot_text:
             # Handle split result - create composite brush structure
             # Match handle and knot separately
