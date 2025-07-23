@@ -89,8 +89,23 @@ def save_overrides(overrides, filename="data/thread_overrides.yaml"):
     for key in sorted(overrides.keys()):
         sorted_overrides[str(key)] = overrides[key]
 
+    # Write YAML manually to control formatting
     with open(filename, "w") as f:
-        yaml.dump(sorted_overrides, f, default_flow_style=False, indent=2)
+        f.write("# Manual thread overrides for threads that don't match standard search patterns\n")
+        f.write("# Format: YYYY-MM-DD: [list of Reddit URLs]\n")
+        f.write(
+            '# Example: 2025-06-25: ["https://www.reddit.com/r/Wetshaving/comments/1lk3ooa/wednesday_sotd_25_june/"]\n\n'
+        )
+
+        for date in sorted(sorted_overrides.keys()):
+            urls = sorted_overrides[date]
+            if urls and isinstance(urls, list):
+                f.write(f"{date}:\n")
+                for url in urls:
+                    f.write(f"  - {url}\n")
+                f.write("\n")
+            else:
+                f.write(f"{date}: null\n\n")
 
 
 def main():
