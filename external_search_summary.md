@@ -1,7 +1,9 @@
 # External Search Summary - Missing SOTD Threads
 
 ## Overview
-This document provides search patterns and URLs for the 25 missing SOTD thread dates that were not found in the cache analysis.
+This document provides search patterns and URLs for the 20 missing SOTD thread dates that were not found in the cache analysis.
+
+**UPDATE**: 5 July 2025 dates (2025-07-18 through 2025-07-22) were found in updated fetch results and removed from missing list.
 
 ## Missing Dates Requiring External Search
 
@@ -37,12 +39,12 @@ This document provides search patterns and URLs for the 25 missing SOTD thread d
 - **2022-05-08**: Likely genuinely missing
 - **2022-05-12**: Likely genuinely missing
 
-### 2025 (5 dates)
-- **2025-07-18**: Recent date
-- **2025-07-19**: Recent date
-- **2025-07-20**: Recent date
-- **2025-07-21**: Recent date
-- **2025-07-22**: Recent date
+### ~~2025 (5 dates)~~ ✅ **FOUND**
+- ~~2025-07-18~~: **FOUND** in updated fetch results
+- ~~2025-07-19~~: **FOUND** in updated fetch results  
+- ~~2025-07-20~~: **FOUND** in updated fetch results
+- ~~2025-07-21~~: **FOUND** in updated fetch results
+- ~~2025-07-22~~: **FOUND** in updated fetch results
 
 ## Search Strategies
 
@@ -79,7 +81,7 @@ When found, validate threads against:
 5. **Update Plan**: Document external search results
 
 ## Expected Outcomes
-- **Low success rate**: Many of these dates likely have genuinely missing threads
-- **Focus on recent dates**: 2025 dates may be more likely to have threads
+- **Reduced scope**: 20 dates instead of 25 (20% reduction)
+- **Focus on older dates**: 2016-2022 dates likely have genuinely missing threads
 - **Archive importance**: Wayback Machine may be key for older dates
 - **Community patterns**: Early dates (2016) may have different thread patterns 
