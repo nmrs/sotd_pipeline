@@ -5,7 +5,7 @@ Extracts best matches and formats them for the overrides file.
 """
 
 import json
-from datetime import datetime
+from datetime import datetime, date
 from pathlib import Path
 
 import yaml
@@ -78,12 +78,31 @@ def load_existing_overrides():
         return {}
 
 
+def filter_future_dates(missing_dates):
+    """Filter out future dates from the missing dates list."""
+    today = date.today()
+    filtered_dates = []
+
+    for date_str in missing_dates:
+        try:
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+            if date_obj <= today:
+                filtered_dates.append(date_str)
+        except ValueError:
+            # Skip invalid date formats
+            continue
+
+    return filtered_dates
+
+
 def load_missing_dates():
     """Load the list of all missing dates from the analysis."""
     try:
         with open("missing_dates_analysis.json", "r") as f:
             data = json.load(f)
-            return data.get("missing_dates", [])
+            missing_dates = data.get("missing_dates", [])
+            # Filter out future dates
+            return filter_future_dates(missing_dates)
     except FileNotFoundError:
         print("Warning: missing_dates_analysis.json not found")
         return []
