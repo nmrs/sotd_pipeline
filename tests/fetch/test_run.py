@@ -155,7 +155,6 @@ def test_calc_missing_leap_year():
 # _process_month tests                                                         #
 # --------------------------------------------------------------------------- #
 @patch("sotd.fetch.run.search_threads")
-@patch("sotd.fetch.run.apply_overrides")
 @patch("sotd.fetch.run.load_month_file")
 @patch("sotd.fetch.run.write_month_file")
 @patch("sotd.fetch.reddit.fetch_top_level_comments_parallel")
@@ -163,7 +162,6 @@ def test_process_month_basic_flow(
     mock_fetch_comments,
     mock_write,
     _mock_load,
-    mock_apply_overrides,
     mock_search,
     mock_args,  # pylint: disable=redefined-outer-name
     sample_threads,  # pylint: disable=redefined-outer-name
@@ -171,16 +169,13 @@ def test_process_month_basic_flow(
 ):
     """_process_month should complete basic processing workflow."""
     mock_search.return_value = sample_threads
-    mock_apply_overrides.return_value = sample_threads
     # mock_fetch_comments_parallel returns tuple of (comment_lists, metrics)
     # when return_metrics=True
     comment_lists = [sample_comments[thread.id] for thread in sample_threads]
     mock_fetch_comments.return_value = (comment_lists, {"test": "metrics"})
 
     with patch("sotd.fetch.run.load_month_file", return_value=None):
-        result = _process_month(
-            2025, 5, mock_args, reddit=Mock(), include_overrides={}, exclude_overrides={}
-        )
+        result = _process_month(2025, 5, mock_args, reddit=Mock())
 
         # Verify result structure
         assert result["year"] == 2025
@@ -194,20 +189,15 @@ def test_process_month_basic_flow(
 
 
 @patch("sotd.fetch.run.search_threads")
-@patch("sotd.fetch.run.apply_overrides")
 def test_process_month_no_threads_found(
-    mock_apply_overrides,
     mock_search,
     mock_args,  # pylint: disable=redefined-outer-name
 ):
     """_process_month should handle case when no threads are found."""
     # Setup mocks for no threads
     mock_search.return_value = []
-    mock_apply_overrides.return_value = []
 
     mock_reddit = Mock()
-    mock_include = {}
-    mock_exclude = {}
 
     with patch("builtins.print") as mock_print:
         result = _process_month(
@@ -215,8 +205,6 @@ def test_process_month_no_threads_found(
             5,
             mock_args,
             reddit=mock_reddit,
-            include_overrides=mock_include,
-            exclude_overrides=mock_exclude,
         )
 
     # Should print warning
@@ -231,7 +219,6 @@ def test_process_month_no_threads_found(
 
 
 @patch("sotd.fetch.run.search_threads")
-@patch("sotd.fetch.run.apply_overrides")
 @patch("sotd.fetch.run.load_month_file")
 @patch("sotd.fetch.run.write_month_file")
 @patch("sotd.fetch.reddit.fetch_top_level_comments_parallel")
@@ -239,7 +226,6 @@ def test_process_month_with_existing_files(
     mock_fetch_comments,
     _mock_write,
     mock_load,
-    mock_apply_overrides,
     mock_search,
     mock_args,  # pylint: disable=redefined-outer-name
     sample_threads,  # pylint: disable=redefined-outer-name
@@ -259,7 +245,7 @@ def test_process_month_with_existing_files(
     ]
 
     mock_search.return_value = sample_threads
-    mock_apply_overrides.return_value = sample_threads
+
     mock_load.side_effect = [
         ("metadata", existing_threads),  # First call for threads
         ("metadata", existing_comments),  # Second call for comments
@@ -274,9 +260,7 @@ def test_process_month_with_existing_files(
             existing_comments,  # Comment merge
         ]
 
-        result = _process_month(
-            2025, 5, mock_args, reddit=Mock(), include_overrides={}, exclude_overrides={}
-        )
+        result = _process_month(2025, 5, mock_args, reddit=Mock())
 
     # Should call merge_records for both threads and comments
     assert mock_merge.call_count == 2
@@ -286,32 +270,25 @@ def test_process_month_with_existing_files(
 
 
 @patch("sotd.fetch.run.search_threads")
-@patch("sotd.fetch.run.apply_overrides")
 def test_process_month_force_mode(
-    mock_apply_overrides,
     mock_search,
     mock_args,  # pylint: disable=redefined-outer-name
 ):
     """_process_month should skip loading existing files when force=True."""
     mock_args.force = True
     mock_search.return_value = []
-    mock_apply_overrides.return_value = []
 
     with patch("sotd.fetch.run.load_month_file") as mock_load:
-        _process_month(
-            2025, 5, mock_args, reddit=Mock(), include_overrides={}, exclude_overrides={}
-        )
+        _process_month(2025, 5, mock_args, reddit=Mock())
 
     # load_month_file should not be called in force mode
     mock_load.assert_not_called()
 
 
 @patch("sotd.fetch.run.search_threads")
-@patch("sotd.fetch.run.apply_overrides")
 @patch("sotd.fetch.reddit.fetch_top_level_comments_parallel")
 def test_process_month_debug_output(
     mock_fetch_comments,
-    mock_apply_overrides,
     mock_search,
     mock_args,  # pylint: disable=redefined-outer-name
     sample_threads,  # pylint: disable=redefined-outer-name
@@ -319,15 +296,13 @@ def test_process_month_debug_output(
     """_process_month should print debug information when debug=True."""
     mock_args.debug = True
     mock_search.return_value = sample_threads
-    mock_apply_overrides.return_value = sample_threads
+
     mock_fetch_comments.return_value = []
 
     with patch("builtins.print") as mock_print:
         with patch("sotd.fetch.run.load_month_file", return_value=None):
             with patch("sotd.fetch.run.write_month_file"):
-                _process_month(
-                    2025, 5, mock_args, reddit=Mock(), include_overrides={}, exclude_overrides={}
-                )
+                _process_month(2025, 5, mock_args, reddit=Mock())
 
             # Should print debug info about overrides (but parallel processing happens first)
         # The debug message is printed after parallel processing, so we check for the metrics
@@ -339,11 +314,9 @@ def test_process_month_debug_output(
 
 
 @patch("sotd.fetch.run.search_threads")
-@patch("sotd.fetch.run.apply_overrides")
 @patch("sotd.fetch.reddit.fetch_top_level_comments_parallel")
 def test_process_month_comment_processing(
     mock_fetch_comments,
-    mock_apply_overrides,
     mock_search,
     mock_args,  # pylint: disable=redefined-outer-name
     sample_threads,  # pylint: disable=redefined-outer-name
@@ -351,7 +324,7 @@ def test_process_month_comment_processing(
 ):
     """_process_month should process comments correctly with progress bars."""
     mock_search.return_value = sample_threads
-    mock_apply_overrides.return_value = sample_threads
+
     # mock_fetch_comments_parallel returns tuple of (comment_lists, metrics)
     # when return_metrics=True
     comment_lists = [sample_comments[thread.id] for thread in sample_threads]
@@ -362,9 +335,7 @@ def test_process_month_comment_processing(
             with patch("sotd.fetch.run.tqdm") as mock_tqdm:
                 mock_tqdm.return_value = sample_threads  # tqdm returns the iterable
 
-                result = _process_month(
-                    2025, 5, mock_args, reddit=Mock(), include_overrides={}, exclude_overrides={}
-                )
+                result = _process_month(2025, 5, mock_args, reddit=Mock())
 
             # Should not create progress bar for parallel processing (tqdm is not used)
         # The parallel processing handles progress internally
@@ -436,12 +407,11 @@ def test_main_audit_mode_with_issues(mock_audit, capsys):
 
 
 @patch("sotd.fetch.run.get_reddit")
-@patch("sotd.fetch.run.load_overrides")
 @patch("sotd.fetch.run._process_month")
-def test_main_single_month_processing(mock_process, mock_load_overrides, mock_get_reddit, capsys):
+def test_main_single_month_processing(mock_process, mock_get_reddit, capsys):
     """main should process single month and display results."""
     mock_get_reddit.return_value = Mock()
-    mock_load_overrides.return_value = ({}, {})
+
     mock_process.return_value = {
         "year": 2025,
         "month": 5,
@@ -464,12 +434,11 @@ def test_main_single_month_processing(mock_process, mock_load_overrides, mock_ge
 
 
 @patch("sotd.fetch.run.get_reddit")
-@patch("sotd.fetch.run.load_overrides")
 @patch("sotd.fetch.run._process_month")
-def test_main_multi_month_processing(mock_process, mock_load_overrides, mock_get_reddit, capsys):
+def test_main_multi_month_processing(mock_process, mock_get_reddit, capsys):
     """main should process multiple months and display summary."""
     mock_get_reddit.return_value = Mock()
-    mock_load_overrides.return_value = ({}, {})
+
     mock_process.side_effect = [
         {"year": 2025, "month": 1, "threads": 10, "comments": 50, "missing_days": ["2025-01-15"]},
         {"year": 2025, "month": 2, "threads": 12, "comments": 60, "missing_days": []},
@@ -493,12 +462,11 @@ def test_main_multi_month_processing(mock_process, mock_load_overrides, mock_get
 
 
 @patch("sotd.fetch.run.get_reddit")
-@patch("sotd.fetch.run.load_overrides")
 @patch("sotd.fetch.run._process_month")
-def test_main_no_missing_days_warning(mock_process, mock_load_overrides, mock_get_reddit, capsys):
+def test_main_no_missing_days_warning(mock_process, mock_get_reddit, capsys):
     """main should not show missing day warnings when entire month is missing."""
     mock_get_reddit.return_value = Mock()
-    mock_load_overrides.return_value = ({}, {})
+
     mock_process.return_value = {
         "year": 2025,
         "month": 5,
@@ -524,13 +492,11 @@ def test_main_argument_parsing():
     """main should properly parse command line arguments."""
     with patch("sotd.fetch.run.month_span") as mock_span:
         with patch("sotd.fetch.run.get_reddit"):
-            with patch("sotd.fetch.run.load_overrides", return_value=({}, {})):
-                with patch("sotd.fetch.run._process_month", return_value=None):
-                    with patch("sotd.fetch.run.tqdm", return_value=[]):
-                        # Test various argument combinations
-                        main(
-                            ["--month", "2025-05", "--debug", "--force", "--out-dir", "custom_data"]
-                        )
+
+            with patch("sotd.fetch.run._process_month", return_value=None):
+                with patch("sotd.fetch.run.tqdm", return_value=[]):
+                    # Test various argument combinations
+                    main(["--month", "2025-05", "--debug", "--force", "--out-dir", "custom_data"])
 
     # Verify that month_span was called (indicating args were parsed)
     mock_span.assert_called_once()
@@ -548,34 +514,27 @@ def test_process_month_search_error(
     mock_search.side_effect = Exception("Reddit API Error")
 
     with pytest.raises(Exception, match="Reddit API Error"):
-        _process_month(
-            2025, 5, mock_args, reddit=Mock(), include_overrides={}, exclude_overrides={}
-        )
+        _process_month(2025, 5, mock_args, reddit=Mock())
 
 
 @patch("sotd.fetch.run.search_threads")
-@patch("sotd.fetch.run.apply_overrides")
 @patch("sotd.fetch.run.write_month_file")
 @patch("sotd.fetch.reddit.fetch_top_level_comments_parallel")
 def test_process_month_file_write_error(
     mock_fetch_comments,
     _mock_write,  # Unused argument
-    mock_apply_overrides,
     mock_search,
     mock_args,  # pylint: disable=redefined-outer-name
 ):
     """_process_month should propagate file write errors."""
     # Setup mocks to return some threads so we get to the file write stage
     mock_search.return_value = [MockSubmission("thread1", "SOTD Thread May 01, 2025")]
-    mock_apply_overrides.return_value = [MockSubmission("thread1", "SOTD Thread May 01, 2025")]
     mock_fetch_comments.return_value = []  # Return no comments
     _mock_write.side_effect = OSError("Write failed")
 
     # The error should propagate up
     with pytest.raises(OSError, match="Write failed"):
-        _process_month(
-            2025, 5, mock_args, reddit=Mock(), include_overrides={}, exclude_overrides={}
-        )
+        _process_month(2025, 5, mock_args, reddit=Mock())
 
 
 def test_main_invalid_arguments():

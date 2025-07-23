@@ -83,7 +83,7 @@ def extract_core_product_prefixes():
         print("\nNo core product prefixes found in these patterns.")
 
     # Look for non-English core product patterns
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print("NON-ENGLISH CORE PRODUCT PATTERNS")
     print("=" * 80)
 
@@ -122,7 +122,7 @@ def extract_core_product_prefixes():
         print("\nNo international core product patterns found.")
 
     # Analyze what these prefixes might map to
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print("CORE PRODUCT FIELD MAPPING")
     print("=" * 80)
 
@@ -154,7 +154,7 @@ def extract_core_product_prefixes():
 def analyze_checkmark_and_emoji_patterns():
     """Analyze checkmark and emoji patterns for core products."""
 
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print("CHECKMARK AND EMOJI PATTERN ANALYSIS")
     print("=" * 80)
 

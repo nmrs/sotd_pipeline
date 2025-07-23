@@ -29,7 +29,6 @@ from sotd.cli_utils.date_span import month_span
 from sotd.fetch.audit import _audit_months, list_available_months
 from sotd.fetch.cli import get_parser
 from sotd.fetch.merge import merge_records
-from sotd.fetch.overrides import apply_overrides, load_overrides
 from sotd.fetch.reddit import (
     fetch_top_level_comments_parallel,
     get_reddit,
@@ -64,23 +63,12 @@ def _process_month(
     args: argparse.Namespace,
     *,
     reddit,
-    include_overrides,
-    exclude_overrides,
 ) -> dict:
     """Fetch + merge + save for one calendar month."""
     threads = search_threads("wetshaving", year, month, debug=args.debug)
 
-    threads = apply_overrides(
-        threads,
-        include_overrides,
-        exclude_overrides,
-        reddit=reddit,
-        year=year,
-        month=month,
-        debug=args.debug,
-    )
     if args.debug:
-        print(f"[DEBUG] After overrides:  {len(threads)} valid threads")
+        print(f"[DEBUG] Found {len(threads)} valid threads")
 
     out = Path(args.out_dir)
     threads_path = out / "threads" / f"{year:04d}-{month:02d}.json"
@@ -243,8 +231,6 @@ def main(argv: Sequence[str] | None = None) -> int:  # easier to test
 
         reddit = get_reddit()
 
-        inc_over, exc_over = load_overrides()
-
         results = []
         for year, month in tqdm(months, desc="Months", unit="month", disable=False):
             result = _process_month(
@@ -252,8 +238,6 @@ def main(argv: Sequence[str] | None = None) -> int:  # easier to test
                 month,
                 args,
                 reddit=reddit,
-                include_overrides=inc_over,
-                exclude_overrides=exc_over,
             )
             results.append(result)
 

@@ -10,9 +10,9 @@ import sys
 
 sys.path.append(".")
 
-from sotd.match.razor_matcher import RazorMatcher
 from sotd.match.blade_matcher import BladeMatcher
 from sotd.match.brush_matcher import BrushMatcher
+from sotd.match.razor_matcher import RazorMatcher
 from sotd.match.soap_matcher import SoapMatcher
 
 

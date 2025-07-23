@@ -102,7 +102,6 @@ def test_main_multi_month(monkeypatch):
         raising=True,
     )  # type: ignore[attr-defined]
     monkeypatch.setattr("sotd.fetch.run.get_reddit", lambda: None, raising=True)
-    monkeypatch.setattr("sotd.fetch.overrides.load_overrides", lambda: ({}, {}), raising=True)
 
     # run main with a fake argv (year 2024)
     run_mod.main(["--year", "2024"])

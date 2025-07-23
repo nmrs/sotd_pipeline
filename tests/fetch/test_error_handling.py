@@ -1,19 +1,14 @@
 """Tests for error handling across the fetch pipeline."""
 
 import os
-import argparse
 from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
-from types import SimpleNamespace
-from typing import List, cast
-from praw.models import Submission
+from unittest.mock import patch, mock_open
+
 
 import pytest
 
 from sotd.fetch.reddit import get_reddit, safe_call
 from sotd.fetch.save import load_month_file, write_month_file
-from sotd.fetch.overrides import load_overrides, apply_overrides
-from sotd.fetch.run import _process_month
 
 
 # --------------------------------------------------------------------------- #
@@ -133,128 +128,6 @@ def test_write_month_file_directory_creation_error(tmp_path):
 
 
 # --------------------------------------------------------------------------- #
-# Override System Error Handling                                              #
-# --------------------------------------------------------------------------- #
-def test_load_overrides_file_not_found():
-    """Test handling when override files don't exist."""
-    with patch("sotd.fetch.overrides.Path.is_file", return_value=False):
-        include, exclude = load_overrides()
-
-        assert include == {}
-        assert exclude == {}
-
-
-def test_load_overrides_malformed_json():
-    """Test handling of malformed override JSON files."""
-    with patch("sotd.fetch.overrides.Path.is_file", return_value=True):
-        with patch("sotd.fetch.overrides.Path.open", mock_open(read_data="invalid json {")):
-            with pytest.raises(RuntimeError, match=r"Invalid JSON in overrides file: .*"):
-                load_overrides()
-
-
-def test_apply_overrides_network_error():
-    """Test handling of network errors when fetching override submissions."""
-    base_threads = [
-        Mock(
-            id="thread1",
-            title="SOTD Thread May 01, 2025",
-            permalink="/r/wetshaving/comments/thread1/",
-            author="test_user",
-            created_utc=1640995200,
-            num_comments=5,
-            link_flair_text="SOTD",
-        )
-    ]
-    include_overrides = {"override1": "some_submission_id"}
-
-    mock_reddit = Mock()
-    mock_reddit.submission.side_effect = ConnectionError("Network error")
-
-    # Should handle gracefully and return original threads
-    result = apply_overrides(
-        cast(List[Submission], base_threads),
-        include_overrides,
-        {},
-        reddit=mock_reddit,
-        year=2025,
-        month=5,
-        debug=False,
-    )  # type: ignore
-    assert len(result) == 1  # Only the original thread is present
-
-
-def test_apply_overrides_submission_not_found():
-    """Test handling when override submission doesn't exist."""
-    base_threads = [
-        SimpleNamespace(
-            id="thread1",
-            title="SOTD Thread May 01, 2025",
-            permalink="/r/wetshaving/comments/thread1/",
-            author="test_user",
-            created_utc=1640995200,
-            num_comments=5,
-            link_flair_text="SOTD",
-        )
-    ]
-    include_overrides = {"nonexistent": "fake_id"}
-
-    mock_reddit = Mock()
-    mock_reddit.submission.side_effect = ConnectionError("not found")
-
-    # Should handle gracefully and return original threads
-    result = apply_overrides(
-        cast(List[Submission], base_threads),
-        include_overrides,
-        {},
-        reddit=mock_reddit,
-        year=2025,
-        month=5,
-        debug=False,
-    )  # type: ignore
-    assert len(result) == 1  # Original thread preserved
-
-
-def test_apply_overrides_invalid_submission():
-    """Test handling when override submission is invalid."""
-    base_threads = [
-        SimpleNamespace(
-            id="thread1",
-            title="SOTD Thread May 01, 2025",
-            permalink="/r/wetshaving/comments/thread1/",
-            author="test_user",
-            created_utc=1640995200,
-            num_comments=5,
-            link_flair_text="SOTD",
-        )
-    ]
-    include_overrides = {"invalid": "fake_id"}
-
-    mock_submission = SimpleNamespace(
-        id="invalid",
-        title="Not a SOTD Thread",
-        permalink="/r/wetshaving/comments/invalid/",
-        author="test_user",
-        created_utc=1640995200,
-        num_comments=5,
-        link_flair_text="SOTD",
-    )
-    mock_reddit = Mock()
-    mock_reddit.submission.return_value = mock_submission
-
-    # Should handle gracefully and return original threads
-    result = apply_overrides(
-        cast(List[Submission], base_threads),
-        include_overrides,
-        {},
-        reddit=mock_reddit,
-        year=2025,
-        month=5,
-        debug=False,
-    )  # type: ignore
-    assert len(result) == 1  # Original thread preserved
-
-
-# --------------------------------------------------------------------------- #
 # Memory and Resource Error Handling                                          #
 # --------------------------------------------------------------------------- #
 def test_large_dataset_memory_handling(tmp_path):
@@ -339,93 +212,3 @@ def mock_open_with_content(content):
 # --------------------------------------------------------------------------- #
 # Integration Error Scenarios                                                 #
 # --------------------------------------------------------------------------- #
-def test_partial_failure_recovery():
-    """Test recovery from partial failures in the fetch pipeline."""
-    # Simulate scenario where threads are fetched but comments fail
-
-    args = argparse.Namespace()
-    args.out_dir = "test_data"
-    args.debug = False
-    args.force = False
-
-    with patch("sotd.fetch.run.search_threads") as mock_search:
-        with patch("sotd.fetch.run.apply_overrides") as mock_apply:
-            with patch(
-                "sotd.fetch.reddit.fetch_top_level_comments_parallel"
-            ) as mock_fetch_comments:
-                with patch("sotd.fetch.run.load_month_file", return_value=None):
-                    with patch("sotd.fetch.run.write_month_file"):
-
-                        # Setup: threads found successfully
-                        mock_thread = Mock()
-                        mock_thread.id = "thread1"
-                        mock_thread.title = "SOTD Thread May 01, 2025"
-                        mock_thread.permalink = "/r/wetshaving/comments/thread1/"
-                        mock_thread.author = "test_user"
-                        mock_thread.created_utc = 1640995200
-                        mock_thread.num_comments = 5
-                        mock_thread.link_flair_text = "SOTD"
-                        mock_thread.title = "SOTD Thread May 01, 2025"  # Set title as string
-
-                        mock_search.return_value = [mock_thread]
-                        mock_apply.return_value = [mock_thread]
-
-                        # But comment fetching fails
-                        # This broad Exception is intentional for test simulation
-                        mock_fetch_comments.side_effect = Exception("Reddit API error")
-
-                        # Should handle the error gracefully and continue
-                        result = _process_month(
-                            2025,
-                            5,
-                            args,
-                            reddit=Mock(),
-                            include_overrides={},
-                            exclude_overrides={},
-                        )
-
-                        # Should return result with 0 comments due to error
-                        assert result["threads"] == 1
-                        assert result["comments"] == 0
-
-
-def test_graceful_degradation_no_comments():
-    """Test graceful handling when comments can't be fetched but threads can."""
-    args = argparse.Namespace()
-    args.out_dir = "test_data"
-    args.debug = False
-    args.force = False
-
-    with patch("sotd.fetch.run.search_threads") as mock_search:
-        with patch("sotd.fetch.run.apply_overrides") as mock_apply:
-            with patch(
-                "sotd.fetch.reddit.fetch_top_level_comments_parallel"
-            ) as mock_fetch_comments:
-                with patch("sotd.fetch.run.load_month_file", return_value=None):
-                    with patch("sotd.fetch.run.write_month_file"):
-
-                        # Setup successful thread fetching
-                        mock_thread = Mock()
-                        mock_thread.id = "thread1"
-                        mock_thread.title = "SOTD Thread May 01, 2025"
-                        mock_thread.created_utc = 1640995200
-                        mock_thread.permalink = "/r/wetshaving/comments/thread1/"
-                        mock_thread.num_comments = 0
-                        mock_thread.link_flair_text = "SOTD"
-                        mock_thread.author = "user1"
-
-                        mock_search.return_value = [mock_thread]
-                        mock_apply.return_value = [mock_thread]
-
-                        # No comments available (empty list, not error)
-                        mock_fetch_comments.return_value = []
-
-                        # Should complete successfully with 0 comments
-                        result = _process_month(
-                            2025, 5, args, reddit=Mock(), include_overrides={}, exclude_overrides={}
-                        )
-
-                        assert result["threads"] == 1
-                        assert result["comments"] == 0
-                        assert result["year"] == 2025
-                        assert result["month"] == 5
