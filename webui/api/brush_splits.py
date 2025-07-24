@@ -9,6 +9,7 @@ import json
 import logging
 import re
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -319,7 +320,6 @@ class SaveSplitRequest(BaseModel):
     knot: Optional[str] = Field(
         None, description="Corrected knot component (null when should_not_split is true)"
     )
-    validated_at: Optional[str] = Field(None, description="ISO timestamp of validation")
     should_not_split: bool = Field(False, description="Whether this brush should not be split")
 
 
@@ -603,7 +603,21 @@ class BrushSplitValidator:
         from webui.api.utils.yaml_utils import save_yaml_file
 
         try:
-            # Group splits by original brush name (case-insensitive)
+            # Load existing data first
+            existing_data = {"splits": {}}
+            if self.yaml_path.exists():
+                try:
+                    with open(self.yaml_path, "r", encoding="utf-8") as f:
+                        loaded_data = yaml.safe_load(f) or {"splits": {}}
+                        # Handle case where splits is None (empty YAML file)
+                        if loaded_data.get("splits") is None:
+                            loaded_data["splits"] = {}
+                        existing_data = loaded_data
+                except (yaml.YAMLError, OSError) as e:
+                    logger.warning(f"Could not load existing YAML data: {e}")
+                    existing_data = {"splits": {}}
+
+            # Group new splits by original brush name (case-insensitive)
             organized_splits = {}
             for split in splits:
                 key = split.original.lower()
@@ -611,20 +625,29 @@ class BrushSplitValidator:
                     organized_splits[key] = []
                 organized_splits[key].append(split.to_dict())
 
-            # Create new structure with alphabetical organization
-            data = {"splits": {}}
-            for key in sorted(organized_splits.keys()):
-                # Use the first entry's original as the display name
-                display_name = organized_splits[key][0]["original"]
-                data["splits"][display_name] = organized_splits[key]
+            # Merge with existing data
+            for key, new_entries in organized_splits.items():
+                display_name = new_entries[0]["original"]
+                if display_name in existing_data["splits"]:
+                    # Update existing entry
+                    existing_data["splits"][display_name] = new_entries
+                else:
+                    # Add new entry
+                    existing_data["splits"][display_name] = new_entries
+
+            # Sort the splits alphabetically by key (case insensitive)
+            sorted_splits = {}
+            for key in sorted(existing_data["splits"].keys(), key=str.lower):
+                sorted_splits[key] = existing_data["splits"][key]
+            existing_data["splits"] = sorted_splits
 
             # Ensure directory exists
             self.yaml_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Use the new YAML utility for atomic write
-            save_yaml_file(data, self.yaml_path)
+            save_yaml_file(existing_data, self.yaml_path)
 
-            logger.info(f"Saved {len(splits)} validated splits in new organized structure")
+            logger.info(f"Saved {len(splits)} validated splits, merged with existing data")
             return True
 
         except (OSError, IOError) as e:
@@ -712,7 +735,6 @@ class BrushSplitValidator:
         original: str,
         handle: Optional[str],
         knot: str,
-        validated_at: Optional[str] = None,
         should_not_split: bool = False,
     ) -> BrushSplit:
         """Create a validated brush split."""
@@ -740,11 +762,28 @@ class BrushSplitValidator:
                 system_handle = existing.handle
                 system_knot = existing.knot
 
+        # Determine if this split is being validated
+        # If validated_at is provided, use it; otherwise, check if this is a new validation
+        is_validated = False  # Default to False, will be set to True if validated_at is provided
+        if existing:
+            # If no validated_at provided but we have an existing split,
+            # check if it was already validated
+            is_validated = existing.validated
+
+        # Always set validated_at timestamp when saving a split (unless already provided)
+        # If validated_at is provided, use it; otherwise, generate a new one
+        # Only generate if it's a new validation or no existing timestamp
+        if not existing or not existing.validated_at:
+            validated_at = datetime.now().isoformat()
+            is_validated = True
+        else:
+            validated_at = existing.validated_at  # Keep existing timestamp if provided
+
         return BrushSplit(
             original=original,
             handle=handle,
             knot=knot,
-            validated=validated_at is not None,
+            validated=is_validated,
             corrected=corrected,
             validated_at=validated_at,
             system_handle=system_handle,
@@ -920,11 +959,17 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
                                     "handle": handle,
                                     "knot": knot,
                                     "match_type": match_type,
-                                    "comment_ids": [],
+                                    "occurrences": {},  # file -> comment_ids
                                 }
-                            brush_splits[normalized]["comment_ids"].append(
-                                record.get("comment_id", "")
-                            )
+
+                            # Add comment ID to the appropriate file
+                            comment_id = record.get("id", "") if record else ""
+                            if comment_id:  # Only add non-empty comment IDs
+                                file_key = f"{month}.json"
+                                if file_key not in brush_splits[normalized]["occurrences"]:
+                                    brush_splits[normalized]["occurrences"][file_key] = []
+                                brush_splits[normalized]["occurrences"][file_key].append(comment_id)
+
                             total_records_loaded += 1
 
                 loaded_months.append(month)
@@ -958,17 +1003,38 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
             handle = split_data["handle"]
             knot = split_data["knot"]
             match_type = split_data.get("match_type")
-            comment_ids = split_data["comment_ids"]
+            occurrences_data = split_data["occurrences"]
+
+            # Convert occurrences data to BrushSplitOccurrence objects
+            occurrences = []
+            for file_name, comment_ids in occurrences_data.items():
+                if comment_ids:  # Only add occurrences with comment IDs
+                    occurrences.append(
+                        BrushSplitOccurrence(file=file_name, comment_ids=comment_ids)
+                    )
 
             # Check if already validated
             if original in validator.validated_splits:
                 split = validator.validated_splits[original]
-                # Add new occurrences
-                new_occurrence = BrushSplitOccurrence(
-                    file=f"{months[0]}.json",  # Use first month as representative
-                    comment_ids=comment_ids,
-                )
-                split.occurrences.append(new_occurrence)
+                # Merge new occurrences with existing ones
+                for new_occurrence in occurrences:
+                    # Find existing occurrence for this file or create new one
+                    existing_occurrence = None
+                    for occ in split.occurrences:
+                        if occ.file == new_occurrence.file:
+                            existing_occurrence = occ
+                            break
+
+                    if existing_occurrence:
+                        # Merge comment IDs, avoiding duplicates
+                        existing_comment_ids = set(existing_occurrence.comment_ids)
+                        for comment_id in new_occurrence.comment_ids:
+                            if comment_id not in existing_comment_ids:
+                                existing_occurrence.comment_ids.append(comment_id)
+                    else:
+                        # Add new occurrence
+                        split.occurrences.append(new_occurrence)
+
                 splits.append(split)
             else:
                 # Create new unvalidated split with actual split data
@@ -979,9 +1045,7 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
                     match_type=match_type,
                     validated=False,
                     corrected=False,
-                    occurrences=[
-                        BrushSplitOccurrence(file=f"{months[0]}.json", comment_ids=comment_ids)
-                    ],
+                    occurrences=occurrences,
                 )
                 splits.append(split)
 
@@ -1093,9 +1157,17 @@ async def save_splits(data: SaveSplitsRequest):
                 if not split_dict.get("original"):
                     validation_errors.append(f"Split {i}: missing original field")
                     continue
-                if not split_dict.get("knot"):
+
+                # Only require knot field if should_not_split is false
+                should_not_split = split_dict.get("should_not_split", False)
+                if not should_not_split and not split_dict.get("knot"):
                     validation_errors.append(f"Split {i}: missing knot field")
                     continue
+
+                # Automatically set validated_at timestamp and validated=True for all saved splits
+                if not split_dict.get("validated_at"):
+                    split_dict["validated_at"] = datetime.now().isoformat()
+                split_dict["validated"] = True
 
                 split = BrushSplit.from_dict(split_dict)
                 validated_splits.append(split)
@@ -1164,7 +1236,6 @@ async def save_single_split(data: SaveSplitRequest):
             original=data.original,
             handle=data.handle,
             knot=data.knot,
-            validated_at=data.validated_at,
             should_not_split=data.should_not_split,
         )
 
