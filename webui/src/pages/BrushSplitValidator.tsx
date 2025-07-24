@@ -5,7 +5,7 @@ import { BrushSplit } from '../types/brushSplit';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff } from 'lucide-react';
 import CommentModal from '../components/domain/CommentModal';
-import { getCommentDetail, CommentDetail } from '../services/api';
+import { getCommentDetail, CommentDetail, saveBrushSplits } from '../services/api';
 
 interface LoadResponse {
   brush_splits: BrushSplit[];
@@ -60,6 +60,7 @@ const BrushSplitValidator: React.FC = () => {
 
   // Filter brush splits based on showValidated state
   const filteredBrushSplits = useMemo(() => {
+    console.log('Filtering brush splits:', { brushSplits, showValidated });
     if (showValidated) {
       // Show all items (validated + unvalidated)
       return brushSplits;
@@ -149,9 +150,39 @@ const BrushSplitValidator: React.FC = () => {
           onSelectionChange={() => {
             // Note: This callback is available for future use but not currently implemented
           }}
-          onSave={(updatedData: BrushSplit[]) => {
-            // Update the brush splits with the new data
-            setBrushSplits(updatedData);
+          onSave={async (updatedData: BrushSplit[]) => {
+            try {
+              // Save the validated brush splits to the backend
+              const response = await saveBrushSplits(updatedData);
+
+              if (response.success) {
+                // Update the local state by merging the validated items with existing unvalidated items
+                setBrushSplits(prevSplits => {
+                  // Create a map of validated items by original name for quick lookup
+                  const validatedMap = new Map(updatedData.map(split => [split.original, split]));
+
+                  // Merge: keep unvalidated items, update validated items
+                  return prevSplits.map(split => {
+                    const validatedSplit = validatedMap.get(split.original);
+                    if (validatedSplit) {
+                      // This item was validated and saved
+                      return validatedSplit;
+                    } else {
+                      // This item was not validated, keep as is
+                      return split;
+                    }
+                  });
+                });
+
+                console.log(`Successfully saved ${response.saved_count} brush splits`);
+              } else {
+                console.error('Failed to save brush splits:', response.message);
+                setError(`Failed to save brush splits: ${response.message}`);
+              }
+            } catch (error: any) {
+              console.error('Error saving brush splits:', error);
+              setError(`Error saving brush splits: ${error.message || 'Unknown error'}`);
+            }
           }}
           customControls={validatedButton}
           onCommentClick={handleCommentClick}

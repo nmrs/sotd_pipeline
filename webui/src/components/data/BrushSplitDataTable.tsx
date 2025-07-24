@@ -27,15 +27,25 @@ const MemoizedInput = memo<{
   onChange: (value: string) => void;
   placeholder: string;
   'aria-label': string;
-}>(({ value, onChange, placeholder, 'aria-label': ariaLabel }) => (
-  <Input
-    value={value}
-    onChange={e => onChange(e.target.value)}
-    placeholder={placeholder}
-    aria-label={ariaLabel}
-    className='w-full'
-  />
-));
+}>(({ value, onChange, placeholder, 'aria-label': ariaLabel }) => {
+  const [localValue, setLocalValue] = useState(value);
+
+  // Update local value when prop changes
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  return (
+    <Input
+      value={localValue}
+      onChange={e => setLocalValue(e.target.value)}
+      onBlur={() => onChange(localValue)}
+      placeholder={placeholder}
+      aria-label={ariaLabel}
+      className='w-full'
+    />
+  );
+});
 
 MemoizedInput.displayName = 'MemoizedInput';
 
@@ -48,42 +58,13 @@ export function BrushSplitDataTable({
   commentLoading = false,
 }: BrushSplitDataTableProps) {
   const [editingData, setEditingData] = useState<Record<number, Partial<BrushSplit>>>({});
-  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-  const [clearSelection, setClearSelection] = useState(false);
 
   // Track original values before "Don't Split" was checked
   const [originalValues, setOriginalValues] = useState<
     Record<number, { handle: string; knot: string; validated: boolean }>
   >({});
 
-  // Initialize row selection based on validation status
-  useEffect(() => {
-    const validatedIndices = new Set(
-      brushSplits
-        .map((split, index) => ({ split, index }))
-        .filter(({ split }) => split.validated)
-        .map(({ index }) => index)
-    );
-    setSelectedRows(validatedIndices);
-  }, [brushSplits]);
 
-  // Handle row selection changes
-  const handleSelectionChange = useCallback((selectedRowsData: BrushSplitWithIndex[]) => {
-    const selectedIndices = new Set(selectedRowsData.map(row => row.index));
-    setSelectedRows(selectedIndices);
-    onSelectionChange?.(selectedRowsData);
-  }, [onSelectionChange]);
-
-  // Reset clearSelection flag after it's been used
-  useEffect(() => {
-    if (clearSelection) {
-      // Reset the flag after a short delay to ensure the DataTable has processed it
-      const timer = setTimeout(() => {
-        setClearSelection(false);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [clearSelection]);
 
   const handleFieldChange = useCallback(
     (index: number, field: keyof BrushSplit, value: string | boolean) => {
@@ -117,47 +98,87 @@ export function BrushSplitDataTable({
   );
 
   const handleSave = useCallback(() => {
-    const updatedData = brushSplits.map((item, index) => {
+    // Only send validated splits to the API
+    const validatedData = brushSplits.map((item, index) => {
       const editingChanges = editingData[index] || {};
+      const isEdited = Object.keys(editingChanges).length > 0;
+      const wasValidated = item.validated;
+
+      // Only include splits that are validated (edited or previously validated)
+      const isValidated = isEdited || wasValidated;
+
+      if (!isValidated) {
+        return null; // Skip unvalidated splits
+      }
 
       return {
         ...item,
         ...editingChanges,
-        // Mark as validated if the row is selected
-        validated: selectedRows.has(index) || editingChanges.validated || item.validated,
+        // Mark as validated if the row is edited
+        validated: true,
       };
-    });
-    onSave(updatedData);
+    }).filter(Boolean) as BrushSplit[]; // Remove null entries
+
+    // Only call onSave if there are validated splits to save
+    if (validatedData.length > 0) {
+      onSave(validatedData);
+    }
+
     setEditingData({});
     setOriginalValues({});
-    setSelectedRows(new Set()); // Clear selection after save
-    setClearSelection(true); // Set flag to clear selection
-  }, [brushSplits, editingData, selectedRows, onSave]);
+  }, [brushSplits, editingData, onSave]);
 
-  const hasUnsavedChanges = Object.keys(editingData).length > 0 ||
-    (selectedRows.size > 0 && selectedRows.size !== brushSplits.filter(split => split.validated).length);
+  const hasUnsavedChanges = Object.keys(editingData).length > 0;
 
   const columns = useMemo<ColumnDef<BrushSplitWithIndex>[]>(
     () => [
       {
-        id: 'select',
-        header: ({ table }) => (
-          <Checkbox
-            checked={
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && 'indeterminate')
-            }
-            onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
-            aria-label='Select all'
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={value => row.toggleSelected(!!value)}
-            aria-label='Select row'
-          />
-        ),
+        id: 'validated',
+        header: ({ table }) => {
+          // Get all rows on current page
+          const pageRows = table.getRowModel().rows;
+          const checkedRows = pageRows.filter(row => {
+            const index = row.original.index;
+            const editingValue = editingData[index]?.validated;
+            return editingValue !== undefined ? editingValue : row.original.validated || false;
+          });
+
+          const isAllChecked = pageRows.length > 0 && checkedRows.length === pageRows.length;
+          const isIndeterminate = checkedRows.length > 0 && checkedRows.length < pageRows.length;
+
+          return (
+            <div className="flex items-center gap-2">
+              <span>Validated</span>
+              <Checkbox
+                checked={isAllChecked || (isIndeterminate && 'indeterminate')}
+                onCheckedChange={checked => {
+                  console.log(`Select all validated clicked:`, { checked });
+                  pageRows.forEach(row => {
+                    const index = row.original.index;
+                    handleFieldChange(index, 'validated', !!checked);
+                  });
+                }}
+                aria-label='Select all validated'
+              />
+            </div>
+          );
+        },
+        cell: ({ row }) => {
+          const index = row.original.index;
+          const editingValue = editingData[index]?.validated;
+          const value = editingValue !== undefined ? editingValue : row.original.validated || false;
+
+          return (
+            <Checkbox
+              checked={value}
+              onCheckedChange={checked => {
+                console.log(`Validated checkbox clicked for row ${index}:`, { checked });
+                handleFieldChange(index, 'validated', checked);
+              }}
+              aria-label={`Validated for row ${index + 1}`}
+            />
+          );
+        },
         enableSorting: false,
         enableHiding: false,
       },
@@ -214,7 +235,7 @@ export function BrushSplitDataTable({
         header: 'Comments',
         cell: ({ row }) => {
           // Extract all comment_ids from occurrences
-          const allCommentIds = row.original.occurrences.flatMap(occurrence => occurrence.comment_ids);
+          const allCommentIds = (row.original.occurrences || []).flatMap(occurrence => occurrence.comment_ids || []);
           const uniqueCommentIds = [...new Set(allCommentIds)];
 
           if (uniqueCommentIds.length === 0) {
@@ -255,7 +276,112 @@ export function BrushSplitDataTable({
       },
       {
         accessorKey: 'should_not_split',
-        header: "Don't Split",
+        header: ({ table }) => {
+          // Get all rows on current page
+          const pageRows = table.getRowModel().rows;
+          const checkedRows = pageRows.filter(row => {
+            const index = row.original.index;
+            const editingValue = editingData[index]?.should_not_split;
+            return editingValue !== undefined ? editingValue : row.original.should_not_split || false;
+          });
+
+          const isAllChecked = pageRows.length > 0 && checkedRows.length === pageRows.length;
+          const isIndeterminate = checkedRows.length > 0 && checkedRows.length < pageRows.length;
+
+          return (
+            <div className="flex items-center gap-2">
+              <span>Don't Split</span>
+              <Checkbox
+                checked={isAllChecked || (isIndeterminate && 'indeterminate')}
+                onCheckedChange={checked => {
+                  console.log(`Select all Don't Split clicked:`, { checked });
+                  pageRows.forEach(row => {
+                    const index = row.original.index;
+                    // Use the same logic as individual "Don't Split" checkbox
+                    if (checked) {
+                      // When "Don't Split" is checked, save original values and clear fields
+                      setOriginalValues(prev => ({
+                        ...prev,
+                        [index]: {
+                          handle: editingData[index]?.handle ?? row.original.handle ?? '',
+                          knot: editingData[index]?.knot ?? row.original.knot ?? '',
+                          validated: editingData[index]?.validated ?? row.original.validated ?? false,
+                        },
+                      }));
+
+                      // Set all changes at once - auto-check validated when "Don't Split" is checked
+                      setEditingData(prev => {
+                        const newData = {
+                          ...prev,
+                          [index]: {
+                            ...prev[index],
+                            should_not_split: true,
+                            handle: '',
+                            knot: '',
+                            validated: true, // Auto-check validated when "Don't Split" is checked
+                          },
+                        };
+                        console.log(`Updated editing data for row ${index}:`, newData[index]);
+                        return newData;
+                      });
+                    } else {
+                      // When "Don't Split" is unchecked, restore original values
+                      const original = originalValues[index];
+                      if (original) {
+                        console.log(`Restoring original values for row ${index}:`, original);
+
+                        // Restore original values and clear the should_not_split change
+                        setEditingData(prev => {
+                          const newData = { ...prev };
+                          if (newData[index]) {
+                            // Restore original values including validated state
+                            newData[index] = {
+                              ...newData[index],
+                              handle: original.handle,
+                              knot: original.knot,
+                              validated: original.validated, // Restore original validated state
+                            };
+
+                            // Clear the should_not_split change since it's back to original
+                            delete newData[index].should_not_split;
+
+                            // If no more changes for this row, remove the entire row entry
+                            if (Object.keys(newData[index]).length === 0) {
+                              delete newData[index];
+                            }
+                          }
+                          console.log(`Restored editing data for row ${index}:`, newData[index]);
+                          return newData;
+                        });
+
+                        // Clean up original values
+                        setOriginalValues(prev => {
+                          const newValues = { ...prev };
+                          delete newValues[index];
+                          return newValues;
+                        });
+                      } else {
+                        // No original values saved, just clear the should_not_split change
+                        setEditingData(prev => {
+                          const newData = { ...prev };
+                          if (newData[index]) {
+                            delete newData[index].should_not_split;
+                            // If no more changes for this row, remove the entire row entry
+                            if (Object.keys(newData[index]).length === 0) {
+                              delete newData[index];
+                            }
+                          }
+                          return newData;
+                        });
+                      }
+                    }
+                  });
+                }}
+                aria-label="Select all Don't Split"
+              />
+            </div>
+          );
+        },
         cell: ({ row }) => {
           const index = row.original.index;
           const editingValue = editingData[index]?.should_not_split;
@@ -267,8 +393,12 @@ export function BrushSplitDataTable({
               key={`should_not_split_${index}_${value}`}
               checked={value}
               onCheckedChange={checked => {
+                console.log(`Don't Split checkbox clicked for row ${index}:`, { checked, original: row.original });
+
                 // Handle "Don't Split" specific behavior first
                 if (checked) {
+                  console.log(`Setting "Don't Split" to true for row ${index}`);
+
                   // When "Don't Split" is checked, save original values and clear fields
                   setOriginalValues(prev => ({
                     ...prev,
@@ -279,29 +409,39 @@ export function BrushSplitDataTable({
                     },
                   }));
 
-                  // Set all changes at once
-                  setEditingData(prev => ({
-                    ...prev,
-                    [index]: {
-                      ...prev[index],
-                      should_not_split: true,
-                      handle: '',
-                      knot: '',
-                    },
-                  }));
+                  // Set all changes at once - auto-check validated when "Don't Split" is checked
+                  setEditingData(prev => {
+                    const newData = {
+                      ...prev,
+                      [index]: {
+                        ...prev[index],
+                        should_not_split: true,
+                        handle: '',
+                        knot: '',
+                        validated: true, // Auto-check validated when "Don't Split" is checked
+                      },
+                    };
+                    console.log(`Updated editing data for row ${index}:`, newData[index]);
+                    return newData;
+                  });
                 } else {
+                  console.log(`Setting "Don't Split" to false for row ${index}`);
+
                   // When "Don't Split" is unchecked, restore original values
                   const original = originalValues[index];
                   if (original) {
+                    console.log(`Restoring original values for row ${index}:`, original);
+
                     // Restore original values and clear the should_not_split change
                     setEditingData(prev => {
                       const newData = { ...prev };
                       if (newData[index]) {
-                        // Restore original values
+                        // Restore original values including validated state
                         newData[index] = {
                           ...newData[index],
                           handle: original.handle,
                           knot: original.knot,
+                          validated: original.validated, // Restore original validated state
                         };
 
                         // Clear the should_not_split change since it's back to original
@@ -312,6 +452,7 @@ export function BrushSplitDataTable({
                           delete newData[index];
                         }
                       }
+                      console.log(`Restored editing data for row ${index}:`, newData[index]);
                       return newData;
                     });
 
@@ -334,6 +475,8 @@ export function BrushSplitDataTable({
                       }
                       return newData;
                     });
+
+
                   }
                 }
               }}
@@ -357,12 +500,14 @@ export function BrushSplitDataTable({
   const initialRowSelection = useMemo(() => {
     const selection: Record<string, boolean> = {};
     brushSplits.forEach((split, index) => {
-      if (split.validated) {
+      if (split && split.validated) {
         selection[index.toString()] = true;
       }
     });
     return selection;
   }, [brushSplits]);
+
+
 
   // Handle empty data
   if (brushSplits.length === 0) {
@@ -383,9 +528,6 @@ export function BrushSplitDataTable({
         showColumnVisibility={true}
         searchKey='original'
         customControls={customControls}
-        onSelectionChange={handleSelectionChange}
-        clearSelection={clearSelection} // Pass the clearSelection state
-        initialRowSelection={initialRowSelection} // Pass the initial row selection
       />
       {hasUnsavedChanges && (
         <div className='flex justify-between items-center'>
