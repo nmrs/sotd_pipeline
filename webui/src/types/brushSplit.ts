@@ -15,6 +15,7 @@ export interface BrushSplit {
   system_confidence?: 'high' | 'medium' | 'low'; // Only if corrected=true
   system_reasoning?: string; // Only if corrected=true
   occurrences: BrushSplitOccurrence[];
+  should_not_split?: boolean; // Don't split checkbox
 }
 
 export interface BrushSplitValidationStatus {
