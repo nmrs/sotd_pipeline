@@ -22,13 +22,16 @@ strip_tags:
   - MACHINEAGE
   - MERMAID
   - MODERNGEM
+  - MOTIONOFTHEOCEAN
   - OLDWORLD
   - PLASTIC
   - PREMIUMPLASTIC
   - RAINBOW
   - RESIN
   - RESINLESS
+  - RESURRECTIONBRUSH
   - REVENANT
+  - RUNT
   - RUSTYBUTTRUSTY
   - SHD
   - SILVERTIP
@@ -45,6 +48,7 @@ strip_tags:
   - TWINS
   - WECKONISTA
   - WEDONTNEEDNOSTINKINGBADGERS
+  - WOODEN
   - ZAMAC
 # Tags that should be preserved (might be useful for matching)
 preserve_tags:
