@@ -76,26 +76,18 @@ class BrushSplitter:
         # Medium-reliability delimiters (need smart analysis)
         medium_reliability_delimiters = [" + ", " - "]
         # Non-delimiters (should NOT trigger splitting)
-        non_delimiters = [" x ", " × ", " & ", "()"]
-
-        # Check if text contains any non-delimiters - if so, don't split
-        # But be smarter about " & " - only treat as non-delimiter if it's not part of a brand name
-        for non_delimiter in non_delimiters:
-            if non_delimiter in text:
-                # Special handling for " & " - only treat as non-delimiter if it's not part of a
-                # brand name
-                if non_delimiter == " & ":
-                    # Check if " & " is followed by a space and another word (likely a brand name)
-                    # or if it's followed immediately by another word (likely a delimiter)
-                    if re.search(r" &\s+\w", text):
-                        # " & " is followed by space + word, likely a brand name, so don't treat as
-                        # non-delimiter
-                        continue
-                    else:
-                        # " & " is followed immediately by word, likely a delimiter
-                        return None, None, None
-                else:
-                    return None, None, None
+        # Check if text contains " & " - only treat as non-delimiter if it's not part of a brand
+        # name
+        if " & " in text:
+            # Check if " & " is followed by a space and another word (likely a brand name)
+            # or if it's followed immediately by another word (likely a delimiter)
+            if re.search(r" &\s+\w", text):
+                # " & " is followed by space + word, likely a brand name, so don't treat as
+                # non-delimiter
+                pass
+            else:
+                # " & " is followed immediately by word, likely a delimiter
+                return None, None, None
 
         # Always check for ' w/ ' and ' with ' first to avoid misinterpreting 'w/' as '/'
         for delimiter in high_reliability_delimiters:
