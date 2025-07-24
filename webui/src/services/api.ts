@@ -219,11 +219,21 @@ export interface SaveBrushSplitRequest {
 export interface SaveBrushSplitResponse {
   success: boolean;
   message: string;
-  corrected: boolean;
+  corrected?: boolean;
   system_handle?: string | null;
   system_knot?: string | null;
   system_confidence?: string | null;
   system_reasoning?: string | null;
+}
+
+export interface SaveBrushSplitsRequest {
+  brush_splits: BrushSplit[];
+}
+
+export interface SaveBrushSplitsResponse {
+  success: boolean;
+  message: string;
+  saved_count: number;
 }
 
 export const loadBrushSplits = async (months: string[]): Promise<LoadBrushSplitsResponse> => {
@@ -248,6 +258,42 @@ export const saveBrushSplit = async (
     return response.data;
   } catch (error) {
     console.error('Failed to save brush split:', error);
+    throw error;
+  }
+};
+
+export const saveBrushSplits = async (
+  brushSplits: BrushSplit[]
+): Promise<SaveBrushSplitsResponse> => {
+  try {
+    // Convert BrushSplit objects to the format expected by the API
+    const formattedSplits = brushSplits.map(split => ({
+      original: split.original,
+      handle: split.handle,
+      knot: split.knot,
+      match_type: split.match_type,
+      validated: split.validated,
+      corrected: split.corrected,
+      system_handle: split.system_handle,
+      system_knot: split.system_knot,
+      system_confidence: split.system_confidence,
+      system_reasoning: split.system_reasoning,
+      should_not_split: split.should_not_split,
+      occurrences: split.occurrences?.map(occ => ({
+        file: occ.file,
+        comment_ids: occ.comment_ids,
+      })) || [],
+    }));
+
+    // Debug: Log the data we're sending
+    console.log('Sending brush splits to API:', JSON.stringify(formattedSplits, null, 2));
+
+    const response = await api.post('/brush-splits/save', {
+      brush_splits: formattedSplits,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to save brush splits:', error);
     throw error;
   }
 };

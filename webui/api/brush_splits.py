@@ -287,7 +287,6 @@ class BrushSplitModel(BaseModel):
     match_type: Optional[str] = Field(None, description="Match type from brush matcher")
     validated: bool = Field(False, description="Whether this split has been validated")
     corrected: bool = Field(False, description="Whether this split was corrected")
-    validated_at: Optional[str] = Field(None, description="ISO timestamp of validation")
     system_handle: Optional[str] = Field(None, description="System-generated handle")
     system_knot: Optional[str] = Field(None, description="System-generated knot")
     system_confidence: Optional[str] = Field(None, description="System confidence level")
@@ -554,7 +553,7 @@ class BrushSplitValidator:
                 )
 
             self.validated_splits.clear()
-            splits_data = data.get("splits", {})
+            splits_data = data.get("splits", {}) if data else {}
 
             # Handle new structure: splits is a dict with brush names as keys
             if isinstance(splits_data, dict):
@@ -1129,22 +1128,23 @@ async def load_yaml():
 
 @router.post("/save", response_model=SaveSplitsResponse, summary="Save validated splits to YAML")
 async def save_splits(data: SaveSplitsRequest):
-    """Save validated splits to YAML file.
+    """Save validated brush splits to YAML file.
 
     Args:
-        data: SaveSplitsRequest containing brush splits to save
+        data: SaveSplitsRequest containing the brush splits to save
 
     Returns:
-        SaveSplitsResponse with save operation results
-
-    Raises:
-        HTTPException: If save operation fails, data is invalid, or file operations fail
+        SaveSplitsResponse with success status and save details
     """
     try:
-        if not data.brush_splits:
-            raise HTTPException(status_code=400, detail="No brush splits provided")
+        # Debug: Log the received data
+        logger.info(f"Received {len(data.brush_splits)} brush splits for saving")
+        for i, split in enumerate(data.brush_splits):
+            logger.info(
+                f"Split {i}: original='{split.original}', handle='{split.handle}', "
+                f"knot='{split.knot}', should_not_split={split.should_not_split}"
+            )
 
-        # Validate input data
         validated_splits = []
         validation_errors = []
 
