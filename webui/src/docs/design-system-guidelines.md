@@ -146,6 +146,12 @@ import { Input } from '@/components/ui/input';
 
 ## Component Reuse Philosophy
 
+### **MANDATORY**: ShadCN-First Component Strategy
+- **PRIORITY 1**: **ALWAYS** use ShadCN components first - they are the foundation
+- **PRIORITY 2**: **ONLY** create custom components when ShadCN doesn't provide the functionality
+- **PRIORITY 3**: **ALWAYS** build custom components on ShadCN base when possible
+- **PRIORITY 4**: **NEVER** duplicate ShadCN functionality with custom implementations
+
 ### **MANDATORY**: Component Reuse First
 - **ALWAYS** check existing components before creating new ones
 - **PREFER** extending existing components over creating new ones
@@ -168,6 +174,12 @@ Before creating any new component, ask:
 - Will this component be used in multiple places?
 - Have I checked all existing components in the codebase?
 
+### **MANDATORY**: ShadCN Component Adoption
+- **ALWAYS** check ShadCN documentation first: https://ui.shadcn.com/
+- **ALWAYS** check ShadCN GitHub for community solutions
+- **ALWAYS** prefer community-tested solutions over custom implementations
+- **NEVER** create custom table implementations when ShadCN + community solutions exist
+
 ## Table Component Standards
 
 ### **MANDATORY**: Use ShadCN DataTable
@@ -175,6 +187,12 @@ Before creating any new component, ask:
 - **NEVER** create custom table implementations that duplicate DataTable functionality
 - **EXTEND** DataTable with specialized features (editing, subrows) when needed
 - **LEVERAGE** TanStack Table features (sorting, filtering, resizing, virtualization)
+
+### **MANDATORY**: Proper Virtualization Approach
+- **PRIORITY 1**: Use community-tested solutions like [react-virtuoso](https://github.com/shipurjan/shadcnui-virtualized-data-table)
+- **PRIORITY 2**: Extend existing DataTable with proper virtualization
+- **PRIORITY 3**: Only create custom virtualization when no community solution exists
+- **NEVER** use react-window directly with ShadCN tables (causes DOM nesting issues)
 
 ### Table Component Architecture
 ```typescript
@@ -191,9 +209,14 @@ const BrushTable = (props) => {
   return <DataTable {...props} />; // Add subrow logic on top
 };
 
+// ✅ CORRECT - Use community virtualization solution
+// For large datasets, consider react-virtuoso approach
+// See: https://github.com/shipurjan/shadcnui-virtualized-data-table
+
 // ❌ WRONG - Don't create custom table implementations
 // Don't create VirtualizedTable when DataTable supports virtualization
 // Don't create GenericDataTable when DataTable provides all features
+// Don't use react-window directly with ShadCN tables
 ```
 
 ### ShadCN DataTable Features
@@ -202,9 +225,16 @@ const BrushTable = (props) => {
 - ✅ **Resizable columns** - Column width adjustment
 - ✅ **Column visibility** - Show/hide columns
 - ✅ **Row selection** - Checkbox selection
-- ✅ **Virtualization** - For large datasets
+- ✅ **Virtualization** - For large datasets (use community solutions)
 - ✅ **Accessibility** - Built-in ARIA support
 - ✅ **Performance** - Optimized with TanStack Table
+
+### Virtualization Best Practices
+- **Use react-virtuoso** for proper ShadCN table virtualization
+- **Avoid react-window** with ShadCN tables (DOM nesting issues)
+- **Maintain proper table semantics** (thead, tbody, tr, td)
+- **Preserve header-body alignment** in virtualized tables
+- **Test with large datasets** to ensure performance
 
 ### Basic Table Structure (for custom tables when needed)
 ```tsx
