@@ -1,1 +1,1269 @@
-splits: {}
+splits:
+  AKA Brushworx AK47 knot in Southland 1 in. x 3 in. Galvanized Nipple Handle $HOLLOW:
+  - corrected: false
+    handle: AKA Brushworx AK47 knot
+    knot: Southland 1 in. x 3 in. Galvanized Nipple Handle $HOLLOW
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvfc6vy
+      file: 2025-06.json
+    original: AKA Brushworx AK47 knot in Southland 1 in. x 3 in. Galvanized Nipple
+      Handle $HOLLOW
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  AP SHAVECO AP400B XL 28 mm (G5C):
+  - corrected: false
+    handle: AP SHAVECO AP400B XL 28 mm
+    knot: (G5C)
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvgpnin
+      - mvmdpog
+      - mvv8hkr
+      - mw50x47
+      - mwf1lt3
+      - mwjk0qk
+      - mwrinaq
+      - mww1cub
+      - mx6rb8z
+      - mxs0f5r
+      - my36ifm
+      - mydc5b3
+      - myqc1pc
+      - myr59up
+      - myvvgbd
+      - mz2hc9d
+      - mz9oubw
+      - mzcsk4u
+      - mzslw5b
+      - mzzxgu5
+      - n04381k
+      - n0hvyrj
+      - n0o8iy9
+      file: 2025-06.json
+    original: AP SHAVECO AP400B XL 28 mm (G5C)
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  AP Shave Co G5C:
+  - corrected: false
+    handle: null
+    knot: AP Shave Co G5C
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvifvj4
+      - mvm1m4f
+      - mvze0v8
+      - mw68j8h
+      - mwdk8j2
+      - mwqhd9q
+      - mwvxi3z
+      - mx4umpr
+      - mx8p0qa
+      - mxhnq32
+      - mxqz0ki
+      - myd4tfa
+      - myqodkz
+      - mywyfki
+      - mz9vkpu
+      - mzggc0o
+      - mzn82tt
+      - mzt1bfs
+      - n007wzq
+      - n0425el
+      - n0coi88
+      - n0j07xq
+      - n0paavn
+      file: 2025-06.json
+    original: AP Shave Co G5C
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T23:45:58.807Z'
+  Alpha Shaving BIG RED Synthetic:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvff2j8
+      file: 2025-06.json
+    original: Alpha Shaving BIG RED Synthetic
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Alpha Shaving Works Outlaw 28mm G5:
+  - corrected: false
+    handle: Alpha Shaving Works Outlaw
+    knot: Alpha Shaving Works 28mm G5
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvhrl5f
+      - mvnyg7o
+      - mvta4h5
+      - mw5jiwd
+      - mwawfuu
+      - mwjd4yp
+      - mwto8h5
+      - mx1sm6z
+      - mx5ptr9
+      - myc780g
+      - myplsat
+      - mysxanb
+      - mz54m76
+      - mzeq2cb
+      - mzib83g
+      file: 2025-06.json
+    original: Alpha Shaving Works Outlaw 28mm G5
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Auroa Grooming - LG 2024 with AP Shave Co. Pure Bliss 26mm Synthetic $FRANKENBRUSH $PREMIUMPLASTIC $FAUXFUR $SUBBROOSH:
+  - corrected: false
+    handle: Auroa Grooming - LG 2024
+    knot: AP Shave Co. Pure Bliss 26mm Synthetic $FRANKENBRUSH $PREMIUMPLASTIC $FAUXFUR
+      $SUBBROOSH
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvf7kv0
+      file: 2025-06.json
+    original: Auroa Grooming - LG 2024 with AP Shave Co. Pure Bliss 26mm Synthetic
+      $FRANKENBRUSH $PREMIUMPLASTIC $FAUXFUR $SUBBROOSH
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm SHD $FAUXFUR $FRANKENBRUSH $HOLLOW $PREMIUMPLASTIC:
+  - corrected: false
+    handle: Aylsworth The Altare Handle
+    knot: 'AP Shave Co. Pure Bliss 26mm SHD '
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvhn6nj
+      file: 2025-06.json
+    original: Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm SHD $FAUXFUR
+      $FRANKENBRUSH $HOLLOW $PREMIUMPLASTIC
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Böker Synthetic:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: null
+    occurrences:
+    - comment_ids:
+      - mve403p
+      - mxcjml2
+      - myfejv7
+      file: 2025-06.json
+    original: Böker Synthetic
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  C&H+TnS 27mm H8:
+  - corrected: false
+    handle: C&H
+    knot: TnS 27mm H8
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvi9c2y
+      file: 2025-06.json
+    original: C&H+TnS 27mm H8
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Carnavis and Richardson - Industry w/26mm Frank Shaving Finest XD:
+  - corrected: false
+    handle: 'Carnavis and Richardson Industry '
+    knot: 26mm Frank Shaving Finest XD
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvecbe2
+      file: 2025-06.json
+    original: Carnavis and Richardson - Industry w/26mm Frank Shaving Finest XD
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Cayuen Abalone w/ 28mm Timberwolf Synthetic:
+  - corrected: false
+    handle: Cayuen Abalone
+    knot: 28mm Timberwolf Synthetic
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvfpj9j
+      - mvka81y
+      - mvqra3z
+      - mvxavlm
+      - mwahcn1
+      - mwsxsa6
+      - mwzz9a2
+      - mxcsjqe
+      - mxzb96e
+      - my8erdy
+      - mysf1yj
+      - mzejrpe
+      - mzgu7dl
+      - mzuqtfp
+      file: 2025-06.json
+    original: Cayuen Abalone w/ 28mm Timberwolf Synthetic
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Chisel & Hound - Rob's Finest - 25mm Synthetic:
+  - corrected: false
+    handle: Chisel & Hound
+    knot: Rob's Finest - 25mm Synthetic
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvebgp6
+      - n01bhxl
+      file: 2025-06.json
+    original: Chisel & Hound - Rob's Finest - 25mm Synthetic
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Chisel & Hound Carbon Lily v24 Fanchurian Badger $COMPOSITE $TWOBAND:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvh7oeh
+      file: 2025-06.json
+    original: Chisel & Hound Carbon Lily v24 Fanchurian Badger $COMPOSITE $TWOBAND
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Chisel & Hound Gulf Short 26mm V22 Fanchurian:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvh3qw0
+      file: 2025-06.json
+    original: Chisel & Hound Gulf Short 26mm V22 Fanchurian
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Chisel and Hound Sakura with v21 Fanchurian:
+  - corrected: false
+    handle: Chisel and Hound Sakura
+    knot: Chisel and Hound v21 Fanchurian
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvgjix8
+      - mvnfcel
+      - mvs6txl
+      file: 2025-06.json
+    original: Chisel and Hound Sakura with v21 Fanchurian
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Dogwood Handcrafts - Svolaer 2023 LG Prize with Maggard 28mm SHD $COMPOSITE $FRANKENBRUSH $TWOBAND:
+  - corrected: false
+    handle: Dogwood Handcrafts - Svolaer 2023 LG Prize
+    knot: Maggard 28mm SHD $COMPOSITE $FRANKENBRUSH $TWOBAND
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvh1m9f
+      file: 2025-06.json
+    original: Dogwood Handcrafts - Svolaer 2023 LG Prize with Maggard 28mm SHD $COMPOSITE
+      $FRANKENBRUSH $TWOBAND
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Dogwood Handcrafts 26mm APSC Pure Bliss:
+  - corrected: false
+    handle: Dogwood Handcrafts
+    knot: 26mm APSC Pure Bliss
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvfunlv
+      - mvl6jqq
+      - mvrff2t
+      - mw3ocya
+      file: 2025-06.json
+    original: Dogwood Handcrafts 26mm APSC Pure Bliss
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Dogwood Handcrafts Declaration Grooming Coprolite B15 $FRANKENBRUSH:
+  - corrected: false
+    handle: Dogwood Handcrafts Coprolite
+    knot: Declaration Grooming B15
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvhsj3c
+      file: 2025-06.json
+    original: Dogwood Handcrafts Declaration Grooming Coprolite B15 $FRANKENBRUSH
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Dogwood Handcrafts Valley of Ashes with 28mm timberwolf synth:
+  - corrected: false
+    handle: Dogwood Handcrafts Valley of Ashes
+    knot: 28mm timberwolf synth
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvi4tjg
+      file: 2025-06.json
+    original: Dogwood Handcrafts Valley of Ashes with 28mm timberwolf synth
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Ever Ready unnumbered Synth:
+  - corrected: false
+    handle: Ever Ready unnumbered
+    knot: Synth
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvf5mbv
+      - mx701yx
+      - mxx5enp
+      - n08zp54
+      - n0esaf4
+      file: 2025-06.json
+    original: Ever Ready unnumbered Synth
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Farvour Turn Craft W a 26MM Badger Knot:
+  - corrected: false
+    handle: Farvour Turn Craft
+    knot: 26MM
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvhare0
+      - mzhx4kn
+      file: 2025-06.json
+    original: Farvour Turn Craft W a 26MM Badger Knot
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Maggard Synthetic:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvftuio
+      - mwb4ci8
+      - mxd8vix
+      - mxrvfif
+      - mxxr89c
+      - mxyb4d9
+      - n024qlc
+      - n08bt8p
+      file: 2025-06.json
+    original: Maggard Synthetic
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Muhle 31m530 Travel:
+  - corrected: false
+    handle: null
+    knot: null
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvezhae
+      - mvjzoig
+      - mvvfkv6
+      - my3191m
+      file: 2025-06.json
+    original: Muhle 31m530 Travel
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Muhle 31m530 Travel $FAUXFUR $HOLLOW:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvezhae
+      - mvjzoig
+      file: 2025-06.json
+    original: Muhle 31m530 Travel $FAUXFUR $HOLLOW
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Muhle STF XL 25mm:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvf2o8c
+      - mvjwo6i
+      - mvqrr3k
+      - mvxayt1
+      - mw3958u
+      - mwacl50
+      - mwg6uu4
+      - mwm7ick
+      - mwtn55l
+      - mwz935w
+      - mx627dg
+      - mxc6e1m
+      - mxjr6ck
+      - mxpnsgw
+      - my3ksqa
+      - my83fcp
+      - myfi3r1
+      - myn028f
+      - mytn76p
+      - myy3dwf
+      - mz4etjt
+      - mzavyh7
+      - mzhs4j7
+      - mzohyth
+      - mzu9q4v
+      - n00vujn
+      - n075h6p
+      - n0dev9b
+      - n0nuiyt
+      file: 2025-06.json
+    original: Muhle STF XL 25mm
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Muhle Travel Shaving Brush $FAUXFUR $HOLLOW:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvfyrd5
+      file: 2025-06.json
+    original: Muhle Travel Shaving Brush $FAUXFUR $HOLLOW
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Muninn Woodworks Amboyna Burl B14:
+  - corrected: false
+    handle: Muninn Woodworks Amboyna Burl
+    knot: B14
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvfq2rr
+      file: 2025-06.json
+    original: Muninn Woodworks Amboyna Burl B14
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  MÜHLE Travel:
+  - corrected: false
+    handle: null
+    knot: null
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvgckm1
+      - mwd1ujz
+      - mwocxb7
+      - mxmdw6r
+      - mype2ji
+      - mzducko
+      - n09e1ei
+      file: 2025-06.json
+    original: MÜHLE Travel
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  MÜHLE Travel $FAUXFUR $HOLLOW:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvgckm1
+      - mwd1ujz
+      - mwocxb7
+      - mxmdw6r
+      - mype2ji
+      - mzducko
+      - n09e1ei
+      file: 2025-06.json
+    original: MÜHLE Travel $FAUXFUR $HOLLOW
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Omega - Orange handle mini 24mm Boar:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvgmj63
+      - mzr2qwl
+      - n0g1387
+      file: 2025-06.json
+    original: Omega - Orange handle mini 24mm Boar
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Omega 10049:
+  - corrected: false
+    handle: null
+    knot: null
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvepnsn
+      - mvqyczm
+      - mxjl2io
+      - mxkysgu
+      - mxmlfa1
+      - mxmwtzf
+      - n02n03d
+      - n089eeh
+      file: 2025-06.json
+    original: Omega 10049
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Omega 10049 $HOLLOW:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvepnsn
+      - mxkysgu
+      - mxmlfa1
+      - n02n03d
+      file: 2025-06.json
+    original: Omega 10049 $HOLLOW
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Oumo O4 Venus SHD Badger Brush 26MM:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvheklg
+      - mvkjztp
+      - mvvbxmz
+      - mw1sayg
+      - mw8p3f4
+      - mwjxste
+      - mwqyoif
+      - mwxasrf
+      - mxa7wjl
+      - mxesgpq
+      - mxny4a0
+      - mxtg0qi
+      file: 2025-06.json
+    original: Oumo O4 Venus SHD Badger Brush 26MM
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan:
+  - corrected: false
+    handle: Rad Dinosaur Creations "Mackie"
+    knot: 26mm AP Shave Co. Synbad Fan
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvhu6n0
+      file: 2025-06.json
+    original: Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rad Dinosaur Creations *Atlas II* 26mm Raptor Synthentic Knot:
+  - corrected: false
+    handle: Rad Dinosaur Creations *Atlas II*
+    knot: Rad Dinosaur Creations 26mm Raptor Synthentic Knot
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvgfgf6
+      - mxilfd1
+      file: 2025-06.json
+    original: Rad Dinosaur Creations *Atlas II* 26mm Raptor Synthentic Knot
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rad Dinosaur Creations - Blue Flame Raptor Synthetic:
+  - corrected: false
+    handle: Rad Dinosaur Creations Blue Flame
+    knot: Rad Dinosaur Creations Raptor Synthetic
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mve0h9v
+      file: 2025-06.json
+    original: Rad Dinosaur Creations - Blue Flame Raptor Synthetic
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rad Dinosaur Creations - Blue Flame Raptor Synthetic $PREMIUMPLASTIC:
+  - corrected: false
+    handle: Rad Dinosaur Creations - Blue Flame
+    knot: Rad Dinosaur Creations Raptor Synthetic
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mve0h9v
+      file: 2025-06.json
+    original: Rad Dinosaur Creations - Blue Flame Raptor Synthetic $PREMIUMPLASTIC
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rad Dinosaur Creations - Cirrostratus w./ AP Shave Co. Cashmere 28mm Synthetic $FRANKENBRUSH:
+  - corrected: false
+    handle: Rad Dinosaur Creations - Cirrostratus
+    knot: AP Shave Co. Cashmere 28mm Synthetic $FRANKENBRUSH
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvg1g7g
+      - mwnm18q
+      file: 2025-06.json
+    original: Rad Dinosaur Creations - Cirrostratus w./ AP Shave Co. Cashmere 28mm
+      Synthetic $FRANKENBRUSH
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rad Dinosaur Creations - G5C:
+  - corrected: false
+    handle: Rad Dinosaur Creations
+    knot: G5C
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvie948
+      - mvvxbfo
+      - mw2f30w
+      - mztch77
+      file: 2025-06.json
+    original: Rad Dinosaur Creations - G5C
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rad Dinosaur Creations - G5C $fauxfur:
+  - corrected: false
+    handle: Rad Dinosaur Creations
+    knot: G5C
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvie948
+      file: 2025-06.json
+    original: Rad Dinosaur Creations - G5C $fauxfur
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rad Dinosaur Creations - Jetson - 25mm Muhle STF:
+  - corrected: false
+    handle: Rad Dinosaur Creations Jetson
+    knot: 25mm Muhle STF
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvdtovb
+      - mw6uj1m
+      - my6xpi1
+      file: 2025-06.json
+    original: Rad Dinosaur Creations - Jetson - 25mm Muhle STF
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rad Dinosaur Creations -Blue Skys- 26mm G5C Synthetic:
+  - corrected: false
+    handle: Rad Dinosaur Creations -Blue Skys
+    knot: 26mm G5C Synthetic
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvejdjs
+      file: 2025-06.json
+    original: Rad Dinosaur Creations -Blue Skys- 26mm G5C Synthetic
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rad Dinosaur Creations >!EXPUNGED!< w/ Raptor Synthetic:
+  - corrected: false
+    handle: Rad Dinosaur Creations >!EXPUNGED!<
+    knot: Rad Dinosaur Creations Raptor Synthetic
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvho4v3
+      - n05ybqy
+      file: 2025-06.json
+    original: Rad Dinosaur Creations >!EXPUNGED!< w/ Raptor Synthetic
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rad Dinosaur Creations Black River w/ AP Shave Co G5C:
+  - corrected: false
+    handle: Rad Dinosaur Creations Black River
+    knot: AP Shave Co G5C
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvf7krh
+      - mvvrvy6
+      - mz1k43h
+      - mzmgl0o
+      file: 2025-06.json
+    original: Rad Dinosaur Creations Black River w/ AP Shave Co G5C
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rad Dinosaur Creations Gold Mine w/v19 Fanchurian Badger $FRANKENBRUSH $TWOBAND:
+  - corrected: false
+    handle: Rad Dinosaur Creations Gold Mine
+    knot: v19 Fanchurian Badger $FRANKENBRUSH $TWOBAND
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvg5xqj
+      file: 2025-06.json
+    original: Rad Dinosaur Creations Gold Mine w/v19 Fanchurian Badger $FRANKENBRUSH
+      $TWOBAND
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip $TWOBAND:
+  - corrected: false
+    handle: Rad Dinosaur Creations Magma
+    knot: 26mm Turn-n-Shave V9 Tip $TWOBAND
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvhneeu
+      file: 2025-06.json
+    original: Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip $TWOBAND
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rad Dinosaur Creations Ore-Not handle (No. 43) w/ AP Shave Co. 26mm Pure Bliss SHD Premium Synthetic Knot:
+  - corrected: false
+    handle: Rad Dinosaur Creations Ore-Not handle (No. 43)
+    knot: AP Shave Co. 26mm Pure Bliss SHD Premium Synthetic Knot
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvgq11w
+      - mvpru32
+      - mvw0jx3
+      file: 2025-06.json
+    original: Rad Dinosaur Creations Ore-Not handle (No. 43) w/ AP Shave Co. 26mm
+      Pure Bliss SHD Premium Synthetic Knot
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  RadDinosaurCreations "Reznor" w/26mm AP Shave Co G5C:
+  - corrected: false
+    handle: RadDinosaurCreations "Reznor"
+    knot: 26mm AP Shave Co G5C
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvenyr3
+      - mxct72q
+      - mzav6jl
+      - mzhhde0
+      - mzvg6qt
+      file: 2025-06.json
+    original: RadDinosaurCreations "Reznor" w/26mm AP Shave Co G5C
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Rubberset 400 - Silvertip Badger 24mm $HOLLOW $SILVERTIP:
+  - corrected: false
+    handle: Rubberset 400
+    knot: Silvertip Badger 24mm $HOLLOW $SILVERTIP
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvf3uud
+      file: 2025-06.json
+    original: Rubberset 400 - Silvertip Badger 24mm $HOLLOW $SILVERTIP
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Semogue 1305 (Boar):
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mve7dav
+      - mvkyufm
+      - mvs5ohm
+      - mvy2zwj
+      - mw41kc0
+      - mxk9ygq
+      - mxqibb8
+      - myoaegc
+      - myrxwv2
+      - myye9xx
+      - mzbdhv3
+      - mzh917n
+      file: 2025-06.json
+    original: Semogue 1305 (Boar)
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Semogue 2020 Best Badger $WOODEN:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvg2ai8
+      file: 2025-06.json
+    original: Semogue 2020 Best Badger $WOODEN
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Semogue 610 21mm Boar:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mveeq6x
+      - mvkcgxp
+      - mwt2f49
+      - mwzqlff
+      - mxwc8xy
+      file: 2025-06.json
+    original: Semogue 610 21mm Boar
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Semogue Owners Club - Cherry Wood Boar 24mm $WOODEN:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvfxpkg
+      - mvvqp1e
+      - mx44kx2
+      - mxx8fx5
+      file: 2025-06.json
+    original: Semogue Owners Club - Cherry Wood Boar 24mm $WOODEN
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Shore Shave - Player Custom with 24mm Blond Boar:
+  - corrected: false
+    handle: Shore Shave - Player Custom
+    knot: 24mm Blond Boar
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvg5k55
+      - mvwxzay
+      - mzvd4ui
+      file: 2025-06.json
+    original: Shore Shave - Player Custom with 24mm Blond Boar
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  'Simpson Classic # 1 Synthetic bristle':
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvgqri2
+      - mvlufa0
+      - mx2cplc
+      - mydd4xk
+      - myr8we3
+      - mzk6yx2
+      - mzqyttc
+      - mzxfbxi
+      file: 2025-06.json
+    original: 'Simpson Classic # 1 Synthetic bristle'
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Simpson Trafalgar T2:
+  - corrected: false
+    handle: null
+    knot: null
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvfgz98
+      file: 2025-06.json
+    original: Simpson Trafalgar T2
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T23:46:42.800Z'
+  Simpson Trafalgar T2 $PREMIUMPLASTIC:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvfgz98
+      file: 2025-06.json
+    original: Simpson Trafalgar T2 $PREMIUMPLASTIC
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Stirling Finest Badger Brush $TWOBAND:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mveb5vx
+      - mvk9za3
+      - mwmy63m
+      - mwwa2nm
+      - mwzwbfr
+      - mx6qrk7
+      - mxd6bij
+      - mxq2h5a
+      file: 2025-06.json
+    original: Stirling Finest Badger Brush $TWOBAND
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Stirling Two Band Synthetic:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvf5ypt
+      - mvkupjj
+      - mvuf8ue
+      - mw13il4
+      - mw7of7c
+      - mwb2as6
+      - mwij2h2
+      - mwnmj3w
+      - mwwfkwa
+      - mx1xr61
+      - mx5l0nh
+      - mxer14r
+      - mxlsyrs
+      - mxrvrku
+      - mxy1jf1
+      - my4y8fk
+      - myawmr6
+      - myowh3q
+      - myu6x71
+      - myzs6rh
+      - mz7m66t
+      - mzf0qpk
+      - mzletux
+      - mzs8zwk
+      - mzypdrb
+      - n01s03y
+      - n0bgrfw
+      - n0h7a7s
+      - n0o1bf9
+      file: 2025-06.json
+    original: Stirling Two Band Synthetic
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Summer Break Soaps:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvf10qu
+      - mzbit73
+      - mzil4yz
+      file: 2025-06.json
+    original: Summer Break Soaps
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Test Brush Auto Timestamp Fixed:
+  - corrected: false
+    handle: Test Handle
+    knot: Test Knot
+    match_type: null
+    occurrences: []
+    original: Test Brush Auto Timestamp Fixed
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T18:52:19.495975'
+  Test Brush Updated Signature:
+  - corrected: false
+    handle: Test Handle
+    knot: Test Knot
+    match_type: null
+    occurrences: []
+    original: Test Brush Updated Signature
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T18:53:55.036011'
+  Test Brush for Validation:
+  - corrected: false
+    handle: Test Handle
+    knot: Test Knot
+    match_type: null
+    occurrences: []
+    original: Test Brush for Validation
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  WCS 26mm synth:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvek6dk
+      - mvl7j0p
+      - mvr877x
+      - mvzsiou
+      - mw4fjov
+      - mwdx0n5
+      - mwtpu8u
+      - mx1r3t7
+      - mxgn1pm
+      - mygmw9d
+      - mymee3h
+      - mysr52b
+      - myzx97y
+      - mz5ueyd
+      - mzbdmk6
+      - mzi6izp
+      - mzoqyhs
+      - mzvfiyy
+      - n0210ql
+      - n098o3w
+      file: 2025-06.json
+    original: WCS 26mm synth
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Wolf Whiskers RCE 1301 / Omega 10049 Boar:
+  - corrected: false
+    handle: Wolf Whiskers RCE 1301
+    knot: Omega 10049 Boar
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvep5po
+      - mvriqoc
+      - mw4rxxv
+      - mxdtcmf
+      - my2ycfz
+      - mzp3n6f
+      - n0kzwrd
+      file: 2025-06.json
+    original: Wolf Whiskers RCE 1301 / Omega 10049 Boar
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Wolf Whiskers/Paragon Synthetic:
+  - corrected: false
+    handle: Wolf Whiskers
+    knot: Paragon Synthetic
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvggarf
+      - mvtoinn
+      - mw5ziv0
+      - mwj27cs
+      - mwv9a7m
+      - mx98n9s
+      - my49kg7
+      - myo2eo6
+      - myzr5d6
+      - mzcey3a
+      file: 2025-06.json
+    original: Wolf Whiskers/Paragon Synthetic
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Yaqi 22mm Synth:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mveopwt
+      - mw48uh1
+      - mwna1lt
+      - my2lpmd
+      - mym9zsb
+      - myzl4am
+      - mziis0v
+      file: 2025-06.json
+    original: Yaqi 22mm Synth
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Yaqi Cola 22mm Synthetic Three Band:
+  - corrected: false
+    handle: null
+    knot: null
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvf66ov
+      file: 2025-06.json
+    original: Yaqi Cola 22mm Synthetic Three Band
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Yaqi Cola 22mm Synthetic Three Band $FAUXFUR:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvf66ov
+      file: 2025-06.json
+    original: Yaqi Cola 22mm Synthetic Three Band $FAUXFUR
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Yaqi Ferrari 26mm:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvhhrm0
+      - mvocuyq
+      - mvupggf
+      - mw7qz3e
+      - mwej7ab
+      - mwke6mg
+      - mwqotwp
+      - mwwxrwu
+      - mx3fi89
+      - mxa2g6y
+      - mxiqamz
+      file: 2025-06.json
+    original: Yaqi Ferrari 26mm
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Yaqi Sagrada:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvesyvf
+      file: 2025-06.json
+    original: Yaqi Sagrada
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Zenith - MOAR BOAR:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvef37u
+      file: 2025-06.json
+    original: Zenith - MOAR BOAR
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Zenith 506U N (50/50 horse mane/tail) $WOODEN $HORSESASS:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvdf209
+      file: 2025-06.json
+    original: Zenith 506U N (50/50 horse mane/tail) $WOODEN $HORSESASS
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Zenith Barberpole XSE 26mm:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvf2lnt
+      - mwbexiy
+      - mx6q1mc
+      - my2ekqg
+      - myzfd9p
+      - mzvf9gy
+      file: 2025-06.json
+    original: Zenith Barberpole XSE 26mm
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
+  Zenith Prop aluminum Boar:
+  - corrected: false
+    handle: ''
+    knot: ''
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mvhihew
+      file: 2025-06.json
+    original: Zenith Prop aluminum Boar
+    should_not_split: true
+    validated: true
+    validated_at: '2025-07-23T22:03:26.589674'
