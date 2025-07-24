@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import MonthSelector from '../components/forms/MonthSelector';
-import BrushSplitTable from '../components/data/BrushSplitTable';
+import { BrushSplitTable } from '../components/data/BrushSplitTable';
 import { BrushSplit } from '../types/brushSplit';
 
 interface LoadResponse {
