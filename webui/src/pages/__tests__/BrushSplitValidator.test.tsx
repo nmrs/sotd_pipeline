@@ -162,4 +162,161 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
     // Check that the table is rendered correctly
     expect(screen.getByTestId('brush-split-table')).toBeInTheDocument();
   });
+
+  test('toggle validated button shows and hides validated items', async () => {
+    const mockBrushSplits = [
+      {
+        original: 'Validated Brush',
+        handle: 'Test Maker',
+        knot: 'Test Knot',
+        validated: true,
+        corrected: false,
+        validated_at: new Date().toISOString(),
+        occurrences: [],
+      },
+      {
+        original: 'Unvalidated Brush',
+        handle: 'Another Maker',
+        knot: 'Another Knot',
+        validated: false,
+        corrected: false,
+        validated_at: null,
+        occurrences: [],
+      },
+      {
+        original: 'Another Validated Brush',
+        handle: 'Third Maker',
+        knot: 'Third Knot',
+        validated: true,
+        corrected: true, // This item is validated and corrected
+        validated_at: new Date().toISOString(),
+        occurrences: [],
+      },
+    ];
+
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        brush_splits: mockBrushSplits,
+        statistics: { total: 3 },
+      }),
+    });
+
+    render(<BrushSplitValidator />);
+
+    // Wait for the month selector to load and show "Select Months"
+    await waitFor(() => {
+      expect(screen.getByText('Select Months')).toBeInTheDocument();
+    });
+
+    // Simulate selecting a month
+    const monthSelector = screen.getByText('Select Months');
+    fireEvent.click(monthSelector);
+
+    // Select a month from the dropdown
+    const monthCheckbox = screen.getByLabelText('2025-01');
+    fireEvent.click(monthCheckbox);
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Unvalidated Brush')).toBeInTheDocument();
+    });
+
+    // Initially should show only unvalidated items (1 item)
+    // Validated items should be hidden
+    expect(screen.queryByText('Validated Brush')).not.toBeInTheDocument();
+    expect(screen.queryByText('Another Validated Brush')).not.toBeInTheDocument();
+    expect(screen.getByText('Unvalidated Brush')).toBeInTheDocument();
+
+    // Check that the toggle button is present and shows correct count
+    const toggleButton = screen.getByText(/Show Validated/);
+    expect(toggleButton).toBeInTheDocument();
+    expect(toggleButton).toHaveTextContent('Show Validated (2)'); // 2 validated items
+
+    // Click the button to show all items including validated
+    fireEvent.click(toggleButton);
+
+    // Should now show all items including the validated ones
+    await waitFor(() => {
+      expect(screen.getByText('Validated Brush')).toBeInTheDocument();
+      expect(screen.getByText('Unvalidated Brush')).toBeInTheDocument();
+      expect(screen.getByText('Another Validated Brush')).toBeInTheDocument();
+    });
+
+    // Button should now say "Hide Validated"
+    expect(screen.getByText(/Hide Validated/)).toBeInTheDocument();
+
+    // Click again to hide validated items
+    fireEvent.click(screen.getByText(/Hide Validated/));
+
+    // Should hide the validated items again
+    await waitFor(() => {
+      expect(screen.queryByText('Validated Brush')).not.toBeInTheDocument();
+      expect(screen.queryByText('Another Validated Brush')).not.toBeInTheDocument();
+      expect(screen.getByText('Unvalidated Brush')).toBeInTheDocument();
+    });
+  });
+
+  test('displays comment_ids column with clickable comment links', async () => {
+    const mockBrushSplits = [
+      {
+        original: 'Test Brush with Comments',
+        handle: 'Test Maker',
+        knot: 'Test Knot',
+        validated: false,
+        corrected: false,
+        validated_at: null,
+        occurrences: [
+          {
+            file: '2025-01.json',
+            comment_ids: ['comment1', 'comment2'],
+          },
+          {
+            file: '2025-02.json',
+            comment_ids: ['comment3'],
+          },
+        ],
+      },
+    ];
+
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        brush_splits: mockBrushSplits,
+        statistics: { total: 1 },
+      }),
+    });
+
+    render(<BrushSplitValidator />);
+
+    // Wait for the month selector to load and show "Select Months"
+    await waitFor(() => {
+      expect(screen.getByText('Select Months')).toBeInTheDocument();
+    });
+
+    // Simulate selecting a month
+    const monthSelector = screen.getByText('Select Months');
+    fireEvent.click(monthSelector);
+
+    // Select a month from the dropdown
+    const monthCheckbox = screen.getByLabelText('2025-01');
+    fireEvent.click(monthCheckbox);
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Test Brush with Comments')).toBeInTheDocument();
+    });
+
+    // Check that the Comments column header is present
+    expect(screen.getByText('Comments')).toBeInTheDocument();
+
+    // Check that comment links are present (should show unique comment IDs)
+    expect(screen.getByText('comment1')).toBeInTheDocument();
+    expect(screen.getByText('comment2')).toBeInTheDocument();
+    expect(screen.getByText('comment3')).toBeInTheDocument();
+
+    // Check that the "+1 more" indicator is shown (since we have 3 comments but only show 3)
+    // Actually, we have 3 unique comments, so no "+more" should be shown
+    expect(screen.queryByText(/\+.*more/)).not.toBeInTheDocument();
+  });
 });

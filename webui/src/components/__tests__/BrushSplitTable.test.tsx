@@ -82,14 +82,14 @@ describe('BrushSplitTable', () => {
     });
   });
 
-  describe('Don\'t Split Checkbox Functionality', () => {
-    it('renders Don\'t Split checkbox column', () => {
+  describe("Don't Split Checkbox Functionality", () => {
+    it("renders Don't Split checkbox column", () => {
       render(<BrushSplitTable brushSplits={mockBrushSplits} />);
 
-      expect(screen.getByText('Don\'t Split')).toBeInTheDocument();
+      expect(screen.getByText("Don't Split")).toBeInTheDocument();
     });
 
-    it('shows correct initial state for Don\'t Split checkboxes', () => {
+    it("shows correct initial state for Don't Split checkboxes", () => {
       render(<BrushSplitTable brushSplits={mockBrushSplits} />);
 
       // Get all checkboxes (Select, Validated, Don't Split)
@@ -97,7 +97,12 @@ describe('BrushSplitTable', () => {
 
       // Debug: Log all checkboxes to understand the order
       checkboxes.forEach((checkbox, index) => {
-        console.log(`Checkbox ${index}:`, checkbox.getAttribute('aria-label'), 'checked:', checkbox.getAttribute('aria-checked'));
+        console.log(
+          `Checkbox ${index}:`,
+          checkbox.getAttribute('aria-label'),
+          'checked:',
+          checkbox.getAttribute('aria-checked')
+        );
       });
 
       // First row: should_not_split = false
@@ -116,13 +121,13 @@ describe('BrushSplitTable', () => {
       expect(checkboxes[9]).toBeChecked(); // Don't Split checkbox (row 3) - should be checked
     });
 
-    it('allows toggling Don\'t Split checkbox', async () => {
+    it("allows toggling Don't Split checkbox", async () => {
       render(<BrushSplitTable brushSplits={mockBrushSplits} />);
 
       // Find Don't Split checkboxes using the correct aria-label
-      const dontSplitCheckboxes = screen.getAllByRole('checkbox').filter(
-        checkbox => checkbox.getAttribute('aria-label')?.includes('Don\'t split')
-      );
+      const dontSplitCheckboxes = screen
+        .getAllByRole('checkbox')
+        .filter(checkbox => checkbox.getAttribute('aria-label')?.includes("Don't split"));
       expect(dontSplitCheckboxes.length).toBeGreaterThan(0);
 
       const firstDontSplitCheckbox = dontSplitCheckboxes[0];
@@ -139,19 +144,19 @@ describe('BrushSplitTable', () => {
       });
     });
 
-    it('auto-checks Validated when Don\'t Split is checked', async () => {
+    it("auto-checks Validated when Don't Split is checked", async () => {
       render(<BrushSplitTable brushSplits={mockBrushSplits} />);
 
       // Find the first row's Don't Split checkbox
-      const dontSplitCheckboxes = screen.getAllByRole('checkbox').filter(
-        checkbox => checkbox.getAttribute('aria-label')?.includes('Don\'t split')
-      );
+      const dontSplitCheckboxes = screen
+        .getAllByRole('checkbox')
+        .filter(checkbox => checkbox.getAttribute('aria-label')?.includes("Don't split"));
       const firstDontSplitCheckbox = dontSplitCheckboxes[0];
 
       // Find the corresponding Validated checkbox (same row)
-      const validatedCheckboxes = screen.getAllByRole('checkbox').filter(
-        checkbox => checkbox.getAttribute('aria-label')?.includes('Validated')
-      );
+      const validatedCheckboxes = screen
+        .getAllByRole('checkbox')
+        .filter(checkbox => checkbox.getAttribute('aria-label')?.includes('Validated'));
       const firstValidatedCheckbox = validatedCheckboxes[0];
 
       // Initially, no Save All Changes button should be visible
@@ -166,13 +171,13 @@ describe('BrushSplitTable', () => {
       });
     });
 
-    it('clears handle and knot fields when Don\'t Split is checked', async () => {
+    it("clears handle and knot fields when Don't Split is checked", async () => {
       render(<BrushSplitTable brushSplits={mockBrushSplits} />);
 
       // Find the first row's Don't Split checkbox
-      const dontSplitCheckboxes = screen.getAllByRole('checkbox').filter(
-        checkbox => checkbox.getAttribute('aria-label')?.includes('Don\'t split')
-      );
+      const dontSplitCheckboxes = screen
+        .getAllByRole('checkbox')
+        .filter(checkbox => checkbox.getAttribute('aria-label')?.includes("Don't split"));
       const firstDontSplitCheckbox = dontSplitCheckboxes[0];
 
       // Initially, no Save All Changes button should be visible
@@ -187,13 +192,13 @@ describe('BrushSplitTable', () => {
       });
     });
 
-    it('creates changes when Don\'t Split checkbox is clicked', async () => {
+    it("creates changes when Don't Split checkbox is clicked", async () => {
       render(<BrushSplitTable brushSplits={mockBrushSplits} />);
 
       // Find the first row's Don't Split checkbox
-      const dontSplitCheckboxes = screen.getAllByRole('checkbox').filter(
-        checkbox => checkbox.getAttribute('aria-label')?.includes('Don\'t split')
-      );
+      const dontSplitCheckboxes = screen
+        .getAllByRole('checkbox')
+        .filter(checkbox => checkbox.getAttribute('aria-label')?.includes("Don't split"));
       const firstDontSplitCheckbox = dontSplitCheckboxes[0];
 
       // Initially, no Save All Changes button should be visible
@@ -406,14 +411,14 @@ describe('BrushSplitTable', () => {
     });
   });
 
-  describe('Don\'t Split Checkbox Functionality', () => {
-    it('creates changes when Don\'t Split checkbox is clicked', async () => {
+  describe("Don't Split Checkbox Functionality", () => {
+    it("creates changes when Don't Split checkbox is clicked", async () => {
       render(<BrushSplitTable brushSplits={mockBrushSplits} />);
 
       // Find the first row's Don't Split checkbox
-      const dontSplitCheckboxes = screen.getAllByRole('checkbox').filter(
-        checkbox => checkbox.getAttribute('aria-label')?.includes('Don\'t split')
-      );
+      const dontSplitCheckboxes = screen
+        .getAllByRole('checkbox')
+        .filter(checkbox => checkbox.getAttribute('aria-label')?.includes("Don't split"));
       const firstDontSplitCheckbox = dontSplitCheckboxes[0];
 
       // Initially, no Save All Changes button should be visible
@@ -428,13 +433,13 @@ describe('BrushSplitTable', () => {
       });
     });
 
-    it('tracks changes when Don\'t Split is checked and unchecked', async () => {
+    it("tracks changes when Don't Split is checked and unchecked", async () => {
       render(<BrushSplitTable brushSplits={mockBrushSplits} />);
 
       // Find the first row's Don't Split checkbox
-      const dontSplitCheckboxes = screen.getAllByRole('checkbox').filter(
-        checkbox => checkbox.getAttribute('aria-label')?.includes('Don\'t split')
-      );
+      const dontSplitCheckboxes = screen
+        .getAllByRole('checkbox')
+        .filter(checkbox => checkbox.getAttribute('aria-label')?.includes("Don't split"));
       const firstDontSplitCheckbox = dontSplitCheckboxes[0];
 
       // Initially, no Save All Changes button should be visible
