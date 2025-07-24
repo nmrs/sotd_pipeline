@@ -149,7 +149,7 @@ const UnmatchedAnalyzer: React.FC = () => {
         if (result.partial_results) {
           messaging.addWarningMessage(
             `Partial results: ${result.error || 'Some items could not be processed'}. ` +
-            'Only available data is shown.'
+              'Only available data is shown.'
           );
         }
 
@@ -217,17 +217,17 @@ const UnmatchedAnalyzer: React.FC = () => {
         components: {
           handle: item.unmatched?.handle
             ? {
-              text: item.unmatched.handle.text,
-              status: 'Unmatched' as const,
-              pattern: item.unmatched.handle.pattern,
-            }
+                text: item.unmatched.handle.text,
+                status: 'Unmatched' as const,
+                pattern: item.unmatched.handle.pattern,
+              }
             : undefined,
           knot: item.unmatched?.knot
             ? {
-              text: item.unmatched.knot.text,
-              status: 'Unmatched' as const,
-              pattern: item.unmatched.knot.pattern,
-            }
+                text: item.unmatched.knot.text,
+                status: 'Unmatched' as const,
+                pattern: item.unmatched.knot.pattern,
+              }
             : undefined,
         },
       };
@@ -560,15 +560,17 @@ const UnmatchedAnalyzer: React.FC = () => {
           {results && (
             <div className='flex items-center justify-between'>
               <div className='text-sm text-gray-600'>
-                {results.field} | {results.months?.join(', ')} | {results.total_unmatched || 0} items | {results.processing_time?.toFixed(2) || '0.00'}s
+                {results.field} | {results.months?.join(', ')} | {results.total_unmatched || 0}{' '}
+                items | {results.processing_time?.toFixed(2) || '0.00'}s
               </div>
               <div className='flex items-center space-x-2'>
                 <button
                   onClick={viewState.toggleShowFiltered}
-                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${viewState.showFiltered
+                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                    viewState.showFiltered
                       ? 'bg-gray-600 text-white hover:bg-gray-700'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
+                  }`}
                 >
                   {viewState.showFiltered ? 'Hide Filtered' : 'Show Filtered'}
                 </button>
@@ -627,14 +629,17 @@ const UnmatchedAnalyzer: React.FC = () => {
                     <div className='flex items-center space-x-4'>
                       <div>
                         <h3 className='text-base font-medium text-gray-900'>
-                          Top Unmatched Items ({searchSort.searchResultsCount} of {searchSort.totalItemsCount})
+                          Top Unmatched Items ({searchSort.searchResultsCount} of{' '}
+                          {searchSort.totalItemsCount})
                         </h3>
                       </div>
                     </div>
                     <div className='flex items-center space-x-2'>
                       {/* Apply Changes Button */}
                       {(() => {
-                        const visibleItems = searchSort.filteredAndSortedItems.map(item => item.item);
+                        const visibleItems = searchSort.filteredAndSortedItems.map(
+                          item => item.item
+                        );
                         const visibleChanges = Object.keys(pendingChanges).filter(itemName =>
                           visibleItems.includes(itemName)
                         );
@@ -654,10 +659,11 @@ const UnmatchedAnalyzer: React.FC = () => {
                             <button
                               onClick={handleApplyFilteredChanges}
                               disabled={loading || visibleChangesCount === 0}
-                              className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || visibleChangesCount === 0
+                              className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${
+                                loading || visibleChangesCount === 0
                                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                                   : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                                }`}
+                              }`}
                             >
                               {loading ? 'Applying...' : `Apply (${visibleChangesCount})`}
                             </button>

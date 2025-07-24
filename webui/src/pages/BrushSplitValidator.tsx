@@ -1,19 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import MonthSelector from '../components/forms/MonthSelector';
 import { BrushSplitTable } from '../components/data/BrushSplitTable';
 import { BrushSplit } from '../types/brushSplit';
+import { Button } from '@/components/ui/button';
+import { Eye, EyeOff } from 'lucide-react';
+import CommentModal from '../components/domain/CommentModal';
+import { getCommentDetail, CommentDetail } from '../services/api';
 
 interface LoadResponse {
   brush_splits: BrushSplit[];
-  statistics: any;
+  statistics: Record<string, unknown>;
 }
 
 const BrushSplitValidator: React.FC = () => {
   const [brushSplits, setBrushSplits] = useState<BrushSplit[]>([]);
-  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
+  const [showValidated, setShowValidated] = useState(false);
+  const [selectedComment, setSelectedComment] = useState<CommentDetail | null>(null);
+  const [commentModalOpen, setCommentModalOpen] = useState(false);
+  const [commentLoading, setCommentLoading] = useState(false);
 
   useEffect(() => {
     if (selectedMonths.length === 0) {
@@ -39,74 +46,128 @@ const BrushSplitValidator: React.FC = () => {
       })
       .then((data: LoadResponse) => {
         setBrushSplits(data.brush_splits);
-        setLoading(false);
+        // Reset to show validated items hidden when months change
+        setShowValidated(false);
       })
       .catch(error => {
-        console.error('Failed to load brush splits:', error);
-        setError('Error loading brush splits');
+        console.error('Error loading brush splits:', error);
+        setError(error.message);
+      })
+      .finally(() => {
         setLoading(false);
       });
   }, [selectedMonths]);
 
-  return (
-    <div data-testid='brush-split-validator' className='h-screen flex flex-col'>
-      {/* Sticky Header */}
-      <div className='sticky top-0 z-20 bg-white border-b border-gray-200 p-4 shadow-sm'>
-        <h1 className='text-2xl font-bold text-gray-900 mb-4'>Brush Split Validator</h1>
+  // Filter brush splits based on showValidated state
+  const filteredBrushSplits = useMemo(() => {
+    if (showValidated) {
+      // Show all items (validated + unvalidated)
+      return brushSplits;
+    } else {
+      // Show only unvalidated items
+      return brushSplits.filter(split => !split.validated);
+    }
+  }, [brushSplits, showValidated]);
 
-        {/* Month Selection */}
-        <div className='mb-4'>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
-            Select Months to Analyze:
-          </label>
-          <MonthSelector
-            selectedMonths={selectedMonths}
-            onMonthsChange={setSelectedMonths}
-            multiple={true}
-          />
-        </div>
+  // Count validated items that would be hidden
+  const hiddenValidatedCount = useMemo(() => {
+    if (showValidated) {
+      return 0; // All items are shown
+    } else {
+      return brushSplits.filter(split => split.validated).length;
+    }
+  }, [brushSplits, showValidated]);
 
-        {/* Status Information */}
-        {selectedMonths.length > 0 && (
-          <div className='text-sm text-gray-600'>
-            <p>Total brush splits: {brushSplits.length}</p>
-            <p>Selected months: {selectedMonths.join(', ')}</p>
-          </div>
-        )}
-      </div>
+  const handleToggleValidated = useCallback(() => {
+    setShowValidated(!showValidated);
+  }, [showValidated]);
 
-      {/* Scrollable Content */}
-      <div className='flex-1 overflow-hidden'>
-        {loading ? (
-          <div className='flex items-center justify-center h-full'>
-            <div className='text-lg text-gray-600'>Loading...</div>
-          </div>
-        ) : error ? (
-          <div className='flex items-center justify-center h-full'>
-            <div className='text-lg text-red-600'>{error}</div>
-          </div>
-        ) : selectedMonths.length === 0 ? (
-          <div className='flex items-center justify-center h-full'>
-            <div className='text-lg text-gray-600'>
-              Please select at least one month to analyze brush splits.
-            </div>
-          </div>
+  const handleCommentClick = useCallback(async (commentId: string) => {
+    try {
+      setCommentLoading(true);
+      const comment = await getCommentDetail(commentId, selectedMonths);
+      setSelectedComment(comment);
+      setCommentModalOpen(true);
+    } catch (err: any) {
+      console.error('Error loading comment detail:', err);
+      // Don't show error to user, just log it
+    } finally {
+      setCommentLoading(false);
+    }
+  }, [selectedMonths]);
+
+  // Create the show/hide validated button
+  const validatedButton = useMemo(() => {
+    if (brushSplits.length === 0) return null;
+
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleToggleValidated}
+        className="flex items-center gap-2"
+      >
+        {showValidated ? (
+          <>
+            <EyeOff className="h-4 w-4" />
+            Hide Validated
+          </>
         ) : (
-          <div className='h-full p-4'>
-            <BrushSplitTable
-              brushSplits={brushSplits}
-              onSelectionChange={selectedIndices => {
-                setSelectedRows(new Set(selectedIndices));
-              }}
-              onSave={(index, updatedData) => {
-                const newSplits = [...brushSplits];
-                newSplits[index] = { ...newSplits[index], ...updatedData };
-                setBrushSplits(newSplits);
-              }}
-            />
-          </div>
+          <>
+            <Eye className="h-4 w-4" />
+            Show Validated ({hiddenValidatedCount})
+          </>
         )}
+      </Button>
+    );
+  }, [brushSplits.length, showValidated, hiddenValidatedCount, handleToggleValidated]);
+
+  return (
+    <div className="container mx-auto p-4">
+      <div className="mb-4">
+        <MonthSelector
+          selectedMonths={selectedMonths}
+          onMonthsChange={setSelectedMonths}
+        />
       </div>
+
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+          Error: {error}
+        </div>
+      )}
+
+      {loading && (
+        <div className="mb-4 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded">
+          Loading brush splits...
+        </div>
+      )}
+
+      {!loading && !error && (
+        <BrushSplitTable
+          brushSplits={filteredBrushSplits}
+          onSelectionChange={() => {
+            // Note: This callback is available for future use but not currently implemented
+          }}
+          onSave={(updatedData: BrushSplit[]) => {
+            // Update the brush splits with the new data
+            setBrushSplits(updatedData);
+          }}
+          customControls={validatedButton}
+          onCommentClick={handleCommentClick}
+          commentLoading={commentLoading}
+        />
+      )}
+
+      {/* Comment Modal */}
+      <CommentModal
+        comment={selectedComment}
+        isOpen={commentModalOpen}
+        onClose={() => {
+          setCommentModalOpen(false);
+          setSelectedComment(null);
+        }}
+      />
     </div>
   );
 };
