@@ -67,8 +67,10 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
     await waitFor(() => {
       expect(screen.getByTestId('brush-split-table')).toBeInTheDocument();
       // Check that the original brush names are present
+      // Note: Only unvalidated items are shown by default
       expect(screen.getByText('Test Brush 1')).toBeInTheDocument();
-      expect(screen.getByText('Test Brush 2')).toBeInTheDocument();
+      // Test Brush 2 is validated, so it should be hidden by default
+      expect(screen.queryByText('Test Brush 2')).not.toBeInTheDocument();
     });
   });
 
