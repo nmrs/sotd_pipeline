@@ -1,0 +1,346 @@
+# Plan: Thread Overrides Recovery - Process-Focused Implementation
+# Date: 2025-07-24
+# Status: TODO
+
+## Project Summary
+This plan documents the process for researching and recovering missing Reddit SOTD thread URLs for days identified as missing in the SOTD pipeline's `data/comments/` folder. The goal is to improve data completeness by finding and adding thread URLs to `thread_overrides.yaml` for dates with missing threads.
+
+## CRITICAL REQUIREMENT: EXACT DATE MATCHING
+**ONLY URLs that match the exact missing date (YYYY-MM-DD) should be added to thread_overrides.yaml. NO ±1 day tolerance is allowed. Thread title dates must exactly match the missing date.**
+
+## MANDATORY: Document All Findings in This Plan
+**As we proceed through each phase, ALL findings must be documented in this plan:**
+- **Audit Results**: All entries reviewed, corrections made, removals performed
+- **Missing Dates**: Complete list of dates identified as missing
+- **Cache Search Results**: All URLs found in cache, validation status, rejection reasons
+- **External Search Results**: All URLs found externally, validation status, rejection reasons
+- **Recovery Statistics**: Success rates, efficiency metrics, quality assessments
+- **Pattern Discoveries**: Thread title patterns, date format variations, search strategy insights
+
+## Implementation Strategy: Cache-First Approach
+
+### Phase 0: Audit Existing Thread Overrides (MANDATORY FIRST STEP)
+0. **TODO**: Audit all existing entries in `data/thread_overrides.yaml` for date accuracy
+   - **Method**: Review each URL and verify it matches the exact date key
+   - **Validation sources**: 
+     - **Primary**: Parse thread title from URL for date information
+     - **Secondary**: Check corresponding `data/comments/YYYY-MM.json` file for thread metadata
+     - **Tertiary**: Visit live Reddit URL to verify thread title and date
+   - **Documentation**: Record all entries that need correction or removal
+   - **Output**: Cleaned thread_overrides.yaml with only correct date matches
+   - **REQUIREMENT**: Remove any entries where URL date doesn't exactly match YAML key date
+
+### Phase 1: Cache Analysis (Primary Strategy)
+1. **TODO**: Analyze `data/comments/` metadata to identify missing thread dates
+   - **Method**: Cross-reference expected daily threads vs actual fetched threads
+   - **Coverage**: 2016-05 through 2025-06 (9+ years of data)
+   - **Output**: List of specific missing dates with exact YYYY-MM-DD format
+   - **REQUIREMENT**: Only work with dates that are actually missing in current analysis
+2. **TODO**: Search cache validation results for missing thread URLs
+   - **Search method**: Date-based pattern matching against cached thread data
+   - **Validation criteria**: Thread title relevance, date accuracy, engagement levels
+   - **Output**: List of found URLs with validation status
+   - **REQUIREMENT**: Only include URLs where thread title date exactly matches missing date
+3. **TODO**: Validate found cache threads against missing dates
+   - **Validation criteria**: EXACT date matches only, proper SOTD content, good engagement
+   - **Rejection tracking**: Document reasons for rejected threads
+   - **Output**: Validated thread list with metadata
+   - **REQUIREMENT**: Reject any URLs where thread title date doesn't exactly match missing date
+4. **TODO**: Extract best matches from validation results
+   - **Quality criteria**: EXACT date matches only, proper SOTD content, good engagement
+   - **Output**: Final list of valid threads for overrides
+   - **REQUIREMENT**: No ±1 day tolerance - exact matches only
+5. **TODO**: Update `thread_overrides.yaml` with validated cache results
+   - **Format**: YAML with exact date keys and URL lists
+   - **Validation**: Ensure YAML format is correct
+   - **Output**: Updated thread_overrides.yaml file
+   - **REQUIREMENT**: Only add URLs for exact date matches
+6. **TODO**: Calculate cache analysis recovery success rate
+   - **Metrics**: Recovery rate, efficiency, quality
+   - **Output**: Success rate statistics
+7. **TODO**: Document cache search process and results for each missing date
+   - **Documentation**: Complete cache search methodology
+   - **Results tracking**: All cache findings documented
+   - **Quality metrics**: Success rates and validation criteria documented
+
+### Phase 2: External Search (Secondary Strategy - Only if Needed)
+8. **TODO**: For remaining missing dates after cache analysis, execute external searches:
+   - **Standard Reddit search patterns**: flair:SOTD, date-based searches
+   - **Alternative title formats**: "SOTD Thread", "Shave of the Day", "Daily SOTD", etc.
+   - **Date format variations**: MM/DD, MM-DD, DD/MM, ISO formats
+   - **Broader searches**: Without flair restrictions, by author, by time period
+   - **External resources**: Djudge Portal, DamnFineShave, other wetshaving forums
+   - **Archive searches**: Wayback Machine, Reddit archives, Google site searches
+   - **Cross-reference validation**: Check if threads exist with different titles or flairs
+   - **Output**: Search results for remaining missing dates
+   - **REQUIREMENT**: Only include URLs where thread title date exactly matches missing date
+9. **TODO**: Validate external search results
+   - **Validation criteria**: EXACT date matches only, same as cache validation
+   - **Output**: Validated external search results
+   - **REQUIREMENT**: Reject any URLs where thread title date doesn't exactly match missing date
+
+### Phase 3: Analysis and Documentation
+10. **TODO**: Analyze investigation results and document findings:
+    - **Thread pattern evolution**: Document different title formats across years
+    - **Success rate validation**: Calculate actual recovery rates
+    - **Documentation**: Create missing thread analysis report
+    - **Recommendations**: Provide actionable recommendations
+11. **TODO**: Calculate overall recovery success rate and statistics:
+    - **Final success rate**: Calculate recovery percentage
+    - **Missing threads analysis**: Document genuinely missing threads
+    - **Pattern analysis**: Document thread title evolution
+    - **Investigation methods**: Document all search strategies used
+12. **TODO**: Document lessons learned and search strategy effectiveness:
+    - **Cache analysis effectiveness**: Document success rates
+    - **External search effectiveness**: Document external search results
+    - **Pattern analysis insights**: Document discovered patterns
+    - **Recommendations**: Provide future improvement recommendations
+13. **TODO**: Update pipeline search patterns based on discoveries:
+    - **Pattern documentation**: Create comprehensive pattern guide
+    - **Year-specific formats**: Document different formats by year
+    - **Search strategy**: Enhance external search approach
+    - **Validation methods**: Improve thread validation criteria
+
+## Phase 0: Audit Process Details
+
+### Audit Validation Methods (in order of preference)
+1. **URL Title Parsing**: Extract date from thread title in URL
+   - **Example**: `wednesday_sotd_thread_may_04_2016` → 2016-05-04
+   - **Method**: Parse title component after last `/` in URL
+   - **Validation**: Check if parsed date matches YAML key date
+
+2. **Comments File Validation**: Check `data/comments/YYYY-MM.json` for thread metadata
+   - **Method**: Search for thread ID in comments file
+   - **Look for**: Thread title, creation date, author information
+   - **Validation**: Compare thread title date with YAML key date
+
+3. **Live Reddit Validation**: Visit actual Reddit URL to verify thread
+   - **Method**: Use Reddit API or web scraping to fetch thread details
+   - **Look for**: Thread title, creation timestamp, author
+   - **Validation**: Compare thread title date with YAML key date
+   - **Fallback**: Manual verification if automated methods fail
+
+### Audit Documentation Format
+```
+AUDIT ENTRY: 2016-05-04
+URL: https://www.reddit.com/r/Wetshaving/comments/4htj81/wednesday_sotd_thread_may_04_2016/
+Title from URL: wednesday_sotd_thread_may_04_2016
+Parsed Date: 2016-05-04
+YAML Key Date: 2016-05-04
+Status: ✅ EXACT MATCH
+Action: Keep
+
+AUDIT ENTRY: 2016-05-03
+URL: https://www.reddit.com/r/Wetshaving/comments/4htj81/wednesday_sotd_thread_may_04_2016/
+Title from URL: wednesday_sotd_thread_may_04_2016
+Parsed Date: 2016-05-04
+YAML Key Date: 2016-05-03
+Status: ❌ DATE MISMATCH
+Action: Remove or correct YAML key
+```
+
+### Audit Success Criteria
+- [ ] Review all existing URLs in thread_overrides.yaml
+- [ ] Verify each URL title date matches YAML key date exactly
+- [ ] Document all mismatches found
+- [ ] Remove or correct all incorrect entries
+- [ ] Validate unclear cases with comments files or live Reddit
+- [ ] Ensure 100% accuracy of existing entries before proceeding
+
+## FINDINGS TRACKING SECTIONS
+
+### Phase 0: Audit Findings
+**TODO**: Document all audit results here as we proceed
+- **Entries Reviewed**: [Count and list]
+- **Exact Matches Found**: [Count and list]
+- **Date Mismatches Found**: [Count and list with details]
+- **Corrections Made**: [List of changes made to thread_overrides.yaml]
+- **Removals Performed**: [List of entries removed]
+- **Unclear Cases**: [List of entries requiring additional validation]
+- **Validation Methods Used**: [Document which validation method was used for each entry]
+
+### Phase 1: Missing Dates Analysis
+**TODO**: Document missing dates identified
+- **Total Missing Dates**: [Count]
+- **Missing Dates by Year**: [Breakdown by year]
+- **Missing Dates List**: [Complete list of YYYY-MM-DD format]
+- **Date Range Analysis**: [Patterns in missing dates]
+- **Comments File Analysis**: [Methodology and findings]
+
+### Phase 1: Cache Search Results
+**TODO**: Document all cache search findings
+- **Cache Files Searched**: [List of cache files examined]
+- **Search Methods Used**: [Document all search strategies]
+- **URLs Found in Cache**: [Complete list with validation status]
+- **Valid URLs**: [List of URLs that passed validation]
+- **Rejected URLs**: [List with rejection reasons]
+- **Cache Recovery Rate**: [Percentage of missing dates found in cache]
+- **Cache Search Efficiency**: [Time spent, files processed, etc.]
+
+### Phase 2: External Search Results (if needed)
+**TODO**: Document external search findings
+- **External Sources Searched**: [List of external resources used]
+- **Search Strategies Used**: [Document all external search methods]
+- **URLs Found Externally**: [Complete list with validation status]
+- **Valid External URLs**: [List of URLs that passed validation]
+- **Rejected External URLs**: [List with rejection reasons]
+- **External Recovery Rate**: [Percentage of remaining missing dates found]
+- **External Search Efficiency**: [Time spent, sources checked, etc.]
+
+### Overall Recovery Statistics
+**TODO**: Document final recovery statistics
+- **Total Missing Dates**: [Count]
+- **Dates Recovered**: [Count]
+- **Overall Recovery Rate**: [Percentage]
+- **Recovery by Source**: [Cache vs External breakdown]
+- **Quality Metrics**: [Validation success rates, etc.]
+- **Time Investment**: [Total time spent on recovery effort]
+
+### Pattern Discoveries
+**TODO**: Document discovered patterns and insights
+- **Thread Title Patterns**: [Different title formats found]
+- **Date Format Variations**: [Date formats in thread titles]
+- **Year-Specific Patterns**: [Patterns by year]
+- **Search Strategy Insights**: [What worked best for finding threads]
+- **Validation Insights**: [What made threads valid vs invalid]
+
+### Lessons Learned
+**TODO**: Document lessons learned and recommendations
+- **Cache Analysis Lessons**: [What worked, what didn't]
+- **External Search Lessons**: [What worked, what didn't]
+- **Validation Lessons**: [What criteria were most effective]
+- **Process Improvements**: [Recommendations for future searches]
+- **Pipeline Enhancement Ideas**: [How to improve the pipeline based on findings]
+
+## Cache-First Search Strategy
+
+### Cache Analysis Priority Order
+1. **Direct Date Match**: Search for exact date in cache files
+2. **Date Variation Search**: Look for threads posted day before/after missing date (for documentation only - don't include in overrides)
+3. **Title Pattern Search**: Search for SOTD thread title patterns in cache
+4. **Comment Activity Analysis**: Identify threads with comments on missing dates
+5. **Author Pattern Search**: Look for both AutoModerator and human-posted threads
+
+### Cache Validation Criteria
+- **Thread Relevance**: Must be a genuine SOTD thread
+- **Comment Activity**: Should have substantial community engagement
+- **Date Accuracy**: Thread date MUST exactly match missing date (NO ±1 day tolerance)
+- **Title Consistency**: Should follow SOTD thread naming patterns
+- **Content Quality**: Thread should contain SOTD-related content and community discussion
+
+### Cache File Structure Analysis
+- **Threads Cache Location**: `/Users/jmoore/Documents/Projects/sotd-report/cache/threads/`
+- **Comments Cache Location**: `/Users/jmoore/Documents/Projects/sotd-report/cache/comments/`
+- **Threads Cache Format**: JSON files by year/month (e.g., `202205.json`)
+- **Comments Cache Format**: JSON files by year/month (e.g., `202205.json`)
+- **Threads Cache Content**: Thread metadata and basic thread information
+- **Comments Cache Content**: Comment data with thread references and activity
+- **Coverage**: Complete thread history with comment activity from both sources
+
+## Documentation Format for Found Threads
+
+### When documenting found threads, include:
+- **Date**: YYYY-MM-DD format
+- **URL**: Complete Reddit thread URL
+- **Title**: Thread title for context
+- **Author**: AutoModerator or human username (for reference only)
+- **Comment Count**: Number of comments for validation
+- **Source**: Cache file or external search method
+- **Validation Status**: Valid SOTD thread, Rejected, or Under Review
+- **Rejection Reasons**: Detailed explanation if thread was rejected
+- **Date Match Verification**: Confirm thread title date exactly matches missing date
+
+### Example Documentation Format:
+```
+2022-05-01: 
+  URL: "https://www.reddit.com/r/Wetshaving/comments/ufshnb/sunday_sotd_thread_may_01_2022/"
+  Title: "Sunday SOTD Thread - May 01, 2022"
+  Author: AutoModerator
+  Comments: 47
+  Source: Cache file 202205.json
+  Status: Valid SOTD thread
+  Date Match: EXACT (May 01, 2022 matches 2022-05-01)
+
+2022-05-08:
+  URL: "https://www.reddit.com/r/Wetshaving/comments/example/random_thread/"
+  Title: "Random Discussion Thread"
+  Author: HumanUser
+  Comments: 12
+  Source: Cache file 202205.json
+  Status: Rejected
+  Rejection Reasons: 
+    - Thread title not SOTD-related
+    - Low comment activity (12 comments)
+    - Content focused on general discussion, not shaving
+```
+
+### Historical Record Requirements
+- **Record ALL threads found**: Valid, rejected, and under review
+- **Include rejection reasons**: Detailed explanation for why threads were rejected
+- **Document search process**: What search strategies were used for each date
+- **Track validation decisions**: Maintain audit trail of all validation choices
+- **Note edge cases**: Document unusual or borderline cases for future reference
+- **Document date mismatches**: Record all URLs rejected due to date mismatch
+
+## Critical Process Requirements
+
+### 1. EXACT Date Matching (MANDATORY)
+- **ONLY add URLs for exact date matches**: NO ±1 day tolerance allowed
+- **Verify thread title dates**: Ensure URL title date exactly matches the missing date
+- **Reject off-by-one URLs**: Even if found, don't include if date doesn't match exactly
+- **Document date mismatches**: Record all URLs rejected due to date mismatch
+- **Example**: If missing date is 2022-05-01, only accept URLs with "May 01, 2022" in title
+
+### 2. Missing Date Identification
+- **Start with actual missing dates**: Only work with dates identified as missing in current analysis
+- **Don't use previous findings**: Previous "found" URLs may not correspond to current missing dates
+- **Verify each date**: Ensure each date was actually missing before adding URLs
+- **Document missing date list**: Maintain complete list of dates identified as missing
+
+### 3. Validation Process
+- **Cache validation first**: Use cache analysis as primary method
+- **External search only if needed**: Only search externally for dates not found in cache
+- **Document all decisions**: Record why each thread was accepted or rejected
+- **Quality over quantity**: Prefer fewer, high-quality matches over many questionable ones
+- **Date verification required**: Every URL must be verified for exact date match
+
+### 4. Documentation Standards
+- **Track missing dates**: Maintain list of dates identified as missing
+- **Track found URLs**: Document all URLs found with validation status
+- **Track rejected URLs**: Document why URLs were rejected
+- **Track search methods**: Document which search methods were used for each date
+- **Track date mismatches**: Document all URLs rejected due to date mismatch
+
+## Success Criteria
+- [ ] **COMPLETE PHASE 0**: Audit all existing thread_overrides.yaml entries for accuracy
+- [ ] Complete systematic cache analysis of all missing dates
+- [ ] Achieve cache recovery rate of at least 40% of missing dates
+- [ ] Use external searches for remaining cache-missed dates
+- [ ] Validate all found threads before adding to overrides
+- [ ] Document comprehensive cache search strategies with URLs
+- [ ] Provide actionable recommendations for pipeline improvements
+- [ ] Maintain complete historical record of all findings (valid and rejected)
+- [ ] **ENSURE ONLY EXACT DATE MATCHES ARE INCLUDED IN OVERRIDES**
+- [ ] **VERIFY EVERY URL FOR EXACT DATE MATCH BEFORE ADDING**
+- [ ] **DOCUMENT ALL FINDINGS IN THIS PLAN AS WE PROCEED**
+
+## Implementation Priority
+1. **PHASE 0 FIRST**: Audit existing thread_overrides.yaml for accuracy
+2. **Cache Analysis**: Exhaust all cache search possibilities
+3. **Save Cache Results**: Update `thread_overrides.yaml` with cache findings
+4. **External Search Only if Needed**: Only search externally for dates not found in cache
+5. **Validate Everything**: Ensure all threads meet quality criteria
+6. **Document URLs**: Always include the actual Reddit URLs when documenting found threads
+7. **Record Rejections**: Document all rejected threads with detailed reasons for historical record
+8. **EXACT DATE MATCHING**: Only include URLs that match the exact missing date
+9. **VERIFY EVERY URL**: Check thread title date matches missing date exactly
+10. **SAVE ALL FINDINGS**: Document every discovery, decision, and result in this plan
+
+---
+
+## Implementation Chunks
+
+description: Thread Overrides Recovery - Process-Focused Implementation
+globs: ["data/thread_overrides.yaml", "data/comments/"]
+alwaysApply: false
+---
