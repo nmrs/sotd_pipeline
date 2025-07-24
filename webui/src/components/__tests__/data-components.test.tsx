@@ -20,7 +20,7 @@ describe('Data Components', () => {
     expect(() => {
       // We'll implement the actual import in the next step
       // For now, just verify the test structure
-      const { default: BrushSplitTable } = require('../data/BrushSplitTable');
+      const { BrushSplitTable } = require('../data/BrushSplitTable');
       expect(BrushSplitTable).toBeDefined();
     }).not.toThrow();
   });

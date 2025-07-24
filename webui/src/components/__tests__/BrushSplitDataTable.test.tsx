@@ -12,10 +12,11 @@ jest.mock('@/components/ui/data-table', () => ({
     resizable,
     showColumnVisibility,
     searchKey,
+    showPagination,
   }: any) => (
     <div data-testid='shadcn-data-table'>
       <div data-testid='data-table-props'>
-        {JSON.stringify({ height, itemSize, resizable, showColumnVisibility, searchKey })}
+        {JSON.stringify({ height, itemSize, resizable, showColumnVisibility, searchKey, showPagination })}
       </div>
       <div data-testid='data-table-columns'>
         {columns.map((col: any, index: number) => (
@@ -69,26 +70,25 @@ const mockBrushSplits = [
 describe('BrushSplitDataTable', () => {
   describe('ShadCN DataTable Integration', () => {
     it('uses ShadCN DataTable as foundation', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
 
       expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
     });
 
     it('passes correct props to ShadCN DataTable', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
 
       const propsElement = screen.getByTestId('data-table-props');
       const props = JSON.parse(propsElement.textContent || '{}');
 
-      expect(props.height).toBe(400);
-      expect(props.itemSize).toBe(48);
+      expect(props.showPagination).toBe(true);
       expect(props.resizable).toBe(true);
       expect(props.showColumnVisibility).toBe(true);
       expect(props.searchKey).toBe('original');
     });
 
     it('defines correct columns for ShadCN DataTable', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
 
       expect(screen.getByTestId('column-original')).toBeInTheDocument();
       expect(screen.getByTestId('column-handle')).toBeInTheDocument();
@@ -98,7 +98,7 @@ describe('BrushSplitDataTable', () => {
     });
 
     it('transforms data correctly for ShadCN DataTable', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
 
       expect(screen.getByTestId('row-0')).toHaveTextContent(
         'Test Brush 1 - Test Maker - Test Knot'
@@ -114,7 +114,7 @@ describe('BrushSplitDataTable', () => {
 
   describe('Specialized Editing Functionality', () => {
     it('shows unsaved changes indicator when editing', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
 
       // Initially no unsaved changes
       expect(screen.queryByText(/unsaved change/)).not.toBeInTheDocument();
@@ -146,19 +146,19 @@ describe('BrushSplitDataTable', () => {
 
   describe('Column Definitions', () => {
     it('defines original column with correct header', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
 
       expect(screen.getByTestId('column-original')).toHaveTextContent('Original');
     });
 
     it('defines handle column with correct header', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
 
       expect(screen.getByTestId('column-handle')).toHaveTextContent('Handle');
     });
 
     it('defines knot column with correct header', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
 
       expect(screen.getByTestId('column-knot')).toHaveTextContent('Knot');
     });
