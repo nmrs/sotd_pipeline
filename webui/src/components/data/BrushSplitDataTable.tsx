@@ -13,6 +13,9 @@ interface BrushSplitDataTableProps {
   brushSplits: BrushSplit[];
   onSave: (data: BrushSplit[]) => void;
   onSelectionChange?: (selectedRows: BrushSplit[]) => void;
+  customControls?: React.ReactNode;
+  onCommentClick?: (commentId: string) => void;
+  commentLoading?: boolean;
 }
 
 // Extended type for table data with index
@@ -27,7 +30,7 @@ const MemoizedInput = memo<{
 }>(({ value, onChange, placeholder, 'aria-label': ariaLabel }) => (
   <Input
     value={value}
-    onChange={(e) => onChange(e.target.value)}
+    onChange={e => onChange(e.target.value)}
     placeholder={placeholder}
     aria-label={ariaLabel}
     className='w-full'
@@ -40,15 +43,16 @@ export function BrushSplitDataTable({
   brushSplits,
   onSave,
   onSelectionChange,
+  customControls,
+  onCommentClick,
+  commentLoading = false,
 }: BrushSplitDataTableProps) {
-  const [editingData, setEditingData] = useState<Record<number, Partial<BrushSplit>>>(
-    {}
-  );
+  const [editingData, setEditingData] = useState<Record<number, Partial<BrushSplit>>>({});
 
   // Track original values before "Don't Split" was checked
-  const [originalValues, setOriginalValues] = useState<Record<number, { handle: string; knot: string; validated: boolean }>>(
-    {}
-  );
+  const [originalValues, setOriginalValues] = useState<
+    Record<number, { handle: string; knot: string; validated: boolean }>
+  >({});
 
   const handleFieldChange = useCallback(
     (index: number, field: keyof BrushSplit, value: string | boolean) => {
@@ -56,7 +60,7 @@ export function BrushSplitDataTable({
 
       // If the new value matches the original, clear the change
       if (value === originalValue) {
-        setEditingData((prev) => {
+        setEditingData(prev => {
           const newData = { ...prev };
           if (newData[index]) {
             delete newData[index][field];
@@ -69,7 +73,7 @@ export function BrushSplitDataTable({
         });
       } else {
         // Set the change
-        setEditingData((prev) => ({
+        setEditingData(prev => ({
           ...prev,
           [index]: {
             ...prev[index],
@@ -103,14 +107,14 @@ export function BrushSplitDataTable({
               table.getIsAllPageRowsSelected() ||
               (table.getIsSomePageRowsSelected() && 'indeterminate')
             }
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
             aria-label='Select all'
           />
         ),
         cell: ({ row }) => (
           <Checkbox
             checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            onCheckedChange={value => row.toggleSelected(!!value)}
             aria-label='Select row'
           />
         ),
@@ -137,7 +141,7 @@ export function BrushSplitDataTable({
         cell: ({ row }) => {
           const index = row.original.index;
           const editingValue = editingData[index]?.handle;
-          const value = editingValue !== undefined ? (editingValue || '') : (row.original.handle || '');
+          const value = editingValue !== undefined ? editingValue || '' : row.original.handle || '';
           return (
             <MemoizedInput
               value={value}
@@ -154,7 +158,7 @@ export function BrushSplitDataTable({
         cell: ({ row }) => {
           const index = row.original.index;
           const editingValue = editingData[index]?.knot;
-          const value = editingValue !== undefined ? (editingValue || '') : (row.original.knot || '');
+          const value = editingValue !== undefined ? editingValue || '' : row.original.knot || '';
           return (
             <MemoizedInput
               value={value}
@@ -175,30 +179,74 @@ export function BrushSplitDataTable({
           return (
             <Checkbox
               checked={value}
-              onCheckedChange={(checked) => handleFieldChange(index, 'validated', !!checked)}
+              onCheckedChange={checked => handleFieldChange(index, 'validated', !!checked)}
               aria-label={`Validated for row ${index + 1}`}
             />
           );
         },
       },
       {
+        accessorKey: 'comment_ids',
+        header: 'Comments',
+        cell: ({ row }) => {
+          // Extract all comment_ids from occurrences
+          const allCommentIds = row.original.occurrences.flatMap(occurrence => occurrence.comment_ids);
+          const uniqueCommentIds = [...new Set(allCommentIds)];
+
+          if (uniqueCommentIds.length === 0) {
+            return (
+              <span
+                className='text-gray-400 text-xs'
+                role='cell'
+                aria-label='No comments available'
+              >
+                No comments
+              </span>
+            );
+          }
+
+          return (
+            <div
+              className='space-y-1'
+              role='cell'
+              aria-label={`${uniqueCommentIds.length} comment${uniqueCommentIds.length !== 1 ? 's' : ''} available`}
+            >
+              {uniqueCommentIds.slice(0, 3).map((commentId, index) => (
+                <button
+                  key={commentId}
+                  onClick={() => onCommentClick?.(commentId)}
+                  disabled={commentLoading}
+                  className='block w-full text-left text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded'
+                  aria-label={`View comment ${index + 1} of ${uniqueCommentIds.length}`}
+                >
+                  {commentId}
+                </button>
+              ))}
+              {uniqueCommentIds.length > 3 && (
+                <span className='text-xs text-gray-500'>+{uniqueCommentIds.length - 3} more</span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
         accessorKey: 'should_not_split',
-        header: 'Don\'t Split',
+        header: "Don't Split",
         cell: ({ row }) => {
           const index = row.original.index;
           const editingValue = editingData[index]?.should_not_split;
-          const value = editingValue !== undefined ? editingValue : row.original.should_not_split || false;
+          const value =
+            editingValue !== undefined ? editingValue : row.original.should_not_split || false;
 
           return (
             <Checkbox
               key={`should_not_split_${index}_${value}`}
               checked={value}
-              onCheckedChange={(checked) => {
-
+              onCheckedChange={checked => {
                 // Handle "Don't Split" specific behavior first
                 if (checked) {
                   // When "Don't Split" is checked, save original values and clear fields
-                  setOriginalValues((prev) => ({
+                  setOriginalValues(prev => ({
                     ...prev,
                     [index]: {
                       handle: editingData[index]?.handle ?? row.original.handle ?? '',
@@ -208,7 +256,7 @@ export function BrushSplitDataTable({
                   }));
 
                   // Set all changes at once
-                  setEditingData((prev) => ({
+                  setEditingData(prev => ({
                     ...prev,
                     [index]: {
                       ...prev[index],
@@ -223,7 +271,7 @@ export function BrushSplitDataTable({
                   const original = originalValues[index];
                   if (original) {
                     // Restore original values and clear the should_not_split change
-                    setEditingData((prev) => {
+                    setEditingData(prev => {
                       const newData = { ...prev };
                       if (newData[index]) {
                         // Restore original values
@@ -246,14 +294,14 @@ export function BrushSplitDataTable({
                     });
 
                     // Clean up original values
-                    setOriginalValues((prev) => {
+                    setOriginalValues(prev => {
                       const newValues = { ...prev };
                       delete newValues[index];
                       return newValues;
                     });
                   } else {
                     // No original values saved, just clear the should_not_split change
-                    setEditingData((prev) => {
+                    setEditingData(prev => {
                       const newData = { ...prev };
                       if (newData[index]) {
                         delete newData[index].should_not_split;
@@ -287,9 +335,7 @@ export function BrushSplitDataTable({
   if (brushSplits.length === 0) {
     return (
       <div className='space-y-4'>
-        <div className='text-center py-8 text-muted-foreground'>
-          No brush splits to display
-        </div>
+        <div className='text-center py-8 text-muted-foreground'>No brush splits to display</div>
       </div>
     );
   }
@@ -302,12 +348,14 @@ export function BrushSplitDataTable({
         showPagination={true}
         resizable={true}
         showColumnVisibility={true}
-        searchKey="original"
+        searchKey='original'
+        customControls={customControls}
       />
       {hasUnsavedChanges && (
         <div className='flex justify-between items-center'>
           <span className='text-sm text-muted-foreground'>
-            {Object.keys(editingData).length} unsaved change{Object.keys(editingData).length !== 1 ? 's' : ''}
+            {Object.keys(editingData).length} unsaved change
+            {Object.keys(editingData).length !== 1 ? 's' : ''}
           </span>
           <Button onClick={handleSave}>Save All Changes</Button>
         </div>
