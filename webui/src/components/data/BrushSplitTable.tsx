@@ -1,32 +1,32 @@
+'use client';
+
 import React from 'react';
 import { BrushSplitDataTable } from './BrushSplitDataTable';
-import { BrushSplit } from '../../types/brushSplit';
+import { BrushSplit } from '@/types/brushSplit';
 
 interface BrushSplitTableProps {
   brushSplits: BrushSplit[];
-  onSave?: (index: number, updatedSplit: BrushSplit) => void;
-  onSelectionChange?: (selectedIndices: number[]) => void;
-  selectedIndices?: number[];
+  onSave?: (data: BrushSplit[]) => void;
+  onSelectionChange?: (selectedRows: BrushSplit[]) => void;
 }
 
-const BrushSplitTable: React.FC<BrushSplitTableProps> = ({
+export function BrushSplitTable({
   brushSplits,
-  onSave,
+  onSave = () => { },
   onSelectionChange,
-  selectedIndices = [],
-}) => {
+}: BrushSplitTableProps) {
+  const handleSave = (updatedData: BrushSplit[]) => {
+    // Pass the updated data array to the parent onSave callback
+    onSave(updatedData);
+  };
+
   return (
-    <div data-testid='brush-split-table'>
+    <div className='w-full' data-testid="brush-split-table">
       <BrushSplitDataTable
         brushSplits={brushSplits}
-        onSave={onSave}
+        onSave={handleSave}
         onSelectionChange={onSelectionChange}
-        selectedIndices={selectedIndices}
       />
     </div>
   );
-};
-
-BrushSplitTable.displayName = 'BrushSplitTable';
-
-export default BrushSplitTable;
+}
