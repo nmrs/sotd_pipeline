@@ -1895,6 +1895,10 @@ Stando:
       format: Half DE
       patterns:
         - stando.*prowe
+  Rod:
+    format: AC
+    patterns:
+    - stando.*rod
 Star:
   Cadet:
     format: GEM
