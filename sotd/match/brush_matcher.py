@@ -417,10 +417,26 @@ class BrushMatcher:
                     "_pattern": "split",
                 },
                 "knot": {
-                    "brand": knot_match.matched.get("brand") if knot_match else None,
-                    "model": knot_match.matched.get("model") if knot_match else None,
-                    "fiber": knot_match.matched.get("fiber") if knot_match else None,
-                    "knot_size_mm": knot_match.matched.get("knot_size_mm") if knot_match else None,
+                    "brand": (
+                        knot_match.matched.get("brand")
+                        if knot_match and knot_match.matched
+                        else None
+                    ),
+                    "model": (
+                        knot_match.matched.get("model")
+                        if knot_match and knot_match.matched
+                        else None
+                    ),
+                    "fiber": (
+                        knot_match.matched.get("fiber")
+                        if knot_match and knot_match.matched
+                        else None
+                    ),
+                    "knot_size_mm": (
+                        knot_match.matched.get("knot_size_mm")
+                        if knot_match and knot_match.matched
+                        else None
+                    ),
                     "source_text": knot_text,
                     "_matched_by": "BrushSplitter",
                     "_pattern": "split",
@@ -458,6 +474,137 @@ class BrushMatcher:
                 matched=matched,
                 match_type="regex",
                 pattern="split",
+            )
+
+        elif knot_text and not handle_text:
+            # Handle knot-only entries (no handle component)
+            # This handles cases like "AP Shave Co G5C" where brush_splits.yaml specifies handle: null
+
+            # Check correct matches for knot component first
+            knot_correct_match = self.correct_matches_checker.check(knot_text)
+            if knot_correct_match:
+                # Use correct match for knot
+                from sotd.match.types import create_match_result
+
+                # Extract knot info safely
+                knot_info = knot_correct_match.knot_info or {}
+                knot_match = create_match_result(
+                    original=knot_text,
+                    matched={
+                        "brand": knot_info.get("brand"),
+                        "model": knot_info.get("model"),
+                        "fiber": knot_info.get("fiber"),
+                        "knot_size_mm": knot_info.get("knot_size_mm"),
+                        "_matched_by": "CorrectMatches",
+                        "_pattern": "correct_matches_knot",
+                    },
+                    match_type="exact",
+                    pattern="correct_matches_knot",
+                )
+            else:
+                # Fall back to knot matcher strategies
+                knot_match = None
+                for strategy in self.strategies:
+                    try:
+                        result = strategy.match(knot_text)
+                        if result and hasattr(result, "matched") and result.matched:
+                            knot_match = result
+                            break
+                    except Exception:
+                        continue
+
+            matched = {
+                "brand": None,  # Knot-only entry
+                "model": None,  # Knot-only entry
+                "handle": {
+                    "brand": None,  # No handle component
+                    "model": None,
+                    "source_text": None,
+                    "_matched_by": "BrushSplitsLoader",
+                    "_pattern": "curated_split",
+                },
+                "knot": {
+                    "brand": (
+                        knot_match.matched.get("brand")
+                        if knot_match and knot_match.matched
+                        else None
+                    ),
+                    "model": (
+                        knot_match.matched.get("model")
+                        if knot_match and knot_match.matched
+                        else None
+                    ),
+                    "fiber": (
+                        knot_match.matched.get("fiber")
+                        if knot_match and knot_match.matched
+                        else None
+                    ),
+                    "knot_size_mm": (
+                        knot_match.matched.get("knot_size_mm")
+                        if knot_match and knot_match.matched
+                        else None
+                    ),
+                    "source_text": knot_text,
+                    "_matched_by": "BrushSplitsLoader",
+                    "_pattern": "curated_split",
+                },
+            }
+
+            from sotd.match.types import create_match_result
+
+            return create_match_result(
+                original=value,
+                matched=matched,
+                match_type="regex",
+                pattern="curated_split",
+            )
+
+        elif handle_text and not knot_text:
+            # Handle handle-only entries (no knot component)
+            # This handles cases where brush_splits.yaml specifies knot: null
+
+            # Check correct matches for handle component first
+            handle_correct_match = self.correct_matches_checker.check(handle_text)
+            if handle_correct_match:
+                # Use correct match for handle
+                handle_match = {
+                    "handle_maker": handle_correct_match.handle_maker,
+                    "handle_model": handle_correct_match.handle_model,
+                    "_matched_by": "CorrectMatches",
+                    "_pattern": "correct_matches_handle",
+                }
+            else:
+                # Fall back to handle matcher
+                handle_match = self.handle_matcher.match_handle_maker(handle_text)
+
+            matched = {
+                "brand": None,  # Handle-only entry
+                "model": None,  # Handle-only entry
+                "handle": {
+                    "brand": handle_match.get("handle_maker") if handle_match else None,
+                    "model": handle_match.get("handle_model") if handle_match else None,
+                    "source_text": handle_text,
+                    "_matched_by": "BrushSplitsLoader",
+                    "_pattern": "curated_split",
+                },
+                "knot": {
+                    "brand": None,  # No knot component
+                    "model": None,
+                    "fiber": None,
+                    "knot_size_mm": None,
+                    "source_text": None,
+                    "_matched_by": "BrushSplitsLoader",
+                    "_pattern": "curated_split",
+                },
+            }
+
+            from sotd.match.types import create_match_result
+
+            return create_match_result(
+                original=value,
+                matched=matched,
+                match_type="regex",
+                pattern="curated_split",
             )
 
         # Step 2: Try complete brush matching (single-brand brushes) - only use brush strategies

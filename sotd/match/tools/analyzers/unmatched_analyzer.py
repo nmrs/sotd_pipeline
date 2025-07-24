@@ -150,19 +150,25 @@ class UnmatchedAnalyzer(AnalysisTool):
             return
 
         # Only check handle/knot components if we don't have a complete brush match
-        # Check handle component
+        # Check handle component (only if it has source_text - indicates it was actually processed)
         handle = matched.get("handle")
         handle_unmatched = None
-        if handle and (
-            handle.get("brand") is None or handle.get("brand") in ["UnknownMaker", "Unknown"]
+        if (
+            handle
+            and handle.get("source_text")
+            and (handle.get("brand") is None or handle.get("brand") in ["UnknownMaker", "Unknown"])
         ):
             handle_text = handle.get("source_text", "unknown handle")
             handle_unmatched = {"text": handle_text, "pattern": None}
 
-        # Check knot component
+        # Check knot component (only if it has source_text - indicates it was actually processed)
         knot = matched.get("knot")
         knot_unmatched = None
-        if knot and (knot.get("brand") is None or knot.get("brand") in ["UnknownKnot", "Unknown"]):
+        if (
+            knot
+            and knot.get("source_text")
+            and (knot.get("brand") is None or knot.get("brand") in ["UnknownKnot", "Unknown"])
+        ):
             knot_text = knot.get("source_text", "unknown knot")
             knot_unmatched = {"text": knot_text, "pattern": None}
 
@@ -179,9 +185,41 @@ class UnmatchedAnalyzer(AnalysisTool):
                     },
                 }
             )
-        # If neither handle nor knot issues, but still unmatched, show as general brush issue
+        # If neither handle nor knot issues, check if we have a valid composite brush or knot-only entry
         elif matched.get("brand") is None:
-            # Use extract_text helper for consistency
+            # Check if we have a valid composite brush (both handle and knot are matched)
+            # OR a valid knot-only entry (knot is matched, handle is null/empty)
+            handle = matched.get("handle")
+            knot = matched.get("knot")
+
+            # Check if handle is valid (has brand and not unknown)
+            handle_valid = (
+                handle
+                and handle.get("brand")
+                and handle.get("brand") not in ["UnknownMaker", "Unknown"]
+            )
+
+            # Check if knot is valid (has brand and not unknown)
+            knot_valid = (
+                knot and knot.get("brand") and knot.get("brand") not in ["UnknownKnot", "Unknown"]
+            )
+
+            # Check if handle is null/empty (expected for knot-only entries)
+            handle_null_or_empty = (
+                not handle
+                or not handle.get("source_text")  # No source_text = not processed
+                or (handle.get("brand") is None and handle.get("source_text") is None)
+            )
+
+            # Valid composite brush (both handle and knot are matched)
+            if handle_valid and knot_valid:
+                return
+
+            # Valid knot-only entry (knot is matched, handle is null/empty)
+            if knot_valid and handle_null_or_empty:
+                return
+
+            # Otherwise, it's a general brush issue
             normalized = extract_text(brush, "brush")
             all_unmatched[normalized].append(file_info)
 
