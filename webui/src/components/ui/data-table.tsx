@@ -13,6 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
   type Table as TanStackTable,
+  type RowSelectionState,
 } from '@tanstack/react-table';
 
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
@@ -41,6 +42,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ChevronDown, ArrowUpDown } from 'lucide-react';
+import { useState } from 'react';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -51,6 +53,9 @@ interface DataTableProps<TData, TValue> {
   resizable?: boolean;
   onColumnResize?: (columnId: string, width: number) => void;
   customControls?: React.ReactNode;
+  onSelectionChange?: (selectedRows: TData[]) => void;
+  clearSelection?: boolean;
+  initialRowSelection?: Record<string, boolean>;
 }
 
 export function DataTable<TData, TValue>({
@@ -62,14 +67,17 @@ export function DataTable<TData, TValue>({
   resizable = false,
   onColumnResize,
   customControls,
+  onSelectionChange,
+  clearSelection = false,
+  initialRowSelection = {},
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
-  const [columnWidths, setColumnWidths] = React.useState<Record<string, number>>({});
-  const [isResizing, setIsResizing] = React.useState(false);
-  const [resizeColumn, setResizeColumn] = React.useState<string | null>(null);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>(initialRowSelection);
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeColumn, setResizeColumn] = useState<string | null>(null);
 
   const table = useReactTable({
     data,
@@ -91,6 +99,28 @@ export function DataTable<TData, TValue>({
   });
 
   const { rows } = table.getRowModel();
+
+  // Call onSelectionChange when row selection changes
+  React.useEffect(() => {
+    if (onSelectionChange) {
+      const selectedRows = rows
+        .filter(row => row.getIsSelected())
+        .map(row => row.original);
+      onSelectionChange(selectedRows);
+    }
+  }, [rowSelection, rows, onSelectionChange]);
+
+  // Clear selection when clearSelection prop is true
+  React.useEffect(() => {
+    if (clearSelection) {
+      setRowSelection({});
+    }
+  }, [clearSelection]);
+
+  // Update row selection when initialRowSelection changes
+  React.useEffect(() => {
+    setRowSelection(initialRowSelection);
+  }, [initialRowSelection]);
 
   // Column resizing handlers
   const handleMouseDown = (columnId: string, e: React.MouseEvent) => {
@@ -129,16 +159,16 @@ export function DataTable<TData, TValue>({
   }, [isResizing, handleMouseMove, handleMouseUp]);
 
   return (
-    <div className='w-full'>
-      <div className='flex items-center py-4 gap-4'>
-        {searchKey && (
-          <Input
-            placeholder={`Search ${searchKey}...`}
-            value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
-            onChange={event => table.getColumn(searchKey)?.setFilterValue(event.target.value)}
-            className='max-w-sm'
-          />
-        )}
+    <div className='w-full space-y-4'>
+      <div className='flex items-center py-4'>
+        <Input
+          placeholder={`Filter ${searchKey}...`}
+          value={table.getColumn(searchKey || '')?.getFilterValue() as string ?? ''}
+          onChange={event =>
+            table.getColumn(searchKey || '')?.setFilterValue(event.target.value)
+          }
+          className='max-w-sm'
+        />
         {customControls}
         {showColumnVisibility && (
           <DropdownMenu>
@@ -168,65 +198,63 @@ export function DataTable<TData, TValue>({
         )}
       </div>
       <div className='rounded-md border'>
-        <div className='relative w-full overflow-auto'>
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map(headerGroup => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map(header => {
-                    return (
-                      <TableHead
-                        key={header.id}
-                        className='relative'
-                        style={
-                          columnWidths[header.column.id]
-                            ? { width: columnWidths[header.column.id] }
-                            : undefined
-                        }
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                        {resizable && (
-                          <div
-                            className='absolute right-0 top-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-gray-300'
-                            onMouseDown={e => handleMouseDown(header.column.id, e)}
-                          />
-                        )}
-                      </TableHead>
-                    );
-                  })}
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map(headerGroup => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map(header => {
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className='relative'
+                      style={
+                        columnWidths[header.column.id]
+                          ? { width: columnWidths[header.column.id] }
+                          : undefined
+                      }
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                      {resizable && (
+                        <div
+                          className='absolute right-0 top-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-gray-300'
+                          onMouseDown={e => handleMouseDown(header.column.id, e)}
+                        />
+                      )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {rows.length ? (
+              rows.map(row => (
+                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                  {row.getVisibleCells().map(cell => (
+                    <TableCell
+                      key={cell.id}
+                      style={
+                        columnWidths[cell.column.id]
+                          ? { width: columnWidths[cell.column.id] }
+                          : undefined
+                      }
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {rows.length ? (
-                rows.map(row => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                    {row.getVisibleCells().map(cell => (
-                      <TableCell
-                        key={cell.id}
-                        style={
-                          columnWidths[cell.column.id]
-                            ? { width: columnWidths[cell.column.id] }
-                            : undefined
-                        }
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className='h-24 text-center'>
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className='h-24 text-center'>
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
       {showPagination && <DataTablePagination table={table} />}
     </div>

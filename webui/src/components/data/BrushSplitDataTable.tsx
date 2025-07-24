@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useMemo, useState, memo } from 'react';
+import React, { useCallback, useMemo, useState, memo, useRef, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
@@ -48,11 +48,42 @@ export function BrushSplitDataTable({
   commentLoading = false,
 }: BrushSplitDataTableProps) {
   const [editingData, setEditingData] = useState<Record<number, Partial<BrushSplit>>>({});
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [clearSelection, setClearSelection] = useState(false);
 
   // Track original values before "Don't Split" was checked
   const [originalValues, setOriginalValues] = useState<
     Record<number, { handle: string; knot: string; validated: boolean }>
   >({});
+
+  // Initialize row selection based on validation status
+  useEffect(() => {
+    const validatedIndices = new Set(
+      brushSplits
+        .map((split, index) => ({ split, index }))
+        .filter(({ split }) => split.validated)
+        .map(({ index }) => index)
+    );
+    setSelectedRows(validatedIndices);
+  }, [brushSplits]);
+
+  // Handle row selection changes
+  const handleSelectionChange = useCallback((selectedRowsData: BrushSplitWithIndex[]) => {
+    const selectedIndices = new Set(selectedRowsData.map(row => row.index));
+    setSelectedRows(selectedIndices);
+    onSelectionChange?.(selectedRowsData);
+  }, [onSelectionChange]);
+
+  // Reset clearSelection flag after it's been used
+  useEffect(() => {
+    if (clearSelection) {
+      // Reset the flag after a short delay to ensure the DataTable has processed it
+      const timer = setTimeout(() => {
+        setClearSelection(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [clearSelection]);
 
   const handleFieldChange = useCallback(
     (index: number, field: keyof BrushSplit, value: string | boolean) => {
@@ -86,16 +117,25 @@ export function BrushSplitDataTable({
   );
 
   const handleSave = useCallback(() => {
-    const updatedData = brushSplits.map((item, index) => ({
-      ...item,
-      ...editingData[index],
-    }));
+    const updatedData = brushSplits.map((item, index) => {
+      const editingChanges = editingData[index] || {};
+
+      return {
+        ...item,
+        ...editingChanges,
+        // Mark as validated if the row is selected
+        validated: selectedRows.has(index) || editingChanges.validated || item.validated,
+      };
+    });
     onSave(updatedData);
     setEditingData({});
     setOriginalValues({});
-  }, [brushSplits, editingData, onSave]);
+    setSelectedRows(new Set()); // Clear selection after save
+    setClearSelection(true); // Set flag to clear selection
+  }, [brushSplits, editingData, selectedRows, onSave]);
 
-  const hasUnsavedChanges = Object.keys(editingData).length > 0;
+  const hasUnsavedChanges = Object.keys(editingData).length > 0 ||
+    (selectedRows.size > 0 && selectedRows.size !== brushSplits.filter(split => split.validated).length);
 
   const columns = useMemo<ColumnDef<BrushSplitWithIndex>[]>(
     () => [
@@ -165,22 +205,6 @@ export function BrushSplitDataTable({
               onChange={newValue => handleFieldChange(index, 'knot', newValue)}
               placeholder='Enter knot'
               aria-label={`Knot for row ${index + 1}`}
-            />
-          );
-        },
-      },
-      {
-        accessorKey: 'validated',
-        header: 'Validated',
-        cell: ({ row }) => {
-          const index = row.original.index;
-          const editingValue = editingData[index]?.validated;
-          const value = editingValue !== undefined ? editingValue : row.original.validated;
-          return (
-            <Checkbox
-              checked={value}
-              onCheckedChange={checked => handleFieldChange(index, 'validated', !!checked)}
-              aria-label={`Validated for row ${index + 1}`}
             />
           );
         },
@@ -261,7 +285,6 @@ export function BrushSplitDataTable({
                     [index]: {
                       ...prev[index],
                       should_not_split: true,
-                      validated: true,
                       handle: '',
                       knot: '',
                     },
@@ -277,7 +300,6 @@ export function BrushSplitDataTable({
                         // Restore original values
                         newData[index] = {
                           ...newData[index],
-                          validated: original.validated,
                           handle: original.handle,
                           knot: original.knot,
                         };
@@ -331,6 +353,17 @@ export function BrushSplitDataTable({
     }));
   }, [brushSplits]);
 
+  // Create initial row selection based on validation status
+  const initialRowSelection = useMemo(() => {
+    const selection: Record<string, boolean> = {};
+    brushSplits.forEach((split, index) => {
+      if (split.validated) {
+        selection[index.toString()] = true;
+      }
+    });
+    return selection;
+  }, [brushSplits]);
+
   // Handle empty data
   if (brushSplits.length === 0) {
     return (
@@ -350,6 +383,9 @@ export function BrushSplitDataTable({
         showColumnVisibility={true}
         searchKey='original'
         customControls={customControls}
+        onSelectionChange={handleSelectionChange}
+        clearSelection={clearSelection} // Pass the clearSelection state
+        initialRowSelection={initialRowSelection} // Pass the initial row selection
       />
       {hasUnsavedChanges && (
         <div className='flex justify-between items-center'>
