@@ -16,7 +16,7 @@ function App() {
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className='h-screen flex flex-col'>
         <Header />
-        <main className='flex-1 overflow-hidden'>
+        <main className='flex-1 overflow-auto'>
           <Routes>
             <Route path='/' element={<Dashboard />} />
             <Route path='/brush-split-validator' element={<BrushSplitValidator />} />
