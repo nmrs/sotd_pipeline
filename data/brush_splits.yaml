@@ -111,6 +111,37 @@ splits:
     should_not_split: false
     validated: true
     validated_at: '2025-07-24T15:58:55.719948'
+  AP Shave Co 28MM G5A SHD:
+  - corrected: false
+    handle: ''
+    knot: AP Shave Co 28MM G5A SHD
+    match_type: regex
+    occurrences:
+    - comment_ids:
+      - mw3w3gc
+      - mwapu25
+      - mwsl4xw
+      - mwzccqq
+      - mx5ptru
+      - mxc76qw
+      - mygfefp
+      - mylawzt
+      - mysgj1j
+      - myzipf8
+      - mz427q6
+      - mzcgcty
+      - mzifeij
+      - mznm0jx
+      - mzuxg06
+      - n01pvjz
+      - n079f3j
+      - n0d90el
+      - n0jy7vo
+      file: 2025-06.json
+    original: AP Shave Co 28MM G5A SHD
+    should_not_split: false
+    validated: true
+    validated_at: '2025-07-24T18:08:56.913027'
   AP Shave Co G5C:
   - corrected: false
     handle: null
