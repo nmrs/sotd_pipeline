@@ -29,7 +29,7 @@ export interface MainData {
  */
 export interface ProductData {
   main: MainData;
-  components?: Record<string, any>;
+  components?: Record<string, unknown>;
 }
 
 /**
@@ -37,10 +37,10 @@ export interface ProductData {
  *
  * @template T - The type of input data to transform
  */
-export interface TransformerConfig<T = any> {
+export interface TransformerConfig<T = unknown> {
   productType: ProductType;
   extractMainData: (data: T) => MainData;
-  extractComponents: (data: T) => Record<string, any>;
+  extractComponents: (data: T) => Record<string, unknown>;
   determineStatus: (data: T) => 'Matched' | 'Unmatched' | 'Filtered';
 }
 
@@ -49,9 +49,38 @@ export interface TransformerConfig<T = any> {
  *
  * @template T - The type of input data to transform
  */
-export interface DataTransformer<T = any> {
+export interface DataTransformer<T = unknown> {
   transform: (data: T | null | undefined) => ProductData;
   transformArray: (data: T[]) => ProductData[];
+}
+
+interface HandleComponent {
+  source_text?: string;
+  brand?: string;
+  model?: string;
+  _pattern?: string;
+  text?: string;
+  pattern?: string;
+}
+
+interface KnotComponent {
+  source_text?: string;
+  brand?: string;
+  model?: string;
+  _pattern?: string;
+  text?: string;
+  pattern?: string;
+}
+
+interface BrushComponents {
+  matched?: {
+    handle?: HandleComponent;
+    knot?: KnotComponent;
+  };
+  unmatched?: {
+    handle?: HandleComponent;
+    knot?: KnotComponent;
+  };
 }
 
 /**
@@ -80,7 +109,7 @@ export interface DataTransformer<T = any> {
  * });
  * ```
  */
-export function createGenericTransformer<T = any>(
+export function createGenericTransformer<T = unknown>(
   config: TransformerConfig<T>
 ): DataTransformer<T> {
   const { extractMainData, extractComponents, determineStatus } = config;
@@ -127,10 +156,10 @@ export function createGenericTransformer<T = any>(
       // Return default structure on validation errors
       return {
         main: {
-          text: (data as any)?.item || '',
-          count: (data as any)?.count || 0,
-          comment_ids: (data as any)?.comment_ids || [],
-          examples: (data as any)?.examples || [],
+          text: (data as unknown)?.item || '',
+          count: (data as unknown)?.count || 0,
+          comment_ids: (data as unknown)?.comment_ids || [],
+          examples: (data as unknown)?.examples || [],
           status: 'Unmatched',
         },
         components: {},
@@ -170,14 +199,14 @@ export function createGenericTransformer<T = any>(
  * const bladeTransformer = createSimpleTransformer('blade');
  * ```
  */
-export function createSimpleTransformer(productType: ProductType): DataTransformer<any> {
+export function createSimpleTransformer(productType: ProductType): DataTransformer<unknown> {
   return createGenericTransformer({
     productType,
-    extractMainData: (data: any) => ({
-      text: data.item || '',
-      count: data.count || 0,
-      comment_ids: data.comment_ids || [],
-      examples: data.examples || [],
+    extractMainData: (data: unknown) => ({
+      text: (data as { item?: string })?.item || '',
+      count: (data as { count?: number })?.count || 0,
+      comment_ids: (data as { comment_ids?: string[] })?.comment_ids || [],
+      examples: (data as { examples?: string[] })?.examples || [],
       status: 'Unmatched',
     }),
     extractComponents: () => ({}),
@@ -200,65 +229,68 @@ export function createSimpleTransformer(productType: ProductType): DataTransform
  * const transformedBrush = brushTransformer.transform(brushData);
  * ```
  */
-export function createBrushTransformer(): DataTransformer<any> {
+export function createBrushTransformer(): DataTransformer<unknown> {
   return createGenericTransformer({
     productType: 'brush',
-    extractMainData: (data: any) => ({
-      text: data.item || '',
-      count: data.count || 0,
-      comment_ids: data.comment_ids || [],
-      examples: data.examples || [],
+    extractMainData: (data: unknown) => ({
+      text: (data as { item?: string })?.item || '',
+      count: (data as { count?: number })?.count || 0,
+      comment_ids: (data as { comment_ids?: string[] })?.comment_ids || [],
+      examples: (data as { examples?: string[] })?.examples || [],
       status: 'Unmatched', // Will be overridden by determineStatus
     }),
-    extractComponents: (data: any) => {
-      const components: Record<string, any> = {};
+    extractComponents: (data: unknown) => {
+      const components: Record<string, unknown> = {};
+      const matchedData = data as BrushComponents;
 
       // Extract handle component from matched data
-      if (data.matched?.handle) {
+      if (matchedData.matched?.handle) {
         components.handle = {
           text:
-            data.matched.handle.source_text ||
-            `${data.matched.handle.brand} ${data.matched.handle.model}`,
+            matchedData.matched.handle.source_text ||
+            `${matchedData.matched.handle.brand} ${matchedData.matched.handle.model}`,
           status: 'Matched',
-          pattern: data.matched.handle._pattern || 'exact',
+          pattern: matchedData.matched.handle._pattern || 'exact',
         };
-      } else if (data.unmatched?.handle) {
+      } else if (matchedData.unmatched?.handle) {
         components.handle = {
-          text: data.unmatched.handle.text || '',
+          text: matchedData.unmatched.handle.text || '',
           status: 'Unmatched',
-          pattern: data.unmatched.handle.pattern || '',
+          pattern: matchedData.unmatched.handle.pattern || '',
         };
       }
 
       // Extract knot component from matched data
-      if (data.matched?.knot) {
+      if (matchedData.matched?.knot) {
         components.knot = {
           text:
-            data.matched.knot.source_text ||
-            `${data.matched.knot.brand} ${data.matched.knot.model}`,
+            matchedData.matched.knot.source_text ||
+            `${matchedData.matched.knot.brand} ${matchedData.matched.knot.model}`,
           status: 'Matched',
-          pattern: data.matched.knot._pattern || 'exact',
+          pattern: matchedData.matched.knot._pattern || 'exact',
         };
-      } else if (data.unmatched?.knot) {
+      } else if (matchedData.unmatched?.knot) {
         components.knot = {
-          text: data.unmatched.knot.text || '',
+          text: matchedData.unmatched.knot.text || '',
           status: 'Unmatched',
-          pattern: data.unmatched.knot.pattern || '',
+          pattern: matchedData.unmatched.knot.pattern || '',
         };
       }
 
       return components;
     },
-    determineStatus: (data: any) => {
+    determineStatus: (data: unknown) => {
       // Determine overall status based on component statuses
-      const handleStatus = data.matched?.handle
+      const matchedData = data as BrushComponents;
+
+      const handleStatus = matchedData.matched?.handle
         ? 'Matched'
-        : data.unmatched?.handle
+        : matchedData.unmatched?.handle
           ? 'Unmatched'
           : undefined;
-      const knotStatus = data.matched?.knot
+      const knotStatus = matchedData.matched?.knot
         ? 'Matched'
-        : data.unmatched?.knot
+        : matchedData.unmatched?.knot
           ? 'Unmatched'
           : undefined;
 
