@@ -178,6 +178,10 @@ export interface MismatchItem {
   match_type: string;
   confidence?: number;
   mismatch_type?: string;
+  reason?: string;
+  count: number;
+  examples: string[];
+  comment_ids: string[];
 }
 
 export interface MismatchAnalysisResult {

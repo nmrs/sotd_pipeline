@@ -443,12 +443,13 @@ class MismatchAnalyzer(AnalysisTool):
                     self.console.print(f"[blue]DEBUG: Blade correct match key: {key}[/blue]")
 
         # Sort records by a stable key for deterministic processing order
-        # Use the original text as the primary sort key, with record ID as secondary
+        # Use the normalized text as the primary sort key, with record ID as secondary
         def record_sort_key(record):
             field_data = record.get(field, {})
             original = field_data.get("original", "")
+            normalized = field_data.get("normalized", original)
             record_id = record.get("id", "")
-            return (original.lower(), record_id)
+            return (normalized.lower(), record_id)
 
         sorted_records = sorted(records, key=record_sort_key)
 
@@ -461,12 +462,14 @@ class MismatchAnalyzer(AnalysisTool):
                 continue
 
             original = field_data.get("original", "")
+            # Use normalized if available, fallback to original
+            normalized = field_data.get("normalized", original)
             matched = field_data.get("matched", {})
             pattern = field_data.get("pattern", "")
             match_type = field_data.get("match_type", "")
             confidence = field_data.get("confidence", 1.0)
 
-            if not original or not matched:
+            if not normalized or not matched:
                 continue
 
             # Debug: Show processing info for first few records
@@ -477,9 +480,9 @@ class MismatchAnalyzer(AnalysisTool):
                 + len(mismatches["levenshtein_distance"])
                 < 10
             ):
-                match_key = self._create_match_key(field, original, matched)
+                match_key = self._create_match_key(field, normalized, matched)
                 self.console.print(
-                    f"[blue]DEBUG: Processing record - Original: '{original}', "
+                    f"[blue]DEBUG: Processing record - Normalized: '{normalized}', "
                     f"Match type: {match_type}, Match key: {match_key}[/blue]"
                 )
                 if match_key in self._correct_matches:
@@ -493,14 +496,14 @@ class MismatchAnalyzer(AnalysisTool):
                     {
                         "record": record,
                         "field_data": field_data,
-                        "match_key": self._create_match_key(field, original, matched),
+                        "match_key": self._create_match_key(field, normalized, matched),
                         "reason": "Exact match from correct_matches.yaml",
                     }
                 )
                 continue  # Skip further analysis for exact matches
 
             # Create a unique key for this match
-            match_key = self._create_match_key(field, original, matched)
+            match_key = self._create_match_key(field, normalized, matched)
 
             # Skip if this match was previously marked as correct (unless showing correct matches)
             if match_key in self._correct_matches and not args.show_correct:
@@ -509,7 +512,7 @@ class MismatchAnalyzer(AnalysisTool):
             # Check for multiple regex patterns (only if we have catalog patterns)
             if catalog_patterns:
                 multiple_patterns = self._find_multiple_pattern_matches_fast(
-                    original, field, pattern, catalog_patterns
+                    normalized, field, pattern, catalog_patterns
                 )
                 if multiple_patterns:
                     pattern_list = ", ".join(multiple_patterns[:3])
@@ -524,7 +527,9 @@ class MismatchAnalyzer(AnalysisTool):
 
             # Check Levenshtein distance (for non-exact matches only)
             matched_text = self._get_matched_text(field, matched)
-            if self._levenshtein_distance_exceeds_threshold(original, matched_text, args.threshold):
+            if self._levenshtein_distance_exceeds_threshold(
+                normalized, matched_text, args.threshold
+            ):
                 mismatches["levenshtein_distance"].append(
                     {
                         "record": record,
@@ -538,7 +543,7 @@ class MismatchAnalyzer(AnalysisTool):
             # (to help populate correct_matches.yaml)
             if args.threshold == 0 and match_type == "regex":
                 # Check if this is a perfect or near-perfect match (Levenshtein distance <= 2)
-                distance = self._levenshtein_distance(original, matched_text)
+                distance = self._levenshtein_distance(normalized, matched_text)
                 if distance <= 2:
                     reason = (
                         "Perfect regex match (threshold 0)"

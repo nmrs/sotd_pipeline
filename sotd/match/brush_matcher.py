@@ -677,9 +677,11 @@ class BrushMatcher:
                 result = strategy.match(value)
                 if result and hasattr(result, "matched") and result.matched:
                     score = score_match_type(
-                        value, "knot", 5, 
+                        value,
+                        "knot",
+                        5,
                         knot_matcher=self.knot_matcher,
-                        handle_matcher=self.handle_matcher
+                        handle_matcher=self.handle_matcher,
                     )  # Base score for knot match
                     if score > best_score:
                         best_score = score
@@ -693,9 +695,11 @@ class BrushMatcher:
         handle_match = self.handle_matcher.match_handle_maker(value)
         if handle_match and handle_match.get("handle_maker"):
             handle_score = score_match_type(
-                value, "handle", 5,
+                value,
+                "handle",
+                5,
                 knot_matcher=self.knot_matcher,
-                handle_matcher=self.handle_matcher
+                handle_matcher=self.handle_matcher,
             )  # Base score for handle match
             if handle_score > best_score:
                 best_score = handle_score

@@ -348,11 +348,7 @@ def has_handle_indicators(text: str) -> bool:
 
 
 def score_match_type(
-    text: str, 
-    match_type: str, 
-    pattern_score: int,
-    knot_matcher=None,
-    handle_matcher=None
+    text: str, match_type: str, pattern_score: int, knot_matcher=None, handle_matcher=None
 ) -> int:
     """Score a potential match based on text indicators and actual matching capability.
 
@@ -372,18 +368,18 @@ def score_match_type(
         # Handle indicators increase score for handle matches
         if has_handle_indicators(text):
             score += 10
-        
+
         # Actual handle matching capability (strongest indicator)
         if handle_matcher:
             handle_match = handle_matcher.match_handle_maker(text)
             if handle_match and handle_match.get("handle_maker"):
                 score += 20  # Strong bonus for actual handle match
-                
+
     elif match_type == "knot":
         # Knot indicators increase score for knot matches
         if has_knot_indicators(text):
             score += 10
-        
+
         # Actual knot matching capability (strongest indicator)
         if knot_matcher:
             knot_match = knot_matcher.match(text)

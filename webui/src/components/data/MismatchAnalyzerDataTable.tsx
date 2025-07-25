@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
+import { Button } from '@/components/ui/button';
 import { MismatchItem } from '../../services/api';
 
 interface MismatchAnalyzerDataTableProps {
@@ -9,7 +10,11 @@ interface MismatchAnalyzerDataTableProps {
   commentLoading?: boolean;
 }
 
-const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({ data }) => {
+const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
+  data,
+  onCommentClick,
+  commentLoading,
+}) => {
   const getMismatchTypeIcon = (mismatchType?: string) => {
     switch (mismatchType) {
       case 'multiple_patterns':
@@ -151,8 +156,51 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({ d
           );
         },
       },
+      {
+        accessorKey: 'comment_ids',
+        header: 'Comments',
+        cell: ({ row }) => {
+          const item = row.original;
+          const commentIds = item.comment_ids || [];
+
+          if (commentIds.length === 0) {
+            return (
+              <span
+                className='text-gray-400 text-xs'
+                role='cell'
+                aria-label='No comments available'
+              >
+                No comments
+              </span>
+            );
+          }
+
+          return (
+            <div
+              className='space-y-1'
+              role='cell'
+              aria-label={`${commentIds.length} comment${commentIds.length !== 1 ? 's' : ''} available`}
+            >
+              {commentIds.slice(0, 3).map((commentId, index) => (
+                <Button
+                  key={commentId}
+                  onClick={() => onCommentClick?.(commentId)}
+                  disabled={commentLoading}
+                  className='block w-full text-left text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded'
+                  aria-label={`View comment ${index + 1} of ${commentIds.length}`}
+                >
+                  {commentId}
+                </Button>
+              ))}
+              {commentIds.length > 3 && (
+                <span className='text-xs text-gray-500'>+{commentIds.length - 3} more</span>
+              )}
+            </div>
+          );
+        },
+      },
     ],
-    []
+    [onCommentClick, commentLoading]
   );
 
   return (

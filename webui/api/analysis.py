@@ -19,11 +19,11 @@ if str(project_root) not in sys.path:
 logger = logging.getLogger(__name__)
 
 try:
-    from sotd.match.tools.analyzers.unmatched_analyzer import UnmatchedAnalyzer
     from sotd.match.tools.analyzers.mismatch_analyzer import MismatchAnalyzer
+    from sotd.match.tools.analyzers.unmatched_analyzer import UnmatchedAnalyzer
 
-    logger.info("✅ UnmatchedAnalyzer imported successfully")
     logger.info("✅ MismatchAnalyzer imported successfully")
+    logger.info("✅ UnmatchedAnalyzer imported successfully")
 except ImportError as e:
     # Fallback for development
     logger.error(f"❌ Failed to import analyzers: {e}")
@@ -495,7 +495,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
         validate_months([request.month])
 
         logger.info(
-            f"Starting mismatch analysis for field '{request.field}' " f"for month {request.month}"
+            f"Starting mismatch analysis for field '{request.field}' for month {request.month}"
         )
 
         # Create analyzer instance
@@ -560,6 +560,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
 
                 # Extract basic information
                 original = field_data.get("original", "")
+                normalized = field_data.get("normalized", original)  # Use normalized if available
                 matched = field_data.get("matched", {})
                 pattern = field_data.get("pattern") or ""
                 match_type = field_data.get("match_type", "")
@@ -568,9 +569,9 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 examples = [record.get("_source_file", "")]
                 comment_ids = [record.get("id", "")] if record.get("id") else []
 
-                # Create mismatch item
+                # Create mismatch item - use normalized for display
                 mismatch_item = MismatchItem(
-                    original=original,
+                    original=normalized,  # Use normalized instead of original
                     matched=matched,
                     pattern=pattern,
                     match_type=match_type,
@@ -583,7 +584,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
 
                 mismatch_items.append(mismatch_item)
 
-        # Sort by mismatch type and original text
+        # Sort by mismatch type and normalized text
         mismatch_items.sort(key=lambda x: (x.mismatch_type or "", x.original.lower()))
 
         return MismatchAnalysisResponse(
