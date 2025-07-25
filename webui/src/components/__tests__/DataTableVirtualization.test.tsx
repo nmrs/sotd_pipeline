@@ -37,7 +37,7 @@ describe('DataTable Virtualization Layout Issues', () => {
       );
 
       // Get the search input
-      const searchInput = screen.getByPlaceholderText('Search name...');
+      const searchInput = screen.getByPlaceholderText('Filter name...');
       expect(searchInput).toBeInTheDocument();
 
       // Filter to show only one item
@@ -62,7 +62,7 @@ describe('DataTable Virtualization Layout Issues', () => {
         <DataTable columns={columns} data={mockData} height={200} itemSize={40} searchKey='name' />
       );
 
-      const searchInput = screen.getByPlaceholderText('Search name...');
+      const searchInput = screen.getByPlaceholderText('Filter name...');
       fireEvent.change(searchInput, { target: { value: 'Item' } });
 
       // Check that the table structure is maintained
@@ -110,7 +110,7 @@ describe('DataTable Virtualization Layout Issues', () => {
             <input
               data-testid={`input-${row.original.id}`}
               defaultValue={row.original.name}
-              onChange={() => {}}
+              onChange={() => { }}
             />
           ),
         },

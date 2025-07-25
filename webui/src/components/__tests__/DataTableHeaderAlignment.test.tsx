@@ -69,7 +69,7 @@ describe('DataTable Header Alignment', () => {
     render(<DataTable columns={columns} data={mockData} searchKey='name' />);
 
     // Find the search input
-    const searchInput = screen.getByPlaceholderText('Search name...');
+    const searchInput = screen.getByPlaceholderText('Filter name...');
     expect(searchInput).toBeInTheDocument();
 
     // Filter the data

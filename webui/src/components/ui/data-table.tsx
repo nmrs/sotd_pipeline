@@ -103,9 +103,7 @@ export function DataTable<TData, TValue>({
   // Call onSelectionChange when row selection changes
   React.useEffect(() => {
     if (onSelectionChange) {
-      const selectedRows = rows
-        .filter(row => row.getIsSelected())
-        .map(row => row.original);
+      const selectedRows = rows.filter(row => row.getIsSelected()).map(row => row.original);
       onSelectionChange(selectedRows);
     }
   }, [rowSelection, rows, onSelectionChange]);
@@ -119,8 +117,10 @@ export function DataTable<TData, TValue>({
 
   // Update row selection when initialRowSelection changes
   React.useEffect(() => {
-    setRowSelection(initialRowSelection);
-  }, [initialRowSelection]);
+    if (initialRowSelection && Object.keys(initialRowSelection).length > 0) {
+      setRowSelection(initialRowSelection);
+    }
+  }, [JSON.stringify(initialRowSelection)]);
 
   // Column resizing handlers
   const handleMouseDown = (columnId: string, e: React.MouseEvent) => {
@@ -163,10 +163,8 @@ export function DataTable<TData, TValue>({
       <div className='flex items-center py-4'>
         <Input
           placeholder={`Filter ${searchKey}...`}
-          value={table.getColumn(searchKey || '')?.getFilterValue() as string ?? ''}
-          onChange={event =>
-            table.getColumn(searchKey || '')?.setFilterValue(event.target.value)
-          }
+          value={(table.getColumn(searchKey || '')?.getFilterValue() as string) ?? ''}
+          onChange={event => table.getColumn(searchKey || '')?.setFilterValue(event.target.value)}
           className='max-w-sm'
         />
         {customControls}

@@ -79,7 +79,7 @@ describe('DataTable Pagination', () => {
     render(<DataTable columns={columns} data={mockData} searchKey='name' showPagination={true} />);
 
     // Find the search input
-    const searchInput = screen.getByPlaceholderText('Search name...');
+    const searchInput = screen.getByPlaceholderText('Filter name...');
     expect(searchInput).toBeInTheDocument();
 
     // Filter the data with a term that will match only one item
@@ -132,7 +132,7 @@ describe('DataTable Pagination', () => {
         columns={columns}
         data={mockData}
         showPagination={true}
-        // No height or itemSize props - these should be removed
+      // No height or itemSize props - these should be removed
       />
     );
 
