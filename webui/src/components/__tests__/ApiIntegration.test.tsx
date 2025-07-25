@@ -1,12 +1,13 @@
+// Mock the API service using test utilities - must be at the top
+import { createMockApi } from '../../utils/testUtils';
+
+jest.mock('../../services/api', () => {
+  return createMockApi();
+});
+
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Dashboard from '../../pages/Dashboard';
-
-// Mock the API service using test utilities
-jest.mock('../../services/api', () => {
-  const { createMockApi } = require('../../utils/testUtils');
-  return createMockApi();
-});
 
 // Import the mocked functions
 import { getAvailableMonths, checkHealth } from '../../services/api';

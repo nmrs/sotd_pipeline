@@ -1,5 +1,5 @@
 import React from 'react';
-import { Message } from '../hooks/useMessaging';
+import { Message } from '../../hooks/useMessaging';
 
 interface MessageDisplayProps {
   messages: Message[];

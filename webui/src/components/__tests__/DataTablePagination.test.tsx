@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DataTable } from '../ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
@@ -132,7 +131,7 @@ describe('DataTable Pagination', () => {
         columns={columns}
         data={mockData}
         showPagination={true}
-      // No height or itemSize props - these should be removed
+        // No height or itemSize props - these should be removed
       />
     );
 

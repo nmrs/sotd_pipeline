@@ -1,5 +1,6 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import MonthSelector from '../forms/MonthSelector';
+import FilteredEntryCheckbox from '../forms/FilteredEntryCheckbox';
 
 // Mock the useAvailableMonths hook
 jest.mock('../../hooks/useAvailableMonths', () => ({
@@ -18,7 +19,6 @@ describe('Form Components', () => {
     expect(() => {
       // We'll implement the actual import in the next step
       // For now, just verify the test structure
-      const MonthSelector = require('../forms/MonthSelector').default;
       expect(MonthSelector).toBeDefined();
     }).not.toThrow();
   });
@@ -29,14 +29,12 @@ describe('Form Components', () => {
     expect(() => {
       // We'll implement the actual import in the next step
       // For now, just verify the test structure
-      const FilteredEntryCheckbox = require('../forms/FilteredEntryCheckbox').default;
       expect(FilteredEntryCheckbox).toBeDefined();
     }).not.toThrow();
   });
 
   test('should render MonthSelector component with basic props', () => {
     // Test that MonthSelector component renders correctly
-    const MonthSelector = require('../forms/MonthSelector').default;
     render(<MonthSelector selectedMonths={[]} onMonthsChange={() => {}} multiple={true} />);
 
     // Verify basic month selector structure
@@ -45,7 +43,6 @@ describe('Form Components', () => {
 
   test('should render FilteredEntryCheckbox component with basic props', () => {
     // Test that FilteredEntryCheckbox component renders correctly
-    const FilteredEntryCheckbox = require('../forms/FilteredEntryCheckbox').default;
     render(
       <FilteredEntryCheckbox
         itemName='test-item'

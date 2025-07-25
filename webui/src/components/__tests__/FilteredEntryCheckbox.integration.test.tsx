@@ -1,6 +1,6 @@
-// import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import FilteredEntryCheckbox from '../forms/FilteredEntryCheckbox';
+import { checkFilteredStatus, updateFilteredEntries } from '../../services/api';
 
 // Mock the API functions to verify they're not called
 jest.mock('../../services/api', () => ({
@@ -38,7 +38,6 @@ describe('FilteredEntryCheckbox Integration', () => {
     expect(mockOnStatusChange).toHaveBeenCalledTimes(1);
 
     // Should NOT make any API calls
-    const { checkFilteredStatus, updateFilteredEntries } = require('../../services/api');
     expect(checkFilteredStatus).not.toHaveBeenCalled();
     expect(updateFilteredEntries).not.toHaveBeenCalled();
   });

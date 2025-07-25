@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo, memo } from 'react';
+import React, { useCallback, useMemo, memo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -16,9 +16,9 @@ interface UnmatchedItem {
 
 interface UnmatchedAnalyzerDataTableProps {
   data: UnmatchedItem[];
-  filteredStatus: Record<string, boolean>;
-  pendingChanges: Record<string, boolean>;
-  onFilteredStatusChange: (itemName: string, isFiltered: boolean) => void;
+  filteredStatus?: Record<string, boolean>;
+  pendingChanges?: Record<string, boolean>;
+  onFilteredStatusChange?: (itemName: string, isFiltered: boolean) => void;
   onCommentClick: (commentId: string) => void;
   commentLoading: boolean;
   fieldType: 'razor' | 'blade' | 'soap' | 'brush';
@@ -83,13 +83,9 @@ MemoizedButton.displayName = 'MemoizedButton';
 export const UnmatchedAnalyzerDataTable = memo<UnmatchedAnalyzerDataTableProps>(
   ({
     data,
-    filteredStatus,
-    pendingChanges,
-    onFilteredStatusChange,
     onCommentClick,
     commentLoading,
     fieldType,
-    columnWidths,
     enablePerformanceLogging = false,
     testId = 'unmatched-analyzer-data-table',
   }) => {
@@ -121,50 +117,14 @@ export const UnmatchedAnalyzerDataTable = memo<UnmatchedAnalyzerDataTableProps>(
     const columns: ColumnDef<UnmatchedItem>[] = useMemo(
       () => [
         {
-          accessorKey: 'filtered',
-          header: 'Filtered',
-          cell: ({ row }) => {
-            const item = row.original;
-            const isCurrentlyFiltered = filteredStatus[item.item] || false;
-            const hasPendingChange = item.item in pendingChanges;
-            const pendingValue = pendingChanges[item.item];
-            const displayValue = hasPendingChange ? pendingValue : isCurrentlyFiltered;
-
-            return (
-              <MemoizedCheckbox
-                checked={displayValue}
-                onCheckedChange={checked => {
-                  const startTime = performance.now();
-                  onFilteredStatusChange(item.item, !!checked);
-                  logPerformance('filtered status change', startTime);
-                }}
-                disabled={commentLoading}
-                title={displayValue ? 'Mark as unfiltered' : 'Mark as intentionally unmatched'}
-                hasPendingChange={hasPendingChange}
-              />
-            );
-          },
-        },
-        {
           accessorKey: 'item',
-          header: fieldType.charAt(0).toUpperCase() + fieldType.slice(1),
+          header: 'Item',
           cell: ({ row }) => {
             const item = row.original;
             return (
-              <span
-                className={`font-medium text-sm ${
-                  filteredStatus[item.item] ? 'text-gray-400 line-through' : 'text-gray-900'
-                }`}
-                role='cell'
-                aria-label={`${fieldType}: ${item.item}`}
-              >
+              <div className='font-medium text-gray-900' data-testid='item-cell'>
                 {item.item}
-                {filteredStatus[item.item] && (
-                  <span className='ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded'>
-                    Filtered
-                  </span>
-                )}
-              </span>
+              </div>
             );
           },
         },
@@ -238,16 +198,7 @@ export const UnmatchedAnalyzerDataTable = memo<UnmatchedAnalyzerDataTableProps>(
           ),
         },
       ],
-      [
-        filteredStatus,
-        pendingChanges,
-        onFilteredStatusChange,
-        onCommentClick,
-        commentLoading,
-        fieldType,
-        formatExamples,
-        logPerformance,
-      ]
+      [onCommentClick, commentLoading, formatExamples, logPerformance]
     );
 
     // Handle empty data gracefully
@@ -275,8 +226,6 @@ export const UnmatchedAnalyzerDataTable = memo<UnmatchedAnalyzerDataTableProps>(
         <DataTable
           columns={columns}
           data={data}
-          height={400}
-          itemSize={48}
           resizable={true}
           showColumnVisibility={true}
           searchKey='item'

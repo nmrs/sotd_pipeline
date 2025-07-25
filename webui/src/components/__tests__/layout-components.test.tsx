@@ -1,6 +1,7 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import Header from '../layout/Header';
+import LoadingSpinner from '../layout/LoadingSpinner';
 
 // Test that layout components work correctly from layout/ directory
 describe('Layout Components', () => {
@@ -10,7 +11,6 @@ describe('Layout Components', () => {
     expect(() => {
       // We'll implement the actual import in the next step
       // For now, just verify the test structure
-      const Header = require('../layout/Header').default;
       expect(Header).toBeDefined();
     }).not.toThrow();
   });
@@ -21,14 +21,12 @@ describe('Layout Components', () => {
     expect(() => {
       // We'll implement the actual import in the next step
       // For now, just verify the test structure
-      const LoadingSpinner = require('../layout/LoadingSpinner').default;
       expect(LoadingSpinner).toBeDefined();
     }).not.toThrow();
   });
 
   test('should render Header component with navigation', () => {
     // Test that Header component renders correctly with navigation
-    const Header = require('../layout/Header').default;
     render(
       <BrowserRouter>
         <Header />
@@ -42,7 +40,6 @@ describe('Layout Components', () => {
 
   test('should render LoadingSpinner component with message', () => {
     // Test that LoadingSpinner component renders correctly
-    const LoadingSpinner = require('../layout/LoadingSpinner').default;
     render(<LoadingSpinner message='Loading...' />);
 
     // Verify loading spinner displays

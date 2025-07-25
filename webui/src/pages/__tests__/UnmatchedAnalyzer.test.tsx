@@ -14,7 +14,15 @@ jest.mock('../../services/api', () => ({
 // Mock the BrushTable component to verify it receives correct data
 jest.mock('../../components/data/BrushTable', () => ({
   __esModule: true,
-  default: function MockBrushTable(props: any) {
+  default: function MockBrushTable(props: {
+    items?: Array<{
+      main?: { text: string };
+      components?: {
+        handle?: { text: string };
+        knot?: { text: string };
+      };
+    }>;
+  }) {
     // Log the data structure to help debug
     console.log('BrushTable received data:', JSON.stringify(props.items, null, 2));
 
@@ -22,11 +30,11 @@ jest.mock('../../components/data/BrushTable', () => ({
       <div data-testid='brush-table'>
         <div data-testid='brush-table-item-count'>{props.items?.length || 0}</div>
         <div data-testid='brush-table-has-components'>
-          {props.items?.some((item: any) => item.components?.handle || item.components?.knot)
+          {props.items?.some(item => item.components?.handle || item.components?.knot)
             ? 'true'
             : 'false'}
         </div>
-        {props.items?.map((item: any, index: number) => (
+        {props.items?.map((item, index: number) => (
           <div key={index} data-testid={`brush-item-${index}`}>
             <span data-testid={`brush-item-main-${index}`}>{item.main?.text}</span>
             <span data-testid={`brush-item-handle-${index}`}>
@@ -44,14 +52,17 @@ jest.mock('../../components/data/BrushTable', () => ({
 
 // Mock the VirtualizedTable component
 jest.mock('../../components/data/VirtualizedTable', () => ({
-  VirtualizedTable: function MockVirtualizedTable(props: any) {
+  VirtualizedTable: function MockVirtualizedTable(props: {
+    data?: Array<Record<string, unknown>>;
+    columns?: Array<{ key: string; render?: (item: Record<string, unknown>) => React.ReactNode }>;
+  }) {
     return (
       <div data-testid='virtualized-table'>
-        {props.data?.map((item: any, index: number) => (
+        {props.data?.map((item, index: number) => (
           <div key={index} data-testid={`table-row-${index}`}>
-            {props.columns?.map((column: any) => (
+            {props.columns?.map(column => (
               <div key={column.key} data-testid={`cell-${column.key}-${index}`}>
-                {column.render ? column.render(item) : item[column.key]}
+                {column.render ? column.render(item) : String(item[column.key] || '')}
               </div>
             ))}
           </div>
@@ -62,41 +73,21 @@ jest.mock('../../components/data/VirtualizedTable', () => ({
 }));
 
 import UnmatchedAnalyzer from '../UnmatchedAnalyzer';
+import * as mockApi from '../../services/api';
 
 describe('UnmatchedAnalyzer Integration Tests', () => {
-  const mockApi = require('../../services/api');
-
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Mock successful API response
-    mockApi.fetchUnmatchedData.mockResolvedValue({
-      unmatched_items: [
-        {
-          item: 'Simpson Chubby 2',
-          count: 5,
-          comment_ids: ['123', '456'],
-          examples: ['2024-01.json', '2024-02.json'],
-          unmatched: {
-            handle: { text: 'Elite handle', pattern: 'handle_pattern' },
-            knot: { text: 'Declaration knot', pattern: 'knot_pattern' },
-          },
-        },
-        {
-          item: 'Declaration B15',
-          count: 3,
-          comment_ids: ['789'],
-          examples: ['2024-03.json'],
-          unmatched: {
-            handle: { text: 'Declaration handle', pattern: 'handle_pattern' },
-            knot: { text: 'Declaration knot', pattern: 'knot_pattern' },
-          },
-        },
-      ],
-    });
+    // Mock successful API response for analyzeUnmatched
 
     // Mock analyzeUnmatched to return the same data
-    mockApi.analyzeUnmatched.mockResolvedValue({
+    (
+      mockApi.analyzeUnmatched as jest.MockedFunction<typeof mockApi.analyzeUnmatched>
+    ).mockResolvedValue({
+      field: 'brush',
+      months: ['2024-01', '2024-02', '2024-03'],
+      total_unmatched: 2,
       unmatched_items: [
         {
           item: 'Simpson Chubby 2',
@@ -119,10 +110,13 @@ describe('UnmatchedAnalyzer Integration Tests', () => {
           },
         },
       ],
+      processing_time: 1.5,
     });
 
     // Mock available months
-    mockApi.getAvailableMonths.mockResolvedValue(['2024-01', '2024-02', '2024-03']);
+    (
+      mockApi.getAvailableMonths as jest.MockedFunction<typeof mockApi.getAvailableMonths>
+    ).mockResolvedValue(['2024-01', '2024-02', '2024-03']);
   });
 
   test('should transform brush data correctly for BrushTable with sub-rows', async () => {

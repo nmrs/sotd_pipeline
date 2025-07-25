@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { checkHealth, getAvailableMonths, getCatalogs } from '../services/api';
-import LoadingSpinner from '../components/layout/LoadingSpinner';
 import ErrorDisplay from '../components/feedback/ErrorDisplay';
 import {
   PageLayout,
@@ -43,8 +42,9 @@ const Dashboard: React.FC = () => {
           months,
           catalogs,
         });
-      } catch (err: any) {
-        setError(err.message || 'Failed to check system status');
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to check system status';
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -167,8 +167,8 @@ const Dashboard: React.FC = () => {
               <div className='bg-green-50 border border-green-200 rounded-lg p-4'>
                 <h4 className='font-semibold text-green-900 mb-2'>Data Management</h4>
                 <p className='text-green-800 text-sm'>
-                  All data is cached locally for performance. Use the "Clear Cache" button in the
-                  header to refresh data after pipeline runs.
+                  All data is cached locally for performance. Use the &quot;Clear Cache&quot; button
+                  in the header to refresh data after pipeline runs.
                 </p>
               </div>
             </div>

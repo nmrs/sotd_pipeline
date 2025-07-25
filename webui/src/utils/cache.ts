@@ -161,11 +161,23 @@ class Cache<T> {
   }
 }
 
+interface AnalysisData {
+  [key: string]: unknown;
+}
+
+interface CatalogData {
+  [key: string]: unknown;
+}
+
+interface FileData {
+  [key: string]: unknown;
+}
+
 /**
  * Cache instance for analysis results
  * TTL: 10 minutes, Max Size: 50 entries
  */
-export const analysisCache = new Cache<any>({
+export const analysisCache = new Cache<AnalysisData>({
   ttl: 10 * 60 * 1000, // 10 minutes for analysis results
   maxSize: 50, // 50 cached analyses
 });
@@ -174,7 +186,7 @@ export const analysisCache = new Cache<any>({
  * Cache instance for catalog data
  * TTL: 30 minutes, Max Size: 20 entries
  */
-export const catalogCache = new Cache<any>({
+export const catalogCache = new Cache<CatalogData>({
   ttl: 30 * 60 * 1000, // 30 minutes for catalogs
   maxSize: 20, // 20 cached catalogs
 });
@@ -183,7 +195,7 @@ export const catalogCache = new Cache<any>({
  * Cache instance for file data
  * TTL: 5 minutes, Max Size: 100 entries
  */
-export const fileCache = new Cache<any>({
+export const fileCache = new Cache<FileData>({
   ttl: 5 * 60 * 1000, // 5 minutes for file data
   maxSize: 100, // 100 cached files
 });
@@ -244,9 +256,9 @@ export const clearAllCachesComprehensive = (): void => {
   clearAllCaches();
 
   // Clear global months cache
-  // @ts-ignore - accessing global cache for clearing
+  // @ts-expect-error - accessing global cache for clearing
   if (typeof window !== 'undefined' && window.monthsCache !== undefined) {
-    // @ts-ignore
+    // @ts-expect-error - accessing global cache for clearing
     window.monthsCache = null;
   }
 

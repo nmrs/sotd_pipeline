@@ -24,8 +24,10 @@ export const useAvailableMonths = () => {
         try {
           const months = await cachePromise;
           setAvailableMonths(months);
-        } catch (err: any) {
-          setError(err.message || 'Failed to load available months');
+        } catch (err: unknown) {
+          const errorMessage =
+            err instanceof Error ? err.message : 'Failed to load available months';
+          setError(errorMessage);
         } finally {
           setLoading(false);
         }
@@ -43,8 +45,9 @@ export const useAvailableMonths = () => {
         // Cache the result
         monthsCache = months.sort().reverse(); // Sort newest first
         setAvailableMonths(monthsCache);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load available months');
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load available months';
+        setError(errorMessage);
       } finally {
         setLoading(false);
         cachePromise = null;
@@ -65,8 +68,9 @@ export const useAvailableMonths = () => {
       const months = await getAvailableMonths();
       monthsCache = months.sort().reverse();
       setAvailableMonths(monthsCache);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load available months');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load available months';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

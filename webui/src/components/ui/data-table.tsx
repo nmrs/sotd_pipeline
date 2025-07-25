@@ -41,7 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ChevronDown, ArrowUpDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 
 interface DataTableProps<TData, TValue> {
@@ -117,10 +117,11 @@ export function DataTable<TData, TValue>({
 
   // Update row selection when initialRowSelection changes
   React.useEffect(() => {
-    if (initialRowSelection && Object.keys(initialRowSelection).length > 0) {
+    const hasInitialSelection = initialRowSelection && Object.keys(initialRowSelection).length > 0;
+    if (hasInitialSelection) {
       setRowSelection(initialRowSelection);
     }
-  }, [JSON.stringify(initialRowSelection)]);
+  }, [initialRowSelection]);
 
   // Column resizing handlers
   const handleMouseDown = (columnId: string, e: React.MouseEvent) => {

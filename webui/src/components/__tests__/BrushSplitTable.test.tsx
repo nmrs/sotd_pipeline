@@ -1,7 +1,6 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { flushSync } from 'react-dom';
 import { BrushSplitTable } from '../data/BrushSplitTable';
+import { BrushSplit } from '../../types/brushSplit';
 
 // Test data
 const mockBrushSplits = [
@@ -43,7 +42,7 @@ describe('BrushSplitTable', () => {
       render(<BrushSplitTable brushSplits={mockBrushSplits} />);
 
       expect(screen.getByTestId('brush-split-table')).toBeInTheDocument();
-      expect(screen.getByText('Original')).toBeInTheDocument();
+      expect(screen.getByText('Original Text')).toBeInTheDocument();
       expect(screen.getByText('Handle')).toBeInTheDocument();
       expect(screen.getByText('Knot')).toBeInTheDocument();
     });
@@ -64,21 +63,22 @@ describe('BrushSplitTable', () => {
   });
 
   describe('Inline Editing Functionality', () => {
-    it('allows toggling validation checkbox', () => {
+    it('allows toggling validation checkbox', async () => {
       render(<BrushSplitTable brushSplits={mockBrushSplits} />);
 
-      // Find validation checkboxes
-      const checkboxes = screen.getAllByRole('checkbox');
-      expect(checkboxes.length).toBeGreaterThan(0);
+      // Find individual validation checkboxes (not the "Select all" checkbox)
+      const validationCheckboxes = screen
+        .getAllByRole('checkbox')
+        .filter(checkbox => checkbox.getAttribute('aria-label')?.includes('Validated for row'));
+      expect(validationCheckboxes.length).toBeGreaterThan(0);
 
-      const firstCheckbox = checkboxes[0];
-      fireEvent.click(firstCheckbox);
+      const firstValidationCheckbox = validationCheckboxes[0];
+      fireEvent.click(firstValidationCheckbox);
 
-      // The checkbox should be checked (visual feedback)
-      expect(firstCheckbox).toBeChecked();
-
-      // onSave should NOT be called immediately - only when "Save All Changes" is clicked
-      // This is the expected behavior for batch saving
+      // Wait for the Save All Changes button to appear, indicating a change was made
+      await waitFor(() => {
+        expect(screen.getByText('Save All Changes')).toBeInTheDocument();
+      });
     });
   });
 
@@ -101,21 +101,29 @@ describe('BrushSplitTable', () => {
           `Checkbox ${index}:`,
           checkbox.getAttribute('aria-label'),
           'checked:',
-          checkbox.getAttribute('aria-checked')
+          checkbox.getAttribute('data-state')
         );
       });
 
+      // Based on the console output, the checkbox order is:
+      // checkbox[0]: Validated for row 1 (unchecked) - should be unchecked since validated: false
+      // checkbox[1]: Don't split for row 1 (unchecked) - should be unchecked since should_not_split: false
+      // checkbox[2]: Validated for row 2 (checked) - should be checked since validated: true
+      // checkbox[3]: Don't split for row 2 (unchecked) - should be unchecked since should_not_split: false
+      // checkbox[4]: Validated for row 3 (unchecked) - should be unchecked since validated: false
+      // checkbox[5]: Don't split for row 3 (checked) - should be checked since should_not_split: true
+
       // First row: should_not_split = false, validated = false
-      expect(checkboxes[1]).not.toBeChecked(); // Select checkbox (row 1)
-      expect(checkboxes[2]).not.toBeChecked(); // Don't Split checkbox (row 1)
+      expect(checkboxes[0]).toHaveAttribute('data-state', 'unchecked'); // Validated checkbox (row 1)
+      expect(checkboxes[1]).toHaveAttribute('data-state', 'unchecked'); // Don't Split checkbox (row 1)
 
       // Second row: should_not_split = false, validated = true
-      expect(checkboxes[3]).toBeChecked(); // Select checkbox (row 2) - should be checked since validated
-      expect(checkboxes[4]).not.toBeChecked(); // Don't Split checkbox (row 2)
+      expect(checkboxes[2]).toHaveAttribute('data-state', 'checked'); // Validated checkbox (row 2) - should be checked since validated: true
+      expect(checkboxes[3]).toHaveAttribute('data-state', 'unchecked'); // Don't Split checkbox (row 2)
 
       // Third row: should_not_split = true, validated = false
-      expect(checkboxes[5]).not.toBeChecked(); // Select checkbox (row 3)
-      expect(checkboxes[6]).toBeChecked(); // Don't Split checkbox (row 3) - should be checked
+      expect(checkboxes[4]).toHaveAttribute('data-state', 'unchecked'); // Validated checkbox (row 3)
+      expect(checkboxes[5]).toHaveAttribute('data-state', 'checked'); // Don't Split checkbox (row 3) - should be checked
     });
 
     it("allows toggling Don't Split checkbox", async () => {
@@ -149,12 +157,6 @@ describe('BrushSplitTable', () => {
         .getAllByRole('checkbox')
         .filter(checkbox => checkbox.getAttribute('aria-label')?.includes("Don't split"));
       const firstDontSplitCheckbox = dontSplitCheckboxes[0];
-
-      // Find the corresponding Validated checkbox (same row)
-      const validatedCheckboxes = screen
-        .getAllByRole('checkbox')
-        .filter(checkbox => checkbox.getAttribute('aria-label')?.includes('Validated'));
-      const firstValidatedCheckbox = validatedCheckboxes[0];
 
       // Initially, no Save All Changes button should be visible
       expect(screen.queryByText('Save All Changes')).not.toBeInTheDocument();
@@ -221,6 +223,7 @@ describe('BrushSplitTable', () => {
       // Make a change
       const handleInputs = screen.getAllByDisplayValue('Test Maker');
       fireEvent.change(handleInputs[0], { target: { value: 'New Handle' } });
+      fireEvent.blur(handleInputs[0]); // Trigger blur to commit the change
 
       // Should show unsaved changes count
       expect(screen.getByText('1 unsaved change')).toBeInTheDocument();
@@ -234,6 +237,7 @@ describe('BrushSplitTable', () => {
       // Make a change
       const handleInputs = screen.getAllByDisplayValue('Test Maker');
       fireEvent.change(handleInputs[0], { target: { value: 'New Handle' } });
+      fireEvent.blur(handleInputs[0]); // Trigger blur to commit the change
 
       // Click save all changes
       const saveButton = screen.getByText(/Save All Changes/);
@@ -302,7 +306,8 @@ describe('BrushSplitTable', () => {
         },
       ];
 
-      render(<BrushSplitTable brushSplits={malformedData as any} />);
+      // Test with malformed data that includes null values
+      render(<BrushSplitTable brushSplits={malformedData as unknown as BrushSplit[]} />);
 
       expect(screen.getByTestId('brush-split-table')).toBeInTheDocument();
     });
@@ -399,6 +404,7 @@ describe('BrushSplitTable', () => {
 
       // Change the handle value
       fireEvent.change(firstHandleInput, { target: { value: 'New Handle' } });
+      fireEvent.blur(firstHandleInput); // Trigger blur to commit the change
 
       // Verify the change
       expect(firstHandleInput).toHaveValue('New Handle');

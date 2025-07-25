@@ -12,7 +12,7 @@
  * Configuration for mock API responses and errors
  */
 export interface MockApiConfig {
-  responses?: Record<string, any>;
+  responses?: Record<string, unknown>;
   errors?: Record<string, Error>;
 }
 
@@ -21,7 +21,7 @@ export interface MockApiConfig {
  */
 export interface MockFetchResponse {
   status: number;
-  data?: any;
+  data?: unknown;
   error?: string;
 }
 
@@ -99,7 +99,7 @@ export function createMockApi(config?: MockApiConfig) {
     },
   };
 
-  const responses: Record<string, any> = { ...defaultResponses, ...config?.responses };
+  const responses: Record<string, unknown> = { ...defaultResponses, ...config?.responses };
   const errors: Record<string, Error> = config?.errors || {};
 
   const mockApi: Record<string, jest.Mock> = {};
@@ -229,7 +229,7 @@ export function createMockAxios(config?: MockApiConfig) {
     delete: { data: { success: true } },
   };
 
-  const responses: Record<string, any> = { ...defaultResponses, ...config?.responses };
+  const responses: Record<string, unknown> = { ...defaultResponses, ...config?.responses };
   const errors: Record<string, Error> = config?.errors || {};
 
   const mockAxios: Record<string, jest.Mock> = {};

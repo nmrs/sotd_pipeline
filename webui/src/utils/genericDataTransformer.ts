@@ -154,12 +154,13 @@ export function createGenericTransformer<T = unknown>(
       };
     } catch (error) {
       // Return default structure on validation errors
+      const dataObj = data as Record<string, unknown>;
       return {
         main: {
-          text: (data as unknown)?.item || '',
-          count: (data as unknown)?.count || 0,
-          comment_ids: (data as unknown)?.comment_ids || [],
-          examples: (data as unknown)?.examples || [],
+          text: (typeof dataObj?.item === 'string' ? dataObj.item : '') || '',
+          count: (typeof dataObj?.count === 'number' ? dataObj.count : 0) || 0,
+          comment_ids: (Array.isArray(dataObj?.comment_ids) ? dataObj.comment_ids : []) || [],
+          examples: (Array.isArray(dataObj?.examples) ? dataObj.examples : []) || [],
           status: 'Unmatched',
         },
         components: {},

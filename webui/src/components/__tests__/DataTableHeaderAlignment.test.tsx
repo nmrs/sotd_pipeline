@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DataTable } from '../ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
@@ -109,16 +108,7 @@ describe('DataTable Header Alignment', () => {
   });
 
   test('should maintain column width consistency between header and body', () => {
-    render(
-      <DataTable
-        columns={columns}
-        data={mockData}
-        height={200}
-        itemSize={50}
-        searchKey='name'
-        resizable={true}
-      />
-    );
+    render(<DataTable columns={columns} data={mockData} searchKey='name' resizable={true} />);
 
     // Check that header and body cells have consistent styling
     const headerCells = screen.getAllByRole('columnheader');

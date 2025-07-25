@@ -5,13 +5,7 @@ import { BrushSplit } from '../types/brushSplit';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff } from 'lucide-react';
 import CommentModal from '../components/domain/CommentModal';
-import {
-  getCommentDetail,
-  CommentDetail,
-  saveBrushSplits,
-  loadBrushSplits,
-  LoadBrushSplitsResponse,
-} from '../services/api';
+import { getCommentDetail, CommentDetail, saveBrushSplits } from '../services/api';
 
 const BrushSplitValidator: React.FC = () => {
   const [brushSplits, setBrushSplits] = useState<BrushSplit[]>([]);
@@ -24,31 +18,52 @@ const BrushSplitValidator: React.FC = () => {
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [commentLoading, setCommentLoading] = useState(false);
 
+  // Load brush splits when months are selected
   useEffect(() => {
     if (selectedMonths.length === 0) {
       setBrushSplits([]);
-      setError(null);
       return;
     }
 
-    setLoading(true);
-    setError(null);
+    const loadBrushSplits = async () => {
+      try {
+        setLoading(true);
+        console.log('Loading brush splits for months:', selectedMonths);
 
-    // Use the API function with unmatchedOnly parameter
-    loadBrushSplits(selectedMonths, !showMatched)
-      .then((data: LoadBrushSplitsResponse) => {
-        setBrushSplits(data.brush_splits);
-        // Reset to show validated items hidden when months change
-        setShowValidated(false);
-      })
-      .catch(error => {
+        const response = await fetch('/api/brush-splits', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ months: selectedMonths }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Received brush splits data:', data);
+
+        // Extract the brush_splits array from the response
+        const brushSplitsArray = data.brush_splits || [];
+        console.log('Number of brush splits:', brushSplitsArray.length);
+
+        if (brushSplitsArray.length > 0) {
+          console.log('First brush split:', brushSplitsArray[0]);
+        }
+
+        setBrushSplits(brushSplitsArray);
+      } catch (error) {
         console.error('Error loading brush splits:', error);
-        setError(error.message);
-      })
-      .finally(() => {
+        setError('Failed to load brush splits');
+      } finally {
         setLoading(false);
-      });
-  }, [selectedMonths, showMatched]);
+      }
+    };
+
+    loadBrushSplits();
+  }, [selectedMonths]);
 
   // Filter brush splits based on showValidated state
   const filteredBrushSplits = useMemo(() => {
@@ -82,7 +97,7 @@ const BrushSplitValidator: React.FC = () => {
         const comment = await getCommentDetail(commentId, selectedMonths);
         setSelectedComment(comment);
         setCommentModalOpen(true);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error loading comment detail:', err);
         // Don't show error to user, just log it
       } finally {
@@ -197,9 +212,10 @@ const BrushSplitValidator: React.FC = () => {
                 console.error('Failed to save brush splits:', response.message);
                 setError(`Failed to save brush splits: ${response.message}`);
               }
-            } catch (error: any) {
+            } catch (error: unknown) {
               console.error('Error saving brush splits:', error);
-              setError(`Error saving brush splits: ${error.message || 'Unknown error'}`);
+              const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+              setError(`Error saving brush splits: ${errorMessage}`);
             }
           }}
           customControls={

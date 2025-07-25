@@ -3,14 +3,27 @@ import { useState, useMemo, useCallback } from 'react';
 export type SortField = 'item' | 'count' | 'comment_ids' | 'examples';
 export type SortDirection = 'asc' | 'desc';
 
+interface SearchSortItem {
+  item: string;
+  count: number;
+  comment_ids?: string[];
+  examples?: string[];
+  [key: string]: unknown;
+}
+
+// Type alias for compatibility with UnmatchedItem
+export type SearchSortItemType = SearchSortItem;
+
 interface UseSearchSortOptions {
-  items: Array<{
-    item: string;
-    count: number;
-    comment_ids?: string[];
-    examples?: string[];
-    [key: string]: any;
-  }>;
+  items:
+    | SearchSortItem[]
+    | Array<{
+        item: string;
+        count: number;
+        comment_ids?: string[];
+        examples?: string[];
+        [key: string]: unknown;
+      }>;
   defaultSortField?: SortField;
   defaultSortDirection?: SortDirection;
   showFiltered?: boolean;
@@ -25,13 +38,7 @@ interface UseSearchSortReturn {
   sortDirection: SortDirection;
   setSortDirection: (direction: SortDirection) => void;
   toggleSortDirection: () => void;
-  filteredAndSortedItems: Array<{
-    item: string;
-    count: number;
-    comment_ids?: string[];
-    examples?: string[];
-    [key: string]: any;
-  }>;
+  filteredAndSortedItems: SearchSortItem[];
   searchResultsCount: number;
   totalItemsCount: number;
   clearSearch: () => void;
@@ -86,8 +93,8 @@ export const useSearchSort = ({
   // Sort filtered items
   const filteredAndSortedItems = useMemo(() => {
     const sorted = [...filteredItems].sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
+      let aValue: string | number;
+      let bValue: string | number;
 
       switch (sortField) {
         case 'item':
@@ -107,8 +114,8 @@ export const useSearchSort = ({
           bValue = b.examples?.length || 0;
           break;
         default:
-          aValue = a[sortField];
-          bValue = b[sortField];
+          aValue = a[sortField] as string | number;
+          bValue = b[sortField] as string | number;
       }
 
       // Handle null/undefined values

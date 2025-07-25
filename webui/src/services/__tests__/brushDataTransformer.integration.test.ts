@@ -273,12 +273,12 @@ describe('BrushData Transformer Integration Tests', () => {
         comment_ids: ['123'],
         examples: ['Example'],
         // Missing match_type and matched/unmatched fields
-      } as any;
+      } as unknown;
 
       // Should not throw error
-      expect(() => transformBrushData(malformedOutput)).not.toThrow();
+      expect(() => transformBrushData(malformedOutput as BrushMatcherOutput)).not.toThrow();
 
-      const brushData = transformBrushData(malformedOutput);
+      const brushData = transformBrushData(malformedOutput as BrushMatcherOutput);
 
       // Should handle gracefully
       expect(brushData.main.text).toBe('Valid Brush');
@@ -288,11 +288,11 @@ describe('BrushData Transformer Integration Tests', () => {
 
     test('should handle null/undefined real data gracefully', () => {
       // Should not throw error
-      expect(() => transformBrushData(null as any)).not.toThrow();
-      expect(() => transformBrushData(undefined as any)).not.toThrow();
+      expect(() => transformBrushData(null)).not.toThrow();
+      expect(() => transformBrushData(undefined)).not.toThrow();
 
-      const nullResult = transformBrushData(null as any);
-      const undefinedResult = transformBrushData(undefined as any);
+      const nullResult = transformBrushData(null);
+      const undefinedResult = transformBrushData(undefined);
 
       // Should return default structure
       expect(nullResult.main.text).toBe('');

@@ -12,8 +12,6 @@ interface TestData {
 const PerformanceTest: React.FC = () => {
   const [testData, setTestData] = useState<TestData[]>([]);
   const [enableLogging, setEnableLogging] = useState(false);
-  const [sortColumn, setSortColumn] = useState<string>('');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [useOptimized, setUseOptimized] = useState(false);
   const [dataSize, setDataSize] = useState(1000);
 
@@ -31,18 +29,6 @@ const PerformanceTest: React.FC = () => {
     }
     setTestData(data);
   }, [dataSize]);
-
-  const handleSort = (column: string) => {
-    const start = performance.now();
-    if (sortColumn === column) {
-      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortColumn(column);
-      setSortDirection('asc');
-    }
-    const end = performance.now();
-    console.log(`Sort operation took ${end - start}ms`);
-  };
 
   const tableLabel = useOptimized ? 'Optimized' : 'Baseline';
 
@@ -119,10 +105,7 @@ const PerformanceTest: React.FC = () => {
       </div>
 
       <PerformanceDataTable
-        data={testData}
-        onSort={handleSort}
-        sortColumn={sortColumn}
-        sortDirection={sortDirection}
+        data={testData.map(item => ({ ...item, id: item.id.toString() }))}
         enablePerformanceLogging={enableLogging}
         testId={`performance-test-table-${useOptimized ? 'optimized' : 'baseline'}`}
       />

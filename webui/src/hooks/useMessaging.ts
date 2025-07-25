@@ -30,6 +30,10 @@ export const useMessaging = (options: UseMessagingOptions = {}): UseMessagingRet
   const { autoHideDelay = 3000, maxMessages = 10 } = options;
   const [messages, setMessages] = useState<Message[]>([]);
 
+  const removeMessage = useCallback((id: string) => {
+    setMessages(prev => prev.filter(msg => msg.id !== id));
+  }, []);
+
   // Auto-hide messages
   useEffect(() => {
     const timeouts: ReturnType<typeof setTimeout>[] = [];
@@ -46,7 +50,7 @@ export const useMessaging = (options: UseMessagingOptions = {}): UseMessagingRet
     return () => {
       timeouts.forEach(clearTimeout);
     };
-  }, [messages, autoHideDelay]);
+  }, [messages, autoHideDelay, removeMessage]);
 
   const addMessage = useCallback(
     (
@@ -100,10 +104,6 @@ export const useMessaging = (options: UseMessagingOptions = {}): UseMessagingRet
     },
     [addMessage]
   );
-
-  const removeMessage = useCallback((id: string) => {
-    setMessages(prev => prev.filter(msg => msg.id !== id));
-  }, []);
 
   const clearMessages = useCallback(() => {
     setMessages([]);

@@ -49,7 +49,7 @@ const MismatchAnalyzer: React.FC = () => {
       });
 
       setResults(result);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(handleApiError(err));
     } finally {
       setLoading(false);
@@ -64,7 +64,7 @@ const MismatchAnalyzer: React.FC = () => {
       const comment = await getCommentDetail(commentId, [selectedMonth]);
       setSelectedComment(comment);
       setCommentModalOpen(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(handleApiError(err));
     } finally {
       setCommentLoading(false);
@@ -107,7 +107,9 @@ const MismatchAnalyzer: React.FC = () => {
             />
           </div>
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Levenshtein Threshold</label>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>
+              Levenshtein Threshold
+            </label>
             <input
               type='number'
               min='1'
@@ -190,11 +192,22 @@ const MismatchAnalyzer: React.FC = () => {
           <div className='px-6 py-4 border-b border-gray-200'>
             <h3 className='text-lg font-medium text-gray-900'>Analysis Results</h3>
             <div className='mt-2 text-sm text-gray-600 flex flex-wrap gap-6'>
-              <span>Field: <span className='font-medium'>{results.field}</span></span>
-              <span>Month: <span className='font-medium'>{results.month}</span></span>
-              <span>Total Matches: <span className='font-medium'>{results.total_matches}</span></span>
-              <span>Total Mismatches: <span className='font-medium'>{results.total_mismatches}</span></span>
-              <span>Processing Time: <span className='font-medium'>{results.processing_time.toFixed(2)}s</span></span>
+              <span>
+                Field: <span className='font-medium'>{results.field}</span>
+              </span>
+              <span>
+                Month: <span className='font-medium'>{results.month}</span>
+              </span>
+              <span>
+                Total Matches: <span className='font-medium'>{results.total_matches}</span>
+              </span>
+              <span>
+                Total Mismatches: <span className='font-medium'>{results.total_mismatches}</span>
+              </span>
+              <span>
+                Processing Time:{' '}
+                <span className='font-medium'>{results.processing_time.toFixed(2)}s</span>
+              </span>
             </div>
           </div>
           <div className='p-6'>
@@ -208,7 +221,9 @@ const MismatchAnalyzer: React.FC = () => {
               <div className='text-center py-8'>
                 <div className='text-green-600 text-4xl mb-2'>✅</div>
                 <h3 className='text-lg font-medium text-gray-900 mb-2'>No Mismatches Found</h3>
-                <p className='text-gray-600'>No mismatches were detected for the selected criteria.</p>
+                <p className='text-gray-600'>
+                  No mismatches were detected for the selected criteria.
+                </p>
               </div>
             )}
           </div>
@@ -221,7 +236,9 @@ const MismatchAnalyzer: React.FC = () => {
           <div className='text-center py-8'>
             <div className='text-gray-400 text-6xl mb-4'>🔍</div>
             <h3 className='text-lg font-medium text-gray-900 mb-2'>Ready to Analyze</h3>
-            <p className='text-gray-600'>Select a month and field, then click "Analyze" to begin.</p>
+            <p className='text-gray-600'>
+              Select a month and field, then click &quot;Analyze&quot; to begin.
+            </p>
           </div>
         </div>
       )}

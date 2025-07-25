@@ -1,5 +1,6 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import CommentModal from '../domain/CommentModal';
+import PerformanceMonitor from '../domain/PerformanceMonitor';
 
 // Test that domain components work correctly from domain/ directory
 describe('Domain Components', () => {
@@ -9,7 +10,6 @@ describe('Domain Components', () => {
     expect(() => {
       // We'll implement the actual import in the next step
       // For now, just verify the test structure
-      const CommentModal = require('../domain/CommentModal').default;
       expect(CommentModal).toBeDefined();
     }).not.toThrow();
   });
@@ -20,14 +20,12 @@ describe('Domain Components', () => {
     expect(() => {
       // We'll implement the actual import in the next step
       // For now, just verify the test structure
-      const PerformanceMonitor = require('../domain/PerformanceMonitor').default;
       expect(PerformanceMonitor).toBeDefined();
     }).not.toThrow();
   });
 
   test('should render CommentModal component with basic props', () => {
     // Test that CommentModal component renders correctly
-    const CommentModal = require('../domain/CommentModal').default;
     render(
       <CommentModal
         isOpen={true}
@@ -37,7 +35,10 @@ describe('Domain Components', () => {
           id: 'test-comment',
           body: 'Test comment body',
           author: 'test-author',
-          created_utc: Date.now() / 1000,
+          created_utc: new Date().toISOString(),
+          thread_id: 'test-thread',
+          thread_title: 'Test Thread',
+          url: 'https://reddit.com/test',
         }}
       />
     );
@@ -48,7 +49,6 @@ describe('Domain Components', () => {
 
   test('should render PerformanceMonitor component with basic props', () => {
     // Test that PerformanceMonitor component renders correctly
-    const PerformanceMonitor = require('../domain/PerformanceMonitor').default;
     render(<PerformanceMonitor dataSize={1000} operationCount={50} />);
 
     // Verify performance monitor renders

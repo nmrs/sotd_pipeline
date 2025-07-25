@@ -19,22 +19,27 @@ interface VirtualizedTableProps<T> {
   resizable?: boolean;
 }
 
-interface RowProps {
+interface RowProps<T> {
   index: number;
   style: React.CSSProperties;
   data: {
-    items: any[];
-    columns: any[];
+    items: T[];
+    columns: {
+      key: string;
+      header: string;
+      width: number;
+      render: (item: T) => React.ReactNode;
+    }[];
     columnWidths: number[];
     rowHeight: number;
-    onRowClick?: (item: any, index: number) => void;
+    onRowClick?: (item: T, index: number) => void;
     selectedRows?: Set<number>;
     onRowSelect?: (index: number, selected: boolean) => void;
     showCheckboxes?: boolean;
   };
 }
 
-const Row: React.FC<RowProps> = ({ index, style, data }) => {
+const Row = <T,>({ index, style, data }: RowProps<T>) => {
   const { items, columns, columnWidths, onRowClick, selectedRows, onRowSelect, showCheckboxes } =
     data;
   const item = items[index];
@@ -130,14 +135,23 @@ export function VirtualizedTable<T>({
     if (!sortConfig) return data;
 
     return [...data].sort((a, b) => {
-      const aValue = (a as any)[sortConfig.key];
-      const bValue = (b as any)[sortConfig.key];
+      const aValue = (a as Record<string, unknown>)[sortConfig.key] as unknown;
+      const bValue = (b as Record<string, unknown>)[sortConfig.key] as unknown;
 
-      if (aValue < bValue) {
-        return sortConfig.direction === 'asc' ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return sortConfig.direction === 'asc' ? 1 : -1;
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+      } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
       }
       return 0;
     });
@@ -156,6 +170,52 @@ export function VirtualizedTable<T>({
   };
 
   // Resize handlers
+  const handleResizeMove = useCallback(
+    (e: MouseEvent) => {
+      // Use ref values to get current state
+      if (!isResizingRef.current || resizeColumnIndexRef.current === null) {
+        return;
+      }
+
+      const deltaX = e.clientX - resizeStartXRef.current;
+      const newWidth = Math.max(50, columnWidthsRef.current[resizeColumnIndexRef.current] + deltaX);
+
+      setColumnWidths(prev => {
+        const newWidths = [...prev];
+        newWidths[resizeColumnIndexRef.current!] = newWidth;
+        return newWidths;
+      });
+
+      setResizeStartX(e.clientX);
+      resizeStartXRef.current = e.clientX;
+    },
+    [setResizeStartX]
+  );
+
+  const handleResizeEnd = useCallback(() => {
+    setIsResizing(false);
+    setResizeColumnIndex(null);
+
+    // Update refs
+    isResizingRef.current = false;
+    resizeColumnIndexRef.current = null;
+
+    // Reset cursor
+    document.body.style.cursor = 'default';
+
+    // Remove global event listeners using stored handlers
+    const handlers = (
+      window as unknown as {
+        __resizeHandlers?: { moveHandler: (e: MouseEvent) => void; endHandler: () => void };
+      }
+    ).__resizeHandlers;
+    if (handlers) {
+      document.removeEventListener('mousemove', handlers.moveHandler);
+      document.removeEventListener('mouseup', handlers.endHandler);
+      delete (window as unknown as { __resizeHandlers?: unknown }).__resizeHandlers;
+    }
+  }, [setIsResizing, setResizeColumnIndex]);
+
   const handleResizeStart = useCallback(
     (e: React.MouseEvent, columnIndex: number) => {
       if (!resizable) return;
@@ -180,29 +240,10 @@ export function VirtualizedTable<T>({
       document.addEventListener('mouseup', endHandler);
 
       // Store handlers for cleanup
-      (window as any).__resizeHandlers = { moveHandler, endHandler };
+      (window as unknown as Record<string, unknown>).__resizeHandlers = { moveHandler, endHandler };
     },
-    [resizable]
+    [resizable, handleResizeMove, handleResizeEnd]
   );
-
-  const handleResizeMove = useCallback((e: MouseEvent) => {
-    // Use ref values to get current state
-    if (!isResizingRef.current || resizeColumnIndexRef.current === null) {
-      return;
-    }
-
-    const deltaX = e.clientX - resizeStartXRef.current;
-    const newWidth = Math.max(50, columnWidthsRef.current[resizeColumnIndexRef.current] + deltaX);
-
-    setColumnWidths(prev => {
-      const newWidths = [...prev];
-      newWidths[resizeColumnIndexRef.current!] = newWidth;
-      return newWidths;
-    });
-
-    setResizeStartX(e.clientX);
-    resizeStartXRef.current = e.clientX;
-  }, []);
 
   // Add visual feedback during resize
   useEffect(() => {
@@ -215,34 +256,18 @@ export function VirtualizedTable<T>({
     }
   }, [isResizing]);
 
-  const handleResizeEnd = useCallback(() => {
-    setIsResizing(false);
-    setResizeColumnIndex(null);
-
-    // Update refs
-    isResizingRef.current = false;
-    resizeColumnIndexRef.current = null;
-
-    // Reset cursor
-    document.body.style.cursor = 'default';
-
-    // Remove global event listeners using stored handlers
-    const handlers = (window as any).__resizeHandlers;
-    if (handlers) {
-      document.removeEventListener('mousemove', handlers.moveHandler);
-      document.removeEventListener('mouseup', handlers.endHandler);
-      delete (window as any).__resizeHandlers;
-    }
-  }, []);
-
   // Cleanup event listeners on unmount
   useEffect(() => {
     return () => {
-      const handlers = (window as any).__resizeHandlers;
+      const handlers = (
+        window as unknown as {
+          __resizeHandlers?: { moveHandler: (e: MouseEvent) => void; endHandler: () => void };
+        }
+      ).__resizeHandlers;
       if (handlers) {
         document.removeEventListener('mousemove', handlers.moveHandler);
         document.removeEventListener('mouseup', handlers.endHandler);
-        delete (window as any).__resizeHandlers;
+        delete (window as unknown as { __resizeHandlers?: unknown }).__resizeHandlers;
       }
     };
   }, []);
@@ -347,11 +372,16 @@ export function VirtualizedTable<T>({
                 itemSize={rowHeight}
                 width={width}
                 itemData={{
-                  items: sortedData,
-                  columns,
+                  items: sortedData as unknown[],
+                  columns: columns as {
+                    key: string;
+                    header: string;
+                    width: number;
+                    render: (item: unknown) => React.ReactNode;
+                  }[],
                   columnWidths,
                   rowHeight,
-                  onRowClick,
+                  onRowClick: onRowClick as ((item: unknown, index: number) => void) | undefined,
                   selectedRows,
                   onRowSelect,
                   showCheckboxes,

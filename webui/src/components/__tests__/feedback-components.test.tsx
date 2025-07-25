@@ -1,5 +1,6 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import ErrorDisplay from '../feedback/ErrorDisplay';
+import MessageDisplay from '../feedback/MessageDisplay';
 
 // Test that feedback components work correctly from feedback/ directory
 describe('Feedback Components', () => {
@@ -9,7 +10,6 @@ describe('Feedback Components', () => {
     expect(() => {
       // We'll implement the actual import in the next step
       // For now, just verify the test structure
-      const ErrorDisplay = require('../feedback/ErrorDisplay').default;
       expect(ErrorDisplay).toBeDefined();
     }).not.toThrow();
   });
@@ -20,14 +20,12 @@ describe('Feedback Components', () => {
     expect(() => {
       // We'll implement the actual import in the next step
       // For now, just verify the test structure
-      const MessageDisplay = require('../feedback/MessageDisplay').default;
       expect(MessageDisplay).toBeDefined();
     }).not.toThrow();
   });
 
   test('should render ErrorDisplay component with error message', () => {
     // Test that ErrorDisplay component renders correctly
-    const ErrorDisplay = require('../feedback/ErrorDisplay').default;
     render(<ErrorDisplay error='Test error message' onRetry={() => {}} />);
 
     // Verify error message is displayed
@@ -36,7 +34,6 @@ describe('Feedback Components', () => {
 
   test('should render MessageDisplay component with success message', () => {
     // Test that MessageDisplay component renders correctly
-    const MessageDisplay = require('../feedback/MessageDisplay').default;
     render(
       <MessageDisplay
         messages={[
@@ -44,6 +41,7 @@ describe('Feedback Components', () => {
             id: '1',
             message: 'Success message',
             type: 'success',
+            timestamp: Date.now(),
           },
         ]}
         onRemoveMessage={() => {}}

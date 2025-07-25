@@ -36,7 +36,8 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
 
   useEffect(() => {
     const renderTime = performance.now() - renderStartTime.current;
-    const memoryUsage = (performance as any).memory?.usedJSHeapSize;
+    const memoryUsage = (performance as Performance & { memory?: { usedJSHeapSize: number } })
+      .memory?.usedJSHeapSize;
 
     const newMetrics: PerformanceMetrics = {
       renderTime,

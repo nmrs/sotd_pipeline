@@ -1,0 +1,16 @@
+
+> sotd-analyzer-webui@0.0.0 build
+> tsc && vite build
+
+vite v7.0.5 building for production...
+transforming...
+✓ 1812 modules transformed.
+[plugin vite:reporter] 
+(!) /Users/jmoore/Documents/Projects/sotd_pipeline/webui/src/services/api.ts is dynamically imported by /Users/jmoore/Documents/Projects/sotd_pipeline/webui/src/pages/UnmatchedAnalyzer.tsx but also statically imported by /Users/jmoore/Documents/Projects/sotd_pipeline/webui/src/hooks/useAvailableMonths.ts, /Users/jmoore/Documents/Projects/sotd_pipeline/webui/src/pages/BrushSplitValidator.tsx, /Users/jmoore/Documents/Projects/sotd_pipeline/webui/src/pages/Dashboard.tsx, /Users/jmoore/Documents/Projects/sotd_pipeline/webui/src/pages/MismatchAnalyzer.tsx, /Users/jmoore/Documents/Projects/sotd_pipeline/webui/src/pages/UnmatchedAnalyzer.tsx, dynamic import will not move module into another chunk.
+
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.46 kB │ gzip:   0.31 kB
+dist/assets/index-iUPxOMMr.css   35.88 kB │ gzip:   6.99 kB
+dist/assets/index-BLeBrk-1.js   466.30 kB │ gzip: 145.87 kB
+✓ built in 2.04s

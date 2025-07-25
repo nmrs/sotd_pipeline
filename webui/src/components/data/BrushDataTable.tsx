@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 // Interface for brush data with subrows
-interface BrushData {
+export interface BrushData {
   brand: string;
   model: string;
   handle_maker?: string;
@@ -17,7 +17,7 @@ interface BrushData {
   subrows?: BrushData[];
 }
 
-interface BrushDataTableProps {
+export interface BrushDataTableProps {
   brushData: BrushData[];
   /** Enable performance logging */
   enablePerformanceLogging?: boolean;
@@ -265,9 +265,6 @@ export const BrushDataTable = memo<BrushDataTableProps>(
         <DataTable
           columns={columns}
           data={flattenedData}
-          height={400}
-          itemSize={48}
-          resizable={true}
           showColumnVisibility={true}
           searchKey='brand'
         />

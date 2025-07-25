@@ -9,11 +9,7 @@ interface MismatchAnalyzerDataTableProps {
   commentLoading?: boolean;
 }
 
-const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
-  data,
-  onCommentClick,
-  commentLoading = false,
-}) => {
+const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({ data }) => {
   const getMismatchTypeIcon = (mismatchType?: string) => {
     switch (mismatchType) {
       case 'multiple_patterns':
@@ -57,20 +53,21 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     return text.substring(0, maxLength) + '...';
   };
 
-  const formatMatchedData = (matched: any) => {
+  const formatMatchedData = (matched: unknown) => {
     if (!matched) return 'N/A';
 
     if (typeof matched === 'string') {
       return matched;
     }
 
-    if (typeof matched === 'object') {
+    if (typeof matched === 'object' && matched !== null) {
+      const matchedObj = matched as Record<string, unknown>;
       const parts = [];
-      if (matched.brand) parts.push(matched.brand);
-      if (matched.model) parts.push(matched.model);
-      if (matched.format) parts.push(matched.format);
-      if (matched.maker) parts.push(matched.maker);
-      if (matched.scent) parts.push(matched.scent);
+      if (matchedObj.brand) parts.push(String(matchedObj.brand));
+      if (matchedObj.model) parts.push(String(matchedObj.model));
+      if (matchedObj.format) parts.push(String(matchedObj.format));
+      if (matchedObj.maker) parts.push(String(matchedObj.maker));
+      if (matchedObj.scent) parts.push(String(matchedObj.scent));
 
       return parts.length > 0 ? parts.join(' - ') : JSON.stringify(matched);
     }
@@ -88,9 +85,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <div className='flex items-center'>
               <span className='text-lg mr-2'>{getMismatchTypeIcon(item.mismatch_type)}</span>
-              <span
-                className={`text-sm font-medium ${getMismatchTypeColor(item.mismatch_type)}`}
-              >
+              <span className={`text-sm font-medium ${getMismatchTypeColor(item.mismatch_type)}`}>
                 {item.mismatch_type?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) ||
                   'Unknown'}
               </span>
@@ -104,9 +99,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         cell: ({ row }) => {
           const item = row.original;
           return (
-            <div className='text-sm text-gray-900 max-w-xs'>
-              {truncateText(item.original, 60)}
-            </div>
+            <div className='text-sm text-gray-900 max-w-xs'>{truncateText(item.original, 60)}</div>
           );
         },
       },
@@ -147,35 +140,19 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         },
       },
       {
-        accessorKey: 'count',
-        header: 'Count',
-        cell: ({ row }) => {
-          const item = row.original;
-          return <span className='text-sm text-gray-900'>{item.count}</span>;
-        },
-      },
-      {
-        accessorKey: 'examples',
-        header: 'Examples',
+        accessorKey: 'confidence',
+        header: 'Confidence',
         cell: ({ row }) => {
           const item = row.original;
           return (
-            <div className='text-sm text-gray-900'>
-              {item.examples.length > 0 && (
-                <button
-                  onClick={() => onCommentClick?.(item.comment_ids[0])}
-                  disabled={commentLoading}
-                  className='text-blue-600 hover:text-blue-800 underline disabled:opacity-50'
-                >
-                  {commentLoading ? 'Loading...' : 'View'}
-                </button>
-              )}
-            </div>
+            <span className='text-sm text-gray-900'>
+              {item.confidence ? `${Math.round(item.confidence * 100)}%` : 'N/A'}
+            </span>
           );
         },
       },
     ],
-    [onCommentClick, commentLoading]
+    []
   );
 
   return (

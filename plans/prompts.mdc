@@ -107,6 +107,40 @@ After drafting, review the full plan:
 Repeat until the plan is lean, safe, and buildable via codegen prompts with no dangling pieces.
 ```
 
+### Non-TDD Project Planning  
+**Use when**: Tackling tasks that don’t require test-first development, such as lint cleanup, dependency updates, refactoring, or fixing failing tests.  
+**Persona**: You are a Principal Engineer at a software company. You care deeply about clean, maintainable, DRY code that’s easy to read and evolve. You emphasize systematic progress, minimal regressions, and clear, actionable steps.  
+**Goal**: Produce an executable project blueprint and a sequence of self-contained prompts—structured for use by a code-generation LLM and ready to save as an `.mdc` plan under `/plans`.  
+
+```
+Draft a clear, step-by-step blueprint for completing this task without TDD.
+
+Start with a high-level overview, then iteratively break it down into smaller, incremental steps. Each step should:
+- Build logically on the previous one
+- Clearly describe the code cleanup, fixes, or improvements
+- Avoid large, monolithic changes that are risky or hard to verify
+- Be small enough to implement safely, but large enough to show meaningful progress
+
+Once the plan is decomposed into steps:
+- For each step, generate a separate code-generation prompt formatted as an MDC section
+- Each prompt should be enclosed in fenced code blocks using the `text` tag
+- Include just enough context from the previous steps to ensure continuity
+
+Structure the final output as an `.mdc` document with:
+- 📘 A short project summary
+- 🧩 A list of component steps
+- 🔁 One `text`-tagged prompt block per step
+- 🧠 Your own critical analysis of the prompt sequence and structure
+
+After drafting, review the plan:
+- Check for redundant, ambiguous, or overly large steps
+- Ensure each prompt produces coherent, incremental progress
+- Refine the plan as needed
+
+Repeat until the plan is lean, safe, and buildable via codegen prompts with no dangling pieces.
+```
+
+<!-- 
 ### Non-TDD Project Planning
 **Use when**: Starting a new feature without strict TDD requirements.
 
@@ -116,7 +150,8 @@ Draft a detailed, step-by-step blueprint for building this project. Then, once y
 From here you should have the foundation to provide a series of prompts for a code-generation LLM that will implement each step. Prioritize best practices, and incremental progress, ensuring no big jumps in complexity at any stage. Make sure that each prompt builds on the previous prompts, and ends with wiring things together. There should be no hanging or orphaned code that isn't integrated into a previous step.
 
 Make sure and separate each prompt section. Use markdown. Each prompt should be tagged as text using code tags. The goal is to output prompts, but context, etc is important as well.
-```
+``` 
+-->
 
 ---
 
@@ -270,3 +305,9 @@ feature_implementation_plan_${CURRENT_DATE}.mdc
 
 **Why This Matters**: Avoids conflicts, maintains historical tracking, prevents confusion from incorrect dates
 
+
+'''
+use ### Tracked Implementation Development Process to proceed with @plan_webui_lint_issues_fix_2025-07-25.mdc 
+
+run all react tests and lint and build to validate that there are no remaining issues. Update plan status and add additional steps (or modify additional steps) if issues are found. Then use the process to continue the implementation if necessary
+'''

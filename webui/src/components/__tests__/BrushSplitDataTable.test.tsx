@@ -1,9 +1,9 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { BrushSplitDataTable } from '../data/BrushSplitDataTable';
+import { BrushSplit } from '@/types/brushSplit';
 
-// Mock ShadCN DataTable component
-jest.mock('@/components/ui/data-table', () => ({
+// Mock the ShadCN DataTable component
+jest.mock('../ui/data-table', () => ({
   DataTable: ({
     columns,
     data,
@@ -13,7 +13,16 @@ jest.mock('@/components/ui/data-table', () => ({
     showColumnVisibility,
     searchKey,
     showPagination,
-  }: any) => (
+  }: {
+    columns: Array<{ accessorKey: string; header: string }>;
+    data: Array<{ original: string; handle: string; knot: string }>;
+    height?: number;
+    itemSize?: number;
+    resizable?: boolean;
+    showColumnVisibility?: boolean;
+    searchKey?: string;
+    showPagination?: boolean;
+  }) => (
     <div data-testid='shadcn-data-table'>
       <div data-testid='data-table-props'>
         {JSON.stringify({
@@ -26,14 +35,14 @@ jest.mock('@/components/ui/data-table', () => ({
         })}
       </div>
       <div data-testid='data-table-columns'>
-        {columns.map((col: any, index: number) => (
+        {columns.map((col, index: number) => (
           <div key={index} data-testid={`column-${col.accessorKey}`}>
             {col.header}
           </div>
         ))}
       </div>
       <div data-testid='data-table-data'>
-        {data.map((item: any, index: number) => (
+        {data.map((item, index: number) => (
           <div key={index} data-testid={`row-${index}`}>
             {item.original} - {item.handle} - {item.knot}
           </div>
@@ -100,7 +109,7 @@ describe('BrushSplitDataTable', () => {
       expect(screen.getByTestId('column-original')).toBeInTheDocument();
       expect(screen.getByTestId('column-handle')).toBeInTheDocument();
       expect(screen.getByTestId('column-knot')).toBeInTheDocument();
-      expect(screen.getByTestId('column-corrected')).toBeInTheDocument();
+      expect(screen.getByTestId('column-validated')).toBeInTheDocument();
       expect(screen.getByTestId('column-should_not_split')).toBeInTheDocument();
     });
 
@@ -140,15 +149,7 @@ describe('BrushSplitDataTable', () => {
     });
 
     it('handles selection change callbacks', () => {
-      const onSelectionChange = jest.fn();
-
-      render(
-        <BrushSplitDataTable
-          brushSplits={mockBrushSplits}
-          onSelectionChange={onSelectionChange}
-          onSave={() => {}}
-        />
-      );
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => {}} />);
 
       // Selection change is handled by ShadCN DataTable
       // The component passes the callback through to DataTable
@@ -191,10 +192,10 @@ describe('BrushSplitDataTable', () => {
       expect(screen.getByTestId('column-knot')).toHaveTextContent('Knot');
     });
 
-    it('defines corrected column with correct header', () => {
+    it('defines validated column with correct header', () => {
       render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => {}} />);
 
-      expect(screen.getByTestId('column-corrected')).toHaveTextContent('Corrected');
+      expect(screen.getByTestId('column-validated')).toHaveTextContent('Validated');
     });
   });
 
@@ -234,7 +235,7 @@ describe('BrushSplitDataTable', () => {
           validated_at: null,
           occurrences: [],
         },
-      ] as any;
+      ] as unknown as BrushSplit[];
 
       render(<BrushSplitDataTable brushSplits={malformedData} onSave={() => {}} />);
 

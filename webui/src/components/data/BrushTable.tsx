@@ -10,15 +10,7 @@ export interface BrushTableProps {
   onComponentFilter: (componentName: string, isFiltered: boolean) => void;
   filteredStatus?: Record<string, boolean>;
   pendingChanges?: Record<string, boolean>;
-  columnWidths: {
-    filtered: number;
-    brush: number;
-    handle: number;
-    knot: number;
-    count: number;
-    comment_ids: number;
-    examples: number;
-  };
+  columnWidths?: Record<string, number>;
   onCommentClick?: (commentId: string) => void;
   commentLoading?: boolean;
 }
@@ -81,8 +73,6 @@ const BrushTable: React.FC<BrushTableProps> = ({
   onBrushFilter,
   onComponentFilter,
   filteredStatus = {},
-  pendingChanges = {},
-  columnWidths,
   onCommentClick,
   commentLoading = false,
 }) => {
@@ -105,7 +95,6 @@ const BrushTable: React.FC<BrushTableProps> = ({
           const isMain = item.type === 'main';
           const text = isMain ? item.main.text : item.parentText || '';
           const isFiltered = filteredStatus[text] || false;
-          const isPending = pendingChanges[text] || false;
 
           return (
             <div className='flex items-center justify-center'>
@@ -272,14 +261,7 @@ const BrushTable: React.FC<BrushTableProps> = ({
         },
       },
     ],
-    [
-      filteredStatus,
-      pendingChanges,
-      onBrushFilter,
-      onComponentFilter,
-      onCommentClick,
-      commentLoading,
-    ]
+    [filteredStatus, onBrushFilter, onComponentFilter, onCommentClick, commentLoading]
   );
 
   return (
@@ -288,8 +270,6 @@ const BrushTable: React.FC<BrushTableProps> = ({
       <DataTable
         columns={columns}
         data={flattenedData}
-        height={400}
-        itemSize={48}
         resizable={true}
         showColumnVisibility={true}
         searchKey='brush'

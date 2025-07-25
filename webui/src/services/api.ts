@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { BrushSplit } from '@/types/brushSplit';
 
 // Use different base URL for tests vs development
 const API_BASE_URL =
@@ -83,7 +84,7 @@ export const getCatalogs = async (): Promise<CatalogInfo[]> => {
   }
 };
 
-export const getCatalogContent = async (catalogName: string): Promise<any> => {
+export const getCatalogContent = async (catalogName: string): Promise<Record<string, unknown>> => {
   try {
     const response = await api.get(`/catalogs/${catalogName}`);
     return response.data;
@@ -132,8 +133,8 @@ export interface UnmatchedItem {
   comment_ids: string[];
   // Optional fields for brush matching data
   match_type?: string;
-  matched?: any;
-  unmatched?: any;
+  matched?: Record<string, unknown>;
+  unmatched?: Record<string, unknown>;
 }
 
 export interface UnmatchedAnalysisResult {
@@ -172,15 +173,11 @@ export interface MismatchAnalysisRequest {
 
 export interface MismatchItem {
   original: string;
-  matched: any;
+  matched: Record<string, unknown>;
   pattern: string;
   match_type: string;
   confidence?: number;
   mismatch_type?: string;
-  reason?: string;
-  count: number;
-  examples: string[];
-  comment_ids: string[];
 }
 
 export interface MismatchAnalysisResult {
@@ -232,27 +229,11 @@ export const runMatchPhase = async (request: MatchPhaseRequest): Promise<MatchPh
 };
 
 // Brush split operations
-export interface BrushSplit {
-  original: string;
-  handle: string | null;
-  knot: string;
-  match_type?: string;
-  validated?: boolean;
-  corrected?: boolean;
-  validated_at?: string | null;
-  system_handle?: string | null;
-  system_knot?: string | null;
-  system_confidence?: string | null;
-  system_reasoning?: string | null;
-  occurrences?: any[];
-  should_not_split?: boolean;
-}
-
 export interface LoadBrushSplitsResponse {
   brush_splits: BrushSplit[];
-  statistics: any;
-  processing_info?: any;
-  errors?: any;
+  statistics: Record<string, unknown>;
+  processing_info?: Record<string, unknown>;
+  errors?: Array<Record<string, unknown>>;
 }
 
 export interface SaveBrushSplitRequest {
@@ -322,7 +303,6 @@ export const saveBrushSplits = async (
       original: split.original,
       handle: split.handle,
       knot: split.knot,
-      match_type: split.match_type,
       validated: split.validated,
       corrected: split.corrected,
       system_handle: split.system_handle,
@@ -351,17 +331,20 @@ export const saveBrushSplits = async (
 };
 
 // Error handling utility
-export const handleApiError = (error: any): string => {
-  if (error.response) {
-    // Server responded with error status
-    return error.response.data?.detail || `Server error: ${error.response.status}`;
-  } else if (error.request) {
-    // Request was made but no response received
-    return 'Network error: Unable to reach the server';
-  } else {
-    // Something else happened
-    return error.message || 'An unexpected error occurred';
+export const handleApiError = (error: unknown): string => {
+  if (error && typeof error === 'object' && 'response' in error) {
+    const apiError = error as { response: { data?: { message?: string }; status?: number } };
+    if (apiError.response?.data?.message) {
+      return apiError.response.data.message;
+    }
+    if (apiError.response?.status) {
+      return `HTTP ${apiError.response.status} error`;
+    }
   }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'An unexpected error occurred';
 };
 
 // Filtered entries operations
@@ -382,7 +365,7 @@ export interface FilteredEntryRequest {
 export interface FilteredEntryResponse {
   success: boolean;
   message: string;
-  data?: any;
+  data?: Record<string, unknown>;
   added_count: number;
   removed_count: number;
   errors: string[];

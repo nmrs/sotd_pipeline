@@ -1,8 +1,4 @@
-import {
-  createGenericTransformer,
-  TransformerConfig,
-  ProductType,
-} from '../genericDataTransformer';
+import { createGenericTransformer, TransformerConfig } from '../genericDataTransformer';
 
 // Mock product type interfaces for testing
 interface RazorMatcherOutput {
@@ -56,16 +52,30 @@ interface SoapMatcherOutput {
   };
 }
 
-// Generic product data interface
-interface ProductData {
-  main: {
-    text: string;
-    count: number;
-    comment_ids: string[];
-    examples: string[];
-    status: 'Matched' | 'Unmatched' | 'Filtered';
+interface BrushMatcherOutput {
+  item: string;
+  count: number;
+  comment_ids: string[];
+  examples: string[];
+  matched?: {
+    handle?: {
+      source_text: string;
+      brand: string;
+    };
+    knot?: {
+      source_text: string;
+      brand: string;
+    };
   };
-  components?: Record<string, any>;
+}
+
+interface TestData {
+  item?: string;
+  count?: number;
+  comment_ids?: string[];
+  examples?: string[];
+  match_type?: string;
+  matched?: unknown;
 }
 
 describe('Generic Data Transformer', () => {
@@ -73,15 +83,16 @@ describe('Generic Data Transformer', () => {
     test('should create transformer with basic configuration', () => {
       const config: TransformerConfig = {
         productType: 'razor',
-        extractMainData: (data: any) => ({
-          text: data.item,
-          count: data.count,
-          comment_ids: data.comment_ids,
-          examples: data.examples,
-          status: data.matched ? 'Matched' : 'Unmatched',
+        extractMainData: (data: unknown) => ({
+          text: (data as RazorMatcherOutput).item,
+          count: (data as RazorMatcherOutput).count,
+          comment_ids: (data as RazorMatcherOutput).comment_ids,
+          examples: (data as RazorMatcherOutput).examples,
+          status: (data as RazorMatcherOutput).matched ? 'Matched' : 'Unmatched',
         }),
-        extractComponents: (data: any) => ({}),
-        determineStatus: (data: any) => (data.matched ? 'Matched' : 'Unmatched'),
+        extractComponents: () => ({}),
+        determineStatus: (data: unknown) =>
+          (data as RazorMatcherOutput).matched ? 'Matched' : 'Unmatched',
       };
 
       const transformer = createGenericTransformer(config);
@@ -93,15 +104,16 @@ describe('Generic Data Transformer', () => {
     test('should transform razor data correctly', () => {
       const razorConfig: TransformerConfig = {
         productType: 'razor',
-        extractMainData: (data: RazorMatcherOutput) => ({
-          text: data.item,
-          count: data.count,
-          comment_ids: data.comment_ids,
-          examples: data.examples,
-          status: data.matched ? 'Matched' : 'Unmatched',
+        extractMainData: (data: unknown) => ({
+          text: (data as RazorMatcherOutput).item,
+          count: (data as RazorMatcherOutput).count,
+          comment_ids: (data as RazorMatcherOutput).comment_ids,
+          examples: (data as RazorMatcherOutput).examples,
+          status: (data as RazorMatcherOutput).matched ? 'Matched' : 'Unmatched',
         }),
-        extractComponents: (data: RazorMatcherOutput) => ({}),
-        determineStatus: (data: RazorMatcherOutput) => (data.matched ? 'Matched' : 'Unmatched'),
+        extractComponents: () => ({}),
+        determineStatus: (data: unknown) =>
+          (data as RazorMatcherOutput).matched ? 'Matched' : 'Unmatched',
       };
 
       const transformer = createGenericTransformer(razorConfig);
@@ -127,15 +139,16 @@ describe('Generic Data Transformer', () => {
     test('should transform blade data correctly', () => {
       const bladeConfig: TransformerConfig = {
         productType: 'blade',
-        extractMainData: (data: BladeMatcherOutput) => ({
-          text: data.item,
-          count: data.count,
-          comment_ids: data.comment_ids,
-          examples: data.examples,
-          status: data.matched ? 'Matched' : 'Unmatched',
+        extractMainData: (data: unknown) => ({
+          text: (data as BladeMatcherOutput).item,
+          count: (data as BladeMatcherOutput).count,
+          comment_ids: (data as BladeMatcherOutput).comment_ids,
+          examples: (data as BladeMatcherOutput).examples,
+          status: (data as BladeMatcherOutput).matched ? 'Matched' : 'Unmatched',
         }),
-        extractComponents: (data: BladeMatcherOutput) => ({}),
-        determineStatus: (data: BladeMatcherOutput) => (data.matched ? 'Matched' : 'Unmatched'),
+        extractComponents: () => ({}),
+        determineStatus: (data: unknown) =>
+          (data as BladeMatcherOutput).matched ? 'Matched' : 'Unmatched',
       };
 
       const transformer = createGenericTransformer(bladeConfig);
@@ -159,15 +172,16 @@ describe('Generic Data Transformer', () => {
     test('should transform soap data correctly', () => {
       const soapConfig: TransformerConfig = {
         productType: 'soap',
-        extractMainData: (data: SoapMatcherOutput) => ({
-          text: data.item,
-          count: data.count,
-          comment_ids: data.comment_ids,
-          examples: data.examples,
-          status: data.matched ? 'Matched' : 'Unmatched',
+        extractMainData: (_data: unknown) => ({
+          text: (_data as SoapMatcherOutput).item,
+          count: (_data as SoapMatcherOutput).count,
+          comment_ids: (_data as SoapMatcherOutput).comment_ids,
+          examples: (_data as SoapMatcherOutput).examples,
+          status: (_data as SoapMatcherOutput).matched ? 'Matched' : 'Unmatched',
         }),
-        extractComponents: (data: SoapMatcherOutput) => ({}),
-        determineStatus: (data: SoapMatcherOutput) => (data.matched ? 'Matched' : 'Unmatched'),
+        extractComponents: () => ({}),
+        determineStatus: (data: unknown) =>
+          (data as SoapMatcherOutput).matched ? 'Matched' : 'Unmatched',
       };
 
       const transformer = createGenericTransformer(soapConfig);
@@ -193,24 +207,24 @@ describe('Generic Data Transformer', () => {
     test('should handle null/undefined input gracefully', () => {
       const config: TransformerConfig = {
         productType: 'razor',
-        extractMainData: (data: any) => ({
-          text: data?.item || '',
-          count: data?.count || 0,
-          comment_ids: data?.comment_ids || [],
-          examples: data?.examples || [],
+        extractMainData: (data: unknown) => ({
+          text: (data as TestData | null | undefined)?.item || '',
+          count: (data as TestData | null | undefined)?.count || 0,
+          comment_ids: (data as TestData | null | undefined)?.comment_ids || [],
+          examples: (data as TestData | null | undefined)?.examples || [],
           status: 'Unmatched',
         }),
-        extractComponents: (data: any) => ({}),
-        determineStatus: (data: any) => 'Unmatched',
+        extractComponents: () => ({}),
+        determineStatus: () => 'Unmatched',
       };
 
       const transformer = createGenericTransformer(config);
 
-      const nullResult = transformer.transform(null as any);
+      const nullResult = transformer.transform(null as TestData | null | undefined);
       expect(nullResult.main.text).toBe('');
       expect(nullResult.main.count).toBe(0);
 
-      const undefinedResult = transformer.transform(undefined as any);
+      const undefinedResult = transformer.transform(undefined as TestData | null | undefined);
       expect(undefinedResult.main.text).toBe('');
       expect(undefinedResult.main.count).toBe(0);
     });
@@ -218,15 +232,16 @@ describe('Generic Data Transformer', () => {
     test('should transform arrays correctly', () => {
       const config: TransformerConfig = {
         productType: 'razor',
-        extractMainData: (data: RazorMatcherOutput) => ({
-          text: data.item,
-          count: data.count,
-          comment_ids: data.comment_ids,
-          examples: data.examples,
-          status: data.matched ? 'Matched' : 'Unmatched',
+        extractMainData: (data: unknown) => ({
+          text: (data as RazorMatcherOutput).item,
+          count: (data as RazorMatcherOutput).count,
+          comment_ids: (data as RazorMatcherOutput).comment_ids,
+          examples: (data as RazorMatcherOutput).examples,
+          status: (data as RazorMatcherOutput).matched ? 'Matched' : 'Unmatched',
         }),
-        extractComponents: (data: RazorMatcherOutput) => ({}),
-        determineStatus: (data: RazorMatcherOutput) => (data.matched ? 'Matched' : 'Unmatched'),
+        extractComponents: () => ({}),
+        determineStatus: (data: unknown) =>
+          (data as RazorMatcherOutput).matched ? 'Matched' : 'Unmatched',
       };
 
       const transformer = createGenericTransformer(config);
@@ -258,30 +273,32 @@ describe('Generic Data Transformer', () => {
     test('should handle complex component extraction', () => {
       const config: TransformerConfig = {
         productType: 'brush',
-        extractMainData: (data: any) => ({
-          text: data.item,
-          count: data.count,
-          comment_ids: data.comment_ids,
-          examples: data.examples,
-          status: data.matched ? 'Matched' : 'Unmatched',
+        extractMainData: (data: unknown) => ({
+          text: (data as BrushMatcherOutput).item,
+          count: (data as BrushMatcherOutput).count,
+          comment_ids: (data as BrushMatcherOutput).comment_ids,
+          examples: (data as BrushMatcherOutput).examples,
+          status: (data as BrushMatcherOutput).matched ? 'Matched' : 'Unmatched',
         }),
-        extractComponents: (data: any) => {
-          const components: Record<string, any> = {};
-          if (data.matched?.handle) {
+        extractComponents: (data: unknown) => {
+          const brushData = data as BrushMatcherOutput;
+          const components: Record<string, unknown> = {};
+          if (brushData.matched?.handle) {
             components.handle = {
-              text: data.matched.handle.source_text || 'Unknown handle',
+              text: brushData.matched.handle.source_text || 'Unknown handle',
               status: 'Matched',
             };
           }
-          if (data.matched?.knot) {
+          if (brushData.matched?.knot) {
             components.knot = {
-              text: data.matched.knot.source_text || 'Unknown knot',
+              text: brushData.matched.knot.source_text || 'Unknown knot',
               status: 'Matched',
             };
           }
           return components;
         },
-        determineStatus: (data: any) => (data.matched ? 'Matched' : 'Unmatched'),
+        determineStatus: (data: unknown) =>
+          (data as BrushMatcherOutput).matched ? 'Matched' : 'Unmatched',
       };
 
       const transformer = createGenericTransformer(config);
@@ -304,27 +321,28 @@ describe('Generic Data Transformer', () => {
 
       const result = transformer.transform(brushData);
       expect(result.main.text).toBe('Elite handle w/ Declaration knot');
-      expect(result.components?.handle?.text).toBe('Elite handle');
-      expect(result.components?.knot?.text).toBe('Declaration knot');
+      expect((result.components?.handle as { text: string })?.text).toBe('Elite handle');
+      expect((result.components?.knot as { text: string })?.text).toBe('Declaration knot');
     });
 
     test('should handle validation errors gracefully', () => {
       const config: TransformerConfig = {
         productType: 'razor',
-        extractMainData: (data: any) => {
-          if (!data?.item) {
+        extractMainData: (data: unknown) => {
+          const testData = data as TestData;
+          if (!testData?.item) {
             throw new Error('Invalid item');
           }
           return {
-            text: data.item,
-            count: data.count || 0,
-            comment_ids: data.comment_ids || [],
-            examples: data.examples || [],
+            text: testData.item,
+            count: testData.count || 0,
+            comment_ids: testData.comment_ids || [],
+            examples: testData.examples || [],
             status: 'Unmatched',
           };
         },
-        extractComponents: (data: any) => ({}),
-        determineStatus: (data: any) => 'Unmatched',
+        extractComponents: () => ({}),
+        determineStatus: () => 'Unmatched',
       };
 
       const transformer = createGenericTransformer(config);
@@ -343,17 +361,18 @@ describe('Generic Data Transformer', () => {
     test('should support custom status determination', () => {
       const config: TransformerConfig = {
         productType: 'razor',
-        extractMainData: (data: any) => ({
-          text: data.item,
-          count: data.count,
-          comment_ids: data.comment_ids,
-          examples: data.examples,
+        extractMainData: (data: unknown) => ({
+          text: (data as TestData).item || '',
+          count: (data as TestData).count || 0,
+          comment_ids: (data as TestData).comment_ids || [],
+          examples: (data as TestData).examples || [],
           status: 'Unmatched', // Will be overridden by determineStatus
         }),
-        extractComponents: (data: any) => ({}),
-        determineStatus: (data: any) => {
-          if (data.match_type === 'filtered') return 'Filtered';
-          if (data.matched) return 'Matched';
+        extractComponents: () => ({}),
+        determineStatus: (data: unknown) => {
+          const testData = data as TestData;
+          if (testData.match_type === 'filtered') return 'Filtered';
+          if (testData.matched) return 'Matched';
           return 'Unmatched';
         },
       };

@@ -10,7 +10,6 @@ import {
 } from '../services/api';
 import MonthSelector from '../components/forms/MonthSelector';
 import LoadingSpinner from '../components/layout/LoadingSpinner';
-import ErrorDisplay from '../components/feedback/ErrorDisplay';
 import { UnmatchedAnalyzerDataTable } from '../components/data/UnmatchedAnalyzerDataTable';
 import PerformanceMonitor from '../components/domain/PerformanceMonitor';
 import CommentModal from '../components/domain/CommentModal';
@@ -23,22 +22,6 @@ import { useSearchSort } from '../hooks/useSearchSort';
 import { useMessaging } from '../hooks/useMessaging';
 import MessageDisplay from '../components/feedback/MessageDisplay';
 import { checkFilteredStatus } from '../services/api';
-
-// Hook to get screen width
-const useScreenWidth = () => {
-  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setScreenWidth(window.innerWidth);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  return screenWidth;
-};
 
 const UnmatchedAnalyzer: React.FC = () => {
   const [selectedField, setSelectedField] = useState<string>('razor');
@@ -62,7 +45,13 @@ const UnmatchedAnalyzer: React.FC = () => {
 
   // Search and sort hook
   const searchSort = useSearchSort({
-    items: results?.unmatched_items || [],
+    items: (results?.unmatched_items || []) as Array<{
+      item: string;
+      count: number;
+      comment_ids?: string[];
+      examples?: string[];
+      [key: string]: unknown;
+    }>,
     showFiltered: viewState.showFiltered,
     filteredStatus,
   });
@@ -70,46 +59,46 @@ const UnmatchedAnalyzer: React.FC = () => {
   // Messaging hook
   const messaging = useMessaging();
 
-  // Screen width hook for dynamic column sizing
-  const screenWidth = useScreenWidth();
-
   // Load filtered status from backend
-  const loadFilteredStatus = useCallback(async (items: any[], category: string) => {
-    if (!items || items.length === 0) return;
+  const loadFilteredStatus = useCallback(
+    async (items: Array<{ item: string }>, category: string) => {
+      if (!items || items.length === 0) return;
 
-    try {
-      const entries = items.map(item => ({
-        category,
-        name: item.item,
-      }));
+      try {
+        const entries = items.map(item => ({
+          category,
+          name: item.item,
+        }));
 
-      console.log('Loading filtered status for:', category, 'entries:', entries);
-      console.log(
-        'Entries being sent to backend:',
-        entries.map(e => e.name)
-      );
-      const response = await checkFilteredStatus({ entries });
+        console.log('Loading filtered status for:', category, 'entries:', entries);
+        console.log(
+          'Entries being sent to backend:',
+          entries.map(e => e.name)
+        );
+        const response = await checkFilteredStatus({ entries });
 
-      if (response.success) {
-        const newFilteredStatus: Record<string, boolean> = {};
+        if (response.success) {
+          const newFilteredStatus: Record<string, boolean> = {};
 
-        // Parse the response data to extract filtered status
-        Object.entries(response.data).forEach(([key, isFiltered]) => {
-          // Key format is "category:itemName"
-          const itemName = key.split(':')[1];
-          if (itemName) {
-            newFilteredStatus[itemName] = isFiltered;
-          }
-        });
+          // Parse the response data to extract filtered status
+          Object.entries(response.data).forEach(([key, isFiltered]) => {
+            // Key format is "category:itemName"
+            const itemName = key.split(':')[1];
+            if (itemName) {
+              newFilteredStatus[itemName] = isFiltered;
+            }
+          });
 
-        console.log('Loaded filtered status:', newFilteredStatus);
-        setFilteredStatus(newFilteredStatus);
+          console.log('Loaded filtered status:', newFilteredStatus);
+          setFilteredStatus(newFilteredStatus);
+        }
+      } catch (err: unknown) {
+        console.warn('Failed to load filtered status:', err);
+        // Don't show error to user, just log it
       }
-    } catch (err: any) {
-      console.warn('Failed to load filtered status:', err);
-      // Don't show error to user, just log it
-    }
-  }, []);
+    },
+    []
+  );
 
   const fieldOptions = [
     { value: 'razor', label: 'Razor' },
@@ -159,7 +148,7 @@ const UnmatchedAnalyzer: React.FC = () => {
       } else {
         throw new Error('Invalid response format from API');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage = handleApiError(err);
 
       // Provide specific recovery suggestions based on error type
@@ -198,13 +187,16 @@ const UnmatchedAnalyzer: React.FC = () => {
     }
   };
 
-  const formatExamples = (examples: string[]) => {
-    if (examples.length === 0) return 'No examples available';
-    return examples.slice(0, 3).join(', ') + (examples.length > 3 ? '...' : '');
-  };
-
   // Transform API response data to BrushTable format
-  const transformApiDataToBrushTable = (items: any[]): BrushData[] => {
+  const transformApiDataToBrushTable = (
+    items: Array<{
+      item: string;
+      count: number;
+      comment_ids: string[];
+      examples: string[];
+      unmatched?: Record<string, unknown>;
+    }>
+  ): BrushData[] => {
     const result = items.map(item => {
       const transformed = {
         main: {
@@ -215,20 +207,27 @@ const UnmatchedAnalyzer: React.FC = () => {
           status: 'Unmatched' as const,
         },
         components: {
-          handle: item.unmatched?.handle
-            ? {
-                text: item.unmatched.handle.text,
-                status: 'Unmatched' as const,
-                pattern: item.unmatched.handle.pattern,
-              }
-            : undefined,
-          knot: item.unmatched?.knot
-            ? {
-                text: item.unmatched.knot.text,
-                status: 'Unmatched' as const,
-                pattern: item.unmatched.knot.pattern,
-              }
-            : undefined,
+          handle:
+            item.unmatched?.handle &&
+            typeof item.unmatched.handle === 'object' &&
+            'text' in item.unmatched.handle
+              ? {
+                  text: (item.unmatched.handle as { text: string }).text,
+                  status: 'Unmatched' as const,
+                  pattern:
+                    (item.unmatched.handle as { pattern: string; text: string }).pattern || '',
+                }
+              : undefined,
+          knot:
+            item.unmatched?.knot &&
+            typeof item.unmatched.knot === 'object' &&
+            'text' in item.unmatched.knot
+              ? {
+                  text: (item.unmatched.knot as { text: string }).text,
+                  status: 'Unmatched' as const,
+                  pattern: (item.unmatched.knot as { pattern: string; text: string }).pattern || '',
+                }
+              : undefined,
         },
       };
 
@@ -241,7 +240,14 @@ const UnmatchedAnalyzer: React.FC = () => {
   // Memoize the transformed brush data to prevent unnecessary re-renders
   const transformedBrushData = useMemo(() => {
     if (selectedField === 'brush' && searchSort.filteredAndSortedItems) {
-      const data = transformApiDataToBrushTable(searchSort.filteredAndSortedItems as any[]);
+      const data = transformApiDataToBrushTable(
+        searchSort.filteredAndSortedItems as Array<{
+          item: string;
+          count: number;
+          comment_ids: string[];
+          examples: string[];
+        }>
+      );
       return data;
     }
     return [];
@@ -272,7 +278,7 @@ const UnmatchedAnalyzer: React.FC = () => {
       const comment = await getCommentDetail(commentId, selectedMonths);
       setSelectedComment(comment);
       setCommentModalOpen(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       messaging.addErrorMessage(handleApiError(err));
     } finally {
       setCommentLoading(false);
@@ -390,8 +396,9 @@ const UnmatchedAnalyzer: React.FC = () => {
       messaging.addSuccessMessage(
         `Updated ${Object.keys(pendingChanges).length} entries successfully`
       );
-    } catch (err: any) {
-      messaging.addErrorMessage(err.message || 'Failed to update filtered entries');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update filtered entries';
+      messaging.addErrorMessage(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -430,7 +437,7 @@ const UnmatchedAnalyzer: React.FC = () => {
           : result.message;
         messaging.addErrorMessage(errorMessage);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       messaging.addErrorMessage(handleApiError(err));
     } finally {
       setMatchPhaseLoading(false);
@@ -741,7 +748,7 @@ const UnmatchedAnalyzer: React.FC = () => {
         ) : (
           <div className='flex items-center justify-center h-full'>
             <div className='text-lg text-gray-600'>
-              Please select months and click "Analyze" to begin.
+              Please select months and click &quot;Analyze&quot; to begin.
             </div>
           </div>
         )}

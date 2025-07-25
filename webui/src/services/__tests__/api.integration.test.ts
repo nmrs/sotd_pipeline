@@ -4,8 +4,6 @@
  * These tests verify the API interface and types without hitting real endpoints
  */
 
-import { saveBrushSplit, loadBrushSplits } from '../api';
-
 describe('API Integration - Should Not Split Feature (Interface Tests)', () => {
   test('saveBrushSplit accepts should_not_split field', async () => {
     const brushSplit = {

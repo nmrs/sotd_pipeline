@@ -1,13 +1,13 @@
 import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 
-export interface DataTableColumn<T = any> {
+export interface DataTableColumn<T = unknown> {
   key: string;
   header: string;
   width?: number;
-  render?: (value: any, row: T) => React.ReactNode;
+  render?: (value: unknown, row: T) => React.ReactNode;
 }
 
-export interface GenericDataTableProps<T = any> {
+export interface GenericDataTableProps<T = unknown> {
   data: T[];
   columns: DataTableColumn<T>[];
   onRowClick?: (row: T) => void;
@@ -22,7 +22,7 @@ export interface GenericDataTableProps<T = any> {
   enablePerformanceLogging?: boolean;
 }
 
-export function GenericDataTableOptimized<T = any>({
+export function GenericDataTableOptimized<T = unknown>({
   data,
   columns,
   onRowClick,
@@ -64,8 +64,8 @@ export function GenericDataTableOptimized<T = any>({
 
     const start = performance.now();
     const result = [...data].sort((a, b) => {
-      const aVal = (a as any)[sortColumn];
-      const bVal = (b as any)[sortColumn];
+      const aVal = (a as Record<string, unknown>)[sortColumn];
+      const bVal = (b as Record<string, unknown>)[sortColumn];
 
       if (aVal === bVal) return 0;
       if (aVal === null || aVal === undefined) return 1;
@@ -250,8 +250,8 @@ export function GenericDataTableOptimized<T = any>({
                     style={{ width: memoizedColumnWidths[column.key] }}
                   >
                     {column.render
-                      ? column.render((row as any)[column.key], row)
-                      : (row as any)[column.key]}
+                      ? column.render((row as Record<string, unknown>)[column.key], row)
+                      : String((row as Record<string, unknown>)[column.key] || '')}
                   </td>
                 ))}
               </tr>

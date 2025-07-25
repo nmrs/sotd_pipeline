@@ -1,11 +1,17 @@
 import { useState, useCallback, useMemo } from 'react';
 import { updateFilteredEntries, FilteredEntryRequest } from '../services/api';
 
+interface FilteredItem {
+  item: string;
+  comment_ids?: string[];
+  [key: string]: unknown;
+}
+
 export interface UseFilteredStateOptions {
   category: string;
   month: string;
   selectedItems: Set<string>;
-  items: any[];
+  items: FilteredItem[];
   onSuccess?: (message: string) => void;
   onError?: (message: string) => void;
 }
@@ -130,10 +136,14 @@ export const useFilteredState = ({
             : response.message || 'Failed to update filtered entries';
         onError?.(errorMessage);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage =
-        error.response?.data?.detail || error.message || 'Failed to update filtered entries';
-      onError?.(errorMessage);
+        error && typeof error === 'object' && 'response' in error
+          ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail
+          : error instanceof Error
+            ? error.message
+            : 'Failed to update filtered entries';
+      onError?.(errorMessage || 'Failed to update filtered entries');
     } finally {
       setIsUpdating(false);
     }

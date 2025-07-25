@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import {
   FormField,
@@ -12,7 +11,21 @@ import {
 
 // Mock ShadCN components
 jest.mock('@/components/ui/input', () => ({
-  Input: ({ value, onChange, placeholder, disabled, className, type }: any) => (
+  Input: ({
+    value,
+    onChange,
+    placeholder,
+    disabled,
+    className,
+    type,
+  }: {
+    value?: string;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    placeholder?: string;
+    disabled?: boolean;
+    className?: string;
+    type?: string;
+  }) => (
     <input
       type={type}
       value={value}
@@ -26,28 +39,48 @@ jest.mock('@/components/ui/input', () => ({
 }));
 
 jest.mock('@/components/ui/select', () => ({
-  Select: ({ value, onValueChange, disabled, children }: any) => (
+  Select: ({
+    value,
+    onValueChange,
+    disabled,
+    children,
+  }: {
+    value?: string;
+    onValueChange?: (value: string) => void;
+    disabled?: boolean;
+    children?: React.ReactNode;
+  }) => (
     <select
       value={value}
-      onChange={e => onValueChange(e.target.value)}
+      onChange={e => onValueChange?.(e.target.value)}
       disabled={disabled}
       data-testid='shadcn-select'
     >
       {children}
     </select>
   ),
-  SelectContent: ({ children }: any) => <div data-testid='select-content'>{children}</div>,
-  SelectItem: ({ value, children, disabled }: any) => (
+  SelectContent: ({ children }: { children?: React.ReactNode }) => (
+    <div data-testid='select-content'>{children}</div>
+  ),
+  SelectItem: ({
+    value,
+    children,
+    disabled,
+  }: {
+    value?: string;
+    children?: React.ReactNode;
+    disabled?: boolean;
+  }) => (
     <option value={value} disabled={disabled} data-testid={`select-item-${value}`}>
       {children}
     </option>
   ),
-  SelectTrigger: ({ children, className }: any) => (
+  SelectTrigger: ({ children, className }: { children?: React.ReactNode; className?: string }) => (
     <div className={className} data-testid='select-trigger'>
       {children}
     </div>
   ),
-  SelectValue: ({ placeholder, value }: any) => (
+  SelectValue: ({ placeholder, value }: { placeholder?: string; value?: string }) => (
     <span data-testid='select-value' data-placeholder={placeholder}>
       {value || placeholder}
     </span>
@@ -55,11 +88,21 @@ jest.mock('@/components/ui/select', () => ({
 }));
 
 jest.mock('@/components/ui/checkbox', () => ({
-  Checkbox: ({ checked, onCheckedChange, disabled, className }: any) => (
+  Checkbox: ({
+    checked,
+    onCheckedChange,
+    disabled,
+    className,
+  }: {
+    checked?: boolean;
+    onCheckedChange?: (checked: boolean) => void;
+    disabled?: boolean;
+    className?: string;
+  }) => (
     <input
       type='checkbox'
       checked={checked}
-      onChange={e => onCheckedChange(e.target.checked)}
+      onChange={e => onCheckedChange?.(e.target.checked)}
       disabled={disabled}
       className={className}
       data-testid='shadcn-checkbox'

@@ -8,7 +8,7 @@
  * @module BrushDataTransformer
  */
 
-import { createBrushTransformer, ProductData } from './genericDataTransformer';
+import { createBrushTransformer } from './genericDataTransformer';
 
 /**
  * Brush matcher output structure from the backend API

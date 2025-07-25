@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo, memo } from 'react';
+import React, { useCallback, useMemo, memo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 
@@ -37,7 +37,7 @@ const MemoizedCell = memo<{
 MemoizedCell.displayName = 'MemoizedCell';
 
 export const PerformanceDataTable = memo<PerformanceDataTableProps>(
-  ({ data, enablePerformanceLogging = false, onSort, testId = 'performance-data-table' }) => {
+  ({ data, enablePerformanceLogging = false, testId = 'performance-data-table' }) => {
     // Performance logging
     const logPerformance = useCallback(
       (operation: string, startTime: number) => {
@@ -126,46 +126,22 @@ export const PerformanceDataTable = memo<PerformanceDataTableProps>(
       []
     );
 
-    // Handle sort operations with performance logging
-    const handleSort = useCallback(
-      (column: string, direction: 'asc' | 'desc') => {
-        const startTime = performance.now();
-
-        if (onSort) {
-          onSort(column, direction);
-        }
-
-        logPerformance('sort operation', startTime);
-      },
-      [onSort, logPerformance]
-    );
-
-    // Handle empty data gracefully
-    if (!data || data.length === 0) {
-      return (
-        <div
-          className='flex items-center justify-center p-8 text-gray-500'
-          role='status'
-          aria-live='polite'
-          data-testid={testId}
-        >
-          <p>No performance data to display</p>
-        </div>
-      );
-    }
-
     // Performance metrics display
     const performanceMetrics = useMemo(() => {
-      if (!enablePerformanceLogging) return null;
-
       const startTime = performance.now();
+
+      // Filter out null/undefined items and handle malformed data gracefully
+      const validData = data.filter(item => item && typeof item === 'object');
+
       const metrics = {
-        totalRows: data.length,
-        uniqueStatuses: new Set(data.map(item => item.status)).size,
-        activeUsers: data.filter(item => item.status === 'active').length,
+        totalRows: validData.length,
+        uniqueStatuses: new Set(validData.map(item => item?.status).filter(Boolean)).size,
+        activeUsers: validData.filter(item => item?.status === 'active').length,
       };
 
       logPerformance('metrics calculation', startTime);
+
+      if (!enablePerformanceLogging) return null;
 
       return (
         <div
@@ -192,6 +168,20 @@ export const PerformanceDataTable = memo<PerformanceDataTableProps>(
       );
     }, [data, enablePerformanceLogging, logPerformance]);
 
+    // Handle empty data gracefully
+    if (!data || data.length === 0) {
+      return (
+        <div
+          className='flex items-center justify-center p-8 text-gray-500'
+          role='status'
+          aria-live='polite'
+          data-testid={testId}
+        >
+          <p>No performance data to display</p>
+        </div>
+      );
+    }
+
     return (
       <div
         className='space-y-4'
@@ -206,8 +196,6 @@ export const PerformanceDataTable = memo<PerformanceDataTableProps>(
         <DataTable
           columns={columns}
           data={data}
-          height={400}
-          itemSize={48}
           resizable={true}
           showColumnVisibility={true}
           searchKey='name'

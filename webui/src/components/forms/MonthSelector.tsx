@@ -1,17 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useAvailableMonths } from '../../hooks/useAvailableMonths';
 import LoadingSpinner from '../layout/LoadingSpinner';
 import ErrorDisplay from '../feedback/ErrorDisplay';
-import { SelectInput, FormField } from '../ui/reusable-forms';
+import { SelectInput } from '../ui/reusable-forms';
 import { SecondaryButton } from '../ui/reusable-buttons';
 
 interface MonthSelectorProps {

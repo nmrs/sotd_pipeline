@@ -1,8 +1,9 @@
 import React from 'react';
-import { CommentDetail } from '../services/api';
+import { CommentDetail } from '../../services/api';
 
 interface CommentModalProps {
   comment: CommentDetail | null;
+  commentId?: string;
   isOpen: boolean;
   onClose: () => void;
 }

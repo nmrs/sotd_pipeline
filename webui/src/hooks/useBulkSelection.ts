@@ -9,7 +9,7 @@ export interface BulkSelectionState {
 }
 
 export interface UseBulkSelectionOptions {
-  items: Array<{ item: string; [key: string]: any }>;
+  items: Array<{ item: string; [key: string]: unknown }>;
   filteredStatus: Record<string, boolean>;
   onSelectionChange?: (selectedItems: Set<string>) => void;
 }

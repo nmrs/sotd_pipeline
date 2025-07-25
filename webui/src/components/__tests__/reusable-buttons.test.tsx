@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import {
   PrimaryButton,
@@ -10,17 +9,32 @@ import {
 
 // Mock ShadCN Button component
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, disabled, className, type, variant }: any) => (
+  Button: ({
+    children,
+    onClick,
+    disabled,
+    className,
+    type,
+    variant,
+  }: {
+    children?: React.ReactNode;
+    onClick?: (e: React.MouseEvent) => void;
+    disabled?: boolean;
+    className?: string;
+    type?: string;
+    variant?: string;
+  }) => (
     <button
       onClick={onClick}
       onKeyDown={e => {
         if (e.key === 'Enter' || e.key === ' ') {
-          onClick && onClick(e);
+          // For testing purposes, just call onClick with a mock event
+          onClick && onClick({} as React.MouseEvent<HTMLButtonElement>);
         }
       }}
       disabled={disabled}
       className={className}
-      type={type}
+      type={type as 'button' | 'submit' | 'reset' | undefined}
       data-testid={`button-${variant || 'default'}`}
     >
       {children}

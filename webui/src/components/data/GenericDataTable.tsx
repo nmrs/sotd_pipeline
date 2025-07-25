@@ -1,13 +1,13 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 
-export interface DataTableColumn<T = any> {
+export interface DataTableColumn<T = unknown> {
   key: string;
   header: string;
   width?: number;
-  render?: (value: any, row: T) => React.ReactNode;
+  render?: (value: unknown, row: T) => React.ReactNode;
 }
 
-export interface GenericDataTableProps<T = any> {
+export interface GenericDataTableProps<T = unknown> {
   data: T[];
   columns: DataTableColumn<T>[];
   onRowClick?: (row: T) => void;
@@ -22,7 +22,7 @@ export interface GenericDataTableProps<T = any> {
   enablePerformanceLogging?: boolean;
 }
 
-export function GenericDataTable<T = any>({
+export function GenericDataTable<T = unknown>({
   data,
   columns,
   onRowClick,
@@ -64,8 +64,8 @@ export function GenericDataTable<T = any>({
 
     const start = performance.now();
     const result = [...data].sort((a, b) => {
-      const aVal = (a as any)[sortColumn];
-      const bVal = (b as any)[sortColumn];
+      const aVal = (a as Record<string, unknown>)[sortColumn];
+      const bVal = (b as Record<string, unknown>)[sortColumn];
 
       if (aVal === bVal) return 0;
       if (aVal === null || aVal === undefined) return 1;
@@ -108,34 +108,37 @@ export function GenericDataTable<T = any>({
     }
   };
 
-  const handleResizeMove = (e: MouseEvent) => {
-    if (!isResizing) return;
+  const handleResizeMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing) return;
 
-    resizeCount.current++;
-    const deltaX = e.clientX - startX;
-    const newWidth = Math.max(50, startWidth + deltaX);
+      resizeCount.current++;
+      const deltaX = e.clientX - startX;
+      const newWidth = Math.max(50, startWidth + deltaX);
 
-    // Measure resize performance
-    const start = performance.now();
-    setColumnWidths(prev => ({
-      ...prev,
-      [isResizing]: newWidth,
-    }));
-    const end = performance.now();
+      // Measure resize performance
+      const start = performance.now();
+      setColumnWidths(prev => ({
+        ...prev,
+        [isResizing]: newWidth,
+      }));
+      const end = performance.now();
 
-    // Log every 10th resize operation to avoid spam
-    if (enablePerformanceLogging && resizeCount.current % 10 === 0) {
-      console.log(`Resize operation ${resizeCount.current}: ${end - start}ms`);
-    }
-  };
+      // Log every 10th resize operation to avoid spam
+      if (enablePerformanceLogging && resizeCount.current % 10 === 0) {
+        console.log(`Resize operation ${resizeCount.current}: ${end - start}ms`);
+      }
+    },
+    [isResizing, startX, startWidth, enablePerformanceLogging]
+  );
 
-  const handleResizeEnd = () => {
+  const handleResizeEnd = useCallback(() => {
     const totalTime = performance.now() - resizeStartTime.current;
     if (enablePerformanceLogging) {
       console.log(`Resize complete: ${totalTime}ms total, ${resizeCount.current} operations`);
     }
     setIsResizing(null);
-  };
+  }, [enablePerformanceLogging]);
 
   useEffect(() => {
     if (isResizing) {
@@ -151,7 +154,7 @@ export function GenericDataTable<T = any>({
         document.body.style.userSelect = '';
       };
     }
-  }, [isResizing]);
+  }, [isResizing, handleResizeMove, handleResizeEnd]);
 
   if (loading) {
     return (
@@ -219,8 +222,8 @@ export function GenericDataTable<T = any>({
                     style={{ width: currentColumnWidths[column.key] }}
                   >
                     {column.render
-                      ? column.render((row as any)[column.key], row)
-                      : (row as any)[column.key]}
+                      ? column.render((row as Record<string, unknown>)[column.key], row)
+                      : String((row as Record<string, unknown>)[column.key] || '')}
                   </td>
                 ))}
               </tr>

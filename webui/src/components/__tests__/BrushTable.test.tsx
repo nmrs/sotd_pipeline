@@ -1,9 +1,8 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import BrushTable from '../data/BrushTable';
 
-// Mock ShadCN DataTable component
-jest.mock('@/components/ui/data-table', () => ({
+// Mock the ShadCN DataTable component
+jest.mock('../ui/data-table', () => ({
   DataTable: ({
     columns,
     data,
@@ -12,25 +11,39 @@ jest.mock('@/components/ui/data-table', () => ({
     resizable,
     showColumnVisibility,
     searchKey,
-  }: any) => (
+  }: {
+    columns: Array<{
+      accessorKey: string;
+      header: string;
+      cell?: (props: { row: { original: unknown } }) => React.ReactNode;
+    }>;
+    data: Array<Record<string, unknown>>;
+    height?: number;
+    itemSize?: number;
+    resizable?: boolean;
+    showColumnVisibility?: boolean;
+    searchKey?: string;
+  }) => (
     <div data-testid='shadcn-data-table'>
       <div data-testid='data-table-props'>
         {JSON.stringify({ height, itemSize, resizable, showColumnVisibility, searchKey })}
       </div>
       <div data-testid='data-table-columns'>
-        {columns.map((col: any, index: number) => (
+        {columns.map((col, index: number) => (
           <div key={index} data-testid={`column-${col.accessorKey}`}>
             {col.header}
           </div>
         ))}
       </div>
       <div data-testid='data-table-data'>
-        {data.map((item: any, index: number) => (
+        {data.map((item, index: number) => (
           <div key={index} data-testid={`row-${index}`}>
             {/* Render each column's cell content */}
-            {columns.map((col: any, colIndex: number) => (
+            {columns.map((col, colIndex: number) => (
               <div key={colIndex} data-testid={`cell-${col.accessorKey}-${index}`}>
-                {col.cell ? col.cell({ row: { original: item } }) : item[col.accessorKey]}
+                {col.cell
+                  ? col.cell({ row: { original: item } })
+                  : String(item[col.accessorKey] || '')}
               </div>
             ))}
           </div>
@@ -43,7 +56,15 @@ jest.mock('@/components/ui/data-table', () => ({
 // Mock FilteredEntryCheckbox component
 jest.mock('../forms/FilteredEntryCheckbox', () => ({
   __esModule: true,
-  default: ({ itemName, isFiltered, onStatusChange, uniqueId }: any) => (
+  default: ({
+    itemName,
+    isFiltered,
+    onStatusChange,
+  }: {
+    itemName: string;
+    isFiltered: boolean;
+    onStatusChange?: (checked: boolean) => void;
+  }) => (
     <div data-testid={`checkbox-${itemName}`}>
       <input
         data-testid={`checkbox-input-${itemName}`}
@@ -203,7 +224,7 @@ describe('BrushTable', () => {
     it('handles null/undefined items gracefully', () => {
       render(
         <BrushTable
-          items={null as any}
+          items={[]}
           onBrushFilter={jest.fn()}
           onComponentFilter={jest.fn()}
           columnWidths={mockColumnWidths}

@@ -1,31 +1,33 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { BrushDataTable } from '../data/BrushDataTable';
+import type { BrushDataTableProps } from '../data/BrushDataTable';
 
-// Mock ShadCN DataTable component
-jest.mock('@/components/ui/data-table', () => ({
+// Mock the ShadCN DataTable component
+jest.mock('../ui/data-table', () => ({
   DataTable: ({
     columns,
     data,
-    height,
-    itemSize,
-    resizable,
     showColumnVisibility,
     searchKey,
-  }: any) => (
+  }: {
+    columns: Array<{ accessorKey: string; header: string }>;
+    data: Array<{ brand: string; model: string; level: number }>;
+    showColumnVisibility?: boolean;
+    searchKey?: string;
+  }) => (
     <div data-testid='shadcn-data-table'>
       <div data-testid='data-table-props'>
-        {JSON.stringify({ height, itemSize, resizable, showColumnVisibility, searchKey })}
+        {JSON.stringify({ showColumnVisibility, searchKey })}
       </div>
       <div data-testid='data-table-columns'>
-        {columns.map((col: any, index: number) => (
+        {columns.map((col, index: number) => (
           <div key={index} data-testid={`column-${col.accessorKey}`}>
             {col.header}
           </div>
         ))}
       </div>
       <div data-testid='data-table-data'>
-        {data.map((item: any, index: number) => (
+        {data.map((item, index: number) => (
           <div key={index} data-testid={`row-${index}`}>
             {item.brand} - {item.model} - {item.level === 0 ? 'main' : 'subrow'}
           </div>
@@ -112,9 +114,6 @@ describe('BrushDataTable', () => {
       const propsElement = screen.getByTestId('data-table-props');
       const props = JSON.parse(propsElement.textContent || '{}');
 
-      expect(props.height).toBe(400);
-      expect(props.itemSize).toBe(48);
-      expect(props.resizable).toBe(true);
       expect(props.showColumnVisibility).toBe(true);
       expect(props.searchKey).toBe('brand');
     });
@@ -149,8 +148,6 @@ describe('BrushDataTable', () => {
     });
 
     it('handles subrow toggle callbacks', () => {
-      const onSubrowToggle = jest.fn();
-
       render(<BrushDataTable brushData={mockBrushData} />);
 
       // Subrow toggle is handled internally by the component
@@ -169,8 +166,6 @@ describe('BrushDataTable', () => {
 
   describe('Row Interaction', () => {
     it('handles row click callbacks', () => {
-      const onRowClick = jest.fn();
-
       render(<BrushDataTable brushData={mockBrushData} />);
 
       // Row click is handled through cell click handlers
@@ -268,7 +263,10 @@ describe('BrushDataTable', () => {
         },
       ];
 
-      render(<BrushDataTable brushData={malformedData as any} />);
+      // Test with malformed data that includes null values
+      render(
+        <BrushDataTable brushData={malformedData as unknown as BrushDataTableProps['brushData']} />
+      );
 
       expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
     });
