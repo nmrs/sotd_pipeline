@@ -858,11 +858,15 @@ calculator = StatisticsCalculator(validator)
 
 
 @router.get("/load", response_model=LoadResponse, summary="Load brush splits from selected months")
-async def load_brush_splits(months: List[str] = Query(..., description="Months to load data from")):
+async def load_brush_splits(
+    months: List[str] = Query(..., description="Months to load data from"),
+    unmatched_only: bool = Query(True, description="Show only unmatched items"),
+):
     """Load brush strings from selected months with data processing.
 
     Args:
         months: List of months in YYYY-MM format to load data from
+        unmatched_only: If True, show only unmatched items. If False, show all items.
 
     Returns:
         LoadResponse containing brush splits and statistics
@@ -1074,6 +1078,27 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
                     occurrences=occurrences,
                 )
                 splits.append(split)
+
+        # Filter splits based on unmatched_only parameter
+        if unmatched_only:
+            # Show only unmatched items (where matched is None)
+            filtered_splits = []
+            for split in splits:
+                # Check if this split is unmatched by looking at the original data
+                # We need to check if the original brush had matched data
+                is_unmatched = True
+                for split_data in brush_splits.values():
+                    if split_data["original"] == split.original:
+                        # If match_type is not None, it's matched
+                        if split_data.get("match_type") is not None:
+                            is_unmatched = False
+                        break
+
+                if is_unmatched:
+                    filtered_splits.append(split)
+
+            splits = filtered_splits
+            logger.info(f"Filtered to {len(splits)} unmatched splits")
 
         # Calculate statistics with split type breakdown
         logger.info(f"Calculating statistics for {len(splits)} brush splits")

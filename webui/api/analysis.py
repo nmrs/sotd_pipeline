@@ -20,12 +20,15 @@ logger = logging.getLogger(__name__)
 
 try:
     from sotd.match.tools.analyzers.unmatched_analyzer import UnmatchedAnalyzer
+    from sotd.match.tools.analyzers.mismatch_analyzer import MismatchAnalyzer
 
     logger.info("✅ UnmatchedAnalyzer imported successfully")
+    logger.info("✅ MismatchAnalyzer imported successfully")
 except ImportError as e:
     # Fallback for development
-    logger.error(f"❌ Failed to import UnmatchedAnalyzer: {e}")
+    logger.error(f"❌ Failed to import analyzers: {e}")
     UnmatchedAnalyzer = None
+    MismatchAnalyzer = None
 
 router = APIRouter(prefix="/api/analyze", tags=["analysis"])
 
@@ -36,6 +39,18 @@ class UnmatchedAnalysisRequest(BaseModel):
     field: str = Field(..., description="Field to analyze (razor, blade, brush, soap)")
     months: List[str] = Field(..., description="List of months to analyze (YYYY-MM format)")
     limit: int = Field(default=50, ge=1, le=1000, description="Maximum number of results to return")
+
+
+class MismatchAnalysisRequest(BaseModel):
+    """Request model for mismatch analysis."""
+
+    field: str = Field(..., description="Field to analyze (razor, blade, brush, soap)")
+    month: str = Field(..., description="Month to analyze (YYYY-MM format)")
+    threshold: int = Field(default=3, ge=1, le=10, description="Levenshtein distance threshold")
+    limit: int = Field(default=50, ge=1, le=1000, description="Maximum number of results to return")
+    show_all: bool = Field(default=False, description="Show all matches, not just mismatches")
+    show_unconfirmed: bool = Field(default=False, description="Show only unconfirmed matches")
+    show_regex_matches: bool = Field(default=False, description="Show only regex matches")
 
 
 class MatchPhaseRequest(BaseModel):
@@ -91,6 +106,36 @@ class UnmatchedAnalysisResponse(BaseModel):
     total_unmatched: int
     unmatched_items: List[UnmatchedItem]
     processing_time: float
+    partial_results: bool = False
+    error: Optional[str] = None
+
+
+class MismatchItem(BaseModel):
+    """Model for individual mismatch item."""
+
+    original: str
+    matched: dict
+    pattern: Optional[str] = None
+    match_type: str
+    confidence: Optional[float] = None
+    mismatch_type: Optional[str] = None
+    reason: Optional[str] = None
+    count: int
+    examples: List[str]
+    comment_ids: List[str]
+
+
+class MismatchAnalysisResponse(BaseModel):
+    """Response model for mismatch analysis."""
+
+    field: str
+    month: str
+    total_matches: int
+    total_mismatches: int
+    mismatch_items: List[MismatchItem]
+    processing_time: float
+    partial_results: bool = False
+    error: Optional[str] = None
 
 
 def validate_field(field: str) -> None:
@@ -439,3 +484,122 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
         raise HTTPException(
             status_code=500, detail=f"Error performing unmatched analysis: {str(e)}"
         )
+
+
+@router.post("/mismatch", response_model=MismatchAnalysisResponse)
+async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysisResponse:
+    """Analyze mismatches in matched data for the specified month."""
+    try:
+        # Validate input parameters
+        validate_field(request.field)
+        validate_months([request.month])
+
+        logger.info(
+            f"Starting mismatch analysis for field '{request.field}' " f"for month {request.month}"
+        )
+
+        # Create analyzer instance
+        if MismatchAnalyzer is None:
+            raise HTTPException(
+                status_code=500,
+                detail=(
+                    "MismatchAnalyzer not available. "
+                    "Please ensure the SOTD pipeline is properly installed."
+                ),
+            )
+        analyzer = MismatchAnalyzer()
+
+        # Create args object for the analyzer
+        class Args:
+            def __init__(self):
+                self.month = request.month
+                self.year = None
+                self.range = None
+                self.start = None
+                self.end = None
+                self.field = request.field
+                self.threshold = request.threshold
+                self.limit = request.limit
+                self.show_all = request.show_all
+                self.show_unconfirmed = request.show_unconfirmed
+                self.show_regex_matches = request.show_regex_matches
+                self.out_dir = project_root / "data"
+                self.debug = False
+                self.force = False
+                self.mark_correct = False
+                self.dry_run = False
+                self.no_confirm = False
+                self.clear_correct = False
+                self.clear_field = None
+                self.show_correct = False
+                self.test_correct_matches = None
+
+        args = Args()
+
+        # Load data using the analyzer's method
+        try:
+            records = analyzer.load_matched_data(args)
+            data = {"data": records}
+        except Exception as e:
+            logger.error(f"Error loading data: {e}")
+            raise HTTPException(status_code=500, detail=f"Error loading data: {str(e)}")
+
+        # Identify mismatches
+        mismatches = analyzer.identify_mismatches(data, request.field, args)
+
+        # Convert mismatches to response format
+        mismatch_items = []
+        total_matches = len(records)
+        total_mismatches = sum(len(items) for items in mismatches.values())
+
+        # Process each mismatch type
+        for mismatch_type, items in mismatches.items():
+            for item in items[: request.limit]:
+                field_data = item.get("field_data", {})
+                record = item.get("record", {})
+
+                # Extract basic information
+                original = field_data.get("original", "")
+                matched = field_data.get("matched", {})
+                pattern = field_data.get("pattern") or ""
+                match_type = field_data.get("match_type", "")
+
+                # Get examples and comment IDs
+                examples = [record.get("_source_file", "")]
+                comment_ids = [record.get("id", "")] if record.get("id") else []
+
+                # Create mismatch item
+                mismatch_item = MismatchItem(
+                    original=original,
+                    matched=matched,
+                    pattern=pattern,
+                    match_type=match_type,
+                    mismatch_type=mismatch_type,
+                    reason=item.get("reason", ""),
+                    count=1,
+                    examples=examples,
+                    comment_ids=comment_ids,
+                )
+
+                mismatch_items.append(mismatch_item)
+
+        # Sort by mismatch type and original text
+        mismatch_items.sort(key=lambda x: (x.mismatch_type or "", x.original.lower()))
+
+        return MismatchAnalysisResponse(
+            field=request.field,
+            month=request.month,
+            total_matches=total_matches,
+            total_mismatches=total_mismatches,
+            mismatch_items=mismatch_items[: request.limit],
+            processing_time=0.0,  # TODO: Add timing
+            partial_results=False,
+            error=None,
+        )
+
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except Exception as e:
+        logger.error(f"Error in mismatch analysis: {e}")
+        raise HTTPException(status_code=500, detail=f"Error analyzing mismatches: {str(e)}")
