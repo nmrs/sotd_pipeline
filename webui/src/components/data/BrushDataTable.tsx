@@ -267,6 +267,8 @@ export const BrushDataTable = memo<BrushDataTableProps>(
           data={flattenedData}
           showColumnVisibility={true}
           searchKey='brand'
+          resizable={true}
+          sortable={true}
         />
       </div>
     );

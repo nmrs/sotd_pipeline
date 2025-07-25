@@ -161,11 +161,10 @@ export function BrushSplitDataTable({
               <Input
                 value={currentValue || ''}
                 onChange={e => handleFieldChange(item.index, 'handle', e.target.value)}
-                className={`${hasChanges ? 'border-orange-500 bg-orange-50' : ''} ${
-                  originalValue && originalValue.handle !== item.handle
+                className={`${hasChanges ? 'border-orange-500 bg-orange-50' : ''} ${originalValue && originalValue.handle !== item.handle
                     ? 'border-blue-500 bg-blue-50'
                     : ''
-                }`}
+                  }`}
                 placeholder='Handle'
                 disabled={commentLoading}
               />
@@ -205,11 +204,10 @@ export function BrushSplitDataTable({
               <Input
                 value={currentValue || ''}
                 onChange={e => handleFieldChange(item.index, 'knot', e.target.value)}
-                className={`${hasChanges ? 'border-orange-500 bg-orange-50' : ''} ${
-                  originalValue && originalValue.knot !== item.knot
+                className={`${hasChanges ? 'border-orange-500 bg-orange-50' : ''} ${originalValue && originalValue.knot !== item.knot
                     ? 'border-blue-500 bg-blue-50'
                     : ''
-                }`}
+                  }`}
                 placeholder='Knot'
                 disabled={commentLoading}
               />

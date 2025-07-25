@@ -153,6 +153,14 @@ Before creating any new component, ask:
 - **EXTEND** DataTable with specialized features (editing, subrows) when needed
 - **LEVERAGE** TanStack Table features (sorting, filtering, resizing, virtualization)
 
+### **MANDATORY**: Resizable and Sortable Column Headers
+- **ALWAYS** enable resizable columns for all table implementations
+- **ALWAYS** enable sortable columns for all table implementations (built into TanStack Table)
+- **NEVER** create tables without resizable and sortable functionality
+- **CONSISTENT** user experience across all table components
+- **REQUIRED** props: `resizable={true}` for all DataTable instances
+- **SORTING**: Built into TanStack Table - all columns with `accessorKey` are automatically sortable
+
 ### Table Component Architecture
 ```typescript
 // ✅ CORRECT - Use ShadCN DataTable as foundation
