@@ -341,16 +341,49 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
 
         # Combine results from all months using the same logic as command line tool
         combined_unmatched = defaultdict(list)
+
         for result in all_results:
             for item, file_infos in result.items():
-                combined_unmatched[item].extend(file_infos)
+                # For brush field, use case-insensitive grouping
+                if request.field == "brush":
+                    # Use lowercase as the key for case-insensitive grouping
+                    key = item.lower()
+                    combined_unmatched[key].extend(file_infos)
+                else:
+                    # For other fields, use the original item as key
+                    combined_unmatched[item].extend(file_infos)
 
         # Convert to response format
         unmatched_items = []
-        # Sort alphabetically by value, then by count descending (same as command line tool)
-        sorted_items = sorted(combined_unmatched.items(), key=lambda x: (x[0].lower(), -len(x[1])))[
-            : request.limit
-        ]
+        case_groups = {}  # Initialize for both brush and non-brush cases
+
+        # For brush field, we need to handle case-insensitive grouping
+        if request.field == "brush":
+            # Use the first occurrence of each case-insensitive group as the display text
+            for key, file_infos in combined_unmatched.items():
+                # Find the first occurrence of this key in the original results
+                first_occurrence = None
+                for result in all_results:
+                    for item, _ in result.items():
+                        if item.lower() == key:
+                            first_occurrence = item
+                            break
+                    if first_occurrence:
+                        break
+
+                # Use the first occurrence, or the key if not found
+                display_text = first_occurrence or key
+                case_groups[display_text] = file_infos
+
+            # Sort by the display text (alphabetically), then by count descending
+            sorted_items = sorted(case_groups.items(), key=lambda x: (x[0].lower(), -len(x[1])))[
+                : request.limit
+            ]
+        else:
+            # For other fields, use the original sorting logic
+            sorted_items = sorted(
+                combined_unmatched.items(), key=lambda x: (x[0].lower(), -len(x[1]))
+            )[: request.limit]
 
         for original_text, file_infos in sorted_items:
             # Extract comment IDs and examples from file_infos (same as command line tool)
@@ -382,7 +415,12 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
                 )
             )
 
-        total_unmatched = len(combined_unmatched)
+        # Use the correct total count based on field type
+        if request.field == "brush":
+            total_unmatched = len(case_groups)
+        else:
+            total_unmatched = len(combined_unmatched)
+
         logger.info(f"Analysis complete. Found {total_unmatched} unmatched items across all months")
 
         return UnmatchedAnalysisResponse(

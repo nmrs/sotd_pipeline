@@ -627,9 +627,17 @@ class BrushSplitValidator:
             # Merge with existing data
             for key, new_entries in organized_splits.items():
                 display_name = new_entries[0]["original"]
-                if display_name in existing_data["splits"]:
+
+                # Check for case-insensitive match in existing data
+                existing_key = None
+                for existing_name in existing_data["splits"].keys():
+                    if existing_name.lower() == key:
+                        existing_key = existing_name
+                        break
+
+                if existing_key:
                     # Update existing entry
-                    existing_data["splits"][display_name] = new_entries
+                    existing_data["splits"][existing_key] = new_entries
                 else:
                     # Add new entry
                     existing_data["splits"][display_name] = new_entries
@@ -735,6 +743,7 @@ class BrushSplitValidator:
         handle: Optional[str],
         knot: str,
         should_not_split: bool = False,
+        validated_at: Optional[str] = None,
     ) -> BrushSplit:
         """Create a validated brush split."""
         # If should_not_split is True, override the handle and knot
@@ -746,7 +755,12 @@ class BrushSplitValidator:
         system_confidence, system_reasoning = self.calculate_confidence(original, handle, knot)
 
         # Check if this is a correction
-        existing = self.validated_splits.get(original)
+        existing = None
+        for validated_key, validated_split in self.validated_splits.items():
+            if validated_key.lower() == original.lower():
+                existing = validated_split
+                break
+
         corrected = False
         system_handle = None
         system_knot = None
@@ -761,22 +775,26 @@ class BrushSplitValidator:
                 system_handle = existing.handle
                 system_knot = existing.knot
 
-        # Determine if this split is being validated
-        # If validated_at is provided, use it; otherwise, check if this is a new validation
-        is_validated = False  # Default to False, will be set to True if validated_at is provided
-        if existing:
+        # Determine validation status
+        is_validated = False
+        if validated_at:
+            # If validated_at is provided, this is a validated split
+            is_validated = True
+        elif existing:
             # If no validated_at provided but we have an existing split,
             # check if it was already validated
             is_validated = existing.validated
 
-        # Always set validated_at timestamp when saving a split (unless already provided)
-        # If validated_at is provided, use it; otherwise, generate a new one
-        # Only generate if it's a new validation or no existing timestamp
-        if not existing or not existing.validated_at:
-            validated_at = datetime.now().isoformat()
-            is_validated = True
+        # Set validated_at timestamp
+        if validated_at:
+            # Use provided timestamp
+            final_validated_at = validated_at
+        elif existing and existing.validated_at:
+            # Keep existing timestamp
+            final_validated_at = existing.validated_at
         else:
-            validated_at = existing.validated_at  # Keep existing timestamp if provided
+            # No timestamp available
+            final_validated_at = None
 
         return BrushSplit(
             original=original,
@@ -784,7 +802,7 @@ class BrushSplitValidator:
             knot=knot,
             validated=is_validated,
             corrected=corrected,
-            validated_at=validated_at,
+            validated_at=final_validated_at,
             system_handle=system_handle,
             system_knot=system_knot,
             system_confidence=system_confidence if corrected else None,
@@ -795,10 +813,14 @@ class BrushSplitValidator:
 
     def merge_occurrences(self, original: str, new_occurrences: List[BrushSplitOccurrence]) -> None:
         """Merge new occurrences with existing validated entries."""
-        if original not in self.validated_splits:
-            return
+        existing_split = None
+        for validated_key, validated_split in self.validated_splits.items():
+            if validated_key.lower() == original.lower():
+                existing_split = validated_split
+                break
 
-        existing_split = self.validated_splits[original]
+        if existing_split is None:
+            return
 
         # Create a set of existing file/comment_id combinations for efficient lookup
         existing_combinations = set()
@@ -873,7 +895,7 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
         total_records_loaded = 0
 
         for month in months:
-            file_path = Path(f"data/matched/{month}.json")
+            file_path = Path(f"../data/matched/{month}.json")
             if not file_path.exists():
                 logger.error(f"Month file not found: {file_path}")
                 failed_months.append(month)
@@ -1012,14 +1034,19 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
                         BrushSplitOccurrence(file=file_name, comment_ids=comment_ids)
                     )
 
-            # Check if already validated
-            if original in validator.validated_splits:
-                split = validator.validated_splits[original]
+            # Check if already validated (case-insensitive)
+            existing_split = None
+            for validated_key, validated_split in validator.validated_splits.items():
+                if validated_key.lower() == original.lower():
+                    existing_split = validated_split
+                    break
+
+            if existing_split:
                 # Merge new occurrences with existing ones
                 for new_occurrence in occurrences:
                     # Find existing occurrence for this file or create new one
                     existing_occurrence = None
-                    for occ in split.occurrences:
+                    for occ in existing_split.occurrences:
                         if occ.file == new_occurrence.file:
                             existing_occurrence = occ
                             break
@@ -1032,9 +1059,9 @@ async def load_brush_splits(months: List[str] = Query(..., description="Months t
                                 existing_occurrence.comment_ids.append(comment_id)
                     else:
                         # Add new occurrence
-                        split.occurrences.append(new_occurrence)
+                        existing_split.occurrences.append(new_occurrence)
 
-                splits.append(split)
+                splits.append(existing_split)
             else:
                 # Create new unvalidated split with actual split data
                 split = BrushSplit(
@@ -1139,6 +1166,11 @@ async def save_splits(data: SaveSplitsRequest):
     try:
         # Debug: Log the received data
         logger.info(f"Received {len(data.brush_splits)} brush splits for saving")
+
+        # Check if any splits were provided
+        if not data.brush_splits:
+            raise HTTPException(status_code=400, detail="No brush splits provided for saving")
+
         for i, split in enumerate(data.brush_splits):
             logger.info(
                 f"Split {i}: original='{split.original}', handle='{split.handle}', "

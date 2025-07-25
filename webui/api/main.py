@@ -10,11 +10,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from webui.api.analysis import router as analysis_router
-from webui.api.brush_splits import router as brush_splits_router
-from webui.api.catalogs import router as catalogs_router
-from webui.api.files import router as files_router
-from webui.api.filtered import router as filtered_router
+from api.analysis import router as analysis_router
+from api.brush_splits import router as brush_splits_router
+from api.catalogs import router as catalogs_router
+from api.files import router as files_router
+from api.filtered import router as filtered_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
