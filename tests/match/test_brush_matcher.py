@@ -257,6 +257,23 @@ class TestBrushMatcher:
         assert result.matched["brand"] is None
         assert result.matched["model"] is None
 
+    def test_improved_scoring_with_actual_matching(self, brush_matcher):
+        """Test that scoring considers actual matching capability, not just text indicators."""
+        # Test a case where text has knot indicators but can actually be matched as a handle
+        # This should score higher for handle matching due to actual handle matcher capability
+        
+        # Create a test case that has knot indicators but is actually a handle
+        # Use a handle maker that's only in the handle catalog, not knot catalog
+        test_string = "Wolf Whiskers Custom 26mm"  # Has size indicator but is actually a handle
+        
+        result = brush_matcher.match(test_string)
+        
+        # Should match as handle-only since Wolf Whiskers is only a handle maker
+        # and the actual handle matcher can match it, even though it has knot indicators
+        assert result.match_type == "regex"
+        assert result.matched["handle"]["brand"] == "Wolf Whiskers"
+        assert result.matched["knot"]["brand"] is None  # No knot component
+
 
 # Parameterized strategy/fiber tests
 
@@ -407,3 +424,5 @@ class TestBrushMatcherPriorityOrder:
         assert knot["model"] == "B15"
         handle = result.matched["handle"]
         assert handle["brand"] == "UnknownMaker"
+
+
