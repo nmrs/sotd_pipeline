@@ -547,42 +547,115 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
         # Identify mismatches
         mismatches = analyzer.identify_mismatches(data, request.field, args)
 
-        # Convert mismatches to response format
+        # Group duplicate mismatches using comprehensive logic that includes comment IDs
+        grouped_mismatches = []
+        mismatch_keys = [
+            "multiple_patterns", 
+            "levenshtein_distance", 
+            "low_confidence", 
+            "perfect_regex_matches"
+        ]
+        
+        # Group by normalized original and matched text, case-insensitive
+        grouped = {}
+        for mismatch_type in mismatch_keys:
+            for item in mismatches[mismatch_type]:
+                field_data = item["field_data"]
+                original = field_data.get("original", "")
+                # Use normalized if available, otherwise normalize
+                normalized = field_data.get("normalized", original)
+                matched = analyzer._get_matched_text(
+                    request.field, field_data.get("matched", {})
+                )
+                reason = item["reason"]
+
+                # Group by the actual match, not by mismatch type, case-insensitive
+                group_key = (normalized.lower(), matched.lower())
+                if group_key not in grouped:
+                    grouped[group_key] = {
+                        "record_ids": set(),
+                        "item": item,
+                        "sources": set(),
+                        "mismatch_types": set(),
+                        "reasons": set(),
+                        "comment_ids": set(),
+                    }
+                
+                record_id = item["record"].get("id", "")
+                if record_id:
+                    grouped[group_key]["record_ids"].add(record_id)
+                grouped[group_key]["mismatch_types"].add(mismatch_type)
+                grouped[group_key]["reasons"].add(reason)
+                source = item["record"].get("_source_file", "")
+                if source:
+                    grouped[group_key]["sources"].add(source)
+                comment_id = item["record"].get("id", "")
+                if comment_id:
+                    grouped[group_key]["comment_ids"].add(comment_id)
+
+        # Convert groups to list format with deterministic sorting
+        priority = [
+            "multiple_patterns", 
+            "levenshtein_distance", 
+            "low_confidence", 
+            "perfect_regex_matches"
+        ]
+        for group_key in sorted(grouped.keys()):
+            group_info = grouped[group_key]
+            norm_original, matched = group_key
+            modified_item = group_info["item"].copy()
+            modified_item["count"] = len(group_info["record_ids"])
+            modified_item["sources"] = sorted(list(group_info["sources"]))
+            modified_item["comment_ids"] = sorted(list(group_info["comment_ids"]))
+            
+            # Choose the highest priority mismatch type present
+            mismatch_types = sorted(list(group_info["mismatch_types"]))
+            for p in priority:
+                if p in mismatch_types:
+                    modified_item["mismatch_type"] = p
+                    break
+            else:
+                modified_item["mismatch_type"] = mismatch_types[0] if mismatch_types else ""
+            
+            # Combine all reasons
+            reasons = sorted(list(group_info["reasons"]))
+            modified_item["reason"] = "; ".join(reasons)
+            grouped_mismatches.append(modified_item)
+
+        # Convert grouped mismatches to response format
         mismatch_items = []
         total_matches = len(records)
-        total_mismatches = sum(len(items) for items in mismatches.values())
+        total_mismatches = len(grouped_mismatches)
 
-        # Process each mismatch type
-        for mismatch_type, items in mismatches.items():
-            for item in items[: request.limit]:
-                field_data = item.get("field_data", {})
-                record = item.get("record", {})
+        # Process each grouped mismatch
+        for item in grouped_mismatches[: request.limit]:
+            field_data = item.get("field_data", {})
 
-                # Extract basic information
-                original = field_data.get("original", "")
-                normalized = field_data.get("normalized", original)  # Use normalized if available
-                matched = field_data.get("matched", {})
-                pattern = field_data.get("pattern") or ""
-                match_type = field_data.get("match_type", "")
+            # Extract basic information
+            original = field_data.get("original", "")
+            normalized = field_data.get("normalized", original)  # Use normalized if available
+            matched = field_data.get("matched", {})
+            pattern = field_data.get("pattern") or ""
+            match_type = field_data.get("match_type", "")
 
-                # Get examples and comment IDs
-                examples = [record.get("_source_file", "")]
-                comment_ids = [record.get("id", "")] if record.get("id") else []
+            # Get examples and comment IDs from the grouped data
+            examples = item.get("sources", [])
+            comment_ids = list(item.get("comment_ids", set())) if "comment_ids" in item else []
 
-                # Create mismatch item - use normalized for display
-                mismatch_item = MismatchItem(
-                    original=normalized,  # Use normalized instead of original
-                    matched=matched,
-                    pattern=pattern,
-                    match_type=match_type,
-                    mismatch_type=mismatch_type,
-                    reason=item.get("reason", ""),
-                    count=1,
-                    examples=examples,
-                    comment_ids=comment_ids,
-                )
+            # Create mismatch item - use normalized for display
+            mismatch_item = MismatchItem(
+                original=normalized,  # Use normalized instead of original
+                matched=matched,
+                pattern=pattern,
+                match_type=match_type,
+                mismatch_type=item.get("mismatch_type", ""),
+                reason=item.get("reason", ""),
+                count=item.get("count", 1),
+                examples=examples,
+                comment_ids=comment_ids,
+            )
 
-                mismatch_items.append(mismatch_item)
+            mismatch_items.append(mismatch_item)
 
         # Sort by mismatch type and normalized text
         mismatch_items.sort(key=lambda x: (x.mismatch_type or "", x.original.lower()))
