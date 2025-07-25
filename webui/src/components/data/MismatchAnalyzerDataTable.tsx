@@ -83,6 +83,18 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   const columns = useMemo<ColumnDef<MismatchItem>[]>(
     () => [
       {
+        accessorKey: 'count',
+        header: 'Count',
+        cell: ({ row }) => {
+          const item = row.original;
+          return (
+            <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800'>
+              {item.count || 1}
+            </span>
+          );
+        },
+      },
+      {
         accessorKey: 'mismatch_type',
         header: 'Type',
         cell: ({ row }) => {
