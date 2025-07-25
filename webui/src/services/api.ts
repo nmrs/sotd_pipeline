@@ -433,3 +433,65 @@ export const checkFilteredStatus = async (
     throw error;
   }
 };
+
+export interface MarkCorrectRequest {
+  field: string;
+  matches: Array<{
+    original: string;
+    matched: any;
+  }>;
+  force?: boolean;
+}
+
+export interface MarkCorrectResponse {
+  success: boolean;
+  message: string;
+  marked_count: number;
+  errors: string[];
+}
+
+export interface CorrectMatchesResponse {
+  field: string;
+  total_entries: number;
+  entries: Record<string, any>;
+}
+
+export const getCorrectMatches = async (field: string): Promise<CorrectMatchesResponse> => {
+  try {
+    const response = await api.get(`/analyze/correct-matches/${field}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get correct matches:', error);
+    throw error;
+  }
+};
+
+export const markMatchesAsCorrect = async (request: MarkCorrectRequest): Promise<MarkCorrectResponse> => {
+  try {
+    const response = await api.post('/analyze/mark-correct', request);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to mark matches as correct:', error);
+    throw error;
+  }
+};
+
+export const clearCorrectMatchesByField = async (field: string): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await api.delete(`/analyze/correct-matches/${field}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to clear correct matches:', error);
+    throw error;
+  }
+};
+
+export const clearAllCorrectMatches = async (): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await api.delete('/analyze/correct-matches');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to clear all correct matches:', error);
+    throw error;
+  }
+};

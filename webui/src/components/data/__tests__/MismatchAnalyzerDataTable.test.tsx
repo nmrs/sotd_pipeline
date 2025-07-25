@@ -1,113 +1,195 @@
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import MismatchAnalyzerDataTable from '../MismatchAnalyzerDataTable';
 import { MismatchItem } from '../../../services/api';
 
 // Mock the CommentList component
-jest.mock('../../domain/CommentList', () => ({
-  CommentList: ({
-    commentIds,
-    onCommentClick,
-  }: {
-    commentIds: string[];
-    onCommentClick: (commentId: string) => void;
-  }) => (
-    <div data-testid='comment-list'>
-      {commentIds.map(id => (
-        <button key={id} onClick={() => onCommentClick(id)}>
-          {id}
-        </button>
-      ))}
-    </div>
-  ),
-}));
-
-const createMockMismatchItem = (overrides = {}): MismatchItem => ({
-  original: 'test razor',
-  matched: { brand: 'Test', model: 'Razor' },
-  pattern: 'test pattern',
-  match_type: 'regex',
-  confidence: 0.8,
-  mismatch_type: 'levenshtein_distance',
-  reason: 'Distance exceeds threshold',
-  count: 1,
-  examples: ['example1'],
-  comment_ids: ['abc123', 'def456'],
-  ...overrides,
+jest.mock('../../domain/CommentList', () => {
+  return {
+    CommentList: ({ commentIds, onCommentClick, commentLoading, maxDisplay, 'aria-label': ariaLabel }: any) => (
+      <div data-testid="comment-list" aria-label={ariaLabel}>
+        {commentIds.map((id: string, index: number) => (
+          <button
+            key={id}
+            onClick={() => onCommentClick?.(id)}
+            disabled={commentLoading}
+            aria-label={`View comment ${index + 1} of ${commentIds.length}`}
+          >
+            {id}
+          </button>
+        ))}
+      </div>
+    ),
+  };
 });
 
-describe('MismatchAnalyzerDataTable with CommentList Integration', () => {
-  const mockOnCommentClick = jest.fn();
-  const mockCommentLoading = false;
+const mockData: MismatchItem[] = [
+  {
+    original: 'Test Razor 1',
+    matched: { brand: 'Test Brand', model: 'Model 1' },
+    mismatch_type: 'levenshtein_distance',
+    match_type: 'regex',
+    pattern: 'test_pattern',
+    confidence: 0.8,
+    count: 5,
+    comment_ids: ['123', '456'],
+  },
+  {
+    original: 'Test Razor 2',
+    matched: { brand: 'Test Brand', model: 'Model 2' },
+    mismatch_type: 'multiple_patterns',
+    match_type: 'alias',
+    pattern: 'test_pattern_2',
+    confidence: 0.6,
+    count: 3,
+    comment_ids: ['789'],
+  },
+];
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+describe('MismatchAnalyzerDataTable', () => {
+  const defaultProps = {
+    data: mockData,
+    onCommentClick: jest.fn(),
+    commentLoading: false,
+  };
+
+  describe('MismatchAnalyzerDataTable with CommentList Integration', () => {
+    test('renders CommentList component in comments column', () => {
+      render(<MismatchAnalyzerDataTable {...defaultProps} />);
+
+      const commentLists = screen.getAllByTestId('comment-list');
+      expect(commentLists).toHaveLength(2);
+    });
+
+    test('passes correct props to CommentList component', () => {
+      render(<MismatchAnalyzerDataTable {...defaultProps} />);
+
+      const commentLists = screen.getAllByTestId('comment-list');
+      expect(commentLists[0]).toHaveAttribute('aria-label', '2 comments available');
+      expect(commentLists[1]).toHaveAttribute('aria-label', '1 comment available');
+    });
+
+    test('handles empty comment_ids array', () => {
+      const dataWithEmptyComments = [
+        { ...mockData[0], comment_ids: [] },
+      ];
+
+      render(<MismatchAnalyzerDataTable {...defaultProps} data={dataWithEmptyComments} />);
+
+      const commentList = screen.getByTestId('comment-list');
+      expect(commentList).toHaveAttribute('aria-label', '0 comments available');
+    });
+
+    test('passes commentLoading prop to CommentList', () => {
+      render(<MismatchAnalyzerDataTable {...defaultProps} commentLoading={true} />);
+
+      const commentLists = screen.getAllByTestId('comment-list');
+      const buttons = commentLists[0].querySelectorAll('button');
+      buttons.forEach(button => {
+        expect(button).toBeDisabled();
+      });
+    });
+
+    test('calls onCommentClick when comment is clicked', () => {
+      const onCommentClick = jest.fn();
+      render(<MismatchAnalyzerDataTable {...defaultProps} onCommentClick={onCommentClick} />);
+
+      const commentButtons = screen.getAllByText('123');
+      fireEvent.click(commentButtons[0]);
+
+      expect(onCommentClick).toHaveBeenCalledWith('123');
+    });
   });
 
-  test('renders CommentList component in comments column', () => {
-    const data = [createMockMismatchItem()];
-    render(
-      <MismatchAnalyzerDataTable
-        data={data}
-        onCommentClick={mockOnCommentClick}
-        commentLoading={mockCommentLoading}
-      />
-    );
+  describe('MismatchAnalyzerDataTable with Selection and Confirmation', () => {
+    test('renders selection checkboxes when onItemSelection is provided', () => {
+      const onItemSelection = jest.fn();
+      render(<MismatchAnalyzerDataTable {...defaultProps} onItemSelection={onItemSelection} />);
 
-    expect(screen.getByTestId('comment-list')).toBeInTheDocument();
-  });
+      // Should have a "Select" column header
+      expect(screen.getByText('Select')).toBeInTheDocument();
 
-  test('passes correct props to CommentList component', () => {
-    const data = [createMockMismatchItem()];
-    render(
-      <MismatchAnalyzerDataTable
-        data={data}
-        onCommentClick={mockOnCommentClick}
-        commentLoading={mockCommentLoading}
-      />
-    );
+      // Should have checkboxes for each row
+      const checkboxes = screen.getAllByRole('checkbox');
+      expect(checkboxes).toHaveLength(2); // One for each data item
+    });
 
-    // Verify CommentList is rendered with the correct comment IDs
-    expect(screen.getByText('abc123')).toBeInTheDocument();
-    expect(screen.getByText('def456')).toBeInTheDocument();
-  });
+    test('renders confirmation status when isItemConfirmed is provided', () => {
+      const isItemConfirmed = jest.fn().mockReturnValue(true);
+      render(<MismatchAnalyzerDataTable {...defaultProps} isItemConfirmed={isItemConfirmed} />);
 
-  test('handles empty comment_ids array', () => {
-    const data = [createMockMismatchItem({ comment_ids: [] })];
-    render(
-      <MismatchAnalyzerDataTable
-        data={data}
-        onCommentClick={mockOnCommentClick}
-        commentLoading={mockCommentLoading}
-      />
-    );
+      // Should have a "Status" column header
+      expect(screen.getByText('Status')).toBeInTheDocument();
 
-    expect(screen.getByTestId('comment-list')).toBeInTheDocument();
-  });
+      // Should show confirmed status (multiple elements expected)
+      const confirmedElements = screen.getAllByText('✅ Confirmed');
+      expect(confirmedElements).toHaveLength(2); // One for each data item
+    });
 
-  test('passes commentLoading prop to CommentList', () => {
-    const data = [createMockMismatchItem()];
-    render(
-      <MismatchAnalyzerDataTable
-        data={data}
-        onCommentClick={mockOnCommentClick}
-        commentLoading={true}
-      />
-    );
+    test('shows unconfirmed status for non-confirmed items', () => {
+      const isItemConfirmed = jest.fn().mockReturnValue(false);
+      render(<MismatchAnalyzerDataTable {...defaultProps} isItemConfirmed={isItemConfirmed} />);
 
-    expect(screen.getByTestId('comment-list')).toBeInTheDocument();
-  });
+      // Should show unconfirmed status (multiple elements expected)
+      const unconfirmedElements = screen.getAllByText('⚠️ Unconfirmed');
+      expect(unconfirmedElements).toHaveLength(2); // One for each data item
+    });
 
-  test('calls onCommentClick when comment is clicked', () => {
-    const data = [createMockMismatchItem()];
-    render(
-      <MismatchAnalyzerDataTable
-        data={data}
-        onCommentClick={mockOnCommentClick}
-        commentLoading={mockCommentLoading}
-      />
-    );
+    test('handles item selection correctly', () => {
+      const onItemSelection = jest.fn();
+      const selectedItems = new Set();
 
-    fireEvent.click(screen.getByText('abc123'));
-    expect(mockOnCommentClick).toHaveBeenCalledWith('abc123');
+      render(
+        <MismatchAnalyzerDataTable
+          {...defaultProps}
+          onItemSelection={onItemSelection}
+          selectedItems={selectedItems}
+        />
+      );
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[0]);
+
+      expect(onItemSelection).toHaveBeenCalledWith(
+        'Test Razor 1|{"brand":"Test Brand","model":"Model 1"}',
+        true
+      );
+    });
+
+    test('reflects selected state in checkboxes', () => {
+      const onItemSelection = jest.fn();
+      const selectedItems = new Set(['Test Razor 1|{"brand":"Test Brand","model":"Model 1"}']);
+
+      render(
+        <MismatchAnalyzerDataTable
+          {...defaultProps}
+          onItemSelection={onItemSelection}
+          selectedItems={selectedItems}
+        />
+      );
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      expect(checkboxes[0]).toBeChecked();
+      expect(checkboxes[1]).not.toBeChecked();
+    });
+
+    test('does not render selection or status columns when props are not provided', () => {
+      render(<MismatchAnalyzerDataTable {...defaultProps} />);
+
+      // Should not have Select or Status columns
+      expect(screen.queryByText('Select')).not.toBeInTheDocument();
+      expect(screen.queryByText('Status')).not.toBeInTheDocument();
+    });
+
+    test('handles mixed confirmation status', () => {
+      const isItemConfirmed = jest.fn()
+        .mockReturnValueOnce(true)  // First item confirmed
+        .mockReturnValueOnce(false); // Second item unconfirmed
+
+      render(<MismatchAnalyzerDataTable {...defaultProps} isItemConfirmed={isItemConfirmed} />);
+
+      expect(screen.getByText('✅ Confirmed')).toBeInTheDocument();
+      expect(screen.getByText('⚠️ Unconfirmed')).toBeInTheDocument();
+    });
   });
 });

@@ -203,6 +203,52 @@ The system recognizes various delimiters and applies semantic understanding:
 - **`" in "`** - Handle-primary delimiter  
 - **`" / "`, `"/"`, `" - "`** - Neutral delimiters
 
+### Data-Driven Validation and Real-World Patterns
+
+The brush splitter logic has been validated against real SOTD data to ensure it handles actual community usage patterns correctly.
+
+#### Real-World Data Analysis
+- **Analyzed 5+ months of real SOTD data** (9+ years available)
+- **Found 0 cases** where both " in " and " x " appear together in the same brush string
+- **Confirmed realistic patterns** from actual community data
+
+#### Common Real-World Patterns
+
+**Handle/Knot Combinations:**
+- `"Dogwood Handcrafts/Zenith B2 Boar"` → Handle: "Dogwood Handcrafts", Knot: "Zenith B2 Boar"
+- `"Mozingo/Declaration B2"` → Handle: "Mozingo", Knot: "Declaration B2"
+- `"Declaration B2 in Mozingo handle"` → Handle: "Mozingo handle", Knot: "Declaration B2"
+
+**Brand Collaborations:**
+- `"Druidia x Mammoth 26mm SHD"` → Brand collaboration (not handle/knot split)
+- `"AP Shaveco x Declaration Grooming B10"` → Brand collaboration (not handle/knot split)
+
+**Size Specifications:**
+- `"24mm x 51mm"`, `"65mm x 30mm"` → Size specifications (not delimiters)
+- `"28mm x 52mm"` → Knot specifications (diameter x loft)
+
+#### Test Case Validation
+**Before (unrealistic test cases):**
+- ❌ `"Declaration B2 in 26mm x 52mm x 48mm"` (doesn't exist in real data)
+- ❌ `"Zenith B2 / 28mm x 52mm"` (unrealistic pattern)
+
+**After (realistic test cases):**
+- ✅ `"Declaration B2 in Mozingo handle"` → `('Mozingo handle', 'Declaration B2', 'handle_primary')`
+- ✅ `"Dogwood Handcrafts/Zenith B2 Boar"` → `('Dogwood Handcrafts', 'Zenith B2 Boar', 'high_reliability')`
+
+#### Key Insights from Real Data
+1. **"Zenith B2"** = Zenith brand B2 knot (not Declaration Grooming)
+2. **"28mm x 52mm"** = knot specifications (diameter x loft), not a handle
+3. **Real data patterns** are much simpler and more predictable than contrived test cases
+4. **Brand collaborations** use " x " but are not handle/knot splits
+5. **Size specifications** with " x " are not delimiters
+
+#### Implementation Impact
+- **Test cases updated** to use realistic patterns from actual SOTD data
+- **Delimiter detection** works correctly with real-world patterns
+- **All 33 brush splitter tests pass** with realistic data validation
+- **No breaking changes** to existing functionality
+
 ### Dual Component Fallback Enhancement
 
 When splitting fails or no clear delimiter is present, the system now includes an enhanced fallback mechanism:

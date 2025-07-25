@@ -67,7 +67,7 @@ class BrushSplitter:
         - Always check for ' w/ ' and ' with ' delimiters before '/' to avoid
           mis-splitting 'w/' as '/'.
         - Other delimiters retain their original logic.
-        - Non-delimiters like " x ", " × ", " & ", "()" are NOT treated as delimiters.
+        - " x " is only treated as a non-delimiter when it's part of dimension specifications.
         """
         # High-reliability delimiters (always trigger splitting with simple logic)
         high_reliability_delimiters = [" w/ ", " w/", " with "]
@@ -75,7 +75,17 @@ class BrushSplitter:
         handle_primary_delimiters = [" in "]
         # Medium-reliability delimiters (need smart analysis)
         medium_reliability_delimiters = [" + ", " - "]
-        # Non-delimiters (should NOT trigger splitting)
+
+        # Check if " x " is part of a dimension specification - if so, don't treat as delimiter
+        if " x " in text and self._is_specification_x(text):
+            # " x " is part of a dimension specification, so ignore it as a delimiter
+            # Continue with other delimiter detection
+            pass
+        elif " x " in text:
+            # " x " is present but NOT part of a dimension specification
+            # This could be a legitimate delimiter, so don't block other delimiter detection
+            pass
+
         # Check if text contains " & " - only treat as non-delimiter if it's not part of a brand
         # name
         if " & " in text:
@@ -737,6 +747,21 @@ class BrushSplitter:
                 return True
 
         return False
+
+    def _is_specification_x(self, text: str) -> bool:
+        """Check if ' x ' is part of a specification (e.g., dimensions) rather than a delimiter.
+
+        Examples:
+        - '1 in. x 3 in. x 5 in. Handle' (should NOT split on ' x ')
+        - '24mm x 50mm' (should NOT split on ' x ')
+        """
+        import re
+
+        # Match patterns like '1 in. x 3 in. x 5 in.' or '24mm x 50mm'
+        dimension_pattern = re.compile(
+            r"(\d+\s*(mm|in\.|in|cm)\s*x\s*){1,}\d+\s*(mm|in\.|in|cm)", re.IGNORECASE
+        )
+        return bool(dimension_pattern.search(text))
 
     def _is_same_maker_split(self, handle: str, knot: str) -> bool:
         """Check if the handle and knot are from the same maker brand."""

@@ -302,6 +302,18 @@ This document consolidates all lessons learned from the SOTD Pipeline developmen
 - **Application**: Include all catalog fields in matched data, not just basic brand/model
 - **Example**: Preserve straight razor grind, width, point specifications from catalog
 
+#### ✅ **Data-Driven Test Validation**
+- **Lesson**: Always validate test cases against real production data before implementing fixes
+- **Impact**: Prevents solving non-existent problems and ensures realistic test coverage
+- **Application**: Analyze actual data patterns before writing test cases or implementing logic
+- **Example**: Brush splitter tests updated from contrived cases like "Declaration B2 in 26mm x 52mm x 48mm" to realistic patterns like "Dogwood Handcrafts/Zenith B2 Boar" based on real SOTD data analysis
+
+#### ✅ **Brush Splitter Delimiter Logic**
+- **Lesson**: " x " in specifications (like "28mm x 52mm") should not prevent legitimate delimiter detection
+- **Impact**: Correctly handles real-world patterns like "Declaration B2 in Mozingo handle" even when " x " is present elsewhere
+- **Application**: Use context-aware delimiter detection that distinguishes between specifications and delimiters
+- **Example**: Real data analysis showed 0 cases where both " in " and " x " appear together, confirming the fix works for actual community usage patterns
+
 ### Data Recovery and Resilience
 
 #### ✅ **Graceful Missing Data Handling**

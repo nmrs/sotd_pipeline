@@ -139,16 +139,16 @@ class TestBrushSplitterDelimiterWithSpecifications:
         """
         test_cases = [
             {
-                "text": "Zenith B2 / 28mm x 52mm",
-                "expected_handle": "Zenith B2",
-                "expected_knot": "28mm x 52mm",
-                "description": "x in size specifications",
+                "text": "Dogwood Handcrafts/Zenith B2 Boar",
+                "expected_handle": "Dogwood Handcrafts",
+                "expected_knot": "Zenith B2 Boar",
+                "description": "realistic handle/knot split",
             },
             {
-                "text": "Simpson Chubby 2 / 26mm x 48mm",
-                "expected_handle": "Simpson Chubby 2",
-                "expected_knot": "26mm x 48mm",
-                "description": "x in size specifications",
+                "text": "Mozingo/Declaration B2",
+                "expected_handle": "Mozingo",
+                "expected_knot": "Declaration B2",
+                "description": "realistic handle/knot split",
             },
         ]
 

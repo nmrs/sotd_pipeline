@@ -6,7 +6,7 @@ import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -136,6 +136,31 @@ class MismatchAnalysisResponse(BaseModel):
     processing_time: float
     partial_results: bool = False
     error: Optional[str] = None
+
+
+class MarkCorrectRequest(BaseModel):
+    """Request model for marking matches as correct."""
+
+    field: str = Field(..., description="Field type (razor, blade, brush, soap)")
+    matches: List[Dict[str, Any]] = Field(..., description="List of matches to mark as correct")
+    force: bool = Field(default=False, description="Force operation without confirmation")
+
+
+class MarkCorrectResponse(BaseModel):
+    """Response model for marking matches as correct."""
+
+    success: bool
+    message: str
+    marked_count: int
+    errors: List[str] = []
+
+
+class CorrectMatchesResponse(BaseModel):
+    """Response model for correct matches data."""
+
+    field: str
+    total_entries: int
+    entries: Dict[str, Any]
 
 
 def validate_field(field: str) -> None:
@@ -550,12 +575,12 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
         # Group duplicate mismatches using comprehensive logic that includes comment IDs
         grouped_mismatches = []
         mismatch_keys = [
-            "multiple_patterns", 
-            "levenshtein_distance", 
-            "low_confidence", 
-            "perfect_regex_matches"
+            "multiple_patterns",
+            "levenshtein_distance",
+            "low_confidence",
+            "perfect_regex_matches",
         ]
-        
+
         # Group by normalized original and matched text, case-insensitive
         grouped = {}
         for mismatch_type in mismatch_keys:
@@ -564,9 +589,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 original = field_data.get("original", "")
                 # Use normalized if available, otherwise normalize
                 normalized = field_data.get("normalized", original)
-                matched = analyzer._get_matched_text(
-                    request.field, field_data.get("matched", {})
-                )
+                matched = analyzer._get_matched_text(request.field, field_data.get("matched", {}))
                 reason = item["reason"]
 
                 # Group by the actual match, not by mismatch type, case-insensitive
@@ -580,7 +603,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                         "reasons": set(),
                         "comment_ids": set(),
                     }
-                
+
                 record_id = item["record"].get("id", "")
                 if record_id:
                     grouped[group_key]["record_ids"].add(record_id)
@@ -595,10 +618,10 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
 
         # Convert groups to list format with deterministic sorting
         priority = [
-            "multiple_patterns", 
-            "levenshtein_distance", 
-            "low_confidence", 
-            "perfect_regex_matches"
+            "multiple_patterns",
+            "levenshtein_distance",
+            "low_confidence",
+            "perfect_regex_matches",
         ]
         for group_key in sorted(grouped.keys()):
             group_info = grouped[group_key]
@@ -607,7 +630,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
             modified_item["count"] = len(group_info["record_ids"])
             modified_item["sources"] = sorted(list(group_info["sources"]))
             modified_item["comment_ids"] = sorted(list(group_info["comment_ids"]))
-            
+
             # Choose the highest priority mismatch type present
             mismatch_types = sorted(list(group_info["mismatch_types"]))
             for p in priority:
@@ -616,7 +639,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     break
             else:
                 modified_item["mismatch_type"] = mismatch_types[0] if mismatch_types else ""
-            
+
             # Combine all reasons
             reasons = sorted(list(group_info["reasons"]))
             modified_item["reason"] = "; ".join(reasons)
@@ -677,3 +700,150 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
     except Exception as e:
         logger.error(f"Error in mismatch analysis: {e}")
         raise HTTPException(status_code=500, detail=f"Error analyzing mismatches: {str(e)}")
+
+
+@router.get("/correct-matches/{field}", response_model=CorrectMatchesResponse)
+async def get_correct_matches(field: str):
+    """Get correct matches for a specific field."""
+    try:
+        validate_field(field)
+
+        # Load correct matches from file
+        correct_matches_file = project_root / "data" / "correct_matches.yaml"
+        if not correct_matches_file.exists():
+            return CorrectMatchesResponse(field=field, total_entries=0, entries={})
+
+        import yaml
+
+        with correct_matches_file.open("r", encoding="utf-8") as f:
+            data = yaml.safe_load(f) or {}
+
+        field_data = data.get(field, {})
+        total_entries = sum(
+            len(strings) if isinstance(strings, list) else 0
+            for brand_data in field_data.values()
+            if isinstance(brand_data, dict)
+            for strings in brand_data.values()
+        )
+
+        return CorrectMatchesResponse(field=field, total_entries=total_entries, entries=field_data)
+
+    except Exception as e:
+        logger.error(f"Error loading correct matches: {e}")
+        raise HTTPException(status_code=500, detail=f"Error loading correct matches: {str(e)}")
+
+
+@router.post("/mark-correct", response_model=MarkCorrectResponse)
+async def mark_matches_as_correct(request: MarkCorrectRequest):
+    """Mark matches as correct and save to correct_matches.yaml."""
+    try:
+        validate_field(request.field)
+
+        if not request.matches:
+            return MarkCorrectResponse(success=False, message="No matches provided", marked_count=0)
+
+        # Import the correct matches manager
+        try:
+            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
+            from rich.console import Console
+        except ImportError as e:
+            raise HTTPException(
+                status_code=500, detail=f"Could not import CorrectMatchesManager: {e}"
+            )
+
+        # Create manager instance
+        console = Console()
+        manager = CorrectMatchesManager(console)
+
+        # Load existing correct matches
+        manager.load_correct_matches()
+
+        marked_count = 0
+        errors = []
+
+        for match in request.matches:
+            try:
+                original = match.get("original", "")
+                matched = match.get("matched", {})
+
+                if not original or not matched:
+                    errors.append(f"Invalid match data: {match}")
+                    continue
+
+                # Create match key and mark as correct
+                match_key = manager.create_match_key(request.field, original, matched)
+                manager.mark_match_as_correct(
+                    match_key, {"original": original, "matched": matched, "field": request.field}
+                )
+                marked_count += 1
+
+            except Exception as e:
+                errors.append(f"Error marking match {match}: {e}")
+
+        # Save to file
+        if marked_count > 0:
+            manager.save_correct_matches()
+
+        return MarkCorrectResponse(
+            success=marked_count > 0,
+            message=f"Marked {marked_count} matches as correct",
+            marked_count=marked_count,
+            errors=errors,
+        )
+
+    except Exception as e:
+        logger.error(f"Error marking matches as correct: {e}")
+        raise HTTPException(status_code=500, detail=f"Error marking matches as correct: {str(e)}")
+
+
+@router.delete("/correct-matches/{field}")
+async def clear_correct_matches_by_field(field: str):
+    """Clear correct matches for a specific field."""
+    try:
+        validate_field(field)
+
+        # Import the correct matches manager
+        try:
+            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
+            from rich.console import Console
+        except ImportError as e:
+            raise HTTPException(
+                status_code=500, detail=f"Could not import CorrectMatchesManager: {e}"
+            )
+
+        # Create manager instance and clear field
+        console = Console()
+        manager = CorrectMatchesManager(console)
+        manager.load_correct_matches()
+        manager.clear_correct_matches_by_field(field)
+
+        return {"success": True, "message": f"Cleared correct matches for {field}"}
+
+    except Exception as e:
+        logger.error(f"Error clearing correct matches: {e}")
+        raise HTTPException(status_code=500, detail=f"Error clearing correct matches: {str(e)}")
+
+
+@router.delete("/correct-matches")
+async def clear_all_correct_matches():
+    """Clear all correct matches."""
+    try:
+        # Import the correct matches manager
+        try:
+            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
+            from rich.console import Console
+        except ImportError as e:
+            raise HTTPException(
+                status_code=500, detail=f"Could not import CorrectMatchesManager: {e}"
+            )
+
+        # Create manager instance and clear all
+        console = Console()
+        manager = CorrectMatchesManager(console)
+        manager.clear_correct_matches()
+
+        return {"success": True, "message": "Cleared all correct matches"}
+
+    except Exception as e:
+        logger.error(f"Error clearing all correct matches: {e}")
+        raise HTTPException(status_code=500, detail=f"Error clearing all correct matches: {str(e)}")

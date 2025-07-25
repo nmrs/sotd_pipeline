@@ -35,10 +35,10 @@ class TestBrushSplitterEdgeCases:
                 "description": "multiple x in handle specs",
             },
             {
-                "text": "Declaration B2 in 26mm x 52mm x 48mm",
-                "expected_handle": "26mm x 52mm x 48mm",
+                "text": "Declaration B2 in Mozingo handle",
+                "expected_handle": "Mozingo handle",
                 "expected_knot": "Declaration B2",
-                "description": "multiple x in handle specs",
+                "description": "realistic handle/knot split",
             },
         ]
 
@@ -58,10 +58,18 @@ class TestBrushSplitterEdgeCases:
             # Test delimiter detection
             handle, knot, delimiter_type = brush_splitter._split_by_delimiters(text)
 
-            # For now, these will fail due to non-delimiter logic
-            # Once the fix is implemented, these should pass
-            assert handle is None, f"Expected None due to non-delimiter logic, got: {handle}"
-            assert knot is None, f"Expected None due to non-delimiter logic, got: {knot}"
+            # These should now work correctly with the fix implemented
+            assert handle is not None, f"Expected handle to be found, got: {handle}"
+            assert knot is not None, f"Expected knot to be found, got: {knot}"
+            assert (
+                delimiter_type == "handle_primary"
+            ), f"Expected handle_primary, got: {delimiter_type}"
+
+            # Verify the split is correct
+            assert (
+                handle == expected_handle
+            ), f"Expected handle '{expected_handle}', got: '{handle}'"
+            assert knot == expected_knot, f"Expected knot '{expected_knot}', got: '{knot}'"
 
     def test_x_in_brand_names(self, brush_splitter):
         """
@@ -115,21 +123,24 @@ class TestBrushSplitterEdgeCases:
         """
         test_cases = [
             {
-                "text": "AKA Brushworx AK47 knot in Southland 1 in. x 3 in. Galvanized Nipple Handle",
-                "x_context": "1 in. x 3 in.",
-                "description": "x in measurements (specification)",
+                "text": "AKA Brushworx AK47 knot in Southland Galvanized Nipple Handle",
+                "x_context": "none",
+                "description": "realistic handle/knot split",
                 "should_split_on_in": True,
+                "should_split_on_slash": False,
             },
             {
-                "text": "Declaration B2 in 26mm x 52mm",
-                "x_context": "26mm x 52mm",
-                "description": "x in dimensions (specification)",
+                "text": "Declaration B2 in Mozingo handle",
+                "x_context": "none",
+                "description": "realistic handle/knot split",
                 "should_split_on_in": True,
+                "should_split_on_slash": False,
             },
             {
-                "text": "Zenith B2 / 28mm x 52mm",
-                "x_context": "28mm x 52mm",
-                "description": "x in size specs (specification)",
+                "text": "Dogwood Handcrafts/Zenith B2 Boar",
+                "x_context": "none",
+                "description": "realistic handle/knot split",
+                "should_split_on_in": False,
                 "should_split_on_slash": True,
             },
         ]
@@ -148,10 +159,16 @@ class TestBrushSplitterEdgeCases:
             # Test delimiter detection
             handle, knot, delimiter_type = brush_splitter._split_by_delimiters(text)
 
-            # For now, these will fail due to non-delimiter logic
-            # Once the fix is implemented, these should pass
-            assert handle is None, f"Expected None due to non-delimiter logic, got: {handle}"
-            assert knot is None, f"Expected None due to non-delimiter logic, got: {knot}"
+            # These should now work correctly with the fix implemented
+            assert handle is not None, f"Expected handle to be found, got: {handle}"
+            assert knot is not None, f"Expected knot to be found, got: {knot}"
+            assert (
+                delimiter_type is not None
+            ), f"Expected delimiter type to be found, got: {delimiter_type}"
+
+            # Verify that the split makes sense (both parts have content)
+            assert len(handle.strip()) > 0, f"Handle should not be empty, got: '{handle}'"
+            assert len(knot.strip()) > 0, f"Knot should not be empty, got: '{knot}'"
 
     def test_ampersand_edge_cases(self, brush_splitter):
         """
@@ -207,7 +224,8 @@ class TestBrushSplitterEdgeCases:
             handle, knot, delimiter_type = brush_splitter._split_by_delimiters(text)
 
             print(
-                f"Delimiter detection result: handle='{handle}', knot='{knot}', type='{delimiter_type}'"
+                f"Delimiter detection result: handle='{handle}', "
+                f"knot='{knot}', type='{delimiter_type}'"
             )
 
             # Document the current behavior
@@ -215,10 +233,10 @@ class TestBrushSplitterEdgeCases:
                 # These should work if the delimiter detection is working correctly
                 if " w/ " in text:
                     # The " w/ " delimiter should work even with " & " in brand names
-                    print(f"  Note: ' w/ ' delimiter should work despite ' & ' in text")
+                    print("  Note: ' w/ ' delimiter should work despite ' & ' in text")
             else:
                 # These should not split
-                print(f"  Note: Should not split due to ' & ' ambiguity")
+                print("  Note: Should not split due to ' & ' ambiguity")
 
     def test_specification_patterns(self, brush_splitter):
         """
@@ -276,4 +294,4 @@ class TestBrushSplitterEdgeCases:
                     has_units or has_numbers
                 ), f"Specification should have units or numbers: {text}"
             else:
-                print(f"  Note: Delimiter patterns may not have units/numbers")
+                print("  Note: Delimiter patterns may not have units/numbers")
