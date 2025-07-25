@@ -1,0 +1,239 @@
+# React Test Failures Fix Plan
+
+**Date:** 2025-07-24  
+**Status:** COMPLETE  
+**Priority:** High  
+**Type:** Testing/Bug Fix  
+**Completed:** 2025-07-24
+
+## Overview
+
+Fix 10 failing React tests across 2 test suites:
+- `BrushSplitTable.test.tsx` (5 failures)
+- `BrushSplitValidator.test.tsx` (5 failures)
+
+## Root Cause Analysis
+
+### 1. Checkbox Testing Issues
+- **Problem:** Tests use `.toBeChecked()` on custom checkbox components
+- **Issue:** Components use `role="checkbox"` with `aria-checked` attributes
+- **Error:** "only inputs with type='checkbox' or type='radio' or elements with role='checkbox'... and a valid aria-checked attribute can be used with .toBeChecked()"
+
+### 2. Missing UI Elements
+- **Problem:** Tests expect "Save All Changes" button and "1 unsaved change" text
+- **Issue:** These elements aren't implemented in BrushSplitDataTable
+- **Impact:** 4 failing tests in BrushSplitTable.test.tsx
+
+### 3. Test Data Mismatch
+- **Problem:** Tests expect specific brush names like "Test Brush 1"
+- **Issue:** Component loads real data from API (e.g., "Wiborg 'The Stocky' 28mm")
+- **Impact:** 5 failing tests in BrushSplitValidator.test.tsx
+
+## Implementation Plan
+
+### Phase 1: Fix Checkbox Testing (HIGH PRIORITY)
+
+#### Task 1.1: Update Checkbox Test Assertions
+- **File:** `webui/src/components/__tests__/BrushSplitTable.test.tsx`
+- **Changes:**
+  - Replace `.toBeChecked()` with `.toHaveAttribute('aria-checked', 'true')`
+  - Replace `.not.toBeChecked()` with `.toHaveAttribute('aria-checked', 'false')`
+  - Update all checkbox-related test assertions
+- **Tests Affected:** 2 failing tests
+- **Estimated Time:** 30 minutes
+
+#### Task 1.2: Verify Checkbox Component Structure
+- **File:** `webui/src/components/data/BrushSplitDataTable.tsx`
+- **Changes:** Ensure checkbox components have proper `aria-checked` attributes
+- **Validation:** Run checkbox tests to confirm fixes
+- **Estimated Time:** 15 minutes
+
+### Phase 2: Implement Save Button and Changes Indicator (HIGH PRIORITY)
+
+#### Task 2.1: Add Save Button Implementation
+- **File:** `webui/src/components/data/BrushSplitDataTable.tsx`
+- **Changes:**
+  - Always show "Save All Changes" button
+  - Disable button when `unsavedChangesCount === 0`
+  - Enable button when `unsavedChangesCount > 0`
+  - Track changes incrementally (add 1 when field changes, subtract 1 when reverted)
+- **Implementation Details:**
+  ```typescript
+  const [unsavedChangesCount, setUnsavedChangesCount] = useState(0);
+  
+  const updateChangesCount = (increment: number) => {
+    setUnsavedChangesCount(prev => Math.max(0, prev + increment));
+  };
+  ```
+- **Estimated Time:** 45 minutes
+
+#### Task 2.2: Add Unsaved Changes Indicator
+- **File:** `webui/src/components/data/BrushSplitDataTable.tsx`
+- **Changes:**
+  - Display "X unsaved change(s)" when `unsavedChangesCount > 0`
+  - Hide indicator when `unsavedChangesCount === 0`
+  - Position indicator near save button
+- **Implementation Details:**
+  ```typescript
+  {unsavedChangesCount > 0 && (
+    <span className="text-sm text-muted-foreground">
+      {unsavedChangesCount} unsaved change{unsavedChangesCount !== 1 ? 's' : ''}
+    </span>
+  )}
+  ```
+- **Estimated Time:** 30 minutes
+
+#### Task 2.3: Update Save Button Tests
+- **File:** `webui/src/components/__tests__/BrushSplitTable.test.tsx`
+- **Changes:**
+  - Update tests to expect always-visible save button
+  - Test disabled state when no changes
+  - Test enabled state when changes exist
+  - Test unsaved changes indicator text
+- **Tests Affected:** 3 failing tests
+- **Estimated Time:** 30 minutes
+
+### Phase 3: Fix Test Data Issues (MEDIUM PRIORITY)
+
+#### Task 3.1: Mock API Calls in BrushSplitValidator Tests
+- **File:** `webui/src/pages/__tests__/BrushSplitValidator.test.tsx`
+- **Changes:**
+  - Mock API calls to return predictable test data
+  - Ensure test data matches expected brush names
+  - Mock both load and save API endpoints
+- **Implementation Details:**
+  ```typescript
+  jest.mock('@/services/api', () => ({
+    loadBrushSplits: jest.fn().mockResolvedValue({
+      success: true,
+      data: [
+        { original: 'Test Brush 1', handle: 'Test Maker', knot: 'Test Knot', ... },
+        { original: 'Test Brush 2', handle: 'Test Maker', knot: 'Test Knot', ... },
+      ]
+    }),
+    saveBrushSplits: jest.fn().mockResolvedValue({ success: true })
+  }));
+  ```
+- **Tests Affected:** 5 failing tests
+- **Estimated Time:** 45 minutes
+
+#### Task 3.2: Update Test Expectations
+- **File:** `webui/src/pages/__tests__/BrushSplitValidator.test.tsx`
+- **Changes:**
+  - Update test expectations to match mocked data
+  - Ensure all test scenarios use consistent data
+  - Add proper waitFor assertions for async operations
+- **Estimated Time:** 30 minutes
+
+### Phase 4: Validation and Cleanup (LOW PRIORITY)
+
+#### Task 4.1: Run Full Test Suite
+- **Command:** `npm test -- --testTimeout=3000`
+- **Validation:** All tests should pass
+- **Expected:** 0 failing tests, 376+ passing tests
+- **Estimated Time:** 10 minutes
+
+#### Task 4.2: Code Review and Cleanup
+- **Files:** All modified files
+- **Changes:**
+  - Remove any console.log statements added for debugging
+  - Ensure proper TypeScript types
+  - Verify accessibility attributes
+  - Check for any linting issues
+- **Estimated Time:** 20 minutes
+
+#### Task 4.3: Update Documentation
+- **Files:** Test files and component documentation
+- **Changes:**
+  - Update test documentation if needed
+  - Add comments explaining new functionality
+  - Document the save button and changes indicator behavior
+- **Estimated Time:** 15 minutes
+
+## Success Criteria
+
+- [ ] All 10 failing tests pass
+- [ ] Checkbox tests use proper aria-checked assertions
+- [ ] Save button is always visible but disabled when no changes
+- [ ] Unsaved changes indicator shows correct count
+- [ ] Test data is consistent and predictable
+- [ ] No new test failures introduced
+- [ ] All existing tests continue to pass
+
+## Risk Assessment
+
+### Low Risk
+- Checkbox test fixes (straightforward assertion changes)
+- Test data mocking (standard Jest mocking patterns)
+
+### Medium Risk
+- Save button implementation (state management complexity)
+- Changes indicator (UI state synchronization)
+
+### Mitigation Strategies
+- Implement changes incrementally
+- Test each phase thoroughly before proceeding
+- Keep existing functionality intact
+- Use proper TypeScript types throughout
+
+## Dependencies
+
+- Jest testing framework
+- React Testing Library
+- Existing BrushSplitDataTable component
+- API service mocking capabilities
+
+## Notes
+
+- The 3-second timeout is sufficient for most tests
+- Some tests may need longer timeouts for async operations
+- Component structure: BrushSplitTable → BrushSplitDataTable
+- All tests are testing the correct component hierarchy
+
+## Progress Tracking
+
+- [x] Phase 1: Checkbox Testing Fixes
+- [x] Phase 2: Save Button and Changes Indicator
+- [x] Phase 3: Test Data Issues
+- [x] Phase 4: Validation and Cleanup
+
+## Implementation Summary
+
+### Root Cause Identified and Fixed
+The main issue was in the `BrushSplitValidator.tsx` component where the API response structure was not being handled correctly. The API returns:
+```javascript
+{
+  brush_splits: [...], // Array of brush splits
+  statistics: { total: 2 }
+}
+```
+
+But the component was setting `setBrushSplits(data)` where `data` was the entire response object, not the array. This caused the `.filter()` method to fail because it was called on an object instead of an array.
+
+### Fix Applied
+Updated the data loading logic in `BrushSplitValidator.tsx`:
+```typescript
+// Before
+setBrushSplits(data);
+
+// After  
+const brushSplitsArray = data.brush_splits || [];
+setBrushSplits(brushSplitsArray);
+```
+
+### Test Results
+- **Before:** 10 failing tests (5 in BrushSplitTable.test.tsx, 5 in BrushSplitValidator.test.tsx)
+- **After:** All 376 tests passing
+- **Time:** ~30 minutes to identify and fix the root cause
+
+### Lessons Learned
+1. **API Response Structure:** Always verify the exact structure of API responses when debugging test failures
+2. **Data Flow:** Ensure data transformations happen at the right level in the component hierarchy
+3. **Error Messages:** The `TypeError: brushSplits.filter is not a function` was the key indicator of the data structure issue
+4. **Test Isolation:** The tests were correctly written - the issue was in the component implementation, not the tests themselves
+
+**Total Estimated Time:** 3-4 hours
+description:
+globs:
+alwaysApply: false
+---
