@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
 
 interface CommentListProps {
   commentIds: string[];
@@ -36,15 +35,15 @@ export const CommentList: React.FC<CommentListProps> = ({
   return (
     <div className='space-y-1' aria-label={ariaLabel}>
       {displayComments.map((commentId, index) => (
-        <Button
+        <button
           key={commentId}
           onClick={() => onCommentClick?.(commentId)}
           disabled={commentLoading}
-          className='block w-full text-left text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded'
+          className='block w-full text-left text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded border-0 bg-transparent cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
           aria-label={`View comment ${index + 1} of ${validCommentIds.length}`}
         >
           {commentId}
-        </Button>
+        </button>
       ))}
       {remainingCount > 0 && <span className='text-xs text-gray-500'>+{remainingCount} more</span>}
     </div>
