@@ -1,5 +1,6 @@
+import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { UnmatchedAnalyzerDataTable } from '../data/UnmatchedAnalyzerDataTable';
+import UnmatchedAnalyzerDataTable from '../data/UnmatchedAnalyzerDataTable';
 
 // Mock ShadCN DataTable component
 jest.mock('@/components/ui/data-table', () => ({

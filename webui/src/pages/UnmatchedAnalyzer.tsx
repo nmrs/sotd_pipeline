@@ -10,7 +10,7 @@ import {
 } from '../services/api';
 import MonthSelector from '../components/forms/MonthSelector';
 import LoadingSpinner from '../components/layout/LoadingSpinner';
-import { UnmatchedAnalyzerDataTable } from '../components/data/UnmatchedAnalyzerDataTable';
+import UnmatchedAnalyzerDataTable from '../components/data/UnmatchedAnalyzerDataTable';
 import PerformanceMonitor from '../components/domain/PerformanceMonitor';
 import CommentModal from '../components/domain/CommentModal';
 import BrushTable from '../components/data/BrushTable';
@@ -138,7 +138,7 @@ const UnmatchedAnalyzer: React.FC = () => {
         if (result.partial_results) {
           messaging.addWarningMessage(
             `Partial results: ${result.error || 'Some items could not be processed'}. ` +
-              'Only available data is shown.'
+            'Only available data is shown.'
           );
         }
 
@@ -209,24 +209,24 @@ const UnmatchedAnalyzer: React.FC = () => {
         components: {
           handle:
             item.unmatched?.handle &&
-            typeof item.unmatched.handle === 'object' &&
-            'text' in item.unmatched.handle
+              typeof item.unmatched.handle === 'object' &&
+              'text' in item.unmatched.handle
               ? {
-                  text: (item.unmatched.handle as { text: string }).text,
-                  status: 'Unmatched' as const,
-                  pattern:
-                    (item.unmatched.handle as { pattern: string; text: string }).pattern || '',
-                }
+                text: (item.unmatched.handle as { text: string }).text,
+                status: 'Unmatched' as const,
+                pattern:
+                  (item.unmatched.handle as { pattern: string; text: string }).pattern || '',
+              }
               : undefined,
           knot:
             item.unmatched?.knot &&
-            typeof item.unmatched.knot === 'object' &&
-            'text' in item.unmatched.knot
+              typeof item.unmatched.knot === 'object' &&
+              'text' in item.unmatched.knot
               ? {
-                  text: (item.unmatched.knot as { text: string }).text,
-                  status: 'Unmatched' as const,
-                  pattern: (item.unmatched.knot as { pattern: string; text: string }).pattern || '',
-                }
+                text: (item.unmatched.knot as { text: string }).text,
+                status: 'Unmatched' as const,
+                pattern: (item.unmatched.knot as { pattern: string; text: string }).pattern || '',
+              }
               : undefined,
         },
       };
@@ -573,11 +573,10 @@ const UnmatchedAnalyzer: React.FC = () => {
               <div className='flex items-center space-x-2'>
                 <button
                   onClick={viewState.toggleShowFiltered}
-                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                    viewState.showFiltered
+                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${viewState.showFiltered
                       ? 'bg-gray-600 text-white hover:bg-gray-700'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                    }`}
                 >
                   {viewState.showFiltered ? 'Hide Filtered' : 'Show Filtered'}
                 </button>
@@ -666,11 +665,10 @@ const UnmatchedAnalyzer: React.FC = () => {
                             <button
                               onClick={handleApplyFilteredChanges}
                               disabled={loading || visibleChangesCount === 0}
-                              className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${
-                                loading || visibleChangesCount === 0
+                              className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || visibleChangesCount === 0
                                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                                   : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                              }`}
+                                }`}
                             >
                               {loading ? 'Applying...' : `Apply (${visibleChangesCount})`}
                             </button>

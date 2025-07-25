@@ -1,12 +1,10 @@
 'use client';
 
-import React, { useCallback, useMemo, memo } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
+import React, { useMemo } from 'react';
 import { DataTable } from '@/components/ui/data-table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
+import { CommentList } from '../domain/CommentList';
 
-// Interface for unmatched analyzer data
 interface UnmatchedItem {
   item: string;
   count: number;
@@ -22,123 +20,91 @@ interface UnmatchedAnalyzerDataTableProps {
   onCommentClick: (commentId: string) => void;
   commentLoading: boolean;
   fieldType: 'razor' | 'blade' | 'soap' | 'brush';
-  columnWidths: {
-    filtered: number;
-    item: number;
-    count: number;
-    comment_ids: number;
-    examples: number;
-  };
   /** Enable performance logging */
   enablePerformanceLogging?: boolean;
   /** Test ID for testing */
   testId?: string;
 }
 
-// Memoized checkbox component for better performance
-const MemoizedCheckbox = memo<{
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-  disabled: boolean;
-  title: string;
-  hasPendingChange: boolean;
-}>(({ checked, onCheckedChange, disabled, title, hasPendingChange }) => (
-  <div className='flex items-center'>
-    <Checkbox
-      checked={checked}
-      onCheckedChange={onCheckedChange}
-      disabled={disabled}
-      className='rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
-      title={title}
-      aria-label={title}
-    />
-    {hasPendingChange && (
-      <div className='ml-1'>
-        <div
-          className='w-2 h-2 bg-blue-600 rounded-full'
-          aria-label='Pending change indicator'
-        ></div>
-      </div>
-    )}
-  </div>
-));
-
-MemoizedCheckbox.displayName = 'MemoizedCheckbox';
-
-// Memoized button component for better performance
-const MemoizedButton = memo<{
-  onClick: () => void;
-  disabled: boolean;
-  children: React.ReactNode;
-  className: string;
-  'aria-label': string;
-}>(({ onClick, disabled, children, className, 'aria-label': ariaLabel }) => (
-  <Button onClick={onClick} disabled={disabled} className={className} aria-label={ariaLabel}>
-    {children}
-  </Button>
-));
-
-MemoizedButton.displayName = 'MemoizedButton';
-
-export const UnmatchedAnalyzerDataTable = memo<UnmatchedAnalyzerDataTableProps>(
+const UnmatchedAnalyzerDataTable = React.memo<UnmatchedAnalyzerDataTableProps>(
   ({
     data,
+    filteredStatus = {},
+    pendingChanges = {},
+    onFilteredStatusChange,
     onCommentClick,
     commentLoading,
     fieldType,
     enablePerformanceLogging = false,
     testId = 'unmatched-analyzer-data-table',
   }) => {
-    // Performance logging
-    const logPerformance = useCallback(
-      (operation: string, startTime: number) => {
+    const columns = useMemo(() => {
+      const logPerformance = (operation: string, startTime: number) => {
         if (enablePerformanceLogging) {
-          const endTime = performance.now();
-          console.log(`UnmatchedAnalyzerDataTable ${operation}: ${endTime - startTime}ms`);
+          const duration = performance.now() - startTime;
+          console.log(`${operation}: ${duration.toFixed(2)}ms`);
         }
-      },
-      [enablePerformanceLogging]
-    );
+      };
 
-    // Memoize format examples function
-    const formatExamples = useCallback((examples: string[]) => {
-      if (!examples || examples.length === 0) {
-        return <span className='text-gray-400 text-xs'>No examples</span>;
-      }
-      return (
-        <span className='text-sm text-gray-600'>
-          {examples.slice(0, 2).join(', ')}
-          {examples.length > 2 && ` +${examples.length - 2} more`}
-        </span>
-      );
-    }, []);
+      const formatExamples = (examples: string[]) => {
+        if (!examples || examples.length === 0) {
+          return <span className='text-gray-400 text-xs'>No examples</span>;
+        }
 
-    // Memoize columns to prevent unnecessary re-renders
-    const columns: ColumnDef<UnmatchedItem>[] = useMemo(
-      () => [
+        return (
+          <div className='space-y-1'>
+            {examples.slice(0, 3).map((example, index) => (
+              <div key={index} className='text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded'>
+                {example}
+              </div>
+            ))}
+            {examples.length > 3 && (
+              <span className='text-xs text-gray-500'>+{examples.length - 3} more</span>
+            )}
+          </div>
+        );
+      };
+
+      return [
         {
-          accessorKey: 'item',
-          header: 'Item',
+          accessorKey: 'filtered',
+          header: 'Filtered',
           cell: ({ row }) => {
             const item = row.original;
+            const isFiltered = filteredStatus[item.item] || false;
+            const isPending = pendingChanges[item.item] || false;
+
             return (
-              <div className='font-medium text-gray-900' data-testid='item-cell'>
-                {item.item}
+              <div className='flex items-center space-x-2'>
+                <Checkbox
+                  checked={isFiltered}
+                  onCheckedChange={checked => {
+                    const startTime = performance.now();
+                    onFilteredStatusChange?.(item.item, checked as boolean);
+                    logPerformance('filter change', startTime);
+                  }}
+                  disabled={isPending}
+                  className='data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600'
+                />
+                {isPending && (
+                  <div className='w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin' />
+                )}
               </div>
             );
           },
         },
         {
+          accessorKey: 'item',
+          header: 'Item',
+          cell: ({ row }) => (
+            <div className='text-sm font-medium text-gray-900 max-w-xs'>{row.original.item}</div>
+          ),
+        },
+        {
           accessorKey: 'count',
           header: 'Count',
           cell: ({ row }) => (
-            <span
-              className='text-sm text-gray-600'
-              role='cell'
-              aria-label={`Count: ${row.original.count}`}
-            >
-              {row.original.count}
-            </span>
+            <span className='text-sm text-gray-900 font-medium'>{row.original.count}</span>
           ),
         },
         {
@@ -148,43 +114,18 @@ export const UnmatchedAnalyzerDataTable = memo<UnmatchedAnalyzerDataTableProps>(
             const item = row.original;
             const commentIds = item.comment_ids || [];
 
-            if (commentIds.length === 0) {
-              return (
-                <span
-                  className='text-gray-400 text-xs'
-                  role='cell'
-                  aria-label='No comments available'
-                >
-                  No comments
-                </span>
-              );
-            }
-
             return (
-              <div
-                className='space-y-1'
-                role='cell'
+              <CommentList
+                commentIds={commentIds}
+                onCommentClick={commentId => {
+                  const startTime = performance.now();
+                  onCommentClick(commentId);
+                  logPerformance('comment click', startTime);
+                }}
+                commentLoading={commentLoading}
+                maxDisplay={3}
                 aria-label={`${commentIds.length} comment${commentIds.length !== 1 ? 's' : ''} available`}
-              >
-                {commentIds.slice(0, 3).map((commentId, index) => (
-                  <MemoizedButton
-                    key={commentId}
-                    onClick={() => {
-                      const startTime = performance.now();
-                      onCommentClick(commentId);
-                      logPerformance('comment click', startTime);
-                    }}
-                    disabled={commentLoading}
-                    className='block w-full text-left text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded'
-                    aria-label={`View comment ${index + 1} of ${commentIds.length}`}
-                  >
-                    {commentId}
-                  </MemoizedButton>
-                ))}
-                {commentIds.length > 3 && (
-                  <span className='text-xs text-gray-500'>+{commentIds.length - 3} more</span>
-                )}
-              </div>
+              />
             );
           },
         },
@@ -197,9 +138,15 @@ export const UnmatchedAnalyzerDataTable = memo<UnmatchedAnalyzerDataTableProps>(
             </div>
           ),
         },
-      ],
-      [onCommentClick, commentLoading, formatExamples, logPerformance]
-    );
+      ];
+    }, [
+      onCommentClick,
+      commentLoading,
+      filteredStatus,
+      onFilteredStatusChange,
+      pendingChanges,
+      enablePerformanceLogging,
+    ]);
 
     // Handle empty data gracefully
     if (!data || data.length === 0) {
@@ -236,3 +183,5 @@ export const UnmatchedAnalyzerDataTable = memo<UnmatchedAnalyzerDataTableProps>(
 );
 
 UnmatchedAnalyzerDataTable.displayName = 'UnmatchedAnalyzerDataTable';
+
+export default UnmatchedAnalyzerDataTable;

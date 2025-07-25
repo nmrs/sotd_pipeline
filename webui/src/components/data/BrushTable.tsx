@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
-import FilteredEntryCheckbox from '../forms/FilteredEntryCheckbox';
-import { BrushData } from '../../utils/brushDataTransformer';
+import { Checkbox } from '@/components/ui/checkbox';
+import { CommentList } from '../domain/CommentList';
 
 export interface BrushTableProps {
   items: BrushData[];
@@ -15,7 +14,27 @@ export interface BrushTableProps {
   commentLoading?: boolean;
 }
 
-// Flatten brush data for DataTable while preserving component information
+interface BrushData {
+  main: {
+    brush: string;
+    count: number;
+    comment_ids?: string[];
+    examples?: string[];
+  };
+  components: {
+    handle?: {
+      maker: string;
+      count: number;
+      comment_ids?: string[];
+    };
+    knot?: {
+      maker: string;
+      count: number;
+      comment_ids?: string[];
+    };
+  };
+}
+
 const flattenBrushData = (
   items: BrushData[],
   filteredStatus: Record<string, boolean> = {}
@@ -35,32 +54,35 @@ const flattenBrushData = (
   }> = [];
 
   items.forEach(item => {
-    const isMainFiltered = filteredStatus[item.main.text] || false;
+    const isParentFiltered = filteredStatus[item.main.brush] || false;
 
     // Add main brush row
     flattened.push({
       main: item.main,
       components: item.components,
       type: 'main',
+      isParentFiltered,
     });
 
-    // Always add component sub-rows, but mark them as dimmed if parent is filtered
+    // Add handle component row if exists
     if (item.components.handle) {
       flattened.push({
         main: item.main,
         components: item.components,
         type: 'handle',
-        parentText: item.main.text,
-        isParentFiltered: isMainFiltered,
+        parentText: item.main.brush,
+        isParentFiltered,
       });
     }
+
+    // Add knot component row if exists
     if (item.components.knot) {
       flattened.push({
         main: item.main,
         components: item.components,
         type: 'knot',
-        parentText: item.main.text,
-        isParentFiltered: isMainFiltered,
+        parentText: item.main.brush,
+        isParentFiltered,
       });
     }
   });
@@ -76,59 +98,36 @@ const BrushTable: React.FC<BrushTableProps> = ({
   onCommentClick,
   commentLoading = false,
 }) => {
-  // Handle null/undefined items gracefully
-  const safeItems = useMemo(() => items || [], [items]);
+  const flattenedData = useMemo(
+    () => flattenBrushData(items, filteredStatus),
+    [items, filteredStatus]
+  );
 
-  // Flatten brush data for DataTable
-  const flattenedData = useMemo(() => {
-    return flattenBrushData(safeItems, filteredStatus);
-  }, [safeItems, filteredStatus]);
-
-  // Create columns for DataTable using TanStack Table ColumnDef
-  const columns: ColumnDef<ReturnType<typeof flattenBrushData>[0]>[] = useMemo(
+  const columns = useMemo(
     () => [
-      {
-        accessorKey: 'filtered',
-        header: 'Filtered',
-        cell: ({ row }) => {
-          const item = row.original;
-          const isMain = item.type === 'main';
-          const text = isMain ? item.main.text : item.parentText || '';
-          const isFiltered = filteredStatus[text] || false;
-
-          return (
-            <div className='flex items-center justify-center'>
-              <FilteredEntryCheckbox
-                itemName={text}
-                commentIds={item.main.comment_ids || []}
-                isFiltered={isFiltered}
-                onStatusChange={checked => {
-                  if (isMain) {
-                    onBrushFilter(text, checked);
-                  } else {
-                    onComponentFilter(text, checked);
-                  }
-                }}
-                uniqueId={isMain ? 'main' : item.type}
-              />
-            </div>
-          );
-        },
-      },
       {
         accessorKey: 'brush',
         header: 'Brush',
         cell: ({ row }) => {
           const item = row.original;
           const isMain = item.type === 'main';
-          const text = isMain ? item.main.text : item.parentText || '';
+          const brushName = item.main.brush;
           const isParentFiltered = item.isParentFiltered;
 
-          return (
-            <div className={`${isParentFiltered ? 'text-gray-400' : ''} ${!isMain ? 'ml-6' : ''}`}>
-              {text}
-            </div>
-          );
+          if (isMain) {
+            return (
+              <div className='flex items-center space-x-2'>
+                <Checkbox
+                  checked={filteredStatus[brushName] || false}
+                  onCheckedChange={checked => onBrushFilter(brushName, checked as boolean)}
+                  className='data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600'
+                />
+                <span className={isParentFiltered ? 'text-gray-400' : ''}>{brushName}</span>
+              </div>
+            );
+          }
+
+          return <div className='ml-6'>-</div>;
         },
       },
       {
@@ -136,22 +135,24 @@ const BrushTable: React.FC<BrushTableProps> = ({
         header: 'Handle',
         cell: ({ row }) => {
           const item = row.original;
-          const isMain = item.type === 'main';
+          const isHandle = item.type === 'handle';
           const handle = item.components.handle;
           const isParentFiltered = item.isParentFiltered;
 
-          if (isMain) {
+          if (isHandle && handle) {
             return (
-              <div className={isParentFiltered ? 'text-gray-400' : ''}>
-                {typeof handle === 'string' ? handle : handle?.text || '-'}
-              </div>
-            );
-          }
-
-          if (item.type === 'handle') {
-            return (
-              <div className={`${isParentFiltered ? 'text-gray-400' : ''} ml-6`}>
-                {typeof handle === 'string' ? handle : handle?.text || '-'}
+              <div className='flex items-center space-x-2'>
+                <Checkbox
+                  checked={filteredStatus[`${item.main.brush}_handle_${handle.maker}`] || false}
+                  onCheckedChange={checked =>
+                    onComponentFilter(
+                      `${item.main.brush}_handle_${handle.maker}`,
+                      checked as boolean
+                    )
+                  }
+                  className='data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600'
+                />
+                <span className={isParentFiltered ? 'text-gray-400' : ''}>{handle.maker}</span>
               </div>
             );
           }
@@ -164,22 +165,21 @@ const BrushTable: React.FC<BrushTableProps> = ({
         header: 'Knot',
         cell: ({ row }) => {
           const item = row.original;
-          const isMain = item.type === 'main';
+          const isKnot = item.type === 'knot';
           const knot = item.components.knot;
           const isParentFiltered = item.isParentFiltered;
 
-          if (isMain) {
+          if (isKnot && knot) {
             return (
-              <div className={isParentFiltered ? 'text-gray-400' : ''}>
-                {typeof knot === 'string' ? knot : knot?.text || '-'}
-              </div>
-            );
-          }
-
-          if (item.type === 'knot') {
-            return (
-              <div className={`${isParentFiltered ? 'text-gray-400' : ''} ml-6`}>
-                {typeof knot === 'string' ? knot : knot?.text || '-'}
+              <div className='flex items-center space-x-2'>
+                <Checkbox
+                  checked={filteredStatus[`${item.main.brush}_knot_${knot.maker}`] || false}
+                  onCheckedChange={checked =>
+                    onComponentFilter(`${item.main.brush}_knot_${knot.maker}`, checked as boolean)
+                  }
+                  className='data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600'
+                />
+                <span className={isParentFiltered ? 'text-gray-400' : ''}>{knot.maker}</span>
               </div>
             );
           }
@@ -215,21 +215,13 @@ const BrushTable: React.FC<BrushTableProps> = ({
           if (isMain && commentIds && commentIds.length > 0) {
             return (
               <div className={isParentFiltered ? 'text-gray-400' : ''}>
-                <div className='flex flex-wrap gap-1'>
-                  {commentIds.slice(0, 3).map(id => (
-                    <button
-                      key={id}
-                      onClick={() => onCommentClick?.(id)}
-                      disabled={commentLoading}
-                      className='px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200 disabled:opacity-50'
-                    >
-                      {id}
-                    </button>
-                  ))}
-                  {commentIds.length > 3 && (
-                    <span className='text-xs text-gray-500'>+{commentIds.length - 3} more</span>
-                  )}
-                </div>
+                <CommentList
+                  commentIds={commentIds}
+                  onCommentClick={onCommentClick}
+                  commentLoading={commentLoading}
+                  maxDisplay={3}
+                  aria-label={`${commentIds.length} comment${commentIds.length !== 1 ? 's' : ''} available`}
+                />
               </div>
             );
           }
