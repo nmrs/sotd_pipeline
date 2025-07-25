@@ -236,6 +236,12 @@ known_knots:
       fiber: Badger
       patterns:
       - (oumo.*)?rorschach
+  Rich Man Shaving:
+    S2 Innovator:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+      - rich.*man.*shav.*s-?2.*innovator
   Turn-N-Shave:
     Tip (Badger):
       fiber: Badger

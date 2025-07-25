@@ -478,7 +478,8 @@ class BrushMatcher:
 
         elif knot_text and not handle_text:
             # Handle knot-only entries (no handle component)
-            # This handles cases like "AP Shave Co G5C" where brush_splits.yaml specifies handle: null
+            # This handles cases like "AP Shave Co G5C" where brush_splits.yaml
+            # specifies handle: null
 
             # Check correct matches for knot component first
             knot_correct_match = self.correct_matches_checker.check(knot_text)
@@ -736,28 +737,29 @@ class BrushMatcher:
                 self._resolve_knot_maker(matched, value)
 
             else:
-                # Knot match - extract and process
-                match_dict = self._extract_match_dict(best_match, None)
-                if match_dict is not None:
-                    self._ensure_handle_knot_sections(
-                        match_dict, None, getattr(best_match, "pattern", None), None, None, None
-                    )
-                    self._enrich_match_result(match_dict, value)
-                    self._post_process_match(match_dict)
-                    # Resolve handle and knot makers
-                    self._resolve_handle_maker(match_dict, value)
-                    self._resolve_knot_maker(match_dict, value)
-                    self._final_cleanup(match_dict)
-                    matched = match_dict
-                else:
-                    # Fallback if extraction fails
-                    matched = {
-                        "brand": best_match.matched.get("brand"),
-                        "model": best_match.matched.get("model"),
+                # Knot-only match - create knot-only structure
+                matched = {
+                    "brand": None,  # Not a complete brush
+                    "model": None,  # Not a complete brush
+                    "handle": {
+                        "brand": None,  # No handle component
+                        "model": None,
+                        "source_text": None,
+                        "_matched_by": "KnotMatcher",
+                        "_pattern": "knot_only",
+                    },
+                    "knot": {
+                        "brand": best_match.matched.get("brand") if best_match.matched else None,
+                        "model": best_match.matched.get("model") if best_match.matched else None,
+                        "fiber": best_match.matched.get("fiber") if best_match.matched else None,
+                        "knot_size_mm": (
+                            best_match.matched.get("knot_size_mm") if best_match.matched else None
+                        ),
                         "source_text": value,
-                        "_matched_by": "Unknown",
-                        "_pattern": getattr(best_match, "pattern", "unknown"),
-                    }
+                        "_matched_by": "KnotMatcher",
+                        "_pattern": getattr(best_match, "pattern", "knot_only"),
+                    },
+                }
 
             from sotd.match.types import create_match_result
 

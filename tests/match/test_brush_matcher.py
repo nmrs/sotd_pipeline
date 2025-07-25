@@ -103,6 +103,11 @@ def test_knots_catalog():
                 "knot_size_mm": 26,
                 "Zebra": {"patterns": ["zebra"]},
             },
+            "Rich Man Shaving": {
+                "fiber": "Badger",
+                "knot_size_mm": 26,
+                "S2 Innovator": {"patterns": ["rich.*man.*shav.*s-?2.*innovator"]},
+            },
         },
         "other_knots": {
             "Simpson": {
@@ -228,6 +233,29 @@ class TestBrushMatcher:
         """Test handling of None input."""
         result = brush_matcher.match(None)
         assert result is None
+
+    def test_knot_only_matching_without_curated_split(self, brush_matcher):
+        """Test that knot-only strings match correctly when no curated split exists."""
+        # Test the specific case from the plan
+        result = brush_matcher.match("Richman Shaving 28 mm S2 innovator knot")
+
+        # Should match as knot-only (not complete brush)
+        assert result.match_type == "regex"
+        assert result.pattern == "rich.*man.*shav.*s-?2.*innovator"
+
+        # Verify handle is None (no handle component)
+        assert result.matched["handle"]["brand"] is None
+        assert result.matched["handle"]["model"] is None
+
+        # Verify knot has correct brand, model, fiber, and size
+        assert result.matched["knot"]["brand"] == "Rich Man Shaving"
+        assert result.matched["knot"]["model"] == "S2 Innovator"
+        assert result.matched["knot"]["fiber"] == "Badger"
+        assert result.matched["knot"]["knot_size_mm"] == 26
+
+        # Verify top-level brand/model are None (not a complete brush)
+        assert result.matched["brand"] is None
+        assert result.matched["model"] is None
 
 
 # Parameterized strategy/fiber tests

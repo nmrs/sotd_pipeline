@@ -365,8 +365,8 @@ def score_match_type(text: str, match_type: str, pattern_score: int) -> int:
         if has_handle_indicators(text):
             score += 10
     elif match_type == "knot":
-        # Knot indicators decrease score for handle matches (increase for knot matches)
+        # Knot indicators increase score for knot matches
         if has_knot_indicators(text):
-            score -= 8
+            score += 10
 
     return score

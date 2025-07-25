@@ -14,6 +14,11 @@ known_brushes:
       fiber: Synthetic
       patterns:
       - alpha.*outlaw
+    T-400:
+      fiber: Synthetic
+      knot_size_mm: 24
+      patterns:
+      - \bt-?400\b
   Aurora Grooming:
     default: Synthetic
     patterns:
@@ -216,11 +221,17 @@ known_brushes:
       patterns:
       - (declaration|\bdg\b).*\bb16\b
       - \bb16\b
+  Dreadnought:
+    Avenger:
+      fiber: Boar
+      patterns:
+      - dreadnought.*avenger
   EldrormR Industries/Muninn Woodworks:
     BFM:
       # knot_size_mm: 50
       patterns:
       - \bbfm\b(.*50mm)?
+      - bigfuckingmotherload
       knot:
         brand: Moti
         fiber: Synthetic
@@ -228,12 +239,19 @@ known_brushes:
         model: Motherlode
       handle:
         brand: Muninn Woodworks
+  Groomatorium:
+    Synthetic:
+      fiber: Synthetic
+      knot_size_mm: 24
+      patterns:
+      - groomatorium
   Kent:
     INF1:
       fiber: Synthetic
       knot_size_mm: 22
       patterns:
       - kent.*inf1
+      - kent.*infinity
   Mühle:
     Hexagon:
       knot_size_mm: 21
@@ -266,7 +284,7 @@ known_brushes:
     '10048':
       knot_size_mm: 28
       patterns:
-      - omega.*(pro)*.*48
+      - omeg\w.*(pro)?.*48
     '10049':
       knot_size_mm: 26
       patterns:
@@ -818,3 +836,16 @@ other_brushes:
     default: Synthetic
     patterns:
     - gillette
+  Body Shop:
+    default: Synthetic
+    knot_size_mm: 22
+    patterns:
+    - body.*shop
+  Böker:
+    default: Badger
+    patterns:
+    - böker
+  Spokar:
+    default: Synthetic
+    patterns:
+    - spokar
