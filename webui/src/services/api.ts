@@ -159,6 +159,53 @@ export const analyzeUnmatched = async (
   }
 };
 
+// Mismatch analyzer types and functions
+export interface MismatchAnalysisRequest {
+  field: string;
+  month: string;
+  threshold?: number;
+  limit?: number;
+  show_all?: boolean;
+  show_unconfirmed?: boolean;
+  show_regex_matches?: boolean;
+}
+
+export interface MismatchItem {
+  original: string;
+  matched: any;
+  pattern: string;
+  match_type: string;
+  confidence?: number;
+  mismatch_type?: string;
+  reason?: string;
+  count: number;
+  examples: string[];
+  comment_ids: string[];
+}
+
+export interface MismatchAnalysisResult {
+  field: string;
+  month: string;
+  total_matches: number;
+  total_mismatches: number;
+  mismatch_items: MismatchItem[];
+  processing_time: number;
+  partial_results?: boolean;
+  error?: string;
+}
+
+export const analyzeMismatch = async (
+  request: MismatchAnalysisRequest
+): Promise<MismatchAnalysisResult> => {
+  try {
+    const response = await api.post('/analyze/mismatch', request);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to analyze mismatches:', error);
+    throw error;
+  }
+};
+
 // Match phase operations
 export interface MatchPhaseRequest {
   months: string[];
@@ -236,10 +283,14 @@ export interface SaveBrushSplitsResponse {
   saved_count: number;
 }
 
-export const loadBrushSplits = async (months: string[]): Promise<LoadBrushSplitsResponse> => {
+export const loadBrushSplits = async (
+  months: string[],
+  unmatchedOnly: boolean = true
+): Promise<LoadBrushSplitsResponse> => {
   try {
     const queryParams = months.map(month => `months=${encodeURIComponent(month)}`).join('&');
-    const response = await api.get(`/brush-splits/load?${queryParams}`);
+    const unmatchedParam = `unmatched_only=${unmatchedOnly}`;
+    const response = await api.get(`/brush-splits/load?${queryParams}&${unmatchedParam}`);
     return response.data;
   } catch (error) {
     console.error('Failed to load brush splits:', error);
@@ -279,10 +330,11 @@ export const saveBrushSplits = async (
       system_confidence: split.system_confidence,
       system_reasoning: split.system_reasoning,
       should_not_split: split.should_not_split,
-      occurrences: split.occurrences?.map(occ => ({
-        file: occ.file,
-        comment_ids: occ.comment_ids,
-      })) || [],
+      occurrences:
+        split.occurrences?.map(occ => ({
+          file: occ.file,
+          comment_ids: occ.comment_ids,
+        })) || [],
     }));
 
     // Debug: Log the data we're sending

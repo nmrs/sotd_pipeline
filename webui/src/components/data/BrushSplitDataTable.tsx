@@ -64,8 +64,6 @@ export function BrushSplitDataTable({
     Record<number, { handle: string; knot: string; validated: boolean }>
   >({});
 
-
-
   const handleFieldChange = useCallback(
     (index: number, field: keyof BrushSplit, value: string | boolean) => {
       const originalValue = brushSplits[index][field];
@@ -99,25 +97,27 @@ export function BrushSplitDataTable({
 
   const handleSave = useCallback(() => {
     // Only send validated splits to the API
-    const validatedData = brushSplits.map((item, index) => {
-      const editingChanges = editingData[index] || {};
-      const isEdited = Object.keys(editingChanges).length > 0;
-      const wasValidated = item.validated;
+    const validatedData = brushSplits
+      .map((item, index) => {
+        const editingChanges = editingData[index] || {};
+        const isEdited = Object.keys(editingChanges).length > 0;
+        const wasValidated = item.validated;
 
-      // Only include splits that are validated (edited or previously validated)
-      const isValidated = isEdited || wasValidated;
+        // Only include splits that are validated (edited or previously validated)
+        const isValidated = isEdited || wasValidated;
 
-      if (!isValidated) {
-        return null; // Skip unvalidated splits
-      }
+        if (!isValidated) {
+          return null; // Skip unvalidated splits
+        }
 
-      return {
-        ...item,
-        ...editingChanges,
-        // Mark as validated if the row is edited
-        validated: true,
-      };
-    }).filter(Boolean) as BrushSplit[]; // Remove null entries
+        return {
+          ...item,
+          ...editingChanges,
+          // Mark as validated if the row is edited
+          validated: true,
+        };
+      })
+      .filter(Boolean) as BrushSplit[]; // Remove null entries
 
     // Only call onSave if there are validated splits to save
     if (validatedData.length > 0) {
@@ -147,7 +147,7 @@ export function BrushSplitDataTable({
           const isIndeterminate = checkedRows.length > 0 && checkedRows.length < pageRows.length;
 
           return (
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               <span>Validated</span>
               <Checkbox
                 checked={isAllChecked || (isIndeterminate && 'indeterminate')}
@@ -235,7 +235,9 @@ export function BrushSplitDataTable({
         header: 'Comments',
         cell: ({ row }) => {
           // Extract all comment_ids from occurrences
-          const allCommentIds = (row.original.occurrences || []).flatMap(occurrence => occurrence.comment_ids || []);
+          const allCommentIds = (row.original.occurrences || []).flatMap(
+            occurrence => occurrence.comment_ids || []
+          );
           const uniqueCommentIds = [...new Set(allCommentIds)];
 
           if (uniqueCommentIds.length === 0) {
@@ -282,14 +284,16 @@ export function BrushSplitDataTable({
           const checkedRows = pageRows.filter(row => {
             const index = row.original.index;
             const editingValue = editingData[index]?.should_not_split;
-            return editingValue !== undefined ? editingValue : row.original.should_not_split || false;
+            return editingValue !== undefined
+              ? editingValue
+              : row.original.should_not_split || false;
           });
 
           const isAllChecked = pageRows.length > 0 && checkedRows.length === pageRows.length;
           const isIndeterminate = checkedRows.length > 0 && checkedRows.length < pageRows.length;
 
           return (
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               <span>Don't Split</span>
               <Checkbox
                 checked={isAllChecked || (isIndeterminate && 'indeterminate')}
@@ -305,7 +309,8 @@ export function BrushSplitDataTable({
                         [index]: {
                           handle: editingData[index]?.handle ?? row.original.handle ?? '',
                           knot: editingData[index]?.knot ?? row.original.knot ?? '',
-                          validated: editingData[index]?.validated ?? row.original.validated ?? false,
+                          validated:
+                            editingData[index]?.validated ?? row.original.validated ?? false,
                         },
                       }));
 
@@ -393,7 +398,10 @@ export function BrushSplitDataTable({
               key={`should_not_split_${index}_${value}`}
               checked={value}
               onCheckedChange={checked => {
-                console.log(`Don't Split checkbox clicked for row ${index}:`, { checked, original: row.original });
+                console.log(`Don't Split checkbox clicked for row ${index}:`, {
+                  checked,
+                  original: row.original,
+                });
 
                 // Handle "Don't Split" specific behavior first
                 if (checked) {
@@ -475,8 +483,6 @@ export function BrushSplitDataTable({
                       }
                       return newData;
                     });
-
-
                   }
                 }
               }}
@@ -506,8 +512,6 @@ export function BrushSplitDataTable({
     });
     return selection;
   }, [brushSplits]);
-
-
 
   // Handle empty data
   if (brushSplits.length === 0) {

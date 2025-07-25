@@ -77,13 +77,13 @@ const mockBrushSplits = [
 describe('BrushSplitDataTable', () => {
   describe('ShadCN DataTable Integration', () => {
     it('uses ShadCN DataTable as foundation', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => {}} />);
 
       expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
     });
 
     it('passes correct props to ShadCN DataTable', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => {}} />);
 
       const propsElement = screen.getByTestId('data-table-props');
       const props = JSON.parse(propsElement.textContent || '{}');
@@ -95,7 +95,7 @@ describe('BrushSplitDataTable', () => {
     });
 
     it('defines correct columns for ShadCN DataTable', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => {}} />);
 
       expect(screen.getByTestId('column-original')).toBeInTheDocument();
       expect(screen.getByTestId('column-handle')).toBeInTheDocument();
@@ -105,7 +105,7 @@ describe('BrushSplitDataTable', () => {
     });
 
     it('transforms data correctly for ShadCN DataTable', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => {}} />);
 
       expect(screen.getByTestId('row-0')).toHaveTextContent(
         'Test Brush 1 - Test Maker - Test Knot'
@@ -121,7 +121,7 @@ describe('BrushSplitDataTable', () => {
 
   describe('Specialized Editing Functionality', () => {
     it('shows unsaved changes indicator when editing', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => {}} />);
 
       // Initially no unsaved changes
       expect(screen.queryByText(/unsaved change/)).not.toBeInTheDocument();
@@ -143,7 +143,11 @@ describe('BrushSplitDataTable', () => {
       const onSelectionChange = jest.fn();
 
       render(
-        <BrushSplitDataTable brushSplits={mockBrushSplits} onSelectionChange={onSelectionChange} onSave={() => { }} />
+        <BrushSplitDataTable
+          brushSplits={mockBrushSplits}
+          onSelectionChange={onSelectionChange}
+          onSave={() => {}}
+        />
       );
 
       // Selection change is handled by ShadCN DataTable
@@ -155,12 +159,7 @@ describe('BrushSplitDataTable', () => {
     it('includes validation status in save data', async () => {
       const onSave = jest.fn();
 
-      render(
-        <BrushSplitDataTable
-          brushSplits={mockBrushSplits}
-          onSave={onSave}
-        />
-      );
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={onSave} />);
 
       // Wait for component to render
       await waitFor(() => {
@@ -175,25 +174,25 @@ describe('BrushSplitDataTable', () => {
 
   describe('Column Definitions', () => {
     it('defines original column with correct header', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => {}} />);
 
       expect(screen.getByTestId('column-original')).toHaveTextContent('Original');
     });
 
     it('defines handle column with correct header', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => {}} />);
 
       expect(screen.getByTestId('column-handle')).toHaveTextContent('Handle');
     });
 
     it('defines knot column with correct header', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => {}} />);
 
       expect(screen.getByTestId('column-knot')).toHaveTextContent('Knot');
     });
 
     it('defines corrected column with correct header', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => {}} />);
 
       expect(screen.getByTestId('column-corrected')).toHaveTextContent('Corrected');
     });
@@ -201,7 +200,7 @@ describe('BrushSplitDataTable', () => {
 
   describe('Data Transformation', () => {
     it('adds index to each brush split', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => {}} />);
 
       // Each row should have an index added
       expect(screen.getByTestId('row-0')).toBeInTheDocument();
@@ -209,7 +208,7 @@ describe('BrushSplitDataTable', () => {
     });
 
     it('preserves all original brush split properties', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => {}} />);
 
       // Check that original data is preserved
       expect(screen.getByText(/Test Brush 1/)).toBeInTheDocument();
@@ -219,7 +218,7 @@ describe('BrushSplitDataTable', () => {
 
   describe('Error Handling', () => {
     it('handles empty brush splits array', () => {
-      render(<BrushSplitDataTable brushSplits={[]} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={[]} onSave={() => {}} />);
 
       expect(screen.getByText('No brush splits to display')).toBeInTheDocument();
     });
@@ -237,7 +236,7 @@ describe('BrushSplitDataTable', () => {
         },
       ] as any;
 
-      render(<BrushSplitDataTable brushSplits={malformedData} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={malformedData} onSave={() => {}} />);
 
       // Should still render without crashing
       expect(screen.getByText(/Test Brush/)).toBeInTheDocument();
@@ -256,7 +255,7 @@ describe('BrushSplitDataTable', () => {
         occurrences: [],
       }));
 
-      render(<BrushSplitDataTable brushSplits={largeDataset} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={largeDataset} onSave={() => {}} />);
 
       // Should render without performance issues
       expect(screen.getByText(/Brush 0/)).toBeInTheDocument();
@@ -265,7 +264,7 @@ describe('BrushSplitDataTable', () => {
 
   describe('Accessibility', () => {
     it('uses ShadCN DataTable accessibility features', () => {
-      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => { }} />);
+      render(<BrushSplitDataTable brushSplits={mockBrushSplits} onSave={() => {}} />);
 
       // Check that accessibility features are present
       expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
@@ -307,12 +306,7 @@ describe('BrushSplitDataTable', () => {
         },
       ];
 
-      render(
-        <BrushSplitDataTable
-          brushSplits={validatedBrushSplits}
-          onSave={() => { }}
-        />
-      );
+      render(<BrushSplitDataTable brushSplits={validatedBrushSplits} onSave={() => {}} />);
 
       // The component should render without errors
       expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();

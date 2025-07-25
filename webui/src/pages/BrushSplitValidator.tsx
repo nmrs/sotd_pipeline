@@ -5,12 +5,13 @@ import { BrushSplit } from '../types/brushSplit';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff } from 'lucide-react';
 import CommentModal from '../components/domain/CommentModal';
-import { getCommentDetail, CommentDetail, saveBrushSplits } from '../services/api';
-
-interface LoadResponse {
-  brush_splits: BrushSplit[];
-  statistics: Record<string, unknown>;
-}
+import {
+  getCommentDetail,
+  CommentDetail,
+  saveBrushSplits,
+  loadBrushSplits,
+  LoadBrushSplitsResponse,
+} from '../services/api';
 
 const BrushSplitValidator: React.FC = () => {
   const [brushSplits, setBrushSplits] = useState<BrushSplit[]>([]);
@@ -18,6 +19,7 @@ const BrushSplitValidator: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [showValidated, setShowValidated] = useState(false);
+  const [showMatched, setShowMatched] = useState(false);
   const [selectedComment, setSelectedComment] = useState<CommentDetail | null>(null);
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [commentLoading, setCommentLoading] = useState(false);
@@ -32,19 +34,9 @@ const BrushSplitValidator: React.FC = () => {
     setLoading(true);
     setError(null);
 
-    // Build query parameters for the API call
-    const queryParams = selectedMonths
-      .map(month => `months=${encodeURIComponent(month)}`)
-      .join('&');
-
-    fetch(`/api/brush-splits/load?${queryParams}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        return response.json();
-      })
-      .then((data: LoadResponse) => {
+    // Use the API function with unmatchedOnly parameter
+    loadBrushSplits(selectedMonths, !showMatched)
+      .then((data: LoadBrushSplitsResponse) => {
         setBrushSplits(data.brush_splits);
         // Reset to show validated items hidden when months change
         setShowValidated(false);
@@ -56,7 +48,7 @@ const BrushSplitValidator: React.FC = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, [selectedMonths]);
+  }, [selectedMonths, showMatched]);
 
   // Filter brush splits based on showValidated state
   const filteredBrushSplits = useMemo(() => {
@@ -83,19 +75,22 @@ const BrushSplitValidator: React.FC = () => {
     setShowValidated(!showValidated);
   }, [showValidated]);
 
-  const handleCommentClick = useCallback(async (commentId: string) => {
-    try {
-      setCommentLoading(true);
-      const comment = await getCommentDetail(commentId, selectedMonths);
-      setSelectedComment(comment);
-      setCommentModalOpen(true);
-    } catch (err: any) {
-      console.error('Error loading comment detail:', err);
-      // Don't show error to user, just log it
-    } finally {
-      setCommentLoading(false);
-    }
-  }, [selectedMonths]);
+  const handleCommentClick = useCallback(
+    async (commentId: string) => {
+      try {
+        setCommentLoading(true);
+        const comment = await getCommentDetail(commentId, selectedMonths);
+        setSelectedComment(comment);
+        setCommentModalOpen(true);
+      } catch (err: any) {
+        console.error('Error loading comment detail:', err);
+        // Don't show error to user, just log it
+      } finally {
+        setCommentLoading(false);
+      }
+    },
+    [selectedMonths]
+  );
 
   // Create the show/hide validated button
   const validatedButton = useMemo(() => {
@@ -103,19 +98,19 @@ const BrushSplitValidator: React.FC = () => {
 
     return (
       <Button
-        variant="outline"
-        size="sm"
+        variant='outline'
+        size='sm'
         onClick={handleToggleValidated}
-        className="flex items-center gap-2"
+        className='flex items-center gap-2'
       >
         {showValidated ? (
           <>
-            <EyeOff className="h-4 w-4" />
+            <EyeOff className='h-4 w-4' />
             Hide Validated
           </>
         ) : (
           <>
-            <Eye className="h-4 w-4" />
+            <Eye className='h-4 w-4' />
             Show Validated ({hiddenValidatedCount})
           </>
         )}
@@ -123,23 +118,46 @@ const BrushSplitValidator: React.FC = () => {
     );
   }, [brushSplits.length, showValidated, hiddenValidatedCount, handleToggleValidated]);
 
+  // Create the show/hide matched button
+  const matchedButton = useMemo(() => {
+    if (brushSplits.length === 0) return null;
+
+    return (
+      <Button
+        variant='outline'
+        size='sm'
+        onClick={() => setShowMatched(!showMatched)}
+        className='flex items-center gap-2'
+      >
+        {showMatched ? (
+          <>
+            <EyeOff className='h-4 w-4' />
+            Hide Matched
+          </>
+        ) : (
+          <>
+            <Eye className='h-4 w-4' />
+            Show Matched
+          </>
+        )}
+      </Button>
+    );
+  }, [brushSplits.length, showMatched]);
+
   return (
-    <div className="container mx-auto p-4">
-      <div className="mb-4">
-        <MonthSelector
-          selectedMonths={selectedMonths}
-          onMonthsChange={setSelectedMonths}
-        />
+    <div className='container mx-auto p-4'>
+      <div className='mb-4'>
+        <MonthSelector selectedMonths={selectedMonths} onMonthsChange={setSelectedMonths} />
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className='mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded'>
           Error: {error}
         </div>
       )}
 
       {loading && (
-        <div className="mb-4 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded">
+        <div className='mb-4 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded'>
           Loading brush splits...
         </div>
       )}
@@ -184,7 +202,12 @@ const BrushSplitValidator: React.FC = () => {
               setError(`Error saving brush splits: ${error.message || 'Unknown error'}`);
             }
           }}
-          customControls={validatedButton}
+          customControls={
+            <div className='flex gap-2'>
+              {validatedButton}
+              {matchedButton}
+            </div>
+          }
           onCommentClick={handleCommentClick}
           commentLoading={commentLoading}
         />
