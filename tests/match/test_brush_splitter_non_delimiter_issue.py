@@ -137,7 +137,9 @@ class TestBrushSplitterNonDelimiterIssue:
             # These should now work correctly with the fix
             assert handle is not None, f"Expected handle to be found, got: {handle}"
             assert knot is not None, f"Expected knot to be found, got: {knot}"
-            assert delimiter_type is not None, f"Expected delimiter type to be found, got: {delimiter_type}"
+            assert (
+                delimiter_type is not None
+            ), f"Expected delimiter type to be found, got: {delimiter_type}"
 
     def test_ampersand_reliability_analysis(self, brush_splitter):
         """

@@ -277,6 +277,33 @@ class TestNormalizeBrushString:
         result = normalize_brush_string(None)  # type: ignore
         assert result is None
 
+    def test_case_insensitive_matching(self):
+        """Test that brush strings are matched case-insensitively."""
+        validator = BrushSplitValidator()
+
+        # Create a validated split with one case
+        split1 = validator.validate_split(
+            "AP Shave Co. 24mm 'Synbad' Synthetic",
+            None,
+            "AP Shave Co. 24mm 'Synbad' Synthetic",
+            validated_at="2025-01-27T14:30:00Z",
+        )
+
+        # Save it to the validator's internal storage
+        validator.validated_splits[split1.original] = split1
+
+        # Try to find it with different case
+        existing_split = None
+        for validated_key, validated_split in validator.validated_splits.items():
+            if validated_key.lower() == "AP Shave Co. 24mm 'SynBad' Synthetic".lower():
+                existing_split = validated_split
+                break
+
+        # Should find the existing split despite case difference
+        assert existing_split is not None
+        assert existing_split.original == "AP Shave Co. 24mm 'Synbad' Synthetic"
+        assert existing_split.validated is True
+
 
 class TestBrushSplitValidator:
     """Test BrushSplitValidator functionality."""

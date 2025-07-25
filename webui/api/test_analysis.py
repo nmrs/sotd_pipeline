@@ -16,46 +16,31 @@ def client():
 @pytest.fixture
 def mock_analyzer():
     """Mock UnmatchedAnalyzer for testing."""
-    with patch("analysis.UnmatchedAnalyzer") as mock:
+    with patch("webui.api.analysis.UnmatchedAnalyzer") as mock:
         analyzer_instance = MagicMock()
         mock.return_value = analyzer_instance
 
-        # Mock load_matched_data to return test records
-        test_records = [
-            {
-                "razor": {
-                    "original": "Unknown Razor 1",
-                    "matched": None,
-                    "_source_file": "test_file.json",
-                    "_source_line": "123",
-                }
-            },
-            {
-                "razor": {
-                    "original": "Unknown Razor 2",
-                    "matched": None,
-                    "_source_file": "test_file.json",
-                    "_source_line": "456",
-                }
-            },
-        ]
-        analyzer_instance.load_matched_data.return_value = test_records
-
-        # Mock _process_field_unmatched to populate all_unmatched
-        def mock_process(record, field, all_unmatched):
-            if field == "razor" and record.get("razor"):
-                razor_data = record["razor"]
-                if razor_data.get("matched") is None:
-                    original = razor_data.get("original", "")
-                    file_info = {
-                        "file": razor_data.get("_source_file", ""),
-                        "line": razor_data.get("_source_line", "unknown"),
+        # Mock analyze_unmatched to return expected data structure
+        def mock_analyze_unmatched(args):
+            # Return the data structure that the API expects
+            return {
+                "Unknown Razor 1": [
+                    {
+                        "file": "test_file.json",
+                        "line": "123",
+                        "comment_id": "test_comment_1",
                     }
-                    if original not in all_unmatched:
-                        all_unmatched[original] = []
-                    all_unmatched[original].append(file_info)
+                ],
+                "Unknown Razor 2": [
+                    {
+                        "file": "test_file.json",
+                        "line": "456",
+                        "comment_id": "test_comment_2",
+                    }
+                ],
+            }
 
-        analyzer_instance._process_field_unmatched = mock_process
+        analyzer_instance.analyze_unmatched = mock_analyze_unmatched
 
         yield mock
 
@@ -75,14 +60,14 @@ class TestAnalysisEndpoints:
         assert data["field"] == "razor"
         assert data["months"] == ["2025-01"]
         assert data["total_unmatched"] == 2
-        assert len(data["results"]) == 2
+        assert len(data["unmatched_items"]) == 2
 
         # Check first result
-        first_result = data["results"][0]
-        assert "original_text" in first_result
-        assert "use_count" in first_result
-        assert "source_files" in first_result
-        assert "source_lines" in first_result
+        first_result = data["unmatched_items"][0]
+        assert "item" in first_result
+        assert "count" in first_result
+        assert "examples" in first_result
+        assert "comment_ids" in first_result
 
     def test_analyze_unmatched_invalid_field(self, client):
         """Test analysis with invalid field."""
@@ -126,3 +111,45 @@ class TestAnalysisEndpoints:
         request_data["limit"] = 1001
         response = client.post("/api/analyze/unmatched", json=request_data)
         assert response.status_code == 422  # Validation error
+
+    def test_analyze_unmatched_brush_case_insensitive_grouping(self, client):
+        """Test that brush items are grouped case-insensitively."""
+        with patch("webui.api.analysis.UnmatchedAnalyzer") as mock:
+            analyzer_instance = MagicMock()
+            mock.return_value = analyzer_instance
+
+            # Mock analyze_unmatched to return brush data with different cases
+            def mock_analyze_unmatched(args):
+                return {
+                    "AP Shave Co. 24mm 'Synbad' Synthetic": [
+                        {
+                            "file": "test_file1.json",
+                            "line": "123",
+                            "comment_id": "test_comment_1",
+                        }
+                    ],
+                    "AP Shave Co. 24mm 'SynBad' Synthetic": [
+                        {
+                            "file": "test_file2.json",
+                            "line": "456",
+                            "comment_id": "test_comment_2",
+                        }
+                    ],
+                }
+
+            analyzer_instance.analyze_unmatched = mock_analyze_unmatched
+
+            request_data = {"field": "brush", "months": ["2025-01"], "limit": 10}
+            response = client.post("/api/analyze/unmatched", json=request_data)
+
+            assert response.status_code == 200
+            data = response.json()
+
+            # Should only have one item due to case-insensitive grouping
+            assert data["total_unmatched"] == 1
+            assert len(data["unmatched_items"]) == 1
+
+            # Should use the first occurrence as the display text
+            first_item = data["unmatched_items"][0]
+            assert first_item["item"] == "AP Shave Co. 24mm 'Synbad' Synthetic"
+            assert first_item["count"] == 2  # Combined count from both cases

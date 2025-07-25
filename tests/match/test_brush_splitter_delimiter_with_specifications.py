@@ -86,7 +86,7 @@ class TestBrushSplitterDelimiterWithSpecifications:
     def test_w_delimiter_with_x_specifications(self, brush_splitter):
         """
         Test " w/ " delimiter with " x " specifications.
-        
+
         These should split correctly on " w/ " even when " x " is present
         in specifications.
         """
@@ -122,8 +122,10 @@ class TestBrushSplitterDelimiterWithSpecifications:
             # These should now work correctly with the fix
             assert handle is not None, f"Expected handle to be found, got: {handle}"
             assert knot is not None, f"Expected knot to be found, got: {knot}"
-            assert delimiter_type is not None, f"Expected delimiter type to be found, got: {delimiter_type}"
-            
+            assert (
+                delimiter_type is not None
+            ), f"Expected delimiter type to be found, got: {delimiter_type}"
+
             # Verify that the split makes sense (both parts have content)
             assert len(handle.strip()) > 0, f"Handle should not be empty, got: '{handle}'"
             assert len(knot.strip()) > 0, f"Knot should not be empty, got: '{knot}'"
@@ -167,8 +169,10 @@ class TestBrushSplitterDelimiterWithSpecifications:
             # These should now work correctly with the fix
             assert handle is not None, f"Expected handle to be found, got: {handle}"
             assert knot is not None, f"Expected knot to be found, got: {knot}"
-            assert delimiter_type is not None, f"Expected delimiter type to be found, got: {delimiter_type}"
-            
+            assert (
+                delimiter_type is not None
+            ), f"Expected delimiter type to be found, got: {delimiter_type}"
+
             # Verify that the split makes sense (both parts have content)
             assert len(handle.strip()) > 0, f"Handle should not be empty, got: '{handle}'"
             assert len(knot.strip()) > 0, f"Knot should not be empty, got: '{knot}'"
@@ -176,7 +180,7 @@ class TestBrushSplitterDelimiterWithSpecifications:
     def test_dash_delimiter_with_x_specifications(self, brush_splitter):
         """
         Test " - " delimiter with " x " specifications.
-        
+
         These should split correctly on " - " even when " x " is present
         in specifications.
         """
@@ -212,8 +216,10 @@ class TestBrushSplitterDelimiterWithSpecifications:
             # These should now work correctly with the fix
             assert handle is not None, f"Expected handle to be found, got: {handle}"
             assert knot is not None, f"Expected knot to be found, got: {knot}"
-            assert delimiter_type is not None, f"Expected delimiter type to be found, got: {delimiter_type}"
-            
+            assert (
+                delimiter_type is not None
+            ), f"Expected delimiter type to be found, got: {delimiter_type}"
+
             # Verify that the split makes sense (both parts have content)
             assert len(handle.strip()) > 0, f"Handle should not be empty, got: '{handle}'"
             assert len(knot.strip()) > 0, f"Knot should not be empty, got: '{knot}'"
