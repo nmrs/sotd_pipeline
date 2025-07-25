@@ -163,9 +163,6 @@ const MismatchAnalyzer: React.FC = () => {
         await loadCorrectMatches();
         setSelectedItems(new Set());
         setError(null);
-
-        // Show success message
-        alert(`Successfully marked ${response.marked_count} items as correct`);
       } else {
         setError(`Failed to mark items as correct: ${response.message}`);
       }
@@ -185,7 +182,6 @@ const MismatchAnalyzer: React.FC = () => {
       await clearCorrectMatchesByField(selectedField);
       await loadCorrectMatches();
       setError(null);
-      alert('Correct matches cleared successfully');
     } catch (err: unknown) {
       setError(handleApiError(err));
     }
