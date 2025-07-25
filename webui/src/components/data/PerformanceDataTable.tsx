@@ -197,6 +197,7 @@ export const PerformanceDataTable = memo<PerformanceDataTableProps>(
           columns={columns}
           data={data}
           resizable={true}
+          sortable={true}
           showColumnVisibility={true}
           searchKey='name'
         />

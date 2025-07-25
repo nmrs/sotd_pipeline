@@ -51,6 +51,7 @@ interface DataTableProps<TData, TValue> {
   showColumnVisibility?: boolean;
   showPagination?: boolean;
   resizable?: boolean;
+  sortable?: boolean;
   onColumnResize?: (columnId: string, width: number) => void;
   customControls?: React.ReactNode;
   onSelectionChange?: (selectedRows: TData[]) => void;
@@ -65,6 +66,7 @@ export function DataTable<TData, TValue>({
   showColumnVisibility = true,
   showPagination = false,
   resizable = false,
+  sortable = true,
   onColumnResize,
   customControls,
   onSelectionChange,
@@ -212,14 +214,38 @@ export function DataTable<TData, TValue>({
                           : undefined
                       }
                     >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                      {resizable && (
-                        <div
-                          className='absolute right-0 top-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-gray-300'
-                          onMouseDown={e => handleMouseDown(header.column.id, e)}
-                        />
+                      {header.isPlaceholder ? null : (
+                        <div className='flex items-center justify-between'>
+                          {sortable ? (
+                            <button
+                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${
+                                header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
+                              }`}
+                              onClick={header.column.getToggleSortingHandler()}
+                              disabled={!header.column.getCanSort()}
+                            >
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                              {header.column.getCanSort() && (
+                                <span className='ml-1'>
+                                  {{
+                                    asc: '↑',
+                                    desc: '↓',
+                                  }[header.column.getIsSorted() as string] ?? '↕'}
+                                </span>
+                              )}
+                            </button>
+                          ) : (
+                            <div className='flex items-center gap-1'>
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                            </div>
+                          )}
+                          {resizable && (
+                            <div
+                              className='absolute right-0 top-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-gray-300'
+                              onMouseDown={e => handleMouseDown(header.column.id, e)}
+                            />
+                          )}
+                        </div>
                       )}
                     </TableHead>
                   );

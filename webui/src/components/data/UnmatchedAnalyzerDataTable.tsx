@@ -174,6 +174,7 @@ const UnmatchedAnalyzerDataTable = React.memo<UnmatchedAnalyzerDataTableProps>(
           columns={columns}
           data={data}
           resizable={true}
+          sortable={true}
           showColumnVisibility={true}
           searchKey='item'
         />

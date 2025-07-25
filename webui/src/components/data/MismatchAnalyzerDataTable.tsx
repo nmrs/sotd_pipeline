@@ -245,6 +245,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         data={data}
         showPagination={true}
         resizable={true}
+        sortable={true}
         showColumnVisibility={true}
         searchKey='original'
       />

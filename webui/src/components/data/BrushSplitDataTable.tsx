@@ -373,6 +373,7 @@ export function BrushSplitDataTable({
         data={tableData}
         showPagination={true}
         resizable={true}
+        sortable={true}
         showColumnVisibility={true}
         searchKey='original'
         customControls={customControls}
