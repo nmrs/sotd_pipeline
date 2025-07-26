@@ -218,9 +218,8 @@ export function DataTable<TData, TValue>({
                         <div className='flex items-center justify-between'>
                           {sortable ? (
                             <button
-                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${
-                                header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
-                              }`}
+                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
+                                }`}
                               onClick={header.column.getToggleSortingHandler()}
                               disabled={!header.column.getCanSort()}
                             >

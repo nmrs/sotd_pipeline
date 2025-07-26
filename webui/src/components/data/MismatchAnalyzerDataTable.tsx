@@ -241,6 +241,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   return (
     <div className='space-y-4'>
       <DataTable
+        key={`mismatch-table-${data.length}`} // Force re-render when data changes
         columns={columns}
         data={data}
         showPagination={true}

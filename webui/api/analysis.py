@@ -47,10 +47,6 @@ class MismatchAnalysisRequest(BaseModel):
     field: str = Field(..., description="Field to analyze (razor, blade, brush, soap)")
     month: str = Field(..., description="Month to analyze (YYYY-MM format)")
     threshold: int = Field(default=3, ge=1, le=10, description="Levenshtein distance threshold")
-    limit: int = Field(default=50, ge=1, le=1000, description="Maximum number of results to return")
-    show_all: bool = Field(default=False, description="Show all matches, not just mismatches")
-    show_unconfirmed: bool = Field(default=False, description="Show only unconfirmed matches")
-    show_regex_matches: bool = Field(default=False, description="Show only regex matches")
 
 
 class MatchPhaseRequest(BaseModel):
@@ -544,10 +540,6 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 self.end = None
                 self.field = request.field
                 self.threshold = request.threshold
-                self.limit = request.limit
-                self.show_all = request.show_all
-                self.show_unconfirmed = request.show_unconfirmed
-                self.show_regex_matches = request.show_regex_matches
                 self.out_dir = project_root / "data"
                 self.debug = False
                 self.force = False
@@ -572,124 +564,87 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
         # Identify mismatches
         mismatches = analyzer.identify_mismatches(data, request.field, args)
 
-        # Group duplicate mismatches using comprehensive logic that includes comment IDs
-        grouped_mismatches = []
-        mismatch_keys = [
-            "multiple_patterns",
-            "levenshtein_distance",
-            "low_confidence",
-            "perfect_regex_matches",
-        ]
+        # Always process all records for consistent frontend filtering
+        all_items = []
+        total_matches = len(records)
+        total_mismatches = 0
 
-        # Group by normalized original and matched text, case-insensitive
-        grouped = {}
-        for mismatch_type in mismatch_keys:
-            for item in mismatches[mismatch_type]:
-                field_data = item["field_data"]
-                original = field_data.get("original", "")
-                # Use normalized if available, otherwise normalize
-                normalized = field_data.get("normalized", original)
-                matched = analyzer._get_matched_text(request.field, field_data.get("matched", {}))
-                reason = item["reason"]
-
-                # Group by the actual match, not by mismatch type, case-insensitive
-                group_key = (normalized.lower(), matched.lower())
-                if group_key not in grouped:
-                    grouped[group_key] = {
-                        "record_ids": set(),
-                        "item": item,
-                        "sources": set(),
-                        "mismatch_types": set(),
-                        "reasons": set(),
-                        "comment_ids": set(),
-                    }
-
+        # Create lookup for mismatches to mark them appropriately
+        mismatch_lookup = {}
+        for mismatch_type, items in mismatches.items():
+            for item in items:
                 record_id = item["record"].get("id", "")
                 if record_id:
-                    grouped[group_key]["record_ids"].add(record_id)
-                grouped[group_key]["mismatch_types"].add(mismatch_type)
-                grouped[group_key]["reasons"].add(reason)
-                source = item["record"].get("_source_file", "")
-                if source:
-                    grouped[group_key]["sources"].add(source)
-                comment_id = item["record"].get("id", "")
-                if comment_id:
-                    grouped[group_key]["comment_ids"].add(comment_id)
+                    mismatch_lookup[record_id] = (mismatch_type, item["reason"])
 
-        # Convert groups to list format with deterministic sorting
-        priority = [
-            "multiple_patterns",
-            "levenshtein_distance",
-            "low_confidence",
-            "perfect_regex_matches",
-        ]
-        for group_key in sorted(grouped.keys()):
-            group_info = grouped[group_key]
-            norm_original, matched = group_key
-            modified_item = group_info["item"].copy()
-            modified_item["count"] = len(group_info["record_ids"])
-            modified_item["sources"] = sorted(list(group_info["sources"]))
-            modified_item["comment_ids"] = sorted(list(group_info["comment_ids"]))
+        # Process all records
+        skipped_count = 0
+        for record in records:
+            try:
+                field_data = record.get(request.field, {})
+                if not isinstance(field_data, dict):
+                    skipped_count += 1
+                    continue
 
-            # Choose the highest priority mismatch type present
-            mismatch_types = sorted(list(group_info["mismatch_types"]))
-            for p in priority:
-                if p in mismatch_types:
-                    modified_item["mismatch_type"] = p
-                    break
-            else:
-                modified_item["mismatch_type"] = mismatch_types[0] if mismatch_types else ""
+                original = field_data.get("original", "")
+                normalized = field_data.get("normalized", original)
+                matched = field_data.get("matched", {})
+                pattern = field_data.get("pattern") or ""
+                match_type = field_data.get("match_type", "")
+                record_id = record.get("id", "")
 
-            # Combine all reasons
-            reasons = sorted(list(group_info["reasons"]))
-            modified_item["reason"] = "; ".join(reasons)
-            grouped_mismatches.append(modified_item)
+                # Include all records, even those with missing data
+                # For records with missing normalized or matched data, create placeholder items
+                if not normalized:
+                    normalized = str(original) if original else "No original text"
+                if not matched:
+                    matched = {"error": "No matched data"}
 
-        # Convert grouped mismatches to response format
-        mismatch_items = []
-        total_matches = len(records)
-        total_mismatches = len(grouped_mismatches)
+                # Determine if this is a mismatch
+                mismatch_type = None
+                reason = ""
+                if record_id in mismatch_lookup:
+                    mismatch_type, reason = mismatch_lookup[record_id]
+                    total_mismatches += 1
 
-        # Process each grouped mismatch
-        for item in grouped_mismatches[: request.limit]:
-            field_data = item.get("field_data", {})
+                # Create item for all matches
+                all_item = MismatchItem(
+                    original=normalized,
+                    matched=matched,
+                    pattern=pattern,
+                    match_type=match_type or "No Match",
+                    confidence=field_data.get("confidence"),
+                    mismatch_type=mismatch_type or "good_match",
+                    reason=reason,
+                    count=1,
+                    examples=(
+                        [str(record.get("_source_file", ""))] if record.get("_source_file") else []
+                    ),
+                    comment_ids=[str(record_id)] if record_id else [],
+                )
 
-            # Extract basic information
-            original = field_data.get("original", "")
-            normalized = field_data.get("normalized", original)  # Use normalized if available
-            matched = field_data.get("matched", {})
-            pattern = field_data.get("pattern") or ""
-            match_type = field_data.get("match_type", "")
-
-            # Get examples and comment IDs from the grouped data
-            examples = item.get("sources", [])
-            comment_ids = list(item.get("comment_ids", set())) if "comment_ids" in item else []
-
-            # Create mismatch item - use normalized for display
-            mismatch_item = MismatchItem(
-                original=normalized,  # Use normalized instead of original
-                matched=matched,
-                pattern=pattern,
-                match_type=match_type,
-                mismatch_type=item.get("mismatch_type", ""),
-                reason=item.get("reason", ""),
-                count=item.get("count", 1),
-                examples=examples,
-                comment_ids=comment_ids,
-            )
-
-            mismatch_items.append(mismatch_item)
+                all_items.append(all_item)
+            except Exception as e:
+                logger.warning(f"Error processing record {record.get('id', 'unknown')}: {e}")
+                skipped_count += 1
+                continue
 
         # Sort by mismatch type and normalized text
-        mismatch_items.sort(key=lambda x: (x.mismatch_type or "", x.original.lower()))
+        all_items.sort(key=lambda x: (x.mismatch_type or "", x.original.lower()))
+
+        logger.info(
+            f"Mismatch analysis: total_records={len(records)}, "
+            f"skipped_invalid_field_data={skipped_count}, returned={len(all_items)}, "
+            f"total_matches={total_matches}, total_mismatches={total_mismatches}"
+        )
 
         return MismatchAnalysisResponse(
             field=request.field,
             month=request.month,
             total_matches=total_matches,
             total_mismatches=total_mismatches,
-            mismatch_items=mismatch_items[: request.limit],
-            processing_time=0.0,  # TODO: Add timing
+            mismatch_items=all_items,
+            processing_time=0.0,
             partial_results=False,
             error=None,
         )

@@ -165,10 +165,6 @@ export interface MismatchAnalysisRequest {
   field: string;
   month: string;
   threshold?: number;
-  limit?: number;
-  show_all?: boolean;
-  show_unconfirmed?: boolean;
-  show_regex_matches?: boolean;
 }
 
 export interface MismatchItem {

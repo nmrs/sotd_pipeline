@@ -4,6 +4,8 @@ import LoadingSpinner from '../components/layout/LoadingSpinner';
 import ErrorDisplay from '../components/feedback/ErrorDisplay';
 import MismatchAnalyzerDataTable from '../components/data/MismatchAnalyzerDataTable';
 import CommentModal from '../components/domain/CommentModal';
+import { Button } from '@/components/ui/button';
+import { Eye, EyeOff, Filter } from 'lucide-react';
 import {
   analyzeMismatch,
   MismatchAnalysisResult,
@@ -13,7 +15,6 @@ import {
   getCorrectMatches,
   markMatchesAsCorrect,
   clearCorrectMatchesByField,
-  clearAllCorrectMatches,
   CorrectMatchesResponse,
 } from '../services/api';
 
@@ -21,10 +22,7 @@ const MismatchAnalyzer: React.FC = () => {
   const [selectedField, setSelectedField] = useState<string>('razor');
   const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [threshold, setThreshold] = useState<number>(3);
-  const [limit, setLimit] = useState<number>(50);
-  const [showAll, setShowAll] = useState<boolean>(false);
-  const [showUnconfirmed, setShowUnconfirmed] = useState<boolean>(false);
-  const [showRegexMatches, setShowRegexMatches] = useState<boolean>(false);
+  const [displayMode, setDisplayMode] = useState<'mismatches' | 'all' | 'unconfirmed' | 'regex'>('mismatches');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<MismatchAnalysisResult | null>(null);
@@ -74,10 +72,6 @@ const MismatchAnalyzer: React.FC = () => {
         field: selectedField,
         month: selectedMonth,
         threshold,
-        limit,
-        show_all: showAll,
-        show_unconfirmed: showUnconfirmed,
-        show_regex_matches: showRegexMatches,
       });
 
       setResults(result);
@@ -118,9 +112,10 @@ const MismatchAnalyzer: React.FC = () => {
   };
 
   const handleSelectAll = () => {
-    if (!results?.mismatch_items) return;
+    const filteredResults = getFilteredResults();
+    if (!filteredResults.length) return;
 
-    const allKeys = results.mismatch_items.map(item =>
+    const allKeys = filteredResults.map(item =>
       `${item.original}|${JSON.stringify(item.matched)}`
     );
     setSelectedItems(new Set(allKeys));
@@ -194,9 +189,9 @@ const MismatchAnalyzer: React.FC = () => {
     const normalizedOriginal = item.original.toLowerCase().trim();
 
     // Search through correct matches structure
-    for (const [brand, brandData] of Object.entries(correctMatches.entries)) {
+    for (const [, brandData] of Object.entries(correctMatches.entries)) {
       if (typeof brandData === 'object' && brandData !== null) {
-        for (const [model, strings] of Object.entries(brandData)) {
+        for (const [, strings] of Object.entries(brandData)) {
           if (Array.isArray(strings)) {
             for (const correctString of strings) {
               if (correctString.toLowerCase().trim() === normalizedOriginal) {
@@ -211,8 +206,78 @@ const MismatchAnalyzer: React.FC = () => {
     return false;
   };
 
+  // Filter results based on display mode
+  const getFilteredResults = () => {
+    if (!results?.mismatch_items) return [];
+
+    const filteredResults = (() => {
+      switch (displayMode) {
+        case 'mismatches':
+          // Show only potential mismatches (default behavior)
+          return results.mismatch_items.filter(item =>
+            item.mismatch_type && item.mismatch_type !== 'good_match'
+          );
+
+        case 'all':
+          // Show all matches (both good and problematic)
+          return results.mismatch_items;
+
+        case 'unconfirmed':
+          // Show only unconfirmed matches (not exact or previously confirmed)
+          return results.mismatch_items.filter(item => !isItemConfirmed(item));
+
+        case 'regex':
+          // Show only regex matches that need confirmation
+          return results.mismatch_items.filter(item =>
+            item.match_type === 'regex' && !isItemConfirmed(item)
+          );
+
+        default:
+          return results.mismatch_items;
+      }
+    })();
+
+    // Debug logging
+    if (displayMode === 'all') {
+      console.log('Debug - All mode:', {
+        totalMatches: results.total_matches,
+        returnedItems: results.mismatch_items.length,
+        filteredResults: filteredResults.length,
+        difference: results.mismatch_items.length - filteredResults.length
+      });
+    }
+
+    return filteredResults;
+  };
+
+  // Get counts for each display mode
+  const getDisplayModeCounts = () => {
+    if (!results) {
+      return {
+        mismatches: 0,
+        all: 0,
+        unconfirmed: 0,
+        regex: 0,
+      };
+    }
+
+    // We always have the full dataset now, so calculate from the returned items
+    const returnedItems = results.mismatch_items || [];
+    const totalMatches = results.total_matches || 0;
+    const totalMismatches = results.total_mismatches || 0;
+
+    return {
+      mismatches: totalMismatches,
+      all: totalMatches,
+      unconfirmed: returnedItems.filter(item => !isItemConfirmed(item)).length,
+      regex: returnedItems.filter(item =>
+        item.match_type === 'regex' && !isItemConfirmed(item)
+      ).length,
+    };
+  };
+
   return (
-    <div className='container mx-auto p-4'>
+    <div className='w-full p-4'>
       {/* Controls and Header */}
       <div className='mb-4'>
         <h1 className='text-3xl font-bold text-gray-900 mb-2'>Mismatch Analyzer</h1>
@@ -276,47 +341,81 @@ const MismatchAnalyzer: React.FC = () => {
               className='px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-24'
             />
           </div>
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Result Limit</label>
-            <input
-              type='number'
-              min='1'
-              max='1000'
-              value={limit}
-              onChange={e => setLimit(Number(e.target.value))}
-              className='px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-28'
-            />
-          </div>
           <div className='flex flex-col gap-1'>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Options</label>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>Display Mode</label>
             <div className='flex gap-2'>
-              <label className='flex items-center gap-1 text-sm'>
-                <input
-                  type='checkbox'
-                  checked={showAll}
-                  onChange={e => setShowAll(e.target.checked)}
-                  className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                />
-                Show all
-              </label>
-              <label className='flex items-center gap-1 text-sm'>
-                <input
-                  type='checkbox'
-                  checked={showUnconfirmed}
-                  onChange={e => setShowUnconfirmed(e.target.checked)}
-                  className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                />
+              <Button
+                variant='outline'
+                onClick={() => setDisplayMode('all')}
+                className={`flex items-center gap-1 text-sm relative group ${displayMode === 'all' ? 'bg-blue-600 text-white' : ''}`}
+                title='Show all matches with mismatch indicators'
+              >
+                <Eye className='h-4 w-4' />
+                All
+                <span className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'all'
+                  ? 'bg-white text-blue-600'
+                  : 'bg-gray-100 text-gray-700'
+                  }`}>
+                  {getDisplayModeCounts().all}
+                </span>
+                <span className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm'>
+                  Show all matches (both good and problematic)
+                </span>
+              </Button>
+              <Button
+                variant='outline'
+                onClick={() => setDisplayMode('mismatches')}
+                className={`flex items-center gap-1 text-sm relative group ${displayMode === 'mismatches' ? 'bg-blue-600 text-white' : ''}`}
+                title='Show only potential mismatches that need review'
+              >
+                <EyeOff className='h-4 w-4' />
+                Mismatches
+                <span className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
+                  ? 'bg-white text-blue-600'
+                  : 'bg-gray-100 text-gray-700'
+                  }`}>
+                  {getDisplayModeCounts().mismatches}
+                </span>
+                <span className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm'>
+                  Show only problematic matches that need review
+                </span>
+              </Button>
+              <Button
+                variant='outline'
+                onClick={() => setDisplayMode('unconfirmed')}
+                className={`flex items-center gap-1 text-sm relative group ${displayMode === 'unconfirmed' ? 'bg-blue-600 text-white' : ''}`}
+                title='Show only unconfirmed matches (not exact or previously confirmed)'
+              >
+                <Filter className='h-4 w-4' />
                 Unconfirmed
-              </label>
-              <label className='flex items-center gap-1 text-sm'>
-                <input
-                  type='checkbox'
-                  checked={showRegexMatches}
-                  onChange={e => setShowRegexMatches(e.target.checked)}
-                  className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                />
+                <span className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'unconfirmed'
+                  ? 'bg-white text-blue-600'
+                  : 'bg-gray-100 text-gray-700'
+                  }`}>
+                  {getDisplayModeCounts().unconfirmed}
+                </span>
+                <span className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm'>
+                  Show only unconfirmed matches (not exact or previously confirmed)
+                </span>
+              </Button>
+              <Button
+                variant='outline'
+                onClick={() => setDisplayMode('regex')}
+                className={`flex items-center gap-1 text-sm relative group ${displayMode === 'regex' ? 'bg-blue-600 text-white' : ''}`}
+                title='Show only regex matches that need confirmation'
+              >
+                <Filter className='h-4 w-4' />
                 Regex
-              </label>
+                <span className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'regex'
+                  ? 'bg-white text-blue-600'
+                  : 'bg-gray-100 text-gray-700'
+                  }`}>
+                  {getDisplayModeCounts().regex}
+                </span>
+                <span className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm'>
+                  Show only regex matches that need confirmation
+                </span>
+              </Button>
             </div>
           </div>
           <button
@@ -364,6 +463,9 @@ const MismatchAnalyzer: React.FC = () => {
                     Total Mismatches: <span className='font-medium'>{results.total_mismatches}</span>
                   </span>
                   <span>
+                    Displayed: <span className='font-medium'>{getFilteredResults().length}</span>
+                  </span>
+                  <span>
                     Processing Time:{' '}
                     <span className='font-medium'>{results.processing_time.toFixed(2)}s</span>
                   </span>
@@ -371,7 +473,7 @@ const MismatchAnalyzer: React.FC = () => {
               </div>
 
               {/* Bulk Actions */}
-              {results.mismatch_items.length > 0 && (
+              {getFilteredResults().length > 0 && (
                 <div className='flex gap-2'>
                   <button
                     onClick={handleSelectAll}
@@ -397,9 +499,10 @@ const MismatchAnalyzer: React.FC = () => {
             </div>
           </div>
           <div className='p-6'>
-            {results.mismatch_items.length > 0 ? (
+            {getFilteredResults().length > 0 ? (
               <MismatchAnalyzerDataTable
-                data={results.mismatch_items}
+                key={`mismatch-${displayMode}-${getFilteredResults().length}`} // Force re-render when mode changes
+                data={getFilteredResults()}
                 onCommentClick={handleCommentClick}
                 commentLoading={commentLoading}
                 selectedItems={selectedItems}
@@ -409,9 +512,9 @@ const MismatchAnalyzer: React.FC = () => {
             ) : (
               <div className='text-center py-8'>
                 <div className='text-green-600 text-4xl mb-2'>✅</div>
-                <h3 className='text-lg font-medium text-gray-900 mb-2'>No Mismatches Found</h3>
+                <h3 className='text-lg font-medium text-gray-900 mb-2'>No Items Found</h3>
                 <p className='text-gray-600'>
-                  No mismatches were detected for the selected criteria.
+                  No items match the current display mode criteria.
                 </p>
               </div>
             )}
