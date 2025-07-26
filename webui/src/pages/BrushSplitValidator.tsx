@@ -5,7 +5,7 @@ import { BrushSplit } from '../types/brushSplit';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff } from 'lucide-react';
 import CommentModal from '../components/domain/CommentModal';
-import { getCommentDetail, CommentDetail, saveBrushSplits } from '../services/api';
+import { getCommentDetail, CommentDetail, saveBrushSplits, loadBrushSplits } from '../services/api';
 
 const BrushSplitValidator: React.FC = () => {
   const [brushSplits, setBrushSplits] = useState<BrushSplit[]>([]);
@@ -25,28 +25,16 @@ const BrushSplitValidator: React.FC = () => {
       return;
     }
 
-    const loadBrushSplits = async () => {
+    const loadBrushSplitsData = async () => {
       try {
         setLoading(true);
         console.log('Loading brush splits for months:', selectedMonths);
 
-        const response = await fetch('/api/brush-splits', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ months: selectedMonths }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Received brush splits data:', data);
+        const response = await loadBrushSplits(selectedMonths, !showMatched);
+        console.log('Received brush splits data:', response);
 
         // Extract the brush_splits array from the response
-        const brushSplitsArray = data.brush_splits || [];
+        const brushSplitsArray = response.brush_splits || [];
         console.log('Number of brush splits:', brushSplitsArray.length);
 
         if (brushSplitsArray.length > 0) {
@@ -54,6 +42,7 @@ const BrushSplitValidator: React.FC = () => {
         }
 
         setBrushSplits(brushSplitsArray);
+        setError(null); // Clear any previous errors
       } catch (error) {
         console.error('Error loading brush splits:', error);
         setError('Failed to load brush splits');
@@ -62,8 +51,8 @@ const BrushSplitValidator: React.FC = () => {
       }
     };
 
-    loadBrushSplits();
-  }, [selectedMonths]);
+    loadBrushSplitsData();
+  }, [selectedMonths, showMatched]);
 
   // Filter brush splits based on showValidated state
   const filteredBrushSplits = useMemo(() => {

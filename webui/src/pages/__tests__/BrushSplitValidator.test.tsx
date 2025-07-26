@@ -1,8 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import BrushSplitValidator from '../BrushSplitValidator';
 
-// Mock fetch globally
-global.fetch = jest.fn();
+// Mock the API service
+jest.mock('../../services/api', () => ({
+  loadBrushSplits: jest.fn(),
+  getCommentDetail: jest.fn(),
+  saveBrushSplits: jest.fn(),
+}));
 
 // Mock the useAvailableMonths hook
 jest.mock('../../hooks/useAvailableMonths', () => ({
@@ -14,8 +18,14 @@ jest.mock('../../hooks/useAvailableMonths', () => ({
 }));
 
 describe('BrushSplitValidator - Should Not Split Integration', () => {
+  const mockLoadBrushSplits = require('../../services/api').loadBrushSplits as jest.Mock;
+  const mockGetCommentDetail = require('../../services/api').getCommentDetail as jest.Mock;
+  const mockSaveBrushSplits = require('../../services/api').saveBrushSplits as jest.Mock;
+
   beforeEach(() => {
-    (global.fetch as jest.Mock).mockClear();
+    mockLoadBrushSplits.mockClear();
+    mockGetCommentDetail.mockClear();
+    mockSaveBrushSplits.mockClear();
   });
 
   test('loads brush splits with should_not_split field', async () => {
@@ -42,12 +52,9 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
       },
     ];
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        brush_splits: mockBrushSplits,
-        statistics: { total: 2 },
-      }),
+    mockLoadBrushSplits.mockResolvedValueOnce({
+      brush_splits: mockBrushSplits,
+      statistics: { total: 2 },
     });
 
     render(<BrushSplitValidator />);
@@ -95,12 +102,9 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
       },
     ];
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        brush_splits: mockBrushSplits,
-        statistics: { total: 1 },
-      }),
+    mockLoadBrushSplits.mockResolvedValueOnce({
+      brush_splits: mockBrushSplits,
+      statistics: { total: 1 },
     });
 
     render(<BrushSplitValidator />);
@@ -143,12 +147,9 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
       },
     ];
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        brush_splits: mockBrushSplits,
-        statistics: { total: 1 },
-      }),
+    mockLoadBrushSplits.mockResolvedValueOnce({
+      brush_splits: mockBrushSplits,
+      statistics: { total: 1 },
     });
 
     render(<BrushSplitValidator />);
@@ -208,12 +209,9 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
       },
     ];
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        brush_splits: mockBrushSplits,
-        statistics: { total: 3 },
-      }),
+    mockLoadBrushSplits.mockResolvedValueOnce({
+      brush_splits: mockBrushSplits,
+      statistics: { total: 3 },
     });
 
     render(<BrushSplitValidator />);
@@ -294,12 +292,9 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
       },
     ];
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        brush_splits: mockBrushSplits,
-        statistics: { total: 1 },
-      }),
+    mockLoadBrushSplits.mockResolvedValueOnce({
+      brush_splits: mockBrushSplits,
+      statistics: { total: 1 },
     });
 
     render(<BrushSplitValidator />);
