@@ -282,15 +282,20 @@ def process_month(
             converted_record = {}
             for key, value in matched_record.items():
                 if hasattr(value, "original"):  # Check if it's a MatchResult
-                    # Preserve both original and normalized fields from extraction
-                    # The normalized field should come from the extraction data
-                    original_text = value.original
-                    normalized_text = value.original  # Default to original if no normalized field
+                    # Get the original structured data from the input record
+                    original_structured_data = record.get(key, {})
 
-                    # If the original value was structured (from extraction), extract normalized
-                    if isinstance(original_text, dict) and "normalized" in original_text:
-                        normalized_text = original_text["normalized"]
-                        original_text = original_text["original"]
+                    # Extract original and normalized text from the structured data
+                    if (
+                        isinstance(original_structured_data, dict)
+                        and "normalized" in original_structured_data
+                    ):
+                        original_text = original_structured_data["original"]
+                        normalized_text = original_structured_data["normalized"]
+                    else:
+                        # Fallback to the MatchResult original field
+                        original_text = value.original
+                        normalized_text = value.original
 
                     converted_record[key] = {
                         "original": original_text,
