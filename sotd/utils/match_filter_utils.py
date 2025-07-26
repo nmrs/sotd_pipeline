@@ -306,6 +306,38 @@ def strip_razor_use_counts(value: str) -> str:
     return cleaned
 
 
+def strip_asterisk_markup(value: str) -> str:
+    """
+    Strip asterisk markup from product strings.
+
+    This removes Reddit formatting like *bold* text that doesn't add value
+    to product matching. Examples:
+    - "*New* King C. Gillette" -> "New King C. Gillette"
+    - "*Blackbird* razor" -> "Blackbird razor"
+    - "**Feather** blade" -> "Feather blade"
+
+    Args:
+        value: Input string that may contain asterisk markup
+
+    Returns:
+        String with asterisk markup removed
+    """
+    if not isinstance(value, str):
+        return ""
+
+    # Remove double asterisks (**text**) first
+    cleaned = re.sub(r"\*\*([^*]+?)\*\*", r"\1", value)
+
+    # Remove single asterisks (*text*)
+    cleaned = re.sub(r"\*([^*]+?)\*", r"\1", cleaned)
+
+    # Clean up any extra whitespace that might result
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    cleaned = cleaned.strip()
+
+    return cleaned
+
+
 # --- CANONICAL NORMALIZATION FUNCTION ---
 # All correct match lookups in the SOTD Pipeline must use this function.
 # See docs/product_matching_validation.md for details and examples.
@@ -346,6 +378,7 @@ def normalize_for_matching(
 
     - Strips competition tags and normalizes whitespace to prevent bloat and duplicates in the file.
     - Strips trailing periods that are common in SOTD comments.
+    - Strips asterisk markup (Reddit formatting) that doesn't add value to matching.
     - For blades only, strips blade count/usage patterns (including 'new' as usage).
     - For razors only, strips handle swap/modification indicators.
     - For soaps only, strips soap-related patterns (sample, puck, croap, cream, etc.).
@@ -371,6 +404,9 @@ def normalize_for_matching(
 
     # Strip trailing periods (common in SOTD comments)
     normalized = strip_trailing_periods(normalized)
+
+    # Strip asterisk markup (Reddit formatting)
+    normalized = strip_asterisk_markup(normalized)
 
     # For blade strings, also strip blade count and usage patterns (including 'new')
     if field == "blade":

@@ -15,6 +15,7 @@ from sotd.utils.match_filter_utils import (
     strip_soap_patterns,
     strip_razor_use_counts,
     strip_trailing_periods,
+    strip_asterisk_markup,
 )
 
 
@@ -674,6 +675,72 @@ class TestStripTrailingPeriods:
         assert strip_trailing_periods("Wizamet Super Iridium.") == "Wizamet Super Iridium"
 
 
+class TestStripAsteriskMarkup:
+    """Test asterisk markup stripping."""
+
+    def test_strip_asterisk_markup_basic(self):
+        """Test basic asterisk markup stripping."""
+        test_cases = [
+            ("*blackbird*", "blackbird"),
+            ("**Feather**", "Feather"),
+            ("*New* King C. Gillette", "New King C. Gillette"),
+            ("*Simpson* brush", "Simpson brush"),
+            ("**B&M** soap", "B&M soap"),
+        ]
+        for input_text, expected in test_cases:
+            result = strip_asterisk_markup(input_text)
+            assert result == expected, f"Failed for input: {input_text}"
+
+    def test_strip_asterisk_markup_no_asterisks(self):
+        """Test strings without asterisks are unchanged."""
+        test_cases = [
+            "King C. Gillette",
+            "Blackbird",
+            "Feather",
+            "Simpson",
+            "B&M Seville",
+        ]
+        for input_text in test_cases:
+            result = strip_asterisk_markup(input_text)
+            assert result == input_text, f"Failed for input: {input_text}"
+
+    def test_strip_asterisk_markup_edge_cases(self):
+        """Test edge cases for asterisk stripping."""
+        test_cases = [
+            ("*", "*"),  # Single asterisk
+            ("**", "**"),  # Double asterisk
+            ("***", "***"),  # Triple asterisk
+            ("*text*", "text"),  # Basic case
+            ("**text**", "text"),  # Double asterisk case
+            ("*text*text*", "texttext*"),  # Unmatched asterisks
+            ("text*text", "text*text"),  # Unmatched asterisk
+        ]
+        for input_text, expected in test_cases:
+            result = strip_asterisk_markup(input_text)
+            assert result == expected, f"Failed for input: {input_text}"
+
+    def test_strip_asterisk_markup_whitespace_cleanup(self):
+        """Test that whitespace is cleaned up after asterisk removal."""
+        test_cases = [
+            ("*New*  King  C.  Gillette", "New King C. Gillette"),
+            ("**Feather**   blade", "Feather blade"),
+            ("*Simpson*  brush  ", "Simpson brush"),
+        ]
+        for input_text, expected in test_cases:
+            result = strip_asterisk_markup(input_text)
+            assert result == expected, f"Failed for input: {input_text}"
+
+    def test_strip_asterisk_markup_none_input(self):
+        """Test None input."""
+        result = strip_asterisk_markup(None)  # type: ignore
+        assert result == ""
+
+    def test_strip_asterisk_markup_empty_string(self):
+        """Test empty string input."""
+        result = strip_asterisk_markup("")
+        assert result == ""
+
+
 class TestNormalizeForMatching:
     """Test normalization for matching."""
 
@@ -774,7 +841,7 @@ class TestNormalizeForMatching:
         # Test that case is preserved (unlike BaseMatcher.normalize which lowercases)
         assert (
             normalize_for_matching("*New* King C. Gillette", field="razor")
-            == "*New* King C. Gillette"
+            == "New King C. Gillette"
         )
         assert normalize_for_matching("ATT S1", field="razor") == "ATT S1"
         assert (
@@ -839,7 +906,7 @@ class TestNormalizeForMatching:
         # Real examples from correct_matches.yaml
         assert (
             normalize_for_matching("*New* King C. Gillette", field="razor")
-            == "*New* King C. Gillette"
+            == "New King C. Gillette"
         )
         assert normalize_for_matching("ATT S1", field="razor") == "ATT S1"
         assert (
