@@ -331,6 +331,9 @@ def strip_asterisk_markup(value: str) -> str:
     # Remove single asterisks (*text*)
     cleaned = re.sub(r"\*([^*]+?)\*", r"\1", cleaned)
 
+    # Remove any remaining unmatched asterisks
+    cleaned = cleaned.replace("*", "")
+
     # Clean up any extra whitespace that might result
     cleaned = re.sub(r"\s+", " ", cleaned)
     cleaned = cleaned.strip()
