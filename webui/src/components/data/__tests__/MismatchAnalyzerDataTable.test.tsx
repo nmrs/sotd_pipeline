@@ -113,9 +113,9 @@ describe('MismatchAnalyzerDataTable', () => {
       // Should have a "Select" column header
       expect(screen.getByText('Select')).toBeInTheDocument();
 
-      // Should have checkboxes for each row
+      // Should have checkboxes for each row plus the "Select All" checkbox
       const checkboxes = screen.getAllByRole('checkbox');
-      expect(checkboxes).toHaveLength(2); // One for each data item
+      expect(checkboxes).toHaveLength(3); // One "Select All" + one for each data item
     });
 
     test('renders confirmation status when isItemConfirmed is provided', () => {
@@ -152,7 +152,8 @@ describe('MismatchAnalyzerDataTable', () => {
       );
 
       const checkboxes = screen.getAllByRole('checkbox');
-      fireEvent.click(checkboxes[0]);
+      // Click the first row checkbox (index 1, since index 0 is the "Select All" checkbox)
+      fireEvent.click(checkboxes[1]);
 
       expect(onItemSelection).toHaveBeenCalledWith(
         'Test Razor 1|{"brand":"Test Brand","model":"Model 1"}',
@@ -173,8 +174,12 @@ describe('MismatchAnalyzerDataTable', () => {
       );
 
       const checkboxes = screen.getAllByRole('checkbox');
-      expect(checkboxes[0]).toBeChecked();
-      expect(checkboxes[1]).not.toBeChecked();
+      // The "Select All" checkbox (index 0) should be indeterminate since only one item is selected
+      expect(checkboxes[0]).not.toBeChecked();
+      // The first row checkbox (index 1) should be checked
+      expect(checkboxes[1]).toBeChecked();
+      // The second row checkbox (index 2) should not be checked
+      expect(checkboxes[2]).not.toBeChecked();
     });
 
     test('does not render selection or status columns when props are not provided', () => {

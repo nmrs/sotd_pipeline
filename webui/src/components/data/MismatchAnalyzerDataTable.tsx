@@ -128,7 +128,35 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         ? [
             {
               id: 'selection',
-              header: 'Select',
+              header: () => {
+                // Calculate if all visible items are selected
+                const visibleItemKeys = data.map(item => `${item.original}|${JSON.stringify(item.matched)}`);
+                const allSelected = visibleItemKeys.length > 0 && visibleItemKeys.every(key => selectedItems.has(key));
+                const someSelected = visibleItemKeys.some(key => selectedItems.has(key));
+
+                const handleSelectAll = (checked: boolean) => {
+                  visibleItemKeys.forEach(key => {
+                    onItemSelection(key, checked);
+                  });
+                };
+
+                return (
+                  <div className='flex items-center gap-2'>
+                    <span>Select</span>
+                    <input
+                      type='checkbox'
+                      checked={allSelected}
+                      ref={input => {
+                        if (input) {
+                          input.indeterminate = someSelected && !allSelected;
+                        }
+                      }}
+                      onChange={e => handleSelectAll(e.target.checked)}
+                      className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                    />
+                  </div>
+                );
+              },
               cell: ({ row }) => {
                 const item = row.original;
                 const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
