@@ -603,12 +603,12 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 # Determine if this is a mismatch
                 mismatch_type = None
                 reason = ""
-                
+
                 # Check if this record was flagged by the analyzer
                 if record_id in mismatch_lookup:
                     mismatch_type, reason = mismatch_lookup[record_id]
                     total_mismatches += 1
-                
+
                 # Additional checks for problematic data
                 if not mismatch_type:
                     # Check for missing or invalid match data
@@ -626,6 +626,13 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                         mismatch_type = "no_match_found"
                         reason = "No match was found for this item"
                         total_mismatches += 1
+
+                # Override Levenshtein distance matches if they were successful
+                if mismatch_type == "levenshtein_distance" and matched and not matched.get("error"):
+                    # Successful fuzzy matches should be considered good matches
+                    mismatch_type = "good_match"
+                    reason = "Successfully matched with fuzzy matching"
+                    total_mismatches -= 1  # Reduce count since this is now a good match
 
                 # Create item for all matches
                 all_item = MismatchItem(
