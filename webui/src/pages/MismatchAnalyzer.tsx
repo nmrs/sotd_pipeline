@@ -154,10 +154,15 @@ const MismatchAnalyzer: React.FC = () => {
       });
 
       if (response.success) {
-        // Reload correct matches and clear selection
+        // Reload correct matches and re-analyze to get fresh data
         await loadCorrectMatches();
         setSelectedItems(new Set());
         setError(null);
+        
+        // Re-run analysis to get updated mismatch data
+        if (selectedMonth) {
+          await handleAnalyze();
+        }
       } else {
         setError(`Failed to mark items as correct: ${response.message}`);
       }
@@ -177,6 +182,11 @@ const MismatchAnalyzer: React.FC = () => {
       await clearCorrectMatchesByField(selectedField);
       await loadCorrectMatches();
       setError(null);
+      
+      // Re-run analysis to get updated mismatch data
+      if (selectedMonth) {
+        await handleAnalyze();
+      }
     } catch (err: unknown) {
       setError(handleApiError(err));
     }
