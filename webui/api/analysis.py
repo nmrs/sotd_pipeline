@@ -629,7 +629,40 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 skipped_count += 1
                 continue
 
-        # Sort by mismatch type and normalized text
+        # Group identical items together
+        grouped_items = {}
+        for item in all_items:
+            # Create a key for grouping based on the main identifying fields
+            # Use JSON string for consistent dictionary comparison
+            import json
+
+            matched_json = json.dumps(item.matched, sort_keys=True)
+            group_key = (
+                item.original,
+                matched_json,
+                item.pattern or "",
+                item.match_type,
+                item.mismatch_type or "",
+                item.reason or "",
+            )
+
+            if group_key in grouped_items:
+                # Merge with existing item
+                existing = grouped_items[group_key]
+                existing.count += item.count
+                existing.examples.extend(item.examples)
+                existing.comment_ids.extend(item.comment_ids)
+                # Keep the highest confidence if available
+                if item.confidence is not None and (
+                    existing.confidence is None or item.confidence > existing.confidence
+                ):
+                    existing.confidence = item.confidence
+            else:
+                # Create new grouped item
+                grouped_items[group_key] = item
+
+        # Convert back to list and sort
+        all_items = list(grouped_items.values())
         all_items.sort(key=lambda x: (x.mismatch_type or "", x.original.lower()))
 
         logger.info(
