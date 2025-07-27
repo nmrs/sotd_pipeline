@@ -11,6 +11,9 @@ interface MismatchAnalyzerDataTableProps {
   selectedItems?: Set<string>;
   onItemSelection?: (itemKey: string, selected: boolean) => void;
   isItemConfirmed?: (item: MismatchItem) => boolean;
+  filteredStatus?: Record<string, boolean>;
+  onFilteredItemSelection?: (itemName: string, shouldBeFiltered: boolean) => void;
+  isItemFiltered?: (item: MismatchItem) => boolean;
 }
 
 const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
@@ -20,6 +23,9 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   selectedItems = new Set(),
   onItemSelection,
   isItemConfirmed,
+  filteredStatus = {},
+  onFilteredItemSelection,
+  isItemFiltered,
 }) => {
   const getMismatchTypeIcon = (mismatchType?: string) => {
     switch (mismatchType) {
@@ -138,6 +144,25 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
               checked={isSelected}
               onChange={(e) => onItemSelection(itemKey, e.target.checked)}
               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+          );
+        },
+      }] : []),
+      // Filtered column
+      ...(onFilteredItemSelection ? [{
+        id: 'filtered',
+        header: 'Filtered',
+        cell: ({ row }) => {
+          const item = row.original;
+          const isFiltered = isItemFiltered ? isItemFiltered(item) : filteredStatus[item.original] || false;
+
+          return (
+            <input
+              type="checkbox"
+              checked={isFiltered}
+              onChange={(e) => onFilteredItemSelection(item.original, e.target.checked)}
+              className="rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
+              title="Mark as intentionally unmatched"
             />
           );
         },
