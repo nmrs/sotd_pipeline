@@ -272,14 +272,15 @@ const MismatchAnalyzer: React.FC = () => {
 
     const filteredResults = (() => {
       switch (displayMode) {
-                case 'mismatches':
+        case 'mismatches':
           // Show only potential mismatches (default behavior)
           const mismatches = results.mismatch_items.filter(item =>
-            item.mismatch_type && 
-            item.mismatch_type !== 'good_match' && 
-            item.mismatch_type !== 'exact_matches'
+            item.mismatch_type &&
+            item.mismatch_type !== 'good_match' &&
+            item.mismatch_type !== 'exact_matches' &&
+            item.mismatch_type !== 'intentionally_unmatched'
           );
-          
+
           // Debug logging for 1953 Gillette items
           mismatches.forEach(item => {
             if (item.original.toLowerCase().includes('1953 gillette super')) {
@@ -291,7 +292,7 @@ const MismatchAnalyzer: React.FC = () => {
               });
             }
           });
-          
+
           return mismatches;
 
         case 'all':
@@ -329,7 +330,7 @@ const MismatchAnalyzer: React.FC = () => {
   // Get counts for each display mode
   const getMismatchTypeDisplay = (mismatchType: string | null) => {
     if (!mismatchType || mismatchType === 'good_match') return 'Good Match';
-    
+
     switch (mismatchType) {
       case 'invalid_match_data':
         return 'Invalid Match Data';
@@ -341,6 +342,8 @@ const MismatchAnalyzer: React.FC = () => {
         return 'Low Confidence';
       case 'unmatched':
         return 'Unmatched';
+      case 'intentionally_unmatched':
+        return 'Intentionally Unmatched';
       default:
         return mismatchType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     }
@@ -359,9 +362,11 @@ const MismatchAnalyzer: React.FC = () => {
     // We always have the full dataset now, so calculate from the returned items
     const returnedItems = results.mismatch_items || [];
 
-    return {
-              mismatches: returnedItems.filter(item => 
-          item.mismatch_type !== 'good_match' && item.mismatch_type !== 'exact_matches'
+          return {
+        mismatches: returnedItems.filter(item =>
+          item.mismatch_type !== 'good_match' && 
+          item.mismatch_type !== 'exact_matches' &&
+          item.mismatch_type !== 'intentionally_unmatched'
         ).length,
       all: returnedItems.length, // Use actual returned items count instead of totalMatches
       unconfirmed: returnedItems.filter(item => !isItemConfirmed(item)).length,
@@ -555,13 +560,15 @@ const MismatchAnalyzer: React.FC = () => {
                   <span>
                     Total Matches: <span className='font-medium'>{results.mismatch_items?.length || 0}</span>
                   </span>
-                  <span>
-                    Total Mismatches: <span className='font-medium'>
-                      {(results.mismatch_items || []).filter(item => 
-                  item.mismatch_type !== 'good_match' && item.mismatch_type !== 'exact_matches'
-                ).length}
+                                      <span>
+                      Total Mismatches: <span className='font-medium'>
+                        {(results.mismatch_items || []).filter(item =>
+                          item.mismatch_type !== 'good_match' && 
+                          item.mismatch_type !== 'exact_matches' &&
+                          item.mismatch_type !== 'intentionally_unmatched'
+                        ).length}
+                      </span>
                     </span>
-                  </span>
                   <span>
                     Displayed: <span className='font-medium'>{getFilteredResults().length}</span>
                   </span>

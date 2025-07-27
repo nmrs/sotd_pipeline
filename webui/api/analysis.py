@@ -200,6 +200,36 @@ def validate_months(months: List[str]) -> None:
             )
 
 
+def load_intentionally_unmatched() -> Dict[str, Any]:
+    """Load intentionally unmatched items from YAML file."""
+    try:
+        intentionally_unmatched_file = project_root / "data" / "intentionally_unmatched.yaml"
+        if not intentionally_unmatched_file.exists():
+            return {}
+        
+        import yaml
+        with open(intentionally_unmatched_file, 'r', encoding='utf-8') as f:
+            return yaml.safe_load(f) or {}
+    except Exception as e:
+        logger.warning(f"Error loading intentionally_unmatched.yaml: {e}")
+        return {}
+
+
+def is_intentionally_unmatched(
+    original: str, field: str, intentionally_unmatched_data: Dict[str, Any]
+) -> bool:
+    """Check if an item is intentionally unmatched."""
+    if not intentionally_unmatched_data or field not in intentionally_unmatched_data:
+        return False
+    
+    field_data = intentionally_unmatched_data[field]
+    if not isinstance(field_data, dict):
+        return False
+    
+    # Check if the original text matches any key in the intentionally unmatched data
+    return original in field_data
+
+
 def find_comment_by_id(comment_id: str, months: List[str]) -> Optional[dict]:
     """Find a comment by its ID across the specified months."""
     import json
@@ -580,6 +610,9 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
             logger.error(f"Error loading data: {e}")
             raise HTTPException(status_code=500, detail=f"Error loading data: {str(e)}")
 
+        # Load intentionally unmatched data
+        intentionally_unmatched_data = load_intentionally_unmatched()
+
         # Identify mismatches
         mismatches = analyzer.identify_mismatches(data, request.field, args)
 
@@ -623,8 +656,15 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 mismatch_type = None
                 reason = ""
 
+                # Check if this item is intentionally unmatched
+                if is_intentionally_unmatched(
+                    original, request.field, intentionally_unmatched_data
+                ):
+                    mismatch_type = "intentionally_unmatched"
+                    reason = "Item marked as intentionally unmatched"
+                    # Don't increment total_mismatches for intentionally unmatched items
                 # Check if this record was flagged by the analyzer
-                if record_id in mismatch_lookup:
+                elif record_id in mismatch_lookup:
                     mismatch_type, reason = mismatch_lookup[record_id]
                     total_mismatches += 1
 
@@ -873,7 +913,7 @@ async def remove_matches_from_correct(request: RemoveCorrectRequest):
 
                 # Create match key and remove from correct matches
                 match_key = manager.create_match_key(request.field, original, matched)
-                
+
                 # Check if the match exists in correct matches
                 if manager.is_match_correct(match_key):
                     # Remove the match from correct matches
@@ -881,7 +921,7 @@ async def remove_matches_from_correct(request: RemoveCorrectRequest):
                     # For now, we'll clear the entire field and re-add everything except this match
                     # This is a temporary solution - ideally the manager would have a remove method
                     field_data = manager._correct_matches_data.get(request.field, {})
-                    
+
                     # Find and remove the specific entry
                     for brand, brand_data in field_data.items():
                         if isinstance(brand_data, dict):
@@ -898,10 +938,10 @@ async def remove_matches_from_correct(request: RemoveCorrectRequest):
                                         if not brand_data:
                                             del field_data[brand]
                                         break
-                    
+
                     # Update the manager's internal data
                     manager._correct_matches_data[request.field] = field_data
-                    
+
                 else:
                     errors.append(f"Match not found in correct matches: {original}")
 
@@ -922,8 +962,7 @@ async def remove_matches_from_correct(request: RemoveCorrectRequest):
     except Exception as e:
         logger.error(f"Error removing matches from correct matches: {e}")
         raise HTTPException(
-            status_code=500, 
-            detail=f"Error removing matches from correct matches: {str(e)}"
+            status_code=500, detail=f"Error removing matches from correct matches: {str(e)}"
         )
 
 
