@@ -39,9 +39,7 @@ const MismatchAnalyzer: React.FC = () => {
   const [markingCorrect, setMarkingCorrect] = useState(false);
   const [removingCorrect, setRemovingCorrect] = useState(false);
 
-  // Filtered entries state
-  const [filteredStatus, setFilteredStatus] = useState<Record<string, boolean>>({});
-  const [pendingFilteredChanges, setPendingFilteredChanges] = useState<Record<string, boolean>>({});
+  // Reason for marking as unmatched
   const [reasonText, setReasonText] = useState<string>('');
   const [updatingFiltered, setUpdatingFiltered] = useState(false);
 
@@ -65,33 +63,7 @@ const MismatchAnalyzer: React.FC = () => {
     }
   };
 
-  // Load filtered status for items
-  const loadFilteredStatus = async (items: Array<{ original: string }>) => {
-    if (!items || items.length === 0) return;
 
-    try {
-      const entries = items.map(item => ({
-        category: selectedField,
-        name: item.original,
-      }));
-
-      const response = await checkFilteredStatus({ entries });
-
-      if (response.success) {
-        const newFilteredStatus: Record<string, boolean> = {};
-        Object.entries(response.data).forEach(([key, isFiltered]) => {
-          const itemName = key.split(':')[1];
-          if (itemName) {
-            newFilteredStatus[itemName] = isFiltered;
-          }
-        });
-        setFilteredStatus(newFilteredStatus);
-      }
-    } catch (err: unknown) {
-      console.warn('Failed to load filtered status:', err);
-      // Don't show error to user, just log it
-    }
-  };
 
   const handleAnalyze = async () => {
     if (!selectedMonth) {
@@ -112,11 +84,6 @@ const MismatchAnalyzer: React.FC = () => {
       });
 
       setResults(result);
-
-      // Load filtered status for the returned items
-      if (result.mismatch_items && result.mismatch_items.length > 0) {
-        await loadFilteredStatus(result.mismatch_items);
-      }
     } catch (err: unknown) {
       setError(handleApiError(err));
     } finally {
@@ -167,12 +134,7 @@ const MismatchAnalyzer: React.FC = () => {
     setSelectedItems(new Set());
   };
 
-  const handleFilteredItemSelection = (itemName: string, shouldBeFiltered: boolean) => {
-    setPendingFilteredChanges(prev => ({
-      ...prev,
-      [itemName]: shouldBeFiltered,
-    }));
-  };
+
 
   const handleMarkAsCorrect = async () => {
     if (selectedItems.size === 0) {
@@ -271,15 +233,15 @@ const MismatchAnalyzer: React.FC = () => {
   };
 
   const handleMarkAsIntentionallyUnmatched = async () => {
-    if (Object.keys(pendingFilteredChanges).length === 0) {
-      setError('No changes to apply');
+    if (selectedItems.size === 0) {
+      setError('Please select items to mark as intentionally unmatched');
       return;
     }
 
     try {
       setUpdatingFiltered(true);
 
-      // Prepare entries for bulk update
+      // Convert selected items to filtered entries format
       const allEntries: Array<{
         name: string;
         action: 'add' | 'remove';
@@ -288,22 +250,28 @@ const MismatchAnalyzer: React.FC = () => {
         month: string;
       }> = [];
 
-      Object.entries(pendingFilteredChanges).forEach(([itemName, shouldBeFiltered]) => {
-        const item = results?.mismatch_items?.find(i => i.original === itemName);
-        if (item && item.comment_ids && item.comment_ids.length > 0) {
-          // Use the first comment_id as representative
-          const firstCommentId = item.comment_ids[0];
-          if (firstCommentId) {
-            allEntries.push({
-              name: itemName,
-              action: shouldBeFiltered ? 'add' : 'remove',
-              comment_id: firstCommentId,
-              source: 'user',
-              month: selectedMonth,
-            });
+      if (!results?.mismatch_items) return;
+
+      results.mismatch_items
+        .filter(item => {
+          const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
+          return selectedItems.has(itemKey);
+        })
+        .forEach(item => {
+          if (item.comment_ids && item.comment_ids.length > 0) {
+            // Use the first comment_id as representative
+            const firstCommentId = item.comment_ids[0];
+            if (firstCommentId) {
+              allEntries.push({
+                name: item.original,
+                action: 'add',
+                comment_id: firstCommentId,
+                source: 'user',
+                month: selectedMonth,
+              });
+            }
           }
-        }
-      });
+        });
 
       if (allEntries.length === 0) {
         setError('No valid entries to update');
@@ -317,12 +285,8 @@ const MismatchAnalyzer: React.FC = () => {
       });
 
       if (response.success) {
-        // Update filtered status and clear pending changes
-        setFilteredStatus(prev => ({
-          ...prev,
-          ...pendingFilteredChanges,
-        }));
-        setPendingFilteredChanges({});
+        // Clear selections and reason
+        setSelectedItems(new Set());
         setReasonText('');
         setError(null);
 
@@ -384,9 +348,7 @@ const MismatchAnalyzer: React.FC = () => {
     return false;
   };
 
-  const isItemFiltered = (item: any) => {
-    return filteredStatus[item.original] || false;
-  };
+
 
   // Filter results based on display mode
   const getFilteredResults = () => {
@@ -528,43 +490,7 @@ const MismatchAnalyzer: React.FC = () => {
           </div>
         )}
 
-        {/* Intentionally Unmatched Controls */}
-        {results && getFilteredResults().length > 0 && (
-          <div className='bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4'>
-            <div className='flex items-center justify-between mb-3'>
-              <div>
-                <h3 className='text-lg font-medium text-yellow-900'>Intentionally Unmatched</h3>
-                <p className='text-yellow-700'>
-                  Mark items as intentionally unmatched to exclude them from future analysis
-                </p>
-              </div>
-              <button
-                onClick={handleMarkAsIntentionallyUnmatched}
-                disabled={Object.keys(pendingFilteredChanges).length === 0 || updatingFiltered}
-                className='px-3 py-1 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed'
-              >
-                {updatingFiltered ? 'Updating...' : `Update ${Object.keys(pendingFilteredChanges).length} Items`}
-              </button>
-            </div>
-            <div className='flex gap-4 items-center'>
-              <div className='flex-1'>
-                <label className='block text-sm font-medium text-yellow-800 mb-1'>
-                  Reason (optional)
-                </label>
-                <input
-                  type='text'
-                  value={reasonText}
-                  onChange={e => setReasonText(e.target.value)}
-                  placeholder='e.g., not a real product, joke, spam...'
-                  className='w-full px-3 py-2 border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm'
-                />
-              </div>
-              <div className='text-sm text-yellow-700'>
-                {Object.keys(pendingFilteredChanges).length} items selected for update
-              </div>
-            </div>
-          </div>
-        )}
+
 
         <div className='flex flex-wrap gap-4 items-end mb-4'>
           <div>
@@ -739,6 +665,22 @@ const MismatchAnalyzer: React.FC = () => {
                 </div>
               </div>
 
+              {/* Reason Input for Unmatched */}
+              {selectedItems.size > 0 && (
+                <div className='mb-3'>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>
+                    Reason for marking as unmatched (optional)
+                  </label>
+                  <input
+                    type='text'
+                    value={reasonText}
+                    onChange={e => setReasonText(e.target.value)}
+                    placeholder='e.g., not a real product, joke, spam...'
+                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm'
+                  />
+                </div>
+              )}
+
               {/* Bulk Actions */}
               {getFilteredResults().length > 0 && (
                 <div className='flex gap-2'>
@@ -761,6 +703,13 @@ const MismatchAnalyzer: React.FC = () => {
                   >
                     {markingCorrect ? 'Marking...' : `Mark ${selectedItems.size} as Correct`}
                   </button>
+                  <button
+                    onClick={handleMarkAsIntentionallyUnmatched}
+                    disabled={selectedItems.size === 0 || updatingFiltered}
+                    className='px-3 py-1 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed'
+                  >
+                    {updatingFiltered ? 'Marking...' : `Mark ${selectedItems.size} as Unmatched`}
+                  </button>
                 </div>
               )}
             </div>
@@ -775,9 +724,6 @@ const MismatchAnalyzer: React.FC = () => {
                 selectedItems={selectedItems}
                 onItemSelection={handleItemSelection}
                 isItemConfirmed={isItemConfirmed}
-                filteredStatus={filteredStatus}
-                onFilteredItemSelection={handleFilteredItemSelection}
-                isItemFiltered={isItemFiltered}
               />
             ) : (
               <div className='text-center py-8'>
