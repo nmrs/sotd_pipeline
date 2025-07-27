@@ -214,6 +214,11 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       {
         accessorKey: 'matched',
         header: 'Matched',
+        sortingFn: (rowA, rowB) => {
+          const a = formatMatchedData(rowA.original.matched);
+          const b = formatMatchedData(rowB.original.matched);
+          return a.localeCompare(b);
+        },
         cell: ({ row }) => {
           const item = row.original;
           return (
