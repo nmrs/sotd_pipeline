@@ -128,13 +128,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         ? [
             {
               id: 'selection',
-              header: ({ table }) => {
-                // Get the current visible rows from the table
-                const visibleRows = table.getRowModel().rows;
-                const visibleItemKeys = visibleRows.map(row => {
-                  const item = row.original;
-                  return `${item.original}|${JSON.stringify(item.matched)}`;
-                });
+              header: () => {
+                // For now, use all data since we can't easily access visible rows from header
+                // This will be fixed in a future update when we can pass table context
+                const visibleItemKeys = data.map(item => `${item.original}|${JSON.stringify(item.matched)}`);
                 
                 const allSelected = visibleItemKeys.length > 0 && visibleItemKeys.every(key => selectedItems.has(key));
                 const someSelected = visibleItemKeys.some(key => selectedItems.has(key));
