@@ -613,22 +613,6 @@ const MismatchAnalyzer: React.FC = () => {
                 </div>
               </div>
 
-              {/* Reason Input for Unmatched */}
-              {selectedItems.size > 0 && (
-                <div className='mb-3'>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>
-                    Reason for marking as unmatched (optional)
-                  </label>
-                  <input
-                    type='text'
-                    value={reasonText}
-                    onChange={e => setReasonText(e.target.value)}
-                    placeholder='e.g., not a real product, joke, spam...'
-                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm'
-                  />
-                </div>
-              )}
-
               {/* Bulk Actions */}
               {filteredResults.length > 0 && (
                 <div className='flex gap-2'>
@@ -658,6 +642,22 @@ const MismatchAnalyzer: React.FC = () => {
                   >
                     {updatingFiltered ? 'Marking...' : `Mark ${selectedItems.size} as Unmatched`}
                   </button>
+                </div>
+              )}
+
+              {/* Reason Input for Unmatched - Fixed position to prevent layout shift */}
+              {selectedItems.size > 0 && (
+                <div className='mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md'>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>
+                    Reason for marking as unmatched (optional)
+                  </label>
+                  <input
+                    type='text'
+                    value={reasonText}
+                    onChange={e => setReasonText(e.target.value)}
+                    placeholder='e.g., not a real product, joke, spam...'
+                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm'
+                  />
                 </div>
               )}
             </div>
