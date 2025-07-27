@@ -431,6 +431,28 @@ const MismatchAnalyzer: React.FC = () => {
     }
   };
 
+  const shouldShowReasonInput = () => {
+    if (selectedItems.size === 0) return false;
+
+    // Only show reason input if we're adding items (not removing)
+    let hasAddItems = false;
+
+    if (results?.mismatch_items) {
+      results.mismatch_items
+        .filter(item => {
+          const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
+          return selectedItems.has(itemKey);
+        })
+        .forEach(item => {
+          if (item.mismatch_type !== 'intentionally_unmatched') {
+            hasAddItems = true;
+          }
+        });
+    }
+
+    return hasAddItems;
+  };
+
   return (
     <div className='w-full p-4'>
       {/* Controls and Header */}
@@ -678,8 +700,8 @@ const MismatchAnalyzer: React.FC = () => {
             </div>
           </div>
 
-          {/* Reason Input for Unmatched - Separate section to prevent layout shift */}
-          {selectedItems.size > 0 && (
+          {/* Reason Input for Unmatched - Only show when adding items */}
+          {selectedItems.size > 0 && shouldShowReasonInput() && (
             <div className='px-6 py-3 bg-gray-50 border-t border-gray-200'>
               <label className='block text-sm font-medium text-gray-700 mb-1'>
                 Reason for marking as unmatched (optional)
