@@ -54,8 +54,43 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         return 'text-red-600';
       case 'perfect_regex_matches':
         return 'text-purple-600';
+      case 'invalid_match_data':
+        return 'text-red-600';
+      case 'empty_original':
+        return 'text-red-600';
+      case 'no_match_found':
+        return 'text-red-600';
       default:
         return 'text-gray-600';
+    }
+  };
+
+  const getMismatchTypeDisplay = (mismatchType?: string) => {
+    if (!mismatchType || mismatchType === 'good_match') return 'Good Match';
+    
+    switch (mismatchType) {
+      case 'invalid_match_data':
+        return 'Invalid Match Data';
+      case 'empty_original':
+        return 'Empty Original';
+      case 'no_match_found':
+        return 'No Match Found';
+      case 'low_confidence':
+        return 'Low Confidence';
+      case 'unmatched':
+        return 'Unmatched';
+      case 'levenshtein_distance':
+        return 'Levenshtein Distance';
+      case 'multiple_patterns':
+        return 'Multiple Patterns';
+      case 'regex_match':
+        return 'Regex Match';
+      case 'potential_mismatch':
+        return 'Potential Mismatch';
+      case 'perfect_regex_matches':
+        return 'Perfect Regex Matches';
+      default:
+        return mismatchType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     }
   };
 
@@ -151,8 +186,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             <div className='flex items-center'>
               <span className='text-lg mr-2'>{getMismatchTypeIcon(item.mismatch_type)}</span>
               <span className={`text-sm font-medium ${getMismatchTypeColor(item.mismatch_type)}`}>
-                {item.mismatch_type?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) ||
-                  'Unknown'}
+                {getMismatchTypeDisplay(item.mismatch_type)}
               </span>
             </div>
           );

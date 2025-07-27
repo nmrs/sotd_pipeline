@@ -603,9 +603,29 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 # Determine if this is a mismatch
                 mismatch_type = None
                 reason = ""
+                
+                # Check if this record was flagged by the analyzer
                 if record_id in mismatch_lookup:
                     mismatch_type, reason = mismatch_lookup[record_id]
                     total_mismatches += 1
+                
+                # Additional checks for problematic data
+                if not mismatch_type:
+                    # Check for missing or invalid match data
+                    if not matched or matched.get("error"):
+                        mismatch_type = "invalid_match_data"
+                        reason = "Missing or invalid match data"
+                        total_mismatches += 1
+                    # Check for empty or invalid original text
+                    elif not original or original.strip() == "":
+                        mismatch_type = "empty_original"
+                        reason = "Empty or missing original text"
+                        total_mismatches += 1
+                    # Check for "No Match" status
+                    elif match_type == "No Match":
+                        mismatch_type = "no_match_found"
+                        reason = "No match was found for this item"
+                        total_mismatches += 1
 
                 # Create item for all matches
                 all_item = MismatchItem(
