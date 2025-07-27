@@ -206,9 +206,10 @@ def load_intentionally_unmatched() -> Dict[str, Any]:
         intentionally_unmatched_file = project_root / "data" / "intentionally_unmatched.yaml"
         if not intentionally_unmatched_file.exists():
             return {}
-        
+
         import yaml
-        with open(intentionally_unmatched_file, 'r', encoding='utf-8') as f:
+
+        with open(intentionally_unmatched_file, "r", encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
     except Exception as e:
         logger.warning(f"Error loading intentionally_unmatched.yaml: {e}")
@@ -219,15 +220,22 @@ def is_intentionally_unmatched(
     original: str, field: str, intentionally_unmatched_data: Dict[str, Any]
 ) -> bool:
     """Check if an item is intentionally unmatched."""
+    logger.info(f"Checking if '{original}' is intentionally unmatched for field '{field}'")
+    logger.info(f"Intentionally unmatched data: {intentionally_unmatched_data}")
+
     if not intentionally_unmatched_data or field not in intentionally_unmatched_data:
+        logger.info(f"Field '{field}' not found in intentionally unmatched data")
         return False
-    
+
     field_data = intentionally_unmatched_data[field]
     if not isinstance(field_data, dict):
+        logger.info(f"Field data for '{field}' is not a dict: {type(field_data)}")
         return False
-    
+
     # Check if the original text matches any key in the intentionally unmatched data
-    return original in field_data
+    result = original in field_data
+    logger.info(f"'{original}' in field_data: {result}")
+    return result
 
 
 def find_comment_by_id(comment_id: str, months: List[str]) -> Optional[dict]:
@@ -612,6 +620,13 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
 
         # Load intentionally unmatched data
         intentionally_unmatched_data = load_intentionally_unmatched()
+        logger.info(f"Loaded intentionally unmatched data: {intentionally_unmatched_data}")
+        razor_keys = list(intentionally_unmatched_data.get("razor", {}).keys())
+        logger.info(f"Razor keys in intentionally unmatched data: {razor_keys}")
+        hot_wheels_in_keys = "Hot Wheels Play Razor" in intentionally_unmatched_data.get(
+            "razor", {}
+        )
+        logger.info(f"'Hot Wheels Play Razor' in razor keys: {hot_wheels_in_keys}")
 
         # Identify mismatches
         mismatches = analyzer.identify_mismatches(data, request.field, args)
@@ -645,6 +660,11 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 match_type = field_data.get("match_type", "")
                 record_id = record.get("id", "")
 
+                # Skip records with completely missing original text (missing razor field)
+                if not original or original.strip() == "":
+                    skipped_count += 1
+                    continue
+
                 # Include all records, even those with missing data
                 # For records with missing normalized or matched data, create placeholder items
                 if not normalized:
@@ -656,22 +676,53 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 mismatch_type = None
                 reason = ""
 
-                # Check if this item is intentionally unmatched
-                if is_intentionally_unmatched(
-                    original, request.field, intentionally_unmatched_data
-                ):
+                # Print repr of original for debug
+                logger.info(f"DEBUG original repr: {repr(original)}")
+                if request.field == "razor":
+                    keys = intentionally_unmatched_data.get("razor", {}).keys()
+                    debug_keys = [repr(k) for k in keys]
+                    logger.info(f"DEBUG razor keys: {debug_keys}")
+                # Check if this item is intentionally unmatched FIRST (before any other checks)
+                logger.info(f"Processing item: '{original}' (normalized: '{normalized}')")
+                is_intentionally_unmatched_result = is_intentionally_unmatched(
+                    normalized, request.field, intentionally_unmatched_data
+                )
+                logger.info(
+                    f"Intentional unmatched result for '{original}': "
+                    f"{is_intentionally_unmatched_result}"
+                )
+                if is_intentionally_unmatched_result:
+                    logger.info(f"Item '{original}' is intentionally unmatched")
                     mismatch_type = "intentionally_unmatched"
                     reason = "Item marked as intentionally unmatched"
                     # Don't increment total_mismatches for intentionally unmatched items
-                # Check if this record was flagged by the analyzer
-                elif record_id in mismatch_lookup:
-                    mismatch_type, reason = mismatch_lookup[record_id]
-                    total_mismatches += 1
-
-                # Additional checks for problematic data
-                if not mismatch_type:
-                    # Check for missing or invalid match data
-                    if not matched or matched.get("error"):
+                else:
+                    logger.info(f"Item '{original}' is NOT intentionally unmatched")
+                    # Add debug info for specific problematic items
+                    if original == "Hot Wheels Play Razor":
+                        data_keys = (
+                            list(intentionally_unmatched_data.keys())
+                            if intentionally_unmatched_data
+                            else "None"
+                        )
+                        logger.info(
+                            f"Debug for Hot Wheels: original='{original}', "
+                            f"field='{request.field}', data_keys={data_keys}"
+                        )
+                        if request.field in intentionally_unmatched_data:
+                            razor_keys = list(intentionally_unmatched_data[request.field].keys())
+                            logger.info(f"Razor keys: {razor_keys}")
+                    # Check if this record was flagged by the analyzer
+                    if record_id in mismatch_lookup:
+                        mismatch_type, reason = mismatch_lookup[record_id]
+                        total_mismatches += 1
+                    # Check for "No Match" status or null match_type
+                    elif match_type == "No Match" or match_type is None:
+                        mismatch_type = "no_match_found"
+                        reason = "No match was found for this item"
+                        total_mismatches += 1
+                    # Additional checks for problematic data (after intentionally unmatched check)
+                    elif not matched or matched.get("error"):
                         mismatch_type = "invalid_match_data"
                         reason = "Missing or invalid match data"
                         total_mismatches += 1
@@ -679,11 +730,6 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     elif not original or original.strip() == "":
                         mismatch_type = "empty_original"
                         reason = "Empty or missing original text"
-                        total_mismatches += 1
-                    # Check for "No Match" status
-                    elif match_type == "No Match":
-                        mismatch_type = "no_match_found"
-                        reason = "No match was found for this item"
                         total_mismatches += 1
 
                 # Override Levenshtein distance matches if they were successful

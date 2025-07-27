@@ -1,1967 +1,1432 @@
-blade:
-  A77:
-    Cloud:
-      A77:
-      - Cloud A77 Full Blade
-  AC:
-    Feather:
-      Pro:
-      - Feather - Professional
-      - Feather Artist Club PRO
-      - Feather Artist Club Professional
-      - Feather Artist Club Professional (SE)
-      - Feather Pro
-      - Feather Pro (AC)
-      - Feather Professional
-      - Feather Professional AC Blade
-      Pro Super:
-      - Feather Pro Super
-      - Feather Professional SUPER
-      ProGuard:
-      - Feather - Pro Guard
-      - Feather - Pro guard Artis club
-      - Feather Artist Club Pro Guard
-      - Feather Pro Guard
-      - Feather ProGuard
-    Generic:
-      Kai Clone:
-      - Chinese KAI Clone
-    Kai:
-      Captain Blade:
-      - Kai - Captain Original
-      Captain ProGuard:
-      - Kai Proguard M
-      - Kai Proguard MG
-      Captain ProTouch:
-      - Kai - Captain Titan Mild Pro Touch MG
-      - Kai - Captain Titan Mild ProTouch MG
-      - Kai - Kai - Captain Titan Mild Pro Touch MG
-      - Kai Captain Mild ProTouch MG (ancient)
-      - Kai Captain Titan Mild ProTouch MG
-      - Kai Captain Titan Protouch MG
-      - KAI ProTouch MG
-      Captain Titan Mild:
-      - KAI - Captain Titan Mild Pink (SE)
-      - Kai Captain Mild
-      - Kai Captain Titan Mild
-      - KAI Captain Titan Mild Pink (SE)
-      Salon Select Premium Guard:
-      - Kai Salon Select Premium Guard
-    Schick:
-      Proline (AC):
-      - Schick P-30
-      - Schick P-30 Proline Artist Club (SE)
-      - Schick ProLine
-      - Schick Proline P-Series Artist Club
-  Cartridge:
-    Cartridge:
-      Cartridge:
-      - Personna Twin Pivot Plus (Atra) Cart
-  DE:
-    7 O'Clock:
-      Sharpedge (Yellow):
-      - 7'O Clock - Yellow
-      - Gillette - 7 O'Clock Sharp Edge
-      - Gillette 7 O'Clock (Yellow)
-      - Gillette 7 O'Clock Sharp Edge
-      - Gillette 7 O'Clock Sharp Edge (yellow)
-      - Gillette 7 O'Clock SharpEdge
-      - Gillette 7 O'clock SharpEdge
-      - Gillette 7 O'Clock SharpEdge Yellow
-      - Gillette 7 O'clock Yellow
-      - Gillette Yellow
-      Super Platinum (Black):
-      - 7sp
-      - Gilette 7 O'Clock - Super Platinum
-      - Gillette - 7 o'clock Super Platinum
-      - Gillette 7o'clock Black
-      - Gillette Seven O'Clock Super Platinum
-      Super Stainless (Green):
-      - Gilette 7 O' Clock Super Stainless (Green)
-      - Gillette 7 O Clock green
-      - Gillette 7 O'Clock Stainless (Green)
-      - Gillette 7 O'Clock Stainless Green
-      - Gillette 7 O'Clock Super Stainless (Green)
-      - Gillette 7 O'clock Super Stainless (green), DE
-      - Gillette Seven O'Clock Super Stainless
-      - Gillette Super Stainless (Green)
-    Asco:
-      Platinum:
-      - ASCO Orange Platinum
-    Assured for Men:
-      DE:
-      - Assured for Men
-    Astra:
-      Superior Platinum (Green):
-      - Astra
-      - Astra - Platinum
-      - Astra - Superior Platinum
-      - Astra Green
-      - Astra Green (Indian)
-      - Astra Green - [ on both razors]
-      - Astra Platinum
-      - Astra Platinum (green)
-      - Astra SP
-      - Astra SP (Green)
-      - Astra SP Green
-      - Astra Super Platinum (Greens)
-      - Astra Superior Platinum
-      - Astra Superior Platinum, DE
-      - Gillette Astra Platinum Green
-      Superior Stainless (Blue):
-      - Astra - Blue
-      - Astra Blue
-      - Astra Stainless
-      - Astra Superior Stainless (ASS)
-      - Astra Superior Stainless (Blue)
-      - GIllette Astra Stainless Blue
-      - Gillette Astra Superior Stainless Blue
-    Bevel:
-      Double Edge:
-      - Bevel
-      - Bevel DE
-    Bic:
-      Astor Stainless:
-      - Bic Astor
-      - BIC Astor Stainless
-      - Bic Astor Stainless Steel
-      Chrome:
-      - Bic
-      - Bic Chrome
-      - Bic Chrome Platinum
-    Big Ben:
-      Super Stainless:
-      - Big Ben - Super Stainless
-      - Big Ben Stainless Steel
-      - Big Ben Super Stainless (Purple)
-    Bolzano:
-      Superinox:
-      - Bolzano
-      - Bolzano - Superinox
-      - Bolzano Superinox
-    Cloud:
-      Super Stainless:
-      - Cloud Super Blades
-    Crown:
-      Super Stainless:
-      - Crown - Super Stainless
-    Crystal:
-      Super:
-      - Crystal
-    Derby:
-      Extra:
-      - Derby - Extra
-      - Derby Extra
-      Premium:
-      - Derby Premium
-    Dorco:
-      Prime Platinum:
-      - Dorco Prime Platinum
-      ST-300:
-      - Dorco
-      - Dorco Stainless
-      Titan:
-      - Dorco Titan
-    Durablade:
-      Sharp Hi Chromium:
-      - Durablade Sharp Hi Chromium
-    Feather:
-      DE:
-      - Feather
-      - Feather (DE)
-      - Feather - Hi-stainless
-      - Feather - HiStainless
-      - Feather - New Hi-Stainless
-      - Feather Hi Stainless
-      - Feather Hi-Stainless
-      - Feather New Hi Stainless
-      - Feather new Hi-Stainless
-      - Feather Stainless
-    Filoso:
-      Platinum:
-      - Filoso
-      - Filoso - Platinum Blade
-      - Filoso - The Barbers Blade
-    FlyDear:
-      Super Platinum:
-      - FlyDear
-      - FlyDear - 9/10
-      - modified FlyDear 🤦🏻♂️
-    Gillette:
-      '365':
-      - Gillette 365
-      Blue:
-      - Gillette - Blue Blade
-      - Gillette Blue
-      Minora:
-      - Gillette - Minora
-      - Gillette - Minora Stainless
-      - Gillette Minora
-      - Gillette Minora Stainless
-      Nacet:
-      - Gillette - Nacet
-      - Gillette - Nacet Stainless
-      - Gillette Nacet
-      - Nacet
-      Perma-Sharp:
-      - Gillete PermaSharp
-      - Gillette - Perma Sharp
-      - Gillette - Permasharp
-      - Gillette Green - Permasharp
-      - Gillette Perma-Sharp
-      - Gillette PermaSharp
-      - Perma-sharp
-      - Perma-sharp Stainless
-      - Perma-Sharp Super
-      - Permasharp
-      Platinum:
-      - Gillette - Platinum
-      - Gillette - Platinum (half in Kamisori new, whole in Overlander new)
-      - Gillette Platinum
-      Silver Blue:
-      - Gillete Silver Blue
-      - Gillette - Silver Blue
-      - Gillette Silver Blue
-      - GSB
-      Super Thin Platinum:
-      - Gillette - Super thin Platinum
-      - Gillette - Super Thin
-      Wilkinson Sword:
-      - Gillette Wilkinson Sword
-      - Gillette Wilkinson Sword (India)
-      - GWS
-      - GWS Chinese
-      Winner:
-      - Gillette Winner
-      - Gillette Winner Platinum
-      - Gillette Winner Stainless
-    Glätz:
-      Super Platinum:
-      - Glatz
-    Kai:
-      DE:
-      - Kai
-      - Kai - Stainless
-    King C Gillette:
-      DE:
-      - Gillette - King C Gillette Blades
-      - King C. Gillette
-    Ladas:
-      Super Stainless:
-      - Ladas
-    Laser:
-      Ultra:
-      - Laser Super Platinum
-      - Laser Ultra
-    Lord:
-      Blue Sword Platinum:
-      - Blue Sword Platinum
-      Super Stainless:
-      - Lord Shark - Super Stainless
-      - Lord Super Chrome
-      - Lord Super Stainless Steel
-    Merkur:
-      Super Platinum:
-      - Merkur Super Platinum
-    Personna:
-      '74':
-      - Personna 74
-      - Personna P74
-      Lab Blue:
-      - Accuforge
-      - Persona
-      - Personna - Comfort Coated (Lab Blue)
-      - Personna - Lab Blue
-      - Personna Comfort Coat
-      - Personna Comfort Coated
-      - Personna Lab Blue
-      - Personna Super Comfort Coated (aka Lab Blue)
-      Med Prep:
-      - AccuTec - Med Prep
-      - Persona Medical
-      - Personna Med Prep
-      Platinum:
-      - Personna "Israeli Red"
-      - Personna - Platinum
-      - Personna - Platinum (for both)
-      - Personna - Platinum Chrome Israeli Red
-      - Personna Platinum
-      - Personna Red
-      - Personna Super Stainless
-      - Personne Super Stainless
-    Polsilver:
-      Super Iridium:
-      - Polsilver SI
-      - Polsilver Super Iridium
-    RK:
-      Stainless:
-      - RK Stainless
-    Rapira:
-      Platinum Lux:
-      - Rapira
-      Super Stainless:
-      - Rapira Super Stainless
-      Swedish:
-      - Rapira Sweedish Super Steel
-    Rockwell:
-      Swedish Stainless:
-      - Rockwell Swedish Stainless Steel
-      - Rockwell Swedish Stainless Steel $WOODEN
-    Schick:
-      Stainless (DE):
-      - Schick Stainless
-    Shark:
-      Chrome:
-      - Lord Shark - Super Chrome
-      - Shark - Super Chrome
-      - Shark Super Chrome
-      - Shark Super Chromes
-      Stainless:
-      - Shark (Egypt)
-      - Shark SS
-    Silver Star:
-      Super Stainless:
-      - Lord Silver Star - Stainless
-    Statum:
-      Platinum:
-      - Statum
-    Super-Max:
-      Platinum:
-      - SuperMax Platinum Plus
-      Super Stainless (Green):
-      - Super- Super-Max Super Stainless
-    Tatara:
-      DE:
-      - Tatara - Platinum
-      - Tatara Stainless
-    Tatra:
-      Carbon Steel:
-      - Tatra Carbon Steel
-      Platinum:
-      - Czech Blades Tatra Platinum Stainless
-      - Tatra Platinum
-    Tiger:
-      Platinum:
-      - Tiger
-      - Tiger - Platinum
-      - Tiger Platinum
-      - Tiger Platinum, DE
-    Topaz:
-      Platinum:
-      - Topaz Platinum
-    Treet:
-      Black Beauty:
-      - Treet Black Beauty Carbon
-      Carbon:
-      - Treet - Carbon Steel
-      - Treet Carbon Steel
-      - Treet Carbon Steel -
-      Classic:
-      - Treet - Classic Carbon
-      - Treet Classic
-      - Treet Classic Carbon Steel
-      Dura Sharp:
-      - Treet DuraSharp
-      Edge:
-      - Treet Edge
-      Falcon:
-      - Treet - Falcon Carbon Steel
-      New Edge:
-      - Treet New Edge
-      Platinum:
-      - Treet
-      - Treet - Platinum
-      - Treet Platinum
-      Silver:
-      - Treet Silver
-    Van Der Hagen:
-      Stainless:
-      - Van Der Hagen Stainless
-    Voskhod:
-      Teflon Coated:
-      - Voskhod
-      - Voskhod - Teflon Coated
-      - Voskhod Teflon Coated
-    Wilkinson Sword:
-      Classic:
-      - Wilkinson Sword
-      - Wilkinson Sword (German)
-    Willy's:
-      Premium:
-      - Willy's Premium
-    Wizamet:
-      Super Iridium:
-      - Wizamet
-      - Wizamet - Iridium Super Extra Stainless
-      - Wizamet - Super Iridium
-      - Wizamet Half
-      - Wizamet iridium
-      - Wizamet Super Iridium
-    XR:
-      RhinoceRos:
-      - Rhinoceros A77 Blade
-  FHS:
-    Feather:
-      FHS-1:
-      - Feather ASD-10
-      - Feather FHS-10
-      - FHS-10
-    OneBlade:
-      HiCarbon SE:
-      - OneBlade - HiCarbon SE
-  GEM:
-    GEM:
-      Blue Star:
-      - Gem - Blue Star uncoated blade
-      - Gem - Blue Star uncoated blades
-      - GEM Blue Star
-    PAL:
-      Blue Blade:
-      - PAL | Single Edge Carbon Steel BLUE Blades
-    Personna:
-      GEM PTFE:
-      - Accuforge - Gem Microcoat
-      - AccuForge Coated
-      - Accuforge GEM coated stainless steel
-      - Accuforge GEM Microcoat
-      - Accuforge Pro PTFE GEM
-      - AccuTec - Pro Premium Coated
-      - AccuTec Pro Premium
-      - Accutec Pro Premium (GEM)
-      - Gem
-      - Gem blade
-      - GEM PTFE
-      - GEM PTFE / Schick Injector
-      - GEM SS PTFE
-      - Personna - GEM PTFE
-      - Personna GEM
-      - Personna GEM PTFE
-      - Personna GEM PTFE Coated
-      - Personna GEM PTFE, Crown Half Blade, Parker Injector
-      - Personna GEM Stainless PTFE
-      - Personna PTFE
-      - Personna PTFE Stainless Steel GEM
-      - PTFE
-      GEM Stainless:
-      - GEM stainless
-  Hair Shaper:
-    Annie:
-      Hair Shaper:
-      - Annie Hair Shaper
-      - Annie Hair Shaper Blade
-    Fromm:
-      Hair Shaper:
-      - Fromm
-      - Fromm - Hair Shaper
-      - FROMM Hair Shaper Blade
-    Gutche:
-      Hair Shaper:
-      - Gutche Hair Shaper Blade
-    Kismet:
-      Hair Shaper:
-      - Kismet
-      - Kismet blade
-      - Kismet Blade Corked
-      - Kismet hair shaper
-      - Kismet Rostfrei
-      - Kismet Rostfrei, Polymer beschichtet
-    Personna:
-      Hair Shaper:
-      - Personna
-      - Personna - Hair Shaper
-      - Personna Hair Shaper
-      - Personna Hair Shaper Blade
-      - Personna Specimen Prep
-    Weck:
-      Sextoblade:
-      - Weck hair shaper
-  Half DE:
-    Dorco:
-      HST-300:
-      - Dorco HST-300-P1 1/2 DE
-    Gillette:
-      Perma-Sharp SE:
-      - Permasharp 1/2 DE
-    Leaf:
-      SE:
-      - Leaf Single-Edge Blades
-      - Leaf Super Platinum
-  Injector:
-    Generic:
-      Injector:
-      - Unbranded Vintage Injector
-      - Vintage Generic Injector
-      - Vintage Unbranded Injector
-    Parker:
-      Injector:
-      - Parker Injector
-      - Parker SS Injector
-    Personna:
-      74 Injector:
-      - Personna - 74 - Injector
-      Injector:
-      - Personna injector
-      - Personna Injector (SE)
-      - Personna Injector Blade
-      - Personna Stainless Coated Injector Blades
-    Schick:
-      Injector:
-      - Injector
-      - Schick
-      - Schick - Chinese Schick Plus
-      - Schick - Injector
-      - Schick Injector
-      - Schick Injector Blade
-      - Schick Injector yellow
-      - Schick Krona
-      - Schick Stainless Steel Injector
-      - Schick Yellow
-      - Shick Injector blade
-      Proline (Injector):
-      - Schick - Proline B-20
-      - Schick Proline B-20
-      - Shick proline B20
-    Ted Pella:
-      Injector:
-      - Ted Pella - Injector
-      - Ted Pella Injector Blade
-      - Ted Pella PTFE
-      - Ted Pella Single Edge Injector
-  Other:
-    Kampfe:
-      Wedge:
-      - Kampfe Bros Saturday
-    Rolls Razor:
-      Blade:
-      - Rolls (not this kind of Rolls) Razor Wedge Blade
-      - Rolls Blade
-      - Rolls Razor
-    Valet:
-      Blade:
-      - Valet Auto Strop
-      - Valet SE Blade
 razor:
   3D Printed:
     DE:
-    - 3D Printed - Tride
-    - GL Customs 3D printed travel razor preloaded with Asco Orange blade
-    - Me - 3D Printed
-    - TriDE Safety Razor - 3D-printed red
-    - WrongCoyote9525 - 3D Printed Razor
+    - 3d printed - tride
+    - gl customs 3d printed travel razor preloaded with asco orange blade
+    - me - 3d printed
+    - tride safety razor - 3d-printed red
+    - wrongcoyote9525 - 3d printed razor
     GEM:
-    - Wrong_Coyote 3D Printed GEM
+    - wrong_coyote 3d printed gem
     Half DE:
-    - Roger Quintero 3d Printed Half DE Razor
+    - roger quintero 3d printed half de razor
     Lathercatcher:
-    - Stoll Jr. - 3D Lathercatcher
+    - stoll jr. - 3d lathercatcher
   Above the Tie:
     R2:
-    - ATT OC R2
+    - att oc r2
     S1:
-    - Above The Tie - Aluminum ALRH Plate Bamboo Handle
-    - Above the Tie Atlas S1
-    - ATT S1
-    - ATT S1 Slant
+    - above the tie - aluminum alrh plate bamboo handle
+    - above the tie atlas s1
+    - att s1
+    - att s1 slant
     SE2:
-    - Above The Tie SE2 OC
+    - above the tie se2 oc
     Windsor Pro SB90:
-    - Above The Tie - Calypso Blue V2 SB90, DE
+    - above the tie - calypso blue v2 sb90, de
     Windsor SSRH2:
-    - Above The Tie - Windsor SSRH2, OC Base Plate, DE - (original version not Windsor
-      Pro)
+    - above the tie - windsor ssrh2, oc base plate, de - (original version not windsor
+      pro)
   Alpha:
     Claymore:
-    - Alpha shaving - Claymore
+    - alpha shaving - claymore
     Outlaw:
-    - Alpha Outlaw Evolution Ti
-    - Alpha Shaving Works - Lone Star
-    - Alpha Shaving Works - Lone Star Outlaw
-    - Alpha Shaving Works - Outlaw Evolution Titanium
+    - alpha outlaw evolution ti
+    - alpha shaving works - lone star
+    - alpha shaving works - lone star outlaw
+    - alpha shaving works - outlaw evolution titanium
   Alshabab:
     Razor:
-    - Alshabab Original
+    - alshabab original
   Art Razor:
     Straight:
-    - Art Razors Capitaine 19/16 Full Hollow Square Tip
-    - Yurii Kravcenko Hunter Half Hollow 8/8
-    - Yurii Kravcenko Kamisori style razor
-    - Yurii Kravcenko Konsul 8/8
+    - art razors capitaine 19/16 full hollow square tip
+    - yurii kravcenko hunter half hollow 8/8
+    - yurii kravcenko kamisori style razor
+    - yurii kravcenko konsul 8/8
   Assured for Men:
     Dollar Tree Safety Razor:
-    - Assured for Men Safety Razor
+    - assured for men safety razor
   Asylum:
     Rx:
-    - Asylum Artist Club RX (v2)
-    - Asylum Artist Club RX v2
-    - Asylum Rx V2 - AC Razor
+    - asylum artist club rx (v2)
+    - asylum artist club rx v2
+    - asylum rx v2 - ac razor
   Atelier Durdan:
     Horizon:
-    - Atelier Durdan - Horizon
+    - atelier durdan - horizon
     Le Faulx:
-    - Atelier Durdan - La Faulx Classique
+    - atelier durdan - la faulx classique
     Le Maurice:
-    - Atelier Durdan Le Maurice
+    - atelier durdan le maurice
     Vestige:
-    - Atelier Durdan - Vestige ++
-    - Atelier Durdan - Vestige Ti Ultra Plate
+    - atelier durdan - vestige ++
+    - atelier durdan - vestige ti ultra plate
   Aylsworth:
     Apex:
-    - Aylsworth Apex
-    - Aylsworth APEX-SS
-    - Aylsworth Razors - Apex
-    - Aylsworth Razors - Apex Titanium
+    - aylsworth apex
+    - aylsworth apex-ss
+    - aylsworth razors - apex
+    - aylsworth razors - apex titanium
     Drakkant:
-    - Aylesworth Razors - Kopparkant
-    - Aylsworth Drakkant
-    - Aylsworth Drakkant Brass
-    - Aylsworth Kopperkant
-    - Aylsworth Razors - Drakkant SS
-    - Aylsworth Razors - Frank-kant, Drakkant SS
-    - Aylsworth Razors Drakkant Plus
-    - Aylsworth Razors Drakkant Ti
+    - aylesworth razors - kopparkant
+    - aylsworth drakkant
+    - aylsworth drakkant brass
+    - aylsworth kopperkant
+    - aylsworth razors - drakkant ss
+    - aylsworth razors - frank-kant, drakkant ss
+    - aylsworth razors drakkant plus
+    - aylsworth razors drakkant ti
   Baili:
     3-Piece:
-    - BAILI - Classic 3-piece DE
-    - Baili - Classic DE
-    - BAILI BR 176
-    - Baili BR172
-    - Baili BT131
-    - Baili Tech Copy
+    - baili - classic 3-piece de
+    - baili - classic de
+    - baili br 176
+    - baili br172
+    - baili bt131
+    - baili tech copy
   Bambaw:
     Safety Razor:
-    - Bambaw Sea Green
+    - bambaw sea green
   Bevel:
     Essential Disposable:
-    - Bevel Disposable DE
-    - Bevel Essential Disposable Safety Razor
+    - bevel disposable de
+    - bevel essential disposable safety razor
   Blackland:
     Blackbird:
-    - Blackland - Blackbird and Van Der Hagen - Traditional Safety Razor
-    - Blackland - Blackbird SS
-    - Blackland - Blackbird Ti
-    - Blackland - Blackbird, DE safety razor, Brass, 101 mm handle \- "Brassbird"
-    - Blackland Blackbird
-    - Blackland Blackbird (Brass)
-    - Blackland Blackbird (SS)
-    - Blackland Blackbird brass
-    - Blackland Blackbird Lite
-    - Blackland Blackbird Lite SS
-    - Blackland Blackbird OC
-    - Blackland Blackbird SS
-    - Blackland Blackbird Ti
-    - Blackland Blackbird Ti Lite
-    - Blackland Blackbird Ti SB
-    - Blackland Blackbird Titanium
-    - Blackland Razors - Blackbird
-    - Blackland Razors Blackbird
-    - Blackland Razors Blackbird Lite
-    - Blackland Razors Blackbird Ti
-    - Blackland SS
-    - Polished Brassbird OC
-    - Polished Brassbird SB
+    - blackland - blackbird and van der hagen - traditional safety razor
+    - blackland - blackbird ss
+    - blackland - blackbird ti
+    - blackland - blackbird, de safety razor, brass, 101 mm handle \- "brassbird"
+    - blackland blackbird
+    - blackland blackbird (brass)
+    - blackland blackbird (ss)
+    - blackland blackbird brass
+    - blackland blackbird lite
+    - blackland blackbird lite ss
+    - blackland blackbird oc
+    - blackland blackbird ss
+    - blackland blackbird ti
+    - blackland blackbird ti lite
+    - blackland blackbird ti sb
+    - blackland blackbird titanium
+    - blackland razors - blackbird
+    - blackland razors blackbird
+    - blackland razors blackbird lite
+    - blackland razors blackbird ti
+    - blackland ss
+    - polished brassbird oc
+    - polished brassbird sb
     Dart:
-    - Blackland Dart
+    - blackland dart
     Era:
-    - Blackland - Era
-    - Blackland Era
-    - Blackland Era SB LVL 3
-    - Blackland Razors Era
+    - blackland - era
+    - blackland era
+    - blackland era sb lvl 3
+    - blackland razors era
     Osprey:
-    - Blackland Osprey
-    - Blackland Razors Osprey
-    - Blackland Razors Osprey Camping Edition
+    - blackland osprey
+    - blackland razors osprey
+    - blackland razors osprey camping edition
     Sabre:
-    - Blackland - Sabre
-    - Blackland Razors Sabre (level 2)
-    - Blackland Razors Sabre lvl 2
-    - Blackland Sabre
-    - Blackland Sabre L2
-    - Blackland Sabre Level 2
+    - blackland - sabre
+    - blackland razors sabre (level 2)
+    - blackland razors sabre lvl 2
+    - blackland sabre
+    - blackland sabre l2
+    - blackland sabre level 2
     Sabre V2:
-    - Blackland Sabre 2.0
-    - Blackland Sabre V2
-    - Blackland Sabre v2 Lvl 2
-    - Blackland Sabre v2 Lvl 4
+    - blackland sabre 2.0
+    - blackland sabre v2
+    - blackland sabre v2 lvl 2
+    - blackland sabre v2 lvl 4
     Square (Workshop Batch 002):
-    - Blackland Razors - Batch 002
-    - Blackland Square
+    - blackland razors - batch 002
+    - blackland square
     Tradere:
-    - Blackland - Tradere OC
+    - blackland - tradere oc
     Vector:
-    - Blackbird Vector
-    - Blackland - Vector OC Gold PVD Coated
-    - Blackland - Vector SS
-    - Blackland Razors Vector
-    - Blackland Razors Vector (lite)
-    - Blackland Razors Vector Lite
-    - Blackland Vector
-    - Blackland Vector (lite)
-    - Blackland Vector titanium
-    - Blackland, Vector
-    - Vector Ti
+    - blackbird vector
+    - blackland - vector oc gold pvd coated
+    - blackland - vector ss
+    - blackland razors vector
+    - blackland razors vector (lite)
+    - blackland razors vector lite
+    - blackland vector
+    - blackland vector (lite)
+    - blackland vector titanium
+    - blackland, vector
+    - vector ti
   Blutt Rasur:
     BR-1:
-    - Blutt Rasur BR-1 0.99
+    - blutt rasur br-1 0.99
   Bulimica:
     Safety Razor:
-    - BULIMICA - Rainbow Safety Razor (Green)
-  Böker:
+    - bulimica - rainbow safety razor (green)
+  "B\xF6ker":
     Elite Carbon 2.0:
-    - Böker Elite Carbon 2.0
+    - "b\xF6ker elite carbon 2.0"
     King Cutter:
-    - Böker - King cutter
-    - Böker - King Cutter - 6/8 square point - full hollow
+    - "b\xF6ker - king cutter"
+    - "b\xF6ker - king cutter - 6/8 square point - full hollow"
     Straight:
-    - Boker No.1056 - full hollow - Dreadnought point - 5/8
-    - Böker - 14er (8/8", extra hollow, carbon steel, square point)
-    - Böker - Dönges Expert Fire Folder
-    - Böker 14er 8/8" Full Hollow
-    - Böker S.S. Paris Wins (6/8", carbon steel, full hollow, square point)
-    - Custom designed Böker 6/8 with bog oak scale and French head
-    - H Boker "American Line - S.S. St. Louis" 11/16"
-    - H Boker 5/8" and tang
+    - boker no.1056 - full hollow - dreadnought point - 5/8
+    - "b\xF6ker - 14er (8/8\", extra hollow, carbon steel, square point)"
+    - "b\xF6ker - d\xF6nges expert fire folder"
+    - "b\xF6ker 14er 8/8\" full hollow"
+    - "b\xF6ker s.s. paris wins (6/8\", carbon steel, full hollow, square point)"
+    - "custom designed b\xF6ker 6/8 with bog oak scale and french head"
+    - h boker "american line - s.s. st. louis" 11/16"
+    - h boker 5/8" and tang
   CJB:
     GR-100B:
-    - Greager GR-100B
+    - greager gr-100b
     Kamisori Shavette:
-    - CJB GR100B Kamisori
-    - CJB Kamisori Shavette
+    - cjb gr100b kamisori
+    - cjb kamisori shavette
   CV Heljestrand:
     Straight:
-    - C.V. Heljestrand - MK 32
-    - C.V. Heljestrand MK 31 11/16" Söderfors Extra Specialstål Full Hollow
-    - C.V.Heljestrand - No.2
-    - Carl Victor Heljestrand 5/8
+    - c.v. heljestrand - mk 32
+    - "c.v. heljestrand mk 31 11/16\" s\xF6derfors extra specialst\xE5l full hollow"
+    - c.v.heljestrand - no.2
+    - carl victor heljestrand 5/8
   Carbon:
     Cx:
-    - Carbon +
-    - Carbon CX 316L R1 with ++ plate
-    - Carbon Cx-Ti .68mm
-    - Carbon Razors Cx-7Q-89
-    - Carbon Shaving Co CX-Fuso ++Plate with Mokume-Gane
-    - Carbon Shaving Co. - Yeti-Mascus
-    - Carbon Shaving Co. Cx-316L/Web ++ Plate
-    - Carbon Shaving CX-316L
+    - carbon +
+    - carbon cx 316l r1 with ++ plate
+    - carbon cx-ti .68mm
+    - carbon razors cx-7q-89
+    - carbon shaving co cx-fuso ++plate with mokume-gane
+    - carbon shaving co. - yeti-mascus
+    - carbon shaving co. cx-316l/web ++ plate
+    - carbon shaving cx-316l
   Charcoal Goods:
     Everyday:
-    - Charcoal Goods - Gen 3 Everyday
-    - Charcoal Goods - Gen 3 Everyday Razor Hammered Handle
-    - Charcoal Goods Everyday
+    - charcoal goods - gen 3 everyday
+    - charcoal goods - gen 3 everyday razor hammered handle
+    - charcoal goods everyday
     Lvl 2:
-    - CG lvl 2 SB
-    - CG lvl 2 straight bar
-    - Charcoal Goods Brass Level 2
-    - Charcoal Goods Level 2
-    - Charcoal Goods Level 2 (Gen.3) Torpedo
-    - Charcoal Goods LVL II SS
-    - Charcoal Goods Maze with level 2 plate
-    - CharcoalGoods LV2
+    - cg lvl 2 sb
+    - cg lvl 2 straight bar
+    - charcoal goods brass level 2
+    - charcoal goods level 2
+    - charcoal goods level 2 (gen.3) torpedo
+    - charcoal goods lvl ii ss
+    - charcoal goods maze with level 2 plate
+    - charcoalgoods lv2
     Lvl 3:
-    - Charcoal Goods - Gen 1 Level 3
+    - charcoal goods - gen 1 level 3
   Chiseled Face:
     Legacy:
-    - Chiseled Face - Legacy
-    - Chiseled Face - Legacy Ti
-    - Chiseled Face - Legacy Titanium, DE
-    - Chiseled Face - Titanium Legacy Razor
-    - Chiseled Face Brass Legacy
-    - Chiseled Face Groomatorium - Legacy Ti
-    - Chiseled Face Legacy
-    - Chiseled Face Legacy (Aluminum)
-    - Chiseled Face Legacy Aluminum
-    - Chiseled Face Legacy Raw Titanium - (#69)
-    - Chiseled Face Legacy Ti
-    - Chiseled Face Legacy Titanium
-    - Chiseled Face Titanium Legacy Razor
-    - Legacy Razor
+    - chiseled face - legacy
+    - chiseled face - legacy ti
+    - chiseled face - legacy titanium, de
+    - chiseled face - titanium legacy razor
+    - chiseled face brass legacy
+    - chiseled face groomatorium - legacy ti
+    - chiseled face legacy
+    - chiseled face legacy (aluminum)
+    - chiseled face legacy aluminum
+    - chiseled face legacy raw titanium - (#69)
+    - chiseled face legacy ti
+    - chiseled face legacy titanium
+    - chiseled face titanium legacy razor
+    - legacy razor
   Classic:
     King Cobra:
-    - Classic Shaving - King Cobra
+    - classic shaving - king cobra
   Clix:
     E-Z Flo:
-    - Clix E-Z Flo
+    - clix e-z flo
   Colonial:
     General:
-    - AL Colonial General
+    - al colonial general
+    CR7:
+    - colonial razors cr7
   Cooper:
     Monobilt:
-    - Cooper - Monobilt
+    - cooper - monobilt
   Daune:
     Double Edge Shavette:
-    - Daune
+    - daune
   Diane:
     Double Edge Shaver:
-    - Diane Double Edge Shaver
+    - diane double edge shaver
   Dovo:
     Shavette:
-    - Dovo - Shavette
-    - Dovo shavette
+    - dovo - shavette
+    - dovo shavette
     Straight:
-    - Dovo - 15/16" Round Point Hollow Ground
-    - Dovo - Runde Sache - Full Hollow 5/8 Square Point
-    - Dovo 11/16" Hollow Ground Round Point
-    - Dovo Art of Shaving 5/8 Hollow Ground Round Point
+    - dovo - 15/16" round point hollow ground
+    - dovo - runde sache - full hollow 5/8 square point
+    - dovo 11/16" hollow ground round point
+    - dovo art of shaving 5/8 hollow ground round point
   Dubl Duck:
     Goldedge:
-    - Dubl Duck Goldedge
+    - dubl duck goldedge
     Hair Shaper:
-    - Dubl Duck Duchess Hair Shaper
-    - Dubl Duck Hair Shaper
-    - PearlDuck DUBL Duck Hair Shaper
+    - dubl duck duchess hair shaper
+    - dubl duck hair shaper
+    - pearlduck dubl duck hair shaper
     Straight:
-    - Dubl Duck Pearl Duck 6/8 Full Hollow
+    - dubl duck pearl duck 6/8 full hollow
   Durham:
     Duplex:
-    - Durham Demonstrator Black Scales
-    - Durham Duplex Straight Bar Shavette
+    - durham demonstrator black scales
+    - durham duplex straight bar shavette
   ERN:
     Straight:
-    - ERN - 5/8" Hollow Ground
-    - Ern 207, 6/8 full hollow round point
-    - Ern 22 7/8, full hollow square point
-    - Ern ATOR, 6/8 full hollow round point
-    - Ern Ferreteria Sardon Arequipa 2611, 15/16 full hollow round point
+    - ern - 5/8" hollow ground
+    - ern 207, 6/8 full hollow round point
+    - ern 22 7/8, full hollow square point
+    - ern ator, 6/8 full hollow round point
+    - ern ferreteria sardon arequipa 2611, 15/16 full hollow round point
   Edwin Jagger:
     DE89:
-    - Edwin Jagger - DE89
-    - Edwin Jagger - EJ89
-    - Edwin Jagger DE86
-    - Edwin Jagger DE86RC14bl Black Rubber Coated
-    - Edwin Jagger DE89
-    - Edwin Jagger DE89 Octagonal Gold
+    - edwin jagger - de89
+    - edwin jagger - ej89
+    - edwin jagger de86
+    - edwin jagger de86rc14bl black rubber coated
+    - edwin jagger de89
+    - edwin jagger de89 octagonal gold
   EldrormR Industries:
     MM24:
-    - EldromR Industries MM24
-    - EldromR Industries Two-Tone MM24
-    - EldrormR Industries - MM24
-    - EldrormR Industries - MM24 (two-tone)
-    - EldrormR Industries MM24
-    - EldrormR Industries MM24 (two tone)
-    - EldrormR Industries MM24 Brass
-    - EldrormR Industries MM24, Two-Toned Finish
-    - Eldrormr MM24
-    - GEM - MM24 - Eldrormr Industries
-    - MM24
-    - u/EldormR Industries - MM24
-    - u/EldrormR Industries MM24
+    - eldromr industries mm24
+    - eldromr industries two-tone mm24
+    - eldrormr industries - mm24
+    - eldrormr industries - mm24 (two-tone)
+    - eldrormr industries mm24
+    - eldrormr industries mm24 (two tone)
+    - eldrormr industries mm24 brass
+    - eldrormr industries mm24, two-toned finish
+    - eldrormr mm24
+    - gem - mm24 - eldrormr industries
+    - mm24
+    - u/eldormr industries - mm24
+    - u/eldrormr industries mm24
   Ever-Ready:
     '1912':
-    - Ever Ready - 1912
-    - Ever Ready 1912
-    - Ever-Ready 1912
-    - Gem - Gold1912 Ever Ready Sunray 1912
-    - Vintage EverReady GEM 1912
+    - ever ready - 1912
+    - ever ready 1912
+    - ever-ready 1912
+    - gem - gold1912 ever ready sunray 1912
+    - vintage everready gem 1912
     '1914':
-    - Ever-Ready 1914
+    - ever-ready 1914
     '1924':
-    - 1924 EVER READY Single edge (BRASS)
-    - Ever-Ready 1924
+    - 1924 ever ready single edge (brass)
+    - ever-ready 1924
     Streamline:
-    - Ever Ready - Ambassador
-    - Ever Ready Streamline
-    - Ever Ready Streamline gen 2
-    - EverReady Streamline Strop Outfit Gen 2
-  Facón:
+    - ever ready - ambassador
+    - ever ready streamline
+    - ever ready streamline gen 2
+    - everready streamline strop outfit gen 2
+  "Fac\xF3n":
     Kamisori Shavette:
-    - Facón - Kamisori-style Shavette; Karve Shaving Co. - Overlander Brass
+    - "fac\xF3n - kamisori-style shavette; karve shaving co. - overlander brass"
   Fasan:
     Bakelite Slant:
-    - Fasan - Bakelite Slant
+    - fasan - bakelite slant
   Fatip:
     Gentile:
-    - Fatip - Testina Gentile
-    - Fatip Classic Testina Gentile - Chrome
+    - fatip - testina gentile
+    - fatip classic testina gentile - chrome
     Grande:
-    - Fatip Classic Grande
+    - fatip classic grande
     Lo Storto:
-    - Fatip - Lo Storto Gentile (Closed Comb, chrome)
-    - Fatip Lo Storto
+    - fatip - lo storto gentile (closed comb, chrome)
+    - fatip lo storto
     Piccolo:
-    - Fatip il Piccolo Sorto
-    - Fatip Piccolo
-    - Fatip Piccolo Slant
-    - Fatip Piccolo Slant Open Comb Gold
+    - fatip il piccolo sorto
+    - fatip piccolo
+    - fatip piccolo slant
+    - fatip piccolo slant open comb gold
   Feather:
     Shavette:
-    - Feather - SS Kamisori
-    - Feather AC Kamisori
-    - Feather Artist Club DX
-    - Feather Artist Club SR
-    - Feather Artist Club SS
-    - Feather Artist Club SS Kamisori
-    - Feather Artist Club SS Western
-    - Feather SS Kamisori
+    - feather - ss kamisori
+    - feather ac kamisori
+    - feather artist club dx
+    - feather artist club sr
+    - feather artist club ss
+    - feather artist club ss kamisori
+    - feather artist club ss western
+    - feather ss kamisori
   Filarmonica:
     Straight:
-    - Filarmonica 13 Novodur 13/16" Para Profesionales Full Hollow
-    - Filarmónica Doble Temple 14
+    - filarmonica 13 novodur 13/16" para profesionales full hollow
+    - "filarm\xF3nica doble temple 14"
   Fine Accoutrements:
     DE5:
-    - Fine Accouterments DE5
+    - fine accouterments de5
   Flying Eagle:
     Tech Clone:
-    - Flying Eagle - Tech Clone
+    - flying eagle - tech clone
   FrankenRazor:
     ? ''
-    : - Greek Handled and Star Baseplated Frankenrazor
+    : - greek handled and star baseplated frankenrazor
   Futur Clone:
     ? ''
-    : - Mingshi 2000s
-      - Qshave Adjustable
-      - Qshave Adjustable (Merkur Futur copy)
+    : - mingshi 2000s
+      - qshave adjustable
+      - qshave adjustable (merkur futur copy)
   GEM:
     '1912':
-    - GEM 1912
-    - Gem Squat Head 1912
+    - gem 1912
+    - gem squat head 1912
     Clog Pruf:
-    - GEM - Clog Pruf -
-    - GEM - Micromatic Clog-Pruf
-    - GEM Clog Pruf
-    - GEM Clog-Pruf
-    - Gem Clog-Pruf, gen 1
-    - GEM Micromatic Clog-Pruf
-    - GEM Micromatic Gen 2 "Peerless" Clog Pruf
+    - gem - clog pruf -
+    - gem - micromatic clog-pruf
+    - gem clog pruf
+    - gem clog-pruf
+    - gem clog-pruf, gen 1
+    - gem micromatic clog-pruf
+    - gem micromatic gen 2 "peerless" clog pruf
     Damaskeene:
-    - GEM Damaskeen ('Screwy')
-    - GEM Damaskeene ('Screwy')
-    - GEM Damaskeene ('Screwy') $MACHIENAGE
-    - GEM Damaskeene ('Skrewy')
+    - gem damaskeen ('screwy')
+    - gem damaskeene ('screwy')
+    - gem damaskeene ('screwy') $machienage
+    - gem damaskeene ('skrewy')
     Damaskeene OC:
-    - GEM - Damaskeene Open Comb
+    - gem - damaskeene open comb
     Featherweight:
-    - GEM - Featherweight
-    - GEM - Featherweight $ATOMIC AGE
-    - GEM Featherweight
+    - gem - featherweight
+    - gem - featherweight $atomic age
+    - gem featherweight
     Flying Wing (aka Bullet Tip):
-    - Gem - "Flying Wing" Bullet tip
-    - GEM - Micromatic Flying Wing
-    - Gem Flying Wing / Bullet Tip
-    - GEM Micromatic Flying Wing
+    - gem - "flying wing" bullet tip
+    - gem - micromatic flying wing
+    - gem flying wing / bullet tip
+    - gem micromatic flying wing
     G-Bar:
-    - Gem - G Bar
-    - GEM G-Bar
+    - gem - g bar
+    - gem g-bar
     Junior:
-    - GEM - Junior
-    - GEM 1912 Junior
-    - GEM Junior
-    - GEM Junior 1912
+    - gem - junior
+    - gem 1912 junior
+    - gem junior
+    - gem junior 1912
     Micromatic:
-    - GEM MicroMatic
+    - gem micromatic
     Micromatic Open Comb:
-    - GEM - Micromatic Open Comb
-    - Gem - Micromatic Open Comb - Gen 2
-    - GEM Micromatic MMOC
-    - GEM Micromatic Open Comb
-    - GEM MMOC
-    - GEM MMOC Gen2
-    - GEM MMOC Gold Gen2
-    - Gem MMOC, gen 2
+    - gem - micromatic open comb
+    - gem - micromatic open comb - gen 2
+    - gem micromatic mmoc
+    - gem micromatic open comb
+    - gem mmoc
+    - gem mmoc gen2
+    - gem mmoc gold gen2
+    - gem mmoc, gen 2
     Pushbutton:
-    - GEM - Push Button
+    - gem - push button
   GL Customs:
     Keystone Light:
-    - GL Customs - 'Mystic Midnight' Keystone Light Razor
+    - gl customs - 'mystic midnight' keystone light razor
   Gillette:
     Fatboy:
-    - 1961 Gillette 195/Fatboy
-    - Gillette - Executive Fatboy
-    - Gillette 195 (Fatboy)
-    - Gillette 195 Adjustable E-1 "Mal"
-    - Gillette Executive Fatboy
-    - Gillette Executive Fatboy (D3)
-    - Gillette Fatboy
-    - Gillette Fatboy Adjustable
-    - Gillette Fatboy Adjustable (E3-1959)
-    - Gillette Fatboy E4 (**setting:** 6)
-    - Gillette Fatboy G1
+    - 1961 gillette 195/fatboy
+    - gillette - executive fatboy
+    - gillette 195 (fatboy)
+    - gillette 195 adjustable e-1 "mal"
+    - gillette executive fatboy
+    - gillette executive fatboy (d3)
+    - gillette fatboy
+    - gillette fatboy adjustable
+    - gillette fatboy adjustable (e3-1959)
+    - 'gillette fatboy e4 (setting: 6)'
+    - gillette fatboy g1
     Heritage:
-    - Gillette Heritage Inspired
+    - gillette heritage inspired
     King C. Gillette:
-    - Gillette - King C Chrome
-    - Gillette - King C Gillette
-    - Gillette - King Chrome (Target)
-    - KC Gillette
-    - King C Gillette
-    - King C. Gillette
+    - gillette - king c chrome
+    - gillette - king c gillette
+    - gillette - king chrome (target)
+    - kc gillette
+    - king c gillette
+    - king c. gillette
+    - new king c. gillette
     Knack:
-    - Gillette Knack
+    - gillette knack
     Lady Gillette:
-    - Gillette - 1966 Lady Gillette
-    - Gillette Lady Gillette (Blue)
+    - gillette - 1966 lady gillette
+    - gillette lady gillette (blue)
     NEW:
-    - Gillette "The New" Vintage Razor
-    - Gillette long-comb NEW
-    - Gillette New (Long Comb)
-    - Gillette NEW Big Boy (\~1930)
-    - Gillette NEW Big Boy (~1930)
-    - Gillette NEW DeLuxe
-    - Gillette New Long Comb
-    - Gillette NEW SC
-    - Gillette NEW Short Comb Replated
-    - Gillette New Standard
-    - Gillette RFB 44
-    - Gillette short-comb NEW
+    - gillette "the new" vintage razor
+    - gillette long-comb new
+    - gillette new (long comb)
+    - gillette new big boy (\~1930)
+    - gillette new big boy (~1930)
+    - gillette new deluxe
+    - gillette new long comb
+    - gillette new sc
+    - gillette new short comb replated
+    - gillette new standard
+    - gillette rfb 44
+    - gillette short-comb new
     Old Type:
-    - 'Gillette - ABC Pocket Edition: Floral'
-    - Gillette Old Type
-    - Gillette Old Type (no date code)
-    - Gillette Tuckaway (Old Type)
+    - 'gillette - abc pocket edition: floral'
+    - gillette old type
+    - gillette old type (no date code)
+    - gillette tuckaway (old type)
     President:
-    - Gillette President Y-2
+    - gillette president y-2
     Service Razor:
-    - British Gillette 1940's WWII Service Razor
-    - Gillette WWII English Service Razor
+    - british gillette 1940's wwii service razor
+    - gillette wwii english service razor
     Slim:
-    - 1962 Gillette Slim Adjustable
-    - 1963 Gillette Slim Adjustable
-    - 1968 Gillette Slim Adjustable
-    - Gillette *Slim* Adjustable
-    - Gillette - Aristocrat - No.20
-    - Gillette - Aristocrat 16 (UK)
-    - Gillette - Slim
-    - Gillette - Slim Adjustable
-    - Gillette - Slim Adjustable (L4, 1966)
-    - Gillette - Slim Adjustable M-4
-    - Gillette - Slim Adjustable N2
-    - Gillette - Slim J2
-    - Gillette Adjustable Slim (H4)
-    - Gillette Aristocrat
-    - Gillette Aristocrat (1948-50)
-    - Gillette Aristocrat 1938 Rhodium
-    - Gillette Aristocrat Slim (G3)
-    - 'Gillette British Aristocrat #16'
-    - Gillette English Aristocrat No. 22 (1948-1950)
-    - Gillette Slim
-    - Gillette Slim Adjustable
-    - Gillette Slim Adjustable - Date Code J3
-    - Gillette Slim Adjustable H4
-    - Gillette Slim Aristocrat H4
-    - Gillette Super Slim Twist
-    - Qshave Adjustable and Gillette Slim Adjustable
+    - 1962 gillette slim adjustable
+    - 1963 gillette slim adjustable
+    - 1968 gillette slim adjustable
+    - gillette slim adjustable
+    - gillette - aristocrat - no.20
+    - gillette - aristocrat 16 (uk)
+    - gillette - slim
+    - gillette - slim adjustable
+    - gillette - slim adjustable (l4, 1966)
+    - gillette - slim adjustable m-4
+    - gillette - slim adjustable n2
+    - gillette - slim j2
+    - gillette adjustable slim (h4)
+    - gillette aristocrat
+    - gillette aristocrat (1948-50)
+    - gillette aristocrat 1938 rhodium
+    - gillette aristocrat slim (g3)
+    - 'gillette british aristocrat #16'
+    - gillette english aristocrat no. 22 (1948-1950)
+    - gillette slim
+    - gillette slim adjustable - date code j3
+    - gillette slim adjustable h4
+    - gillette slim aristocrat h4
+    - gillette super slim twist
+    - qshave adjustable and gillette slim adjustable
     Super Adjustable:
-    - Gillete Super Adjustable
-    - Gillette - Black Beauty adjustible - Long handle
-    - Gillette - Super 109 Adjustable
-    - Gillette - Super Adjustable U2
-    - Gillette 1969-1975 Super Adjustable "Super 109"(Black Beauty)
-    - Gillette Black Beauty T3
-    - Gillette Short Handled Black Beauty
-    - Gillette Super Adjustable
-    - Gillette Super Adjustable 109 (Black Beauty) Gold O-4 (**setting:** 6)
-    - Gillette Super Adjustable 84 O-1
+    - gillete super adjustable
+    - gillette - black beauty adjustible - long handle
+    - gillette - super 109 adjustable
+    - gillette - super adjustable u2
+    - gillette 1969-1975 super adjustable "super 109"(black beauty)
+    - gillette black beauty t3
+    - gillette short handled black beauty
+    - gillette super adjustable
+    - 'gillette super adjustable 109 (black beauty) gold o-4 (setting: 6)'
+    - gillette super adjustable 84 o-1
     Super Speed:
-    - 1951 Gillette Black Tip SuperSpeed
-    - 1953 Gillette Super Speed
-    - 1953 Gillette Super-Speed
-    - 1956 Gillette Red Tip SuperSpeed
-    - 1957 Gillette Flare Tip SuperSpeed
-    - 1961 (G-2) Gillette Flare Tip
-    - 1967 Vintage Gillette SuperSpeed
-    - Gillette - 1940's English Parat TTO Double Edge
-    - Gillette - 1950's Flare Tip Super Speed
-    - Gillette - Black Handled Super Speed
-    - Gillette - Black Handled Super Speed - 1968
-    - Gillette - Flare Tip Super Speed - 1956
-    - Gillette - Gillette Flare Tip Super Speed (1954 Z3)
-    - Gillette - R2 TTO - 1971
-    - Gillette - Red Tip Super Speed
-    - Gillette - Rocket HD
-    - Gillette - Rocket HD500 (England)
-    - Gillette - Super Speed Black Tip
-    - Gillette - Super Speed Black Tip X2
-    - Gillette - Super Speed Flare
-    - Gillette 40's-style superspeed
-    - Gillette Black Tip Super Speed
-    - Gillette black-handled superspeed
-    - Gillette Blue Tip Super Speed
-    - Gillette flair-tip superspeed
-    - Gillette Flare Tip Super Speed
-    - Gillette Flare Tip Super Speed F1
-    - Gillette Milord Tech
-    - Gillette Ranger Tech
-    - Gillette Red Tip
-    - Gillette Red Tip Super Speed
-    - Gillette Red Tip Super Speed TTO (E1 - 1959 Q1)
-    - Gillette red-tip (C4 --> Q4 1957)
-    - Gillette Super Speed
-    - Gillette Super Speed (H-4)
-    - Gillette Super Speed Blacktip
-    - Gillette Super Speed Red Tip (B3-1956)
-    - Gillette Superspeed
-    - Gillette Superspeed 40s NDC
-    - Gillette Superspeed Red Tip
-    - Gillette TTO (W1)
-    - Gold Plated Gillette Super Speed 47
-    - Vintage Gillette Flair Tip 1956
+    - 1951 gillette black tip superspeed
+    - 1953 gillette super speed
+    - 1953 gillette super-speed
+    - 1956 gillette red tip superspeed
+    - 1957 gillette flare tip superspeed
+    - 1961 (g-2) gillette flare tip
+    - 1967 vintage gillette superspeed
+    - gillette - 1940's english parat tto double edge
+    - gillette - 1950's flare tip super speed
+    - gillette - black handled super speed
+    - gillette - black handled super speed - 1968
+    - gillette - flare tip super speed - 1956
+    - gillette - gillette flare tip super speed (1954 z3)
+    - gillette - r2 tto - 1971
+    - gillette - red tip super speed
+    - gillette - rocket hd
+    - gillette - rocket hd500 (england)
+    - gillette - super speed black tip
+    - gillette - super speed black tip x2
+    - gillette - super speed flare
+    - gillette 40's-style superspeed
+    - gillette black tip super speed
+    - gillette black-handled superspeed
+    - gillette blue tip super speed
+    - gillette flair-tip superspeed
+    - gillette flare tip super speed
+    - gillette flare tip super speed f1
+    - gillette milord tech
+    - gillette ranger tech
+    - gillette red tip
+    - gillette red tip super speed
+    - gillette red tip super speed tto (e1 - 1959 q1)
+    - gillette red-tip (c4 --> q4 1957)
+    - gillette super speed
+    - gillette super speed (h-4)
+    - gillette super speed blacktip
+    - gillette super speed red tip (b3-1956)
+    - gillette superspeed
+    - gillette superspeed 40s ndc
+    - gillette superspeed red tip
+    - gillette tto (w1)
+    - gold plated gillette super speed 47
+    - vintage gillette flair tip 1956
     Tech:
-    - 1953 Gillette Tech
-    - 1964 Gillette Travel Tech Head w
-    - 1967 Gillette Travel Tech (M3)
-    - Gilette Pre-War Fat Handle Tech
-    - Gillette - 1946 TECH WWII civilian replica Gold
-    - Gillette - Tech
-    - Gillette - Tech 1964 Solid Handle
-    - Gillette - Travel Tech
-    - Gillette Ball End Tech
-    - Gillette Ball End Tech (A)
-    - Gillette Ball-end Tech
-    - Gillette English Flat Bottom Tech, Fat Handle
-    - Gillette Fat Handle Tech
-    - Gillette Flat Bottom Tech
-    - Gillette Flat Head Tech
-    - Gillette Gold Ball-End Tech
-    - Gillette Tech
-    - Gillette Tech (H4)
-    - Gillette Tech (No Date Code, Oblong Slots - 1946-1950)
-    - Gillette Tech (user grade)
-    - Gillette Tech Bakelite Handle
-    - Gillette Tech English Flat Bottom
-    - Gillette Tech head
-    - Gillette Tech Minora OC
-    - Gillette Tiny Travel Razor
-    - Gillette Travel Tech
-    - Gillette travel tech (date code M4)
-    - Gillette Travel Tech K3
+    - 1953 gillette tech
+    - 1964 gillette travel tech head w
+    - 1967 gillette travel tech (m3)
+    - gilette pre-war fat handle tech
+    - gillette - 1946 tech wwii civilian replica gold
+    - gillette - tech
+    - gillette - tech 1964 solid handle
+    - gillette - travel tech
+    - gillette ball end tech
+    - gillette ball end tech (a)
+    - gillette ball-end tech
+    - gillette english flat bottom tech, fat handle
+    - gillette fat handle tech
+    - gillette flat bottom tech
+    - gillette flat head tech
+    - gillette gold ball-end tech
+    - gillette tech
+    - gillette tech (h4)
+    - gillette tech (no date code, oblong slots - 1946-1950)
+    - gillette tech (user grade)
+    - gillette tech bakelite handle
+    - gillette tech english flat bottom
+    - gillette tech head
+    - gillette tech minora oc
+    - gillette tiny travel razor
+    - gillette travel tech
+    - gillette travel tech (date code m4)
+    - gillette travel tech k3
     Toggle:
-    - Gillette - Toggle 1960 F4
-    - Gillette Toggle (D1)
+    - gillette - toggle 1960 f4
+    - gillette toggle (d1)
     Tuckaway:
-    - Gillette SIlver Plated Tuckaway
+    - gillette silver plated tuckaway
   Greencult:
     GC 2.0:
-    - Green Cult 2.0 Plate II
+    - green cult 2.0 plate ii
   Gutche:
     A77 Shavette:
-    - Gutche A77 Shavette
+    - gutche a77 shavette
   H&S Co.:
     NO75:
-    - Haircut & Save Co. - No75 Stainless Steel
+    - haircut & save co. - no75 stainless steel
   Haryali:
     Travel Razor:
-    - Haryali - Travel Razor
+    - haryali - travel razor
   Henkotsu:
     Kamisori:
-    - Henkotsu - Kamisori
-    - Henkotsu Kamisori
-    - Henkotsu Traditional Right Hand Grind Kamisori
+    - henkotsu - kamisori
+    - henkotsu kamisori
+    - henkotsu traditional right hand grind kamisori
   Henson:
     AL13:
-    - Dr. Squatch AL-13
-    - Dr. Squatch Safety Razor
-    - Henson
-    - Henson - AL 13 Mild
-    - Henson - AL13
-    - Henson - AL13 (Squatch)
-    - Henson - AL13++
-    - Henson Al 13
-    - Henson AL 13 (+)
-    - Henson Al 13 Blue
-    - Henson AL 13 Blue -
-    - Henson AL 13 Mild Blue
-    - Henson AL-13
-    - Henson AL-13 in Copper color
-    - Henson Al13
-    - Henson AL13 (Squatch)
-    - Henson AL13 Mild
-    - Henson AL13+
-    - Henson AL13-M
-    - Henson Shaving - AL13 Medium
-    - Henson Shaving Al +
-    - Henson Shaving Al +++
-    - Henson Shaving Al13 +
-    - V2 Henson + ("Dr. Squatch")
+    - dr. squatch al-13
+    - dr. squatch safety razor
+    - henson
+    - henson - al 13 mild
+    - henson - al13
+    - henson - al13 (squatch)
+    - henson - al13++
+    - henson al 13
+    - henson al 13 (+)
+    - henson al 13 blue
+    - henson al 13 blue -
+    - henson al 13 mild blue
+    - henson al-13
+    - henson al-13 in copper color
+    - henson al13
+    - henson al13 (squatch)
+    - henson al13 mild
+    - henson al13+
+    - henson al13-m
+    - henson shaving - al13 medium
+    - henson shaving al +
+    - henson shaving al +++
+    - henson shaving al13 +
+    - v2 henson + ("dr. squatch")
     Ti22:
-    - Henson - Ti22 +++
-    - Henson Razors - Ti-22 "++"
-    - Henson Ti22
-    - Henson Ti22 +++
-    - Titanium Henson +++, polished, tattooed ("Dark Age Mechanicus Shaver")
+    - henson - ti22 +++
+    - henson razors - ti-22 "++"
+    - henson ti22
+    - henson ti22 +++
+    - titanium henson +++, polished, tattooed ("dark age mechanicus shaver")
   Hoffritz:
     Slant:
-    - Hoffritz - Slant
-    - Hoffritz Slant
+    - hoffritz - slant
+    - hoffritz slant
   J.A. Henckels:
     Friodur Straight:
-    - Friodur 14
-    - J.A.Henckels Friodur 17 - half hollow - square point - 13/16
-    - Zwilling J. A. Henckels Friodur 14 (8/8", extra hollow ground, stainless steel)
+    - friodur 14
+    - j.a.henckels friodur 17 - half hollow - square point - 13/16
+    - zwilling j. a. henckels friodur 14 (8/8", extra hollow ground, stainless steel)
     Straight:
-    - Henckels 34
-    - Henckels 34, 6/8 half hollow Spanish Point
-    - 'J.A. Henckels #50 5/8 Hollow'
-    - J.A. Henckels Friodor 72 6/8 Stainless Full Hollow Square Point
+    - henckels 34
+    - henckels 34, 6/8 half hollow spanish point
+    - 'j.a. henckels #50 5/8 hollow'
+    - j.a. henckels friodor 72 6/8 stainless full hollow square point
   Kampfe:
     Star Lather Catcher 1902:
-    - Kampfe Bros Star Lather Catcher
+    - kampfe bros star lather catcher
   Karve:
     Bison:
-    - Karve - Bison Tangerine
-    - Karve Bison (NeverAlone4)
-    - Karve Bison Never Alone Edition
-    - Karve Shaving Co - Bison (matte black aluminum)
-    - Karve Shaving Co. - Bison
+    - karve - bison tangerine
+    - karve bison (neveralone4)
+    - karve bison never alone edition
+    - karve shaving co - bison (matte black aluminum)
+    - karve shaving co. - bison
     Christopher Bradley:
-    - Karve Brass CB OC-F
-    - Karve CB
-    - Karve CB (brass SB-D)
-    - Karve CB - Brass D
-    - Karve CB B Plate
-    - Karve CB C
-    - Karve CB SB C
-    - Karve CB SB C Brass
-    - Karve CB SB-C
-    - Karve CB SB-D
-    - Karve CB SS SB (B Plate)
-    - Karve CB SS SB (B Plate, First Pass; D Plate, Second Pass)
-    - Karve CB SS SB (D Plate)
-    - Karve CB SS SB (D Plate, First Pass; B Plate, Second Pass)
-    - Karve Christopher Bradley
-    - Karve Christopher Bradley (aluminum SB-C)
-    - Karve Christopher Bradley (brass SB-D)
-    - Karve Christopher Bradley Aluminum (**setting:** C Plate)
-    - Karve Christopher Bradley SB-AA plate
-    - Karve Christopher Bradley SB-C
-    - Karve Shaving - CB
-    - Karve Shaving CB (copper) / D Plate
-    - Karve Shaving Co. Christopher Bradley Copper, SB-D (Copper)
-    - Karve solid-bar C plate
-    - Parker Shavette (Karve CB)
+    - karve brass cb oc-f
+    - karve cb
+    - karve cb (brass sb-d)
+    - karve cb - brass d
+    - karve cb b plate
+    - karve cb c
+    - karve cb sb c
+    - karve cb sb c brass
+    - karve cb sb-c
+    - karve cb sb-d
+    - karve cb ss sb (b plate)
+    - karve cb ss sb (b plate, first pass; d plate, second pass)
+    - karve cb ss sb (d plate)
+    - karve cb ss sb (d plate, first pass; b plate, second pass)
+    - karve christopher bradley
+    - karve christopher bradley (aluminum sb-c)
+    - karve christopher bradley (brass sb-d)
+    - 'karve christopher bradley aluminum (setting: c plate)'
+    - karve christopher bradley sb-aa plate
+    - karve christopher bradley sb-c
+    - karve shaving - cb
+    - karve shaving cb (copper) / d plate
+    - karve shaving co. christopher bradley copper, sb-d (copper)
+    - karve solid-bar c plate
+    - parker shavette (karve cb)
     Overlander:
-    - Karve - Overlander SS
-    - Karve Overlander
-    - Karve Overlander Brass
-    - Karve Overlander Copper
-    - Karve Overlander Nickel Plated Brass
-    - Karve Shaving Co. - Overlander Brass
-    - Karve Shaving Co. Overlander
+    - karve - overlander ss
+    - karve overlander
+    - karve overlander brass
+    - karve overlander copper
+    - karve overlander nickel plated brass
+    - karve shaving co. - overlander brass
+    - karve shaving co. overlander
   Koraat:
     Moarteen (r/Wetshaving exclusive):
-    - Koraat *MOARteen* Sub-Exclusive (15/16", Full Hollow, Square Point)
-    - Koraat - MOARTEEN
-    - Koraat - Moarteen (square point, 15/16", full hollow, r/wetshaving exclusive)
-    - Koraat - Moarteen 15/16
-    - Koraat - MOARteen 15/16" Full Hollow Custom Point josiguuh special
-    - Koraat - r/Wetshaving exclusive MOARteen
-    - Koraat - r/Wetshaving exclusive Moarteen (15/16", full hollow, carbon steel)
-    - Koraat 14 "Moarteen" 15/16" Full Hollow
-    - Koraat 15/16 Full Hollow - Sub Exclusive 'Moarteen'
-    - Koraat Knives - r/Wetshaving Exclusive Moarteen 15/16
-    - Koraat Knives- Moarteen 15/16 Square Point
-    - Koraat MOAR TEEN
-    - Koraat Moarteen
-    - Koraat Moarteen - full hollow - square point - 15/16
-    - Koraat Moarteen 14 Square Point 15/16 Hollow
-    - Koraat MOARTEEN 15/16
-    - Koraat MOARteen 15/16" Full Hollow Custom Point josiguuh special
-    - Koraat MOARteen r/wetshaving Exclusive 15/16
-    - Koraat MOARteen r/Wetshaving Exclusive 15/16, Full Hollow Square Point
-    - Koraat Moarteen sub razor
-    - Koraat r/Wetshaving Moarteen 7/8
-    - Koraat-Knives - Moarteen
-    - Koraat-Knives MOARteen
-    - r/Wetshaving MOARTEEN
+    - koraat moarteen sub-exclusive (15/16", full hollow, square point)
+    - koraat - moarteen
+    - koraat - moarteen (square point, 15/16", full hollow, r/wetshaving exclusive)
+    - koraat - moarteen 15/16
+    - koraat - moarteen 15/16" full hollow custom point josiguuh special
+    - koraat - r/wetshaving exclusive moarteen
+    - koraat - r/wetshaving exclusive moarteen (15/16", full hollow, carbon steel)
+    - koraat 14 "moarteen" 15/16" full hollow
+    - koraat 15/16 full hollow - sub exclusive 'moarteen'
+    - koraat knives - r/wetshaving exclusive moarteen 15/16
+    - koraat knives- moarteen 15/16 square point
+    - koraat moar teen
+    - koraat moarteen
+    - koraat moarteen - full hollow - square point - 15/16
+    - koraat moarteen 14 square point 15/16 hollow
+    - koraat moarteen 15/16
+    - koraat moarteen 15/16" full hollow custom point josiguuh special
+    - koraat moarteen r/wetshaving exclusive 15/16
+    - koraat moarteen r/wetshaving exclusive 15/16, full hollow square point
+    - koraat moarteen sub razor
+    - koraat r/wetshaving moarteen 7/8
+    - koraat-knives - moarteen
+    - koraat-knives moarteen
+    - r/wetshaving moarteen
     Straight:
-    - Koraat - 6/8 14-2.0
-    - Koraat - 6/8 Ebony
-    - Koraat - Purist
-    - Koraat 14-2.0 8/8" Full Hollow
-    - Koraat Sparschweinchen (7/8", "Sheffield-style" full hollow, carbon steel)
+    - koraat - 6/8 14-2.0
+    - koraat - 6/8 ebony
+    - koraat - purist
+    - koraat 14-2.0 8/8" full hollow
+    - koraat sparschweinchen (7/8", "sheffield-style" full hollow, carbon steel)
   Krisp Beauty:
     DE Safety Razor:
-    - Krisp Beauty Safety Razor (also purchased on Ebay)
+    - krisp beauty safety razor (also purchased on ebay)
   LASSCo:
     BBS-1:
-    - LA Shaving Soap Company - BBS1
+    - la shaving soap company - bbs1
   Lambda:
     Ares:
-    - Lambda Ares
-    - Lambda Razors - Ares SS
+    - lambda ares
+    - lambda razors - ares ss
     Athena:
-    - Lambda - Athena
-    - Lambda Razors - Athena SS
-    - Lambda Razors Athena
+    - lambda - athena
+    - lambda razors - athena ss
+    - lambda razors athena
   Leaf:
     Razor:
-    - Leaf Razor
-    - Leaf Shave Co. - Leaf Razor
+    - leaf razor
+    - leaf shave co. - leaf razor
   Lord:
     L122:
-    - Lord L122
+    - lord l122
   Maggard:
     SS70:
-    - Maggard Razors CNC .70
+    - maggard razors cnc .70
     Shavette:
-    - Maggard shavette
+    - maggard shavette
     Slant:
-    - Gillette handles and Maggard Slant head
-    - Maggard MR11 with Slant Head
-    - Maggard Razors - Slant + RR UFO Handle
+    - gillette handles and maggard slant head
+    - maggard mr11 with slant head
+    - maggard razors - slant + rr ufo handle
     V3:
-    - Maggard MR18 V3
-    - Maggard Razors SS70
-    - Maggard Razors V3
-    - Maggard Razors V3 Head
-    - Maggard V3
-    - Windrose G3 SS with Maggard V3M
+    - maggard mr18 v3
+    - maggard razors ss70
+    - maggard razors v3
+    - maggard razors v3 head
+    - maggard v3
+    - windrose g3 ss with maggard v3m
   Manscaped:
     The Plow 2.0:
-    - Manscape - The Plow 2
-    - Manscaped - Plow 2.0
-    - Manscaped - The Plow 2
-    - Manscaped Plow 2.0
+    - manscape - the plow 2
+    - manscaped - plow 2.0
+    - manscaped - the plow 2
+    - manscaped plow 2.0
   Master Barber:
     Magic Razor:
-    - Magic Barber Magic Razor
-    - Master Barber - Magic Razor
-    - Master Barber Magic Razor
+    - magic barber magic razor
+    - master barber - magic razor
+    - master barber magic razor
   Max Sprecher:
     Straight:
-    - Max Sprecher 9/8" with Abalone inlay and scales
-    - Max Sprecher 9/8・1/2 Hollow • Barber's Notch・Opal・Blue Pearl Kirinite
-    - Max Sprecher Paua Scales 1/2 Hallow Barber's Notch 9/8
+    - max sprecher 9/8" with abalone inlay and scales
+    - "max sprecher 9/8\u30FB1/2 hollow \u2022 barber's notch\u30FBopal\u30FBblue\
+      \ pearl kirinite"
+    - max sprecher paua scales 1/2 hallow barber's notch 9/8
   Merkur:
     23C:
-    - Merkur 23c
+    - merkur 23c
     33C:
-    - Merkur 33c
+    - merkur 33c
     34C:
-    - Merkur - 34C
-    - Merkur - 34c HD
-    - Merkur 34-G
-    - Merkur 34c
-    - Merkur 34C HD
-    - Merkur 34G
-    - Razorock GOAT & Merkur 34C
+    - merkur - 34c
+    - merkur - 34c hd
+    - merkur 34-g
+    - merkur 34c
+    - merkur 34c hd
+    - merkur 34g
+    - razorock goat & merkur 34c
     37C:
-    - Merkur 37C
-    - Vtg. Mercur Slant
+    - merkur 37c
+    - vtg. mercur slant
     39C:
-    - Merkur 39C
+    - merkur 39c
     41C:
-    - Merkur 41c
+    - merkur 41c
     Futur:
-    - Merkur Futur
-    - Merkur Futur (Matte Finish)
+    - merkur futur
+    - merkur futur (matte finish)
     Progress:
-    - Merkur - Progress
-    - Merkur Progress
+    - merkur - progress
+    - merkur progress
   Mongoose:
     Alumigoose:
-    - Mongoose Alumigoose
-    - Mongoose Razors Alumigoose
+    - mongoose alumigoose
+    - mongoose razors alumigoose
     Original:
-    - Mongoose - Mongoose
+    - mongoose - mongoose
   Mossei:
     Mono:
-    - Mossei - Mono Injector
-  Mühle:
+    - mossei - mono injector
+  "M\xFChle":
     Companion:
-    - Muhle Companion
+    - muhle companion
     Neo:
-    - Muhle Neo
+    - muhle neo
     R41:
-    - Muhle - R41 Zamac
-    - Muhle R41
-    - Muninn Woodworks Forest Moss R41
-    - Mühle - R41 Kosmo
-    - Mühle R41
+    - muhle - r41 zamac
+    - muhle r41
+    - muninn woodworks forest moss r41
+    - "m\xFChle - r41 kosmo"
+    - "m\xFChle r41"
     R89:
-    - Muhle R89
-    - Mühle -R89
-    - Mühle R89
+    - muhle r89
+    - "m\xFChle -r89"
+    - "m\xFChle r89"
     Rocca:
-    - Muhle Rocca
-    - Muhle Rocca Birch handle
-    - Muhle Rocca R94
-    - Muhle Rocca R95
-    - Mühle Rocca R94
-    - Mühle Rocca R95
+    - muhle rocca
+    - muhle rocca birch handle
+    - muhle rocca r94
+    - muhle rocca r95
+    - "m\xFChle rocca r94"
+    - "m\xFChle rocca r95"
   Occams Razor:
     Enoch:
-    - Occam's Razors - the SEnoch
+    - occam's razors - the senoch
   OliWorks:
     M3teorite:
-    - Oliworks M3teorite plate 1
+    - oliworks m3teorite plate 1
     OliBlade:
-    - Oliworks adjustable
+    - oliworks adjustable
   OneBlade:
     Core:
-    - OneBlade Core
+    - oneblade core
     Genesis:
-    - OneBlade - Genesis
+    - oneblade - genesis
   Other:
     Cartridge / Disposable:
-    - Bic - Sensitive
-    - Bic - Single Blade $PLATIC
-    - Bic 1 blade Disposable
-    - Bic Metal
-    - Bic Sensitive
-    - BiC Sensitive Disposable Razor
-    - BIC Sensitive Single Blade Razor
-    - Bic Single Blade Disposable
-    - BIC single-blade disposable
-    - Equate - 2 Blade Disposable Cartridge
-    - Gillette - Disposable
-    - Gillette - Joy
-    - Gillette - Mach 3 disposable
-    - Gillette Guard
-    - Gillette Mach 3
-    - Gillette Mach3
-    - Gillette Sensor 2
-    - Gillette Sensor 2 Disposable
-    - Gillette Sensor 3
-    - Gillette Sensor II
-    - Gillette Trac-II Plus
-    - Harry's Cartridge Razor
-    - Schick - Xtreme 2 Mens Disposable
-    - Schick Disposable
-    - Schick Hydro 5
-    - Schick Hydro 5 Cartridge
-    - Schick skintimate women's razor
-    - Schick Xtreme 2 Sensitive
-    - ShIk pLa5tiK
-    - Simply Max - Alibaba
-    - Simply Smooth Triple Blade
-    - Simply Smooth Triple Blade Razor
-    - Target brand - disposable
+    - bic - sensitive
+    - bic - single blade $platic
+    - bic 1 blade disposable
+    - bic metal
+    - bic sensitive
+    - bic sensitive disposable razor
+    - bic sensitive single blade razor
+    - bic single blade disposable
+    - bic single-blade disposable
+    - equate - 2 blade disposable cartridge
+    - gillette - disposable
+    - gillette - joy
+    - gillette - mach 3 disposable
+    - gillette guard
+    - gillette mach 3
+    - gillette mach3
+    - gillette sensor 2
+    - gillette sensor 2 disposable
+    - gillette sensor 3
+    - gillette sensor ii
+    - gillette trac-ii plus
+    - harry's cartridge razor
+    - schick - xtreme 2 mens disposable
+    - schick disposable
+    - schick hydro 5
+    - schick hydro 5 cartridge
+    - schick skintimate women's razor
+    - schick xtreme 2 sensitive
+    - shik pla5tik
+    - simply max - alibaba
+    - simply smooth triple blade
+    - simply smooth triple blade razor
+    - target brand - disposable
     DE:
-    - German Travel Razor
-    - Pazor - Batch 007
+    - german travel razor
+    - pazor - batch 007
     DE Clone:
-    - Captured Ring Woodwork 34C Clone - Mahogany Handle
+    - captured ring woodwork 34c clone - mahogany handle
     Kamisori:
-    - Dairi - Kamisori
-    - ShaveSmith Kamisori (3/4 width, Spanish point)
+    - dairi - kamisori
+    - shavesmith kamisori (3/4 width, spanish point)
     Shavette:
-    - Burmax Products Aristocrat Shavette
-    - Chopstick Kamisori
-    - ChronnoCrafts Ice Pick Kamisori 2.0
-    - Grotesque Torture Implement $MEDIEVAL
-    - K-TEL Hair Magician Shavette
-    - Kismet Shavette
-    - Stainless Steel Barber Razor Shavette - Alibaba
-    - Unbranded Shavette
-    - Weller Shavette
+    - burmax products aristocrat shavette
+    - chopstick kamisori
+    - chronnocrafts ice pick kamisori 2.0
+    - grotesque torture implement $medieval
+    - k-tel hair magician shavette
+    - kismet shavette
+    - stainless steel barber razor shavette - alibaba
+    - unbranded shavette
+    - weller shavette
+    - witte kismet shavette
     Shavette (A77):
-    - Knight A77 Shavette
+    - knight a77 shavette
     Shavette (AC):
-    - AC Shavette - Orange Scales
+    - ac shavette - orange scales
     Shavette (Disposable):
-    - CVS Dermaplaner
-    - Kroger - Dermaplane
-    - Sassy + Chic Eyebrow Razor
+    - cvs dermaplaner
+    - kroger - dermaplane
+    - sassy + chic eyebrow razor
     Straight Razor:
-    - Bengall 5/8
-    - Best Solingen 6/8 Hollow Round Point
-    - Bismarck - No.49
-    - Campobasso 6/8 full hollow round point
-    - Campobasso, 6/8 full hollow round point
-    - Carl Rader 6/8" French Point straight razor
-    - Delolme - Le Thiernois No14 Acier Spécial pour Coiffeur (8/8", hollow ground,
-      round tip, carbon steel)
-    - Ditzer - Ditzer Gold - 4/8 round point
-    - Drew Dick - Sheffield Style 9/8 1/4 Hollow
-    - E. A. Berg Eskilstuna Swedish Frameback
-    - Ed Wüsthof Barber's King 13/16 Full Hollow
-    - Erik Anton Berg 9/16 rattler
-    - F.W. Engels Leader 6/8 Full Hollow Square Point
-    - F.W. Engels Special
-    - Frederick Reynold - Swayback
-    - Friedrich Herder Abraham Sohn - 49 straight
-    - Geneva Cutlery Co. 6/8" Hollow Ground Round Point
-    - George Wostenholm & Sons 13/16" Near Wedge Soft Square Point
-    - George Wostenholm & Sons IXL Celebrated
-    - George Wostenholm IXL "Perfection" 6/8" extra hollow in Buffalo horn scales
-    - Goerge Westenholm Original Pipe Razor
-    - Gold Dollar 208
-    - Gold Dollar 66
-    - Gold Dollar Straight Razor
-    - Griffith 15/16 Silver Steel Full Hollow
-    - Griffon XX "Carbo-Magnetic 60" 5/8
-    - Hadoson - Matsukura Frameback 7/8
-    - Hess 4/8" Full Hollow
-    - Iberia 14 Doble Temple 8/8, Extra Hollow Square Point
-    - Iwasaki 13/16" Full Hollow Square Point Tamahagane
-    - J.A. Henckles 60 - 5/8" Round Point
-    - Jernbolaget N° 11 5/8
-    - John Clarke and Son - 6/8 round point / full hollow - Scheffield
-    - Joseph Allen & Sons - Non XLL The Celebrated Extra Hollow Ground Barbers Notch
-      Horn Scale
-    - Joseph Rogers & Sons Near Wedge
-    - JR Torrey - Unnamed, Hollow Ground, 6/8"
-    - Kikuboshi 6/8" Frameback
-    - Kobar - High Class - Monday
-    - Kobar - High Class Thursday - 6/8 square point hollow ground
-    - Kropp 5/8 Full Hollow on loan from u/whosgotthepudding
-    - Lee Manufacturing Co. - Lee's Warranted
-    - M. JUNG No. 80 Straight Razor
-    - Maher & Grosh - The Jockey Razor - 5/8 / barber's notch
-    - Puma 88 (5/8", round tip, carbon steel, hollow ground)
-    - Red Imp 132 5/8 Square Point Near Wedge
-    - River Razors 6/8 3/4 Hollow
-    - S. K. Colling Custom Blue Paua Scaled - full hollow - French point - 6/8
-    - Shumate Barber De Luxe 5/8 hollow round point
-    - Shumate Barber De Luxe 5/8" hollow, round point
-    - Solingen - 5/8" Hollow Ground Round Point
-    - Tanifuji Spalding 0411 6/8" Full Hollow
-    - Thomas Turner & Co. - Cutlers to his majesty - 6/8 square point
-    - Union 5/8 Full Hollow Square Point
-    - Union Razor Cutlery 5/8 Full Hollow
-    - Victoria 4 (6/8", half hollow, round tip, carbon steel)
-    - Vostok 1968 Straight
-    - W. Greaves & Sons The Canadian - wedge - barber's notch - 11/16
-    - Wacker - Best Tradition 6/8
-    - Wester Bros De-Fi No. 34 Straight
+    - bengall 5/8
+    - best solingen 6/8 hollow round point
+    - bismarck - no.49
+    - campobasso 6/8 full hollow round point
+    - campobasso, 6/8 full hollow round point
+    - carl rader 6/8" french point straight razor
+    - "delolme - le thiernois no14 acier sp\xE9cial pour coiffeur (8/8\", hollow ground,\
+      \ round tip, carbon steel)"
+    - ditzer - ditzer gold - 4/8 round point
+    - drew dick - sheffield style 9/8 1/4 hollow
+    - e. a. berg eskilstuna swedish frameback
+    - "ed w\xFCsthof barber's king 13/16 full hollow"
+    - erik anton berg 9/16 rattler
+    - f.w. engels leader 6/8 full hollow square point
+    - f.w. engels special
+    - frederick reynold - swayback
+    - friedrich herder abraham sohn - 49 straight
+    - geneva cutlery co. 6/8" hollow ground round point
+    - george wostenholm & sons 13/16" near wedge soft square point
+    - george wostenholm & sons ixl celebrated
+    - george wostenholm ixl "perfection" 6/8" extra hollow in buffalo horn scales
+    - goerge westenholm original pipe razor
+    - gold dollar 208
+    - gold dollar 66
+    - gold dollar straight razor
+    - griffith 15/16 silver steel full hollow
+    - griffon xx "carbo-magnetic 60" 5/8
+    - hadoson - matsukura frameback 7/8
+    - hess 4/8" full hollow
+    - iberia 14 doble temple 8/8, extra hollow square point
+    - iwasaki 13/16" full hollow square point tamahagane
+    - j.a. henckles 60 - 5/8" round point
+    - "jernbolaget n\xB0 11 5/8"
+    - john clarke and son - 6/8 round point / full hollow - scheffield
+    - joseph allen & sons - non xll the celebrated extra hollow ground barbers notch
+      horn scale
+    - joseph rogers & sons near wedge
+    - jr torrey - unnamed, hollow ground, 6/8"
+    - kikuboshi 6/8" frameback
+    - kobar - high class - monday
+    - kobar - high class thursday - 6/8 square point hollow ground
+    - kropp 5/8 full hollow on loan from u/whosgotthepudding
+    - lee manufacturing co. - lee's warranted
+    - m. jung no. 80 straight razor
+    - maher & grosh - the jockey razor - 5/8 / barber's notch
+    - puma 88 (5/8", round tip, carbon steel, hollow ground)
+    - red imp 132 5/8 square point near wedge
+    - river razors 6/8 3/4 hollow
+    - s. k. colling custom blue paua scaled - full hollow - french point - 6/8
+    - shumate barber de luxe 5/8 hollow round point
+    - shumate barber de luxe 5/8" hollow, round point
+    - solingen - 5/8" hollow ground round point
+    - tanifuji spalding 0411 6/8" full hollow
+    - thomas turner & co. - cutlers to his majesty - 6/8 square point
+    - union 5/8 full hollow square point
+    - union razor cutlery 5/8 full hollow
+    - victoria 4 (6/8", half hollow, round tip, carbon steel)
+    - vostok 1968 straight
+    - w. greaves & sons the canadian - wedge - barber's notch - 11/16
+    - wacker - best tradition 6/8
+    - wester bros de-fi no. 34 straight
   PAA:
     Chrimson Ghost:
-    - Phoenix Artisan Accoutrements - Crimson Ghost Monster Slant
+    - phoenix artisan accoutrements - crimson ghost monster slant
     Phantom Blue:
-    - PAA Phantom Blue
+    - paa phantom blue
   PAL:
     Injectomatic:
-    - PAL - Injectomatic
+    - pal - injectomatic
   Paradigm:
     Diamondback:
-    - Paradigm Diamondback Titanium
+    - paradigm diamondback titanium
   Parker:
     11R:
-    - Parker 11R \- (3 Piece, horn handle)
+    - parker 11r \- (3 piece, horn handle)
     55SL-RG:
-    - Parker 55SL-RG
+    - parker 55sl-rg
     78R:
-    - Parker 78r
+    - parker 78r
     96R:
-    - Parker 96R
+    - parker 96r
     A1R:
-    - Parker A1R Travel Razor
+    - parker a1r travel razor
     Adjustable Injector:
-    - Parker Adjustable Injector
+    - parker adjustable injector
     SRB Shavette:
-    - Parker SRB Shavette
+    - parker srb shavette
     Semi Slant:
-    - Parker Semi Slant
+    - parker semi slant
     Variant:
-    - Parker Variant
+    - parker variant
   Pearl:
     Flexi:
-    - Pearl Flexi
+    - pearl flexi
     L-65 Semi Slant:
-    - Pearl - Slant
+    - pearl - slant
     OC:
-    - Pearl OC
+    - pearl oc
   Personna:
     BBS-0:
-    - 'Personna - New Angle 70: BBS-0'
+    - 'personna - new angle 70: bbs-0'
   Raido Star:
     Straight:
-    - Raido Star - Avalon 8/8
-    - Raido Star 10/8, Full Hollow French Point
-    - Raido Star Kami
-    - Raido Star Kami, 8/8 Western grind full hollow (on loan)
+    - raido star - avalon 8/8
+    - raido star 10/8, full hollow french point
+    - raido star kami
+    - raido star kami, 8/8 western grind full hollow (on loan)
   Ralf Aust:
     Straight:
-    - Ralf Aust - Ralf Aust 5/8" Round Point Straight Razor
-    - Ralf Aust 5/8
-    - Ralf Aust 5/8 Round Point Hollow Ground
-    - Ralf Aust 5/8" full hollow, Spanish tip, stainless steel
-    - Ralf Aust 6/8 Full Hollow Round Point With Mammoth Ivory & Blue Resin Scales
-      Made By u/whosgotthepudding
-    - Ralf Aust 6/8 Full Hollow Spanish Point
-    - Ralf Aust 6/8 Full Hollow Square Point Horn Scales
-    - Ralf Aust 6/8 Square Point
-    - Ralf Aust 6/8, Full Hollow Square Point
+    - ralf aust - ralf aust 5/8" round point straight razor
+    - ralf aust 5/8
+    - ralf aust 5/8 round point hollow ground
+    - ralf aust 5/8" full hollow, spanish tip, stainless steel
+    - ralf aust 6/8 full hollow round point with mammoth ivory & blue resin scales
+      made by u/whosgotthepudding
+    - ralf aust 6/8 full hollow spanish point
+    - ralf aust 6/8 full hollow square point horn scales
+    - ralf aust 6/8 square point
+    - ralf aust 6/8, full hollow square point
   RazoRock:
     Baby Smooth:
-    - RazoRock - BBS Standard
-    - RazoRock Baby Smooth
+    - razorock - bbs standard
+    - razorock baby smooth
     Cyber:
-    - RazoRock / Italian Barber - Cyber Razor, Mild
+    - razorock / italian barber - cyber razor, mild
     Eco:
-    - Razorock Eco Hulk Green
+    - razorock eco hulk green
     GOAT:
-    - RazoRock Goat
-    - RazoRock The GOAT
+    - razorock goat
+    - razorock the goat
     Game Changer:
-    - RazoRock - Game Changer .76-P
-    - Razorock - Game Changer 84 OC
-    - Razorock - Game Changer 84CC
-    - Razorock - Game Changer 84CC / Tatara Masamune OC
-    - Razorock .84 GameChanger
-    - RazoRock Game Changer .68 Jaws (face) + Leaf (3 blades for the dome)
-    - RazoRock Game Changer .76
-    - RazoRock Game Changer .76-P
-    - RazoRock Game Changer .84
-    - RazoRock Game Changer .84 (face) + Leaf (3 blades for the dome)
-    - RazoRock Game changer .84 P
-    - RazoRock Game Changer .84-P
-    - RazoRock Game Changer 0.84 SB
-    - RazoRock Game Changer 0.84-P / MR5
-    - RazoRock Game Changer 1.05
-    - RazoRock Game Changer Jaws .84 (face) + Leaf (2 blades for the dome)
-    - RazoRock Gamechanger . 84
-    - RazoRock GameChanger .76-B (CC)
-    - RazoRock Gamechanger .84
-    - RazoRock GameChanger .84 OC
-    - RazoRock Gamechanger .84 w/ Titanium Halo
-    - RazoRock Gamechanger 84
-    - RazoRock Gamechanger, Aylsworth Drakkant Brass
-    - RazoRock GC.84
-    - RazoRock GC.84 $25
+    - razorock - game changer .76-p
+    - razorock - game changer 84 oc
+    - razorock - game changer 84cc
+    - razorock - game changer 84cc / tatara masamune oc
+    - razorock .84 gamechanger
+    - razorock game changer .68 jaws (face) + leaf (3 blades for the dome)
+    - razorock game changer .76
+    - razorock game changer .76-p
+    - razorock game changer .84
+    - razorock game changer .84 (face) + leaf (3 blades for the dome)
+    - razorock game changer .84 p
+    - razorock game changer .84-p
+    - razorock game changer 0.84 sb
+    - razorock game changer 0.84-p / mr5
+    - razorock game changer 1.05
+    - razorock game changer jaws .84 (face) + leaf (2 blades for the dome)
+    - razorock gamechanger . 84
+    - razorock gamechanger .76-b (cc)
+    - razorock gamechanger .84
+    - razorock gamechanger .84 oc
+    - razorock gamechanger .84 w/ titanium halo
+    - razorock gamechanger 84
+    - razorock gamechanger, aylsworth drakkant brass
+    - razorock gc.84
+    - razorock gc.84 $25
     German 37 Slant:
-    - RazoRock *German 37*
-    - RazoRock - German 37 Slant Razor Torsionshobel,
-    - Razorock German 37 Slant
+    - razorock german 37
+    - razorock - german 37 slant razor torsionshobel,
+    - razorock german 37 slant
     Hawk v2:
-    - RazoRock Hawk V2
+    - razorock hawk v2
     Hawk v3:
-    - RazoRock - BLACK HAWK Single Edge Razor
-    - RazoRock - Hawk V3
-    - RazoRock Hawk
-    - RazoRock Hawk DLC
-    - RazoRock Hawk v3
-    - RazoRock Hawk v3 Standard
+    - razorock - black hawk single edge razor
+    - razorock - hawk v3
+    - razorock hawk
+    - razorock hawk dlc
+    - razorock hawk v3
+    - razorock hawk v3 standard
     Lupo:
-    - Lupo 95
-    - Razorock - Lupo 95OC
-    - RazoRock - Lupo DC
-    - RazoRock Lupo .58
-    - RazoRock Lupo .72 (face) + Leaf (2 blades for the dome)
-    - RazoRock Lupo .72 OC (face) + Leaf (2 blades for the dome)
-    - RazoRock Lupo 58
-    - RazoRock Lupo 72
-    - RazoRock Lupo 72 OC
-    - RazoRock Lupo 95 CC
-    - RazoRock Lupo 95 OC
-    - RazoRock Lupo Black
-    - RazoRock Lupo DC
-    - RazoRock Lupo, Silver
-    - RazoRock Lupo.58
+    - lupo 95
+    - razorock - lupo 95oc
+    - razorock - lupo dc
+    - razorock lupo .58
+    - razorock lupo .72 (face) + leaf (2 blades for the dome)
+    - razorock lupo .72 oc (face) + leaf (2 blades for the dome)
+    - razorock lupo 58
+    - razorock lupo 72
+    - razorock lupo 72 oc
+    - razorock lupo 95 cc
+    - razorock lupo 95 oc
+    - razorock lupo black
+    - razorock lupo dc
+    - razorock lupo, silver
+    - razorock lupo.58
     Mamba:
-    - Razorock Mamba
-    - Razorock Mamba 70
-    - RazoRock Mamba 92
+    - razorock mamba
+    - razorock mamba 70
+    - razorock mamba 92
     Mentor:
-    - RazoRock Frankenrazor - Mentor base, Mission cap
+    - razorock frankenrazor - mentor base, mission cap
     Mission:
-    - RazoRock Mission
-    - RazoRock Mission - I think
+    - razorock mission
+    - razorock mission - i think
     SLOC:
-    - RazoRock SLOC
+    - razorock sloc
     Stealth Slant:
-    - RazoRock - Stealth Slant; stainless, with PVD coating
+    - razorock - stealth slant; stainless, with pvd coating
     Superslant:
-    - Razorock Superslant L2++
+    - razorock superslant l2++
     Teck II:
-    - Razorock Tech II
+    - razorock tech ii
   Rex:
     Envoy:
-    - Rex Envoy
-    - Rex Supply Co Envoy
-    - Rex- Envoy
+    - rex envoy
+    - rex supply co envoy
+    - rex- envoy
     Konsul:
-    - Rex - Konsul
-    - Rex Konsul
-    - Rex Supply Co. - Konsul
+    - rex - konsul
+    - rex konsul
+    - rex supply co. - konsul
     Sentry:
-    - Rex Supply Co. - Sentry
+    - rex supply co. - sentry
   Robin:
     Snap 2.0:
-    - Robin Razor - Snap! 2.0, (Half DE)
+    - robin razor - snap! 2.0, (half de)
   Rockwell:
     6C:
-    - Rockwell 6C
-    - Rockwell 6C (R4)
+    - rockwell 6c
+    - rockwell 6c (r4)
     6S:
-    - Rockwell - 6S
-    - Rockwell 6S
-    - Rockwell 6S $SIX
-    - Rockwell 6S (4 plate)
+    - rockwell - 6s
+    - rockwell 6s
+    - rockwell 6s $six
+    - rockwell 6s (4 plate)
   Rolls:
     Razor:
-    - Rolls
-    - Rolls - u/priusaurus's Rolls
-    - Rolls Razor
-    - Rolls Razor Imperial no. 2
+    - rolls
+    - rolls - u/priusaurus's rolls
+    - rolls razor
+    - rolls razor imperial no. 2
   Romer-7:
     Ricardo:
-    - Ricardo OC
+    - ricardo oc
     Shivira:
-    - Romer 7 Shivira
+    - romer 7 shivira
   Rubin:
     '1':
-    - Рубин
+    - "\u0440\u0443\u0431\u0438\u043D"
   SCS:
     Model A:
-    - Simple Clean Shave (REB Engineering & Machine, LLC) - SCS Model A
+    - simple clean shave (reb engineering & machine, llc) - scs model a
   Saiver:
     DE:
-    - Sayver -
+    - sayver -
   Schick:
     Adjustable Injector:
-    - Schick Adjustable Injector
-    - Schick M1 Adjustable
-    - Schick Type M Adjustable
-    - Schick Type M1
-    - Shick injector Adjustable( 6-4-2)
+    - schick adjustable injector
+    - schick m1 adjustable
+    - schick type m adjustable
+    - schick type m1
+    - shick injector adjustable( 6-4-2)
     Dermaplaner:
-    - Schick Dermaplaner
+    - schick dermaplaner
     Eversharp:
-    - Schick Eversharp G
+    - schick eversharp g
     Hydromagic:
-    - Eversharp-Schick Hydro-magic (I2, NOS)
-    - Schick Hydro-Magic I2
-    - Schick Type I2 Hydro-magic
+    - eversharp-schick hydro-magic (i2, nos)
+    - schick hydro-magic i2
+    - schick type i2 hydro-magic
     Injector:
-    - 1972 Schick L7 "Championship"
-    - Schick "66"
-    - Schick "66" G4
-    - Schick - Injector
-    - Schick - Injector Type G
-    - Schick - Injector Type J
-    - Schick - Injector x 6" generic locking pliers
-    - Schick - Stick Schick
-    - Schick - Type I1
-    - Schick - Type L1
-    - Schick Injector
-    - Schick Injector G1
-    - Schick Injector I1
-    - Schick Injector M29
-    - Schick Injector Razor Type E3
-    - Schick Injector Type F
-    - Schick Injector Type I
-    - Schick Injector Type J
-    - Schick Injector Type M Variant D2,H1,G1 (1968 - 1973)
-    - Schick Injector Type N1
-    - Schick L1
-    - Schick Type E2
-    - Schick Type G Injector
-    - Schick Type L
-    - Schick Type L1
-    - Shick Injector
-    - Vintage SCHICK Injector Razor Type-E (1930-1940s)
-    - ~~Gillette~~ Schick L7 "Championship" Injector
+    - 1972 schick l7 "championship"
+    - schick "66"
+    - schick "66" g4
+    - schick - injector
+    - schick - injector type g
+    - schick - injector type j
+    - schick - injector x 6" generic locking pliers
+    - schick - stick schick
+    - schick - type i1
+    - schick - type l1
+    - schick injector
+    - schick injector g1
+    - schick injector i1
+    - schick injector m29
+    - schick injector razor type e3
+    - schick injector type f
+    - schick injector type i
+    - schick injector type j
+    - schick injector type m variant d2,h1,g1 (1968 - 1973)
+    - schick injector type n1
+    - schick l1
+    - schick type e2
+    - schick type g injector
+    - schick type l
+    - schick type l1
+    - shick injector
+    - vintage schick injector razor type-e (1930-1940s)
+    - ~~gillette~~ schick l7 "championship" injector
     Krona:
-    - Schick - Krona
-    - Schick - Krona 1960s TTO DE
-    - Schick Krona
+    - schick - krona
+    - schick - krona 1960s tto de
+    - schick krona
     Magazine Repeating Razor:
-    - Schick Magazine Repeating Razor (Type C3)
+    - schick magazine repeating razor (type c3)
   Segal:
     Unitary:
-    - Segal Unitary
+    - segal unitary
   Shavent:
     Razor:
-    - Shavent
+    - shavent
   Shield:
     SE AC:
-    - Shield - SE AC Brass
+    - shield - se ac brass
   Silver STAR:
     Model 100:
-    - Silver Star - Vintage DE
-    - Silver Star Vintage DE
+    - silver star - vintage de
+    - silver star vintage de
   Stirling:
     Stainless DE Razor:
-    - Stirling Soap Co. - 316 Stainless Steel Razor
-    - Stirling Soap Company - Stirling Stainless Steel (Austin Handle / ST plate)
-      Serial No. ST-01-084
-    - Stirling SS Standard Plate
+    - stirling soap co. - 316 stainless steel razor
+    - stirling soap company - stirling stainless steel (austin handle / st plate)
+      serial no. st-01-084
+    - stirling ss standard plate
   Supply:
     SE Pro:
-    - Supply Adjustable
+    - supply adjustable
+    SE:
+    - supply - sing edge
   TRC:
     DE:
-    - The Razor Company - TRC AL Lvl 2
-    - The Razor Company - TRC Aluminum Lvl 2
+    - the razor company - trc al lvl 2
+    - the razor company - trc aluminum lvl 2
   Tatara:
     Amakuni:
-    - Tatara *Amakuni*
-    - Tatara Amakuni
+    - tatara amakuni
     Masamune:
-    - Tatara - Masamune OC
-    - Tatara Masamune
+    - tatara - masamune oc
+    - tatara masamune
     Masamune Nodachi:
-    - Tatara Gold Plated Nodachi/Masamune
-    - Tatara Masamune Nodachi Ti
-    - Tatara Masamune Nodachi Ti CC
+    - tatara gold plated nodachi/masamune
+    - tatara masamune nodachi ti
+    - tatara masamune nodachi ti cc
     Muramasa:
-    - Tatara - Muramasa
-    - Tatara Muramasa
+    - tatara - muramasa
+    - tatara muramasa
   Tedalus:
     Essence Shavette:
-    - Tedalus Essence - Shavette
+    - tedalus essence - shavette
     Velocity-ONE:
-    - Tedalus - Velocity One
+    - tedalus - velocity one
   The Holy Black:
     Shavette:
-    - The Holy Black Shavette
+    - the holy black shavette
   Thiers Issard:
     Straight:
-    - Thiers Issard 1937 Special Coiffeur 60 Médaille Argent - half hollow - round
-      point - 6/8
-    - Thiers Issard Le Dandy (5/8", square point, carbon steel)
-    - Thiers Issard Le Transatlantic 7/8" Full Hollow Round Point
-    - Thiers Issard Médaille d'Or Exposition d'Alger - full hollow - round point -
-      6/8
+    - "thiers issard 1937 special coiffeur 60 m\xE9daille argent - half hollow - round\
+      \ point - 6/8"
+    - thiers issard le dandy (5/8", square point, carbon steel)
+    - thiers issard le transatlantic 7/8" full hollow round point
+    - "thiers issard m\xE9daille d'or exposition d'alger - full hollow - round point\
+      \ - 6/8"
   Timeless:
     Razor:
-    - Timeless - .38 Bronze
-    - Timeless Bronze SB
-    - Timeless Bronze SB .38
-    - Timeless Matte Stainless OC 95
-    - Timeless Razor - Bronze OC
-    - Timeless Razor Bronze Solid Bar .38
-    - Timeless Razor TR Ti .68 Matte
-    - Timeless Ti .68
-    - Timeless Ti .95
-    - Timeless Titanium Slim
+    - timeless - .38 bronze
+    - timeless bronze sb
+    - timeless bronze sb .38
+    - timeless matte stainless oc 95
+    - timeless razor - bronze oc
+    - timeless razor bronze solid bar .38
+    - timeless razor tr ti .68 matte
+    - timeless ti .68
+    - timeless ti .95
+    - timeless titanium slim
   Treet:
     TTO:
-    - Treet $TRICKORTREAT
+    - treet $trickortreat
   Valet:
     Autostrop:
-    - Valet - Autostrop
-    - Valet Auto Strop
-    - Valet AutoStrop Razor VB1
+    - valet - autostrop
+    - valet auto strop
+    - valet autostrop razor vb1
   Van Der Hagen:
     Razor:
-    - Van Der Hagen - TTO
-    - Van Der Hagen 85mm Safety Razor
+    - van der hagen - tto
+    - van der hagen 85mm safety razor
   WCS:
     Multi Titanium Collection Razor:
-    - W.C.S. Multi Titanium Collection Razor, 84M
+    - w.c.s. multi titanium collection razor, 84m
   Wade & Butcher:
     Straight:
-    - Butcher & Wade - 6/8" Wedge Barber's Notch
-    - Butcher and Wade with Old Type Cap - Open Comb Frankenrazor
-    - Vintage Wade & Butcher (late 1800s) Straight Razor; Calvalry called by Karve
-      Overlander Brass
-    - W&B Celebrated EH 6/8 Barber's Notch
-    - Wade & Butcher "The Celebrated Hollow Ground Razor For Barber's Use" 8/8, Half
-      Hollow Barber's Notch
-    - Wade & Butcher - 5/8" Square Point Hollow Ground
-    - Wade & Butcher - 6/8" Wedge Barber's Notch
-    - Wade & Butcher - Straight Razor (Vintage)
-    - Wade & Butcher 5/8
-    - Wade & Butcher 5/8" Hollow Ground Square Point
-    - Wade & Butcher 6/8 Extra Hollow Ground Improved Tang w/ Pre-Ban Ivory Scales
-      Saturday from 7 Day Set
-    - Wade & Butcher The Sheffield (9/8", extra hollow ground)
-    - Wade and Butcher 11/16 Wedge
-    - Wade and Butcher YLWISW 5/8 Near Wedge on loan from u/whosgotthepudding
-    - Wade Butcher 6/8 Extra Hollow Ground
+    - butcher & wade - 6/8" wedge barber's notch
+    - butcher and wade with old type cap - open comb frankenrazor
+    - vintage wade & butcher (late 1800s) straight razor; calvalry called by karve
+      overlander brass
+    - w&b celebrated eh 6/8 barber's notch
+    - wade & butcher "the celebrated hollow ground razor for barber's use" 8/8, half
+      hollow barber's notch
+    - wade & butcher - 5/8" square point hollow ground
+    - wade & butcher - 6/8" wedge barber's notch
+    - wade & butcher - straight razor (vintage)
+    - wade & butcher 5/8
+    - wade & butcher 5/8" hollow ground square point
+    - wade & butcher 6/8 extra hollow ground improved tang w/ pre-ban ivory scales
+      saturday from 7 day set
+    - wade & butcher the sheffield (9/8", extra hollow ground)
+    - wade and butcher 11/16 wedge
+    - wade and butcher ylwisw 5/8 near wedge on loan from u/whosgotthepudding
+    - wade butcher 6/8 extra hollow ground
   Weck:
     Med Prep:
-    - Weck Sextoblade - Med Prep
+    - weck sextoblade - med prep
     Sextoblade:
-    - Weck - Hair Shaper
-    - Weck - Weck Junior
-    - Weck Gold Scales Hair Shaper
-    - Weck hair shaper
-    - Weck Hair Shaper (Translucent Blue Scales)
-    - WECK Hair Shaper - Gold Scales
-    - WECK Hair Shaper - Pink Scales
-    - Weck Sextoblade
-    - Weck Sextoblade "Trade Sample Not For Sale"
-    - Weck Sextoblade (red translucent scales)
-    - Weck Trade Sample Razor
+    - weck - hair shaper
+    - weck - weck junior
+    - weck gold scales hair shaper
+    - weck hair shaper
+    - weck hair shaper (translucent blue scales)
+    - weck hair shaper - gold scales
+    - weck hair shaper - pink scales
+    - weck sextoblade
+    - weck sextoblade "trade sample not for sale"
+    - weck sextoblade (red translucent scales)
+    - weck trade sample razor
   Weishi:
     '9306':
-    - Weishi Butterfly $JAWS
+    - weishi butterfly $jaws
   Well Kept:
     Safety Razor:
     - well kept "rose" safety razor
   Whityle:
     20T Glide Pro 4D:
-    - Whityle 20T Glide Pro 4D Razor
+    - whityle 20t glide pro 4d razor
   Wilkinson Sword:
     Butterfly:
-    - Wilkinson Sword
-    - Wilkinson Sword - Wilkinson Razor
+    - wilkinson sword
+    - wilkinson sword - wilkinson razor
     Classic:
-    - Wilkinson Sword Classic
+    - wilkinson sword classic
   Wolfman:
     Guerilla:
-    - Guerrilla Razors Camo Brown .99 Gap
-    - Wolfman - Guerrilla
-    - Wolfman Guerilla - Gen 1
-    - Wolfman Guerrilla
-    - Wolfman Guerrilla $FULLMOON $AOOOO
-    - Wolfman Guerrilla 2 Prototype
-    - Wolfman Razors - Guerrilla
-    - Wolfman Razors Guerrilla
-    - Wolfman Titanium Guerrilla (.54mm SB)
+    - guerrilla razors camo brown .99 gap
+    - wolfman - guerrilla
+    - wolfman guerilla - gen 1
+    - wolfman guerrilla
+    - wolfman guerrilla $fullmoon $aoooo
+    - wolfman guerrilla 2 prototype
+    - wolfman razors - guerrilla
+    - wolfman razors guerrilla
+    - wolfman titanium guerrilla (.54mm sb)
     WR1:
-    - Wolfman WR1 0.84
-    - Wolfman WR1 OC .80mm
+    - wolfman wr1 0.84
+    - wolfman wr1 oc .80mm
     WR2:
-    - Wolfman - WR2 1.15 w/WRH2
-    - Wolfman - WR2 SB 1.25 Basic Polish
-    - Wolfman .95 WR2
-    - Wolfman Razors - WR2-DC 0.95 SB / 1.25 OC, Darwin Handle, Antique Bronze
-    - Wolfman Razors WR2 1.15mm
-    - Wolfman Razors WR2-DC 0.95 SB / 1.25 OC
-    - Wolfman Razors WR2/WRH2
-    - Wolfman WR2
-    - Wolfman WR2 (1.55 mm SB / 1.25 mm OC)
-    - Wolfman WR2 .95
-    - Wolfman WR2 0.95
-    - Wolfman WR2 1.05mm
-    - Wolfman WR2 1.25
-    - Wolfman WR2 1.25 DC / WRH7
-    - Wolfman WR2 RazoRock Superknurl Handle
-    - Wolfman WR2 SB 1.35mm
-    - Wolfman WR2-SB 1.05 Gap
+    - wolfman - wr2 1.15 w/wrh2
+    - wolfman - wr2 sb 1.25 basic polish
+    - wolfman .95 wr2
+    - wolfman razors - wr2-dc 0.95 sb / 1.25 oc, darwin handle, antique bronze
+    - wolfman razors wr2 1.15mm
+    - wolfman razors wr2-dc 0.95 sb / 1.25 oc
+    - wolfman razors wr2/wrh2
+    - wolfman wr2
+    - wolfman wr2 (1.55 mm sb / 1.25 mm oc)
+    - wolfman wr2 .95
+    - wolfman wr2 0.95
+    - wolfman wr2 1.05mm
+    - wolfman wr2 1.25
+    - wolfman wr2 1.25 dc / wrh7
+    - wolfman wr2 razorock superknurl handle
+    - wolfman wr2 sb 1.35mm
+    - wolfman wr2-sb 1.05 gap
     WR3:
-    - Wolfman Copper WR3 -
-    - Wolfman WR3
+    - wolfman copper wr3 -
+    - wolfman wr3
     WR4:
-    - Wolfman Razors WR4/WRH3
+    - wolfman razors wr4/wrh3
   Yaqi:
     Adjustable TFC:
-    - Yaqi The Final Cut
+    - yaqi the final cut
     Beast Hybrid:
-    - Yaqi Hybrid
+    - yaqi hybrid
     Ghost:
-    - Yaqi - Titanium Ghost .90
-    - Yaqi Ghost 70 SP
-    - Yaqi stainless .90 Ghost (Razorock Halo handle)
+    - yaqi - titanium ghost .90
+    - yaqi ghost 70 sp
+    - yaqi stainless .90 ghost (razorock halo handle)
     Knight Helmet:
-    - Yaqi Knight Helmet head + WCS 175S handle (Head frozen with blade overnight)
+    - yaqi knight helmet head + wcs 175s handle (head frozen with blade overnight)
       - 8/10
     Open Comb:
-    - Yaqi - Open Comb Head
+    - yaqi - open comb head
     Romulus:
-    - Yaqi Romulus
+    - yaqi romulus
     Slant 37:
-    - Yaqi - Slant 37 + RR UFO Handle
-    - Yaqi Slant 37 + RR UFO Handle
+    - yaqi - slant 37 + rr ufo handle
+    - yaqi slant 37 + rr ufo handle
     Slope:
-    - Yaqi Slope
+    - yaqi slope
     Torqx:
-    - Yaqi - Torqx
+    - yaqi - torqx
   Yates:
     '''Merica':
-    - Yates 'Merica (brass)
-    - Yates *'Merica* (brass)
-    - Yates Precision Manufacturing - Merica
+    - yates 'merica (brass)
+    - yates precision manufacturing - merica
     '921':
-    - Yates 921-H
-    - Yates 921-M
-    - Yates 931-M
-    - Yates Precision Manufacturing - 921-M
-    - Yates Titanium Lather Games 2023 M Plate
+    - yates 921-h
+    - yates 921-m
+    - yates 931-m
+    - yates precision manufacturing - 921-m
+    - yates titanium lather games 2023 m plate
     Winning:
-    - Yates Winning v2
-    - YPM - Winning Razor Mk1, polished
-    - YPM - Winning Razor Mk2, polished, tattooed ("The Emperor's Razor!")
-    - YPM - Winning Razor Mk2, polished, tattooed ("The Razor of Mankind!")
+    - yates winning v2
+    - ypm - winning razor mk1, polished
+    - ypm - winning razor mk2, polished, tattooed ("the emperor's razor!")
+    - ypm - winning razor mk2, polished, tattooed ("the razor of mankind!")
   Yuma:
     DE:
-    - Yuma
+    - yuma
   iKon:
     B1:
-    - iKon B1OSS
+    - ikon b1oss
     Short Comb:
-    - Ikon Razors - Ikon Short Comb
+    - ikon razors - ikon short comb
     X3:
-    - iKon X3
+    - ikon x3
+  Stando:
+    Rod:
+    - stando rod custom
