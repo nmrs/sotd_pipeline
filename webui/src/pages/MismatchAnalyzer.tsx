@@ -263,10 +263,9 @@ const MismatchAnalyzer: React.FC = () => {
 
     // We always have the full dataset now, so calculate from the returned items
     const returnedItems = results.mismatch_items || [];
-    const totalMismatches = results.total_mismatches || 0;
 
     return {
-      mismatches: totalMismatches,
+      mismatches: returnedItems.filter(item => item.mismatch_type !== 'good_match').length,
       all: returnedItems.length, // Use actual returned items count instead of totalMatches
       unconfirmed: returnedItems.filter(item => !isItemConfirmed(item)).length,
       regex: returnedItems.filter(item =>
@@ -459,7 +458,9 @@ const MismatchAnalyzer: React.FC = () => {
                     Total Matches: <span className='font-medium'>{results.mismatch_items?.length || 0}</span>
                   </span>
                   <span>
-                    Total Mismatches: <span className='font-medium'>{results.total_mismatches}</span>
+                    Total Mismatches: <span className='font-medium'>
+                      {(results.mismatch_items || []).filter(item => item.mismatch_type !== 'good_match').length}
+                    </span>
                   </span>
                   <span>
                     Displayed: <span className='font-medium'>{getFilteredResults().length}</span>
