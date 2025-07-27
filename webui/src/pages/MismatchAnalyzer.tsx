@@ -263,7 +263,6 @@ const MismatchAnalyzer: React.FC = () => {
 
     // We always have the full dataset now, so calculate from the returned items
     const returnedItems = results.mismatch_items || [];
-    const totalMatches = results.total_matches || 0;
     const totalMismatches = results.total_mismatches || 0;
 
     return {
@@ -457,7 +456,7 @@ const MismatchAnalyzer: React.FC = () => {
                     Month: <span className='font-medium'>{results.month}</span>
                   </span>
                   <span>
-                    Total Matches: <span className='font-medium'>{results.total_matches}</span>
+                    Total Matches: <span className='font-medium'>{results.mismatch_items?.length || 0}</span>
                   </span>
                   <span>
                     Total Mismatches: <span className='font-medium'>{results.total_mismatches}</span>
