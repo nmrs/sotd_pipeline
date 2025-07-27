@@ -766,9 +766,10 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
                 status_code=500, detail=f"Could not import CorrectMatchesManager: {e}"
             )
 
-        # Create manager instance
+        # Create manager instance with correct file path
         console = Console()
-        manager = CorrectMatchesManager(console)
+        correct_matches_file = project_root / "data" / "correct_matches.yaml"
+        manager = CorrectMatchesManager(console, correct_matches_file)
 
         # Load existing correct matches
         manager.load_correct_matches()
@@ -828,7 +829,8 @@ async def clear_correct_matches_by_field(field: str):
 
         # Create manager instance and clear field
         console = Console()
-        manager = CorrectMatchesManager(console)
+        correct_matches_file = project_root / "data" / "correct_matches.yaml"
+        manager = CorrectMatchesManager(console, correct_matches_file)
         manager.load_correct_matches()
         manager.clear_correct_matches_by_field(field)
 
@@ -854,7 +856,8 @@ async def clear_all_correct_matches():
 
         # Create manager instance and clear all
         console = Console()
-        manager = CorrectMatchesManager(console)
+        correct_matches_file = project_root / "data" / "correct_matches.yaml"
+        manager = CorrectMatchesManager(console, correct_matches_file)
         manager.clear_correct_matches()
 
         return {"success": True, "message": "Cleared all correct matches"}
