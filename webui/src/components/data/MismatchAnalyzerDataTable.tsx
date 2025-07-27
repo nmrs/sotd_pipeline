@@ -292,6 +292,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         sortable={true}
         showColumnVisibility={true}
         searchKey='original'
+        initialPageSize={50}
       />
     </div>
   );
