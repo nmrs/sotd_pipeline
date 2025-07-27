@@ -15,7 +15,6 @@ import {
   getCorrectMatches,
   markMatchesAsCorrect,
   removeMatchesFromCorrect,
-  clearCorrectMatchesByField,
   CorrectMatchesResponse,
 } from '../services/api';
 
@@ -223,24 +222,7 @@ const MismatchAnalyzer: React.FC = () => {
     }
   };
 
-  const handleClearCorrectMatches = async () => {
-    if (!confirm(`Are you sure you want to clear all correct matches for ${selectedField}?`)) {
-      return;
-    }
 
-    try {
-      await clearCorrectMatchesByField(selectedField);
-      await loadCorrectMatches();
-      setError(null);
-
-      // Re-run analysis to get updated mismatch data
-      if (selectedMonth) {
-        await handleAnalyze();
-      }
-    } catch (err: unknown) {
-      setError(handleApiError(err));
-    }
-  };
 
   const isItemConfirmed = (item: any) => {
     if (!correctMatches?.entries) return false;
@@ -408,21 +390,13 @@ const MismatchAnalyzer: React.FC = () => {
                   {correctMatches.total_entries} confirmed matches for {selectedField}
                 </p>
               </div>
-              <div className='flex gap-2'>
-                <button
-                  onClick={handleRemoveFromCorrect}
-                  disabled={selectedItems.size === 0 || removingCorrect}
-                  className='px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed'
-                >
-                  {removingCorrect ? 'Removing...' : `Clear ${selectedItems.size} Entry`}
-                </button>
-                <button
-                  onClick={handleClearCorrectMatches}
-                  className='px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500'
-                >
-                  Clear All
-                </button>
-              </div>
+              <button
+                onClick={handleRemoveFromCorrect}
+                disabled={selectedItems.size === 0 || removingCorrect}
+                className='px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed'
+              >
+                {removingCorrect ? 'Removing...' : `Clear ${selectedItems.size} Entry`}
+              </button>
             </div>
           </div>
         )}
