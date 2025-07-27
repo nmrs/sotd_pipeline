@@ -268,7 +268,7 @@ const MismatchAnalyzer: React.FC = () => {
 
     return {
       mismatches: totalMismatches,
-      all: totalMatches,
+      all: returnedItems.length, // Use actual returned items count instead of totalMatches
       unconfirmed: returnedItems.filter(item => !isItemConfirmed(item)).length,
       regex: returnedItems.filter(item =>
         item.match_type === 'regex' && !isItemConfirmed(item)
