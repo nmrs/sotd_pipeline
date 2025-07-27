@@ -645,23 +645,25 @@ const MismatchAnalyzer: React.FC = () => {
                 </div>
               )}
 
-              {/* Reason Input for Unmatched - Fixed position to prevent layout shift */}
-              {selectedItems.size > 0 && (
-                <div className='mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md'>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>
-                    Reason for marking as unmatched (optional)
-                  </label>
-                  <input
-                    type='text'
-                    value={reasonText}
-                    onChange={e => setReasonText(e.target.value)}
-                    placeholder='e.g., not a real product, joke, spam...'
-                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm'
-                  />
-                </div>
-              )}
             </div>
           </div>
+
+          {/* Reason Input for Unmatched - Separate section to prevent layout shift */}
+          {selectedItems.size > 0 && (
+            <div className='px-6 py-3 bg-gray-50 border-t border-gray-200'>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                Reason for marking as unmatched (optional)
+              </label>
+              <input
+                type='text'
+                value={reasonText}
+                onChange={e => setReasonText(e.target.value)}
+                placeholder='e.g., not a real product, joke, spam...'
+                className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm'
+              />
+            </div>
+          )}
+
           <div className='p-6'>
             {filteredResults.length > 0 ? (
               <MismatchAnalyzerDataTable
