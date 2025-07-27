@@ -124,48 +124,56 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   const columns = useMemo<ColumnDef<MismatchItem>[]>(
     () => [
       // Selection column
-      ...(onItemSelection ? [{
-        id: 'selection',
-        header: 'Select',
-        cell: ({ row }) => {
-          const item = row.original;
-          const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
-          const isSelected = selectedItems.has(itemKey);
+      ...(onItemSelection
+        ? [
+            {
+              id: 'selection',
+              header: 'Select',
+              cell: ({ row }) => {
+                const item = row.original;
+                const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
+                const isSelected = selectedItems.has(itemKey);
 
-          return (
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={(e) => onItemSelection(itemKey, e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-          );
-        },
-      }] : []),
+                return (
+                  <input
+                    type='checkbox'
+                    checked={isSelected}
+                    onChange={e => onItemSelection(itemKey, e.target.checked)}
+                    className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                  />
+                );
+              },
+            },
+          ]
+        : []),
 
       // Status column
-      ...(isItemConfirmed ? [{
-        id: 'status',
-        header: 'Status',
-        cell: ({ row }) => {
-          const item = row.original;
-          const isConfirmed = isItemConfirmed(item);
+      ...(isItemConfirmed
+        ? [
+            {
+              id: 'status',
+              header: 'Status',
+              cell: ({ row }) => {
+                const item = row.original;
+                const isConfirmed = isItemConfirmed(item);
 
-          return (
-            <div className="flex items-center">
-              {isConfirmed ? (
-                <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                  ✅ Confirmed
-                </span>
-              ) : (
-                <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                  ⚠️ Unconfirmed
-                </span>
-              )}
-            </div>
-          );
-        },
-      }] : []),
+                return (
+                  <div className='flex items-center'>
+                    {isConfirmed ? (
+                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
+                        ✅ Confirmed
+                      </span>
+                    ) : (
+                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
+                        ⚠️ Unconfirmed
+                      </span>
+                    )}
+                  </div>
+                );
+              },
+            },
+          ]
+        : []),
       {
         accessorKey: 'count',
         header: 'Count',

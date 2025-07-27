@@ -462,7 +462,9 @@ export const getCorrectMatches = async (field: string): Promise<CorrectMatchesRe
   }
 };
 
-export const markMatchesAsCorrect = async (request: MarkCorrectRequest): Promise<MarkCorrectResponse> => {
+export const markMatchesAsCorrect = async (
+  request: MarkCorrectRequest
+): Promise<MarkCorrectResponse> => {
   try {
     const response = await api.post('/analyze/mark-correct', request);
     return response.data;
@@ -472,7 +474,9 @@ export const markMatchesAsCorrect = async (request: MarkCorrectRequest): Promise
   }
 };
 
-export const clearCorrectMatchesByField = async (field: string): Promise<{ success: boolean; message: string }> => {
+export const clearCorrectMatchesByField = async (
+  field: string
+): Promise<{ success: boolean; message: string }> => {
   try {
     const response = await api.delete(`/analyze/correct-matches/${field}`);
     return response.data;
@@ -498,7 +502,9 @@ export interface RemoveCorrectResponse {
   errors: string[];
 }
 
-export const removeMatchesFromCorrect = async (request: RemoveCorrectRequest): Promise<RemoveCorrectResponse> => {
+export const removeMatchesFromCorrect = async (
+  request: RemoveCorrectRequest
+): Promise<RemoveCorrectResponse> => {
   try {
     const response = await api.post('/analyze/remove-correct', request);
     return response.data;

@@ -6,8 +6,14 @@ import { MismatchItem } from '../../../services/api';
 // Mock the CommentList component
 jest.mock('../../domain/CommentList', () => {
   return {
-    CommentList: ({ commentIds, onCommentClick, commentLoading, maxDisplay, 'aria-label': ariaLabel }: any) => (
-      <div data-testid="comment-list" aria-label={ariaLabel}>
+    CommentList: ({
+      commentIds,
+      onCommentClick,
+      commentLoading,
+      maxDisplay,
+      'aria-label': ariaLabel,
+    }: any) => (
+      <div data-testid='comment-list' aria-label={ariaLabel}>
         {commentIds.map((id: string, index: number) => (
           <button
             key={id}
@@ -70,9 +76,7 @@ describe('MismatchAnalyzerDataTable', () => {
     });
 
     test('handles empty comment_ids array', () => {
-      const dataWithEmptyComments = [
-        { ...mockData[0], comment_ids: [] },
-      ];
+      const dataWithEmptyComments = [{ ...mockData[0], comment_ids: [] }];
 
       render(<MismatchAnalyzerDataTable {...defaultProps} data={dataWithEmptyComments} />);
 
@@ -182,8 +186,9 @@ describe('MismatchAnalyzerDataTable', () => {
     });
 
     test('handles mixed confirmation status', () => {
-      const isItemConfirmed = jest.fn()
-        .mockReturnValueOnce(true)  // First item confirmed
+      const isItemConfirmed = jest
+        .fn()
+        .mockReturnValueOnce(true) // First item confirmed
         .mockReturnValueOnce(false); // Second item unconfirmed
 
       render(<MismatchAnalyzerDataTable {...defaultProps} isItemConfirmed={isItemConfirmed} />);
