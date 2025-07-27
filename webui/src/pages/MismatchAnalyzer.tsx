@@ -255,9 +255,12 @@ const MismatchAnalyzer: React.FC = () => {
             // Use the first comment_id as representative
             const firstCommentId = item.comment_ids[0];
             if (firstCommentId) {
+              // Determine action based on current mismatch_type
+              const action = item.mismatch_type === 'intentionally_unmatched' ? 'remove' : 'add';
+              
               allEntries.push({
                 name: item.original,
-                action: 'add',
+                action,
                 comment_id: firstCommentId,
                 source: 'user',
                 month: selectedMonth,
@@ -397,6 +400,37 @@ const MismatchAnalyzer: React.FC = () => {
     };
   };
 
+  const getUnmatchedButtonText = () => {
+    if (selectedItems.size === 0) return 'Mark 0 as Unmatched';
+
+    // Count how many selected items are already intentionally unmatched
+    let addCount = 0;
+    let removeCount = 0;
+
+    if (results?.mismatch_items) {
+      results.mismatch_items
+        .filter(item => {
+          const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
+          return selectedItems.has(itemKey);
+        })
+        .forEach(item => {
+          if (item.mismatch_type === 'intentionally_unmatched') {
+            removeCount++;
+          } else {
+            addCount++;
+          }
+        });
+    }
+
+    if (addCount > 0 && removeCount > 0) {
+      return `Add ${addCount}, Remove ${removeCount} from Unmatched`;
+    } else if (removeCount > 0) {
+      return `Remove ${removeCount} from Unmatched`;
+    } else {
+      return `Mark ${addCount} as Unmatched`;
+    }
+  };
+
   return (
     <div className='w-full p-4'>
       {/* Controls and Header */}
@@ -475,9 +509,8 @@ const MismatchAnalyzer: React.FC = () => {
                 <Eye className='h-4 w-4' />
                 All
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().all}
                 </span>
@@ -494,11 +527,10 @@ const MismatchAnalyzer: React.FC = () => {
                 <EyeOff className='h-4 w-4' />
                 Mismatches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'mismatches'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
                       ? 'bg-white text-blue-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().mismatches}
                 </span>
@@ -515,11 +547,10 @@ const MismatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Unconfirmed
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'unconfirmed'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'unconfirmed'
                       ? 'bg-white text-blue-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().unconfirmed}
                 </span>
@@ -536,9 +567,8 @@ const MismatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Regex
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().regex}
                 </span>
@@ -640,7 +670,7 @@ const MismatchAnalyzer: React.FC = () => {
                     disabled={selectedItems.size === 0 || updatingFiltered}
                     className='px-3 py-1 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed'
                   >
-                    {updatingFiltered ? 'Marking...' : `Mark ${selectedItems.size} as Unmatched`}
+                    {updatingFiltered ? 'Updating...' : getUnmatchedButtonText()}
                   </button>
                 </div>
               )}
