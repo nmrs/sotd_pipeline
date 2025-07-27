@@ -128,9 +128,14 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         ? [
             {
               id: 'selection',
-              header: () => {
-                // Calculate if all visible items are selected
-                const visibleItemKeys = data.map(item => `${item.original}|${JSON.stringify(item.matched)}`);
+              header: ({ table }) => {
+                // Get the current visible rows from the table
+                const visibleRows = table.getRowModel().rows;
+                const visibleItemKeys = visibleRows.map(row => {
+                  const item = row.original;
+                  return `${item.original}|${JSON.stringify(item.matched)}`;
+                });
+                
                 const allSelected = visibleItemKeys.length > 0 && visibleItemKeys.every(key => selectedItems.has(key));
                 const someSelected = visibleItemKeys.some(key => selectedItems.has(key));
 

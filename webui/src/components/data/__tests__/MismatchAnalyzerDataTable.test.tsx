@@ -115,7 +115,7 @@ describe('MismatchAnalyzerDataTable', () => {
 
       // Should have checkboxes for each row plus the "Select All" checkbox
       const checkboxes = screen.getAllByRole('checkbox');
-      expect(checkboxes).toHaveLength(3); // One "Select All" + one for each data item
+      expect(checkboxes).toHaveLength(3); // One "Select All" + one for each visible data item (2 items in test data)
     });
 
     test('renders confirmation status when isItemConfirmed is provided', () => {
