@@ -212,18 +212,6 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         },
       },
       {
-        accessorKey: 'match_type',
-        header: 'Match Type',
-        cell: ({ row }) => {
-          const item = row.original;
-          return (
-            <span className='inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800'>
-              {item.match_type}
-            </span>
-          );
-        },
-      },
-      {
         accessorKey: 'matched',
         header: 'Matched',
         cell: ({ row }) => {
@@ -232,6 +220,18 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             <div className='text-sm text-gray-900 max-w-xs'>
               {truncateText(formatMatchedData(item.matched), 60)}
             </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'match_type',
+        header: 'Match Type',
+        cell: ({ row }) => {
+          const item = row.original;
+          return (
+            <span className='inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800'>
+              {item.match_type}
+            </span>
           );
         },
       },
