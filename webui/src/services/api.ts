@@ -482,6 +482,32 @@ export const clearCorrectMatchesByField = async (field: string): Promise<{ succe
   }
 };
 
+export interface RemoveCorrectRequest {
+  field: string;
+  matches: Array<{
+    original: string;
+    matched: any;
+  }>;
+  force?: boolean;
+}
+
+export interface RemoveCorrectResponse {
+  success: boolean;
+  message: string;
+  removed_count: number;
+  errors: string[];
+}
+
+export const removeMatchesFromCorrect = async (request: RemoveCorrectRequest): Promise<RemoveCorrectResponse> => {
+  try {
+    const response = await api.post('/analyze/remove-correct', request);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to remove matches from correct matches:', error);
+    throw error;
+  }
+};
+
 export const clearAllCorrectMatches = async (): Promise<{ success: boolean; message: string }> => {
   try {
     const response = await api.delete('/analyze/correct-matches');

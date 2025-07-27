@@ -14,6 +14,7 @@ import {
   CommentDetail,
   getCorrectMatches,
   markMatchesAsCorrect,
+  removeMatchesFromCorrect,
   clearCorrectMatchesByField,
   CorrectMatchesResponse,
 } from '../services/api';
@@ -35,6 +36,7 @@ const MismatchAnalyzer: React.FC = () => {
   const [loadingCorrectMatches, setLoadingCorrectMatches] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [markingCorrect, setMarkingCorrect] = useState(false);
+  const [removingCorrect, setRemovingCorrect] = useState(false);
 
   // Load correct matches when field changes
   useEffect(() => {
@@ -170,6 +172,54 @@ const MismatchAnalyzer: React.FC = () => {
       setError(handleApiError(err));
     } finally {
       setMarkingCorrect(false);
+    }
+  };
+
+  const handleRemoveFromCorrect = async () => {
+    if (selectedItems.size === 0) {
+      setError('Please select items to remove from correct matches');
+      return;
+    }
+
+    if (!results?.mismatch_items) return;
+
+    try {
+      setRemovingCorrect(true);
+
+      // Convert selected items to match format
+      const matches = results.mismatch_items
+        .filter(item => {
+          const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
+          return selectedItems.has(itemKey);
+        })
+        .map(item => ({
+          original: item.original,
+          matched: item.matched,
+        }));
+
+      const response = await removeMatchesFromCorrect({
+        field: selectedField,
+        matches,
+        force: true,
+      });
+
+      if (response.success) {
+        // Reload correct matches and re-analyze to get fresh data
+        await loadCorrectMatches();
+        setSelectedItems(new Set());
+        setError(null);
+
+        // Re-run analysis to get updated mismatch data
+        if (selectedMonth) {
+          await handleAnalyze();
+        }
+      } else {
+        setError(`Failed to remove items from correct matches: ${response.message}`);
+      }
+    } catch (err: unknown) {
+      setError(handleApiError(err));
+    } finally {
+      setRemovingCorrect(false);
     }
   };
 
@@ -358,12 +408,21 @@ const MismatchAnalyzer: React.FC = () => {
                   {correctMatches.total_entries} confirmed matches for {selectedField}
                 </p>
               </div>
-              <button
-                onClick={handleClearCorrectMatches}
-                className='px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500'
-              >
-                Clear All
-              </button>
+              <div className='flex gap-2'>
+                <button
+                  onClick={handleRemoveFromCorrect}
+                  disabled={selectedItems.size === 0 || removingCorrect}
+                  className='px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  {removingCorrect ? 'Removing...' : `Clear ${selectedItems.size} Entry`}
+                </button>
+                <button
+                  onClick={handleClearCorrectMatches}
+                  className='px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500'
+                >
+                  Clear All
+                </button>
+              </div>
             </div>
           </div>
         )}

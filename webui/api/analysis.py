@@ -151,6 +151,25 @@ class MarkCorrectResponse(BaseModel):
     errors: List[str] = []
 
 
+class RemoveCorrectRequest(BaseModel):
+    """Request model for removing matches from correct matches."""
+
+    field: str = Field(..., description="Field type (razor, blade, brush, soap)")
+    matches: List[Dict[str, Any]] = Field(
+        ..., description="List of matches to remove from correct matches"
+    )
+    force: bool = Field(default=False, description="Force operation without confirmation")
+
+
+class RemoveCorrectResponse(BaseModel):
+    """Response model for removing matches from correct matches."""
+
+    success: bool
+    message: str
+    removed_count: int
+    errors: List[str] = []
+
+
 class CorrectMatchesResponse(BaseModel):
     """Response model for correct matches data."""
 
@@ -810,6 +829,102 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
     except Exception as e:
         logger.error(f"Error marking matches as correct: {e}")
         raise HTTPException(status_code=500, detail=f"Error marking matches as correct: {str(e)}")
+
+
+@router.post("/remove-correct", response_model=RemoveCorrectResponse)
+async def remove_matches_from_correct(request: RemoveCorrectRequest):
+    """Remove matches from correct matches and save to correct_matches.yaml."""
+    try:
+        validate_field(request.field)
+
+        if not request.matches:
+            return RemoveCorrectResponse(
+                success=False, message="No matches provided", removed_count=0
+            )
+
+        # Import the correct matches manager
+        try:
+            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
+            from rich.console import Console
+        except ImportError as e:
+            raise HTTPException(
+                status_code=500, detail=f"Could not import CorrectMatchesManager: {e}"
+            )
+
+        # Create manager instance with correct file path
+        console = Console()
+        correct_matches_file = project_root / "data" / "correct_matches.yaml"
+        manager = CorrectMatchesManager(console, correct_matches_file)
+
+        # Load existing correct matches
+        manager.load_correct_matches()
+
+        removed_count = 0
+        errors = []
+
+        for match in request.matches:
+            try:
+                original = match.get("original", "")
+                matched = match.get("matched", {})
+
+                if not original or not matched:
+                    errors.append(f"Invalid match data: {match}")
+                    continue
+
+                # Create match key and remove from correct matches
+                match_key = manager.create_match_key(request.field, original, matched)
+                
+                # Check if the match exists in correct matches
+                if manager.is_match_correct(match_key):
+                    # Remove the match from correct matches
+                    # We need to modify the manager to support removal
+                    # For now, we'll clear the entire field and re-add everything except this match
+                    # This is a temporary solution - ideally the manager would have a remove method
+                    field_data = manager._correct_matches_data.get(request.field, {})
+                    
+                    # Find and remove the specific entry
+                    for brand, brand_data in field_data.items():
+                        if isinstance(brand_data, dict):
+                            for model, strings in brand_data.items():
+                                if isinstance(strings, list):
+                                    # Remove the specific original string
+                                    if original in strings:
+                                        strings.remove(original)
+                                        removed_count += 1
+                                        # If this was the last string for this model, clean up
+                                        if not strings:
+                                            del brand_data[model]
+                                        # If this was the last model for this brand, clean up
+                                        if not brand_data:
+                                            del field_data[brand]
+                                        break
+                    
+                    # Update the manager's internal data
+                    manager._correct_matches_data[request.field] = field_data
+                    
+                else:
+                    errors.append(f"Match not found in correct matches: {original}")
+
+            except Exception as e:
+                errors.append(f"Error removing match {match}: {e}")
+
+        # Save to file
+        if removed_count > 0:
+            manager.save_correct_matches()
+
+        return RemoveCorrectResponse(
+            success=removed_count > 0,
+            message=f"Removed {removed_count} matches from correct matches",
+            removed_count=removed_count,
+            errors=errors,
+        )
+
+    except Exception as e:
+        logger.error(f"Error removing matches from correct matches: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error removing matches from correct matches: {str(e)}"
+        )
 
 
 @router.delete("/correct-matches/{field}")
