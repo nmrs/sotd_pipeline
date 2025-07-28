@@ -192,9 +192,31 @@ class CorrectMatchesManager:
                     ):
                         field_data[field][brand][model].append(normalized_original)
 
+            # Alphabetize entries within each field/brand/model (or field/format/brand/model)
+            for field_name, field_data in field_data.items():
+                if isinstance(field_data, dict):
+                    if field_name == "blade":
+                        # For blade field, sort by format -> brand -> model
+                        for format_name, format_data in field_data.items():
+                            if isinstance(format_data, dict):
+                                for brand, brand_data in format_data.items():
+                                    if isinstance(brand_data, dict):
+                                        for model, entries in brand_data.items():
+                                            if isinstance(entries, list):
+                                                # Sort entries alphabetically (case-insensitive)
+                                                entries.sort(key=str.lower)
+                    else:
+                        # For other fields, sort by brand -> model
+                        for brand, brand_data in field_data.items():
+                            if isinstance(brand_data, dict):
+                                for model, entries in brand_data.items():
+                                    if isinstance(entries, list):
+                                        # Sort entries alphabetically (case-insensitive)
+                                        entries.sort(key=str.lower)
+
             # Save to file
             with self._correct_matches_file.open("w", encoding="utf-8") as f:
-                yaml.dump(field_data, f, default_flow_style=False, sort_keys=False)
+                yaml.dump(field_data, f, default_flow_style=False, sort_keys=True)
 
             self.console.print(
                 f"[green]Correct matches saved to {self._correct_matches_file}[/green]"
