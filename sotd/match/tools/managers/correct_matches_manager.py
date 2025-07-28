@@ -13,6 +13,9 @@ from sotd.utils.match_filter_utils import (
     strip_competition_tags,
 )
 
+# Delimiter for item keys to avoid conflicts with characters in original text
+ITEM_KEY_DELIMITER = "|||"
+
 
 class CorrectMatchesManager:
     """Manages loading, saving, and querying of correct matches."""
@@ -63,33 +66,64 @@ class CorrectMatchesManager:
                     return
                 for field, field_data in data.items():
                     if isinstance(field_data, dict):
-                        for brand, brand_data in field_data.items():
-                            if isinstance(brand_data, dict):
-                                for model, strings in brand_data.items():
-                                    if isinstance(strings, list):
-                                        for original in strings:
-                                            match_key = (
-                                                f"{field}:{original.lower().strip()}|"
-                                                f"{(brand + ' ' + model).lower().strip()}"
-                                            )
-                                            self._correct_matches.add(match_key)
-                                            self._correct_matches_data[match_key] = {
-                                                "original": original,
-                                                "matched": {
-                                                    "brand": (
-                                                        brand
-                                                        if field in ("razor", "blade", "brush")
-                                                        else None
-                                                    ),
-                                                    "model": (
-                                                        model
-                                                        if field in ("razor", "blade", "brush")
-                                                        else None
-                                                    ),
-                                                    "maker": brand if field == "soap" else None,
-                                                    "scent": model if field == "soap" else None,
-                                                },
-                                            }
+                        if field == "blade":
+                            # Handle format-aware structure for blade field
+                            for format_name, format_data in field_data.items():
+                                if isinstance(format_data, dict):
+                                    for brand, brand_data in format_data.items():
+                                        if isinstance(brand_data, dict):
+                                            for model, strings in brand_data.items():
+                                                if isinstance(strings, list):
+                                                    for original in strings:
+                                                        brand_model = (
+                                                            (brand + " " + model).lower().strip()
+                                                        )
+                                                        match_key = (
+                                                            f"{field}:{original.lower().strip()}"
+                                                            f"{ITEM_KEY_DELIMITER}"
+                                                            f"{brand_model}"
+                                                        )
+                                                        self._correct_matches.add(match_key)
+                                                        self._correct_matches_data[match_key] = {
+                                                            "original": original,
+                                                            "matched": {
+                                                                "brand": brand,
+                                                                "model": model,
+                                                                "format": format_name,
+                                                            },
+                                                            "field": field,
+                                                        }
+                        else:
+                            # Handle flat structure for other fields
+                            for brand, brand_data in field_data.items():
+                                if isinstance(brand_data, dict):
+                                    for model, strings in brand_data.items():
+                                        if isinstance(strings, list):
+                                            for original in strings:
+                                                brand_model = (brand + " " + model).lower().strip()
+                                                match_key = (
+                                                    f"{field}:{original.lower().strip()}"
+                                                    f"{ITEM_KEY_DELIMITER}{brand_model}"
+                                                )
+                                                self._correct_matches.add(match_key)
+                                                self._correct_matches_data[match_key] = {
+                                                    "original": original,
+                                                    "matched": {
+                                                        "brand": (
+                                                            brand
+                                                            if field in ("razor", "blade", "brush")
+                                                            else None
+                                                        ),
+                                                        "model": (
+                                                            model
+                                                            if field in ("razor", "blade", "brush")
+                                                            else None
+                                                        ),
+                                                        "maker": brand if field == "soap" else None,
+                                                        "scent": model if field == "soap" else None,
+                                                    },
+                                                    "field": field,
+                                                }
         except Exception as e:
             self.console.print(f"[red]Error loading correct matches: {e}[/red]")
 
@@ -100,12 +134,35 @@ class CorrectMatchesManager:
             field_data = {}
             for match_key, match_data in self._correct_matches_data.items():
                 field, rest = match_key.split(":", 1)
-                original, matched = rest.split("|", 1)
+                original, matched = rest.split(ITEM_KEY_DELIMITER, 1)
 
                 if field not in field_data:
                     field_data[field] = {}
 
-                if field == "soap":
+                if field == "blade":
+                    # Handle format-aware structure for blade field
+                    brand = match_data["matched"]["brand"]
+                    model = match_data["matched"]["model"]
+                    format_name = match_data["matched"].get(
+                        "format", "DE"
+                    )  # Default to DE if not specified
+
+                    if format_name not in field_data[field]:
+                        field_data[field][format_name] = {}
+                    if brand not in field_data[field][format_name]:
+                        field_data[field][format_name][brand] = {}
+                    if model not in field_data[field][format_name][brand]:
+                        field_data[field][format_name][brand][model] = []
+
+                    # Normalize the original string before storing to prevent bloat
+                    normalized_original = self._normalize_for_matching(original, field)
+                    if (
+                        normalized_original
+                        and normalized_original not in field_data[field][format_name][brand][model]
+                    ):
+                        field_data[field][format_name][brand][model].append(normalized_original)
+
+                elif field == "soap":
                     maker = match_data["matched"]["maker"]
                     scent = match_data["matched"]["scent"]
                     if maker not in field_data[field]:
@@ -120,6 +177,7 @@ class CorrectMatchesManager:
                     ):
                         field_data[field][maker][scent].append(normalized_original)
                 else:
+                    # Handle flat structure for other fields
                     brand = match_data["matched"]["brand"]
                     model = match_data["matched"]["model"]
                     if brand not in field_data[field]:
@@ -196,7 +254,9 @@ class CorrectMatchesManager:
         # Normalize for consistent key generation
         original_normalized = original.lower().strip()
         matched_normalized = matched_text.lower().strip()
-        return f"{field}:{original_normalized}|{matched_normalized}"
+        # Use ITEM_KEY_DELIMITER to avoid conflicts with | in original text
+        key = f"{field}:{original_normalized}{ITEM_KEY_DELIMITER}{matched_normalized}"
+        return key
 
     def _get_matched_text(self, field: str, matched: Dict) -> str:
         """Extract matched text from matched data."""
@@ -207,4 +267,5 @@ class CorrectMatchesManager:
         else:
             brand = matched.get("brand", "")
             model = matched.get("model", "")
+            # Don't include format in key generation since YAML structure doesn't support it
             return f"{brand} {model}".strip()
