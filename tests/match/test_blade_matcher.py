@@ -16,7 +16,7 @@ DE:
       patterns:
         - feather
   Astra:
-    Superior Platinum (Green)":
+    Superior Platinum (Green):
       patterns:
         - astra.*sp
   Derby:
