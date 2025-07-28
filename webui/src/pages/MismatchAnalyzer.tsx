@@ -19,6 +19,23 @@ import {
   updateFilteredEntries,
 } from '../services/api';
 
+// Delimiter for item keys to avoid conflicts with characters in original text
+const ITEM_KEY_DELIMITER = '|||';
+
+// Helper function to extract matched text (matching backend logic)
+const getMatchedText = (field: string, matched: any): string => {
+  if (field === 'soap') {
+    const maker = matched.maker || '';
+    const scent = matched.scent || '';
+    return `${maker} ${scent}`.trim();
+  } else {
+    const brand = matched.brand || '';
+    const model = matched.model || '';
+    // Don't include format in key generation since YAML structure doesn't support it
+    return `${brand} ${model}`.trim();
+  }
+};
+
 const MismatchAnalyzer: React.FC = () => {
   const [selectedField, setSelectedField] = useState<string>('razor');
   const [selectedMonth, setSelectedMonth] = useState<string>('');
@@ -48,6 +65,11 @@ const MismatchAnalyzer: React.FC = () => {
   const [reasonText, setReasonText] = useState<string>('');
   const [updatingFiltered, setUpdatingFiltered] = useState(false);
 
+  // Clear selections on component mount to ensure clean state
+  useEffect(() => {
+    setSelectedItems(new Set());
+  }, []);
+
   const loadCorrectMatches = React.useCallback(async () => {
     try {
       const data = await getCorrectMatches(selectedField);
@@ -62,6 +84,8 @@ const MismatchAnalyzer: React.FC = () => {
   useEffect(() => {
     if (selectedField) {
       loadCorrectMatches();
+      // Clear selections when field changes to avoid key format mismatches
+      setSelectedItems(new Set());
     }
   }, [selectedField, loadCorrectMatches]);
 
@@ -119,9 +143,9 @@ const MismatchAnalyzer: React.FC = () => {
     }
   };
 
-    const handleCommentNavigation = async (direction: 'prev' | 'next') => {
+  const handleCommentNavigation = async (direction: 'prev' | 'next') => {
     if (allComments.length <= 1 && remainingCommentIds.length === 0) return;
-    
+
     let newIndex = currentCommentIndex;
     if (direction === 'prev') {
       newIndex = Math.max(0, currentCommentIndex - 1);
@@ -135,7 +159,7 @@ const MismatchAnalyzer: React.FC = () => {
           setCommentLoading(true);
           const nextCommentId = remainingCommentIds[0];
           const nextComment = await getCommentDetail(nextCommentId, [selectedMonth]);
-          
+
           setAllComments(prev => [...prev, nextComment]);
           setRemainingCommentIds(prev => prev.slice(1));
           setCurrentCommentIndex(allComments.length);
@@ -180,8 +204,12 @@ const MismatchAnalyzer: React.FC = () => {
     if (!visibleRows.length) return;
 
     const allKeys = visibleRows.map(
-      (item: MismatchAnalysisResult['mismatch_items'][0]) =>
-        `${item.original}|${JSON.stringify(item.matched)}`
+      (item: MismatchAnalysisResult['mismatch_items'][0]) => {
+        const matchedText = getMatchedText(selectedField, item.matched);
+        const originalNormalized = item.original.toLowerCase().trim();
+        const matchedNormalized = matchedText.toLowerCase().trim();
+        return `${selectedField}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
+      }
     );
     setSelectedItems(new Set(allKeys));
   }, [visibleRows]);
@@ -196,8 +224,14 @@ const MismatchAnalyzer: React.FC = () => {
 
   // Memoize item keys to avoid repeated JSON.stringify operations
   const visibleItemKeys = React.useMemo(() => {
-    return visibleRows.map(item => `${item.original}|${JSON.stringify(item.matched)}`);
-  }, [visibleRows]);
+    return visibleRows.map(item => {
+      // Use backend-style key generation for consistency
+      const matchedText = getMatchedText(selectedField, item.matched);
+      const originalNormalized = item.original.toLowerCase().trim();
+      const matchedNormalized = matchedText.toLowerCase().trim();
+      return `${selectedField}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
+    });
+  }, [visibleRows, selectedField]);
 
   // Count selected items that are currently visible on the page
   const visibleSelectedCount = React.useMemo(() => {
@@ -220,7 +254,10 @@ const MismatchAnalyzer: React.FC = () => {
       // Convert selected items to match format
       const matches = results.mismatch_items
         .filter(item => {
-          const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
+          const matchedText = getMatchedText(selectedField, item.matched);
+          const originalNormalized = item.original.toLowerCase().trim();
+          const matchedNormalized = matchedText.toLowerCase().trim();
+          const itemKey = `${selectedField}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
           return selectedItems.has(itemKey);
         })
         .map(item => ({
@@ -268,7 +305,10 @@ const MismatchAnalyzer: React.FC = () => {
       // Convert selected items to match format
       const matches = results.mismatch_items
         .filter(item => {
-          const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
+          const matchedText = getMatchedText(selectedField, item.matched);
+          const originalNormalized = item.original.toLowerCase().trim();
+          const matchedNormalized = matchedText.toLowerCase().trim();
+          const itemKey = `${selectedField}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
           return selectedItems.has(itemKey);
         })
         .map(item => ({
@@ -324,7 +364,10 @@ const MismatchAnalyzer: React.FC = () => {
 
       results.mismatch_items
         .filter(item => {
-          const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
+          const matchedText = getMatchedText(selectedField, item.matched);
+          const originalNormalized = item.original.toLowerCase().trim();
+          const matchedNormalized = matchedText.toLowerCase().trim();
+          const itemKey = `${selectedField}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
           return selectedItems.has(itemKey);
         })
         .forEach(item => {
@@ -384,13 +427,38 @@ const MismatchAnalyzer: React.FC = () => {
     const confirmedSet = new Set<string>();
 
     // Build lookup set from correct matches
-    for (const [, brandData] of Object.entries(correctMatches.entries)) {
-      if (typeof brandData === 'object' && brandData !== null) {
-        for (const [, strings] of Object.entries(brandData)) {
-          if (Array.isArray(strings)) {
-            for (const correctString of strings) {
-              const normalizedCorrect = correctString.toLowerCase().trim();
-              confirmedSet.add(normalizedCorrect);
+    if (selectedField === 'blade') {
+      // Blade has 4-level structure: format -> brand -> model -> strings
+      for (const [, formatData] of Object.entries(correctMatches.entries)) {
+        if (typeof formatData === 'object' && formatData !== null) {
+          for (const [, brandData] of Object.entries(formatData)) {
+            if (typeof brandData === 'object' && brandData !== null) {
+              for (const [, modelData] of Object.entries(brandData)) {
+                if (typeof modelData === 'object' && modelData !== null) {
+                  for (const [, strings] of Object.entries(modelData)) {
+                    if (Array.isArray(strings)) {
+                      for (const correctString of strings) {
+                        const normalizedCorrect = correctString.toLowerCase().trim();
+                        confirmedSet.add(normalizedCorrect);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    } else {
+      // Other fields have 3-level structure: brand -> model -> strings
+      for (const [, brandData] of Object.entries(correctMatches.entries)) {
+        if (typeof brandData === 'object' && brandData !== null) {
+          for (const [, strings] of Object.entries(brandData)) {
+            if (Array.isArray(strings)) {
+              for (const correctString of strings) {
+                const normalizedCorrect = correctString.toLowerCase().trim();
+                confirmedSet.add(normalizedCorrect);
+              }
             }
           }
         }
@@ -398,7 +466,7 @@ const MismatchAnalyzer: React.FC = () => {
     }
 
     return confirmedSet;
-  }, [correctMatches?.entries]);
+  }, [correctMatches?.entries, selectedField]);
 
   const isItemConfirmed = React.useCallback(
     (item: MismatchAnalysisResult['mismatch_items'][0]) => {
@@ -433,7 +501,8 @@ const MismatchAnalyzer: React.FC = () => {
             item.mismatch_type &&
             item.mismatch_type !== 'good_match' &&
             item.mismatch_type !== 'exact_matches' &&
-            item.mismatch_type !== 'intentionally_unmatched'
+            item.mismatch_type !== 'intentionally_unmatched' &&
+            !isItemConfirmed(item)
         );
 
       case 'all':
@@ -478,7 +547,8 @@ const MismatchAnalyzer: React.FC = () => {
         item =>
           item.mismatch_type !== 'good_match' &&
           item.mismatch_type !== 'exact_matches' &&
-          item.mismatch_type !== 'intentionally_unmatched'
+          item.mismatch_type !== 'intentionally_unmatched' &&
+          !isItemConfirmed(item)
       ).length,
       all: returnedItems.length, // Use actual returned items count instead of totalMatches
       unconfirmed: returnedItems.filter(item => !isItemConfirmed(item)).length,
@@ -526,7 +596,10 @@ const MismatchAnalyzer: React.FC = () => {
     if (results?.mismatch_items) {
       results.mismatch_items
         .filter(item => {
-          const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
+          const matchedText = getMatchedText(selectedField, item.matched);
+          const originalNormalized = item.original.toLowerCase().trim();
+          const matchedNormalized = matchedText.toLowerCase().trim();
+          const itemKey = `${selectedField}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
           return selectedItems.has(itemKey);
         })
         .forEach(item => {
@@ -827,6 +900,7 @@ const MismatchAnalyzer: React.FC = () => {
               <MismatchAnalyzerDataTable
                 key={`mismatch-${displayMode}-${filteredResults.length}`} // Force re-render when mode changes
                 data={filteredResults}
+                field={selectedField}
                 onCommentClick={handleCommentClick}
                 commentLoading={commentLoading}
                 selectedItems={selectedItems}
