@@ -420,58 +420,8 @@ const MismatchAnalyzer: React.FC = () => {
     }
   };
 
-  // Memoized confirmed items lookup for performance
-  const confirmedItemsLookup = React.useMemo(() => {
-    if (!correctMatches?.entries) return new Set<string>();
-
-    const confirmedSet = new Set<string>();
-
-    // Build lookup set from correct matches
-    if (selectedField === 'blade') {
-      // Blade has 4-level structure: format -> brand -> model -> strings
-      for (const [, formatData] of Object.entries(correctMatches.entries)) {
-        if (typeof formatData === 'object' && formatData !== null) {
-          for (const [, brandData] of Object.entries(formatData)) {
-            if (typeof brandData === 'object' && brandData !== null) {
-              for (const [, modelData] of Object.entries(brandData)) {
-                if (typeof modelData === 'object' && modelData !== null) {
-                  for (const [, strings] of Object.entries(modelData)) {
-                    if (Array.isArray(strings)) {
-                      for (const correctString of strings) {
-                        const normalizedCorrect = correctString.toLowerCase().trim();
-                        confirmedSet.add(normalizedCorrect);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    } else {
-      // Other fields have 3-level structure: brand -> model -> strings
-      for (const [, brandData] of Object.entries(correctMatches.entries)) {
-        if (typeof brandData === 'object' && brandData !== null) {
-          for (const [, strings] of Object.entries(brandData)) {
-            if (Array.isArray(strings)) {
-              for (const correctString of strings) {
-                const normalizedCorrect = correctString.toLowerCase().trim();
-                confirmedSet.add(normalizedCorrect);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return confirmedSet;
-  }, [correctMatches?.entries, selectedField]);
-
   const isItemConfirmed = React.useCallback(
     (item: MismatchAnalysisResult['mismatch_items'][0]) => {
-      if (!correctMatches?.entries) return false;
-
       // Check if item is marked as exact match by the backend
       if (item.mismatch_type === 'exact_matches') {
         return true;
@@ -482,11 +432,10 @@ const MismatchAnalyzer: React.FC = () => {
         return true;
       }
 
-      // Use memoized lookup for performance
-      const normalizedOriginal = item.original.toLowerCase().trim();
-      return confirmedItemsLookup.has(normalizedOriginal);
+      // Default to false - let the backend determine confirmation status
+      return false;
     },
-    [correctMatches?.entries, confirmedItemsLookup]
+    []
   );
 
   // Memoized filtered results for performance
