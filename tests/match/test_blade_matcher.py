@@ -523,3 +523,36 @@ GEM:
     assert result.matched is None
     assert result.match_type is None
     assert result.pattern is None
+
+
+def test_shavette_fallback_prioritizes_format_appropriate_blades():
+    """Test that Shavette razors prioritize format-appropriate blades over DE in fallback."""
+    matcher = BladeMatcher()
+    
+    # Test case: Shavette (Injector) razor with "Personna injector" blade
+    # Should match to Personna Injector, not Personna Lab Blue (DE)
+    result = matcher.match_with_context(
+        normalized_text="personna injector",
+        razor_format="Shavette (Injector)",
+        original_text="Personna injector"
+    )
+    
+    # Should match to Injector format, not DE
+    assert result.matched is not None
+    assert result.matched["format"] == "Injector"
+    assert result.matched["brand"] == "Personna"
+    assert result.matched["model"] == "Injector"
+    
+    # Test case: Shavette (Hair Shaper) razor with "Personna" blade
+    # Should prioritize Hair Shaper format over DE
+    result = matcher.match_with_context(
+        normalized_text="personna",
+        razor_format="Shavette (Hair Shaper)",
+        original_text="Personna"
+    )
+    
+    # Should match to Hair Shaper format, not DE
+    assert result.matched is not None
+    assert result.matched["format"] == "Hair Shaper"
+    assert result.matched["brand"] == "Personna"
+    assert result.matched["model"] == "Hair Shaper"
