@@ -36,6 +36,9 @@ const UnmatchedAnalyzer: React.FC = () => {
   const [selectedComment, setSelectedComment] = useState<CommentDetail | null>(null);
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [commentLoading, setCommentLoading] = useState(false);
+  // Multi-comment navigation state
+  const [allComments, setAllComments] = useState<CommentDetail[]>([]);
+  const [currentCommentIndex, setCurrentCommentIndex] = useState<number>(0);
   const [filteredStatus, setFilteredStatus] = useState<Record<string, boolean>>({});
   const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
   const [reasonText, setReasonText] = useState<string>('');
@@ -138,7 +141,7 @@ const UnmatchedAnalyzer: React.FC = () => {
         if (result.partial_results) {
           messaging.addWarningMessage(
             `Partial results: ${result.error || 'Some items could not be processed'}. ` +
-              'Only available data is shown.'
+            'Only available data is shown.'
           );
         }
 
@@ -209,24 +212,24 @@ const UnmatchedAnalyzer: React.FC = () => {
         components: {
           handle:
             item.unmatched?.handle &&
-            typeof item.unmatched.handle === 'object' &&
-            'text' in item.unmatched.handle
+              typeof item.unmatched.handle === 'object' &&
+              'text' in item.unmatched.handle
               ? {
-                  text: (item.unmatched.handle as { text: string }).text,
-                  status: 'Unmatched' as const,
-                  pattern:
-                    (item.unmatched.handle as { pattern: string; text: string }).pattern || '',
-                }
+                text: (item.unmatched.handle as { text: string }).text,
+                status: 'Unmatched' as const,
+                pattern:
+                  (item.unmatched.handle as { pattern: string; text: string }).pattern || '',
+              }
               : undefined,
           knot:
             item.unmatched?.knot &&
-            typeof item.unmatched.knot === 'object' &&
-            'text' in item.unmatched.knot
+              typeof item.unmatched.knot === 'object' &&
+              'text' in item.unmatched.knot
               ? {
-                  text: (item.unmatched.knot as { text: string }).text,
-                  status: 'Unmatched' as const,
-                  pattern: (item.unmatched.knot as { pattern: string; text: string }).pattern || '',
-                }
+                text: (item.unmatched.knot as { text: string }).text,
+                status: 'Unmatched' as const,
+                pattern: (item.unmatched.knot as { pattern: string; text: string }).pattern || '',
+              }
               : undefined,
         },
       };
@@ -272,17 +275,52 @@ const UnmatchedAnalyzer: React.FC = () => {
     examples: 200,
   };
 
-  const handleCommentClick = async (commentId: string) => {
+  const handleCommentClick = async (commentId: string, allCommentIds?: string[]) => {
     try {
       setCommentLoading(true);
-      const comment = await getCommentDetail(commentId, selectedMonths);
-      setSelectedComment(comment);
+
+      // If we have multiple comment IDs, load all of them
+      if (allCommentIds && allCommentIds.length > 1) {
+        const commentPromises = allCommentIds.map(id => getCommentDetail(id, selectedMonths));
+        const comments = await Promise.all(commentPromises);
+        setAllComments(comments);
+        setSelectedComment(comments[0]);
+        setCurrentCommentIndex(0);
+      } else {
+        // Single comment - load just the one
+        const comment = await getCommentDetail(commentId, selectedMonths);
+        setAllComments([comment]);
+        setSelectedComment(comment);
+        setCurrentCommentIndex(0);
+      }
+
       setCommentModalOpen(true);
     } catch (err: unknown) {
       messaging.addErrorMessage(handleApiError(err));
     } finally {
       setCommentLoading(false);
     }
+  };
+
+  const handleCommentNavigation = (direction: 'prev' | 'next') => {
+    if (allComments.length <= 1) return;
+
+    let newIndex = currentCommentIndex;
+    if (direction === 'prev') {
+      newIndex = Math.max(0, currentCommentIndex - 1);
+    } else {
+      newIndex = Math.min(allComments.length - 1, currentCommentIndex + 1);
+    }
+
+    setCurrentCommentIndex(newIndex);
+    setSelectedComment(allComments[newIndex]);
+  };
+
+  const handleCloseCommentModal = () => {
+    setCommentModalOpen(false);
+    setSelectedComment(null);
+    setAllComments([]);
+    setCurrentCommentIndex(0);
   };
 
   const handleFilteredStatusChange = useCallback(
@@ -573,11 +611,10 @@ const UnmatchedAnalyzer: React.FC = () => {
               <div className='flex items-center space-x-2'>
                 <button
                   onClick={viewState.toggleShowFiltered}
-                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                    viewState.showFiltered
+                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${viewState.showFiltered
                       ? 'bg-gray-600 text-white hover:bg-gray-700'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                    }`}
                 >
                   {viewState.showFiltered ? 'Hide Filtered' : 'Show Filtered'}
                 </button>
@@ -666,11 +703,10 @@ const UnmatchedAnalyzer: React.FC = () => {
                             <button
                               onClick={handleApplyFilteredChanges}
                               disabled={loading || visibleChangesCount === 0}
-                              className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${
-                                loading || visibleChangesCount === 0
+                              className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || visibleChangesCount === 0
                                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                                   : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                              }`}
+                                }`}
                             >
                               {loading ? 'Applying...' : `Apply (${visibleChangesCount})`}
                             </button>
@@ -758,10 +794,10 @@ const UnmatchedAnalyzer: React.FC = () => {
       <CommentModal
         comment={selectedComment}
         isOpen={commentModalOpen}
-        onClose={() => {
-          setCommentModalOpen(false);
-          setSelectedComment(null);
-        }}
+        onClose={handleCloseCommentModal}
+        comments={allComments}
+        currentIndex={currentCommentIndex}
+        onNavigate={handleCommentNavigation}
       />
 
       {/* Message Display */}

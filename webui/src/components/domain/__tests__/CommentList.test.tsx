@@ -29,7 +29,7 @@ describe('CommentList', () => {
     render(<CommentList commentIds={['abc123']} onCommentClick={mockOnCommentClick} />);
 
     fireEvent.click(screen.getByText('abc123'));
-    expect(mockOnCommentClick).toHaveBeenCalledWith('abc123');
+    expect(mockOnCommentClick).toHaveBeenCalledWith('abc123', ['abc123']);
   });
 
   test('renders multiple comment IDs up to maxDisplay limit', () => {
@@ -134,7 +134,7 @@ describe('CommentList', () => {
 
     // Test click works
     fireEvent.click(firstButton);
-    expect(mockOnCommentClick).toHaveBeenCalledWith('abc123');
+    expect(mockOnCommentClick).toHaveBeenCalledWith('abc123', ['abc123', 'def456']);
 
     // Test that buttons are accessible via keyboard (Tab navigation)
     const buttons = screen.getAllByRole('button');

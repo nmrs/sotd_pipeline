@@ -1435,12 +1435,24 @@ blade:
     Sharpedge (Yellow):
     - 7'o clock - yellow
     - gillette - 7 o'clock sharp edge
+    - gillette 7 o'clock (yellow)
+    - gillette 7 o'clock sharp edge
+    - gillette 7 o'clock sharp edge (yellow)
+    - gillette 7 o'clock sharpedge
+    - gillette 7 o'clock sharpedge yellow
+    - gillette 7 o'clock yellow
     Super Platinum (Black):
     - 7sp
     - gilette 7 o'clock - super platinum
     - gillette - 7 o'clock super platinum
+    - gillette 7o'clock black
     Super Stainless (Green):
     - gilette 7 o' clock super stainless (green)
+    - gillette 7 o clock green
+    - gillette 7 o'clock stainless (green)
+    - gillette 7 o'clock stainless green
+    - gillette 7 o'clock super stainless (green)
+    - gillette 7 o'clock super stainless (green), de
   Personna:
     Lab Blue:
     - accuforge
@@ -1619,12 +1631,36 @@ blade:
   Gillette:
     Perma-Sharp:
     - gillete permasharp
+    - gillette - perma sharp
+    - gillette - permasharp
+    - gillette green - permasharp
+    - gillette perma-sharp
+    - gillette permasharp
     Silver Blue:
     - gillete silver blue
+    - gillette - silver blue
     Blue:
     - gillette - blue blade
+    - gillette blue
     Minora:
     - gillette - minora
+    - gillette minora
+    - gillette minora stainless
+    Minora Stainless:
+    - gillette - minora stainless
+    Nacet:
+    - gillette - nacet
+    - gillette - nacet stainless
+    - gillette nacet
+    Platinum:
+    - gillette - platinum
+    - gillette - platinum (half in kamisori new, whole in overlander new)
+    Stainless:
+    - gillette - stainless
+    Super Thin Platinum:
+    - gillette - super thin platinum
+    '365':
+    - gillette 365
   King C Gillette:
     DE:
     - gillette - king c gillette blades

@@ -1,17 +1,62 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CommentDetail } from '../../services/api';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CommentModalProps {
   comment: CommentDetail | null;
   commentId?: string;
   isOpen: boolean;
   onClose: () => void;
+  // New props for multi-comment navigation
+  comments?: CommentDetail[];
+  currentIndex?: number;
+  onNavigate?: (direction: 'prev' | 'next') => void;
 }
 
-const CommentModal: React.FC<CommentModalProps> = ({ comment, isOpen, onClose }) => {
+const CommentModal: React.FC<CommentModalProps> = ({
+  comment,
+  isOpen,
+  onClose,
+  comments = [],
+  currentIndex = 0,
+  onNavigate
+}) => {
   if (!isOpen || !comment) {
     return null;
   }
+
+  const hasMultipleComments = comments.length > 1;
+  const canGoPrev = hasMultipleComments && currentIndex > 0;
+  const canGoNext = hasMultipleComments && currentIndex < comments.length - 1;
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      switch (event.key) {
+        case 'ArrowLeft':
+          if (canGoPrev && onNavigate) {
+            event.preventDefault();
+            onNavigate('prev');
+          }
+          break;
+        case 'ArrowRight':
+          if (canGoNext && onNavigate) {
+            event.preventDefault();
+            onNavigate('next');
+          }
+          break;
+        case 'Escape':
+          event.preventDefault();
+          onClose();
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, canGoPrev, canGoNext, onNavigate, onClose]);
 
   const formatDate = (dateString: string) => {
     try {
@@ -36,15 +81,46 @@ const CommentModal: React.FC<CommentModalProps> = ({ comment, isOpen, onClose })
       <div className='bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden'>
         {/* Header */}
         <div className='flex items-center justify-between p-4 border-b border-gray-200'>
-          <div>
-            <h2 className='text-lg font-semibold text-gray-900'>Comment Details</h2>
-            <p className='text-sm text-gray-500'>
-              ID: {comment.id} • {formatDate(comment.created_utc)}
-            </p>
+          <div className='flex items-center space-x-4'>
+            <div>
+              <h2 className='text-lg font-semibold text-gray-900'>Comment Details</h2>
+              <p className='text-sm text-gray-500'>
+                ID: {comment.id} • {formatDate(comment.created_utc)}
+                {hasMultipleComments && (
+                  <span className='ml-2 text-gray-400'>
+                    ({currentIndex + 1} of {comments.length})
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* Navigation arrows */}
+            {hasMultipleComments && (
+              <div className='flex items-center space-x-2'>
+                <button
+                  onClick={() => onNavigate?.('prev')}
+                  disabled={!canGoPrev}
+                  className='p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500'
+                  aria-label='Previous comment'
+                >
+                  <ChevronLeft className='h-5 w-5' />
+                </button>
+                <button
+                  onClick={() => onNavigate?.('next')}
+                  disabled={!canGoNext}
+                  className='p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500'
+                  aria-label='Next comment'
+                >
+                  <ChevronRight className='h-5 w-5' />
+                </button>
+              </div>
+            )}
           </div>
+
           <button
             onClick={onClose}
             className='text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600'
+            aria-label='Close modal'
           >
             <svg className='h-6 w-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
               <path

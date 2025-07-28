@@ -6,7 +6,7 @@ import { MismatchItem } from '../../services/api';
 
 interface MismatchAnalyzerDataTableProps {
   data: MismatchItem[];
-  onCommentClick?: (commentId: string) => void;
+  onCommentClick?: (commentId: string, allCommentIds?: string[]) => void;
   commentLoading?: boolean;
   selectedItems?: Set<string>;
   onItemSelection?: (itemKey: string, selected: boolean) => void;
@@ -290,7 +290,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <CommentList
               commentIds={commentIds}
-              onCommentClick={onCommentClick}
+              onCommentClick={onCommentClick || (() => { })}
               commentLoading={commentLoading}
               maxDisplay={3}
               aria-label={`${commentIds.length} comment${commentIds.length !== 1 ? 's' : ''} available`}

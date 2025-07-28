@@ -311,12 +311,18 @@ DE:
       - london\s*bridge
     Minora:
       patterns:
-      - minora
+      - (?:gil)?.*minora
+      - minora.*stain
+      - minora.*ss
+      - minora.*yellow
+    Minora Platinum:
+      patterns:
       - minora.*plat
+      - minora.*green
     Nacet:
       patterns:
       - nancet
-      - nacet
+      - (?:gil)?.*nacet
       - nacrt
     Perma-Sharp:
       patterns:

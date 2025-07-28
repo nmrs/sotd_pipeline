@@ -2,7 +2,7 @@ import React from 'react';
 
 interface CommentListProps {
   commentIds: string[];
-  onCommentClick: (commentId: string) => void;
+  onCommentClick: (commentId: string, allCommentIds?: string[]) => void;
   commentLoading?: boolean;
   maxDisplay?: number;
   'aria-label'?: string;
@@ -37,7 +37,7 @@ export const CommentList: React.FC<CommentListProps> = ({
       {displayComments.map((commentId, index) => (
         <button
           key={commentId}
-          onClick={() => onCommentClick?.(commentId)}
+          onClick={() => onCommentClick?.(commentId, validCommentIds)}
           disabled={commentLoading}
           className='block w-full text-left text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded border-0 bg-transparent cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
           aria-label={`View comment ${index + 1} of ${validCommentIds.length}`}

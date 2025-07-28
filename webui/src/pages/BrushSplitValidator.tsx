@@ -17,6 +17,9 @@ const BrushSplitValidator: React.FC = () => {
   const [selectedComment, setSelectedComment] = useState<CommentDetail | null>(null);
   const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [commentLoading, setCommentLoading] = useState(false);
+  // Multi-comment navigation state
+  const [allComments, setAllComments] = useState<CommentDetail[]>([]);
+  const [currentCommentIndex, setCurrentCommentIndex] = useState<number>(0);
 
   // Load brush splits when months are selected
   useEffect(() => {
@@ -80,11 +83,25 @@ const BrushSplitValidator: React.FC = () => {
   }, [showValidated]);
 
   const handleCommentClick = useCallback(
-    async (commentId: string) => {
+    async (commentId: string, allCommentIds?: string[]) => {
       try {
         setCommentLoading(true);
-        const comment = await getCommentDetail(commentId, selectedMonths);
-        setSelectedComment(comment);
+        
+        // If we have multiple comment IDs, load all of them
+        if (allCommentIds && allCommentIds.length > 1) {
+          const commentPromises = allCommentIds.map(id => getCommentDetail(id, selectedMonths));
+          const comments = await Promise.all(commentPromises);
+          setAllComments(comments);
+          setSelectedComment(comments[0]);
+          setCurrentCommentIndex(0);
+        } else {
+          // Single comment - load just the one
+          const comment = await getCommentDetail(commentId, selectedMonths);
+          setAllComments([comment]);
+          setSelectedComment(comment);
+          setCurrentCommentIndex(0);
+        }
+        
         setCommentModalOpen(true);
       } catch (err: unknown) {
         console.error('Error loading comment detail:', err);
@@ -95,6 +112,27 @@ const BrushSplitValidator: React.FC = () => {
     },
     [selectedMonths]
   );
+
+  const handleCommentNavigation = (direction: 'prev' | 'next') => {
+    if (allComments.length <= 1) return;
+    
+    let newIndex = currentCommentIndex;
+    if (direction === 'prev') {
+      newIndex = Math.max(0, currentCommentIndex - 1);
+    } else {
+      newIndex = Math.min(allComments.length - 1, currentCommentIndex + 1);
+    }
+    
+    setCurrentCommentIndex(newIndex);
+    setSelectedComment(allComments[newIndex]);
+  };
+
+  const handleCloseCommentModal = () => {
+    setCommentModalOpen(false);
+    setSelectedComment(null);
+    setAllComments([]);
+    setCurrentCommentIndex(0);
+  };
 
   // Create the show/hide validated button
   const validatedButton = useMemo(() => {
@@ -222,10 +260,10 @@ const BrushSplitValidator: React.FC = () => {
       <CommentModal
         comment={selectedComment}
         isOpen={commentModalOpen}
-        onClose={() => {
-          setCommentModalOpen(false);
-          setSelectedComment(null);
-        }}
+        onClose={handleCloseCommentModal}
+        comments={allComments}
+        currentIndex={currentCommentIndex}
+        onNavigate={handleCommentNavigation}
       />
     </div>
   );

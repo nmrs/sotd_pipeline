@@ -17,7 +17,7 @@ interface UnmatchedAnalyzerDataTableProps {
   filteredStatus?: Record<string, boolean>;
   pendingChanges?: Record<string, boolean>;
   onFilteredStatusChange?: (itemName: string, isFiltered: boolean) => void;
-  onCommentClick: (commentId: string) => void;
+  onCommentClick: (commentId: string, allCommentIds?: string[]) => void;
   commentLoading: boolean;
   fieldType: 'razor' | 'blade' | 'soap' | 'brush';
   /** Enable performance logging */
@@ -117,9 +117,9 @@ const UnmatchedAnalyzerDataTable = React.memo<UnmatchedAnalyzerDataTableProps>(
             return (
               <CommentList
                 commentIds={commentIds}
-                onCommentClick={commentId => {
+                onCommentClick={(commentId, allCommentIds) => {
                   const startTime = performance.now();
-                  onCommentClick(commentId);
+                  onCommentClick(commentId, allCommentIds);
                   logPerformance('comment click', startTime);
                 }}
                 commentLoading={commentLoading}
