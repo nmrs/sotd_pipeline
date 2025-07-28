@@ -292,8 +292,6 @@ export function BrushSplitDataTable({
                   // When "Don't Split" is unchecked, restore original values
                   const original = originalValues[item.index];
                   if (original) {
-                    console.log(`Restoring original values for row ${item.index}:`, original);
-
                     // Restore original values and clear the should_not_split change
                     setEditingData(prev => {
                       const newData = { ...prev };
@@ -314,10 +312,6 @@ export function BrushSplitDataTable({
                           delete newData[item.index];
                         }
                       }
-                      console.log(
-                        `Restored editing data for row ${item.index}:`,
-                        newData[item.index]
-                      );
                       return newData;
                     });
 

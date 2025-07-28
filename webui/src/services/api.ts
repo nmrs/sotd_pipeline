@@ -317,9 +317,6 @@ export const saveBrushSplits = async (
         })) || [],
     }));
 
-    // Debug: Log the data we're sending
-    console.log('Sending brush splits to API:', JSON.stringify(formattedSplits, null, 2));
-
     const response = await api.post('/brush-splits/save', {
       brush_splits: formattedSplits,
     });

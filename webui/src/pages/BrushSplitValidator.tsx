@@ -32,18 +32,11 @@ const BrushSplitValidator: React.FC = () => {
     const loadBrushSplitsData = async () => {
       try {
         setLoading(true);
-        console.log('Loading brush splits for months:', selectedMonths);
 
         const response = await loadBrushSplits(selectedMonths, !showMatched);
-        console.log('Received brush splits data:', response);
 
         // Extract the brush_splits array from the response
         const brushSplitsArray = response.brush_splits || [];
-        console.log('Number of brush splits:', brushSplitsArray.length);
-
-        if (brushSplitsArray.length > 0) {
-          console.log('First brush split:', brushSplitsArray[0]);
-        }
 
         setBrushSplits(brushSplitsArray);
         setError(null); // Clear any previous errors
@@ -60,7 +53,6 @@ const BrushSplitValidator: React.FC = () => {
 
   // Filter brush splits based on showValidated state
   const filteredBrushSplits = useMemo(() => {
-    console.log('Filtering brush splits:', { brushSplits, showValidated });
     if (showValidated) {
       // Show all items (validated + unvalidated)
       return brushSplits;
@@ -256,7 +248,6 @@ const BrushSplitValidator: React.FC = () => {
                   });
                 });
 
-                console.log(`Successfully saved ${response.saved_count} brush splits`);
               } else {
                 console.error('Failed to save brush splits:', response.message);
                 setError(`Failed to save brush splits: ${response.message}`);
