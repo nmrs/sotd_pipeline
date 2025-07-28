@@ -769,8 +769,9 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
             import json
 
             matched_json = json.dumps(item.matched, sort_keys=True)
+            # Use case-insensitive original for grouping to combine items that differ only by case
             group_key = (
-                item.original,
+                item.original.lower(),
                 matched_json,
                 item.pattern or "",
                 item.match_type,
@@ -789,6 +790,9 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     existing.confidence is None or item.confidence > existing.confidence
                 ):
                     existing.confidence = item.confidence
+                # Keep the first occurrence's original text for display
+                # (preserve case of first item)
+                # Don't change existing.original since we want to keep the first one
             else:
                 # Create new grouped item
                 grouped_items[group_key] = item
