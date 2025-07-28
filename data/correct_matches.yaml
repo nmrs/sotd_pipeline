@@ -1,3 +1,443 @@
+blade:
+  A77:
+    Cloud:
+      A77:
+      - cloud a77 full blade
+  AC:
+    Feather:
+      Pro:
+      - feather - professional
+      - feather artist club pro
+      - feather artist club professional
+      - feather artist club professional (se)
+      - feather pro
+      - feather pro (ac)
+      - feather professional
+      - feather professional ac blade
+      Pro Super:
+      - feather pro super
+      - feather professional super
+      ProGuard:
+      - feather - pro guard
+      - feather - pro guard artis club
+      - feather artist club pro guard
+      - feather pro guard
+      - feather proguard
+    Generic:
+      Kai Clone:
+      - chinese kai clone
+    Kai:
+      Captain Blade:
+      - kai - captain original
+      Captain ProGuard:
+      - kai proguard m
+      - kai proguard mg
+      Captain ProTouch:
+      - kai - captain titan mild pro touch mg
+      - kai - captain titan mild protouch mg
+      - kai - kai - captain titan mild pro touch mg
+      - kai captain mild protouch mg (ancient)
+      - kai captain titan mild protouch mg
+      - kai captain titan protouch mg
+      - kai protouch mg
+      Captain Titan Mild:
+      - kai - captain titan mild pink (se)
+      - kai captain mild
+      - kai captain titan mild
+      - kai captain titan mild pink (se)
+      Salon Select Premium Guard:
+      - kai salon select premium guard
+  DE:
+    7 O'Clock:
+      Sharpedge (Yellow):
+      - 7'o clock - yellow
+      - gillette - 7 o'clock sharp edge
+      - gillette 7 o'clock (yellow)
+      - gillette 7 o'clock sharp edge
+      - gillette 7 o'clock sharp edge (yellow)
+      - gillette 7 o'clock sharpedge
+      - gillette 7 o'clock sharpedge yellow
+      - gillette 7 o'clock yellow
+      - gillette 7 o'clock yellowddd
+      - gillette yellow
+      Super Platinum (Black):
+      - 7sp
+      - gilette 7 o'clock - super platinum
+      - gillette - 7 o'clock super platinum
+      - gillette 7o'clock black
+      - gillette seven o'clock super platinum
+      Super Stainless (Green):
+      - gilette 7 o' clock super stainless (green)
+      - gillette 7 o clock green
+      - gillette 7 o'clock stainless (green)
+      - gillette 7 o'clock stainless green
+      - gillette 7 o'clock super stainless (green)
+      - gillette 7 o'clock super stainless (green), de
+      - gillette seven o'clock super stainless
+      - gillette super stainless (green)
+    Asco:
+      Platinum:
+      - asco orange platinum
+      Super Stainless:
+      - asco orange (comes preloaded in razor, new) (seven cents/blade)
+    Assured for Men:
+      DE:
+      - assured for men
+    Astra:
+      Superior Platinum (Green):
+      - astra
+      - astra - platinum
+      - astra - superior platinum
+      - astra green
+      - astra green (indian)
+      - astra green - [ on both razors]
+      - astra platinum
+      - astra platinum (green)
+      - astra sp
+      - astra sp (green)
+      - astra sp green
+      - astra super platinum (greens)
+      - astra superior platinum
+      - astra superior platinum, de
+      - gillette astra platinum green
+      Superior Stainless (Blue):
+      - astra - blue
+      - astra blue
+      - astra stainless
+      - astra superior stainless (ass)
+      - astra superior stainless (blue)
+      - gillette astra stainless blue
+      - gillette astra superior stainless blue
+    Bevel:
+      Double Edge:
+      - bevel
+      - bevel de
+    Bic:
+      Astor Stainless:
+      - bic astor
+      - bic astor stainless
+      - bic astor stainless steel
+      Chrome:
+      - bic
+      - bic chrome
+      - bic chrome platinum
+    Big Ben:
+      Super Stainless:
+      - big ben - super stainless
+      - big ben stainless steel
+      - big ben super stainless (purple)
+    Bolzano:
+      Superinox:
+      - bolzano
+      - bolzano - superinox
+      - bolzano superinox
+    Cloud:
+      Super Stainless:
+      - cloud super blades
+    Crown:
+      Super Stainless:
+      - crown - super stainless
+    Crystal:
+      Super:
+      - crystal
+    Derby:
+      Extra:
+      - derby - extra
+      - derby extra
+      Premium:
+      - derby premium
+    Dorco:
+      Prime Platinum:
+      - dorco prime platinum
+      ST-300:
+      - dorco
+      - dorco stainless
+      Titan:
+      - dorco titan
+    Durablade:
+      Sharp Hi Chromium:
+      - durablade sharp hi chromium
+    Feather:
+      DE:
+      - feather
+      - feather (de)
+      - feather - hi-stainless
+      - feather - histainless
+      - feather - new hi-stainless
+      - feather hi-stainless
+      - feather new hi stainless
+      - feather new hi-stainless
+      - feather stainless
+    Filoso:
+      Platinum:
+      - filoso
+      - filoso - platinum blade
+      - filoso - the barbers blade
+    FlyDear:
+      Super Platinum:
+      - flydear
+      - flydear - 9/10
+      - "modified flydear \U0001F926\U0001F3FB\u2642\uFE0F"
+    Gillette:
+      '365':
+      - gillette 365
+      Blue:
+      - gillette - blue blade
+      - gillette blue
+      Minora:
+      - gillette - minora
+      - gillette - minora stainless
+      - gillette minora
+      - gillette minora stainless
+      Nacet:
+      - gillette - nacet
+      - gillette - nacet stainless
+      - gillette nacet
+      - nacet
+      Perma-Sharp:
+      - gillete permasharp
+      - gillette - perma sharp
+      - gillette - permasharp
+      - gillette green - permasharp
+      - gillette perma-sharp
+      - gillette permasharp
+      - perma-sharp
+      - perma-sharp stainless
+      - perma-sharp super
+      - permasharp
+      Platinum:
+      - gillette - platinum
+      - gillette - platinum (half in kamisori new, whole in overlander new)
+      - gillette platinum
+      Silver Blue:
+      - gillete silver blue
+      - gillette - silver blue
+      - gillette silver blue
+      - gsb
+      Stainless:
+      - gillette - stainless
+      Super Thin Mejorada:
+      - gillette - super thin
+      Super Thin Platinum:
+      - gillette - super thin platinum
+      Wilkinson Sword:
+      - gillette wilkinson sword
+      - gws
+      - gws chinese
+      Winner:
+      - gillette winner
+      - gillette winner stainless
+      Winner Platinum:
+      - gillette winner platinum
+    "Gl\xE4tz":
+      Super Platinum:
+      - glatz
+    Kai:
+      DE:
+      - kai
+      - kai - stainless
+    King C Gillette:
+      DE:
+      - gillette - king c gillette blades
+      - king c. gillette
+    Ladas:
+      Super Stainless:
+      - ladas
+    Laser:
+      Ultra:
+      - laser super platinum
+      - laser ultra
+      - lazer triple coated
+    Lord:
+      Blue Sword Platinum:
+      - blue sword platinum
+      Super Chrome:
+      - lord super chrome
+      Super Stainless:
+      - lord super stainless steel
+    Merkur:
+      Super Platinum:
+      - merkur super platinum
+    OK:
+      Super Stainless:
+      - ok (stainless steel, manufactured by lord, )
+    Personna:
+      '74':
+      - personna 74
+      - personna p74
+      Lab Blue:
+      - accuforge
+      - persona
+      - personna - comfort coated (lab blue)
+      - personna - lab blue
+      - personna comfort coat
+      - personna comfort coated
+      - personna gem ptfe
+      - personna lab blue
+      - personna super comfort coated (aka lab blue)
+      Med Prep:
+      - accutec - med prep
+      - persona medical
+      - personna med prep
+      Platinum:
+      - person super stainless
+      - personna "israeli red"
+      - personna - platinum (for both)
+      - personna - platinum chrome israeli red
+      - personna platinum
+      - personna red
+    Shark:
+      Chrome:
+      - lord shark - super chrome
+      Stainless:
+      - lord shark - super stainless
+    Silver Star:
+      Super Stainless:
+      - lord silver star - stainless
+    Super-Max:
+      Platinum:
+      - supermax platinum plus
+      Stainless (Red):
+      - supermax
+    Tatra:
+      Platinum:
+      - czech blades tatra platinum stainless
+    Tiger:
+      Platinum:
+      - tiger platinum, de
+    Treet:
+      Black Beauty:
+      - black beauty
+    Wizamet:
+      Super Iridium:
+      - wizamet
+      - wizamet - iridium super extra stainless
+      - wizamet - super iridium
+      - wizamet half
+      - wizamet iridium
+      - wizamet super iridium
+  FHS:
+    Feather:
+      FHS-1:
+      - feather asd-10
+      - feather fhs-10
+      - fhs-10
+    OneBlade:
+      HiCarbon SE:
+      - oneblade - hicarbon se
+  GEM:
+    GEM:
+      Blue Star:
+      - gem - blue star uncoated blade
+      - gem - blue star uncoated blades
+      - gem blue star
+    PAL:
+      Blue Blade:
+      - pal | single edge carbon steel blue blades
+    Personna:
+      GEM PTFE:
+      - accuforge - gem microcoat
+      - accuforge coated
+      - accuforge gem coated stainless steel
+      - accuforge gem microcoat
+      - accuforge pro ptfe gem
+      - accutec - pro premium coated
+      - accutec pro premium
+      - accutec pro premium (gem)
+      - gem
+      - gem blade
+      - gem ptfe
+      - gem ptfe / schick injector
+      - gem ss ptfe
+      - personna - gem ptfe
+      - personna gem
+      - personna gem ptfe
+      - personna gem ptfe coated
+      - personna gem ptfe, crown half blade, parker injector
+      - personna gem stainless ptfe
+      - personna ptfe
+      - personna ptfe stainless steel gem
+      GEM Stainless:
+      - gem stainless
+  Hair Shaper:
+    Annie:
+      Hair Shaper:
+      - annie hair shaper
+      - annie hair shaper blade
+    Fromm:
+      Hair Shaper:
+      - fromm
+      - fromm - hair shaper
+      - fromm hair shaper blade
+    Gutche:
+      Hair Shaper:
+      - gutche hair shaper blade
+    Kismet:
+      Hair Shaper:
+      - kismet
+      - kismet blade
+      - kismet blade corked
+      - kismet hair shaper
+      - kismet rostfrei
+      - kismet rostfrei, polymer beschichtet
+    Personna:
+      Hair Shaper:
+      - personna
+      - personna - hair shaper
+      - personna - platinum
+      - personna hair shaper
+      - personna hair shaper blade
+      - personna specimen prep
+  Half DE:
+    Dorco:
+      HST-300:
+      - dorco hst-300-p1 1/2 de
+    Gillette:
+      Perma-Sharp SE:
+      - permasharp 1/2 de
+    Leaf:
+      SE:
+      - leaf single-edge blades
+      - leaf super platinum
+    Misaki:
+      Platinum SE:
+      - misaka - platinum
+  Injector:
+    Generic:
+      Injector:
+      - unbranded vintage injector
+      - vintage generic injector
+      - vintage unbranded injector
+    Parker:
+      Injector:
+      - parker injector
+      - parker ss injector
+    Personna:
+      74 Injector:
+      - personna - 74 - injector
+      Injector:
+      - personna injector
+      - personna injector (se)
+      - personna injector blade
+      - personna stainless coated injector blades
+    Schick:
+      Injector:
+      - injector
+      - schick - injector
+      - schick injector
+      - schick injector blade
+      - schick injector yellow
+      - schick stainless steel injector
+      - shick injector blade
+    Ted Pella:
+      Injector:
+      - ted pella - injector
+      - ted pella injector blade
+      - ted pella single edge injector
+  Other:
+    Kampfe:
+      Wedge:
+      - kampfe bros saturday
 razor:
   3D Printed:
     DE:
@@ -239,10 +679,10 @@ razor:
     E-Z Flo:
     - clix e-z flo
   Colonial:
-    General:
-    - al colonial general
     CR7:
     - colonial razors cr7
+    General:
+    - al colonial general
   Cooper:
     Monobilt:
     - cooper - monobilt
@@ -476,7 +916,6 @@ razor:
     - 1962 gillette slim adjustable
     - 1963 gillette slim adjustable
     - 1968 gillette slim adjustable
-    - gillette slim adjustable
     - gillette - aristocrat - no.20
     - gillette - aristocrat 16 (uk)
     - gillette - slim
@@ -493,6 +932,7 @@ razor:
     - 'gillette british aristocrat #16'
     - gillette english aristocrat no. 22 (1948-1950)
     - gillette slim
+    - gillette slim adjustable
     - gillette slim adjustable - date code j3
     - gillette slim adjustable h4
     - gillette slim aristocrat h4
@@ -696,7 +1136,6 @@ razor:
     - karve shaving co. overlander
   Koraat:
     Moarteen (r/Wetshaving exclusive):
-    - koraat moarteen sub-exclusive (15/16", full hollow, square point)
     - koraat - moarteen
     - koraat - moarteen (square point, 15/16", full hollow, r/wetshaving exclusive)
     - koraat - moarteen 15/16
@@ -716,6 +1155,7 @@ razor:
     - koraat moarteen r/wetshaving exclusive 15/16
     - koraat moarteen r/wetshaving exclusive 15/16, full hollow square point
     - koraat moarteen sub razor
+    - koraat moarteen sub-exclusive (15/16", full hollow, square point)
     - koraat r/wetshaving moarteen 7/8
     - koraat-knives - moarteen
     - koraat-knives moarteen
@@ -1070,8 +1510,8 @@ razor:
     - razorock gc.84
     - razorock gc.84 $25
     German 37 Slant:
-    - razorock german 37
     - razorock - german 37 slant razor torsionshobel,
+    - razorock german 37
     - razorock german 37 slant
     Hawk v2:
     - razorock hawk v2
@@ -1221,6 +1661,9 @@ razor:
     Model 100:
     - silver star - vintage de
     - silver star vintage de
+  Stando:
+    Rod:
+    - stando rod custom
   Stirling:
     Stainless DE Razor:
     - stirling soap co. - 316 stainless steel razor
@@ -1228,10 +1671,10 @@ razor:
       serial no. st-01-084
     - stirling ss standard plate
   Supply:
-    SE Pro:
-    - supply adjustable
     SE:
     - supply - sing edge
+    SE Pro:
+    - supply adjustable
   TRC:
     DE:
     - the razor company - trc al lvl 2
@@ -1427,327 +1870,3 @@ razor:
     - ikon razors - ikon short comb
     X3:
     - ikon x3
-  Stando:
-    Rod:
-    - stando rod custom
-blade:
-  7 O'Clock:
-    Sharpedge (Yellow):
-    - 7'o clock - yellow
-    - gillette - 7 o'clock sharp edge
-    - gillette 7 o'clock (yellow)
-    - gillette 7 o'clock sharp edge
-    - gillette 7 o'clock sharp edge (yellow)
-    - gillette 7 o'clock sharpedge
-    - gillette 7 o'clock sharpedge yellow
-    - gillette 7 o'clock yellow
-    - gillette yellow
-    Super Platinum (Black):
-    - 7sp
-    - gilette 7 o'clock - super platinum
-    - gillette - 7 o'clock super platinum
-    - gillette 7o'clock black
-    - gillette seven o'clock super platinum
-    Super Stainless (Green):
-    - gilette 7 o' clock super stainless (green)
-    - gillette 7 o clock green
-    - gillette 7 o'clock stainless (green)
-    - gillette 7 o'clock stainless green
-    - gillette 7 o'clock super stainless (green)
-    - gillette 7 o'clock super stainless (green), de
-    - gillette seven o'clock super stainless
-    - gillette super stainless (green)
-  Personna:
-    Lab Blue:
-    - accuforge
-    GEM PTFE:
-    - accuforge - gem microcoat
-    - accuforge coated
-    - accuforge gem coated stainless steel
-    - accuforge gem microcoat
-    - accuforge pro ptfe gem
-    - accutec - pro premium coated
-    - accutec pro premium
-    - accutec pro premium (gem)
-    - gem
-    - gem blade
-    - gem ptfe
-    - gem ptfe / schick injector
-    - gem ss ptfe
-    - personna gem ptfe, crown half blade, parker injector
-    - personna - gem ptfe
-    - personna gem
-    - personna gem ptfe
-    - personna gem ptfe coated
-    - personna gem stainless ptfe
-    - personna ptfe stainless steel gem
-    Med Prep:
-    - accutec - med prep
-    GEM Stainless:
-    - gem stainless
-    74 Injector:
-    - personna - 74 - injector
-  Astra:
-    Superior Stainless (Blue):
-    - astra - blue
-    - astra blue
-    - astra stainless
-    - astra superior stainless (ass)
-    - astra superior stainless (blue)
-    - gillette astra stainless blue
-    - gillette astra superior stainless blue
-    Superior Platinum (Green):
-    - astra
-    - astra - platinum
-    - astra - superior platinum
-    - astra green
-    - astra green (indian)
-    - astra green - [ on both razors]
-    - astra platinum
-    - astra platinum (green)
-    - astra sp
-    - astra sp (green)
-    - astra sp green
-    - astra super platinum (greens)
-    - astra superior platinum
-    - astra superior platinum, de
-    - gillette astra platinum green
-  Annie:
-    Hair Shaper:
-    - annie hair shaper
-    - annie hair shaper blade
-  Asco:
-    Super Stainless:
-    - asco orange (comes preloaded in razor, new) (seven cents/blade)
-    Platinum:
-    - asco orange platinum
-  Assured for Men:
-    DE:
-    - assured for men
-  Bevel:
-    Double Edge:
-    - bevel
-    - bevel de
-  Bic:
-    Chrome:
-    - bic
-    - bic chrome
-    - bic chrome platinum
-    Astor Stainless:
-    - bic astor
-    - bic astor stainless
-    - bic astor stainless steel
-  Big Ben:
-    Super Stainless:
-    - big ben - super stainless
-    - big ben stainless steel
-    - big ben super stainless (purple)
-  Treet:
-    Black Beauty:
-    - black beauty
-  Lord:
-    Blue Sword Platinum:
-    - blue sword platinum
-  Bolzano:
-    Superinox:
-    - bolzano
-    - bolzano - superinox
-    - bolzano superinox
-  Generic:
-    Kai Clone:
-    - chinese kai clone
-  Cloud:
-    A77:
-    - cloud a77 full blade
-    Super Stainless:
-    - cloud super blades
-  Crown:
-    Super Stainless:
-    - crown - super stainless
-  Crystal:
-    Super:
-    - crystal
-  Tatra:
-    Platinum:
-    - czech blades tatra platinum stainless
-  Derby:
-    Extra:
-    - derby - extra
-    - derby extra
-    Premium:
-    - derby premium
-  Dorco:
-    ST-300:
-    - dorco
-    - dorco stainless
-    HST-300:
-    - dorco hst-300-p1 1/2 de
-    Prime Platinum:
-    - dorco prime platinum
-    Titan:
-    - dorco titan
-  Durablade:
-    Sharp Hi Chromium:
-    - durablade sharp hi chromium
-  Feather:
-    DE:
-    - feather
-    - feather (de)
-    - feather - hi-stainless
-    - feather - histainless
-    - feather - new hi-stainless
-    - feather hi-stainless
-    - feather new hi stainless
-    - feather new hi-stainless
-    - feather stainless
-    ProGuard:
-    - feather - pro guard
-    - feather - pro guard artis club
-    - feather artist club pro guard
-    - feather pro guard
-    - feather proguard
-    Pro:
-    - feather - professional
-    - feather artist club pro
-    - feather artist club professional
-    - feather artist club professional (se)
-    - feather pro
-    - feather pro (ac)
-    - feather professional
-    - feather professional ac blade
-    FHS-1:
-    - feather asd-10
-    - feather fhs-10
-    - fhs-10
-    Pro Super:
-    - feather pro super
-    - feather professional super
-  Filoso:
-    Platinum:
-    - filoso
-    - filoso - platinum blade
-    - filoso - the barbers blade
-  FlyDear:
-    Super Platinum:
-    - flydear
-    - flydear - 9/10
-  Fromm:
-    Hair Shaper:
-    - fromm
-    - fromm - hair shaper
-    - fromm hair shaper blade
-  GEM:
-    Blue Star:
-    - gem - blue star uncoated blade
-    - gem - blue star uncoated blades
-    - gem blue star
-  Gillette:
-    Perma-Sharp:
-    - gillete permasharp
-    - gillette - perma sharp
-    - gillette - permasharp
-    - gillette green - permasharp
-    - gillette perma-sharp
-    - gillette permasharp
-    Silver Blue:
-    - gillete silver blue
-    - gillette - silver blue
-    - gillette silver blue
-    - gsb
-    Blue:
-    - gillette - blue blade
-    - gillette blue
-    Minora:
-    - gillette - minora
-    - gillette minora
-    - gillette minora stainless
-    Minora Stainless:
-    - gillette - minora stainless
-    Nacet:
-    - gillette - nacet
-    - gillette - nacet stainless
-    - gillette nacet
-    - nacet
-    Platinum:
-    - gillette - platinum
-    - gillette - platinum (half in kamisori new, whole in overlander new)
-    - gillette platinum
-    Stainless:
-    - gillette - stainless
-    Super Thin Platinum:
-    - gillette - super thin platinum
-    '365':
-    - gillette 365
-    Wilkinson Sword:
-    - gillette wilkinson sword
-    - gws
-    - gws chinese
-    Winner:
-    - gillette winner
-    - gillette winner stainless
-    Winner Platinum:
-    - gillette winner platinum
-  King C Gillette:
-    DE:
-    - gillette - king c gillette blades
-    - king c. gillette
-  Schick:
-    Injector:
-    - injector
-  Parker:
-    Injector:
-    - parker injector
-    - parker ss injector
-  Kai:
-    DE:
-    - kai
-    - kai - stainless
-    Captain Blade:
-    - kai - captain original
-    Captain Titan Mild:
-    - kai - captain titan mild pink (se)
-    - kai - captain titan mild pro touch mg
-    - kai - captain titan mild protouch mg
-    - kai - kai - captain titan mild pro touch mg
-    - kai captain mild
-    - kai captain mild protouch mg (ancient)
-    - kai captain titan mild
-    - kai captain titan mild pink (se)
-    - kai captain titan mild protouch mg
-    Captain ProTouch:
-    - kai captain titan protouch mg
-    - kai protouch mg
-    Captain ProGuard:
-    - kai proguard m
-    - kai proguard mg
-    Salon Select Premium Guard:
-    - kai salon select premium guard
-  Kismet:
-    Hair Shaper:
-    - kismet
-    - kismet blade
-    - kismet blade corked
-    - kismet hair shaper
-    - kismet rostfrei
-    - kismet rostfrei, polymer beschichtet
-  "Gl\xE4tz":
-    Super Platinum:
-    - glatz
-  Kampfe:
-    Wedge:
-    - kampfe bros saturday
-  Gutche:
-    Hair Shaper:
-    - gutche hair shaper blade
-  Ladas:
-    Super Stainless:
-    - ladas
-  Laser:
-    Ultra:
-    - laser super platinum
-    - laser ultra
-    - lazer triple coated
-  Leaf:
-    SE:
-    - leaf single-edge blades
-    - leaf super platinum

@@ -58,6 +58,7 @@ AC:
     Captain ProTouch:
       patterns:
       - kai.*pro\s*touch
+      - kai.*mild.*pro\s*touch
       - protouch
     Salon Select Premium Guard:
       patterns:
@@ -354,6 +355,7 @@ DE:
     Super Thin Mejorada:
       patterns:
       - mejorada
+      - gil.*super.*thin
     Super Thin Platinum:
       patterns:
       - super.*thin.*plat
@@ -479,6 +481,8 @@ DE:
       patterns:
       - person.*plat
       - person.*red
+    Super Stainless:
+      patterns:
       - person.*stainless
       - person.*\bss\b
       - person.*super
