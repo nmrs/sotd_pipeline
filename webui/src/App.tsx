@@ -8,6 +8,7 @@ import MessageDisplay from './components/feedback/MessageDisplay';
 import { useMessaging } from './hooks/useMessaging';
 import './App.css';
 import MismatchAnalyzer from './pages/MismatchAnalyzer';
+import CatalogValidator from './pages/CatalogValidator';
 
 function App() {
   const messaging = useMessaging();
@@ -23,6 +24,7 @@ function App() {
             <Route path='/unmatched-analyzer' element={<UnmatchedAnalyzer />} />
             <Route path='/performance-test' element={<PerformanceTest />} />
             <Route path='/mismatch' element={<MismatchAnalyzer />} />
+            <Route path='/catalog-validator' element={<CatalogValidator />} />
           </Routes>
         </main>
         <MessageDisplay messages={messaging.messages} onRemoveMessage={messaging.removeMessage} />

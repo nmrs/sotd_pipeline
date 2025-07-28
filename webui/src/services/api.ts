@@ -178,6 +178,7 @@ export interface MismatchItem {
   count: number;
   examples: string[];
   comment_ids: string[];
+  is_confirmed?: boolean;
 }
 
 export interface MismatchAnalysisResult {

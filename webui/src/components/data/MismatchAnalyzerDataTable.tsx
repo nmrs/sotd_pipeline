@@ -4,8 +4,26 @@ import { DataTable } from '@/components/ui/data-table';
 import { CommentList } from '../domain/CommentList';
 import { MismatchItem } from '../../services/api';
 
+// Delimiter for item keys to avoid conflicts with characters in original text
+const ITEM_KEY_DELIMITER = '|||';
+
+// Helper function to extract matched text (matching backend logic)
+const getMatchedText = (field: string, matched: any): string => {
+  if (field === 'soap') {
+    const maker = matched.maker || '';
+    const scent = matched.scent || '';
+    return `${maker} ${scent}`.trim();
+  } else {
+    const brand = matched.brand || '';
+    const model = matched.model || '';
+    // Don't include format in key generation since YAML structure doesn't support it
+    return `${brand} ${model}`.trim();
+  }
+};
+
 interface MismatchAnalyzerDataTableProps {
   data: MismatchItem[];
+  field: string; // Add field prop
   onCommentClick?: (commentId: string, allCommentIds?: string[]) => void;
   commentLoading?: boolean;
   selectedItems?: Set<string>;
@@ -16,6 +34,7 @@ interface MismatchAnalyzerDataTableProps {
 
 const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   data,
+  field,
   onCommentClick,
   commentLoading,
   selectedItems = new Set(),
@@ -133,7 +152,12 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             header: () => {
               // For now, use all data since we can't easily access visible rows from header
               // This will be fixed in a future update when we can pass table context
-              const visibleItemKeys = data.map(item => `${item.original}|${JSON.stringify(item.matched)}`);
+              const visibleItemKeys = data.map(item => {
+                const matchedText = getMatchedText(field, item.matched);
+                const originalNormalized = item.original.toLowerCase().trim();
+                const matchedNormalized = matchedText.toLowerCase().trim();
+                return `${field}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
+              });
 
               const allSelected = visibleItemKeys.length > 0 && visibleItemKeys.every(key => selectedItems.has(key));
               const someSelected = visibleItemKeys.some(key => selectedItems.has(key));
@@ -146,7 +170,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             },
             cell: ({ row }) => {
               const item = row.original;
-              const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
+              const matchedText = getMatchedText(field, item.matched);
+              const originalNormalized = item.original.toLowerCase().trim();
+              const matchedNormalized = matchedText.toLowerCase().trim();
+              const itemKey = `${field}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
               const isSelected = selectedItems.has(itemKey);
 
               return (

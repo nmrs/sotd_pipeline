@@ -422,18 +422,8 @@ const MismatchAnalyzer: React.FC = () => {
 
   const isItemConfirmed = React.useCallback(
     (item: MismatchAnalysisResult['mismatch_items'][0]) => {
-      // Check if item is marked as exact match by the backend
-      if (item.mismatch_type === 'exact_matches') {
-        return true;
-      }
-
-      // Check if item is intentionally unmatched (also considered confirmed)
-      if (item.mismatch_type === 'intentionally_unmatched') {
-        return true;
-      }
-
-      // Default to false - let the backend determine confirmation status
-      return false;
+      // Use the is_confirmed field from the backend
+      return item.is_confirmed || false;
     },
     []
   );

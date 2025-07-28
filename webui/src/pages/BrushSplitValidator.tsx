@@ -79,13 +79,13 @@ const BrushSplitValidator: React.FC = () => {
     async (commentId: string, allCommentIds?: string[]) => {
       try {
         setCommentLoading(true);
-        
+
         // Always load just the clicked comment initially for fast response
         const comment = await getCommentDetail(commentId, selectedMonths);
         setSelectedComment(comment);
         setCurrentCommentIndex(0);
         setCommentModalOpen(true);
-        
+
         // Store the comment IDs for potential future loading
         if (allCommentIds && allCommentIds.length > 1) {
           setAllComments([comment]); // Start with just the first comment
@@ -107,7 +107,7 @@ const BrushSplitValidator: React.FC = () => {
 
   const handleCommentNavigation = async (direction: 'prev' | 'next') => {
     if (allComments.length <= 1 && remainingCommentIds.length === 0) return;
-    
+
     let newIndex = currentCommentIndex;
     if (direction === 'prev') {
       newIndex = Math.max(0, currentCommentIndex - 1);
@@ -121,7 +121,7 @@ const BrushSplitValidator: React.FC = () => {
           setCommentLoading(true);
           const nextCommentId = remainingCommentIds[0];
           const nextComment = await getCommentDetail(nextCommentId, selectedMonths);
-          
+
           setAllComments(prev => [...prev, nextComment]);
           setRemainingCommentIds(prev => prev.slice(1));
           setCurrentCommentIndex(allComments.length);

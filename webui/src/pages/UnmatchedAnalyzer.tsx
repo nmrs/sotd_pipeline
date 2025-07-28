@@ -293,9 +293,9 @@ const UnmatchedAnalyzer: React.FC = () => {
     }
   };
 
-    const handleCommentNavigation = async (direction: 'prev' | 'next') => {
+  const handleCommentNavigation = async (direction: 'prev' | 'next') => {
     if (allComments.length <= 1 && remainingCommentIds.length === 0) return;
-    
+
     let newIndex = currentCommentIndex;
     if (direction === 'prev') {
       newIndex = Math.max(0, currentCommentIndex - 1);
@@ -309,7 +309,7 @@ const UnmatchedAnalyzer: React.FC = () => {
           setCommentLoading(true);
           const nextCommentId = remainingCommentIds[0];
           const nextComment = await getCommentDetail(nextCommentId, selectedMonths);
-          
+
           setAllComments(prev => [...prev, nextComment]);
           setRemainingCommentIds(prev => prev.slice(1));
           setCurrentCommentIndex(allComments.length);
@@ -623,8 +623,8 @@ const UnmatchedAnalyzer: React.FC = () => {
                 <button
                   onClick={viewState.toggleShowFiltered}
                   className={`px-3 py-1 rounded text-sm font-medium transition-colors ${viewState.showFiltered
-                      ? 'bg-gray-600 text-white hover:bg-gray-700'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ? 'bg-gray-600 text-white hover:bg-gray-700'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     }`}
                 >
                   {viewState.showFiltered ? 'Hide Filtered' : 'Show Filtered'}
@@ -715,8 +715,8 @@ const UnmatchedAnalyzer: React.FC = () => {
                               onClick={handleApplyFilteredChanges}
                               disabled={loading || visibleChangesCount === 0}
                               className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || visibleChangesCount === 0
-                                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                                  : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                                : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
                                 }`}
                             >
                               {loading ? 'Applying...' : `Apply (${visibleChangesCount})`}
