@@ -20,6 +20,7 @@ const BrushSplitValidator: React.FC = () => {
   // Multi-comment navigation state
   const [allComments, setAllComments] = useState<CommentDetail[]>([]);
   const [currentCommentIndex, setCurrentCommentIndex] = useState<number>(0);
+  const [remainingCommentIds, setRemainingCommentIds] = useState<string[]>([]);
 
   // Load brush splits when months are selected
   useEffect(() => {
@@ -87,22 +88,21 @@ const BrushSplitValidator: React.FC = () => {
       try {
         setCommentLoading(true);
         
-        // If we have multiple comment IDs, load all of them
-        if (allCommentIds && allCommentIds.length > 1) {
-          const commentPromises = allCommentIds.map(id => getCommentDetail(id, selectedMonths));
-          const comments = await Promise.all(commentPromises);
-          setAllComments(comments);
-          setSelectedComment(comments[0]);
-          setCurrentCommentIndex(0);
-        } else {
-          // Single comment - load just the one
-          const comment = await getCommentDetail(commentId, selectedMonths);
-          setAllComments([comment]);
-          setSelectedComment(comment);
-          setCurrentCommentIndex(0);
-        }
-        
+        // Always load just the clicked comment initially for fast response
+        const comment = await getCommentDetail(commentId, selectedMonths);
+        setSelectedComment(comment);
+        setCurrentCommentIndex(0);
         setCommentModalOpen(true);
+        
+        // Store the comment IDs for potential future loading
+        if (allCommentIds && allCommentIds.length > 1) {
+          setAllComments([comment]); // Start with just the first comment
+          // Store the remaining IDs for lazy loading
+          setRemainingCommentIds(allCommentIds.filter(id => id !== commentId));
+        } else {
+          setAllComments([comment]);
+          setRemainingCommentIds([]);
+        }
       } catch (err: unknown) {
         console.error('Error loading comment detail:', err);
         // Don't show error to user, just log it
@@ -113,18 +113,39 @@ const BrushSplitValidator: React.FC = () => {
     [selectedMonths]
   );
 
-  const handleCommentNavigation = (direction: 'prev' | 'next') => {
-    if (allComments.length <= 1) return;
+  const handleCommentNavigation = async (direction: 'prev' | 'next') => {
+    if (allComments.length <= 1 && remainingCommentIds.length === 0) return;
     
     let newIndex = currentCommentIndex;
     if (direction === 'prev') {
       newIndex = Math.max(0, currentCommentIndex - 1);
+      setCurrentCommentIndex(newIndex);
+      setSelectedComment(allComments[newIndex]);
     } else {
-      newIndex = Math.min(allComments.length - 1, currentCommentIndex + 1);
+      // Next - check if we need to load more comments
+      if (currentCommentIndex === allComments.length - 1 && remainingCommentIds.length > 0) {
+        // Load the next comment
+        try {
+          setCommentLoading(true);
+          const nextCommentId = remainingCommentIds[0];
+          const nextComment = await getCommentDetail(nextCommentId, selectedMonths);
+          
+          setAllComments(prev => [...prev, nextComment]);
+          setRemainingCommentIds(prev => prev.slice(1));
+          setCurrentCommentIndex(allComments.length);
+          setSelectedComment(nextComment);
+        } catch (err: unknown) {
+          console.error('Error loading comment detail:', err);
+        } finally {
+          setCommentLoading(false);
+        }
+      } else {
+        // Navigate to existing comment
+        newIndex = Math.min(allComments.length - 1, currentCommentIndex + 1);
+        setCurrentCommentIndex(newIndex);
+        setSelectedComment(allComments[newIndex]);
+      }
     }
-    
-    setCurrentCommentIndex(newIndex);
-    setSelectedComment(allComments[newIndex]);
   };
 
   const handleCloseCommentModal = () => {
@@ -132,6 +153,7 @@ const BrushSplitValidator: React.FC = () => {
     setSelectedComment(null);
     setAllComments([]);
     setCurrentCommentIndex(0);
+    setRemainingCommentIds([]);
   };
 
   // Create the show/hide validated button

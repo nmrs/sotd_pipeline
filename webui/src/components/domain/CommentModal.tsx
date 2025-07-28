@@ -10,7 +10,7 @@ interface CommentModalProps {
   // New props for multi-comment navigation
   comments?: CommentDetail[];
   currentIndex?: number;
-  onNavigate?: (direction: 'prev' | 'next') => void;
+  onNavigate?: (direction: 'prev' | 'next') => Promise<void>;
 }
 
 const CommentModal: React.FC<CommentModalProps> = ({
