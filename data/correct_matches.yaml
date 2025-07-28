@@ -1441,11 +1441,13 @@ blade:
     - gillette 7 o'clock sharpedge
     - gillette 7 o'clock sharpedge yellow
     - gillette 7 o'clock yellow
+    - gillette yellow
     Super Platinum (Black):
     - 7sp
     - gilette 7 o'clock - super platinum
     - gillette - 7 o'clock super platinum
     - gillette 7o'clock black
+    - gillette seven o'clock super platinum
     Super Stainless (Green):
     - gilette 7 o' clock super stainless (green)
     - gillette 7 o clock green
@@ -1453,6 +1455,8 @@ blade:
     - gillette 7 o'clock stainless green
     - gillette 7 o'clock super stainless (green)
     - gillette 7 o'clock super stainless (green), de
+    - gillette seven o'clock super stainless
+    - gillette super stainless (green)
   Personna:
     Lab Blue:
     - accuforge
@@ -1470,10 +1474,19 @@ blade:
     - gem ptfe
     - gem ptfe / schick injector
     - gem ss ptfe
+    - personna gem ptfe, crown half blade, parker injector
+    - personna - gem ptfe
+    - personna gem
+    - personna gem ptfe
+    - personna gem ptfe coated
+    - personna gem stainless ptfe
+    - personna ptfe stainless steel gem
     Med Prep:
     - accutec - med prep
     GEM Stainless:
     - gem stainless
+    74 Injector:
+    - personna - 74 - injector
   Astra:
     Superior Stainless (Blue):
     - astra - blue
@@ -1639,6 +1652,8 @@ blade:
     Silver Blue:
     - gillete silver blue
     - gillette - silver blue
+    - gillette silver blue
+    - gsb
     Blue:
     - gillette - blue blade
     - gillette blue
@@ -1652,15 +1667,87 @@ blade:
     - gillette - nacet
     - gillette - nacet stainless
     - gillette nacet
+    - nacet
     Platinum:
     - gillette - platinum
     - gillette - platinum (half in kamisori new, whole in overlander new)
+    - gillette platinum
     Stainless:
     - gillette - stainless
     Super Thin Platinum:
     - gillette - super thin platinum
     '365':
     - gillette 365
+    Wilkinson Sword:
+    - gillette wilkinson sword
+    - gws
+    - gws chinese
+    Winner:
+    - gillette winner
+    - gillette winner stainless
+    Winner Platinum:
+    - gillette winner platinum
   King C Gillette:
     DE:
     - gillette - king c gillette blades
+    - king c. gillette
+  Schick:
+    Injector:
+    - injector
+  Parker:
+    Injector:
+    - parker injector
+    - parker ss injector
+  Kai:
+    DE:
+    - kai
+    - kai - stainless
+    Captain Blade:
+    - kai - captain original
+    Captain Titan Mild:
+    - kai - captain titan mild pink (se)
+    - kai - captain titan mild pro touch mg
+    - kai - captain titan mild protouch mg
+    - kai - kai - captain titan mild pro touch mg
+    - kai captain mild
+    - kai captain mild protouch mg (ancient)
+    - kai captain titan mild
+    - kai captain titan mild pink (se)
+    - kai captain titan mild protouch mg
+    Captain ProTouch:
+    - kai captain titan protouch mg
+    - kai protouch mg
+    Captain ProGuard:
+    - kai proguard m
+    - kai proguard mg
+    Salon Select Premium Guard:
+    - kai salon select premium guard
+  Kismet:
+    Hair Shaper:
+    - kismet
+    - kismet blade
+    - kismet blade corked
+    - kismet hair shaper
+    - kismet rostfrei
+    - kismet rostfrei, polymer beschichtet
+  "Gl\xE4tz":
+    Super Platinum:
+    - glatz
+  Kampfe:
+    Wedge:
+    - kampfe bros saturday
+  Gutche:
+    Hair Shaper:
+    - gutche hair shaper blade
+  Ladas:
+    Super Stainless:
+    - ladas
+  Laser:
+    Ultra:
+    - laser super platinum
+    - laser ultra
+    - lazer triple coated
+  Leaf:
+    SE:
+    - leaf single-edge blades
+    - leaf super platinum

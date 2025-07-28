@@ -49,6 +49,8 @@ AC:
     Captain Titan Mild:
       patterns:
       - kai.*cap.*mild
+      - kai.*captain.*mild
+      - kai.*titan.*mild
     Captain ProGuard:
       patterns:
       - kai.*pro\s*guard
@@ -361,8 +363,11 @@ DE:
       - \bgws\b
     Winner:
       patterns:
-      - gil.*winner(?:.*black)?
+      - gil.*winner
       - winner
+    Winner Platinum:
+      patterns:
+      - winner.*plat
   Glätz:
     Super Platinum:
       patterns:
@@ -410,6 +415,9 @@ DE:
     Platinum:
       patterns:
       - lord.*plat
+    Super Chrome:
+      patterns:
+      - lord.*chrome
     Super Stainless:
       patterns:
       - lord.*sup
@@ -526,12 +534,14 @@ DE:
     Chrome:
       patterns:
       - shark.*chr
+      - lord.*shark.*chr
     Platinum:
       patterns:
       - shark.*pla
     Stainless:
       patterns:
       - shark
+      - lord.*shark.*stain
   Sharp Star:
     Platinum:
       patterns:
