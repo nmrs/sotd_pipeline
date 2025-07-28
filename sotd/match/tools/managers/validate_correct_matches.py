@@ -1021,6 +1021,7 @@ class ValidateCorrectMatches:
                             if match_result and "brand" in match_result and "model" in match_result:
                                 actual_brand = match_result["brand"]
                                 actual_model = match_result["model"]
+                                conflicting_pattern = match_result.get("pattern", "unknown")
 
                                 if actual_brand != brand or actual_model != model:
                                     issues.append(
@@ -1044,7 +1045,8 @@ class ValidateCorrectMatches:
                                                 f"Correct match '{correct_match}' was expected to map to "
                                                 f"{brand} {model} but now maps to "
                                                 f"{actual_brand} {actual_model} "
-                                                f"due to catalog pattern changes."
+                                                f"due to catalog pattern changes. "
+                                                f"Conflicting pattern: '{conflicting_pattern}'"
                                             ),
                                         }
                                     )
@@ -1181,7 +1183,7 @@ class ValidateCorrectMatches:
             value: Value to match
 
         Returns:
-            Match result dictionary or None
+            Match result dictionary with pattern information or None
         """
         # For validation, we want to test what the regex patterns would match to
         # if the correct matches didn't exist. We use cached fresh matchers for performance.
@@ -1222,7 +1224,10 @@ class ValidateCorrectMatches:
                     if hasattr(match_result, "matched"):
                         # MatchResult object
                         if match_result.matched:
-                            return match_result.matched
+                            result = match_result.matched
+                            if hasattr(match_result, "pattern"):
+                                result["pattern"] = match_result.pattern
+                            return result
                         return None
                     else:
                         # Dict object
@@ -1239,19 +1244,22 @@ class ValidateCorrectMatches:
 
         # Use the cached fresh matcher
         fresh_matcher = self._fresh_matchers[matcher_type]
+
+        # Get the match result with pattern information
         match_result = fresh_matcher.match(value)
 
-        # Convert MatchResult to dict if needed for backward compatibility
-        if hasattr(match_result, "matched"):
-            # MatchResult object
-            if match_result.matched:
-                return match_result.matched
-            return None
-        else:
-            # Dict object
-            if match_result and match_result.get("matched"):
-                return match_result.get("matched")
-            return None
+        if hasattr(match_result, "matched") and match_result.matched:
+            result = match_result.matched.copy()
+            if hasattr(match_result, "pattern"):
+                result["pattern"] = match_result.pattern
+            return result
+        elif isinstance(match_result, dict) and match_result.get("matched"):
+            result = match_result["matched"].copy()
+            if "pattern" in match_result:
+                result["pattern"] = match_result["pattern"]
+            return result
+
+        return None
 
     def clear_caches(self):
         """Clear all caches to free memory."""
