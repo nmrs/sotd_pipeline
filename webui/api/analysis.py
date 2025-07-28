@@ -675,7 +675,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
         )
         logger.info(f"'Hot Wheels Play Razor' in razor keys: {hot_wheels_in_keys}")
 
-        # Identify mismatches
+        # Identify mismatches using the analyzer
         mismatches = analyzer.identify_mismatches(data, request.field, args)
 
         # Always process all records for consistent frontend filtering
@@ -690,6 +690,9 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 record_id = item["record"].get("id", "")
                 if record_id:
                     mismatch_lookup[record_id] = (mismatch_type, item["reason"])
+                    # Count mismatches (excluding exact_matches which are confirmed)
+                    if mismatch_type != "exact_matches":
+                        total_mismatches += 1
 
         # Process all records
         skipped_count = 0
@@ -719,72 +722,25 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 if not matched:
                     matched = {"error": "No matched data"}
 
-                # Determine if this is a mismatch
+                # Determine mismatch_type using analyzer results
                 mismatch_type = None
                 reason = ""
 
-                # Print repr of original for debug
-                logger.info(f"DEBUG original repr: {repr(original)}")
-                if request.field == "razor":
-                    keys = intentionally_unmatched_data.get("razor", {}).keys()
-                    debug_keys = [repr(k) for k in keys]
-                    logger.info(f"DEBUG razor keys: {debug_keys}")
-                # Check if this item is intentionally unmatched FIRST (before any other checks)
-                logger.info(f"Processing item: '{original}' (normalized: '{normalized}')")
+                # Check if this item is intentionally unmatched FIRST
                 is_intentionally_unmatched_result = is_intentionally_unmatched(
                     normalized, request.field, intentionally_unmatched_data
                 )
-                logger.info(
-                    f"Intentional unmatched result for '{original}': "
-                    f"{is_intentionally_unmatched_result}"
-                )
                 if is_intentionally_unmatched_result:
-                    logger.info(f"Item '{original}' is intentionally unmatched")
                     mismatch_type = "intentionally_unmatched"
                     reason = "Item marked as intentionally unmatched"
-                    # Don't increment total_mismatches for intentionally unmatched items
                 else:
-                    logger.info(f"Item '{original}' is NOT intentionally unmatched")
-                    # Add debug info for specific problematic items
-                    if original == "Hot Wheels Play Razor":
-                        data_keys = (
-                            list(intentionally_unmatched_data.keys())
-                            if intentionally_unmatched_data
-                            else "None"
-                        )
-                        logger.info(
-                            f"Debug for Hot Wheels: original='{original}', "
-                            f"field='{request.field}', data_keys={data_keys}"
-                        )
-                        if request.field in intentionally_unmatched_data:
-                            razor_keys = list(intentionally_unmatched_data[request.field].keys())
-                            logger.info(f"Razor keys: {razor_keys}")
-                    # Check if this record was flagged by the analyzer
+                    # Use analyzer's mismatch detection
                     if record_id in mismatch_lookup:
                         mismatch_type, reason = mismatch_lookup[record_id]
-                        total_mismatches += 1
-                    # Check for "No Match" status or null match_type
-                    elif match_type == "No Match" or match_type is None:
-                        mismatch_type = "no_match_found"
-                        reason = "No match was found for this item"
-                        total_mismatches += 1
-                    # Additional checks for problematic data (after intentionally unmatched check)
-                    elif not matched or matched.get("error"):
-                        mismatch_type = "invalid_match_data"
-                        reason = "Missing or invalid match data"
-                        total_mismatches += 1
-                    # Check for empty or invalid original text
-                    elif not original or original.strip() == "":
-                        mismatch_type = "empty_original"
-                        reason = "Empty or missing original text"
-                        total_mismatches += 1
-
-                # Override Levenshtein distance matches if they were successful
-                if mismatch_type == "levenshtein_distance" and matched and not matched.get("error"):
-                    # Successful fuzzy matches should be considered good matches
-                    mismatch_type = "good_match"
-                    reason = "Successfully matched with fuzzy matching"
-                    total_mismatches -= 1  # Reduce count since this is now a good match
+                    else:
+                        # Default to good match if not flagged by analyzer
+                        mismatch_type = "good_match"
+                        reason = "Successfully matched"
 
                 # Create item for all matches
                 all_item = MismatchItem(
@@ -889,13 +845,40 @@ async def get_correct_matches(field: str):
         with correct_matches_file.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
 
+        logger.info(f"Loaded data keys: {list(data.keys())}")
         field_data = data.get(field, {})
-        total_entries = sum(
-            len(strings) if isinstance(strings, list) else 0
-            for brand_data in field_data.values()
-            if isinstance(brand_data, dict)
-            for strings in brand_data.values()
-        )
+        logger.info(f"Field data for '{field}': {field_data}")
+
+        # Calculate total entries based on field structure
+        total_entries = 0
+        if field == "blade":
+            # Blade can have either format -> brand -> model -> strings structure
+            # or brand -> model -> strings structure (flat)
+            for first_level in field_data.values():
+                if isinstance(first_level, dict):
+                    # Check if this is format structure (has brands as values)
+                    # or brand structure (has models as values)
+                    sample_value = next(iter(first_level.values())) if first_level else None
+                    if isinstance(sample_value, dict):
+                        # Format structure: format -> brand -> model -> strings
+                        for brand_data in first_level.values():
+                            if isinstance(brand_data, dict):
+                                for model_data in brand_data.values():
+                                    if isinstance(model_data, list):
+                                        total_entries += len(model_data)
+                    else:
+                        # Brand structure: brand -> model -> strings
+                        for model_data in first_level.values():
+                            if isinstance(model_data, list):
+                                total_entries += len(model_data)
+        else:
+            # Other fields have brand -> model -> strings structure
+            total_entries = sum(
+                len(strings) if isinstance(strings, list) else 0
+                for brand_data in field_data.values()
+                if isinstance(brand_data, dict)
+                for strings in brand_data.values()
+            )
 
         return CorrectMatchesResponse(field=field, total_entries=total_entries, entries=field_data)
 
