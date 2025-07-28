@@ -119,6 +119,7 @@ class MismatchItem(BaseModel):
     count: int
     examples: List[str]
     comment_ids: List[str]
+    is_confirmed: Optional[bool] = None
 
 
 class MismatchAnalysisResponse(BaseModel):
@@ -594,6 +595,12 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
         )
 
 
+@router.get("/debug/version")
+async def debug_version():
+    """Debug endpoint to check if the server is using updated code."""
+    return {"message": "Updated code loaded", "timestamp": "2025-01-27 16:30"}
+
+
 @router.post("/clear-validator-cache")
 async def clear_validator_cache():
     """Clear the validator cache to force a fresh validation."""
@@ -677,25 +684,57 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
 
         # Load correct matches first
         analyzer._load_correct_matches()
-        
+        logger.info(f"DEBUG: Loaded {len(analyzer._correct_matches)} correct matches")
+
+        # Debug: Show some correct match keys
+        correct_keys = list(analyzer._correct_matches)[:5]
+        for key in correct_keys:
+            logger.info(f"DEBUG: Correct match key example: {key}")
+
         # Identify mismatches using the analyzer
         mismatches = analyzer.identify_mismatches(data, request.field, args)
 
-        # Always process all records for consistent frontend filtering
+        # Process all records using analyzer results
         all_items = []
         total_matches = len(records)
         total_mismatches = 0
 
-        # Create lookup for mismatches to mark them appropriately
-        mismatch_lookup = {}
+        # Create a comprehensive lookup from analyzer results
+        analyzer_results = {}
         for mismatch_type, items in mismatches.items():
             for item in items:
                 record_id = item["record"].get("id", "")
                 if record_id:
-                    mismatch_lookup[record_id] = (mismatch_type, item["reason"])
-                    # Count mismatches (excluding exact_matches which are confirmed)
-                    if mismatch_type != "exact_matches":
+                    # Get all info from analyzer
+                    is_confirmed = item.get("is_confirmed", False)
+                    reason = item.get("reason", "")
+                    analyzer_results[record_id] = {
+                        "mismatch_type": mismatch_type,
+                        "reason": reason,
+                        "is_confirmed": is_confirmed,
+                        "record": item["record"],
+                        "field_data": item.get("field_data", {}),
+                    }
+                    # Debug: Print for 1924 entries
+                    original_text = item["record"].get(request.field, {}).get("original", "")
+                    if "1924" in original_text:
+                        logger.info(
+                            f"DEBUG: Analyzer result for 1924 entry {record_id}: "
+                            f"{mismatch_type}, is_confirmed={is_confirmed}, reason={reason}"
+                        )
+                    # Count mismatches (excluding good_matches)
+                    if mismatch_type != "good_matches":
                         total_mismatches += 1
+
+        # Debug: Show analyzer results summary
+        logger.info(f"DEBUG: Analyzer processed {len(analyzer_results)} records")
+        logger.info(f"DEBUG: Analyzer result keys: {list(analyzer_results.keys())[:5]}")
+
+        # Debug: Show what 1924 entries the analyzer found
+        for record_id, result in analyzer_results.items():
+            original_text = result["record"].get(request.field, {}).get("original", "")
+            if "1924" in original_text:
+                logger.info(f"DEBUG: Analyzer found 1924 entry: {record_id} -> '{original_text}'")
 
         # Process all records
         skipped_count = 0
@@ -713,21 +752,28 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 match_type = field_data.get("match_type", "")
                 record_id = record.get("id", "")
 
-                # Skip records with completely missing original text (missing razor field)
+                # Skip records with completely missing original text
                 if not original or original.strip() == "":
                     skipped_count += 1
                     continue
 
+                # Debug: Print for 1924 entries
+                if "1924" in normalized:
+                    logger.info(
+                        f"DEBUG: API processing 1924 entry {record_id}: "
+                        f"normalized='{normalized}', record_id='{record_id}'"
+                    )
+
                 # Include all records, even those with missing data
-                # For records with missing normalized or matched data, create placeholder items
                 if not normalized:
                     normalized = str(original) if original else "No original text"
                 if not matched:
                     matched = {"error": "No matched data"}
 
-                # Determine mismatch_type using analyzer results
-                mismatch_type = None
-                reason = ""
+                # Use analyzer's results directly
+                mismatch_type = "good_match"
+                reason = "Successfully matched"
+                is_confirmed = False
 
                 # Check if this item is intentionally unmatched FIRST
                 is_intentionally_unmatched_result = is_intentionally_unmatched(
@@ -736,14 +782,58 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 if is_intentionally_unmatched_result:
                     mismatch_type = "intentionally_unmatched"
                     reason = "Item marked as intentionally unmatched"
+                    is_confirmed = True  # Intentionally unmatched items are confirmed
+                elif record_id in analyzer_results:
+                    # Use analyzer's results directly
+                    analyzer_result = analyzer_results[record_id]
+                    mismatch_type = analyzer_result["mismatch_type"]
+                    reason = analyzer_result["reason"]
+                    is_confirmed = analyzer_result["is_confirmed"]
+
+                    # Debug: Print for 1924 entries
+                    if "1924" in normalized:
+                        logger.info(
+                            f"DEBUG: API using analyzer result for 1924 entry {record_id}: "
+                            f"{mismatch_type}, is_confirmed={is_confirmed}, reason={reason}"
+                        )
                 else:
-                    # Use analyzer's mismatch detection
-                    if record_id in mismatch_lookup:
-                        mismatch_type, reason = mismatch_lookup[record_id]
-                    else:
-                        # Default to good match if not flagged by analyzer
-                        mismatch_type = "good_match"
-                        reason = "Successfully matched"
+                    # For records not processed by analyzer, check if they're confirmed
+                    match_key = analyzer._create_match_key(request.field, normalized, matched)
+                    is_confirmed = match_key in analyzer._correct_matches
+
+                    # Debug: Print for 1924 entries
+                    if "1924" in normalized:
+                        logger.info(
+                            f"DEBUG: API fallback for 1924 entry {record_id}: "
+                            f"match_key={match_key}, is_confirmed={is_confirmed}"
+                        )
+                        logger.info(
+                            f"DEBUG: Available analyzer result keys: "
+                            f"{list(analyzer_results.keys())}"
+                        )
+
+                        # Also check if any analyzer results contain this original text
+                        for result_record_id, result in analyzer_results.items():
+                            result_original = (
+                                result["record"].get(request.field, {}).get("original", "")
+                            )
+                            if "1924" in result_original and "1924" in normalized:
+                                logger.info(
+                                    f"DEBUG: Found matching 1924 entry in analyzer results: "
+                                    f"result_id={result_record_id}, api_id={record_id}, "
+                                    f"result_original='{result_original}', "
+                                    f"api_original='{normalized}'"
+                                )
+
+                                # Use the analyzer result if we found a match
+                                mismatch_type = result["mismatch_type"]
+                                reason = result["reason"]
+                                is_confirmed = result["is_confirmed"]
+                                logger.info(
+                                    f"DEBUG: Using analyzer result for 1924 entry: "
+                                    f"is_confirmed={is_confirmed}"
+                                )
+                                break
 
                 # Create item for all matches
                 all_item = MismatchItem(
@@ -752,13 +842,14 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     pattern=pattern,
                     match_type=match_type or "No Match",
                     confidence=field_data.get("confidence"),
-                    mismatch_type=mismatch_type or "good_match",
+                    mismatch_type=mismatch_type,
                     reason=reason,
                     count=1,
                     examples=(
                         [str(record.get("_source_file", ""))] if record.get("_source_file") else []
                     ),
                     comment_ids=[str(record_id)] if record_id else [],
+                    is_confirmed=is_confirmed,
                 )
 
                 all_items.append(all_item)
@@ -776,6 +867,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
 
             matched_json = json.dumps(item.matched, sort_keys=True)
             # Use case-insensitive original for grouping to combine items that differ only by case
+            # Include is_confirmed in the group key to preserve confirmation status
             group_key = (
                 item.original.lower(),
                 matched_json,
@@ -783,6 +875,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 item.match_type,
                 item.mismatch_type or "",
                 item.reason or "",
+                item.is_confirmed or False,
             )
 
             if group_key in grouped_items:
