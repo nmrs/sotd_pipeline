@@ -126,83 +126,67 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       // Selection column
       ...(onItemSelection
         ? [
-            {
-              id: 'selection',
-              header: () => {
-                // For now, use all data since we can't easily access visible rows from header
-                // This will be fixed in a future update when we can pass table context
-                const visibleItemKeys = data.map(item => `${item.original}|${JSON.stringify(item.matched)}`);
-                
-                const allSelected = visibleItemKeys.length > 0 && visibleItemKeys.every(key => selectedItems.has(key));
-                const someSelected = visibleItemKeys.some(key => selectedItems.has(key));
+          {
+            id: 'selection',
+            header: () => {
+              // For now, use all data since we can't easily access visible rows from header
+              // This will be fixed in a future update when we can pass table context
+              const visibleItemKeys = data.map(item => `${item.original}|${JSON.stringify(item.matched)}`);
 
-                const handleSelectAll = (checked: boolean) => {
-                  visibleItemKeys.forEach(key => {
-                    onItemSelection(key, checked);
-                  });
-                };
+              const allSelected = visibleItemKeys.length > 0 && visibleItemKeys.every(key => selectedItems.has(key));
+              const someSelected = visibleItemKeys.some(key => selectedItems.has(key));
 
-                return (
-                  <div className='flex items-center gap-2'>
-                    <span>Select</span>
-                    <input
-                      type='checkbox'
-                      checked={allSelected}
-                      ref={input => {
-                        if (input) {
-                          input.indeterminate = someSelected && !allSelected;
-                        }
-                      }}
-                      onChange={e => handleSelectAll(e.target.checked)}
-                      className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                    />
-                  </div>
-                );
-              },
-              cell: ({ row }) => {
-                const item = row.original;
-                const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
-                const isSelected = selectedItems.has(itemKey);
-
-                return (
-                  <input
-                    type='checkbox'
-                    checked={isSelected}
-                    onChange={e => onItemSelection(itemKey, e.target.checked)}
-                    className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                  />
-                );
-              },
+              return (
+                <div className='flex items-center gap-2'>
+                  <span>Select</span>
+                </div>
+              );
             },
-          ]
+            cell: ({ row }) => {
+              const item = row.original;
+              const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
+              const isSelected = selectedItems.has(itemKey);
+
+              return (
+                <input
+                  type='checkbox'
+                  checked={isSelected}
+                  onChange={e => onItemSelection(itemKey, e.target.checked)}
+                  className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                />
+              );
+            },
+            enableSorting: false,
+          },
+        ]
         : []),
 
       // Status column
       ...(isItemConfirmed
         ? [
-            {
-              id: 'status',
-              header: 'Status',
-              cell: ({ row }) => {
-                const item = row.original;
-                const isConfirmed = isItemConfirmed(item);
+          {
+            id: 'status',
+            header: 'Status',
+            cell: ({ row }) => {
+              const item = row.original;
+              const isConfirmed = isItemConfirmed(item);
 
-                return (
-                  <div className='flex items-center'>
-                    {isConfirmed ? (
-                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
-                        ✅ Confirmed
-                      </span>
-                    ) : (
-                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
-                        ⚠️ Unconfirmed
-                      </span>
-                    )}
-                  </div>
-                );
-              },
+              return (
+                <div className='flex items-center'>
+                  {isConfirmed ? (
+                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
+                      ✅ Confirmed
+                    </span>
+                  ) : (
+                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
+                      ⚠️ Unconfirmed
+                    </span>
+                  )}
+                </div>
+              );
             },
-          ]
+          },
+        ]
         : []),
       {
         accessorKey: 'count',
