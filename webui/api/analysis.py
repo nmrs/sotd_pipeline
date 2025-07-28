@@ -652,7 +652,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 self.no_confirm = False
                 self.clear_correct = False
                 self.clear_field = None
-                self.show_correct = False
+                self.show_correct = True
                 self.test_correct_matches = None
 
         args = Args()
@@ -675,6 +675,9 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
         )
         logger.info(f"'Hot Wheels Play Razor' in razor keys: {hot_wheels_in_keys}")
 
+        # Load correct matches first
+        analyzer._load_correct_matches()
+        
         # Identify mismatches using the analyzer
         mismatches = analyzer.identify_mismatches(data, request.field, args)
 

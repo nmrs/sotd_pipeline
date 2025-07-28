@@ -505,9 +505,21 @@ class MismatchAnalyzer(AnalysisTool):
             # Create a unique key for this match
             match_key = self._create_match_key(field, normalized, matched)
 
-            # Skip if this match was previously marked as correct (unless showing correct matches)
-            if match_key in self._correct_matches and not args.show_correct:
-                continue
+            # Check if this match was previously marked as correct
+            if match_key in self._correct_matches:
+                if args.show_correct:
+                    # Add to exact_matches category when showing correct matches
+                    mismatches["exact_matches"].append(
+                        {
+                            "record": record,
+                            "field_data": field_data,
+                            "match_key": match_key,
+                            "reason": "Exact match from correct_matches.yaml",
+                        }
+                    )
+                else:
+                    # Skip further analysis for confirmed matches (unless showing correct matches)
+                    continue
 
             # Check for multiple regex patterns (only if we have catalog patterns)
             if catalog_patterns:
@@ -637,8 +649,13 @@ class MismatchAnalyzer(AnalysisTool):
                                                 if isinstance(strings, list):
                                                     for original in strings:
                                                         brand_model = f"{brand} {model}"
+                                                        # Use the same normalization as _create_match_key
+                                                        normalized = normalize_for_matching(
+                                                            original, None, field=field
+                                                        )
+                                                        original_normalized = normalized.lower().strip()
                                                         match_key = (
-                                                            f"{field}:{original.lower().strip()}|"
+                                                            f"{field}:{original_normalized}|"
                                                             f"{brand_model.lower().strip()}"
                                                         )
                                                         self._correct_matches.add(match_key)
@@ -659,8 +676,13 @@ class MismatchAnalyzer(AnalysisTool):
                                         if isinstance(strings, list):
                                             for original in strings:
                                                 brand_model = f"{brand} {model}"
+                                                # Use the same normalization as _create_match_key
+                                                normalized = normalize_for_matching(
+                                                    original, None, field=field
+                                                )
+                                                original_normalized = normalized.lower().strip()
                                                 match_key = (
-                                                    f"{field}:{original.lower().strip()}|"
+                                                    f"{field}:{original_normalized}|"
                                                     f"{brand_model.lower().strip()}"
                                                 )
                                                 self._correct_matches.add(match_key)
