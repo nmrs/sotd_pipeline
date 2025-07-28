@@ -108,8 +108,22 @@ def match_record(record: dict) -> dict:
                 "pattern": None,
             }
         else:
-            # Match using normalized string only
-            blade_result = blade_matcher.match(blade_normalized, blade_original)
+            # Get razor context for blade matching
+            razor_format = None
+            if "razor" in result and result["razor"] and "matched" in result["razor"]:
+                razor_matched = result["razor"]["matched"]
+                if razor_matched and "format" in razor_matched:
+                    razor_format = razor_matched["format"]
+
+            # Match using context-aware matching if we have razor format
+            if razor_format:
+                blade_result = blade_matcher.match_with_context(
+                    blade_normalized, razor_format, blade_original
+                )
+            else:
+                # Fallback to non-context matching
+                blade_result = blade_matcher.match(blade_normalized, blade_original)
+
             # Convert MatchResult to dict for consistency
             if blade_result is not None:
                 result["blade"] = {

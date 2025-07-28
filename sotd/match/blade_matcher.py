@@ -86,6 +86,84 @@ class BladeMatcher:
 
         return fallback_formats
 
+    def _build_shavette_fallback_formats(self, target_format: str) -> List[str]:
+        """
+        Build fallback formats list specifically for Shavettes.
+
+        For Shavettes, prioritize format-appropriate blades over DE since DE blades
+        are less common in Shavettes than specialized formats.
+
+        Args:
+            target_format: The target blade format from the razor
+
+        Returns formats in order of preference for Shavette fallback matching.
+        """
+        if not self.catalog:
+            return []
+
+        # Get all formats from the catalog
+        available_formats = list(self.catalog.keys())
+
+        # For Shavettes, prioritize the target format and related formats over DE
+        if target_format.upper() in ["AC", "ARTIST CLUB"]:
+            # For AC razors, prioritize AC, then other specialized formats
+            shavette_order = [
+                "AC",  # Target format
+                "GEM",  # Related single-edge format
+                "Injector",  # Another single-edge format
+                "Hair Shaper",  # Specialized format
+                "FHS",  # Feather format
+                "A77",  # AC77 format
+                "Half DE",  # Half DE before full DE
+                "DE",  # DE last for Shavettes
+            ]
+        elif target_format.upper() in ["INJECTOR"]:
+            # For Injector razors, prioritize Injector, then other single-edge formats
+            shavette_order = [
+                "Injector",  # Target format
+                "GEM",  # Related single-edge format
+                "AC",  # Another single-edge format
+                "Hair Shaper",  # Specialized format
+                "FHS",  # Feather format
+                "A77",  # AC77 format
+                "Half DE",  # Half DE before full DE
+                "DE",  # DE last for Shavettes
+            ]
+        elif target_format.upper() in ["HAIR SHAPER"]:
+            # For Hair Shaper razors, prioritize Hair Shaper, then other specialized formats
+            shavette_order = [
+                "Hair Shaper",  # Target format
+                "Injector",  # Related single-edge format
+                "GEM",  # Another single-edge format
+                "AC",  # Another single-edge format
+                "FHS",  # Feather format
+                "A77",  # AC77 format
+                "Half DE",  # Half DE before full DE
+                "DE",  # DE last for Shavettes
+            ]
+        else:
+            # For other Shavette formats, use a general Shavette-appropriate order
+            shavette_order = [
+                target_format,  # Target format first
+                "Injector",  # Common Shavette format
+                "AC",  # Common Shavette format
+                "GEM",  # Single-edge format
+                "Hair Shaper",  # Specialized format
+                "FHS",  # Feather format
+                "A77",  # AC77 format
+                "Half DE",  # Half DE before full DE
+                "DE",  # DE last for Shavettes
+            ]
+
+        # Start with Shavette-appropriate order formats that exist in catalog
+        fallback_formats = [fmt for fmt in shavette_order if fmt in available_formats]
+
+        # Add any remaining formats from catalog that weren't in the order
+        remaining_formats = [fmt for fmt in available_formats if fmt not in shavette_order]
+        fallback_formats.extend(remaining_formats)
+
+        return fallback_formats
+
     def _compile_patterns(self):
         compiled = []
         for format_name, brands in self.catalog.items():
@@ -111,6 +189,47 @@ class BladeMatcher:
             return (-length_score, -complexity_score, -boundary_score)
 
         return sorted(compiled, key=pattern_sort_key)
+
+    def _get_context_aware_patterns(self, target_format: str, is_shavette: bool = False):
+        """
+        Get patterns sorted with context-aware prioritization.
+
+        For Shavettes, prioritize patterns from the target format and related formats
+        over DE patterns to avoid incorrect fallback to DE.
+        """
+        if not is_shavette:
+            return self.patterns
+
+        # For Shavettes, re-sort patterns to prioritize target format and related formats
+        target_format_upper = target_format.upper()
+
+        def shavette_pattern_sort_key(item):
+            brand, model, fmt, pattern, compiled, entry = item
+
+            # Primary: target format gets highest priority
+            if fmt.upper() == target_format_upper:
+                format_priority = 0
+            # Secondary: related single-edge formats
+            elif fmt.upper() in ["INJECTOR", "AC", "GEM", "HAIR SHAPER", "FHS", "A77"]:
+                format_priority = 1
+            # Tertiary: Half DE
+            elif fmt.upper() == "HALF DE":
+                format_priority = 2
+            # Last: DE format
+            elif fmt.upper() == "DE":
+                format_priority = 3
+            else:
+                format_priority = 2  # Other formats get medium priority
+
+            # Within each format priority, sort by pattern specificity
+            pattern = item[3]
+            length_score = len(pattern)
+            complexity_score = sum(1 for c in pattern if c in r"[].*+?{}()|^$\\")
+            boundary_score = pattern.count(r"\b") + pattern.count(r"\s")
+
+            return (format_priority, -length_score, -complexity_score, -boundary_score)
+
+        return sorted(self.patterns, key=shavette_pattern_sort_key)
 
     def _precompute_normalized_correct_matches(self) -> Dict[str, List[Dict[str, Any]]]:
         """
@@ -318,7 +437,7 @@ class BladeMatcher:
         return format_matches
 
     def _match_regex_in_format(
-        self, normalized_value: str, target_format: str
+        self, normalized_value: str, target_format: str, is_shavette: bool = False
     ) -> Optional[Dict[str, Any]]:
         """
         Match using regex patterns in a specific format only.
@@ -326,12 +445,16 @@ class BladeMatcher:
         Args:
             normalized_value: The normalized string to match
             target_format: The target format to search in
+            is_shavette: Whether this is a Shavette razor for context-aware matching
 
         Returns:
             Match result or None if no match found
         """
+        # Use context-aware patterns for Shavettes
+        patterns_to_search = self._get_context_aware_patterns(target_format, is_shavette)
+
         # Search only patterns in the target format
-        for brand, model, fmt, raw_pattern, compiled, entry in self.patterns:
+        for brand, model, fmt, raw_pattern, compiled, entry in patterns_to_search:
             if fmt.upper() == target_format.upper() and compiled.search(normalized_value):
                 match_data = {
                     "brand": brand,
@@ -464,6 +587,9 @@ class BladeMatcher:
         # Track which formats we've already searched to avoid redundant work
         searched_formats = set()
 
+        # Determine if this is a Shavette razor for context-aware matching
+        is_shavette = razor_format.upper().startswith("SHAVETTE")
+
         # 1. Try correct matches in target format first
         if normalized_text:
             searched_formats.add(target_blade_format.upper())
@@ -480,7 +606,9 @@ class BladeMatcher:
 
         # 2. Try regex matching in target format
         if normalized_text:
-            regex_target = self._match_regex_in_format(normalized_text, target_blade_format)
+            regex_target = self._match_regex_in_format(
+                normalized_text, target_blade_format, is_shavette
+            )
             if regex_target:
                 return create_match_result(
                     original=original,
@@ -500,7 +628,7 @@ class BladeMatcher:
                     match_type="exact",
                     pattern=None,
                 )
-            regex_half_de = self._match_regex_in_format(normalized_text, "HALF DE")
+            regex_half_de = self._match_regex_in_format(normalized_text, "HALF DE", is_shavette)
             if regex_half_de:
                 return create_match_result(
                     original=original,
@@ -520,7 +648,7 @@ class BladeMatcher:
                     match_type="exact",
                     pattern=None,
                 )
-            regex_fhs = self._match_regex_in_format(normalized_text, "FHS")
+            regex_fhs = self._match_regex_in_format(normalized_text, "FHS", is_shavette)
             if regex_fhs:
                 return create_match_result(
                     original=original,
@@ -529,33 +657,45 @@ class BladeMatcher:
                     pattern=regex_fhs.get("pattern"),
                 )
 
-        # 4. General fallback system: try DE first, then other formats
+        # 4. General fallback system: try format-appropriate blades first
         if normalized_text:
-            # Try DE format first (most common) - unless we already searched it
-            if "DE" not in searched_formats:
-                correct_de = self._collect_correct_matches_in_format(normalized_text, "DE")
-                if correct_de:
-                    return create_match_result(
-                        original=original,
-                        matched=correct_de[0],
-                        match_type="exact",
-                        pattern=None,
-                    )
-                regex_de = self._match_regex_in_format(normalized_text, "DE")
-                if regex_de:
-                    return create_match_result(
-                        original=original,
-                        matched=regex_de["matched"],
-                        match_type=MatchType.REGEX,
-                        pattern=regex_de.get("pattern"),
-                    )
+            # Determine if this is a Shavette razor for special fallback logic
+            is_shavette = razor_format.upper().startswith("SHAVETTE")
 
-            # Try other formats in order of preference - skip already searched formats
-            # Use context-aware fallback list if we have a target format
-            if target_blade_format and target_blade_format != "DE":
-                fallback_formats = self._build_fallback_formats(target_blade_format)
+            # For Shavettes, use Shavette-specific fallback that prioritizes
+            # format-appropriate blades
+            if is_shavette:
+                # Use Shavette-specific fallback order that prioritizes target format and
+                # related formats over DE
+                fallback_formats = self._build_shavette_fallback_formats(target_blade_format)
             else:
-                fallback_formats = self._fallback_formats
+                # For non-Shavettes (dedicated razors), use standard fallback with DE priority
+                # Try DE format first (most common) - unless we already searched it
+                if "DE" not in searched_formats:
+                    correct_de = self._collect_correct_matches_in_format(normalized_text, "DE")
+                    if correct_de:
+                        return create_match_result(
+                            original=original,
+                            matched=correct_de[0],
+                            match_type="exact",
+                            pattern=None,
+                        )
+                    regex_de = self._match_regex_in_format(normalized_text, "DE", is_shavette)
+                    if regex_de:
+                        return create_match_result(
+                            original=original,
+                            matched=regex_de["matched"],
+                            match_type=MatchType.REGEX,
+                            pattern=regex_de.get("pattern"),
+                        )
+
+                # Use context-aware fallback list if we have a target format
+                if target_blade_format and target_blade_format != "DE":
+                    fallback_formats = self._build_fallback_formats(target_blade_format)
+                else:
+                    fallback_formats = self._fallback_formats
+
+            # Try fallback formats in order - skip already searched formats
             for fallback_format in fallback_formats:
                 if fallback_format not in searched_formats:
                     correct_fallback = self._collect_correct_matches_in_format(
@@ -568,7 +708,9 @@ class BladeMatcher:
                             match_type="exact",
                             pattern=None,
                         )
-                    regex_fallback = self._match_regex_in_format(normalized_text, fallback_format)
+                    regex_fallback = self._match_regex_in_format(
+                        normalized_text, fallback_format, is_shavette
+                    )
                     if regex_fallback:
                         return create_match_result(
                             original=original,
