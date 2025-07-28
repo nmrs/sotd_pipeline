@@ -1434,8 +1434,13 @@ blade:
   7 O'Clock:
     Sharpedge (Yellow):
     - 7'o clock - yellow
+    - gillette - 7 o'clock sharp edge
     Super Platinum (Black):
     - 7sp
+    - gilette 7 o'clock - super platinum
+    - gillette - 7 o'clock super platinum
+    Super Stainless (Green):
+    - gilette 7 o' clock super stainless (green)
   Personna:
     Lab Blue:
     - accuforge
@@ -1446,8 +1451,17 @@ blade:
     - accuforge gem microcoat
     - accuforge pro ptfe gem
     - accutec - pro premium coated
+    - accutec pro premium
+    - accutec pro premium (gem)
+    - gem
+    - gem blade
+    - gem ptfe
+    - gem ptfe / schick injector
+    - gem ss ptfe
     Med Prep:
     - accutec - med prep
+    GEM Stainless:
+    - gem stainless
   Astra:
     Superior Stainless (Blue):
     - astra - blue
@@ -1457,3 +1471,160 @@ blade:
     - astra superior stainless (blue)
     - gillette astra stainless blue
     - gillette astra superior stainless blue
+    Superior Platinum (Green):
+    - astra
+    - astra - platinum
+    - astra - superior platinum
+    - astra green
+    - astra green (indian)
+    - astra green - [ on both razors]
+    - astra platinum
+    - astra platinum (green)
+    - astra sp
+    - astra sp (green)
+    - astra sp green
+    - astra super platinum (greens)
+    - astra superior platinum
+    - astra superior platinum, de
+    - gillette astra platinum green
+  Annie:
+    Hair Shaper:
+    - annie hair shaper
+    - annie hair shaper blade
+  Asco:
+    Super Stainless:
+    - asco orange (comes preloaded in razor, new) (seven cents/blade)
+    Platinum:
+    - asco orange platinum
+  Assured for Men:
+    DE:
+    - assured for men
+  Bevel:
+    Double Edge:
+    - bevel
+    - bevel de
+  Bic:
+    Chrome:
+    - bic
+    - bic chrome
+    - bic chrome platinum
+    Astor Stainless:
+    - bic astor
+    - bic astor stainless
+    - bic astor stainless steel
+  Big Ben:
+    Super Stainless:
+    - big ben - super stainless
+    - big ben stainless steel
+    - big ben super stainless (purple)
+  Treet:
+    Black Beauty:
+    - black beauty
+  Lord:
+    Blue Sword Platinum:
+    - blue sword platinum
+  Bolzano:
+    Superinox:
+    - bolzano
+    - bolzano - superinox
+    - bolzano superinox
+  Generic:
+    Kai Clone:
+    - chinese kai clone
+  Cloud:
+    A77:
+    - cloud a77 full blade
+    Super Stainless:
+    - cloud super blades
+  Crown:
+    Super Stainless:
+    - crown - super stainless
+  Crystal:
+    Super:
+    - crystal
+  Tatra:
+    Platinum:
+    - czech blades tatra platinum stainless
+  Derby:
+    Extra:
+    - derby - extra
+    - derby extra
+    Premium:
+    - derby premium
+  Dorco:
+    ST-300:
+    - dorco
+    - dorco stainless
+    HST-300:
+    - dorco hst-300-p1 1/2 de
+    Prime Platinum:
+    - dorco prime platinum
+    Titan:
+    - dorco titan
+  Durablade:
+    Sharp Hi Chromium:
+    - durablade sharp hi chromium
+  Feather:
+    DE:
+    - feather
+    - feather (de)
+    - feather - hi-stainless
+    - feather - histainless
+    - feather - new hi-stainless
+    - feather hi-stainless
+    - feather new hi stainless
+    - feather new hi-stainless
+    - feather stainless
+    ProGuard:
+    - feather - pro guard
+    - feather - pro guard artis club
+    - feather artist club pro guard
+    - feather pro guard
+    - feather proguard
+    Pro:
+    - feather - professional
+    - feather artist club pro
+    - feather artist club professional
+    - feather artist club professional (se)
+    - feather pro
+    - feather pro (ac)
+    - feather professional
+    - feather professional ac blade
+    FHS-1:
+    - feather asd-10
+    - feather fhs-10
+    - fhs-10
+    Pro Super:
+    - feather pro super
+    - feather professional super
+  Filoso:
+    Platinum:
+    - filoso
+    - filoso - platinum blade
+    - filoso - the barbers blade
+  FlyDear:
+    Super Platinum:
+    - flydear
+    - flydear - 9/10
+  Fromm:
+    Hair Shaper:
+    - fromm
+    - fromm - hair shaper
+    - fromm hair shaper blade
+  GEM:
+    Blue Star:
+    - gem - blue star uncoated blade
+    - gem - blue star uncoated blades
+    - gem blue star
+  Gillette:
+    Perma-Sharp:
+    - gillete permasharp
+    Silver Blue:
+    - gillete silver blue
+    Blue:
+    - gillette - blue blade
+    Minora:
+    - gillette - minora
+  King C Gillette:
+    DE:
+    - gillette - king c gillette blades
