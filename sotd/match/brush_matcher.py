@@ -14,8 +14,8 @@ from sotd.match.brush_matching_strategies.other_brushes_strategy import (
 )
 from sotd.match.brush_matching_strategies.other_knot_strategy import OtherKnotMatchingStrategy
 from sotd.match.brush_matching_strategies.zenith_strategy import ZenithBrushMatchingStrategy
-from sotd.match.brush_splitter import BrushSplitter
 from sotd.match.brush_splits_loader import BrushSplitsLoader
+from sotd.match.brush_splitter import BrushSplitter
 from sotd.match.cache import MatchCache
 from sotd.match.config import BrushMatcherConfig
 from sotd.match.correct_matches import CorrectMatchesChecker

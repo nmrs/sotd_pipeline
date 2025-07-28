@@ -1192,8 +1192,8 @@ class ValidateCorrectMatches:
         if matcher_type not in self._fresh_matchers:
             # Create and cache a fresh matcher without correct matches
             from sotd.match.blade_matcher import BladeMatcher
-            from sotd.match.razor_matcher import RazorMatcher
             from sotd.match.brush_matcher import BrushMatcher
+            from sotd.match.razor_matcher import RazorMatcher
             from sotd.match.soap_matcher import SoapMatcher
 
             if isinstance(matcher, BladeMatcher):

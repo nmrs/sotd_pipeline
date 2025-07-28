@@ -5,7 +5,6 @@ This implements Phase 2 of the missing thread URL recovery plan.
 """
 
 import json
-import requests
 from datetime import datetime
 from urllib.parse import quote_plus
 
@@ -154,14 +153,14 @@ def main():
     with open("external_search_results.json", "w") as f:
         json.dump(external_search_results, f, indent=2)
 
-    print(f"\n=== EXTERNAL SEARCH COMPLETE ===")
+    print("\n=== EXTERNAL SEARCH COMPLETE ===")
     print(f"Searched {len(missing_dates)} missing dates")
-    print(f"Results saved to: external_search_results.json")
-    print(f"\nNext steps:")
-    print(f"1. Manually review search URLs for each date")
-    print(f"2. Validate found threads against criteria")
-    print(f"3. Add valid threads to thread_overrides.yaml")
-    print(f"4. Update plan with external search results")
+    print("Results saved to: external_search_results.json")
+    print("\nNext steps:")
+    print("1. Manually review search URLs for each date")
+    print("2. Validate found threads against criteria")
+    print("3. Add valid threads to thread_overrides.yaml")
+    print("4. Update plan with external search results")
 
     return external_search_results
 

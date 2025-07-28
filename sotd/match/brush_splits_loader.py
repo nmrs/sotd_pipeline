@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
-from sotd.utils.yaml_loader import load_yaml_with_nfc, UniqueKeyLoader
+from sotd.utils.yaml_loader import UniqueKeyLoader, load_yaml_with_nfc
 
 
 class BrushSplit:

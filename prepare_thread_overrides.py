@@ -5,8 +5,7 @@ Extracts best matches and formats them for the overrides file.
 """
 
 import json
-from datetime import datetime, date
-from pathlib import Path
+from datetime import date, datetime
 
 import yaml
 

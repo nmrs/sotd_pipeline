@@ -6,7 +6,7 @@ import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -999,8 +999,9 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
 
         # Import the correct matches manager
         try:
-            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
             from rich.console import Console
+
+            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
         except ImportError as e:
             raise HTTPException(
                 status_code=500, detail=f"Could not import CorrectMatchesManager: {e}"
@@ -1068,8 +1069,9 @@ async def remove_matches_from_correct(request: RemoveCorrectRequest):
 
         # Import the correct matches manager
         try:
-            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
             from rich.console import Console
+
+            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
         except ImportError as e:
             raise HTTPException(
                 status_code=500, detail=f"Could not import CorrectMatchesManager: {e}"
@@ -1158,8 +1160,9 @@ async def clear_correct_matches_by_field(field: str):
 
         # Import the correct matches manager
         try:
-            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
             from rich.console import Console
+
+            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
         except ImportError as e:
             raise HTTPException(
                 status_code=500, detail=f"Could not import CorrectMatchesManager: {e}"
@@ -1185,8 +1188,9 @@ async def clear_all_correct_matches():
     try:
         # Import the correct matches manager
         try:
-            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
             from rich.console import Console
+
+            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
         except ImportError as e:
             raise HTTPException(
                 status_code=500, detail=f"Could not import CorrectMatchesManager: {e}"
@@ -1217,8 +1221,9 @@ async def validate_catalog_against_correct_matches(request: CatalogValidationReq
 
         # Import and use the validation logic directly
         try:
-            from sotd.match.tools.managers.validate_correct_matches import ValidateCorrectMatches
             from rich.console import Console
+
+            from sotd.match.tools.managers.validate_correct_matches import ValidateCorrectMatches
         except ImportError as e:
             raise HTTPException(status_code=500, detail=f"Could not import validation tools: {e}")
 
