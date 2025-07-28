@@ -783,6 +783,11 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     mismatch_type = "intentionally_unmatched"
                     reason = "Item marked as intentionally unmatched"
                     is_confirmed = True  # Intentionally unmatched items are confirmed
+                elif match_type == "irrelevant_razor_format":
+                    # Items marked as irrelevant due to razor format are confirmed
+                    mismatch_type = "irrelevant_razor_format"
+                    reason = "Blade irrelevant for razor format (straight, cartridge, etc.)"
+                    is_confirmed = True  # Irrelevant razor format items are confirmed
                 elif record_id in analyzer_results:
                     # Use analyzer's results directly
                     analyzer_result = analyzer_results[record_id]

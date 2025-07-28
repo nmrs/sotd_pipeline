@@ -491,24 +491,25 @@ class MismatchAnalyzer(AnalysisTool):
                 else:
                     self.console.print("[yellow]DEBUG: NOT found in correct matches[/yellow]")
 
-            # Skip exact matches (from correct_matches.yaml) - these are already confirmed correct
-            if match_type == "exact":
-                mismatches["exact_matches"].append(
-                    {
-                        "record": record,
-                        "field_data": field_data,
-                        "match_key": self._create_match_key(field, normalized, matched),
-                        "reason": "Exact match from correct_matches.yaml",
-                        "is_confirmed": True,  # Exact matches are confirmed
-                    }
-                )
-                continue  # Skip further analysis for exact matches
-
             # Create a unique key for this match
             match_key = self._create_match_key(field, normalized, matched)
 
             # Check if this match was previously marked as correct
             is_confirmed = match_key in self._correct_matches
+
+            # Skip exact matches (from correct_matches.yaml) - these are already confirmed correct
+            # Also check if match_type is "exact" or if the item is in correct_matches.yaml
+            if match_type == "exact" or is_confirmed:
+                mismatches["exact_matches"].append(
+                    {
+                        "record": record,
+                        "field_data": field_data,
+                        "match_key": match_key,
+                        "reason": "Exact match from correct_matches.yaml",
+                        "is_confirmed": True,  # Exact matches are confirmed
+                    }
+                )
+                continue  # Skip further analysis for exact matches
 
             # Always categorize based on match quality, regardless of confirmation status
             # Check Levenshtein distance (for all matches)
@@ -713,9 +714,7 @@ class MismatchAnalyzer(AnalysisTool):
                                                     "field": field,
                                                 }
         except (yaml.YAMLError, KeyError) as e:
-            self.console.print(
-                f"[yellow]Warning: Could not load correct matches: {e}[/yellow]"
-            )
+            self.console.print(f"[yellow]Warning: Could not load correct matches: {e}[/yellow]")
             self._correct_matches = set()
             self._correct_matches_data = {}
 
