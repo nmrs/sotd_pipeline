@@ -23,7 +23,7 @@ const MismatchAnalyzer: React.FC = () => {
   const [selectedField, setSelectedField] = useState<string>('razor');
   const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [threshold, setThreshold] = useState<number>(3);
-  const [displayMode, setDisplayMode] = useState<'mismatches' | 'all' | 'unconfirmed' | 'regex'>(
+  const [displayMode, setDisplayMode] = useState<'mismatches' | 'all' | 'unconfirmed' | 'regex' | 'intentionally_unmatched'>(
     'mismatches'
   );
   const [loading, setLoading] = useState(false);
@@ -38,6 +38,7 @@ const MismatchAnalyzer: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [markingCorrect, setMarkingCorrect] = useState(false);
   const [removingCorrect, setRemovingCorrect] = useState(false);
+  const [visibleRows, setVisibleRows] = useState<MismatchAnalysisResult['mismatch_items']>([]);
 
   // Reason for marking as unmatched
   const [reasonText, setReasonText] = useState<string>('');
@@ -105,7 +106,7 @@ const MismatchAnalyzer: React.FC = () => {
     setSelectedMonth(months[0] || '');
   };
 
-  const handleItemSelection = (itemKey: string, selected: boolean) => {
+  const handleItemSelection = React.useCallback((itemKey: string, selected: boolean) => {
     const newSelected = new Set(selectedItems);
     if (selected) {
       newSelected.add(itemKey);
@@ -113,21 +114,37 @@ const MismatchAnalyzer: React.FC = () => {
       newSelected.delete(itemKey);
     }
     setSelectedItems(newSelected);
-  };
+  }, [selectedItems]);
 
-  const handleSelectAll = () => {
-    if (!filteredResults.length) return;
+  const handleSelectAll = React.useCallback(() => {
+    if (!visibleRows.length) return;
 
-    const allKeys = filteredResults.map(
+    const allKeys = visibleRows.map(
       (item: MismatchAnalysisResult['mismatch_items'][0]) =>
         `${item.original}|${JSON.stringify(item.matched)}`
     );
     setSelectedItems(new Set(allKeys));
-  };
+  }, [visibleRows]);
 
-  const handleClearSelection = () => {
+  const handleClearSelection = React.useCallback(() => {
     setSelectedItems(new Set());
-  };
+  }, []);
+
+  const handleVisibleRowsChange = React.useCallback((rows: MismatchAnalysisResult['mismatch_items']) => {
+    setVisibleRows(rows);
+  }, []);
+
+  // Memoize item keys to avoid repeated JSON.stringify operations
+  const visibleItemKeys = React.useMemo(() => {
+    return visibleRows.map(item => `${item.original}|${JSON.stringify(item.matched)}`);
+  }, [visibleRows]);
+
+  // Count selected items that are currently visible on the page
+  const visibleSelectedCount = React.useMemo(() => {
+    if (!visibleRows.length) return 0;
+
+    return visibleItemKeys.filter(key => selectedItems.has(key)).length;
+  }, [visibleItemKeys, selectedItems]);
 
   const handleMarkAsCorrect = async () => {
     if (selectedItems.size === 0) {
@@ -257,7 +274,7 @@ const MismatchAnalyzer: React.FC = () => {
             if (firstCommentId) {
               // Determine action based on current mismatch_type
               const action = item.mismatch_type === 'intentionally_unmatched' ? 'remove' : 'add';
-              
+
               allEntries.push({
                 name: item.original,
                 action,
@@ -332,6 +349,11 @@ const MismatchAnalyzer: React.FC = () => {
         return true;
       }
 
+      // Check if item is intentionally unmatched (also considered confirmed)
+      if (item.mismatch_type === 'intentionally_unmatched') {
+        return true;
+      }
+
       // Use memoized lookup for performance
       const normalizedOriginal = item.original.toLowerCase().trim();
       return confirmedItemsLookup.has(normalizedOriginal);
@@ -368,6 +390,10 @@ const MismatchAnalyzer: React.FC = () => {
           item => item.match_type === 'regex' && !isItemConfirmed(item)
         );
 
+      case 'intentionally_unmatched':
+        // Show only intentionally unmatched items
+        return results.mismatch_items.filter(item => item.mismatch_type === 'intentionally_unmatched');
+
       default:
         return results.mismatch_items;
     }
@@ -380,6 +406,7 @@ const MismatchAnalyzer: React.FC = () => {
         all: 0,
         unconfirmed: 0,
         regex: 0,
+        intentionally_unmatched: 0,
       };
     }
 
@@ -397,29 +424,28 @@ const MismatchAnalyzer: React.FC = () => {
       unconfirmed: returnedItems.filter(item => !isItemConfirmed(item)).length,
       regex: returnedItems.filter(item => item.match_type === 'regex' && !isItemConfirmed(item))
         .length,
+      intentionally_unmatched: returnedItems.filter(item => item.mismatch_type === 'intentionally_unmatched').length,
     };
   };
 
-  const getUnmatchedButtonText = () => {
-    if (selectedItems.size === 0) return 'Mark 0 as Unmatched';
+  const getUnmatchedButtonText = React.useMemo(() => {
+    if (visibleSelectedCount === 0) return 'Mark 0 as Unmatched';
 
-    // Count how many selected items are already intentionally unmatched
+    // Count how many visible selected items are already intentionally unmatched
     let addCount = 0;
     let removeCount = 0;
 
-    if (results?.mismatch_items) {
-      results.mismatch_items
-        .filter(item => {
-          const itemKey = `${item.original}|${JSON.stringify(item.matched)}`;
-          return selectedItems.has(itemKey);
-        })
-        .forEach(item => {
+    if (visibleRows.length > 0) {
+      visibleRows.forEach((item, index) => {
+        const itemKey = visibleItemKeys[index];
+        if (selectedItems.has(itemKey)) {
           if (item.mismatch_type === 'intentionally_unmatched') {
             removeCount++;
           } else {
             addCount++;
           }
-        });
+        }
+      });
     }
 
     if (addCount > 0 && removeCount > 0) {
@@ -429,9 +455,9 @@ const MismatchAnalyzer: React.FC = () => {
     } else {
       return `Mark ${addCount} as Unmatched`;
     }
-  };
+  }, [visibleSelectedCount, visibleRows, visibleItemKeys, selectedItems]);
 
-  const shouldShowReasonInput = () => {
+  const shouldShowReasonInput = React.useMemo(() => {
     if (selectedItems.size === 0) return false;
 
     // Only show reason input if we're adding items (not removing)
@@ -451,7 +477,7 @@ const MismatchAnalyzer: React.FC = () => {
     }
 
     return hasAddItems;
-  };
+  }, [selectedItems, results?.mismatch_items]);
 
   return (
     <div className='w-full p-4'>
@@ -477,7 +503,7 @@ const MismatchAnalyzer: React.FC = () => {
                 disabled={selectedItems.size === 0 || removingCorrect}
                 className='px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed'
               >
-                {removingCorrect ? 'Removing...' : `Clear ${selectedItems.size} Entry`}
+                {removingCorrect ? 'Removing...' : `Clear ${visibleSelectedCount} Entry`}
               </button>
             </div>
           </div>
@@ -550,8 +576,8 @@ const MismatchAnalyzer: React.FC = () => {
                 Mismatches
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getDisplayModeCounts().mismatches}
@@ -570,8 +596,8 @@ const MismatchAnalyzer: React.FC = () => {
                 Unconfirmed
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'unconfirmed'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getDisplayModeCounts().unconfirmed}
@@ -596,6 +622,26 @@ const MismatchAnalyzer: React.FC = () => {
                 </span>
                 <span className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm'>
                   Show only regex matches that need confirmation
+                </span>
+              </Button>
+              <Button
+                variant='outline'
+                onClick={() => setDisplayMode('intentionally_unmatched')}
+                className={`flex items-center gap-1 text-sm relative group ${displayMode === 'intentionally_unmatched' ? 'bg-blue-600 text-white' : ''}`}
+                title='Show only intentionally unmatched items'
+              >
+                <Filter className='h-4 w-4' />
+                Intentionally Unmatched
+                <span
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'intentionally_unmatched'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
+                    }`}
+                >
+                  {getDisplayModeCounts().intentionally_unmatched}
+                </span>
+                <span className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm'>
+                  Show only intentionally unmatched items
                 </span>
               </Button>
             </div>
@@ -685,14 +731,14 @@ const MismatchAnalyzer: React.FC = () => {
                     disabled={selectedItems.size === 0 || markingCorrect}
                     className='px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed'
                   >
-                    {markingCorrect ? 'Marking...' : `Mark ${selectedItems.size} as Correct`}
+                    {markingCorrect ? 'Marking...' : `Mark ${visibleSelectedCount} as Correct`}
                   </button>
                   <button
                     onClick={handleMarkAsIntentionallyUnmatched}
                     disabled={selectedItems.size === 0 || updatingFiltered}
                     className='px-3 py-1 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed'
                   >
-                    {updatingFiltered ? 'Updating...' : getUnmatchedButtonText()}
+                    {updatingFiltered ? 'Updating...' : getUnmatchedButtonText}
                   </button>
                 </div>
               )}
@@ -701,7 +747,7 @@ const MismatchAnalyzer: React.FC = () => {
           </div>
 
           {/* Reason Input for Unmatched - Only show when adding items */}
-          {selectedItems.size > 0 && shouldShowReasonInput() && (
+          {selectedItems.size > 0 && shouldShowReasonInput && (
             <div className='px-6 py-3 bg-gray-50 border-t border-gray-200'>
               <label className='block text-sm font-medium text-gray-700 mb-1'>
                 Reason for marking as unmatched (optional)
@@ -726,6 +772,7 @@ const MismatchAnalyzer: React.FC = () => {
                 selectedItems={selectedItems}
                 onItemSelection={handleItemSelection}
                 isItemConfirmed={isItemConfirmed}
+                onVisibleRowsChange={handleVisibleRowsChange}
               />
             ) : (
               <div className='text-center py-8'>

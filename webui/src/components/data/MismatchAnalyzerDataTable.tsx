@@ -11,6 +11,7 @@ interface MismatchAnalyzerDataTableProps {
   selectedItems?: Set<string>;
   onItemSelection?: (itemKey: string, selected: boolean) => void;
   isItemConfirmed?: (item: MismatchItem) => boolean;
+  onVisibleRowsChange?: (visibleRows: MismatchItem[]) => void;
 }
 
 const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
@@ -20,6 +21,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   selectedItems = new Set(),
   onItemSelection,
   isItemConfirmed,
+  onVisibleRowsChange,
 }) => {
   const getMismatchTypeIcon = (mismatchType?: string) => {
     switch (mismatchType) {
@@ -151,7 +153,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
                 <input
                   type='checkbox'
                   checked={isSelected}
-                  onChange={e => onItemSelection(itemKey, e.target.checked)}
+                  onChange={e => onItemSelection?.(itemKey, e.target.checked)}
                   className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
                 />
               );
@@ -312,6 +314,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         showColumnVisibility={true}
         searchKey='original'
         initialPageSize={50}
+        onVisibleRowsChange={onVisibleRowsChange}
       />
     </div>
   );

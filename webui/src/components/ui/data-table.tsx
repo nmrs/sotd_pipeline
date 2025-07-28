@@ -55,6 +55,7 @@ interface DataTableProps<TData, TValue> {
   onColumnResize?: (columnId: string, width: number) => void;
   customControls?: React.ReactNode;
   onSelectionChange?: (selectedRows: TData[]) => void;
+  onVisibleRowsChange?: (visibleRows: TData[]) => void;
   clearSelection?: boolean;
   initialRowSelection?: Record<string, boolean>;
   initialPageSize?: number;
@@ -71,6 +72,7 @@ export function DataTable<TData, TValue>({
   onColumnResize,
   customControls,
   onSelectionChange,
+  onVisibleRowsChange,
   clearSelection = false,
   initialRowSelection = {},
   initialPageSize = 10,
@@ -116,6 +118,14 @@ export function DataTable<TData, TValue>({
       onSelectionChange(selectedRows);
     }
   }, [rowSelection, rows, onSelectionChange]);
+
+  // Call onVisibleRowsChange when visible rows change (pagination, filtering, sorting)
+  React.useEffect(() => {
+    if (onVisibleRowsChange) {
+      const visibleRows = rows.map(row => row.original);
+      onVisibleRowsChange(visibleRows);
+    }
+  }, [rows, onVisibleRowsChange]);
 
   // Clear selection when clearSelection prop is true
   React.useEffect(() => {
@@ -225,9 +235,8 @@ export function DataTable<TData, TValue>({
                         <div className='flex items-center justify-between'>
                           {sortable ? (
                             <button
-                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${
-                                header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
-                              }`}
+                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
+                                }`}
                               onClick={header.column.getToggleSortingHandler()}
                               disabled={!header.column.getCanSort()}
                             >

@@ -39,6 +39,7 @@ const mockData: MismatchItem[] = [
     confidence: 0.8,
     count: 5,
     comment_ids: ['123', '456'],
+    examples: ['example1', 'example2'],
   },
   {
     original: 'Test Razor 2',
@@ -49,6 +50,7 @@ const mockData: MismatchItem[] = [
     confidence: 0.6,
     count: 3,
     comment_ids: ['789'],
+    examples: ['example3'],
   },
 ];
 
@@ -163,7 +165,7 @@ describe('MismatchAnalyzerDataTable', () => {
 
     test('reflects selected state in checkboxes', () => {
       const onItemSelection = jest.fn();
-      const selectedItems = new Set(['Test Razor 1|{"brand":"Test Brand","model":"Model 1"}']);
+      const selectedItems = new Set<string>(['Test Razor 1|{"brand":"Test Brand","model":"Model 1"}']);
 
       render(
         <MismatchAnalyzerDataTable
