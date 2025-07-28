@@ -74,11 +74,7 @@ const UnmatchedAnalyzer: React.FC = () => {
           name: item.item,
         }));
 
-        console.log('Loading filtered status for:', category, 'entries:', entries);
-        console.log(
-          'Entries being sent to backend:',
-          entries.map(e => e.name)
-        );
+
         const response = await checkFilteredStatus({ entries });
 
         if (response.success) {
@@ -93,7 +89,6 @@ const UnmatchedAnalyzer: React.FC = () => {
             }
           });
 
-          console.log('Loaded filtered status:', newFilteredStatus);
           setFilteredStatus(newFilteredStatus);
         }
       } catch (err: unknown) {
@@ -123,7 +118,6 @@ const UnmatchedAnalyzer: React.FC = () => {
       setOperationCount(prev => prev + 1);
 
       // Analyze unmatched items
-      console.log('Analyzing unmatched items...');
 
       const result = await analyzeUnmatched({
         field: selectedField,
@@ -133,10 +127,7 @@ const UnmatchedAnalyzer: React.FC = () => {
 
       // Validate the response structure
       if (result && typeof result === 'object') {
-        console.log(
-          'Received API response with items:',
-          result.unmatched_items?.map(item => item.item)
-        );
+
 
         // Check for partial results
         if (result.partial_results) {
@@ -368,7 +359,6 @@ const UnmatchedAnalyzer: React.FC = () => {
           newChanges[itemName] = isFiltered;
         }
 
-        console.log('Updated pending changes:', newChanges);
         return newChanges;
       });
     },
@@ -591,7 +581,6 @@ const UnmatchedAnalyzer: React.FC = () => {
 
             <button
               onClick={() => {
-                console.log('Manual refresh triggered');
                 setResults(null);
                 setFilteredStatus({});
                 setPendingChanges({});
