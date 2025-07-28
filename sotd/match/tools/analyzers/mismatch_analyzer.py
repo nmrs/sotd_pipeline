@@ -411,6 +411,7 @@ class MismatchAnalyzer(AnalysisTool):
             "low_confidence": [],
             "exact_matches": [],
             "perfect_regex_matches": [],
+            "good_matches": [],
         }
 
         # Extract the actual records from the data structure
@@ -498,6 +499,7 @@ class MismatchAnalyzer(AnalysisTool):
                         "field_data": field_data,
                         "match_key": self._create_match_key(field, normalized, matched),
                         "reason": "Exact match from correct_matches.yaml",
+                        "is_confirmed": True,  # Exact matches are confirmed
                     }
                 )
                 continue  # Skip further analysis for exact matches
@@ -506,20 +508,34 @@ class MismatchAnalyzer(AnalysisTool):
             match_key = self._create_match_key(field, normalized, matched)
 
             # Check if this match was previously marked as correct
-            if match_key in self._correct_matches:
-                if args.show_correct:
-                    # Add to exact_matches category when showing correct matches
-                    mismatches["exact_matches"].append(
-                        {
-                            "record": record,
-                            "field_data": field_data,
-                            "match_key": match_key,
-                            "reason": "Exact match from correct_matches.yaml",
-                        }
-                    )
-                else:
-                    # Skip further analysis for confirmed matches (unless showing correct matches)
-                    continue
+            is_confirmed = match_key in self._correct_matches
+
+            # Always categorize based on match quality, regardless of confirmation status
+            # Check Levenshtein distance (for all matches)
+            matched_text = self._get_matched_text(field, matched)
+            if self._levenshtein_distance_exceeds_threshold(
+                normalized, matched_text, args.threshold
+            ):
+                mismatches["levenshtein_distance"].append(
+                    {
+                        "record": record,
+                        "field_data": field_data,
+                        "match_key": match_key,
+                        "reason": "High Levenshtein distance",
+                        "is_confirmed": is_confirmed,
+                    }
+                )
+            else:
+                # Good quality match
+                mismatches["good_matches"].append(
+                    {
+                        "record": record,
+                        "field_data": field_data,
+                        "match_key": match_key,
+                        "reason": "Good quality match",
+                        "is_confirmed": is_confirmed,
+                    }
+                )
 
             # Check for multiple regex patterns (only if we have catalog patterns)
             if catalog_patterns:
@@ -537,23 +553,13 @@ class MismatchAnalyzer(AnalysisTool):
                         }
                     )
 
-            # Check Levenshtein distance (for non-exact matches only)
-            matched_text = self._get_matched_text(field, matched)
-            if self._levenshtein_distance_exceeds_threshold(
-                normalized, matched_text, args.threshold
-            ):
-                mismatches["levenshtein_distance"].append(
-                    {
-                        "record": record,
-                        "field_data": field_data,
-                        "match_key": match_key,
-                        "reason": "High Levenshtein distance",
-                    }
-                )
+            # Note: Levenshtein distance check is now handled above with is_confirmed field
 
             # Check for perfect regex matches when threshold is 0
             # (to help populate correct_matches.yaml)
             if args.threshold == 0 and match_type == "regex":
+                # Get matched text for distance calculation
+                matched_text = self._get_matched_text(field, matched)
                 # Check if this is a perfect or near-perfect match (Levenshtein distance <= 2)
                 distance = self._levenshtein_distance(normalized, matched_text)
                 if distance <= 2:
@@ -649,11 +655,13 @@ class MismatchAnalyzer(AnalysisTool):
                                                 if isinstance(strings, list):
                                                     for original in strings:
                                                         brand_model = f"{brand} {model}"
-                                                        # Use the same normalization as _create_match_key
+                                                        # Use same normalization
                                                         normalized = normalize_for_matching(
                                                             original, None, field=field
                                                         )
-                                                        original_normalized = normalized.lower().strip()
+                                                        original_normalized = (
+                                                            normalized.lower().strip()
+                                                        )
                                                         match_key = (
                                                             f"{field}:{original_normalized}|"
                                                             f"{brand_model.lower().strip()}"
@@ -705,7 +713,9 @@ class MismatchAnalyzer(AnalysisTool):
                                                     "field": field,
                                                 }
         except (yaml.YAMLError, KeyError) as e:
-            self.console.print(f"[yellow]Warning: Could not load correct matches: {e}[/yellow]")
+            self.console.print(
+                f"[yellow]Warning: Could not load correct matches: {e}[/yellow]"
+            )
             self._correct_matches = set()
             self._correct_matches_data = {}
 

@@ -568,3 +568,42 @@ class TestMismatchAnalyzer:
         has_gem = ("GEM" in clean_output) or ("(GEM)" in clean_output)
         assert has_de
         assert has_gem
+
+    def test_exact_matches_are_confirmed(self):
+        """Test that exact matches are marked as confirmed."""
+        analyzer = MismatchAnalyzer()
+        
+        # Create test data with an exact match
+        data = {
+            "data": [
+                {
+                    "id": "test1",
+                    "razor": {
+                        "original": "Well Kept Safety Razor",
+                        "normalized": "well kept safety razor",
+                        "matched": {"brand": "Well Kept", "model": "Safety Razor", "format": "DE"},
+                        "match_type": "exact",
+                        "pattern": "",
+                    }
+                }
+            ]
+        }
+        
+        # Create args object
+        class Args:
+            def __init__(self):
+                self.threshold = 3
+                self.debug = False
+        
+        args = Args()
+        
+        # Identify mismatches
+        mismatches = analyzer.identify_mismatches(data, "razor", args)
+        
+        # Check that exact matches are in the exact_matches category
+        assert "exact_matches" in mismatches
+        assert len(mismatches["exact_matches"]) > 0
+        
+        # Check that exact matches are marked as confirmed
+        for item in mismatches["exact_matches"]:
+            assert item.get("is_confirmed") is True, "Exact matches should be marked as confirmed"
