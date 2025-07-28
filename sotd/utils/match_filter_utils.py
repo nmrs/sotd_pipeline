@@ -325,14 +325,8 @@ def strip_asterisk_markup(value: str) -> str:
     if not isinstance(value, str):
         return ""
 
-    # Remove double asterisks (**text**) first
-    cleaned = re.sub(r"\*\*([^*]+?)\*\*", r"\1", value)
-
-    # Remove single asterisks (*text*)
-    cleaned = re.sub(r"\*([^*]+?)\*", r"\1", cleaned)
-
-    # Remove any remaining unmatched asterisks
-    cleaned = cleaned.replace("*", "")
+    # Remove all asterisks - they're not needed for matching
+    cleaned = value.replace("*", "")
 
     # Clean up any extra whitespace that might result
     cleaned = re.sub(r"\s+", " ", cleaned)
