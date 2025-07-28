@@ -178,6 +178,36 @@ class CorrectMatchesResponse(BaseModel):
     entries: Dict[str, Any]
 
 
+class CatalogValidationRequest(BaseModel):
+    """Request model for catalog validation."""
+
+    field: str = Field(..., description="Field to validate (razor, blade, brush, soap)")
+
+
+class CatalogValidationIssue(BaseModel):
+    """Model for catalog validation issue."""
+
+    issue_type: str
+    field: str
+    correct_match: str
+    expected_brand: str
+    expected_model: str
+    actual_brand: str
+    actual_model: str
+    severity: str
+    suggested_action: str
+    details: str
+
+
+class CatalogValidationResponse(BaseModel):
+    """Response model for catalog validation."""
+
+    field: str
+    total_entries: int
+    issues: List[CatalogValidationIssue]
+    processing_time: float
+
+
 def validate_field(field: str) -> None:
     """Validate that the field is supported."""
     supported_fields = ["razor", "blade", "brush", "soap"]
@@ -564,6 +594,23 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
         )
 
 
+@router.post("/clear-validator-cache")
+async def clear_validator_cache():
+    """Clear the validator cache to force a fresh validation."""
+    try:
+        from sotd.match.tools.managers.validate_correct_matches import ValidateCorrectMatches
+
+        # Create a validator instance and clear its caches
+        validator = ValidateCorrectMatches()
+        validator.force_refresh()
+
+        logger.info("✅ Validator cache cleared successfully")
+        return {"success": True, "message": "Validator cache cleared successfully"}
+    except Exception as e:
+        logger.error(f"❌ Failed to clear validator cache: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to clear validator cache: {str(e)}")
+
+
 @router.post("/mismatch", response_model=MismatchAnalysisResponse)
 async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysisResponse:
     """Analyze mismatches in matched data for the specified month."""
@@ -895,6 +942,9 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
                     errors.append(f"Invalid match data: {match}")
                     continue
 
+                # Debug logging
+                logger.info(f"Processing match - original: {original}, matched: {matched}")
+
                 # Create match key and mark as correct
                 match_key = manager.create_match_key(request.field, original, matched)
                 manager.mark_match_as_correct(
@@ -1069,3 +1119,89 @@ async def clear_all_correct_matches():
     except Exception as e:
         logger.error(f"Error clearing all correct matches: {e}")
         raise HTTPException(status_code=500, detail=f"Error clearing all correct matches: {str(e)}")
+
+
+@router.post("/validate-catalog", response_model=CatalogValidationResponse)
+async def validate_catalog_against_correct_matches(request: CatalogValidationRequest):
+    """Validate correct_matches.yaml against current catalog patterns."""
+    import time
+
+    start_time = time.time()
+
+    try:
+        validate_field(request.field)
+
+        # Import and use the validation logic directly
+        try:
+            from sotd.match.tools.managers.validate_correct_matches import ValidateCorrectMatches
+            from rich.console import Console
+        except ImportError as e:
+            raise HTTPException(status_code=500, detail=f"Could not import validation tools: {e}")
+
+        # Create validator instance and run validation
+        console = Console()
+        validator = ValidateCorrectMatches(console)
+
+        # Run the catalog validation
+        issues = validator.validate_correct_matches_against_catalog(request.field)
+
+        # Count total entries from correct_matches.yaml
+        total_entries = 0
+        try:
+            import yaml
+
+            correct_matches_file = project_root / "data" / "correct_matches.yaml"
+            if correct_matches_file.exists():
+                with open(correct_matches_file, "r", encoding="utf-8") as f:
+                    data = yaml.safe_load(f)
+                    field_data = data.get(request.field, {})
+                    if isinstance(field_data, dict):
+                        if request.field == "blade":
+                            # Blade has format-aware structure: format -> brand -> model -> strings
+                            for format, brands in field_data.items():
+                                if isinstance(brands, dict):
+                                    for brand, models in brands.items():
+                                        if isinstance(models, dict):
+                                            for model, strings in models.items():
+                                                if isinstance(strings, list):
+                                                    total_entries += len(strings)
+                        else:
+                            # Other fields have flat structure: brand -> model -> strings
+                            for brand, models in field_data.items():
+                                if isinstance(models, dict):
+                                    for model, strings in models.items():
+                                        if isinstance(strings, list):
+                                            total_entries += len(strings)
+        except Exception as e:
+            logger.warning(f"Could not count total entries: {e}")
+
+        processing_time = time.time() - start_time
+
+        # Convert issues to proper format
+        catalog_issues = []
+        for issue in issues:
+            catalog_issues.append(
+                CatalogValidationIssue(
+                    issue_type=issue.get("issue_type", ""),
+                    field=issue.get("field", ""),
+                    correct_match=issue.get("correct_match", ""),
+                    expected_brand=issue.get("expected_brand", ""),
+                    expected_model=issue.get("expected_model", ""),
+                    actual_brand=issue.get("actual_brand", ""),
+                    actual_model=issue.get("actual_model", ""),
+                    severity=issue.get("severity", ""),
+                    suggested_action=issue.get("suggested_action", ""),
+                    details=issue.get("details", ""),
+                )
+            )
+
+        return CatalogValidationResponse(
+            field=request.field,
+            total_entries=total_entries,
+            issues=catalog_issues,
+            processing_time=processing_time,
+        )
+
+    except Exception as e:
+        logger.error(f"Error validating catalog: {e}")
+        raise HTTPException(status_code=500, detail=f"Error validating catalog: {str(e)}")

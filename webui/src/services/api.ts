@@ -523,3 +523,50 @@ export const clearAllCorrectMatches = async (): Promise<{ success: boolean; mess
     throw error;
   }
 };
+
+export const clearValidatorCache = async (): Promise<{ success: boolean; message: string }> => {
+  try {
+    const response = await api.post('/analyze/clear-validator-cache');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to clear validator cache:', error);
+    throw error;
+  }
+};
+
+// Catalog validation operations
+export interface CatalogValidationRequest {
+  field: string;
+}
+
+export interface CatalogValidationIssue {
+  issue_type: 'catalog_pattern_mismatch' | 'catalog_pattern_no_match';
+  field: string;
+  correct_match: string;
+  expected_brand: string;
+  expected_model: string;
+  actual_brand: string;
+  actual_model: string;
+  severity: string;
+  suggested_action: string;
+  details: string;
+}
+
+export interface CatalogValidationResult {
+  field: string;
+  total_entries: number;
+  issues: CatalogValidationIssue[];
+  processing_time: number;
+}
+
+export const validateCatalogAgainstCorrectMatches = async (
+  request: CatalogValidationRequest
+): Promise<CatalogValidationResult> => {
+  try {
+    const response = await api.post('/analyze/validate-catalog', request);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to validate catalog against correct matches:', error);
+    throw error;
+  }
+};

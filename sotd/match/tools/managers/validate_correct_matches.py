@@ -6,6 +6,7 @@ previously approved matches are still aligned with catalog updates.
 """
 
 import sys
+import unicodedata
 from pathlib import Path
 
 # Add project root to Python path for direct execution
@@ -40,6 +41,19 @@ class ValidateCorrectMatches:
         self.correct_matches = None
         self.catalog_cache = {}
         self._matchers = {}  # Lazy-loaded matchers cache
+        self._fresh_matchers = {}  # Cached fresh matchers for validation
+        self._last_modified = {}  # Track file modification times
+
+    def _normalize_unicode(self, text: str) -> str:
+        """Normalize Unicode text to handle different character encodings.
+
+        Args:
+            text: Text to normalize
+
+        Returns:
+            Normalized text using NFC form
+        """
+        return unicodedata.normalize("NFC", text)
 
     def get_parser(self) -> argparse.ArgumentParser:
         """Get CLI argument parser.
@@ -68,6 +82,11 @@ class ValidateCorrectMatches:
             "--dry-run",
             action="store_true",
             help="Show what would be validated without running validation",
+        )
+        parser.add_argument(
+            "--catalog-validation",
+            action="store_true",
+            help="Validate correct_matches.yaml against current catalog patterns",
         )
 
         return parser
@@ -98,7 +117,10 @@ class ValidateCorrectMatches:
 
         for field in fields_to_validate:
             try:
-                issues = self._validate_field(field)
+                if args.catalog_validation:
+                    issues = self.validate_correct_matches_against_catalog(field)
+                else:
+                    issues = self._validate_field(field)
                 all_issues[field] = issues
 
                 if args.verbose:
@@ -860,6 +882,10 @@ class ValidateCorrectMatches:
         format_issues = self._check_format_mismatches(field)
         issues.extend(format_issues)
 
+        # Check for invalid brand/model combinations in YAML structure
+        brand_model_issues = self._check_invalid_brand_model_combinations(field)
+        issues.extend(brand_model_issues)
+
         # Get the matcher for this field
         matcher = self._get_matcher(field)
 
@@ -929,6 +955,186 @@ class ValidateCorrectMatches:
 
         return issues
 
+    def validate_correct_matches_against_catalog(self, field: str) -> List[Dict]:
+        """
+        Validate that existing correct_matches.yaml entries would still match
+        to the same brand/model combinations using current catalog regex patterns.
+
+        This is for backward validation when catalog patterns are updated to ensure
+        existing correct matches haven't been broken by pattern changes.
+
+        Args:
+            field: Field type to validate (razor, blade, brush, soap)
+
+        Returns:
+            List of validation issues where correct matches would now map to
+            different brand/model
+        """
+        import time
+
+        start_time = time.time()
+
+        # Check if files have been modified and clear caches if needed
+        if self._check_file_modifications(field):
+            self.clear_caches()
+            self.correct_matches = None
+
+        if self.correct_matches is None:
+            try:
+                self.correct_matches = self._load_correct_matches()
+            except FileNotFoundError:
+                return []
+
+        issues = []
+
+        # Check if field exists in correct matches
+        if field not in self.correct_matches:
+            return issues
+
+        # Load catalog for this field
+        try:
+            if field not in self.catalog_cache:
+                self.catalog_cache[field] = self._load_catalog(field)
+        except FileNotFoundError:
+            return []
+
+        # Check for invalid brand/model combinations in YAML structure
+        brand_model_issues = self._check_invalid_brand_model_combinations(field)
+        issues.extend(brand_model_issues)
+
+        # Get the matcher for this field
+        matcher = self._get_matcher(field)
+
+        # Validate each correct match entry
+        if field == "blade":
+            # Special handling for blade structure: format -> brand -> model -> strings
+            for format, brands in self.correct_matches[field].items():
+                for brand, models in brands.items():
+                    for model, correct_matches in models.items():
+                        for correct_match in correct_matches:
+                            # Use the actual matcher to see what this would match to
+                            match_result = self._match_using_catalog_patterns(
+                                matcher, correct_match
+                            )
+
+                            # Check if the match result matches our expected brand/model
+                            if match_result and "brand" in match_result and "model" in match_result:
+                                actual_brand = match_result["brand"]
+                                actual_model = match_result["model"]
+
+                                if actual_brand != brand or actual_model != model:
+                                    issues.append(
+                                        {
+                                            "issue_type": "catalog_pattern_mismatch",
+                                            "field": field,
+                                            "correct_match": correct_match,
+                                            "expected_brand": brand,
+                                            "expected_model": model,
+                                            "actual_brand": actual_brand,
+                                            "actual_model": actual_model,
+                                            "severity": "high",
+                                            "suggested_action": (
+                                                f"Catalog pattern update has broken this correct match. "
+                                                f"Either update the correct match to "
+                                                f"{actual_brand} {actual_model} "
+                                                f"or adjust the catalog pattern to maintain the "
+                                                f"original mapping."
+                                            ),
+                                            "details": (
+                                                f"Correct match '{correct_match}' was expected to map to "
+                                                f"{brand} {model} but now maps to "
+                                                f"{actual_brand} {actual_model} "
+                                                f"due to catalog pattern changes."
+                                            ),
+                                        }
+                                    )
+                            else:
+                                # No match found - this is also a problem
+                                issues.append(
+                                    {
+                                        "issue_type": "catalog_pattern_no_match",
+                                        "field": field,
+                                        "correct_match": correct_match,
+                                        "expected_brand": brand,
+                                        "expected_model": model,
+                                        "severity": "high",
+                                        "suggested_action": (
+                                            f"Correct match '{correct_match}' no longer matches any catalog pattern. "
+                                            f"Either add a pattern for this entry or remove it from "
+                                            f"correct_matches.yaml."
+                                        ),
+                                        "details": (
+                                            f"Correct match '{correct_match}' was expected to map to "
+                                            f"{brand} {model} but no longer matches any catalog pattern."
+                                        ),
+                                    }
+                                )
+        else:
+            # Standard handling for other fields: brand -> model -> strings
+            for brand, models in self.correct_matches[field].items():
+                for model, correct_matches in models.items():
+                    for correct_match in correct_matches:
+                        # Use the actual matcher to see what this would match to
+                        match_result = self._match_using_catalog_patterns(matcher, correct_match)
+
+                        # Check if the match result matches our expected brand/model
+                        if match_result and "brand" in match_result and "model" in match_result:
+                            actual_brand = match_result["brand"]
+                            actual_model = match_result["model"]
+
+                            if actual_brand != brand or actual_model != model:
+                                issues.append(
+                                    {
+                                        "issue_type": "catalog_pattern_mismatch",
+                                        "field": field,
+                                        "correct_match": correct_match,
+                                        "expected_brand": brand,
+                                        "expected_model": model,
+                                        "actual_brand": actual_brand,
+                                        "actual_model": actual_model,
+                                        "severity": "high",
+                                        "suggested_action": (
+                                            f"Catalog pattern update has broken this correct match. "
+                                            f"Either update the correct match to "
+                                            f"{actual_brand} {actual_model} "
+                                            f"or adjust the catalog pattern to maintain the original mapping."
+                                        ),
+                                        "details": (
+                                            f"Correct match '{correct_match}' was expected to map to "
+                                            f"{brand} {model} but now maps to "
+                                            f"{actual_brand} {actual_model} "
+                                            f"due to catalog pattern changes."
+                                        ),
+                                    }
+                                )
+                        else:
+                            # No match found - this is also a problem
+                            issues.append(
+                                {
+                                    "issue_type": "catalog_pattern_no_match",
+                                    "field": field,
+                                    "correct_match": correct_match,
+                                    "expected_brand": brand,
+                                    "expected_model": model,
+                                    "severity": "high",
+                                    "suggested_action": (
+                                        f"Correct match '{correct_match}' no longer matches any catalog pattern. "
+                                        f"Either add a pattern for this entry or remove it from correct_matches.yaml."
+                                    ),
+                                    "details": (
+                                        f"Correct match '{correct_match}' was expected to map to "
+                                        f"{brand} {model} but no longer matches any catalog pattern."
+                                    ),
+                                }
+                            )
+
+        # Add timing information if console is available
+        if self.console:
+            elapsed_time = time.time() - start_time
+            self.console.print(f"[dim]Validation completed in {elapsed_time:.2f}s[/dim]")
+
+        return issues
+
     def _get_matcher(self, field: str):
         """Get matcher for field, creating it lazily if needed.
 
@@ -968,7 +1174,7 @@ class ValidateCorrectMatches:
         return matcher.match(value)
 
     def _match_using_catalog_patterns(self, matcher, value: str) -> Optional[Dict]:
-        """Match using catalog patterns.
+        """Match using catalog patterns with cached matchers for performance.
 
         Args:
             matcher: Matcher instance to use
@@ -977,10 +1183,63 @@ class ValidateCorrectMatches:
         Returns:
             Match result dictionary or None
         """
-        # Use the matcher's match method with bypass_correct_matches=True
-        # This tests what the regex patterns would match to if the correct match
-        # didn't exist
-        match_result = matcher.match(value, bypass_correct_matches=True)
+        # For validation, we want to test what the regex patterns would match to
+        # if the correct matches didn't exist. We use cached fresh matchers for performance.
+
+        # Determine matcher type and get cached fresh matcher
+        matcher_type = type(matcher).__name__
+
+        if matcher_type not in self._fresh_matchers:
+            # Create and cache a fresh matcher without correct matches
+            from sotd.match.blade_matcher import BladeMatcher
+            from sotd.match.razor_matcher import RazorMatcher
+            from sotd.match.brush_matcher import BrushMatcher
+            from sotd.match.soap_matcher import SoapMatcher
+
+            if isinstance(matcher, BladeMatcher):
+                fresh_matcher = BladeMatcher()
+                fresh_matcher.correct_matches = {}
+            elif isinstance(matcher, RazorMatcher):
+                fresh_matcher = RazorMatcher()
+                fresh_matcher.correct_matches = {}
+            elif isinstance(matcher, BrushMatcher):
+                fresh_matcher = BrushMatcher()
+                fresh_matcher.correct_matches = {}
+            elif isinstance(matcher, SoapMatcher):
+                fresh_matcher = SoapMatcher()
+                fresh_matcher.correct_matches = {}
+            else:
+                # Fallback to original method for unknown matcher types
+                original_correct_matches = None
+                if hasattr(matcher, "correct_matches"):
+                    original_correct_matches = matcher.correct_matches
+                    matcher.correct_matches = {}
+
+                try:
+                    match_result = matcher.match(value)
+
+                    # Convert MatchResult to dict if needed for backward compatibility
+                    if hasattr(match_result, "matched"):
+                        # MatchResult object
+                        if match_result.matched:
+                            return match_result.matched
+                        return None
+                    else:
+                        # Dict object
+                        if match_result and match_result.get("matched"):
+                            return match_result.get("matched")
+                        return None
+                finally:
+                    # Restore original correct matches
+                    if original_correct_matches is not None:
+                        matcher.correct_matches = original_correct_matches
+
+            # Cache the fresh matcher
+            self._fresh_matchers[matcher_type] = fresh_matcher
+
+        # Use the cached fresh matcher
+        fresh_matcher = self._fresh_matchers[matcher_type]
+        match_result = fresh_matcher.match(value)
 
         # Convert MatchResult to dict if needed for backward compatibility
         if hasattr(match_result, "matched"):
@@ -993,6 +1252,51 @@ class ValidateCorrectMatches:
             if match_result and match_result.get("matched"):
                 return match_result.get("matched")
             return None
+
+    def clear_caches(self):
+        """Clear all caches to free memory."""
+        self.catalog_cache.clear()
+        self._matchers.clear()
+        self._fresh_matchers.clear()
+        self._last_modified.clear()
+
+    def force_refresh(self):
+        """Force a complete refresh of all cached data.
+
+        This is useful when files have been modified outside of the normal
+        file modification detection.
+        """
+        self.clear_caches()
+        self.correct_matches = None
+
+    def _check_file_modifications(self, field: str) -> bool:
+        """Check if relevant files have been modified since last cache.
+
+        Args:
+            field: Field type to check
+
+        Returns:
+            True if files have been modified, False otherwise
+        """
+        import os
+
+        files_to_check = [self._data_dir / "correct_matches.yaml", self._data_dir / f"{field}.yaml"]
+
+        for file_path in files_to_check:
+            if not file_path.exists():
+                continue
+
+            current_mtime = os.path.getmtime(file_path)
+            cache_key = str(file_path)
+
+            if cache_key not in self._last_modified:
+                self._last_modified[cache_key] = current_mtime
+                return True
+            elif self._last_modified[cache_key] != current_mtime:
+                self._last_modified[cache_key] = current_mtime
+                return True
+
+        return False
 
     def _check_format_mismatches(self, field: str) -> List[Dict]:
         """Check for format mismatches between correct_matches.yaml and catalog.
@@ -1048,6 +1352,165 @@ class ValidateCorrectMatches:
                                 ),
                             }
                         )
+
+        return issues
+
+    def _check_invalid_brand_model_combinations(self, field: str) -> List[Dict]:
+        """Check for invalid brand/model combinations in correct_matches.yaml.
+
+        Args:
+            field: Field type to check.
+
+        Returns:
+            List of invalid brand/model issues.
+        """
+        issues = []
+
+        if self.correct_matches is None or field not in self.correct_matches:
+            return issues
+
+        # Load catalog for this field to get valid brand/model combinations
+        try:
+            if field not in self.catalog_cache:
+                self.catalog_cache[field] = self._load_catalog(field)
+        except FileNotFoundError:
+            # If catalog file doesn't exist, we can't validate
+            return issues
+
+        catalog = self.catalog_cache[field]
+
+        if field == "blade":
+            # Special handling for blade structure: format -> brand -> model
+            for format_name, brands in self.correct_matches[field].items():
+                # Check if format exists in catalog
+                normalized_format = self._normalize_unicode(format_name)
+                if normalized_format not in catalog:
+                    issues.append(
+                        {
+                            "issue_type": "invalid_format",
+                            "field": field,
+                            "format": format_name,
+                            "severity": "high",
+                            "suggested_action": (
+                                f"Format '{format_name}' not found in {field} catalog. "
+                                f"Please add it to {field}.yaml."
+                            ),
+                            "details": (
+                                f"Format '{format_name}' is listed in correct_matches.yaml "
+                                f"but not found in {field}.yaml."
+                            ),
+                        }
+                    )
+                    continue
+
+                for brand, models in brands.items():
+                    normalized_brand = self._normalize_unicode(brand)
+                    normalized_catalog_brands = {
+                        self._normalize_unicode(k): v for k, v in catalog[format_name].items()
+                    }
+
+                    if normalized_brand not in normalized_catalog_brands:
+                        issues.append(
+                            {
+                                "issue_type": "invalid_brand",
+                                "field": field,
+                                "format": format_name,
+                                "brand": brand,
+                                "severity": "high",
+                                "suggested_action": (
+                                    f"Brand '{brand}' not found in {format_name} format in {field} catalog. "
+                                    f"Please add it to {field}.yaml."
+                                ),
+                                "details": (
+                                    f"Brand '{brand}' is listed in correct_matches.yaml "
+                                    f"under {format_name} format but not found in {field}.yaml."
+                                ),
+                            }
+                        )
+                        continue
+
+                    for model in models:
+                        normalized_model = self._normalize_unicode(model)
+                        # Only check models if the brand exists in the catalog
+                        if normalized_brand in normalized_catalog_brands:
+                            normalized_catalog_models = {
+                                self._normalize_unicode(k): v
+                                for k, v in normalized_catalog_brands[normalized_brand].items()
+                            }
+
+                            if normalized_model not in normalized_catalog_models:
+                                issues.append(
+                                    {
+                                        "issue_type": "invalid_model",
+                                        "field": field,
+                                        "format": format_name,
+                                        "brand": brand,
+                                        "model": model,
+                                        "severity": "high",
+                                        "suggested_action": (
+                                            f"Model '{model}' not found for brand '{brand}' in {format_name} format in {field} catalog. "
+                                            f"Please add it to {field}.yaml."
+                                        ),
+                                        "details": (
+                                            f"Model '{model}' is listed in correct_matches.yaml "
+                                            f"for brand '{brand}' under {format_name} format but not found in {field}.yaml."
+                                        ),
+                                    }
+                                )
+        else:
+            # Standard handling for other fields: brand -> model
+            for brand, models in self.correct_matches[field].items():
+                normalized_brand = self._normalize_unicode(brand)
+                normalized_catalog_brands = {
+                    self._normalize_unicode(k): v for k, v in catalog.items()
+                }
+
+                if normalized_brand not in normalized_catalog_brands:
+                    issues.append(
+                        {
+                            "issue_type": "invalid_brand",
+                            "field": field,
+                            "brand": brand,
+                            "severity": "high",
+                            "suggested_action": (
+                                f"Brand '{brand}' not found in {field} catalog. "
+                                f"Please add it to {field}.yaml."
+                            ),
+                            "details": (
+                                f"Brand '{brand}' is listed in correct_matches.yaml "
+                                f"but not found in {field}.yaml."
+                            ),
+                        }
+                    )
+                    continue
+
+                for model in models:
+                    normalized_model = self._normalize_unicode(model)
+                    # Only check models if the brand exists in the catalog
+                    if normalized_brand in normalized_catalog_brands:
+                        normalized_catalog_models = {
+                            self._normalize_unicode(k): v
+                            for k, v in normalized_catalog_brands[normalized_brand].items()
+                        }
+
+                        if normalized_model not in normalized_catalog_models:
+                            issues.append(
+                                {
+                                    "issue_type": "invalid_model",
+                                    "field": field,
+                                    "brand": brand,
+                                    "model": model,
+                                    "severity": "high",
+                                    "suggested_action": (
+                                        f"Model '{model}' not found for brand '{brand}' in {field} catalog. "
+                                        f"Please add it to {field}.yaml."
+                                    ),
+                                    "details": (
+                                        f"Model '{model}' is listed in correct_matches.yaml "
+                                        f"for brand '{brand}' but not found in {field}.yaml."
+                                    ),
+                                }
+                            )
 
         return issues
 

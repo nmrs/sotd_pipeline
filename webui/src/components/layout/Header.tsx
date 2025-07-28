@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { clearAllCachesComprehensive } from '../../utils/cache';
+import { clearValidatorCache } from '../../services/api';
 import { useMessaging } from '../../hooks/useMessaging';
 import { DangerButton } from '../ui/reusable-buttons';
 
@@ -12,7 +13,13 @@ const Header: React.FC = () => {
   const handleClearCache = async () => {
     try {
       setCacheClearing(true);
+
+      // Clear frontend caches
       clearAllCachesComprehensive();
+
+      // Clear backend validator caches
+      await clearValidatorCache();
+
       messaging.addSuccessMessage('All caches cleared successfully', true);
 
       // Refresh the page to show fresh data
@@ -29,6 +36,8 @@ const Header: React.FC = () => {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: '🏠' },
     { path: '/unmatched-analyzer', label: 'Unmatched', icon: '🔍' },
+    { path: '/mismatch', label: 'Mismatch', icon: '⚠️' },
+    { path: '/catalog-validator', label: 'Catalog Validator', icon: '✅' },
     { path: '/brush-split-validator', label: 'Brush Validator', icon: '🪒' },
     { path: '/performance-test', label: 'Performance Test', icon: '⚡' },
   ];
@@ -49,11 +58,10 @@ const Header: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  location.pathname === item.path
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
+                className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${location.pathname === item.path
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
               >
                 <span>{item.icon}</span>
                 <span>{item.label}</span>
