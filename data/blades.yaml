@@ -132,7 +132,7 @@ DE:
   Asco:
     Platinum:
       patterns:
-      - asco.*plat
+      - asco.*platinum
     Super Stainless:
       patterns:
       - asco.*stain
@@ -713,7 +713,7 @@ FHS:
   Feather:
     FHS-1:
       patterns:
-      - (feather)?.*\b(fhs|asd)\b
+      - (feather)?.*(fhs|asd)
   OneBlade:
     HiCarbon SE:
       patterns:
