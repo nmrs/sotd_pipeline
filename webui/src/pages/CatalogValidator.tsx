@@ -247,8 +247,8 @@ const CatalogValidator: React.FC = () => {
                                                         {issue.issue_type === 'catalog_pattern_mismatch' ? 'Pattern Mismatch' : 'No Match Found'}
                                                     </h4>
                                                     <span className={`px-2 py-1 text-xs rounded-full ${issue.severity === 'high' ? 'bg-red-100 text-red-800' :
-                                                            issue.severity === 'medium' ? 'bg-orange-100 text-orange-800' :
-                                                                'bg-yellow-100 text-yellow-800'
+                                                        issue.severity === 'medium' ? 'bg-orange-100 text-orange-800' :
+                                                            'bg-yellow-100 text-yellow-800'
                                                         }`}>
                                                         {issue.severity}
                                                     </span>
@@ -277,6 +277,16 @@ const CatalogValidator: React.FC = () => {
                                                         </div>
                                                     )}
                                                 </div>
+
+                                                {/* Show conflicting pattern information */}
+                                                {issue.issue_type === 'catalog_pattern_mismatch' && issue.details.includes('Conflicting pattern:') && (
+                                                    <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                                                        <p className="text-sm font-medium text-red-800 mb-1">Conflicting Pattern:</p>
+                                                        <code className="text-sm text-red-700 bg-red-100 px-2 py-1 rounded">
+                                                            {issue.details.split('Conflicting pattern:')[1]?.trim().replace(/['"]/g, '') || 'Unknown pattern'}
+                                                        </code>
+                                                    </div>
+                                                )}
 
                                                 <div className="mb-3">
                                                     <p className="text-sm font-medium text-gray-700 mb-1">Suggested Action:</p>
