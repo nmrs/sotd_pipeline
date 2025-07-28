@@ -11,6 +11,8 @@ interface CommentModalProps {
   comments?: CommentDetail[];
   currentIndex?: number;
   onNavigate?: (direction: 'prev' | 'next') => Promise<void>;
+  // Additional props for lazy loading
+  remainingCommentIds?: string[];
 }
 
 const CommentModal: React.FC<CommentModalProps> = ({
@@ -19,15 +21,18 @@ const CommentModal: React.FC<CommentModalProps> = ({
   onClose,
   comments = [],
   currentIndex = 0,
-  onNavigate
+  onNavigate,
+  remainingCommentIds = []
 }) => {
   if (!isOpen || !comment) {
     return null;
   }
 
-  const hasMultipleComments = comments.length > 1;
+  // Consider both loaded comments and remaining IDs for navigation
+  const totalCommentCount = comments.length + remainingCommentIds.length;
+  const hasMultipleComments = totalCommentCount > 1;
   const canGoPrev = hasMultipleComments && currentIndex > 0;
-  const canGoNext = hasMultipleComments && currentIndex < comments.length - 1;
+  const canGoNext = hasMultipleComments && (currentIndex < comments.length - 1 || remainingCommentIds.length > 0);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -88,7 +93,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
                 ID: {comment.id} • {formatDate(comment.created_utc)}
                 {hasMultipleComments && (
                   <span className='ml-2 text-gray-400'>
-                    ({currentIndex + 1} of {comments.length})
+                    ({currentIndex + 1} of {totalCommentCount})
                   </span>
                 )}
               </p>

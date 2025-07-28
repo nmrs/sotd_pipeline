@@ -286,6 +286,7 @@ const BrushSplitValidator: React.FC = () => {
         comments={allComments}
         currentIndex={currentCommentIndex}
         onNavigate={handleCommentNavigation}
+        remainingCommentIds={remainingCommentIds}
       />
     </div>
   );

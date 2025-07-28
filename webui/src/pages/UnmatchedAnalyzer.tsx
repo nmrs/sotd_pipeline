@@ -820,6 +820,7 @@ const UnmatchedAnalyzer: React.FC = () => {
         comments={allComments}
         currentIndex={currentCommentIndex}
         onNavigate={handleCommentNavigation}
+        remainingCommentIds={remainingCommentIds}
       />
 
       {/* Message Display */}
