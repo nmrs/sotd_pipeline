@@ -3,6 +3,9 @@ blade:
     Cloud:
       A77:
       - cloud a77 full blade
+    RhinoceRos:
+      A77:
+      - rhinoceros a77 blade
   AC:
     Feather:
       Pro:
@@ -47,6 +50,17 @@ blade:
       - kai captain titan mild pink (se)
       Salon Select Premium Guard:
       - kai salon select premium guard
+    Schick:
+      Proline (AC):
+      - schick p-30
+      - schick p-30 proline artist club (se)
+      - schick proline
+      - schick proline b-20
+      - schick proline p-series artist club
+  Cartridge:
+    Cartridge:
+      Cartridge:
+      - personna twin pivot plus (atra) cart
   DE:
     7 O'Clock:
       Sharpedge (Yellow):
@@ -75,6 +89,9 @@ blade:
       - gillette 7 o'clock super stainless (green), de
       - gillette seven o'clock super stainless
       - gillette super stainless (green)
+    AMC:
+      De-Luxe Thin:
+      - vintage amc thin
     Asco:
       Platinum:
       - asco orange platinum
@@ -248,6 +265,9 @@ blade:
       - laser super platinum
       - laser ultra
       - lazer triple coated
+    Leningrad:
+      DE:
+      - "\u043B\u0435\u043D\u0438\u043D\u0433\u0440\u0430\u0434"
     Lord:
       Blue Sword Platinum:
       - blue sword platinum
@@ -272,7 +292,6 @@ blade:
       - personna - lab blue
       - personna comfort coat
       - personna comfort coated
-      - personna gem ptfe
       - personna lab blue
       - personna super comfort coated (aka lab blue)
       Med Prep:
@@ -282,32 +301,129 @@ blade:
       Platinum:
       - person super stainless
       - personna "israeli red"
+      - personna - platinum
       - personna - platinum (for both)
       - personna - platinum chrome israeli red
       - personna platinum
       - personna red
+      Super Stainless:
+      - personna super stainless
+      - personne super stainless
+    Polsilver:
+      Super Iridium:
+      - polsilver si
+      - polsilver super iridium
+    QShave:
+      Titanium:
+      - q-shave
+    RK:
+      Stainless:
+      - rk stainless
+    Rapira:
+      Platinum Lux:
+      - rapira
+      Super Stainless:
+      - rapira super stainless
+      Swedish:
+      - rapira sweedish super steel
+    Rockwell:
+      Swedish Stainless:
+      - rockwell swedish stainless steel
+    Schick:
+      Stainless (DE):
+      - schick stainless
     Shark:
       Chrome:
       - lord shark - super chrome
+      - shark - super chrome
+      - shark super chrome
+      - shark super chromes
       Stainless:
       - lord shark - super stainless
+      - shark (egypt)
+      - shark ss
+    Sharp Star:
+      Platinum:
+      - sharp star
     Silver Star:
       Super Stainless:
       - lord silver star - stainless
+    Starmaxx:
+      Superior Platinum:
+      - starmaxx - superior platinum
+    Statum:
+      Platinum:
+      - statum
     Super-Max:
       Platinum:
       - supermax platinum plus
       Stainless (Red):
+      - super- super-max super stainless
       - supermax
+    Tatara:
+      DE:
+      - tatara - platinum
+      - tatara stainless
     Tatra:
+      Carbon Steel:
+      - tatra carbon steel
       Platinum:
       - czech blades tatra platinum stainless
+      - tatra platinum
     Tiger:
       Platinum:
+      - tiger
+      - tiger - platinum
+      - tiger platinum
       - tiger platinum, de
+    Topaz:
+      Platinum:
+      - topaz platinum
+      Stainless:
+      - topaz - stainless
     Treet:
       Black Beauty:
       - black beauty
+      - treet black beauty carbon
+      Carbon:
+      - trees carbon steel -
+      - treet - carbon steel
+      - treet carbon steel
+      - treet carbon steel -
+      Classic:
+      - treet - classic carbon
+      - treet classic
+      - treet classic carbon steel
+      Dura Sharp:
+      - treet durasharp
+      Falcon:
+      - treet - falcon carbon steel
+      New Edge:
+      - treet new edge
+      Platinum:
+      - treet
+      - treet - platinum
+      - treet platinum
+      Silver:
+      - treet silver
+    V12:
+      Super Platinum:
+      - v12
+    Van Der Hagen:
+      Stainless:
+      - van der hagen stainless
+    Voskhod:
+      Teflon Coated:
+      - voskhod
+      - voskhod - teflon coated
+      - voskhod teflon coated
+    Wilkinson Sword:
+      Classic:
+      - wilkinson sword
+      - wilkinson sword (german)
+    Willy's:
+      Premium:
+      - willy's premium
     Wizamet:
       Super Iridium:
       - wizamet
@@ -357,6 +473,7 @@ blade:
       - personna gem stainless ptfe
       - personna ptfe
       - personna ptfe stainless steel gem
+      - ptfe
       GEM Stainless:
       - gem stainless
   Hair Shaper:
@@ -388,6 +505,9 @@ blade:
       - personna hair shaper
       - personna hair shaper blade
       - personna specimen prep
+    Weck:
+      Sextoblade:
+      - weck hair shaper
   Half DE:
     Dorco:
       HST-300:
@@ -423,21 +543,38 @@ blade:
     Schick:
       Injector:
       - injector
+      - schick
+      - schick - chinese schick plus
       - schick - injector
       - schick injector
       - schick injector blade
       - schick injector yellow
+      - schick krona
       - schick stainless steel injector
+      - schick yellow
       - shick injector blade
+      Proline (Injector):
+      - schick - proline b-20
+      - shick proline b20
     Ted Pella:
       Injector:
       - ted pella - injector
       - ted pella injector blade
+      - ted pella ptfe
       - ted pella single edge injector
   Other:
     Kampfe:
       Wedge:
       - kampfe bros saturday
+    Rolls Razor:
+      Blade:
+      - rolls (not this kind of rolls) razor wedge blade
+      - rolls blade
+      - rolls razor
+    Valet:
+      Blade:
+      - valet auto strop
+      - valet se blade
 razor:
   3D Printed:
     DE:

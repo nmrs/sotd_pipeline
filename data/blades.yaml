@@ -3,6 +3,10 @@ A77:
     A77:
       patterns:
       - cloud.*a77
+  RhinoceRos:
+    A77:
+      patterns:
+      - rhinoceros.*a77
   Snow Mountain Wolf:
     A77:
       patterns:
@@ -87,7 +91,7 @@ Cartridge:
       - mach ?(iii|3|three)
       - sensor ?(iii|3|three)
       - trac( |-)?(2|two|ii)
-      - twin.*pivot
+      - twin.*pivot(.*plus)?
       - xtreme2
 DE:
   7 O'Clock:
@@ -470,8 +474,8 @@ DE:
       - (person+a)?.*lab *blue
       - personn*a.*blue
       - personn*a.*c.*c
-      - personn*a
-      - accuforge
+      - ^(?!.*(atra|gem|pfte|plat|stain|ss)).*personn*a
+      - ^(?!.*(atra|gem|pfte|plat|stain|ss)).*accuforge
     Med Prep:
       patterns:
       - person.*med
