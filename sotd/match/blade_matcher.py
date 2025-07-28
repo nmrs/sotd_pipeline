@@ -509,6 +509,26 @@ class BladeMatcher:
                     pattern=regex_half_de.get("pattern"),
                 )
 
+        # 3.5. Try FHS format if target is Other (special case for Valet AutoStrop razors)
+        if target_blade_format.upper() == "OTHER" and normalized_text:
+            searched_formats.add("FHS")
+            correct_fhs = self._collect_correct_matches_in_format(normalized_text, "FHS")
+            if correct_fhs:
+                return create_match_result(
+                    original=original,
+                    matched=correct_fhs[0],
+                    match_type="exact",
+                    pattern=None,
+                )
+            regex_fhs = self._match_regex_in_format(normalized_text, "FHS")
+            if regex_fhs:
+                return create_match_result(
+                    original=original,
+                    matched=regex_fhs["matched"],
+                    match_type=MatchType.REGEX,
+                    pattern=regex_fhs.get("pattern"),
+                )
+
         # 4. General fallback system: try DE first, then other formats
         if normalized_text:
             # Try DE format first (most common) - unless we already searched it
@@ -582,17 +602,17 @@ class BladeMatcher:
         all_correct_matches = self._collect_all_correct_matches(normalized_text)
         if all_correct_matches:
             # If we have multiple matches, prioritize by format compatibility
-            # Prioritize Half DE over DE when both exist
-            half_de_matches = [m for m in all_correct_matches if m["format"].upper() == "HALF DE"]
-            if half_de_matches:
+            # Prioritize DE over Half DE when no specific context is provided
+            de_matches = [m for m in all_correct_matches if m["format"].upper() == "DE"]
+            if de_matches:
                 return create_match_result(
                     original=original_text,
-                    matched=half_de_matches[0],
+                    matched=de_matches[0],
                     match_type="exact",
                     pattern=None,
                 )
 
-            # If no Half DE matches, return the first match
+            # If no DE matches, return the first match
             return create_match_result(
                 original=original_text,
                 matched=all_correct_matches[0],
@@ -634,17 +654,17 @@ class BladeMatcher:
 
         # If we have matches, prioritize by format compatibility
         if all_matches:
-            # Prioritize Half DE over DE when both exist
-            half_de_matches = [m for m in all_matches if m["format"].upper() == "HALF DE"]
-            if half_de_matches:
+            # Prioritize DE over Half DE when no specific context is provided
+            de_matches = [m for m in all_matches if m["format"].upper() == "DE"]
+            if de_matches:
                 return create_match_result(
                     original=original_text,
-                    matched=half_de_matches[0],
+                    matched=de_matches[0],
                     match_type=MatchType.REGEX,
                     pattern=best_pattern,
                 )
 
-            # If no Half DE matches, return the first match
+            # If no DE matches, return the first match
             return create_match_result(
                 original=original_text,
                 matched=all_matches[0],
