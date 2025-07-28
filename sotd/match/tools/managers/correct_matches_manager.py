@@ -193,11 +193,11 @@ class CorrectMatchesManager:
                         field_data[field][brand][model].append(normalized_original)
 
             # Alphabetize entries within each field/brand/model (or field/format/brand/model)
-            for field_name, field_data in field_data.items():
-                if isinstance(field_data, dict):
+            for field_name, field_section in field_data.items():
+                if isinstance(field_section, dict):
                     if field_name == "blade":
                         # For blade field, sort by format -> brand -> model
-                        for format_name, format_data in field_data.items():
+                        for format_name, format_data in field_section.items():
                             if isinstance(format_data, dict):
                                 for brand, brand_data in format_data.items():
                                     if isinstance(brand_data, dict):
@@ -207,7 +207,7 @@ class CorrectMatchesManager:
                                                 entries.sort(key=str.lower)
                     else:
                         # For other fields, sort by brand -> model
-                        for brand, brand_data in field_data.items():
+                        for brand, brand_data in field_section.items():
                             if isinstance(brand_data, dict):
                                 for model, entries in brand_data.items():
                                     if isinstance(entries, list):
