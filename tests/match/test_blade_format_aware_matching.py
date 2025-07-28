@@ -32,10 +32,6 @@ DE:
         - gillette.*perma
 
 GEM:
-  Accuforge:
-    GEM:
-      patterns:
-        - accu.*(gem|coated|p[ft]{2}e)
   Personna:
     GEM PTFE:
       patterns:
@@ -225,14 +221,10 @@ def test_complex_pattern_matching_gem(test_matcher):
     for input_text, expected_brand, expected_model, expected_format in ptfe_tests:
         result = test_matcher.match_with_context(input_text, "GEM")
         assert result.matched is not None
-        # Update expectations to match actual catalog structure
-        if expected_brand == "Accuforge":
-            # Accuforge coated should match Personna GEM PTFE pattern
-            assert result.matched["brand"] == "Personna"
-            assert result.matched["model"] == "GEM PTFE"
-        else:
-            assert result.matched["brand"] == "Personna"
-            assert result.matched["model"] == "GEM PTFE"
+
+        # All these inputs should match Personna GEM PTFE
+        assert result.matched["brand"] == "Personna"
+        assert result.matched["model"] == "GEM PTFE"
         assert result.matched["format"] == "GEM"
 
 

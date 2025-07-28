@@ -71,7 +71,7 @@ class TestRazorMatcher:
         if "grind" in result.matched:
             assert result.matched["grind"] == "Full Hollow"
         if "width" in result.matched:
-            assert result.matched["width"] == 15
+            assert result.matched["width"] == "15/16"
         if "point" in result.matched:
             assert result.matched["point"] == "Square"
 

@@ -122,6 +122,7 @@ class TestCLIInterface:
             all_fields = False
             verbose = False
             dry_run = False
+            catalog_validation = False
 
         results = validator.run(Args())
         assert "razor" in results
@@ -147,6 +148,7 @@ class TestCLIInterface:
             all_fields = False
             verbose = False
             dry_run = False
+            catalog_validation = False
 
         results = validator.run(Args())
         assert "razor" in results
