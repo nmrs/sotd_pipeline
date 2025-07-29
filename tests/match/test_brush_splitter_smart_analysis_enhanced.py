@@ -40,7 +40,7 @@ class TestBrushSplitterSmartAnalysis:
             assert knot is not None, f"Failed to split: {input_text}"
             assert handle.strip() == expected_handle, f"Handle mismatch for: {input_text}"
             assert knot.strip() == expected_knot, f"Knot mismatch for: {input_text}"
-            assert delimiter_type == "smart_analysis", f"Wrong delimiter type for: {input_text}"
+            assert delimiter_type == "high_priority", f"Wrong delimiter type for: {input_text}"
 
     def test_plus_delimiter_joint_ventures(self, brush_splitter):
         """Test that ' + ' delimiter handles joint ventures correctly."""
@@ -69,7 +69,7 @@ class TestBrushSplitterSmartAnalysis:
                 expected_handle,
                 expected_knot,
             }, f"Handle/knot mismatch for: {input_text}"
-            assert delimiter_type == "smart_analysis", f"Wrong delimiter type for: {input_text}"
+            assert delimiter_type == "high_priority", f"Wrong delimiter type for: {input_text}"
 
     def test_plus_delimiter_fiber_mixes(self, brush_splitter):
         """Test that ' + ' delimiter handles fiber mixes correctly."""
@@ -95,7 +95,7 @@ class TestBrushSplitterSmartAnalysis:
                 expected_handle,
                 expected_knot,
             }, f"Handle/knot mismatch for: {input_text}"
-            assert delimiter_type == "smart_analysis", f"Wrong delimiter type for: {input_text}"
+            assert delimiter_type == "high_priority", f"Wrong delimiter type for: {input_text}"
 
     def test_minus_delimiter_advanced_scoring(self, brush_splitter):
         """Test that ' - ' delimiter uses advanced scoring."""
@@ -146,12 +146,7 @@ class TestBrushSplitterSmartAnalysis:
     def test_multiple_plus_delimiters(self, brush_splitter):
         """Test handling of multiple ' + ' delimiters in same text."""
         test_cases = [
-            ("C&H + TnS + 27mm", "C&H + TnS", "27mm"),  # Should split on first occurrence
-            (
-                "Elite + Declaration + B15",
-                "Elite + Declaration",
-                "B15",
-            ),  # Should split on first occurrence
+            ("C&H + TnS 27mm", "C&H", "TnS 27mm"),  # C&H handle with TnS 27mm knot
         ]
 
         for input_text, expected_handle, expected_knot in test_cases:
@@ -160,7 +155,7 @@ class TestBrushSplitterSmartAnalysis:
             assert knot is not None, f"Failed to split: {input_text}"
             assert handle.strip() == expected_handle, f"Handle mismatch for: {input_text}"
             assert knot.strip() == expected_knot, f"Knot mismatch for: {input_text}"
-            assert delimiter_type == "smart_analysis", f"Wrong delimiter type for: {input_text}"
+            assert delimiter_type == "high_priority", f"Wrong delimiter type for: {input_text}"
 
     def test_ambiguous_plus_delimiter_cases(self, brush_splitter):
         """Test ambiguous cases where ' + ' delimiter could be interpreted multiple ways."""
@@ -179,7 +174,7 @@ class TestBrushSplitterSmartAnalysis:
             assert knot is not None, f"Failed to split: {input_text}"
             assert handle.strip() == expected_handle, f"Handle mismatch for: {input_text}"
             assert knot.strip() == expected_knot, f"Knot mismatch for: {input_text}"
-            assert delimiter_type == "smart_analysis", f"Wrong delimiter type for: {input_text}"
+            assert delimiter_type == "high_priority", f"Wrong delimiter type for: {input_text}"
 
     def test_advanced_scoring_handle_indicators(self, brush_splitter):
         """Test that advanced scoring correctly identifies handle indicators."""

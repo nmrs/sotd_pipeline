@@ -19,30 +19,35 @@ class BrushSplitter:
         if not text:
             return None, None, None
 
-        # Step 1: Try delimiter-based splitting (highest priority)
+        # Step 1: Try high-priority delimiter-based splitting (w/, with, in)
         result = self._try_delimiter_splitting(text)
         if result[0] and result[1]:
             return result
 
         # Step 2: Check if it's a known brush (medium priority)
         result = self._try_known_brush_check(text)
-        if result[0] is None and result[1] is None:
+        if result[0] is None and result[1] is None and result[2] is None:
             return result  # Known brush - don't split
 
-        # Step 3: Try fiber hint splitting (lower priority)
+        # Step 3: Try medium-priority delimiter-based splitting (-, +)
+        result = self._try_medium_priority_delimiter_splitting(text)
+        if result[0] and result[1]:
+            return result
+
+        # Step 4: Try fiber hint splitting (lower priority)
         result = self._try_fiber_hint_splitting(text)
         if result[0] and result[1]:
             return result
 
-        # Step 4: Final fallback - try all splitting methods again
+        # Step 5: Final fallback - try all splitting methods again
         result = self._try_fallback_splitting(text)
         return result
 
     def _try_delimiter_splitting(
         self, text: str
     ) -> tuple[Optional[str], Optional[str], Optional[str]]:
-        """Step 1: Try delimiter-based splitting (highest priority)."""
-        return self._split_by_delimiters(text)
+        """Step 1: Try high-priority delimiter-based splitting."""
+        return self._split_by_high_priority_delimiters(text)
 
     def _try_known_brush_check(
         self, text: str
@@ -55,6 +60,12 @@ class BrushSplitter:
             # Not a known brush, continue with other methods
             return None, None, "not_known_brush"
 
+    def _try_medium_priority_delimiter_splitting(
+        self, text: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Step 3: Try medium-priority delimiter-based splitting."""
+        return self._split_by_medium_priority_delimiters(text)
+
     def _try_fiber_hint_splitting(
         self, text: str
     ) -> tuple[Optional[str], Optional[str], Optional[str]]:
@@ -64,15 +75,18 @@ class BrushSplitter:
     def _try_fallback_splitting(
         self, text: str
     ) -> tuple[Optional[str], Optional[str], Optional[str]]:
-        """Step 4: Final fallback - try all splitting methods again."""
-        # Try to split and see if we can match the parts
-        handle, knot, delimiter_type = self._split_by_delimiters(text)
+        """Step 5: Final fallback - try all splitting methods again."""
+        # Try high-priority delimiters first
+        handle, knot, delimiter_type = self._split_by_high_priority_delimiters(text)
         if handle and knot:
-            # Splitting succeeded - return the split components regardless of match status
-            # The brush matcher will handle matching each component separately
             return handle, knot, delimiter_type
 
-        # Try other splitting methods
+        # Try medium-priority delimiters
+        handle, knot, delimiter_type = self._split_by_medium_priority_delimiters(text)
+        if handle and knot:
+            return handle, knot, delimiter_type
+
+        # Try fiber hint splitting
         handle, knot, delimiter_type = self._split_by_fiber_hint(text)
         if handle and knot:
             return handle, knot, delimiter_type
@@ -80,45 +94,20 @@ class BrushSplitter:
         # If no splitting methods worked, return None to indicate no splitting
         return None, None, None
 
-    def _split_by_delimiters(self, text: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
-        """Split text using known delimiters and return parts and delimiter type.
+    def _split_by_high_priority_delimiters(
+        self, text: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Split text using high-priority delimiters.
 
-        - `/` is treated as a high-reliability delimiter regardless of spaces
-          (e.g., 'A/B', 'A / B', 'A/ B', 'A /B').
-        - Always check for ' w/ ' and ' with ' delimiters before '/' to avoid
-          mis-splitting 'w/' as '/'.
-        - Other delimiters retain their original logic.
-        - " x " is only treated as a non-delimiter when it's part of dimension specifications.
+        These delimiters are always treated as splitting indicators and are checked
+        before known brush validation.
         """
         # High-reliability delimiters (always trigger splitting with simple logic)
         high_reliability_delimiters = [" w/ ", " w/", " with "]
         # Handle-primary delimiters (first part is handle)
         handle_primary_delimiters = [" in "]
-        # Medium-reliability delimiters (need smart analysis)
-        medium_reliability_delimiters = [" + ", " - "]
-
-        # Check if " x " is part of a dimension specification - if so, don't treat as delimiter
-        if " x " in text and self._is_specification_x(text):
-            # " x " is part of a dimension specification, so ignore it as a delimiter
-            # Continue with other delimiter detection
-            pass
-        elif " x " in text:
-            # " x " is present but NOT part of a dimension specification
-            # This could be a legitimate delimiter, so don't block other delimiter detection
-            pass
-
-        # Check if text contains " & " - only treat as non-delimiter if it's not part of a brand
-        # name
-        if " & " in text:
-            # Check if " & " is followed by a space and another word (likely a brand name)
-            # or if it's followed immediately by another word (likely a delimiter)
-            if re.search(r" &\s+\w", text):
-                # " & " is followed by space + word, likely a brand name, so don't treat as
-                # non-delimiter
-                pass
-            else:
-                # " & " is followed immediately by word, likely a delimiter
-                return None, None, None
+        # Other high-priority delimiters
+        other_high_priority_delimiters = [" + "]
 
         # Always check for ' w/ ' and ' with ' first to avoid misinterpreting 'w/' as '/'
         for delimiter in high_reliability_delimiters:
@@ -147,6 +136,24 @@ class BrushSplitter:
         for delimiter in handle_primary_delimiters:
             if delimiter in text:
                 return self._split_by_delimiter_simple(text, delimiter, "handle_primary")
+
+        # Check other high-priority delimiters
+        for delimiter in other_high_priority_delimiters:
+            if delimiter in text:
+                return self._split_by_delimiter_simple(text, delimiter, "high_priority")
+
+        return None, None, None
+
+    def _split_by_medium_priority_delimiters(
+        self, text: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Split text using medium-priority delimiters.
+
+        These delimiters are checked after known brush validation and may not always
+        indicate a split (e.g., "Zenith - MOAR BOAR" should not split).
+        """
+        # Medium-reliability delimiters (need smart analysis)
+        medium_reliability_delimiters = [" - "]
 
         # Check medium-reliability delimiters (use smart analysis)
         for delimiter in medium_reliability_delimiters:
@@ -758,9 +765,20 @@ class BrushSplitter:
             return False
 
     def _is_known_brush(self, text: str) -> bool:
-        """Check if the text matches a known brush in the catalog."""
+        """Check if the text matches a known brush in the catalog.
+
+        This method should only return True for complete, single brush descriptions
+        that don't contain delimiters that should trigger splitting.
+        """
         if not self.strategies:
             return False
+
+        # If the text contains delimiters that should trigger splitting,
+        # it's not a "known brush" - it should be split instead
+        splitting_delimiters = [" + ", " - ", " w/ ", " with ", " in "]
+        for delimiter in splitting_delimiters:
+            if delimiter in text:
+                return False
 
         # Try to match against all strategies
         for strategy in self.strategies:
