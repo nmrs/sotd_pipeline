@@ -8,9 +8,62 @@ from sotd.match.brush_matching_strategies.utils.knot_size_utils import parse_kno
 class BrushSplitter:
     """Brush splitting functionality extracted from BrushMatcher."""
 
+    # Class-level cache for brands with slashes to avoid repeated YAML loading
+    _brands_with_slash_cache = None
+
     def __init__(self, handle_matcher=None, strategies=None):
         self.handle_matcher = handle_matcher
         self.strategies = strategies or []
+
+    @classmethod
+    def _get_brands_with_slash(cls) -> set:
+        """Get cached set of brand and model names that contain '/'."""
+        if cls._brands_with_slash_cache is None:
+            cls._brands_with_slash_cache = cls._load_brands_with_slash()
+        return cls._brands_with_slash_cache
+
+    @classmethod
+    def _load_brands_with_slash(cls) -> set:
+        """Load brands and models with '/' from brushes.yaml."""
+        try:
+            import yaml
+            from pathlib import Path
+
+            # Load brushes.yaml to find brands/models with "/"
+            brushes_path = Path("data/brushes.yaml")
+            if not brushes_path.exists():
+                return set()
+
+            with open(brushes_path, "r", encoding="utf-8") as f:
+                brushes_data = yaml.safe_load(f)
+
+            brands_with_slash = set()
+
+            # Search through known_brushes and other_brushes sections
+            sections_to_check = ["known_brushes", "other_brushes"]
+
+            for section_name in sections_to_check:
+                section_data = brushes_data.get(section_name, {})
+                if not isinstance(section_data, dict):
+                    continue
+
+                # Check brand names (top level keys)
+                for brand_name in section_data.keys():
+                    if "/" in brand_name:
+                        brands_with_slash.add(brand_name.lower())
+
+                    # Check model names under each brand
+                    brand_data = section_data[brand_name]
+                    if isinstance(brand_data, dict):
+                        for model_name in brand_data.keys():
+                            if "/" in model_name:
+                                brands_with_slash.add(model_name.lower())
+
+            return brands_with_slash
+
+        except Exception:
+            # If there's any error loading the YAML or processing, fall back to empty set
+            return set()
 
     def split_handle_and_knot(
         self, text: str
@@ -670,6 +723,7 @@ class BrushSplitter:
         - "80/20" (80% synthetic, 20% badger)
         - "25/75" (25% horse, 75% badger)
         - "r/wetshaving" (Reddit subreddit reference)
+        - "EldrormR Industries/Muninn Woodworks" (known brand with "/")
         """
         # Look for percentage specifications like "50/50", "70/30", etc.
         # These are typically found in parentheses or as part of fiber descriptions
@@ -691,6 +745,25 @@ class BrushSplitter:
 
         for pattern in reddit_patterns:
             if re.search(pattern, text, re.IGNORECASE):
+                return True
+
+        # Check if the text contains a known brand or model name with "/"
+        # This prevents splitting on "/" when it's part of a known brand name
+        if self._contains_known_brand_with_slash(text):
+            return True
+
+        return False
+
+    def _contains_known_brand_with_slash(self, text: str) -> bool:
+        """Check if the text contains a known brand or model name that includes '/'."""
+        brands_with_slash = self._get_brands_with_slash()
+        if not brands_with_slash:
+            return False
+
+        text_lower = text.lower()
+
+        for brand_name in brands_with_slash:
+            if brand_name in text_lower:
                 return True
 
         return False
@@ -768,17 +841,10 @@ class BrushSplitter:
         """Check if the text matches a known brush in the catalog.
 
         This method should only return True for complete, single brush descriptions
-        that don't contain delimiters that should trigger splitting.
+        that match patterns in the brush catalog.
         """
         if not self.strategies:
             return False
-
-        # If the text contains delimiters that should trigger splitting,
-        # it's not a "known brush" - it should be split instead
-        splitting_delimiters = [" + ", " - ", " w/ ", " with ", " in "]
-        for delimiter in splitting_delimiters:
-            if delimiter in text:
-                return False
 
         # Try to match against all strategies
         for strategy in self.strategies:
