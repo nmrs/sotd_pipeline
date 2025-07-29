@@ -576,7 +576,98 @@ blade:
       - valet auto strop
       - valet se blade
 brush:
+  Alpha:
+    Amber:
+    - alpha amber
+    Bulldog:
+    - alpha bulldog ti
+  Aurora Grooming:
+    LG24:
+    - aurora grooming lg24
+  Böker:
+    Synthetic:
+    - böker synthetic
+  Dreadnought:
+    Avenger:
+    - dreadnought avenger
+  Omega:
+    '10005':
+    - omega 10005
+    '10048':
+    - omega pro48
+    '10049':
+    - omega - 10049
+    - omega 10049
+    '10065':
+    - omega 10065
+    '10066':
+    - omega 10066
+    '10098':
+    - omega 10098
+    '11137':
+    - omega 11137
+    '146818':
+    - omega 146818
+    '20102':
+    - omega 20102
+    '81151':
+    - omega 81151
+  Semogue:
+    '1305':
+    - semogue 1305
+    '1800':
+    - semogue 1800
+    '2000':
+    - semogue 2000
+    '610':
+    - semogue 610
+    '830':
+    - semogue 830
+    SOC Boar:
+    - semogue - soc boar
+  Simpson:
+    Chubby 2:
+    - simpson - 'chubby 2' silvertip
+    - simpson ch2 super badger super badger
+    - simpson chubby 2 manchurian
+    Chubby 2 Synthetic:
+    - simpsons chubby 2 synthetic
+    Chubby 3:
+    - simpson butterscotch ch3 manchurian badger
+    Colonel X2L:
+    - simpson - 'colonel' best
+    M7:
+    - simpson - 'm7' manchurian
+    Trafalgar T2:
+    - simpson trafalgar t2
+    - simpsons trafalgar t2
+    Trafalgar T3:
+    - simpson - trafalgar t3
+    - simpson trafalgar t3
+    - simpson trafalgar t3 synthetic 26mm
+    Wee Scot:
+    - simpson - 'wee scot' best
+    - simpson - wee scott
+    - simpson wee scot
+    - simpsons wee scot
+  Stirling:
+    2-Band Synthetic:
+    - stirling 2 band synthetic
+  Wald:
+    A1:
+    - wald a1
+  Walfront:
+    Travel Brush:
+    - walfront travel brush
   Zenith:
+    505BC SE:
+    - zenith 505bc
+    506U SE:
+    - zenith 506u xse
+    B15:
+    - zenith b15
+    B37:
+    - zenith b37
     r/wetshaving MOAR BOAR:
     - moar boar
     - moar f'n boar
@@ -603,6 +694,9 @@ brush:
     - zenith r/wetshaving moar boar
     - zenith r/wetshaving sub exclusive moar boar
     - zentih - moar boar r/wetshaving
+  null:
+    null:
+    - 'jayaruh #441 w/ ap shave co g5c'
 razor:
   3D Printed:
     DE:

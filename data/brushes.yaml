@@ -499,7 +499,14 @@ known_brushes:
       knot_size_mm: 27
       patterns:
       - simp.*chubby\s*2\b
+      - simp.*chubby*two
       - simp.*ch2\b
+    Chubby 2 Synthetic:
+      fiber: Synthetic
+      knot_size_mm: 27
+      patterns:
+      - simp.*chubby\s*2\b.*syn
+      - simp.*ch2s
     Chubby 3:
       fiber: Badger
       knot_size_mm: 29
@@ -511,22 +518,35 @@ known_brushes:
       knot_size_mm: 21
       patterns:
       - sim.*colonel
+    M7:
+      fiber: Badger
+      knot_size_mm: 22
+      patterns:
+      - simp.*m7
+    M7 Synthetic:
+      fiber: Synthetic
+      knot_size_mm: 22
+      patterns:
+      - simp.*m7s
+      - simp.*m7.*syn
     Trafalgar T1:
       fiber: Synthetic
       knot_size_mm: 23
       patterns:
-      - simp(?:.*traf)?.*t?1
+      - simp.*traf.*\bt1
+      - trafalgar.*\bt1
     Trafalgar T2:
       fiber: Synthetic
       knot_size_mm: 24
       patterns:
-      - simp.*traf.*t2
-      - trafalgar.*t2
+      - simp.*traf.*\bt2
+      - trafalgar.*\bt2
     Trafalgar T3:
       fiber: Synthetic
       knot_size_mm: 28
       patterns:
-      - simp(?:.*traf)?.*t?3
+      - simp.*traf.*\bt3
+      - trafalgar.*\bt3
     Tulip T1:
       fiber: Synthetic
       knot_size_mm: 19
@@ -542,6 +562,11 @@ known_brushes:
       knot_size_mm: 22
       patterns:
       - simp.*tulip.*t3
+    Wee Scot:
+      fiber: Badger
+      knot_size_mm: 13
+      patterns:
+      - simp.*wee.*scot
   Stirling:
     2-Band Synthetic:
       fibether: Synthetic

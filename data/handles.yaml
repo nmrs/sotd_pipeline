@@ -117,6 +117,9 @@ artisan_handles:
     patterns:
     - heritage
     - heritage collection
+  Jayaruh:
+    patterns:
+    - jayaruh
   Lancaster Brushworks:
     patterns:
     - lancaster
