@@ -82,6 +82,7 @@ def test_handles_catalog():
                     "\\bc(?:\\s*\\&\\s*|\\s+and\\s+|\\s*\\+\\s*)h\\b",
                 ]
             },
+            "Jayaruh": {"patterns": ["jayaruh"]},
         },
         "manufacturer_handles": {"Elite": {"patterns": ["elite"]}},
         "other_handles": {"Wolf Whiskers": {"patterns": ["wolf.*whis"]}},
@@ -107,6 +108,10 @@ def test_knots_catalog():
                 "fiber": "Badger",
                 "knot_size_mm": 26,
                 "S2 Innovator": {"patterns": ["rich.*man.*shav.*s-?2.*innovator"]},
+            },
+            "AP Shave Co": {
+                "fiber": "Synthetic",
+                "G5C": {"patterns": [r"\ba[\s.]*p\b.*g5c"]},
             },
         },
         "other_knots": {
@@ -424,3 +429,100 @@ class TestBrushMatcherPriorityOrder:
         assert knot["model"] == "B15"
         handle = result.matched["handle"]
         assert handle["brand"] == "UnknownMaker"
+
+
+class TestBrushMatcherPatternFields:
+    """Test that pattern fields use actual YAML patterns instead of hardcoded values."""
+
+    def test_pattern_fields_use_actual_yaml_patterns(self, brush_matcher):
+        """Test that handle and knot pattern fields use actual YAML patterns, not hardcoded values."""
+        # Test case: "Jayaruh #441 w/ AP Shave Co G5C"
+        # This should split into:
+        # - Handle: "Jayaruh #441" (matches "jayaruh" pattern from handles.yaml)
+        # - Knot: "AP Shave Co G5C" (matches "\ba[\s.]*p\b.*g5c" pattern from knots.yaml)
+
+        result = brush_matcher.match("Jayaruh #441 w/ AP Shave Co G5C")
+
+        assert result is not None
+        assert result.match_type == "regex"
+        assert result.pattern == "split"
+
+        # Check that we have handle and knot sections
+        assert "handle" in result.matched
+        assert "knot" in result.matched
+
+        handle = result.matched["handle"]
+        knot = result.matched["knot"]
+
+        # Verify handle section
+        assert handle["brand"] == "Jayaruh"
+        assert handle["model"] == "#441"
+        assert handle["source_text"] == "Jayaruh #441"
+        # The _matched_by field can be either "HandleMatcher" or "BrushSplitter" depending on the flow
+        assert handle["_matched_by"] in ["HandleMatcher", "BrushSplitter"]
+
+        # CRITICAL: Pattern should be the actual YAML pattern, not "split"
+        assert handle["_pattern"] == "jayaruh", f"Expected 'jayaruh', got '{handle['_pattern']}'"
+
+        # Verify knot section
+        assert knot["brand"] == "AP Shave Co"
+        assert knot["model"] == "G5C"
+        assert knot["fiber"] == "Synthetic"
+        assert knot["source_text"] == "AP Shave Co G5C"
+        assert knot["_matched_by"] == "BrushSplitter"
+
+        # CRITICAL: Pattern should be the actual YAML pattern, not "split"
+        expected_knot_pattern = r"\ba[\s.]*p\b.*g5c"
+        assert (
+            knot["_pattern"] == expected_knot_pattern
+        ), f"Expected '{expected_knot_pattern}', got '{knot['_pattern']}'"
+
+    def test_pattern_fields_for_known_handles(self, brush_matcher):
+        """Test pattern fields for known handle makers from handles.yaml."""
+        # Test with a known handle maker that has a specific pattern
+        result = brush_matcher.match("Chisel & Hound handle w/ AP Shave Co G5C")
+
+        assert result is not None
+        assert "handle" in result.matched
+
+        handle = result.matched["handle"]
+
+        # Should match the actual pattern from handles.yaml
+        # The pattern should be one of the Chisel & Hound patterns, not "split"
+        expected_patterns = ["chis.*hou", "chis.*fou", r"\bc(?:\s*\&\s*|\s+and\s+|\s*\+\s*)h\b"]
+        assert (
+            handle["_pattern"] in expected_patterns
+        ), f"Expected one of {expected_patterns}, got '{handle['_pattern']}'"
+
+    def test_pattern_fields_for_known_knots(self, brush_matcher):
+        """Test pattern fields for known knots from knots.yaml."""
+        # Test with a known knot that has a specific pattern
+        result = brush_matcher.match("Unknown handle w/ Declaration Grooming B15")
+
+        assert result is not None
+        assert "knot" in result.matched
+
+        knot = result.matched["knot"]
+
+        # Should match the actual pattern from knots.yaml
+        # The pattern should be one of the Declaration Grooming B15 patterns, not "split"
+        expected_patterns = ["(declaration|\\bdg\\b).*\\bb15\\b", "b15"]
+        assert (
+            knot["_pattern"] in expected_patterns
+        ), f"Expected one of {expected_patterns}, got '{knot['_pattern']}'"
+
+    def test_pattern_fields_fallback_to_split_when_no_match(self, brush_matcher):
+        """Test that pattern fields fall back to 'split' when no YAML pattern matches."""
+        # Test with unknown handle and knot that don't match any YAML patterns
+        result = brush_matcher.match("UnknownHandle #123 w/ UnknownKnot XYZ")
+
+        assert result is not None
+        assert "handle" in result.matched
+        assert "knot" in result.matched
+
+        handle = result.matched["handle"]
+        knot = result.matched["knot"]
+
+        # When no YAML pattern matches, should fall back to "split"
+        assert handle["_pattern"] == "split", f"Expected 'split', got '{handle['_pattern']}'"
+        assert knot["_pattern"] == "split", f"Expected 'split', got '{knot['_pattern']}'"
