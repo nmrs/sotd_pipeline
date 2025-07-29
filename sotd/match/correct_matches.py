@@ -91,9 +91,9 @@ class CorrectMatchesChecker:
                     continue
 
                 # Check if normalized value matches any of the correct strings
+                # Note: correct match strings are already normalized, so no need to normalize them
                 for correct_string in strings:
-                    normalized_correct = normalize_for_matching(correct_string, field="brush")
-                    if normalized_correct == normalized_value:
+                    if correct_string == normalized_value:
                         # Return match data in the expected format
                         return CorrectMatchData(
                             brand=brand, model=model, match_type="brush_section"
@@ -127,17 +127,38 @@ class CorrectMatchesChecker:
                     continue
 
                 # Check if normalized value matches any of the correct strings
+                # Note: correct match strings are already normalized, so no need to normalize them
                 for correct_string in strings:
-                    normalized_correct = normalize_for_matching(correct_string, field="brush")
-                    if normalized_correct == normalized_value:
-                        # Find corresponding knot information
+                    if correct_string == normalized_value:
+                        # Find corresponding knot info
                         knot_info = self._find_knot_info_for_string(value, knot_section)
-
                         return CorrectMatchData(
                             handle_maker=handle_maker,
                             handle_model=handle_model,
                             knot_info=knot_info,
                             match_type="handle_knot_section",
+                        )
+
+        # Search through knot section
+        for knot_brand, knot_models in knot_section.items():
+            if not isinstance(knot_models, dict):
+                continue
+
+            for knot_model, strings in knot_models.items():
+                if not isinstance(strings, list):
+                    continue
+
+                # Check if normalized value matches any of the correct strings
+                # Note: correct match strings are already normalized, so no need to normalize them
+                for correct_string in strings:
+                    if correct_string == normalized_value:
+                        # Create knot info structure
+                        knot_info = {
+                            "brand": knot_brand,
+                            "model": knot_model,
+                        }
+                        return CorrectMatchData(
+                            knot_info=knot_info, match_type="handle_knot_section"
                         )
 
         return None
