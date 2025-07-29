@@ -1,1 +1,6 @@
-splits: {}
+splits:
+  do_not_split:
+    - original: "Zenith - 508A XL/Bristle (B35) (MOAR BOAR) 31mm Boar"
+      should_not_split: true
+      match_type: "known_brush"
+      validated: true

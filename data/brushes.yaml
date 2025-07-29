@@ -566,9 +566,11 @@ known_brushes:
       - (510(\s*|-*)se|jhdsajkghjkdhagkgkjgkhagdkjagdassd)
       - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*28).*
     31mmx50mm Boar (510SE-XL):
-      fiber: Boar
-      knot_maker: Zenith
-      knot_size_mm: 31
+      knot:
+        brand: Zenith
+        fiber: Boar
+        knot_size_mm: 31
+        model: B35
       patterns:
       - (510(\s*|-*)se(\s*|-*)xl|jhdsajkghjkdhagkgkjgkhagdkjagdassd)
       - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*31).*
@@ -805,7 +807,7 @@ known_brushes:
       knot_size_mm: 31
       knot_loft_mm: 57
       patterns:
-      - zenith.*\bb35\b
+      - ^(?!.*moar).*zenith.*\bb35\b
       - 508a
     Butterscotch Chubby (B34):
       fiber: Boar
@@ -822,14 +824,18 @@ known_brushes:
       - zenith.*\bb36\b
       - copper.*scrubby
     r/wetshaving MOAR BOAR:
-    fiber: Boar
-    knot_size_mm: 31
-    name: r/wetshaving MOAR BOAR
-    patterns:
-    - moar(.*boar)?
-    - 508\s*xl
-    - wetshaving.*exc
-    - maor boar
+      patterns:
+      - moar(.*boar)?
+      - 508\s*xl
+      - wetshaving.*exc
+      - maor boar
+      knot:
+        brand: Zenith
+        fiber: Boar
+        knot_size_mm: 31
+        model: B35
+      handle:
+        brand: Zenith
 
 other_brushes:
   Gilette:
