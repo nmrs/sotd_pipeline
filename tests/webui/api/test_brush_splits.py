@@ -469,7 +469,6 @@ class TestAdvancedBrushSplitStatistics:
         assert stats.split_types == {
             "delimiter": 0,
             "fiber_hint": 0,
-            "brand_context": 0,
             "no_split": 0,
         }
         assert stats.confidence_breakdown == {"high": 0, "medium": 0, "low": 0}

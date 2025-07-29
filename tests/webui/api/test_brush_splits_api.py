@@ -252,7 +252,6 @@ class TestBrushSplitsAPI:
         split_types = data["split_types"]
         assert "delimiter" in split_types
         assert "fiber_hint" in split_types
-        assert "brand_context" in split_types
         assert "no_split" in split_types
 
     def test_normalize_brush_string_integration(self):

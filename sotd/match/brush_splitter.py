@@ -19,45 +19,66 @@ class BrushSplitter:
         if not text:
             return None, None, None
 
-        # Try delimiter-based splitting first (most reliable)
-        handle, knot, delimiter_type = self._split_by_delimiters(text)
-        if handle and knot:
-            return handle, knot, delimiter_type
+        # Step 1: Try delimiter-based splitting (highest priority)
+        result = self._try_delimiter_splitting(text)
+        if result[0] and result[1]:
+            return result
 
-        # Try fiber detection as a hint (next most reliable)
-        handle, knot, delimiter_type = self._split_by_fiber_hint(text)
-        if handle and knot:
-            return handle, knot, delimiter_type
+        # Step 2: Check if it's a known brush (medium priority)
+        result = self._try_known_brush_check(text)
+        if result[0] is None and result[1] is None:
+            return result  # Known brush - don't split
 
-        # Try brand-context splitting as last resort (most speculative)
-        handle, knot, delimiter_type = self._split_by_brand_context(text)
-        if handle and knot:
-            return handle, knot, delimiter_type
+        # Step 3: Try fiber hint splitting (lower priority)
+        result = self._try_fiber_hint_splitting(text)
+        if result[0] and result[1]:
+            return result
 
-        # If no splitting is possible, try to match against known brushes/knots/handles
-        # Try matching as a complete brush first, then try splitting, then individual components
+        # Step 4: Final fallback - try all splitting methods again
+        result = self._try_fallback_splitting(text)
+        return result
+
+    def _try_delimiter_splitting(
+        self, text: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Step 1: Try delimiter-based splitting (highest priority)."""
+        return self._split_by_delimiters(text)
+
+    def _try_known_brush_check(
+        self, text: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Step 2: Check if it's a known brush (medium priority)."""
         if self._is_known_brush(text):
             # It's a known complete brush, don't split it
             return None, None, None
         else:
-            # Try to split and see if we can match the parts
-            handle, knot, delimiter_type = self._split_by_delimiters(text)
-            if handle and knot:
-                # Splitting succeeded - return the split components regardless of match status
-                # The brush matcher will handle matching each component separately
-                return handle, knot, delimiter_type
+            # Not a known brush, continue with other methods
+            return None, None, "not_known_brush"
 
-            # Try other splitting methods
-            handle, knot, delimiter_type = self._split_by_fiber_hint(text)
-            if handle and knot:
-                return handle, knot, delimiter_type
+    def _try_fiber_hint_splitting(
+        self, text: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Step 3: Try fiber hint splitting (lower priority)."""
+        return self._split_by_fiber_hint(text)
 
-            handle, knot, delimiter_type = self._split_by_brand_context(text)
-            if handle and knot:
-                return handle, knot, delimiter_type
+    def _try_fallback_splitting(
+        self, text: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Step 4: Final fallback - try all splitting methods again."""
+        # Try to split and see if we can match the parts
+        handle, knot, delimiter_type = self._split_by_delimiters(text)
+        if handle and knot:
+            # Splitting succeeded - return the split components regardless of match status
+            # The brush matcher will handle matching each component separately
+            return handle, knot, delimiter_type
 
-            # If no splitting methods worked, return None to indicate no splitting
-            return None, None, None
+        # Try other splitting methods
+        handle, knot, delimiter_type = self._split_by_fiber_hint(text)
+        if handle and knot:
+            return handle, knot, delimiter_type
+
+        # If no splitting methods worked, return None to indicate no splitting
+        return None, None, None
 
     def _split_by_delimiters(self, text: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
         """Split text using known delimiters and return parts and delimiter type.
@@ -633,97 +654,6 @@ class BrushSplitter:
                 return handle_part, knot_part
         return None, None
 
-    def _split_by_brand_context(
-        self, text: str
-    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
-        """Split text by recognizing brand context patterns when clear handle/knot makers
-        are present.
-
-        This handles cases like 'CH Circus B13' or 'B13 CH Circus' where:
-        - B13 is a Declaration Grooming knot pattern
-        - CH/Circus indicates Chisel & Hound handle
-        - No explicit delimiters are present
-        """
-        # Look for Declaration Grooming knot patterns (B2, B3, B13, etc.)
-        # Be conservative - only B followed by 1-2 digits, optionally followed by a single letter
-        dg_knot_pattern = r"\b(B\d{1,2}[A-Z]?)\b"
-        dg_matches = list(re.finditer(dg_knot_pattern, text, re.IGNORECASE))
-
-        # Look for Chisel & Hound handle indicators
-        ch_handle_patterns = [
-            r"\bCH\b",  # "CH" as standalone word
-            r"\bC&H\b",  # "C&H" abbreviation
-            r"\bChisel\b",  # "Chisel" word
-            r"\bCircus\b",  # "Circus" (known CH handle pattern)
-            r"\bHound\b",  # "Hound" word
-        ]
-
-        # Find all CH pattern matches
-        ch_matches = []
-        for pattern in ch_handle_patterns:
-            ch_matches.extend(re.finditer(pattern, text, re.IGNORECASE))
-
-        # Only proceed if we found both DG knot and CH handle indicators
-        # This is specifically for Chisel & Hound handles with Declaration Grooming knots
-        if not dg_matches or not ch_matches:
-            return None, None, None
-
-        # Additional safety: Don't split if this appears to be a single Declaration Grooming brush
-        # Check if "Declaration" appears in the text (indicating it might be "Declaration B3" not
-        # "CH ... B3")
-        declaration_indicators = [r"\bdeclaration\b", r"\bdg\b"]
-        has_declaration_context = any(
-            re.search(pattern, text, re.IGNORECASE) for pattern in declaration_indicators
-        )
-
-        # If we have Declaration context, only split if we also have clear CH context
-        if has_declaration_context:
-            # This looks like "Declaration B3" - treat as single brush, not handle/knot combo
-            return None, None, None
-
-        # Additional safety check: make sure this isn't already covered by delimiter splitting
-        # If we have common delimiters, let the delimiter logic handle it
-        common_delimiters = [" w/ ", " with ", " / ", "/", " - ", " in "]
-        if any(delimiter in text for delimiter in common_delimiters):
-            return None, None, None
-
-        # Take the first DG knot match
-        dg_match = dg_matches[0]
-        knot_text = dg_match.group(1)  # Just the B13 part
-
-        # Build handle text by removing the knot part and cleaning up
-        handle_parts = []
-
-        # Add text before the knot
-        before_knot = text[: dg_match.start()].strip()
-        if before_knot:
-            handle_parts.append(before_knot)
-
-        # Add text after the knot
-        after_knot = text[dg_match.end() :].strip()
-        if after_knot:
-            handle_parts.append(after_knot)
-
-        if not handle_parts:
-            return None, None, None
-
-        handle_text = " ".join(handle_parts).strip()
-
-        # Validate that the handle part actually contains CH indicators
-        has_ch_in_handle = any(
-            re.search(pattern, handle_text, re.IGNORECASE) for pattern in ch_handle_patterns
-        )
-
-        if not has_ch_in_handle:
-            return None, None, None
-
-        # Additional validation: make sure we're not breaking up a legitimate single brush name
-        # If the knot text is very short and the handle text is also very short, skip
-        if len(knot_text) < 2 or len(handle_text.replace(" ", "")) < 2:
-            return None, None, None
-
-        return handle_text, knot_text, "brand_context"
-
     def _is_specification_slash(self, text: str) -> bool:
         """Check if `/` is part of a specification rather than a delimiter.
 
@@ -732,6 +662,7 @@ class BrushSplitter:
         - "70/30" (70% badger, 30% boar)
         - "80/20" (80% synthetic, 20% badger)
         - "25/75" (25% horse, 75% badger)
+        - "r/wetshaving" (Reddit subreddit reference)
         """
         # Look for percentage specifications like "50/50", "70/30", etc.
         # These are typically found in parentheses or as part of fiber descriptions
@@ -743,6 +674,15 @@ class BrushSplitter:
         ]
 
         for pattern in percentage_patterns:
+            if re.search(pattern, text, re.IGNORECASE):
+                return True
+
+        # Look for Reddit subreddit references like "r/wetshaving"
+        reddit_patterns = [
+            r"\br/\w+\b",  # r/wetshaving, r/something
+        ]
+
+        for pattern in reddit_patterns:
             if re.search(pattern, text, re.IGNORECASE):
                 return True
 

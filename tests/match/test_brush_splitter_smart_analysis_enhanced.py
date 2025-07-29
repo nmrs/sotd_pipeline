@@ -240,4 +240,9 @@ class TestBrushSplitterSmartAnalysis:
             assert handle == expected_handle, f"Handle mismatch for: {input_text}"
             assert knot == expected_knot, f"Knot mismatch for: {input_text}"
             if expected_handle is None:
-                assert delimiter_type is None, f"Should not have delimiter type: {input_text}"
+                # When no splitting occurs, delimiter_type can be None (known brush) or
+                # "not_known_brush"
+                assert delimiter_type in [
+                    None,
+                    "not_known_brush",
+                ], f"Should not have delimiter type: {input_text}"

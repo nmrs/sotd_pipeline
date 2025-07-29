@@ -13,7 +13,55 @@ from sotd.match.handle_matcher import HandleMatcher
 
 
 class TestBrushSplitterEdgeCases:
-    """Test cases for edge cases in delimiter detection."""
+    """Test edge cases for brush splitting."""
+
+    def setup_method(self):
+        """Set up test fixtures."""
+        self.handle_matcher = HandleMatcher()
+        self.splitter = BrushSplitter(self.handle_matcher)
+
+    def test_fiber_words_dont_force_split_for_complete_brushes(self):
+        """Test that fiber words don't force a split when string should be a complete brush."""
+        # These strings contain fiber words but should be treated as complete brushes
+        # because they match known brush patterns in the catalog
+        test_cases = [
+            "Zenith r/wetshaving MOAR BOAR",  # Contains "BOAR" but should be complete brush
+            "Zenith 31mm MOAR BOAR",  # Contains "BOAR" but should be complete brush
+            "Zenith 508 Moar Boar",  # Contains "Boar" but should be complete brush
+            "Zenith MOAR Boar",  # Contains "Boar" but should be complete brush
+            "Zenith Moar Boar Sub Exclusive",  # Contains "Boar" but should be complete brush
+        ]
+
+        for test_str in test_cases:
+            handle, knot, delimiter = self.splitter.split_handle_and_knot(test_str)
+            # Should NOT be split - should return None, None, None for complete brushes
+            # OR None, None, "not_known_brush" if not recognized as known brush
+            assert handle is None, f"Expected no split for '{test_str}', got handle: {handle}"
+            assert knot is None, f"Expected no split for '{test_str}', got knot: {knot}"
+            # The delimiter can be None (known brush) or "not_known_brush" (not recognized)
+            assert delimiter in [
+                None,
+                "not_known_brush",
+            ], f"Expected no split for '{test_str}', got delimiter: {delimiter}"
+
+    def test_fiber_words_do_split_when_appropriate(self):
+        """Test that fiber words do cause splitting when appropriate."""
+        # These strings should be split because they contain clear delimiters
+        # and the fiber word indicates which part is the knot
+        test_cases = [
+            ("Elite handle w/ Declaration Boar knot", "Elite handle", "Declaration Boar knot"),
+            ("Wolf Whiskers w/ Omega Boar", "Wolf Whiskers", "Omega Boar"),
+        ]
+
+        for test_str, expected_handle, expected_knot in test_cases:
+            handle, knot, delimiter = self.splitter.split_handle_and_knot(test_str)
+            # Should be split
+            assert handle is not None, f"Expected split for '{test_str}', got no handle"
+            assert knot is not None, f"Expected split for '{test_str}', got no knot"
+            assert (
+                handle.strip() == expected_handle
+            ), f"Expected handle '{expected_handle}', got '{handle}'"
+            assert knot.strip() == expected_knot, f"Expected knot '{expected_knot}', got '{knot}'"
 
     @pytest.fixture
     def brush_splitter(self):

@@ -129,7 +129,12 @@ class TestBrushSplitterDelimiterClassification:
             # Should not split on non-delimiters
             assert handle is None, f"Should not split: {input_text}"
             assert knot is None, f"Should not split: {input_text}"
-            assert delimiter_type is None, f"Should not have delimiter type: {input_text}"
+            # When no splitting occurs, delimiter_type can be None (known brush) or
+            # "not_known_brush"
+            assert delimiter_type in [
+                None,
+                "not_known_brush",
+            ], f"Should not have delimiter type: {input_text}"
 
     def test_multiple_delimiters_handled_correctly(self, brush_splitter):
         """Test edge cases with multiple delimiters."""
@@ -164,7 +169,12 @@ class TestBrushSplitterDelimiterClassification:
             # Should return None for all parts
             assert handle is None, f"Should not split: {input_text}"
             assert knot is None, f"Should not split: {input_text}"
-            assert delimiter_type is None, f"Should not have delimiter type: {input_text}"
+            # When no splitting occurs, delimiter_type can be None (known brush) or
+            # "not_known_brush"
+            assert delimiter_type in [
+                None,
+                "not_known_brush",
+            ], f"Should not have delimiter type: {input_text}"
 
     def test_delimiter_reliability_classification(self, brush_splitter):
         """Test that delimiter reliability is correctly classified."""
@@ -209,4 +219,9 @@ class TestBrushSplitterDelimiterClassification:
             # Non-delimiters should not trigger splitting
             assert handle is None, f"Non-delimiter should not split: {delimiter}"
             assert knot is None, f"Non-delimiter should not split: {delimiter}"
-            assert delimiter_type is None, f"Non-delimiter should not have type: {delimiter}"
+            # When no splitting occurs, delimiter_type can be None (known brush) or
+            # "not_known_brush"
+            assert delimiter_type in [
+                None,
+                "not_known_brush",
+            ], f"Non-delimiter should not have type: {delimiter}"

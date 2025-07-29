@@ -198,7 +198,7 @@ class BrushSplitStatistics:
     validation_percentage: float = 0.0
     correction_percentage: float = 0.0
     split_types: Dict[str, int] = field(
-        default_factory=lambda: {"delimiter": 0, "fiber_hint": 0, "brand_context": 0, "no_split": 0}
+        default_factory=lambda: {"delimiter": 0, "fiber_hint": 0, "no_split": 0}
     )
     confidence_breakdown: Dict[str, int] = field(
         default_factory=lambda: {"high": 0, "medium": 0, "low": 0}
@@ -262,7 +262,7 @@ class BrushSplitStatistics:
         self.corrected = 0
         self.validation_percentage = 0.0
         self.correction_percentage = 0.0
-        self.split_types = {"delimiter": 0, "fiber_hint": 0, "brand_context": 0, "no_split": 0}
+        self.split_types = {"delimiter": 0, "fiber_hint": 0, "no_split": 0}
         self.confidence_breakdown = {"high": 0, "medium": 0, "low": 0}
         self.month_breakdown = {}
         self.recent_activity = {}
@@ -401,8 +401,6 @@ class StatisticsCalculator:
                     stats.split_types["delimiter"] += 1
                 elif "fiber" in reasoning.lower():
                     stats.split_types["fiber_hint"] += 1
-                elif "brand" in reasoning.lower():
-                    stats.split_types["brand_context"] += 1
                 else:
                     stats.split_types["no_split"] += 1
 
@@ -466,8 +464,6 @@ class StatisticsCalculator:
             return "delimiter"
         elif "fiber" in reasoning.lower():
             return "fiber_hint"
-        elif "brand" in reasoning.lower():
-            return "brand_context"
         else:
             return "no_split"
 
@@ -702,30 +698,6 @@ class BrushSplitValidator:
             return (
                 ConfidenceLevel.MEDIUM,
                 "Fiber-hint split: both components contain fiber indicators",
-            )
-
-        # Check for brand patterns (common brand names)
-        brand_indicators = [
-            "omega",
-            "semogue",
-            "zenith",
-            "simpson",
-            "declaration",
-            "dg",
-            "chisel",
-            "c&h",
-        ]
-        handle_has_brand = any(brand in handle.lower() for brand in brand_indicators)
-        knot_has_brand = any(brand in knot.lower() for brand in brand_indicators)
-
-        if handle_has_brand and not knot_has_brand:
-            return ConfidenceLevel.HIGH, "Brand-context split: handle contains brand indicator"
-        elif knot_has_brand and not handle_has_brand:
-            return ConfidenceLevel.HIGH, "Brand-context split: knot contains brand indicator"
-        elif handle_has_brand and knot_has_brand:
-            return (
-                ConfidenceLevel.MEDIUM,
-                "Brand-context split: both components contain brand indicators",
             )
 
         # Analyze component quality for unknown splits
@@ -1367,7 +1339,7 @@ async def get_filtered_statistics(
         None, description="Filter by confidence level (high/medium/low)"
     ),
     split_type: Optional[str] = Query(
-        None, description="Filter by split type (delimiter/fiber_hint/brand_context/no_split)"
+        None, description="Filter by split type (delimiter/fiber_hint/no_split)"
     ),
     months: Optional[List[str]] = Query(None, description="Filter by specific months"),
 ):
