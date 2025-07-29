@@ -407,6 +407,10 @@ class BrushMatcher:
                         pattern="generic_knot",
                     )
 
+            # Get actual patterns from individual matchers
+            handle_pattern = handle_match.get("_pattern_used") if handle_match else "split"
+            knot_pattern = knot_match.pattern if knot_match else "split"
+
             matched = {
                 "brand": None,  # Composite brush
                 "model": None,  # Composite brush
@@ -415,7 +419,7 @@ class BrushMatcher:
                     "model": handle_match.get("handle_model") if handle_match else None,
                     "source_text": handle_text,
                     "_matched_by": "HandleMatcher" if handle_match else "BrushSplitter",
-                    "_pattern": "split",
+                    "_pattern": handle_pattern,
                 },
                 "knot": {
                     "brand": (
@@ -440,7 +444,7 @@ class BrushMatcher:
                     ),
                     "source_text": knot_text,
                     "_matched_by": "BrushSplitter",
-                    "_pattern": "split",
+                    "_pattern": knot_pattern,
                 },
             }
 
