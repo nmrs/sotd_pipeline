@@ -8,6 +8,7 @@ including data loading, YAML file management, and statistics calculation.
 import json
 import logging
 import re
+import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -18,7 +19,7 @@ import yaml
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
-# Setup logging
+# Get logger for this module
 logger = logging.getLogger(__name__)
 
 
@@ -834,6 +835,9 @@ async def load_brush_splits(
     months: List[str] = Query(..., description="Months to load data from"),
     unmatched_only: bool = Query(True, description="Show only unmatched items"),
 ):
+    """Load brush splits from selected months."""
+    logger.info(f"🔄 Loading brush splits for months: {months}, unmatched_only: {unmatched_only}")
+    start_time = time.time()
     """Load brush strings from selected months with data processing.
 
     Args:
@@ -1105,9 +1109,10 @@ async def load_brush_splits(
                 ),
             }
 
+        processing_time = time.time() - start_time
         logger.info(
-            f"Data processing complete: {len(splits)} splits, {len(loaded_months)} months loaded, "
-            f"{len(failed_months)} months failed"
+            f"✅ Data processing complete in {processing_time:.2f}s: {len(splits)} splits, "
+            f"{len(loaded_months)} months loaded, {len(failed_months)} months failed"
         )
         return response_data
 

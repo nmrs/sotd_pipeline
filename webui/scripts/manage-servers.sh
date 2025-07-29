@@ -110,7 +110,8 @@ start_backend() {
     # Run from webui directory with proper PYTHONPATH
     cd "$FRONTEND_DIR"
     # Set test environment for CORS to allow all origins during testing
-    ENVIRONMENT=test PYTHONPATH=. python -m uvicorn api.main:app --host 0.0.0.0 --port $BACKEND_PORT --reload > "$BACKEND_LOG_FILE" 2>&1 &
+    # Set debug environment for enhanced logging
+    ENVIRONMENT=test DEBUG=true PYTHONPATH=. python -m uvicorn api.main:app --host 0.0.0.0 --port $BACKEND_PORT --reload --log-level debug > "$BACKEND_LOG_FILE" 2>&1 &
     local pid=$!
     echo $pid > "$BACKEND_PID_FILE"
     
@@ -213,8 +214,26 @@ show_logs() {
                 print_status $RED "No backend log file found"
             fi
             ;;
+        api-debug)
+            local api_debug_log="$FRONTEND_DIR/logs/api_debug.log"
+            if [[ -f "$api_debug_log" ]]; then
+                print_status $BLUE "=== API Debug Logs ==="
+                tail -f "$api_debug_log"
+            else
+                print_status $RED "No API debug log file found at $api_debug_log"
+            fi
+            ;;
+        api-errors)
+            local api_errors_log="$FRONTEND_DIR/logs/api_errors.log"
+            if [[ -f "$api_errors_log" ]]; then
+                print_status $BLUE "=== API Error Logs ==="
+                tail -f "$api_errors_log"
+            else
+                print_status $RED "No API error log file found at $api_errors_log"
+            fi
+            ;;
         *)
-            print_status $RED "Usage: $0 logs [frontend|backend]"
+            print_status $RED "Usage: $0 logs [frontend|backend|api-debug|api-errors]"
             exit 1
             ;;
     esac
@@ -231,7 +250,7 @@ show_help() {
     echo "  stop        Stop both frontend and backend servers"
     echo "  restart     Restart both servers"
     echo "  status      Show status of both servers"
-    echo "  logs [server] Show logs for specified server (frontend|backend)"
+    echo "  logs [server] Show logs for specified server (frontend|backend|api-debug|api-errors)"
     echo "  clean       Clean up PID files and logs"
     echo "  help        Show this help message"
     echo ""
@@ -241,6 +260,8 @@ show_help() {
     echo "  $0 status         # Check server status"
     echo "  $0 logs frontend  # Show frontend logs"
     echo "  $0 logs backend   # Show backend logs"
+    echo "  $0 logs api-debug # Show API debug logs"
+    echo "  $0 logs api-errors # Show API error logs"
     echo ""
     echo "Server URLs:"
     echo "  Frontend: http://localhost:$FRONTEND_PORT"

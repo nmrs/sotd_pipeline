@@ -20,12 +20,7 @@ if str(project_root) not in sys.path:
 # Import the existing FilteredEntriesManager instead of duplicating logic
 from sotd.utils.filtered_entries import FilteredEntriesManager
 
-# Configure logging to write to a file
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler("webui_api.log"), logging.StreamHandler()],
-)
+# Get logger for this module
 logger = logging.getLogger(__name__)
 
 
@@ -310,6 +305,9 @@ async def get_comment_detail(comment_id: str, months: str) -> CommentDetail:
 
 @router.post("/match-phase", response_model=MatchPhaseResponse)
 async def run_match_phase(request: MatchPhaseRequest) -> MatchPhaseResponse:
+    """Run match phase on specified months."""
+    logger.info(f"🎯 Starting match phase for months: {request.months}, force: {request.force}")
+    start_time = time.time()
     """Run the match phase for the specified months."""
     try:
         # Validate input parameters
@@ -405,13 +403,15 @@ async def run_match_phase(request: MatchPhaseRequest) -> MatchPhaseResponse:
         # Combine all output for display
         full_output = "\n".join(all_output)
 
+        processing_time = time.time() - start_time
+        logger.info(f"✅ Match phase completed in {processing_time:.2f}s - {message}")
         return MatchPhaseResponse(
             months=request.months,
             force=request.force,
             success=success,
             message=message,
             error_details=full_output if not success else full_output,  # Always include output
-            processing_time=0.0,  # TODO: Add actual timing
+            processing_time=processing_time,
         )
 
     except HTTPException:
