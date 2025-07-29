@@ -4,38 +4,27 @@ import { DataTable } from '@/components/ui/data-table';
 import { CommentList } from '../domain/CommentList';
 import { MismatchItem } from '../../services/api';
 
-// Delimiter for item keys to avoid conflicts with characters in original text
-const ITEM_KEY_DELIMITER = '|||';
-
-// Helper function to extract matched text (matching backend logic)
-const getMatchedText = (field: string, matched: any): string => {
-  if (field === 'soap') {
-    const maker = matched.maker || '';
-    const scent = matched.scent || '';
-    return `${maker} ${scent}`.trim();
-  } else {
-    const brand = matched.brand || '';
-    const model = matched.model || '';
-    // Don't include format in key generation since YAML structure doesn't support it
-    return `${brand} ${model}`.trim();
-  }
-};
-
 // Helper function to extract brush component patterns
-const getBrushComponentPattern = (matched: any, component: 'handle' | 'knot'): string => {
+const getBrushComponentPattern = (
+  matched: Record<string, unknown>,
+  component: 'handle' | 'knot'
+): string => {
   if (!matched || typeof matched !== 'object') return 'N/A';
 
-  const componentData = matched[component];
+  const componentData = matched[component] as Record<string, unknown>;
   if (!componentData || typeof componentData !== 'object') return 'N/A';
 
-  return componentData._pattern || 'N/A';
+  return (componentData._pattern as string) || 'N/A';
 };
 
 // Helper function to format brush component data
-const formatBrushComponent = (matched: any, component: 'handle' | 'knot'): string => {
+const formatBrushComponent = (
+  matched: Record<string, unknown>,
+  component: 'handle' | 'knot'
+): string => {
   if (!matched || typeof matched !== 'object') return 'N/A';
 
-  const componentData = matched[component];
+  const componentData = matched[component] as Record<string, unknown>;
   if (!componentData || typeof componentData !== 'object') return 'N/A';
 
   const parts = [];
@@ -49,6 +38,18 @@ const formatBrushComponent = (matched: any, component: 'handle' | 'knot'): strin
   }
 
   return parts.length > 0 ? parts.join(' - ') : 'N/A';
+};
+
+// Helper function to check if brush was split into handle/knot components
+const isBrushSplit = (matched: Record<string, unknown>): boolean => {
+  if (!matched || typeof matched !== 'object') return false;
+
+  // If top-level brand and model are null/undefined, it's a split brush
+  const hasTopLevelBrand = matched.brand && matched.brand !== null && matched.brand !== undefined;
+  const hasTopLevelModel = matched.model && matched.model !== null && matched.model !== undefined;
+
+  // If both brand and model are missing at top level, it's a split brush
+  return !hasTopLevelBrand && !hasTopLevelModel;
 };
 
 interface MismatchAnalyzerDataTableProps {
@@ -86,6 +87,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         return '❌';
       case 'perfect_regex_matches':
         return '✨';
+      case 'exact_matches':
+        return '✅';
       default:
         return '❓';
     }
@@ -105,6 +108,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         return 'text-red-600';
       case 'perfect_regex_matches':
         return 'text-purple-600';
+      case 'exact_matches':
+        return 'text-green-600';
       case 'invalid_match_data':
         return 'text-red-600';
       case 'empty_original':
@@ -138,6 +143,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         return 'Potential Mismatch';
       case 'perfect_regex_matches':
         return 'Perfect Regex Matches';
+      case 'exact_matches':
+        return 'Exact Match';
       default:
         return mismatchType;
     }
@@ -170,264 +177,271 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     return String(matched);
   };
 
-  const columns = useMemo<ColumnDef<MismatchItem>[]>(
-    () => {
-      const baseColumns: ColumnDef<MismatchItem>[] = [
-        // Selection column
-        ...(onItemSelection
-          ? [
-            {
-              id: 'selection',
-              header: () => {
-                // For now, use all data since we can't easily access visible rows from header
-                // This will be fixed in a future update when we can pass table context
-                const visibleItemKeys = data.map((item) => {
-                  // Since backend groups by case-insensitive original text, use that as the key
-                  return `${field}:${item.original.toLowerCase()}`;
-                });
-
-                const allSelected = visibleItemKeys.length > 0 && visibleItemKeys.every(key => selectedItems.has(key));
-                const someSelected = visibleItemKeys.some(key => selectedItems.has(key));
-
-                return (
-                  <div className='flex items-center gap-2'>
-                    <span>Select</span>
-                  </div>
-                );
-              },
-              cell: ({ row }: { row: Row<MismatchItem> }) => {
-                const item = row.original;
-                // Since backend groups by case-insensitive original text, use that as the key
-                const itemKey = `${field}:${item.original.toLowerCase()}`;
-                const isSelected = selectedItems.has(itemKey);
-
-                return (
-                  <input
-                    type='checkbox'
-                    checked={isSelected}
-                    onChange={e => onItemSelection?.(itemKey, e.target.checked)}
-                    className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                  />
-                );
-              },
-              enableSorting: false,
+  const columns = useMemo(() => {
+    const baseColumns: ColumnDef<MismatchItem>[] = [
+      // Selection column
+      ...(onItemSelection
+        ? [
+          {
+            id: 'selection',
+            header: () => {
+              // For now, use all data since we can't easily access visible rows from header
+              // This will be fixed in a future update when we can pass table context
+              return (
+                <div className='flex items-center gap-2'>
+                  <span>Select</span>
+                </div>
+              );
             },
-          ]
-          : []),
+            cell: ({ row }: { row: Row<MismatchItem> }) => {
+              const item = row.original;
+              // Since backend groups by case-insensitive original text, use that as the key
+              const itemKey = `${field}:${item.original.toLowerCase()}`;
+              const isSelected = selectedItems.has(itemKey);
 
-        // Status column
-        ...(isItemConfirmed
-          ? [
-            {
-              id: 'status',
-              header: 'Status',
-              cell: ({ row }: { row: Row<MismatchItem> }) => {
-                const item = row.original;
-                const isConfirmed = isItemConfirmed(item);
-
-                return (
-                  <div className='flex items-center'>
-                    {isConfirmed ? (
-                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
-                        ✅ Confirmed
-                      </span>
-                    ) : (
-                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
-                        ⚠️ Unconfirmed
-                      </span>
-                    )}
-                  </div>
-                );
-              },
+              return (
+                <input
+                  type='checkbox'
+                  checked={isSelected}
+                  onChange={e => onItemSelection?.(itemKey, e.target.checked)}
+                  className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                />
+              );
             },
-          ]
-          : []),
-        {
-          accessorKey: 'count',
-          header: 'Count',
-          cell: ({ row }: { row: Row<MismatchItem> }) => {
-            const item = row.original;
-            return (
-              <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800'>
-                {item.count || 1}
+            enableSorting: false,
+          },
+        ]
+        : []),
+
+      // Status column
+      ...(isItemConfirmed
+        ? [
+          {
+            id: 'status',
+            header: 'Status',
+            cell: ({ row }: { row: Row<MismatchItem> }) => {
+              const item = row.original;
+              const isConfirmed = isItemConfirmed(item);
+
+              return (
+                <div className='flex items-center'>
+                  {isConfirmed ? (
+                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
+                      ✅ Confirmed
+                    </span>
+                  ) : (
+                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
+                      ⚠️ Unconfirmed
+                    </span>
+                  )}
+                </div>
+              );
+            },
+          },
+        ]
+        : []),
+      {
+        accessorKey: 'count',
+        header: 'Count',
+        cell: ({ row }: { row: Row<MismatchItem> }) => {
+          const item = row.original;
+          return (
+            <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800'>
+              {item.count || 1}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: 'mismatch_type',
+        header: 'Type',
+        cell: ({ row }: { row: Row<MismatchItem> }) => {
+          const item = row.original;
+          return (
+            <div className='flex items-center'>
+              <span className='text-lg mr-2'>{getMismatchTypeIcon(item.mismatch_type)}</span>
+              <span className={`text-sm font-medium ${getMismatchTypeColor(item.mismatch_type)}`}>
+                {getMismatchTypeDisplay(item.mismatch_type)}
               </span>
-            );
-          },
+            </div>
+          );
         },
-        {
-          accessorKey: 'mismatch_type',
-          header: 'Type',
-          cell: ({ row }: { row: Row<MismatchItem> }) => {
-            const item = row.original;
-            return (
-              <div className='flex items-center'>
-                <span className='text-lg mr-2'>{getMismatchTypeIcon(item.mismatch_type)}</span>
-                <span className={`text-sm font-medium ${getMismatchTypeColor(item.mismatch_type)}`}>
-                  {getMismatchTypeDisplay(item.mismatch_type)}
-                </span>
-              </div>
-            );
-          },
+      },
+      {
+        accessorKey: 'original',
+        header: 'Original',
+        cell: ({ row }: { row: Row<MismatchItem> }) => {
+          const item = row.original;
+          return (
+            <div className='text-sm text-gray-900 max-w-xs'>{truncateText(item.original, 60)}</div>
+          );
         },
-        {
-          accessorKey: 'original',
-          header: 'Original',
-          cell: ({ row }: { row: Row<MismatchItem> }) => {
-            const item = row.original;
-            return (
-              <div className='text-sm text-gray-900 max-w-xs'>{truncateText(item.original, 60)}</div>
-            );
-          },
+      },
+      {
+        accessorKey: 'matched',
+        header: 'Matched',
+        sortingFn: (rowA, rowB) => {
+          const a = formatMatchedData(rowA.original.matched);
+          const b = formatMatchedData(rowB.original.matched);
+          return a.localeCompare(b);
         },
+        cell: ({ row }: { row: Row<MismatchItem> }) => {
+          const item = row.original;
+          return (
+            <div className='text-sm text-gray-900 max-w-xs'>
+              {truncateText(formatMatchedData(item.matched), 60)}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'match_type',
+        header: 'Match Type',
+        cell: ({ row }: { row: Row<MismatchItem> }) => {
+          const item = row.original;
+          return (
+            <span className='inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800'>
+              {item.match_type}
+            </span>
+          );
+        },
+      },
+    ];
+
+    // Add brush-specific columns if field is brush
+    if (field === 'brush') {
+      console.log('Adding brush columns for field:', field);
+      console.log('Brush columns will be added for handle and knot data');
+
+      // Always show brush pattern column
+      baseColumns.push({
+        accessorKey: 'brush_pattern',
+        header: 'Brush Pattern',
+        cell: ({ row }: { row: Row<MismatchItem> }) => {
+          const item = row.original;
+          return (
+            <div className='text-sm text-gray-500 max-w-xs font-mono'>
+              {truncateText(item.pattern, 40)}
+            </div>
+          );
+        },
+      });
+
+      // Always show handle/knot columns for brush fields
+      baseColumns.push(
         {
-          accessorKey: 'matched',
-          header: 'Matched',
-          sortingFn: (rowA, rowB) => {
-            const a = formatMatchedData(rowA.original.matched);
-            const b = formatMatchedData(rowB.original.matched);
-            return a.localeCompare(b);
-          },
+          accessorKey: 'handle',
+          header: 'Handle',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
             return (
               <div className='text-sm text-gray-900 max-w-xs'>
-                {truncateText(formatMatchedData(item.matched), 60)}
+                {truncateText(formatBrushComponent(item.matched, 'handle'), 50)}
               </div>
             );
           },
         },
         {
-          accessorKey: 'match_type',
-          header: 'Match Type',
-          cell: ({ row }: { row: Row<MismatchItem> }) => {
-            const item = row.original;
-            return (
-              <span className='inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800'>
-                {item.match_type}
-              </span>
-            );
-          },
-        },
-      ];
-
-      // Add brush-specific columns if field is brush
-      if (field === 'brush') {
-        baseColumns.push(
-          {
-            accessorKey: 'brush_pattern',
-            header: 'Brush Pattern',
-            cell: ({ row }: { row: Row<MismatchItem> }) => {
-              const item = row.original;
-              return (
-                <div className='text-sm text-gray-500 max-w-xs font-mono'>
-                  {truncateText(item.pattern, 40)}
-                </div>
-              );
-            },
-          },
-          {
-            accessorKey: 'handle',
-            header: 'Handle',
-            cell: ({ row }: { row: Row<MismatchItem> }) => {
-              const item = row.original;
-              return (
-                <div className='text-sm text-gray-900 max-w-xs'>
-                  {truncateText(formatBrushComponent(item.matched, 'handle'), 50)}
-                </div>
-              );
-            },
-          },
-          {
-            accessorKey: 'handle_pattern',
-            header: 'Handle Pattern',
-            cell: ({ row }: { row: Row<MismatchItem> }) => {
-              const item = row.original;
-              return (
-                <div className='text-sm text-gray-500 max-w-xs font-mono'>
-                  {truncateText(getBrushComponentPattern(item.matched, 'handle'), 40)}
-                </div>
-              );
-            },
-          },
-          {
-            accessorKey: 'knot',
-            header: 'Knot',
-            cell: ({ row }: { row: Row<MismatchItem> }) => {
-              const item = row.original;
-              return (
-                <div className='text-sm text-gray-900 max-w-xs'>
-                  {truncateText(formatBrushComponent(item.matched, 'knot'), 50)}
-                </div>
-              );
-            },
-          },
-          {
-            accessorKey: 'knot_pattern',
-            header: 'Knot Pattern',
-            cell: ({ row }: { row: Row<MismatchItem> }) => {
-              const item = row.original;
-              return (
-                <div className='text-sm text-gray-500 max-w-xs font-mono'>
-                  {truncateText(getBrushComponentPattern(item.matched, 'knot'), 40)}
-                </div>
-              );
-            },
-          }
-        );
-      } else {
-        // For non-brush fields, keep the original pattern column
-        baseColumns.push({
-          accessorKey: 'pattern',
-          header: 'Pattern',
+          accessorKey: 'handle_pattern',
+          header: 'Handle Pattern',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
             return (
               <div className='text-sm text-gray-500 max-w-xs font-mono'>
-                {truncateText(item.pattern, 40)}
+                {truncateText(getBrushComponentPattern(item.matched, 'handle'), 40)}
               </div>
-            );
-          },
-        });
-      }
-
-      // Add common columns
-      baseColumns.push(
-        {
-          accessorKey: 'confidence',
-          header: 'Confidence',
-          cell: ({ row }: { row: Row<MismatchItem> }) => {
-            const item = row.original;
-            return (
-              <span className='text-sm text-gray-900'>
-                {item.confidence ? `${Math.round(item.confidence * 100)}%` : 'N/A'}
-              </span>
             );
           },
         },
         {
-          accessorKey: 'comment_ids',
-          header: 'Comments',
+          accessorKey: 'knot',
+          header: 'Knot',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
-            const commentIds = item.comment_ids || [];
-
             return (
-              <CommentList
-                commentIds={commentIds}
-                onCommentClick={onCommentClick || (() => { })}
-                commentLoading={commentLoading}
-                maxDisplay={3}
-                aria-label={`${commentIds.length} comment${commentIds.length !== 1 ? 's' : ''} available`}
-              />
+              <div className='text-sm text-gray-900 max-w-xs'>
+                {truncateText(formatBrushComponent(item.matched, 'knot'), 50)}
+              </div>
+            );
+          },
+        },
+        {
+          accessorKey: 'knot_pattern',
+          header: 'Knot Pattern',
+          cell: ({ row }: { row: Row<MismatchItem> }) => {
+            const item = row.original;
+            return (
+              <div className='text-sm text-gray-500 max-w-xs font-mono'>
+                {truncateText(getBrushComponentPattern(item.matched, 'knot'), 40)}
+              </div>
             );
           },
         }
       );
 
-      return baseColumns;
-    },
-    [onCommentClick, commentLoading, selectedItems, onItemSelection, isItemConfirmed, field]
-  );
+      console.log('Brush columns added. Total columns:', baseColumns.length);
+      console.log('Columns include: Handle, Handle Pattern, Knot, Knot Pattern');
+    } else {
+      console.log('Not adding brush columns for field:', field);
+      // For non-brush fields, keep the original pattern column
+      baseColumns.push({
+        accessorKey: 'pattern',
+        header: 'Pattern',
+        cell: ({ row }: { row: Row<MismatchItem> }) => {
+          const item = row.original;
+          return (
+            <div className='text-sm text-gray-500 max-w-xs font-mono'>
+              {truncateText(item.pattern, 40)}
+            </div>
+          );
+        },
+      });
+    }
+
+    // Add common columns
+    baseColumns.push(
+      {
+        accessorKey: 'confidence',
+        header: 'Confidence',
+        cell: ({ row }: { row: Row<MismatchItem> }) => {
+          const item = row.original;
+          return (
+            <span className='text-sm text-gray-900'>
+              {item.confidence ? `${Math.round(item.confidence * 100)}%` : 'N/A'}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: 'comment_ids',
+        header: 'Comments',
+        cell: ({ row }: { row: Row<MismatchItem> }) => {
+          const item = row.original;
+          const commentIds = item.comment_ids || [];
+
+          return (
+            <CommentList
+              commentIds={commentIds}
+              onCommentClick={onCommentClick || (() => { })}
+              commentLoading={commentLoading}
+              maxDisplay={3}
+              aria-label={`${commentIds.length} comment${commentIds.length !== 1 ? 's' : ''} available`}
+            />
+          );
+        },
+      }
+    );
+
+    console.log('Final column count:', baseColumns.length, 'for field:', field);
+    return baseColumns;
+  }, [
+    onCommentClick,
+    commentLoading,
+    selectedItems,
+    onItemSelection,
+    isItemConfirmed,
+    field,
+  ]);
 
   return (
     <div className='space-y-4'>
