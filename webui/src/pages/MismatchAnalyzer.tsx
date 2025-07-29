@@ -203,16 +203,12 @@ const MismatchAnalyzer: React.FC = () => {
   const handleSelectAll = React.useCallback(() => {
     if (!visibleRows.length) return;
 
-    const allKeys = visibleRows.map(
-      (item: MismatchAnalysisResult['mismatch_items'][0]) => {
-        const matchedText = getMatchedText(selectedField, item.matched);
-        const originalNormalized = item.original.toLowerCase().trim();
-        const matchedNormalized = matchedText.toLowerCase().trim();
-        return `${selectedField}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
-      }
-    );
+    const allKeys = visibleRows.map((item) => {
+      // Since backend groups by case-insensitive original text, use that as the key
+      return `${selectedField}:${item.original.toLowerCase()}`;
+    });
     setSelectedItems(new Set(allKeys));
-  }, [visibleRows]);
+  }, [visibleRows, selectedField]);
 
   const handleClearSelection = React.useCallback(() => {
     setSelectedItems(new Set());
@@ -222,14 +218,11 @@ const MismatchAnalyzer: React.FC = () => {
     setVisibleRows(rows);
   }, []);
 
-  // Memoize item keys to avoid repeated JSON.stringify operations
+  // Memoize item keys to avoid repeated operations
   const visibleItemKeys = React.useMemo(() => {
-    return visibleRows.map(item => {
-      // Use backend-style key generation for consistency
-      const matchedText = getMatchedText(selectedField, item.matched);
-      const originalNormalized = item.original.toLowerCase().trim();
-      const matchedNormalized = matchedText.toLowerCase().trim();
-      return `${selectedField}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
+    return visibleRows.map((item) => {
+      // Since backend groups by case-insensitive original text, use that as the key
+      return `${selectedField}:${item.original.toLowerCase()}`;
     });
   }, [visibleRows, selectedField]);
 
@@ -253,11 +246,8 @@ const MismatchAnalyzer: React.FC = () => {
 
       // Convert selected items to match format
       const matches = results.mismatch_items
-        .filter(item => {
-          const matchedText = getMatchedText(selectedField, item.matched);
-          const originalNormalized = item.original.toLowerCase().trim();
-          const matchedNormalized = matchedText.toLowerCase().trim();
-          const itemKey = `${selectedField}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
+        .filter((item) => {
+          const itemKey = `${selectedField}:${item.original.toLowerCase()}`;
           return selectedItems.has(itemKey);
         })
         .map(item => ({
@@ -304,11 +294,8 @@ const MismatchAnalyzer: React.FC = () => {
 
       // Convert selected items to match format
       const matches = results.mismatch_items
-        .filter(item => {
-          const matchedText = getMatchedText(selectedField, item.matched);
-          const originalNormalized = item.original.toLowerCase().trim();
-          const matchedNormalized = matchedText.toLowerCase().trim();
-          const itemKey = `${selectedField}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
+        .filter((item) => {
+          const itemKey = `${selectedField}:${item.original.toLowerCase()}`;
           return selectedItems.has(itemKey);
         })
         .map(item => ({
@@ -363,11 +350,8 @@ const MismatchAnalyzer: React.FC = () => {
       if (!results?.mismatch_items) return;
 
       results.mismatch_items
-        .filter(item => {
-          const matchedText = getMatchedText(selectedField, item.matched);
-          const originalNormalized = item.original.toLowerCase().trim();
-          const matchedNormalized = matchedText.toLowerCase().trim();
-          const itemKey = `${selectedField}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
+        .filter((item) => {
+          const itemKey = `${selectedField}:${item.original.toLowerCase()}`;
           return selectedItems.has(itemKey);
         })
         .forEach(item => {
@@ -534,11 +518,8 @@ const MismatchAnalyzer: React.FC = () => {
 
     if (results?.mismatch_items) {
       results.mismatch_items
-        .filter(item => {
-          const matchedText = getMatchedText(selectedField, item.matched);
-          const originalNormalized = item.original.toLowerCase().trim();
-          const matchedNormalized = matchedText.toLowerCase().trim();
-          const itemKey = `${selectedField}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
+        .filter((item, index) => {
+          const itemKey = `${selectedField}:${index}`;
           return selectedItems.has(itemKey);
         })
         .forEach(item => {

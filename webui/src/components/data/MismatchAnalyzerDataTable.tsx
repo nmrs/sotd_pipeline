@@ -181,11 +181,9 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
               header: () => {
                 // For now, use all data since we can't easily access visible rows from header
                 // This will be fixed in a future update when we can pass table context
-                const visibleItemKeys = data.map(item => {
-                  const matchedText = getMatchedText(field, item.matched);
-                  const originalNormalized = item.original.toLowerCase().trim();
-                  const matchedNormalized = matchedText.toLowerCase().trim();
-                  return `${field}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
+                const visibleItemKeys = data.map((item) => {
+                  // Since backend groups by case-insensitive original text, use that as the key
+                  return `${field}:${item.original.toLowerCase()}`;
                 });
 
                 const allSelected = visibleItemKeys.length > 0 && visibleItemKeys.every(key => selectedItems.has(key));
@@ -199,10 +197,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
               },
               cell: ({ row }: { row: Row<MismatchItem> }) => {
                 const item = row.original;
-                const matchedText = getMatchedText(field, item.matched);
-                const originalNormalized = item.original.toLowerCase().trim();
-                const matchedNormalized = matchedText.toLowerCase().trim();
-                const itemKey = `${field}:${originalNormalized}${ITEM_KEY_DELIMITER}${matchedNormalized}`;
+                // Since backend groups by case-insensitive original text, use that as the key
+                const itemKey = `${field}:${item.original.toLowerCase()}`;
                 const isSelected = selectedItems.has(itemKey);
 
                 return (

@@ -866,22 +866,9 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
         # Group identical items together
         grouped_items = {}
         for item in all_items:
-            # Create a key for grouping based on the main identifying fields
-            # Use JSON string for consistent dictionary comparison
-            import json
-
-            matched_json = json.dumps(item.matched, sort_keys=True)
-            # Use case-insensitive original for grouping to combine items that differ only by case
-            # Include is_confirmed in the group key to preserve confirmation status
-            group_key = (
-                item.original.lower(),
-                matched_json,
-                item.pattern or "",
-                item.match_type,
-                item.mismatch_type or "",
-                item.reason or "",
-                item.is_confirmed or False,
-            )
+            # Create a simple group key based on case-insensitive original text
+            # This groups items that have the same original text regardless of case
+            group_key = item.original.lower()
 
             if group_key in grouped_items:
                 # Merge with existing item

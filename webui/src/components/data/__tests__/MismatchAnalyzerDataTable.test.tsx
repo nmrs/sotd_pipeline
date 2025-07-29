@@ -159,14 +159,14 @@ describe('MismatchAnalyzerDataTable', () => {
       fireEvent.click(checkboxes[0]);
 
       expect(onItemSelection).toHaveBeenCalledWith(
-        'razor:test razor 1|||test brand model 1',
+        'razor:test razor 1',
         true
       );
     });
 
     test('reflects selected state in checkboxes', () => {
       const onItemSelection = jest.fn();
-      const selectedItems = new Set<string>(['razor:test razor 1|||test brand model 1']);
+      const selectedItems = new Set<string>(['razor:test razor 1']);
 
       render(
         <MismatchAnalyzerDataTable
