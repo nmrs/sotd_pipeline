@@ -1,48 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import MonthSelector from '../components/forms/MonthSelector';
-import LoadingSpinner from '../components/layout/LoadingSpinner';
-import ErrorDisplay from '../components/feedback/ErrorDisplay';
-import MismatchAnalyzerDataTable from '../components/data/MismatchAnalyzerDataTable';
-import CommentModal from '../components/domain/CommentModal';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Eye, EyeOff, Filter } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Filter,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
+import MismatchAnalyzerDataTable from '@/components/data/MismatchAnalyzerDataTable';
 import {
   analyzeMismatch,
   MismatchAnalysisResult,
-  handleApiError,
-  getCommentDetail,
   CommentDetail,
+  CorrectMatchesResponse,
+  getCommentDetail,
   getCorrectMatches,
   markMatchesAsCorrect,
   removeMatchesFromCorrect,
-  CorrectMatchesResponse,
   updateFilteredEntries,
-} from '../services/api';
+  handleApiError,
+} from '@/services/api';
 
-// Delimiter for item keys to avoid conflicts with characters in original text
-const ITEM_KEY_DELIMITER = '|||';
-
-// Helper function to extract matched text (matching backend logic)
-const getMatchedText = (field: string, matched: any): string => {
-  if (field === 'soap') {
-    const maker = matched.maker || '';
-    const scent = matched.scent || '';
-    return `${maker} ${scent}`.trim();
-  } else {
-    const brand = matched.brand || '';
-    const model = matched.model || '';
-    // Don't include format in key generation since YAML structure doesn't support it
-    return `${brand} ${model}`.trim();
-  }
-};
+import LoadingSpinner from '@/components/layout/LoadingSpinner';
+import ErrorDisplay from '@/components/feedback/ErrorDisplay';
+import MonthSelector from '@/components/forms/MonthSelector';
+import CommentModal from '@/components/domain/CommentModal';
 
 const MismatchAnalyzer: React.FC = () => {
   const [selectedField, setSelectedField] = useState<string>('razor');
   const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [threshold, setThreshold] = useState<number>(3);
-  const [displayMode, setDisplayMode] = useState<'mismatches' | 'all' | 'unconfirmed' | 'regex' | 'intentionally_unmatched'>(
-    'mismatches'
-  );
+  const [displayMode, setDisplayMode] = useState<
+    'mismatches' | 'all' | 'unconfirmed' | 'regex' | 'intentionally_unmatched'
+  >('mismatches');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<MismatchAnalysisResult | null>(null);
@@ -70,7 +65,7 @@ const MismatchAnalyzer: React.FC = () => {
     setSelectedItems(new Set());
   }, []);
 
-  const loadCorrectMatches = React.useCallback(async () => {
+  const loadCorrectMatches = useCallback(async () => {
     try {
       const data = await getCorrectMatches(selectedField);
       setCorrectMatches(data);
@@ -190,44 +185,47 @@ const MismatchAnalyzer: React.FC = () => {
     setSelectedMonth(months[0] || '');
   };
 
-  const handleItemSelection = React.useCallback((itemKey: string, selected: boolean) => {
-    const newSelected = new Set(selectedItems);
-    if (selected) {
-      newSelected.add(itemKey);
-    } else {
-      newSelected.delete(itemKey);
-    }
-    setSelectedItems(newSelected);
-  }, [selectedItems]);
+  const handleItemSelection = useCallback(
+    (itemKey: string, selected: boolean) => {
+      const newSelected = new Set(selectedItems);
+      if (selected) {
+        newSelected.add(itemKey);
+      } else {
+        newSelected.delete(itemKey);
+      }
+      setSelectedItems(newSelected);
+    },
+    [selectedItems]
+  );
 
-  const handleSelectAll = React.useCallback(() => {
+  const handleSelectAll = useCallback(() => {
     if (!visibleRows.length) return;
 
-    const allKeys = visibleRows.map((item) => {
+    const allKeys = visibleRows.map(item => {
       // Since backend groups by case-insensitive original text, use that as the key
       return `${selectedField}:${item.original.toLowerCase()}`;
     });
     setSelectedItems(new Set(allKeys));
   }, [visibleRows, selectedField]);
 
-  const handleClearSelection = React.useCallback(() => {
+  const handleClearSelection = useCallback(() => {
     setSelectedItems(new Set());
   }, []);
 
-  const handleVisibleRowsChange = React.useCallback((rows: MismatchAnalysisResult['mismatch_items']) => {
+  const handleVisibleRowsChange = useCallback((rows: MismatchAnalysisResult['mismatch_items']) => {
     setVisibleRows(rows);
   }, []);
 
   // Memoize item keys to avoid repeated operations
-  const visibleItemKeys = React.useMemo(() => {
-    return visibleRows.map((item) => {
+  const visibleItemKeys = useMemo(() => {
+    return visibleRows.map(item => {
       // Since backend groups by case-insensitive original text, use that as the key
       return `${selectedField}:${item.original.toLowerCase()}`;
     });
   }, [visibleRows, selectedField]);
 
   // Count selected items that are currently visible on the page
-  const visibleSelectedCount = React.useMemo(() => {
+  const visibleSelectedCount = useMemo(() => {
     if (!visibleRows.length) return 0;
 
     return visibleItemKeys.filter(key => selectedItems.has(key)).length;
@@ -246,7 +244,7 @@ const MismatchAnalyzer: React.FC = () => {
 
       // Convert selected items to match format
       const matches = results.mismatch_items
-        .filter((item) => {
+        .filter(item => {
           const itemKey = `${selectedField}:${item.original.toLowerCase()}`;
           return selectedItems.has(itemKey);
         })
@@ -294,7 +292,7 @@ const MismatchAnalyzer: React.FC = () => {
 
       // Convert selected items to match format
       const matches = results.mismatch_items
-        .filter((item) => {
+        .filter(item => {
           const itemKey = `${selectedField}:${item.original.toLowerCase()}`;
           return selectedItems.has(itemKey);
         })
@@ -350,7 +348,7 @@ const MismatchAnalyzer: React.FC = () => {
       if (!results?.mismatch_items) return;
 
       results.mismatch_items
-        .filter((item) => {
+        .filter(item => {
           const itemKey = `${selectedField}:${item.original.toLowerCase()}`;
           return selectedItems.has(itemKey);
         })
@@ -404,16 +402,13 @@ const MismatchAnalyzer: React.FC = () => {
     }
   };
 
-  const isItemConfirmed = React.useCallback(
-    (item: MismatchAnalysisResult['mismatch_items'][0]) => {
-      // Use the is_confirmed field from the backend
-      return item.is_confirmed || false;
-    },
-    []
-  );
+  const isItemConfirmed = useCallback((item: MismatchAnalysisResult['mismatch_items'][0]) => {
+    // Use the is_confirmed field from the backend
+    return item.is_confirmed || false;
+  }, []);
 
   // Memoized filtered results for performance
-  const filteredResults = React.useMemo(() => {
+  const filteredResults = useMemo(() => {
     if (!results?.mismatch_items) return [];
 
     switch (displayMode) {
@@ -444,7 +439,9 @@ const MismatchAnalyzer: React.FC = () => {
 
       case 'intentionally_unmatched':
         // Show only intentionally unmatched items
-        return results.mismatch_items.filter(item => item.mismatch_type === 'intentionally_unmatched');
+        return results.mismatch_items.filter(
+          item => item.mismatch_type === 'intentionally_unmatched'
+        );
 
       default:
         return results.mismatch_items;
@@ -477,11 +474,13 @@ const MismatchAnalyzer: React.FC = () => {
       unconfirmed: returnedItems.filter(item => !isItemConfirmed(item)).length,
       regex: returnedItems.filter(item => item.match_type === 'regex' && !isItemConfirmed(item))
         .length,
-      intentionally_unmatched: returnedItems.filter(item => item.mismatch_type === 'intentionally_unmatched').length,
+      intentionally_unmatched: returnedItems.filter(
+        item => item.mismatch_type === 'intentionally_unmatched'
+      ).length,
     };
   };
 
-  const getUnmatchedButtonText = React.useMemo(() => {
+  const getUnmatchedButtonText = useMemo(() => {
     if (visibleSelectedCount === 0) return 'Mark 0 as Unmatched';
 
     // Count how many visible selected items are already intentionally unmatched
@@ -510,7 +509,7 @@ const MismatchAnalyzer: React.FC = () => {
     }
   }, [visibleSelectedCount, visibleRows, visibleItemKeys, selectedItems]);
 
-  const shouldShowReasonInput = React.useMemo(() => {
+  const shouldShowReasonInput = useMemo(() => {
     if (selectedItems.size === 0) return false;
 
     // Only show reason input if we're adding items (not removing)
@@ -795,7 +794,6 @@ const MismatchAnalyzer: React.FC = () => {
                   </button>
                 </div>
               )}
-
             </div>
           </div>
 
