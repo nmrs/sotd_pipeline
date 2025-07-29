@@ -194,7 +194,7 @@ blade:
       Super Platinum:
       - flydear
       - flydear - 9/10
-      - "modified flydear \U0001F926\U0001F3FB\u2642\uFE0F"
+      - modified flydear 🤦🏻♂️
     Gillette:
       '365':
       - gillette 365
@@ -246,7 +246,7 @@ blade:
       - gillette winner stainless
       Winner Platinum:
       - gillette winner platinum
-    "Gl\xE4tz":
+    Glätz:
       Super Platinum:
       - glatz
     Kai:
@@ -267,7 +267,7 @@ blade:
       - lazer triple coated
     Leningrad:
       DE:
-      - "\u043B\u0435\u043D\u0438\u043D\u0433\u0440\u0430\u0434"
+      - ленинград
     Lord:
       Blue Sword Platinum:
       - blue sword platinum
@@ -597,7 +597,7 @@ brush:
     - zenith r/wetshaving 31mm x 57mm moar boar
     - zenith r/wetshaving exclusive moar badger (silvertip)
     - zenith r/wetshaving exclusive moar boar
-    - "zenith r/wetshaving exclusive moar boar (31 mm \xD7 57 mm bleached boar)"
+    - zenith r/wetshaving exclusive moar boar (31 mm × 57 mm bleached boar)
     - zenith r/wetshaving exclusive moar boar 31 mm
     - zenith r/wetshaving exclusive moar boar 31mm
     - zenith r/wetshaving moar boar
@@ -768,19 +768,19 @@ razor:
   Bulimica:
     Safety Razor:
     - bulimica - rainbow safety razor (green)
-  "B\xF6ker":
+  Böker:
     Elite Carbon 2.0:
-    - "b\xF6ker elite carbon 2.0"
+    - böker elite carbon 2.0
     King Cutter:
-    - "b\xF6ker - king cutter"
-    - "b\xF6ker - king cutter - 6/8 square point - full hollow"
+    - böker - king cutter
+    - böker - king cutter - 6/8 square point - full hollow
     Straight:
     - boker no.1056 - full hollow - dreadnought point - 5/8
-    - "b\xF6ker - 14er (8/8\", extra hollow, carbon steel, square point)"
-    - "b\xF6ker - d\xF6nges expert fire folder"
-    - "b\xF6ker 14er 8/8\" full hollow"
-    - "b\xF6ker s.s. paris wins (6/8\", carbon steel, full hollow, square point)"
-    - "custom designed b\xF6ker 6/8 with bog oak scale and french head"
+    - böker - 14er (8/8", extra hollow, carbon steel, square point)
+    - böker - dönges expert fire folder
+    - böker 14er 8/8" full hollow
+    - böker s.s. paris wins (6/8", carbon steel, full hollow, square point)
+    - custom designed böker 6/8 with bog oak scale and french head
     - h boker "american line - s.s. st. louis" 11/16"
     - h boker 5/8" and tang
   CJB:
@@ -792,7 +792,7 @@ razor:
   CV Heljestrand:
     Straight:
     - c.v. heljestrand - mk 32
-    - "c.v. heljestrand mk 31 11/16\" s\xF6derfors extra specialst\xE5l full hollow"
+    - c.v. heljestrand mk 31 11/16" söderfors extra specialstål full hollow
     - c.v.heljestrand - no.2
     - carl victor heljestrand 5/8
   Carbon:
@@ -926,9 +926,9 @@ razor:
     - ever ready streamline
     - ever ready streamline gen 2
     - everready streamline strop outfit gen 2
-  "Fac\xF3n":
+  Facón:
     Kamisori Shavette:
-    - "fac\xF3n - kamisori-style shavette; karve shaving co. - overlander brass"
+    - facón - kamisori-style shavette; karve shaving co. - overlander brass
   Fasan:
     Bakelite Slant:
     - fasan - bakelite slant
@@ -959,7 +959,7 @@ razor:
   Filarmonica:
     Straight:
     - filarmonica 13 novodur 13/16" para profesionales full hollow
-    - "filarm\xF3nica doble temple 14"
+    - filarmónica doble temple 14
   Fine Accoutrements:
     DE5:
     - fine accouterments de5
@@ -1382,8 +1382,7 @@ razor:
   Max Sprecher:
     Straight:
     - max sprecher 9/8" with abalone inlay and scales
-    - "max sprecher 9/8\u30FB1/2 hollow \u2022 barber's notch\u30FBopal\u30FBblue\
-      \ pearl kirinite"
+    - max sprecher 9/8・1/2 hollow • barber's notch・opal・blue pearl kirinite
     - max sprecher paua scales 1/2 hallow barber's notch 9/8
   Merkur:
     23C:
@@ -1420,7 +1419,7 @@ razor:
   Mossei:
     Mono:
     - mossei - mono injector
-  "M\xFChle":
+  Mühle:
     Companion:
     - muhle companion
     Neo:
@@ -1429,19 +1428,19 @@ razor:
     - muhle - r41 zamac
     - muhle r41
     - muninn woodworks forest moss r41
-    - "m\xFChle - r41 kosmo"
-    - "m\xFChle r41"
+    - mühle - r41 kosmo
+    - mühle r41
     R89:
     - muhle r89
-    - "m\xFChle -r89"
-    - "m\xFChle r89"
+    - mühle -r89
+    - mühle r89
     Rocca:
     - muhle rocca
     - muhle rocca birch handle
     - muhle rocca r94
     - muhle rocca r95
-    - "m\xFChle rocca r94"
-    - "m\xFChle rocca r95"
+    - mühle rocca r94
+    - mühle rocca r95
   Occams Razor:
     Enoch:
     - occam's razors - the senoch
@@ -1524,12 +1523,12 @@ razor:
     - campobasso 6/8 full hollow round point
     - campobasso, 6/8 full hollow round point
     - carl rader 6/8" french point straight razor
-    - "delolme - le thiernois no14 acier sp\xE9cial pour coiffeur (8/8\", hollow ground,\
-      \ round tip, carbon steel)"
+    - delolme - le thiernois no14 acier spécial pour coiffeur (8/8", hollow ground,
+      round tip, carbon steel)
     - ditzer - ditzer gold - 4/8 round point
     - drew dick - sheffield style 9/8 1/4 hollow
     - e. a. berg eskilstuna swedish frameback
-    - "ed w\xFCsthof barber's king 13/16 full hollow"
+    - ed wüsthof barber's king 13/16 full hollow
     - erik anton berg 9/16 rattler
     - f.w. engels leader 6/8 full hollow square point
     - f.w. engels special
@@ -1550,7 +1549,7 @@ razor:
     - iberia 14 doble temple 8/8, extra hollow square point
     - iwasaki 13/16" full hollow square point tamahagane
     - j.a. henckles 60 - 5/8" round point
-    - "jernbolaget n\xB0 11 5/8"
+    - jernbolaget n° 11 5/8
     - john clarke and son - 6/8 round point / full hollow - scheffield
     - joseph allen & sons - non xll the celebrated extra hollow ground barbers notch
       horn scale
@@ -1756,7 +1755,7 @@ razor:
     - romer 7 shivira
   Rubin:
     '1':
-    - "\u0440\u0443\u0431\u0438\u043D"
+    - рубин
   SCS:
     Model A:
     - simple clean shave (reb engineering & machine, llc) - scs model a
@@ -1867,12 +1866,12 @@ razor:
     - the holy black shavette
   Thiers Issard:
     Straight:
-    - "thiers issard 1937 special coiffeur 60 m\xE9daille argent - half hollow - round\
-      \ point - 6/8"
+    - thiers issard 1937 special coiffeur 60 médaille argent - half hollow - round
+      point - 6/8
     - thiers issard le dandy (5/8", square point, carbon steel)
     - thiers issard le transatlantic 7/8" full hollow round point
-    - "thiers issard m\xE9daille d'or exposition d'alger - full hollow - round point\
-      \ - 6/8"
+    - thiers issard médaille d'or exposition d'alger - full hollow - round point -
+      6/8
   Timeless:
     Razor:
     - timeless - .38 bronze
