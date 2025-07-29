@@ -50,7 +50,9 @@ class FilteredEntriesManager:
             self.file_path.parent.mkdir(parents=True, exist_ok=True)
 
             with open(self.file_path, "w", encoding="utf-8") as f:
-                yaml.dump(self._data, f, default_flow_style=False, sort_keys=True)
+                yaml.dump(
+                    self._data, f, default_flow_style=False, sort_keys=True, allow_unicode=True
+                )
         except Exception as e:
             raise ValueError(f"Error saving filtered entries to {self.file_path}: {e}")
 
