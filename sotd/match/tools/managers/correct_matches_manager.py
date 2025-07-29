@@ -216,7 +216,9 @@ class CorrectMatchesManager:
 
             # Save to file
             with self._correct_matches_file.open("w", encoding="utf-8") as f:
-                yaml.dump(field_data, f, default_flow_style=False, sort_keys=True)
+                yaml.dump(
+                    field_data, f, default_flow_style=False, sort_keys=True, allow_unicode=True
+                )
 
             self.console.print(
                 f"[green]Correct matches saved to {self._correct_matches_file}[/green]"
