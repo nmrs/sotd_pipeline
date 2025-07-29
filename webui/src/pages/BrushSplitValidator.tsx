@@ -247,7 +247,6 @@ const BrushSplitValidator: React.FC = () => {
                     }
                   });
                 });
-
               } else {
                 console.error('Failed to save brush splits:', response.message);
                 setError(`Failed to save brush splits: ${response.message}`);
