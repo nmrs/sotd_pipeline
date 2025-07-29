@@ -22,7 +22,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
   comments = [],
   currentIndex = 0,
   onNavigate,
-  remainingCommentIds = []
+  remainingCommentIds = [],
 }) => {
   if (!isOpen || !comment) {
     return null;
@@ -32,7 +32,8 @@ const CommentModal: React.FC<CommentModalProps> = ({
   const totalCommentCount = comments.length + remainingCommentIds.length;
   const hasMultipleComments = totalCommentCount > 1;
   const canGoPrev = hasMultipleComments && currentIndex > 0;
-  const canGoNext = hasMultipleComments && (currentIndex < comments.length - 1 || remainingCommentIds.length > 0);
+  const canGoNext =
+    hasMultipleComments && (currentIndex < comments.length - 1 || remainingCommentIds.length > 0);
 
   // Handle keyboard navigation
   useEffect(() => {

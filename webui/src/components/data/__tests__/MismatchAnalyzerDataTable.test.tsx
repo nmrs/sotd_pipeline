@@ -3,31 +3,36 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import MismatchAnalyzerDataTable from '../MismatchAnalyzerDataTable';
 import { MismatchItem } from '../../../services/api';
 
-// Mock the CommentList component
-jest.mock('../../domain/CommentList', () => {
-  return {
-    CommentList: ({
-      commentIds,
-      onCommentClick,
-      commentLoading,
-      maxDisplay,
-      'aria-label': ariaLabel,
-    }: any) => (
-      <div data-testid='comment-list' aria-label={ariaLabel}>
-        {commentIds.map((id: string, index: number) => (
-          <button
-            key={id}
-            onClick={() => onCommentClick?.(id)}
-            disabled={commentLoading}
-            aria-label={`View comment ${index + 1} of ${commentIds.length}`}
-          >
-            {id}
-          </button>
-        ))}
-      </div>
-    ),
-  };
-});
+// Mock CommentList component
+jest.mock('../../domain/CommentList', () => ({
+  CommentList: ({
+    commentIds,
+    onCommentClick,
+    commentLoading,
+    'aria-label': ariaLabel,
+  }: {
+    commentIds: string[];
+    onCommentClick: (id: string) => void;
+    commentLoading?: boolean;
+    'aria-label'?: string;
+  }) => (
+    <div data-testid='comment-list' aria-label={ariaLabel}>
+      {commentIds.map((id, index) => (
+        <button
+          key={id}
+          onClick={() => onCommentClick(id)}
+          data-testid={`comment-${id}`}
+          disabled={commentLoading}
+          aria-label={`View comment ${index + 1} of ${commentIds.length}`}
+        >
+          {id}
+        </button>
+      ))}
+    </div>
+  ),
+}));
+
+const mockOnCommentClick = jest.fn();
 
 const mockData: MismatchItem[] = [
   {
@@ -58,7 +63,7 @@ describe('MismatchAnalyzerDataTable', () => {
   const defaultProps = {
     data: mockData,
     field: 'razor',
-    onCommentClick: jest.fn(),
+    onCommentClick: mockOnCommentClick,
     commentLoading: false,
   };
 
@@ -158,10 +163,7 @@ describe('MismatchAnalyzerDataTable', () => {
       // Click the first row checkbox (index 0, since there's no "Select All" checkbox)
       fireEvent.click(checkboxes[0]);
 
-      expect(onItemSelection).toHaveBeenCalledWith(
-        'razor:test razor 1',
-        true
-      );
+      expect(onItemSelection).toHaveBeenCalledWith('razor:test razor 1', true);
     });
 
     test('reflects selected state in checkboxes', () => {
@@ -201,6 +203,120 @@ describe('MismatchAnalyzerDataTable', () => {
 
       expect(screen.getByText('✅ Confirmed')).toBeInTheDocument();
       expect(screen.getByText('⚠️ Unconfirmed')).toBeInTheDocument();
+    });
+  });
+
+  describe('MismatchAnalyzerDataTable with Handle and Knot Columns', () => {
+    test('shows handle and knot columns for brush fields', () => {
+      // Known brush data (has top-level brand/model)
+      const knownBrushData: MismatchItem[] = [
+        {
+          original: 'Omega 10049',
+          matched: {
+            brand: 'Omega',
+            model: '10049',
+            format: 'Boar',
+          },
+          pattern: 'omega.*(pro)*.*49',
+          match_type: 'regex',
+          confidence: 0.9,
+          mismatch_type: 'good_match',
+          reason: 'Good match found',
+          count: 8,
+          examples: ['2025-06.json'],
+          comment_ids: ['mvepnsn', 'mvqyczm', 'mxjl2io'],
+          is_confirmed: true,
+        },
+      ];
+
+      // Split brush data (no top-level brand/model)
+      const splitBrushData: MismatchItem[] = [
+        {
+          original: 'Declaration B2 in Mozingo handle',
+          matched: {
+            handle: {
+              brand: 'Mozingo',
+              model: 'Custom',
+              _pattern: 'mozingo.*handle',
+            },
+            knot: {
+              brand: 'Declaration',
+              model: 'B2',
+              _pattern: 'declaration.*b2',
+            },
+          },
+          pattern: 'declaration.*b2.*mozingo.*handle',
+          match_type: 'regex',
+          confidence: 0.8,
+          mismatch_type: 'potential_mismatch',
+          reason: 'Multiple patterns found',
+          count: 3,
+          examples: ['2025-06.json'],
+          comment_ids: ['abc123', 'def456'],
+          is_confirmed: false,
+        },
+      ];
+
+      // Test known brush (should show handle/knot columns for brush field)
+      const { rerender } = render(
+        <MismatchAnalyzerDataTable
+          data={knownBrushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Should show brush pattern column AND handle/knot pattern columns for brush field
+      expect(screen.getByText('Type')).toBeInTheDocument();
+      expect(screen.getByText('Handle Pattern')).toBeInTheDocument();
+      expect(screen.getByText('Knot Pattern')).toBeInTheDocument();
+
+      // Test split brush (should also show handle/knot columns)
+      rerender(
+        <MismatchAnalyzerDataTable
+          data={splitBrushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Should show handle/knot pattern columns
+      expect(screen.getByText('Handle Pattern')).toBeInTheDocument();
+      expect(screen.getByText('Knot Pattern')).toBeInTheDocument();
+    });
+
+    test('displays correct icon and text for exact_matches type', () => {
+      const exactMatchData: MismatchItem[] = [
+        {
+          original: 'Gillette Super Speed',
+          matched: {
+            brand: 'Gillette',
+            model: 'Super Speed',
+            format: 'DE',
+          },
+          pattern: 'gillette.*super.*speed',
+          match_type: 'exact',
+          confidence: 1.0,
+          mismatch_type: 'exact_matches',
+          reason: 'Exact match from correct_matches.yaml',
+          count: 5,
+          examples: ['2025-06.json'],
+          comment_ids: ['abc123'],
+          is_confirmed: true,
+        },
+      ];
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={exactMatchData}
+          field='razor'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Should show ✅ icon and "Exact Match" text
+      expect(screen.getByText('✅')).toBeInTheDocument();
+      expect(screen.getByText('Exact Match')).toBeInTheDocument();
     });
   });
 });
