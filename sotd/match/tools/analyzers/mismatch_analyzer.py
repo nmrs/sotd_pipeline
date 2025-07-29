@@ -40,10 +40,15 @@ class MismatchAnalyzer(AnalysisTool):
             "regex_match": "🔍",
             "potential_mismatch": "❌",
             "perfect_regex_matches": "✨",
+            "intentionally_unmatched": "🚫",  # Add indicator for intentionally unmatched items
         }
         self._catalog_patterns = {}  # Cache for catalog patterns
         self._catalog_cache_info = {}  # Cache metadata (timestamps, hashes)
-        self._correct_matches_file = Path("data/correct_matches.yaml")
+        # Use a more robust path resolution that works regardless of working directory
+        # Look for the file relative to the project root (4 levels up from this module)
+        module_path = Path(__file__)
+        project_root = module_path.parent.parent.parent.parent.parent
+        self._correct_matches_file = project_root / "data" / "correct_matches.yaml"
         self._correct_matches: Set[str] = set()
         self._compiled_patterns = {}  # Cache for compiled regex patterns
         self._correct_matches_data = {}  # Added for new _load_correct_matches method
@@ -412,6 +417,7 @@ class MismatchAnalyzer(AnalysisTool):
             "exact_matches": [],
             "perfect_regex_matches": [],
             "good_matches": [],
+            "intentionally_unmatched": [],  # Add new category for intentionally unmatched items
         }
 
         # Extract the actual records from the data structure
@@ -470,7 +476,31 @@ class MismatchAnalyzer(AnalysisTool):
             match_type = field_data.get("match_type", "")
             confidence = field_data.get("confidence", 1.0)
 
-            if not normalized or not matched:
+            if not normalized:
+                continue
+
+            # Handle intentionally unmatched items (match_type: "filtered")
+            if match_type == "filtered":
+                mismatches["intentionally_unmatched"].append(
+                    {
+                        "record": record,
+                        # These are intentionally unmatched, so they're "confirmed" as such
+                        "is_confirmed": True,
+                        "reason": "Intentionally unmatched item",
+                        "confidence": 1.0,
+                        "count": 1,
+                        "examples": (
+                            [str(record.get("_source_file", ""))]
+                            if record.get("_source_file")
+                            else []
+                        ),
+                        "comment_ids": ([str(record.get("id", ""))] if record.get("id") else []),
+                    }
+                )
+                continue
+
+            # Skip records without matched data (except for intentionally unmatched which we handled above)
+            if not matched:
                 continue
 
             # Debug: Show processing info for first few records
@@ -1215,6 +1245,7 @@ class MismatchAnalyzer(AnalysisTool):
             "levenshtein_distance",
             "low_confidence",
             "perfect_regex_matches",
+            "intentionally_unmatched",  # Add intentionally unmatched items
         ]
         total_mismatches = sum(len(mismatches[key]) for key in mismatch_keys)
         exact_matches_count = len(mismatches.get("exact_matches", []))
@@ -1235,10 +1266,18 @@ class MismatchAnalyzer(AnalysisTool):
         grouped = {}
         for mismatch_type in mismatch_keys:
             for item in mismatches[mismatch_type]:
-                field_data = item["field_data"]
-                original = field_data.get("original", "")
-                norm_original = normalize_for_matching(original, None, field=field)
-                matched = self._get_matched_text(field, field_data.get("matched", {}))
+                # Handle intentionally unmatched items differently
+                if mismatch_type == "intentionally_unmatched":
+                    field_data = item["record"].get(field, {})
+                    original = field_data.get("original", "")
+                    norm_original = normalize_for_matching(original, None, field=field)
+                    matched = "N/A"
+                else:
+                    field_data = item["field_data"]
+                    original = field_data.get("original", "")
+                    norm_original = normalize_for_matching(original, None, field=field)
+                    matched = self._get_matched_text(field, field_data.get("matched", {}))
+
                 reason = item["reason"]
 
                 # Group by the actual match, not by mismatch type, case-insensitive
@@ -1272,6 +1311,7 @@ class MismatchAnalyzer(AnalysisTool):
             "levenshtein_distance",
             "low_confidence",
             "perfect_regex_matches",
+            "intentionally_unmatched",  # Add intentionally unmatched to priority
         ]
         for group_key in sorted(grouped.keys()):
             group_info = grouped[group_key]
@@ -1327,14 +1367,20 @@ class MismatchAnalyzer(AnalysisTool):
         row_number = 1
 
         for item in grouped_mismatches[:limit]:
-            field_data = item["field_data"]
+            # Handle intentionally unmatched items differently
+            if item["mismatch_type"] == "intentionally_unmatched":
+                field_data = item["record"].get(field, {})
+                matched = "N/A"
+            else:
+                field_data = item["field_data"]
+                matched = self._get_matched_text(field, field_data.get("matched", {}))
+
             mismatch_type = item["mismatch_type"]
             count = item["count"]
             sources = item["sources"]
             comment_ids = item["comment_ids"]
 
             norm_original = item["norm_original"]
-            matched = self._get_matched_text(field, field_data.get("matched", {}))
             reason = item["reason"]
 
             # Get the actual regex pattern from field_data
@@ -1375,7 +1421,8 @@ class MismatchAnalyzer(AnalysisTool):
                 str(row_number),
                 count_text,
                 type_text,
-                field_data.get("original", ""),  # Original: exact string from matched data
+                # Use normalized for display
+                field_data.get("normalized", field_data.get("original", "")),
                 norm_original,  # Normalized: normalized version
                 matched,
                 pattern,

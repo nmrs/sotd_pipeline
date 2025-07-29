@@ -4,6 +4,7 @@
 import logging
 import subprocess
 import sys
+import time
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -11,12 +12,22 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-# Add project root to Python path for importing SOTD modules
-project_root = Path(__file__).resolve().parents[2]
+# Add project root to Python path for imports
+project_root = Path(__file__).parent.parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+# Import the existing FilteredEntriesManager instead of duplicating logic
+from sotd.utils.filtered_entries import FilteredEntriesManager
+
+# Configure logging to write to a file
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler("webui_api.log"), logging.StreamHandler()],
+)
 logger = logging.getLogger(__name__)
+
 
 try:
     from sotd.match.tools.analyzers.mismatch_analyzer import MismatchAnalyzer
@@ -231,42 +242,12 @@ def validate_months(months: List[str]) -> None:
             )
 
 
-def load_intentionally_unmatched() -> Dict[str, Any]:
-    """Load intentionally unmatched items from YAML file."""
-    try:
-        intentionally_unmatched_file = project_root / "data" / "intentionally_unmatched.yaml"
-        if not intentionally_unmatched_file.exists():
-            return {}
-
-        import yaml
-
-        with open(intentionally_unmatched_file, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f) or {}
-    except Exception as e:
-        logger.warning(f"Error loading intentionally_unmatched.yaml: {e}")
-        return {}
-
-
-def is_intentionally_unmatched(
-    original: str, field: str, intentionally_unmatched_data: Dict[str, Any]
-) -> bool:
-    """Check if an item is intentionally unmatched."""
-    logger.info(f"Checking if '{original}' is intentionally unmatched for field '{field}'")
-    logger.info(f"Intentionally unmatched data: {intentionally_unmatched_data}")
-
-    if not intentionally_unmatched_data or field not in intentionally_unmatched_data:
-        logger.info(f"Field '{field}' not found in intentionally unmatched data")
-        return False
-
-    field_data = intentionally_unmatched_data[field]
-    if not isinstance(field_data, dict):
-        logger.info(f"Field data for '{field}' is not a dict: {type(field_data)}")
-        return False
-
-    # Check if the original text matches any key in the intentionally unmatched data
-    result = original in field_data
-    logger.info(f"'{original}' in field_data: {result}")
-    return result
+def get_filtered_entries_manager() -> FilteredEntriesManager:
+    """Get FilteredEntriesManager instance for intentionally unmatched data."""
+    filtered_file = project_root / "data" / "intentionally_unmatched.yaml"
+    manager = FilteredEntriesManager(filtered_file)
+    manager.load()
+    return manager
 
 
 def find_comment_by_id(comment_id: str, months: List[str]) -> Optional[dict]:
@@ -672,176 +653,48 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
             logger.error(f"Error loading data: {e}")
             raise HTTPException(status_code=500, detail=f"Error loading data: {str(e)}")
 
-        # Load intentionally unmatched data
-        intentionally_unmatched_data = load_intentionally_unmatched()
-        logger.info(f"Loaded intentionally unmatched data: {intentionally_unmatched_data}")
-        razor_keys = list(intentionally_unmatched_data.get("razor", {}).keys())
-        logger.info(f"Razor keys in intentionally unmatched data: {razor_keys}")
-        hot_wheels_in_keys = "Hot Wheels Play Razor" in intentionally_unmatched_data.get(
-            "razor", {}
-        )
-        logger.info(f"'Hot Wheels Play Razor' in razor keys: {hot_wheels_in_keys}")
-
-        # Load correct matches first
+        # Load correct matches first - this is required for identify_mismatches to work correctly
         analyzer._load_correct_matches()
-        logger.info(f"DEBUG: Loaded {len(analyzer._correct_matches)} correct matches")
+        logger.info(f"Loaded {len(analyzer._correct_matches)} correct matches")
 
-        # Debug: Show some correct match keys
-        correct_keys = list(analyzer._correct_matches)[:5]
-        for key in correct_keys:
-            logger.info(f"DEBUG: Correct match key example: {key}")
-
-        # Identify mismatches using the analyzer
+        # Use the analyzer's logic directly - DRY principle
         mismatches = analyzer.identify_mismatches(data, request.field, args)
 
-        # Process all records using analyzer results
+        # Convert analyzer results to API response format
         all_items = []
         total_matches = len(records)
         total_mismatches = 0
 
-        # Create a comprehensive lookup from analyzer results
-        analyzer_results = {}
+        # Process all mismatch categories from analyzer
         for mismatch_type, items in mismatches.items():
+            logger.info(f"Processing category '{mismatch_type}' with {len(items)} items")
             for item in items:
-                record_id = item["record"].get("id", "")
-                if record_id:
-                    # Get all info from analyzer
-                    is_confirmed = item.get("is_confirmed", False)
-                    reason = item.get("reason", "")
-                    analyzer_results[record_id] = {
-                        "mismatch_type": mismatch_type,
-                        "reason": reason,
-                        "is_confirmed": is_confirmed,
-                        "record": item["record"],
-                        "field_data": item.get("field_data", {}),
-                    }
-                    # Debug: Print for 1924 entries
-                    original_text = item["record"].get(request.field, {}).get("original", "")
-                    if "1924" in original_text:
-                        logger.info(
-                            f"DEBUG: Analyzer result for 1924 entry {record_id}: "
-                            f"{mismatch_type}, is_confirmed={is_confirmed}, reason={reason}"
-                        )
-                    # Count mismatches (excluding good_matches)
-                    if mismatch_type != "good_matches":
-                        total_mismatches += 1
-
-        # Debug: Show analyzer results summary
-        logger.info(f"DEBUG: Analyzer processed {len(analyzer_results)} records")
-        logger.info(f"DEBUG: Analyzer result keys: {list(analyzer_results.keys())[:5]}")
-
-        # Debug: Show what 1924 entries the analyzer found
-        for record_id, result in analyzer_results.items():
-            original_text = result["record"].get(request.field, {}).get("original", "")
-            if "1924" in original_text:
-                logger.info(f"DEBUG: Analyzer found 1924 entry: {record_id} -> '{original_text}'")
-
-        # Process all records
-        skipped_count = 0
-        for record in records:
-            try:
+                record = item["record"]
                 field_data = record.get(request.field, {})
-                if not isinstance(field_data, dict):
-                    skipped_count += 1
-                    continue
 
                 original = field_data.get("original", "")
                 normalized = field_data.get("normalized", original)
                 matched = field_data.get("matched", {})
-                pattern = field_data.get("pattern") or ""
+                pattern = field_data.get("pattern", "")
                 match_type = field_data.get("match_type", "")
                 record_id = record.get("id", "")
 
-                # Skip records with completely missing original text
-                if not original or original.strip() == "":
-                    skipped_count += 1
-                    continue
-
-                # Debug: Print for 1924 entries
-                if "1924" in normalized:
-                    logger.info(
-                        f"DEBUG: API processing 1924 entry {record_id}: "
-                        f"normalized='{normalized}', record_id='{record_id}'"
-                    )
-
-                # Include all records, even those with missing data
-                if not normalized:
-                    normalized = str(original) if original else "No original text"
-                if not matched:
-                    matched = {"error": "No matched data"}
+                # Handle intentionally unmatched items differently - they don't have matched data
+                if mismatch_type == "intentionally_unmatched":
+                    # For intentionally unmatched items, use empty matched dict and set match_type to "filtered"
+                    matched = {}
+                    match_type = "filtered"
+                else:
+                    # Skip records with missing data for other categories
+                    if not normalized or not matched:
+                        continue
 
                 # Use analyzer's results directly
-                mismatch_type = "good_match"
-                reason = "Successfully matched"
-                is_confirmed = False
+                is_confirmed = item.get("is_confirmed", False)
+                reason = item.get("reason", "")
 
-                # Check if this item is intentionally unmatched FIRST
-                is_intentionally_unmatched_result = is_intentionally_unmatched(
-                    normalized, request.field, intentionally_unmatched_data
-                )
-                if is_intentionally_unmatched_result:
-                    mismatch_type = "intentionally_unmatched"
-                    reason = "Item marked as intentionally unmatched"
-                    is_confirmed = True  # Intentionally unmatched items are confirmed
-                elif match_type == "irrelevant_razor_format":
-                    # Items marked as irrelevant due to razor format are confirmed
-                    mismatch_type = "irrelevant_razor_format"
-                    reason = "Blade irrelevant for razor format (straight, cartridge, etc.)"
-                    is_confirmed = True  # Irrelevant razor format items are confirmed
-                elif record_id in analyzer_results:
-                    # Use analyzer's results directly
-                    analyzer_result = analyzer_results[record_id]
-                    mismatch_type = analyzer_result["mismatch_type"]
-                    reason = analyzer_result["reason"]
-                    is_confirmed = analyzer_result["is_confirmed"]
-
-                    # Debug: Print for 1924 entries
-                    if "1924" in normalized:
-                        logger.info(
-                            f"DEBUG: API using analyzer result for 1924 entry {record_id}: "
-                            f"{mismatch_type}, is_confirmed={is_confirmed}, reason={reason}"
-                        )
-                else:
-                    # For records not processed by analyzer, check if they're confirmed
-                    match_key = analyzer._create_match_key(request.field, normalized, matched)
-                    is_confirmed = match_key in analyzer._correct_matches
-
-                    # Debug: Print for 1924 entries
-                    if "1924" in normalized:
-                        logger.info(
-                            f"DEBUG: API fallback for 1924 entry {record_id}: "
-                            f"match_key={match_key}, is_confirmed={is_confirmed}"
-                        )
-                        logger.info(
-                            f"DEBUG: Available analyzer result keys: "
-                            f"{list(analyzer_results.keys())}"
-                        )
-
-                        # Also check if any analyzer results contain this original text
-                        for result_record_id, result in analyzer_results.items():
-                            result_original = (
-                                result["record"].get(request.field, {}).get("original", "")
-                            )
-                            if "1924" in result_original and "1924" in normalized:
-                                logger.info(
-                                    f"DEBUG: Found matching 1924 entry in analyzer results: "
-                                    f"result_id={result_record_id}, api_id={record_id}, "
-                                    f"result_original='{result_original}', "
-                                    f"api_original='{normalized}'"
-                                )
-
-                                # Use the analyzer result if we found a match
-                                mismatch_type = result["mismatch_type"]
-                                reason = result["reason"]
-                                is_confirmed = result["is_confirmed"]
-                                logger.info(
-                                    f"DEBUG: Using analyzer result for 1924 entry: "
-                                    f"is_confirmed={is_confirmed}"
-                                )
-                                break
-
-                # Create item for all matches
-                all_item = MismatchItem(
+                # Create API response item
+                api_item = MismatchItem(
                     original=normalized,
                     matched=matched,
                     pattern=pattern,
@@ -857,17 +710,15 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     is_confirmed=is_confirmed,
                 )
 
-                all_items.append(all_item)
-            except Exception as e:
-                logger.warning(f"Error processing record {record.get('id', 'unknown')}: {e}")
-                skipped_count += 1
-                continue
+                all_items.append(api_item)
 
-        # Group identical items together
+                # Count mismatches (excluding good_matches and exact_matches)
+                if mismatch_type not in ["good_matches", "exact_matches"]:
+                    total_mismatches += 1
+
+        # Group identical items together (case-insensitive)
         grouped_items = {}
         for item in all_items:
-            # Create a simple group key based on case-insensitive original text
-            # This groups items that have the same original text regardless of case
             group_key = item.original.lower()
 
             if group_key in grouped_items:
@@ -881,9 +732,6 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     existing.confidence is None or item.confidence > existing.confidence
                 ):
                     existing.confidence = item.confidence
-                # Keep the first occurrence's original text for display
-                # (preserve case of first item)
-                # Don't change existing.original since we want to keep the first one
             else:
                 # Create new grouped item
                 grouped_items[group_key] = item
@@ -894,7 +742,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
 
         logger.info(
             f"Mismatch analysis: total_records={len(records)}, "
-            f"skipped_invalid_field_data={skipped_count}, returned={len(all_items)}, "
+            f"returned={len(all_items)}, "
             f"total_matches={total_matches}, total_mismatches={total_mismatches}"
         )
 
