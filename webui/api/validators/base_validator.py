@@ -50,7 +50,7 @@ class BaseValidator:
             self.yaml_path.parent.mkdir(parents=True, exist_ok=True)
 
             with open(self.yaml_path, "w") as f:
-                yaml.dump(data, f)
+                yaml.dump(data, f, allow_unicode=True)
 
             self.data = data
             return ValidationResult(success=True)
@@ -168,7 +168,7 @@ class BaseValidator:
 
         try:
             with open(backup_path, "w") as f:
-                yaml.dump(self.data, f)
+                yaml.dump(self.data, f, allow_unicode=True)
 
             return ValidationResult(success=True)
 
