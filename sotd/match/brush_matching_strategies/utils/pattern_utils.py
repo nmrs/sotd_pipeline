@@ -129,6 +129,27 @@ def compile_catalog_patterns(
             for field in metadata_fields:
                 pattern_metadata[field] = metadata.get(field, brand_defaults.get(field))
 
+            # Handle nested knot and handle structures
+            if "knot" in metadata and isinstance(metadata["knot"], dict):
+                knot_data = metadata["knot"]
+                # Extract knot-specific fields
+                pattern_metadata["knot_fiber"] = knot_data.get("fiber")
+                pattern_metadata["knot_size_mm"] = knot_data.get("knot_size_mm")
+                pattern_metadata["knot_model"] = knot_data.get("model")
+                pattern_metadata["knot_brand"] = knot_data.get("brand")
+                # Use knot fiber as primary fiber if available
+                if pattern_metadata["knot_fiber"]:
+                    pattern_metadata["fiber"] = pattern_metadata["knot_fiber"]
+                # Use knot size as primary size if available
+                if pattern_metadata["knot_size_mm"]:
+                    pattern_metadata["knot_size_mm"] = pattern_metadata["knot_size_mm"]
+
+            if "handle" in metadata and isinstance(metadata["handle"], dict):
+                handle_data = metadata["handle"]
+                # Extract handle-specific fields
+                pattern_metadata["handle_brand"] = handle_data.get("brand")
+                pattern_metadata["handle_model"] = handle_data.get("model")
+
             # Create pattern entries
             for pattern in patterns:
                 pattern_entry = {"pattern": pattern, **pattern_metadata}

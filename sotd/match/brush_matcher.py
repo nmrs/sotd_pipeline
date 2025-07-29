@@ -609,6 +609,12 @@ class BrushMatcher:
                 pattern="curated_split",
             )
 
+        else:
+            # No split result - try complete brush matching (known brush case)
+            # This handles cases where split_handle_and_knot returns (None, None, None)
+            # indicating the brush should be treated as a complete known brush
+            pass
+
         # Step 2: Try complete brush matching (single-brand brushes) - only use brush strategies
         for strategy in self.brush_strategies:
             try:
@@ -903,10 +909,19 @@ class BrushMatcher:
                     if isinstance(knot_entry, dict) and "default" in knot_entry:
                         fiber = knot_entry["default"]
                         print(f"DEBUG: Found default fiber '{fiber}' for brand '{brand}'")
+
+            # Use knot-specific information if available
+            # Use knot model if available, otherwise brush model
+            knot_model = m.get("knot_model", model)
+            # Use knot fiber if available, otherwise brush fiber
+            knot_fiber = m.get("knot_fiber", fiber)
+            # Use knot brand if available, otherwise brush brand
+            knot_brand = m.get("knot_brand", brand)
+
             m["knot"] = {
-                "brand": brand,
-                "model": model,
-                "fiber": fiber,
+                "brand": knot_brand,
+                "model": knot_model,
+                "fiber": knot_fiber,
                 "knot_size_mm": knot_size_mm,
                 "source_text": m.get("source_text", ""),
                 "_matched_by": strategy.__class__.__name__,

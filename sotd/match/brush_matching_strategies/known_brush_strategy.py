@@ -38,6 +38,21 @@ class KnownBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                     "handle_maker": entry.get("handle_maker"),
                     "source_text": value,
                 }
+
+                # Add knot-specific information if available
+                if entry.get("knot_model"):
+                    entry_result["knot_model"] = entry.get("knot_model")
+                if entry.get("knot_fiber"):
+                    entry_result["knot_fiber"] = entry.get("knot_fiber")
+                if entry.get("knot_brand"):
+                    entry_result["knot_brand"] = entry.get("knot_brand")
+
+                # Add handle-specific information if available
+                if entry.get("handle_model"):
+                    entry_result["handle_model"] = entry.get("handle_model")
+                if entry.get("handle_brand"):
+                    entry_result["handle_brand"] = entry.get("handle_brand")
+
                 return create_match_result(
                     original=value,
                     matched=entry_result,
