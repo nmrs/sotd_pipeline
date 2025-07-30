@@ -61,16 +61,39 @@ check_process() {
     return 1
 }
 
+# Function to kill external processes using a port
+kill_external_process() {
+    local port=$1
+    local process_name=$2
+    
+    if check_port $port; then
+        local pids=$(lsof -ti:$port 2>/dev/null)
+        if [[ -n "$pids" ]]; then
+            print_status $YELLOW "Killing external process(es) using port $port (PID(s): $pids)..."
+            echo "$pids" | xargs kill -9 2>/dev/null || true
+            sleep 1
+            print_status $GREEN "External process(es) killed"
+        fi
+    fi
+}
+
 # Function to start frontend server
 start_frontend() {
+    local force=${1:-false}
+    
     if check_process "$FRONTEND_PID_FILE" "frontend"; then
         print_status $YELLOW "Frontend server is already running (PID: $(cat $FRONTEND_PID_FILE))"
         return 0
     fi
     
     if check_port $FRONTEND_PORT; then
-        print_status $RED "Port $FRONTEND_PORT is already in use by another process"
-        return 1
+        if [[ "$force" == "true" ]]; then
+            kill_external_process $FRONTEND_PORT "frontend"
+        else
+            print_status $RED "Port $FRONTEND_PORT is already in use by another process"
+            print_status $YELLOW "Use --force flag to kill external processes and start anyway"
+            return 1
+        fi
     fi
     
     print_status $BLUE "Starting frontend server (Vite) on port $FRONTEND_PORT..."
@@ -95,14 +118,21 @@ start_frontend() {
 
 # Function to start backend server
 start_backend() {
+    local force=${1:-false}
+    
     if check_process "$BACKEND_PID_FILE" "backend"; then
         print_status $YELLOW "Backend server is already running (PID: $(cat $BACKEND_PID_FILE))"
         return 0
     fi
     
     if check_port $BACKEND_PORT; then
-        print_status $RED "Port $BACKEND_PORT is already in use by another process"
-        return 1
+        if [[ "$force" == "true" ]]; then
+            kill_external_process $BACKEND_PORT "backend"
+        else
+            print_status $RED "Port $BACKEND_PORT is already in use by another process"
+            print_status $YELLOW "Use --force flag to kill external processes and start anyway"
+            return 1
+        fi
     fi
     
     print_status $BLUE "Starting backend server (FastAPI) on port $BACKEND_PORT..."
@@ -243,7 +273,7 @@ show_logs() {
 show_help() {
     echo "SOTD Pipeline WebUI Server Manager"
     echo ""
-    echo "Usage: $0 [COMMAND]"
+    echo "Usage: $0 [COMMAND] [OPTIONS]"
     echo ""
     echo "Commands:"
     echo "  start       Start both frontend and backend servers"
@@ -254,8 +284,12 @@ show_help() {
     echo "  clean       Clean up PID files and logs"
     echo "  help        Show this help message"
     echo ""
+    echo "Options:"
+    echo "  --force     Kill external processes using required ports before starting"
+    echo ""
     echo "Examples:"
     echo "  $0 start          # Start both servers"
+    echo "  $0 start --force  # Start servers, killing external processes if needed"
     echo "  $0 stop           # Stop both servers"
     echo "  $0 status         # Check server status"
     echo "  $0 logs frontend  # Show frontend logs"
@@ -276,12 +310,24 @@ cleanup() {
     print_status $GREEN "Cleanup complete"
 }
 
+# Parse command line arguments
+COMMAND="${1:-help}"
+FORCE=false
+
+# Check for --force flag
+if [[ "$2" == "--force" ]]; then
+    FORCE=true
+fi
+
 # Main script logic
-case "${1:-help}" in
+case "$COMMAND" in
     start)
         print_status $BLUE "Starting SOTD Pipeline WebUI servers..."
-        start_frontend
-        start_backend
+        if [[ "$FORCE" == "true" ]]; then
+            print_status $YELLOW "Force mode enabled - will kill external processes if needed"
+        fi
+        start_frontend "$FORCE"
+        start_backend "$FORCE"
         print_status $GREEN "All servers started!"
         print_status $BLUE "Frontend: http://localhost:$FRONTEND_PORT"
         print_status $BLUE "Backend:  http://localhost:$BACKEND_PORT"
@@ -294,11 +340,14 @@ case "${1:-help}" in
         ;;
     restart)
         print_status $BLUE "Restarting SOTD Pipeline WebUI servers..."
+        if [[ "$FORCE" == "true" ]]; then
+            print_status $YELLOW "Force mode enabled - will kill external processes if needed"
+        fi
         stop_server "$FRONTEND_PID_FILE" "frontend" $FRONTEND_PORT
         stop_server "$BACKEND_PID_FILE" "backend" $BACKEND_PORT
         sleep 2
-        start_frontend
-        start_backend
+        start_frontend "$FORCE"
+        start_backend "$FORCE"
         print_status $GREEN "All servers restarted!"
         ;;
     status)
