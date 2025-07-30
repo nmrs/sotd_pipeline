@@ -456,7 +456,7 @@ class TestBrushMatcherPatternFields:
 
         # Verify handle section
         assert handle["brand"] == "Jayaruh"
-        assert handle["model"] == "#441"
+        assert handle["model"] == "Unspecified"  # New structure uses Unspecified for Jayaruh
         assert handle["source_text"] == "Jayaruh #441"
         # The _matched_by field can be either "HandleMatcher" or "BrushSplitter" depending on the flow
         assert handle["_matched_by"] in ["HandleMatcher", "BrushSplitter"]
