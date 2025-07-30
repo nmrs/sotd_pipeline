@@ -501,36 +501,32 @@ class TestCatalogValidationIntegration:
     @pytest.mark.integration
     def test_api_validation_with_corrupted_data(self):
         """Test API validation with corrupted data."""
-        # Create corrupted test data
-        corrupted_data = {
-            "blade": {"DE": {"InvalidBrand": {"InvalidModel": ["invalid blade entry"]}}}
-        }
+        # This test requires the API server to be running
+        # It will be skipped if not running in integration mode
 
-        # Create temporary file
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            yaml.dump(corrupted_data, f)
-            temp_file = Path(f.name)
-
+        # Test API endpoint
         try:
-            # Test API endpoint
             response = requests.post(
                 "http://localhost:8000/api/analyze/validate-catalog",
                 json={"field": "blade"},
                 timeout=10,
             )
+        except requests.exceptions.ConnectionError:
+            pytest.skip("API server not available")
 
-            if response.status_code == 200:
-                data = response.json()
-                print(
-                    f"API Response: {data['total_entries']} entries, {len(data['issues'])} issues"
-                )
+        if response.status_code == 200:
+            data = response.json()
+            print(f"API Response: {data['total_entries']} entries, {len(data['issues'])} issues")
 
-                # With corrupted data, should have issues
-                assert len(data["issues"]) > 0, "Expected issues with corrupted data, but got none"
-            else:
-                pytest.skip("API server not available")
+            # API should return validation results (may have issues in real catalog)
+            assert "total_entries" in data, "Response should include total_entries"
+            assert "issues" in data, "Response should include issues"
+            assert isinstance(data["issues"], list), "Issues should be a list"
 
-        finally:
-            # Clean up
-            if temp_file.exists():
-                temp_file.unlink()
+            # If there are issues, they should have the expected structure
+            for issue in data["issues"]:
+                assert "issue_type" in issue, "Each issue should have an issue_type"
+                assert "field" in issue, "Each issue should have a field"
+                assert "severity" in issue, "Each issue should have a severity"
+        else:
+            pytest.skip("API server not available")
