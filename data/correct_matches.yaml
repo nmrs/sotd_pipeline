@@ -694,6 +694,14 @@ brush:
     - zenith r/wetshaving moar boar
     - zenith r/wetshaving sub exclusive moar boar
     - zentih - moar boar r/wetshaving
+handle:
+  Jayaruh:
+    '#441':
+    - 'Jayaruh #441'
+knot:
+  AP:
+    Shave Co G5C:
+    - AP Shave Co G5C
 razor:
   3D Printed:
     DE:
@@ -2125,3 +2133,7 @@ razor:
     - ikon razors - ikon short comb
     X3:
     - ikon x3
+split_brush:
+  'jayaruh #441 w/ ap shave co g5c':
+    handle: 'Jayaruh #441'
+    knot: AP Shave Co G5C
