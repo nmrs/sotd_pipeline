@@ -172,6 +172,14 @@ test-coverage-html:
 	pytest --cov=sotd --cov-report=html tests/
 	@echo "Coverage report available at htmlcov/index.html"
 
+# Python integration tests (requires API server)
+test-integration:
+	PYTHONPATH=. pytest tests/ -m integration
+
+# Python integration directory tests (no API server required)
+test-integration-dir:
+	PYTHONPATH=. pytest tests/integration/
+
 # =============================================================================
 # REACT TEST VARIATIONS (WITH SERVER MANAGEMENT)
 # =============================================================================
