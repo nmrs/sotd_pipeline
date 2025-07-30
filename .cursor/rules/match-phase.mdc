@@ -1,0 +1,359 @@
+---
+globs: sotd/match/*.py,sotd/match/**/*.py,tests/match/**/*.py,tests/match/*.py,data/correct_matches.yaml,data/*.yaml
+alwaysApply: false
+---
+# Match Phase Rules
+
+## Field Usage Standards
+
+### **MANDATORY**: Always Use Normalized Field for Matching
+- **Always use the `normalized` field for matching operations, not the `original` field**
+- **The `original` field should be preserved for reference but not used in matching logic**
+- **This applies to all matchers: blade, brush, razor, soap, etc.**
+- **Rationale**: Normalized field contains cleaned, standardized text that's optimized for matching
+
+### **MANDATORY**: Case Insensitive Matching
+- **ALL matching operations MUST be case insensitive**
+- **This applies to all matching types: exact, regex, alias, brand fallback**
+- **Use `.lower()` for string comparisons and `re.IGNORECASE` for regex patterns**
+- **Correct matches keys should be stored in lowercase for consistency**
+- **Rationale**: User input varies in case, so matching must be robust to case differences**
+
+```python
+# ✅ CORRECT - Use normalized field for matching
+def match(self, field_data: dict) -> Optional[dict]:
+    normalized_text = field_data.get("normalized", "")
+    # Use normalized_text for all matching operations
+    
+# ❌ WRONG - Using original field for matching
+def match(self, field_data: dict) -> Optional[dict]:
+    original_text = field_data.get("original", "")  # Don't use this for matching
+
+# ✅ CORRECT - Case insensitive matching
+def match(self, field_data: dict) -> Optional[dict]:
+    normalized_text = field_data.get("normalized", "").lower()  # Convert to lowercase
+    # All string comparisons should use lowercase
+    
+# ❌ WRONG - Case sensitive matching
+def match(self, field_data: dict) -> Optional[dict]:
+    normalized_text = field_data.get("normalized", "")  # Don't use case-sensitive matching
+```
+
+## Match Priority and Semantics
+
+### Match Type Hierarchy
+1. **`exact`**: From `data/correct_matches.yaml` (manually confirmed)
+2. **`regex`**: From regex pattern in YAML catalog
+3. **`alias`**: From alias patterns in catalog
+4. **`brand`**: From brand-only fallback
+5. **`None`**: Unmatched
+
+### Correct Matches Priority
+- **ALWAYS check `data/correct_matches.yaml` first** before attempting any other matching
+- If found in correct_matches.yaml, return with `match_type: exact` and preserve all catalog fields
+- Only proceed to regex/fallback matching if not found in correct_matches.yaml
+- **Use case-insensitive lookup**: Convert normalized text to lowercase before checking correct_matches
+
+```python
+def match(self, field_data: dict) -> Optional[dict]:
+    normalized_text = field_data.get("normalized", "").lower()  # Convert to lowercase for case-insensitive matching
+    
+    # 1. Check correct_matches.yaml first (case-insensitive)
+    exact_match = self.correct_matches.get(normalized_text)
+    if exact_match:
+        return {
+            "matched": exact_match,
+            "match_type": "exact",
+            "pattern": "correct_matches.yaml"
+        }
+    
+    # 2. Proceed with regex/fallback matching only if not found
+    # ... rest of matching logic (all should be case-insensitive)
+```
+
+## Catalog Data Preservation
+
+### **MANDATORY**: Preserve Complete Catalog Specifications
+- **All matchers must preserve complete catalog specifications in match output**
+- **Don't just preserve basic brand/model fields**
+- **Include all relevant specifications: grind, width, point, fiber, knot_size_mm, etc.**
+
+```python
+# ✅ CORRECT - Preserve all catalog fields
+{
+    "matched": {
+        "brand": "Koraat",
+        "model": "Moarteen", 
+        "grind": "full_hollow",      # Preserve razor specifications
+        "width": "15/16",           # Preserve razor specifications
+        "point": "round",           # Preserve razor specifications
+        "fiber": "badger",          # Preserve brush specifications
+        "knot_size_mm": 26.0,       # Preserve brush specifications
+        "handle_maker": "Elite"     # Preserve brush specifications
+    }
+}
+
+# ❌ WRONG - Only basic fields
+{
+    "matched": {
+        "brand": "Koraat",
+        "model": "Moarteen"
+        # Missing grind, width, point specifications
+    }
+}
+```
+
+## Return Structure Standards
+
+### Consistent Match Output Format
+All matchers must return consistent structure:
+
+```python
+{
+    "original": str,           # Preserve original input
+    "normalized": str,         # Preserve normalized input  
+    "matched": {
+        # Product-specific fields based on catalog structure
+        "brand": str | None,
+        "model": str | None,
+        # ... other catalog fields
+    } | None,
+    "match_type": "exact|regex|alias|brand|None",
+    "pattern": str | None      # Pattern used for matching
+}
+```
+
+### Brush-Specific Return Structure
+Brush matchers have additional requirements:
+
+```python
+{
+    "original": str,
+    "normalized": str,
+    "matched": {
+        "brand": str | None,
+        "model": str | None,
+        "fiber": str | None,
+        "knot_size_mm": float | None,
+        "handle_maker": str | None,
+        "_matched_by_strategy": str,
+        "_pattern_used": str,
+        "_matched_from": str,  # "knot_part", "handle_part", "full_string"
+        "_original_knot_text": str | None,
+        "_original_handle_text": str | None,
+        "fiber_strategy": "user_input|yaml|default",
+        "fiber_conflict": str | None
+    } | None,
+    "match_type": str | None,
+    "pattern": str | None
+}
+```
+
+## Strategy Pattern Implementation
+
+### Base Matcher Requirements
+All matchers must inherit from `BaseMatcher`:
+
+```python
+from sotd.match.base_matcher import BaseMatcher
+
+class ProductMatcher(BaseMatcher):
+    def __init__(self, catalog_data: dict, correct_matches: dict):
+        super().__init__(catalog_data, correct_matches)
+        
+    def match(self, field_data: dict) -> Optional[dict]:
+        normalized_text = field_data.get("normalized", "")
+        # Implementation using normalized_text
+```
+
+### Strategy Execution Order
+For complex matching (like brushes), follow strategy priority:
+
+```python
+def match(self, field_data: dict) -> Optional[dict]:
+    normalized_text = field_data.get("normalized", "")
+    
+    for strategy in self.strategies:
+        # Let implementation errors bubble up - fail fast for debugging
+        result = strategy.match(normalized_text)
+        if result and self._is_valid_match(result):
+            return self._process_result(result, strategy)
+    
+    return None
+```
+
+## Error Handling
+
+### Fail Fast for Development
+- **Use minimal try/except for internal/logic errors during development**
+- **Let implementation errors bubble up with clear stack traces**
+- **Only catch specific external failures (file I/O, network)**
+
+```python
+# ✅ CORRECT - Fail fast for debugging
+for strategy in self.strategies:
+    # Let implementation errors bubble up
+    result = strategy.match(normalized_text)
+    if result:
+        return result
+
+# ❌ WRONG - Masking implementation errors
+for strategy in self.strategies:
+    try:
+        result = strategy.match(normalized_text)
+        if result:
+            return result
+    except Exception as e:
+        # Don't mask implementation errors during development
+        continue
+```
+
+## Case Insensitivity Implementation
+
+### **MANDATORY**: Case Insensitive Matching Patterns
+All matching implementations must follow these patterns:
+
+```python
+# ✅ CORRECT - String comparison (case-insensitive)
+def match_exact(self, text: str) -> Optional[dict]:
+    normalized_lower = text.lower()
+    return self.catalog.get(normalized_lower)
+
+# ✅ CORRECT - Regex matching (case-insensitive)
+def match_regex(self, text: str) -> Optional[dict]:
+    for pattern_info in self.compiled_patterns:
+        if pattern_info["regex"].search(text):  # re.IGNORECASE already applied
+            return pattern_info["match_data"]
+
+# ✅ CORRECT - Brand fallback (case-insensitive)
+def match_brand(self, text: str) -> Optional[dict]:
+    text_lower = text.lower()
+    for brand, brand_data in self.brands.items():
+        if brand.lower() in text_lower:
+            return brand_data
+
+# ❌ WRONG - Case sensitive matching
+def match_exact(self, text: str) -> Optional[dict]:
+    return self.catalog.get(text)  # Will fail with different case
+```
+
+### Case Insensitive Strategy Implementation
+For strategy-based matchers (like brushes), ensure all strategies are case-insensitive:
+
+```python
+class CaseInsensitiveStrategy:
+    def match(self, text: str) -> Optional[dict]:
+        text_lower = text.lower()
+        # All internal matching logic uses text_lower
+        for pattern in self.patterns:
+            if pattern.lower() in text_lower:
+                return self.get_match_data(pattern)
+        return None
+```
+
+## Performance Considerations
+
+### Pattern Compilation
+- **Compile regex patterns once during initialization**
+- **Reuse compiled patterns for all matching operations**
+- **Fail fast on invalid patterns during setup**
+- **ALWAYS use `re.IGNORECASE` flag for case-insensitive matching**
+
+```python
+def __init__(self, catalog_data: dict, correct_matches: dict):
+    self.catalog_data = catalog_data
+    self.correct_matches = correct_matches
+    self.compiled_patterns = self._compile_patterns(catalog_data.get("patterns", []))
+    
+def _compile_patterns(self, patterns: list[str]) -> list[dict]:
+    compiled = []
+    for pattern in sorted(patterns, key=len, reverse=True):
+        try:
+            compiled.append({
+                "pattern": pattern,
+                "regex": re.compile(pattern, re.IGNORECASE)
+            })
+        except re.error as e:
+            # Fail fast on invalid patterns during initialization
+            raise ValueError(f"Invalid regex pattern '{pattern}': {e}")
+    return compiled
+```
+
+## Testing Requirements
+
+### Test Data Structure
+All match phase tests must use proper field structure:
+
+```python
+def test_matcher():
+    field_data = {
+        "original": "Koraat Moarteen",
+        "normalized": "koraat moarteen"  # Use normalized for matching
+    }
+    
+    result = matcher.match(field_data)
+    assert result["match_type"] == "exact"
+    assert result["matched"]["brand"] == "Koraat"
+```
+
+### Edge Case Testing
+Always test edge cases:
+- Empty normalized field
+- Missing normalized field
+- **Case sensitivity testing (MUST be case-insensitive)**
+  - Test with mixed case input: "Koraat Moarteen", "KORAAT MOARTEEN", "koraat moarteen"
+  - Test with different case patterns in catalogs
+  - Verify all matching types work regardless of case
+- Special characters and whitespace
+- Unmatched scenarios
+
+## Integration with Other Phases
+
+### Enrich Phase Compatibility
+- **Match phase output must be compatible with enrich phase input**
+- **Preserve all fields that enrich phase expects**
+- **Maintain field structure for downstream processing**
+
+### Data Flow Validation
+- **Match phase reads from extract phase output**
+- **Match phase writes to matched data files**
+- **Ensure consistent data format across all phases**
+
+## YAML Catalog Integration
+
+### Catalog Structure Requirements
+- **All product catalogs must follow consistent structure**
+- **Include patterns, aliases, and specifications**
+- **Maintain backward compatibility for catalog evolution**
+
+### Correct Matches Management
+- **`data/correct_matches.yaml` contains manually verified matches**
+- **Format: `"normalized_text": {catalog_entry}`
+- **ALWAYS use lowercase keys for case-insensitive matching**
+- **All keys in correct_matches.yaml must be lowercase for consistency**
+- **When adding new entries, convert the normalized text to lowercase before using as key**
+
+```yaml
+# data/correct_matches.yaml
+# All keys must be lowercase for case-insensitive matching
+"koraat moarteen": 
+  brand: "Koraat"
+  model: "Moarteen"
+  grind: "full_hollow"
+  width: "15/16"
+  point: "round"
+
+# ✅ CORRECT - Lowercase key
+"feather artist club": 
+  brand: "Feather"
+  model: "Artist Club"
+
+# ❌ WRONG - Mixed case key (will cause case-sensitive matching issues)
+"Feather Artist Club": 
+  brand: "Feather"
+  model: "Artist Club"
+```
+description: Match phase rules and patterns for SOTD pipeline
+globs: sotd/match/**/*.py,tests/match/**/*.py,data/correct_matches.yaml,data/*.yaml
+alwaysApply: true
+---
