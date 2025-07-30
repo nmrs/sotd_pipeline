@@ -262,11 +262,13 @@ class CorrectMatchesManager:
                         if "split_brush" not in field_data:
                             field_data["split_brush"] = {}
 
-                        # Save split brush mapping - store in lowercase for consistency with lookup strings
+                        # Save split brush mapping - store in lowercase for consistency with lookup
                         normalized_original = original.lower().strip()
                         field_data["split_brush"][normalized_original] = {
-                            "handle": handle_component.lower().strip() if handle_component else "",
-                            "knot": knot_component.lower().strip() if knot_component else "",
+                            "handle": (
+                                handle_component.lower().strip() if handle_component else ""
+                            ),
+                            "knot": (knot_component.lower().strip() if knot_component else ""),
                         }
 
                         # Save handle component to handle section
@@ -539,16 +541,17 @@ class CorrectMatchesManager:
         handle = matched.get("handle")
         if handle:
             if isinstance(handle, dict):
-                # Use source_text if available (actual split text), otherwise construct from brand/model
-                source_text = handle.get("source_text")
-                if source_text:
-                    handle_component = source_text
-                else:
-                    handle_brand = handle.get("brand", "")
-                    handle_model = handle.get("model", "")
-                    handle_component = f"{handle_brand} {handle_model}".strip()
-                # Always preserve the brand name for proper casing
+                # Use canonical brand/model from matcher, not source_text
                 handle_brand = handle.get("brand", "")
+                handle_model = handle.get("model", "")
+                # Construct canonical component from brand/model
+                if handle_brand and handle_model:
+                    handle_component = f"{handle_brand} {handle_model}".strip()
+                elif handle_brand:
+                    handle_component = handle_brand
+                else:
+                    # Fallback to source_text only if no canonical data available
+                    handle_component = handle.get("source_text", "")
             elif isinstance(handle, str):
                 handle_component = handle
 
@@ -556,16 +559,17 @@ class CorrectMatchesManager:
         knot = matched.get("knot")
         if knot:
             if isinstance(knot, dict):
-                # Use source_text if available (actual split text), otherwise construct from brand/model
-                source_text = knot.get("source_text")
-                if source_text:
-                    knot_component = source_text
-                else:
-                    knot_brand = knot.get("brand", "")
-                    knot_model = knot.get("model", "")
-                    knot_component = f"{knot_brand} {knot_model}".strip()
-                # Always preserve the brand name for proper casing
+                # Use canonical brand/model from matcher, not source_text
                 knot_brand = knot.get("brand", "")
+                knot_model = knot.get("model", "")
+                # Construct canonical component from brand/model
+                if knot_brand and knot_model:
+                    knot_component = f"{knot_brand} {knot_model}".strip()
+                elif knot_brand:
+                    knot_component = knot_brand
+                else:
+                    # Fallback to source_text only if no canonical data available
+                    knot_component = knot.get("source_text", "")
             elif isinstance(knot, str):
                 knot_component = knot
 
