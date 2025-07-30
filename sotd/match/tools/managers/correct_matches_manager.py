@@ -492,9 +492,16 @@ class CorrectMatchesManager:
         handle = matched.get("handle")
         if handle:
             if isinstance(handle, dict):
-                handle_brand = handle.get("brand", "")
-                handle_model = handle.get("model", "")
-                handle_component = f"{handle_brand} {handle_model}".strip()
+                # Use source_text if available (actual split text), otherwise construct from brand/model
+                source_text = handle.get("source_text")
+                if source_text:
+                    handle_component = source_text
+                else:
+                    handle_brand = handle.get("brand", "")
+                    handle_model = handle.get("model", "")
+                    handle_component = (
+                        f"{handle_brand} {handle_model}".strip()
+                    )
             elif isinstance(handle, str):
                 handle_component = handle
 
@@ -502,11 +509,20 @@ class CorrectMatchesManager:
         knot = matched.get("knot")
         if knot:
             if isinstance(knot, dict):
-                knot_brand = knot.get("brand", "")
-                knot_model = knot.get("model", "")
-                knot_component = f"{knot_brand} {knot_model}".strip()
+                # Use source_text if available (actual split text), otherwise construct from brand/model
+                source_text = knot.get("source_text")
+                if source_text:
+                    knot_component = source_text
+                else:
+                    knot_brand = knot.get("brand", "")
+                    knot_model = knot.get("model", "")
+                    knot_component = (
+                        f"{knot_brand} {knot_model}".strip()
+                    )
             elif isinstance(knot, str):
                 knot_component = knot
 
-        # Convert to lowercase for consistency
-        return handle_component.lower().strip(), knot_component.lower().strip()
+        # Convert to lowercase for consistency, handle None values
+        handle_result = handle_component.lower().strip() if handle_component else ""
+        knot_result = knot_component.lower().strip() if knot_component else ""
+        return handle_result, knot_result

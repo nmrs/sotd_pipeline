@@ -592,7 +592,10 @@ brush:
     - dreadnought avenger
   EldrormR Industries/Muninn Woodworks:
     BFM:
-    - '>![redacted]!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn woodworks handle $frankenbrush'
+    - '>![redacted]!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn
+      woodworks handle $frankenbrush'
+    - '>!redacted!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn
+      woodworks handle'
     - muninn woodworks "bfm" 50mm motherlode
     - muninn woodworks bfm
   Omega:
@@ -702,6 +705,20 @@ brush:
     - zenith r/wetshaving moar boar
     - zenith r/wetshaving sub exclusive moar boar
     - zentih - moar boar r/wetshaving
+handle:
+  dogwood:
+    handcrafts none:
+    - dogwood handcrafts none
+  jayaruh:
+    '#441':
+    - 'jayaruh #441'
+knot:
+  ap:
+    shave co g5c:
+    - ap shave co g5c
+  declaration:
+    grooming b12:
+    - declaration grooming b12
 razor:
   3D Printed:
     DE:
@@ -2133,3 +2150,10 @@ razor:
     - ikon razors - ikon short comb
     X3:
     - ikon x3
+split_brush:
+  3dogwood w/ dg b12 butterscotch 2 band badger:
+    handle: dogwood handcrafts none
+    knot: declaration grooming b12
+  'jayaruh #441 w/ ap shave co g5c':
+    handle: 'jayaruh #441'
+    knot: ap shave co g5c
