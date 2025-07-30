@@ -286,6 +286,89 @@ class BrushMatcher:
         """
         return value
 
+    def _process_split_brush_correct_match(
+        self, value: str, correct_match: Dict[str, Any]
+    ) -> "MatchResult":
+        """
+        Process correct match from split_brush section for split brushes.
+        Returns MatchResult structure in the new unified format.
+        """
+        # Get handle and knot components from the split brush mapping
+        handle_component = correct_match.get("handle_component")
+        knot_component = correct_match.get("knot_component")
+
+        # Look up handle component in handle section
+        handle_match = None
+        if handle_component:
+            handle_correct_match = self.correct_matches_checker.check(handle_component)
+            if handle_correct_match:
+                handle_match = {
+                    "handle_maker": handle_correct_match.handle_maker,
+                    "handle_model": handle_correct_match.handle_model,
+                    "_matched_by": "CorrectMatches",
+                    "_pattern": "correct_matches_handle",
+                }
+            else:
+                # Fall back to handle matcher
+                handle_match = self.handle_matcher.match_handle_maker(handle_component)
+
+        # Look up knot component in knot section
+        knot_match = None
+        if knot_component:
+            knot_correct_match = self.correct_matches_checker.check(knot_component)
+            if knot_correct_match:
+                # Extract knot info safely
+                knot_info = knot_correct_match.knot_info or {}
+                knot_match = {
+                    "brand": knot_info.get("brand"),
+                    "model": knot_info.get("model"),
+                    "fiber": knot_info.get("fiber"),
+                    "knot_size_mm": knot_info.get("knot_size_mm"),
+                    "_matched_by": "CorrectMatches",
+                    "_pattern": "correct_matches_knot",
+                }
+            else:
+                # Fall back to knot matcher strategies
+                for strategy in self.strategies:
+                    try:
+                        result = strategy.match(knot_component)
+                        if result and hasattr(result, "matched") and result.matched:
+                            knot_match = result.matched
+                            break
+                    except Exception:
+                        continue
+
+        # Create unified format with nested sections
+        matched = {
+            "brand": None,  # Split brushes have no top-level brand
+            "model": None,  # Split brushes have no top-level model
+            "handle": {
+                "brand": handle_match.get("handle_maker") if handle_match else None,
+                "model": handle_match.get("handle_model") if handle_match else None,
+                "source_text": handle_component,
+                "_matched_by": "CorrectMatches",
+                "_pattern": "correct_matches_split_brush",
+            },
+            "knot": {
+                "brand": knot_match.get("brand") if knot_match else None,
+                "model": knot_match.get("model") if knot_match else None,
+                "fiber": knot_match.get("fiber") if knot_match else None,
+                "knot_size_mm": knot_match.get("knot_size_mm") if knot_match else None,
+                "source_text": knot_component,
+                "_matched_by": "CorrectMatches",
+                "_pattern": "correct_matches_split_brush",
+            },
+        }
+
+        from sotd.match.types import create_match_result
+
+        return create_match_result(
+            original=value,
+            matched=matched,
+            match_type="exact",
+            pattern="correct_matches_split_brush",
+        )
+
     def match(self, value: str) -> Optional["MatchResult"]:
         """
         Match a brush string against all available strategies.
@@ -310,9 +393,13 @@ class BrushMatcher:
                     "handle_maker": getattr(correct_match, "handle_maker", None),
                     "handle_model": getattr(correct_match, "handle_model", None),
                     "knot_info": getattr(correct_match, "knot_info", {}),
+                    "handle_component": getattr(correct_match, "handle_component", None),
+                    "knot_component": getattr(correct_match, "knot_component", None),
                 }
 
-            if correct_match_dict.get("match_type") == "handle_knot_section":
+            if correct_match_dict.get("match_type") == "split_brush_section":
+                return self._process_split_brush_correct_match(value, correct_match_dict)
+            elif correct_match_dict.get("match_type") == "handle_knot_section":
                 return self._process_handle_knot_correct_match(value, correct_match_dict)
             else:
                 return self._process_regular_correct_match(value, correct_match_dict)

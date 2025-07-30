@@ -43,7 +43,8 @@ class CorrectMatchesChecker:
 
         Returns:
             CorrectMatchData if found, None otherwise.
-            Supports both brush section (simple brushes) and handle/knot sections (combo brushes).
+            Supports both brush section (simple brushes), handle/knot sections (combo brushes),
+            and split_brush section (split brush mappings).
         """
         if not value or not self.correct_matches:
             return None
@@ -54,15 +55,52 @@ class CorrectMatchesChecker:
         if not normalized_value:
             return None
 
-        # Step 1: Check handle/knot sections first (for combo brush/handle brushes)
+        # Step 1: Check split_brush section first (highest priority for split brushes)
+        split_brush_match = self._check_split_brush_correct_matches(value, normalized_value)
+        if split_brush_match:
+            return split_brush_match
+
+        # Step 2: Check handle/knot sections (for combo brush/handle brushes)
         handle_knot_match = self._check_handle_knot_correct_matches(value, normalized_value)
         if handle_knot_match:
             return handle_knot_match
 
-        # Step 2: Check brush section (for simple brushes)
+        # Step 3: Check brush section (for simple brushes)
         brush_match = self._check_brush_correct_matches(value, normalized_value)
         if brush_match:
             return brush_match
+
+        return None
+
+    def _check_split_brush_correct_matches(
+        self, value: str, normalized_value: str
+    ) -> Optional[CorrectMatchData]:
+        """
+        Check if value matches any split_brush section correct matches entry.
+
+        Args:
+            value: Original input string
+            normalized_value: Normalized input string for comparison
+
+        Returns:
+            CorrectMatchData if found, None otherwise.
+        """
+        split_brush_section = self.correct_matches.get("split_brush", {})
+
+        # Check if normalized value matches any split brush entry
+        for split_brush_string, components in split_brush_section.items():
+            if not isinstance(components, dict):
+                continue
+
+            # Normalize the split brush string for comparison
+            normalized_split_brush = normalize_for_matching(split_brush_string, field="brush")
+            if normalized_split_brush == normalized_value:
+                # Return match data with split brush fields
+                return CorrectMatchData(
+                    handle_component=components.get("handle"),
+                    knot_component=components.get("knot"),
+                    match_type="split_brush_section",
+                )
 
         return None
 

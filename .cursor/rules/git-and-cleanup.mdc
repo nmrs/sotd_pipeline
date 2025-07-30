@@ -1,4 +1,7 @@
-git
+---
+description: Rules for git operations, commit organization, file management, and cleanup procedures
+alwaysApply: false
+---
 # Git and Cleanup Rules
 
 ## **CRITICAL**: File Naming with Dates

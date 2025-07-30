@@ -103,7 +103,11 @@ class CorrectMatchData:
     handle_maker: Optional[str] = None
     handle_model: Optional[str] = None
     knot_info: Optional[Dict[str, Any]] = None
-    match_type: str = "brush_section"  # "brush_section" or "handle_knot_section"
+    # "brush_section", "handle_knot_section", or "split_brush_section"
+    match_type: str = "brush_section"
+    # Split brush fields
+    handle_component: Optional[str] = None
+    knot_component: Optional[str] = None
 
 
 @dataclass
