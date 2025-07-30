@@ -179,6 +179,10 @@ export interface MismatchItem {
   examples: string[];
   comment_ids: string[];
   is_confirmed?: boolean;
+  // Split brush fields
+  is_split_brush?: boolean;
+  handle_component?: string;
+  knot_component?: string;
 }
 
 export interface MismatchAnalysisResult {

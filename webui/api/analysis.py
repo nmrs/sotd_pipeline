@@ -126,6 +126,10 @@ class MismatchItem(BaseModel):
     examples: List[str]
     comment_ids: List[str]
     is_confirmed: Optional[bool] = None
+    # Split brush fields
+    is_split_brush: Optional[bool] = None
+    handle_component: Optional[str] = None
+    knot_component: Optional[str] = None
 
 
 class MismatchAnalysisResponse(BaseModel):
@@ -708,6 +712,10 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     ),
                     comment_ids=[str(record_id)] if record_id else [],
                     is_confirmed=is_confirmed,
+                    # Split brush fields from analyzer results
+                    is_split_brush=item.get("is_split_brush"),
+                    handle_component=item.get("handle_component"),
+                    knot_component=item.get("knot_component"),
                 )
 
                 all_items.append(api_item)
@@ -743,7 +751,8 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
         logger.info(
             f"Mismatch analysis: total_records={len(records)}, "
             f"returned={len(all_items)}, "
-            f"total_matches={total_matches}, total_mismatches={total_mismatches}"
+            f"total_matches={total_matches}, "
+            f"total_mismatches={total_mismatches}"
         )
 
         return MismatchAnalysisResponse(
