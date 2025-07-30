@@ -42,7 +42,7 @@ Proceed through the remaining tasks in the current step one at a time. After com
 **Goal**: Produce a detailed, unambiguous specification that a developer can confidently implement without requiring further clarification.
 ```
 Your task:
-- Ask one clear, focused question at a time
+- Ask ONE clear, focused question at a time
 - Build each question based on my previous answers
 - Identify edge cases, assumptions, and missing context
 - Ensure we cover business logic, user experience, technical constraints, and developer handoff requirements
@@ -54,6 +54,8 @@ IMPORTANT: Stay focused on the current question/topic until it is fully resolved
 - Complete the current discussion thoroughly before proceeding
 
 Avoid summarizing or skipping ahead. We're working iteratively—step by step—until the specification is complete and implementation-ready.
+
+Remember: Only ONE question at at time (not one question with multiple sub-questions)!
 
 Here’s the idea:
 [INSERT IDEA HERE]
