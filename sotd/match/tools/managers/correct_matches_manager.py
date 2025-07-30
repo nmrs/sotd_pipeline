@@ -356,9 +356,19 @@ class CorrectMatchesManager:
                         ):
                             field_data[field][brand][model].append(normalized_original)
                 elif field == "handle":
-                    # Handle handle field with new brand/model hierarchy structure
-                    handle_maker = match_data["matched"]["handle_maker"]
-                    handle_model = match_data["matched"]["handle_model"]
+                    # Handle handle field - support both old and new structures
+                    if (
+                        "handle_maker" in match_data["matched"]
+                        and "handle_model" in match_data["matched"]
+                    ):
+                        # New structure
+                        handle_maker = match_data["matched"]["handle_maker"]
+                        handle_model = match_data["matched"]["handle_model"]
+                    else:
+                        # Old structure - extract from brand/model fields
+                        handle_maker = match_data["matched"].get("brand", "")
+                        handle_model = match_data["matched"].get("model", "")
+
                     if handle_maker not in field_data[field]:
                         field_data[field][handle_maker] = {}
                     if handle_model not in field_data[field][handle_maker]:
@@ -490,11 +500,16 @@ class CorrectMatchesManager:
             maker = matched.get("maker", "")
             scent = matched.get("scent", "")
             return f"{maker} {scent}".strip()
+        elif field == "handle":
+            # Handle field uses handle_maker and handle_model
+            handle_maker = matched.get("handle_maker", "")
+            handle_model = matched.get("handle_model", "")
+            return f"{handle_maker} {handle_model}".strip()
         elif field == "brush":
             # Check if this is a simple brush (has top-level brand/model)
             brand = matched.get("brand")
             model = matched.get("model")
-            
+
             if brand and model:
                 # Simple brush structure - use top-level brand/model
                 return f"{brand} {model}".strip()
