@@ -153,10 +153,8 @@ Before considering any plan complete, verify:
 - **No Backward Compatibility Required**: Since we own the entire pipeline and can rerun it at any point, backward compatibility is not a concern. Focus on correct data representation and optimal functionality.
 
 ## Brush Matching Specifics
-- **Handle Maker**: Extract from split input (e.g., "Elite handle w/ Declaration knot")
-- **Strategy Priority**: Known > Declaration > Chisel&Hound > Omega/Semogue > Zenith > Other
-- **Fiber/Knot Detection**: Distinguish user input vs catalog defaults vs YAML data
-- **No knot_maker field**: Removed as redundant with brand field
+- **See `.cursor/rules/match-phase.mdc` for detailed brush matching implementation and strategy patterns**
+- **Key principles**: Use strategy pattern, handle/knot splitting, preserve complete specifications
 
 ## Common Patterns to Follow
 - Use `Path` objects for file system operations
@@ -179,17 +177,9 @@ Before considering any plan complete, verify:
 - Do not spend excessive time making pandas code perfectly lint-free if it would harm readability or maintainability.
 - Prioritize code clarity and correctness over strict linter compliance for complex pandas operations.
 
-## Match Phase Matching Priority and match_type Semantics
-- The match phase must check `data/correct_matches.yaml` for confirmed matches before attempting regex or fallback matching.
-- If a match is found in correct_matches.yaml, it is returned with `match_type: exact` and all catalog fields are preserved.
-- If not found, regex patterns are used (`match_type: regex`).
-- Fallbacks (brand, alias, etc.) are used only if both fail.
-- The `match_type` field in match output indicates the source of the match:
-    - `exact`: From correct_matches.yaml (manually confirmed)
-    - `regex`: From regex pattern in YAML catalog
-    - `alias`, `brand`, etc.: Fallback strategies
-    - `None`: Unmatched
-- All catalog specifications (e.g., grind, width, point) must be preserved in the match output for both correct and regex matches.
+## Match Phase Rules
+- **See `.cursor/rules/match-phase.mdc` for comprehensive match phase rules and implementation details**
+- **Key principles**: Check correct_matches.yaml first, preserve complete catalog specifications, use normalized field for matching
 
 ## File Naming and Date Formatting (MANDATORY)
 - **Date Format**: Use ISO 8601 format (YYYY-MM-DD) for all date suffixes in filenames
