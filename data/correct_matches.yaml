@@ -707,13 +707,10 @@ brush:
     - zentih - moar boar r/wetshaving
 handle:
   Dogwood Handcrafts:
-    3Dogwood:
+    Unspecified:
     - 3dogwood
   Jayaruh:
-    '#441':
-    - 'jayaruh #441'
-  jayaruh:
-    '#441':
+    Unspecified:
     - 'jayaruh #441'
 knot:
   AP Shave Co:

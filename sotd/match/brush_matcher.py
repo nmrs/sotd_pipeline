@@ -377,7 +377,41 @@ class BrushMatcher:
         if not value:
             return None
 
-            # Check correct matches first
+        # Step 1: Check brush section in correct_matches.yaml (fastest)
+        normalized_text = value.lower().strip()
+        brush_correct_matches = self.correct_matches_checker.correct_matches.get("brush", {})
+
+        # Check if this is a known brush (exact match)
+        for brand, brand_data in brush_correct_matches.items():
+            for model, patterns in brand_data.items():
+                if normalized_text in patterns:
+                    return self._process_regular_correct_match(
+                        value,
+                        {
+                            "match_type": "brush_section",
+                            "brand": brand,
+                            "model": model,
+                            "matched": {"brand": brand, "model": model},
+                        },
+                    )
+
+        # Step 2: Check split_brush section in correct_matches.yaml (fast lookup)
+        split_brush_correct_matches = self.correct_matches_checker.correct_matches.get(
+            "split_brush", {}
+        )
+        if normalized_text in split_brush_correct_matches:
+            split_data = split_brush_correct_matches[normalized_text]
+            return self._process_split_brush_correct_match(
+                value,
+                {
+                    "match_type": "split_brush_section",
+                    "handle": split_data.get("handle", ""),
+                    "knot": split_data.get("knot", ""),
+                },
+            )
+
+        # Step 3: Only do expensive operations if both checks fail
+        # Check correct matches for other sections
         correct_match = self.correct_matches_checker.check(value)
         if correct_match:
             # Convert CorrectMatchData to dict if needed
@@ -404,18 +438,19 @@ class BrushMatcher:
             else:
                 return self._process_regular_correct_match(value, correct_match_dict)
 
-        # Step 1: Check if this brush should not be split (human-curated decision)
+        # Step 4: Try brush splitting and dual component matching
+        # Check if this brush should not be split (human-curated decision)
         if self.brush_splits_loader.should_not_split(value):
             # Treat as complete brush, skip splitting
             handle_text, knot_text, delimiter_type = None, None, None
         else:
-            # Step 2: Check human-curated brush splits first (highest priority)
+            # Check human-curated brush splits first (highest priority)
             curated_split = self.brush_splits_loader.get_handle_and_knot(value)
             if curated_split:
                 handle_text, knot_text = curated_split
                 delimiter_type = "curated_split"
             else:
-                # Step 3: Try automated splitting (fallback)
+                # Try automated splitting (fallback)
                 handle_text, knot_text, delimiter_type = self.brush_splitter.split_handle_and_knot(
                     value
                 )
@@ -746,7 +781,7 @@ class BrushMatcher:
                 print(f"Strategy {strategy.__class__.__name__} failed: {e}")
                 continue
 
-        # Step 3: Try dual component matching (both handle and knot)
+        # Step 5: Try dual component matching (both handle and knot)
         dual_result = self._try_dual_component_match(value)
         if dual_result is not None:
             handle_match, knot_match = dual_result
@@ -1422,7 +1457,7 @@ class BrushMatcher:
             return None
 
         try:
-            # Try handle matching on the entire string
+            # Try handle matching on the entire string first (cheaper than knot matching)
             # Check correct matches first, then fall back to handle matcher
             handle_correct_match = self.correct_matches_checker.check(value)
             if handle_correct_match and handle_correct_match.handle_maker:

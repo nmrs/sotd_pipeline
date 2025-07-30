@@ -25,56 +25,36 @@ class HandleMatcher:
         """Compile handle patterns from the handles catalog in priority order."""
         patterns = []
 
-        # Priority 1: artisan_handles
-        artisan_handles = self.handles_data.get("artisan_handles", {})
-        for handle_maker, data in artisan_handles.items():
-            for pattern in data.get("patterns", []):
-                try:
-                    patterns.append(
-                        {
-                            "maker": handle_maker,
-                            "pattern": pattern,
-                            "regex": re.compile(pattern, re.IGNORECASE),
-                            "section": "artisan_handles",
-                            "priority": 1,
-                        }
-                    )
-                except re.error:
+        def _process_section(section_data: dict, section_name: str, priority: int):
+            """Process a section of handle data efficiently."""
+            for handle_maker, data in section_data.items():
+                if not isinstance(data, dict):
                     continue
 
-        # Priority 2: manufacturer_handles
-        manufacturer_handles = self.handles_data.get("manufacturer_handles", {})
-        for handle_maker, data in manufacturer_handles.items():
-            for pattern in data.get("patterns", []):
-                try:
-                    patterns.append(
-                        {
-                            "maker": handle_maker,
-                            "pattern": pattern,
-                            "regex": re.compile(pattern, re.IGNORECASE),
-                            "section": "manufacturer_handles",
-                            "priority": 2,
-                        }
-                    )
-                except re.error:
-                    continue
+                # New structure: brand -> model -> patterns
+                for model_name, model_data in data.items():
+                    if isinstance(model_data, dict) and "patterns" in model_data:
+                        for pattern in model_data["patterns"]:
+                            try:
+                                patterns.append(
+                                    {
+                                        "maker": handle_maker,
+                                        "model": model_name,
+                                        "pattern": pattern,
+                                        "regex": re.compile(pattern, re.IGNORECASE),
+                                        "section": section_name,
+                                        "priority": priority,
+                                    }
+                                )
+                            except re.error:
+                                continue
 
-        # Priority 3: other_handles
-        other_handles = self.handles_data.get("other_handles", {})
-        for handle_maker, data in other_handles.items():
-            for pattern in data.get("patterns", []):
-                try:
-                    patterns.append(
-                        {
-                            "maker": handle_maker,
-                            "pattern": pattern,
-                            "regex": re.compile(pattern, re.IGNORECASE),
-                            "section": "other_handles",
-                            "priority": 3,
-                        }
-                    )
-                except re.error:
-                    continue
+        # Process all sections
+        _process_section(self.handles_data.get("artisan_handles", {}), "artisan_handles", 1)
+        _process_section(
+            self.handles_data.get("manufacturer_handles", {}), "manufacturer_handles", 2
+        )
+        _process_section(self.handles_data.get("other_handles", {}), "other_handles", 3)
 
         # Sort by priority (lower = higher), then by pattern length (longer = more specific)
         patterns.sort(key=lambda x: (x["priority"], -len(x["pattern"])))
@@ -83,19 +63,21 @@ class HandleMatcher:
     def match_handle_maker(self, text: str) -> Optional[dict]:
         """
         Match handle maker from text using the handle patterns.
-        Returns dict with maker and metadata or None if no match.
+        Returns dict with maker, model, and metadata or None if no match.
         """
         if not text:
             return None
 
         for pattern_info in self.handle_patterns:
             if pattern_info["regex"].search(text):
-                return {
+                result = {
                     "handle_maker": pattern_info["maker"],
+                    "handle_model": pattern_info["model"],
                     "_matched_by_section": pattern_info["section"],
                     "_pattern_used": pattern_info["pattern"],
                     "_source_text": text,
                 }
+                return result
 
         return None
 
@@ -115,8 +97,9 @@ class HandleMatcher:
 
     def resolve_handle_maker(self, updated: dict, value: str) -> None:
         """
-        Resolve and set handle_maker field in the match result.
-        This method handles the logic for determining the handle maker from the input text.
+        Resolve and set handle_maker and handle_model fields in the match result.
+        This method handles the logic for determining the handle maker and model
+        from the input text.
         """
         # If handle_maker is already set, don't override it
         if updated.get("handle_maker"):
@@ -126,6 +109,7 @@ class HandleMatcher:
         handle_result = self.match_handle_maker(value)
         if handle_result:
             updated["handle_maker"] = handle_result["handle_maker"]
+            updated["handle_model"] = handle_result["handle_model"]
             # Preserve metadata if not already present
             if "_matched_by_section" not in updated:
                 updated["_matched_by_section"] = handle_result["_matched_by_section"]
@@ -137,6 +121,7 @@ class HandleMatcher:
         brand = updated.get("brand", "").strip()
         if brand and self.is_known_handle_maker(brand):
             updated["handle_maker"] = brand
+            updated["handle_model"] = "Unspecified"
             return
 
         # If still no match, try to extract from model field
@@ -145,6 +130,7 @@ class HandleMatcher:
             model_handle_result = self.match_handle_maker(model)
             if model_handle_result:
                 updated["handle_maker"] = model_handle_result["handle_maker"]
+                updated["handle_model"] = model_handle_result["handle_model"]
                 if "_matched_by_section" not in updated:
                     updated["_matched_by_section"] = model_handle_result["_matched_by_section"]
                 if "_pattern_used" not in updated:

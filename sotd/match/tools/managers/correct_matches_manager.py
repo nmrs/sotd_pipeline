@@ -281,10 +281,10 @@ class CorrectMatchesManager:
                                 # Remove brand name from the beginning of source_text
                                 # Use case-insensitive replacement to handle multi-word brands
                                 handle_model = re.sub(
-                                    f"^{re.escape(handle_brand)}", 
-                                    "", 
-                                    handle_component, 
-                                    flags=re.IGNORECASE
+                                    f"^{re.escape(handle_brand)}",
+                                    "",
+                                    handle_component,
+                                    flags=re.IGNORECASE,
                                 ).strip()
                                 if not handle_model:
                                     handle_model = handle_component  # Fallback to full text
@@ -316,10 +316,10 @@ class CorrectMatchesManager:
                                 # Remove brand name from the beginning of source_text
                                 # Use case-insensitive replacement to handle multi-word brands
                                 knot_model = re.sub(
-                                    f"^{re.escape(knot_brand)}", 
-                                    "", 
-                                    knot_component, 
-                                    flags=re.IGNORECASE
+                                    f"^{re.escape(knot_brand)}",
+                                    "",
+                                    knot_component,
+                                    flags=re.IGNORECASE,
                                 ).strip()
                                 if not knot_model:
                                     knot_model = knot_component  # Fallback to full text
@@ -353,6 +353,21 @@ class CorrectMatchesManager:
                             and normalized_original not in field_data[field][brand][model]
                         ):
                             field_data[field][brand][model].append(normalized_original)
+                elif field == "handle":
+                    # Handle handle field with new brand/model hierarchy structure
+                    handle_maker = match_data["matched"]["handle_maker"]
+                    handle_model = match_data["matched"]["handle_model"]
+                    if handle_maker not in field_data[field]:
+                        field_data[field][handle_maker] = {}
+                    if handle_model not in field_data[field][handle_maker]:
+                        field_data[field][handle_maker][handle_model] = []
+                    # Normalize the original string before storing to prevent bloat
+                    normalized_original = self._normalize_for_matching(original, field)
+                    if (
+                        normalized_original
+                        and normalized_original not in field_data[field][handle_maker][handle_model]
+                    ):
+                        field_data[field][handle_maker][handle_model].append(normalized_original)
                 else:
                     # Handle flat structure for other fields
                     brand = match_data["matched"]["brand"]

@@ -14,6 +14,8 @@ class BrushSplitter:
     def __init__(self, handle_matcher=None, strategies=None):
         self.handle_matcher = handle_matcher
         self.strategies = strategies or []
+        # Pre-load brands with slash to avoid repeated YAML loading during matching
+        self._brands_with_slash = self._get_brands_with_slash()
 
     @classmethod
     def _get_brands_with_slash(cls) -> set:
@@ -743,20 +745,20 @@ class BrushSplitter:
 
         # Check if the text contains a known brand or model name with "/"
         # This prevents splitting on "/" when it's part of a known brand name
-        if self._contains_known_brand_with_slash(text):
+        # Performance optimization: only check if text contains "/"
+        if "/" in text and self._contains_known_brand_with_slash(text):
             return True
 
         return False
 
     def _contains_known_brand_with_slash(self, text: str) -> bool:
         """Check if the text contains a known brand or model name that includes '/'."""
-        brands_with_slash = self._get_brands_with_slash()
-        if not brands_with_slash:
+        if not self._brands_with_slash:
             return False
 
         text_lower = text.lower()
 
-        for brand_name in brands_with_slash:
+        for brand_name in self._brands_with_slash:
             if brand_name in text_lower:
                 return True
 
