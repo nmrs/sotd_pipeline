@@ -94,7 +94,8 @@ class CorrectMatchesChecker:
 
             # Normalize the split brush string for comparison
             normalized_split_brush = normalize_for_matching(split_brush_string, field="brush")
-            if normalized_split_brush == normalized_value:
+            # Use case-insensitive comparison as per match phase rules
+            if normalized_split_brush.lower() == normalized_value.lower():
                 # Return match data with split brush fields
                 return CorrectMatchData(
                     handle_component=components.get("handle"),
