@@ -479,6 +479,14 @@ class MismatchAnalyzer(AnalysisTool):
             if not normalized:
                 continue
 
+            # Detect split brushes for brush field
+            is_split_brush = False
+            handle_component = None
+            knot_component = None
+            if field == "brush" and self._is_split_brush(matched):
+                is_split_brush = True
+                handle_component, knot_component = self._extract_split_brush_components(matched)
+
             # Handle intentionally unmatched items (match_type: "filtered")
             if match_type == "filtered":
                 mismatches["intentionally_unmatched"].append(
@@ -495,6 +503,9 @@ class MismatchAnalyzer(AnalysisTool):
                             else []
                         ),
                         "comment_ids": ([str(record.get("id", ""))] if record.get("id") else []),
+                        "is_split_brush": is_split_brush,
+                        "handle_component": handle_component,
+                        "knot_component": knot_component,
                     }
                 )
                 continue
@@ -537,6 +548,9 @@ class MismatchAnalyzer(AnalysisTool):
                         "match_key": match_key,
                         "reason": "Exact match from correct_matches.yaml",
                         "is_confirmed": True,  # Exact matches are confirmed
+                        "is_split_brush": is_split_brush,
+                        "handle_component": handle_component,
+                        "knot_component": knot_component,
                     }
                 )
                 continue  # Skip further analysis for exact matches
@@ -554,6 +568,9 @@ class MismatchAnalyzer(AnalysisTool):
                         "match_key": match_key,
                         "reason": "High Levenshtein distance",
                         "is_confirmed": is_confirmed,
+                        "is_split_brush": is_split_brush,
+                        "handle_component": handle_component,
+                        "knot_component": knot_component,
                     }
                 )
             else:
@@ -565,6 +582,9 @@ class MismatchAnalyzer(AnalysisTool):
                         "match_key": match_key,
                         "reason": "Good quality match",
                         "is_confirmed": is_confirmed,
+                        "is_split_brush": is_split_brush,
+                        "handle_component": handle_component,
+                        "knot_component": knot_component,
                     }
                 )
 
@@ -581,6 +601,9 @@ class MismatchAnalyzer(AnalysisTool):
                             "field_data": field_data,
                             "match_key": match_key,
                             "reason": f"Matches {len(multiple_patterns)} patterns: {pattern_list}",
+                            "is_split_brush": is_split_brush,
+                            "handle_component": handle_component,
+                            "knot_component": knot_component,
                         }
                     )
 
@@ -605,6 +628,9 @@ class MismatchAnalyzer(AnalysisTool):
                             "field_data": field_data,
                             "match_key": match_key,
                             "reason": reason,
+                            "is_split_brush": is_split_brush,
+                            "handle_component": handle_component,
+                            "knot_component": knot_component,
                         }
                     )
 
@@ -616,6 +642,9 @@ class MismatchAnalyzer(AnalysisTool):
                         "field_data": field_data,
                         "match_key": match_key,
                         "reason": f"Low confidence: {confidence:.2f}",
+                        "is_split_brush": is_split_brush,
+                        "handle_component": handle_component,
+                        "knot_component": knot_component,
                     }
                 )
 
@@ -2097,6 +2126,66 @@ class MismatchAnalyzer(AnalysisTool):
         if self._test_correct_matches_file and self._test_correct_matches_file.exists():
             return self._test_correct_matches_file
         return self._correct_matches_file
+
+    def _is_split_brush(self, field_data: Dict) -> bool:
+        """Check if a brush record is a split brush based on the specification criteria."""
+        if not isinstance(field_data, dict):
+            return False
+
+        # Check for split brush criteria: brand=null AND model=null AND presence of handle/knot sections
+        brand = field_data.get("brand")
+        model = field_data.get("model")
+        handle = field_data.get("handle")
+        knot = field_data.get("knot")
+
+        # Primary conditions: brand=null AND model=null AND presence of handle section AND/OR knot section
+        return brand is None and model is None and (handle is not None or knot is not None)
+
+    def _extract_split_brush_components(
+        self, field_data: Dict
+    ) -> tuple[Optional[str], Optional[str]]:
+        """Extract handle and knot components from split brush data."""
+        if not self._is_split_brush(field_data):
+            return None, None
+
+        handle_component = None
+        knot_component = None
+
+        # Extract handle component
+        handle = field_data.get("handle")
+        if handle:
+            if isinstance(handle, dict):
+                # Use source_text if available, otherwise construct from brand/model
+                if handle.get("source_text"):
+                    handle_component = handle.get("source_text")
+                else:
+                    handle_brand = handle.get("brand", "")
+                    handle_model = handle.get("model", "")
+                    if handle_model:
+                        handle_component = f"{handle_brand} {handle_model}".strip()
+                    else:
+                        handle_component = handle_brand
+            elif isinstance(handle, str):
+                handle_component = handle
+
+        # Extract knot component
+        knot = field_data.get("knot")
+        if knot:
+            if isinstance(knot, dict):
+                # Use source_text if available, otherwise construct from brand/model
+                if knot.get("source_text"):
+                    knot_component = knot.get("source_text")
+                else:
+                    knot_brand = knot.get("brand", "")
+                    knot_model = knot.get("model", "")
+                    if knot_model:
+                        knot_component = f"{knot_brand} {knot_model}".strip()
+                    else:
+                        knot_component = knot_brand
+            elif isinstance(knot, str):
+                knot_component = knot
+
+        return handle_component, knot_component
 
 
 def main(argv: List[str] | None = None) -> None:
