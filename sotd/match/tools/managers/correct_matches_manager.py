@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Correct matches management utilities for mismatch analysis."""
 
+import re
 from pathlib import Path
 from typing import Dict, Set
 
@@ -278,7 +279,13 @@ class CorrectMatchesManager:
                             handle_model = handle_component
                             if handle_brand.lower() in handle_component.lower():
                                 # Remove brand name from the beginning of source_text
-                                handle_model = handle_component[len(handle_brand) :].strip()
+                                # Use case-insensitive replacement to handle multi-word brands
+                                handle_model = re.sub(
+                                    f"^{re.escape(handle_brand)}", 
+                                    "", 
+                                    handle_component, 
+                                    flags=re.IGNORECASE
+                                ).strip()
                                 if not handle_model:
                                     handle_model = handle_component  # Fallback to full text
 
@@ -307,7 +314,13 @@ class CorrectMatchesManager:
                             knot_model = knot_component
                             if knot_brand.lower() in knot_component.lower():
                                 # Remove brand name from the beginning of source_text
-                                knot_model = knot_component[len(knot_brand) :].strip()
+                                # Use case-insensitive replacement to handle multi-word brands
+                                knot_model = re.sub(
+                                    f"^{re.escape(knot_brand)}", 
+                                    "", 
+                                    knot_component, 
+                                    flags=re.IGNORECASE
+                                ).strip()
                                 if not knot_model:
                                     knot_model = knot_component  # Fallback to full text
 
