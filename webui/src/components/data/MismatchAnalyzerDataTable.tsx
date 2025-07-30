@@ -167,15 +167,28 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
       // Special handling for brush field
       if (field === 'brush') {
-        // For brushes, show handle and knot components instead of raw JSON
-        const handleText = formatBrushComponent(matchedObj, 'handle');
-        const knotText = formatBrushComponent(matchedObj, 'knot');
+        // Check if this is a split brush or complete brush
+        if (isBrushSplit(matchedObj)) {
+          // For split brushes, show handle and knot components
+          const handleText = formatBrushComponent(matchedObj, 'handle');
+          const knotText = formatBrushComponent(matchedObj, 'knot');
 
-        if (handleText !== 'N/A' || knotText !== 'N/A') {
+          if (handleText !== 'N/A' || knotText !== 'N/A') {
+            const parts = [];
+            if (handleText !== 'N/A') parts.push(`Handle: ${handleText}`);
+            if (knotText !== 'N/A') parts.push(`Knot: ${knotText}`);
+            return parts.join('\n');
+          }
+        } else {
+          // For complete brushes, show brand and model like other products
           const parts = [];
-          if (handleText !== 'N/A') parts.push(`Handle: ${handleText}`);
-          if (knotText !== 'N/A') parts.push(`Knot: ${knotText}`);
-          return parts.join('\n');
+          if (matchedObj.brand) parts.push(String(matchedObj.brand));
+          if (matchedObj.model) parts.push(String(matchedObj.model));
+          if (matchedObj.fiber) parts.push(String(matchedObj.fiber));
+          if (matchedObj.knot_size_mm) parts.push(`${matchedObj.knot_size_mm}mm`);
+          if (matchedObj.handle_maker) parts.push(String(matchedObj.handle_maker));
+
+          return parts.length > 0 ? parts.join(' - ') : JSON.stringify(matched);
         }
       }
 
@@ -342,8 +355,6 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
     // Add brush-specific columns if field is brush
     if (field === 'brush') {
-      console.log('Adding brush columns for field:', field);
-      console.log('Brush columns will be added for handle and knot data');
 
       // Always show brush pattern column
       baseColumns.push({
@@ -352,13 +363,27 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
           const isSplitBrush = item.is_split_brush === true;
-          const patternText = item.pattern || '';
 
-          return (
-            <div className='text-sm text-gray-500 max-w-xs font-mono relative'>
-              {isSplitBrush ? `🔗 ${truncateText(patternText, 38)}` : truncateText(patternText, 40)}
-            </div>
-          );
+          if (isSplitBrush) {
+            // For split brushes, show the split format
+            const handleText = item.handle_component || 'N/A';
+            const knotText = item.knot_component || 'N/A';
+            return (
+              <div className='text-sm text-gray-500 max-w-xs font-mono relative'>
+                🔗 split<br />
+                handle: {truncateText(handleText, 30)}<br />
+                knot: {truncateText(knotText, 30)}
+              </div>
+            );
+          } else {
+            // For complete brushes, show the pattern
+            const patternText = item.pattern || '';
+            return (
+              <div className='text-sm text-gray-500 max-w-xs font-mono relative'>
+                {truncateText(patternText, 40)}
+              </div>
+            );
+          }
         },
       });
 
@@ -369,8 +394,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           header: 'Handle',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
-            // Use split brush field if available, otherwise fall back to existing logic
-            const handleText = item.handle_component || formatBrushComponent(item.matched, 'handle');
+            // For split brushes, show the matched handle data
+            const handleText = formatBrushComponent(item.matched, 'handle');
             return (
               <div className='text-sm text-gray-900 max-w-xs relative'>
                 {truncateText(handleText, 50)}
@@ -395,8 +420,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           header: 'Knot',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
-            // Use split brush field if available, otherwise fall back to existing logic
-            const knotText = item.knot_component || formatBrushComponent(item.matched, 'knot');
+            // For split brushes, show the matched knot data
+            const knotText = formatBrushComponent(item.matched, 'knot');
             return (
               <div className='text-sm text-gray-900 max-w-xs'>
                 {truncateText(knotText, 50)}
@@ -417,11 +442,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           },
         }
       );
-
-      console.log('Brush columns added. Total columns:', baseColumns.length);
-      console.log('Columns include: Handle, Handle Pattern, Knot, Knot Pattern');
     } else {
-      console.log('Not adding brush columns for field:', field);
       // For non-brush fields, keep the original pattern column
       baseColumns.push({
         accessorKey: 'pattern',
@@ -471,7 +492,6 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       }
     );
 
-    console.log('Final column count:', baseColumns.length, 'for field:', field);
     return baseColumns;
   }, [
     onCommentClick,

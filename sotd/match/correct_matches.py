@@ -130,9 +130,13 @@ class CorrectMatchesChecker:
                     continue
 
                 # Check if normalized value matches any of the correct strings
-                # Note: correct match strings are already normalized, so no need to normalize them
+                # Use case-insensitive comparison as per match phase rules
                 for correct_string in strings:
-                    if correct_string == normalized_value:
+                    # Normalize the correct string for comparison
+                    normalized_correct_string = normalize_for_matching(
+                        correct_string, field="brush"
+                    )
+                    if normalized_correct_string.lower() == normalized_value.lower():
                         # Return match data in the expected format
                         return CorrectMatchData(
                             brand=brand, model=model, match_type="brush_section"
@@ -166,9 +170,9 @@ class CorrectMatchesChecker:
                     continue
 
                 # Check if normalized value matches any of the correct strings
-                # Note: correct match strings are already normalized, so no need to normalize them
+                # Use case-insensitive comparison as per match phase rules
                 for correct_string in strings:
-                    if correct_string == normalized_value:
+                    if correct_string.lower() == normalized_value.lower():
                         # Find corresponding knot info
                         knot_info = self._find_knot_info_for_string(value, knot_section)
                         return CorrectMatchData(
@@ -188,9 +192,9 @@ class CorrectMatchesChecker:
                     continue
 
                 # Check if normalized value matches any of the correct strings
-                # Note: correct match strings are already normalized, so no need to normalize them
+                # Use case-insensitive comparison as per match phase rules
                 for correct_string in strings:
-                    if correct_string == normalized_value:
+                    if correct_string.lower() == normalized_value.lower():
                         # Create knot info structure
                         knot_info = {
                             "brand": knot_brand,

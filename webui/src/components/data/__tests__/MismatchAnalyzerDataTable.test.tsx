@@ -318,5 +318,104 @@ describe('MismatchAnalyzerDataTable', () => {
       expect(screen.getByText('✅')).toBeInTheDocument();
       expect(screen.getByText('Exact Match')).toBeInTheDocument();
     });
+
+    test('displays correct brush data for complete vs split brushes', () => {
+      // Complete brush data (has top-level brand/model)
+      const completeBrushData: MismatchItem[] = [
+        {
+          original: 'Simpson Chubby 2 Best Badger',
+          matched: {
+            brand: 'Simpson',
+            model: 'Chubby 2',
+            fiber: 'best_badger',
+            knot_size_mm: 27.0,
+            handle_maker: 'Simpson',
+          },
+          pattern: 'simpson.*chubby.*2',
+          match_type: 'exact',
+          confidence: 1.0,
+          mismatch_type: 'exact_matches',
+          reason: 'Exact match from catalog',
+          count: 5,
+          examples: ['2025-06.json'],
+          comment_ids: ['abc123'],
+          is_confirmed: true,
+        },
+      ];
+
+      // Split brush data (no top-level brand/model, has handle/knot components)
+      const splitBrushData: MismatchItem[] = [
+        {
+          original: 'Declaration B2 in Mozingo handle',
+          matched: {
+            handle: {
+              brand: 'Mozingo',
+              model: 'Custom',
+              _pattern: 'mozingo.*handle',
+            },
+            knot: {
+              brand: 'Declaration',
+              model: 'B2',
+              _pattern: 'declaration.*b2',
+            },
+          },
+          pattern: 'declaration.*b2.*mozingo.*handle',
+          match_type: 'regex',
+          confidence: 0.8,
+          mismatch_type: 'potential_mismatch',
+          reason: 'Multiple patterns found',
+          count: 3,
+          examples: ['2025-06.json'],
+          comment_ids: ['def456'],
+          is_confirmed: false,
+          is_split_brush: true,
+          handle_component: 'Mozingo handle',
+          knot_component: 'Declaration B2',
+        },
+      ];
+
+      // Test complete brush - should show brand/model in "Matched" column
+      const { rerender } = render(
+        <MismatchAnalyzerDataTable
+          data={completeBrushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Complete brush should show brand-model-fiber-size format
+      // Look specifically for the matched data format (not the original)
+      expect(screen.getByText('Simpson - Chubby 2 - best_badger - 27mm - Simpson')).toBeInTheDocument();
+
+      // Test split brush - should show handle/knot components in "Matched" column
+      rerender(
+        <MismatchAnalyzerDataTable
+          data={splitBrushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Split brush should show handle/knot format
+      expect(screen.getByText('Handle: Mozingo - Custom')).toBeInTheDocument();
+      expect(screen.getByText('Knot: Declaration - B2')).toBeInTheDocument();
+
+      // Split brush should show the new brush pattern format
+      // Use getAllByText since there might be multiple elements with similar content
+      const splitElements = screen.getAllByText((content, element) => {
+        return element?.textContent?.includes('🔗 split');
+      });
+      expect(splitElements.length).toBeGreaterThan(0);
+
+      const handleElements = screen.getAllByText((content, element) => {
+        return element?.textContent?.includes('handle: Mozingo handle');
+      });
+      expect(handleElements.length).toBeGreaterThan(0);
+
+      const knotElements = screen.getAllByText((content, element) => {
+        return element?.textContent?.includes('knot: Declaration B2');
+      });
+      expect(knotElements.length).toBeGreaterThan(0);
+    });
   });
 });

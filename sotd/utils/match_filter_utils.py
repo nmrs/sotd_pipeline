@@ -335,6 +335,42 @@ def strip_asterisk_markup(value: str) -> str:
     return cleaned
 
 
+def strip_link_markup(value: str) -> str:
+    """
+    Strip Reddit link markup from product strings.
+
+    This removes Reddit link formatting like [text](url) that doesn't add value
+    to product matching. Examples:
+    - "Brush [link](https://imgur.com/abc)" -> "Brush"
+    - "[Razor](https://example.com) blade" -> "Razor blade"
+    - "Handle](https://imgur.com/xyz)" -> "Handle" (handles unbalanced brackets)
+
+    Args:
+        value: Input string that may contain link markup
+
+    Returns:
+        String with link markup removed
+    """
+    if not isinstance(value, str):
+        return ""
+
+    # Remove complete [text](url) links
+    cleaned = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", value)
+
+    # Remove any remaining unbalanced brackets (like "Handle](url)")
+    cleaned = re.sub(r"\]\([^)]*\)", "", cleaned)
+
+    # Remove any remaining standalone brackets that might be left
+    cleaned = re.sub(r"\[([^\]]*)\]", r"\1", cleaned)
+    cleaned = re.sub(r"\]", "", cleaned)
+
+    # Clean up any extra whitespace that might result
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    cleaned = cleaned.strip()
+
+    return cleaned
+
+
 # --- CANONICAL NORMALIZATION FUNCTION ---
 # All correct match lookups in the SOTD Pipeline must use this function.
 # See docs/product_matching_validation.md for details and examples.
@@ -404,6 +440,9 @@ def normalize_for_matching(
 
     # Strip asterisk markup (Reddit formatting)
     normalized = strip_asterisk_markup(normalized)
+
+    # Strip link markup (Reddit formatting)
+    normalized = strip_link_markup(normalized)
 
     # For blade strings, also strip blade count and usage patterns (including 'new')
     if field == "blade":
