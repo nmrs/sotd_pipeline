@@ -491,8 +491,14 @@ class CorrectMatchesManager:
             scent = matched.get("scent", "")
             return f"{maker} {scent}".strip()
         elif field == "brush":
-            # Handle split brush structure
-            if "handle" in matched and "knot" in matched:
+            # Check if this is a simple brush (has top-level brand/model)
+            brand = matched.get("brand")
+            model = matched.get("model")
+            
+            if brand and model:
+                # Simple brush structure - use top-level brand/model
+                return f"{brand} {model}".strip()
+            elif "handle" in matched and "knot" in matched:
                 # Split brush - extract handle and knot components
                 handle = matched.get("handle", {})
                 knot = matched.get("knot", {})
@@ -507,7 +513,7 @@ class CorrectMatchesManager:
                 # The actual saving will be handled in save_correct_matches
                 return f"{handle_brand} {handle_model} || {knot_brand} {knot_model}".strip()
             else:
-                # Simple brush structure
+                # Fallback - simple brush structure
                 brand = matched.get("brand", "")
                 model = matched.get("model", "")
                 return f"{brand} {model}".strip()
