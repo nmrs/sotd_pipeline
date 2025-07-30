@@ -155,7 +155,10 @@ export function DataTable<TData, TValue>({
     (e: MouseEvent) => {
       if (!isResizing || !resizeColumn) return;
 
-      const newWidth = Math.max(50, e.clientX - 100); // Minimum width of 50px
+      // Calculate the new width based on the mouse position
+      // Use a simpler approach - calculate relative to the viewport
+      const newWidth = Math.max(50, e.clientX - 50); // Minimum width of 50px
+
       setColumnWidths(prev => ({ ...prev, [resizeColumn]: newWidth }));
       onColumnResize?.(resizeColumn, newWidth);
     },
@@ -216,7 +219,7 @@ export function DataTable<TData, TValue>({
         )}
       </div>
       <div className='rounded-md border'>
-        <Table>
+        <Table data-table>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
@@ -235,9 +238,8 @@ export function DataTable<TData, TValue>({
                         <div className='flex items-center justify-between'>
                           {sortable ? (
                             <button
-                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${
-                                header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
-                              }`}
+                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
+                                }`}
                               onClick={header.column.getToggleSortingHandler()}
                               disabled={!header.column.getCanSort()}
                             >
@@ -258,8 +260,9 @@ export function DataTable<TData, TValue>({
                           )}
                           {resizable && (
                             <div
-                              className='absolute right-0 top-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-gray-300'
+                              className='absolute right-0 top-0 h-full w-2 cursor-col-resize bg-transparent hover:bg-gray-300 z-20'
                               onMouseDown={e => handleMouseDown(header.column.id, e)}
+                              style={{ touchAction: 'none' }}
                             />
                           )}
                         </div>
