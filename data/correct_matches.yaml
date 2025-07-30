@@ -706,19 +706,13 @@ brush:
     - zenith r/wetshaving sub exclusive moar boar
     - zentih - moar boar r/wetshaving
 handle:
-  dogwood:
-    handcrafts none:
-    - dogwood handcrafts none
-  jayaruh:
-    '#441':
-    - 'jayaruh #441'
+  Jayaruh:
+    'Jayaruh #441':
+    - 'Jayaruh #441'
 knot:
-  ap:
-    shave co g5c:
-    - ap shave co g5c
-  declaration:
-    grooming b12:
-    - declaration grooming b12
+  AP Shave Co:
+    AP Shave Co G5C:
+    - AP Shave Co G5C
 razor:
   3D Printed:
     DE:
@@ -2151,9 +2145,6 @@ razor:
     X3:
     - ikon x3
 split_brush:
-  3dogwood w/ dg b12 butterscotch 2 band badger:
-    handle: 3dogwood
-    knot: dg b12 butterscotch 2 band badger
   'jayaruh #441 w/ ap shave co g5c':
-    handle: 'jayaruh #441'
-    knot: ap shave co g5c
+    handle: 'Jayaruh #441'
+    knot: AP Shave Co G5C
