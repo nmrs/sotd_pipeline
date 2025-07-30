@@ -287,9 +287,22 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         },
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
+          const isSplitBrush = item.is_split_brush === true;
+
           return (
             <div className='text-sm text-gray-900 max-w-xs'>
-              {truncateText(formatMatchedData(item.matched), 60)}
+              <div className='flex items-center gap-2'>
+                {isSplitBrush && (
+                  <span className='text-blue-600' title='Split Brush'>🔗</span>
+                )}
+                <span>{truncateText(formatMatchedData(item.matched), 60)}</span>
+              </div>
+              {isSplitBrush && (
+                <div className='text-xs text-gray-500 mt-1'>
+                  <div>Handle: {item.handle_component || 'N/A'}</div>
+                  <div>Knot: {item.knot_component || 'N/A'}</div>
+                </div>
+              )}
             </div>
           );
         },
@@ -334,9 +347,11 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           header: 'Handle',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
+            // Use split brush field if available, otherwise fall back to existing logic
+            const handleText = item.handle_component || formatBrushComponent(item.matched, 'handle');
             return (
               <div className='text-sm text-gray-900 max-w-xs'>
-                {truncateText(formatBrushComponent(item.matched, 'handle'), 50)}
+                {truncateText(handleText, 50)}
               </div>
             );
           },
@@ -358,9 +373,11 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           header: 'Knot',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
+            // Use split brush field if available, otherwise fall back to existing logic
+            const knotText = item.knot_component || formatBrushComponent(item.matched, 'knot');
             return (
               <div className='text-sm text-gray-900 max-w-xs'>
-                {truncateText(formatBrushComponent(item.matched, 'knot'), 50)}
+                {truncateText(knotText, 50)}
               </div>
             );
           },
