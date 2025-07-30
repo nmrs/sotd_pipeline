@@ -27,6 +27,7 @@ class BrushSplitter:
         """Load brands and models with '/' from brushes.yaml."""
         try:
             from pathlib import Path
+
             import yaml
 
             # Load brushes.yaml to find brands/models with "/"

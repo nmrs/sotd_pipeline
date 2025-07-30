@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Script to tail API logs in real-time for debugging."""
 
-import os
 import sys
 import time
 from pathlib import Path
