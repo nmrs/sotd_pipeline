@@ -45,7 +45,7 @@ class TestSplitBrushConfirmationIntegration:
                 }
             }
         }
-        
+
         # Write test data to temporary file
         with open(self.temp_correct_matches, "w") as f:
             yaml.dump(test_data, f)
@@ -65,7 +65,7 @@ class TestSplitBrushConfirmationIntegration:
                 self.debug = False
 
         args = Args()
-        
+
         result = analyzer.identify_mismatches(
             {
                 "data": [
@@ -111,7 +111,7 @@ class TestSplitBrushConfirmationIntegration:
                 }
             }
         }
-        
+
         # Write test data to temporary file
         with open(self.temp_correct_matches, "w") as f:
             yaml.dump(test_data, f)
@@ -140,7 +140,7 @@ class TestSplitBrushConfirmationIntegration:
                 }
             }
         }
-        
+
         # Write test data to temporary file
         with open(self.temp_correct_matches, "w") as f:
             yaml.dump(test_data, f)
@@ -160,7 +160,7 @@ class TestSplitBrushConfirmationIntegration:
                 self.debug = False
 
         args = Args()
-        
+
         result = analyzer.identify_mismatches(
             {
                 "data": [
@@ -230,11 +230,11 @@ class TestSplitBrushConfirmationIntegration:
 
         assert "split_brush" in saved_data
         split_brush_data = saved_data["split_brush"]
-        
+
         # Key should be lowercase
         expected_key = "test handle w/ test knot"
         assert expected_key in split_brush_data
-        
+
         # Components should be lowercase
         brush_entry = split_brush_data[expected_key]
         assert brush_entry["handle"] == "test handle"
@@ -255,7 +255,7 @@ class TestSplitBrushConfirmationIntegration:
                 }
             }
         }
-        
+
         with open(correct_matches_file, "w") as f:
             yaml.dump(existing_data, f)
 
@@ -293,16 +293,16 @@ class TestSplitBrushConfirmationIntegration:
 
         assert "split_brush" in saved_data
         split_brush_data = saved_data["split_brush"]
-        
+
         # Both entries should exist
         assert "existing handle w/ existing knot" in split_brush_data
         assert "new handle w/ new knot" in split_brush_data
-        
+
         # Verify the content
         existing_entry = split_brush_data["existing handle w/ existing knot"]
         assert existing_entry["handle"] == "existing handle"
         assert existing_entry["knot"] == "existing knot"
-        
+
         new_entry = split_brush_data["new handle w/ new knot"]
         assert new_entry["handle"] == "new handle"
         assert new_entry["knot"] == "new knot"
@@ -323,10 +323,10 @@ class TestSplitBrushConfirmationIntegration:
                 "declaration b2 in mozingo handle": {
                     "handle": "declaration b2",
                     "knot": "mozingo handle",
-                }
+                },
             }
         }
-        
+
         with open(correct_matches_file, "w") as f:
             yaml.dump(existing_data, f)
 
@@ -335,15 +335,11 @@ class TestSplitBrushConfirmationIntegration:
 
         # Verify that both entries are loaded
         assert len(manager._correct_matches) >= 2
-        
+
         # Check that the entries are properly loaded into the internal data structure
-        jayaruh_keys = [
-            key for key in manager._correct_matches if "jayaruh" in key.lower()
-        ]
-        declaration_keys = [
-            key for key in manager._correct_matches if "declaration" in key.lower()
-        ]
-        
+        jayaruh_keys = [key for key in manager._correct_matches if "jayaruh" in key.lower()]
+        declaration_keys = [key for key in manager._correct_matches if "declaration" in key.lower()]
+
         assert len(jayaruh_keys) > 0
         assert len(declaration_keys) > 0
 
@@ -356,6 +352,6 @@ class TestSplitBrushConfirmationIntegration:
 
         assert "split_brush" in saved_data
         split_brush_data = saved_data["split_brush"]
-        
+
         assert "jayaruh #441 w/ ap shave co g5c" in split_brush_data
         assert "declaration b2 in mozingo handle" in split_brush_data

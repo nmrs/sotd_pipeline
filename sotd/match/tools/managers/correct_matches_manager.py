@@ -261,11 +261,12 @@ class CorrectMatchesManager:
                         if "split_brush" not in field_data:
                             field_data["split_brush"] = {}
 
-                        # Save split brush mapping - convert to lowercase for consistency
+                        # Save split brush mapping - components are already lowercase from
+                        # _extract_split_brush_components
                         normalized_original = original.lower().strip()
                         field_data["split_brush"][normalized_original] = {
-                            "handle": handle_component.lower().strip() if handle_component else "",
-                            "knot": knot_component.lower().strip() if knot_component else "",
+                            "handle": handle_component if handle_component else "",
+                            "knot": knot_component if knot_component else "",
                         }
 
                         # Save handle component to handle section
@@ -507,4 +508,5 @@ class CorrectMatchesManager:
             elif isinstance(knot, str):
                 knot_component = knot
 
-        return handle_component, knot_component
+        # Convert to lowercase for consistency
+        return handle_component.lower().strip(), knot_component.lower().strip()
