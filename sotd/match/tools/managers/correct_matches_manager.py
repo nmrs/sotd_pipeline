@@ -25,6 +25,8 @@ class CorrectMatchesManager:
         self._correct_matches_file = correct_matches_file or Path("data/correct_matches.yaml")
         self._correct_matches: Set[str] = set()
         self._correct_matches_data = {}
+        # Load existing data if file exists
+        self.load_correct_matches()
 
     def _load_competition_tags(self) -> Dict[str, list]:
         """Load competition tags configuration."""

@@ -26,8 +26,8 @@ class BrushSplitter:
     def _load_brands_with_slash(cls) -> set:
         """Load brands and models with '/' from brushes.yaml."""
         try:
-            import yaml
             from pathlib import Path
+            import yaml
 
             # Load brushes.yaml to find brands/models with "/"
             brushes_path = Path("data/brushes.yaml")
@@ -87,10 +87,8 @@ class BrushSplitter:
         if result[0] and result[1]:
             return result
 
-        # Step 4: Try fiber hint splitting (lower priority)
-        result = self._try_fiber_hint_splitting(text)
-        if result[0] and result[1]:
-            return result
+        # Step 4: Fiber hint splitting removed - fiber words are for scoring only, not splitting
+        # Fiber words should only be used in _score_as_handle() and _score_as_knot() methods
 
         # Step 5: Final fallback - try all splitting methods again
         result = self._try_fallback_splitting(text)
@@ -119,11 +117,7 @@ class BrushSplitter:
         """Step 3: Try medium-priority delimiter-based splitting."""
         return self._split_by_medium_priority_delimiters(text)
 
-    def _try_fiber_hint_splitting(
-        self, text: str
-    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
-        """Step 3: Try fiber hint splitting (lower priority)."""
-        return self._split_by_fiber_hint(text)
+    # _try_fiber_hint_splitting method removed - fiber words are for scoring only, not splitting
 
     def _try_fallback_splitting(
         self, text: str
@@ -139,10 +133,7 @@ class BrushSplitter:
         if handle and knot:
             return handle, knot, delimiter_type
 
-        # Try fiber hint splitting
-        handle, knot, delimiter_type = self._split_by_fiber_hint(text)
-        if handle and knot:
-            return handle, knot, delimiter_type
+        # Fiber hint splitting removed - fiber words are for scoring only, not splitting
 
         # If no splitting methods worked, return None to indicate no splitting
         return None, None, None
@@ -160,7 +151,9 @@ class BrushSplitter:
         # Handle-primary delimiters (first part is handle)
         handle_primary_delimiters = [" in "]
         # Other high-priority delimiters
-        other_high_priority_delimiters = [" + "]
+        other_high_priority_delimiters = (
+            []
+        )  # "+" requires smart analysis, not high-priority splitting
 
         # Always check for ' w/ ' and ' with ' first to avoid misinterpreting 'w/' as '/'
         for delimiter in high_reliability_delimiters:
@@ -206,13 +199,13 @@ class BrushSplitter:
         indicate a split (e.g., "Zenith - MOAR BOAR" should not split).
         """
         # Medium-reliability delimiters (need smart analysis)
-        medium_reliability_delimiters = [" - "]
+        medium_reliability_delimiters = [" - ", " + "]
 
         # Check medium-reliability delimiters (use smart analysis)
         for delimiter in medium_reliability_delimiters:
             if delimiter in text:
-                # For " - " delimiter, be extra smart about brand aliases and logical grouping
-                if delimiter == " - ":
+                # For " - " and " + " delimiters, use smart analysis
+                if delimiter in [" - ", " + "]:
                     return self._split_by_delimiter_smart(text, delimiter, "smart_analysis")
                 else:
                     return self._split_by_delimiter_smart(text, delimiter, "smart_analysis")
