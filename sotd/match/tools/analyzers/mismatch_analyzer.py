@@ -499,7 +499,7 @@ class MismatchAnalyzer(AnalysisTool):
                 )
                 continue
 
-            # Skip records without matched data (except for intentionally unmatched which we handled above)
+            # Skip records without matched data (except for intentionally unmatched)
             if not matched:
                 continue
 
@@ -825,8 +825,88 @@ class MismatchAnalyzer(AnalysisTool):
                             normalized_original
                         )
 
-                elif field in ("razor", "brush"):
-                    # Use brand-first structure for razor and brush fields
+                elif field == "brush":
+                    # Handle brush field - check if it's a split brush or regular brush
+                    brand = matched_dict.get("brand", "")
+                    model = matched_dict.get("model", "")
+                    handle = matched_dict.get("handle", {})
+                    knot = matched_dict.get("knot", {})
+
+                    if brand or model:
+                        # Regular brush with brand/model
+                        canonical_brand = brand.strip()
+                        canonical_model = model.strip()
+
+                        if field not in yaml_data:
+                            yaml_data[field] = {}
+                        if canonical_brand not in yaml_data[field]:
+                            yaml_data[field][canonical_brand] = {}
+                        if canonical_model not in yaml_data[field][canonical_brand]:
+                            yaml_data[field][canonical_brand][canonical_model] = []
+
+                        # Normalize the original string before storing to prevent bloat
+                        normalized_original = normalize_for_matching(original, None, field)
+                        if (
+                            normalized_original
+                            and normalized_original
+                            not in yaml_data[field][canonical_brand][canonical_model]
+                        ):
+                            yaml_data[field][canonical_brand][canonical_model].append(
+                                normalized_original
+                            )
+                    elif handle and knot:
+                        # Split brush - save handle and knot separately
+                        handle_brand = handle.get("brand", "")
+                        handle_model = handle.get("model", "")
+                        handle_source_text = handle.get("source_text", "")
+
+                        knot_brand = knot.get("brand", "")
+                        knot_model = knot.get("model", "")
+                        knot_source_text = knot.get("source_text", "")
+
+                        # Save handle component
+                        if handle_source_text:
+                            if "handle" not in yaml_data:
+                                yaml_data["handle"] = {}
+                            if handle_brand not in yaml_data["handle"]:
+                                yaml_data["handle"][handle_brand] = {}
+                            if handle_model not in yaml_data["handle"][handle_brand]:
+                                yaml_data["handle"][handle_brand][handle_model] = []
+
+                            # Normalize the handle source text
+                            normalized_handle = normalize_for_matching(
+                                handle_source_text, None, field="handle"
+                            )
+                            if (
+                                normalized_handle
+                                and normalized_handle
+                                not in yaml_data["handle"][handle_brand][handle_model]
+                            ):
+                                yaml_data["handle"][handle_brand][handle_model].append(
+                                    normalized_handle
+                                )
+
+                        # Save knot component
+                        if knot_source_text:
+                            if "knot" not in yaml_data:
+                                yaml_data["knot"] = {}
+                            if knot_brand not in yaml_data["knot"]:
+                                yaml_data["knot"][knot_brand] = {}
+                            if knot_model not in yaml_data["knot"][knot_brand]:
+                                yaml_data["knot"][knot_brand][knot_model] = []
+
+                            # Normalize the knot source text
+                            normalized_knot = normalize_for_matching(
+                                knot_source_text, None, field="knot"
+                            )
+                            if (
+                                normalized_knot
+                                and normalized_knot not in yaml_data["knot"][knot_brand][knot_model]
+                            ):
+                                yaml_data["knot"][knot_brand][knot_model].append(normalized_knot)
+
+                elif field == "razor":
+                    # Use brand-first structure for razor field
                     canonical_brand = matched_dict.get("brand", "")
                     canonical_model = matched_dict.get("model", "")
 
