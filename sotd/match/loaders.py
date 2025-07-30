@@ -117,6 +117,7 @@ class CatalogLoader:
                     "brush": data.get("brush", {}),
                     "handle": data.get("handle", {}),
                     "knot": data.get("knot", {}),
+                    "split_brush": data.get("split_brush", {}),
                 }
 
         except (FileNotFoundError, yaml.YAMLError) as e:
