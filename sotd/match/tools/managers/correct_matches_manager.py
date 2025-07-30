@@ -253,7 +253,7 @@ class CorrectMatchesManager:
 
                     if self._is_split_brush(matched):
                         # Split brush - save to new structure
-                        handle_component, knot_component = self._extract_split_brush_components(
+                        handle_component, knot_component, handle_brand, knot_brand = self._extract_split_brush_components(
                             matched
                         )
 
@@ -270,16 +270,13 @@ class CorrectMatchesManager:
                         }
 
                         # Save handle component to handle section
-                        if handle_component:
+                        if handle_component and handle_brand:
                             if "handle" not in field_data:
                                 field_data["handle"] = {}
 
-                            # Parse handle component to get brand and model
-                            handle_parts = handle_component.split(" ", 1)
-                            if len(handle_parts) >= 2:
-                                handle_brand, handle_model = (handle_parts[0], handle_parts[1])
-                            else:
-                                handle_brand, handle_model = "Unknown", handle_component
+                            # Use the proper brand name from the matched data
+                            # For the model, use the source_text as the model name
+                            handle_model = handle_component
 
                             if handle_brand not in field_data["handle"]:
                                 field_data["handle"][handle_brand] = {}
@@ -295,16 +292,13 @@ class CorrectMatchesManager:
                                 )
 
                         # Save knot component to knot section
-                        if knot_component:
+                        if knot_component and knot_brand:
                             if "knot" not in field_data:
                                 field_data["knot"] = {}
 
-                            # Parse knot component to get brand and model
-                            knot_parts = knot_component.split(" ", 1)
-                            if len(knot_parts) >= 2:
-                                knot_brand, knot_model = knot_parts[0], knot_parts[1]
-                            else:
-                                knot_brand, knot_model = "Unknown", knot_component
+                            # Use the proper brand name from the matched data
+                            # For the model, use the source_text as the model name
+                            knot_model = knot_component
 
                             if knot_brand not in field_data["knot"]:
                                 field_data["knot"][knot_brand] = {}
@@ -483,10 +477,17 @@ class CorrectMatchesManager:
             and ("handle" in matched or "knot" in matched)
         )
 
-    def _extract_split_brush_components(self, matched: Dict) -> tuple[str, str]:
-        """Extract handle and knot components from split brush data."""
+    def _extract_split_brush_components(self, matched: Dict) -> tuple[str, str, str, str]:
+        """
+        Extract handle and knot components from split brush data.
+        
+        Returns:
+            tuple: (handle_source_text, knot_source_text, handle_brand, knot_brand)
+        """
         handle_component = ""
         knot_component = ""
+        handle_brand = ""
+        knot_brand = ""
 
         # Extract handle component
         handle = matched.get("handle")
@@ -502,6 +503,8 @@ class CorrectMatchesManager:
                     handle_component = (
                         f"{handle_brand} {handle_model}".strip()
                     )
+                # Always preserve the brand name for proper casing
+                handle_brand = handle.get("brand", "")
             elif isinstance(handle, str):
                 handle_component = handle
 
@@ -519,10 +522,12 @@ class CorrectMatchesManager:
                     knot_component = (
                         f"{knot_brand} {knot_model}".strip()
                     )
+                # Always preserve the brand name for proper casing
+                knot_brand = knot.get("brand", "")
             elif isinstance(knot, str):
                 knot_component = knot
 
-        # Convert to lowercase for consistency, handle None values
-        handle_result = handle_component.lower().strip() if handle_component else ""
-        knot_result = knot_component.lower().strip() if knot_component else ""
-        return handle_result, knot_result
+        # Return source_text (for split_brush section) and brand names (for handle/knot sections)
+        handle_result = handle_component.strip() if handle_component else ""
+        knot_result = knot_component.strip() if knot_component else ""
+        return handle_result, knot_result, handle_brand, knot_brand
