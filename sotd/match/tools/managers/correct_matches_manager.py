@@ -253,20 +253,19 @@ class CorrectMatchesManager:
 
                     if self._is_split_brush(matched):
                         # Split brush - save to new structure
-                        handle_component, knot_component, handle_brand, knot_brand = self._extract_split_brush_components(
-                            matched
+                        handle_component, knot_component, handle_brand, knot_brand = (
+                            self._extract_split_brush_components(matched)
                         )
 
                         # Initialize split_brush section if not exists
                         if "split_brush" not in field_data:
                             field_data["split_brush"] = {}
 
-                        # Save split brush mapping - components are already lowercase from
-                        # _extract_split_brush_components
+                        # Save split brush mapping - store in lowercase for consistency with lookup strings
                         normalized_original = original.lower().strip()
                         field_data["split_brush"][normalized_original] = {
-                            "handle": handle_component if handle_component else "",
-                            "knot": knot_component if knot_component else "",
+                            "handle": handle_component.lower().strip() if handle_component else "",
+                            "knot": knot_component.lower().strip() if knot_component else "",
                         }
 
                         # Save handle component to handle section
@@ -279,7 +278,7 @@ class CorrectMatchesManager:
                             handle_model = handle_component
                             if handle_brand.lower() in handle_component.lower():
                                 # Remove brand name from the beginning of source_text
-                                handle_model = handle_component[len(handle_brand):].strip()
+                                handle_model = handle_component[len(handle_brand) :].strip()
                                 if not handle_model:
                                     handle_model = handle_component  # Fallback to full text
 
@@ -308,7 +307,7 @@ class CorrectMatchesManager:
                             knot_model = knot_component
                             if knot_brand.lower() in knot_component.lower():
                                 # Remove brand name from the beginning of source_text
-                                knot_model = knot_component[len(knot_brand):].strip()
+                                knot_model = knot_component[len(knot_brand) :].strip()
                                 if not knot_model:
                                     knot_model = knot_component  # Fallback to full text
 
@@ -319,8 +318,13 @@ class CorrectMatchesManager:
 
                             # Store in lowercase for consistency
                             normalized_component = knot_component.lower().strip()
-                            if normalized_component not in field_data["knot"][knot_brand][knot_model]:
-                                field_data["knot"][knot_brand][knot_model].append(normalized_component)
+                            if (
+                                normalized_component
+                                not in field_data["knot"][knot_brand][knot_model]
+                            ):
+                                field_data["knot"][knot_brand][knot_model].append(
+                                    normalized_component
+                                )
                     else:
                         # Regular brush - save to brush section
                         brand = match_data["matched"]["brand"]
@@ -494,7 +498,7 @@ class CorrectMatchesManager:
     def _extract_split_brush_components(self, matched: Dict) -> tuple[str, str, str, str]:
         """
         Extract handle and knot components from split brush data.
-        
+
         Returns:
             tuple: (handle_source_text, knot_source_text, handle_brand, knot_brand)
         """
@@ -514,9 +518,7 @@ class CorrectMatchesManager:
                 else:
                     handle_brand = handle.get("brand", "")
                     handle_model = handle.get("model", "")
-                    handle_component = (
-                        f"{handle_brand} {handle_model}".strip()
-                    )
+                    handle_component = f"{handle_brand} {handle_model}".strip()
                 # Always preserve the brand name for proper casing
                 handle_brand = handle.get("brand", "")
             elif isinstance(handle, str):
@@ -533,9 +535,7 @@ class CorrectMatchesManager:
                 else:
                     knot_brand = knot.get("brand", "")
                     knot_model = knot.get("model", "")
-                    knot_component = (
-                        f"{knot_brand} {knot_model}".strip()
-                    )
+                    knot_component = f"{knot_brand} {knot_model}".strip()
                 # Always preserve the brand name for proper casing
                 knot_brand = knot.get("brand", "")
             elif isinstance(knot, str):
