@@ -155,7 +155,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     return text.substring(0, maxLength) + '...';
   };
 
-  const formatMatchedData = (matched: unknown) => {
+  const formatMatchedData = (matched: unknown, field?: string) => {
     if (!matched) return 'N/A';
 
     if (typeof matched === 'string') {
@@ -164,6 +164,22 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
     if (typeof matched === 'object' && matched !== null) {
       const matchedObj = matched as Record<string, unknown>;
+
+      // Special handling for brush field
+      if (field === 'brush') {
+        // For brushes, show handle and knot components instead of raw JSON
+        const handleText = formatBrushComponent(matchedObj, 'handle');
+        const knotText = formatBrushComponent(matchedObj, 'knot');
+
+        if (handleText !== 'N/A' || knotText !== 'N/A') {
+          const parts = [];
+          if (handleText !== 'N/A') parts.push(`Handle: ${handleText}`);
+          if (knotText !== 'N/A') parts.push(`Knot: ${knotText}`);
+          return parts.join('\n');
+        }
+      }
+
+      // For other fields, use the original logic
       const parts = [];
       if (matchedObj.brand) parts.push(String(matchedObj.brand));
       if (matchedObj.model) parts.push(String(matchedObj.model));
@@ -281,28 +297,31 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         accessorKey: 'matched',
         header: 'Matched',
         sortingFn: (rowA, rowB) => {
-          const a = formatMatchedData(rowA.original.matched);
-          const b = formatMatchedData(rowB.original.matched);
+          const a = formatMatchedData(rowA.original.matched, field);
+          const b = formatMatchedData(rowB.original.matched, field);
           return a.localeCompare(b);
         },
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
-          const isSplitBrush = item.is_split_brush === true;
+          const formattedData = formatMatchedData(item.matched, field);
 
+          // For brush field, render with line breaks
+          if (field === 'brush' && formattedData.includes('\n')) {
+            return (
+              <div className='text-sm text-gray-900 max-w-xs'>
+                {formattedData.split('\n').map((line, index) => (
+                  <div key={index} className={index > 0 ? 'mt-1' : ''}>
+                    {truncateText(line, 60)}
+                  </div>
+                ))}
+              </div>
+            );
+          }
+
+          // For other fields, use the original rendering
           return (
             <div className='text-sm text-gray-900 max-w-xs'>
-              <div className='flex items-center gap-2'>
-                {isSplitBrush && (
-                  <span className='text-blue-600' title='Split Brush'>🔗</span>
-                )}
-                <span>{truncateText(formatMatchedData(item.matched), 60)}</span>
-              </div>
-              {isSplitBrush && (
-                <div className='text-xs text-gray-500 mt-1'>
-                  <div>Handle: {item.handle_component || 'N/A'}</div>
-                  <div>Knot: {item.knot_component || 'N/A'}</div>
-                </div>
-              )}
+              <span>{truncateText(formattedData, 60)}</span>
             </div>
           );
         },
@@ -332,9 +351,12 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         header: 'Brush Pattern',
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
+          const isSplitBrush = item.is_split_brush === true;
+          const patternText = item.pattern || '';
+
           return (
-            <div className='text-sm text-gray-500 max-w-xs font-mono'>
-              {truncateText(item.pattern, 40)}
+            <div className='text-sm text-gray-500 max-w-xs font-mono relative'>
+              {isSplitBrush ? `🔗 ${truncateText(patternText, 38)}` : truncateText(patternText, 40)}
             </div>
           );
         },
@@ -350,7 +372,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             // Use split brush field if available, otherwise fall back to existing logic
             const handleText = item.handle_component || formatBrushComponent(item.matched, 'handle');
             return (
-              <div className='text-sm text-gray-900 max-w-xs'>
+              <div className='text-sm text-gray-900 max-w-xs relative'>
                 {truncateText(handleText, 50)}
               </div>
             );
@@ -362,7 +384,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
             return (
-              <div className='text-sm text-gray-500 max-w-xs font-mono'>
+              <div className='text-sm text-gray-500 max-w-xs font-mono relative'>
                 {truncateText(getBrushComponentPattern(item.matched, 'handle'), 40)}
               </div>
             );
