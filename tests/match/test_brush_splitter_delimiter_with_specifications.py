@@ -56,7 +56,7 @@ class TestBrushSplitterDelimiterWithSpecifications:
             description = test_case["description"]
 
             # Test delimiter detection
-            handle, knot, delimiter_type = brush_splitter._split_by_delimiters(text)
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(text)
 
             print(f"\nTest case: {description}")
             print(f"Text: {text}")
@@ -112,7 +112,7 @@ class TestBrushSplitterDelimiterWithSpecifications:
             description = test_case["description"]
 
             # Test delimiter detection
-            handle, knot, delimiter_type = brush_splitter._split_by_delimiters(text)
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(text)
 
             print(f"\nTest case: {description}")
             print(f"Text: {text}")
@@ -159,7 +159,7 @@ class TestBrushSplitterDelimiterWithSpecifications:
             description = test_case["description"]
 
             # Test delimiter detection
-            handle, knot, delimiter_type = brush_splitter._split_by_delimiters(text)
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(text)
 
             print(f"\nTest case: {description}")
             print(f"Text: {text}")
@@ -206,7 +206,7 @@ class TestBrushSplitterDelimiterWithSpecifications:
             description = test_case["description"]
 
             # Test delimiter detection
-            handle, knot, delimiter_type = brush_splitter._split_by_delimiters(text)
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(text)
 
             print(f"\nTest case: {description}")
             print(f"Text: {text}")

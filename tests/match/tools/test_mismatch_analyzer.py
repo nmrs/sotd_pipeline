@@ -59,6 +59,7 @@ class TestMismatchAnalyzer:
             "regex_match": "🔍",
             "potential_mismatch": "❌",
             "perfect_regex_matches": "✨",
+            "intentionally_unmatched": "🚫",
         }
 
     def test_get_parser(self):
@@ -310,6 +311,7 @@ class TestMismatchAnalyzer:
             "low_confidence": [],
             "exact_matches": [],
             "perfect_regex_matches": [],
+            "intentionally_unmatched": [],
         }
 
         args = Mock()
@@ -374,6 +376,7 @@ class TestMismatchAnalyzer:
             "low_confidence": [],
             "exact_matches": [],
             "perfect_regex_matches": [],
+            "intentionally_unmatched": [],
         }
         args = Mock()
         args.limit = 5
@@ -492,6 +495,7 @@ class TestMismatchAnalyzer:
             "low_confidence": [],
             "exact_matches": [],
             "perfect_regex_matches": [],
+            "intentionally_unmatched": [],
         }
 
         buf = io.StringIO()
@@ -539,6 +543,7 @@ class TestMismatchAnalyzer:
             "low_confidence": [],
             "exact_matches": [],
             "perfect_regex_matches": [],
+            "intentionally_unmatched": [],
         }
 
         args = Mock()

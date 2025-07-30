@@ -36,7 +36,7 @@ class TestBrushSplitterNonDelimiterIssue:
         # Expected knot: "AKA Brushworx AK47 knot"
 
         # Test delimiter detection directly
-        handle, knot, delimiter_type = brush_splitter._split_by_delimiters(test_brush)
+        handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(test_brush)
 
         # This should now work correctly with the fix
         assert handle is not None, f"Expected handle to be found, got: {handle}"
@@ -73,7 +73,7 @@ class TestBrushSplitterNonDelimiterIssue:
         # Expected handle: "Southland Handle"
         # Expected knot: "AKA Brushworx AK47 knot"
 
-        handle, knot, delimiter_type = brush_splitter._split_by_delimiters(test_brush)
+        handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(test_brush)
 
         # This should work correctly
         assert handle is not None, "Expected handle to be found"
@@ -123,7 +123,7 @@ class TestBrushSplitterNonDelimiterIssue:
             assert " x " in text, f"' x ' not found in text for {description}"
 
             # Test delimiter detection
-            handle, knot, delimiter_type = brush_splitter._split_by_delimiters(text)
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(text)
 
             # Document the current behavior
             print(f"\nTest case: {description}")
@@ -183,7 +183,7 @@ class TestBrushSplitterNonDelimiterIssue:
             reason = test_case["reason"]
 
             # Test delimiter detection
-            handle, knot, delimiter_type = brush_splitter._split_by_delimiters(text)
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(text)
 
             print(f"\nTest case: {description}")
             print(f"Text: {text}")

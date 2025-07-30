@@ -128,12 +128,28 @@ class TestSplitBrushAPIE2E:
 
         # Step 5: Test component reuse
         # Mark another split brush with the same handle component
-        correct_matches_manager.mark_brush_correct(
-            original="jayaruh #441 w/ different knot",
-            is_split_brush=True,
-            handle_component="Jayaruh #441",
-            knot_component="Different Knot",
+        match_data_2 = {
+            "original": "jayaruh #441 w/ different knot",
+            "matched": {
+                "brand": None,
+                "model": None,
+                "handle": {
+                    "brand": "Jayaruh",
+                    "model": "#441",
+                },
+                "knot": {
+                    "brand": "Different",
+                    "model": "Knot",
+                },
+            },
+            "field": "brush",
+        }
+
+        match_key_2 = correct_matches_manager.create_match_key(
+            "brush", match_data_2["original"], match_data_2["matched"]
         )
+        correct_matches_manager.mark_match_as_correct(match_key_2, match_data_2)
+        correct_matches_manager.save_correct_matches()
 
         # Verify that handle components are reused
         with open(temp_correct_matches_file, "r") as f:
@@ -147,12 +163,29 @@ class TestSplitBrushAPIE2E:
         # Step 6: Test performance with multiple operations
         # Add several more split brushes to test performance
         for i in range(10):
-            correct_matches_manager.mark_brush_correct(
-                original=f"test handle {i} w/ test knot {i}",
-                is_split_brush=True,
-                handle_component=f"Test Handle {i}",
-                knot_component=f"Test Knot {i}",
+            match_data = {
+                "original": f"test handle {i} w/ test knot {i}",
+                "matched": {
+                    "brand": None,
+                    "model": None,
+                    "handle": {
+                        "brand": f"Test Handle {i}",
+                        "model": f"Handle {i}",
+                    },
+                    "knot": {
+                        "brand": f"Test Knot {i}",
+                        "model": f"Knot {i}",
+                    },
+                },
+                "field": "brush",
+            }
+            match_key = correct_matches_manager.create_match_key(
+                "brush", match_data["original"], match_data["matched"]
             )
+            correct_matches_manager.mark_match_as_correct(match_key, match_data)
+
+        # Save all changes at once
+        correct_matches_manager.save_correct_matches()
 
         # Verify all entries were added correctly
         with open(temp_correct_matches_file, "r") as f:
@@ -163,12 +196,20 @@ class TestSplitBrushAPIE2E:
         # Step 7: Test error handling
         # Test with invalid data
         try:
-            correct_matches_manager.mark_brush_correct(
-                original="",
-                is_split_brush=True,
-                handle_component=None,
-                knot_component=None,
+            match_data = {
+                "original": "",
+                "matched": {
+                    "brand": None,
+                    "model": None,
+                    "handle": {"brand": None},
+                    "knot": {"brand": None},
+                },
+                "field": "brush",
+            }
+            match_key = correct_matches_manager.create_match_key(
+                "brush", match_data["original"], match_data["matched"]
             )
+            correct_matches_manager.mark_match_as_correct(match_key, match_data)
         except Exception as e:
             # Should handle empty original gracefully
             assert "original" in str(e).lower() or "empty" in str(e).lower()
@@ -183,13 +224,31 @@ class TestSplitBrushAPIE2E:
             yaml.dump(existing_data, f)
 
         # Test that existing structure is preserved when adding split brushes
-        correct_matches_manager = CorrectMatchesManager(temp_correct_matches_file)
-        correct_matches_manager.mark_brush_correct(
-            original="test split brush",
-            is_split_brush=True,
-            handle_component="Test Handle",
-            knot_component="Test Knot",
+        console = Console()
+        correct_matches_manager = CorrectMatchesManager(console, temp_correct_matches_file)
+
+        match_data = {
+            "original": "test split brush",
+            "matched": {
+                "brand": None,
+                "model": None,
+                "handle": {
+                    "brand": "Test",
+                    "model": "Handle",
+                },
+                "knot": {
+                    "brand": "Test",
+                    "model": "Knot",
+                },
+            },
+            "field": "brush",
+        }
+
+        match_key = correct_matches_manager.create_match_key(
+            "brush", match_data["original"], match_data["matched"]
         )
+        correct_matches_manager.mark_match_as_correct(match_key, match_data)
+        correct_matches_manager.save_correct_matches()
 
         with open(temp_correct_matches_file, "r") as f:
             updated_data = yaml.safe_load(f)
@@ -206,29 +265,46 @@ class TestSplitBrushAPIE2E:
     def test_error_handling(self, temp_data_dir, temp_correct_matches_file):
         """Test error handling in the split brush workflow."""
 
-        correct_matches_manager = CorrectMatchesManager(temp_correct_matches_file)
+        console = Console()
+        correct_matches_manager = CorrectMatchesManager(console, temp_correct_matches_file)
 
         # Test with malformed data
         try:
-            correct_matches_manager.mark_brush_correct(
-                original=None,
-                is_split_brush=True,
-                handle_component="Test",
-                knot_component="Test",
+            match_data = {
+                "original": None,
+                "matched": {
+                    "brand": None,
+                    "model": None,
+                    "handle": {"brand": "Test"},
+                    "knot": {"brand": "Test"},
+                },
+                "field": "brush",
+            }
+            match_key = correct_matches_manager.create_match_key(
+                "brush", match_data["original"], match_data["matched"]
             )
+            correct_matches_manager.mark_match_as_correct(match_key, match_data)
         except Exception as e:
             # Should handle None original gracefully
-            assert "original" in str(e).lower()
+            assert "original" in str(e).lower() or "none" in str(e).lower()
 
         # Test with invalid file path
-        invalid_manager = CorrectMatchesManager(Path("/nonexistent/path/file.yaml"))
+        invalid_manager = CorrectMatchesManager(console, Path("/nonexistent/path/file.yaml"))
         try:
-            invalid_manager.mark_brush_correct(
-                original="test",
-                is_split_brush=True,
-                handle_component="Test",
-                knot_component="Test",
+            match_data = {
+                "original": "test",
+                "matched": {
+                    "brand": None,
+                    "model": None,
+                    "handle": {"brand": "Test"},
+                    "knot": {"brand": "Test"},
+                },
+                "field": "brush",
+            }
+            match_key = invalid_manager.create_match_key(
+                "brush", match_data["original"], match_data["matched"]
             )
+            invalid_manager.mark_match_as_correct(match_key, match_data)
         except Exception as e:
             # Should handle file I/O errors gracefully
             assert "file" in str(e).lower() or "path" in str(e).lower()

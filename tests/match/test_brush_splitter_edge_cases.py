@@ -104,7 +104,7 @@ class TestBrushSplitterEdgeCases:
             print(f"Expected: handle='{expected_handle}', knot='{expected_knot}'")
 
             # Test delimiter detection
-            handle, knot, delimiter_type = brush_splitter._split_by_delimiters(text)
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(text)
 
             # These should now work correctly with the fix implemented
             assert handle is not None, f"Expected handle to be found, got: {handle}"
@@ -151,7 +151,7 @@ class TestBrushSplitterEdgeCases:
             print(f"Expected: handle='{expected_handle}', knot='{expected_knot}'")
 
             # Test delimiter detection
-            handle, knot, delimiter_type = brush_splitter._split_by_delimiters(text)
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(text)
 
             # These should work correctly since " x " is not present
             if " x " not in text:
@@ -205,7 +205,7 @@ class TestBrushSplitterEdgeCases:
             print(f"Should split on delimiter: {should_split_on_in}")
 
             # Test delimiter detection
-            handle, knot, delimiter_type = brush_splitter._split_by_delimiters(text)
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(text)
 
             # These should now work correctly with the fix implemented
             assert handle is not None, f"Expected handle to be found, got: {handle}"
@@ -269,7 +269,7 @@ class TestBrushSplitterEdgeCases:
             print(f"Reason: {reason}")
 
             # Test delimiter detection
-            handle, knot, delimiter_type = brush_splitter._split_by_delimiters(text)
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(text)
 
             print(
                 f"Delimiter detection result: handle='{handle}', "
