@@ -360,9 +360,8 @@ def strip_link_markup(value: str) -> str:
     # Remove any remaining unbalanced brackets (like "Handle](url)")
     cleaned = re.sub(r"\]\([^)]*\)", "", cleaned)
 
-    # Remove any remaining standalone brackets that might be left
-    cleaned = re.sub(r"\[([^\]]*)\]", r"\1", cleaned)
-    cleaned = re.sub(r"\]", "", cleaned)
+    # Don't remove standalone brackets - they might be legitimate text like [REDACTED]
+    # Only remove brackets that are part of incomplete link syntax
 
     # Clean up any extra whitespace that might result
     cleaned = re.sub(r"\s+", " ", cleaned)
