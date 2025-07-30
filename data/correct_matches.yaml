@@ -697,10 +697,14 @@ brush:
 handle:
   Jayaruh:
     '#441':
+    - 'jayaruh #441'
     - 'Jayaruh #441'
+    None:
+    - jayaruh none
 knot:
   AP:
     Shave Co G5C:
+    - ap shave co g5c
     - AP Shave Co G5C
 razor:
   3D Printed:

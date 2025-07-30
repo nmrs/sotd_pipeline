@@ -736,6 +736,46 @@ class MismatchAnalyzer(AnalysisTool):
                                                             },
                                                             "field": field,
                                                         }
+                        elif field == "split_brush":
+                            # Handle split_brush section for brush field
+                            for split_brush_string, components in field_data.items():
+                                if isinstance(components, dict):
+                                    handle_component = components.get("handle", "")
+                                    knot_component = components.get("knot", "")
+
+                                    # Create a matched structure that represents the split brush
+                                    matched_structure = {
+                                        "brand": None,  # Split brushes have no top-level brand
+                                        "model": None,  # Split brushes have no top-level model
+                                        "handle": {
+                                            "brand": "Unknown",  # Will be looked up in handle section
+                                            "model": handle_component,
+                                            "source_text": handle_component,
+                                        },
+                                        "knot": {
+                                            "brand": "Unknown",  # Will be looked up in knot section
+                                            "model": knot_component,
+                                            "source_text": knot_component,
+                                        },
+                                    }
+
+                                    # Use same normalization as _create_match_key
+                                    normalized = normalize_for_matching(
+                                        split_brush_string, None, field="brush"
+                                    )
+                                    original_normalized = normalized.lower().strip()
+
+                                    # For split brushes, the matched text is the original string
+                                    # since it's stored as the key in split_brush section
+                                    matched_text = split_brush_string.lower().strip()
+
+                                    match_key = f"brush:{original_normalized}|{matched_text}"
+                                    self._correct_matches.add(match_key)
+                                    self._correct_matches_data[match_key] = {
+                                        "original": split_brush_string,
+                                        "matched": matched_structure,
+                                        "field": "brush",
+                                    }
                         else:
                             # Handle brand-first structure for other fields
                             for brand, brand_data in field_data.items():

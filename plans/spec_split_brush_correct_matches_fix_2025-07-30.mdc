@@ -17,6 +17,13 @@ When split brushes (e.g., "Jayaruh #441 w/ AP Shave Co G5C") are marked as corre
 
 ## Requirements
 
+### 1A. Split Brush Confirmation Semantics (NEW)
+- Marking a split brush as correct MUST validate:
+  1. The split itself is correct (the string was split into handle and knot as intended)
+  2. The handle component is matched to the correct catalog entry (handle section)
+  3. The knot component is matched to the correct catalog entry (knot section)
+- The system must check all three before confirming a split brush as correct.
+
 ### 1. Data Structure Requirements
 
 **Split Brush Section**:
@@ -69,6 +76,12 @@ knot:
    - Proceed with existing split detection logic
    - Split the input and look up components individually
    - Use existing match phase logic for handle/knot matching
+
+### 3A. Split Brush Validation Data Flow (NEW)
+- When a split brush is marked as correct:
+  - The backend must check that the split_brush mapping exists
+  - The referenced handle and knot must exist in their respective sections and match the intended catalog entries
+  - If any component is missing or mismatched, the confirmation should fail or prompt for correction
 
 ### 4. Performance Requirements
 

@@ -791,8 +791,20 @@ async def get_correct_matches(field: str):
             data = yaml.safe_load(f) or {}
 
         logger.info(f"Loaded data keys: {list(data.keys())}")
-        field_data = data.get(field, {})
-        logger.info(f"Field data for '{field}': {field_data}")
+
+        # For brush field, include both brush and split_brush sections
+        if field == "brush":
+            field_data = data.get(field, {})
+            split_brush_data = data.get("split_brush", {})
+            # Combine both sections
+            combined_data = {"brush": field_data, "split_brush": split_brush_data}
+            logger.info(f"Field data for '{field}': {field_data}")
+            logger.info(f"Split brush data: {split_brush_data}")
+        else:
+            field_data = data.get(field, {})
+            split_brush_data = {}  # Initialize for non-brush fields
+            combined_data = field_data
+            logger.info(f"Field data for '{field}': {field_data}")
 
         # Calculate total entries based on field structure
         total_entries = 0
@@ -816,6 +828,18 @@ async def get_correct_matches(field: str):
                         for model_data in first_level.values():
                             if isinstance(model_data, list):
                                 total_entries += len(model_data)
+        elif field == "brush":
+            # For brush field, count both brush and split_brush entries
+            # Count brush section entries
+            brush_entries = sum(
+                len(strings) if isinstance(strings, list) else 0
+                for brand_data in field_data.values()
+                if isinstance(brand_data, dict)
+                for strings in brand_data.values()
+            )
+            # Count split_brush section entries
+            split_brush_entries = len(split_brush_data)
+            total_entries = brush_entries + split_brush_entries
         else:
             # Other fields have brand -> model -> strings structure
             total_entries = sum(
@@ -825,7 +849,9 @@ async def get_correct_matches(field: str):
                 for strings in brand_data.values()
             )
 
-        return CorrectMatchesResponse(field=field, total_entries=total_entries, entries=field_data)
+        return CorrectMatchesResponse(
+            field=field, total_entries=total_entries, entries=combined_data
+        )
 
     except Exception as e:
         logger.error(f"Error loading correct matches: {e}")
