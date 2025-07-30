@@ -78,6 +78,31 @@ def match(self, field_data: dict) -> Optional[dict]:
 - **Don't just preserve basic brand/model fields**
 - **Include all relevant specifications: grind, width, point, fiber, knot_size_mm, etc.**
 
+## Brush Splitting Rules
+
+### **MANDATORY**: Fiber Words Are For Scoring Only
+- **FIBER WORDS ARE NEVER USED FOR SPLITTING**
+- **Fiber words (per `fiber_utils.py`) are ONLY used for scoring whether a substring is more likely a knot or handle**
+- **The presence of fiber words should NEVER trigger text splitting**
+- **Fiber words are used in `_score_as_handle()` and `_score_as_knot()` methods for content analysis only**
+- **Splitting should only occur on explicit delimiters: " w/ ", " with ", " in ", " / ", " - ", " + "**
+
+```python
+# ✅ CORRECT - Use fiber words for scoring only
+def _score_as_knot(self, text: str) -> int:
+    score = 0
+    fiber_type = match_fiber(text)  # From fiber_utils.py
+    if fiber_type:
+        score += 8  # Fiber words indicate knot likelihood
+    return score
+
+# ❌ WRONG - Never split on fiber words
+def _split_by_fiber_hint(self, text: str):
+    # This method should NOT exist or should be removed
+    # Fiber words are for scoring, not splitting
+    pass
+```
+
 ```python
 # ✅ CORRECT - Preserve all catalog fields
 {
