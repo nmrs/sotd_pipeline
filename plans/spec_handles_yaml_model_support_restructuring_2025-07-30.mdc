@@ -1,0 +1,289 @@
+# Specification: Handles.yaml Model Support Restructuring
+
+**Date**: 2025-07-30  
+**Status**: SPECIFICATION  
+**Priority**: HIGH  
+**Scope**: handles.yaml restructuring, handle matchers, correct_matches.yaml compatibility
+
+## Overview
+
+Restructure `handles.yaml` to support models similar to `knots.yaml`, enabling consistent brand/model separation for handles and improving the structure of `correct_matches.yaml` handle sections.
+
+## Current State
+
+### Current handles.yaml Structure
+```yaml
+artisan_handles:
+  Declaration Grooming:
+    patterns:
+    - ^(?!.*dogwood)declaration
+    - ^(?!.*dogwood)\bdg\b
+    - washington      # Specific model mentioned in patterns
+    - jefferson       # Specific model mentioned in patterns
+    - jeffington      # Specific model mentioned in patterns
+  Jayaruh:
+    patterns:
+    - jayaruh
+  Dogwood Handcrafts:
+    patterns:
+    - dogwoo
+    - dogwood.*handcrafts+
+    - dogc*l
+    - ^voa
+    - \bdw\b
+```
+
+### Current correct_matches.yaml Handle Section Issues
+- Inconsistent structure with knots section
+- Trying to extract model names from handles that don't have models
+- Brand name duplication in model fields
+- Mixed casing issues
+
+## Target State
+
+### New handles.yaml Structure
+```yaml
+artisan_handles:
+  Declaration Grooming:
+    Washington:
+      patterns:
+      - washington
+    Jefferson:
+      patterns:
+      - jefferson
+    Jeffington:
+      patterns:
+      - jeffington
+    Unspecified:
+      patterns:
+      - ^(?!.*dogwood)declaration
+      - ^(?!.*dogwood)\bdg\b
+  Jayaruh:
+    Unspecified:
+      patterns:
+      - jayaruh
+  Dogwood Handcrafts:
+    Unspecified:
+      patterns:
+      - dogwoo
+      - dogwood.*handcrafts+
+      - dogc*l
+      - ^voa
+      - \bdw\b
+```
+
+### Target correct_matches.yaml Handle Section
+```yaml
+handle:
+  Jayaruh:
+    Unspecified:  # Model name from catalog
+      - 'jayaruh #441'  # Full source_text in lowercase
+  Dogwood Handcrafts:
+    Unspecified:  # Model name from catalog
+      - 'dogwood handcrafts handle'  # Full source_text in lowercase
+  Declaration Grooming:
+    Washington:  # Specific model when available
+      - 'declaration grooming washington'
+    Unspecified:  # Default model for general matches
+      - 'declaration grooming handle'
+```
+
+## Requirements
+
+### 1. YAML Structure Changes
+- **Restructure handles.yaml** to match knots.yaml pattern
+- **Add "Unspecified" model** for all brands that don't have specific models
+- **Move specific model patterns** (like "washington", "jefferson") to their own model sections
+- **Keep general brand patterns** under "Unspecified" model
+- **Maintain all existing patterns** - no pattern loss
+
+### 2. Handle Matcher Updates
+- **Update all handle matchers** to work with new structure
+- **Support brand/model hierarchy** (brand → model → patterns)
+- **Maintain case-insensitive matching** per @match-phase.mdc
+- **Preserve all existing functionality** - no regression in matching accuracy
+
+### 3. Correct Matches Manager Updates
+- **Update CorrectMatchesManager** to work with new structure
+- **Use catalog model names** (like "Unspecified", "Washington") instead of extracted model names
+- **Store full source_text** under the appropriate model
+- **Maintain lowercase storage** for consistency
+
+### 4. Backward Compatibility
+- **No backward compatibility required** - we can rerun pipeline anytime
+- **Update all dependent code** to work with new structure
+- **Remove old structure support** after migration
+
+## Technical Specifications
+
+### YAML Structure Pattern
+```yaml
+artisan_handles:
+  {Brand Name}:
+    {Model Name}:  # "Unspecified" for general, specific name for known models
+      patterns:
+      - {pattern1}
+      - {pattern2}
+    {Another Model}:  # Additional models if applicable
+      patterns:
+      - {pattern3}
+```
+
+### Handle Matcher Interface
+```python
+def match(self, field_data: dict) -> Optional[dict]:
+    """
+    Match handle using brand/model hierarchy.
+    
+    Returns:
+        {
+            "brand": "Declaration Grooming",
+            "model": "Washington",  # or "Unspecified"
+            "source_text": "declaration grooming washington"
+        }
+    """
+```
+
+### Correct Matches Structure
+```yaml
+handle:
+  {Brand Name}:
+    {Model Name}:  # From catalog (Unspecified, Washington, etc.)
+      - {full_source_text_lowercase}
+```
+
+## Implementation Phases
+
+### Phase 1: YAML Restructuring
+1. **Analyze current handles.yaml** to identify specific models vs general patterns
+2. **Create new handles.yaml structure** with brand/model hierarchy
+3. **Move specific model patterns** to their own sections
+4. **Add "Unspecified" model** for all general patterns
+5. **Validate structure** matches knots.yaml pattern
+
+### Phase 2: Handle Matcher Updates
+1. **Update handle matchers** to traverse brand/model hierarchy
+2. **Maintain pattern matching logic** with new structure
+3. **Update return format** to include model information
+4. **Add comprehensive tests** for new structure
+
+### Phase 3: Correct Matches Manager Updates
+1. **Update CorrectMatchesManager** to use catalog model names
+2. **Fix handle section structure** in correct_matches.yaml
+3. **Maintain split_brush compatibility**
+4. **Update tests** for new behavior
+
+### Phase 4: Integration and Testing
+1. **Update all dependent code** (brush matchers, etc.)
+2. **Comprehensive integration testing**
+3. **Validate correct_matches.yaml structure**
+4. **Performance testing** to ensure no regression
+
+## Success Criteria
+
+### Functional Requirements
+- [ ] All existing handle patterns continue to work
+- [ ] New structure matches knots.yaml pattern
+- [ ] Correct matches handle section uses proper model names
+- [ ] No regression in matching accuracy
+- [ ] All tests pass with new structure
+
+### Quality Requirements
+- [ ] Consistent casing handling (proper brand casing, lowercase storage)
+- [ ] No duplicate brand/model entries
+- [ ] Clean YAML structure with proper indentation
+- [ ] Comprehensive test coverage for new structure
+
+### Performance Requirements
+- [ ] No significant performance regression in handle matching
+- [ ] Efficient brand/model hierarchy traversal
+- [ ] Minimal memory overhead for new structure
+
+## Risks and Mitigation
+
+### Risk: Pattern Matching Regression
+- **Mitigation**: Comprehensive test suite with existing patterns
+- **Mitigation**: Gradual migration with validation at each step
+
+### Risk: Correct Matches Incompatibility
+- **Mitigation**: Update CorrectMatchesManager before YAML changes
+- **Mitigation**: Validate correct_matches.yaml structure after changes
+
+### Risk: Performance Impact
+- **Mitigation**: Benchmark before and after changes
+- **Mitigation**: Optimize brand/model hierarchy traversal if needed
+
+## Dependencies
+
+### Internal Dependencies
+- `sotd/match/brush_matching_strategies/` - Handle matchers
+- `sotd/match/tools/managers/correct_matches_manager.py` - Correct matches handling
+- `tests/match/` - Test suite updates
+
+### External Dependencies
+- None - this is a self-contained restructuring
+
+## Testing Strategy
+
+### Unit Tests
+- **Handle matcher tests** with new structure
+- **Pattern matching tests** for all existing patterns
+- **Model extraction tests** for brand/model hierarchy
+- **Correct matches manager tests** for new structure
+
+### Integration Tests
+- **End-to-end handle matching** with new YAML structure
+- **Correct matches saving/loading** with new format
+- **Brush splitting integration** with updated handle matchers
+
+### Performance Tests
+- **Handle matching performance** before/after changes
+- **Memory usage** with new structure
+- **Large dataset handling** with brand/model hierarchy
+
+## Migration Plan
+
+### Pre-Migration
+1. **Backup current handles.yaml**
+2. **Document current pattern coverage**
+3. **Create comprehensive test baseline**
+
+### Migration Steps
+1. **Update handle matchers** to support new structure
+2. **Update correct matches manager** for new format
+3. **Restructure handles.yaml** to new format
+4. **Update all dependent code**
+5. **Run comprehensive tests**
+
+### Post-Migration
+1. **Validate all patterns still work**
+2. **Verify correct_matches.yaml structure**
+3. **Performance validation**
+4. **Document new structure**
+
+## Future Considerations
+
+### Model Discovery
+- **Manual identification** of specific models during restructuring
+- **Future model additions** can follow established pattern
+- **Consistent naming** for model discovery
+
+### Reporting Enhancements
+- **Handle model reporting** in aggregation phase
+- **Model-specific analytics** for handles with known models
+- **Consistent reporting** across handles and knots
+
+### Catalog Evolution
+- **Easy addition** of new handle models
+- **Consistent structure** with knots.yaml
+- **Maintainable pattern organization**
+
+## Conclusion
+
+This restructuring will provide a consistent, maintainable structure for handles that matches the established knots.yaml pattern. It will improve the organization of correct_matches.yaml and enable future handle model reporting while maintaining all existing functionality.
+
+The implementation should be done in phases with comprehensive testing at each step to ensure no regression in matching accuracy or performance.
+description:
+globs:
+alwaysApply: false
+---
