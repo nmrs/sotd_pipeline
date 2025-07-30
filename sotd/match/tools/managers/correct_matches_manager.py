@@ -116,6 +116,54 @@ class CorrectMatchesManager:
                                                     },
                                                     "field": field,
                                                 }
+                        elif field == "split_brush":
+                            # Handle split_brush section
+                            for original, components in field_data.items():
+                                if isinstance(components, dict):
+                                    handle_component = components.get("handle", "")
+                                    knot_component = components.get("knot", "")
+
+                                    # Create a combined key for split brush
+                                    combined_components = (
+                                        f"{handle_component} || {knot_component}".lower().strip()
+                                    )
+                                    match_key = (
+                                        f"brush:{original.lower().strip()}"
+                                        f"{ITEM_KEY_DELIMITER}{combined_components}"
+                                    )
+                                    self._correct_matches.add(match_key)
+                                    self._correct_matches_data[match_key] = {
+                                        "original": original,
+                                        "matched": {
+                                            "brand": None,
+                                            "model": None,
+                                            "handle": {
+                                                "brand": (
+                                                    handle_component.split(" ", 1)[0]
+                                                    if handle_component
+                                                    else ""
+                                                ),
+                                                "model": (
+                                                    handle_component.split(" ", 1)[1]
+                                                    if handle_component and " " in handle_component
+                                                    else handle_component
+                                                ),
+                                            },
+                                            "knot": {
+                                                "brand": (
+                                                    knot_component.split(" ", 1)[0]
+                                                    if knot_component
+                                                    else ""
+                                                ),
+                                                "model": (
+                                                    knot_component.split(" ", 1)[1]
+                                                    if knot_component and " " in knot_component
+                                                    else knot_component
+                                                ),
+                                            },
+                                        },
+                                        "field": "brush",
+                                    }
                         else:
                             # Handle flat structure for other fields
                             for brand, brand_data in field_data.items():
@@ -213,10 +261,11 @@ class CorrectMatchesManager:
                         if "split_brush" not in field_data:
                             field_data["split_brush"] = {}
 
-                        # Save split brush mapping
-                        field_data["split_brush"][original] = {
-                            "handle": handle_component,
-                            "knot": knot_component,
+                        # Save split brush mapping - convert to lowercase for consistency
+                        normalized_original = original.lower().strip()
+                        field_data["split_brush"][normalized_original] = {
+                            "handle": handle_component.lower().strip() if handle_component else "",
+                            "knot": knot_component.lower().strip() if knot_component else "",
                         }
 
                         # Save handle component to handle section

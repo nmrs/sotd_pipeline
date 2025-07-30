@@ -34,54 +34,6 @@ class TestSplitBrushAPIE2E:
         """Test complete split brush workflow through API endpoints."""
 
         # Step 1: Test API mismatch analysis with split brush data
-        # Create sample matched data with split brushes
-        sample_data = {
-            "data": [
-                {
-                    "id": "1",
-                    "brush": {
-                        "original": "jayaruh #441 w/ ap shave co g5c",
-                        "normalized": "jayaruh #441 w/ ap shave co g5c",
-                        "matched": {
-                            "brand": None,
-                            "model": None,
-                            "handle": {
-                                "brand": "Jayaruh",
-                                "model": "#441",
-                                "normalized": "jayaruh #441",
-                            },
-                            "knot": {
-                                "brand": "AP Shave Co",
-                                "model": "G5C",
-                                "normalized": "ap shave co g5c",
-                            },
-                        },
-                        "match_type": "split_detection",
-                        "confidence": 0.8,
-                    },
-                },
-                {
-                    "id": "2",
-                    "brush": {
-                        "original": "declaration b2 in mozingo handle",
-                        "normalized": "declaration b2 in mozingo handle",
-                        "matched": {
-                            "brand": None,
-                            "model": None,
-                            "handle": {
-                                "brand": "Declaration",
-                                "model": "B2",
-                                "normalized": "declaration b2",
-                            },
-                        },
-                        "match_type": "split_detection",
-                        "confidence": 0.7,
-                    },
-                },
-            ]
-        }
-
-        # Step 2: Test API endpoint with split brush data
         # Note: This is a simplified test since we can't easily mock the full API
         # In a real scenario, we would test the actual API endpoints
 
@@ -123,8 +75,8 @@ class TestSplitBrushAPIE2E:
         assert "jayaruh #441 w/ ap shave co g5c" in split_brush_data
 
         brush_entry = split_brush_data["jayaruh #441 w/ ap shave co g5c"]
-        assert brush_entry["handle"] == "Jayaruh #441"
-        assert brush_entry["knot"] == "AP Shave Co G5C"
+        assert brush_entry["handle"] == "jayaruh #441"
+        assert brush_entry["knot"] == "ap shave co g5c"
 
         # Step 5: Test component reuse
         # Mark another split brush with the same handle component
