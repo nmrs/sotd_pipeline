@@ -1,0 +1,83 @@
+# Knot Fallback Strategies Specification
+
+## Overview
+Implement two new fallback strategies for knot matching to handle unknown knots that aren't matched by existing catalog entries:
+1. **FiberFallbackStrategy** - Uses fiber detection to create "Unspecified - {Fiber}" entries
+2. **KnotSizeFallbackStrategy** - Creates "Unspecified - {Size}" entries for size-only specifications
+
+## Problem Statement
+Current knot matching fails for unknown knots like:
+- "Timberwolf 24mm" (unknown maker, but fiber detectable)
+- "Custom 26mm" (unknown maker, no fiber, but size detectable)
+
+These should be matched as generic entries rather than remaining unmatched.
+
+## Requirements
+
+### 1. Strategy Implementation
+- Create new strategy classes that inherit from `BaseBrushMatchingStrategy`
+- Add strategies to `KnotMatcher` strategies list
+- Priority: After ALL existing knot strategies (final fallback)
+- Return `MatchResult` objects (consistent with other strategies)
+
+### 2. FiberFallbackStrategy
+- Use `fiber_utils.py` to detect fiber type
+- If no fiber detected → return `None` (unmatched)
+- If fiber detected → create "Unspecified" brand with fiber as model
+- Set `fiber_strategy: "fiber_fallback"` in result
+- **NO size extraction** - let enrich phase handle this
+
+### 3. KnotSizeFallbackStrategy
+- For cases with no fiber detected but size information present
+- Use `knot_size_utils.py` for size extraction
+- Create `brand: "Unspecified", model: "{size}mm", fiber: None`
+- **NO knot_size_mm field** - let enrich phase handle this
+
+### 4. Strategy Order
+1. Existing knot strategies (known_knots, other_knots, etc.)
+2. **FiberFallbackStrategy** (new)
+3. **KnotSizeFallbackStrategy** (new)
+
+### 5. Integration
+- Add both strategies to existing `KnotMatcher` strategies list
+- Error handling: Fail fast for debugging (let errors bubble up)
+
+### 6. Example Results
+- **"Timberwolf 24mm"** → `brand: "Unspecified", model: "Synthetic", fiber: "Synthetic", fiber_strategy: "fiber_fallback"`
+- **"Custom 26mm"** → `brand: "Unspecified", model: "26mm", fiber: None`
+
+### 7. Testing Requirements
+- Unit tests for both strategies
+- Real examples: "Timberwolf 24mm", "Custom 26mm"
+- Edge cases: "24 mm" (with space), "Custom" (no size), "Unknown" (no fiber/size)
+- Integration tests with existing knot matching
+
+## Technical Details
+
+### Dependencies
+- `fiber_utils.py` - for fiber detection
+- `knot_size_utils.py` - for size extraction
+- `BaseBrushMatchingStrategy` - base class for strategies
+- `MatchResult` - return type for consistency
+
+### Files to Modify
+- `sotd/match/brush_matching_strategies/` - new strategy files
+- `sotd/match/knot_matcher.py` - integration
+- `tests/match/brush_matching_strategies/` - unit tests
+
+### Files to Create
+- `sotd/match/brush_matching_strategies/fiber_fallback_strategy.py`
+- `sotd/match/brush_matching_strategies/knot_size_fallback_strategy.py`
+- `tests/match/brush_matching_strategies/test_fiber_fallback_strategy.py`
+- `tests/match/brush_matching_strategies/test_knot_size_fallback_strategy.py`
+
+## Success Criteria
+1. "Timberwolf 24mm" matches as Unspecified Synthetic
+2. "Custom 26mm" matches as Unspecified 26mm
+3. No regression in existing knot matching
+4. All tests pass
+5. Integration with existing brush matching pipeline works correctly
+description:
+globs:
+alwaysApply: false
+---

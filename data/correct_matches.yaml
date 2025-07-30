@@ -594,6 +594,8 @@ brush:
     BFM:
     - '>![redacted]!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn
       woodworks handle $frankenbrush'
+    - '>!redacted!< $bigfuckingmotherload'
+    - '>!redacted!< [bigfuckingmotherload]'
     - '>!redacted!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn
       woodworks handle'
     - muninn woodworks "bfm" 50mm motherlode
@@ -706,16 +708,19 @@ brush:
     - zenith r/wetshaving sub exclusive moar boar
     - zentih - moar boar r/wetshaving
 handle:
-  Dogwood Handcrafts:
+  Yaqi:
     Unspecified:
-    - 3dogwood
-  Jayaruh:
-    Unspecified:
-    - 'jayaruh #441'
+    - yaqi unspecified
+  yaqi:
+    unspecified:
+    - yaqi unspecified
 knot:
-  AP Shave Co:
-    G5C:
-    - ap shave co g5c
+  Yaqi:
+    Synthetic:
+    - yaqi synthetic
+  yaqi:
+    synthetic:
+    - yaqi synthetic
 razor:
   3D Printed:
     DE:
@@ -2148,9 +2153,6 @@ razor:
     X3:
     - ikon x3
 split_brush:
-  3dogwood w/ dg b12 butterscotch 2 band badger:
-    handle: 3dogwood
-    knot: dg b12 butterscotch 2 band badger
-  'jayaruh #441 w/ ap shave co g5c':
-    handle: 'jayaruh #441'
-    knot: ap shave co g5c
+  22mm yaqi synth:
+    handle: yaqi unspecified
+    knot: yaqi synthetic

@@ -242,7 +242,7 @@ const MismatchAnalyzer: React.FC = () => {
     try {
       setMarkingCorrect(true);
 
-      // Convert selected items to match format
+      // Send the complete match data directly
       const matches = results.mismatch_items
         .filter(item => {
           const itemKey = `${selectedField}:${item.original.toLowerCase()}`;
@@ -290,7 +290,7 @@ const MismatchAnalyzer: React.FC = () => {
     try {
       setRemovingCorrect(true);
 
-      // Convert selected items to match format
+      // Send the complete match data directly
       const matches = results.mismatch_items
         .filter(item => {
           const itemKey = `${selectedField}:${item.original.toLowerCase()}`;

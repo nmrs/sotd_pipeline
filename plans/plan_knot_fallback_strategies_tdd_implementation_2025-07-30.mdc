@@ -1,0 +1,249 @@
+# Knot Fallback Strategies TDD Implementation Plan
+
+## 📘 Project Summary
+Implement two new fallback strategies for knot matching using test-driven development:
+1. **FiberFallbackStrategy** - Uses fiber detection for unknown knots with detectable fiber types
+2. **KnotSizeFallbackStrategy** - Creates generic entries for size-only specifications
+
+This will handle cases like "Timberwolf 24mm" and "Custom 26mm" that currently remain unmatched.
+
+## 🧩 Component Steps
+
+### Step 1: FiberFallbackStrategy Unit Tests ✅ COMPLETE
+Create comprehensive unit tests for the fiber fallback strategy before implementation.
+
+### Step 2: FiberFallbackStrategy Implementation ✅ COMPLETE
+Implement the strategy class with fiber detection logic.
+
+### Step 3: KnotSizeFallbackStrategy Unit Tests ✅ COMPLETE
+Create unit tests for the size-based fallback strategy.
+
+### Step 4: KnotSizeFallbackStrategy Implementation ✅ COMPLETE
+Implement the strategy class with size extraction logic.
+
+### Step 5: Integration Tests ✅ COMPLETE
+Test both strategies integrated with the existing KnotMatcher.
+
+### Step 6: KnotMatcher Integration ✅ COMPLETE
+Add both strategies to the KnotMatcher strategies list.
+
+### Step 7: End-to-End Testing ✅ COMPLETE
+Test complete brush matching pipeline with new strategies.
+
+## 🔁 Implementation Prompts
+
+### Step 1: FiberFallbackStrategy Unit Tests
+
+```text
+Create comprehensive unit tests for the FiberFallbackStrategy class. The strategy should:
+
+1. Use fiber_utils.py to detect fiber types in unknown knot text
+2. Return None if no fiber is detected
+3. Return a MatchResult with brand="Unspecified", model=fiber_type, fiber=fiber_type if fiber is detected
+4. Set fiber_strategy="fiber_fallback" in the result
+5. Not extract size information (let enrich phase handle this)
+
+Test cases to include:
+- "Timberwolf 24mm" → should match as "Synthetic" (from "timber" pattern)
+- "Custom Badger" → should match as "Badger"
+- "Unknown Boar" → should match as "Boar"
+- "Custom 26mm" → should return None (no fiber detected)
+- "Unknown" → should return None (no fiber detected)
+- "Mixed Badger/Boar" → should match as "Mixed Badger/Boar"
+- "Horse Hair" → should match as "Horse"
+
+Create the test file at tests/match/brush_matching_strategies/test_fiber_fallback_strategy.py
+Follow the existing test patterns in the project.
+Use pytest fixtures and mock fiber_utils.py if needed.
+```
+
+### Step 2: FiberFallbackStrategy Implementation
+
+```text
+Implement the FiberFallbackStrategy class based on the unit tests created in Step 1.
+
+Requirements:
+1. Inherit from BaseBrushMatchingStrategy
+2. Implement match() method that takes a string and returns Optional[MatchResult]
+3. Use fiber_utils.match_fiber() to detect fiber types
+4. Return None if no fiber detected
+5. Return MatchResult with:
+   - brand: "Unspecified"
+   - model: detected_fiber
+   - fiber: detected_fiber
+   - fiber_strategy: "fiber_fallback"
+   - source_text: input_text
+   - _matched_by_strategy: "FiberFallbackStrategy"
+   - _pattern_used: "fiber_detection"
+   - match_type: "fiber_fallback"
+6. Do NOT extract size information (let enrich phase handle this)
+
+Create the file at sotd/match/brush_matching_strategies/fiber_fallback_strategy.py
+Follow the existing strategy patterns in the project.
+Import necessary dependencies and use proper type hints.
+```
+
+### Step 3: KnotSizeFallbackStrategy Unit Tests
+
+```text
+Create comprehensive unit tests for the KnotSizeFallbackStrategy class. The strategy should:
+
+1. Only run when no fiber is detected (after FiberFallbackStrategy)
+2. Use knot_size_utils.py to extract size information
+3. Return None if no size is detected
+4. Return a MatchResult with brand="Unspecified", model="{size}mm", fiber=None if size is detected
+5. Not set knot_size_mm field (let enrich phase handle this)
+
+Test cases to include:
+- "Custom 26mm" → should match as model="26mm"
+- "Unknown 24 mm" → should match as model="24mm" (handle space)
+- "Custom" → should return None (no size detected)
+- "Unknown" → should return None (no size detected)
+- "Timberwolf 24mm" → should return None (fiber detected, so this strategy shouldn't run)
+- "Custom 27.5mm" → should match as model="27.5mm"
+- "Unknown 28x50" → should match as model="28mm" (first number in NxM pattern)
+
+Create the test file at tests/match/brush_matching_strategies/test_knot_size_fallback_strategy.py
+Follow the existing test patterns in the project.
+Use pytest fixtures and mock knot_size_utils.py if needed.
+```
+
+### Step 4: KnotSizeFallbackStrategy Implementation
+
+```text
+Implement the KnotSizeFallbackStrategy class based on the unit tests created in Step 3.
+
+Requirements:
+1. Inherit from BaseBrushMatchingStrategy
+2. Implement match() method that takes a string and returns Optional[MatchResult]
+3. Use knot_size_utils.parse_knot_size() to extract size information
+4. Return None if no size detected
+5. Return MatchResult with:
+   - brand: "Unspecified"
+   - model: "{size}mm"
+   - fiber: None
+   - source_text: input_text
+   - _matched_by_strategy: "KnotSizeFallbackStrategy"
+   - _pattern_used: "size_detection"
+   - match_type: "size_fallback"
+6. Do NOT set knot_size_mm field (let enrich phase handle this)
+
+Create the file at sotd/match/brush_matching_strategies/knot_size_fallback_strategy.py
+Follow the existing strategy patterns in the project.
+Import necessary dependencies and use proper type hints.
+```
+
+### Step 5: Integration Tests
+
+```text
+Create integration tests that verify both fallback strategies work correctly when integrated with the existing KnotMatcher.
+
+Test scenarios:
+1. Test that FiberFallbackStrategy runs before KnotSizeFallbackStrategy
+2. Test that "Timberwolf 24mm" matches via FiberFallbackStrategy (not KnotSizeFallbackStrategy)
+3. Test that "Custom 26mm" matches via KnotSizeFallbackStrategy (after FiberFallbackStrategy returns None)
+4. Test that existing known knots still match correctly (no regression)
+5. Test that completely unmatched knots return None
+
+Create the test file at tests/match/test_knot_fallback_integration.py
+Use real KnotMatcher instances with both strategies added.
+Test the complete matching flow from input text to final result.
+Verify strategy execution order and results.
+```
+
+### Step 6: KnotMatcher Integration
+
+```text
+Modify the KnotMatcher to include both fallback strategies in the correct order.
+
+Requirements:
+1. Import both new strategy classes
+2. Add FiberFallbackStrategy to the strategies list (after existing strategies)
+3. Add KnotSizeFallbackStrategy to the strategies list (after FiberFallbackStrategy)
+4. Ensure the strategies list order is correct for proper fallback behavior
+5. Update any necessary imports or dependencies
+
+Modify the file at sotd/match/knot_matcher.py
+Follow the existing patterns for strategy initialization.
+Ensure no breaking changes to existing functionality.
+Add proper imports for the new strategy classes.
+```
+
+### Step 7: End-to-End Testing
+
+```text
+Create end-to-end tests that verify the complete brush matching pipeline works correctly with the new fallback strategies.
+
+Test scenarios:
+1. Test complete brush matching with "3D Printed - Timberwolf 24mm" (split brush case)
+2. Test complete brush matching with "Custom 26mm" (size-only case)
+3. Test that existing brush matching still works correctly
+4. Test integration with the enrich phase (size extraction)
+5. Test that the strategies don't interfere with known knot matching
+
+Create the test file at tests/integration/test_knot_fallback_e2e.py
+Use the complete brush matching pipeline.
+Test with real brush text inputs and verify final results.
+Ensure no regressions in existing functionality.
+```
+
+## 🧠 Critical Analysis
+
+### Prompt Sequence Analysis
+The plan follows a logical TDD progression:
+1. **Tests First**: Each strategy has comprehensive unit tests before implementation
+2. **Incremental Build**: Each step builds on the previous one
+3. **Integration Focus**: Steps 5-7 ensure proper integration with existing systems
+4. **No Dangling Pieces**: Each step produces complete, testable functionality
+
+### Risk Assessment
+- **Low Risk**: Both strategies are fallback-only and won't interfere with existing matching
+- **Dependency Management**: Uses existing utilities (fiber_utils, knot_size_utils)
+- **Testing Coverage**: Comprehensive unit and integration tests prevent regressions
+
+### Refinements Made
+- **Strategy Order**: Clearly defined execution order to prevent conflicts
+- **Size Handling**: Explicitly delegated to enrich phase to maintain separation of concerns
+- **Error Handling**: Fail-fast approach for debugging during development
+
+### Buildability Verification
+- **Step Independence**: Each step can be implemented and tested independently
+- **Integration Points**: Clear integration points with existing KnotMatcher
+- **Test Coverage**: Each step includes comprehensive testing requirements
+- **No Orphaned Code**: All components integrate into the existing pipeline
+
+The plan is lean, safe, and buildable via codegen prompts with no dangling pieces.
+
+## ✅ Implementation Summary
+
+### Completed Work
+- **FiberFallbackStrategy**: Successfully implemented with comprehensive unit tests
+- **KnotSizeFallbackStrategy**: Successfully implemented with comprehensive unit tests
+- **Integration**: Both strategies integrated into KnotMatcher with correct execution order
+- **Testing**: 48 tests passing (12 unit tests + 10 integration tests + 11 e2e tests + 15 existing tests)
+- **Quality**: All code follows project standards and passes quality checks
+
+### Key Achievements
+- **TDD Approach**: All tests written before implementation, ensuring comprehensive coverage
+- **Fallback Priority**: FiberFallbackStrategy runs before KnotSizeFallbackStrategy as designed
+- **No Regressions**: Existing brush matching functionality remains intact
+- **Real-world Validation**: End-to-end tests verify actual pipeline behavior
+
+### Lessons Learned
+- **Brush Splitter Behavior**: The brush splitter treats many inputs as split brushes, creating handle/knot sections
+- **Strategy Integration**: Fallback strategies work correctly within the existing KnotMatcher architecture
+- **Pattern Matching**: Fiber detection patterns (like "g5c") can match before other strategies
+- **Data Structure**: Understanding the actual MatchResult structure was crucial for test accuracy
+
+### Files Created/Modified
+- `sotd/match/brush_matching_strategies/fiber_fallback_strategy.py` (new)
+- `sotd/match/brush_matching_strategies/knot_size_fallback_strategy.py` (new)
+- `tests/match/brush_matching_strategies/test_fiber_fallback_strategy.py` (new)
+- `tests/match/brush_matching_strategies/test_knot_size_fallback_strategy.py` (new)
+- `tests/match/test_knot_fallback_integration.py` (new)
+- `tests/integration/test_knot_fallback_e2e.py` (new)
+- `sotd/match/brush_matcher.py` (modified - added strategy imports and integration)
+description:
+globs:
+alwaysApply: false
+---

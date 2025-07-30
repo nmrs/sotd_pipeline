@@ -149,7 +149,9 @@ class MarkCorrectRequest(BaseModel):
     """Request model for marking matches as correct."""
 
     field: str = Field(..., description="Field type (razor, blade, brush, soap)")
-    matches: List[Dict[str, Any]] = Field(..., description="List of matches to mark as correct")
+    matches: List[Dict[str, Any]] = Field(
+        ..., description="List of matches with original and matched data to mark as correct"
+    )
     force: bool = Field(default=False, description="Force operation without confirmation")
 
 
@@ -870,7 +872,6 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
         # Import the correct matches manager
         try:
             from rich.console import Console
-
             from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
         except ImportError as e:
             raise HTTPException(
@@ -900,10 +901,15 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
                 # Debug logging
                 logger.info(f"Processing match - original: {original}, matched: {matched}")
 
-                # Create match key and mark as correct
+                # Use the proper method to mark as correct
                 match_key = manager.create_match_key(request.field, original, matched)
                 manager.mark_match_as_correct(
-                    match_key, {"original": original, "matched": matched, "field": request.field}
+                    match_key,
+                    {
+                        "original": original,
+                        "matched": matched,
+                        "field": request.field,
+                    },
                 )
                 marked_count += 1
 

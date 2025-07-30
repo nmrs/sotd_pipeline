@@ -26,10 +26,11 @@ class OtherKnotMatchingStrategy:
                 continue
 
             # Extract metadata fields
+            default_fiber = metadata.get("default")
             pattern_metadata = {
                 "brand": brand,
-                "model": None,  # Other knots don't have specific models
-                "fiber": metadata.get("default"),  # Use default fiber
+                "model": default_fiber,  # Use default fiber as model name
+                "fiber": default_fiber,  # Use default fiber
                 "knot_size_mm": metadata.get("knot_size_mm"),
             }
 
@@ -62,7 +63,7 @@ class OtherKnotMatchingStrategy:
                     original_value=value,
                     matched_data={
                         "brand": pattern_data["brand"],
-                        "model": pattern_data["model"],
+                        "model": pattern_data["model"],  # Now uses fiber as model
                         "fiber": pattern_data["fiber"],
                         "knot_size_mm": pattern_data["knot_size_mm"],
                     },

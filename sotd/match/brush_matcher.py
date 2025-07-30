@@ -1,6 +1,11 @@
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from sotd.match.brush_matching_strategies.fiber_fallback_strategy import FiberFallbackStrategy
+from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import (
+    KnotSizeFallbackStrategy,
+)
+
 # import yaml  # unused
 from sotd.match.brush_matching_strategies.known_brush_strategy import (
     KnownBrushMatchingStrategy,
@@ -91,6 +96,8 @@ class BrushMatcher:
         self.knot_strategies = [
             KnownKnotMatchingStrategy(self.knots_data.get("known_knots", {})),
             OtherKnotMatchingStrategy(self.knots_data.get("other_knots", {})),
+            FiberFallbackStrategy(),  # After existing strategies
+            KnotSizeFallbackStrategy(),  # After FiberFallbackStrategy
         ]
         # For handle/knot matching, use both sets of strategies
         self.strategies = self.brush_strategies + self.knot_strategies

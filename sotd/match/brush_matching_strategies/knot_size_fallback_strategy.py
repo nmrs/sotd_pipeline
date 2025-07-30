@@ -1,0 +1,66 @@
+"""
+Knot size fallback strategy for brush matching.
+
+This strategy attempts to match unknown knots by extracting size information
+using the knot_size_utils module. It's used as a fallback when other
+strategies fail to match and no fiber is detected.
+"""
+
+from typing import Optional
+
+from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
+    BaseBrushMatchingStrategy,
+)
+from sotd.match.brush_matching_strategies.utils.knot_size_utils import parse_knot_size
+from sotd.match.types import MatchResult, create_match_result
+
+
+class KnotSizeFallbackStrategy(BaseBrushMatchingStrategy):
+    """
+    Fallback strategy that matches unknown knots by extracting size information.
+
+    This strategy uses knot_size_utils.parse_knot_size() to extract size
+    information from unknown knot text. If a size is detected, it returns
+    a MatchResult with brand="Unspecified" and model="{size}mm".
+    """
+
+    def match(self, value: str) -> Optional[MatchResult]:
+        """
+        Attempt to match the given string by extracting size information.
+
+        Args:
+            value: The knot text to match
+
+        Returns:
+            MatchResult if size is detected, None otherwise
+        """
+        if not value or not value.strip():
+            return None
+
+        # Use knot_size_utils to extract size
+        detected_size = parse_knot_size(value)
+
+        if not detected_size:
+            return None
+
+        # Create match result with detected size
+        # Format as integer if whole number, otherwise keep decimal
+        if detected_size.is_integer():
+            model = f"{int(detected_size)}mm"
+        else:
+            model = f"{detected_size}mm"
+
+        matched_data = {
+            "brand": "Unspecified",
+            "model": model,
+            "fiber": None,
+            "_matched_by_strategy": "KnotSizeFallbackStrategy",
+            "_pattern_used": "size_detection",
+        }
+
+        return create_match_result(
+            original=value,
+            matched=matched_data,
+            match_type="size_fallback",
+            pattern="size_detection",
+        )

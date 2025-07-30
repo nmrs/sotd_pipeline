@@ -39,7 +39,7 @@ class TestOtherKnotMatchingStrategy:
         result = self.strategy.match("AP Shave Co")
         assert result.matched is not None
         assert result.matched["brand"] == "AP Shave Co"
-        assert result.matched["model"] is None  # No specific model
+        assert result.matched["model"] == "Synthetic"  # Now uses fiber as model
         assert result.matched["fiber"] == "Synthetic"
         assert result.matched["knot_size_mm"] is None
         assert result.match_type == "regex"
@@ -49,6 +49,7 @@ class TestOtherKnotMatchingStrategy:
         result = self.strategy.match("Alpha")
         assert result.matched is not None
         assert result.matched["brand"] == "Alpha"
+        assert result.matched["model"] == "Synthetic"  # Now uses fiber as model
         assert result.matched["fiber"] == "Synthetic"
 
     def test_other_knot_with_knot_size(self):
@@ -56,6 +57,7 @@ class TestOtherKnotMatchingStrategy:
         result = self.strategy.match("Chisel & Hound")
         assert result.matched is not None
         assert result.matched["brand"] == "Chisel & Hound"
+        assert result.matched["model"] == "Badger"  # Now uses fiber as model
         assert result.matched["fiber"] == "Badger"
         assert result.matched["knot_size_mm"] == 26
 
@@ -64,6 +66,7 @@ class TestOtherKnotMatchingStrategy:
         result = self.strategy.match("APSC")
         assert result.matched is not None
         assert result.matched["brand"] == "AP Shave Co"
+        assert result.matched["model"] == "Synthetic"  # Now uses fiber as model
         assert result.matched["fiber"] == "Synthetic"
 
     def test_other_knot_case_insensitive(self):
@@ -71,6 +74,7 @@ class TestOtherKnotMatchingStrategy:
         result = self.strategy.match("alpha")
         assert result.matched is not None
         assert result.matched["brand"] == "Alpha"
+        assert result.matched["model"] == "Synthetic"  # Now uses fiber as model
         assert result.matched["fiber"] == "Synthetic"
 
     def test_no_match_for_unknown_brand(self):
