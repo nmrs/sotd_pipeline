@@ -1,0 +1,708 @@
+# Split Brush Correct Matches Fix - TDD Implementation Plan
+
+**Date**: 2025-07-30  
+**Status**: TODO  
+**Type**: Implementation Plan (TDD)  
+
+## 📘 Project Summary
+
+Implement split brush correct matches functionality for the SOTD Pipeline WebUI. This feature will enable users to mark split brushes (e.g., "Jayaruh #441 w/ AP Shave Co G5C") as correct matches, storing them in a new `split_brush` section in `correct_matches.yaml` with component references to separate `handle` and `knot` sections for efficient matching and component reuse.
+
+**Key Features**:
+- Detect split brushes from existing matched data (brand: null, model: null, handle/knot sections present)
+- Extend MismatchAnalyzer to handle split brush identification and storage
+- Add split brush display and filtering to WebUI
+- Enable component reuse across different split brush combinations
+- Follow DRY architecture using existing API endpoints
+
+## 🧩 Component Steps
+
+### Phase 1: Core Data Structure and Models
+1. **Extend MismatchItem Model** - Add split brush fields to existing model
+2. **Update MismatchAnalyzer Core** - Add split brush detection and storage logic
+3. **Test Core Functionality** - Unit tests for split brush identification and storage
+
+### Phase 2: Backend API Integration
+4. **Extend API Endpoints** - Update existing analyze/mismatch and mark-correct endpoints
+5. **Test API Integration** - Integration tests for split brush API functionality
+6. **Test Error Handling** - Edge cases and malformed data handling
+
+### Phase 3: Match Phase Integration
+7. **Update Match Phase Logic** - Integrate split brush correct matches with existing match phase
+8. **Test Match Phase Integration** - Ensure split brush lookup works correctly in match phase
+
+### Phase 4: WebUI Components
+7. **Update MismatchAnalyzer Display** - Add split brush indicators and component breakdown
+8. **Add Filter Buttons** - Split Brushes and Complete Brushes filters for brush field
+9. **Test UI Components** - React component tests for new functionality
+
+### Phase 5: Integration and Validation
+10. **End-to-End Testing** - Full workflow testing with real data
+11. **Performance Validation** - Ensure efficient component lookup and acceptable performance
+12. **Documentation Update** - Update relevant documentation
+
+## 🔁 Implementation Prompts
+
+### Step 1: Extend MismatchItem Model
+
+```text
+Extend the existing MismatchItem model to support split brush functionality. 
+
+Context: The MismatchItem model is used by the MismatchAnalyzer to represent items that need user validation. We need to add split brush fields to support the new functionality.
+
+Requirements:
+- Add `is_split_brush: bool` field to indicate if this is a split brush item
+- Add `handle_component: str` field to store the handle component string
+- Add `knot_component: str` field to store the knot component string
+- Maintain backward compatibility with existing fields
+- Add type hints and docstrings for new fields
+
+Location: Look for MismatchItem model in the webui/api/ directory or similar location.
+
+Test Requirements:
+- Unit tests for new fields
+- Tests for backward compatibility
+- Tests for field validation
+
+Follow existing code patterns and naming conventions in the codebase.
+```
+
+### Step 2: Update MismatchAnalyzer Core
+
+```text
+Extend the MismatchAnalyzer class to detect and handle split brushes from existing matched data.
+
+Context: The MismatchAnalyzer currently identifies mismatches for regular products. We need to add split brush detection logic that reads from existing matched data files.
+
+Requirements:
+- Add method to detect split brushes from matched data (brand: null, model: null, handle/knot sections present)
+- Add method to extract handle/knot components from existing matched data
+- Add method to save split brush mappings to correct_matches.yaml with new structure
+- Add method to load split brush mappings from correct_matches.yaml
+- Follow existing patterns for file I/O and data processing
+
+Split Brush Detection Logic:
+- Check for brand: null AND model: null AND presence of handle section AND/OR knot section
+- Support three types of split brushes:
+  - Handle-only: brand=null, model=null, handle section exists, no knot section
+  - Knot-only: brand=null, model=null, knot section exists, no handle section
+  - Both components: brand=null, model=null, both handle and knot sections exist
+- Extract handle/knot components from existing matched data
+- Create MismatchItem with is_split_brush=True and component fields populated
+
+Data Structure for correct_matches.yaml:
+```yaml
+split_brush:
+  "Jayaruh #441 w/ AP Shave Co G5C":
+    handle: "Jayaruh #441"
+    knot: "AP Shave Co G5C"
+
+handle:
+  Jayaruh:
+    "#441":
+      - "Jayaruh #441"
+
+knot:
+  "AP Shave Co":
+    "G5C":
+      - "AP Shave Co G5C"
+```
+
+Test Requirements:
+- Unit tests for split brush detection logic
+- Unit tests for component extraction
+- Unit tests for save/load operations
+- Tests with real matched data examples
+- Error handling tests for malformed data
+
+Location: Look for MismatchAnalyzer class in webui/api/ directory.
+```
+
+### Step 3: Test Core Functionality
+
+```text
+Create comprehensive unit tests for the split brush functionality added in previous steps.
+
+Context: We've extended the MismatchItem model and MismatchAnalyzer class. Now we need thorough testing to ensure the functionality works correctly.
+
+Test Requirements:
+
+1. MismatchItem Model Tests:
+   - Test new split brush fields (is_split_brush, handle_component, knot_component)
+   - Test backward compatibility with existing fields
+   - Test field validation and type checking
+   - Test serialization/deserialization
+
+2. MismatchAnalyzer Split Brush Detection Tests:
+   - Test detection of valid split brushes (handle-only, knot-only, both components)
+   - Test non-detection of regular brushes (some conditions not met)
+   - Test edge cases (missing handle/knot sections, null values)
+   - Test with real matched data examples
+   - Test handle-only split brushes (no knot section)
+   - Test knot-only split brushes (no handle section)
+
+3. MismatchAnalyzer Component Extraction Tests:
+   - Test extraction of handle/knot components from matched data
+   - Test handling of components without clear brand/model separation
+   - Test error handling for malformed component data
+
+4. MismatchAnalyzer Save/Load Tests:
+   - Test saving split brush mappings to correct_matches.yaml
+   - Test loading split brush mappings from correct_matches.yaml
+   - Test overwrite behavior when re-marking as correct
+   - Test component reuse (reuse existing handle/knot entries if found)
+   - Test auto-creation of handle/knot entries only when they don't exist
+   - Test error handling for file I/O issues
+
+5. Integration Tests:
+   - Test full workflow from detection to storage
+   - Test with multiple split brush examples
+   - Test component reuse across different combinations
+
+Use existing test patterns in the codebase. Create test fixtures with realistic split brush data. Ensure all edge cases and error conditions are covered.
+```
+
+### Step 4: Extend API Endpoints
+
+```text
+Extend existing API endpoints to handle split brush functionality automatically.
+
+Context: The existing /api/analyze/mismatch and /api/mark-correct endpoints need to be updated to handle split brushes without requiring new endpoints.
+
+Requirements:
+
+1. Update /api/analyze/mismatch endpoint:
+   - Automatically detect split brushes from existing matched data
+   - Include split brush items in mismatch analysis results
+   - Return split brush status and component information in response
+   - Maintain existing functionality for regular products
+
+2. Update /api/mark-correct endpoint:
+   - Handle marking split brushes as correct
+   - Save split brush mappings to correct_matches.yaml
+   - Check for existing handle/knot components and reuse them if found
+   - Auto-create handle/knot entries only if they don't exist
+   - Overwrite existing mappings when re-marking as correct
+   - Maintain existing functionality for regular products
+
+3. Response Format:
+   - Include is_split_brush field in MismatchItem responses
+   - Include handle_component and knot_component fields when applicable
+   - Maintain backward compatibility with existing response format
+
+4. Error Handling:
+   - Handle malformed split brush data gracefully
+   - Provide clear error messages for validation failures
+   - Log errors for debugging purposes
+
+Test Requirements:
+- Unit tests for endpoint updates
+- Integration tests with real data
+- Tests for error handling scenarios
+- Tests for backward compatibility
+- Performance tests for large datasets
+
+Location: Look for API endpoint definitions in webui/api/ directory.
+```
+
+### Step 5: Test API Integration
+
+```text
+Create integration tests for the updated API endpoints to ensure split brush functionality works correctly in real scenarios.
+
+Context: We've updated the API endpoints to handle split brushes. Now we need comprehensive integration testing to verify the functionality works end-to-end.
+
+Test Requirements:
+
+1. API Endpoint Integration Tests:
+   - Test /api/analyze/mismatch with split brush data
+   - Test /api/mark-correct with split brush items
+   - Test full workflow from analysis to marking as correct
+   - Test with multiple split brush examples
+
+2. Data Flow Tests:
+   - Test reading split brushes from existing matched data
+   - Test saving split brush mappings to correct_matches.yaml
+   - Test loading and using saved mappings
+   - Test component reuse across different combinations
+
+3. Error Handling Tests:
+   - Test with malformed split brush data
+   - Test with missing handle/knot sections
+   - Test with null or empty component values
+   - Test file I/O error scenarios
+
+4. Performance Tests:
+   - Test with large datasets using existing data loading patterns
+   - Test component lookup efficiency
+   - Test memory usage with many split brushes
+   - Validate performance is acceptable for real-world usage
+
+5. Backward Compatibility Tests:
+   - Test existing functionality still works
+   - Test regular brush handling unchanged
+   - Test API response format compatibility
+
+Use real matched data examples for testing. Create test fixtures that represent actual split brush scenarios from the SOTD community. Ensure all error conditions and edge cases are covered.
+```
+
+### Step 7: Update Match Phase Logic
+
+```text
+Update the match phase to integrate with the new split brush correct matches functionality.
+
+Context: The match phase currently uses correct_matches.yaml for exact matches. We need to extend this to support the new split_brush section for efficient split brush matching.
+
+Requirements:
+
+1. Update BrushMatcher to check split_brush section first:
+   - Check if input is in split_brush section (exact match)
+   - If found, skip all split detection logic completely
+   - Get handle and knot component references from the mapping
+   - Look up those component references in handle and knot sections
+   - Return matched components with match_type: exact
+
+2. Integration Points:
+   - Update _get_correct_matches_lookup() to include split_brush section
+   - Modify match() method to check split_brush before split detection
+   - Ensure component lookup uses existing handle/knot matching logic
+   - Maintain backward compatibility with existing brush matching
+
+3. Performance Optimization:
+   - Direct lookup eliminates expensive split determination for confirmed matches
+   - Use component references for O(1) lookup in handle/knot sections
+   - Preserve existing split detection logic as fallback
+
+4. Error Handling:
+   - Handle missing component references gracefully
+   - Provide fallback to existing split detection if lookup fails
+   - Log errors for debugging split brush matching issues
+
+Test Requirements:
+- Unit tests for split brush lookup in match phase
+- Integration tests with real split brush data
+- Performance tests comparing lookup vs split detection
+- Error handling tests for malformed split brush mappings
+- Backward compatibility tests with existing brush matching
+
+Location: Look for BrushMatcher class in sotd/match/ directory.
+```
+
+### Step 8: Test Match Phase Integration
+
+```text
+Create comprehensive tests for the match phase integration to ensure split brush correct matches work correctly.
+
+Context: We've updated the match phase to use the new split_brush section. Now we need thorough testing to ensure the integration works correctly and efficiently.
+
+Test Requirements:
+
+1. Split Brush Lookup Tests:
+   - Test exact match lookup in split_brush section
+   - Test component reference lookup in handle/knot sections
+   - Test match_type: exact is set correctly
+   - Test performance improvement over split detection
+
+2. Fallback Logic Tests:
+   - Test fallback to existing split detection when not in split_brush
+   - Test fallback when component references are missing
+   - Test fallback when handle/knot sections are malformed
+   - Test error handling during lookup failures
+
+3. Integration Tests:
+   - Test full workflow from input to matched output
+   - Test with real split brush examples from SOTD data
+   - Test component reuse across different combinations
+   - Test performance with large datasets using existing patterns
+
+4. Backward Compatibility Tests:
+   - Test existing brush matching still works
+   - Test regular brush correct matches unchanged
+   - Test split detection logic unchanged for unconfirmed matches
+
+Use existing test patterns in the codebase. Create test fixtures with realistic split brush data. Ensure all integration points work correctly.
+```
+
+### Step 9: Test Error Handling
+
+```text
+Create comprehensive error handling tests for split brush functionality to ensure robustness.
+
+Context: Split brush data can be malformed or incomplete. We need thorough error handling tests to ensure the system handles these cases gracefully.
+
+Test Requirements:
+
+1. Malformed Data Tests:
+   - Test split brushes with missing handle section
+   - Test split brushes with missing knot section
+   - Test split brushes with null handle/knot values
+   - Test split brushes with empty string components
+   - Test split brushes with invalid component references
+
+2. Edge Case Tests:
+   - Test split brushes with only handle component (no knot)
+   - Test split brushes with only knot component (no handle)
+   - Test components without clear brand/model separation
+   - Test components with special characters or unusual formatting
+
+3. File I/O Error Tests:
+   - Test missing matched data files
+   - Test corrupted matched data files
+   - Test permission issues with correct_matches.yaml
+   - Test disk space issues during save operations
+
+4. Validation Error Tests:
+   - Test invalid split brush identification criteria
+   - Test invalid component extraction logic
+   - Test invalid mapping structure
+   - Test duplicate component references
+
+5. Recovery Tests:
+   - Test system behavior after encountering errors
+   - Test partial data recovery
+   - Test graceful degradation when components are missing
+   - Test logging and error reporting
+
+Error Handling Requirements:
+- Missing sections: Save only the sections that exist
+- Null/empty values: Treat as if section wasn't there
+- Missing referenced components: Automatically add them
+- File errors: Provide clear error messages and log details
+- Validation errors: Skip invalid items and continue processing
+
+Use a variety of test scenarios including real-world edge cases. Ensure error messages are clear and actionable for debugging.
+```
+
+### Step 7: Update MismatchAnalyzer Display
+
+```text
+Update the React component that displays mismatch analysis results to handle split brush items.
+
+Context: The existing mismatch analyzer display needs to be updated to show split brush indicators and component breakdown information.
+
+Requirements:
+
+1. Display Updates:
+   - Show "split" indicator in Matched column for split brush items
+   - Display handle/knot components in separate columns
+   - Add visual indicators (🔗 icon) to show split brush status
+   - Convert backend data structures to human-readable text
+   - Avoid displaying raw JSON data
+
+2. Component Breakdown:
+   - Show handle component in a dedicated column
+   - Show knot component in a dedicated column
+   - Format components for readability
+   - Handle cases where components use "Unknown" brand
+
+3. Visual Indicators:
+   - Add 🔗 icon to indicate split brush status
+   - Use consistent styling with existing UI
+   - Maintain accessibility standards
+   - Provide tooltips for additional information
+
+4. Data Transformation:
+   - Convert backend MismatchItem fields to display format
+   - Handle null/empty component values gracefully
+   - Format "Unknown" brand components appropriately
+   - Maintain existing display for regular brush items
+
+Test Requirements:
+- Unit tests for display component updates
+- Tests for data transformation logic
+- Tests for visual indicator rendering
+- Tests for accessibility features
+- Tests with various split brush examples
+
+Location: Look for mismatch analyzer display components in webui/src/components/ directory.
+```
+
+### Step 8: Add Filter Buttons
+
+```text
+Add filter buttons for "Split Brushes" and "Complete Brushes" to the mismatch analyzer display when the field is "brush".
+
+Context: Users need to be able to filter between split brushes and regular brushes when working with brush data. These filters should only appear when the selected field is "brush".
+
+Requirements:
+
+1. Filter Button Implementation:
+   - Add "Split Brushes" filter button
+   - Add "Complete Brushes" filter button
+   - Only show these filters when selectedField === "brush"
+   - Match existing filter button design (Eye/EyeOff icons, counts, tooltips)
+   - Integrate with existing display modes (All, Mismatches, Unconfirmed, Regex)
+
+2. Filter Logic:
+   - Split Brushes filter: Show only items where is_split_brush === true
+   - Complete Brushes filter: Show only items where is_split_brush === false
+   - Work with existing filter combinations
+   - Update counts and tooltips appropriately
+
+3. UI Integration:
+   - Add buttons to existing filter row
+   - Maintain consistent spacing and styling
+   - Update filter state management
+   - Handle filter combinations correctly
+
+4. User Experience:
+   - Clear visual distinction between filter types
+   - Intuitive button labels and icons
+   - Helpful tooltips explaining filter purpose
+   - Smooth transitions between filter states
+
+Example UI Structure:
+```
+[All] [Mismatches] [Unconfirmed] [Regex] [Split Brushes] [Complete Brushes]
+```
+
+Test Requirements:
+- Unit tests for filter button components
+- Tests for filter logic implementation
+- Tests for UI integration
+- Tests for filter state management
+- Tests for user interaction scenarios
+
+Location: Look for filter components in webui/src/components/ directory.
+```
+
+### Step 9: Test UI Components
+
+```text
+Create comprehensive tests for the updated UI components to ensure split brush functionality works correctly in the user interface.
+
+Context: We've updated the mismatch analyzer display and added filter buttons. Now we need thorough testing to ensure the UI works correctly and provides a good user experience.
+
+Test Requirements:
+
+1. Display Component Tests:
+   - Test split brush indicator rendering
+   - Test component breakdown display
+   - Test visual indicator (🔗 icon) rendering
+   - Test data transformation from backend to display format
+   - Test handling of null/empty component values
+   - Test accessibility features (ARIA labels, keyboard navigation)
+
+2. Filter Button Tests:
+   - Test filter button rendering when field is "brush"
+   - Test filter button hiding when field is not "brush"
+   - Test filter logic for split brushes vs complete brushes
+   - Test filter combinations with existing filters
+   - Test filter state management
+   - Test user interaction (clicking, hovering, tooltips)
+
+3. Integration Tests:
+   - Test full workflow from API response to display
+   - Test filter interactions with real data
+   - Test responsive design on different screen sizes
+   - Test performance with large datasets
+
+4. User Experience Tests:
+   - Test intuitive navigation and interaction in Safari
+   - Test clear visual feedback for user actions
+   - Test consistent styling and layout on Mac
+   - Test Safari accessibility compliance
+
+5. Edge Case Tests:
+   - Test with various split brush examples
+   - Test with missing or malformed data
+   - Test with large numbers of items
+   - Test Safari-specific edge cases
+
+Use React Testing Library for component tests. Create test fixtures with realistic split brush data. Ensure all user interaction scenarios are covered.
+```
+
+### Step 10: End-to-End Testing
+
+```text
+Create end-to-end tests to validate the complete split brush workflow from data detection to user interaction.
+
+Context: We need to ensure the entire split brush functionality works correctly in a real application environment, from backend data processing to frontend user interaction.
+
+Test Requirements:
+
+1. Complete Workflow Tests:
+   - Test split brush detection from existing matched data
+   - Test API endpoint responses with split brush data
+   - Test frontend display of split brush items
+   - Test user marking split brushes as correct
+   - Test saving split brush mappings to correct_matches.yaml
+   - Test component reuse in subsequent analyses
+
+2. Real Data Integration Tests:
+   - Test with actual SOTD matched data files
+   - Test with real split brush examples from the community
+   - Test with various handle/knot combinations
+   - Test with edge cases found in real data
+
+3. User Interaction Tests:
+   - Test complete user workflow from analysis to correction
+   - Test filter functionality with real data
+   - Test display updates after marking items as correct
+   - Test error handling in real scenarios
+
+4. Performance Tests:
+   - Test with large datasets (multiple months of data)
+   - Test component lookup efficiency
+   - Test UI responsiveness with many items
+   - Test memory usage during extended use
+
+5. Safari-Specific Tests:
+   - Test functionality in Safari on macOS
+   - Test responsive design on Mac screen sizes
+   - Test Safari-specific accessibility features
+
+Use Playwright with Safari WebKit for E2E testing. Create test scenarios that mirror real user workflows. Include both happy path and error path testing.
+```
+
+### Step 11: Performance Validation
+
+```text
+Validate that the split brush functionality performs efficiently and doesn't introduce performance regressions.
+
+Context: Split brush functionality involves additional data processing and storage. We need to ensure it performs well with large datasets and doesn't impact existing functionality.
+
+Test Requirements:
+
+1. Data Processing Performance:
+   - Test split brush detection speed with large matched data files
+   - Test component extraction efficiency
+   - Test save/load operations performance
+   - Test memory usage during processing
+
+2. Component Lookup Performance:
+   - Test efficiency of component reuse across combinations
+   - Test lookup speed for existing split brush mappings
+   - Test performance with many component variations
+   - Test memory efficiency of component storage
+
+3. API Performance:
+   - Test endpoint response times with split brush data
+   - Test concurrent request handling
+   - Test memory usage during API operations
+   - Test database/file I/O performance
+
+4. UI Performance:
+   - Test rendering performance with many split brush items
+   - Test filter operation speed
+   - Test memory usage during UI interactions
+   - Test responsiveness during user interactions
+
+5. Comparison Tests:
+   - Compare performance with existing brush functionality
+   - Test performance impact on regular brush operations
+   - Test overall system performance with mixed data
+   - Test performance under load
+
+Performance Requirements:
+- Split brush detection: < 1 second for typical monthly data
+- Component lookup: < 100ms for existing mappings
+- UI rendering: < 500ms for 1000+ items
+- Memory usage: < 50MB additional for large datasets
+- No performance regression for existing functionality
+
+Use performance profiling tools and create benchmarks for comparison. Test with realistic data sizes and usage patterns.
+```
+
+### Step 12: Documentation Update
+
+```text
+Update relevant documentation to reflect the new split brush functionality.
+
+Context: The split brush feature adds new capabilities to the system. Documentation needs to be updated to help users understand and use the new functionality.
+
+Requirements:
+
+1. API Documentation:
+   - Document new MismatchItem fields (is_split_brush, handle_component, knot_component)
+   - Document updated API endpoint behavior
+   - Document error handling and response formats
+   - Provide examples of API usage
+
+2. User Documentation:
+   - Explain split brush concept and benefits
+   - Document how to identify split brushes in the UI
+   - Document filter functionality for brush field
+   - Provide examples of common split brush scenarios
+
+3. Technical Documentation:
+   - Document data structure changes in correct_matches.yaml
+   - Document split brush detection logic
+   - Document component reuse mechanism
+   - Document performance characteristics
+
+4. Code Documentation:
+   - Update docstrings for new methods and classes
+   - Document error handling approaches
+   - Document testing strategies
+   - Update inline comments for complex logic
+
+5. Migration Guide:
+   - Document any breaking changes
+   - Provide migration steps if needed
+   - Document backward compatibility considerations
+   - Provide troubleshooting guide
+
+Documentation Requirements:
+- Clear explanations for non-technical users
+- Technical details for developers
+- Examples and use cases
+- Troubleshooting and FAQ sections
+- Performance and best practices guidance
+
+Location: Update relevant documentation files in docs/ directory and code comments throughout the codebase.
+```
+
+## 🧠 Critical Analysis
+
+### Prompt Sequence Analysis
+
+The implementation plan follows a logical progression from core functionality to user interface:
+
+1. **Foundation First**: Steps 1-3 establish the core data structures and business logic
+2. **API Integration**: Steps 4-6 extend existing endpoints and test integration
+3. **User Interface**: Steps 7-9 update the UI components and add filtering
+4. **Validation**: Steps 10-12 ensure quality and performance
+
+### Strengths
+
+- **Incremental Approach**: Each step builds on previous work without large jumps
+- **Test-First**: Every step includes comprehensive testing requirements
+- **DRY Architecture**: Extends existing components rather than creating new ones
+- **Real-World Focus**: Uses actual SOTD data patterns and community examples
+- **Performance Conscious**: Includes performance validation and optimization
+
+### Risk Mitigation
+
+- **Backward Compatibility**: Each step maintains existing functionality
+- **Error Handling**: Comprehensive error handling throughout the pipeline
+- **Testing Coverage**: Multiple levels of testing (unit, integration, E2E, performance)
+- **Incremental Validation**: Each step can be validated independently
+
+### Dependencies and Integration
+
+- **No Orphaned Code**: Each step integrates with existing systems
+- **Clear Interfaces**: Well-defined data structures and API contracts
+- **Consistent Patterns**: Follows existing codebase conventions
+- **Modular Design**: Components can be developed and tested independently
+
+### Implementation Safety
+
+- **Small Steps**: Each step is small enough to implement safely
+- **Testable Output**: Every step produces testable, coherent code
+- **Clear Requirements**: Each prompt has specific, actionable requirements
+- **Error Recovery**: Graceful handling of edge cases and failures
+
+The plan is lean, safe, and buildable with no dangling pieces. Each step provides meaningful progress while maintaining system stability and code quality.
+
+## Current Status
+
+**Status**: TODO  
+**Next Action**: Begin implementation with Step 1 (Extend MismatchItem Model)  
+**Estimated Duration**: 2-3 weeks with incremental delivery  
+**Dependencies**: None - can start immediately  
+**Risk Level**: Low - incremental changes with comprehensive testing
+description:
+globs:
+alwaysApply: false
+---

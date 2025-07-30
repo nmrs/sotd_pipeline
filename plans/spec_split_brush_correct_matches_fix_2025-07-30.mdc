@@ -1,0 +1,319 @@
+# Split Brush Correct Matches Fix Specification
+
+**Date**: 2025-07-30  
+**Status**: IN_PROGRESS (Idea Honing Phase)  
+**Type**: Specification  
+
+## Problem Statement
+
+When split brushes (e.g., "Jayaruh #441 w/ AP Shave Co G5C") are marked as correct in the mismatch analyzer, they are not being saved properly in `correct_matches.yaml`. The current system tries to save them under the `brush` section, but split brushes should be handled differently to enable efficient matching and component reuse.
+
+## Current Issue
+
+- Split brushes are being saved incorrectly in the `brush` section
+- No `handle` or `knot` sections exist in `correct_matches.yaml`
+- The match phase has to run expensive split determination logic for every brush input
+- No component reuse for handles and knots across different split brush combinations
+
+## Requirements
+
+### 1. Data Structure Requirements
+
+**Split Brush Section**:
+- Add `split_brush` section at the same level as `brush` (not nested under it)
+- Map full split brush strings to their component references
+- Structure: `split_brush: {full_string: {handle: component_ref, knot: component_ref}}`
+
+**Handle Section**:
+- Add `handle` section for handle components
+- Structure: `handle: {brand: {model: [normalized_strings]}}`
+- Store only the handle component strings, not full split brush strings
+
+**Knot Section**:
+- Add `knot` section for knot components  
+- Structure: `knot: {brand: {model: [normalized_strings]}}`
+- Store only the knot component strings, not full split brush strings
+
+### 2. Example Structure
+
+```yaml
+split_brush:
+  "Jayaruh #441 w/ AP Shave Co G5C":
+    handle: "Jayaruh #441"
+    knot: "AP Shave Co G5C"
+
+handle:
+  Jayaruh:
+    "#441":
+      - "Jayaruh #441"
+
+knot:
+  "AP Shave Co":
+    "G5C":
+      - "AP Shave Co G5C"
+  Unknown:
+    "Synthetic":
+      - "24mm Synthetic"
+```
+
+### 3. Matching Algorithm Requirements
+
+**Match Phase Integration**:
+1. **First**: Check if input is in `split_brush` section (exact match)
+2. **If found**: 
+   - Skip all split detection logic completely
+   - Get the `handle` and `knot` component references from the mapping
+   - Look up those component references in the `handle` and `knot` sections
+   - Return the matched components with `match_type: exact`
+3. **If not found**: 
+   - Proceed with existing split detection logic
+   - Split the input and look up components individually
+   - Use existing match phase logic for handle/knot matching
+
+### 4. Performance Requirements
+
+- Eliminate need for expensive split determination logic for confirmed split brushes
+- Enable direct component lookup for known split brush combinations
+- Support component reuse across different split brush combinations
+- **Performance Strategy**: Use existing data loading and processing patterns from current mismatch analyzer
+- **Optimization**: Defer performance optimization until after initial implementation and real-world usage analysis
+
+### 5. Component Reuse Strategy
+
+**Handle/Knot Component Reuse**:
+- When marking a split brush as correct, check if handle/knot components already exist
+- **Handle Reuse**: If handle component exists, reuse existing entry; if not, create new entry
+- **Knot Reuse**: If knot component exists, reuse existing entry; if not, create new entry
+- **Example**: 
+  - First split brush: "Jayaruh #441 w/ AP Shave Co G5C" → creates handle "Jayaruh #441" and knot "AP Shave Co G5C"
+  - Second split brush: "Jayaruh #441 w/ Declaration B2" → reuses existing handle "Jayaruh #441", creates new knot "Declaration B2"
+- **Benefits**: Prevents duplication, enables efficient matching of new combinations using existing components
+
+## Implementation Tasks
+
+### Phase 1: Data Structure Updates
+- [ ] Update `_save_correct_matches()` method in `mismatch_analyzer.py`
+- [ ] Update `_load_correct_matches()` method to handle new structure
+- [ ] Update `_create_match_key()` method for split brush handling
+
+### Phase 2: Backend Integration (DRY Approach)
+- [ ] Extend `MismatchAnalyzer.identify_mismatches()` to detect split brushes from existing matched data
+- [ ] Add split brush detection logic by reading existing `matched` structure (check for `brand: null`, `model: null`, and `handle`/`knot` sections)
+- [ ] Extract split brush components from existing `handle`/`knot` sections in matched data
+- [ ] Extend `MismatchItem` model with split brush fields (`is_split_brush`, `handle_component`, `knot_component`)
+- [ ] Update existing `/api/analyze/mismatch` endpoint to handle split brushes automatically
+- [ ] Update existing `/api/mark-correct` endpoint to handle split brush marking
+- [ ] Extend `MismatchAnalyzer._save_correct_matches()` for split brush structure
+
+### Phase 3: Match Phase Integration
+- [ ] Update match phase to use new split brush structure
+- [ ] Implement efficient lookup algorithm
+- [ ] Add fallback to split determination logic for unconfirmed matches
+
+### Phase 4: WebUI Updates
+- [ ] Update React component to handle split brush display
+- [ ] Add filter buttons for "Split Brushes" and "Complete Brushes" in display mode
+- [ ] Update display mode logic to filter by brush type when field is "brush"
+- [ ] Extend data table to show split brush indicators and component breakdown
+
+## Questions to Resolve (Idea Honing Process)
+
+### Question 1: Split Brush Identification Criteria (RESOLVED)
+- [x] What are the exact conditions that determine if a brush entry in the matched data is a split brush?
+  - **Answer**: Primary conditions: `brand: null` AND `model: null` AND presence of `handle` section AND/OR `knot` section
+  - **Split Brush Types**:
+    - **Handle-only**: `brand: null`, `model: null`, `handle` section exists, no `knot` section
+    - **Knot-only**: `brand: null`, `model: null`, `knot` section exists, no `handle` section  
+    - **Both components**: `brand: null`, `model: null`, both `handle` and `knot` sections exist
+  - **Note**: Edge cases will be handled through iteration if encountered
+
+### Question 2: Component Brand/Model Separation (RESOLVED)
+- [x] How should the system handle edge cases where components don't have clear brand/model separation?
+  - **Answer**: Use "Unknown" as the brand and the full string as the model (as shown in example structure)
+
+### Question 3: API Data Flow (RESOLVED)
+- [x] How should the API communicate split brush status and component information to the frontend?
+  - **Answer**: Extend existing `MismatchItem` model with split brush fields (`is_split_brush`, `handle_component`, `knot_component`)
+
+### Question 4: Error Handling (RESOLVED)
+- [x] What error handling is needed for malformed split brush data?
+  - **Answer**: Leverage existing robust error handling from current BrushMatcher implementation
+  - **Handle-only components**: Already handled by existing handle-only entry logic
+  - **Knot-only components**: Already handled by existing knot-only entry logic  
+  - **Components without clear brand/model separation**: Already handled by existing pattern matching and fallback strategies
+  - **Malformed data**: Already handled by existing try/catch blocks and fallback logic
+  - **Missing sections**: Save only the sections that exist (e.g., handle only if knot missing)
+  - **Null/empty values**: Treat as if section wasn't there
+  - **Missing referenced components**: Automatically add them to handle/knot sections
+
+### Question 5: Incomplete Split Brushes (RESOLVED)
+- [x] How should the system handle split brushes that don't have both handle and knot components?
+  - **Answer**: Split brush identification supports handle-only, knot-only, or both components
+  - **Handle-only**: Save to `handle` section only, no `knot` section entry
+  - **Knot-only**: Save to `knot` section only, no `handle` section entry
+  - **Both components**: Save to both `handle` and `knot` sections with split brush mapping
+
+### Question 6: Testing Strategy (RESOLVED)
+- [x] What testing strategy should be used for split brush functionality?
+  - **Answer**: Follow existing testing patterns in the codebase
+
+### Question 7: Update Behavior (RESOLVED)
+- [x] How should the system handle updates to existing split brush mappings when components change?
+  - **Answer**: Overwrite policy - remove old mapping completely and save new "correct" mapping fresh (as per Update Behavior Requirements)
+
+## Update Behavior Requirements
+
+- **Overwrite Policy**: When a split brush is marked as correct, the system should overwrite any existing mapping
+- **Remove and Replace**: Remove the old mapping completely and save the new "correct" mapping fresh
+- **No Merging**: Do not attempt to merge or combine component references
+- **No Validation**: Do not require manual removal before updating - just overwrite directly
+
+## Component Creation Requirements
+
+- **Auto-creation**: When a split brush is marked as correct, the system should automatically create handle/knot entries if they don't exist
+- **Component Reuse**: Check for existing handle/knot components and reuse them if found; only create new entries if they don't exist
+- **No validation required**: The system should not require handle/knot components to exist before saving split brush mappings
+- **Order of operations**: First check for existing components, create new ones if needed, then create the split brush mapping
+
+## UI Enhancement Requirements
+
+### Display Mode Filters for Brush Field
+- **Split Brushes Filter**: Show only split brush items when field is "brush"
+- **Complete Brushes Filter**: Show only regular brush items when field is "brush"
+- **Conditional Display**: These filters only appear when `selectedField === "brush"`
+- **Button Style**: Match existing filter button design (Eye/EyeOff icons, counts, tooltips)
+- **Integration**: Work with existing display modes (All, Mismatches, Unconfirmed, Regex)
+
+### Example UI Structure
+```
+[All] [Mismatches] [Unconfirmed] [Regex] [Split Brushes] [Complete Brushes]
+```
+
+## Technical Architecture (DRY Approach)
+
+### Shared Core Logic
+- **No New API Endpoints**: Extend existing `/api/analyze/mismatch` and `/api/mark-correct` endpoints
+- **Shared MismatchAnalyzer**: Both CLI and API use the same `MismatchAnalyzer` class
+- **Consistent Data Processing**: Same `identify_mismatches()` and `_save_correct_matches()` methods
+- **Unified Data Models**: Extend existing `MismatchItem` model with split brush fields
+
+### Split Brush Detection Strategy
+- **Read Existing Data**: No re-matching - read split brush information from existing `data/matched/YYYY-MM.json` files
+- **Detect Split Brushes**: Check for `brand: null`, `model: null`, and presence of `handle` section AND/OR `knot` section in matched data
+- **Extract Components**: Read handle/knot components from existing `handle`/`knot` sections
+- **Support All Types**: Handle handle-only, knot-only, and both-component split brushes
+- **Preserve Match Phase Logic**: All sophisticated split detection logic remains in the match phase
+- **Performance**: Use existing data loading and processing patterns from current mismatch analyzer
+
+### Match Phase Integration Strategy
+- **Priority Order**: Check `split_brush` section first, before any split detection logic
+- **Skip Detection**: If found in `split_brush`, skip all split detection logic completely
+- **Component Lookup**: Use component references to look up handle/knot in respective sections
+- **Fallback**: If not found in `split_brush`, proceed with existing split detection logic
+- **Performance**: Direct lookup eliminates expensive split determination for confirmed matches
+
+### Benefits
+- **Maintains DRY**: All logic stays in shared `MismatchAnalyzer` class
+- **Minimal Changes**: Extend existing endpoints rather than create new ones
+- **Consistent Experience**: Same workflow for all brush types
+- **Future-Proof**: Easy to extend for other field types
+
+## Key Decisions and Lessons Learned
+
+### Data Structure Decisions
+- **Split Brush Section**: Use `split_brush` (singular) to align with existing `brush:`, `blade:`, `razor:`, `soap:` pattern
+- **Component Storage**: Store handle/knot components separately in `handle:` and `knot:` sections for reuse
+- **Mapping Structure**: `split_brush` maps full strings to component references, not full strings in component sections
+- **Unknown Components**: Use "Unknown" brand for components without clear brand/model separation
+
+### Technical Architecture Decisions
+- **DRY Approach**: Extend existing API endpoints rather than create new ones
+- **Shared Logic**: Use existing `MismatchAnalyzer` class for both CLI and API
+- **No Re-matching**: Read split brush data from existing `data/matched/` files, don't re-run split detection
+- **Detection Method**: Check for `brand: null`, `model: null`, and presence of `handle` section AND/OR `knot` section
+- **Support All Types**: Handle handle-only, knot-only, and both-component split brushes
+
+### UI/UX Decisions
+- **Display Format**: Show "split" in Matched column, handle/knot data in separate columns
+- **Filter Buttons**: Add "Split Brushes" and "Complete Brushes" filters when field is "brush"
+- **No JSON Display**: Convert backend data structures to human-readable text
+- **Visual Indicators**: Add 🔗 icon to show split brush status
+
+### Component Creation Strategy
+- **Auto-creation**: Automatically create handle/knot entries when marking split brushes as correct
+- **No Validation**: Don't require components to exist before saving split brush mappings
+- **Overwrite Policy**: Replace existing mappings when re-marking as correct
+
+### Performance and Efficiency
+- **Leverage Existing Work**: Use sophisticated split detection already done in match phase
+- **Component Reuse**: Enable efficient matching of new combinations using existing components
+- **Direct Lookup**: Eliminate need for expensive split determination for confirmed matches
+- **Match Phase Optimization**: Check `split_brush` section first to skip split detection entirely for confirmed matches
+- **Efficient Component Lookup**: Use component references for O(1) lookup in handle/knot sections
+- **Component Deduplication**: Reuse existing handle/knot entries to prevent duplication and enable efficient matching
+- **Performance Strategy**: Use existing data loading and processing patterns; optimize based on real-world usage
+- **Error Handling**: Leverage existing robust error handling from current BrushMatcher implementation
+
+### User Input Validation Strategy
+- **No Additional Validation Required**: User input represents validation of existing match phase split detection
+- **Trust Match Phase Logic**: The match phase has already performed split detection and component identification
+- **User Validation Purpose**: User is confirming that the split performed during match phase was correct
+- **Fallback Handling**: If user input doesn't match expected format, the match phase will handle it during re-processing
+
+### Rollback/Undo Strategy
+- **Manual Editing**: Users can manually edit `correct_matches.yaml` to remove or modify split brush entries
+- **Git Revert**: Users can use git to revert changes to `correct_matches.yaml` if needed
+- **No WebUI Undo**: No built-in undo functionality in the WebUI for now
+- **Future Enhancement**: Consider adding WebUI undo functionality based on user feedback and usage patterns
+
+### Data Consistency Strategy
+- **Auto-Create on Save**: When marking split brush as correct, automatically create handle/knot entries if they don't exist
+- **Validation During Match**: During match phase, validate that split brush references point to existing handle/knot components
+- **Fail Fast on Missing References**: If split brush entry references missing handle/knot, fail with clear error message
+- **Manual Resolution**: Let users manually fix inconsistencies by editing `correct_matches.yaml`
+- **Example Match Phase Errors**: 
+  - "Split brush 'Jayaruh #441 w/ AP Shave Co G5C' references handle 'Jayaruh #441' that doesn't exist in handle section"
+  - "Split brush 'Declaration B2 in Mozingo handle' references knot 'Declaration B2' that doesn't exist in knot section"
+
+### Testing Strategy for Edge Cases
+- **Real SOTD Data Testing**: Test with actual split brush patterns from SOTD comments
+- **Malformed Data Testing**: Test with incomplete, corrupted, or malformed split brush data
+- **Component Reuse Testing**: Test scenarios where same handle is used with different knots
+- **Data Consistency Testing**: Test validation scenarios where references are missing or invalid
+- **Integration Testing**: Test full workflow from detection to save to match phase lookup
+
+### Documentation Update Requirements
+- **Core Documentation**: Update `docs/brush_matching_spec.md`, `docs/SOTD_Pipeline_Spec.md`, `docs/requirements.md`
+- **WebUI Documentation**: Update `webui/README.md` and create new user guides in `webui/src/docs/`
+- **API Documentation**: Document updated endpoints for split brush handling
+- **Tool Documentation**: Update `sotd/match/tools/README.md` for split brush analysis capabilities
+- **Examples and Tutorials**: Create examples showing common split brush scenarios and workflows
+
+### Implementation Approach
+- **Learning Project**: Single developer/user project with flexible timeline
+- **Iterative Development**: Build and test incrementally, learn from each iteration
+- **Simple Dependencies**: Leverage existing infrastructure without over-engineering
+- **Documentation**: Update as code is developed, not as a separate phase
+- **Risk Management**: Address issues as they arise rather than extensive upfront planning
+
+## Current Status
+
+**Idea Honing Process**: We are currently in the middle of the Idea Honing process to clarify all requirements before implementation planning. Several key decisions have been made, but important questions remain to be resolved.
+
+**Idea Honing Process**: COMPLETE - All questions resolved, ready for implementation planning
+**Completed Decisions**: Data structure, component storage, UI display approach, DRY architecture, detection strategy, split brush identification criteria, component brand/model separation, API data flow, incomplete split brushes, update behavior, error handling, testing strategy
+**Next Step**: Create implementation plan
+
+## Notes
+
+- This approach maximizes the benefits of confirmed matches while maintaining flexibility
+- Component reuse enables efficient matching of new split brush combinations
+- Clear separation between split brush mappings and component storage
+- Enhanced UI filtering improves user experience when working with brush data
+- DRY architecture ensures consistency between CLI and API functionality
+- **Efficient Processing**: No re-matching required - split brush detection leverages existing match phase results
+- **Data Integrity**: Preserves all existing sophisticated split detection logic in the match phase
+description:
+globs:
+alwaysApply: false
+---
