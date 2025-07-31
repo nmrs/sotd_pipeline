@@ -28,9 +28,9 @@ class TestBrushSplitterSmartAnalysis:
             ("C&H + TnS 27mm H8", "C&H", "TnS 27mm H8"),  # Chisel & Hound + Turn N Shave
             (
                 "Wolf Whiskers + Declaration B15",
-                "Declaration B15",
                 "Wolf Whiskers",
-            ),  # Content analysis prioritizes B15 pattern
+                "Declaration B15",
+            ),  # Content analysis prioritizes B15 pattern as knot
             ("Elite + Zenith B2", "Elite", "Zenith B2"),  # Content analysis result
         ]
 
@@ -182,8 +182,8 @@ class TestBrushSplitterSmartAnalysis:
         test_cases = [
             (
                 "Custom handle + Declaration B15",
-                "Declaration B15",
                 "Custom handle",
+                "Declaration B15",
             ),  # Content analysis result
             ("Wood handle + Zenith B2", "Wood handle", "Zenith B2"),  # Content analysis result
             (

@@ -259,11 +259,19 @@ class BrushSplitter:
                     # part2 is better handle, part1 is better knot
                     return part2, part1, delimiter_type
                 else:
-                    # Fall back to handle score comparison (original logic)
-                    if part1_handle_score > part2_handle_score:
+                    # Handle scores are equal or conflicting - prioritize knot scores
+                    if part2_knot_score > part1_knot_score:
+                        # part2 is better knot, so part1 should be handle
                         return part1, part2, delimiter_type
-                    else:
+                    elif part1_knot_score > part2_knot_score:
+                        # part1 is better knot, so part2 should be handle
                         return part2, part1, delimiter_type
+                    else:
+                        # Knot scores are also equal - fall back to handle score comparison
+                        if part1_handle_score > part2_handle_score:
+                            return part1, part2, delimiter_type
+                        else:
+                            return part2, part1, delimiter_type
         return None, None, None
 
     def _split_by_delimiter_smart(
@@ -353,13 +361,23 @@ class BrushSplitter:
                         score = part2_handle_score + part1_knot_score
                         potential_split = (part2, part1, delimiter_type)
                     else:
-                        # Fall back to handle score comparison (original logic)
-                        if part1_handle_score > part2_handle_score:
-                            score = part1_handle_score
+                        # Handle scores are equal or conflicting - prioritize knot scores
+                        if part2_knot_score > part1_knot_score:
+                            # part2 is better knot, so part1 should be handle
+                            score = part1_handle_score + part2_knot_score
                             potential_split = (part1, part2, delimiter_type)
-                        else:
-                            score = part2_handle_score
+                        elif part1_knot_score > part2_knot_score:
+                            # part1 is better knot, so part2 should be handle
+                            score = part2_handle_score + part1_knot_score
                             potential_split = (part2, part1, delimiter_type)
+                        else:
+                            # Knot scores are also equal - fall back to handle score comparison
+                            if part1_handle_score > part2_handle_score:
+                                score = part1_handle_score
+                                potential_split = (part1, part2, delimiter_type)
+                            else:
+                                score = part2_handle_score
+                                potential_split = (part2, part1, delimiter_type)
 
                     # Choose the split with the best score
                     if score > best_score:
@@ -572,9 +590,9 @@ class BrushSplitter:
         if re.search(r"\bv\d{2}\b", text, re.IGNORECASE):
             score += 8
 
-        # Declaration Grooming patterns (B2, B15, etc.)
+        # Declaration Grooming patterns (B2, B15, etc.) - HIGH PRIORITY
         if re.search(r"B\d{1,2}[A-Z]?\b", text, re.IGNORECASE):
-            score += 10
+            score += 25  # Increased from 10 to 25 for high priority
 
         # Handle indicators (negative score for knot likelihood)
         handle_terms = [
@@ -593,19 +611,39 @@ class BrushSplitter:
                 score -= 5
 
         # Test against actual handle patterns from handles.yaml (negative for knot)
+        # BUT give lower priority to handle matches when strong knot indicators are present
         if self.handle_matcher:
             handle_match = self.handle_matcher.match_handle_maker(text)
             if handle_match:
-                # Found a handle pattern match - reduce knot score
-                section = handle_match.get("_matched_by_section", "")
-                if section == "artisan_handles":
-                    score -= 12  # Artisan handles are most specific
-                elif section == "manufacturer_handles":
-                    score -= 10
-                elif section == "other_handles":
-                    score -= 8
+                # Check if we have strong knot indicators that should override handle match
+                has_strong_knot_indicators = (
+                    re.search(r"B\d{1,2}[A-Z]?\b", text, re.IGNORECASE) or
+                    re.search(r"\d{2}\s*mm", text, re.IGNORECASE) or
+                    match_fiber(text)
+                )
+                
+                if has_strong_knot_indicators:
+                    # Reduce the penalty when strong knot indicators are present
+                    section = handle_match.get("_matched_by_section", "")
+                    if section == "artisan_handles":
+                        score -= 4  # Reduced from 12 to 4
+                    elif section == "manufacturer_handles":
+                        score -= 3  # Reduced from 10 to 3
+                    elif section == "other_handles":
+                        score -= 2  # Reduced from 8 to 2
+                    else:
+                        score -= 1  # Reduced from 6 to 1
                 else:
-                    score -= 6
+                    # Normal penalty when no strong knot indicators
+                    section = handle_match.get("_matched_by_section", "")
+                    if section == "artisan_handles":
+                        score -= 12  # Artisan handles are most specific
+                    elif section == "manufacturer_handles":
+                        score -= 10
+                    elif section == "other_handles":
+                        score -= 8
+                    else:
+                        score -= 6
 
         return score
 
