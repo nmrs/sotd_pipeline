@@ -74,17 +74,22 @@ def test_handles_catalog():
     """Create test handles catalog"""
     return {
         "artisan_handles": {
-            "Muninn Woodworks": {"patterns": ["mun+in", "muninn.*woodworks"]},
+            "Muninn Woodworks": {"Unspecified": {"patterns": ["mun+in", "muninn.*woodworks"]}},
             "Chisel & Hound": {
-                "patterns": [
-                    "chis.*hou",
-                    "chis.*fou",
-                    "\\bc(?:\\s*\\&\\s*|\\s+and\\s+|\\s*\\+\\s*)h\\b",
-                ]
+                "Unspecified": {
+                    "patterns": [
+                        "chis.*hou",
+                        "chis.*fou",
+                        "\\bc(?:\\s*\\&\\s*|\\s+and\\s+|\\s*\\+\\s*)h\\b",
+                    ]
+                }
             },
-            "Jayaruh": {"patterns": ["jayaruh"]},
+            "Jayaruh": {"Unspecified": {"patterns": ["jayaruh"]}},
+            "Simpson": {
+                "Unspecified": {"patterns": ["simpson", "duke", "chubby.*(1|2|3)", "trafalgar"]}
+            },
         },
-        "manufacturer_handles": {"Elite": {"patterns": ["elite"]}},
+        "manufacturer_handles": {"Elite": {"Unspecified": {"patterns": ["elite"]}}},
         "other_handles": {"Wolf Whiskers": {"Unspecified": {"patterns": ["wolf.*whis"]}}},
     }
 
@@ -390,18 +395,22 @@ class TestBrushMatcherPriorityOrder:
     """Test algorithmic priority and maker comparison logic for brush matcher."""
 
     def test_same_maker_split_treated_as_complete_brush(self, brush_matcher):
-        # Both handle and knot are from the same maker (e.g., 'Simpson Chubby 2 w/ Simpson knot')
-        # Should match as a complete brush, not as a handle/knot combo
+        # Both handle and knot are from the same maker
+        # (e.g., 'Simpson Chubby 2 w/ Simpson knot')
+        # Should be split because it contains a delimiter, even though both components
+        # are from same maker
         result = brush_matcher.match("Simpson Chubby 2 w/ Simpson knot")
-        # Should match as a complete brush with shared brand but no global model
+        # Should match as a split brush with shared brand but no global model
         assert result.matched["brand"] == "Simpson"
         assert result.matched["model"] is None  # No global model for composite brushes
         # Handle should have the specific model
         assert result.matched["handle"]["brand"] == "Simpson"
-        assert result.matched["handle"]["model"] == "Chubby 2"
-        # Knot should have the shared brand but no specific model
+        # Handle matcher finds "Unspecified" for "Simpson Chubby 2"
+        assert result.matched["handle"]["model"] == "Unspecified"
+        # Knot should have the shared brand and the matched model from "Simpson knot"
         assert result.matched["knot"]["brand"] == "Simpson"
-        assert result.matched["knot"]["model"] is None
+        # "Simpson knot" matches "Badger" model
+        assert result.matched["knot"]["model"] == "Badger"
 
     def test_different_maker_split_treated_as_handle_knot_combo(self, brush_matcher):
         result = brush_matcher.match("Elite handle w/ Declaration B15")
