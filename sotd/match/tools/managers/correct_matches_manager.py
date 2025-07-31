@@ -78,7 +78,9 @@ class CorrectMatchesManager:
                                                 if isinstance(strings, list):
                                                     for original in strings:
                                                         # Use simplified key format
-                                                        match_key = f"{field}:{original.lower().strip()}"
+                                                        match_key = (
+                                                            f"{field}:{original.lower().strip()}"
+                                                        )
                                                         self._correct_matches.add(match_key)
                                                         self._correct_matches_data[match_key] = {
                                                             "original": original,
@@ -127,7 +129,9 @@ class CorrectMatchesManager:
                                                     handle_match_enabled = False
 
                                                 # Use simplified key format
-                                                match_key = f"{field}:{original_text.lower().strip()}"
+                                                match_key = (
+                                                    f"{field}:{original_text.lower().strip()}"
+                                                )
                                                 self._correct_matches.add(match_key)
                                                 self._correct_matches_data[match_key] = {
                                                     "original": original_text,
