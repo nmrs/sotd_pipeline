@@ -262,12 +262,18 @@ class BrushMatcher:
 
         from sotd.match.types import create_match_result
 
-        return create_match_result(
+        result = create_match_result(
             original=value,
             matched=matched,
             match_type="exact",
             pattern=None,
         )
+
+        # Apply complete brush handle matching if enabled
+        if correct_match.get("handle_match_enabled", False):
+            self._complete_brush_handle_matching(matched, value)
+
+        return result
 
     def _get_normalized_text(self, value: str) -> str:
         """
@@ -391,7 +397,27 @@ class BrushMatcher:
         # Check if this is a known brush (exact match)
         for brand, brand_data in brush_correct_matches.items():
             for model, patterns in brand_data.items():
-                if normalized_text in patterns:
+                # Check if normalized_text matches any pattern (handle both strings and dictionaries)
+                pattern_matched = False
+                handle_match_enabled = False
+                
+                for pattern in patterns:
+                    if isinstance(pattern, dict):
+                        # Dictionary with handle_match flag
+                        pattern_text = list(pattern.keys())[0]  # Get the key
+                        if normalized_text == pattern_text:
+                            pattern_matched = True
+                            handle_match_enabled = pattern[pattern_text].get(
+                                "handle_match", False
+                            )
+                            break
+                    else:
+                        # Simple string pattern
+                        if normalized_text == pattern:
+                            pattern_matched = True
+                            break
+                
+                if pattern_matched:
                     return self._process_regular_correct_match(
                         value,
                         {
@@ -399,6 +425,7 @@ class BrushMatcher:
                             "brand": brand,
                             "model": model,
                             "matched": {"brand": brand, "model": model},
+                            "handle_match_enabled": handle_match_enabled,
                         },
                     )
 
@@ -458,10 +485,16 @@ class BrushMatcher:
                 handle_text, knot_text = curated_split
                 delimiter_type = "curated_split"
             else:
-                # Try automated splitting (fallback)
-                handle_text, knot_text, delimiter_type = self.brush_splitter.split_handle_and_knot(
-                    value
-                )
+                # Check if this is a known brush before attempting to split
+                # Known brushes should not be split
+                if self.brush_splitter._is_known_brush(value):
+                    # It's a known complete brush, don't split it
+                    handle_text, knot_text, delimiter_type = None, None, None
+                else:
+                    # Try automated splitting (fallback)
+                    handle_text, knot_text, delimiter_type = (
+                        self.brush_splitter.split_handle_and_knot(value)
+                    )
 
         if handle_text and knot_text:
             # Handle split result - create composite brush structure
