@@ -166,6 +166,68 @@ The system now checks correct matches at multiple levels:
 - This takes precedence over all regex and fallback strategies.
 - The `match_type` will be `exact` for these matches.
 
+## Complete Brush Handle Matching
+
+The brush matching system supports complete brush handle matching for brands that require handle/knot splitting. This feature allows the system to automatically split and match brush components for brands that are known to require this approach.
+
+### Configuration
+
+Brands can be configured to use complete brush handle matching by setting `handle_matching: true` in the `brushes.yaml` catalog:
+
+```yaml
+brands:
+  declaration_grooming:
+    handle_matching: true  # Brand-level configuration
+    models:
+      cold_2_0:
+        handle_matching: false  # Model-level override
+```
+
+### Hierarchical Configuration
+
+- **Brand-level**: Set `handle_matching: true` at the brand level to enable for all models
+- **Model-level**: Override brand-level setting for specific models
+- **Default**: If not specified, `handle_matching` defaults to `false`
+
+### Complete Brush Handle Matching Workflow
+
+When `handle_matching: true` is configured for a brand:
+
+1. **Configuration Check**: System checks if the brand requires handle matching
+2. **Handle Pattern Matching**: Uses `HandleMatcher` to match handle patterns for the brand
+3. **Result Enhancement**: Enhances existing brush match with handle information
+4. **Fail Fast**: If handle matching fails, raises `ValueError` for debugging
+
+**Note**: This feature is integrated into the existing brush matching workflow rather than being a separate process. It enhances complete brush matches that already have `brand` and `model` fields set.
+
+### Implementation Details
+
+- **Method**: Uses `_complete_brush_handle_matching()` method in `BrushMatcher`
+- **Handle Patterns**: Searches across all sections in `handles.yaml` for the brand
+- **Error Handling**: Uses fail-fast approach - raises `ValueError` if handle matching fails
+- **Integration**: Called from two sites in the main `match()` method workflow
+- **Preservation**: Maintains complete catalog specifications in match output
+
+### Example Processing
+
+```
+Input: "Declaration B2 Washington"
+Configuration: declaration_grooming.handle_matching = true
+
+1. Configuration Check: handle_matching = true for Declaration Grooming
+2. Handle Pattern Matching: "Washington" matches Declaration Grooming Washington handle
+3. Result Enhancement: Enhanced brush match with handle information
+4. Result: Unified brush with complete handle/knot specifications
+```
+
+### Benefits
+
+- **Automatic Processing**: No manual intervention required for configured brands
+- **Consistent Results**: Standardized handle matching for known brands
+- **Data Preservation**: Maintains all catalog specifications in output
+- **Fail-Fast Debugging**: Clear error messages when handle matching fails
+- **Integration**: Seamlessly integrated into existing brush matching workflow
+
 ## Architecture
 
 The system uses a **Strategy Pattern** with multiple specialized matching strategies tried in priority order, combined with intelligent handle/knot splitting and content analysis.

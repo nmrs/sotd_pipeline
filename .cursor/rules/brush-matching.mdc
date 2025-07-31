@@ -31,6 +31,51 @@ class CustomBrushMatchingStrategy(BaseBrushMatchingStrategy):
         return None
 ```
 
+## Complete Brush Handle Matching
+
+The brush matching system supports complete brush handle matching for brands that require automatic handle/knot splitting:
+
+### Configuration
+- Set `handle_matching: true` in `brushes.yaml` for brands that need handle/knot splitting
+- Hierarchical configuration: model-level overrides brand-level
+- Default: `handle_matching: false` if not specified
+
+### YAML Configuration Example
+```yaml
+brands:
+  declaration_grooming:
+    handle_matching: true  # Brand-level configuration
+    models:
+      cold_2_0:
+        handle_matching: false  # Model-level override
+```
+
+### Complete Brush Handle Matching Workflow
+1. **Configuration Check**: Look for `handle_matching: true` in brush catalog
+2. **Handle Pattern Matching**: Use `HandleMatcher` to match handle patterns for the brand
+3. **Result Enhancement**: Enhance existing brush match with handle information
+4. **Fail Fast**: If handle matching fails, raises `ValueError` for debugging
+
+**Note**: This feature is integrated into the existing brush matching workflow rather than being a separate process. It enhances complete brush matches that already have `brand` and `model` fields set.
+
+### Implementation Details
+- **Method**: Uses `_complete_brush_handle_matching()` method in `BrushMatcher`
+- **Handle Patterns**: Searches across all sections in `handles.yaml` for the brand
+- **Error Handling**: Uses fail-fast approach - raises `ValueError` if handle matching fails
+- **Integration**: Called from two sites in the main `match()` method workflow
+- **Preservation**: Maintains complete catalog specifications in match output
+
+### Example Processing
+```
+Input: "Declaration B2 Washington"
+Configuration: declaration_grooming.handle_matching = true
+
+1. Configuration Check: handle_matching = true for Declaration Grooming
+2. Handle Pattern Matching: "Washington" matches Declaration Grooming Washington handle
+3. Result Enhancement: Enhanced brush match with handle information
+4. Result: Unified brush with complete handle/knot specifications
+```
+
 ## Intelligent Handle/Knot Splitting
 
 ### Delimiter Semantics

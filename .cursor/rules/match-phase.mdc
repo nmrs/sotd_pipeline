@@ -207,6 +207,46 @@ def match(self, field_data: dict) -> Optional[dict]:
     return None
 ```
 
+## Complete Brush Handle Matching
+
+The brush matching system supports complete brush handle matching for brands that require handle/knot splitting:
+
+### Configuration
+- Set `handle_matching: true` in `brushes.yaml` for brands that need handle/knot splitting
+- Can be configured at brand-level or model-level
+- Hierarchical configuration: model-level overrides brand-level
+
+### YAML Configuration Example
+```yaml
+brands:
+  declaration_grooming:
+    handle_matching: true  # Brand-level configuration
+    models:
+      cold_2_0:
+        handle_matching: false  # Model-level override
+```
+
+### Complete Brush Handle Matching Workflow
+1. **Configuration Check**: Look for `handle_matching: true` in brush catalog
+2. **Handle Pattern Matching**: Use `HandleMatcher` to match handle patterns for the brand
+3. **Result Enhancement**: Enhance existing brush match with handle information
+4. **Fail Fast**: If handle matching fails, raises `ValueError` for debugging
+
+**Note**: This feature is integrated into the existing brush matching workflow rather than being a separate process. It enhances complete brush matches that already have `brand` and `model` fields set.
+
+### Implementation Details
+- Uses `_complete_brush_handle_matching()` method in `BrushMatcher`
+- Preserves complete catalog specifications in match output
+- Searches handle patterns across all sections in `handles.yaml` for the brand
+- Uses fail-fast approach: raises `ValueError` if handle matching fails
+- Integrated into existing workflow at two call sites in the main `match()` method
+
+### Brush Splitting Strategy
+- **Primary**: Use validated splits from `brush_splits.yaml` when available
+- **Fallback**: Dynamic splitting using `BrushSplitter` with delimiter detection
+- **Scoring**: Use fiber words for scoring handle vs knot likelihood (not for splitting)
+- **Delimiters**: " w/ ", " with ", " in ", " / ", " - ", " + "
+
 ## Error Handling
 
 ### Fail Fast for Development
