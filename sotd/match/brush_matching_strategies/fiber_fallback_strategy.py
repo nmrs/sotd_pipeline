@@ -21,7 +21,7 @@ class FiberFallbackStrategy(BaseBrushMatchingStrategy):
 
     This strategy uses fiber_utils.match_fiber() to detect fiber types in
     unknown knot text. If a fiber is detected, it returns a MatchResult
-    with brand="Unspecified" and model=fiber_type.
+    with brand=None and model=fiber_type.
     """
 
     def match(self, value: str) -> Optional[MatchResult]:
@@ -45,7 +45,7 @@ class FiberFallbackStrategy(BaseBrushMatchingStrategy):
 
         # Create match result with detected fiber
         matched_data = {
-            "brand": "Unspecified",
+            "brand": None,
             "model": detected_fiber,
             "fiber": detected_fiber,
             "fiber_strategy": "fiber_fallback",
