@@ -471,8 +471,7 @@ class StatisticsCalculator:
 
         # Filter by validation status
         if "validated_only" in filters and filters["validated_only"]:
-            # Changed from s.validated to s.corrected
-            filtered = [s for s in filtered if s.corrected]
+            filtered = [s for s in filtered if s.validated]
 
         # Filter by confidence level
         if "confidence_level" in filters:
@@ -560,6 +559,8 @@ class StatisticsCalculator:
             "total_recent": len(recent_corrections),
             "corrected_today": corrected_today,
             "corrected_this_week": corrected_this_week,
+            "validated_today": corrected_today,  # For now, use corrected_today as validated_today
+            "validated_this_week": corrected_this_week,  # Use corrected_this_week
         }
 
 
@@ -584,6 +585,12 @@ class BrushSplitValidator:
                 logger.warning("YAML file is empty")
                 return
 
+            # Check if yaml_data is a dictionary (expected structure)
+            if not isinstance(yaml_data, dict):
+                raise DataCorruptionError(
+                    f"YAML file {self.yaml_path} does not contain a dictionary structure"
+                )
+
             # Handle flat structure where each key is a brush name
             for brush_name, split_data in yaml_data.items():
                 if isinstance(split_data, dict):
@@ -605,6 +612,9 @@ class BrushSplitValidator:
 
         except yaml.YAMLError as e:
             raise DataCorruptionError(f"Invalid YAML format in {self.yaml_path}: {e}")
+        except DataCorruptionError:
+            # Re-raise DataCorruptionError without wrapping
+            raise
         except Exception as e:
             raise ProcessingError(f"Error loading validated splits from {self.yaml_path}: {e}")
 
@@ -733,8 +743,8 @@ class BrushSplitValidator:
         # Set timestamp
         final_validated_at = validated_at or (existing.validated_at if existing else None)
 
-        # If this is a validation but no validated_at provided, use current time
-        if not final_validated_at:
+        # Only set current time if this is an actual validation (not just creating a new split)
+        if not final_validated_at and existing:
             from datetime import datetime
 
             final_validated_at = datetime.now().isoformat()

@@ -159,9 +159,10 @@ class BrushSplitter:
         )  # "+" requires smart analysis, not high-priority splitting
 
         # Always check for ' w/ ' and ' with ' first to avoid misinterpreting 'w/' as '/'
+        # These delimiters use positional splitting (first part = handle, second part = knot)
         for delimiter in high_reliability_delimiters:
             if delimiter in text:
-                return self._split_by_delimiter_simple(text, delimiter, "high_reliability")
+                return self._split_by_delimiter_positional(text, delimiter, "high_reliability")
 
         # Special handling for `/` as high-reliability delimiter (any spaces, not part of 'w/')
         # But first check if `/` is part of a specification rather than a delimiter
@@ -617,11 +618,11 @@ class BrushSplitter:
             if handle_match:
                 # Check if we have strong knot indicators that should override handle match
                 has_strong_knot_indicators = (
-                    re.search(r"B\d{1,2}[A-Z]?\b", text, re.IGNORECASE) or
-                    re.search(r"\d{2}\s*mm", text, re.IGNORECASE) or
-                    match_fiber(text)
+                    re.search(r"B\d{1,2}[A-Z]?\b", text, re.IGNORECASE)
+                    or re.search(r"\d{2}\s*mm", text, re.IGNORECASE)
+                    or match_fiber(text)
                 )
-                
+
                 if has_strong_knot_indicators:
                     # Reduce the penalty when strong knot indicators are present
                     section = handle_match.get("_matched_by_section", "")
@@ -772,6 +773,16 @@ class BrushSplitter:
             if re.search(pattern, text, re.IGNORECASE):
                 return True
 
+        # Look for mixed fiber specifications like "Mixed Badger/Boar"
+        mixed_fiber_patterns = [
+            r"mixed\s+(?:badger|boar|synthetic|horse)/\s*(?:badger|boar|synthetic|horse)",
+            r"(?:badger|boar|synthetic|horse)/\s*(?:badger|boar|synthetic|horse)\s+mixed",
+        ]
+
+        for pattern in mixed_fiber_patterns:
+            if re.search(pattern, text, re.IGNORECASE):
+                return True
+
         # Look for Reddit subreddit references like "r/wetshaving"
         reddit_patterns = [
             r"\br/\w+\b",  # r/wetshaving, r/something
@@ -796,7 +807,8 @@ class BrushSplitter:
 
         text_lower = text.lower()
 
-        for brand_name in self._brands_with_slash:
+        # Cast to list to satisfy linter
+        for brand_name in list(self._brands_with_slash):
             if brand_name in text_lower:
                 return True
 
