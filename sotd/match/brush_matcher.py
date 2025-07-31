@@ -715,14 +715,20 @@ class BrushMatcher:
 
             from sotd.match.types import create_match_result
 
+            # Use the pattern from the best match if available
+            overall_pattern = (
+                best_match.pattern if best_match and best_match.pattern 
+                else "single_component_fallback"
+            )
             return create_match_result(
                 original=value,
                 matched=matched,
                 match_type="regex",
-                pattern="single_component_fallback",
+                pattern=overall_pattern,
             )
         # No match found - return MatchResult with matched=None
         from sotd.match.types import create_match_result
+
         return create_match_result(
             original=value,
             matched=None,
