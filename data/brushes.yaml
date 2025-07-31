@@ -222,6 +222,14 @@ known_brushes:
       patterns:
       - (declaration|\bdg\b).*\bb16\b
       - \bb16\b
+    B17:
+      patterns:
+      - (declaration|\bdg\b).*\bb17\b
+      - \bb17\b
+    B18:
+      patterns:
+      - (declaration|\bdg\b).*\bb18\b
+      - \bb18\b
   Dreadnought:
     Avenger:
       fiber: Boar
