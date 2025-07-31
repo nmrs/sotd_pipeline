@@ -120,9 +120,8 @@ class BrushSplit:
     handle: Optional[str]
     knot: Optional[str]  # Can be None when should_not_split is True
     match_type: Optional[str] = None
-    validated: bool = False
-    corrected: bool = False
-    validated_at: Optional[str] = None  # ISO timestamp
+    corrected: bool = False  # Whether this split was corrected (changed)
+    validated_at: Optional[str] = None  # ISO timestamp when validated
     system_handle: Optional[str] = None
     system_knot: Optional[str] = None
     system_confidence: Optional[ConfidenceLevel] = None
@@ -133,14 +132,40 @@ class BrushSplit:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         result = {
-            "original": self.original,
+            "original": self.original,  # Include for API responses
             "handle": self.handle,
             "knot": self.knot,
             "match_type": self.match_type,
-            "validated": self.validated,
             "corrected": self.corrected,
             "validated_at": self.validated_at,
-            "should_not_split": self.should_not_split,
+            "should_not_split": self.should_not_split,  # Include for API responses
+            "occurrences": [occ.to_dict() for occ in self.occurrences],
+        }
+
+        # Only include system fields if corrected
+        if self.corrected:
+            result.update(
+                {
+                    "system_handle": self.system_handle,
+                    "system_knot": self.system_knot,
+                    "system_confidence": (
+                        self.system_confidence.value if self.system_confidence else None
+                    ),
+                    "system_reasoning": self.system_reasoning,
+                }
+            )
+
+        return result
+
+    def to_yaml_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for YAML serialization (without original field)."""
+        result = {
+            "handle": self.handle,
+            "knot": self.knot,
+            "match_type": self.match_type,
+            "corrected": self.corrected,
+            "validated_at": self.validated_at,
+            "should_not_split": self.should_not_split,  # Include for YAML consistency
             "occurrences": [occ.to_dict() for occ in self.occurrences],
         }
 
@@ -160,7 +185,7 @@ class BrushSplit:
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "BrushSplit":
+    def from_dict(cls, data: Dict[str, Any], original: Optional[str] = None) -> "BrushSplit":
         """Create from dictionary."""
         # Handle system confidence enum
         system_confidence = None
@@ -170,19 +195,33 @@ class BrushSplit:
             except ValueError:
                 system_confidence = None
 
+        # Use provided original or fall back to data field
+        original_value = original or data.get("original", "")
+
+        # Check if this is a do_not_split entry (no handle/knot fields)
+        should_not_split = data.get("should_not_split", False)
+
+        # For do_not_split entries, handle and knot should be None
+        if should_not_split:
+            handle = None
+            knot = None
+        else:
+            # Regular split entries require handle and knot
+            handle = data["handle"]
+            knot = data["knot"]
+
         return cls(
-            original=data["original"],
-            handle=data["handle"],
-            knot=data["knot"],
+            original=original_value,
+            handle=handle,
+            knot=knot,
             match_type=data.get("match_type"),
-            validated=data.get("validated", False),
             corrected=data.get("corrected", False),
             validated_at=data.get("validated_at"),
             system_handle=data.get("system_handle"),
             system_knot=data.get("system_knot"),
             system_confidence=system_confidence,
             system_reasoning=data.get("system_reasoning"),
-            should_not_split=data.get("should_not_split", False),
+            should_not_split=should_not_split,
             occurrences=[
                 BrushSplitOccurrence.from_dict(occ) for occ in data.get("occurrences", [])
             ],
@@ -235,7 +274,7 @@ class BrushSplitStatistics:
     def add_split(self, split: "BrushSplit", month: Optional[str] = None):
         """Add a split to the statistics."""
         self.total += 1
-        if split.validated:
+        if split.validated_at:  # If there's a validation timestamp, it's validated
             self.validated += 1
         if split.corrected:
             self.corrected += 1
@@ -286,8 +325,8 @@ class BrushSplitModel(BaseModel):
         None, description="Knot component (null when should_not_split is true)"
     )
     match_type: Optional[str] = Field(None, description="Match type from brush matcher")
-    validated: bool = Field(False, description="Whether this split has been validated")
-    corrected: bool = Field(False, description="Whether this split was corrected")
+    corrected: bool = Field(False, description="Whether this split was corrected (changed)")
+    validated_at: Optional[str] = Field(None, description="ISO timestamp when validated")
     system_handle: Optional[str] = Field(None, description="System-generated handle")
     system_knot: Optional[str] = Field(None, description="System-generated knot")
     system_confidence: Optional[str] = Field(None, description="System confidence level")
@@ -426,7 +465,8 @@ class StatisticsCalculator:
 
         # Filter by validation status
         if "validated_only" in filters and filters["validated_only"]:
-            filtered = [s for s in filtered if s.validated]
+            # Changed from s.validated to s.corrected
+            filtered = [s for s in filtered if s.corrected]
 
         # Filter by confidence level
         if "confidence_level" in filters:
@@ -470,57 +510,50 @@ class StatisticsCalculator:
 
     def _calculate_recent_activity(self, splits: List[BrushSplit]) -> Dict[str, Any]:
         """Calculate recent validation activity."""
-        recent_validations = []
-
-        # Get recent validations (last 7 days)
-        from datetime import datetime, timedelta
-
-        cutoff_date = datetime.now() - timedelta(days=7)
-        today = datetime.now().date()
+        recent_corrections = []
+        now = datetime.now()
 
         for split in splits:
-            if split.validated and split.validated_at:
+            if split.corrected and split.validated_at:
                 try:
                     # Handle both timezone-aware and timezone-naive datetimes
-                    validation_date_str = split.validated_at.replace("Z", "+00:00")
-                    validation_date = datetime.fromisoformat(validation_date_str)
+                    corrected_date_str = split.validated_at.replace("Z", "+00:00")
+                    corrected_date = datetime.fromisoformat(corrected_date_str)
 
-                    # Make cutoff_date timezone-aware for comparison
-                    cutoff_date_aware = cutoff_date.replace(tzinfo=validation_date.tzinfo)
-
-                    if validation_date > cutoff_date_aware:
-                        recent_validations.append(
+                    # Check if within the last 30 days
+                    if (now - corrected_date).days <= 30:
+                        recent_corrections.append(
                             {
                                 "original": split.original,
                                 "validated_at": split.validated_at,
                                 "corrected": split.corrected,
                             }
                         )
-                except ValueError:
+                except (ValueError, TypeError):
+                    # Skip invalid dates
                     continue
 
         # Count validations by time period
-        validated_today = 0
-        validated_this_week = 0
+        corrected_today = 0
+        corrected_this_week = 0
 
-        for validation in recent_validations:
+        for correction in recent_corrections:
             try:
-                validation_date_str = validation["validated_at"].replace("Z", "+00:00")
-                validation_date = datetime.fromisoformat(validation_date_str)
-                validation_date_only = validation_date.date()
+                corrected_date_str = correction["validated_at"].replace("Z", "+00:00")
+                corrected_date = datetime.fromisoformat(corrected_date_str)
+                corrected_date_only = corrected_date.date()
 
-                if validation_date_only == today:
-                    validated_today += 1
-                validated_this_week += 1
+                if corrected_date_only == now.date():
+                    corrected_today += 1
+                corrected_this_week += 1
             except ValueError:
                 continue
 
         return {
-            "recent_validations": recent_validations[:10],  # Limit to 10 most recent
-            "total_recent": len(recent_validations),
-            "recent_corrections": len([v for v in recent_validations if v["corrected"]]),
-            "validated_today": validated_today,
-            "validated_this_week": validated_this_week,
+            "recent_corrections": recent_corrections[:10],  # Limit to 10 most recent
+            "total_recent": len(recent_corrections),
+            "corrected_today": corrected_today,
+            "corrected_this_week": corrected_this_week,
         }
 
 
@@ -528,137 +561,76 @@ class BrushSplitValidator:
     """Validates and manages brush string splits with comprehensive error handling."""
 
     def __init__(self):
-        self.yaml_path = Path("data/brush_splits.yaml")
+        self.yaml_path = Path("../data/brush_splits.yaml")
         self.validated_splits: Dict[str, BrushSplit] = {}
 
     def load_validated_splits(self) -> None:
-        """Load validated splits from YAML file with fail-fast error handling."""
-        from webui.api.utils.yaml_utils import load_yaml_file, validate_yaml_structure
-
-        if not self.yaml_path.exists():
-            logger.info(f"YAML file not found: {self.yaml_path}")
-            return
-
+        """Load validated splits from YAML file."""
         try:
-            # Use the new YAML utility
-            data = load_yaml_file(self.yaml_path)
+            if not self.yaml_path.exists():
+                logger.warning(f"YAML file not found: {self.yaml_path}")
+                return
 
-            # Validate the structure using the utility
-            if not validate_yaml_structure(data, dict):
-                raise DataCorruptionError(
-                    f"Invalid YAML structure: expected dict, got {type(data)}"
-                )
+            with open(self.yaml_path, "r", encoding="utf-8") as f:
+                yaml_data = yaml.safe_load(f)
 
-            self.validated_splits.clear()
-            splits_data = data.get("splits", {}) if data else {}
+            if not yaml_data:
+                logger.warning("YAML file is empty")
+                return
 
-            # Handle new structure: splits is a dict with brush names as keys
-            if isinstance(splits_data, dict):
-                for brush_name, entries in splits_data.items():
-                    if isinstance(entries, list):
-                        for split_data in entries:
-                            try:
-                                split = BrushSplit.from_dict(split_data)
-                                self.validated_splits[split.original] = split
-                            except (KeyError, ValueError) as e:
-                                logger.warning(f"Skipping invalid split data for {brush_name}: {e}")
-                                continue
-                    else:
-                        logger.warning(
-                            f"Invalid entries format for {brush_name}: "
-                            f"expected list, got {type(entries)}"
-                        )
+            # Handle flat structure where each key is a brush name
+            for brush_name, split_data in yaml_data.items():
+                if isinstance(split_data, dict):
+                    # Single entry
+                    split_data["should_not_split"] = split_data.get("should_not_split", False)
+                    brush_split = BrushSplit.from_dict(split_data, original=brush_name)
+                    self.validated_splits[brush_name] = brush_split
+                elif isinstance(split_data, list):
+                    # Legacy list structure (for backward compatibility)
+                    for item in split_data:
+                        if isinstance(item, dict):
+                            item["should_not_split"] = item.get("should_not_split", False)
+                            brush_split = BrushSplit.from_dict(item, original=brush_name)
+                            self.validated_splits[brush_name] = brush_split
 
-            # Handle old structure: splits is a list (backward compatibility)
-            elif isinstance(splits_data, list):
-                for split_data in splits_data:
-                    try:
-                        split = BrushSplit.from_dict(split_data)
-                        self.validated_splits[split.original] = split
-                    except (KeyError, ValueError) as e:
-                        logger.warning(f"Skipping invalid split data: {e}")
-                        continue
+            logger.info(
+                f"Loaded {len(self.validated_splits)} validated splits from {self.yaml_path}"
+            )
 
-            logger.info(f"Loaded {len(self.validated_splits)} validated splits")
-
-        except FileNotFoundError as e:
-            logger.error(f"YAML file not found: {e}")
-            raise FileNotFoundError(f"Failed to read YAML file: {e}")
         except yaml.YAMLError as e:
-            logger.error(f"YAML parsing error: {e}")
-            raise DataCorruptionError(f"Failed to parse YAML file: {e}")
-        except DataCorruptionError:
-            # Re-raise data corruption errors immediately
-            raise
+            raise DataCorruptionError(f"Invalid YAML format in {self.yaml_path}: {e}")
         except Exception as e:
-            logger.error(f"Unexpected error loading splits: {e}")
-            raise ProcessingError(f"Failed to load validated splits: {e}")
+            raise ProcessingError(f"Error loading validated splits from {self.yaml_path}: {e}")
 
     def save_validated_splits(self, splits: List[BrushSplit]) -> bool:
-        """Save validated splits to YAML file with fail-fast error handling."""
-        from webui.api.utils.yaml_utils import save_yaml_file
-
+        """Save validated splits to YAML file."""
         try:
-            # Load existing data first
-            existing_data = {"splits": {}}
+            # Create backup of existing file
             if self.yaml_path.exists():
-                try:
-                    with open(self.yaml_path, "r", encoding="utf-8") as f:
-                        loaded_data = yaml.safe_load(f) or {"splits": {}}
-                        # Handle case where splits is None (empty YAML file)
-                        if loaded_data.get("splits") is None:
-                            loaded_data["splits"] = {}
-                        existing_data = loaded_data
-                except (yaml.YAMLError, OSError) as e:
-                    logger.warning(f"Could not load existing YAML data: {e}")
-                    existing_data = {"splits": {}}
+                backup_path = self.yaml_path.with_suffix(".yaml.backup")
+                import shutil
 
-            # Group new splits by original brush name (case-insensitive)
-            organized_splits = {}
+                shutil.copy2(self.yaml_path, backup_path)
+                logger.info(f"Created backup: {backup_path}")
+
+            # Convert splits to flat YAML structure
+            yaml_data = {}
             for split in splits:
-                key = split.original.lower()
-                if key not in organized_splits:
-                    organized_splits[key] = []
-                organized_splits[key].append(split.to_dict())
+                # Use original as the key
+                yaml_data[split.original] = split.to_yaml_dict()
 
-            # Merge with existing data
-            for key, new_entries in organized_splits.items():
-                display_name = new_entries[0]["original"]
+            # Sort alphabetically by brush name
+            sorted_data = dict(sorted(yaml_data.items()))
 
-                # Check for case-insensitive match in existing data
-                existing_key = None
-                for existing_name in existing_data["splits"].keys():
-                    if existing_name.lower() == key:
-                        existing_key = existing_name
-                        break
+            # Write to file
+            with open(self.yaml_path, "w", encoding="utf-8") as f:
+                yaml.dump(sorted_data, f, default_flow_style=False, sort_keys=False)
 
-                if existing_key:
-                    # Update existing entry
-                    existing_data["splits"][existing_key] = new_entries
-                else:
-                    # Add new entry
-                    existing_data["splits"][display_name] = new_entries
-
-            # Sort the splits alphabetically by key (case insensitive)
-            sorted_splits = {}
-            for key in sorted(existing_data["splits"].keys(), key=str.lower):
-                sorted_splits[key] = existing_data["splits"][key]
-            existing_data["splits"] = sorted_splits
-
-            # Ensure directory exists
-            self.yaml_path.parent.mkdir(parents=True, exist_ok=True)
-
-            # Use the new YAML utility for atomic write
-            save_yaml_file(existing_data, self.yaml_path)
-
-            logger.info(f"Saved {len(splits)} validated splits, merged with existing data")
+            logger.info(f"Saved {len(splits)} validated splits to {self.yaml_path}")
             return True
 
-        except (OSError, IOError) as e:
-            logger.error(f"File I/O error saving splits: {e}")
-            return False
         except Exception as e:
-            logger.error(f"Unexpected error saving splits: {e}")
+            logger.error(f"Error saving validated splits to {self.yaml_path}: {e}")
             return False
 
     def calculate_confidence(
@@ -727,59 +699,50 @@ class BrushSplitValidator:
         # Calculate system confidence and reasoning
         system_confidence, system_reasoning = self.calculate_confidence(original, handle, knot)
 
-        # Check if this is a correction
+        # Check if this is a correction or validation
         existing = None
         for validated_key, validated_split in self.validated_splits.items():
             if validated_key.lower() == original.lower():
                 existing = validated_split
                 break
 
-        corrected = False
+        # Determine if this is a correction (changes made) or validation (accepted as-is)
+        is_corrected = False
         system_handle = None
         system_knot = None
 
         if existing:
-            corrected = (
+            # Check if any changes were made
+            is_corrected = (
                 existing.handle != handle
                 or existing.knot != knot
                 or existing.should_not_split != should_not_split
             )
-            if corrected:
+
+            if is_corrected:
+                # This is a correction - store the original system values
                 system_handle = existing.handle
                 system_knot = existing.knot
 
-        # Determine validation status
-        is_validated = False
-        if validated_at:
-            # If validated_at is provided, this is a validated split
-            is_validated = True
-        elif existing:
-            # If no validated_at provided but we have an existing split,
-            # check if it was already validated
-            is_validated = existing.validated
+        # Set timestamp
+        final_validated_at = validated_at or (existing.validated_at if existing else None)
 
-        # Set validated_at timestamp
-        if validated_at:
-            # Use provided timestamp
-            final_validated_at = validated_at
-        elif existing and existing.validated_at:
-            # Keep existing timestamp
-            final_validated_at = existing.validated_at
-        else:
-            # No timestamp available
-            final_validated_at = None
+        # If this is a validation but no validated_at provided, use current time
+        if not final_validated_at:
+            from datetime import datetime
+
+            final_validated_at = datetime.now().isoformat()
 
         return BrushSplit(
             original=original,
             handle=handle,
             knot=knot,
-            validated=is_validated,
-            corrected=corrected,
+            corrected=is_corrected,
             validated_at=final_validated_at,
             system_handle=system_handle,
             system_knot=system_knot,
-            system_confidence=system_confidence if corrected else None,
-            system_reasoning=system_reasoning if corrected else None,
+            system_confidence=system_confidence if is_corrected else None,
+            system_reasoning=system_reasoning if is_corrected else None,
             should_not_split=should_not_split,
             occurrences=existing.occurrences if existing else [],
         )
@@ -1049,8 +1012,8 @@ async def load_brush_splits(
                     handle=handle,
                     knot=knot,
                     match_type=match_type,
-                    validated=False,
-                    corrected=False,
+                    corrected=False,  # Unvalidated splits are not corrected
+                    validated_at=None,  # No timestamp for unvalidated splits
                     occurrences=occurrences,
                 )
                 splits.append(split)
@@ -1198,10 +1161,10 @@ async def save_splits(data: SaveSplitsRequest):
                     validation_errors.append(f"Split {i}: missing knot field")
                     continue
 
-                # Automatically set validated_at timestamp and validated=True for all saved splits
+                # Automatically set corrected_at timestamp and corrected=True for all saved splits
                 if not split_dict.get("validated_at"):
                     split_dict["validated_at"] = datetime.now().isoformat()
-                split_dict["validated"] = True
+                split_dict["corrected"] = True
 
                 split = BrushSplit.from_dict(split_dict)
                 validated_splits.append(split)
