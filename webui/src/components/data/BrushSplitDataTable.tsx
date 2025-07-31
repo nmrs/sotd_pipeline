@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useMemo, useState, memo, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, memo, useEffect, useRef } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ interface BrushSplitDataTableProps {
   onCommentClick?: (commentId: string) => void;
   customControls?: React.ReactNode;
   commentLoading?: boolean;
+  onUnsavedChangesChange?: (hasChanges: boolean) => void;
 }
 
 // Extended type for table data with index
@@ -26,7 +27,9 @@ const MemoizedInput = memo<{
   onChange: (value: string) => void;
   placeholder: string;
   'aria-label': string;
-}>(({ value, onChange, placeholder, 'aria-label': ariaLabel }) => {
+  className?: string;
+  disabled?: boolean;
+}>(({ value, onChange, placeholder, 'aria-label': ariaLabel, className, disabled }) => {
   const [localValue, setLocalValue] = useState(value);
 
   // Update local value when prop changes
@@ -34,14 +37,23 @@ const MemoizedInput = memo<{
     setLocalValue(value);
   }, [value]);
 
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalValue(e.target.value);
+  }, []);
+
+  const handleBlur = useCallback(() => {
+    onChange(localValue);
+  }, [onChange, localValue]);
+
   return (
     <Input
       value={localValue}
-      onChange={e => setLocalValue(e.target.value)}
-      onBlur={() => onChange(localValue)}
+      onChange={handleChange}
+      onBlur={handleBlur}
       placeholder={placeholder}
       aria-label={ariaLabel}
-      className='w-full'
+      className={className}
+      disabled={disabled}
     />
   );
 });
@@ -53,6 +65,7 @@ export function BrushSplitDataTable({
   onSave,
   customControls,
   commentLoading = false,
+  onUnsavedChangesChange,
 }: BrushSplitDataTableProps) {
   const [editingData, setEditingData] = useState<Record<number, Partial<BrushSplit>>>({});
 
@@ -61,9 +74,13 @@ export function BrushSplitDataTable({
     Record<number, { handle: string | null; knot: string; validated: boolean }>
   >({});
 
+  // Use ref to access current brushSplits without causing re-renders
+  const brushSplitsRef = useRef(brushSplits);
+  brushSplitsRef.current = brushSplits;
+
   const handleFieldChange = useCallback(
     (index: number, field: keyof BrushSplit, value: string | boolean | null) => {
-      const originalValue = brushSplits[index][field];
+      const originalValue = brushSplitsRef.current[index][field];
 
       // If the new value matches the original, clear the change
       if (value === originalValue) {
@@ -89,7 +106,7 @@ export function BrushSplitDataTable({
         }));
       }
     },
-    [brushSplits]
+    [] // No dependencies needed since we use ref
   );
 
   const handleSave = useCallback(() => {
@@ -127,11 +144,17 @@ export function BrushSplitDataTable({
 
   const hasUnsavedChanges = Object.keys(editingData).length > 0;
 
+  // Notify parent component of unsaved changes
+  useEffect(() => {
+    onUnsavedChangesChange?.(hasUnsavedChanges);
+  }, [hasUnsavedChanges, onUnsavedChangesChange]);
+
   const columns = useMemo<ColumnDef<BrushSplitWithIndex>[]>(
     () => [
       {
         accessorKey: 'original',
         header: 'Original Text',
+        size: 300,
         cell: ({ row }) => {
           const item = row.original;
           return (
@@ -149,6 +172,7 @@ export function BrushSplitDataTable({
       {
         accessorKey: 'handle',
         header: 'Handle',
+        size: 200,
         cell: ({ row }) => {
           const item = row.original;
           const isEditing = editingData[item.index];
@@ -158,15 +182,15 @@ export function BrushSplitDataTable({
 
           return (
             <div className='flex items-center space-x-2'>
-              <Input
+              <MemoizedInput
                 value={currentValue || ''}
-                onChange={e => handleFieldChange(item.index, 'handle', e.target.value)}
-                className={`${hasChanges ? 'border-orange-500 bg-orange-50' : ''} ${
-                  originalValue && originalValue.handle !== item.handle
-                    ? 'border-blue-500 bg-blue-50'
-                    : ''
-                }`}
+                onChange={(value) => handleFieldChange(item.index, 'handle', value)}
+                className={`w-full ${hasChanges ? 'border-orange-500 bg-orange-50' : ''} ${originalValue && originalValue.handle !== item.handle
+                  ? 'border-blue-500 bg-blue-50'
+                  : ''
+                  }`}
                 placeholder='Handle'
+                aria-label={`Handle for ${item.original}`}
                 disabled={commentLoading}
               />
               {hasChanges && (
@@ -183,7 +207,7 @@ export function BrushSplitDataTable({
                   }}
                   className='text-orange-600 hover:text-orange-700'
                 >
-                  Reset
+                  ↺
                 </Button>
               )}
             </div>
@@ -193,6 +217,7 @@ export function BrushSplitDataTable({
       {
         accessorKey: 'knot',
         header: 'Knot',
+        size: 200,
         cell: ({ row }) => {
           const item = row.original;
           const isEditing = editingData[item.index];
@@ -202,15 +227,15 @@ export function BrushSplitDataTable({
 
           return (
             <div className='flex items-center space-x-2'>
-              <Input
+              <MemoizedInput
                 value={currentValue || ''}
-                onChange={e => handleFieldChange(item.index, 'knot', e.target.value)}
-                className={`${hasChanges ? 'border-orange-500 bg-orange-50' : ''} ${
-                  originalValue && originalValue.knot !== item.knot
-                    ? 'border-blue-500 bg-blue-50'
-                    : ''
-                }`}
+                onChange={(value) => handleFieldChange(item.index, 'knot', value)}
+                className={`w-full ${hasChanges ? 'border-orange-500 bg-orange-50' : ''} ${originalValue && originalValue.knot !== item.knot
+                  ? 'border-blue-500 bg-blue-50'
+                  : ''
+                  }`}
                 placeholder='Knot'
+                aria-label={`Knot for ${item.original}`}
                 disabled={commentLoading}
               />
               {hasChanges && (
@@ -227,7 +252,7 @@ export function BrushSplitDataTable({
                   }}
                   className='text-orange-600 hover:text-orange-700'
                 >
-                  Reset
+                  ↺
                 </Button>
               )}
             </div>
@@ -237,6 +262,7 @@ export function BrushSplitDataTable({
       {
         accessorKey: 'validated',
         header: 'Validated',
+        size: 120,
         cell: ({ row }) => {
           const item = row.original;
           const isEditing = editingData[item.index];
@@ -260,6 +286,7 @@ export function BrushSplitDataTable({
       {
         accessorKey: 'should_not_split',
         header: "Don't Split",
+        size: 120,
         cell: ({ row }) => {
           const item = row.original;
           const isEditing = editingData[item.index];
@@ -363,7 +390,7 @@ export function BrushSplitDataTable({
   }
 
   return (
-    <div className='space-y-4'>
+    <div className='space-y-4 w-full'>
       <DataTable
         columns={columns}
         data={tableData}
@@ -373,6 +400,7 @@ export function BrushSplitDataTable({
         showColumnVisibility={true}
         searchKey='original'
         customControls={customControls}
+        initialPageSize={50}
       />
       {hasUnsavedChanges && (
         <div className='flex justify-between items-center'>

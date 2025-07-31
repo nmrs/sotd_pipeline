@@ -84,8 +84,8 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
       { timeout: 5000 }
     );
 
-    // Test Brush 2 is validated, so it should be hidden by default
-    expect(screen.queryByText('Test Brush 2')).not.toBeInTheDocument();
+    // Test Brush 2 is validated, so it should be shown by default
+    expect(screen.getByText('Test Brush 2')).toBeInTheDocument();
   });
 
   test('displays disabled fields when should_not_split is true', async () => {
@@ -234,38 +234,37 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
       expect(screen.getByText('Unvalidated Brush')).toBeInTheDocument();
     });
 
-    // Initially should show only unvalidated items (1 item)
-    // Validated items should be hidden
-    expect(screen.queryByText('Validated Brush')).not.toBeInTheDocument();
-    expect(screen.queryByText('Another Validated Brush')).not.toBeInTheDocument();
+    // Initially should show all items including validated ones (3 items total)
+    // Validated items should be visible by default
+    expect(screen.getByText('Validated Brush')).toBeInTheDocument();
+    expect(screen.getByText('Another Validated Brush')).toBeInTheDocument();
     expect(screen.getByText('Unvalidated Brush')).toBeInTheDocument();
 
-    // Check that the toggle button is present and shows correct count
-    const toggleButton = screen.getByText(/Show Validated/);
+    // Check that the toggle button is present
+    const toggleButton = screen.getByText(/Hide Validated/);
     expect(toggleButton).toBeInTheDocument();
-    expect(toggleButton).toHaveTextContent('Show Validated (2)'); // 2 validated items
 
-    // Click the button to show all items including validated
+    // Click the button to hide validated items
     fireEvent.click(toggleButton);
 
-    // Should now show all items including the validated ones
-    await waitFor(() => {
-      expect(screen.getByText('Validated Brush')).toBeInTheDocument();
-      expect(screen.getByText('Unvalidated Brush')).toBeInTheDocument();
-      expect(screen.getByText('Another Validated Brush')).toBeInTheDocument();
-    });
-
-    // Button should now say "Hide Validated"
-    expect(screen.getByText(/Hide Validated/)).toBeInTheDocument();
-
-    // Click again to hide validated items
-    fireEvent.click(screen.getByText(/Hide Validated/));
-
-    // Should hide the validated items again
+    // Should now hide validated items and show only unvalidated ones
     await waitFor(() => {
       expect(screen.queryByText('Validated Brush')).not.toBeInTheDocument();
       expect(screen.queryByText('Another Validated Brush')).not.toBeInTheDocument();
       expect(screen.getByText('Unvalidated Brush')).toBeInTheDocument();
+    });
+
+    // Button should now say "Show Validated"
+    expect(screen.getByText(/Show Validated/)).toBeInTheDocument();
+
+    // Click again to show all items including validated
+    fireEvent.click(screen.getByText(/Show Validated/));
+
+    // Should show all items again including the validated ones
+    await waitFor(() => {
+      expect(screen.getByText('Validated Brush')).toBeInTheDocument();
+      expect(screen.getByText('Unvalidated Brush')).toBeInTheDocument();
+      expect(screen.getByText('Another Validated Brush')).toBeInTheDocument();
     });
   });
 

@@ -11,15 +11,17 @@ interface BrushSplitTableProps {
   customControls?: React.ReactNode;
   onCommentClick?: (commentId: string) => void;
   commentLoading?: boolean;
+  onUnsavedChangesChange?: (hasChanges: boolean) => void;
 }
 
 export function BrushSplitTable({
   brushSplits,
-  onSave = () => {},
+  onSave = () => { },
   onSelectionChange,
   customControls,
   onCommentClick,
   commentLoading = false,
+  onUnsavedChangesChange,
 }: BrushSplitTableProps) {
   const handleSave = (updatedData: BrushSplit[]) => {
     // Pass the updated data array to the parent onSave callback
@@ -35,6 +37,7 @@ export function BrushSplitTable({
         customControls={customControls}
         onCommentClick={onCommentClick}
         commentLoading={commentLoading}
+        onUnsavedChangesChange={onUnsavedChangesChange}
       />
     </div>
   );

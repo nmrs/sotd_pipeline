@@ -6,16 +6,16 @@ export interface BrushSplitOccurrence {
 export interface BrushSplit {
   original: string;
   handle: string | null;
-  knot: string;
-  validated: boolean;
+  knot: string | null;
+  match_type?: string | null;
   corrected: boolean;
-  validated_at: string | null; // ISO timestamp
-  system_handle?: string | null; // Only if corrected=true
-  system_knot?: string; // Only if corrected=true
-  system_confidence?: 'high' | 'medium' | 'low'; // Only if corrected=true
-  system_reasoning?: string; // Only if corrected=true
+  validated_at: string | null;
+  system_handle?: string | null;
+  system_knot?: string | null;
+  system_confidence?: string | null;
+  system_reasoning?: string | null;
+  should_not_split: boolean;
   occurrences: BrushSplitOccurrence[];
-  should_not_split?: boolean; // Don't split checkbox
 }
 
 export interface BrushSplitValidationStatus {

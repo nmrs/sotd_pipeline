@@ -274,12 +274,25 @@ export const loadBrushSplits = async (
   unmatchedOnly: boolean = true
 ): Promise<LoadBrushSplitsResponse> => {
   try {
-    const queryParams = months.map(month => `months=${encodeURIComponent(month)}`).join('&');
-    const unmatchedParam = `unmatched_only=${unmatchedOnly}`;
-    const response = await api.get(`/brush-splits/load?${queryParams}&${unmatchedParam}`);
+    const response = await api.get('/brush-splits/load', {
+      params: {
+        months: months.join(','),
+        unmatched_only: unmatchedOnly,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('Failed to load brush splits:', error);
+    throw error;
+  }
+};
+
+export const loadYamlBrushSplits = async (): Promise<LoadBrushSplitsResponse> => {
+  try {
+    const response = await api.get('/brush-splits/yaml');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to load YAML brush splits:', error);
     throw error;
   }
 };

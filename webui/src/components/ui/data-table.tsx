@@ -218,7 +218,7 @@ export function DataTable<TData, TValue>({
           </DropdownMenu>
         )}
       </div>
-      <div className='rounded-md border'>
+      <div className='rounded-md border overflow-x-auto'>
         <Table data-table>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
@@ -330,7 +330,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side='top'>
-              {[5, 10, 20, 30, 40, 50].map(pageSize => (
+              {[10, 25, 50, 100, 200, 500].map(pageSize => (
                 <SelectItem key={pageSize} value={`${pageSize}`}>
                   {pageSize}
                 </SelectItem>
