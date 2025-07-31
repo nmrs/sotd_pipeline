@@ -498,16 +498,17 @@ class BrushMatcher:
                 handle_text, knot_text = curated_split
                 delimiter_type = "curated_split"
             else:
-                # Check if this is a known brush before attempting to split
-                # Known brushes should not be split
-                if self.brush_splitter._is_known_brush(value):
-                    # It's a known complete brush, don't split it
-                    handle_text, knot_text, delimiter_type = None, None, None
-                else:
-                    # Try automated splitting (fallback)
-                    handle_text, knot_text, delimiter_type = (
-                        self.brush_splitter.split_handle_and_knot(value)
-                    )
+                # Try automated splitting first (high-priority delimiters)
+                # Only check if it's a known brush AFTER attempting to split
+                handle_text, knot_text, delimiter_type = self.brush_splitter.split_handle_and_knot(
+                    value
+                )
+
+                # If no split was found, check if it's a known brush
+                if not handle_text or not knot_text:
+                    if self.brush_splitter._is_known_brush(value):
+                        # It's a known complete brush, don't split it
+                        handle_text, knot_text, delimiter_type = None, None, None
 
         if handle_text and knot_text:
             # Handle split result - create composite brush structure
@@ -1504,10 +1505,10 @@ class BrushMatcher:
 
                 updated["handle"] = {
                     "brand": handle_brand,
-                    "model": None,  # Could be extracted from handle_text if needed
+                    "model": handle_match.get("handle_model") if handle_match else None,
                     "source_text": handle_text,
                     "_matched_by": "HandleMatcher" if handle_match else "BrushSplitter",
-                    "_pattern": "split",
+                    "_pattern": handle_match.get("_pattern_used") if handle_match else "split",
                 }
         if ("knot" not in updated) or (updated["knot"] is None):
             if not ("knot" in updated and updated["knot"]):
