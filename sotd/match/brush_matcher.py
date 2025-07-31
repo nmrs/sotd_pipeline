@@ -717,7 +717,8 @@ class BrushMatcher:
 
             # Use the pattern from the best match if available
             overall_pattern = (
-                best_match.pattern if best_match and best_match.pattern 
+                best_match.pattern
+                if best_match and best_match.pattern
                 else "single_component_fallback"
             )
             return create_match_result(
@@ -740,21 +741,8 @@ class BrushMatcher:
         self, value: str
     ) -> tuple[Optional[str], Optional[str], Optional[str]]:
         """Try splitting with high-priority delimiters only."""
-        # Extract high-priority delimiter logic from brush splitter
-        high_reliability_delimiters = [" w/ ", " w/", " with "]
-        handle_primary_delimiters = [" in "]
-
-        # Check high-reliability delimiters
-        for delimiter in high_reliability_delimiters:
-            if delimiter in value:
-                return self._split_by_delimiter_simple(value, delimiter, "high_reliability")
-
-        # Check handle-primary delimiters
-        for delimiter in handle_primary_delimiters:
-            if delimiter in value:
-                return self._split_by_delimiter_positional(value, delimiter, "handle_primary")
-
-        return None, None, None
+        # Use the brush splitter's logic instead of duplicating it
+        return self.brush_splitter._split_by_high_priority_delimiters(value)
 
     def _try_medium_priority_splitting(
         self, value: str
@@ -939,7 +927,7 @@ class BrushMatcher:
         else:
             # Fall back to knot matcher strategies
             knot_match = None
-            for strategy in self.strategies:
+            for strategy in self.knot_matcher.strategies:
                 try:
                     result = strategy.match(knot_text)
                     if result and hasattr(result, "matched") and result.matched:
@@ -1567,6 +1555,8 @@ class BrushMatcher:
                             "fiber": knot_match.get("fiber"),
                             "knot_size_mm": knot_match.get("knot_size_mm"),
                             "source_text": knot_text,
+                            "_matched_by": "BrushSplitter",
+                            "_pattern": knot_match.get("_pattern_used", "split"),
                         }
                     else:
                         updated["knot"] = {
