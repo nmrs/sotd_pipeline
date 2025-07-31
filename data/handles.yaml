@@ -97,6 +97,8 @@ artisan_handles:
       patterns:
       - ^(?!.*dogwood)declaration
       - ^(?!.*dogwood)\bdg\b
+      - \bdg\b
+      - \bb(?:[1-8]|9[ab]|1[0-8])\b
   DISCARD:
     Unspecified:
       patterns:
@@ -456,12 +458,6 @@ manufacturer_handles:
       patterns:
       - DSC?\s*Cosmetic
       - \bDSC\b
-  Declaration Grooming:
-    Unspecified:
-      patterns:
-      - ^(?!.*dogwood)declaration
-      - ^(?!.*dogwood)\bdg\b
-      - \bdg\b
   Den of Man:
     Unspecified:
       patterns:
