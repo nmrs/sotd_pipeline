@@ -153,8 +153,9 @@ known_brushes:
       patterns:
       - odin'?s.*beard
   Declaration Grooming:
-    knot_size_mm: 28
     fiber: Badger
+    handle_matching: true
+    knot_size_mm: 28
     B1:
       patterns:
       - (declaration|\bdg\b).*\bb1\b
