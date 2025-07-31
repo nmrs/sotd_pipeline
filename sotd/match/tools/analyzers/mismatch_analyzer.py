@@ -687,130 +687,27 @@ class MismatchAnalyzer(AnalysisTool):
         # Normalize for consistent key generation - use normalized original to match storage format
         original_normalized = normalize_for_matching(original, None, field=field).lower().strip()
         matched_normalized = matched_text.lower().strip()
-        return f"{field}:{original_normalized}|{matched_normalized}"
+        # Use same delimiter as CorrectMatchesManager to ensure consistency
+        return f"{field}:{original_normalized}|||{matched_normalized}"
 
     def _load_correct_matches(self) -> None:
         """Load previously marked correct matches from file."""
-        self._correct_matches = set()
-        self._correct_matches_data = {}
-        if not self._get_correct_matches_file().exists():
-            return
-
         try:
-            with self._get_correct_matches_file().open("r", encoding="utf-8") as f:
-                data = yaml.safe_load(f)
-                if not data:
-                    return
-                for field, field_data in data.items():
-                    if isinstance(field_data, dict):
-                        if field == "blade":
-                            # Handle format-first structure for blade field
-                            for format_name, format_data in field_data.items():
-                                if isinstance(format_data, dict):
-                                    for brand, brand_data in format_data.items():
-                                        if isinstance(brand_data, dict):
-                                            for model, strings in brand_data.items():
-                                                if isinstance(strings, list):
-                                                    for original in strings:
-                                                        brand_model = f"{brand} {model}"
-                                                        # Use same normalization
-                                                        normalized = normalize_for_matching(
-                                                            original, None, field=field
-                                                        )
-                                                        original_normalized = (
-                                                            normalized.lower().strip()
-                                                        )
-                                                        match_key = (
-                                                            f"{field}:{original_normalized}|"
-                                                            f"{brand_model.lower().strip()}"
-                                                        )
-                                                        self._correct_matches.add(match_key)
-                                                        self._correct_matches_data[match_key] = {
-                                                            "original": original,
-                                                            "matched": {
-                                                                "brand": brand,
-                                                                "model": model,
-                                                                "format": format_name,
-                                                            },
-                                                            "field": field,
-                                                        }
-                        elif field == "split_brush":
-                            # Handle split_brush section for brush field
-                            for split_brush_string, components in field_data.items():
-                                if isinstance(components, dict):
-                                    handle_component = components.get("handle", "")
-                                    knot_component = components.get("knot", "")
-
-                                    # Create a matched structure that represents the split brush
-                                    matched_structure = {
-                                        "brand": None,  # Split brushes have no top-level brand
-                                        "model": None,  # Split brushes have no top-level model
-                                        "handle": {
-                                            "brand": "Unknown",  # Will be looked up in handle section
-                                            "model": handle_component,
-                                            "source_text": handle_component,
-                                        },
-                                        "knot": {
-                                            "brand": "Unknown",  # Will be looked up in knot section
-                                            "model": knot_component,
-                                            "source_text": knot_component,
-                                        },
-                                    }
-
-                                    # Use same normalization as _create_match_key
-                                    normalized = normalize_for_matching(
-                                        split_brush_string, None, field="brush"
-                                    )
-                                    original_normalized = normalized.lower().strip()
-
-                                    # For split brushes, the matched text is the original string
-                                    # since it's stored as the key in split_brush section
-                                    matched_text = split_brush_string.lower().strip()
-
-                                    match_key = f"brush:{original_normalized}|{matched_text}"
-                                    self._correct_matches.add(match_key)
-                                    self._correct_matches_data[match_key] = {
-                                        "original": split_brush_string,
-                                        "matched": matched_structure,
-                                        "field": "brush",
-                                    }
-                        else:
-                            # Handle brand-first structure for other fields
-                            for brand, brand_data in field_data.items():
-                                if isinstance(brand_data, dict):
-                                    for model, strings in brand_data.items():
-                                        if isinstance(strings, list):
-                                            for original in strings:
-                                                brand_model = f"{brand} {model}"
-                                                # Use the same normalization as _create_match_key
-                                                normalized = normalize_for_matching(
-                                                    original, None, field=field
-                                                )
-                                                original_normalized = normalized.lower().strip()
-                                                match_key = (
-                                                    f"{field}:{original_normalized}|"
-                                                    f"{brand_model.lower().strip()}"
-                                                )
-                                                self._correct_matches.add(match_key)
-                                                self._correct_matches_data[match_key] = {
-                                                    "original": original,
-                                                    "matched": {
-                                                        "brand": (
-                                                            brand
-                                                            if field in ("razor", "blade", "brush")
-                                                            else None
-                                                        ),
-                                                        "model": (
-                                                            model
-                                                            if field in ("razor", "blade", "brush")
-                                                            else None
-                                                        ),
-                                                        "maker": brand if field == "soap" else None,
-                                                        "scent": model if field == "soap" else None,
-                                                    },
-                                                    "field": field,
-                                                }
-        except (yaml.YAMLError, KeyError) as e:
+            from sotd.match.tools.managers.correct_matches_manager import (
+                CorrectMatchesManager
+            )
+            
+            # Use the CorrectMatchesManager instead of duplicating logic
+            manager = CorrectMatchesManager(
+                self.console, self._get_correct_matches_file()
+            )
+            manager.load_correct_matches()
+            
+            # Copy the loaded data
+            self._correct_matches = manager._correct_matches
+            self._correct_matches_data = manager._correct_matches_data
+            
+        except Exception as e:
             self.console.print(f"[yellow]Warning: Could not load correct matches: {e}[/yellow]")
             self._correct_matches = set()
             self._correct_matches_data = {}
