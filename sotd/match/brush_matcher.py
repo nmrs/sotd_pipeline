@@ -704,8 +704,12 @@ class BrushMatcher:
                         "fiber": best_match.matched.get("fiber"),
                         "knot_size_mm": best_match.matched.get("knot_size_mm"),
                         "source_text": value,
-                        "_matched_by": "KnotMatcher",
-                        "_pattern": best_match.matched.get("_pattern", "knot_only"),
+                        "_matched_by": best_match.matched.get(
+                            "_matched_by_strategy", "KnotMatcher"
+                        ),
+                        "_pattern": best_match.matched.get(
+                            "_pattern_used", best_match.pattern or "knot_only"
+                        ),
                     },
                 }
 
@@ -717,7 +721,14 @@ class BrushMatcher:
                 match_type="regex",
                 pattern="single_component_fallback",
             )
-        return None
+        # No match found - return MatchResult with matched=None
+        from sotd.match.types import create_match_result
+        return create_match_result(
+            original=value,
+            matched=None,
+            match_type=None,
+            pattern=None,
+        )
 
     def _try_high_priority_splitting(
         self, value: str
