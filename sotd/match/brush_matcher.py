@@ -400,23 +400,21 @@ class BrushMatcher:
                 # Check if normalized_text matches any pattern (handle both strings and dictionaries)
                 pattern_matched = False
                 handle_match_enabled = False
-                
+
                 for pattern in patterns:
                     if isinstance(pattern, dict):
                         # Dictionary with handle_match flag
                         pattern_text = list(pattern.keys())[0]  # Get the key
                         if normalized_text == pattern_text:
                             pattern_matched = True
-                            handle_match_enabled = pattern[pattern_text].get(
-                                "handle_match", False
-                            )
+                            handle_match_enabled = pattern[pattern_text].get("handle_match", False)
                             break
                     else:
                         # Simple string pattern
                         if normalized_text == pattern:
                             pattern_matched = True
                             break
-                
+
                 if pattern_matched:
                     return self._process_regular_correct_match(
                         value,
