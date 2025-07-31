@@ -397,22 +397,41 @@ class BrushMatcher:
         if not value:
             return None
 
-        # Handle case where value might be a dict (from correct_matches.yaml
-        # structure)
+        # Handle case where value might be a dict (from correct_matches.yaml structure)
         if isinstance(value, dict):
             # Extract the key (brush name) from the dictionary
             brush_name = list(value.keys())[0]
             value = brush_name
 
-        # Step 1: Check brush section in correct_matches.yaml (fastest)
+        # Define strategies in priority order
+        strategies = [
+            self._match_correct_complete_brush,
+            self._match_correct_split_brush,
+            self._match_known_split,
+            self._match_high_priority_automated_split,
+            self._match_complete_brush,
+            self._match_dual_component,
+            self._match_medium_priority_automated_split,
+            self._match_single_component_fallback,
+        ]
+
+        # Try each strategy in order
+        for strategy in strategies:
+            result = strategy(value)
+            if result is not None:
+                return result
+
+        return None
+
+    def _match_correct_complete_brush(self, value: str) -> Optional["MatchResult"]:
+        """Strategy 1: Check brush section in correct_matches.yaml (fastest)."""
         normalized_text = value.lower().strip()
         brush_correct_matches = self.correct_matches_checker.correct_matches.get("brush", {})
 
         # Check if this is a known brush (exact match)
         for brand, brand_data in brush_correct_matches.items():
             for model, patterns in brand_data.items():
-                # Check if normalized_text matches any pattern (handle both strings
-                # and dictionaries)
+                # Check if normalized_text matches any pattern (handle both strings and dicts)
                 pattern_matched = False
                 handle_match_enabled = False
 
@@ -441,8 +460,11 @@ class BrushMatcher:
                             "handle_match_enabled": handle_match_enabled,
                         },
                     )
+        return None
 
-        # Step 2: Check split_brush section in correct_matches.yaml (fast lookup)
+    def _match_correct_split_brush(self, value: str) -> Optional["MatchResult"]:
+        """Strategy 2: Check split_brush section in correct_matches.yaml (fast lookup)."""
+        normalized_text = value.lower().strip()
         split_brush_correct_matches = self.correct_matches_checker.correct_matches.get(
             "split_brush", {}
         )
@@ -456,9 +478,10 @@ class BrushMatcher:
                     "knot": split_data.get("knot", ""),
                 },
             )
+        return None
 
-        # Step 3: Only do expensive operations if both checks fail
-        # Check correct matches for other sections
+    def _match_known_split(self, value: str) -> Optional["MatchResult"]:
+        """Strategy 3: Check other correct matches sections."""
         correct_match = self.correct_matches_checker.check(value)
         if correct_match:
             # Convert CorrectMatchData to dict if needed
@@ -484,9 +507,10 @@ class BrushMatcher:
                 return self._process_handle_knot_correct_match(value, correct_match_dict)
             else:
                 return self._process_regular_correct_match(value, correct_match_dict)
+        return None
 
-        # Step 4: Check brush_splits.yaml (user-curated splits take precedence over
-        # automated matching)
+    def _match_high_priority_automated_split(self, value: str) -> Optional["MatchResult"]:
+        """Strategy 4: Check brush_splits.yaml and high-priority automated splitting."""
         # Check if this brush should not be split (human-curated decision)
         if self.brush_splits_loader.should_not_split(value):
             # Treat as complete brush, skip splitting
@@ -498,305 +522,15 @@ class BrushMatcher:
                 handle_text, knot_text = curated_split
                 delimiter_type = "curated_split"
             else:
-                # Try automated splitting first (high-priority delimiters)
-                # Only check if it's a known brush AFTER attempting to split
-                handle_text, knot_text, delimiter_type = self.brush_splitter.split_handle_and_knot(
-                    value
-                )
-
-                # If no split was found, check if it's a known brush
-                if not handle_text or not knot_text:
-                    if self.brush_splitter._is_known_brush(value):
-                        # It's a known complete brush, don't split it
-                        handle_text, knot_text, delimiter_type = None, None, None
+                # Try automated splitting with high-priority delimiters only
+                handle_text, knot_text, delimiter_type = self._try_high_priority_splitting(value)
 
         if handle_text and knot_text:
-            # Handle split result - create composite brush structure
-            # Match handle and knot separately
+            return self._process_split_result(handle_text, knot_text, delimiter_type, value)
+        return None
 
-            # Check correct matches for handle component first
-            handle_correct_match = self.correct_matches_checker.check(handle_text)
-            if handle_correct_match:
-                # Use correct match for handle
-                handle_match = {
-                    "handle_maker": handle_correct_match.handle_maker,
-                    "handle_model": handle_correct_match.handle_model,
-                    "_matched_by": "CorrectMatches",
-                    "_pattern": "correct_matches_handle",
-                }
-            else:
-                # Fall back to handle matcher
-                handle_match = self.handle_matcher.match_handle_maker(handle_text)
-
-            # Check correct matches for knot component first
-            knot_correct_match = self.correct_matches_checker.check(knot_text)
-            if knot_correct_match:
-                # Use correct match for knot
-                from sotd.match.types import create_match_result
-
-                # Extract knot info safely
-                knot_info = knot_correct_match.knot_info or {}
-                knot_match = create_match_result(
-                    original=knot_text,
-                    matched={
-                        "brand": knot_info.get("brand"),
-                        "model": knot_info.get("model"),
-                        "fiber": knot_info.get("fiber"),
-                        "knot_size_mm": knot_info.get("knot_size_mm"),
-                        "_matched_by": "CorrectMatches",
-                        "_pattern": "correct_matches_knot",
-                    },
-                    match_type="exact",
-                    pattern="correct_matches_knot",
-                )
-            else:
-                # Fall back to knot matcher strategies
-                knot_match = None
-                for strategy in self.strategies:
-                    try:
-                        result = strategy.match(knot_text)
-                        if result and hasattr(result, "matched") and result.matched:
-                            knot_match = result
-                            break
-                    except Exception:
-                        continue
-
-            # If no knot match found, check if it's a generic knot reference (e.g., "Simpson knot")
-            if not knot_match and knot_text:
-                # Check if knot text contains the same brand as the handle
-                handle_brand = handle_match.get("handle_maker") if handle_match else None
-                if handle_brand and handle_brand.lower() in knot_text.lower():
-                    # Generic knot reference - create a synthetic match
-                    from sotd.match.types import create_match_result
-
-                    knot_match = create_match_result(
-                        original=knot_text,
-                        matched={
-                            "brand": handle_brand,
-                            "model": None,  # Generic knot, no specific model
-                            "fiber": None,
-                            "knot_size_mm": None,
-                            "source_text": knot_text,
-                            "_matched_by": "GenericKnotReference",
-                            "_pattern": "generic_knot",
-                        },
-                        match_type="regex",
-                        pattern="generic_knot",
-                    )
-
-            # Get actual patterns from individual matchers
-            handle_pattern = handle_match.get("_pattern_used") if handle_match else "split"
-            knot_pattern = knot_match.pattern if knot_match else "split"
-
-            matched = {
-                "brand": None,  # Composite brush
-                "model": None,  # Composite brush
-                "handle": {
-                    "brand": handle_match.get("handle_maker") if handle_match else None,
-                    "model": handle_match.get("handle_model") if handle_match else None,
-                    "source_text": handle_text,
-                    "_matched_by": "HandleMatcher" if handle_match else "BrushSplitter",
-                    "_pattern": handle_pattern,
-                },
-                "knot": {
-                    "brand": (
-                        knot_match.matched.get("brand")
-                        if knot_match and knot_match.matched
-                        else None
-                    ),
-                    "model": (
-                        knot_match.matched.get("model")
-                        if knot_match and knot_match.matched
-                        else None
-                    ),
-                    "fiber": (
-                        knot_match.matched.get("fiber")
-                        if knot_match and knot_match.matched
-                        else None
-                    ),
-                    "knot_size_mm": (
-                        knot_match.matched.get("knot_size_mm")
-                        if knot_match and knot_match.matched
-                        else None
-                    ),
-                    "source_text": knot_text,
-                    "_matched_by": "BrushSplitter",
-                    "_pattern": knot_pattern,
-                },
-            }
-
-            # Apply the same fallback logic for unmatched handles
-            if not handle_match and handle_text:
-                # Extract the brand from handle_text if no match found
-                # This handles cases like "UnknownMaker handle" where UnknownMaker isn't in the
-                # catalog
-                handle_words = handle_text.lower().split()
-                if "handle" in handle_words:
-                    handle_words.remove("handle")
-                if handle_words:
-                    # Use the first word as the brand (e.g., "UnknownMaker")
-                    matched["handle"]["brand"] = handle_text.split()[0]  # Use original case
-                    matched["handle"]["_matched_by"] = "BrushSplitter"
-
-            # Extract model from handle text if not provided by handle matcher
-            if not matched["handle"]["model"] and handle_text:
-                matched["handle"]["model"] = self._extract_model_from_handle_text(handle_text)
-
-            # Check if both handle and knot are from the same maker - if so, set top-level
-            # brand/model
-            if self._is_same_maker_split(matched["handle"]["brand"], matched["knot"]["brand"]):
-                # Same maker - treat as complete brush with shared brand but no global model
-                matched["brand"] = matched["handle"]["brand"]
-                matched["model"] = None  # No global model for composite brushes
-
-            from sotd.match.types import create_match_result
-
-            return create_match_result(
-                original=value,
-                matched=matched,
-                match_type="regex",
-                pattern="split",
-            )
-
-        elif knot_text and not handle_text:
-            # Handle knot-only entries (no handle component)
-            # This handles cases like "AP Shave Co G5C" where brush_splits.yaml
-            # specifies handle: null
-
-            # Check correct matches for knot component first
-            knot_correct_match = self.correct_matches_checker.check(knot_text)
-            if knot_correct_match:
-                # Use correct match for knot
-                from sotd.match.types import create_match_result
-
-                # Extract knot info safely
-                knot_info = knot_correct_match.knot_info or {}
-                knot_match = create_match_result(
-                    original=knot_text,
-                    matched={
-                        "brand": knot_info.get("brand"),
-                        "model": knot_info.get("model"),
-                        "fiber": knot_info.get("fiber"),
-                        "knot_size_mm": knot_info.get("knot_size_mm"),
-                        "_matched_by": "CorrectMatches",
-                        "_pattern": "correct_matches_knot",
-                    },
-                    match_type="exact",
-                    pattern="correct_matches_knot",
-                )
-            else:
-                # Fall back to knot matcher strategies
-                knot_match = None
-                for strategy in self.strategies:
-                    try:
-                        result = strategy.match(knot_text)
-                        if result and hasattr(result, "matched") and result.matched:
-                            knot_match = result
-                            break
-                    except Exception:
-                        continue
-
-            matched = {
-                "brand": None,  # Knot-only entry
-                "model": None,  # Knot-only entry
-                "handle": {
-                    "brand": None,  # No handle component
-                    "model": None,
-                    "source_text": None,
-                    "_matched_by": "BrushSplitsLoader",
-                    "_pattern": "curated_split",
-                },
-                "knot": {
-                    "brand": (
-                        knot_match.matched.get("brand")
-                        if knot_match and knot_match.matched
-                        else None
-                    ),
-                    "model": (
-                        knot_match.matched.get("model")
-                        if knot_match and knot_match.matched
-                        else None
-                    ),
-                    "fiber": (
-                        knot_match.matched.get("fiber")
-                        if knot_match and knot_match.matched
-                        else None
-                    ),
-                    "knot_size_mm": (
-                        knot_match.matched.get("knot_size_mm")
-                        if knot_match and knot_match.matched
-                        else None
-                    ),
-                    "source_text": knot_text,
-                    "_matched_by": "BrushSplitsLoader",
-                    "_pattern": "curated_split",
-                },
-            }
-
-            from sotd.match.types import create_match_result
-
-            return create_match_result(
-                original=value,
-                matched=matched,
-                match_type="regex",
-                pattern="curated_split",
-            )
-
-        elif handle_text and not knot_text:
-            # Handle handle-only entries (no knot component)
-            # This handles cases where brush_splits.yaml specifies knot: null
-
-            # Check correct matches for handle component first
-            handle_correct_match = self.correct_matches_checker.check(handle_text)
-            if handle_correct_match:
-                # Use correct match for handle
-                handle_match = {
-                    "handle_maker": handle_correct_match.handle_maker,
-                    "handle_model": handle_correct_match.handle_model,
-                    "_matched_by": "CorrectMatches",
-                    "_pattern": "correct_matches_handle",
-                }
-            else:
-                # Fall back to handle matcher
-                handle_match = self.handle_matcher.match_handle_maker(handle_text)
-
-            matched = {
-                "brand": None,  # Handle-only entry
-                "model": None,  # Handle-only entry
-                "handle": {
-                    "brand": handle_match.get("handle_maker") if handle_match else None,
-                    "model": handle_match.get("handle_model") if handle_match else None,
-                    "source_text": handle_text,
-                    "_matched_by": "BrushSplitsLoader",
-                    "_pattern": "curated_split",
-                },
-                "knot": {
-                    "brand": None,  # No knot component
-                    "model": None,
-                    "fiber": None,
-                    "knot_size_mm": None,
-                    "source_text": None,
-                    "_matched_by": "BrushSplitsLoader",
-                    "_pattern": "curated_split",
-                },
-            }
-
-            from sotd.match.types import create_match_result
-
-            return create_match_result(
-                original=value,
-                matched=matched,
-                match_type="regex",
-                pattern="curated_split",
-            )
-
-        else:
-            # No split result - try complete brush matching (known brush case)
-            # This handles cases where split_handle_and_knot returns (None, None, None)
-            # indicating the brush should be treated as a complete known brush
-            pass
-
-        # Step 2: Try complete brush matching (single-brand brushes) - only use brush strategies
+    def _match_complete_brush(self, value: str) -> Optional["MatchResult"]:
+        """Strategy 5: Try complete brush matching strategies."""
         for strategy in self.brush_strategies:
             try:
                 result = strategy.match(value)
@@ -837,12 +571,13 @@ class BrushMatcher:
                         )
             except Exception as e:
                 # Only print strategy failures in debug mode or for unexpected errors
-                # Handle matching failures are expected and shouldn't be noisy
                 if self.debug or "Handle matching failed" not in str(e):
                     print(f"Strategy {strategy.__class__.__name__} failed: {e}")
                 continue
+        return None
 
-        # Step 5: Try dual component matching (both handle and knot)
+    def _match_dual_component(self, value: str) -> Optional["MatchResult"]:
+        """Strategy 6: Try dual component matching (both handle and knot)."""
         dual_result = self._try_dual_component_match(value)
         if dual_result is not None:
             handle_match, knot_match = dual_result
@@ -857,8 +592,19 @@ class BrushMatcher:
             # Create dual component result
             result = self.create_dual_component_result(handle_match, knot_match, value, user_intent)
             return result
+        return None
 
-        # Step 3b: Try single component fallback (handle or knot only)
+    def _match_medium_priority_automated_split(self, value: str) -> Optional["MatchResult"]:
+        """Strategy 7: Try medium-priority automated splitting."""
+        # Try automated splitting with medium-priority delimiters
+        handle_text, knot_text, delimiter_type = self._try_medium_priority_splitting(value)
+
+        if handle_text and knot_text:
+            return self._process_split_result(handle_text, knot_text, delimiter_type, value)
+        return None
+
+    def _match_single_component_fallback(self, value: str) -> Optional["MatchResult"]:
+        """Strategy 8: Try single component fallback (handle or knot only)."""
         from sotd.match.brush_matching_strategies.utils.pattern_utils import score_match_type
 
         best_match = None
@@ -940,50 +686,26 @@ class BrushMatcher:
                         "_pattern": "handle_only",
                     },
                 }
-                # Resolve handle and knot makers
-                self._resolve_handle_maker(matched, value)
-                self._resolve_knot_maker(matched, value)
-
-                # Update handle component model from resolved handle_model
-                if matched.get("handle_model"):
-                    matched["handle"]["model"] = matched["handle_model"]
-
-                # Apply fallback strategies to detect knot information
-                for strategy in self.strategies:
-                    try:
-                        result = strategy.match(value)
-                        if result and hasattr(result, "matched") and result.matched:
-                            # Update knot component with detected information
-                            if result.matched.get("knot_size_mm"):
-                                matched["knot"]["knot_size_mm"] = result.matched["knot_size_mm"]
-                            if result.matched.get("fiber"):
-                                matched["knot"]["fiber"] = result.matched["fiber"]
-                            break  # Use first successful strategy
-                    except Exception as e:
-                        continue
-
             else:
-                # Knot-only match - create knot-only structure
+                # Knot-only match - create composite structure
                 matched = {
-                    "brand": None,  # Not a complete brush
-                    "model": None,  # Not a complete brush
+                    "brand": None,  # Composite brush
+                    "model": None,  # Composite brush
                     "handle": {
-                        "brand": None,  # No handle component
+                        "brand": None,  # No handle information
                         "model": None,
-                        "source_text": None,
+                        "source_text": value,
                         "_matched_by": "KnotMatcher",
                         "_pattern": "knot_only",
                     },
                     "knot": {
-                        "brand": best_match.matched.get("brand") if best_match.matched else None,
-                        "model": best_match.matched.get("model") if best_match.matched else None,
-                        "fiber": best_match.matched.get("fiber") if best_match.matched else None,
-                        "knot_size_mm": (
-                            best_match.matched.get("knot_size_mm") if best_match.matched else None
-                        ),
+                        "brand": best_match.matched.get("brand"),
+                        "model": best_match.matched.get("model"),
+                        "fiber": best_match.matched.get("fiber"),
+                        "knot_size_mm": best_match.matched.get("knot_size_mm"),
                         "source_text": value,
                         "_matched_by": "KnotMatcher",
-                        "_pattern": getattr(best_match, "pattern", "knot_only"),
+                        "_pattern": best_match.matched.get("_pattern", "knot_only"),
                     },
                 }
 
@@ -993,17 +715,308 @@ class BrushMatcher:
                 original=value,
                 matched=matched,
                 match_type="regex",
-                pattern=getattr(best_match, "pattern", "handle_matching"),
+                pattern="single_component_fallback",
             )
+        return None
 
-        # No match found - return proper unmatched structure
+    def _try_high_priority_splitting(
+        self, value: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Try splitting with high-priority delimiters only."""
+        # Extract high-priority delimiter logic from brush splitter
+        high_reliability_delimiters = [" w/ ", " w/", " with "]
+        handle_primary_delimiters = [" in "]
+
+        # Check high-reliability delimiters
+        for delimiter in high_reliability_delimiters:
+            if delimiter in value:
+                return self._split_by_delimiter_simple(value, delimiter, "high_reliability")
+
+        # Check handle-primary delimiters
+        for delimiter in handle_primary_delimiters:
+            if delimiter in value:
+                return self._split_by_delimiter_positional(value, delimiter, "handle_primary")
+
+        return None, None, None
+
+    def _try_medium_priority_splitting(
+        self, value: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Try splitting with medium-priority delimiters only."""
+        # Extract medium-priority delimiter logic from brush splitter
+        medium_reliability_delimiters = [" - ", " + "]
+
+        for delimiter in medium_reliability_delimiters:
+            if delimiter in value:
+                return self._split_by_delimiter_smart(value, delimiter, "smart_analysis")
+
+        return None, None, None
+
+    def _split_by_delimiter_simple(
+        self, text: str, delimiter: str, delimiter_type: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Simple splitting for high-reliability delimiters."""
+        parts = text.split(delimiter, 1)
+        if len(parts) == 2:
+            part1 = parts[0].strip()
+            part2 = parts[1].strip()
+            if part1 and part2:
+                # Score each part as both handle and knot
+                part1_handle_score = self._score_as_handle(part1)
+                part1_knot_score = self._score_as_knot(part1)
+                part2_handle_score = self._score_as_handle(part2)
+                part2_knot_score = self._score_as_knot(part2)
+
+                # Determine which part should be handle and which should be knot
+                if part1_handle_score > part2_handle_score and part2_knot_score > part1_knot_score:
+                    return part1, part2, delimiter_type
+                elif (
+                    part2_handle_score > part1_handle_score and part1_knot_score > part2_knot_score
+                ):
+                    return part2, part1, delimiter_type
+                else:
+                    # Fall back to handle score comparison
+                    if part1_handle_score > part2_handle_score:
+                        return part1, part2, delimiter_type
+                    else:
+                        return part2, part1, delimiter_type
+        return None, None, None
+
+    def _split_by_delimiter_positional(
+        self, text: str, delimiter: str, delimiter_type: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Positional splitting for handle-primary delimiters."""
+        parts = text.split(delimiter, 1)
+        if len(parts) == 2:
+            handle = parts[0].strip()
+            knot = parts[1].strip()
+            if handle and knot:
+                return handle, knot, delimiter_type
+        return None, None, None
+
+    def _split_by_delimiter_smart(
+        self, text: str, delimiter: str, delimiter_type: str
+    ) -> tuple[Optional[str], Optional[str], Optional[str]]:
+        """Smart splitting for medium-priority delimiters."""
+        # Find all occurrences of the delimiter
+        delimiter_positions = []
+        start = 0
+        while True:
+            pos = text.find(delimiter, start)
+            if pos == -1:
+                break
+            delimiter_positions.append(pos)
+            start = pos + len(delimiter)
+
+        if not delimiter_positions:
+            return None, None, None
+
+        # Try each delimiter position and score the results
+        best_split = None
+        best_score = -float("inf")
+
+        for pos in delimiter_positions:
+            part1 = text[:pos].strip()
+            part2 = text[pos + len(delimiter) :].strip()
+
+            if not part1 or not part2:
+                continue
+
+            # Score the split
+            score = self._score_split(part1, part2)
+            if score > best_score:
+                best_score = score
+                best_split = (part1, part2)
+
+        if best_split:
+            return best_split[0], best_split[1], delimiter_type
+        return None, None, None
+
+    def _score_split(self, handle: str, knot: str) -> float:
+        """Score a handle/knot split based on content analysis."""
+        handle_score = self._score_as_handle(handle)
+        knot_score = self._score_as_knot(knot)
+        return handle_score + knot_score
+
+    def _score_as_handle(self, text: str) -> int:
+        """Score text as a handle component."""
+        score = 0
+
+        # Check for handle indicators
+        if "handle" in text.lower():
+            score += 10
+
+        # Check if it matches handle patterns
+        if self.handle_matcher.is_known_handle_maker(text):
+            score += 6
+
+        # Check for handle-related terms
+        handle_terms = ["stock", "custom", "artisan", "turned"]
+        for term in handle_terms:
+            if term in text.lower():
+                score += 2
+
+        return score
+
+    def _score_as_knot(self, text: str) -> int:
+        """Score text as a knot component."""
+        score = 0
+
+        # Check for fiber types
+        fiber_types = ["badger", "boar", "synthetic"]
+        for fiber in fiber_types:
+            if fiber in text.lower():
+                score += 8
+
+        # Check for size patterns
+        import re
+
+        if re.search(r"\d+mm", text):
+            score += 6
+
+        # Check for versioning patterns
+        if re.search(r"[vV]\d+", text):
+            score += 6
+
+        return score
+
+    def _process_split_result(
+        self, handle_text: str, knot_text: str, delimiter_type: str, value: str
+    ) -> Optional["MatchResult"]:
+        """Process a split result into a MatchResult."""
+        # Check correct matches for handle component first
+        handle_correct_match = self.correct_matches_checker.check(handle_text)
+        if handle_correct_match:
+            # Use correct match for handle
+            handle_match = {
+                "handle_maker": handle_correct_match.handle_maker,
+                "handle_model": handle_correct_match.handle_model,
+                "_matched_by": "CorrectMatches",
+                "_pattern": "correct_matches_handle",
+            }
+        else:
+            # Fall back to handle matcher
+            handle_match = self.handle_matcher.match_handle_maker(handle_text)
+
+        # Check correct matches for knot component first
+        knot_correct_match = self.correct_matches_checker.check(knot_text)
+        if knot_correct_match:
+            # Use correct match for knot
+            from sotd.match.types import create_match_result
+
+            # Extract knot info safely
+            knot_info = knot_correct_match.knot_info or {}
+            knot_match = create_match_result(
+                original=knot_text,
+                matched={
+                    "brand": knot_info.get("brand"),
+                    "model": knot_info.get("model"),
+                    "fiber": knot_info.get("fiber"),
+                    "knot_size_mm": knot_info.get("knot_size_mm"),
+                    "_matched_by": "CorrectMatches",
+                    "_pattern": "correct_matches_knot",
+                },
+                match_type="exact",
+                pattern="correct_matches_knot",
+            )
+        else:
+            # Fall back to knot matcher strategies
+            knot_match = None
+            for strategy in self.strategies:
+                try:
+                    result = strategy.match(knot_text)
+                    if result and hasattr(result, "matched") and result.matched:
+                        knot_match = result
+                        break
+                except Exception:
+                    continue
+
+        # If no knot match found, check if it's a generic knot reference
+        if not knot_match and knot_text:
+            # Check if knot text contains the same brand as the handle
+            handle_brand = handle_match.get("handle_maker") if handle_match else None
+            if handle_brand and handle_brand.lower() in knot_text.lower():
+                # Generic knot reference - create a synthetic match
+                from sotd.match.types import create_match_result
+
+                knot_match = create_match_result(
+                    original=knot_text,
+                    matched={
+                        "brand": handle_brand,
+                        "model": None,  # Generic knot, no specific model
+                        "fiber": None,
+                        "knot_size_mm": None,
+                        "source_text": knot_text,
+                        "_matched_by": "GenericKnotReference",
+                        "_pattern": "generic_knot",
+                    },
+                    match_type="regex",
+                    pattern="generic_knot",
+                )
+
+        # Get actual patterns from individual matchers
+        handle_pattern = handle_match.get("_pattern_used") if handle_match else "split"
+        knot_pattern = knot_match.pattern if knot_match else "split"
+
+        matched = {
+            "brand": None,  # Composite brush
+            "model": None,  # Composite brush
+            "handle": {
+                "brand": handle_match.get("handle_maker") if handle_match else None,
+                "model": handle_match.get("handle_model") if handle_match else None,
+                "source_text": handle_text,
+                "_matched_by": "HandleMatcher" if handle_match else "BrushSplitter",
+                "_pattern": handle_pattern,
+            },
+            "knot": {
+                "brand": (
+                    knot_match.matched.get("brand") if knot_match and knot_match.matched else None
+                ),
+                "model": (
+                    knot_match.matched.get("model") if knot_match and knot_match.matched else None
+                ),
+                "fiber": (
+                    knot_match.matched.get("fiber") if knot_match and knot_match.matched else None
+                ),
+                "knot_size_mm": (
+                    knot_match.matched.get("knot_size_mm")
+                    if knot_match and knot_match.matched
+                    else None
+                ),
+                "source_text": knot_text,
+                "_matched_by": "BrushSplitter",
+                "_pattern": knot_pattern,
+            },
+        }
+
+        # Apply the same fallback logic for unmatched handles
+        if not handle_match and handle_text:
+            # Extract the brand from handle_text if no match found
+            handle_words = handle_text.lower().split()
+            if "handle" in handle_words:
+                handle_words.remove("handle")
+            if handle_words:
+                # Use the first word as the brand (e.g., "UnknownMaker")
+                matched["handle"]["brand"] = handle_text.split()[0]  # Use original case
+                matched["handle"]["_matched_by"] = "BrushSplitter"
+
+        # Extract model from handle text if not provided by handle matcher
+        if not matched["handle"]["model"] and handle_text:
+            matched["handle"]["model"] = self._extract_model_from_handle_text(handle_text)
+
+        # Check if both handle and knot are from the same maker
+        if self._is_same_maker_split(matched["handle"]["brand"], matched["knot"]["brand"]):
+            # Same maker - treat as complete brush with shared brand but no global model
+            matched["brand"] = matched["handle"]["brand"]
+            matched["model"] = None  # No global model for composite brushes
+
         from sotd.match.types import create_match_result
 
         return create_match_result(
             original=value,
-            matched=None,
-            match_type=None,
-            pattern=None,
+            matched=matched,
+            match_type="regex",
+            pattern="split",
         )
 
     def _final_cleanup(self, match_dict: dict) -> None:

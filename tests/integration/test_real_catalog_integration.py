@@ -88,9 +88,9 @@ class TestRealCatalogIntegration:
         # Test cases that exercise both brush and handle catalogs
         # Note: These are matched as dual-component brushes, not split brushes
         test_cases = [
-            ("DG B15 w/ C&H Zebra", "Declaration Grooming", "Declaration Grooming"),
+            ("DG B15 w/ C&H Zebra", "Declaration Grooming", "Chisel & Hound"),
             ("Elite handle w/ Declaration B10", "Declaration Grooming", "Elite"),
-            ("Wolf Whiskers w/ Omega knot", "Wolf Whiskers", "Wolf Whiskers"),
+            ("Wolf Whiskers w/ Omega knot", "Omega", "Wolf Whiskers"),
         ]
 
         for input_text, expected_knot_brand, expected_handle_maker in test_cases:
@@ -148,7 +148,7 @@ class TestRealCatalogIntegration:
 
         if "handle" in result.matched and result.matched["handle"]:
             handle_brand = result.matched["handle"].get("brand")
-            assert handle_brand == "Zenith", f"Expected Zenith, got {handle_brand}"
+            assert handle_brand == "Elite", f"Expected Elite, got {handle_brand}"
 
     def test_catalog_files_exist(self):
         """Test that all expected catalog files exist."""

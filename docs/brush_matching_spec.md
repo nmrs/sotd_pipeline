@@ -29,12 +29,12 @@ A single `brush` string provided by the extraction phase. This string may contai
 
 The brush matcher follows a specific priority order to ensure correct handling of different input types:
 
-1. **Correct Matches Check** (Fastest) - Check entire input against `brush` section in correct_matches.yaml
+1. **Correct Matches Check** (Fastest) - Check entire input against `brush` and `split_brush` sections in correct_matches.yaml
 2. **Brush Splits Check** (Human-curated) - Check `brush_splits.yaml` for human-curated splits
 3. **Automated Splitting on High-Priority Delimiters** - Split on "w/", "with", "in" before known brush check
 4. **Complete Brush Matching** - Apply brush strategies (includes Known Brush matching)
-5. **Automated Splitting on Medium-Priority Delimiters** - Split on "-", "+" as fallback
-6. **Dual Component Matching** - Try to match both handle and knot in same string
+5. **Dual Component Matching** - Try to match both handle and knot in same string (BEFORE medium priority splitting)
+6. **Automated Splitting on Medium-Priority Delimiters** - Split on "-", "+" as fallback
 7. **Single Component Fallback** - Try handle-only or knot-only matching
 
 ### Enhanced Correct Matches Integration
@@ -246,22 +246,22 @@ The system uses a **Strategy Pattern** with multiple specialized matching strate
 
 ### Matching Steps (Sequential Processing)
 
-1. **Step 1: Correct Matches Check** - Check entire input against `brush` section in correct_matches.yaml
+1. **Step 1: Correct Matches Check** - Check entire input against `brush` and `split_brush` sections in correct_matches.yaml
 2. **Step 2: Brush Splits Check** - Check `brush_splits.yaml` for human-curated splits
 3. **Step 3: Automated Splitting on High-Priority Delimiters** - Split on "w/", "with", "in" before known brush check
    - Check handle component against `handle` section in correct_matches.yaml
    - Check knot component against `knot` section in correct_matches.yaml
    - Fall back to strategy-based matching for individual components
 4. **Step 4: Complete Brush Matching** - Apply brush-specific strategies to full string (includes Known Brush matching)
-5. **Step 5: Automated Splitting on Medium-Priority Delimiters** - Split on "-", "+" as fallback
-   - Check handle component against `handle` section in correct_matches.yaml
-   - Check knot component against `knot` section in correct_matches.yaml
-   - Fall back to strategy-based matching for individual components
-6. **Step 6: Dual Component Fallback** - Run handle and knot matchers on entire string
+5. **Step 5: Dual Component Matching** - Try to match both handle and knot in same string (BEFORE medium priority splitting)
    - Check handle component against `handle` section in correct_matches.yaml
    - Check knot component against `knot` section in correct_matches.yaml
    - Fall back to strategy-based matching for individual components
    - Create composite brush if both components match
+6. **Step 6: Automated Splitting on Medium-Priority Delimiters** - Split on "-", "+" as fallback
+   - Check handle component against `handle` section in correct_matches.yaml
+   - Check knot component against `knot` section in correct_matches.yaml
+   - Fall back to strategy-based matching for individual components
 7. **Step 7: Single Component Fallback** - Try handle-only or knot-only matching
 
 ### Strategy Priority Order (Within Each Step)
@@ -329,29 +329,30 @@ The brush splitter logic has been validated against real SOTD data to ensure it 
 - **All 33 brush splitter tests pass** with realistic data validation
 - **No breaking changes** to existing functionality
 
-### Dual Component Fallback Enhancement
+### Dual Component Matching Enhancement
 
-When splitting fails or no clear delimiter is present, the system now includes an enhanced fallback mechanism:
+The system now includes dual component matching that runs BEFORE medium priority delimiter splitting to handle cases where the same maker produces both handle and knot:
 
-#### **Step 3: Dual Component Fallback**
-- **Purpose**: Handle cases where both handle and knot components are present without clear delimiters
-- **Example**: `"Rad Dinosaur G5C"` (Rad Dinosaur handle + AP Shave Co G5C knot)
+#### **Step 5: Dual Component Matching**
+- **Purpose**: Handle cases where the same maker produces both handle and knot components (e.g., "Wolf Whiskers - Mixed Badger/Boar")
+- **Example**: `"Wolf Whiskers - Mixed Badger/Boar"` (Wolf Whiskers handle + Wolf Whiskers knot)
 - **Process**: 
   1. Run handle matcher on entire string
   2. Run knot matcher on entire string  
-  3. If both return valid matches, create composite brush structure
+  3. If both return valid matches from the same maker, create dual component brush structure
   4. Detect user intent based on component order in original string
+- **Priority**: Runs BEFORE medium priority delimiter splitting to prevent false splits
 
 #### **User Intent Tracking**
 - **`"handle_primary"`**: Handle component appears first in input string
 - **`"knot_primary"`**: Knot component appears first in input string
-- **Application**: Tracks user's primary focus for both split and fallback scenarios
+- **Application**: Tracks user's primary focus for both split and dual component scenarios
 - **Example**: `"G5C Rad Dinosaur"` → `"knot_primary"`, `"Rad Dinosaur G5C"` → `"handle_primary"`
 
 #### **Dual Component Validation**
-- **Same-brand makers**: Valid dual component matches (e.g., "Zenith Boar" with Zenith handle and knot)
+- **Same-brand makers**: Valid dual component matches (e.g., "Wolf Whiskers - Mixed Badger/Boar" with Wolf Whiskers handle and knot)
 - **Different-brand makers**: Standard dual component validation
-- **Priority**: Dual component matches always take priority over single component matches in fallback
+- **Priority**: Dual component matches always take priority over medium priority delimiter splitting
 
 ### Content Analysis Scoring
 Uses `_score_as_handle()` to determine which part is likely the handle:
