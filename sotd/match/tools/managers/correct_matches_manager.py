@@ -335,20 +335,62 @@ class CorrectMatchesManager:
                                     knot_component
                                 )
                     else:
-                        # Regular brush - save to brush section
+                        # Regular brush - check if it has handle information
                         brand = match_data["matched"]["brand"]
                         model = match_data["matched"]["model"]
-                        if brand not in field_data[field]:
-                            field_data[field][brand] = {}
-                        if model not in field_data[field][brand]:
-                            field_data[field][brand][model] = []
-                        # Normalize the original string before storing to prevent bloat
-                        normalized_original = self._normalize_for_matching(original, field)
-                        if (
-                            normalized_original
-                            and normalized_original not in field_data[field][brand][model]
-                        ):
-                            field_data[field][brand][model].append(normalized_original)
+                        handle = match_data["matched"].get("handle")
+                        
+                        if handle and isinstance(handle, dict):
+                            # Complete brush with handle information - save with handle_match flag
+                            if brand not in field_data[field]:
+                                field_data[field][brand] = {}
+                            if model not in field_data[field][brand]:
+                                field_data[field][brand][model] = []
+                            
+                            # Normalize the original string before storing to prevent bloat
+                            normalized_original = self._normalize_for_matching(original, field)
+                            if (
+                                normalized_original
+                                and normalized_original not in field_data[field][brand][model]
+                            ):
+                                # Save as a dictionary with handle_match flag
+                                field_data[field][brand][model].append(
+                                    {normalized_original: {"handle_match": True}}
+                                )
+                            
+                            # Also save the handle to the handle section
+                            handle_brand = handle.get("brand", "")
+                            handle_model = handle.get("model", "")
+                            if handle_brand and handle_model:
+                                if "handle" not in field_data:
+                                    field_data["handle"] = {}
+                                if handle_brand not in field_data["handle"]:
+                                    field_data["handle"][handle_brand] = {}
+                                if handle_model not in field_data["handle"][handle_brand]:
+                                    field_data["handle"][handle_brand][handle_model] = []
+                                
+                                # Store the original text that matched this handle
+                                if (
+                                    normalized_original
+                                    and normalized_original 
+                                    not in field_data["handle"][handle_brand][handle_model]
+                                ):
+                                    field_data["handle"][handle_brand][handle_model].append(
+                                        normalized_original
+                                    )
+                        else:
+                            # Regular brush without handle information
+                            if brand not in field_data[field]:
+                                field_data[field][brand] = {}
+                            if model not in field_data[field][brand]:
+                                field_data[field][brand][model] = []
+                            # Normalize the original string before storing to prevent bloat
+                            normalized_original = self._normalize_for_matching(original, field)
+                            if (
+                                normalized_original
+                                and normalized_original not in field_data[field][brand][model]
+                            ):
+                                field_data[field][brand][model].append(normalized_original)
                 elif field == "handle":
                     # Handle handle field - support both old and new structures
                     if (
@@ -418,7 +460,14 @@ class CorrectMatchesManager:
                                 for model, entries in brand_data.items():
                                     if isinstance(entries, list):
                                         # Sort entries alphabetically (case-insensitive)
-                                        entries.sort(key=str.lower)
+                                        # Handle both strings and dictionaries
+                                        def sort_key(item):
+                                            if isinstance(item, dict):
+                                                # For dictionaries, use the first key
+                                                return list(item.keys())[0].lower()
+                                            else:
+                                                return str(item).lower()
+                                        entries.sort(key=sort_key)
 
             # Save to file
             with self._correct_matches_file.open("w", encoding="utf-8") as f:
