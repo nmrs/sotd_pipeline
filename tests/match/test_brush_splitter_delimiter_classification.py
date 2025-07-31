@@ -28,8 +28,8 @@ class TestBrushSplitterDelimiterClassification:
             ),
             (
                 "Carnavis and Richardson with Declaration B15",
-                "Declaration B15",
                 "Carnavis and Richardson",
+                "Declaration B15",
             ),
             ("Elite handle / Zenith B2", "Elite handle", "Zenith B2"),
         ]

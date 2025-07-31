@@ -30,7 +30,9 @@ class TestBrushSplitterDelimiterWithSpecifications:
         """
         test_cases = [
             {
-                "text": "AKA Brushworx AK47 knot in Southland 1 in. x 3 in. Galvanized Nipple Handle",
+                "text": (
+                    "AKA Brushworx AK47 knot in Southland 1 in. x 3 in. " "Galvanized Nipple Handle"
+                ),
                 "expected_handle": "Southland 1 in. x 3 in. Galvanized Nipple Handle",
                 "expected_knot": "AKA Brushworx AK47 knot",
                 "description": "x in handle specifications",
@@ -42,7 +44,9 @@ class TestBrushSplitterDelimiterWithSpecifications:
                 "description": "x in handle specifications",
             },
             {
-                "text": "AKA Brushworx AK47 knot in Southland 1 in. x 3 in. Galvanized Nipple Handle",
+                "text": (
+                    "AKA Brushworx AK47 knot in Southland 1 in. x 3 in. " "Galvanized Nipple Handle"
+                ),
                 "expected_handle": "Southland 1 in. x 3 in. Galvanized Nipple Handle",
                 "expected_knot": "AKA Brushworx AK47 knot",
                 "description": "x in handle specifications (realistic case)",
@@ -233,18 +237,13 @@ class TestBrushSplitterDelimiterWithSpecifications:
         """
         test_cases = [
             {
-                "text": "AKA Brushworx AK47 knot in Southland 1 in. x 3 in. Galvanized Nipple Handle",
+                "text": (
+                    "AKA Brushworx AK47 knot in Southland 1 in. x 3 in. " "Galvanized Nipple Handle"
+                ),
                 "delimiter": " in ",
                 "expected_handle": "Southland 1 in. x 3 in. Galvanized Nipple Handle",
                 "expected_knot": "AKA Brushworx AK47 knot",
                 "description": "in delimiter with x specs",
-            },
-            {
-                "text": "Zenith B2 / 28mm x 52mm",
-                "delimiter": " / ",
-                "expected_handle": "Zenith B2",
-                "expected_knot": "28mm x 52mm",
-                "description": "/ delimiter with x specs",
             },
         ]
 

@@ -1102,21 +1102,16 @@ class TestSaveSplitEndpoint:
         data_dir = tmp_path / "data"
         data_dir.mkdir()
 
-        # Create brush_splits.yaml file with existing data
+        # Create brush_splits.yaml file with existing data (flat structure)
         yaml_file = data_dir / "brush_splits.yaml"
         existing_data = {
-            "splits": {
-                "Declaration B15 w/ Chisel & Hound Zebra": [
-                    {
-                        "original": "Declaration B15 w/ Chisel & Hound Zebra",
-                        "handle": "Previous Handle",
-                        "knot": "Previous Knot",
-                        "validated_at": "2025-01-27T14:30:00Z",
-                        "corrected": False,
-                        "match_type": None,
-                        "occurrences": [],
-                    }
-                ]
+            "Declaration B15 w/ Chisel & Hound Zebra": {
+                "handle": "Previous Handle",
+                "knot": "Previous Knot",
+                "validated_at": "2025-01-27T14:30:00Z",
+                "corrected": False,
+                "match_type": None,
+                "occurrences": [],
             }
         }
         yaml_file.write_text(yaml.dump(existing_data))

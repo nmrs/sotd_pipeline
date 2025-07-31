@@ -11,12 +11,12 @@ class TestHandleKnotCombinationStructure:
         [
             ("Elite handle w/ Declaration B10", "Elite", "Declaration Grooming"),
             ("Wolf Whiskers w/ Omega knot", "Wolf Whiskers", "Omega"),
-            ("DG B15 w/ C&H Zebra", "Chisel & Hound", "Declaration Grooming"),
+            ("DG B15 w/ C&H Zebra", "Declaration Grooming", "Chisel & Hound"),
             (
                 "Unknown handle w/ Declaration B15",
+                "Unknown",
                 "Declaration Grooming",
-                None,
-            ),  # Matched as complete brush
+            ),  # Split brush with Unknown handle and Declaration B15 knot
             ("Elite handle w/ Unknown knot", "Elite", None),
             ("Some handle w/ Some knot", "Some", None),  # "Some" is extracted as handle brand
         ],

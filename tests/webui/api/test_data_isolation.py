@@ -98,22 +98,17 @@ class TestDataIsolationStrategy:
         data_dir = tmp_path / "data"
         data_dir.mkdir()
 
-        # Create test brush_splits.yaml
+        # Create test brush_splits.yaml (flat structure)
         test_brush_splits = data_dir / "brush_splits.yaml"
         test_data = {
-            "splits": {
-                "Test Brush": [
-                    {
-                        "original": "Test Brush",
-                        "handle": "Test Handle",
-                        "knot": "Test Knot",
-                        "should_not_split": False,
-                        "validated_at": "2025-01-27T14:30:00Z",
-                        "corrected": False,
-                        "match_type": "regex",
-                        "occurrences": [],
-                    }
-                ]
+            "Test Brush": {
+                "handle": "Test Handle",
+                "knot": "Test Knot",
+                "should_not_split": False,
+                "validated_at": "2025-01-27T14:30:00Z",
+                "corrected": False,
+                "match_type": "regex",
+                "occurrences": [],
             }
         }
         test_brush_splits.write_text(yaml.dump(test_data))
@@ -137,22 +132,17 @@ class TestDataIsolationStrategy:
         data_dir = tmp_path / "data"
         data_dir.mkdir()
 
-        # Create test brush_splits.yaml
+        # Create test brush_splits.yaml (flat structure)
         test_brush_splits = data_dir / "brush_splits.yaml"
         test_data = {
-            "splits": {
-                "Test Brush": [
-                    {
-                        "original": "Test Brush",
-                        "handle": "Test Handle",
-                        "knot": "Test Knot",
-                        "should_not_split": False,
-                        "validated_at": "2025-01-27T14:30:00Z",
-                        "corrected": False,
-                        "match_type": "regex",
-                        "occurrences": [],
-                    }
-                ]
+            "Test Brush": {
+                "handle": "Test Handle",
+                "knot": "Test Knot",
+                "should_not_split": False,
+                "validated_at": "2025-01-27T14:30:00Z",
+                "corrected": False,
+                "match_type": "regex",
+                "occurrences": [],
             }
         }
         test_brush_splits.write_text(yaml.dump(test_data))
@@ -178,13 +168,13 @@ class TestDataIsolationStrategy:
 
             # Verify that the test file was modified, not production
             updated_data = yaml.safe_load(test_brush_splits.read_text())
-            assert "New Test Brush" in updated_data["splits"]
+            assert "New Test Brush" in updated_data
 
             # Verify production file was NOT modified
             production_file = Path("data/brush_splits.yaml")
             if production_file.exists():
                 production_data = yaml.safe_load(production_file.read_text())
-                assert "New Test Brush" not in production_data.get("splits", {})
+                assert "New Test Brush" not in production_data
 
     def test_integration_test_with_isolated_data(self, tmp_path):
         """Test integration tests using isolated data."""
@@ -192,22 +182,17 @@ class TestDataIsolationStrategy:
         data_dir = tmp_path / "data"
         data_dir.mkdir()
 
-        # Create test brush_splits.yaml
+        # Create test brush_splits.yaml (flat structure)
         test_brush_splits = data_dir / "brush_splits.yaml"
         brush_data = {
-            "splits": {
-                "Integration Test Brush": [
-                    {
-                        "original": "Integration Test Brush",
-                        "handle": "Integration Handle",
-                        "knot": "Integration Knot",
-                        "should_not_split": False,
-                        "validated_at": "2025-01-27T14:30:00Z",
-                        "corrected": False,
-                        "match_type": "regex",
-                        "occurrences": [],
-                    }
-                ]
+            "Integration Test Brush": {
+                "handle": "Integration Handle",
+                "knot": "Integration Knot",
+                "should_not_split": False,
+                "validated_at": "2025-01-27T14:30:00Z",
+                "corrected": False,
+                "match_type": "regex",
+                "occurrences": [],
             }
         }
         test_brush_splits.write_text(yaml.dump(brush_data))
