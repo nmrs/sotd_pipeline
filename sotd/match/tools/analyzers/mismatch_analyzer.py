@@ -666,47 +666,30 @@ class MismatchAnalyzer(AnalysisTool):
             model = matched.get("model", "")
             matched_text = f"{brand} {model}".strip()
         elif field == "brush":
-            brand = matched.get("brand", "")
-            model = matched.get("model", "")
-            handle = matched.get("handle", {})
-            knot = matched.get("knot", {})
-
-            # Check if this is a split brush (has handle and/or knot components)
-            if handle or knot:
-                # For split brushes, use original text as matched text
-                # This ensures consistency with how _load_correct_matches stores them
-                matched_text = original.lower().strip()
-            elif brand or model:
-                # For complete brushes, use brand and model
-                matched_text = f"{brand} {model}".strip()
-            else:
-                matched_text = ""
+            # For brush field, we don't need matched_text for key generation
+            pass
         else:
-            matched_text = str(matched)
+            # For other fields, we don't need matched_text for key generation
+            pass
 
-        # Normalize for consistent key generation - use normalized original to match storage format
+        # Normalize for consistent key generation
         original_normalized = normalize_for_matching(original, None, field=field).lower().strip()
-        matched_normalized = matched_text.lower().strip()
-        # Use same delimiter as CorrectMatchesManager to ensure consistency
-        return f"{field}:{original_normalized}|||{matched_normalized}"
+        # Use simplified key format - just the normalized original text
+        return f"{field}:{original_normalized}"
 
     def _load_correct_matches(self) -> None:
         """Load previously marked correct matches from file."""
         try:
-            from sotd.match.tools.managers.correct_matches_manager import (
-                CorrectMatchesManager
-            )
-            
+            from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
+
             # Use the CorrectMatchesManager instead of duplicating logic
-            manager = CorrectMatchesManager(
-                self.console, self._get_correct_matches_file()
-            )
+            manager = CorrectMatchesManager(self.console, self._get_correct_matches_file())
             manager.load_correct_matches()
-            
+
             # Copy the loaded data
             self._correct_matches = manager._correct_matches
             self._correct_matches_data = manager._correct_matches_data
-            
+
         except Exception as e:
             self.console.print(f"[yellow]Warning: Could not load correct matches: {e}[/yellow]")
             self._correct_matches = set()

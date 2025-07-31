@@ -14,7 +14,7 @@ from sotd.utils.match_filter_utils import (
 )
 
 # Delimiter for item keys to avoid conflicts with characters in original text
-ITEM_KEY_DELIMITER = "|||"
+# Simplified key format - no longer need delimiter
 
 
 class CorrectMatchesManager:
@@ -77,14 +77,8 @@ class CorrectMatchesManager:
                                             for model, strings in brand_data.items():
                                                 if isinstance(strings, list):
                                                     for original in strings:
-                                                        brand_model = (
-                                                            (brand + " " + model).lower().strip()
-                                                        )
-                                                        match_key = (
-                                                            f"{field}:{original.lower().strip()}"
-                                                            f"{ITEM_KEY_DELIMITER}"
-                                                            f"{brand_model}"
-                                                        )
+                                                        # Use simplified key format
+                                                        match_key = f"{field}:{original.lower().strip()}"
                                                         self._correct_matches.add(match_key)
                                                         self._correct_matches_data[match_key] = {
                                                             "original": original,
@@ -102,11 +96,8 @@ class CorrectMatchesManager:
                                     for model, strings in brand_data.items():
                                         if isinstance(strings, list):
                                             for original in strings:
-                                                brand_model = (brand + " " + model).lower().strip()
-                                                match_key = (
-                                                    f"{field}:{original.lower().strip()}"
-                                                    f"{ITEM_KEY_DELIMITER}{brand_model}"
-                                                )
+                                                # Use simplified key format
+                                                match_key = f"{field}:{original.lower().strip()}"
                                                 self._correct_matches.add(match_key)
                                                 self._correct_matches_data[match_key] = {
                                                     "original": original,
@@ -115,6 +106,37 @@ class CorrectMatchesManager:
                                                         "model": model,
                                                     },
                                                     "field": field,
+                                                }
+                        elif field == "brush":
+                            # Handle brush field - support both strings and dictionaries
+                            for brand, brand_data in field_data.items():
+                                if isinstance(brand_data, dict):
+                                    for model, patterns in brand_data.items():
+                                        if isinstance(patterns, list):
+                                            for pattern in patterns:
+                                                if isinstance(pattern, dict):
+                                                    # Dictionary with handle_match flag
+                                                    # YAML format: {key: {handle_match: true}}
+                                                    original_text = list(pattern.keys())[0]
+                                                    handle_match_enabled = pattern[
+                                                        original_text
+                                                    ].get("handle_match", False)
+                                                else:
+                                                    # Simple string pattern
+                                                    original_text = pattern
+                                                    handle_match_enabled = False
+
+                                                # Use simplified key format
+                                                match_key = f"{field}:{original_text.lower().strip()}"
+                                                self._correct_matches.add(match_key)
+                                                self._correct_matches_data[match_key] = {
+                                                    "original": original_text,
+                                                    "matched": {
+                                                        "brand": brand,
+                                                        "model": model,
+                                                    },
+                                                    "field": field,
+                                                    "handle_match_enabled": handle_match_enabled,
                                                 }
                         elif field == "split_brush":
                             # Handle split_brush section
@@ -127,10 +149,7 @@ class CorrectMatchesManager:
                                     combined_components = (
                                         f"{handle_component} || {knot_component}".lower().strip()
                                     )
-                                    match_key = (
-                                        f"brush:{original.lower().strip()}"
-                                        f"{ITEM_KEY_DELIMITER}{combined_components}"
-                                    )
+                                    match_key = f"brush:{original.lower().strip()}"
                                     self._correct_matches.add(match_key)
                                     self._correct_matches_data[match_key] = {
                                         "original": original,
@@ -172,10 +191,7 @@ class CorrectMatchesManager:
                                         if isinstance(strings, list):
                                             for original in strings:
                                                 brand_model = (brand + " " + model).lower().strip()
-                                                match_key = (
-                                                    f"{field}:{original.lower().strip()}"
-                                                    f"{ITEM_KEY_DELIMITER}{brand_model}"
-                                                )
+                                                match_key = f"{field}:{original.lower().strip()}"
                                                 self._correct_matches.add(match_key)
                                                 self._correct_matches_data[match_key] = {
                                                     "original": original,
@@ -204,8 +220,7 @@ class CorrectMatchesManager:
             # Group by field
             field_data = {}
             for match_key, match_data in self._correct_matches_data.items():
-                field, rest = match_key.split(":", 1)
-                original, matched = rest.split(ITEM_KEY_DELIMITER, 1)
+                field, original = match_key.split(":", 1)
 
                 if field not in field_data:
                     field_data[field] = {}
@@ -339,14 +354,14 @@ class CorrectMatchesManager:
                         brand = match_data["matched"]["brand"]
                         model = match_data["matched"]["model"]
                         handle = match_data["matched"].get("handle")
-                        
+
                         if handle and isinstance(handle, dict):
                             # Complete brush with handle information - save with handle_match flag
                             if brand not in field_data[field]:
                                 field_data[field][brand] = {}
                             if model not in field_data[field][brand]:
                                 field_data[field][brand][model] = []
-                            
+
                             # Normalize the original string before storing to prevent bloat
                             normalized_original = self._normalize_for_matching(original, field)
                             if (
@@ -357,7 +372,7 @@ class CorrectMatchesManager:
                                 field_data[field][brand][model].append(
                                     {normalized_original: {"handle_match": True}}
                                 )
-                            
+
                             # Also save the handle to the handle section
                             handle_brand = handle.get("brand", "")
                             handle_model = handle.get("model", "")
@@ -368,11 +383,11 @@ class CorrectMatchesManager:
                                     field_data["handle"][handle_brand] = {}
                                 if handle_model not in field_data["handle"][handle_brand]:
                                     field_data["handle"][handle_brand][handle_model] = []
-                                
+
                                 # Store the original text that matched this handle
                                 if (
                                     normalized_original
-                                    and normalized_original 
+                                    and normalized_original
                                     not in field_data["handle"][handle_brand][handle_model]
                                 ):
                                     field_data["handle"][handle_brand][handle_model].append(
@@ -467,6 +482,7 @@ class CorrectMatchesManager:
                                                 return list(item.keys())[0].lower()
                                             else:
                                                 return str(item).lower()
+
                                         entries.sort(key=sort_key)
 
             # Save to file
@@ -528,58 +544,14 @@ class CorrectMatchesManager:
         self._correct_matches_data[match_key] = match_data
 
     def create_match_key(self, field: str, original: str, matched: Dict) -> str:
-        """Create a unique key for a match based on field, original text, and matched data."""
-        matched_text = self._get_matched_text(field, matched)
+        """Create a unique key for a match based on field and original text."""
         # Normalize for consistent key generation
-        original_normalized = original.lower().strip()
-        matched_normalized = matched_text.lower().strip()
-        # Use ITEM_KEY_DELIMITER to avoid conflicts with | in original text
-        key = f"{field}:{original_normalized}{ITEM_KEY_DELIMITER}{matched_normalized}"
+        original_normalized = self._normalize_for_matching(original, field).lower().strip()
+        # Use just the normalized original text as the key
+        key = f"{field}:{original_normalized}"
         return key
 
-    def _get_matched_text(self, field: str, matched: Dict) -> str:
-        """Extract matched text from matched data."""
-        if field == "soap":
-            maker = matched.get("maker", "")
-            scent = matched.get("scent", "")
-            return f"{maker} {scent}".strip()
-        elif field == "handle":
-            # Handle field uses handle_maker and handle_model
-            handle_maker = matched.get("handle_maker", "")
-            handle_model = matched.get("handle_model", "")
-            return f"{handle_maker} {handle_model}".strip()
-        elif field == "brush":
-            # Check if this is a simple brush (has top-level brand/model)
-            brand = matched.get("brand")
-            model = matched.get("model")
-
-            if brand and model:
-                # Simple brush structure - use top-level brand/model
-                return f"{brand} {model}".strip()
-            elif "handle" in matched and "knot" in matched:
-                # Split brush - extract handle and knot components
-                handle = matched.get("handle", {})
-                knot = matched.get("knot", {})
-
-                handle_brand = handle.get("brand", "")
-                handle_model = handle.get("model", "")
-                knot_brand = knot.get("brand", "")
-                knot_model = knot.get("model", "")
-
-                # For split brushes, we need to handle handle and knot separately
-                # This method is used for key generation, so we'll return a combined string
-                # The actual saving will be handled in save_correct_matches
-                return f"{handle_brand} {handle_model} || {knot_brand} {knot_model}".strip()
-            else:
-                # Fallback - simple brush structure
-                brand = matched.get("brand", "")
-                model = matched.get("model", "")
-                return f"{brand} {model}".strip()
-        else:
-            brand = matched.get("brand", "")
-            model = matched.get("model", "")
-            # Don't include format in key generation since YAML structure doesn't support it
-            return f"{brand} {model}".strip()
+    # _get_matched_text method removed - no longer needed with simplified keys
 
     def _is_split_brush(self, matched: Dict) -> bool:
         """Check if a brush match is a split brush."""
