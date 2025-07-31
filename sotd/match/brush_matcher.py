@@ -789,7 +789,10 @@ class BrushMatcher:
                             pattern=getattr(result, "pattern", None),
                         )
             except Exception as e:
-                print(f"Strategy {strategy.__class__.__name__} failed: {e}")
+                # Only print strategy failures in debug mode or for unexpected errors
+                # Handle matching failures are expected and shouldn't be noisy
+                if self.debug or "Handle matching failed" not in str(e):
+                    print(f"Strategy {strategy.__class__.__name__} failed: {e}")
                 continue
 
         # Step 5: Try dual component matching (both handle and knot)
@@ -832,7 +835,9 @@ class BrushMatcher:
                         best_match = result
                         best_match_type = "knot"
             except Exception as e:
-                print(f"Knot strategy {strategy.__class__.__name__} failed: {e}")
+                # Only print strategy failures in debug mode or for unexpected errors
+                if self.debug or "Handle matching failed" not in str(e):
+                    print(f"Knot strategy {strategy.__class__.__name__} failed: {e}")
                 continue
 
         # Try handle matching
