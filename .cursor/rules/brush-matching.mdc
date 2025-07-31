@@ -9,7 +9,10 @@ alwaysApply: false
 
 The brush matcher follows a specific priority order to ensure correct handling of different input types:
 
-1. **Correct Matches Check** (Fastest) - Check entire input against `brush` section in correct_matches.yaml
+1. **Correct Matches Check** (Fastest) - Check entire input against `brush` and `split_brush` sections in correct_matches.yaml
+    - If a match is found in `brush`, return a complete brush match (with handle enrichment if enabled).
+    - If a match is found in `split_brush`, return a split result with matched handle and knot components.
+    - See plan_complete_brush_handle_matching_tdd_implementation_2025-07-31.mdc for handle enrichment details.
 2. **Brush Splits Check** (Human-curated) - Check `brush_splits.yaml` for human-curated splits
 3. **Automated Splitting on High-Priority Delimiters** - Split on "w/", "with", "in" before known brush check
 4. **Complete Brush Matching** - Apply brush strategies (includes Known Brush matching)

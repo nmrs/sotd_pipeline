@@ -42,8 +42,14 @@ The brush matcher follows a specific priority order to ensure correct handling o
 The system checks correct matches at multiple levels:
 
 #### **Step 1: Full String Correct Matches**
-- Check the entire input string against `brush` section in correct_matches.yaml
-- Highest priority for complete brush matches
+- **Check the entire input string against both the `brush` and `split_brush` sections in `correct_matches.yaml`.**
+    - If a match is found in the `brush` section, return a complete brush match.
+      - *If handle enrichment is enabled (per `handle_matching: true` in `brushes.yaml`), the matcher will also perform a handle lookup and include the matched handle fields in the result, as described in [plan_complete_brush_handle_matching_tdd_implementation_2025-07-31.mdc](../plans/plan_complete_brush_handle_matching_tdd_implementation_2025-07-31.mdc).*
+    - If a match is found in the `split_brush` section, return a split result with both handle and knot components, each matched using the appropriate catalog and matching logic.
+- **Highest priority for complete brush matches and human-curated splits.**
+- **The returned structure will include:**
+    - For complete brush: top-level `brand`, `model`, and (if enriched) a `handle` subfield.
+    - For split brush: `handle` and `knot` subfields, each with their own `brand`, `model`, and other matched attributes.
 
 #### **Step 2: Split Component Correct Matches** 
 - After splitting into handle and knot components, check each component individually
