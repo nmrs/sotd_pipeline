@@ -280,7 +280,7 @@ class TestBrushMatcher:
         assert result.matched["handle"]["model"] == "Unspecified"
         # No knot brand (Wolf Whiskers doesn't make knots)
         assert result.matched["knot"]["brand"] is None
-        assert result.matched["knot"]["model"] is None  # No knot model
+        assert result.matched["knot"]["model"] == "26mm"  # Size detected as model
         assert result.matched["knot"]["knot_size_mm"] == 26.0  # Size information preserved
 
 

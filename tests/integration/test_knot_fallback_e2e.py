@@ -28,7 +28,7 @@ def test_complete_brush_matching_with_timberwolf_split_brush(brush_matcher):
 
     # Knot should be matched by FiberFallbackStrategy
     knot = result.matched["knot"]
-    assert knot["brand"] == "Unspecified"
+    assert knot["brand"] is None
     assert knot["model"] == "Synthetic"
     assert knot["fiber"] == "Synthetic"
     assert knot["_pattern"] == "fiber_detection"
@@ -48,7 +48,7 @@ def test_complete_brush_matching_with_custom_size_only(brush_matcher):
 
     # Should be matched by KnotSizeFallbackStrategy
     knot = result.matched["knot"]
-    assert knot["brand"] == "Unspecified"
+    assert knot["brand"] is None
     assert knot["model"] == "26mm"
     assert knot["fiber"] is None
     assert knot["_pattern"] == "size_detection"
@@ -82,7 +82,7 @@ def test_integration_with_enrich_phase_size_extraction(brush_matcher):
 
     # Should have knot section with size information
     knot = result.matched["knot"]
-    assert knot["brand"] == "Unspecified"
+    assert knot["brand"] is None
     assert knot["model"] == "27.5mm"
     assert knot["fiber"] is None
     assert knot["_pattern"] == "size_detection"
@@ -120,14 +120,13 @@ def test_mixed_fiber_types_in_split_brushes(brush_matcher):
     # Handle may not be matched (depends on handle matcher)
     # Handle brand may be None if not matched by handle matcher
 
-    # Knot should be matched by FiberFallbackStrategy
-    # Note: The brush splitter splits this into
-    # "Wolf Whiskers - Mixed Badger" (handle) and "Boar" (knot)
+    # Since there's no brush split entry, this is matched as dual-component
+    # Wolf Whiskers is matched as both handle and knot maker
     knot = result.matched["knot"]
-    assert knot["brand"] == "Unspecified"
-    assert knot["model"] == "Boar"  # Only "Boar" part is detected as fiber
-    assert knot["fiber"] == "Boar"
-    assert knot["_pattern"] == "fiber_detection"
+    assert knot["brand"] == "Wolf Whiskers"
+    assert knot["model"] == "Badger"  # Fiber detected as model
+    assert knot["fiber"] == "Badger"
+    assert knot["_pattern"] == "dual_component_fallback"
 
 
 def test_decimal_sizes_in_split_brushes(brush_matcher):
@@ -146,7 +145,7 @@ def test_decimal_sizes_in_split_brushes(brush_matcher):
 
     # Knot should be matched by KnotSizeFallbackStrategy
     knot = result.matched["knot"]
-    assert knot["brand"] == "Unspecified"
+    assert knot["brand"] is None
     assert knot["model"] == "26.5mm"
     assert knot["fiber"] is None
     assert knot["_pattern"] == "size_detection"

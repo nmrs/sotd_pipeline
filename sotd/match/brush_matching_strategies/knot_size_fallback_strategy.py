@@ -44,9 +44,11 @@ class KnotSizeFallbackStrategy(BaseBrushMatchingStrategy):
             return None
 
         # Create match result with detected size
+        # Format size to remove decimal for whole numbers (e.g., 26.0 -> 26)
+        formatted_size = int(detected_size) if detected_size.is_integer() else detected_size
         matched_data = {
             "brand": None,
-            "model": None,
+            "model": f"{formatted_size}mm",
             "fiber": None,
             "knot_size_mm": detected_size,
             "_matched_by_strategy": "KnotSizeFallbackStrategy",

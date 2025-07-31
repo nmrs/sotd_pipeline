@@ -20,7 +20,7 @@ def test_knot_size_fallback_custom_26mm_match(strategy):
     assert result is not None
     assert result.original == "Custom 26mm"
     assert result.matched is not None
-    assert result.matched["brand"] == "Unspecified"
+    assert result.matched["brand"] is None
     assert result.matched["model"] == "26mm"
     assert result.matched["fiber"] is None
     assert result.matched["_matched_by_strategy"] == "KnotSizeFallbackStrategy"
@@ -35,7 +35,7 @@ def test_knot_size_fallback_unknown_24_mm_match(strategy):
     assert result is not None
     assert result.original == "Unknown 24 mm"
     assert result.matched is not None
-    assert result.matched["brand"] == "Unspecified"
+    assert result.matched["brand"] is None
     assert result.matched["model"] == "24mm"
     assert result.matched["fiber"] is None
     assert result.matched["_matched_by_strategy"] == "KnotSizeFallbackStrategy"
@@ -76,7 +76,7 @@ def test_knot_size_fallback_custom_27_5mm_match(strategy):
     assert result is not None
     assert result.original == "Custom 27.5mm"
     assert result.matched is not None
-    assert result.matched["brand"] == "Unspecified"
+    assert result.matched["brand"] is None
     assert result.matched["model"] == "27.5mm"
     assert result.matched["fiber"] is None
     assert result.matched["_matched_by_strategy"] == "KnotSizeFallbackStrategy"
@@ -91,7 +91,7 @@ def test_knot_size_fallback_unknown_28x50_match(strategy):
     assert result is not None
     assert result.original == "Unknown 28x50"
     assert result.matched is not None
-    assert result.matched["brand"] == "Unspecified"
+    assert result.matched["brand"] is None
     assert result.matched["model"] == "28mm"
     assert result.matched["fiber"] is None
     assert result.matched["_matched_by_strategy"] == "KnotSizeFallbackStrategy"

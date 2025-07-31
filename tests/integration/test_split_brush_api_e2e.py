@@ -109,8 +109,8 @@ class TestSplitBrushAPIE2E:
 
         # Check that handle section contains the reused components
         assert "handle" in updated_data
-        assert "jayaruh" in updated_data["handle"]
-        assert "#441" in updated_data["handle"]["jayaruh"]
+        assert "Jayaruh" in updated_data["handle"]
+        assert "#441" in updated_data["handle"]["Jayaruh"]
 
         # Step 6: Test performance with multiple operations
         # Add several more split brushes to test performance

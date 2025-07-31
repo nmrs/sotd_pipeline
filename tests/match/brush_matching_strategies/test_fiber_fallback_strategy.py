@@ -18,7 +18,7 @@ def test_fiber_fallback_timberwolf_match(strategy):
     assert result is not None
     assert result.original == "Timberwolf 24mm"
     assert result.matched is not None
-    assert result.matched["brand"] == "Unspecified"
+    assert result.matched["brand"] is None
     assert result.matched["model"] == "Synthetic"
     assert result.matched["fiber"] == "Synthetic"
     assert result.matched["fiber_strategy"] == "fiber_fallback"
@@ -34,7 +34,7 @@ def test_fiber_fallback_custom_badger_match(strategy):
     assert result is not None
     assert result.original == "Custom Badger"
     assert result.matched is not None
-    assert result.matched["brand"] == "Unspecified"
+    assert result.matched["brand"] is None
     assert result.matched["model"] == "Badger"
     assert result.matched["fiber"] == "Badger"
     assert result.matched["fiber_strategy"] == "fiber_fallback"
@@ -50,7 +50,7 @@ def test_fiber_fallback_unknown_boar_match(strategy):
     assert result is not None
     assert result.original == "Unknown Boar"
     assert result.matched is not None
-    assert result.matched["brand"] == "Unspecified"
+    assert result.matched["brand"] is None
     assert result.matched["model"] == "Boar"
     assert result.matched["fiber"] == "Boar"
     assert result.matched["fiber_strategy"] == "fiber_fallback"
@@ -80,7 +80,7 @@ def test_fiber_fallback_mixed_badger_boar_match(strategy):
     assert result is not None
     assert result.original == "Mixed Badger/Boar"
     assert result.matched is not None
-    assert result.matched["brand"] == "Unspecified"
+    assert result.matched["brand"] is None
     assert result.matched["model"] == "Mixed Badger/Boar"
     assert result.matched["fiber"] == "Mixed Badger/Boar"
     assert result.matched["fiber_strategy"] == "fiber_fallback"
@@ -96,7 +96,7 @@ def test_fiber_fallback_horse_hair_match(strategy):
     assert result is not None
     assert result.original == "Horse Hair"
     assert result.matched is not None
-    assert result.matched["brand"] == "Unspecified"
+    assert result.matched["brand"] is None
     assert result.matched["model"] == "Horse"
     assert result.matched["fiber"] == "Horse"
     assert result.matched["fiber_strategy"] == "fiber_fallback"
