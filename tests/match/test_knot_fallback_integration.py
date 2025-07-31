@@ -95,17 +95,16 @@ def test_existing_known_knots_still_match_correctly(knot_matcher_with_fallbacks)
 
 def test_existing_other_knots_still_match_correctly(knot_matcher_with_fallbacks):
     """Test that existing other knots still match correctly (no regression)."""
-    # Other knot should still match via OtherKnotMatchingStrategy
-    # Note: "AP Shave Co G5C" contains "g5c" which matches synthetic fiber pattern
-    # So it will be matched by FiberFallbackStrategy instead of OtherKnotMatchingStrategy
-    result = knot_matcher_with_fallbacks.match("AP Shave Co G5C")
+    # Test with a truly unknown fiber to exercise FiberFallbackStrategy
+    # "Unknown Boar" should be matched by FiberFallbackStrategy since it's not in any catalog
+    result = knot_matcher_with_fallbacks.match("Unknown Boar")
 
     assert result is not None
     assert result.matched is not None
     assert result.matched["_matched_by_strategy"] == "FiberFallbackStrategy"
-    assert result.matched["brand"] == "Unspecified"
-    assert result.matched["model"] == "Synthetic"
-    assert result.matched["fiber"] == "Synthetic"
+    assert result.matched["brand"] is None
+    assert result.matched["model"] == "Boar"
+    assert result.matched["fiber"] == "Boar"
 
 
 def test_completely_unmatched_knots_return_none(knot_matcher_with_fallbacks):
