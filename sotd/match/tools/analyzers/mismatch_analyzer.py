@@ -668,19 +668,19 @@ class MismatchAnalyzer(AnalysisTool):
         elif field == "brush":
             brand = matched.get("brand", "")
             model = matched.get("model", "")
-            if brand or model:
+            handle = matched.get("handle", {})
+            knot = matched.get("knot", {})
+
+            # Check if this is a split brush (has handle and/or knot components)
+            if handle or knot:
+                # For split brushes, use original text as matched text
+                # This ensures consistency with how _load_correct_matches stores them
+                matched_text = original.lower().strip()
+            elif brand or model:
+                # For complete brushes, use brand and model
                 matched_text = f"{brand} {model}".strip()
             else:
-                # For split brushes (brand=None, model=None), use original text as matched text
-                # This matches how _load_correct_matches stores split brush keys
-                handle = matched.get("handle", {})
-                knot = matched.get("knot", {})
-                if handle and knot:
-                    # For split brushes, use original text as matched text
-                    # This ensures consistency with how _load_correct_matches stores them
-                    matched_text = original.lower().strip()
-                else:
-                    matched_text = ""
+                matched_text = ""
         else:
             matched_text = str(matched)
 

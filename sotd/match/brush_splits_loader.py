@@ -63,33 +63,51 @@ class BrushSplitsLoader:
 
         try:
             data = load_yaml_with_nfc(self.brush_splits_path, loader_cls=UniqueKeyLoader)
-            splits_data = data.get("splits", {})
 
             self._splits.clear()
 
-            # Handle new structure: splits is a dict with brush names as keys
-            if isinstance(splits_data, dict):
-                for brush_name, entries in splits_data.items():
-                    if isinstance(entries, list):
-                        for split_data in entries:
-                            try:
-                                split = BrushSplit.from_dict(split_data)
-                                self._splits[split.original] = split
-                            except (KeyError, ValueError) as e:
-                                print(f"Warning: Skipping invalid split data for {brush_name}: {e}")
-                                continue
-                    else:
-                        print(f"Warning: Invalid entries format for {brush_name}")
-
-            # Handle old structure: splits is a list (backward compatibility)
-            elif isinstance(splits_data, list):
-                for split_data in splits_data:
+            # Handle current structure: brush names as top-level keys
+            if isinstance(data, dict):
+                for brush_name, split_data in data.items():
                     try:
-                        split = BrushSplit.from_dict(split_data)
+                        # Add the original brush name to the split data
+                        split_data_with_original = split_data.copy()
+                        split_data_with_original["original"] = brush_name
+
+                        split = BrushSplit.from_dict(split_data_with_original)
                         self._splits[split.original] = split
                     except (KeyError, ValueError) as e:
-                        print(f"Warning: Skipping invalid split data: {e}")
+                        print(f"Warning: Skipping invalid split data for {brush_name}: {e}")
                         continue
+
+            # Handle legacy structure: splits is a dict with brush names as keys
+            elif isinstance(data, dict) and "splits" in data:
+                splits_data = data.get("splits", {})
+
+                if isinstance(splits_data, dict):
+                    for brush_name, entries in splits_data.items():
+                        if isinstance(entries, list):
+                            for split_data in entries:
+                                try:
+                                    split = BrushSplit.from_dict(split_data)
+                                    self._splits[split.original] = split
+                                except (KeyError, ValueError) as e:
+                                    print(
+                                        f"Warning: Skipping invalid split data for {brush_name}: {e}"
+                                    )
+                                    continue
+                        else:
+                            print(f"Warning: Invalid entries format for {brush_name}")
+
+                # Handle old structure: splits is a list (backward compatibility)
+                elif isinstance(splits_data, list):
+                    for split_data in splits_data:
+                        try:
+                            split = BrushSplit.from_dict(split_data)
+                            self._splits[split.original] = split
+                        except (KeyError, ValueError) as e:
+                            print(f"Warning: Skipping invalid split data: {e}")
+                            continue
 
             self._loaded = True
 

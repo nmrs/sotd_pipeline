@@ -1,0 +1,180 @@
+# Complete Brush Handle Matching Specification
+
+## Overview
+
+This specification defines a new feature to enhance complete brush matching by attempting handle matching on the full brush text when a brush entry has `handle_matching: true` specified in `brushes.yaml`.
+
+## Problem Statement
+
+Currently, when a brush text like "6dg b16 thaw washington badger" matches as a complete Declaration Grooming brush, we lose the information that it has a Washington handle. The brush splitting logic may fail to identify the handle component, resulting in lost handle information.
+
+## Solution
+
+Add a mechanism to specify in `brushes.yaml` that the handle section of that brand in `handles.yaml` should also be attempted to see if we get a handle match on the full brush text.
+
+## Core Functionality
+
+### YAML Configuration
+- Add `handle_matching: true` field to brush entries in `brushes.yaml` at either brand or model level
+- **Default behavior**: `handle_matching: false` if not specified (backward compatible)
+- Brand-level setting applies to all models unless overridden at model level
+- Model-level setting overrides brand-level setting
+- Examples:
+
+**Brand-level with model override:**
+```yaml
+Declaration Grooming:
+  handle_matching: true
+  B14:
+    handle_matching: false
+    patterns:
+    - (declaration|\bdg\b).*\bb14\b  
+  B15:
+    patterns:
+    - (declaration|\bdg\b).*\bb15\b
+  B16:
+    patterns:
+    - (declaration|\bdg\b).*\bb16\b
+```
+
+**Model-level only:**
+```yaml
+Declaration Grooming:
+  B14:
+    patterns:
+    - (declaration|\bdg\b).*\bb14\b  
+  B15:
+    handle_matching: true
+    patterns:
+    - (declaration|\bdg\b).*\bb15\b
+  B16:
+    handle_matching: true
+    patterns:
+    - (declaration|\bdg\b).*\bb16\b
+```
+
+### Matching Logic
+- When a complete brush match is found, check if `handle_matching: true` is set at either brand or model level
+- **Default behavior**: If `handle_matching` is not specified, treat as `false` (no handle matching attempted)
+- Brand-level setting applies to all models unless overridden at model level
+- Model-level setting overrides brand-level setting
+- If `handle_matching: true` is set, immediately attempt handle matching on the full brush text
+- Use existing handle matching algorithm but restrict to only the brush brand's handle patterns
+- Completely replace the handle section with the new handle match
+- Keep the original brush match as the knot information
+
+### Implementation Details
+- Integrated into main `BrushMatcher` class as `_complete_brush_handle_matching` method
+- Only applies to complete brushes (where "model" is set at top level)
+- Must not overwrite existing split brush results
+- Check for `handle_matching: true` at brand level first, then model level (model overrides brand)
+- **Default behavior**: If `handle_matching` is not specified at either level, treat as `false`
+- Fail fast with exception if handle matching fails, including full brush text in error message
+- Use existing handle matching algorithm for multiple matches
+
+## Expected Result
+
+### Before Enhancement
+```json
+{
+  "brush": {
+    "original": "DG Jefferson Know It All 2.0 28mm B16",
+    "normalized": "DG Jefferson Know It All 2.0 28mm B16",
+    "matched": {
+      "brand": "Declaration Grooming",
+      "model": "B16",
+      "handle": {
+        "brand": "Declaration Grooming",
+        "model": "B16",
+        "source_text": "DG Jefferson Know It All 2.0 28mm B16",
+        "_matched_by": "KnownBrushMatchingStrategy",
+        "_pattern": "(declaration|\\bdg\\b).*\\bb16\\b"
+      },
+      "knot": {
+        "brand": "Declaration Grooming",
+        "model": "B16",
+        "fiber": null,
+        "knot_size_mm": 28,
+        "source_text": "DG Jefferson Know It All 2.0 28mm B16",
+        "_matched_by": "KnownBrushMatchingStrategy",
+        "_pattern": "(declaration|\\bdg\\b).*\\bb16\\b"
+      }
+    },
+    "match_type": "regex",
+    "pattern": "(declaration|\\bdg\\b).*\\bb16\\b"
+  }
+}
+```
+
+### After Enhancement
+```json
+{
+  "brush": {
+    "original": "DG Jefferson Know It All 2.0 28mm B16",
+    "normalized": "DG Jefferson Know It All 2.0 28mm B16",
+    "matched": {
+      "brand": "Declaration Grooming",
+      "model": "B16",
+      "handle": {
+        "brand": "Declaration Grooming",
+        "model": "Jefferson",
+        "source_text": "DG Jefferson Know It All 2.0 28mm B16",
+        "_matched_by": "HandleMatchingStrategy",
+        "_pattern": "jefferson(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)"
+      },
+      "knot": {
+        "brand": "Declaration Grooming",
+        "model": "B16",
+        "fiber": null,
+        "knot_size_mm": 28,
+        "source_text": "DG Jefferson Know It All 2.0 28mm B16",
+        "_matched_by": "KnownBrushMatchingStrategy",
+        "_pattern": "(declaration|\\bdg\\b).*\\bb16\\b"
+      }
+    },
+    "match_type": "regex",
+    "pattern": "(declaration|\\bdg\\b).*\\bb16\\b"
+  }
+}
+```
+
+## Error Handling
+
+### Handle Matching Failure
+When handle matching fails, throw an exception with details:
+```
+"Handle matching failed for brush '6dg b16 thaw washington badger' (Declaration Grooming B16) - attempted handle text '6dg b16 thaw washington badger' did not match any handle patterns"
+```
+
+### Validation
+- Only apply to complete brushes (where "model" is set at top level)
+- Ensure we don't overwrite existing split brush results
+- Verify brush has a brand before attempting handle matching
+- Validate hierarchical `handle_matching` configuration (brand-level with model overrides)
+
+## Performance Requirements
+
+- No more than +1 second performance degradation
+- Baseline measurement: `python run.py match --month 2025-06 --force`
+
+## Implementation Notes
+
+- This feature only applies to complete brushes, not split brushes
+- Handle matching uses the full brush text, not extracted portions
+- Uses existing handle matching algorithm restricted to brush brand patterns
+- Integrated into main BrushMatcher class workflow
+- No additional configuration or debugging options needed initially
+
+## Future Enhancements
+
+- May later add knot matching as well
+- Could add configuration options for debugging and performance monitoring
+- Could expand to support other brush types beyond known brushes
+
+## TDD Implementation
+
+This specification will be implemented using the TDD Project Planning process from `@prompts.mdc` to ensure comprehensive testing and incremental development.
+description:
+globs:
+alwaysApply: false
+---

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Correct matches management utilities for mismatch analysis."""
 
-import re
 from pathlib import Path
 from typing import Dict, Set
 
@@ -276,34 +275,33 @@ class CorrectMatchesManager:
                             if "handle" not in field_data:
                                 field_data["handle"] = {}
 
-                            # Use the proper brand name from the matched data
-                            # For the model, extract just the model part (remove brand name)
-                            handle_model = handle_component
-                            if handle_brand.lower() in handle_component.lower():
-                                # Remove brand name from the beginning of source_text
-                                # Use case-insensitive replacement to handle multi-word brands
-                                handle_model = re.sub(
-                                    f"^{re.escape(handle_brand)}",
-                                    "",
-                                    handle_component,
-                                    flags=re.IGNORECASE,
-                                ).strip()
-                                if not handle_model:
-                                    handle_model = handle_component  # Fallback to full text
+                            # Use the proper brand and model names from the matched data
+                            # The brand and model should come directly from the catalog, not be split
+                            # For handle components, we need to get the actual brand and model from
+                            # the matched data
+                            handle = match_data["matched"].get("handle", {})
+                            if isinstance(handle, dict):
+                                actual_brand = handle.get("brand", handle_brand)
+                                actual_model = handle.get("model", "")
+                                if not actual_model and actual_brand != handle_component:
+                                    # If no model specified, use the component as model
+                                    actual_model = handle_component
+                            else:
+                                actual_brand = handle_brand
+                                actual_model = handle_component
 
-                            if handle_brand not in field_data["handle"]:
-                                field_data["handle"][handle_brand] = {}
-                            if handle_model not in field_data["handle"][handle_brand]:
-                                field_data["handle"][handle_brand][handle_model] = []
+                            if actual_brand not in field_data["handle"]:
+                                field_data["handle"][actual_brand] = {}
+                            if actual_model not in field_data["handle"][actual_brand]:
+                                field_data["handle"][actual_brand][actual_model] = []
 
-                            # Store in lowercase for consistency
-                            normalized_component = handle_component.lower().strip()
+                            # Store the original component (not lowercase) for consistency
                             if (
-                                normalized_component
-                                not in field_data["handle"][handle_brand][handle_model]
+                                handle_component
+                                not in field_data["handle"][actual_brand][actual_model]
                             ):
-                                field_data["handle"][handle_brand][handle_model].append(
-                                    normalized_component
+                                field_data["handle"][actual_brand][actual_model].append(
+                                    handle_component
                                 )
 
                         # Save knot component to knot section
@@ -311,34 +309,30 @@ class CorrectMatchesManager:
                             if "knot" not in field_data:
                                 field_data["knot"] = {}
 
-                            # Use the proper brand name from the matched data
-                            # For the model, extract just the model part (remove brand name)
-                            knot_model = knot_component
-                            if knot_brand.lower() in knot_component.lower():
-                                # Remove brand name from the beginning of source_text
-                                # Use case-insensitive replacement to handle multi-word brands
-                                knot_model = re.sub(
-                                    f"^{re.escape(knot_brand)}",
-                                    "",
-                                    knot_component,
-                                    flags=re.IGNORECASE,
-                                ).strip()
-                                if not knot_model:
-                                    knot_model = knot_component  # Fallback to full text
+                            # Use the proper brand and model names from the matched data
+                            # The brand and model should come directly from the catalog, not be split
+                            # For knot components, we need to get the actual brand and model from
+                            # the matched data
+                            knot = match_data["matched"].get("knot", {})
+                            if isinstance(knot, dict):
+                                actual_brand = knot.get("brand", knot_brand)
+                                actual_model = knot.get("model", "")
+                                if not actual_model and actual_brand != knot_component:
+                                    # If no model specified, use the component as model
+                                    actual_model = knot_component
+                            else:
+                                actual_brand = knot_brand
+                                actual_model = knot_component
 
-                            if knot_brand not in field_data["knot"]:
-                                field_data["knot"][knot_brand] = {}
-                            if knot_model not in field_data["knot"][knot_brand]:
-                                field_data["knot"][knot_brand][knot_model] = []
+                            if actual_brand not in field_data["knot"]:
+                                field_data["knot"][actual_brand] = {}
+                            if actual_model not in field_data["knot"][actual_brand]:
+                                field_data["knot"][actual_brand][actual_model] = []
 
-                            # Store in lowercase for consistency
-                            normalized_component = knot_component.lower().strip()
-                            if (
-                                normalized_component
-                                not in field_data["knot"][knot_brand][knot_model]
-                            ):
-                                field_data["knot"][knot_brand][knot_model].append(
-                                    normalized_component
+                            # Store the original component (not lowercase) for consistency
+                            if knot_component not in field_data["knot"][actual_brand][actual_model]:
+                                field_data["knot"][actual_brand][actual_model].append(
+                                    knot_component
                                 )
                     else:
                         # Regular brush - save to brush section
@@ -540,11 +534,10 @@ class CorrectMatchesManager:
 
     def _is_split_brush(self, matched: Dict) -> bool:
         """Check if a brush match is a split brush."""
-        return (
-            matched.get("brand") is None
-            and matched.get("model") is None
-            and ("handle" in matched or "knot" in matched)
-        )
+        # A brush is a split brush if the top-level model is None
+        # This means it wasn't matched as a complete brush, so it should be treated as split
+        # Known brushes can have handle/knot components but still have a top-level model
+        return matched.get("model") is None
 
     def _extract_split_brush_components(self, matched: Dict) -> tuple[str, str, str, str]:
         """

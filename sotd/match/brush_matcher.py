@@ -445,7 +445,8 @@ class BrushMatcher:
             else:
                 return self._process_regular_correct_match(value, correct_match_dict)
 
-        # Step 4: Try brush splitting and dual component matching
+        # Step 4: Check brush_splits.yaml (user-curated splits take precedence over
+        # automated matching)
         # Check if this brush should not be split (human-curated decision)
         if self.brush_splits_loader.should_not_split(value):
             # Treat as complete brush, skip splitting
@@ -776,6 +777,9 @@ class BrushMatcher:
                         # Final cleanup: remove any redundant top-level fields
                         self._final_cleanup(match_dict)
 
+                        # Apply complete brush handle matching
+                        self._complete_brush_handle_matching(match_dict, value)
+
                         from sotd.match.types import create_match_result
 
                         return create_match_result(
@@ -954,6 +958,189 @@ class BrushMatcher:
         for field in redundant_fields:
             if field in match_dict:
                 del match_dict[field]
+
+    def _complete_brush_handle_matching(self, match_dict: dict, value: str) -> None:
+        """
+        Apply complete brush handle matching to enhance brush matches with handle information.
+
+        This method checks if a complete brush match has handle_matching enabled and attempts
+        to match the handle on the full brush text using the brush brand's handle patterns.
+
+        Args:
+            match_dict: The brush match result dictionary to enhance
+            value: The original brush text being matched
+        """
+        # Only apply to complete brushes (where "model" is set at top level)
+        if not match_dict or "model" not in match_dict:
+            return
+
+        # Get the brush brand and model
+        brand = match_dict.get("brand")
+        model = match_dict.get("model")
+
+        if not brand or not model:
+            return
+
+        # Check if handle_matching is enabled for this brush
+        handle_matching_enabled = self._is_handle_matching_enabled(brand, model)
+        if not handle_matching_enabled:
+            return
+
+        # Attempt handle matching on the full brush text
+        try:
+            handle_match = self._attempt_handle_matching_for_brand(value, brand)
+            if handle_match:
+                # Replace the handle section with the new handle match
+                match_dict["handle"] = handle_match
+        except Exception as e:
+            # Fail fast with exception for debugging
+            error_msg = (
+                f"Handle matching failed for brush '{value}' ({brand} {model}) - "
+                f"attempted handle text '{value}' did not match any handle patterns"
+            )
+            raise ValueError(error_msg) from e
+
+    def _is_handle_matching_enabled(self, brand: str, model: str) -> bool:
+        """
+        Check if handle_matching is enabled for the given brand and model.
+
+        Implements hierarchical logic: brand-level setting applies to all models unless
+        overridden at model level. Model-level setting overrides brand-level setting.
+
+        Args:
+            brand: The brush brand
+            model: The brush model
+
+        Returns:
+            True if handle_matching is enabled, False otherwise
+        """
+        # Check known_brushes first
+        known_brushes = self.catalog_data.get("known_brushes", {})
+        if brand in known_brushes:
+            brand_data = known_brushes[brand]
+
+            # Check model-level setting first (overrides brand-level)
+            if model in brand_data:
+                model_data = brand_data[model]
+                if "handle_matching" in model_data:
+                    return bool(model_data["handle_matching"])
+
+            # Check brand-level setting
+            if "handle_matching" in brand_data:
+                return bool(brand_data["handle_matching"])
+
+        # Check other_brushes
+        other_brushes = self.catalog_data.get("other_brushes", {})
+        if brand in other_brushes:
+            brand_data = other_brushes[brand]
+
+            # Check model-level setting first (overrides brand-level)
+            if model in brand_data:
+                model_data = brand_data[model]
+                if "handle_matching" in model_data:
+                    return bool(model_data["handle_matching"])
+
+            # Check brand-level setting
+            if "handle_matching" in brand_data:
+                return bool(brand_data["handle_matching"])
+
+        # Default to False if not specified
+        return False
+
+    def _attempt_handle_matching_for_brand(
+        self, value: str, brand: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Attempt handle matching on the full brush text using only the brush brand's handle patterns.
+
+        Args:
+            value: The full brush text to match against
+            brand: The brush brand to get handle patterns for
+
+        Returns:
+            Handle match dictionary if found, None otherwise
+
+        Raises:
+            ValueError: If handle matching fails (no patterns match)
+        """
+        # Get handle patterns for this specific brand
+        handle_patterns = self._get_handle_patterns_for_brand(brand)
+        if not handle_patterns:
+            raise ValueError(f"No handle patterns found for brand: {brand}")
+
+        # Try to match against each pattern
+        for pattern_info in handle_patterns:
+            pattern = pattern_info["pattern"]
+            match_data = pattern_info["match_data"]
+
+            # Use case-insensitive matching
+            if pattern.search(value.lower()):
+                return {
+                    "brand": match_data.get("brand"),
+                    "model": match_data.get("model"),
+                    "source_text": value,
+                    "_matched_by": "HandleMatchingStrategy",
+                    "_pattern": pattern_info["original_pattern"],
+                }
+
+        # No match found
+        raise ValueError(f"No handle patterns matched for brand: {brand}")
+
+    def _get_handle_patterns_for_brand(self, brand: str) -> list[dict]:
+        """
+        Get handle patterns for a specific brand from the handles catalog.
+
+        Args:
+            brand: The brand to get handle patterns for
+
+        Returns:
+            List of pattern dictionaries with compiled patterns and match data
+        """
+        import re
+
+        patterns = []
+        handles_data = self.catalog_loader.load_catalog(self.handles_path, "handles")
+
+        # Search through all handle sections for the brand
+        for section_name, section_data in handles_data.items():
+            if section_data and brand in section_data:
+                brand_data = section_data[brand]
+                if not brand_data:
+                    continue
+
+                # Get all models for this brand
+                for model_name, model_data in brand_data.items():
+                    if not model_data:
+                        continue
+
+                    if model_name == "Unspecified":
+                        # Handle unspecified models
+                        for pattern in model_data.get("patterns", []):
+                            patterns.append(
+                                {
+                                    "pattern": re.compile(pattern, re.IGNORECASE),
+                                    "original_pattern": pattern,
+                                    "match_data": {
+                                        "brand": brand,
+                                        "model": model_name,
+                                    },
+                                }
+                            )
+                    else:
+                        # Handle specific models
+                        for pattern in model_data.get("patterns", []):
+                            patterns.append(
+                                {
+                                    "pattern": re.compile(pattern, re.IGNORECASE),
+                                    "original_pattern": pattern,
+                                    "match_data": {
+                                        "brand": brand,
+                                        "model": model_name,
+                                    },
+                                }
+                            )
+
+        return patterns
 
     def _extract_match_dict(
         self,
