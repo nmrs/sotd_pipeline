@@ -5,6 +5,21 @@ alwaysApply: false
 ---
 # Brush Matching Strategy Rules
 
+## Brush Matching Flow
+
+The brush matcher follows a specific priority order to ensure correct handling of different input types:
+
+1. **Correct Matches Check** (Fastest) - Check entire input against `brush` section in correct_matches.yaml
+2. **Brush Splits Check** (Human-curated) - Check `brush_splits.yaml` for human-curated splits
+3. **Automated Splitting on High-Priority Delimiters** - Split on "w/", "with", "in" before known brush check
+4. **Complete Brush Matching** - Apply brush strategies (includes Known Brush matching)
+5. **Automated Splitting on Medium-Priority Delimiters** - Split on "-", "+" as fallback
+6. **Dual Component Matching** - Try to match both handle and knot in same string
+7. **Single Component Fallback** - Try handle-only or knot-only matching
+
+### Key Principle
+**Delimiter splitting takes precedence over known brush detection.** The presence of a delimiter like "w/" should trigger splitting before checking if the input matches a known brush pattern.
+
 ## Strategy Pattern Implementation
 All brush matching strategies must inherit from `BaseBrushMatchingStrategy` and implement the `match()` method:
 
@@ -78,18 +93,20 @@ Configuration: declaration_grooming.handle_matching = true
 
 ## Intelligent Handle/Knot Splitting
 
-### Delimiter Semantics
-Different delimiters have different semantic meanings:
+### Delimiter Semantics and Priority
+Different delimiters have different semantic meanings and priority levels:
 
 ```python
-# Knot-ambiguous delimiters (require content analysis)
-knot_ambiguous_delimiters = [" w/ ", " with "]
+# High-priority delimiters (checked before known brush detection)
+high_priority_delimiters = [" w/ ", " with ", " in "]
 
-# Handle-primary delimiters (handle takes precedence) 
-handle_primary_delimiters = [" in "]
+# Medium-priority delimiters (checked after known brush detection)
+medium_priority_delimiters = [" / ", "/", " - ", " + "]
 
-# Neutral delimiters (no semantic preference)
-neutral_delimiters = [" / ", "/", " - "]
+# Delimiter semantic meanings:
+# " w/ ", " with " - Knot-ambiguous delimiters (require content analysis)
+# " in " - Handle-primary delimiters (handle takes precedence)
+# " / ", "/", " - ", " + " - Neutral delimiters (no semantic preference)
 ```
 
 ### Content Analysis Scoring
@@ -107,12 +124,13 @@ The `_score_as_handle()` method uses multiple signals:
 - Multiple brush strategy matches (-4 to -8 points)
 
 ### Advanced Splitting Strategies
-The system tries multiple splitting approaches in order:
+The system tries multiple splitting approaches in priority order:
 
-1. **Delimiter-based splitting** with semantic analysis
-2. **Fiber-hint splitting** using fiber word positions
-3. **Handle maker splitting** using known handle maker patterns
-4. **Knot maker splitting** using proximity to fiber words
+1. **High-priority delimiter splitting** - Split on "w/", "with", "in" before known brush check
+2. **Medium-priority delimiter splitting** - Split on "-", "+", "/" after known brush check
+3. **Fiber-hint splitting** using fiber word positions
+4. **Handle maker splitting** using known handle maker patterns
+5. **Knot maker splitting** using proximity to fiber words
 
 ## Brand-Specific Intelligence
 

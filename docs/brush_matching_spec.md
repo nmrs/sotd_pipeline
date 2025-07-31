@@ -27,34 +27,40 @@ A single `brush` string provided by the extraction phase. This string may contai
 
 ## Matching Priority Order
 
-1. **Correct Matches File**: If the input matches an entry in `data/correct_matches.yaml`, it is prioritized. The match result will have `match_type: exact` and will include all catalog fields for the matched brush.
-2. **Regex Patterns**: If not found in the correct matches file, regex patterns from the YAML catalogs are used. These matches have `match_type: regex` and also include all catalog fields.
-3. **Fallbacks**: Brand/alias/other fallback strategies as before.
+The brush matcher follows a specific priority order to ensure correct handling of different input types:
+
+1. **Correct Matches Check** (Fastest) - Check entire input against `brush` section in correct_matches.yaml
+2. **Brush Splits Check** (Human-curated) - Check `brush_splits.yaml` for human-curated splits
+3. **Automated Splitting on High-Priority Delimiters** - Split on "w/", "with", "in" before known brush check
+4. **Complete Brush Matching** - Apply brush strategies (includes Known Brush matching)
+5. **Automated Splitting on Medium-Priority Delimiters** - Split on "-", "+" as fallback
+6. **Dual Component Matching** - Try to match both handle and knot in same string
+7. **Single Component Fallback** - Try handle-only or knot-only matching
 
 ### Enhanced Correct Matches Integration
 
-The system now checks correct matches at multiple levels:
+The system checks correct matches at multiple levels:
 
-#### **Step 0: Full String Correct Matches**
+#### **Step 1: Full String Correct Matches**
 - Check the entire input string against `brush` section in correct_matches.yaml
 - Highest priority for complete brush matches
 
-#### **Step 1: Split Component Correct Matches** 
+#### **Step 2: Split Component Correct Matches** 
 - After splitting into handle and knot components, check each component individually
 - Handle component checked against `handle` section in correct_matches.yaml
 - Knot component checked against `knot` section in correct_matches.yaml
 - Correct matches take priority over strategy-based matching for individual components
 
-#### **Step 3: Dual Component Fallback Correct Matches**
+#### **Step 6: Dual Component Fallback Correct Matches**
 - When attempting dual component matching on the entire string
 - Check handle component against `handle` section in correct_matches.yaml
 - Check knot component against `knot` section in correct_matches.yaml
 - Correct matches take priority over strategy-based matching for individual components
 
 ### Correct Matches Priority Hierarchy
-1. **Full String Correct Match** (Step 0) - Highest priority
-2. **Split Component Correct Matches** (Step 1) - Component-level validation
-3. **Dual Component Fallback Correct Matches** (Step 3) - Component-level validation
+1. **Full String Correct Match** (Step 1) - Highest priority
+2. **Split Component Correct Matches** (Step 2) - Component-level validation
+3. **Dual Component Fallback Correct Matches** (Step 6) - Component-level validation
 4. **Strategy-Based Matching** - Fallback when correct matches not found
 
 ## Output Structure
@@ -234,17 +240,23 @@ The system uses a **Strategy Pattern** with multiple specialized matching strate
 
 ### Matching Steps (Sequential Processing)
 
-1. **Step 0: Correct Matches Check** - Check entire input against `brush` section in correct_matches.yaml
-2. **Step 1: Composite Brush Splitting** - Split input into handle and knot components using delimiters
+1. **Step 1: Correct Matches Check** - Check entire input against `brush` section in correct_matches.yaml
+2. **Step 2: Brush Splits Check** - Check `brush_splits.yaml` for human-curated splits
+3. **Step 3: Automated Splitting on High-Priority Delimiters** - Split on "w/", "with", "in" before known brush check
    - Check handle component against `handle` section in correct_matches.yaml
    - Check knot component against `knot` section in correct_matches.yaml
    - Fall back to strategy-based matching for individual components
-3. **Step 2: Complete Brush Matching** - Apply brush-specific strategies to full string
-4. **Step 3: Dual Component Fallback** - Run handle and knot matchers on entire string
+4. **Step 4: Complete Brush Matching** - Apply brush-specific strategies to full string (includes Known Brush matching)
+5. **Step 5: Automated Splitting on Medium-Priority Delimiters** - Split on "-", "+" as fallback
+   - Check handle component against `handle` section in correct_matches.yaml
+   - Check knot component against `knot` section in correct_matches.yaml
+   - Fall back to strategy-based matching for individual components
+6. **Step 6: Dual Component Fallback** - Run handle and knot matchers on entire string
    - Check handle component against `handle` section in correct_matches.yaml
    - Check knot component against `knot` section in correct_matches.yaml
    - Fall back to strategy-based matching for individual components
    - Create composite brush if both components match
+7. **Step 7: Single Component Fallback** - Try handle-only or knot-only matching
 
 ### Strategy Priority Order (Within Each Step)
 
