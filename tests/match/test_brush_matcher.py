@@ -85,7 +85,7 @@ def test_handles_catalog():
             "Jayaruh": {"patterns": ["jayaruh"]},
         },
         "manufacturer_handles": {"Elite": {"patterns": ["elite"]}},
-        "other_handles": {"Wolf Whiskers": {"patterns": ["wolf.*whis"]}},
+        "other_handles": {"Wolf Whiskers": {"Unspecified": {"patterns": ["wolf.*whis"]}}},
     }
 
 
@@ -273,11 +273,15 @@ class TestBrushMatcher:
 
         result = brush_matcher.match(test_string)
 
-        # Should match as handle-only since Wolf Whiskers is only a handle maker
-        # and the actual handle matcher can match it, even though it has knot indicators
+        # Should match as handle with knot size detection since Wolf Whiskers is only a handle maker
+        # but the fallback strategies can detect size information
         assert result.match_type == "regex"
         assert result.matched["handle"]["brand"] == "Wolf Whiskers"
-        assert result.matched["knot"]["brand"] is None  # No knot component
+        assert result.matched["handle"]["model"] == "Unspecified"
+        # No knot brand (Wolf Whiskers doesn't make knots)
+        assert result.matched["knot"]["brand"] is None
+        assert result.matched["knot"]["model"] is None  # No knot model
+        assert result.matched["knot"]["knot_size_mm"] == 26.0  # Size information preserved
 
 
 # Parameterized strategy/fiber tests

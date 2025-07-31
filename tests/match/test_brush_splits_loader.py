@@ -14,32 +14,24 @@ class TestBrushSplitsLoader:
         """Create a temporary YAML file for testing."""
         yaml_file = tmp_path / "test_brush_splits.yaml"
 
-        # Create test data
+        # Create test data using current structure: brush names as top-level keys
         test_data = {
-            "splits": {
-                "Rad Dinosaur Creations - Jetson - 25mm Muhle STF": [
-                    {
-                        "original": "Rad Dinosaur Creations - Jetson - 25mm Muhle STF",
-                        "handle": "Rad Dinosaur Creations Jetson",
-                        "knot": "25mm Muhle STF",
-                        "match_type": "regex",
-                        "validated": True,
-                        "corrected": False,
-                        "should_not_split": False,
-                    }
-                ],
-                "Zenith 506U N (50/50 horse mane/tail) $WOODEN $HORSESASS": [
-                    {
-                        "original": "Zenith 506U N (50/50 horse mane/tail) $WOODEN $HORSESASS",
-                        "handle": "",
-                        "knot": "",
-                        "match_type": "regex",
-                        "validated": True,
-                        "corrected": False,
-                        "should_not_split": True,
-                    }
-                ],
-            }
+            "Rad Dinosaur Creations - Jetson - 25mm Muhle STF": {
+                "handle": "Rad Dinosaur Creations Jetson",
+                "knot": "25mm Muhle STF",
+                "match_type": "regex",
+                "validated": True,
+                "corrected": False,
+                "should_not_split": False,
+            },
+            "Zenith 506U N (50/50 horse mane/tail) $WOODEN $HORSESASS": {
+                "handle": "",
+                "knot": "",
+                "match_type": "regex",
+                "validated": True,
+                "corrected": False,
+                "should_not_split": True,
+            },
         }
 
         # Write test data to file

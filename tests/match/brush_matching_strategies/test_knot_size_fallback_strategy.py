@@ -132,12 +132,10 @@ def test_knot_size_fallback_decimal_size_match(strategy):
 
 
 def test_knot_size_fallback_standalone_number_match(strategy):
-    """Test that standalone numbers are detected."""
+    """Test that standalone numbers without 'mm' are NOT detected."""
     result = strategy.match("Custom 26")
 
-    assert result is not None
-    assert result.matched is not None
-    assert result.matched["model"] == "26mm"
+    assert result is None
 
 
 @patch("sotd.match.brush_matching_strategies.knot_size_fallback_strategy.parse_knot_size")
