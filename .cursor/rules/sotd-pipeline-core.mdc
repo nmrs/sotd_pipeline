@@ -218,11 +218,3 @@ Before considering any plan complete, verify:
   3. Use `git mv` to move with date suffix: `git mv plans/plan.mdc plans/completed/category/type_plan_YYYY-MM-DD.mdc`
   4. Commit with descriptive message: `docs(plan): mark {plan_name} complete and move to completed/{category}`
 - **Why This Matters**: Single source of truth for all completed work, easy discovery, consistent organization, historical tracking
-
-## Model Identification Rule (MANDATORY)
-- **ABSOLUTE ALWAYS MUST DO NEVER FORGET 100% IMPORTANT**: At the beginning AND end of every response, you MUST identify the model you are using.
-- **Format**: Simply add "Model: [model]" at the very start and end of your response.
-- **Purpose**: This helps the user understand model differences and capabilities.
-- **No exceptions**: This rule applies to ALL responses, regardless of content or length.
-- **Placement**: Always place this at the very beginning, before any other content and at the very end, after any other content.
-- **Example**: "Model: Claude-4-Sonnet" or "Model: GPT-4" or whatever the actual model identifier is.

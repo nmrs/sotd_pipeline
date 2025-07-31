@@ -98,7 +98,7 @@ artisan_handles:
       - ^(?!.*dogwood)declaration
       - ^(?!.*dogwood)\bdg\b
       - \bdg\b
-      - \bb(?:[1-8]|9[ab]|1[0-8])\b
+      - ^(?!.*zeni).*\bb(?:[1-8]|9[ab]|1[0-8])\b
   DISCARD:
     Unspecified:
       patterns:
