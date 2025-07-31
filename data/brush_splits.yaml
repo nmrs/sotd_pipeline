@@ -1,7 +1,7 @@
 6DG B16 Thaw Washington Badger:
   handle: DG Thaw Washington
   knot: DG B16 Badger
-  match_type: null
+  match_type: exact
   corrected: true
   validated_at: '2025-07-30T18:23:12.478825'
   should_not_split: false
