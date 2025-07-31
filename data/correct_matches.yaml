@@ -587,6 +587,28 @@ brush:
   Böker:
     Synthetic:
     - böker synthetic
+  Declaration Grooming:
+    B13:
+    - declaration grooming - roil jefferson - 28mm b13
+    B14:
+    - declaration grooming - randy watson washington - 28mm b14
+    - declaration grooming washington envy b14 shd badger
+    B15:
+    - declaration grooming jefferson artist's choice b15 shd badger
+    B16:
+    - 6dg b16 thaw washington badger
+    - declaration grooming - cream jefferson - 28mm b16
+    - declaration grooming - jefferson thaw b16 - 28mm artisan tied badger
+    - dg jefferson know it all 2.0 28mm b16
+    B18:
+    - declaration grooming - cold 2.0 jeffington - 28mm b18:
+        handle_match: true
+    B3:
+    - declaration grooming washington blood of kings b3
+    B6:
+    - declaration grooming washington b6
+    B9A:
+    - declaration grooming - lavender jefferson - 28mm b9a+
   Dreadnought:
     Avenger:
     - dreadnought avenger
@@ -712,8 +734,10 @@ handle:
     printed unspecified:
     - 3d printed unspecified
   Declaration Grooming:
+    Jeffington:
+    - declaration grooming - cold 2.0 jeffington - 28mm b18
     Washington:
-    - Declaration Grooming Washington
+    - declaration grooming washington
   dogwood:
     handcrafts unspecified:
     - dogwood handcrafts unspecified
@@ -723,7 +747,7 @@ handle:
 knot:
   Declaration Grooming:
     B16:
-    - Declaration Grooming B16
+    - declaration grooming b16
   declaration:
     grooming b12:
     - declaration grooming b12
@@ -2174,6 +2198,3 @@ split_brush:
   3dogwood w/ dg b12 butterscotch 2 band badger:
     handle: dogwood handcrafts unspecified
     knot: declaration grooming b12
-  # 6dg b16 thaw washington badger:
-  #   handle: declaration grooming washington
-  #   knot: declaration grooming b16
