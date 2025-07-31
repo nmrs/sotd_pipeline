@@ -1,6 +1,23 @@
-splits:
-  do_not_split:
-    - original: "Zenith - 508A XL/Bristle (B35) (MOAR BOAR) 31mm Boar"
-      should_not_split: true
-      match_type: "known_brush"
-      validated: true
+6DG B16 Thaw Washington Badger:
+  handle: DG Thaw Washington
+  knot: DG B16 Badger
+  match_type: null
+  corrected: true
+  validated_at: '2025-07-30T18:23:12.478825'
+  should_not_split: false
+  occurrences:
+  - comment_ids:
+    - mwucduf
+    - mxtj1hu
+    file: 2025-06.json
+
+Zenith - 508A XL/Bristle (B35) (MOAR BOAR) 31mm Boar:
+  match_type: known_brush
+  corrected: false
+  validated_at: '2025-07-30T18:23:12.478825'
+  should_not_split: true
+  occurrences:
+  - comment_ids:
+    - mx1ywlu
+    - n0axwpr
+    file: 2025-06.json

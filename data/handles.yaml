@@ -1,4 +1,8 @@
 artisan_handles:
+  3D Printed:
+    Unspecified:
+      patterns:
+      - \b3d\b.*(?:printed)?
   AKA Brushworx:
     Unspecified:
       patterns:

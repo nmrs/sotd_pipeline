@@ -708,16 +708,28 @@ brush:
     - zenith r/wetshaving sub exclusive moar boar
     - zentih - moar boar r/wetshaving
 handle:
-  Yaqi:
+  3D Printed:
     Unspecified:
-    - yaqi unspecified
+    - 3d printed unspecified
+  3d:
+    printed unspecified:
+    - 3d printed unspecified
+  Dogwood Handcrafts:
+    Unspecified:
+    - dogwood handcrafts unspecified
   yaqi:
     unspecified:
     - yaqi unspecified
 knot:
-  Yaqi:
+  Declaration Grooming:
+    B12:
+    - declaration grooming b12
+  Unspecified:
     Synthetic:
-    - yaqi synthetic
+    - unspecified synthetic
+  unspecified:
+    synthetic:
+    - unspecified synthetic
   yaqi:
     synthetic:
     - yaqi synthetic
@@ -2156,3 +2168,9 @@ split_brush:
   22mm yaqi synth:
     handle: yaqi unspecified
     knot: yaqi synthetic
+  3d printed - timberwolf 24mm:
+    handle: 3d printed unspecified
+    knot: unspecified synthetic
+  3dogwood w/ dg b12 butterscotch 2 band badger:
+    handle: dogwood handcrafts unspecified
+    knot: declaration grooming b12
