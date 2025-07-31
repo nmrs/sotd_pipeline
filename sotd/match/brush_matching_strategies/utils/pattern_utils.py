@@ -396,6 +396,13 @@ def score_match_type(
             if handle_match and handle_match.get("handle_maker"):
                 score += 20  # Strong bonus for actual handle match
 
+                # Additional bonus if handle maker is only a handle maker (not also a knot maker)
+                handle_maker = handle_match.get("handle_maker")
+                if handle_maker and _is_only_handle_maker(
+                    handle_maker, handle_matcher, knot_matcher
+                ):
+                    score += 15  # Extra bonus for handle-only makers
+
     elif match_type == "knot":
         # Knot indicators increase score for knot matches
         if has_knot_indicators(text):
@@ -408,3 +415,27 @@ def score_match_type(
                 score += 20  # Strong bonus for actual knot match
 
     return score
+
+
+def _is_only_handle_maker(brand: str, handle_matcher, knot_matcher) -> bool:
+    """Check if a brand is only a handle maker (not also a knot maker)."""
+    if not brand:
+        return False
+
+    # Check if brand is in handles catalog
+    is_handle_maker = handle_matcher.is_known_handle_maker(brand)
+
+    # Check if brand is in knots catalog (if knot_matcher has access to knots data)
+    is_knot_maker = False
+    if hasattr(knot_matcher, "strategies"):
+        # Check if any strategy has this brand in knots catalog
+        for strategy in knot_matcher.strategies:
+            if hasattr(strategy, "catalog_data"):
+                known_knots = strategy.catalog_data.get("known_knots", {})
+                other_knots = strategy.catalog_data.get("other_knots", {})
+                if brand in known_knots or brand in other_knots:
+                    is_knot_maker = True
+                    break
+
+    # Return True if it's a handle maker but NOT a knot maker
+    return is_handle_maker and not is_knot_maker

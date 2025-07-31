@@ -45,8 +45,8 @@ class FiberFallbackStrategy(BaseBrushMatchingStrategy):
 
         # Create match result with detected fiber
         matched_data = {
-            "brand": "Unspecified",
-            "model": detected_fiber,
+            "brand": None,
+            "model": None,
             "fiber": detected_fiber,
             "fiber_strategy": "fiber_fallback",
             "_matched_by_strategy": "FiberFallbackStrategy",

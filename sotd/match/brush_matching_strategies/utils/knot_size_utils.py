@@ -24,9 +24,4 @@ def parse_knot_size(text: str) -> Optional[float]:
     if match:
         return float(match.group(1))
 
-    # Fallback: any number in the text
-    match = re.search(r"\b(\d+(?:\.\d+)?)\b", text)
-    if match:
-        return float(match.group(1))
-
     return None

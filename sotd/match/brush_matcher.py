@@ -307,8 +307,15 @@ class BrushMatcher:
         Returns MatchResult structure in the new unified format.
         """
         # Get handle and knot components from the split brush mapping
-        handle_component = correct_match.get("handle_component")
-        knot_component = correct_match.get("knot_component")
+        # Handle both CorrectMatchData objects and raw split data dictionaries
+        if hasattr(correct_match, "handle_component"):
+            # CorrectMatchData object
+            handle_component = correct_match.handle_component
+            knot_component = correct_match.knot_component
+        else:
+            # Raw split data dictionary
+            handle_component = correct_match.get("handle")
+            knot_component = correct_match.get("knot")
 
         # Look up handle component in handle section
         handle_match = None
@@ -898,7 +905,7 @@ class BrushMatcher:
                     original=value,
                     matched={
                         "brand": handle_match["handle_maker"],
-                        "model": None,
+                        "model": handle_match.get("handle_model"),
                         "source_text": value,
                         "_matched_by": "HandleMatcher",
                         "_pattern": handle_match.get("_pattern_used", "handle_matching"),
@@ -935,6 +942,24 @@ class BrushMatcher:
                 # Resolve handle and knot makers
                 self._resolve_handle_maker(matched, value)
                 self._resolve_knot_maker(matched, value)
+
+                # Update handle component model from resolved handle_model
+                if matched.get("handle_model"):
+                    matched["handle"]["model"] = matched["handle_model"]
+
+                # Apply fallback strategies to detect knot information
+                for strategy in self.strategies:
+                    try:
+                        result = strategy.match(value)
+                        if result and hasattr(result, "matched") and result.matched:
+                            # Update knot component with detected information
+                            if result.matched.get("knot_size_mm"):
+                                matched["knot"]["knot_size_mm"] = result.matched["knot_size_mm"]
+                            if result.matched.get("fiber"):
+                                matched["knot"]["fiber"] = result.matched["fiber"]
+                            break  # Use first successful strategy
+                    except Exception as e:
+                        continue
 
             else:
                 # Knot-only match - create knot-only structure
@@ -1572,6 +1597,7 @@ class BrushMatcher:
         handle_match = self.handle_matcher.match_handle_maker(value)
         if handle_match:
             updated["handle_maker"] = handle_match["handle_maker"]
+            updated["handle_model"] = handle_match["handle_model"]
             updated["handle_maker_metadata"] = {
                 "_matched_by_section": handle_match["_matched_by_section"],
                 "_pattern_used": handle_match["_pattern_used"],
@@ -1798,13 +1824,87 @@ class BrushMatcher:
             return False
 
         # Knot match must have valid matched data
-        if not knot_match.matched or not knot_match.matched.get("brand"):
+        if not knot_match.matched:
+            return False
+
+        # For fallback strategies, brand can be None (they only detect partial information)
+        knot_brand = knot_match.matched.get("brand")
+        if knot_brand is None:
+            # Check if this is a fallback strategy (they set brand to None)
+            if knot_match.matched.get("_matched_by_strategy") in [
+                "KnotSizeFallbackStrategy",
+                "FiberFallbackStrategy",
+            ]:
+                # Fallback strategies are valid even with brand: None
+                pass
+            else:
+                # Non-fallback strategies must have a brand
+                return False
+
+        # Check if handle maker is only a handle maker (not also a knot maker)
+        handle_maker = handle_match.get("handle_maker")
+        knot_brand = knot_match.matched.get("brand")
+
+        # If handle maker is only a handle maker and knot brand is "Unspecified",
+        # reject the dual-component match to avoid false positives
+        if (
+            handle_maker
+            and self._is_only_handle_maker(handle_maker)
+            and knot_brand == "Unspecified"
+        ):
             return False
 
         # Same brand is valid for makers that are both handle and knot makers (e.g., Zenith)
         # We don't reject same-brand matches as they can be legitimate dual component scenarios
 
         return True
+
+    def _is_only_handle_maker(self, brand: str) -> bool:
+        """
+        Check if a brand is only a handle maker (not also a knot maker).
+
+        Args:
+            brand: Brand name to check
+
+        Returns:
+            bool: True if brand is only a handle maker, False if it's also a knot maker
+        """
+        if not brand:
+            return False
+
+        # Check if brand is in handles catalog
+        is_handle_maker = self.handle_matcher.is_known_handle_maker(brand)
+
+        # Check if brand is in knots catalog
+        is_knot_maker = self._is_knot_maker(brand)
+
+        # Return True if it's a handle maker but NOT a knot maker
+        return is_handle_maker and not is_knot_maker
+
+    def _is_knot_maker(self, brand: str) -> bool:
+        """
+        Check if a brand is a knot maker.
+
+        Args:
+            brand: Brand name to check
+
+        Returns:
+            bool: True if brand is a knot maker, False otherwise
+        """
+        if not brand:
+            return False
+
+        # Check known_knots section
+        known_knots = self.knots_data.get("known_knots", {})
+        if brand in known_knots:
+            return True
+
+        # Check other_knots section
+        other_knots = self.knots_data.get("other_knots", {})
+        if brand in other_knots:
+            return True
+
+        return False
 
     def create_dual_component_result(
         self, handle_match: dict, knot_match: "MatchResult", value: str, user_intent: str
