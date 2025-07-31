@@ -390,6 +390,13 @@ class BrushMatcher:
         if not value:
             return None
 
+        # Handle case where value might be a dict (from correct_matches.yaml
+        # structure)
+        if isinstance(value, dict):
+            # Extract the key (brush name) from the dictionary
+            brush_name = list(value.keys())[0]
+            value = brush_name
+
         # Step 1: Check brush section in correct_matches.yaml (fastest)
         normalized_text = value.lower().strip()
         brush_correct_matches = self.correct_matches_checker.correct_matches.get("brush", {})
@@ -397,7 +404,8 @@ class BrushMatcher:
         # Check if this is a known brush (exact match)
         for brand, brand_data in brush_correct_matches.items():
             for model, patterns in brand_data.items():
-                # Check if normalized_text matches any pattern (handle both strings and dictionaries)
+                # Check if normalized_text matches any pattern (handle both strings
+                # and dictionaries)
                 pattern_matched = False
                 handle_match_enabled = False
 

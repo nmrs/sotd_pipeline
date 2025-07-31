@@ -60,7 +60,7 @@ class TestBrushSplit:
         assert split.original == "Declaration B15"
         assert split.handle is None
         assert split.knot == "Declaration B15"
-        assert not split.validated
+        assert split.validated_at is None
         assert not split.corrected
 
     def test_creation_multi_component(self):
@@ -81,7 +81,7 @@ class TestBrushSplit:
         assert data["original"] == "Declaration B15"
         assert data["handle"] is None
         assert data["knot"] == "Declaration B15"
-        assert not data["validated"]
+        assert data["validated_at"] is None
         assert not data["corrected"]
 
     def test_to_dict_corrected(self):
@@ -109,7 +109,7 @@ class TestBrushSplit:
             "original": "Declaration B15",
             "handle": None,
             "knot": "Declaration B15",
-            "validated": True,
+            "validated_at": "2025-01-27T14:30:00Z",
             "corrected": False,
             "validated_at": "2025-01-27T14:30:00Z",
             "occurrences": [{"file": "test.json", "comment_ids": ["123"]}],
@@ -118,7 +118,7 @@ class TestBrushSplit:
         assert split.original == "Declaration B15"
         assert split.handle is None
         assert split.knot == "Declaration B15"
-        assert split.validated
+        assert split.validated_at is not None
         assert not split.corrected
         assert split.validated_at == "2025-01-27T14:30:00Z"
         assert len(split.occurrences) == 1
@@ -215,7 +215,9 @@ class TestBrushSplitStatistics:
     def test_add_validated_split(self):
         """Test adding a validated split to statistics."""
         stats = BrushSplitStatistics()
-        split = BrushSplit(original="Test", handle="Test", knot="Test", validated=True)
+        split = BrushSplit(
+            original="Test", handle="Test", knot="Test", validated_at="2025-01-27T14:30:00Z"
+        )
         stats.add_split(split)
         assert stats.total == 1
         assert stats.validated == 1
@@ -225,7 +227,11 @@ class TestBrushSplitStatistics:
         """Test adding a corrected split to statistics."""
         stats = BrushSplitStatistics()
         split = BrushSplit(
-            original="Test", handle="Test", knot="Test", validated=True, corrected=True
+            original="Test",
+            handle="Test",
+            knot="Test",
+            validated_at="2025-01-27T14:30:00Z",
+            corrected=True,
         )
         stats.add_split(split)
         assert stats.total == 1
@@ -490,7 +496,7 @@ class TestAdvancedBrushSplitStatistics:
             original="Test",
             handle="Test",
             knot="Test",
-            validated=True,
+            validated_at="2025-01-27T14:30:00Z",
             corrected=True,
             system_confidence=ConfidenceLevel.HIGH,
         )
@@ -558,8 +564,10 @@ class TestStatisticsCalculator:
         calculator = StatisticsCalculator(validator)
 
         splits = [
-            BrushSplit(original="Test1", handle="Test1", knot="Test1", validated=True),
-            BrushSplit(original="Test2", handle="Test2", knot="Test2", validated=False),
+            BrushSplit(
+                original="Test1", handle="Test1", knot="Test1", validated_at="2025-01-27T14:30:00Z"
+            ),
+            BrushSplit(original="Test2", handle="Test2", knot="Test2", validated_at=None),
         ]
 
         filters = {"validated_only": True}
@@ -573,14 +581,16 @@ class TestStatisticsCalculator:
         calculator = StatisticsCalculator(validator)
 
         splits = [
-            BrushSplit(original="Test1", handle="Test1", knot="Test1", validated=True),
-            BrushSplit(original="Test2", handle="Test2", knot="Test2", validated=False),
+            BrushSplit(
+                original="Test1", handle="Test1", knot="Test1", validated_at="2025-01-27T14:30:00Z"
+            ),
+            BrushSplit(original="Test2", handle="Test2", knot="Test2", validated_at=None),
         ]
 
         # Test validated_only filter
         filtered = calculator._apply_filters(splits, {"validated_only": True})
         assert len(filtered) == 1
-        assert filtered[0].validated
+        assert filtered[0].validated_at is not None
 
         # Test confidence_level filter
         splits[0].system_confidence = ConfidenceLevel.HIGH
@@ -615,14 +625,13 @@ class TestStatisticsCalculator:
                 original="Test1",
                 handle="Test1",
                 knot="Test1",
-                validated=True,
                 validated_at=now,
             ),
             BrushSplit(
                 original="Test2",
                 handle="Test2",
                 knot="Test2",
-                validated=False,
+                validated_at=None,
             ),
         ]
 

@@ -129,6 +129,11 @@ class BrushSplit:
     occurrences: List[BrushSplitOccurrence] = field(default_factory=list)
     should_not_split: bool = False
 
+    @property
+    def validated(self) -> bool:
+        """Return True if this split has been validated (has a validated_at timestamp)."""
+        return self.validated_at is not None
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         result = {
@@ -137,6 +142,7 @@ class BrushSplit:
             "knot": self.knot,
             "match_type": self.match_type,
             "corrected": self.corrected,
+            "validated": self.validated,  # Include validated property
             "validated_at": self.validated_at,
             "should_not_split": self.should_not_split,  # Include for API responses
             "occurrences": [occ.to_dict() for occ in self.occurrences],
