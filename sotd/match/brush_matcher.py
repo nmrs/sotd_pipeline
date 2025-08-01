@@ -170,8 +170,17 @@ class BrushMatcher:
         knot_text_safe = knot_text or ""
         user_intent = self.detect_user_intent(value, handle_text_safe, knot_text_safe)
 
+        # Check if handle and knot have the same brand
+        handle_brand = handle_maker
+        knot_brand = knot_info.get("brand")
+
+        # Set top-level brand based on whether handle and knot brands are the same
+        top_brand = None
+        if handle_brand and knot_brand and handle_brand == knot_brand:
+            top_brand = handle_brand
+
         matched = {
-            "brand": None,
+            "brand": top_brand,  # Set to same brand if handle/knot match, otherwise None
             "model": None,
             "user_intent": user_intent,
             "handle": {
@@ -377,9 +386,18 @@ class BrushMatcher:
         knot_component_safe = knot_component or ""
         user_intent = self.detect_user_intent(value, handle_component_safe, knot_component_safe)
 
+        # Check if handle and knot have the same brand
+        handle_brand = handle_match.get("handle_maker") if handle_match else None
+        knot_brand = knot_match.get("brand") if knot_match else None
+
+        # Set top-level brand based on whether handle and knot brands are the same
+        top_brand = None
+        if handle_brand and knot_brand and handle_brand == knot_brand:
+            top_brand = handle_brand
+
         # Create unified format with nested sections
         matched = {
-            "brand": None,  # Split brushes have no top-level brand
+            "brand": top_brand,  # Set to same brand if handle/knot match, otherwise None
             "model": None,  # Split brushes have no top-level model
             "user_intent": user_intent,
             "handle": {
@@ -1515,9 +1533,10 @@ class BrushMatcher:
                 "_pattern": pattern or "unknown",
             }
 
-            # Clear top-level brand/model for composite brushes
-            m["brand"] = None
-            m["model"] = None
+            # Clear top-level brand/model for composite brushes (only if brands are different)
+            if handle_brand != knot_brand:
+                m["brand"] = None
+                m["model"] = None
 
         else:
             # Fallback for other cases - create minimal sections
@@ -1538,6 +1557,19 @@ class BrushMatcher:
                 "_matched_by": strategy.__class__.__name__,
                 "_pattern": pattern or "unknown",
             }
+
+        # After creating handle and knot sections, check if they have the same brand
+        # and set the top-level brand accordingly
+        if m.get("handle") and m.get("knot"):
+            handle_brand = m["handle"].get("brand")
+            knot_brand = m["knot"].get("brand")
+
+            # If both handle and knot have the same brand, set the top-level brand
+            if handle_brand and knot_brand and handle_brand == knot_brand:
+                m["brand"] = handle_brand
+                # Also set model if not already set
+                if not m.get("model"):
+                    m["model"] = m["handle"].get("model") or m["knot"].get("model")
 
     def _enrich_match_result(self, match_dict: dict, value: str) -> None:
         """Enrich match result with additional data."""
@@ -1687,8 +1719,14 @@ class BrushMatcher:
             and updated.get("_matched_by_strategy")
             not in ["MakerComparison", "KnownBrushMatchingStrategy"]
         ):
-            updated["brand"] = None
-            updated["model"] = None
+            # Check if handle and knot have the same brand before clearing
+            handle_brand = updated["handle"].get("brand")
+            knot_brand = updated["knot"].get("brand")
+
+            # Only clear if brands are different
+            if handle_brand != knot_brand:
+                updated["brand"] = None
+                updated["model"] = None
 
     def _resolve_handle_maker(self, updated: dict, value: str) -> None:
         """Resolve handle maker using multiple strategies."""
@@ -2056,9 +2094,18 @@ class BrushMatcher:
         """
         from sotd.match.types import create_match_result
 
+        # Check if handle and knot have the same brand
+        handle_brand = handle_match.get("handle_maker")
+        knot_brand = knot_match.matched.get("brand")
+
+        # Set top-level brand based on whether handle and knot brands are the same
+        top_brand = None
+        if handle_brand and knot_brand and handle_brand == knot_brand:
+            top_brand = handle_brand
+
         # Create composite brush structure
         matched = {
-            "brand": None,  # Composite brush
+            "brand": top_brand,  # Set to same brand if handle/knot match, otherwise None
             "model": None,  # Composite brush
             "user_intent": user_intent,
             "handle": {
