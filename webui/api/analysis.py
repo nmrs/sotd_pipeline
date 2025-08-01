@@ -120,6 +120,7 @@ class MismatchItem(BaseModel):
 
     original: str
     matched: dict
+    enriched: Optional[dict] = None
     pattern: Optional[str] = None
     match_type: str
     confidence: Optional[float] = None
@@ -702,7 +703,6 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
 
                 original = field_data.get("original", "")
                 normalized = field_data.get("normalized", original)
-                matched = field_data.get("matched", {})
                 pattern = field_data.get("pattern", "")
                 match_type = field_data.get("match_type", "")
                 record_id = record.get("id", "")
@@ -711,8 +711,22 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 if mismatch_type == "intentionally_unmatched":
                     # For intentionally unmatched items, use empty matched dict and set match_type to "filtered"
                     matched = {}
+                    enriched = {}
                     match_type = "filtered"
                 else:
+                    # When using enriched data, get original matched data from matched_data_map
+                    if request.use_enriched_data and data.get("matched_data_map"):
+                        # Get the original matched data from the matched_data_map
+                        matched_data_map = data["matched_data_map"]
+                        matched_record = matched_data_map.get(record_id, {})
+                        matched_field_data = matched_record.get(request.field, {})
+                        matched = matched_field_data.get("matched", {})
+                        enriched = field_data.get("enriched", {})
+                    else:
+                        # Using matched data directly
+                        matched = field_data.get("matched", {})
+                        enriched = field_data.get("enriched", {})
+
                     # Skip records with missing data for other categories
                     if not normalized or not matched:
                         continue
@@ -725,6 +739,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 api_item = MismatchItem(
                     original=normalized,
                     matched=matched,
+                    enriched=enriched if enriched else None,
                     pattern=pattern,
                     match_type=match_type or "No Match",
                     confidence=field_data.get("confidence"),
@@ -788,7 +803,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
             processing_time=0.0,
             partial_results=False,
             error=None,
-            matched_data_map=data.get("matched_data_map") if request.use_enriched_data else None,
+            matched_data_map=data.get("matched_data_map") if request.use_enriched_data else None,  # type: ignore
         )
 
     except HTTPException:
