@@ -213,14 +213,44 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   const hasEnrichPhaseChanges = (originalData: Record<string, any>, enrichedData: Record<string, any>): boolean => {
     if (!originalData || !enrichedData) return false;
     
-    // Check for changes in key fields that are commonly adjusted in enrich phase
-    const fieldsToCheck = ['fiber', 'knot_size_mm', 'handle_maker', 'brand', 'model'];
+    // For brush field, check nested structure
+    if (field === 'brush') {
+      // Check handle fiber
+      const originalHandleFiber = originalData?.handle?.fiber;
+      const enrichedHandleFiber = enrichedData?.handle?.fiber;
+      if (originalHandleFiber !== enrichedHandleFiber) return true;
+      
+      // Check knot fiber
+      const originalKnotFiber = originalData?.knot?.fiber;
+      const enrichedKnotFiber = enrichedData?.knot?.fiber;
+      if (originalKnotFiber !== enrichedKnotFiber) return true;
+      
+      // Check knot size
+      const originalKnotSize = originalData?.knot?.knot_size_mm;
+      const enrichedKnotSize = enrichedData?.knot?.knot_size_mm;
+      if (originalKnotSize !== enrichedKnotSize) return true;
+      
+      // Check handle maker/brand
+      const originalHandleBrand = originalData?.handle?.brand;
+      const enrichedHandleBrand = enrichedData?.handle?.brand;
+      if (originalHandleBrand !== enrichedHandleBrand) return true;
+      
+      // Check knot brand
+      const originalKnotBrand = originalData?.knot?.brand;
+      const enrichedKnotBrand = enrichedData?.knot?.brand;
+      if (originalKnotBrand !== enrichedKnotBrand) return true;
+    } else {
+      // For other fields, check top-level fields
+      const fieldsToCheck = ['fiber', 'knot_size_mm', 'handle_maker', 'brand', 'model'];
+      
+      return fieldsToCheck.some(field => {
+        const original = originalData[field];
+        const enriched = enrichedData[field];
+        return original !== enriched;
+      });
+    }
     
-    return fieldsToCheck.some(field => {
-      const original = originalData[field];
-      const enriched = enrichedData[field];
-      return original !== enriched;
-    });
+    return false;
   };
 
   const columns = useMemo(() => {
@@ -337,9 +367,9 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
           // Check if we have matched_data_map and if there are enrich-phase changes
           const hasChanges = matched_data_map && (() => {
-            // Create a unique key for this item (using original text as key)
-            const itemKey = item.original.toLowerCase();
-            const originalData = matched_data_map[itemKey];
+            // Use the first comment_id as the record ID key (backend uses record ID as key)
+            const recordId = item.comment_ids?.[0] || '';
+            const originalData = matched_data_map[recordId];
             return originalData && hasEnrichPhaseChanges(originalData, item.matched as Record<string, any>);
           })();
 
@@ -356,8 +386,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             );
 
             if (hasChanges && matched_data_map) {
-              const itemKey = item.original.toLowerCase();
-              const originalData = matched_data_map[itemKey];
+              const recordId = item.comment_ids?.[0] || '';
+              const originalData = matched_data_map[recordId];
               return (
                 <EnrichPhaseTooltip
                   originalData={originalData}
@@ -380,8 +410,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           );
 
           if (hasChanges && matched_data_map) {
-            const itemKey = item.original.toLowerCase();
-            const originalData = matched_data_map[itemKey];
+            const recordId = item.comment_ids?.[0] || '';
+            const originalData = matched_data_map[recordId];
             return (
               <EnrichPhaseTooltip
                 originalData={originalData}

@@ -22,13 +22,47 @@ const EnrichPhaseTooltip: React.FC<EnrichPhaseTooltipProps> = ({
   const getComparisonText = () => {
     const changes: string[] = [];
 
-    // Compare fiber if it exists
-    if (originalData.fiber !== enrichedData.fiber) {
-      changes.push(`Fiber: ${originalData.fiber || 'None'} → ${enrichedData.fiber || 'None'}`);
-    }
-
-    // Compare other relevant fields based on field type
+    // For brush field, check nested structure
     if (field === 'brush') {
+      // Check handle fiber
+      const originalHandleFiber = originalData?.handle?.fiber;
+      const enrichedHandleFiber = enrichedData?.handle?.fiber;
+      if (originalHandleFiber !== enrichedHandleFiber) {
+        changes.push(`Handle Fiber: ${originalHandleFiber || 'None'} → ${enrichedHandleFiber || 'None'}`);
+      }
+      
+      // Check knot fiber
+      const originalKnotFiber = originalData?.knot?.fiber;
+      const enrichedKnotFiber = enrichedData?.knot?.fiber;
+      if (originalKnotFiber !== enrichedKnotFiber) {
+        changes.push(`Knot Fiber: ${originalKnotFiber || 'None'} → ${enrichedKnotFiber || 'None'}`);
+      }
+      
+      // Check knot size
+      const originalKnotSize = originalData?.knot?.knot_size_mm;
+      const enrichedKnotSize = enrichedData?.knot?.knot_size_mm;
+      if (originalKnotSize !== enrichedKnotSize) {
+        changes.push(`Knot Size: ${originalKnotSize || 'None'} → ${enrichedKnotSize || 'None'}`);
+      }
+      
+      // Check handle brand
+      const originalHandleBrand = originalData?.handle?.brand;
+      const enrichedHandleBrand = enrichedData?.handle?.brand;
+      if (originalHandleBrand !== enrichedHandleBrand) {
+        changes.push(`Handle Brand: ${originalHandleBrand || 'None'} → ${enrichedHandleBrand || 'None'}`);
+      }
+      
+      // Check knot brand
+      const originalKnotBrand = originalData?.knot?.brand;
+      const enrichedKnotBrand = enrichedData?.knot?.brand;
+      if (originalKnotBrand !== enrichedKnotBrand) {
+        changes.push(`Knot Brand: ${originalKnotBrand || 'None'} → ${enrichedKnotBrand || 'None'}`);
+      }
+    } else {
+      // For other fields, check top-level fields
+      if (originalData.fiber !== enrichedData.fiber) {
+        changes.push(`Fiber: ${originalData.fiber || 'None'} → ${enrichedData.fiber || 'None'}`);
+      }
       if (originalData.knot_size_mm !== enrichedData.knot_size_mm) {
         changes.push(`Knot Size: ${originalData.knot_size_mm || 'None'} → ${enrichedData.knot_size_mm || 'None'}`);
       }

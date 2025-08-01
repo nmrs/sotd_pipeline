@@ -4,15 +4,27 @@ import EnrichPhaseTooltip from '../EnrichPhaseTooltip';
 
 describe('EnrichPhaseTooltip', () => {
   const mockOriginalData = {
-    fiber: 'Synthetic',
-    knot_size_mm: 24,
-    handle_maker: 'Test Brand',
+    handle: {
+      fiber: 'Synthetic',
+      brand: 'Test Brand',
+    },
+    knot: {
+      fiber: 'Synthetic',
+      knot_size_mm: 24,
+      brand: 'Test Brand',
+    },
   };
 
   const mockEnrichedData = {
-    fiber: 'Badger',
-    knot_size_mm: 26,
-    handle_maker: 'Test Brand',
+    handle: {
+      fiber: 'Badger',
+      brand: 'Test Brand',
+    },
+    knot: {
+      fiber: 'Badger',
+      knot_size_mm: 26,
+      brand: 'Test Brand',
+    },
     _extraction_source: 'user_override_catalog',
   };
 
@@ -45,7 +57,8 @@ describe('EnrichPhaseTooltip', () => {
     fireEvent.mouseEnter(trigger);
 
     expect(screen.getByText('Enrich Phase Adjustments:')).toBeInTheDocument();
-    expect(screen.getByText(/Fiber: Synthetic → Badger/)).toBeInTheDocument();
+    expect(screen.getByText(/Handle Fiber: Synthetic → Badger/)).toBeInTheDocument();
+    expect(screen.getByText(/Knot Fiber: Synthetic → Badger/)).toBeInTheDocument();
     expect(screen.getByText(/Knot Size: 24 → 26/)).toBeInTheDocument();
     expect(screen.getByText(/Source: user_override_catalog/)).toBeInTheDocument();
   });
