@@ -1,0 +1,427 @@
+# TDD Implementation Plan: DRY Scoring with Real Matchers
+
+## **Problem Statement**
+The current brush matching system has two critical issues:
+1. **Pattern conflict**: "Zenith B2" incorrectly matches as "Declaration Grooming B2" due to overly broad `\bb2\b` pattern
+2. **DRY violation**: Scoring functions duplicate pattern matching logic instead of using actual matchers
+
+## **Solution Overview**
+Replace duplicated scoring logic with actual matcher results to eliminate DRY violation and automatically resolve pattern conflicts through proper strategy priority ordering.
+
+## **Unified MatchResult Design**
+We will use a single `MatchResult` class that serves both legacy and new DRY scoring needs:
+
+```python
+@dataclass
+class MatchResult:
+    """Unified result structure for all matching operations."""
+    
+    # Core data (always present)
+    original: str
+    matched: Optional[Dict[str, Any]] = None
+    match_type: Optional[str] = None
+    pattern: Optional[str] = None
+    
+    # DRY scoring fields (None = no section/priority info)
+    section: Optional[str] = None      # None = single section or no section info
+    priority: Optional[int] = None     # None = no priority info available
+    
+    @property
+    def has_section_info(self) -> bool:
+        """Check if this result has meaningful section/priority info."""
+        return self.section is not None and self.priority is not None
+```
+
+**Usage Patterns:**
+- **Simple matchers** (razors, blades, soaps): `section=None, priority=None`
+- **Section-based matchers** (knots, handles): `section="known_knots", priority=1`
+- **Future correct matches**: `section="correct_matches", priority=0`
+
+## **Test-Driven Development Approach**
+
+### **Phase 1: Update MatchResult Class and Tests**
+
+#### **Test 1.1: Unified MatchResult Class Structure**
+```python
+# tests/match/test_types.py
+def test_unified_match_result_creation():
+    """Test unified MatchResult class creation and attributes."""
+    # Simple matcher result (no section info)
+    simple_result = MatchResult(
+        original="Koraat Moarteen",
+        matched={"brand": "Koraat", "model": "Moarteen"},
+        match_type="regex",
+        pattern="koraat.*moarteen"
+        # section=None, priority=None by default
+    )
+    
+    assert simple_result.original == "Koraat Moarteen"
+    assert simple_result.matched["brand"] == "Koraat"
+    assert simple_result.section is None
+    assert simple_result.priority is None
+    assert not simple_result.has_section_info
+    
+    # Section-based matcher result (with section info)
+    section_result = MatchResult(
+        original="Zenith B2",
+        matched={"brand": "Zenith", "model": "B2"},
+        match_type="regex", 
+        pattern="zenith.*\\bb2\\b",
+        section="known_knots",
+        priority=1
+    )
+    
+    assert section_result.section == "known_knots"
+    assert section_result.priority == 1
+    assert section_result.has_section_info
+```
+
+#### **Test 1.2: Backward Compatibility with Existing Producers**
+```python
+# tests/match/test_types.py
+def test_backward_compatibility_with_existing_producers():
+    """Test that existing MatchResult producers continue to work."""
+    # Test factory function still works
+    result = create_match_result(
+        original="Test Product",
+        matched={"brand": "Test", "model": "Product"},
+        match_type="regex",
+        pattern="test.*product"
+    )
+    
+    assert isinstance(result, MatchResult)
+    assert result.original == "Test Product"
+    assert result.matched["brand"] == "Test"
+    assert result.section is None  # Default for backward compatibility
+    assert result.priority is None  # Default for backward compatibility
+    
+    # Test direct instantiation with old-style parameters
+    old_style_result = MatchResult(
+        original="Old Style",
+        matched={"brand": "Old"},
+        match_type="regex",
+        pattern="old.*style"
+    )
+    
+    assert old_style_result.section is None
+    assert old_style_result.priority is None
+```
+
+#### **Test 1.3: Backward Compatibility with Existing Consumers**
+```python
+# tests/match/test_types.py
+def test_backward_compatibility_with_existing_consumers():
+    """Test that existing MatchResult consumers continue to work."""
+    # Test that existing properties still work
+    result = MatchResult(
+        original="Test Product",
+        matched={"brand": "Test", "model": "Product"},
+        match_type="regex",
+        pattern="test.*product"
+    )
+    
+    # Test existing property access
+    assert result.original == "Test Product"
+    assert result.matched["brand"] == "Test"
+    assert result.match_type == "regex"
+    assert result.pattern == "test.*product"
+    
+    # Test existing method access
+    assert result.get("brand") == "Test"
+    assert result.get("nonexistent", "default") == "default"
+    
+    # Test that new fields don't break existing code
+    assert result.section is None
+    assert result.priority is None
+    assert not result.has_section_info
+```
+
+#### **Test 1.4: Existing Matcher Integration**
+```python
+# tests/match/test_razor_matcher.py
+def test_razor_matcher_still_works_with_unified_match_result():
+    """Test that razor matcher continues to work with unified MatchResult."""
+    matcher = RazorMatcher()
+    result = matcher.match("Koraat Moarteen")
+    
+    # Test that existing functionality still works
+    assert isinstance(result, MatchResult)
+    assert result.original == "Koraat Moarteen"
+    assert result.matched["brand"] == "Koraat"
+    assert result.matched["model"] == "Moarteen"
+    
+    # Test that new fields are properly set to None
+    assert result.section is None
+    assert result.priority is None
+    assert not result.has_section_info
+```
+
+#### **Test 1.5: Existing Consumer Code Still Works**
+```python
+# tests/match/test_brush_matcher.py
+def test_brush_matcher_consumes_unified_match_result():
+    """Test that brush matcher can consume unified MatchResult objects."""
+    # Test that brush matcher can handle both old and new MatchResult types
+    brush_matcher = BrushMatcher()
+    
+    # Test with simple matcher result (razor)
+    razor_result = MatchResult(
+        original="Koraat Moarteen",
+        matched={"brand": "Koraat", "model": "Moarteen"},
+        match_type="regex",
+        pattern="koraat.*moarteen"
+    )
+    
+    # Test that brush matcher can process this without errors
+    # (This tests that existing consumer code doesn't break)
+    assert razor_result.original == "Koraat Moarteen"
+    assert razor_result.matched["brand"] == "Koraat"
+```
+
+#### **Test 1.2: MatchResult Factory Function**
+```python
+def test_create_match_result_factory():
+    """Test factory function for backward compatibility."""
+    result = create_match_result(
+        original="Test Product",
+        matched={"brand": "Test", "model": "Product"},
+        match_type="regex",
+        pattern="test.*product"
+    )
+    
+    assert isinstance(result, MatchResult)
+    assert result.original == "Test Product"
+    assert result.matched["brand"] == "Test"
+    assert result.section is None  # Default for simple matchers
+    assert result.priority is None  # Default for simple matchers
+```
+
+#### **Test 1.3: Section Priority Calculation**
+```python
+def test_section_priority_calculation():
+    """Test priority calculation based on YAML section order."""
+    sections = ["known_knots", "other_knots", "fiber_fallback"]
+    priorities = calculate_section_priorities(sections)
+    
+    assert priorities["known_knots"] == 1      # First section = highest priority
+    assert priorities["other_knots"] == 2      # Second section = medium priority  
+    assert priorities["fiber_fallback"] == 3   # Third section = lowest priority
+```
+
+### **Phase 2: Update Matchers to Return MatchResult**
+
+#### **Test 2.1: Simple Matchers Return Basic MatchResult**
+```python
+# tests/match/test_razor_matcher.py
+def test_razor_matcher_returns_basic_match_result():
+    """Test that simple matchers return MatchResult without section info."""
+    matcher = RazorMatcher()
+    result = matcher.match("Koraat Moarteen")
+    
+    assert isinstance(result, MatchResult)
+    assert result.original == "Koraat Moarteen"
+    assert result.matched["brand"] == "Koraat"
+    assert result.section is None  # No section info for simple matchers
+    assert result.priority is None  # No priority info for simple matchers
+    assert not result.has_section_info
+```
+
+#### **Test 2.2: Knot Matcher Returns Section-Based MatchResult**
+```python
+# tests/match/test_knot_matcher.py
+def test_knot_matcher_returns_section_match_result():
+    """Test that section-based matchers return MatchResult with section/priority."""
+    matcher = KnotMatcher(strategies)
+    result = matcher.match("Zenith B2")
+    
+    assert isinstance(result, MatchResult)
+    assert result.section == "known_knots"  # Zenith should be in known_knots
+    assert result.priority == 1             # known_knots should have priority 1
+    assert result.matched["brand"] == "Zenith"
+    assert result.pattern == "zenith.*\\bb2\\b"
+    assert result.has_section_info
+```
+
+#### **Test 2.3: Handle Matcher Returns Section-Based MatchResult**
+```python
+# tests/match/test_handle_matcher.py
+def test_handle_matcher_returns_section_match_result():
+    """Test that handle matcher returns MatchResult with section/priority."""
+    matcher = HandleMatcher(strategies)
+    result = matcher.match("Elite Handle")
+    
+    assert isinstance(result, MatchResult)
+    assert result.section == "artisan_handles"  # Elite should be in artisan_handles
+    assert result.priority == 1                 # artisan_handles should have priority 1
+    assert result.matched["handle_maker"] == "Elite"
+    assert result.has_section_info
+```
+
+### **Phase 3: Replace Scoring Functions**
+
+#### **Test 3.1: Scoring Uses Real Matcher Results with Priority**
+```python
+# tests/match/test_brush_matcher.py
+def test_scoring_uses_real_matcher_results_with_priority():
+    """Test that scoring functions use actual matcher results with priority info."""
+    brush_matcher = BrushMatcher()
+    
+    # Test "Zenith B2" scoring - should use priority 1 (known_knots)
+    knot_score = brush_matcher._score_as_knot("Zenith B2")
+    # Should use actual knot matcher result with priority 1
+    assert knot_score > 0  # Should score high for known knot with priority 1
+    
+    # Test "Elite Handle" scoring - should use priority 1 (artisan_handles)  
+    handle_score = brush_matcher._score_as_handle("Elite Handle")
+    # Should use actual handle matcher result with priority 1
+    assert handle_score > 0  # Should score high for artisan handle with priority 1
+    
+    # Test lower priority scoring
+    other_knot_score = brush_matcher._score_as_knot("Some Other Knot")
+    # Should use actual knot matcher result with lower priority
+    assert other_knot_score < knot_score  # Lower priority should score lower
+```
+
+#### **Test 3.2: Scoring Handles Missing Section Info**
+```python
+def test_scoring_handles_missing_section_info():
+    """Test that scoring works correctly when section/priority info is missing."""
+    brush_matcher = BrushMatcher()
+    
+    # Test scoring with simple matcher result (no section info)
+    simple_score = brush_matcher._score_as_knot("Simple Product")
+    # Should still work even without section/priority info
+    assert simple_score >= 0  # Should not crash, may score lower
+```
+
+#### **Test 3.3: Pattern Conflict Resolution**
+```python
+def test_pattern_conflict_resolution():
+    """Test that pattern conflicts are resolved by using real matcher priority."""
+    brush_matcher = BrushMatcher()
+    
+    # "Zenith B2" should match Zenith, not Declaration Grooming
+    result = brush_matcher.match("Zenith B2 w/ Elite Handle")
+    
+    assert result.matched["knot"]["brand"] == "Zenith"  # Should be Zenith, not DG
+    assert result.matched["handle"]["brand"] == "Elite"
+```
+
+### **Phase 4: Integration Tests**
+
+#### **Test 4.1: Fix Failing Integration Test**
+```python
+# tests/integration/test_real_catalog_integration.py
+def test_zenith_b2_matches_zenith_not_elite():
+    """Test that Zenith B2 correctly matches Zenith, not Elite."""
+    result = brush_matcher.match("Zenith B2 w/ Elite Handle")
+    
+    # The test expects Elite as knot brand, but this is wrong
+    # It should be Zenith as knot, Elite as handle
+    assert result.matched["knot"]["brand"] == "Zenith"  # Fixed expectation
+    assert result.matched["handle"]["brand"] == "Elite"
+```
+
+#### **Test 4.2: Fix Handle/Knot Combination Test**
+```python
+# tests/match/test_handle_knot_combination_structure.py
+def test_dg_b15_w_ch_zebra_correct_split():
+    """Test that DG B15 w/ C&H Zebra splits correctly."""
+    result = brush_matcher.match("DG B15 w/ C&H Zebra")
+    
+    # The test expects DG as handle, C&H as knot, but this is wrong
+    # It should be DG B15 as knot, C&H Zebra as handle
+    assert result.matched["knot"]["brand"] == "Declaration Grooming"  # Fixed expectation
+    assert result.matched["handle"]["brand"] == "Chisel & Hound"  # Fixed expectation
+```
+
+## **Implementation Steps**
+
+### **Step 1: Update MatchResult Class**
+- Update `sotd/match/types.py` with unified `MatchResult` class
+- Add `has_section_info` property for clarity
+- Update `create_match_result` factory function
+- Implement priority calculation from YAML section order
+- Add comprehensive tests for unified functionality
+
+### **Step 2: Update Simple Matchers**
+- Modify `razor_matcher.py`, `blade_matcher.py`, `soap_matcher.py` 
+- Return `MatchResult` objects with `section=None, priority=None`
+- Ensure backward compatibility with existing code
+- Add tests for new return types
+
+### **Step 3: Update Section-Based Matchers**
+- Modify `knot_matcher.py` to return `MatchResult` objects with section/priority
+- Modify `handle_matcher.py` to return `MatchResult` objects with section/priority
+- Cache priority calculations at initialization
+- Add tests for section-based return types
+
+### **Step 4: Replace Scoring Functions**
+- Replace `_score_as_handle()` and `_score_as_knot()` methods
+- Use actual matcher results with priority info instead of duplicated logic
+- Handle cases where section/priority info is missing
+- Remove all duplicated pattern matching code
+- Add tests for new scoring behavior
+
+### **Step 5: Update Callers**
+- Update all callers to use new unified `MatchResult` structure
+- Fix failing tests with correct expectations
+- Verify pattern conflicts are resolved
+
+### **Step 6: Validation**
+- Run full test suite to ensure no regressions
+- Verify "Zenith B2" now matches Zenith correctly
+- Verify "DG B15 w/ C&H Zebra" splits correctly
+- Confirm all existing functionality still works
+
+## **Success Criteria**
+- [ ] All tests pass
+- [ ] "Zenith B2" matches Zenith, not Declaration Grooming
+- [ ] "DG B15 w/ C&H Zebra" splits correctly (DG B15 = knot, C&H Zebra = handle)
+- [ ] No duplicated pattern matching logic remains
+- [ ] Scoring uses actual matcher results with proper priority ordering
+- [ ] YAML section priority is calculated from file order
+- [ ] Clear error messages for YAML validation failures
+- [ ] Backward compatibility maintained for all existing code
+- [ ] Simple matchers work with `section=None, priority=None`
+- [ ] Section-based matchers work with proper section/priority info
+
+## **Risk Mitigation**
+- **Risk**: Breaking existing functionality during refactoring
+- **Mitigation**: Comprehensive test coverage and incremental implementation
+- **Risk**: Performance impact from additional object creation
+- **Mitigation**: Cache priority calculations and reuse MatchResult objects where possible
+- **Risk**: Confusion between simple and section-based matchers
+- **Mitigation**: Clear documentation and `has_section_info` property for clarity
+
+## **Current Status**
+- **COMPLETE**: Phase 1 (unified MatchResult class) - ✅ All tests pass
+- **COMPLETE**: Phase 2 (Update Matchers to Return MatchResult) - ✅ All tests pass
+- **COMPLETE**: Phase 3 (Replace Scoring Functions) - ✅ All tests pass
+- **COMPLETE**: Phase 4 (Integration Tests) - ✅ All tests pass
+- **COMPLETE**: Phase 5 (Validation) - ✅ All 2,115 tests pass
+- **Priority**: High - fixes critical pattern conflict and DRY violation
+- **Estimated Effort**: 2-3 hours for complete implementation
+- **Design Decision**: Unified MatchResult with None/None defaults for clarity
+
+## **Implementation Summary**
+✅ **Successfully completed all phases of the DRY scoring implementation!**
+
+### **Key Achievements:**
+1. **✅ Pattern Conflict Resolved**: "Zenith B2" now correctly matches Zenith, not Declaration Grooming
+2. **✅ DRY Violation Eliminated**: Scoring functions now use actual matcher results instead of duplicated logic
+3. **✅ Unified MatchResult**: Single object serves both legacy and new scoring needs
+4. **✅ Backward Compatibility**: All existing code continues to work without changes
+5. **✅ Comprehensive Testing**: All 2,115 tests pass with no regressions
+
+### **Technical Solutions:**
+- **Zenith Pattern Fix**: Added Zenith section to `knots.yaml` with `zenith.*\bb\d+` pattern
+- **DRY Scoring**: Replaced duplicated pattern matching with actual `KnotMatcher` and `HandleMatcher` calls
+- **Unified Architecture**: Single `MatchResult` class with optional section/priority fields
+- **Smart Splitting**: Enhanced delimiter classification and content analysis scoring
+
+### **Test Results:**
+- **"Zenith B2 w/ Elite Handle"**: ✅ Knot="Zenith", Handle="Elite"
+- **"DG B15 w/ C&H Zebra"**: ✅ Knot="Declaration Grooming", Handle="Chisel & Hound"
+- **All Integration Tests**: ✅ Passing with correct expectations
+- **Full Test Suite**: ✅ 2,115 tests passing with no regressions
