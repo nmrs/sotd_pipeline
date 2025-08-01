@@ -338,9 +338,7 @@ describe('BrushTable Unit Tests', () => {
 
       // Find the checkbox in the brush column cell for the main row (row 0)
       // The ShadCN Checkbox renders as a button with role="checkbox"
-      const checkbox = screen
-        .getByTestId('cell-brush-0')
-        .querySelector('button[role="checkbox"]');
+      const checkbox = screen.getByTestId('cell-brush-0').querySelector('button[role="checkbox"]');
       await user.click(checkbox!);
 
       expect(onBrushFilter).toHaveBeenCalledWith('Simpson Chubby 2', true);
@@ -366,12 +364,8 @@ describe('BrushTable Unit Tests', () => {
 
       // Find checkboxes in the brush column cells for main rows
       // The ShadCN Checkbox renders as a button with role="checkbox"
-      const checkbox1 = screen
-        .getByTestId('cell-brush-0')
-        .querySelector('button[role="checkbox"]');
-      const checkbox2 = screen
-        .getByTestId('cell-brush-3')
-        .querySelector('button[role="checkbox"]');
+      const checkbox1 = screen.getByTestId('cell-brush-0').querySelector('button[role="checkbox"]');
+      const checkbox2 = screen.getByTestId('cell-brush-3').querySelector('button[role="checkbox"]');
 
       await user.click(checkbox1!);
       await user.click(checkbox2!);

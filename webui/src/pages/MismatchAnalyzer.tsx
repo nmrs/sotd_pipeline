@@ -7,11 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Filter,
-  Eye,
-  EyeOff,
-} from 'lucide-react';
+import { Filter, Eye, EyeOff } from 'lucide-react';
 import MismatchAnalyzerDataTable from '@/components/data/MismatchAnalyzerDataTable';
 import {
   analyzeMismatch,
@@ -37,7 +33,13 @@ const MismatchAnalyzer: React.FC = () => {
   const [threshold, setThreshold] = useState<number>(3);
   const [useEnrichedData, setUseEnrichedData] = useState<boolean>(false);
   const [displayMode, setDisplayMode] = useState<
-    'mismatches' | 'all' | 'unconfirmed' | 'regex' | 'intentionally_unmatched' | 'split_brushes' | 'complete_brushes'
+    | 'mismatches'
+    | 'all'
+    | 'unconfirmed'
+    | 'regex'
+    | 'intentionally_unmatched'
+    | 'split_brushes'
+    | 'complete_brushes'
   >('mismatches');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -447,15 +449,11 @@ const MismatchAnalyzer: React.FC = () => {
 
       case 'split_brushes':
         // Show only split brush items (when field is brush)
-        return results.mismatch_items.filter(
-          item => item.is_split_brush === true
-        );
+        return results.mismatch_items.filter(item => item.is_split_brush === true);
 
       case 'complete_brushes':
         // Show only complete brush items (when field is brush)
-        return results.mismatch_items.filter(
-          item => item.is_split_brush === false
-        );
+        return results.mismatch_items.filter(item => item.is_split_brush === false);
 
       default:
         return results.mismatch_items;
@@ -626,8 +624,9 @@ const MismatchAnalyzer: React.FC = () => {
                 <Eye className='h-4 w-4' />
                 All
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().all}
                 </span>
@@ -644,10 +643,11 @@ const MismatchAnalyzer: React.FC = () => {
                 <EyeOff className='h-4 w-4' />
                 Mismatches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
-                    ? 'bg-white text-blue-600'
-                    : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'mismatches'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().mismatches}
                 </span>
@@ -664,10 +664,11 @@ const MismatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Unconfirmed
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'unconfirmed'
-                    ? 'bg-white text-blue-600'
-                    : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'unconfirmed'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().unconfirmed}
                 </span>
@@ -684,8 +685,9 @@ const MismatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Regex
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().regex}
                 </span>
@@ -702,10 +704,11 @@ const MismatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Intentionally Unmatched
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'intentionally_unmatched'
-                    ? 'bg-white text-blue-600'
-                    : 'bg-gray-100 text-gray-700'
-                    }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                    displayMode === 'intentionally_unmatched'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
                 >
                   {getDisplayModeCounts().intentionally_unmatched}
                 </span>
@@ -724,10 +727,11 @@ const MismatchAnalyzer: React.FC = () => {
                   <Filter className='h-4 w-4' />
                   Split Brushes
                   <span
-                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'split_brushes'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
-                      }`}
+                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                      displayMode === 'split_brushes'
+                        ? 'bg-white text-blue-600'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}
                   >
                     {getDisplayModeCounts().split_brushes}
                   </span>
@@ -747,10 +751,11 @@ const MismatchAnalyzer: React.FC = () => {
                   <Filter className='h-4 w-4' />
                   Complete Brushes
                   <span
-                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'complete_brushes'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
-                      }`}
+                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                      displayMode === 'complete_brushes'
+                        ? 'bg-white text-blue-600'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}
                   >
                     {getDisplayModeCounts().complete_brushes}
                   </span>

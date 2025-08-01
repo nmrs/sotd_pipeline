@@ -184,11 +184,12 @@ export function BrushSplitDataTable({
             <div className='flex items-center space-x-2'>
               <MemoizedInput
                 value={currentValue || ''}
-                onChange={(value) => handleFieldChange(item.index, 'handle', value)}
-                className={`w-full ${hasChanges ? 'border-orange-500 bg-orange-50' : ''} ${originalValue && originalValue.handle !== item.handle
-                  ? 'border-blue-500 bg-blue-50'
-                  : ''
-                  }`}
+                onChange={value => handleFieldChange(item.index, 'handle', value)}
+                className={`w-full ${hasChanges ? 'border-orange-500 bg-orange-50' : ''} ${
+                  originalValue && originalValue.handle !== item.handle
+                    ? 'border-blue-500 bg-blue-50'
+                    : ''
+                }`}
                 placeholder='Handle'
                 aria-label={`Handle for ${item.original}`}
                 disabled={commentLoading}
@@ -229,11 +230,12 @@ export function BrushSplitDataTable({
             <div className='flex items-center space-x-2'>
               <MemoizedInput
                 value={currentValue || ''}
-                onChange={(value) => handleFieldChange(item.index, 'knot', value)}
-                className={`w-full ${hasChanges ? 'border-orange-500 bg-orange-50' : ''} ${originalValue && originalValue.knot !== item.knot
-                  ? 'border-blue-500 bg-blue-50'
-                  : ''
-                  }`}
+                onChange={value => handleFieldChange(item.index, 'knot', value)}
+                className={`w-full ${hasChanges ? 'border-orange-500 bg-orange-50' : ''} ${
+                  originalValue && originalValue.knot !== item.knot
+                    ? 'border-blue-500 bg-blue-50'
+                    : ''
+                }`}
                 placeholder='Knot'
                 aria-label={`Knot for ${item.original}`}
                 disabled={commentLoading}

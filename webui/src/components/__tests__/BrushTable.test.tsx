@@ -194,9 +194,7 @@ describe('BrushTable', () => {
 
       // Find the checkbox in the brush column cell for the main row (row 0)
       // The ShadCN Checkbox renders as a button with role="checkbox"
-      const checkbox = screen
-        .getByTestId('cell-brush-0')
-        .querySelector('button[role="checkbox"]');
+      const checkbox = screen.getByTestId('cell-brush-0').querySelector('button[role="checkbox"]');
       fireEvent.click(checkbox!);
 
       expect(onBrushFilter).toHaveBeenCalledWith('Test Brush 1', true);

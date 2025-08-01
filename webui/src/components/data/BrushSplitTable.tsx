@@ -16,7 +16,7 @@ interface BrushSplitTableProps {
 
 export function BrushSplitTable({
   brushSplits,
-  onSave = () => { },
+  onSave = () => {},
   onSelectionChange,
   customControls,
   onCommentClick,

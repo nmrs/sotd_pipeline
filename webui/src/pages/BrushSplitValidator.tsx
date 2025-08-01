@@ -5,7 +5,13 @@ import { BrushSplit } from '../types/brushSplit';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff, FileText, Save } from 'lucide-react';
 import CommentModal from '../components/domain/CommentModal';
-import { getCommentDetail, CommentDetail, saveBrushSplits, loadBrushSplits, loadYamlBrushSplits } from '../services/api';
+import {
+  getCommentDetail,
+  CommentDetail,
+  saveBrushSplits,
+  loadBrushSplits,
+  loadYamlBrushSplits,
+} from '../services/api';
 import { handleApiError } from '../services/api';
 
 const BrushSplitValidator: React.FC = () => {
@@ -304,10 +310,19 @@ const BrushSplitValidator: React.FC = () => {
       <div className='mb-4 p-4 bg-gray-50 border border-gray-200 rounded'>
         <h3 className='font-semibold mb-2'>How to validate brush splits:</h3>
         <ul className='text-sm text-gray-600 space-y-1'>
-          <li>• <strong>Edit fields:</strong> Click on handle or knot fields to edit them</li>
-          <li>• <strong>Mark as "Don't Split":</strong> Check the box for brushes that shouldn't be split</li>
-          <li>• <strong>Save changes:</strong> Click "Save Changes" when you're done editing</li>
-          <li>• <strong>View comments:</strong> Click on comment links to see the original context</li>
+          <li>
+            • <strong>Edit fields:</strong> Click on handle or knot fields to edit them
+          </li>
+          <li>
+            • <strong>Mark as "Don't Split":</strong> Check the box for brushes that shouldn't be
+            split
+          </li>
+          <li>
+            • <strong>Save changes:</strong> Click "Save Changes" when you're done editing
+          </li>
+          <li>
+            • <strong>View comments:</strong> Click on comment links to see the original context
+          </li>
         </ul>
       </div>
 

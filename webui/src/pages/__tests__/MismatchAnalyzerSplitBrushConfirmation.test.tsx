@@ -140,4 +140,4 @@ describe('MismatchAnalyzer - Split Brush Confirmation', () => {
     expect(screen.getByText('Mismatch Analyzer')).toBeInTheDocument();
     expect(screen.getByText('Ready to Analyze')).toBeInTheDocument();
   });
-}); 
+});

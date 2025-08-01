@@ -21,7 +21,7 @@ describe('EnrichPhaseTooltip', () => {
       <EnrichPhaseTooltip
         originalData={mockOriginalData}
         enrichedData={mockEnrichedData}
-        field="brush"
+        field='brush'
       >
         <span>Test Content</span>
       </EnrichPhaseTooltip>
@@ -35,7 +35,7 @@ describe('EnrichPhaseTooltip', () => {
       <EnrichPhaseTooltip
         originalData={mockOriginalData}
         enrichedData={mockEnrichedData}
-        field="brush"
+        field='brush'
       >
         <span>Test Content</span>
       </EnrichPhaseTooltip>
@@ -55,7 +55,7 @@ describe('EnrichPhaseTooltip', () => {
       <EnrichPhaseTooltip
         originalData={mockOriginalData}
         enrichedData={mockEnrichedData}
-        field="brush"
+        field='brush'
       >
         <span>Test Content</span>
       </EnrichPhaseTooltip>
@@ -76,11 +76,7 @@ describe('EnrichPhaseTooltip', () => {
     };
 
     render(
-      <EnrichPhaseTooltip
-        originalData={identicalData}
-        enrichedData={identicalData}
-        field="brush"
-      >
+      <EnrichPhaseTooltip originalData={identicalData} enrichedData={identicalData} field='brush'>
         <span>Test Content</span>
       </EnrichPhaseTooltip>
     );
@@ -90,4 +86,4 @@ describe('EnrichPhaseTooltip', () => {
 
     expect(screen.getByText('No enrich-phase changes detected')).toBeInTheDocument();
   });
-}); 
+});
