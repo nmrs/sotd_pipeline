@@ -199,7 +199,7 @@ class TestBrushOutputFormatRefactoring:
         result = brush_matcher.match("DG B15 w/ C&H Zebra")
 
         # VALIDATION: Only expected fields should be present
-        expected_fields = {"brand", "model", "handle", "knot"}
+        expected_fields = {"brand", "model", "handle", "knot", "user_intent"}
         actual_fields = set(result.matched.keys())
         unexpected_fields = actual_fields - expected_fields
         assert not unexpected_fields, f"Unexpected fields found: {unexpected_fields}"
@@ -453,7 +453,7 @@ class TestBrushOutputFormatRefactoring:
             ), f"{brush_type} knot has unexpected fields: {knot_unexpected_fields}"
 
             # VALIDATION: Top-level should only have expected fields
-            top_level_expected_fields = {"brand", "model", "handle", "knot"}
+            top_level_expected_fields = {"brand", "model", "handle", "knot", "user_intent"}
             top_level_actual_fields = set(result.matched.keys())
             top_level_unexpected_fields = top_level_actual_fields - top_level_expected_fields
             assert (
@@ -539,7 +539,7 @@ class TestBrushOutputFormatRefactoring:
 
         # VALIDATION: No mysterious top-level fields
         top_level_fields = set(result.matched.keys())
-        expected_top_level_fields = {"brand", "model", "handle", "knot"}
+        expected_top_level_fields = {"brand", "model", "handle", "knot", "user_intent"}
         mysterious_fields = top_level_fields - expected_top_level_fields
         assert not mysterious_fields, f"Mysterious top-level fields found: {mysterious_fields}"
 
