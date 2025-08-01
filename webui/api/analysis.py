@@ -872,6 +872,7 @@ async def mark_matches_as_correct(request: MarkCorrectRequest):
         # Import the correct matches manager
         try:
             from rich.console import Console
+
             from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
         except ImportError as e:
             raise HTTPException(
