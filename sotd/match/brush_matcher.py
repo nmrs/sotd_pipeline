@@ -73,8 +73,6 @@ class BrushMatcher:
         self.knots_data = catalogs["knots"]
         self.correct_matches = catalogs["correct_matches"]
 
-
-
         # Initialize specialized components
         self.correct_matches_checker = CorrectMatchesChecker(config, self.correct_matches)
         self.handle_matcher = HandleMatcher(config.handles_path)
@@ -431,14 +429,15 @@ class BrushMatcher:
         # Try each strategy in order with timing
         for strategy_name, strategy_func in strategies:
             import time
+
             start_time = time.time()
             result = strategy_func(value)
             duration = time.time() - start_time
-            
+
             # Record strategy timing if monitor is available
-            if hasattr(self, 'monitor') and self.monitor is not None:
+            if hasattr(self, "monitor") and self.monitor is not None:
                 self.monitor.record_brush_strategy_timing(strategy_name, duration)
-            
+
             if result is not None:
                 # Cache successful result
                 self._cache.set(cache_key, result)

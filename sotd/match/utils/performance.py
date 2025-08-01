@@ -129,7 +129,7 @@ class PerformanceMonitor(BasePerformanceMonitor):
                 else:
                     # Last strategy - all attempts were matches
                     matches = attempts
-                
+
                 success_rate = (matches / attempts * 100) if attempts > 0 else 0
                 print(
                     f"  {strategy}: {stats.avg_time * 1000:.1f}ms avg "
