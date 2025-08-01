@@ -1217,7 +1217,7 @@ class MismatchAnalyzer(AnalysisTool):
                     handle_model = handle.get("model", "")
                     knot_brand = knot.get("brand", "")
                     knot_model = knot.get("model", "")
-                    
+
                     # Check for user intent to determine which component is primary
                     user_intent = matched.get("user_intent")
                     if user_intent == "handle_primary":

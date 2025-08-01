@@ -23,7 +23,7 @@ class TestBrushUserIntentRegression:
     def test_regression_user_intent_always_present_in_correct_matches(self, brush_matcher):
         """
         Regression test: Ensure user_intent is always present in correct match results.
-        
+
         This test verifies that all correct match processing methods consistently
         include user_intent field, preventing future regressions.
         """
@@ -41,13 +41,13 @@ class TestBrushUserIntentRegression:
         mock_correct_match.match_type = "handle_knot_section"
 
         with patch.object(
-            brush_matcher.correct_matches_checker, 'check', return_value=mock_correct_match
+            brush_matcher.correct_matches_checker, "check", return_value=mock_correct_match
         ):
-            with patch.object(brush_matcher.brush_splitter, 'split_handle_and_knot') as mock_split:
+            with patch.object(brush_matcher.brush_splitter, "split_handle_and_knot") as mock_split:
                 mock_split.return_value = ("Rad Dinosaur Creation", "G5C", "smart_analysis")
-                
+
                 result = brush_matcher.match(value)
-                
+
                 assert result is not None
                 assert result.matched is not None
                 assert "user_intent" in result.matched
@@ -67,22 +67,24 @@ class TestBrushUserIntentRegression:
         mock_correct_match.match_type = "split_brush_section"
 
         with patch.object(
-            brush_matcher.correct_matches_checker, 'check', return_value=mock_correct_match
+            brush_matcher.correct_matches_checker, "check", return_value=mock_correct_match
         ):
-            with patch.object(brush_matcher.brush_splitter, 'split_handle_and_knot') as mock_split:
+            with patch.object(brush_matcher.brush_splitter, "split_handle_and_knot") as mock_split:
                 mock_split.return_value = ("aka brushworx", "g5c", "smart_analysis")
-                
+
                 result = brush_matcher.match(value)
-                
+
                 assert result is not None
                 assert result.matched is not None
                 assert "user_intent" in result.matched
-                assert result.matched["user_intent"] == "handle_primary"  # aka brushworx appears first
+                assert (
+                    result.matched["user_intent"] == "handle_primary"
+                )  # aka brushworx appears first
 
     def test_regression_detect_user_intent_method_preserved(self, brush_matcher):
         """
         Regression test: Ensure detect_user_intent method is preserved and functional.
-        
+
         This test verifies that the core user intent detection logic remains intact
         and produces correct results for various scenarios.
         """
@@ -97,14 +99,14 @@ class TestBrushUserIntentRegression:
 
         for value, handle_text, knot_text, expected_intent, description in test_cases:
             intent = brush_matcher.detect_user_intent(value, handle_text, knot_text)
-            assert intent == expected_intent, (
-                f"Wrong intent for {description}: expected {expected_intent}, got {intent}"
-            )
+            assert (
+                intent == expected_intent
+            ), f"Wrong intent for {description}: expected {expected_intent}, got {intent}"
 
     def test_regression_correct_matches_never_remove_user_intent(self, brush_matcher):
         """
         Regression test: Ensure correct matches never remove user intent.
-        
+
         This test verifies that adding brushes to correct_matches.yaml never
         results in data loss compared to automated matching.
         """
@@ -112,9 +114,9 @@ class TestBrushUserIntentRegression:
         value = "G5C Rad Dinosaur Creation"
 
         # First, test with automated matching (dual component)
-        with patch.object(brush_matcher, '_check_correct_matches', return_value=None):
+        with patch.object(brush_matcher, "_check_correct_matches", return_value=None):
             result_automated = brush_matcher.match(value)
-            
+
             assert result_automated is not None
             assert result_automated.matched is not None
             assert "user_intent" in result_automated.matched
@@ -133,13 +135,13 @@ class TestBrushUserIntentRegression:
         mock_correct_match.match_type = "handle_knot_section"
 
         with patch.object(
-            brush_matcher.correct_matches_checker, 'check', return_value=mock_correct_match
+            brush_matcher.correct_matches_checker, "check", return_value=mock_correct_match
         ):
-            with patch.object(brush_matcher.brush_splitter, 'split_handle_and_knot') as mock_split:
+            with patch.object(brush_matcher.brush_splitter, "split_handle_and_knot") as mock_split:
                 mock_split.return_value = ("Rad Dinosaur Creation", "G5C", "smart_analysis")
-                
+
                 result_correct = brush_matcher.match(value)
-                
+
                 assert result_correct is not None
                 assert result_correct.matched is not None
                 assert "user_intent" in result_correct.matched
@@ -154,7 +156,7 @@ class TestBrushUserIntentRegression:
     def test_regression_all_correct_match_methods_include_user_intent(self, brush_matcher):
         """
         Regression test: Ensure all correct match processing methods include user intent.
-        
+
         This test directly calls each correct match processing method to verify
         they all include user_intent field.
         """
@@ -168,24 +170,24 @@ class TestBrushUserIntentRegression:
                 "model": "G5C",
                 "fiber": "Synthetic",
                 "knot_size_mm": 26.0,
-            }
+            },
         }
-        
-        with patch.object(brush_matcher.brush_splitter, 'split_handle_and_knot') as mock_split:
+
+        with patch.object(brush_matcher.brush_splitter, "split_handle_and_knot") as mock_split:
             mock_split.return_value = ("Rad Dinosaur Creation", "G5C", "smart_analysis")
-            
+
             result = brush_matcher._process_handle_knot_correct_match(value, correct_match)
             assert "user_intent" in result.matched, "handle_knot correct match missing user_intent"
 
         # Test _process_split_brush_correct_match
         value = "aka brushworx g5c"
         correct_match = {"handle": "aka brushworx", "knot": "ap shave co g5c"}
-        
-        with patch.object(brush_matcher.correct_matches_checker, 'check') as mock_check:
+
+        with patch.object(brush_matcher.correct_matches_checker, "check") as mock_check:
             mock_handle_match = MagicMock()
             mock_handle_match.handle_maker = "AKA Brushworx"
             mock_handle_match.handle_model = None
-            
+
             mock_knot_match = MagicMock()
             mock_knot_match.knot_info = {
                 "brand": "AP Shave Co",
@@ -193,16 +195,16 @@ class TestBrushUserIntentRegression:
                 "fiber": "Synthetic",
                 "knot_size_mm": 26.0,
             }
-            
+
             mock_check.side_effect = [mock_handle_match, mock_knot_match]
-            
+
             result = brush_matcher._process_split_brush_correct_match(value, correct_match)
             assert "user_intent" in result.matched, "split_brush correct match missing user_intent"
 
         # Test _process_regular_correct_match
         value = "Simpson Chubby 2"
         correct_match = {"brand": "Simpson", "model": "Chubby 2"}
-        
+
         result = brush_matcher._process_regular_correct_match(value, correct_match)
         assert "user_intent" in result.matched, "regular correct match missing user_intent"
 
@@ -211,17 +213,17 @@ class TestBrushUserIntentRegression:
         handle_text = "Rad Dinosaur Creation"
         knot_text = "G5C"
         delimiter_type = "smart_analysis"
-        
-        with patch.object(brush_matcher.correct_matches_checker, 'check', return_value=None):
-            with patch.object(brush_matcher.handle_matcher, 'match_handle_maker') as mock_handle:
+
+        with patch.object(brush_matcher.correct_matches_checker, "check", return_value=None):
+            with patch.object(brush_matcher.handle_matcher, "match_handle_maker") as mock_handle:
                 mock_handle.return_value = {
                     "handle_maker": "Rad Dinosaur",
                     "handle_model": "Creation",
                     "_matched_by": "HandleMatcher",
                     "_pattern": "rad_dinosaur_pattern",
                 }
-                
-                with patch.object(brush_matcher.knot_matcher, 'match') as mock_knot:
+
+                with patch.object(brush_matcher.knot_matcher, "match") as mock_knot:
                     mock_knot.return_value = create_match_result(
                         original="G5C",
                         matched={
@@ -235,7 +237,7 @@ class TestBrushUserIntentRegression:
                         match_type="regex",
                         pattern="g5c_pattern",
                     )
-                    
+
                     result = brush_matcher._process_split_result(
                         handle_text, knot_text, delimiter_type, value
                     )
@@ -244,7 +246,7 @@ class TestBrushUserIntentRegression:
     def test_regression_user_intent_data_type_consistency(self, brush_matcher):
         """
         Regression test: Ensure user_intent field has consistent data type.
-        
+
         This test verifies that user_intent is always a string with expected values.
         """
         # Test with brushes that go through correct match processing
@@ -267,59 +269,65 @@ class TestBrushUserIntentRegression:
             mock_correct_match.match_type = "handle_knot_section"
 
             with patch.object(
-                brush_matcher.correct_matches_checker, 'check', return_value=mock_correct_match
+                brush_matcher.correct_matches_checker, "check", return_value=mock_correct_match
             ):
-                with patch.object(brush_matcher.brush_splitter, 'split_handle_and_knot') as mock_split:
+                with patch.object(
+                    brush_matcher.brush_splitter, "split_handle_and_knot"
+                ) as mock_split:
                     # Mock split to return handle first for handle_primary, knot first for knot_primary
                     if expected_intent == "handle_primary":
                         mock_split.return_value = ("handle text", "knot text", "smart_analysis")
                     else:
                         mock_split.return_value = ("knot text", "handle text", "smart_analysis")
-                    
+
                     result = brush_matcher.match(input_text)
-                    
+
                     assert result is not None
                     assert result.matched is not None
                     assert "user_intent" in result.matched
-                    
+
                     user_intent = result.matched["user_intent"]
-                    
+
                     # Verify data type
-                    assert isinstance(user_intent, str), f"user_intent should be string, got {type(user_intent)}"
-                    
+                    assert isinstance(
+                        user_intent, str
+                    ), f"user_intent should be string, got {type(user_intent)}"
+
                     # Verify valid values
-                    assert user_intent in ["handle_primary", "knot_primary"], (
-                        f"user_intent should be 'handle_primary' or 'knot_primary', got '{user_intent}'"
-                    )
+                    assert user_intent in [
+                        "handle_primary",
+                        "knot_primary",
+                    ], f"user_intent should be 'handle_primary' or 'knot_primary', got '{user_intent}'"
 
     def test_regression_user_intent_preserved_across_pipeline_phases(self, brush_matcher):
         """
         Regression test: Ensure user_intent is preserved when data flows through pipeline.
-        
+
         This test simulates what happens when brush data moves through different
         pipeline phases to ensure user_intent is not lost.
         """
         value = "G5C Rad Dinosaur Creation"
-        
+
         # Simulate match phase
         result = brush_matcher.match(value)
         assert "user_intent" in result.matched
         original_intent = result.matched["user_intent"]
-        
+
         # Simulate data transformation (like what might happen in enrich phase)
         transformed_data = result.matched.copy()
         transformed_data["enriched"] = True
         transformed_data["additional_field"] = "test_value"
-        
+
         # Verify user_intent is still present and unchanged
         assert "user_intent" in transformed_data
         assert transformed_data["user_intent"] == original_intent
-        
+
         # Simulate data serialization/deserialization
         import json
+
         serialized = json.dumps(transformed_data)
         deserialized = json.loads(serialized)
-        
+
         # Verify user_intent survives serialization
         assert "user_intent" in deserialized
         assert deserialized["user_intent"] == original_intent
@@ -327,7 +335,7 @@ class TestBrushUserIntentRegression:
     def test_regression_user_intent_edge_cases_handled(self, brush_matcher):
         """
         Regression test: Ensure edge cases in user intent detection are handled correctly.
-        
+
         This test covers various edge cases to ensure they don't cause errors
         or incorrect user intent values.
         """
@@ -339,14 +347,20 @@ class TestBrushUserIntentRegression:
             ("Text", "Text", "Text", "handle_primary", "identical text"),
             ("A B C", "A B", "C", "handle_primary", "handle first"),
             ("A B C", "C", "A B", "knot_primary", "knot first"),
-            ("Very Long Handle Text With Many Words", "Very Long Handle Text", "With Many Words", "handle_primary", "long text"),
+            (
+                "Very Long Handle Text With Many Words",
+                "Very Long Handle Text",
+                "With Many Words",
+                "handle_primary",
+                "long text",
+            ),
         ]
 
         for value, handle_text, knot_text, expected_intent, description in edge_cases:
             try:
                 intent = brush_matcher.detect_user_intent(value, handle_text, knot_text)
-                assert intent == expected_intent, (
-                    f"Edge case failed: {description} - expected {expected_intent}, got {intent}"
-                )
+                assert (
+                    intent == expected_intent
+                ), f"Edge case failed: {description} - expected {expected_intent}, got {intent}"
             except Exception as e:
-                pytest.fail(f"Edge case threw exception: {description} - {e}") 
+                pytest.fail(f"Edge case threw exception: {description} - {e}")
