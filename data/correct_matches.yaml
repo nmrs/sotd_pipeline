@@ -732,39 +732,53 @@ handle:
     printed unspecified:
     - 3d printed unspecified
   AKA Brushworx:
+    Stanley:
+    - AKA Brushworx Stanley
     Unspecified:
     - AKA Brushworx Unspecified
-  AP Shave Co:
-    Unspecified:
-    - ap shave co unspecified
   Declaration Grooming:
     Jeffington:
     - declaration grooming - cold 2.0 jeffington - 28mm b18
     Washington:
     - declaration grooming washington
+  Southland:
+    Galvanized Nipple:
+    - southland galvanized nipple
+  aka:
+    brushworx unspecified:
+    - aka brushworx unspecified
   ap:
     shave co unspecified:
     - ap shave co unspecified
   dogwood:
     handcrafts unspecified:
     - dogwood handcrafts unspecified
+  southland:
+    galvanized nipple:
+    - southland galvanized nipple
   yaqi:
     unspecified:
     - yaqi unspecified
 knot:
   AKA Brushworx:
-    Black Silk:
-    - AKA Brushworx Black Silk
-    DoughMan:
-    - AKA Brushworx DoughMan
+    AK47:
+    - aka brushworx ak47
   AP Shave Co:
-    Pure Bliss:
-    - ap shave co pure bliss
-    Synthetic:
-    - ap shave co synthetic
+    G5C:
+    - AP Shave Co G5C
   Declaration Grooming:
     B16:
     - declaration grooming b16
+  Turn-N-Shave:
+    Quartermoon:
+    - Turn-N-Shave Quartermoon
+  aka:
+    brushworx ak47:
+    - aka brushworx ak47
+    brushworx black silk:
+    - aka brushworx black silk
+    brushworx doughman:
+    - aka brushworx doughman
   ap:
     shave co pure bliss:
     - ap shave co pure bliss
@@ -2238,3 +2252,15 @@ split_brush:
   aka brushworkx 26mm black silk $composite:
     handle: aka brushworx unspecified
     knot: aka brushworx black silk
+  aka brushworx ak47 knot in southland 1 in. x 3 in. galvanized nipple handle:
+    handle: southland galvanized nipple
+    knot: aka brushworx ak47
+  aka brushworx blues stanley cup with 26mm turn n shave quartermoon knot:
+    handle: aka brushworx stanley
+    knot: turn-n-shave quartermoon
+  aka brushworx g5c:
+    handle: aka brushworx unspecified
+    knot: ap shave co g5c
+  aka brushworx g5c $frankenbrush:
+    handle: aka brushworx unspecified
+    knot: ap shave co g5c

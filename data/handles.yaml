@@ -4,6 +4,10 @@ artisan_handles:
       patterns:
       - \b3d\b.*(?:printed)?
   AKA Brushworx:
+    Stanley:
+      patterns:
+      - aka.*brush.*stanley
+      - aka.*stanley
     Unspecified:
       patterns:
       - aka.*brush
@@ -767,8 +771,7 @@ manufacturer_handles:
       - moar
 
 other_handles:
-  The Holy Black:
-    Unspecified:
+  Southland:
+    Galvanized Nipple:
       patterns:
-      - tgn
-      - golden.*nib 
+      - southland.*galvanized.*nipple

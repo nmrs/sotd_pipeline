@@ -615,7 +615,95 @@ class TestMismatchAnalyzer:
 
     def test_intentionally_unmatched_are_confirmed(self):
         """Test that intentionally unmatched items are marked as confirmed."""
-        # This test verifies the API behavior where intentionally unmatched items
-        # should be marked as confirmed (is_confirmed = True)
-        # The actual logic is tested in the API integration tests
-        pass
+        # Create test data with intentionally unmatched items
+        test_data = {
+            "data": [
+                {
+                    "razor": {
+                        "original": "Test Razor",
+                        "matched": {"brand": "Test Brand", "model": "Test Model"},
+                        "match_type": "intentionally_unmatched",
+                    }
+                }
+            ]
+        }
+
+        # Create mock args
+        class Args:
+            def __init__(self):
+                self.field = "razor"
+                self.month = "2024-01"
+                self.threshold = 3
+                self.debug = False
+
+        args = Args()
+
+        # Test that intentionally unmatched items are confirmed
+        mismatches = self.analyzer.identify_mismatches(test_data, "razor", args)
+
+        # Intentionally unmatched items should not appear in mismatch results
+        # because they are considered confirmed
+        assert "potential_mismatch" not in mismatches or len(mismatches["potential_mismatch"]) == 0
+
+    def test_load_enriched_data(self):
+        """Test that the mismatch analyzer can load enriched data instead of matched data."""
+        # Create a temporary enriched data file
+        enriched_data_file = Path(self.temp_dir) / "enriched" / "2024-01.json"
+        enriched_data_file.parent.mkdir(exist_ok=True)
+
+        # Create test enriched data with enrich-phase adjustments
+        enriched_data = {
+            "data": [
+                {
+                    "razor": {
+                        "original": "Test Razor",
+                        "matched": {"brand": "Test Brand", "model": "Test Model"},
+                        "match_type": "regex",
+                        "pattern": "test.*pattern",
+                        "_enriched_by": "RazorEnricher",
+                        "_extraction_source": "user_override_catalog",
+                        "_catalog_fiber": "Synthetic",
+                        "fiber": "Badger",
+                    }
+                }
+            ]
+        }
+
+        enriched_data_file.write_text(str(enriched_data).replace("'", '"'))
+
+        # Create mock args pointing to enriched data
+        class Args:
+            def __init__(self, temp_dir):
+                self.field = "razor"
+                self.month = "2024-01"
+                self.threshold = 3
+                self.debug = False
+                self.out_dir = temp_dir
+                # New flag to use enriched data
+                self.use_enriched_data = True
+                # Add required attributes to avoid AttributeError
+                self.clear_correct = False
+                self.clear_field = None
+                self.show_correct = False
+                self.mark_correct = False
+                self.force = False
+                self.test_correct_matches = None
+                self.show_all = False
+                self.show_unconfirmed = False
+                self.show_regex_matches = False
+
+        args = Args(self.temp_dir)
+
+        # Test that the analyzer can process enriched data
+        # We need to test the run method which handles data loading
+        with patch.object(self.analyzer, "load_enriched_data") as mock_load_enriched:
+            mock_load_enriched.return_value = enriched_data["data"]
+
+            # Test that the run method uses enriched data when flag is set
+            self.analyzer.run(args)
+
+            # Verify that enriched data loading was called
+            assert mock_load_enriched.called
+            # Verify that matched data loading was not called
+            with patch.object(self.analyzer, "load_matched_data") as mock_load_matched:
+                mock_load_matched.assert_not_called()

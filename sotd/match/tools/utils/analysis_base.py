@@ -82,6 +82,31 @@ class AnalysisTool(ABC):
 
         return all_data
 
+    def load_enriched_data(self, args) -> List[Dict[str, Any]]:
+        """Load enriched data from files for the specified time period."""
+        all_data = []
+
+        for year, month in month_span(args):
+            path = Path(args.out_dir) / "enriched" / f"{year:04d}-{month:02d}.json"
+            if path.exists():
+                if args.debug:
+                    print(f"Loading enriched data: {path}")
+
+                with path.open("r", encoding="utf-8") as f:
+                    content = json.load(f)
+                data = content.get("data", [])
+
+                for record in data:
+                    record["_source_file"] = f"{year:04d}-{month:02d}.json"
+                    record["_source_line"] = "unknown"
+
+                all_data.extend(data)
+            else:
+                if args.debug:
+                    print(f"Skipped (missing): {path}")
+
+        return all_data
+
     def extract_field_data(
         self, data: List[Dict[str, Any]], field: str
     ) -> Tuple[List[Dict[str, Any]], List[str], List[float]]:

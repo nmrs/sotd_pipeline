@@ -171,6 +171,11 @@ class MismatchAnalyzer(AnalysisTool):
             "--test-correct-matches",
             help="Use test correct_matches file instead of data/correct_matches.yaml",
         )
+        parser.add_argument(
+            "--use-enriched-data",
+            action="store_true",
+            help="Use enriched data instead of matched data for analysis",
+        )
 
         return parser
 
@@ -232,7 +237,12 @@ class MismatchAnalyzer(AnalysisTool):
             args.debug = False
 
         try:
-            records = self.load_matched_data(args)
+            # Use enriched data if the flag is set, otherwise use matched data
+            if hasattr(args, "use_enriched_data") and args.use_enriched_data:
+                records = self.load_enriched_data(args)
+                self.console.print("[blue]Using enriched data for analysis[/blue]")
+            else:
+                records = self.load_matched_data(args)
             # Convert to the expected format with data wrapper
             data = {"data": records}
         except Exception as e:
@@ -662,9 +672,8 @@ class MismatchAnalyzer(AnalysisTool):
             scent = matched.get("scent", "")
             matched_text = f"{maker} {scent}".strip()
         elif field in ["razor", "blade"]:
-            brand = matched.get("brand", "")
-            model = matched.get("model", "")
-            matched_text = f"{brand} {model}".strip()
+            # For razor field, we don't need matched_text for key generation
+            pass
         elif field == "brush":
             # For brush field, we don't need matched_text for key generation
             pass
