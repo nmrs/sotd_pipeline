@@ -26,6 +26,16 @@
 9. **[x] Add Regression Tests** - Create tests to prevent future data loss
 10. **[x] Update Documentation** - Document the fix and ensure correct matches preserve user intent
 11. **[x] Validate and Enhance Existing Correct Matches** - Run current brush entries through brush matcher to extract user intent
+12. **[x] Fix User Intent Logic for Simple vs Composite Brushes** - Remove user_intent from simple brushes, keep only for composite brushes
+13. **[x] Fix Unicode Corruption in YAML** - Preserve proper unicode characters when saving YAML file
+14. **[x] Enhance Mismatcher Analyzer** - Show user intent by bolding primary component in matched column
+    - Remove user_intent from simple brush entries (brush section)
+    - Keep user_intent only for composite brush entries (split_brush, handle_knot_section)
+    - Update validation script to distinguish between simple and composite brushes
+    - Fix YAML saving to preserve unicode characters properly
+    - Update mismatcher analyzer to show user intent in matched column
+    - Bold the primary component (handle or knot) based on user_intent
+    - Test with real data to ensure proper display
     - Extract all brush entries from `data/correct_matches.yaml`
     - Run each entry through `BrushMatcher` to detect user intent
     - For successful matches: Augment correct_matches.yaml with user_intent field
@@ -780,9 +790,55 @@ This plan addresses a critical data integrity issue while following TDD principl
 **Implementation Complete:**
 All phases of the TDD implementation plan have been successfully completed. The user intent preservation bug has been fixed, tested, documented, and all existing data has been enhanced.
 
+### Session 9 - Steps 12-14 Fixes and Enhancements (2025-08-01)
+
+**Step 12: Fix User Intent Logic for Simple vs Composite Brushes** ✅
+
+**Issue Identified:**
+- Simple brushes incorrectly had `user_intent: handle_primary` added
+- User intent should only apply to composite brushes with separate handle/knot components
+
+**Fix Applied:**
+- Modified `_process_regular_correct_match()` to not add user_intent for simple brushes
+- Updated validation script to remove user_intent from simple brush entries
+- Created cleanup script to remove existing user_intent from 90 simple brush entries
+
+**Step 13: Fix Unicode Corruption in YAML** ✅
+
+**Issue Identified:**
+- YAML file contained escaped unicode: `B\xF6ker` instead of `Böker`
+- Caused by missing `allow_unicode=True` parameter in yaml.dump()
+
+**Fix Applied:**
+- Updated validation script to use `allow_unicode=True` when saving YAML
+- All unicode characters now preserved correctly
+- Test confirms proper unicode preservation
+
+**Step 14: Enhance Mismatcher Analyzer** ✅
+
+**Enhancement Implemented:**
+- Modified `_get_matched_text()` method to show user intent in brush matches
+- Added bolding of primary component based on user_intent:
+  - `handle_primary`: Bold handle component (`**Rad Dinosaur Creation** w/ AP Shave Co G5C`)
+  - `knot_primary`: Bold knot component (`Rad Dinosaur Creation w/ **AP Shave Co G5C**`)
+  - No user_intent: Show without bolding
+- Created comprehensive test suite with 7 test cases
+- All tests passing, confirming proper functionality
+
+**Files Modified:**
+- `sotd/match/brush_matcher.py` - Removed user_intent from simple brushes
+- `scripts/validate_correct_matches_user_intent.py` - Fixed unicode handling
+- `scripts/cleanup_simple_brush_user_intent.py` - New cleanup script
+- `sotd/match/tools/analyzers/mismatch_analyzer.py` - Added user intent bolding
+- `tests/match/tools/test_mismatch_analyzer_user_intent.py` - New test suite
+- `data/correct_matches.yaml` - Cleaned up user_intent and unicode
+
+**Final Status:**
+All 14 steps of the TDD implementation plan have been successfully completed. The user intent preservation bug has been fixed, tested, documented, and all existing data has been enhanced. The system now correctly distinguishes between simple and composite brushes for user intent, preserves unicode properly, and shows user intent in the mismatch analyzer.
+
 ## ✅ **IMPLEMENTATION COMPLETE**
 
-**All 11 steps of the TDD implementation plan have been successfully completed:**
+**All 14 steps of the TDD implementation plan have been successfully completed:**
 
 ### **Phase 1: Analysis and Test Setup** ✅
 1. ✅ **Analysis of Current User Intent Detection** - Confirmed `detect_user_intent()` logic and identified missing usage
@@ -800,6 +856,11 @@ All phases of the TDD implementation plan have been successfully completed. The 
 9. ✅ **Add Regression Tests** - Created 7 comprehensive regression tests preventing future data loss
 10. ✅ **Update Documentation** - Updated brush matching spec and README with fix documentation
 11. ✅ **Validate and Enhance Existing Correct Matches** - Enhanced all 105 brush entries with user intent data
+
+### **Phase 4: Fixes and Enhancements** ✅
+12. ✅ **Fix User Intent Logic** - Removed user_intent from simple brushes, kept only for composite brushes
+13. ✅ **Fix Unicode Corruption** - Preserved proper unicode characters in YAML files
+14. ✅ **Enhance Mismatcher Analyzer** - Added user intent bolding in matched column display
 
 ### **Final Results:**
 - ✅ **17/17 user intent tests passing** - All bug demonstration and fix verification tests pass

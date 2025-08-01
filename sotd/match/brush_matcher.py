@@ -228,16 +228,14 @@ class BrushMatcher:
                     catalog_entry = brand_data[model]
                     break
 
-        # For simple brushes, user intent defaults to handle_primary since there's no separate
-        # handle/knot text to analyze
-        user_intent = "handle_primary"
+        # For simple brushes, no user intent is needed since there are no separate
+        # handle/knot components to analyze
 
         # For simple brushes, create unified format with nested sections AND preserve top-level
         # fields
         matched = {
             "brand": brand,  # Top-level brand for simple brushes
             "model": model,  # Top-level model for simple brushes
-            "user_intent": user_intent,
             "handle": {
                 "brand": brand,  # Handle brand is the brush brand
                 "model": model,  # Handle model is the brush model

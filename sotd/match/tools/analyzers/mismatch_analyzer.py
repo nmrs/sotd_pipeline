@@ -1217,9 +1217,24 @@ class MismatchAnalyzer(AnalysisTool):
                     handle_model = handle.get("model", "")
                     knot_brand = knot.get("brand", "")
                     knot_model = knot.get("model", "")
-                    matched_text = (
-                        f"{handle_brand} {handle_model} w/ {knot_brand} {knot_model}".strip()
-                    )
+                    
+                    # Check for user intent to determine which component is primary
+                    user_intent = matched.get("user_intent")
+                    if user_intent == "handle_primary":
+                        # Bold the handle component
+                        handle_text = f"**{handle_brand} {handle_model}**"
+                        knot_text = f"{knot_brand} {knot_model}"
+                        matched_text = f"{handle_text} w/ {knot_text}".strip()
+                    elif user_intent == "knot_primary":
+                        # Bold the knot component
+                        handle_text = f"{handle_brand} {handle_model}"
+                        knot_text = f"**{knot_brand} {knot_model}**"
+                        matched_text = f"{handle_text} w/ {knot_text}".strip()
+                    else:
+                        # No user intent or unknown - show without bolding
+                        matched_text = (
+                            f"{handle_brand} {handle_model} w/ {knot_brand} {knot_model}".strip()
+                        )
                 else:
                     matched_text = ""
             return matched_text

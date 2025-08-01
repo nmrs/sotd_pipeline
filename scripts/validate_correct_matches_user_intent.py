@@ -139,6 +139,9 @@ class CorrectMatchesValidator:
         """
         Enhance correct_matches.yaml with user intent data for successful validations.
         
+        Only composite brushes (split_brush, handle_knot_section) should have user_intent.
+        Simple brushes (brush section) should not have user_intent.
+        
         Args:
             correct_matches: Original correct_matches.yaml data
             validation_results: Results from validation
@@ -157,39 +160,40 @@ class CorrectMatchesValidator:
                 entry_type = result["entry_type"]
                 user_intent = result["user_intent"]
                 
-                # Enhance the entry based on its type
-                if entry_type == "brush":
-                    # Find and enhance the brush entry
+                # Only enhance composite brushes with user_intent
+                if entry_type in ["split_brush", "handle_knot_section"]:
+                    if entry_type == "split_brush":
+                        # Add user_intent to split_brush entry
+                        if "user_intent" not in enhanced_matches["split_brush"][brush_string]:
+                            enhanced_matches["split_brush"][brush_string]["user_intent"] = user_intent
+                            enhanced_entries.append(f"{entry_type}: {brush_string}")
+                    
+                    elif entry_type == "handle_knot_section":
+                        # Add user_intent to handle_knot_section entry
+                        if "user_intent" not in enhanced_matches["handle_knot_section"][brush_string]:
+                            enhanced_matches["handle_knot_section"][brush_string]["user_intent"] = user_intent
+                            enhanced_entries.append(f"{entry_type}: {brush_string}")
+                
+                # For simple brushes (brush section), remove any existing user_intent
+                elif entry_type == "brush":
+                    # Find and remove user_intent from brush entries
                     for brand, brand_data in enhanced_matches["brush"].items():
                         for model, patterns in brand_data.items():
                             for i, pattern in enumerate(patterns):
                                 if isinstance(pattern, dict):
                                     pattern_string = list(pattern.keys())[0]
+                                    if pattern_string == brush_string:
+                                        # Remove user_intent if present
+                                        if "user_intent" in pattern[pattern_string]:
+                                            del pattern[pattern_string]["user_intent"]
+                                            enhanced_entries.append(f"{entry_type}: {brush_string} (removed user_intent)")
+                                        break
                                 else:
-                                    pattern_string = pattern
-                                
-                                if pattern_string == brush_string:
-                                    if isinstance(pattern, dict):
-                                        # Add user_intent to existing dictionary
-                                        pattern[pattern_string]["user_intent"] = user_intent
-                                    else:
-                                        # Convert string to dictionary with user_intent
-                                        patterns[i] = {pattern_string: {"user_intent": user_intent}}
-                                    
-                                    enhanced_entries.append(f"{entry_type}: {brush_string}")
-                                    break
-                
-                elif entry_type == "split_brush":
-                    # Add user_intent to split_brush entry
-                    if "user_intent" not in enhanced_matches["split_brush"][brush_string]:
-                        enhanced_matches["split_brush"][brush_string]["user_intent"] = user_intent
-                        enhanced_entries.append(f"{entry_type}: {brush_string}")
-                
-                elif entry_type == "handle_knot_section":
-                    # Add user_intent to handle_knot_section entry
-                    if "user_intent" not in enhanced_matches["handle_knot_section"][brush_string]:
-                        enhanced_matches["handle_knot_section"][brush_string]["user_intent"] = user_intent
-                        enhanced_entries.append(f"{entry_type}: {brush_string}")
+                                    if pattern == brush_string:
+                                        # Convert string to dictionary without user_intent
+                                        patterns[i] = {pattern_string: {}}
+                                        enhanced_entries.append(f"{entry_type}: {brush_string} (removed user_intent)")
+                                        break
         
         return enhanced_matches, enhanced_entries
     
@@ -275,9 +279,12 @@ class CorrectMatchesValidator:
                 shutil.copy2(self.correct_matches_path, backup_path)
                 print(f"Created backup: {backup_path}")
         
-        # Save enhanced file
+        # Save enhanced file with proper unicode handling
         with open(self.correct_matches_path, 'w', encoding='utf-8') as f:
-            yaml.dump(enhanced_matches, f, default_flow_style=False, indent=2, sort_keys=False)
+            yaml.dump(
+                enhanced_matches, f, default_flow_style=False, indent=2, 
+                sort_keys=False, allow_unicode=True
+            )
         
         print(f"Saved enhanced correct_matches.yaml: {self.correct_matches_path}")
     
