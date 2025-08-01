@@ -24,7 +24,7 @@
 ### Phase 3: Validation and Integration
 8. **[x] Update Integration Tests** - Ensure all existing tests pass with the new user intent preservation
 9. **[x] Add Regression Tests** - Create tests to prevent future data loss
-10. **Update Documentation** - Document the fix and ensure correct matches preserve user intent
+10. **[x] Update Documentation** - Document the fix and ensure correct matches preserve user intent
 
 ## 🔁 Implementation Prompts
 
@@ -671,6 +671,65 @@ This plan addresses a critical data integrity issue while following TDD principl
 - ✅ **Future regression prevention established**
 
 **Next Steps:** Proceed to Step 10 for documentation updates.
+
+### Session 7 - Step 10 Documentation Updates (2025-08-01)
+
+**Step 10: Update Documentation** ✅
+
+**Documentation Updates Completed:**
+
+1. **Brush Matching Specification (`docs/brush_matching_spec.md`)** ✅
+   - Added "User Intent Preservation" section under "Integration with correct_matches.yaml"
+   - Documented the importance of preserving user intent in correct matches
+   - Explained user intent detection logic and data preservation
+   - Provided example of user intent preservation in action
+
+2. **README.md** ✅
+   - Added "User Intent Preservation Fix (2025-08)" section
+   - Documented the critical bug fix and its importance
+   - Explained the problem, solution, and user intent detection logic
+   - Provided clear example of data quality enhancement
+   - Listed all affected processing methods
+
+**Documentation Content Added:**
+
+**User Intent Detection Logic:**
+- **"knot_primary"**: When knot component appears before handle component
+- **"handle_primary"**: When handle component appears before knot component
+- **Default**: "handle_primary" for edge cases (identical positions, missing text)
+
+**Affected Methods:**
+- `_process_handle_knot_correct_match()`
+- `_process_split_brush_correct_match()`
+- `_process_regular_correct_match()`
+- `_process_split_result()`
+
+**Key Benefits Documented:**
+- **No Data Loss**: Correct matches enhance rather than degrade data quality
+- **Consistent Behavior**: All processing methods preserve user intent
+- **Future-Proof**: Comprehensive regression tests prevent future issues
+
+**Example Documentation:**
+```python
+# Input: "G5C Rad Dinosaur Creation"
+# User intent: "knot_primary" (G5C appears first)
+{
+    "matched": {
+        "user_intent": "knot_primary",  # Preserved in correct matches
+        "handle": {"brand": "Rad Dinosaur", "model": "Creation"},
+        "knot": {"brand": "AP Shave Co", "model": "G5C"}
+    }
+}
+```
+
+**Documentation Standards Met:**
+- ✅ Clear problem description and solution explanation
+- ✅ Technical implementation details provided
+- ✅ Examples with real-world scenarios
+- ✅ Integration with existing documentation structure
+- ✅ User-focused benefits and outcomes
+
+**Next Steps:** All implementation plan steps are now complete. The bug fix is fully implemented, tested, and documented.
 description:
 globs:
 alwaysApply: false

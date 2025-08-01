@@ -154,4 +154,39 @@ knot:
 
 - For combo brushes, reporting/aggregation code should use the `knot` and `handle` fields for display.
 - For simple brushes, `brand` and `model` are set as before.
-- Backward compatibility is maintained for all existing data and workflows. 
+- Backward compatibility is maintained for all existing data and workflows.
+
+## User Intent Preservation Fix (2025-08)
+
+**Critical Bug Fix**: The system now preserves user intent information when processing correct matches, preventing data loss.
+
+### Problem
+Previously, when brushes were added to `correct_matches.yaml`, the system would lose user intent information (whether the user considered the brush "handle-primary" or "knot-primary") that was previously captured through automated matching.
+
+### Solution
+All correct match processing methods now include user intent detection:
+- `_process_handle_knot_correct_match()`
+- `_process_split_brush_correct_match()`
+- `_process_regular_correct_match()`
+- `_process_split_result()`
+
+### User Intent Detection
+The system detects user intent based on component order in the input string:
+- **"knot_primary"**: When knot component appears before handle component (e.g., "G5C Rad Dinosaur")
+- **"handle_primary"**: When handle component appears before knot component (e.g., "Rad Dinosaur G5C")
+
+### Data Quality Enhancement
+Correct matches now enhance rather than degrade data quality by preserving all available information, including user intent. This ensures that adding brushes to `correct_matches.yaml` improves data quality without any information loss.
+
+### Example
+```python
+# Input: "G5C Rad Dinosaur Creation"
+# User intent: "knot_primary" (G5C appears first)
+{
+    "matched": {
+        "user_intent": "knot_primary",  # Preserved in correct matches
+        "handle": {"brand": "Rad Dinosaur", "model": "Creation"},
+        "knot": {"brand": "AP Shave Co", "model": "G5C"}
+    }
+}
+``` 

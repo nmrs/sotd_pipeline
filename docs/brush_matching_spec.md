@@ -178,6 +178,17 @@ The system checks correct matches at multiple levels:
 - This takes precedence over all regex and fallback strategies.
 - The `match_type` will be `exact` for these matches.
 
+### User Intent Preservation
+
+**Important**: The system preserves user intent information when processing correct matches to prevent data loss.
+
+- **User Intent Detection**: The system detects whether a user considers a composite brush "handle-primary" or "knot-primary" based on the order of components in the input string.
+- **Data Preservation**: When brushes are added to `correct_matches.yaml`, the system maintains the same user intent that would be detected through automated matching.
+- **No Data Loss**: Correct matches enhance rather than degrade data quality by preserving all available information, including user intent.
+- **Consistent Behavior**: All correct match processing methods (`_process_handle_knot_correct_match`, `_process_split_brush_correct_match`, `_process_regular_correct_match`, `_process_split_result`) include user intent detection.
+
+**Example**: For input "G5C Rad Dinosaur Creation", the system detects "knot_primary" intent (G5C appears first) and preserves this information whether the brush is matched through automated processing or correct matches.
+
 ## Complete Brush Handle Matching
 
 The brush matching system supports complete brush handle matching for brands that require handle/knot splitting. This feature allows the system to automatically split and match brush components for brands that are known to require this approach.
