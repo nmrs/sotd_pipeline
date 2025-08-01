@@ -29,11 +29,13 @@ class BlackbirdPlateEnricher(BaseEnricher):
         # The original_comment parameter contains the full user comment text
         plate = self._extract_plate(original_comment)
         if plate:
-            return {
+            # Prepare extracted data
+            extracted_data = {
                 "plate": plate,
-                "_enriched_by": self.get_enricher_name(),
-                "_extraction_source": "user_comment",
             }
+
+            # Use BaseEnricher's single source method for consistency
+            return self._create_single_source_enriched_data(extracted_data, "user_comment")
         return None
 
     def _extract_plate(self, text: str) -> Optional[str]:

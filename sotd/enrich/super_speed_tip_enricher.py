@@ -54,11 +54,13 @@ class SuperSpeedTipEnricher(BaseEnricher):
 
         tip_type = self._extract_tip_type(razor_string)
         if tip_type is not None:
-            return {
-                "_enriched_by": self.get_enricher_name(),
-                "_extraction_source": "user_comment",
+            # Prepare extracted data
+            extracted_data = {
                 "super_speed_tip": tip_type,
             }
+
+            # Use BaseEnricher's single source method for consistency
+            return self._create_single_source_enriched_data(extracted_data, "user_comment")
 
         return None
 

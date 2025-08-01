@@ -54,13 +54,15 @@ class ChristopherBradleyEnricher(BaseEnricher):
         if not plate_level:
             return None
         plate_type = self._extract_plate_type(razor_string)
-        result = {
+
+        # Prepare extracted data
+        extracted_data = {
             "plate_level": plate_level,
             "plate_type": plate_type,
-            "_enriched_by": self.get_enricher_name(),
-            "_extraction_source": "user_comment",
         }
-        return result
+
+        # Use BaseEnricher's single source method for consistency
+        return self._create_single_source_enriched_data(extracted_data, "user_comment")
 
     def _extract_plate_level(self, text: str) -> Optional[str]:
         """Extract plate level from text using regex patterns.

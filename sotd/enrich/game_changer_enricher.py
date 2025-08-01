@@ -59,17 +59,15 @@ class GameChangerEnricher(BaseEnricher):
         variant = self._extract_variant(razor_string)
 
         if gap is not None or variant is not None:
-            result = {
-                "_enriched_by": self.get_enricher_name(),
-                "_extraction_source": "user_comment",
-            }
-
+            # Prepare extracted data
+            extracted_data = {}
             if gap is not None:
-                result["gap"] = gap
+                extracted_data["gap"] = gap
             if variant is not None:
-                result["variant"] = variant
+                extracted_data["variant"] = variant
 
-            return result
+            # Use BaseEnricher's single source method for consistency
+            return self._create_single_source_enriched_data(extracted_data, "user_comment")
 
         return None
 
