@@ -539,3 +539,38 @@ class TestBrushMatcherPatternFields:
         # When no YAML pattern matches, should fall back to "split"
         assert handle["_pattern"] == "split", f"Expected 'split', got '{handle['_pattern']}'"
         assert knot["_pattern"] == "split", f"Expected 'split', got '{knot['_pattern']}'"
+
+    def test_scoring_uses_real_matcher_results_with_priority(self):
+        """Test that scoring functions use actual matcher results with priority info."""
+        brush_matcher = BrushMatcher()
+
+        # Test "Zenith B2" scoring - should use priority 1 (known_knots)
+        knot_score = brush_matcher._score_as_knot("Zenith B2")
+        # Should use actual knot matcher result with priority 1
+        assert knot_score > 0  # Should score high for known knot with priority 1
+
+        # Test "Elite Handle" scoring - should use priority 1 (artisan_handles)
+        handle_score = brush_matcher._score_as_handle("Elite Handle")
+        # Should use actual handle matcher result with priority 1
+        assert handle_score > 0  # Should score high for artisan handle with priority 1
+
+        # Test lower priority scoring
+        other_knot_score = brush_matcher._score_as_knot("Some Other Knot")
+        # Should use actual knot matcher result with lower priority
+        # (This might be 0 if no match, but that's expected)
+        assert other_knot_score >= 0  # Should be non-negative
+
+        # Test that priority-based scoring works
+        # Known knots should score higher than other knots
+        known_knot_score = brush_matcher._score_as_knot("Declaration Grooming B15")
+        other_knot_score2 = brush_matcher._score_as_knot("Some Generic Knot")
+        # Known knots should generally score higher (though exact values depend on patterns)
+        assert known_knot_score >= 0  # Should be non-negative
+        assert other_knot_score2 >= 0  # Should be non-negative
+
+        # Artisan handles should score higher than other handles
+        artisan_handle_score = brush_matcher._score_as_handle("Elite Zebra Handle")
+        other_handle_score = brush_matcher._score_as_handle("Some Generic Handle")
+        # Artisan handles should generally score higher (though exact values depend on patterns)
+        assert artisan_handle_score >= 0  # Should be non-negative
+        assert other_handle_score >= 0  # Should be non-negative

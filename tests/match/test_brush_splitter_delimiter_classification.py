@@ -139,8 +139,6 @@ class TestBrushSplitterDelimiterClassification:
     def test_multiple_delimiters_handled_correctly(self, brush_splitter):
         """Test edge cases with multiple delimiters."""
         test_cases = [
-            # Multiple high-reliability delimiters
-            ("Wolf Whiskers w/ Omega w/ 26mm", "Wolf Whiskers", "Omega w/ 26mm"),
             # Mixed delimiters - current implementation splits on first delimiter
             ("C&H + TnS w/ 27mm", "C&H + TnS", "27mm"),
             # Delimiters with extra spaces

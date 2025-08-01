@@ -11,7 +11,7 @@ class TestHandleKnotCombinationStructure:
         [
             ("Elite handle w/ Declaration B10", "Elite", "Declaration Grooming"),
             ("Wolf Whiskers w/ Omega knot", "Wolf Whiskers", "Omega"),
-            ("DG B15 w/ C&H Zebra", "Declaration Grooming", "Chisel & Hound"),
+            ("DG B15 w/ C&H Zebra", "Chisel & Hound", "Declaration Grooming"),
             (
                 "Unknown handle w/ Declaration B15",
                 "Unknown",

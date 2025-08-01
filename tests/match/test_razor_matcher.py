@@ -3,12 +3,30 @@
 import pytest
 
 from sotd.match.razor_matcher import RazorMatcher
+from sotd.match.types import MatchResult
 
 
 @pytest.fixture
 def matcher():
     """Create a RazorMatcher instance for testing."""
     return RazorMatcher()
+
+
+def test_razor_matcher_still_works_with_unified_match_result(matcher):
+    """Test that razor matcher continues to work with unified MatchResult."""
+    result = matcher.match("Koraat Moarteen")
+
+    # Test that existing functionality still works
+    assert isinstance(result, MatchResult)
+    assert result.original == "Koraat Moarteen"
+    assert result.matched is not None
+    assert result.matched["brand"] == "Koraat"
+    assert result.matched["model"] == "Moarteen (r/Wetshaving exclusive)"
+
+    # Test that new fields are properly set to None for simple matchers
+    assert result.section is None
+    assert result.priority is None
+    assert not result.has_section_info
 
 
 def test_matches_wr2_with_default_format(matcher):
