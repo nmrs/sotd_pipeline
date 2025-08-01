@@ -54,7 +54,9 @@ const isBrushSplit = (matched: Record<string, unknown>): boolean => {
 };
 
 // Helper function to determine brush type
-const getBrushType = (matched: Record<string, unknown>): { type: string; isValid: boolean; error?: string } => {
+const getBrushType = (
+  matched: Record<string, unknown>
+): { type: string; isValid: boolean; error?: string } => {
   if (!matched || typeof matched !== 'object') {
     return { type: 'Unknown', isValid: false, error: 'No matched data' };
   }
@@ -86,7 +88,7 @@ const getBrushType = (matched: Record<string, unknown>): { type: string; isValid
       return {
         type: 'Single Maker',
         isValid: false,
-        error: `Brand mismatch: main=${mainBrand}, handle=${handleBrandStr}, knot=${knotBrandStr}`
+        error: `Brand mismatch: main=${mainBrand}, handle=${handleBrandStr}, knot=${knotBrandStr}`,
       };
     }
   }
@@ -99,7 +101,7 @@ const getBrushType = (matched: Record<string, unknown>): { type: string; isValid
       return {
         type: 'ERROR',
         isValid: false,
-        error: `Pipeline error: handle and knot have same brand (${handleBrand}) but no top-level brand/model`
+        error: `Pipeline error: handle and knot have same brand (${handleBrand}) but no top-level brand/model`,
       };
     } else if (handleBrand && knotBrand && handleBrand !== knotBrand) {
       // Valid composite: different brands
@@ -133,7 +135,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   onItemSelection,
   isItemConfirmed,
   onVisibleRowsChange,
-  matched_data_map,
+  matched_data_map: _matched_data_map, // Prefix with underscore to indicate intentionally unused
 }) => {
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -276,7 +278,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   };
 
   // Helper function to check if there are enrich-phase changes
-  const hasEnrichPhaseChanges = (matchedData: Record<string, any>, enrichedData: Record<string, any>): boolean => {
+  const hasEnrichPhaseChanges = (
+    matchedData: Record<string, any>,
+    enrichedData: Record<string, any>
+  ): boolean => {
     if (!matchedData || !enrichedData) return false;
 
     // For brush field, check the enriched data against matched data
@@ -407,7 +412,9 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
           return (
-            <div className='text-sm text-gray-900 max-w-xs whitespace-pre-wrap'>{item.original}</div>
+            <div className='text-sm text-gray-900 max-w-xs whitespace-pre-wrap'>
+              {item.original}
+            </div>
           );
         },
       },
@@ -424,7 +431,12 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           const formattedData = formatMatchedData(item.matched, field);
 
           // Check if there are enrich-phase changes using the enriched data from the API response
-          const hasChanges = item.enriched && hasEnrichPhaseChanges(item.matched as Record<string, any>, item.enriched as Record<string, any>);
+          const hasChanges =
+            item.enriched &&
+            hasEnrichPhaseChanges(
+              item.matched as Record<string, any>,
+              item.enriched as Record<string, any>
+            );
 
           const handleEnrichClick = () => {
             if (hasChanges) {
@@ -444,7 +456,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
                 className={`text-sm text-gray-900 max-w-xs ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
                 onClick={handleEnrichClick}
               >
-                {hasChanges && <span className="text-blue-600 text-xs mr-1">🔄</span>}
+                {hasChanges && <span className='text-blue-600 text-xs mr-1'>🔄</span>}
                 {formattedData.split('\n').map((line, index) => (
                   <div key={index} className={index > 0 ? 'mt-1' : ''}>
                     {truncateText(line, 60)}
@@ -462,7 +474,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
               className={`text-sm text-gray-900 max-w-xs ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
               onClick={handleEnrichClick}
             >
-              {hasChanges && <span className="text-blue-600 text-xs mr-1">🔄</span>}
+              {hasChanges && <span className='text-blue-600 text-xs mr-1'>🔄</span>}
               <span>{truncateText(formattedData, 60)}</span>
             </div>
           );
@@ -486,10 +498,12 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
     // Add brush-specific columns if field is brush
     if (field === 'brush') {
-
       // Add brush type column
       baseColumns.push({
-        accessorKey: 'brush_type',
+        accessorFn: row => {
+          const brushType = getBrushType(row.matched);
+          return brushType.type;
+        },
         header: 'Brush Type',
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
@@ -497,16 +511,14 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
           return (
             <div className='text-sm max-w-xs'>
-              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${brushType.isValid
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
-                }`}>
+              <span
+                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}
+              >
                 {brushType.type}
               </span>
               {!brushType.isValid && brushType.error && (
-                <div className='mt-1 text-xs text-red-600 font-mono'>
-                  {brushType.error}
-                </div>
+                <div className='mt-1 text-xs text-red-600 font-mono'>{brushType.error}</div>
               )}
             </div>
           );
@@ -515,7 +527,16 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
       // Always show brush pattern column
       baseColumns.push({
-        accessorKey: 'brush_pattern',
+        accessorFn: row => {
+          const isSplitBrush = row.is_split_brush === true;
+          if (isSplitBrush) {
+            const handleText = row.handle_component || 'N/A';
+            const knotText = row.knot_component || 'N/A';
+            return `split handle: ${handleText} knot: ${knotText}`;
+          } else {
+            return row.pattern || '';
+          }
+        },
         header: 'Brush Pattern',
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
@@ -527,8 +548,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             const knotText = item.knot_component || 'N/A';
             return (
               <div className='text-sm text-gray-500 max-w-xs font-mono relative'>
-                🔗 split<br />
-                handle: {truncateText(handleText, 30)}<br />
+                🔗 split
+                <br />
+                handle: {truncateText(handleText, 30)}
+                <br />
                 knot: {truncateText(knotText, 30)}
               </div>
             );
@@ -547,7 +570,9 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       // Always show handle/knot columns for brush fields
       baseColumns.push(
         {
-          accessorKey: 'handle',
+          accessorFn: row => {
+            return formatBrushComponent(row.matched, 'handle');
+          },
           header: 'Handle',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
@@ -561,7 +586,9 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           },
         },
         {
-          accessorKey: 'handle_pattern',
+          accessorFn: row => {
+            return getBrushComponentPattern(row.matched, 'handle');
+          },
           header: 'Handle Pattern',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
@@ -573,21 +600,23 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           },
         },
         {
-          accessorKey: 'knot',
+          accessorFn: row => {
+            return formatBrushComponent(row.matched, 'knot');
+          },
           header: 'Knot',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
             // For split brushes, show the matched knot data
             const knotText = formatBrushComponent(item.matched, 'knot');
             return (
-              <div className='text-sm text-gray-900 max-w-xs'>
-                {truncateText(knotText, 50)}
-              </div>
+              <div className='text-sm text-gray-900 max-w-xs'>{truncateText(knotText, 50)}</div>
             );
           },
         },
         {
-          accessorKey: 'knot_pattern',
+          accessorFn: row => {
+            return getBrushComponentPattern(row.matched, 'knot');
+          },
           header: 'Knot Pattern',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
@@ -650,14 +679,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     );
 
     return baseColumns;
-  }, [
-    onCommentClick,
-    commentLoading,
-    selectedItems,
-    onItemSelection,
-    isItemConfirmed,
-    field,
-  ]);
+  }, [onCommentClick, commentLoading, selectedItems, onItemSelection, isItemConfirmed, field]);
 
   return (
     <div className='space-y-4'>
