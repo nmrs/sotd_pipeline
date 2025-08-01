@@ -516,7 +516,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             const content = (
               <div
                 className={`text-sm text-gray-900 max-w-xs ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
-                onClick={handleEnrichClick}
+                onClick={hasChanges ? handleEnrichClick : undefined}
               >
                 {hasChanges && <span className='text-blue-600 text-xs mr-1'>🔄</span>}
                 {formattedData.split('\n').map((line, index) => (
@@ -534,7 +534,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           const content = (
             <div
               className={`text-sm text-gray-900 max-w-xs ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
-              onClick={handleEnrichClick}
+              onClick={hasChanges ? handleEnrichClick : undefined}
             >
               {hasChanges && <span className='text-blue-600 text-xs mr-1'>🔄</span>}
               <span>{truncateText(formattedData, 60)}</span>
@@ -611,7 +611,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <div className='text-sm max-w-xs'>
               <span
-                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                className={`inline-flex items-center justify-center text-center px-2 py-1 text-xs font-semibold rounded-full whitespace-normal ${brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}
               >
                 {brushType.type}
