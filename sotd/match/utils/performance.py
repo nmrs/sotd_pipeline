@@ -117,8 +117,24 @@ class PerformanceMonitor(BasePerformanceMonitor):
 
         if self.metrics.brush_strategy_times:
             print("\nBrush Strategy Performance:")
-            for strategy, stats in self.metrics.brush_strategy_times.items():
-                print(f"  {strategy}: {stats.avg_time * 1000:.1f}ms avg ({stats.count} calls)")
+            # Calculate success rates based on strategy progression
+            strategy_names = list(self.metrics.brush_strategy_times.keys())
+            for i, (strategy, stats) in enumerate(self.metrics.brush_strategy_times.items()):
+                attempts = stats.count
+                # Calculate matches by looking at the next strategy's attempts
+                if i < len(strategy_names) - 1:
+                    next_strategy = strategy_names[i + 1]
+                    next_attempts = self.metrics.brush_strategy_times[next_strategy].count
+                    matches = attempts - next_attempts
+                else:
+                    # Last strategy - all attempts were matches
+                    matches = attempts
+                
+                success_rate = (matches / attempts * 100) if attempts > 0 else 0
+                print(
+                    f"  {strategy}: {stats.avg_time * 1000:.1f}ms avg "
+                    f"({attempts} calls, {matches} matches, {success_rate:.1f}% success)"
+                )
 
         if self.metrics.cache_stats:
             print("\nCache Performance:")
