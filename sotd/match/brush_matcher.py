@@ -229,6 +229,7 @@ class BrushMatcher:
 
         # Search for catalog entry in different sections
         catalog_entry = None
+        brand_data = None
         for section in ["known_brushes", "declaration_grooming", "other_brushes"]:
             section_data = self.catalog_data.get(section, {})
             if brand in section_data:
@@ -264,16 +265,28 @@ class BrushMatcher:
         }
 
         # Populate fiber and knot_size_mm from catalog if available
-        if catalog_entry:
+        if catalog_entry and brand_data:
+            # Get brand-level defaults
+            brand_fiber = brand_data.get("fiber")
+            brand_knot_size = brand_data.get("knot_size_mm")
+            
             if "knot" in catalog_entry:
                 # Extract knot information from nested structure
                 knot_info = catalog_entry["knot"]
-                matched["knot"]["fiber"] = knot_info.get("fiber")
-                matched["knot"]["knot_size_mm"] = knot_info.get("knot_size_mm")
+                model_fiber = knot_info.get("fiber")
+                model_knot_size = knot_info.get("knot_size_mm")
+                
+                # Use model-level overrides if available, otherwise inherit from brand
+                matched["knot"]["fiber"] = model_fiber if model_fiber is not None else brand_fiber
+                matched["knot"]["knot_size_mm"] = model_knot_size if model_knot_size is not None else brand_knot_size
             else:
                 # Fall back to direct catalog fields for backward compatibility
-                matched["knot"]["fiber"] = catalog_entry.get("fiber")
-                matched["knot"]["knot_size_mm"] = catalog_entry.get("knot_size_mm")
+                model_fiber = catalog_entry.get("fiber")
+                model_knot_size = catalog_entry.get("knot_size_mm")
+                
+                # Use model-level overrides if available, otherwise inherit from brand
+                matched["knot"]["fiber"] = model_fiber if model_fiber is not None else brand_fiber
+                matched["knot"]["knot_size_mm"] = model_knot_size if model_knot_size is not None else brand_knot_size
 
         # Handle nested handle structure for handle maker
         if catalog_entry and "handle" in catalog_entry:
@@ -1425,9 +1438,10 @@ class BrushMatcher:
             fiber = m.get("fiber")
             knot_size_mm = m.get("knot_size_mm")
             # If fiber is None, try to get from catalog
-            if fiber is None:
+            if fiber is None or knot_size_mm is None:
                 # Look up catalog entry
                 catalog_entry = None
+                brand_data = None
                 for section in ["known_brushes", "declaration_grooming", "other_brushes"]:
                     section_data = self.catalog_data.get(section, {})
                     if brand in section_data:
@@ -1435,11 +1449,21 @@ class BrushMatcher:
                         if model in brand_data:
                             catalog_entry = brand_data[model]
                             break
+                
+                # Get brand-level defaults
+                brand_fiber = brand_data.get("fiber") if brand_data else None
+                brand_knot_size = brand_data.get("knot_size_mm") if brand_data else None
+                
                 if catalog_entry:
-                    if isinstance(catalog_entry, dict) and "knot" in catalog_entry:
-                        fiber = catalog_entry["knot"].get("fiber")
-                    else:
-                        fiber = catalog_entry.get("fiber")
+                    # Get model-level values (may be None)
+                    model_fiber = catalog_entry.get("fiber")
+                    model_knot_size = catalog_entry.get("knot_size_mm")
+                    
+                    # Use model-level overrides if available, otherwise inherit from brand
+                    if fiber is None:
+                        fiber = model_fiber if model_fiber is not None else brand_fiber
+                    if knot_size_mm is None:
+                        knot_size_mm = model_knot_size if model_knot_size is not None else brand_knot_size
 
                 # If still no fiber, check knots catalog for default fiber
                 if fiber is None and brand in self.knots_data:
@@ -1598,6 +1622,7 @@ class BrushMatcher:
         brand = updated.get("brand")
         model = updated.get("model")
         catalog_entry = None
+        brand_data = None  # Store brand-level data for inheritance
         if brand and model:
             # Check in the known_brushes section first
             known_brushes_data = self.catalog_data.get("known_brushes", {})
@@ -1612,6 +1637,33 @@ class BrushMatcher:
                     brand_data = other_brushes_data[brand]
                     if brand_data and model in brand_data:
                         catalog_entry = brand_data[model]
+        
+        # Handle brand-level field inheritance for simple brushes
+        if catalog_entry and brand_data:
+            # Create knot subsection with brand-level inheritance
+            if "knot" not in updated or updated["knot"] is None:
+                # Get brand-level defaults
+                brand_fiber = brand_data.get("fiber")
+                brand_knot_size = brand_data.get("knot_size_mm")
+                
+                # Use model-level overrides if available, otherwise inherit from brand
+                model_fiber = catalog_entry.get("fiber")
+                model_knot_size = catalog_entry.get("knot_size_mm")
+                
+                # Final values: model overrides brand
+                final_fiber = model_fiber if model_fiber is not None else brand_fiber
+                final_knot_size = model_knot_size if model_knot_size is not None else brand_knot_size
+                
+                updated["knot"] = {
+                    "brand": brand,
+                    "model": model,
+                    "fiber": final_fiber,
+                    "knot_size_mm": final_knot_size,
+                    "source_text": value,
+                    "_matched_by": "CatalogInheritance",
+                    "_pattern": "brand_level_inheritance",
+                }
+        
         # Handle subsection from catalog
         if catalog_entry and isinstance(catalog_entry, dict) and "handle" in catalog_entry:
             handle_info = catalog_entry["handle"]
@@ -1620,7 +1672,7 @@ class BrushMatcher:
                 "model": handle_info.get("model"),
                 "source_text": value,  # Catalog-driven, so use full input
             }
-        # Knot subsection from catalog
+        # Knot subsection from catalog (for complex brushes with nested knot sections)
         if catalog_entry and isinstance(catalog_entry, dict) and "knot" in catalog_entry:
             knot_info = catalog_entry["knot"]
             updated["knot"] = {
