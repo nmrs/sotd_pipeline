@@ -705,5 +705,71 @@ class TestMismatchAnalyzer:
             # Verify that enriched data loading was called
             assert mock_load_enriched.called
             # Verify that matched data loading was not called
-            with patch.object(self.analyzer, "load_matched_data") as mock_load_matched:
+            with patch.object(self.analyzer, 'load_matched_data') as mock_load_matched:
                 mock_load_matched.assert_not_called()
+
+    def test_enriched_data_structure_compatibility(self):
+        """Test that enriched data structure is compatible with mismatch analysis."""
+        # Create test enriched data with typical enrich-phase fields
+        enriched_data = {
+            "data": [
+                {
+                    "razor": {
+                        "original": "Test Razor",
+                        "normalized": "Test Razor",
+                        "matched": {"brand": "Test Brand", "model": "Test Model"},
+                        "match_type": "regex",
+                        "pattern": "test.*pattern",
+                        "_enriched_by": "RazorEnricher",
+                        "_extraction_source": "user_override_catalog",
+                        "_catalog_fiber": "Synthetic",
+                        "fiber": "Badger"
+                    },
+                    "brush": {
+                        "original": "Test Brush",
+                        "normalized": "Test Brush", 
+                        "matched": {
+                            "brand": "Test Brand",
+                            "model": "Test Model",
+                            "fiber": "Badger"
+                        },
+                        "match_type": "regex",
+                        "pattern": "test.*brush",
+                        "_enriched_by": "BrushEnricher",
+                        "_extraction_source": "user_override_catalog",
+                        "_catalog_fiber": "Synthetic",
+                        "fiber": "Badger"
+                    }
+                }
+            ]
+        }
+
+        # Create mock args
+        class Args:
+            def __init__(self):
+                self.field = "razor"
+                self.month = "2024-01"
+                self.threshold = 3
+                self.debug = False
+                self.clear_correct = False
+                self.clear_field = None
+                self.show_correct = False
+                self.mark_correct = False
+                self.force = False
+                self.test_correct_matches = None
+                self.show_all = False
+                self.show_unconfirmed = False
+                self.show_regex_matches = False
+
+        args = Args()
+
+        # Test that the mismatch analyzer can process enriched data structure
+        mismatches = self.analyzer.identify_mismatches(enriched_data, "razor", args)
+        
+        # Verify that enriched data is processed without errors
+        assert isinstance(mismatches, dict)
+        
+        # Test with brush field as well
+        args.field = "brush"
+        mismatches = self.analyzer.identify_mismatches(enriched_data, "brush", args)
+        assert isinstance(mismatches, dict)
