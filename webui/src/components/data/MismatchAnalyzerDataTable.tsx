@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from 'react';
-import { ColumnDef, Row } from '@tanstack/react-table';
+import React, { useMemo, useState, useCallback } from 'react';
+import { ColumnDef, Row, SortingState } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 import { CommentList } from '../domain/CommentList';
 import { MismatchItem } from '../../services/api';
 import EnrichPhaseModal from '../ui/EnrichPhaseModal';
+import HeaderFilter, { HeaderFilterOption } from '../ui/header-filter';
 
 // Helper function to extract brush component patterns
 const getBrushComponentPattern = (
@@ -144,6 +145,67 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     enrichedData: Record<string, any>;
     originalText: string;
   } | null>(null);
+
+  // Header filter state
+  const [matchTypeFilter, setMatchTypeFilter] = useState<Set<string>>(new Set());
+  const [brushTypeFilter, setBrushTypeFilter] = useState<Set<string>>(new Set());
+
+  // Sorting state
+  const [sorting, setSorting] = useState<SortingState>([]);
+
+  // Generate filter options from data
+  const matchTypeOptions = useMemo((): HeaderFilterOption[] => {
+    const typeCounts = new Map<string, number>();
+
+    data.forEach(item => {
+      const matchType = item.match_type || 'unknown';
+      typeCounts.set(matchType, (typeCounts.get(matchType) || 0) + 1);
+    });
+
+    return Array.from(typeCounts.entries()).map(([value, count]) => ({
+      value,
+      label: value.charAt(0).toUpperCase() + value.slice(1).replace(/_/g, ' '),
+      count,
+    }));
+  }, [data]);
+
+  const brushTypeOptions = useMemo((): HeaderFilterOption[] => {
+    if (field !== 'brush') return [];
+
+    const typeCounts = new Map<string, number>();
+
+    data.forEach(item => {
+      const brushType = getBrushType(item.matched);
+      const type = brushType.type || 'Unknown';
+      typeCounts.set(type, (typeCounts.get(type) || 0) + 1);
+    });
+
+    return Array.from(typeCounts.entries()).map(([value, count]) => ({
+      value,
+      label: value,
+      count,
+    }));
+  }, [data, field]);
+
+  // Apply filters to data
+  const filteredData = useMemo(() => {
+    return data.filter(item => {
+      // Apply match type filter
+      if (matchTypeFilter.size > 0) {
+        const matchType = item.match_type || 'unknown';
+        if (!matchTypeFilter.has(matchType)) return false;
+      }
+
+      // Apply brush type filter (only for brush field)
+      if (field === 'brush' && brushTypeFilter.size > 0) {
+        const brushType = getBrushType(item.matched);
+        if (!brushTypeFilter.has(brushType.type)) return false;
+      }
+
+      return true;
+    });
+  }, [data, matchTypeFilter, brushTypeFilter, field]);
+
   const getMismatchTypeIcon = (mismatchType?: string) => {
     switch (mismatchType) {
       case 'multiple_patterns':
@@ -321,63 +383,63 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       // Selection column
       ...(onItemSelection
         ? [
-            {
-              id: 'selection',
-              header: () => {
-                // For now, use all data since we can't easily access visible rows from header
-                // This will be fixed in a future update when we can pass table context
-                return (
-                  <div className='flex items-center gap-2'>
-                    <span>Select</span>
-                  </div>
-                );
-              },
-              cell: ({ row }: { row: Row<MismatchItem> }) => {
-                const item = row.original;
-                // Since backend groups by case-insensitive original text, use that as the key
-                const itemKey = `${field}:${item.original.toLowerCase()}`;
-                const isSelected = selectedItems.has(itemKey);
-
-                return (
-                  <input
-                    type='checkbox'
-                    checked={isSelected}
-                    onChange={e => onItemSelection?.(itemKey, e.target.checked)}
-                    className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                  />
-                );
-              },
-              enableSorting: false,
+          {
+            id: 'selection',
+            header: () => {
+              // For now, use all data since we can't easily access visible rows from header
+              // This will be fixed in a future update when we can pass table context
+              return (
+                <div className='flex items-center gap-2'>
+                  <span>Select</span>
+                </div>
+              );
             },
-          ]
+            cell: ({ row }: { row: Row<MismatchItem> }) => {
+              const item = row.original;
+              // Since backend groups by case-insensitive original text, use that as the key
+              const itemKey = `${field}:${item.original.toLowerCase()}`;
+              const isSelected = selectedItems.has(itemKey);
+
+              return (
+                <input
+                  type='checkbox'
+                  checked={isSelected}
+                  onChange={e => onItemSelection?.(itemKey, e.target.checked)}
+                  className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                />
+              );
+            },
+            enableSorting: false,
+          },
+        ]
         : []),
 
       // Status column
       ...(isItemConfirmed
         ? [
-            {
-              id: 'status',
-              header: 'Status',
-              cell: ({ row }: { row: Row<MismatchItem> }) => {
-                const item = row.original;
-                const isConfirmed = isItemConfirmed(item);
+          {
+            id: 'status',
+            header: 'Status',
+            cell: ({ row }: { row: Row<MismatchItem> }) => {
+              const item = row.original;
+              const isConfirmed = isItemConfirmed(item);
 
-                return (
-                  <div className='flex items-center'>
-                    {isConfirmed ? (
-                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
-                        ✅ Confirmed
-                      </span>
-                    ) : (
-                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
-                        ⚠️ Unconfirmed
-                      </span>
-                    )}
-                  </div>
-                );
-              },
+              return (
+                <div className='flex items-center'>
+                  {isConfirmed ? (
+                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
+                      ✅ Confirmed
+                    </span>
+                  ) : (
+                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
+                      ⚠️ Unconfirmed
+                    </span>
+                  )}
+                </div>
+              );
             },
-          ]
+          },
+        ]
         : []),
       {
         accessorKey: 'count',
@@ -484,7 +546,25 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       },
       {
         accessorKey: 'match_type',
-        header: 'Match Type',
+        header: () => (
+          <HeaderFilter
+            title="Match Type"
+            options={matchTypeOptions}
+            selectedValues={matchTypeFilter}
+            onSelectionChange={setMatchTypeFilter}
+            searchPlaceholder="Search match types..."
+            onSort={() => {
+              const currentSort = sorting.find(s => s.id === 'match_type');
+              const newDirection = !currentSort ? 'asc' : currentSort.desc ? null : 'desc';
+              setSorting(newDirection ? [{ id: 'match_type', desc: newDirection === 'desc' }] : []);
+            }}
+            sortDirection={(() => {
+              const currentSort = sorting.find(s => s.id === 'match_type');
+              if (!currentSort) return null;
+              return currentSort.desc ? 'desc' : 'asc';
+            })()}
+          />
+        ),
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
           return (
@@ -500,11 +580,30 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     if (field === 'brush') {
       // Add brush type column
       baseColumns.push({
+        id: 'brush_type',
         accessorFn: row => {
           const brushType = getBrushType(row.matched);
           return brushType.type;
         },
-        header: 'Brush Type',
+        header: () => (
+          <HeaderFilter
+            title="Brush Type"
+            options={brushTypeOptions}
+            selectedValues={brushTypeFilter}
+            onSelectionChange={setBrushTypeFilter}
+            searchPlaceholder="Search brush types..."
+            onSort={() => {
+              const currentSort = sorting.find(s => s.id === 'brush_type');
+              const newDirection = !currentSort ? 'asc' : currentSort.desc ? null : 'desc';
+              setSorting(newDirection ? [{ id: 'brush_type', desc: newDirection === 'desc' }] : []);
+            }}
+            sortDirection={(() => {
+              const currentSort = sorting.find(s => s.id === 'brush_type');
+              if (!currentSort) return null;
+              return currentSort.desc ? 'desc' : 'asc';
+            })()}
+          />
+        ),
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
           const brushType = getBrushType(item.matched);
@@ -512,9 +611,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <div className='text-sm max-w-xs'>
               <span
-                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}
+                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}
               >
                 {brushType.type}
               </span>
@@ -528,6 +626,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
       // Always show brush pattern column
       baseColumns.push({
+        id: 'brush_pattern',
         accessorFn: row => {
           const isSplitBrush = row.is_split_brush === true;
           if (isSplitBrush) {
@@ -571,6 +670,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       // Always show handle/knot columns for brush fields
       baseColumns.push(
         {
+          id: 'handle',
           accessorFn: row => {
             return formatBrushComponent(row.matched, 'handle');
           },
@@ -587,6 +687,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           },
         },
         {
+          id: 'handle_pattern',
           accessorFn: row => {
             return getBrushComponentPattern(row.matched, 'handle');
           },
@@ -601,6 +702,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           },
         },
         {
+          id: 'knot',
           accessorFn: row => {
             return formatBrushComponent(row.matched, 'knot');
           },
@@ -615,6 +717,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           },
         },
         {
+          id: 'knot_pattern',
           accessorFn: row => {
             return getBrushComponentPattern(row.matched, 'knot');
           },
@@ -669,7 +772,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <CommentList
               commentIds={commentIds}
-              onCommentClick={onCommentClick || (() => {})}
+              onCommentClick={onCommentClick || (() => { })}
               commentLoading={commentLoading}
               maxDisplay={3}
               aria-label={`${commentIds.length} comment${commentIds.length !== 1 ? 's' : ''} available`}
@@ -685,9 +788,9 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   return (
     <div className='space-y-4'>
       <DataTable
-        key={`mismatch-table-${data.length}`} // Force re-render when data changes
+        key={`mismatch-table-${filteredData.length}-${matchTypeFilter.size}-${brushTypeFilter.size}-${sorting.length}`} // Force re-render when data, filters, or sorting change
         columns={columns}
-        data={data}
+        data={filteredData}
         showPagination={true}
         resizable={true}
         sortable={true}
@@ -695,6 +798,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         searchKey='original'
         initialPageSize={50}
         onVisibleRowsChange={onVisibleRowsChange}
+        sorting={sorting}
+        onSortingChange={setSorting}
       />
 
       {/* Enrich Phase Modal */}

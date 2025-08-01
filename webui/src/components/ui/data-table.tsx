@@ -59,6 +59,8 @@ interface DataTableProps<TData, TValue> {
   clearSelection?: boolean;
   initialRowSelection?: Record<string, boolean>;
   initialPageSize?: number;
+  sorting?: SortingState;
+  onSortingChange?: (sorting: SortingState) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -76,8 +78,14 @@ export function DataTable<TData, TValue>({
   clearSelection = false,
   initialRowSelection = {},
   initialPageSize = 10,
+  sorting: externalSorting,
+  onSortingChange,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [internalSorting, setInternalSorting] = useState<SortingState>([]);
+
+  // Use external sorting if provided, otherwise use internal
+  const sorting = externalSorting !== undefined ? externalSorting : internalSorting;
+  const setSorting = onSortingChange || setInternalSorting;
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>(initialRowSelection);
@@ -238,9 +246,8 @@ export function DataTable<TData, TValue>({
                         <div className='flex items-center justify-between'>
                           {sortable ? (
                             <button
-                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${
-                                header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
-                              }`}
+                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
+                                }`}
                               onClick={header.column.getToggleSortingHandler()}
                               disabled={!header.column.getCanSort()}
                             >

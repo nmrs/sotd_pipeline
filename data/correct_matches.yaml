@@ -577,158 +577,165 @@ blade:
 brush:
   All-Star Grooming Co.:
     Shave Brush:
-    - all-star grooming company - badger:
-        handle_match: true
+    - all-star grooming company - badger
   Alpha:
     Amber:
-    - alpha amber: {}
+    - alpha amber
     Bulldog:
-    - alpha bulldog ti: {}
+    - alpha bulldog ti
   Aurora Grooming:
     LG24:
-    - aurora grooming lg24: {}
+    - aurora grooming lg 2024 synthetic ('lux emerald green'):
+        handle_match: true
+    - aurora grooming lg 2024 synthetic ('lux emerald green') $frankenbrush:
+        handle_match: true
+    - aurora grooming lg2024 synthetic ('lux emerald green' handle) $subroosh $frankenbrush:
+        handle_match: true
+    - aurora grooming lg24
   Böker:
     Synthetic:
-    - böker synthetic: {}
+    - böker synthetic
   Declaration Grooming:
     B13:
-    - declaration grooming - roil jefferson - 28mm b13: {}
+    - declaration grooming - roil jefferson - 28mm b13
     B14:
-    - declaration grooming - randy watson washington - 28mm b14: {}
-    - declaration grooming washington envy b14 shd badger: {}
+    - declaration grooming - randy watson washington - 28mm b14
+    - declaration grooming washington envy b14 shd badger
     B15:
-    - declaration grooming jefferson artist's choice b15 shd badger: {}
+    - declaration grooming jefferson artist's choice b15 shd badger
     B16:
-    - 6dg b16 thaw washington badger: {}
-    - declaration grooming - cream jefferson - 28mm b16: {}
-    - declaration grooming - jefferson thaw b16 - 28mm artisan tied badger: {}
-    - dg jefferson know it all 2.0 28mm b16: {}
+    - 6dg b16 thaw washington badger
+    - declaration grooming - cream jefferson - 28mm b16
+    - declaration grooming - jefferson thaw b16 - 28mm artisan tied badger
+    - dg jefferson know it all 2.0 28mm b16
     B18:
-    - declaration grooming - cold 2.0 jeffington - 28mm b18: {}
+    - declaration grooming - cold 2.0 jeffington - 28mm b18
     B3:
-    - declaration grooming washington blood of kings b3: {}
+    - declaration grooming washington blood of kings b3
     B6:
-    - declaration grooming washington b6: {}
+    - declaration grooming washington b6
     B9A:
-    - declaration grooming - lavender jefferson - 28mm b9a+: {}
+    - declaration grooming - lavender jefferson - 28mm b9a+
   Dreadnought:
     Avenger:
-    - dreadnought avenger: {}
+    - dreadnought avenger
   EldrormR Industries/Muninn Woodworks:
     BFM:
-    - '>![redacted]!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn woodworks handle $frankenbrush': {}
-    - '>!redacted!< $bigfuckingmotherload': {}
-    - '>!redacted!< [bigfuckingmotherload]': {}
-    - '>!redacted!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn woodworks handle': {}
-    - muninn woodworks "bfm" 50mm motherlode: {}
-    - muninn woodworks bfm: {}
+    - '>![redacted]!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn
+      woodworks handle $frankenbrush'
+    - '>!redacted!< $bigfuckingmotherload'
+    - '>!redacted!< [bigfuckingmotherload]'
+    - '>!redacted!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn
+      woodworks handle'
+    - muninn woodworks "bfm" 50mm motherlode
+    - muninn woodworks bfm
   Omega:
     '10005':
-    - omega 10005: {}
+    - omega 10005
     '10048':
-    - omega pro48: {}
+    - omega pro48
     '10049':
-    - omega - 10049: {}
-    - omega 10049: {}
+    - omega - 10049
+    - omega 10049
     '10065':
-    - omega 10065: {}
+    - omega 10065
     '10066':
-    - omega 10066: {}
+    - omega 10066
     '10098':
-    - omega 10098: {}
+    - omega 10098
     '11137':
-    - omega 11137: {}
+    - omega 11137
     '146818':
-    - omega 146818: {}
+    - omega 146818
     '20102':
-    - omega 20102: {}
+    - omega 20102
     '81151':
-    - omega 81151: {}
+    - omega 81151
   Semogue:
     '1305':
-    - semogue 1305: {}
+    - semogue 1305
     '1800':
-    - semogue 1800: {}
+    - semogue 1800
     '2000':
-    - semogue 2000: {}
+    - semogue 2000
     '610':
-    - semogue 610: {}
+    - semogue 610
     '830':
-    - semogue 830: {}
+    - semogue 830
     SOC Boar:
-    - semogue - soc boar: {}
+    - semogue - soc boar
   Simpson:
     Chubby 2:
-    - simpson - 'chubby 2' silvertip: {}
-    - simpson ch2 super badger super badger: {}
-    - simpson chubby 2 manchurian: {}
+    - simpson - 'chubby 2' silvertip
+    - simpson ch2 super badger super badger
+    - simpson chubby 2 manchurian
     Chubby 2 Synthetic:
-    - simpsons chubby 2 synthetic: {}
+    - simpsons chubby 2 synthetic
     Chubby 3:
-    - simpson butterscotch ch3 manchurian badger: {}
+    - simpson butterscotch ch3 manchurian badger
     Colonel X2L:
-    - simpson - 'colonel' best: {}
+    - simpson - 'colonel' best
     M7:
-    - simpson - 'm7' manchurian: {}
+    - simpson - 'm7' manchurian
     Trafalgar T2:
-    - simpson trafalgar t2: {}
-    - simpsons trafalgar t2: {}
+    - simpson trafalgar t2
+    - simpsons trafalgar t2
     Trafalgar T3:
-    - simpson - trafalgar t3: {}
-    - simpson trafalgar t3: {}
-    - simpson trafalgar t3 synthetic 26mm: {}
+    - simpson - trafalgar t3
+    - simpson trafalgar t3
+    - simpson trafalgar t3 synthetic 26mm
     Wee Scot:
-    - simpson - 'wee scot' best: {}
-    - simpson - wee scott: {}
-    - simpson wee scot: {}
-    - simpsons wee scot: {}
+    - simpson - 'wee scot' best
+    - simpson - wee scott
+    - simpson wee scot
+    - simpsons wee scot
   Spokar:
     Badger:
-    - spokar badger: {}
+    - spokar badger
   Stirling:
     2-Band Synthetic:
-    - stirling 2 band synthetic: {}
+    - stirling 2 band synthetic
   Wald:
     A1:
-    - wald a1: {}
+    - wald a1
   Walfront:
     Travel Brush:
-    - walfront travel brush: {}
+    - walfront travel brush
   Zenith:
     505BC SE:
-    - zenith 505bc: {}
+    - zenith 505bc
     506U SE:
-    - zenith 506u xse: {}
+    - zenith 506u xse
     B15:
-    - zenith b15: {}
+    - zenith b15
     B37:
-    - zenith b37: {}
+    - zenith b37
     r/wetshaving MOAR BOAR:
-    - moar boar: {}
-    - moar f'n boar: {}
-    - r/wetshaving zenith moar boar: {}
-    - r/wetshaving zentih moar boar 31mm: {}
-    - zenith - 508a xl/bristle (b35) (moar boar) 31mm boar: {}
-    - zenith - moar boar: {}
-    - zenith - moar boar 31mm boar: {}
-    - zenith - moar boar b35 31mm boar: {}
-    - zenith 31mm moar boar: {}
-    - zenith 508 moar boar: {}
-    - zenith b35 moar boar 31mm boar: {}
-    - zenith moar boar: {}
-    - zenith moar boar $girth $oldscratchy: {}
-    - zenith moar boar sub brush: {}
-    - zenith moar boar sub exclusive: {}
-    - zenith moar boar sub-exclusive (508a xl) 31mm boar knot: {}
-    - zenith r/wetshaving 31mm x 57mm moar boar: {}
-    - zenith r/wetshaving exclusive moar badger (silvertip): {}
-    - zenith r/wetshaving exclusive moar boar: {}
-    - zenith r/wetshaving exclusive moar boar (31 mm × 57 mm bleached boar): {}
-    - zenith r/wetshaving exclusive moar boar 31 mm: {}
-    - zenith r/wetshaving exclusive moar boar 31mm: {}
-    - zenith r/wetshaving moar boar: {}
-    - zenith r/wetshaving sub exclusive moar boar: {}
-    - zentih - moar boar r/wetshaving: {}
+    - moar boar
+    - moar f'n boar
+    - r/wetshaving zenith moar boar
+    - r/wetshaving zentih moar boar 31mm
+    - zenith - 508a xl/bristle (b35) (moar boar) 31mm boar
+    - zenith - moar boar
+    - zenith - moar boar 31mm boar
+    - zenith - moar boar b35 31mm boar
+    - zenith 31mm moar boar
+    - zenith 508 moar boar
+    - zenith b35 moar boar 31mm boar
+    - zenith moar boar
+    - zenith moar boar $girth $oldscratchy
+    - zenith moar boar sub brush
+    - zenith moar boar sub exclusive
+    - zenith moar boar sub-exclusive (508a xl) 31mm boar knot
+    - zenith r/wetshaving 31mm x 57mm moar boar
+    - zenith r/wetshaving exclusive moar badger (silvertip)
+    - zenith r/wetshaving exclusive moar boar
+    - zenith r/wetshaving exclusive moar boar (31 mm × 57 mm bleached boar)
+    - zenith r/wetshaving exclusive moar boar 31 mm
+    - zenith r/wetshaving exclusive moar boar 31mm
+    - zenith r/wetshaving moar boar
+    - zenith r/wetshaving sub exclusive moar boar
+    - zentih - moar boar r/wetshaving
 handle:
   3d:
     printed unspecified:
@@ -736,6 +743,11 @@ handle:
   All-Star Grooming Co.:
     Shave Brush:
     - all-star grooming company - badger
+  Aurora Grooming:
+    LG24:
+    - aurora grooming lg 2024 synthetic ('lux emerald green')
+    - aurora grooming lg 2024 synthetic ('lux emerald green') $frankenbrush
+    - aurora grooming lg2024 synthetic ('lux emerald green' handle) $subroosh $frankenbrush
   Declaration Grooming:
     Jeffington:
     - declaration grooming - cold 2.0 jeffington - 28mm b18
@@ -759,11 +771,6 @@ handle:
     unspecified:
     - yaqi unspecified
 knot:
-  AKA Brushworx:
-    AK7:
-    - aka brushworx ak7
-    Synthetic:
-    - aka brushworx synthetic
   Declaration Grooming:
     B16:
     - declaration grooming b16
@@ -2232,60 +2239,45 @@ split_brush:
   22mm yaqi synth:
     handle: yaqi unspecified
     knot: yaqi synthetic
-    user_intent: handle_primary
   3d printed - timberwolf 24mm:
     handle: 3d printed unspecified
     knot: unspecified synthetic
-    user_intent: handle_primary
   3dogwood w/ dg b12 butterscotch 2 band badger:
     handle: dogwood handcrafts unspecified
     knot: declaration grooming b12
-    user_intent: handle_primary
   a p shaveco faux boar - 30mm:
     handle: ap shave co unspecified
     knot: ap shave co synthetic
-    user_intent: handle_primary
   a p shaveco faux horse brush:
     handle: ap shave co unspecified
     knot: ap shave co synthetic
-    user_intent: handle_primary
   a p shaveco luxury knot:
     handle: ap shave co unspecified
     knot: ap shave co synthetic
-    user_intent: handle_primary
   a p shaveco pure bliss:
     handle: ap shave co unspecified
     knot: ap shave co pure bliss
-    user_intent: handle_primary
   aka brushworks never alone 4 with doughman badger:
     handle: aka brushworx unspecified
     knot: aka brushworx doughman
-    user_intent: handle_primary
   aka brushworkx 26mm black silk $composite:
     handle: aka brushworx unspecified
     knot: aka brushworx black silk
-    user_intent: handle_primary
   aka brushworx ak47 knot in southland 1 in. x 3 in. galvanized nipple handle:
     handle: southland galvanized nipple
     knot: aka brushworx ak47
-    user_intent: handle_primary
   aka brushworx blues stanley cup with 26mm turn n shave quartermoon knot:
     handle: aka brushworx stanley
     knot: turn-n-shave quartermoon
-    user_intent: handle_primary
   aka brushworx g5c:
     handle: aka brushworx unspecified
     knot: ap shave co g5c
-    user_intent: handle_primary
   aka brushworx g5c $frankenbrush:
     handle: aka brushworx unspecified
     knot: ap shave co g5c
-    user_intent: handle_primary
   aka brushworx manchurian $composite:
     handle: aka brushworx unspecified
     knot: aka brushworx synthetic
-    user_intent: handle_primary
   aka brushworx sea creature 26mm ak7 synthentic knot:
     handle: aka brushworx unspecified
     knot: aka brushworx ak7
-    user_intent: handle_primary
