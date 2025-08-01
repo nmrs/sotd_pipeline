@@ -73,10 +73,7 @@ class BrushMatcher:
         self.knots_data = catalogs["knots"]
         self.correct_matches = catalogs["correct_matches"]
 
-        # DEBUG: Print correct_matches_path and loaded correct_matches
-        if self.debug:
-            print(f"[BrushMatcher DEBUG] correct_matches_path: {self.correct_matches_path}")
-            print(f"[BrushMatcher DEBUG] loaded correct_matches: {self.correct_matches}")
+
 
         # Initialize specialized components
         self.correct_matches_checker = CorrectMatchesChecker(config, self.correct_matches)
