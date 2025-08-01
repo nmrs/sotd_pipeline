@@ -4,6 +4,8 @@ from typing import Optional
 
 import yaml
 
+from sotd.match.types import MatchResult
+
 
 class HandleMatcher:
     """Handle matching functionality extracted from BrushMatcher."""
@@ -60,26 +62,41 @@ class HandleMatcher:
         patterns.sort(key=lambda x: (x["priority"], -len(x["pattern"])))
         return patterns
 
-    def match_handle_maker(self, text: str) -> Optional[dict]:
+    def match(self, text: str) -> Optional[MatchResult]:
         """
         Match handle maker from text using the handle patterns.
-        Returns dict with maker, model, and metadata or None if no match.
+        Returns MatchResult with section/priority information or None if no match.
         """
         if not text:
             return None
 
         for pattern_info in self.handle_patterns:
             if pattern_info["regex"].search(text):
-                result = {
+                matched_data = {
                     "handle_maker": pattern_info["maker"],
                     "handle_model": pattern_info["model"],
                     "_matched_by_section": pattern_info["section"],
                     "_pattern_used": pattern_info["pattern"],
                     "_source_text": text,
                 }
-                return result
+                return MatchResult(
+                    original=text,
+                    matched=matched_data,
+                    match_type="regex",
+                    pattern=pattern_info["pattern"],
+                    section=pattern_info["section"],
+                    priority=pattern_info["priority"],
+                )
 
         return None
+
+    def match_handle_maker(self, text: str) -> Optional[dict]:
+        """
+        Match handle maker from text using the handle patterns.
+        Returns dict with maker, model, and metadata or None if no match.
+        """
+        result = self.match(text)
+        return result.matched if result else None
 
     def is_known_handle_maker(self, brand: str) -> bool:
         """Check if a brand is a known handle maker."""
@@ -106,7 +123,7 @@ class HandleMatcher:
             return
 
         # Try to match handle maker from the full text
-        handle_result = self.match_handle_maker(value)
+        handle_result: Optional[dict] = self.match_handle_maker(value)
         if handle_result:
             updated["handle_maker"] = handle_result["handle_maker"]
             updated["handle_model"] = handle_result["handle_model"]
@@ -127,7 +144,7 @@ class HandleMatcher:
         # If still no match, try to extract from model field
         model = updated.get("model", "").strip()
         if model:
-            model_handle_result = self.match_handle_maker(model)
+            model_handle_result: Optional[dict] = self.match_handle_maker(model)
             if model_handle_result:
                 updated["handle_maker"] = model_handle_result["handle_maker"]
                 updated["handle_model"] = model_handle_result["handle_model"]

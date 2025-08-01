@@ -11,12 +11,33 @@ from typing import Any, Dict, List, Optional
 
 @dataclass
 class MatchResult:
-    """Result of a matching operation."""
+    """Unified result structure for all matching operations."""
 
+    # Core data (always present)
     original: str
-    matched: Optional[Dict[str, Any]]
-    match_type: Optional[str]
-    pattern: Optional[str]
+    matched: Optional[Dict[str, Any]] = None
+    match_type: Optional[str] = None
+    pattern: Optional[str] = None
+
+    # DRY scoring fields (optional, for section-based matchers)
+    section: Optional[str] = None  # "known_knots", "other_knots", etc.
+    priority: Optional[int] = None  # 1 = highest, 2 = medium, 3 = lowest
+
+    @property
+    def matched_bool(self) -> bool:
+        """Check if this represents a successful match."""
+        return bool(self.matched)
+
+    @property
+    def has_section_info(self) -> bool:
+        """Check if this has section/priority information for scoring."""
+        return self.section is not None and self.priority is not None
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """Get value from matched data with default."""
+        if self.matched is None:
+            return default
+        return self.matched.get(key, default)
 
 
 @dataclass
@@ -204,22 +225,13 @@ class MatchType:
 
 def create_match_result(
     original: str,
-    matched: Optional[Dict[str, Any]] = None,
-    match_type: Optional[str] = None,
-    pattern: Optional[str] = None,
-) -> MatchResult:
-    """
-    Create a MatchResult instance with proper defaults.
-
-    Args:
-        original: Original input string
-        matched: Matched data dictionary
-        match_type: Type of match
-        pattern: Pattern that was matched
-
-    Returns:
-        MatchResult instance
-    """
+    matched: Optional[Dict[str, Any]],
+    match_type: str,
+    pattern: str,
+) -> "MatchResult":
+    """Create a MatchResult from legacy match data."""
+    # This is a compatibility function for existing code
+    # In the future, matchers should return MatchResult directly
     return MatchResult(
         original=original,
         matched=matched,

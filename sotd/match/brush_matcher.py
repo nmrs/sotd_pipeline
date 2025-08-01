@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -844,16 +845,33 @@ class BrushMatcher:
         return handle_score + knot_score
 
     def _score_as_handle(self, text: str) -> int:
-        """Score text as a handle component."""
+        """Score text as a handle component using actual matcher results with priority."""
         score = 0
 
         # Check for handle indicators
         if "handle" in text.lower():
             score += 10
 
-        # Check if it matches handle patterns
-        if self.handle_matcher.is_known_handle_maker(text):
-            score += 6
+        # Check if it matches handle patterns using the actual handle matcher
+        handle_result = self.handle_matcher.match(text)
+        if handle_result and handle_result.matched:
+            # Base score for successful handle match
+            score += 20
+
+            # Use priority information for scoring (lower priority = higher score)
+            if handle_result.has_section_info:
+                # Priority 1 (artisan_handles) = highest score
+                # Priority 2 (manufacturer_handles) = medium score
+                # Priority 3 (other_handles) = lowest score
+                if handle_result.priority == 1:
+                    score += 15  # Artisan handles get highest bonus
+                elif handle_result.priority == 2:
+                    score += 10  # Manufacturer handles get medium bonus
+                elif handle_result.priority == 3:
+                    score += 5  # Other handles get lowest bonus
+            else:
+                # Fallback for backward compatibility
+                score += 10
 
         # Check for handle-related terms
         handle_terms = ["stock", "custom", "artisan", "turned"]
@@ -861,10 +879,16 @@ class BrushMatcher:
             if term in text.lower():
                 score += 2
 
+        # Check for handle model patterns (like "Zebra", "Jeffington", etc.)
+        handle_model_patterns = [r"\b(zebra|jeffington|washington|bulldog)\b", r"\b(handle|grip)\b"]
+        for pattern in handle_model_patterns:
+            if re.search(pattern, text.lower()):
+                score += 5
+
         return score
 
     def _score_as_knot(self, text: str) -> int:
-        """Score text as a knot component."""
+        """Score text as a knot component using actual matcher results with priority."""
         score = 0
 
         # Check for fiber types
@@ -873,15 +897,38 @@ class BrushMatcher:
             if fiber in text.lower():
                 score += 8
 
-        # Check for size patterns
-        import re
+        # Check if it matches knot patterns using the actual knot matcher
+        knot_result = self.knot_matcher.match(text)
+        if knot_result and knot_result.matched:
+            # Base score for successful knot match
+            score += 20
 
+            # Use priority information for scoring (lower priority = higher score)
+            if knot_result.has_section_info:
+                # Priority 1 (known_knots) = highest score
+                # Priority 2 (other_knots) = medium score
+                # Priority 3+ (fallback strategies) = lowest score
+                if knot_result.priority == 1:
+                    score += 15  # Known knots get highest bonus
+                elif knot_result.priority == 2:
+                    score += 10  # Other knots get medium bonus
+                else:
+                    score += 5  # Fallback strategies get lowest bonus
+            else:
+                # Fallback for backward compatibility
+                score += 10
+
+        # Check for size patterns
         if re.search(r"\d+mm", text):
             score += 6
 
         # Check for versioning patterns
         if re.search(r"[vV]\d+", text):
             score += 6
+
+        # Check for knot model patterns (B15, B16, etc.)
+        if re.search(r"\bB(?:[1-8]|9[ab]|1[0-8])\b", text):
+            score += 12  # High score for knot model patterns
 
         return score
 
@@ -925,16 +972,16 @@ class BrushMatcher:
                 pattern="correct_matches_knot",
             )
         else:
-            # Fall back to knot matcher strategies
-            knot_match = None
-            for strategy in self.knot_matcher.strategies:
-                try:
-                    result = strategy.match(knot_text)
-                    if result and hasattr(result, "matched") and result.matched:
-                        knot_match = result
-                        break
-                except Exception:
-                    continue
+            # Fall back to knot matcher using unified MatchResult structure
+            knot_match = self.knot_matcher.match(knot_text)
+            # Debug: Print knot match info
+            if knot_match:
+                print(
+                    f"DEBUG: Knot match from unified matcher: "
+                    f"{knot_match.section}, {knot_match.priority}, {knot_match.pattern}"
+                )
+            else:
+                print(f"DEBUG: No knot match from unified matcher for: {knot_text}")
 
         # If no knot match found, check if it's a generic knot reference
         if not knot_match and knot_text:

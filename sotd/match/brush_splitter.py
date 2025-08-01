@@ -159,10 +159,10 @@ class BrushSplitter:
         )  # "+" requires smart analysis, not high-priority splitting
 
         # Always check for ' w/ ' and ' with ' first to avoid misinterpreting 'w/' as '/'
-        # These delimiters use positional splitting (first part = handle, second part = knot)
+        # These delimiters use smart splitting to determine handle vs knot based on content
         for delimiter in high_reliability_delimiters:
             if delimiter in text:
-                return self._split_by_delimiter_positional(text, delimiter, "high_reliability")
+                return self._split_by_delimiter_smart(text, delimiter, "high_reliability")
 
         # Special handling for `/` as high-reliability delimiter (any spaces, not part of 'w/')
         # But first check if `/` is part of a specification rather than a delimiter
@@ -182,10 +182,10 @@ class BrushSplitter:
                 else:
                     return part2, part1, "high_reliability"
 
-        # Check handle-primary delimiters (first part is handle)
+        # Check handle-primary delimiters (first part is knot, second part is handle)
         for delimiter in handle_primary_delimiters:
             if delimiter in text:
-                return self._split_by_delimiter_simple(text, delimiter, "handle_primary")
+                return self._split_by_delimiter_positional(text, delimiter, "handle_primary")
 
         # Check other high-priority delimiters
         for delimiter in other_high_priority_delimiters:
@@ -219,16 +219,22 @@ class BrushSplitter:
     def _split_by_delimiter_positional(
         self, text: str, delimiter: str, delimiter_type: str
     ) -> tuple[Optional[str], Optional[str], Optional[str]]:
-        """Positional splitting for 'w/' and 'with' delimiters.
+        """Positional splitting for delimiters.
 
-        Respects positional order: first part = handle, second part = knot.
+        For 'in' delimiter: first part = knot, second part = handle
+        For other delimiters: first part = handle, second part = knot
         """
         parts = text.split(delimiter, 1)
         if len(parts) == 2:
-            handle = parts[0].strip()
-            knot = parts[1].strip()
-            if handle and knot:
-                return handle, knot, delimiter_type
+            part1 = parts[0].strip()
+            part2 = parts[1].strip()
+            if part1 and part2:
+                if delimiter == " in ":
+                    # For "in" delimiter: first part = knot, second part = handle
+                    return part2, part1, delimiter_type  # handle, knot
+                else:
+                    # For other delimiters: first part = handle, second part = knot
+                    return part1, part2, delimiter_type  # handle, knot
         return None, None, None
 
     def _split_by_delimiter_simple(

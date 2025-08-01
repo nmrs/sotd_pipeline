@@ -8,6 +8,25 @@ class KnotMatcher:
 
     def __init__(self, strategies: list):
         self.strategies = strategies
+        # Calculate section priorities based on strategy order
+        self.section_priorities = self._calculate_section_priorities()
+
+    def _calculate_section_priorities(self) -> dict:
+        """Calculate priority for each strategy based on order (first = highest priority)."""
+        priorities = {}
+        for i, strategy in enumerate(self.strategies, 1):
+            strategy_name = strategy.__class__.__name__
+            if "KnownKnot" in strategy_name:
+                priorities[strategy] = ("known_knots", i)
+            elif "OtherKnot" in strategy_name:
+                priorities[strategy] = ("other_knots", i)
+            elif "FiberFallback" in strategy_name:
+                priorities[strategy] = ("fiber_fallback", i)
+            elif "KnotSizeFallback" in strategy_name:
+                priorities[strategy] = ("knot_size_fallback", i)
+            else:
+                priorities[strategy] = ("unknown", i)
+        return priorities
 
     def match(self, value: str) -> Optional["MatchResult"]:
         """
@@ -26,7 +45,16 @@ class KnotMatcher:
             try:
                 result = strategy.match(value)
                 if result and result.matched:
-                    return result
+                    # Add section/priority information to the result
+                    section, priority = self.section_priorities.get(strategy, ("unknown", 999))
+                    return MatchResult(
+                        original=result.original,
+                        matched=result.matched,
+                        match_type=result.match_type,
+                        pattern=result.pattern,
+                        section=section,
+                        priority=priority,
+                    )
             except Exception:
                 # Continue to next strategy if one fails
                 continue
