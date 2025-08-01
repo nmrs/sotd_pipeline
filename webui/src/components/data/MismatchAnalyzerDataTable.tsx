@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ColumnDef, Row } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 import { CommentList } from '../domain/CommentList';
 import { MismatchItem } from '../../services/api';
-import EnrichPhaseTooltip from '../ui/EnrichPhaseTooltip';
+import EnrichPhaseModal from '../ui/EnrichPhaseModal';
 
 // Helper function to extract brush component patterns
 const getBrushComponentPattern = (
@@ -76,6 +76,13 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   onVisibleRowsChange,
   matched_data_map,
 }) => {
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalData, setModalData] = useState<{
+    originalData: Record<string, any>;
+    enrichedData: Record<string, any>;
+    originalText: string;
+  } | null>(null);
   const getMismatchTypeIcon = (mismatchType?: string) => {
     switch (mismatchType) {
       case 'multiple_patterns':
@@ -210,46 +217,38 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   };
 
   // Helper function to check if there are enrich-phase changes
-  const hasEnrichPhaseChanges = (originalData: Record<string, any>, enrichedData: Record<string, any>): boolean => {
-    if (!originalData || !enrichedData) return false;
-    
-    // For brush field, check nested structure
+  const hasEnrichPhaseChanges = (matchedData: Record<string, any>, enrichedData: Record<string, any>): boolean => {
+    if (!matchedData || !enrichedData) return false;
+
+    // For brush field, check the enriched data against matched data
     if (field === 'brush') {
-      // Check handle fiber
-      const originalHandleFiber = originalData?.handle?.fiber;
-      const enrichedHandleFiber = enrichedData?.handle?.fiber;
-      if (originalHandleFiber !== enrichedHandleFiber) return true;
-      
-      // Check knot fiber
-      const originalKnotFiber = originalData?.knot?.fiber;
-      const enrichedKnotFiber = enrichedData?.knot?.fiber;
-      if (originalKnotFiber !== enrichedKnotFiber) return true;
-      
-      // Check knot size
-      const originalKnotSize = originalData?.knot?.knot_size_mm;
-      const enrichedKnotSize = enrichedData?.knot?.knot_size_mm;
-      if (originalKnotSize !== enrichedKnotSize) return true;
-      
-      // Check handle maker/brand
-      const originalHandleBrand = originalData?.handle?.brand;
-      const enrichedHandleBrand = enrichedData?.handle?.brand;
-      if (originalHandleBrand !== enrichedHandleBrand) return true;
-      
-      // Check knot brand
-      const originalKnotBrand = originalData?.knot?.brand;
-      const enrichedKnotBrand = enrichedData?.knot?.brand;
-      if (originalKnotBrand !== enrichedKnotBrand) return true;
+      // Check fiber changes (enriched data overrides matched)
+      const matchedKnotFiber = matchedData?.knot?.fiber;
+      const enrichedFiber = enrichedData?.fiber;
+      if (matchedKnotFiber !== enrichedFiber) return true;
+
+      // Check knot size changes
+      const matchedKnotSize = matchedData?.knot?.knot_size_mm;
+      const enrichedKnotSize = enrichedData?.knot_size_mm;
+      if (matchedKnotSize !== enrichedKnotSize) return true;
+
+      // For brush enrichment, only fiber and knot_size_mm can change
+      // Brand, model, handle_maker, etc. should remain the same from match phase
+      // Don't check other fields as they shouldn't change during brush enrichment
+
+      // No changes detected for fiber or knot size
+      return false;
     } else {
       // For other fields, check top-level fields
       const fieldsToCheck = ['fiber', 'knot_size_mm', 'handle_maker', 'brand', 'model'];
-      
+
       return fieldsToCheck.some(field => {
-        const original = originalData[field];
+        const original = matchedData[field];
         const enriched = enrichedData[field];
         return original !== enriched;
       });
     }
-    
+
     return false;
   };
 
@@ -365,18 +364,28 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           const item = row.original;
           const formattedData = formatMatchedData(item.matched, field);
 
-          // Check if we have matched_data_map and if there are enrich-phase changes
-          const hasChanges = matched_data_map && (() => {
-            // Use the first comment_id as the record ID key (backend uses record ID as key)
-            const recordId = item.comment_ids?.[0] || '';
-            const originalData = matched_data_map[recordId];
-            return originalData && hasEnrichPhaseChanges(originalData, item.matched as Record<string, any>);
-          })();
+          // Check if there are enrich-phase changes using the enriched data from the API response
+          const hasChanges = item.enriched && hasEnrichPhaseChanges(item.matched as Record<string, any>, item.enriched as Record<string, any>);
+
+          const handleEnrichClick = () => {
+            if (hasChanges) {
+              setModalData({
+                originalData: item.matched as Record<string, any>,
+                enrichedData: item.enriched as Record<string, any>,
+                originalText: item.original,
+              });
+              setModalOpen(true);
+            }
+          };
 
           // For brush field, render with line breaks
           if (field === 'brush' && formattedData.includes('\n')) {
             const content = (
-              <div className='text-sm text-gray-900 max-w-xs'>
+              <div
+                className={`text-sm text-gray-900 max-w-xs ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
+                onClick={handleEnrichClick}
+              >
+                {hasChanges && <span className="text-blue-600 text-xs mr-1">🔄</span>}
                 {formattedData.split('\n').map((line, index) => (
                   <div key={index} className={index > 0 ? 'mt-1' : ''}>
                     {truncateText(line, 60)}
@@ -385,43 +394,19 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
               </div>
             );
 
-            if (hasChanges && matched_data_map) {
-              const recordId = item.comment_ids?.[0] || '';
-              const originalData = matched_data_map[recordId];
-              return (
-                <EnrichPhaseTooltip
-                  originalData={originalData}
-                  enrichedData={item.matched as Record<string, any>}
-                  field={field}
-                >
-                  {content}
-                </EnrichPhaseTooltip>
-              );
-            }
-
             return content;
           }
 
           // For other fields, use the original rendering
           const content = (
-            <div className='text-sm text-gray-900 max-w-xs'>
+            <div
+              className={`text-sm text-gray-900 max-w-xs ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
+              onClick={handleEnrichClick}
+            >
+              {hasChanges && <span className="text-blue-600 text-xs mr-1">🔄</span>}
               <span>{truncateText(formattedData, 60)}</span>
             </div>
           );
-
-          if (hasChanges && matched_data_map) {
-            const recordId = item.comment_ids?.[0] || '';
-            const originalData = matched_data_map[recordId];
-            return (
-              <EnrichPhaseTooltip
-                originalData={originalData}
-                enrichedData={item.matched as Record<string, any>}
-                field={field}
-              >
-                {content}
-              </EnrichPhaseTooltip>
-            );
-          }
 
           return content;
         },
@@ -603,6 +588,21 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         initialPageSize={50}
         onVisibleRowsChange={onVisibleRowsChange}
       />
+
+      {/* Enrich Phase Modal */}
+      {modalData && (
+        <EnrichPhaseModal
+          isOpen={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
+            setModalData(null);
+          }}
+          originalData={modalData.originalData}
+          enrichedData={modalData.enrichedData}
+          field={field}
+          originalText={modalData.originalText}
+        />
+      )}
     </div>
   );
 };
