@@ -113,6 +113,9 @@ class BrushMatcher:
         # Pre-compile handle patterns for performance optimization
         self._compiled_handle_patterns = self._precompile_handle_patterns()
 
+        # Performance monitoring (optional)
+        self.monitor: Optional[Any] = None
+
     def _check_correct_matches(self, value: str) -> Optional[Dict[str, Any]]:
         """
         Check if value matches any correct matches entry using canonical normalization.
@@ -413,21 +416,29 @@ class BrushMatcher:
         if cached_result is not None:
             return cached_result
 
-        # Define strategies in priority order
+        # Define strategies in priority order with names for timing
         strategies = [
-            self._match_correct_complete_brush,
-            self._match_correct_split_brush,
-            self._match_known_split,
-            self._match_high_priority_automated_split,
-            self._match_complete_brush,
-            self._match_dual_component,
-            self._match_medium_priority_automated_split,
-            self._match_single_component_fallback,
+            ("correct_complete_brush", self._match_correct_complete_brush),
+            ("correct_split_brush", self._match_correct_split_brush),
+            ("known_split", self._match_known_split),
+            ("high_priority_automated_split", self._match_high_priority_automated_split),
+            ("complete_brush", self._match_complete_brush),
+            ("dual_component", self._match_dual_component),
+            ("medium_priority_automated_split", self._match_medium_priority_automated_split),
+            ("single_component_fallback", self._match_single_component_fallback),
         ]
 
-        # Try each strategy in order
-        for strategy in strategies:
-            result = strategy(value)
+        # Try each strategy in order with timing
+        for strategy_name, strategy_func in strategies:
+            import time
+            start_time = time.time()
+            result = strategy_func(value)
+            duration = time.time() - start_time
+            
+            # Record strategy timing if monitor is available
+            if hasattr(self, 'monitor') and self.monitor is not None:
+                self.monitor.record_brush_strategy_timing(strategy_name, duration)
+            
             if result is not None:
                 # Cache successful result
                 self._cache.set(cache_key, result)

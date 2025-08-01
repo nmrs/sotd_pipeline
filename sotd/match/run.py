@@ -266,6 +266,7 @@ def process_month(
         monitor.start_processing_timing()
         blade_matcher = BladeMatcher(correct_matches_path=correct_matches_path)
         brush_matcher = BrushMatcher(correct_matches_path=correct_matches_path, debug=debug)
+        brush_matcher.monitor = monitor  # Attach monitor for strategy timing
         razor_matcher = RazorMatcher(correct_matches_path=correct_matches_path)
         soap_matcher = SoapMatcher(correct_matches_path=correct_matches_path)
 

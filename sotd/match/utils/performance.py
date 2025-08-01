@@ -17,6 +17,8 @@ class MatchPerformanceMetrics(BasePerformanceMetrics):
 
     # Override phase_times to be more specific for match phase
     matcher_times: Dict[str, TimingStats] = field(default_factory=dict)
+    # Brush strategy performance tracking
+    brush_strategy_times: Dict[str, TimingStats] = field(default_factory=dict)
     # Cache statistics
     cache_stats: Dict[str, Dict[str, int]] = field(default_factory=dict)
 
@@ -33,6 +35,17 @@ class MatchPerformanceMetrics(BasePerformanceMetrics):
                 "count": stats.count,
             }
             for matcher, stats in self.matcher_times.items()
+        }
+        # Add brush strategy timing
+        base_dict["brush_strategy_times"] = {
+            strategy: {
+                "total_time_seconds": stats.total_time,
+                "avg_time_seconds": stats.avg_time,
+                "min_time_seconds": stats.min_time if stats.min_time != float("inf") else 0.0,
+                "max_time_seconds": stats.max_time,
+                "count": stats.count,
+            }
+            for strategy, stats in self.brush_strategy_times.items()
         }
         # Add cache statistics
         base_dict["cache_stats"] = self.cache_stats
@@ -62,6 +75,12 @@ class PerformanceMonitor(BasePerformanceMonitor):
     def record_cache_stats(self, cache_name: str, stats: Dict[str, int]) -> None:
         """Record cache statistics for a specific cache."""
         self.metrics.cache_stats[cache_name] = stats
+
+    def record_brush_strategy_timing(self, strategy_name: str, duration: float) -> None:
+        """Record timing for a specific brush strategy."""
+        if strategy_name not in self.metrics.brush_strategy_times:
+            self.metrics.brush_strategy_times[strategy_name] = TimingStats()
+        self.metrics.brush_strategy_times[strategy_name].add_timing(duration)
 
     def print_summary(self) -> None:
         """Print a human-readable performance summary."""
@@ -95,6 +114,11 @@ class PerformanceMonitor(BasePerformanceMonitor):
             print("\nMatcher Performance:")
             for matcher, stats in self.metrics.matcher_times.items():
                 print(f"  {matcher}: {stats.avg_time * 1000:.1f}ms avg ({stats.count} calls)")
+
+        if self.metrics.brush_strategy_times:
+            print("\nBrush Strategy Performance:")
+            for strategy, stats in self.metrics.brush_strategy_times.items():
+                print(f"  {strategy}: {stats.avg_time * 1000:.1f}ms avg ({stats.count} calls)")
 
         if self.metrics.cache_stats:
             print("\nCache Performance:")
