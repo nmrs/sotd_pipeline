@@ -398,11 +398,11 @@ class TestBrushMatcherBrandLevelInheritance:
         """Test that brand-level fiber is inherited when model-level is None via regex matching."""
         # Test with Declaration Grooming B3 - brand has fiber: "Badger", model has None
         result = brush_matcher.match("Declaration Grooming B3")
-        
+
         assert result.match_type == "regex"
         assert result.matched["brand"] == "Declaration Grooming"
         assert result.matched["model"] == "B3"
-        
+
         # Should inherit fiber from brand level
         knot_section = result.matched["knot"]
         assert knot_section["fiber"] == "Badger"  # Inherited from brand level
@@ -415,15 +415,15 @@ class TestBrushMatcherBrandLevelInheritance:
         # Add a test case to correct_matches that should inherit brand-level fields
         # This would require modifying the test fixture, so we'll test with existing data
         # and verify the inheritance logic works correctly
-        
+
         # Test with a brush that has brand-level defaults but model-level None values
         # We'll use the existing Declaration Grooming structure as an example
         result = brush_matcher.match("Declaration Grooming B10")
-        
+
         assert result.match_type == "regex"
         assert result.matched["brand"] == "Declaration Grooming"
         assert result.matched["model"] == "B10"
-        
+
         # Should inherit fiber from brand level
         knot_section = result.matched["knot"]
         assert knot_section["fiber"] == "Badger"  # Inherited from brand level
@@ -435,11 +435,11 @@ class TestBrushMatcherBrandLevelInheritance:
         """Test that model-level fiber and knot_size_mm override brand-level defaults."""
         # Test with Simpson Trafalgar T2 - model has explicit fiber: "Synthetic"
         result = brush_matcher.match("Simpson Trafalgar T2")
-        
+
         assert result.match_type == "regex"
         assert result.matched["brand"] == "Simpson"
         assert result.matched["model"] == "Trafalgar T2"
-        
+
         # Should use model-level values, not inherit from brand
         knot_section = result.matched["knot"]
         assert knot_section["fiber"] == "Synthetic"  # Model-level override
@@ -451,14 +451,14 @@ class TestBrushMatcherBrandLevelInheritance:
         """Test that None values at model level properly inherit from brand level."""
         # Test with a brush that has None values at model level
         # We'll use the existing test catalog structure
-        
+
         # Test with Declaration Grooming B15 - should inherit brand-level defaults
         result = brush_matcher.match("Declaration Grooming B15")
-        
+
         assert result.match_type == "regex"
         assert result.matched["brand"] == "Declaration Grooming"
         assert result.matched["model"] == "B15"
-        
+
         # Should inherit from brand level when model level has None
         knot_section = result.matched["knot"]
         assert knot_section["fiber"] == "Badger"  # Inherited from brand level
@@ -470,14 +470,14 @@ class TestBrushMatcherBrandLevelInheritance:
         """Test edge cases for brand-level inheritance."""
         # Test with a brush that has partial None values
         # Some fields None, some with values
-        
+
         # Test with Omega 10048 - has explicit model-level values
         result = brush_matcher.match("Omega 10048")
-        
+
         assert result.match_type == "regex"
         assert result.matched["brand"] == "Omega"
         assert result.matched["model"] == "10048"
-        
+
         # Should use model-level values (no inheritance needed)
         knot_section = result.matched["knot"]
         assert knot_section["fiber"] == "Boar"  # Model-level value
@@ -489,17 +489,17 @@ class TestBrushMatcherBrandLevelInheritance:
         """Test that catalog lookup properly handles brand-level inheritance."""
         # Test that the catalog lookup logic in both _ensure_handle_knot_sections
         # and _process_regular_correct_match properly inherit brand-level fields
-        
+
         # Test with a brush that should inherit brand-level defaults
         result = brush_matcher.match("Declaration Grooming B3")
-        
+
         assert result.match_type == "regex"
-        
+
         # Verify the inheritance worked correctly
         knot_section = result.matched["knot"]
         assert knot_section["fiber"] == "Badger"  # Inherited from brand level
         assert knot_section["knot_size_mm"] == 28  # Inherited from brand level
-        
+
         # Verify the catalog lookup found the correct brand and model
         assert knot_section["brand"] == "Declaration Grooming"
         assert knot_section["model"] == "B3"
