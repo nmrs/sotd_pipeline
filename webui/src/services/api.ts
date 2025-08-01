@@ -171,6 +171,7 @@ export interface MismatchAnalysisRequest {
 export interface MismatchItem {
   original: string;
   matched: Record<string, unknown>;
+  enriched?: Record<string, unknown>;
   pattern: string;
   match_type: string;
   confidence?: number;
