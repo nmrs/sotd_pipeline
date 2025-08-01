@@ -575,6 +575,10 @@ blade:
       - valet auto strop
       - valet se blade
 brush:
+  All-Star Grooming Co.:
+    Shave Brush:
+    - all-star grooming company - badger:
+        handle_match: true
   Alpha:
     Amber:
     - alpha amber
@@ -731,20 +735,17 @@ handle:
   3d:
     printed unspecified:
     - 3d printed unspecified
-  AKA Brushworx:
-    Stanley:
-    - AKA Brushworx Stanley
-    Unspecified:
-    - AKA Brushworx Unspecified
+  All-Star Grooming Co.:
+    Shave Brush:
+    - all-star grooming company - badger
   Declaration Grooming:
     Jeffington:
     - declaration grooming - cold 2.0 jeffington - 28mm b18
     Washington:
     - declaration grooming washington
-  Southland:
-    Galvanized Nipple:
-    - southland galvanized nipple
   aka:
+    brushworx stanley:
+    - aka brushworx stanley
     brushworx unspecified:
     - aka brushworx unspecified
   ap:
@@ -761,25 +762,27 @@ handle:
     - yaqi unspecified
 knot:
   AKA Brushworx:
-    AK47:
-    - aka brushworx ak47
-  AP Shave Co:
-    G5C:
-    - AP Shave Co G5C
+    AK7:
+    - aka brushworx ak7
+    Synthetic:
+    - aka brushworx synthetic
   Declaration Grooming:
     B16:
     - declaration grooming b16
-  Turn-N-Shave:
-    Quartermoon:
-    - Turn-N-Shave Quartermoon
   aka:
     brushworx ak47:
     - aka brushworx ak47
+    brushworx ak7:
+    - aka brushworx ak7
     brushworx black silk:
     - aka brushworx black silk
     brushworx doughman:
     - aka brushworx doughman
+    brushworx synthetic:
+    - aka brushworx synthetic
   ap:
+    shave co g5c:
+    - ap shave co g5c
     shave co pure bliss:
     - ap shave co pure bliss
     shave co synthetic:
@@ -787,6 +790,9 @@ knot:
   declaration:
     grooming b12:
     - declaration grooming b12
+  turn-n-shave:
+    quartermoon:
+    - turn-n-shave quartermoon
   unspecified:
     synthetic:
     - unspecified synthetic
@@ -2264,3 +2270,9 @@ split_brush:
   aka brushworx g5c $frankenbrush:
     handle: aka brushworx unspecified
     knot: ap shave co g5c
+  aka brushworx manchurian $composite:
+    handle: aka brushworx unspecified
+    knot: aka brushworx synthetic
+  aka brushworx sea creature 26mm ak7 synthentic knot:
+    handle: aka brushworx unspecified
+    knot: aka brushworx ak7

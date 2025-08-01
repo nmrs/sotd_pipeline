@@ -1,24 +1,9 @@
 known_brushes:
-  Alpha:
-    Amber:
-      fiber: Synthetic
-      knot_size_mm: 28
+  All-Star Grooming Co.:
+    Shave Brush:
+      fiber: Badger
       patterns:
-      - alpha.*amber
-    Bulldog:
-      fiber: Synthetic
-      knot_size_mm: 28
-      patterns:
-      - alpha.*bulldog
-    Outlaw:
-      fiber: Synthetic
-      patterns:
-      - alpha.*outlaw
-    T-400:
-      fiber: Synthetic
-      knot_size_mm: 24
-      patterns:
-      - \bt-?400\b
+      - all[ -]?star.*grooming
   Aurora Grooming:
     default: Synthetic
     patterns:

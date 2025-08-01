@@ -13,6 +13,18 @@ artisan_handles:
       - aka.*brush
       - aka
   Alpha:
+    Amber:
+      patterns:
+      - alpha.*amber
+    Bulldog:
+      patterns:
+      - alpha.*bulldog
+    Outlaw:
+      patterns:
+      - alpha.*outlaw
+    T-400:
+      patterns:
+      - \bt-?400\b
     Unspecified:
       patterns:
       - alpha

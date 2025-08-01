@@ -46,7 +46,17 @@ known_knots:
       knot_size_mm: 26
       patterns:
       - doughman
-
+  Alpha:
+    fiber: Synthetic
+    knot_size_mm: 28
+    G4:
+      patterns:
+      - alpha.*g4
+      - \bg4\b
+    G5:
+      patterns:
+      - alpha.*g5
+      - \bg5\b
   AP Shave Co:
     APLuxury:
       fiber: Mixed Badger/Boar
@@ -287,6 +297,12 @@ known_knots:
       patterns:
       - (declaration|\bdg\b).*\bb18\b
       - \bb18\b
+  Mühle:
+    fiber: Synthetic
+    STF:
+      patterns:
+      - m[uü]hle.*stf
+      - stf
   Oumo:
     Rorschach:
       fiber: Badger
@@ -782,7 +798,7 @@ other_knots:
     default: Badger
     patterns:
     - mozingo
-  Muhle:
+  Mühle:
     default: Badger
     patterns:
     - \bm[uü]hle\b
