@@ -302,7 +302,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
           return (
-            <div className='text-sm text-gray-900 max-w-xs'>{truncateText(item.original, 60)}</div>
+            <div className='text-sm text-gray-900 max-w-xs whitespace-pre-wrap'>{item.original}</div>
           );
         },
       },

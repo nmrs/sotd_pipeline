@@ -73,12 +73,11 @@ const CommentModal: React.FC<CommentModalProps> = ({
   };
 
   const formatBody = (body: string) => {
-    // Convert markdown-style formatting to readable text
+    // Convert markdown-style formatting to HTML while preserving user intent
     return body
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Bold
-      .replace(/\*(.*?)\*/g, '$1') // Italic
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Links
-      .replace(/\$([A-Z_]+)/g, '[$1]') // Tags
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+      .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">$1</a>') // Links
       .replace(/\n/g, '<br />'); // Line breaks
   };
 
