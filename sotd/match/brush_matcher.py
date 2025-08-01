@@ -269,24 +269,28 @@ class BrushMatcher:
             # Get brand-level defaults
             brand_fiber = brand_data.get("fiber")
             brand_knot_size = brand_data.get("knot_size_mm")
-            
+
             if "knot" in catalog_entry:
                 # Extract knot information from nested structure
                 knot_info = catalog_entry["knot"]
                 model_fiber = knot_info.get("fiber")
                 model_knot_size = knot_info.get("knot_size_mm")
-                
+
                 # Use model-level overrides if available, otherwise inherit from brand
                 matched["knot"]["fiber"] = model_fiber if model_fiber is not None else brand_fiber
-                matched["knot"]["knot_size_mm"] = model_knot_size if model_knot_size is not None else brand_knot_size
+                matched["knot"]["knot_size_mm"] = (
+                    model_knot_size if model_knot_size is not None else brand_knot_size
+                )
             else:
                 # Fall back to direct catalog fields for backward compatibility
                 model_fiber = catalog_entry.get("fiber")
                 model_knot_size = catalog_entry.get("knot_size_mm")
-                
+
                 # Use model-level overrides if available, otherwise inherit from brand
                 matched["knot"]["fiber"] = model_fiber if model_fiber is not None else brand_fiber
-                matched["knot"]["knot_size_mm"] = model_knot_size if model_knot_size is not None else brand_knot_size
+                matched["knot"]["knot_size_mm"] = (
+                    model_knot_size if model_knot_size is not None else brand_knot_size
+                )
 
         # Handle nested handle structure for handle maker
         if catalog_entry and "handle" in catalog_entry:
@@ -792,6 +796,9 @@ class BrushMatcher:
                 # Create a proper MatchResult-like object for handle match
                 from sotd.match.types import create_match_result
 
+                # Get the actual pattern used for handle matching
+                handle_pattern = handle_match.get("_pattern_used", "unknown")
+
                 best_match = create_match_result(
                     original=value,
                     matched={
@@ -799,10 +806,10 @@ class BrushMatcher:
                         "model": handle_match.get("handle_model"),
                         "source_text": value,
                         "_matched_by": "HandleMatcher",
-                        "_pattern": handle_match.get("_pattern_used", "handle_matching"),
+                        "_pattern": handle_pattern,
                     },
                     match_type="regex",
-                    pattern="handle_matching",
+                    pattern=handle_pattern,
                 )
                 best_match_type = "handle"
 
@@ -1203,11 +1210,16 @@ class BrushMatcher:
 
         from sotd.match.types import create_match_result
 
+        # Use the primary pattern (handle pattern) for the top-level pattern field
+        # This follows the pattern used by other matchers where the pattern field
+        # contains the actual regex pattern that was used for matching
+        primary_pattern = handle_pattern if handle_pattern != "split" else knot_pattern
+
         return create_match_result(
             original=value,
             matched=matched,
             match_type="regex",
-            pattern="split",
+            pattern=primary_pattern,
         )
 
     def _final_cleanup(self, match_dict: dict) -> None:
@@ -1449,21 +1461,23 @@ class BrushMatcher:
                         if model in brand_data:
                             catalog_entry = brand_data[model]
                             break
-                
+
                 # Get brand-level defaults
                 brand_fiber = brand_data.get("fiber") if brand_data else None
                 brand_knot_size = brand_data.get("knot_size_mm") if brand_data else None
-                
+
                 if catalog_entry:
                     # Get model-level values (may be None)
                     model_fiber = catalog_entry.get("fiber")
                     model_knot_size = catalog_entry.get("knot_size_mm")
-                    
+
                     # Use model-level overrides if available, otherwise inherit from brand
                     if fiber is None:
                         fiber = model_fiber if model_fiber is not None else brand_fiber
                     if knot_size_mm is None:
-                        knot_size_mm = model_knot_size if model_knot_size is not None else brand_knot_size
+                        knot_size_mm = (
+                            model_knot_size if model_knot_size is not None else brand_knot_size
+                        )
 
                 # If still no fiber, check knots catalog for default fiber
                 if fiber is None and brand in self.knots_data:
@@ -1637,7 +1651,7 @@ class BrushMatcher:
                     brand_data = other_brushes_data[brand]
                     if brand_data and model in brand_data:
                         catalog_entry = brand_data[model]
-        
+
         # Handle brand-level field inheritance for simple brushes
         if catalog_entry and brand_data:
             # Create knot subsection with brand-level inheritance
@@ -1645,15 +1659,17 @@ class BrushMatcher:
                 # Get brand-level defaults
                 brand_fiber = brand_data.get("fiber")
                 brand_knot_size = brand_data.get("knot_size_mm")
-                
+
                 # Use model-level overrides if available, otherwise inherit from brand
                 model_fiber = catalog_entry.get("fiber")
                 model_knot_size = catalog_entry.get("knot_size_mm")
-                
+
                 # Final values: model overrides brand
                 final_fiber = model_fiber if model_fiber is not None else brand_fiber
-                final_knot_size = model_knot_size if model_knot_size is not None else brand_knot_size
-                
+                final_knot_size = (
+                    model_knot_size if model_knot_size is not None else brand_knot_size
+                )
+
                 updated["knot"] = {
                     "brand": brand,
                     "model": model,
@@ -1663,7 +1679,7 @@ class BrushMatcher:
                     "_matched_by": "CatalogInheritance",
                     "_pattern": "brand_level_inheritance",
                 }
-        
+
         # Handle subsection from catalog
         if catalog_entry and isinstance(catalog_entry, dict) and "handle" in catalog_entry:
             handle_info = catalog_entry["handle"]
@@ -2155,6 +2171,10 @@ class BrushMatcher:
         if handle_brand and knot_brand and handle_brand == knot_brand:
             top_brand = handle_brand
 
+        # Get the actual patterns used for matching
+        handle_pattern = handle_match.get("_pattern_used", "unknown")
+        knot_pattern = knot_match.pattern if knot_match.pattern else "unknown"
+
         # Create composite brush structure
         matched = {
             "brand": top_brand,  # Set to same brand if handle/knot match, otherwise None
@@ -2165,7 +2185,7 @@ class BrushMatcher:
                 "model": handle_match.get("handle_model"),
                 "source_text": value,
                 "_matched_by": "HandleMatcher",
-                "_pattern": "dual_component_fallback",
+                "_pattern": handle_pattern,
             },
             "knot": {
                 "brand": knot_match.matched.get("brand"),
@@ -2174,13 +2194,18 @@ class BrushMatcher:
                 "knot_size_mm": knot_match.matched.get("knot_size_mm"),
                 "source_text": value,
                 "_matched_by": "KnotMatcher",
-                "_pattern": "dual_component_fallback",
+                "_pattern": knot_pattern,
             },
         }
+
+        # Use the primary pattern (handle pattern) for the top-level pattern field
+        # This follows the pattern used by other matchers where the pattern field
+        # contains the actual regex pattern that was used for matching
+        primary_pattern = handle_pattern if handle_pattern != "unknown" else knot_pattern
 
         return create_match_result(
             original=value,
             matched=matched,
             match_type="regex",
-            pattern="dual_component_fallback",
+            pattern=primary_pattern,
         )
