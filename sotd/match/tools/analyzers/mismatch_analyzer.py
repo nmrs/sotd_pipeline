@@ -668,9 +668,10 @@ class MismatchAnalyzer(AnalysisTool):
 
         # Use format-free matched text for consistency with correct_matches.yaml storage
         if field == "soap":
-            maker = matched.get("maker", "")
-            scent = matched.get("scent", "")
-            matched_text = f"{maker} {scent}".strip()
+            # maker = matched.get("maker", "")  # Not used in current implementation
+            # scent = matched.get("scent", "")  # Not used in current implementation
+            # matched_text = f"{maker} {scent}".strip()  # Not used in current implementation
+            pass
         elif field in ["razor", "blade"]:
             # For razor field, we don't need matched_text for key generation
             pass

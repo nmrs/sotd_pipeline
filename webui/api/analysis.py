@@ -53,7 +53,9 @@ class MismatchAnalysisRequest(BaseModel):
     field: str = Field(..., description="Field to analyze (razor, blade, brush, soap)")
     month: str = Field(..., description="Month to analyze (YYYY-MM format)")
     threshold: int = Field(default=3, ge=1, le=10, description="Levenshtein distance threshold")
-    use_enriched_data: bool = Field(default=False, description="Use enriched data instead of matched data")
+    use_enriched_data: bool = Field(
+        default=False, description="Use enriched data instead of matched data"
+    )
 
 
 class MatchPhaseRequest(BaseModel):
@@ -144,6 +146,7 @@ class MismatchAnalysisResponse(BaseModel):
     processing_time: float
     partial_results: bool = False
     error: Optional[str] = None
+    matched_data_map: Optional[Dict[str, Dict[str, Any]]] = None
 
 
 class MarkCorrectRequest(BaseModel):
@@ -655,13 +658,25 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
 
         # Load data using the analyzer's method
         try:
-            # Use enriched data if the flag is set, otherwise use matched data
+            # Always load matched data for comparison
+            matched_records = analyzer.load_matched_data(args)
+
             if request.use_enriched_data:
                 logger.info("Using enriched data for mismatch analysis")
-                records = analyzer.load_enriched_data(args)
+                enriched_records = analyzer.load_enriched_data(args)
+                # Create a mapping of matched data by record ID for comparison
+                matched_data_map = {}
+                for record in matched_records:
+                    record_id = record.get("id", "")
+                    if record_id:
+                        matched_data_map[record_id] = record
+
+                # Use enriched data for analysis but keep matched data for comparison
+                records = enriched_records
+                data = {"data": records, "matched_data_map": matched_data_map}
             else:
-                records = analyzer.load_matched_data(args)
-            data = {"data": records}
+                records = matched_records
+                data = {"data": records}
         except Exception as e:
             logger.error(f"Error loading data: {e}")
             raise HTTPException(status_code=500, detail=f"Error loading data: {str(e)}")
@@ -773,6 +788,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
             processing_time=0.0,
             partial_results=False,
             error=None,
+            matched_data_map=data.get("matched_data_map") if request.use_enriched_data else None,
         )
 
     except HTTPException:

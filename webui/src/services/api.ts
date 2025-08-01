@@ -195,6 +195,7 @@ export interface MismatchAnalysisResult {
   processing_time: number;
   partial_results?: boolean;
   error?: string;
+  matched_data_map?: Record<string, Record<string, any>>;
 }
 
 export const analyzeMismatch = async (

@@ -3,6 +3,7 @@ import { ColumnDef, Row } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 import { CommentList } from '../domain/CommentList';
 import { MismatchItem } from '../../services/api';
+import EnrichPhaseTooltip from '../ui/EnrichPhaseTooltip';
 
 // Helper function to extract brush component patterns
 const getBrushComponentPattern = (
@@ -61,6 +62,7 @@ interface MismatchAnalyzerDataTableProps {
   onItemSelection?: (itemKey: string, selected: boolean) => void;
   isItemConfirmed?: (item: MismatchItem) => boolean;
   onVisibleRowsChange?: (visibleRows: MismatchItem[]) => void;
+  matched_data_map?: Record<string, Record<string, any>>;
 }
 
 const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
@@ -72,6 +74,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   onItemSelection,
   isItemConfirmed,
   onVisibleRowsChange,
+  matched_data_map,
 }) => {
   const getMismatchTypeIcon = (mismatchType?: string) => {
     switch (mismatchType) {
@@ -206,6 +209,20 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     return String(matched);
   };
 
+  // Helper function to check if there are enrich-phase changes
+  const hasEnrichPhaseChanges = (originalData: Record<string, any>, enrichedData: Record<string, any>): boolean => {
+    if (!originalData || !enrichedData) return false;
+    
+    // Check for changes in key fields that are commonly adjusted in enrich phase
+    const fieldsToCheck = ['fiber', 'knot_size_mm', 'handle_maker', 'brand', 'model'];
+    
+    return fieldsToCheck.some(field => {
+      const original = originalData[field];
+      const enriched = enrichedData[field];
+      return original !== enriched;
+    });
+  };
+
   const columns = useMemo(() => {
     const baseColumns: ColumnDef<MismatchItem>[] = [
       // Selection column
@@ -318,9 +335,17 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           const item = row.original;
           const formattedData = formatMatchedData(item.matched, field);
 
+          // Check if we have matched_data_map and if there are enrich-phase changes
+          const hasChanges = matched_data_map && (() => {
+            // Create a unique key for this item (using original text as key)
+            const itemKey = item.original.toLowerCase();
+            const originalData = matched_data_map[itemKey];
+            return originalData && hasEnrichPhaseChanges(originalData, item.matched as Record<string, any>);
+          })();
+
           // For brush field, render with line breaks
           if (field === 'brush' && formattedData.includes('\n')) {
-            return (
+            const content = (
               <div className='text-sm text-gray-900 max-w-xs'>
                 {formattedData.split('\n').map((line, index) => (
                   <div key={index} className={index > 0 ? 'mt-1' : ''}>
@@ -329,14 +354,46 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
                 ))}
               </div>
             );
+
+            if (hasChanges && matched_data_map) {
+              const itemKey = item.original.toLowerCase();
+              const originalData = matched_data_map[itemKey];
+              return (
+                <EnrichPhaseTooltip
+                  originalData={originalData}
+                  enrichedData={item.matched as Record<string, any>}
+                  field={field}
+                >
+                  {content}
+                </EnrichPhaseTooltip>
+              );
+            }
+
+            return content;
           }
 
           // For other fields, use the original rendering
-          return (
+          const content = (
             <div className='text-sm text-gray-900 max-w-xs'>
               <span>{truncateText(formattedData, 60)}</span>
             </div>
           );
+
+          if (hasChanges && matched_data_map) {
+            const itemKey = item.original.toLowerCase();
+            const originalData = matched_data_map[itemKey];
+            return (
+              <EnrichPhaseTooltip
+                originalData={originalData}
+                enrichedData={item.matched as Record<string, any>}
+                field={field}
+              >
+                {content}
+              </EnrichPhaseTooltip>
+            );
+          }
+
+          return content;
         },
       },
       {

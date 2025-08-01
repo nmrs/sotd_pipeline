@@ -900,6 +900,7 @@ const MismatchAnalyzer: React.FC = () => {
                 onItemSelection={handleItemSelection}
                 isItemConfirmed={isItemConfirmed}
                 onVisibleRowsChange={handleVisibleRowsChange}
+                matched_data_map={results?.matched_data_map}
               />
             ) : (
               <div className='text-center py-8'>
