@@ -4,27 +4,15 @@ import EnrichPhaseTooltip from '../EnrichPhaseTooltip';
 
 describe('EnrichPhaseTooltip', () => {
   const mockOriginalData = {
-    handle: {
-      fiber: 'Synthetic',
-      brand: 'Test Brand',
-    },
     knot: {
       fiber: 'Synthetic',
       knot_size_mm: 24,
-      brand: 'Test Brand',
     },
   };
 
   const mockEnrichedData = {
-    handle: {
-      fiber: 'Badger',
-      brand: 'Test Brand',
-    },
-    knot: {
-      fiber: 'Badger',
-      knot_size_mm: 26,
-      brand: 'Test Brand',
-    },
+    fiber: 'Badger',
+    knot_size_mm: 26,
     _extraction_source: 'user_override_catalog',
   };
 
@@ -57,8 +45,7 @@ describe('EnrichPhaseTooltip', () => {
     fireEvent.mouseEnter(trigger);
 
     expect(screen.getByText('Enrich Phase Adjustments:')).toBeInTheDocument();
-    expect(screen.getByText(/Handle Fiber: Synthetic → Badger/)).toBeInTheDocument();
-    expect(screen.getByText(/Knot Fiber: Synthetic → Badger/)).toBeInTheDocument();
+    expect(screen.getByText(/Fiber: Synthetic → Badger/)).toBeInTheDocument();
     expect(screen.getByText(/Knot Size: 24 → 26/)).toBeInTheDocument();
     expect(screen.getByText(/Source: user_override_catalog/)).toBeInTheDocument();
   });
@@ -83,10 +70,15 @@ describe('EnrichPhaseTooltip', () => {
   });
 
   it('shows no changes message when data is identical', () => {
+    const identicalData = {
+      fiber: 'Synthetic',
+      knot_size_mm: 24,
+    };
+
     render(
       <EnrichPhaseTooltip
-        originalData={mockOriginalData}
-        enrichedData={mockOriginalData}
+        originalData={identicalData}
+        enrichedData={identicalData}
         field="brush"
       >
         <span>Test Content</span>
