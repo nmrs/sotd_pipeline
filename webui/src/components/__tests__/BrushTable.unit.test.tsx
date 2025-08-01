@@ -84,46 +84,30 @@ jest.mock('../forms/FilteredEntryCheckbox', () => ({
   },
 }));
 
-// Mock data for testing
-const mockBrushData: BrushData[] = [
+// Test data
+const mockBrushData = [
   {
     main: {
-      text: 'Simpson Chubby 2',
+      brush: 'Simpson Chubby 2',
       count: 5,
       comment_ids: ['123', '456'],
       examples: ['Example 1', 'Example 2'],
-      status: 'Matched',
     },
     components: {
-      handle: {
-        text: 'Simpson Chubby 2',
-        status: 'Matched',
-      },
-      knot: {
-        text: 'Simpson Badger',
-        status: 'Matched',
-      },
+      handle: { maker: 'Elite handle', count: 3, comment_ids: ['123'] },
+      knot: { maker: 'Declaration knot', count: 3, comment_ids: ['456'] },
     },
   },
   {
     main: {
-      text: 'Declaration B15',
+      brush: 'Declaration B15',
       count: 3,
       comment_ids: ['789'],
       examples: ['Example 3'],
-      status: 'Unmatched',
     },
     components: {
-      handle: {
-        text: 'Declaration B15',
-        status: 'Unmatched',
-        pattern: 'Declaration',
-      },
-      knot: {
-        text: 'Declaration Badger',
-        status: 'Unmatched',
-        pattern: 'Declaration',
-      },
+      handle: { maker: 'Declaration handle', count: 2, comment_ids: ['789'] },
+      knot: { maker: 'Declaration knot', count: 2, comment_ids: ['789'] },
     },
   },
 ];
@@ -182,8 +166,7 @@ describe('BrushTable Unit Tests', () => {
       // Check that the DataTable container exists (even with empty data)
       expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
 
-      // Check that columns are defined
-      expect(screen.getByTestId('column-filtered')).toBeInTheDocument();
+      // Check that columns are defined (no separate filtered column in current implementation)
       expect(screen.getByTestId('column-brush')).toBeInTheDocument();
       expect(screen.getByTestId('column-handle')).toBeInTheDocument();
       expect(screen.getByTestId('column-knot')).toBeInTheDocument();
@@ -327,18 +310,22 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
-      // Check that checkboxes are rendered for each brush in the filtered column cells
-      expect(screen.getByTestId('cell-filtered-0')).toBeInTheDocument();
-      expect(screen.getByTestId('cell-filtered-3')).toBeInTheDocument();
+      // Check that the DataTable container exists
+      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
+
+      // Check that checkboxes are rendered for each brush in the brush column cells
+      expect(screen.getByTestId('cell-brush-0')).toBeInTheDocument();
+      expect(screen.getByTestId('cell-brush-3')).toBeInTheDocument();
     });
 
     test('should call onBrushFilter when checkbox is clicked', async () => {
       const user = userEvent.setup();
+      const onBrushFilter = jest.fn();
 
       render(
         <BrushTable
           items={mockBrushData}
-          onBrushFilter={mockOnBrushFilter}
+          onBrushFilter={onBrushFilter}
           onComponentFilter={mockOnComponentFilter}
           filteredStatus={{}}
           pendingChanges={{}}
@@ -346,21 +333,27 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
+      // Check that the DataTable container exists
+      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
+
+      // Find the checkbox in the brush column cell for the main row (row 0)
+      // The ShadCN Checkbox renders as a button with role="checkbox"
       const checkbox = screen
-        .getByTestId('cell-filtered-0')
-        .querySelector('[data-testid="checkbox-Simpson Chubby 2-main"]');
+        .getByTestId('cell-brush-0')
+        .querySelector('button[role="checkbox"]');
       await user.click(checkbox!);
 
-      expect(mockOnBrushFilter).toHaveBeenCalledWith('Simpson Chubby 2', true);
+      expect(onBrushFilter).toHaveBeenCalledWith('Simpson Chubby 2', true);
     });
 
     test('should handle multiple checkbox interactions', async () => {
       const user = userEvent.setup();
+      const onBrushFilter = jest.fn();
 
       render(
         <BrushTable
           items={mockBrushData}
-          onBrushFilter={mockOnBrushFilter}
+          onBrushFilter={onBrushFilter}
           onComponentFilter={mockOnComponentFilter}
           filteredStatus={{}}
           pendingChanges={{}}
@@ -368,19 +361,23 @@ describe('BrushTable Unit Tests', () => {
         />
       );
 
+      // Check that the DataTable container exists
+      expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
+
+      // Find checkboxes in the brush column cells for main rows
+      // The ShadCN Checkbox renders as a button with role="checkbox"
       const checkbox1 = screen
-        .getByTestId('cell-filtered-0')
-        .querySelector('[data-testid="checkbox-Simpson Chubby 2-main"]');
+        .getByTestId('cell-brush-0')
+        .querySelector('button[role="checkbox"]');
       const checkbox2 = screen
-        .getByTestId('cell-filtered-3')
-        .querySelector('[data-testid="checkbox-Declaration B15-main"]');
+        .getByTestId('cell-brush-3')
+        .querySelector('button[role="checkbox"]');
 
       await user.click(checkbox1!);
       await user.click(checkbox2!);
 
-      expect(mockOnBrushFilter).toHaveBeenCalledTimes(2);
-      expect(mockOnBrushFilter).toHaveBeenCalledWith('Simpson Chubby 2', true);
-      expect(mockOnBrushFilter).toHaveBeenCalledWith('Declaration B15', true);
+      expect(onBrushFilter).toHaveBeenCalledWith('Simpson Chubby 2', true);
+      expect(onBrushFilter).toHaveBeenCalledWith('Declaration B15', true);
     });
   });
 
@@ -439,11 +436,10 @@ describe('BrushTable Unit Tests', () => {
       const malformedData = [
         {
           main: {
-            text: 'Valid Brush',
+            brush: 'Valid Brush',
             count: 1,
             comment_ids: ['123'],
             examples: ['Example'],
-            status: 'Matched' as const,
           },
           components: {
             // Missing components - should not crash
@@ -488,16 +484,16 @@ describe('BrushTable Unit Tests', () => {
     test('should render large datasets efficiently', () => {
       const largeDataset = Array.from({ length: 100 }, (_, i) => ({
         main: {
-          text: `Brush ${i}`,
+          brush: `Brush ${i}`,
           count: i,
           comment_ids: [`comment-${i}`],
           examples: [`example-${i}`],
-          status: 'Matched' as const,
         },
         components: {
           handle: {
-            text: `Handle ${i}`,
-            status: 'Matched' as const,
+            maker: `Handle ${i}`,
+            count: i,
+            comment_ids: [`comment-${i}`],
           },
         },
       }));

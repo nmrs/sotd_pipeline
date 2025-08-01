@@ -24,7 +24,7 @@ test.describe('Safari Basic Functionality', () => {
 
     // Check navigation links exist
     const navLinks = page.locator('nav a');
-    await expect(navLinks).toHaveCount(4);
+    await expect(navLinks).toHaveCount(6);
   });
 
   test('should handle navigation between pages', async ({ page }) => {

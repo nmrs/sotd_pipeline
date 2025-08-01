@@ -80,28 +80,26 @@ jest.mock('../forms/FilteredEntryCheckbox', () => ({
 const mockBrushData = [
   {
     main: {
-      text: 'Test Brush 1',
+      brush: 'Test Brush 1',
       count: 10,
       comment_ids: ['comment1', 'comment2'],
       examples: ['example1', 'example2'],
-      status: 'Matched' as const,
     },
     components: {
-      handle: { text: 'Test Handle 1', status: 'Matched' as const },
-      knot: { text: 'Test Knot 1', status: 'Unmatched' as const },
+      handle: { maker: 'Test Handle 1', count: 5, comment_ids: ['comment1'] },
+      knot: { maker: 'Test Knot 1', count: 5, comment_ids: ['comment2'] },
     },
   },
   {
     main: {
-      text: 'Test Brush 2',
+      brush: 'Test Brush 2',
       count: 5,
       comment_ids: ['comment3'],
       examples: ['example3'],
-      status: 'Unmatched' as const,
     },
     components: {
-      handle: undefined,
-      knot: { text: 'Test Knot 2', status: 'Matched' as const },
+      handle: { maker: 'Test Handle 2', count: 3, comment_ids: ['comment3'] },
+      knot: { maker: 'Test Knot 2', count: 3, comment_ids: ['comment3'] },
     },
   },
 ];
@@ -194,10 +192,11 @@ describe('BrushTable', () => {
       // The mock DataTable renders the cell content, so we can find the checkbox
       expect(screen.getByTestId('shadcn-data-table')).toBeInTheDocument();
 
-      // Find the checkbox in the filtered column cell for the main row (row 0)
+      // Find the checkbox in the brush column cell for the main row (row 0)
+      // The ShadCN Checkbox renders as a button with role="checkbox"
       const checkbox = screen
-        .getByTestId('cell-filtered-0')
-        .querySelector('[data-testid="checkbox-input-Test Brush 1"]');
+        .getByTestId('cell-brush-0')
+        .querySelector('button[role="checkbox"]');
       fireEvent.click(checkbox!);
 
       expect(onBrushFilter).toHaveBeenCalledWith('Test Brush 1', true);
@@ -238,11 +237,10 @@ describe('BrushTable', () => {
       const incompleteData = [
         {
           main: {
-            text: 'Brush without components',
+            brush: 'Brush without components',
             count: 100,
             comment_ids: [],
             examples: [],
-            status: 'Unmatched' as const,
           },
           components: {
             handle: undefined,
@@ -268,15 +266,14 @@ describe('BrushTable', () => {
     it('handles large datasets efficiently', () => {
       const largeData = Array.from({ length: 100 }, (_, i) => ({
         main: {
-          text: `Brush ${i + 1}`,
+          brush: `Brush ${i + 1}`,
           count: i + 1,
           comment_ids: [`comment${i + 1}`],
           examples: [`example${i + 1}`],
-          status: 'Matched' as const,
         },
         components: {
-          handle: { text: `Handle ${i + 1}`, status: 'Matched' as const },
-          knot: { text: `Knot ${i + 1}`, status: 'Unmatched' as const },
+          handle: { maker: `Handle ${i + 1}`, count: i + 1, comment_ids: [`comment${i + 1}`] },
+          knot: { maker: `Knot ${i + 1}`, count: i + 1, comment_ids: [`comment${i + 1}`] },
         },
       }));
 
