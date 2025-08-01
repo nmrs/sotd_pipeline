@@ -112,6 +112,9 @@ class BrushMatcher:
 
         # Load human-curated brush splits
         self.brush_splits_loader = BrushSplitsLoader()
+        
+        # Pre-compile handle patterns for performance optimization
+        self._compiled_handle_patterns = self._precompile_handle_patterns()
 
     def _check_correct_matches(self, value: str) -> Optional[Dict[str, Any]]:
         """
@@ -440,6 +443,80 @@ class BrushMatcher:
     def get_cache_stats(self) -> Dict[str, int]:
         """Get cache statistics for performance monitoring."""
         return self._cache.stats()
+
+    def _precompile_handle_patterns(self) -> Dict[str, list[dict]]:
+        """
+        Pre-compile all handle patterns for performance optimization.
+        
+        Returns:
+            Dictionary mapping brand names to lists of compiled pattern dictionaries
+        """
+        import re
+        
+        compiled_patterns = {}
+        handles_data = self.catalog_loader.load_catalog(self.handles_path, "handles")
+
+        # Search through all handle sections for all brands
+        for section_name, section_data in handles_data.items():
+            if not section_data:
+                continue
+                
+            for brand, brand_data in section_data.items():
+                if not brand_data:
+                    continue
+                    
+                if brand not in compiled_patterns:
+                    compiled_patterns[brand] = []
+
+                # Get all models for this brand
+                for model_name, model_data in brand_data.items():
+                    if not model_data:
+                        continue
+
+                    # Handle both dictionary and list structures
+                    if isinstance(model_data, dict):
+                        # Dictionary structure with patterns field
+                        if model_name == "Unspecified":
+                            # Handle unspecified models
+                            for pattern in model_data.get("patterns", []):
+                                compiled_patterns[brand].append(
+                                    {
+                                        "pattern": re.compile(pattern, re.IGNORECASE),
+                                        "original_pattern": pattern,
+                                        "match_data": {
+                                            "brand": brand,
+                                            "model": model_name,
+                                        },
+                                    }
+                                )
+                        else:
+                            # Handle specific models
+                            for pattern in model_data.get("patterns", []):
+                                compiled_patterns[brand].append(
+                                    {
+                                        "pattern": re.compile(pattern, re.IGNORECASE),
+                                        "original_pattern": pattern,
+                                        "match_data": {
+                                            "brand": brand,
+                                            "model": model_name,
+                                        },
+                                    }
+                                )
+                    elif isinstance(model_data, list):
+                        # List structure - treat as patterns directly
+                        for pattern in model_data:
+                            compiled_patterns[brand].append(
+                                {
+                                    "pattern": re.compile(pattern, re.IGNORECASE),
+                                    "original_pattern": pattern,
+                                    "match_data": {
+                                        "brand": brand,
+                                        "model": model_name,
+                                    },
+                                }
+                            )
+
+        return compiled_patterns
 
     def _match_correct_complete_brush(self, value: str) -> Optional["MatchResult"]:
         """Strategy 1: Check brush section in correct_matches.yaml (fastest)."""
@@ -1241,51 +1318,8 @@ class BrushMatcher:
         Returns:
             List of pattern dictionaries with compiled patterns and match data
         """
-        import re
-
-        patterns = []
-        handles_data = self.catalog_loader.load_catalog(self.handles_path, "handles")
-
-        # Search through all handle sections for the brand
-        for section_name, section_data in handles_data.items():
-            if section_data and brand in section_data:
-                brand_data = section_data[brand]
-                if not brand_data:
-                    continue
-
-                # Get all models for this brand
-                for model_name, model_data in brand_data.items():
-                    if not model_data:
-                        continue
-
-                    if model_name == "Unspecified":
-                        # Handle unspecified models
-                        for pattern in model_data.get("patterns", []):
-                            patterns.append(
-                                {
-                                    "pattern": re.compile(pattern, re.IGNORECASE),
-                                    "original_pattern": pattern,
-                                    "match_data": {
-                                        "brand": brand,
-                                        "model": model_name,
-                                    },
-                                }
-                            )
-                    else:
-                        # Handle specific models
-                        for pattern in model_data.get("patterns", []):
-                            patterns.append(
-                                {
-                                    "pattern": re.compile(pattern, re.IGNORECASE),
-                                    "original_pattern": pattern,
-                                    "match_data": {
-                                        "brand": brand,
-                                        "model": model_name,
-                                    },
-                                }
-                            )
-
-        return patterns
+        # Use pre-compiled patterns for performance optimization
+        return self._compiled_handle_patterns.get(brand, [])
 
     def _extract_match_dict(
         self,
