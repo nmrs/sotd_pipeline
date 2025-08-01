@@ -89,6 +89,6 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
         return create_match_result(
             original=value,
             matched=None,
-            pattern="",
-            match_type="",
+            pattern=None,  # type: ignore
+            match_type=None,  # type: ignore
         )
