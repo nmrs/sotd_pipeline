@@ -44,3 +44,52 @@ class BaseEnricher(ABC):
     def get_enricher_name(self) -> str:
         """Get the name of this enricher for metadata purposes."""
         return self.__class__.__name__
+
+    def _create_enriched_data(
+        self, user_data: Dict[str, Any], catalog_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Create enriched data with proper source tracking.
+
+        Args:
+            user_data: Data extracted from user comment (can be empty dict)
+            catalog_data: Data from catalog/match phase (can be empty dict)
+
+        Returns:
+            Enriched data with proper source tracking
+        """
+        # Determine sources
+        sources = []
+        if user_data:
+            sources.append("user_comment")
+        if catalog_data:
+            sources.append("catalog_data")
+
+        # Create base enriched data
+        enriched_data = {
+            "_enriched_by": self.get_enricher_name(),
+            "_extraction_source": " + ".join(sources) if sources else "none",
+        }
+
+        # Merge data (user takes precedence, but None values don't override catalog)
+        merged_data = {**catalog_data, **user_data}
+        # Handle None values: if user data is None, use catalog data
+        for key in user_data:
+            if user_data[key] is None and key in catalog_data:
+                merged_data[key] = catalog_data[key]
+        enriched_data.update(merged_data)
+
+        return enriched_data
+
+    def _create_single_source_enriched_data(
+        self, data: Dict[str, Any], source: str
+    ) -> Dict[str, Any]:
+        """Create enriched data for single-source extraction.
+
+        Args:
+            data: Extracted data
+            source: Source of the data ("user_comment", "catalog_data", etc.)
+
+        Returns:
+            Enriched data with proper source tracking
+        """
+        return {"_enriched_by": self.get_enricher_name(), "_extraction_source": source, **data}

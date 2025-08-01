@@ -1,0 +1,368 @@
+# Enrichment Source Tracking Fix - TDD Implementation Plan
+
+## 📘 Project Summary
+
+Fix the systematic bug in enrichment source tracking where all enrichers incorrectly claim `"user_comment"` as the source even when data comes from catalog sources. This affects 6 out of 7 enrichers and creates misleading metadata for ~4,000+ records.
+
+**Problem**: Enrichers set `_extraction_source: "user_comment"` when data actually comes from catalog sources (like Koraat specs from `razors.yaml`).
+
+**Solution**: Enhance `BaseEnricher` with proper source tracking methods and update all enrichers to use consistent source tracking logic.
+
+**Impact**: Fixes misleading data lineage for ~4,000+ records across all enriched fields.
+
+## 🧩 Component Steps
+
+### Phase 1: Base Enricher Enhancement
+1. **✅ Enhance BaseEnricher with source tracking methods** - COMPLETED
+   - ✅ Add `_create_enriched_data()` method for multi-source scenarios
+   - ✅ Add `_create_single_source_enriched_data()` method for single-source scenarios
+   - ✅ Add comprehensive tests for source tracking logic
+
+### Phase 2: Brush Enricher Fix
+2. **Update Brush Enricher to use new source tracking**
+   - Refactor to use `_create_enriched_data()` method
+   - Add tests for catalog-only, user-only, and mixed scenarios
+   - Validate source tracking accuracy
+
+### Phase 3: Straight Razor Enricher Fix
+3. **Update Straight Razor Enricher to use new source tracking**
+   - Refactor to use `_create_enriched_data()` method
+   - Add tests for catalog-only, user-only, and mixed scenarios
+   - Validate source tracking accuracy
+
+### Phase 4: User-Only Enrichers Fix
+4. **Update GameChanger Enricher**
+   - Refactor to use `_create_single_source_enriched_data()` method
+   - Add tests for user-only extraction scenarios
+
+5. **Update Christopher Bradley Enricher**
+   - Refactor to use `_create_single_source_enriched_data()` method
+   - Add tests for user-only extraction scenarios
+
+6. **Update Super Speed Tip Enricher**
+   - Refactor to use `_create_single_source_enriched_data()` method
+   - Add tests for user-only extraction scenarios
+
+7. **Update Blackbird Plate Enricher**
+   - Refactor to use `_create_single_source_enriched_data()` method
+   - Add tests for user-only extraction scenarios
+
+### Phase 5: Integration and Validation
+8. **Integration testing and validation**
+   - Run enrichment phase on test data
+   - Validate source tracking accuracy across all enrichers
+   - Update documentation
+
+## 🔁 Implementation Prompts
+
+### Step 1: Enhance BaseEnricher with Source Tracking Methods
+
+```text
+Enhance the BaseEnricher class in `sotd/enrich/enricher.py` to provide proper source tracking methods that all enrichers can inherit.
+
+**Requirements:**
+1. Add `_create_enriched_data(user_data: Dict[str, Any], catalog_data: Dict[str, Any]) -> Dict[str, Any]` method
+   - Merges user and catalog data with proper source tracking
+   - User data takes precedence over catalog data
+   - Sets `_extraction_source` to "user_comment + catalog_data" when both exist
+   - Sets `_extraction_source` to "user_comment" when only user data exists
+   - Sets `_extraction_source` to "catalog_data" when only catalog data exists
+
+2. Add `_create_single_source_enriched_data(data: Dict[str, Any], source: str) -> Dict[str, Any]` method
+   - Creates enriched data for single-source extraction
+   - Sets `_extraction_source` to the provided source
+   - Includes `_enriched_by` field
+
+3. Add comprehensive tests in `tests/enrich/test_enricher.py`
+   - Test `_create_enriched_data()` with various combinations
+   - Test `_create_single_source_enriched_data()` with different sources
+   - Test edge cases (empty data, None values, etc.)
+
+**Implementation Notes:**
+- Both methods should include `_enriched_by` field using `get_enricher_name()`
+- Source tracking should be explicit and accurate
+- Methods should handle empty/None data gracefully
+- Follow existing code style and patterns
+
+**Test Scenarios:**
+- User data only: `_extraction_source: "user_comment"`
+- Catalog data only: `_extraction_source: "catalog_data"`
+- Both user and catalog: `_extraction_source: "user_comment + catalog_data"`
+- No data: `_extraction_source: "none"`
+- User data overrides catalog data (user takes precedence)
+```
+
+### Step 2: Update Brush Enricher to Use New Source Tracking
+
+```text
+Refactor the Brush Enricher in `sotd/enrich/brush_enricher.py` to use the new source tracking methods from BaseEnricher.
+
+**Requirements:**
+1. Replace the current source tracking logic with calls to `_create_enriched_data()`
+2. Extract user data (knot_size_mm, fiber) from original_comment
+3. Extract catalog data (knot_size_mm, fiber) from field_data
+4. Use `_create_enriched_data()` to merge with proper source tracking
+5. Preserve all existing functionality (custom knot detection, conflict resolution)
+
+**Implementation Notes:**
+- Keep existing extraction logic for user data
+- Keep existing catalog data extraction from field_data
+- Use `_create_enriched_data()` for the final merge
+- Preserve `_fiber_extraction_source` field for backward compatibility
+- Maintain all existing metadata fields
+
+**Test Scenarios (add to `tests/enrich/test_brush_enricher.py`):**
+- Catalog-only data: `_extraction_source: "catalog_data"`, `_fiber_extraction_source: "catalog_data"`
+- User-only data: `_extraction_source: "user_comment"`, `_fiber_extraction_source: "user_comment"`
+- User confirms catalog: `_extraction_source: "user_comment + catalog_data"`, `_fiber_extraction_source: "user_comment + catalog_data"`
+- User overrides catalog: `_extraction_source: "user_comment + catalog_data"`, `_fiber_extraction_source: "user_comment + catalog_data"`
+- Mixed data (catalog knot_size, user fiber): appropriate source tracking for each field
+
+**Expected Changes:**
+- Replace manual source tracking with `_create_enriched_data()` calls
+- Simplify the enrichment logic
+- Maintain backward compatibility with existing aggregators
+```
+
+### Step 3: Update Straight Razor Enricher to Use New Source Tracking
+
+```text
+Refactor the Straight Razor Enricher in `sotd/enrich/straight_razor_enricher.py` to use the new source tracking methods from BaseEnricher.
+
+**Requirements:**
+1. Replace the current source tracking logic with calls to `_create_enriched_data()`
+2. Extract user data (grind, width, point) from original_comment
+3. Extract catalog data (grind, width, point) from field_data
+4. Use `_create_enriched_data()` to merge with proper source tracking
+5. Preserve all existing functionality
+
+**Implementation Notes:**
+- Keep existing extraction logic for user data
+- Keep existing catalog data extraction from field_data
+- Use `_create_enriched_data()` for the final merge
+- Maintain all existing metadata fields
+
+**Test Scenarios (add to `tests/enrich/test_straight_razor_enricher.py`):**
+- Catalog-only data: `_extraction_source: "catalog_data"`
+- User-only data: `_extraction_source: "user_comment"`
+- User confirms catalog: `_extraction_source: "user_comment + catalog_data"`
+- User overrides catalog: `_extraction_source: "user_comment + catalog_data"`
+- Mixed data: appropriate source tracking
+
+**Expected Changes:**
+- Replace manual source tracking with `_create_enriched_data()` calls
+- Simplify the enrichment logic
+- Maintain backward compatibility
+```
+
+### Step 4: Update GameChanger Enricher to Use New Source Tracking
+
+```text
+Refactor the GameChanger Enricher in `sotd/enrich/game_changer_enricher.py` to use the new source tracking methods from BaseEnricher.
+
+**Requirements:**
+1. Replace the current source tracking logic with calls to `_create_single_source_enriched_data()`
+2. Extract user data (gap, variant) from original_comment
+3. Use `_create_single_source_enriched_data()` with "user_comment" source
+4. Preserve all existing functionality
+
+**Implementation Notes:**
+- Keep existing extraction logic for gap and variant
+- Use `_create_single_source_enriched_data()` for the final result
+- Maintain all existing metadata fields
+
+**Test Scenarios (add to `tests/enrich/test_game_changer_enricher.py`):**
+- User data found: `_extraction_source: "user_comment"`
+- No user data: return None (no enrichment)
+- Various gap and variant combinations
+
+**Expected Changes:**
+- Replace manual source tracking with `_create_single_source_enriched_data()` calls
+- Simplify the enrichment logic
+- Maintain backward compatibility
+```
+
+### Step 5: Update Christopher Bradley Enricher to Use New Source Tracking
+
+```text
+Refactor the Christopher Bradley Enricher in `sotd/enrich/christopher_bradley_enricher.py` to use the new source tracking methods from BaseEnricher.
+
+**Requirements:**
+1. Replace the current source tracking logic with calls to `_create_single_source_enriched_data()`
+2. Extract user data (plate_level, plate_type) from original_comment
+3. Use `_create_single_source_enriched_data()` with "user_comment" source
+4. Preserve all existing functionality
+
+**Implementation Notes:**
+- Keep existing extraction logic for plate_level and plate_type
+- Use `_create_single_source_enriched_data()` for the final result
+- Maintain all existing metadata fields
+
+**Test Scenarios (add to `tests/enrich/test_christopher_bradley_enricher.py`):**
+- User data found: `_extraction_source: "user_comment"`
+- No user data: return None (no enrichment)
+- Various plate level and type combinations
+
+**Expected Changes:**
+- Replace manual source tracking with `_create_single_source_enriched_data()` calls
+- Simplify the enrichment logic
+- Maintain backward compatibility
+```
+
+### Step 6: Update Super Speed Tip Enricher to Use New Source Tracking
+
+```text
+Refactor the Super Speed Tip Enricher in `sotd/enrich/super_speed_tip_enricher.py` to use the new source tracking methods from BaseEnricher.
+
+**Requirements:**
+1. Replace the current source tracking logic with calls to `_create_single_source_enriched_data()`
+2. Extract user data (super_speed_tip) from original_comment
+3. Use `_create_single_source_enriched_data()` with "user_comment" source
+4. Preserve all existing functionality
+
+**Implementation Notes:**
+- Keep existing extraction logic for super_speed_tip
+- Use `_create_single_source_enriched_data()` for the final result
+- Maintain all existing metadata fields
+
+**Test Scenarios (add to `tests/enrich/test_super_speed_tip_enricher.py`):**
+- User data found: `_extraction_source: "user_comment"`
+- No user data: return None (no enrichment)
+- Various tip type combinations (Red, Blue, Black, Flare)
+
+**Expected Changes:**
+- Replace manual source tracking with `_create_single_source_enriched_data()` calls
+- Simplify the enrichment logic
+- Maintain backward compatibility
+```
+
+### Step 7: Update Blackbird Plate Enricher to Use New Source Tracking
+
+```text
+Refactor the Blackbird Plate Enricher in `sotd/enrich/blackbird_plate_enricher.py` to use the new source tracking methods from BaseEnricher.
+
+**Requirements:**
+1. Replace the current source tracking logic with calls to `_create_single_source_enriched_data()`
+2. Extract user data (plate) from original_comment
+3. Use `_create_single_source_enriched_data()` with "user_comment" source
+4. Preserve all existing functionality
+
+**Implementation Notes:**
+- Keep existing extraction logic for plate
+- Use `_create_single_source_enriched_data()` for the final result
+- Maintain all existing metadata fields
+
+**Test Scenarios (add to `tests/enrich/test_blackbird_plate_enricher.py`):**
+- User data found: `_extraction_source: "user_comment"`
+- No user data: return None (no enrichment)
+- Various plate combinations (OC, Lite, Standard)
+
+**Expected Changes:**
+- Replace manual source tracking with `_create_single_source_enriched_data()` calls
+- Simplify the enrichment logic
+- Maintain backward compatibility
+```
+
+### Step 8: Integration Testing and Validation
+
+```text
+Run comprehensive integration tests to validate the source tracking fixes across all enrichers.
+
+**Requirements:**
+1. Run enrichment phase on test data to validate source tracking accuracy
+2. Verify that catalog-only data shows `_extraction_source: "catalog_data"`
+3. Verify that user-only data shows `_extraction_source: "user_comment"`
+4. Verify that mixed data shows `_extraction_source: "user_comment + catalog_data"`
+5. Update documentation to reflect the new source tracking behavior
+
+**Test Commands:**
+- Run `make test` to ensure all tests pass
+- Run enrichment phase on sample data: `python run.py enrich --month 2025-06 --force`
+- Validate source tracking in output files
+- Check that aggregators still work correctly with new source values
+
+**Validation Checklist:**
+- [ ] All enrichers use proper source tracking
+- [ ] Catalog-only data shows correct source
+- [ ] User-only data shows correct source
+- [ ] Mixed data shows correct source
+- [ ] No breaking changes to aggregators
+- [ ] All tests pass
+- [ ] Documentation updated
+
+**Expected Results:**
+- Accurate source tracking for ~4,000+ enriched records
+- Clear distinction between catalog-only and user-influenced data
+- Reliable aggregator behavior based on correct source metadata
+- Maintained backward compatibility
+```
+
+## 🧠 Critical Analysis
+
+### Prompt Sequence and Structure Analysis
+
+**Strengths:**
+1. **Incremental Approach**: Each step builds on the previous one, allowing for safe testing and validation
+2. **Test-First Development**: Each step includes comprehensive test scenarios to ensure correctness
+3. **Backward Compatibility**: All changes maintain compatibility with existing aggregators
+4. **Systematic Coverage**: Addresses all 6 affected enrichers with appropriate patterns
+5. **Clear Separation**: Distinguishes between multi-source (catalog + user) and single-source (user-only) scenarios
+
+**Risk Mitigation:**
+1. **Base Class Enhancement First**: Establishes the foundation before updating individual enrichers
+2. **Comprehensive Testing**: Each step includes detailed test scenarios to catch regressions
+3. **Incremental Validation**: Each enricher can be tested independently
+4. **Integration Testing**: Final step validates the complete system
+
+**Implementation Safety:**
+1. **Small, Focused Changes**: Each step modifies only one enricher at a time
+2. **Preserved Functionality**: All existing features and metadata fields are maintained
+3. **Clear Rollback Path**: Each step can be reverted independently if issues arise
+4. **Validation Points**: Multiple checkpoints to ensure correctness
+
+**Potential Challenges:**
+1. **Complex Source Logic**: The brush enricher has complex catalog/user merging logic that needs careful preservation
+2. **Backward Compatibility**: Need to ensure aggregators handle new source values correctly
+3. **Test Coverage**: Need comprehensive tests for all source tracking scenarios
+4. **Data Validation**: Need to verify that the fixes actually resolve the systematic bug
+
+**Recommendations:**
+1. **Start with BaseEnricher**: This provides the foundation for all other changes
+2. **Test Thoroughly**: Each step should include comprehensive tests before proceeding
+3. **Validate Incrementally**: Test each enricher fix independently before moving to the next
+4. **Monitor Aggregators**: Ensure that downstream aggregators handle new source values correctly
+5. **Document Changes**: Update documentation to reflect the new source tracking behavior
+
+This plan provides a systematic, test-driven approach to fixing the enrichment source tracking bug while maintaining backward compatibility and ensuring comprehensive test coverage.
+
+## 📝 Session Notes
+
+### 2025-08-01 - Task 1 Completed: BaseEnricher Enhancement
+
+**Completed Work:**
+- ✅ Enhanced BaseEnricher with two new source tracking methods:
+  - `_create_enriched_data()`: Handles multi-source scenarios (user + catalog data)
+  - `_create_single_source_enriched_data()`: Handles single-source scenarios
+- ✅ Added comprehensive test suite with 10 test cases covering:
+  - User-only data scenarios
+  - Catalog-only data scenarios  
+  - Mixed data scenarios (user + catalog)
+  - None value handling
+  - Empty data handling
+  - Source precedence (user overrides catalog)
+- ✅ Implemented intelligent None value handling: user None values don't override catalog values
+- ✅ All tests passing (15/15)
+
+**Implementation Details:**
+- Methods properly set `_extraction_source` based on data presence
+- User data takes precedence over catalog data in merges
+- None values are handled gracefully (user None doesn't override catalog)
+- Both methods include `_enriched_by` field using `get_enricher_name()`
+- Source tracking is explicit and accurate
+
+**Next Steps:**
+- Ready to proceed with Task 2: Update Brush Enricher to use new source tracking methods
+description:
+globs:
+alwaysApply: false
+---
