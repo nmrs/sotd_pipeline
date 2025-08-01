@@ -41,7 +41,7 @@ class BrushEnricher(BaseEnricher):
         Returns:
             Dictionary with enriched data, or None if no enrichment possible.
         """
-        if not field_data or not isinstance(field_data, dict):
+        if field_data is None or not isinstance(field_data, dict):
             return None
 
         # All extraction is from the brush_extracted field (passed as original_comment)
@@ -49,6 +49,7 @@ class BrushEnricher(BaseEnricher):
         if not brush_extracted:
             return None
 
+        # Extract user data from brush_extracted
         user_knot_size = extract_knot_size(brush_extracted)
         user_fiber = match_fiber(brush_extracted)
 
@@ -59,15 +60,31 @@ class BrushEnricher(BaseEnricher):
         )
         catalog_fiber = knot_section.get("fiber") if knot_section else field_data.get("fiber")
 
-        # Start with catalog data (preserved from match phase)
-        enriched_data = {
-            "knot_size_mm": catalog_knot_size,
-            "fiber": catalog_fiber,
-            "_enriched_by": "BrushEnricher",
-            "_extraction_source": "catalog" if catalog_knot_size else "none",
-        }
+        # Prepare user data dictionary
+        user_data = {}
+        if user_knot_size is not None:
+            user_data["knot_size_mm"] = user_knot_size
+        if user_fiber is not None:
+            user_data["fiber"] = user_fiber
 
-        # Check if user data indicates a custom knot (fiber or size differs from catalog)
+        # Prepare catalog data dictionary
+        catalog_data = {}
+        if catalog_knot_size is not None:
+            catalog_data["knot_size_mm"] = catalog_knot_size
+        if catalog_fiber is not None:
+            catalog_data["fiber"] = catalog_fiber
+
+        # Use BaseEnricher's source tracking method
+        enriched_data = self._create_enriched_data(user_data, catalog_data)
+
+        # Handle _fiber_extraction_source separately for backward compatibility
+        if user_fiber is not None or catalog_fiber is not None:
+            fiber_user_data = {"fiber": user_fiber} if user_fiber is not None else {}
+            fiber_catalog_data = {"fiber": catalog_fiber} if catalog_fiber is not None else {}
+            fiber_enriched = self._create_enriched_data(fiber_user_data, fiber_catalog_data)
+            enriched_data["_fiber_extraction_source"] = fiber_enriched["_extraction_source"]
+
+        # Add custom knot detection logic
         has_custom_knot = False
         if user_fiber is not None and catalog_fiber is not None:
             if user_fiber.lower() != catalog_fiber.lower():
@@ -76,42 +93,7 @@ class BrushEnricher(BaseEnricher):
             if abs(user_knot_size - catalog_knot_size) >= 0.1:  # Allow small tolerance
                 has_custom_knot = True
 
-        # Handle knot size merging
-        if user_knot_size is not None:
-            if catalog_knot_size is not None:
-                # Both catalog and user have knot size - check for conflicts
-                if abs(catalog_knot_size - user_knot_size) < 0.1:
-                    # Values match (within tolerance) - use user value, mark as confirmed
-                    enriched_data["knot_size_mm"] = user_knot_size
-                    enriched_data["_extraction_source"] = "user_confirmed_catalog"
-                else:
-                    # Values conflict - user takes precedence, mark conflict
-                    enriched_data["knot_size_mm"] = user_knot_size
-                    enriched_data["_extraction_source"] = "user_override_catalog"
-                    enriched_data["_catalog_knot_size_mm"] = catalog_knot_size
-            else:
-                # Only user has knot size - use it
-                enriched_data["knot_size_mm"] = user_knot_size
-                enriched_data["_extraction_source"] = "user_comment"
-
-        # Handle fiber conflict resolution (catalog fiber is preserved from match phase)
-        if user_fiber is not None:
-            if catalog_fiber is not None:
-                if catalog_fiber.lower() == user_fiber.lower():
-                    # Values match - use user value, mark as confirmed
-                    enriched_data["fiber"] = user_fiber
-                    enriched_data["_fiber_extraction_source"] = "user_confirmed_catalog"
-                else:
-                    # Values conflict - user takes precedence, mark conflict
-                    enriched_data["fiber"] = user_fiber
-                    enriched_data["_fiber_extraction_source"] = "user_override_catalog"
-                    enriched_data["_catalog_fiber"] = catalog_fiber
-            else:
-                # Only user has fiber - use it
-                enriched_data["fiber"] = user_fiber
-                enriched_data["_fiber_extraction_source"] = "user_comment"
-
-        # If custom knot detected, add metadata to enriched data
+        # Add custom knot metadata if detected
         if has_custom_knot:
             enriched_data["_custom_knot"] = True
             enriched_data["_custom_knot_reason"] = []
@@ -131,5 +113,14 @@ class BrushEnricher(BaseEnricher):
                 enriched_data["_custom_knot_reason"].append(
                     f"size_mismatch:{catalog_knot_size}->{user_knot_size}"
                 )
+
+        # Add catalog conflict tracking for backward compatibility
+        if user_knot_size is not None and catalog_knot_size is not None:
+            if abs(user_knot_size - catalog_knot_size) >= 0.1:
+                enriched_data["_catalog_knot_size_mm"] = catalog_knot_size
+
+        if user_fiber is not None and catalog_fiber is not None:
+            if user_fiber.lower() != catalog_fiber.lower():
+                enriched_data["_catalog_fiber"] = catalog_fiber
 
         return enriched_data

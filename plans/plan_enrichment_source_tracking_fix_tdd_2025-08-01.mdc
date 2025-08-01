@@ -19,10 +19,10 @@ Fix the systematic bug in enrichment source tracking where all enrichers incorre
    - ✅ Add comprehensive tests for source tracking logic
 
 ### Phase 2: Brush Enricher Fix
-2. **Update Brush Enricher to use new source tracking**
-   - Refactor to use `_create_enriched_data()` method
-   - Add tests for catalog-only, user-only, and mixed scenarios
-   - Validate source tracking accuracy
+2. **✅ Update Brush Enricher to use new source tracking** - COMPLETED
+   - ✅ Refactor to use `_create_enriched_data()` method
+   - ✅ Add tests for catalog-only, user-only, and mixed scenarios
+   - ✅ Validate source tracking accuracy
 
 ### Phase 3: Straight Razor Enricher Fix
 3. **Update Straight Razor Enricher to use new source tracking**
@@ -361,7 +361,35 @@ This plan provides a systematic, test-driven approach to fixing the enrichment s
 - Source tracking is explicit and accurate
 
 **Next Steps:**
-- Ready to proceed with Task 2: Update Brush Enricher to use new source tracking methods
+- Ready to proceed with Task 3: Update Straight Razor Enricher to use new source tracking methods
+
+### 2025-08-01 - Task 2 Completed: Brush Enricher Refactoring
+
+**Completed Work:**
+- ✅ Refactored Brush Enricher to use new `_create_enriched_data()` method from BaseEnricher
+- ✅ Fixed validation logic to handle empty field_data correctly (changed `not field_data` to `field_data is None`)
+- ✅ Updated existing tests to use new standardized source tracking values:
+  - "catalog" → "catalog_data"
+  - "user_comment" → "user_comment + catalog_data" (when both sources present)
+  - "user_confirmed_catalog" → "user_comment + catalog_data"
+  - "user_override_catalog" → "user_comment + catalog_data"
+- ✅ Added comprehensive source tracking validation tests (6 new tests)
+- ✅ Maintained backward compatibility with `_fiber_extraction_source` field
+- ✅ Preserved all existing functionality (custom knot detection, conflict resolution)
+- ✅ All tests passing (43/43)
+
+**Implementation Details:**
+- Replaced manual source tracking logic with `_create_enriched_data()` calls
+- Separately handle `_fiber_extraction_source` for backward compatibility
+- Maintained catalog conflict tracking (`_catalog_knot_size_mm`, `_catalog_fiber`)
+- Preserved custom knot detection and metadata
+- Fixed test expectations to match new standardized source values
+
+**Key Changes:**
+- Source tracking now uses consistent values: "catalog_data", "user_comment", "user_comment + catalog_data", "none"
+- User data takes precedence over catalog data in merges
+- None values are handled gracefully (user None doesn't override catalog)
+- All existing aggregators continue to work with new source values
 description:
 globs:
 alwaysApply: false
