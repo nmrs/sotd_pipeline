@@ -145,34 +145,48 @@ Update the MismatchAnalyzer UI to use enriched data instead of matched data.
 ### Step 4: Tooltip Component Creation
 
 ```text
-Create a reusable tooltip component for displaying enrich-phase previews and adjustments.
+Create reusable tooltip component for showing enrich-phase adjustments.
 
-**Context**: We need to show users what the enrich phase actually produced vs what the match phase would have shown, to help them understand that apparent "mismatches" are actually working correctly.
+**Context**: We need to create a tooltip component that can show users the differences between matched data and enriched data, helping them understand what enrich-phase adjustments were made.
 
 **Requirements**:
-1. Create a reusable `EnrichPreviewTooltip` component
-2. Component should show enrich-phase adjustments (e.g., "Synthetic → Badger")
-3. Component should explain the conflict resolution (e.g., "User input prioritized over catalog data")
-4. Component should be accessible and follow UI patterns
-5. Component should be reusable across different data types (brush, razor, etc.)
+1. Create a reusable tooltip component that can be used throughout the UI
+2. Create a specialized tooltip component for enrich-phase adjustments
+3. The tooltip should show before/after comparisons of relevant fields
+4. Include information about the extraction source when available
+5. Make the tooltip responsive and accessible
+6. Add comprehensive tests for the tooltip functionality
 
 **Test Requirements**:
-- Test tooltip displays correctly for different conflict types
-- Test tooltip accessibility (keyboard navigation, screen readers)
-- Test tooltip positioning and styling
-- Test tooltip with different data scenarios
+- Test that tooltip shows on hover and hides on mouse leave
+- Test that tooltip displays correct comparison information
+- Test that tooltip handles missing or identical data gracefully
+- Test that tooltip is responsive and accessible
+- Test that specialized enrich-phase tooltip shows relevant field comparisons
 
-**Files to create/modify**:
-- `webui/src/components/ui/EnrichPreviewTooltip.tsx` (new)
-- Add tests for the tooltip component
-- Update component library documentation
+**Files to create**:
+- `webui/src/components/ui/tooltip.tsx` - Base tooltip component
+- `webui/src/components/ui/EnrichPhaseTooltip.tsx` - Specialized enrich-phase tooltip
+- `webui/src/components/ui/__tests__/EnrichPhaseTooltip.test.tsx` - Tests for tooltip
 
 **Success Criteria**:
-- Tooltip component is reusable and accessible
-- Tooltip displays enrich-phase adjustments clearly
+- Tooltip component is reusable and well-tested
+- Enrich-phase tooltip shows relevant field comparisons
+- Tooltip is responsive and accessible
 - All tests pass
-- Component follows established UI patterns
+- Tooltip handles edge cases gracefully
 ```
+
+**Status**: ✅ COMPLETE
+
+**Implementation Notes**:
+- Created base `Tooltip` component with hover functionality
+- Created specialized `EnrichPhaseTooltip` component for enrich-phase adjustments
+- Tooltip shows before/after comparisons for relevant fields (fiber, knot_size_mm, handle_maker)
+- Includes extraction source information when available
+- Added comprehensive tests covering hover behavior, content display, and edge cases
+- All tests pass successfully
+- Tooltip is responsive with proper positioning and styling
 
 ### Step 5: UI Integration
 
