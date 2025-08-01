@@ -311,6 +311,10 @@ def process_month(
 
         monitor.end_processing_timing()
 
+        # Record cache statistics
+        brush_cache_stats = brush_matcher.get_cache_stats()
+        monitor.record_cache_stats("brush_matcher", brush_cache_stats)
+
         # Save results
         monitor.start_file_io_timing()
         matched_path.parent.mkdir(exist_ok=True)

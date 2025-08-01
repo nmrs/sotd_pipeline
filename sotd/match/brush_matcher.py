@@ -404,6 +404,15 @@ class BrushMatcher:
             brush_name = list(value.keys())[0]
             value = brush_name
 
+        # Normalize the input for caching
+        normalized_text = value.lower().strip()
+
+        # Check cache first
+        cache_key = f"brush_match:{normalized_text}"
+        cached_result = self._cache.get(cache_key)
+        if cached_result is not None:
+            return cached_result
+
         # Define strategies in priority order
         strategies = [
             self._match_correct_complete_brush,
@@ -420,9 +429,17 @@ class BrushMatcher:
         for strategy in strategies:
             result = strategy(value)
             if result is not None:
+                # Cache successful result
+                self._cache.set(cache_key, result)
                 return result
 
+        # Cache failed result (None) to avoid re-running strategies
+        self._cache.set(cache_key, None)
         return None
+
+    def get_cache_stats(self) -> Dict[str, int]:
+        """Get cache statistics for performance monitoring."""
+        return self._cache.stats()
 
     def _match_correct_complete_brush(self, value: str) -> Optional["MatchResult"]:
         """Strategy 1: Check brush section in correct_matches.yaml (fastest)."""

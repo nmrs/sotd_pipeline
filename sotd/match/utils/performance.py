@@ -17,6 +17,8 @@ class MatchPerformanceMetrics(BasePerformanceMetrics):
 
     # Override phase_times to be more specific for match phase
     matcher_times: Dict[str, TimingStats] = field(default_factory=dict)
+    # Cache statistics
+    cache_stats: Dict[str, Dict[str, int]] = field(default_factory=dict)
 
     def to_dict(self) -> Dict:
         """Convert metrics to dictionary for JSON serialization."""
@@ -32,6 +34,8 @@ class MatchPerformanceMetrics(BasePerformanceMetrics):
             }
             for matcher, stats in self.matcher_times.items()
         }
+        # Add cache statistics
+        base_dict["cache_stats"] = self.cache_stats
         # Remove the generic phase_times since we're using matcher_times
         base_dict.pop("phase_times", None)
         return base_dict
@@ -54,6 +58,10 @@ class PerformanceMonitor(BasePerformanceMonitor):
         if matcher_type not in self.metrics.matcher_times:
             self.metrics.matcher_times[matcher_type] = TimingStats()
         self.metrics.matcher_times[matcher_type].add_timing(duration)
+
+    def record_cache_stats(self, cache_name: str, stats: Dict[str, int]) -> None:
+        """Record cache statistics for a specific cache."""
+        self.metrics.cache_stats[cache_name] = stats
 
     def print_summary(self) -> None:
         """Print a human-readable performance summary."""
@@ -87,6 +95,15 @@ class PerformanceMonitor(BasePerformanceMonitor):
             print("\nMatcher Performance:")
             for matcher, stats in self.metrics.matcher_times.items():
                 print(f"  {matcher}: {stats.avg_time * 1000:.1f}ms avg ({stats.count} calls)")
+
+        if self.metrics.cache_stats:
+            print("\nCache Performance:")
+            for cache_name, stats in self.metrics.cache_stats.items():
+                hits = stats.get("hits", 0)
+                misses = stats.get("misses", 0)
+                total = hits + misses
+                hit_rate = (hits / total * 100) if total > 0 else 0
+                print(f"  {cache_name}: {hit_rate:.1f}% hit rate ({hits} hits, {misses} misses)")
 
         print("\nMemory Usage:")
         print(f"  Peak: {self.metrics.peak_memory_mb:.1f}MB")
