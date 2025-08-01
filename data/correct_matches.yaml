@@ -301,7 +301,6 @@ blade:
       Platinum:
       - person super stainless
       - personna "israeli red"
-      - personna - platinum
       - personna - platinum (for both)
       - personna - platinum chrome israeli red
       - personna platinum
@@ -601,8 +600,7 @@ brush:
     - declaration grooming - jefferson thaw b16 - 28mm artisan tied badger
     - dg jefferson know it all 2.0 28mm b16
     B18:
-    - declaration grooming - cold 2.0 jeffington - 28mm b18:
-        handle_match: true
+    - declaration grooming - cold 2.0 jeffington - 28mm b18
     B3:
     - declaration grooming washington blood of kings b3
     B6:
@@ -733,11 +731,20 @@ handle:
   3d:
     printed unspecified:
     - 3d printed unspecified
+  AKA Brushworx:
+    Unspecified:
+    - AKA Brushworx Unspecified
+  AP Shave Co:
+    Unspecified:
+    - ap shave co unspecified
   Declaration Grooming:
     Jeffington:
     - declaration grooming - cold 2.0 jeffington - 28mm b18
     Washington:
     - declaration grooming washington
+  ap:
+    shave co unspecified:
+    - ap shave co unspecified
   dogwood:
     handcrafts unspecified:
     - dogwood handcrafts unspecified
@@ -745,9 +752,24 @@ handle:
     unspecified:
     - yaqi unspecified
 knot:
+  AKA Brushworx:
+    Black Silk:
+    - AKA Brushworx Black Silk
+    DoughMan:
+    - AKA Brushworx DoughMan
+  AP Shave Co:
+    Pure Bliss:
+    - ap shave co pure bliss
+    Synthetic:
+    - ap shave co synthetic
   Declaration Grooming:
     B16:
     - declaration grooming b16
+  ap:
+    shave co pure bliss:
+    - ap shave co pure bliss
+    shave co synthetic:
+    - ap shave co synthetic
   declaration:
     grooming b12:
     - declaration grooming b12
@@ -2198,3 +2220,21 @@ split_brush:
   3dogwood w/ dg b12 butterscotch 2 band badger:
     handle: dogwood handcrafts unspecified
     knot: declaration grooming b12
+  a p shaveco faux boar - 30mm:
+    handle: ap shave co unspecified
+    knot: ap shave co synthetic
+  a p shaveco faux horse brush:
+    handle: ap shave co unspecified
+    knot: ap shave co synthetic
+  a p shaveco luxury knot:
+    handle: ap shave co unspecified
+    knot: ap shave co synthetic
+  a p shaveco pure bliss:
+    handle: ap shave co unspecified
+    knot: ap shave co pure bliss
+  aka brushworks never alone 4 with doughman badger:
+    handle: aka brushworx unspecified
+    knot: aka brushworx doughman
+  aka brushworkx 26mm black silk $composite:
+    handle: aka brushworx unspecified
+    knot: aka brushworx black silk

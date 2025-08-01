@@ -1,4 +1,52 @@
 known_knots:
+  AKA Brushworx:
+    AK4:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+      - ak4
+    AK47:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+      - ak47
+    AK5:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+      - ak5
+    AK7:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+      - ak7
+    AK7/DoughMan Hybrid:
+      fiber: Mixed Badger/Synthetic
+      knot_size_mm: 26
+      patterns:
+      - ak7.*doughman
+      - doughman.*ak7
+    Black Silk:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+      - aka.*black.*silk
+    ChocolateDoughMan:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+      - choc.*doughman
+    Dough:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+      - dough
+    DoughMan:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+      - doughman
+
   AP Shave Co:
     APLuxury:
       fiber: Mixed Badger/Boar
