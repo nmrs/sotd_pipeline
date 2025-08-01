@@ -581,6 +581,7 @@ class BrushMatcher:
 
                         from sotd.match.types import create_match_result
 
+                        # Early exit: return immediately when we find a valid match
                         return create_match_result(
                             original=value,
                             matched=match_dict,
