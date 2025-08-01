@@ -53,6 +53,65 @@ const isBrushSplit = (matched: Record<string, unknown>): boolean => {
   return !hasTopLevelBrand && !hasTopLevelModel;
 };
 
+// Helper function to determine brush type
+const getBrushType = (matched: Record<string, unknown>): { type: string; isValid: boolean; error?: string } => {
+  if (!matched || typeof matched !== 'object') {
+    return { type: 'Unknown', isValid: false, error: 'No matched data' };
+  }
+
+  const hasTopLevelBrand = matched.brand && matched.brand !== null && matched.brand !== undefined;
+  const hasTopLevelModel = matched.model && matched.model !== null && matched.model !== undefined;
+  const hasHandle = matched.handle && typeof matched.handle === 'object' && matched.handle !== null;
+  const hasKnot = matched.knot && typeof matched.knot === 'object' && matched.knot !== null;
+
+  // Get handle and knot brands for validation
+  const handleBrand = hasHandle ? (matched.handle as Record<string, unknown>).brand : null;
+  const knotBrand = hasKnot ? (matched.knot as Record<string, unknown>).brand : null;
+
+  // Complete brush: has top-level brand and model
+  if (hasTopLevelBrand && hasTopLevelModel) {
+    return { type: 'Complete', isValid: true };
+  }
+
+  // Single maker: has top-level brand and model, and handle/knot brands match main brand
+  if (hasTopLevelBrand && hasTopLevelModel && hasHandle && hasKnot) {
+    const mainBrand = String(matched.brand);
+    const handleBrandStr = handleBrand ? String(handleBrand) : null;
+    const knotBrandStr = knotBrand ? String(knotBrand) : null;
+
+    if (handleBrandStr === mainBrand && knotBrandStr === mainBrand) {
+      return { type: 'Single Maker', isValid: true };
+    } else if (handleBrandStr === mainBrand || knotBrandStr === mainBrand) {
+      // Partial match - this is a validation error
+      return {
+        type: 'Single Maker',
+        isValid: false,
+        error: `Brand mismatch: main=${mainBrand}, handle=${handleBrandStr}, knot=${knotBrandStr}`
+      };
+    }
+  }
+
+  // Composite: no top-level brand/model, but has handle/knot sections
+  if (!hasTopLevelBrand && !hasTopLevelModel && hasHandle && hasKnot) {
+    // Check if handle and knot brands are the same
+    if (handleBrand && knotBrand && handleBrand === knotBrand) {
+      // ERROR: Same brands but no top-level brand/model - this is a pipeline error
+      return {
+        type: 'ERROR',
+        isValid: false,
+        error: `Pipeline error: handle and knot have same brand (${handleBrand}) but no top-level brand/model`
+      };
+    } else if (handleBrand && knotBrand && handleBrand !== knotBrand) {
+      // Valid composite: different brands
+      return { type: 'Composite', isValid: true };
+    }
+    return { type: 'Composite', isValid: true };
+  }
+
+  // Fallback for other cases
+  return { type: 'Unknown', isValid: false, error: 'Invalid brush structure' };
+};
+
 interface MismatchAnalyzerDataTableProps {
   data: MismatchItem[];
   field: string; // Add field prop
@@ -427,6 +486,32 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
 
     // Add brush-specific columns if field is brush
     if (field === 'brush') {
+
+      // Add brush type column
+      baseColumns.push({
+        accessorKey: 'brush_type',
+        header: 'Brush Type',
+        cell: ({ row }: { row: Row<MismatchItem> }) => {
+          const item = row.original;
+          const brushType = getBrushType(item.matched);
+
+          return (
+            <div className='text-sm max-w-xs'>
+              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${brushType.isValid
+                ? 'bg-green-100 text-green-800'
+                : 'bg-red-100 text-red-800'
+                }`}>
+                {brushType.type}
+              </span>
+              {!brushType.isValid && brushType.error && (
+                <div className='mt-1 text-xs text-red-600 font-mono'>
+                  {brushType.error}
+                </div>
+              )}
+            </div>
+          );
+        },
+      });
 
       // Always show brush pattern column
       baseColumns.push({

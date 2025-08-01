@@ -417,5 +417,71 @@ describe('MismatchAnalyzerDataTable', () => {
       });
       expect(knotElements.length).toBeGreaterThan(0);
     });
+
+    test('displays brush type column with correct validation', () => {
+      const brushData: MismatchItem[] = [
+        {
+          original: 'Simpson Chubby 2 Best Badger',
+          matched: {
+            brand: 'Simpson',
+            model: 'Chubby 2',
+            fiber: 'best_badger',
+            knot_size_mm: 27.0,
+            handle_maker: 'Simpson',
+          },
+          pattern: 'simpson.*chubby.*2',
+          match_type: 'exact',
+          confidence: 1.0,
+          mismatch_type: 'exact_matches',
+          reason: 'Exact match from catalog',
+          count: 5,
+          examples: ['2025-06.json'],
+          comment_ids: ['abc123'],
+          is_confirmed: true,
+        },
+        {
+          original: 'Declaration B2 in Declaration handle',
+          matched: {
+            handle: {
+              brand: 'Declaration',
+              model: 'Custom',
+              _pattern: 'declaration.*handle',
+            },
+            knot: {
+              brand: 'Declaration',
+              model: 'B2',
+              _pattern: 'declaration.*b2',
+            },
+          },
+          pattern: 'declaration.*b2.*declaration.*handle',
+          match_type: 'regex',
+          confidence: 0.8,
+          mismatch_type: 'potential_mismatch',
+          reason: 'Multiple patterns found',
+          count: 3,
+          examples: ['2025-06.json'],
+          comment_ids: ['def456'],
+          is_confirmed: false,
+          handle_component: 'Declaration handle',
+          knot_component: 'Declaration B2',
+        },
+      ];
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={brushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Should show "Brush Type" column header
+      expect(screen.getByText('Brush Type')).toBeInTheDocument();
+
+      // Should show "Complete" for the first item
+      expect(screen.getByText('Complete')).toBeInTheDocument();
+      // Should show "ERROR" for the second item (same brands but no top-level brand/model)
+      expect(screen.getByText('ERROR')).toBeInTheDocument();
+    });
   });
 });
