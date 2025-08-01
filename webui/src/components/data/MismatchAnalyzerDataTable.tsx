@@ -73,8 +73,8 @@ const getBrushType = (matched: Record<string, unknown>): { type: string; isValid
     return { type: 'Complete', isValid: true };
   }
 
-  // Single maker: has top-level brand and model, and handle/knot brands match main brand
-  if (hasTopLevelBrand && hasTopLevelModel && hasHandle && hasKnot) {
+  // Single maker: has top-level brand (model can be null), and handle/knot brands match main brand
+  if (hasTopLevelBrand && hasHandle && hasKnot) {
     const mainBrand = String(matched.brand);
     const handleBrandStr = handleBrand ? String(handleBrand) : null;
     const knotBrandStr = knotBrand ? String(knotBrand) : null;
