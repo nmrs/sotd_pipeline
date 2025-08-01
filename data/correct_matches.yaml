@@ -194,7 +194,7 @@ blade:
       Super Platinum:
       - flydear
       - flydear - 9/10
-      - modified flydear 🤦🏻♂️
+      - "modified flydear \U0001F926\U0001F3FB\u2642\uFE0F"
     Gillette:
       '365':
       - gillette 365
@@ -246,7 +246,7 @@ blade:
       - gillette winner stainless
       Winner Platinum:
       - gillette winner platinum
-    Glätz:
+    "Gl\xE4tz":
       Super Platinum:
       - glatz
     Kai:
@@ -267,7 +267,7 @@ blade:
       - lazer triple coated
     Leningrad:
       DE:
-      - ленинград
+      - "\u043B\u0435\u043D\u0438\u043D\u0433\u0440\u0430\u0434"
     Lord:
       Blue Sword Platinum:
       - blue sword platinum
@@ -579,158 +579,246 @@ brush:
     Shave Brush:
     - all-star grooming company - badger:
         handle_match: true
+        user_intent: handle_primary
   Alpha:
     Amber:
-    - alpha amber
+    - alpha amber:
+        user_intent: handle_primary
     Bulldog:
-    - alpha bulldog ti
+    - alpha bulldog ti:
+        user_intent: handle_primary
   Aurora Grooming:
     LG24:
-    - aurora grooming lg24
-  Böker:
+    - aurora grooming lg24:
+        user_intent: handle_primary
+  "B\xF6ker":
     Synthetic:
-    - böker synthetic
+    - "b\xF6ker synthetic":
+        user_intent: handle_primary
   Declaration Grooming:
     B13:
-    - declaration grooming - roil jefferson - 28mm b13
+    - declaration grooming - roil jefferson - 28mm b13:
+        user_intent: handle_primary
     B14:
-    - declaration grooming - randy watson washington - 28mm b14
-    - declaration grooming washington envy b14 shd badger
+    - declaration grooming - randy watson washington - 28mm b14:
+        user_intent: handle_primary
+    - declaration grooming washington envy b14 shd badger:
+        user_intent: handle_primary
     B15:
-    - declaration grooming jefferson artist's choice b15 shd badger
+    - declaration grooming jefferson artist's choice b15 shd badger:
+        user_intent: handle_primary
     B16:
-    - 6dg b16 thaw washington badger
-    - declaration grooming - cream jefferson - 28mm b16
-    - declaration grooming - jefferson thaw b16 - 28mm artisan tied badger
-    - dg jefferson know it all 2.0 28mm b16
+    - 6dg b16 thaw washington badger:
+        user_intent: handle_primary
+    - declaration grooming - cream jefferson - 28mm b16:
+        user_intent: handle_primary
+    - declaration grooming - jefferson thaw b16 - 28mm artisan tied badger:
+        user_intent: handle_primary
+    - dg jefferson know it all 2.0 28mm b16:
+        user_intent: handle_primary
     B18:
-    - declaration grooming - cold 2.0 jeffington - 28mm b18
+    - declaration grooming - cold 2.0 jeffington - 28mm b18:
+        user_intent: handle_primary
     B3:
-    - declaration grooming washington blood of kings b3
+    - declaration grooming washington blood of kings b3:
+        user_intent: handle_primary
     B6:
-    - declaration grooming washington b6
+    - declaration grooming washington b6:
+        user_intent: handle_primary
     B9A:
-    - declaration grooming - lavender jefferson - 28mm b9a+
+    - declaration grooming - lavender jefferson - 28mm b9a+:
+        user_intent: handle_primary
   Dreadnought:
     Avenger:
-    - dreadnought avenger
+    - dreadnought avenger:
+        user_intent: handle_primary
   EldrormR Industries/Muninn Woodworks:
     BFM:
-    - '>![redacted]!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn
-      woodworks handle $frankenbrush'
-    - '>!redacted!< $bigfuckingmotherload'
-    - '>!redacted!< [bigfuckingmotherload]'
-    - '>!redacted!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn
-      woodworks handle'
-    - muninn woodworks "bfm" 50mm motherlode
-    - muninn woodworks bfm
+    - '>![redacted]!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn woodworks handle $frankenbrush':
+        user_intent: handle_primary
+    - '>!redacted!< $bigfuckingmotherload':
+        user_intent: handle_primary
+    - '>!redacted!< [bigfuckingmotherload]':
+        user_intent: handle_primary
+    - '>!redacted!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn woodworks handle':
+        user_intent: handle_primary
+    - muninn woodworks "bfm" 50mm motherlode:
+        user_intent: handle_primary
+    - muninn woodworks bfm:
+        user_intent: handle_primary
   Omega:
     '10005':
-    - omega 10005
+    - omega 10005:
+        user_intent: handle_primary
     '10048':
-    - omega pro48
+    - omega pro48:
+        user_intent: handle_primary
     '10049':
-    - omega - 10049
-    - omega 10049
+    - omega - 10049:
+        user_intent: handle_primary
+    - omega 10049:
+        user_intent: handle_primary
     '10065':
-    - omega 10065
+    - omega 10065:
+        user_intent: handle_primary
     '10066':
-    - omega 10066
+    - omega 10066:
+        user_intent: handle_primary
     '10098':
-    - omega 10098
+    - omega 10098:
+        user_intent: handle_primary
     '11137':
-    - omega 11137
+    - omega 11137:
+        user_intent: handle_primary
     '146818':
-    - omega 146818
+    - omega 146818:
+        user_intent: handle_primary
     '20102':
-    - omega 20102
+    - omega 20102:
+        user_intent: handle_primary
     '81151':
-    - omega 81151
+    - omega 81151:
+        user_intent: handle_primary
   Semogue:
     '1305':
-    - semogue 1305
+    - semogue 1305:
+        user_intent: handle_primary
     '1800':
-    - semogue 1800
+    - semogue 1800:
+        user_intent: handle_primary
     '2000':
-    - semogue 2000
+    - semogue 2000:
+        user_intent: handle_primary
     '610':
-    - semogue 610
+    - semogue 610:
+        user_intent: handle_primary
     '830':
-    - semogue 830
+    - semogue 830:
+        user_intent: handle_primary
     SOC Boar:
-    - semogue - soc boar
+    - semogue - soc boar:
+        user_intent: handle_primary
   Simpson:
     Chubby 2:
-    - simpson - 'chubby 2' silvertip
-    - simpson ch2 super badger super badger
-    - simpson chubby 2 manchurian
+    - simpson - 'chubby 2' silvertip:
+        user_intent: handle_primary
+    - simpson ch2 super badger super badger:
+        user_intent: handle_primary
+    - simpson chubby 2 manchurian:
+        user_intent: handle_primary
     Chubby 2 Synthetic:
-    - simpsons chubby 2 synthetic
+    - simpsons chubby 2 synthetic:
+        user_intent: handle_primary
     Chubby 3:
-    - simpson butterscotch ch3 manchurian badger
+    - simpson butterscotch ch3 manchurian badger:
+        user_intent: handle_primary
     Colonel X2L:
-    - simpson - 'colonel' best
+    - simpson - 'colonel' best:
+        user_intent: handle_primary
     M7:
-    - simpson - 'm7' manchurian
+    - simpson - 'm7' manchurian:
+        user_intent: handle_primary
     Trafalgar T2:
-    - simpson trafalgar t2
-    - simpsons trafalgar t2
+    - simpson trafalgar t2:
+        user_intent: handle_primary
+    - simpsons trafalgar t2:
+        user_intent: handle_primary
     Trafalgar T3:
-    - simpson - trafalgar t3
-    - simpson trafalgar t3
-    - simpson trafalgar t3 synthetic 26mm
+    - simpson - trafalgar t3:
+        user_intent: handle_primary
+    - simpson trafalgar t3:
+        user_intent: handle_primary
+    - simpson trafalgar t3 synthetic 26mm:
+        user_intent: handle_primary
     Wee Scot:
-    - simpson - 'wee scot' best
-    - simpson - wee scott
-    - simpson wee scot
-    - simpsons wee scot
+    - simpson - 'wee scot' best:
+        user_intent: handle_primary
+    - simpson - wee scott:
+        user_intent: handle_primary
+    - simpson wee scot:
+        user_intent: handle_primary
+    - simpsons wee scot:
+        user_intent: handle_primary
   Spokar:
     Badger:
-    - spokar badger
+    - spokar badger:
+        user_intent: handle_primary
   Stirling:
     2-Band Synthetic:
-    - stirling 2 band synthetic
+    - stirling 2 band synthetic:
+        user_intent: handle_primary
   Wald:
     A1:
-    - wald a1
+    - wald a1:
+        user_intent: handle_primary
   Walfront:
     Travel Brush:
-    - walfront travel brush
+    - walfront travel brush:
+        user_intent: handle_primary
   Zenith:
     505BC SE:
-    - zenith 505bc
+    - zenith 505bc:
+        user_intent: handle_primary
     506U SE:
-    - zenith 506u xse
+    - zenith 506u xse:
+        user_intent: handle_primary
     B15:
-    - zenith b15
+    - zenith b15:
+        user_intent: handle_primary
     B37:
-    - zenith b37
+    - zenith b37:
+        user_intent: handle_primary
     r/wetshaving MOAR BOAR:
-    - moar boar
-    - moar f'n boar
-    - r/wetshaving zenith moar boar
-    - r/wetshaving zentih moar boar 31mm
-    - zenith - 508a xl/bristle (b35) (moar boar) 31mm boar
-    - zenith - moar boar
-    - zenith - moar boar 31mm boar
-    - zenith - moar boar b35 31mm boar
-    - zenith 31mm moar boar
-    - zenith 508 moar boar
-    - zenith b35 moar boar 31mm boar
-    - zenith moar boar
-    - zenith moar boar $girth $oldscratchy
-    - zenith moar boar sub brush
-    - zenith moar boar sub exclusive
-    - zenith moar boar sub-exclusive (508a xl) 31mm boar knot
-    - zenith r/wetshaving 31mm x 57mm moar boar
-    - zenith r/wetshaving exclusive moar badger (silvertip)
-    - zenith r/wetshaving exclusive moar boar
-    - zenith r/wetshaving exclusive moar boar (31 mm × 57 mm bleached boar)
-    - zenith r/wetshaving exclusive moar boar 31 mm
-    - zenith r/wetshaving exclusive moar boar 31mm
-    - zenith r/wetshaving moar boar
-    - zenith r/wetshaving sub exclusive moar boar
-    - zentih - moar boar r/wetshaving
+    - moar boar:
+        user_intent: handle_primary
+    - moar f'n boar:
+        user_intent: handle_primary
+    - r/wetshaving zenith moar boar:
+        user_intent: handle_primary
+    - r/wetshaving zentih moar boar 31mm:
+        user_intent: handle_primary
+    - zenith - 508a xl/bristle (b35) (moar boar) 31mm boar:
+        user_intent: handle_primary
+    - zenith - moar boar:
+        user_intent: handle_primary
+    - zenith - moar boar 31mm boar:
+        user_intent: handle_primary
+    - zenith - moar boar b35 31mm boar:
+        user_intent: handle_primary
+    - zenith 31mm moar boar:
+        user_intent: handle_primary
+    - zenith 508 moar boar:
+        user_intent: handle_primary
+    - zenith b35 moar boar 31mm boar:
+        user_intent: handle_primary
+    - zenith moar boar:
+        user_intent: handle_primary
+    - zenith moar boar $girth $oldscratchy:
+        user_intent: handle_primary
+    - zenith moar boar sub brush:
+        user_intent: handle_primary
+    - zenith moar boar sub exclusive:
+        user_intent: handle_primary
+    - zenith moar boar sub-exclusive (508a xl) 31mm boar knot:
+        user_intent: handle_primary
+    - zenith r/wetshaving 31mm x 57mm moar boar:
+        user_intent: handle_primary
+    - zenith r/wetshaving exclusive moar badger (silvertip):
+        user_intent: handle_primary
+    - zenith r/wetshaving exclusive moar boar:
+        user_intent: handle_primary
+    - "zenith r/wetshaving exclusive moar boar (31 mm \xD7 57 mm bleached boar)":
+        user_intent: handle_primary
+    - zenith r/wetshaving exclusive moar boar 31 mm:
+        user_intent: handle_primary
+    - zenith r/wetshaving exclusive moar boar 31mm:
+        user_intent: handle_primary
+    - zenith r/wetshaving moar boar:
+        user_intent: handle_primary
+    - zenith r/wetshaving sub exclusive moar boar:
+        user_intent: handle_primary
+    - zentih - moar boar r/wetshaving:
+        user_intent: handle_primary
 handle:
   3d:
     printed unspecified:
@@ -964,19 +1052,19 @@ razor:
   Bulimica:
     Safety Razor:
     - bulimica - rainbow safety razor (green)
-  Böker:
+  "B\xF6ker":
     Elite Carbon 2.0:
-    - böker elite carbon 2.0
+    - "b\xF6ker elite carbon 2.0"
     King Cutter:
-    - böker - king cutter
-    - böker - king cutter - 6/8 square point - full hollow
+    - "b\xF6ker - king cutter"
+    - "b\xF6ker - king cutter - 6/8 square point - full hollow"
     Straight:
     - boker no.1056 - full hollow - dreadnought point - 5/8
-    - böker - 14er (8/8", extra hollow, carbon steel, square point)
-    - böker - dönges expert fire folder
-    - böker 14er 8/8" full hollow
-    - böker s.s. paris wins (6/8", carbon steel, full hollow, square point)
-    - custom designed böker 6/8 with bog oak scale and french head
+    - "b\xF6ker - 14er (8/8\", extra hollow, carbon steel, square point)"
+    - "b\xF6ker - d\xF6nges expert fire folder"
+    - "b\xF6ker 14er 8/8\" full hollow"
+    - "b\xF6ker s.s. paris wins (6/8\", carbon steel, full hollow, square point)"
+    - "custom designed b\xF6ker 6/8 with bog oak scale and french head"
     - h boker "american line - s.s. st. louis" 11/16"
     - h boker 5/8" and tang
   CJB:
@@ -988,7 +1076,7 @@ razor:
   CV Heljestrand:
     Straight:
     - c.v. heljestrand - mk 32
-    - c.v. heljestrand mk 31 11/16" söderfors extra specialstål full hollow
+    - "c.v. heljestrand mk 31 11/16\" s\xF6derfors extra specialst\xE5l full hollow"
     - c.v.heljestrand - no.2
     - carl victor heljestrand 5/8
   Carbon:
@@ -1122,9 +1210,9 @@ razor:
     - ever ready streamline
     - ever ready streamline gen 2
     - everready streamline strop outfit gen 2
-  Facón:
+  "Fac\xF3n":
     Kamisori Shavette:
-    - facón - kamisori-style shavette; karve shaving co. - overlander brass
+    - "fac\xF3n - kamisori-style shavette; karve shaving co. - overlander brass"
   Fasan:
     Bakelite Slant:
     - fasan - bakelite slant
@@ -1155,7 +1243,7 @@ razor:
   Filarmonica:
     Straight:
     - filarmonica 13 novodur 13/16" para profesionales full hollow
-    - filarmónica doble temple 14
+    - "filarm\xF3nica doble temple 14"
   Fine Accoutrements:
     DE5:
     - fine accouterments de5
@@ -1578,7 +1666,8 @@ razor:
   Max Sprecher:
     Straight:
     - max sprecher 9/8" with abalone inlay and scales
-    - max sprecher 9/8・1/2 hollow • barber's notch・opal・blue pearl kirinite
+    - "max sprecher 9/8\u30FB1/2 hollow \u2022 barber's notch\u30FBopal\u30FBblue\
+      \ pearl kirinite"
     - max sprecher paua scales 1/2 hallow barber's notch 9/8
   Merkur:
     23C:
@@ -1615,7 +1704,7 @@ razor:
   Mossei:
     Mono:
     - mossei - mono injector
-  Mühle:
+  "M\xFChle":
     Companion:
     - muhle companion
     Neo:
@@ -1624,19 +1713,19 @@ razor:
     - muhle - r41 zamac
     - muhle r41
     - muninn woodworks forest moss r41
-    - mühle - r41 kosmo
-    - mühle r41
+    - "m\xFChle - r41 kosmo"
+    - "m\xFChle r41"
     R89:
     - muhle r89
-    - mühle -r89
-    - mühle r89
+    - "m\xFChle -r89"
+    - "m\xFChle r89"
     Rocca:
     - muhle rocca
     - muhle rocca birch handle
     - muhle rocca r94
     - muhle rocca r95
-    - mühle rocca r94
-    - mühle rocca r95
+    - "m\xFChle rocca r94"
+    - "m\xFChle rocca r95"
   Occams Razor:
     Enoch:
     - occam's razors - the senoch
@@ -1719,12 +1808,12 @@ razor:
     - campobasso 6/8 full hollow round point
     - campobasso, 6/8 full hollow round point
     - carl rader 6/8" french point straight razor
-    - delolme - le thiernois no14 acier spécial pour coiffeur (8/8", hollow ground,
-      round tip, carbon steel)
+    - "delolme - le thiernois no14 acier sp\xE9cial pour coiffeur (8/8\", hollow ground,\
+      \ round tip, carbon steel)"
     - ditzer - ditzer gold - 4/8 round point
     - drew dick - sheffield style 9/8 1/4 hollow
     - e. a. berg eskilstuna swedish frameback
-    - ed wüsthof barber's king 13/16 full hollow
+    - "ed w\xFCsthof barber's king 13/16 full hollow"
     - erik anton berg 9/16 rattler
     - f.w. engels leader 6/8 full hollow square point
     - f.w. engels special
@@ -1745,7 +1834,7 @@ razor:
     - iberia 14 doble temple 8/8, extra hollow square point
     - iwasaki 13/16" full hollow square point tamahagane
     - j.a. henckles 60 - 5/8" round point
-    - jernbolaget n° 11 5/8
+    - "jernbolaget n\xB0 11 5/8"
     - john clarke and son - 6/8 round point / full hollow - scheffield
     - joseph allen & sons - non xll the celebrated extra hollow ground barbers notch
       horn scale
@@ -1951,7 +2040,7 @@ razor:
     - romer 7 shivira
   Rubin:
     '1':
-    - рубин
+    - "\u0440\u0443\u0431\u0438\u043D"
   SCS:
     Model A:
     - simple clean shave (reb engineering & machine, llc) - scs model a
@@ -2062,12 +2151,12 @@ razor:
     - the holy black shavette
   Thiers Issard:
     Straight:
-    - thiers issard 1937 special coiffeur 60 médaille argent - half hollow - round
-      point - 6/8
+    - "thiers issard 1937 special coiffeur 60 m\xE9daille argent - half hollow - round\
+      \ point - 6/8"
     - thiers issard le dandy (5/8", square point, carbon steel)
     - thiers issard le transatlantic 7/8" full hollow round point
-    - thiers issard médaille d'or exposition d'alger - full hollow - round point -
-      6/8
+    - "thiers issard m\xE9daille d'or exposition d'alger - full hollow - round point\
+      \ - 6/8"
   Timeless:
     Razor:
     - timeless - .38 bronze
@@ -2234,45 +2323,60 @@ split_brush:
   22mm yaqi synth:
     handle: yaqi unspecified
     knot: yaqi synthetic
+    user_intent: handle_primary
   3d printed - timberwolf 24mm:
     handle: 3d printed unspecified
     knot: unspecified synthetic
+    user_intent: handle_primary
   3dogwood w/ dg b12 butterscotch 2 band badger:
     handle: dogwood handcrafts unspecified
     knot: declaration grooming b12
+    user_intent: handle_primary
   a p shaveco faux boar - 30mm:
     handle: ap shave co unspecified
     knot: ap shave co synthetic
+    user_intent: handle_primary
   a p shaveco faux horse brush:
     handle: ap shave co unspecified
     knot: ap shave co synthetic
+    user_intent: handle_primary
   a p shaveco luxury knot:
     handle: ap shave co unspecified
     knot: ap shave co synthetic
+    user_intent: handle_primary
   a p shaveco pure bliss:
     handle: ap shave co unspecified
     knot: ap shave co pure bliss
+    user_intent: handle_primary
   aka brushworks never alone 4 with doughman badger:
     handle: aka brushworx unspecified
     knot: aka brushworx doughman
+    user_intent: handle_primary
   aka brushworkx 26mm black silk $composite:
     handle: aka brushworx unspecified
     knot: aka brushworx black silk
+    user_intent: handle_primary
   aka brushworx ak47 knot in southland 1 in. x 3 in. galvanized nipple handle:
     handle: southland galvanized nipple
     knot: aka brushworx ak47
+    user_intent: handle_primary
   aka brushworx blues stanley cup with 26mm turn n shave quartermoon knot:
     handle: aka brushworx stanley
     knot: turn-n-shave quartermoon
+    user_intent: handle_primary
   aka brushworx g5c:
     handle: aka brushworx unspecified
     knot: ap shave co g5c
+    user_intent: handle_primary
   aka brushworx g5c $frankenbrush:
     handle: aka brushworx unspecified
     knot: ap shave co g5c
+    user_intent: handle_primary
   aka brushworx manchurian $composite:
     handle: aka brushworx unspecified
     knot: aka brushworx synthetic
+    user_intent: handle_primary
   aka brushworx sea creature 26mm ak7 synthentic knot:
     handle: aka brushworx unspecified
     knot: aka brushworx ak7
+    user_intent: handle_primary

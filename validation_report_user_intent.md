@@ -1,0 +1,225 @@
+
+# Correct Matches User Intent Validation Report
+
+## Summary
+- Total entries processed: 105
+- Successful validations: 105 (100.0%)
+- Failed validations: 0 (0.0%)
+- Errors: 0 (0.0%)
+- Entries enhanced: 105
+
+## Successful Validations (105)
+- brush: `all-star grooming company - badger` → `handle_primary`
+- brush: `alpha amber` → `handle_primary`
+- brush: `alpha bulldog ti` → `handle_primary`
+- brush: `aurora grooming lg24` → `handle_primary`
+- brush: `böker synthetic` → `handle_primary`
+- brush: `declaration grooming - roil jefferson - 28mm b13` → `handle_primary`
+- brush: `declaration grooming - randy watson washington - 28mm b14` → `handle_primary`
+- brush: `declaration grooming washington envy b14 shd badger` → `handle_primary`
+- brush: `declaration grooming jefferson artist's choice b15 shd badger` → `handle_primary`
+- brush: `6dg b16 thaw washington badger` → `handle_primary`
+- brush: `declaration grooming - cream jefferson - 28mm b16` → `handle_primary`
+- brush: `declaration grooming - jefferson thaw b16 - 28mm artisan tied badger` → `handle_primary`
+- brush: `dg jefferson know it all 2.0 28mm b16` → `handle_primary`
+- brush: `declaration grooming - cold 2.0 jeffington - 28mm b18` → `handle_primary`
+- brush: `declaration grooming washington blood of kings b3` → `handle_primary`
+- brush: `declaration grooming washington b6` → `handle_primary`
+- brush: `declaration grooming - lavender jefferson - 28mm b9a+` → `handle_primary`
+- brush: `dreadnought avenger` → `handle_primary`
+- brush: `>![redacted]!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn woodworks handle $frankenbrush` → `handle_primary`
+- brush: `>!redacted!< $bigfuckingmotherload` → `handle_primary`
+- brush: `>!redacted!< [bigfuckingmotherload]` → `handle_primary`
+- brush: `>!redacted!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn woodworks handle` → `handle_primary`
+- brush: `muninn woodworks "bfm" 50mm motherlode` → `handle_primary`
+- brush: `muninn woodworks bfm` → `handle_primary`
+- brush: `omega 10005` → `handle_primary`
+- brush: `omega pro48` → `handle_primary`
+- brush: `omega - 10049` → `handle_primary`
+- brush: `omega 10049` → `handle_primary`
+- brush: `omega 10065` → `handle_primary`
+- brush: `omega 10066` → `handle_primary`
+- brush: `omega 10098` → `handle_primary`
+- brush: `omega 11137` → `handle_primary`
+- brush: `omega 146818` → `handle_primary`
+- brush: `omega 20102` → `handle_primary`
+- brush: `omega 81151` → `handle_primary`
+- brush: `semogue 1305` → `handle_primary`
+- brush: `semogue 1800` → `handle_primary`
+- brush: `semogue 2000` → `handle_primary`
+- brush: `semogue 610` → `handle_primary`
+- brush: `semogue 830` → `handle_primary`
+- brush: `semogue - soc boar` → `handle_primary`
+- brush: `simpson - 'chubby 2' silvertip` → `handle_primary`
+- brush: `simpson ch2 super badger super badger` → `handle_primary`
+- brush: `simpson chubby 2 manchurian` → `handle_primary`
+- brush: `simpsons chubby 2 synthetic` → `handle_primary`
+- brush: `simpson butterscotch ch3 manchurian badger` → `handle_primary`
+- brush: `simpson - 'colonel' best` → `handle_primary`
+- brush: `simpson - 'm7' manchurian` → `handle_primary`
+- brush: `simpson trafalgar t2` → `handle_primary`
+- brush: `simpsons trafalgar t2` → `handle_primary`
+- brush: `simpson - trafalgar t3` → `handle_primary`
+- brush: `simpson trafalgar t3` → `handle_primary`
+- brush: `simpson trafalgar t3 synthetic 26mm` → `handle_primary`
+- brush: `simpson - 'wee scot' best` → `handle_primary`
+- brush: `simpson - wee scott` → `handle_primary`
+- brush: `simpson wee scot` → `handle_primary`
+- brush: `simpsons wee scot` → `handle_primary`
+- brush: `spokar badger` → `handle_primary`
+- brush: `stirling 2 band synthetic` → `handle_primary`
+- brush: `wald a1` → `handle_primary`
+- brush: `walfront travel brush` → `handle_primary`
+- brush: `zenith 505bc` → `handle_primary`
+- brush: `zenith 506u xse` → `handle_primary`
+- brush: `zenith b15` → `handle_primary`
+- brush: `zenith b37` → `handle_primary`
+- brush: `moar boar` → `handle_primary`
+- brush: `moar f'n boar` → `handle_primary`
+- brush: `r/wetshaving zenith moar boar` → `handle_primary`
+- brush: `r/wetshaving zentih moar boar 31mm` → `handle_primary`
+- brush: `zenith - 508a xl/bristle (b35) (moar boar) 31mm boar` → `handle_primary`
+- brush: `zenith - moar boar` → `handle_primary`
+- brush: `zenith - moar boar 31mm boar` → `handle_primary`
+- brush: `zenith - moar boar b35 31mm boar` → `handle_primary`
+- brush: `zenith 31mm moar boar` → `handle_primary`
+- brush: `zenith 508 moar boar` → `handle_primary`
+- brush: `zenith b35 moar boar 31mm boar` → `handle_primary`
+- brush: `zenith moar boar` → `handle_primary`
+- brush: `zenith moar boar $girth $oldscratchy` → `handle_primary`
+- brush: `zenith moar boar sub brush` → `handle_primary`
+- brush: `zenith moar boar sub exclusive` → `handle_primary`
+- brush: `zenith moar boar sub-exclusive (508a xl) 31mm boar knot` → `handle_primary`
+- brush: `zenith r/wetshaving 31mm x 57mm moar boar` → `handle_primary`
+- brush: `zenith r/wetshaving exclusive moar badger (silvertip)` → `handle_primary`
+- brush: `zenith r/wetshaving exclusive moar boar` → `handle_primary`
+- brush: `zenith r/wetshaving exclusive moar boar (31 mm × 57 mm bleached boar)` → `handle_primary`
+- brush: `zenith r/wetshaving exclusive moar boar 31 mm` → `handle_primary`
+- brush: `zenith r/wetshaving exclusive moar boar 31mm` → `handle_primary`
+- brush: `zenith r/wetshaving moar boar` → `handle_primary`
+- brush: `zenith r/wetshaving sub exclusive moar boar` → `handle_primary`
+- brush: `zentih - moar boar r/wetshaving` → `handle_primary`
+- split_brush: `22mm yaqi synth` → `handle_primary`
+- split_brush: `3d printed - timberwolf 24mm` → `handle_primary`
+- split_brush: `3dogwood w/ dg b12 butterscotch 2 band badger` → `handle_primary`
+- split_brush: `a p shaveco faux boar - 30mm` → `handle_primary`
+- split_brush: `a p shaveco faux horse brush` → `handle_primary`
+- split_brush: `a p shaveco luxury knot` → `handle_primary`
+- split_brush: `a p shaveco pure bliss` → `handle_primary`
+- split_brush: `aka brushworks never alone 4 with doughman badger` → `handle_primary`
+- split_brush: `aka brushworkx 26mm black silk $composite` → `handle_primary`
+- split_brush: `aka brushworx ak47 knot in southland 1 in. x 3 in. galvanized nipple handle` → `handle_primary`
+- split_brush: `aka brushworx blues stanley cup with 26mm turn n shave quartermoon knot` → `handle_primary`
+- split_brush: `aka brushworx g5c` → `handle_primary`
+- split_brush: `aka brushworx g5c $frankenbrush` → `handle_primary`
+- split_brush: `aka brushworx manchurian $composite` → `handle_primary`
+- split_brush: `aka brushworx sea creature 26mm ak7 synthentic knot` → `handle_primary`
+
+## Enhanced Entries (105)
+These entries were successfully enhanced with user_intent:
+
+- brush: all-star grooming company - badger
+- brush: alpha amber
+- brush: alpha bulldog ti
+- brush: aurora grooming lg24
+- brush: böker synthetic
+- brush: declaration grooming - roil jefferson - 28mm b13
+- brush: declaration grooming - randy watson washington - 28mm b14
+- brush: declaration grooming washington envy b14 shd badger
+- brush: declaration grooming jefferson artist's choice b15 shd badger
+- brush: 6dg b16 thaw washington badger
+- brush: declaration grooming - cream jefferson - 28mm b16
+- brush: declaration grooming - jefferson thaw b16 - 28mm artisan tied badger
+- brush: dg jefferson know it all 2.0 28mm b16
+- brush: declaration grooming - cold 2.0 jeffington - 28mm b18
+- brush: declaration grooming washington blood of kings b3
+- brush: declaration grooming washington b6
+- brush: declaration grooming - lavender jefferson - 28mm b9a+
+- brush: dreadnought avenger
+- brush: >![redacted]!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn woodworks handle $frankenbrush
+- brush: >!redacted!< $bigfuckingmotherload
+- brush: >!redacted!< [bigfuckingmotherload]
+- brush: >!redacted!< aka bfm (big fucking motherlode) aka 50mm mother lode x muninn woodworks handle
+- brush: muninn woodworks "bfm" 50mm motherlode
+- brush: muninn woodworks bfm
+- brush: omega 10005
+- brush: omega pro48
+- brush: omega - 10049
+- brush: omega 10049
+- brush: omega 10065
+- brush: omega 10066
+- brush: omega 10098
+- brush: omega 11137
+- brush: omega 146818
+- brush: omega 20102
+- brush: omega 81151
+- brush: semogue 1305
+- brush: semogue 1800
+- brush: semogue 2000
+- brush: semogue 610
+- brush: semogue 830
+- brush: semogue - soc boar
+- brush: simpson - 'chubby 2' silvertip
+- brush: simpson ch2 super badger super badger
+- brush: simpson chubby 2 manchurian
+- brush: simpsons chubby 2 synthetic
+- brush: simpson butterscotch ch3 manchurian badger
+- brush: simpson - 'colonel' best
+- brush: simpson - 'm7' manchurian
+- brush: simpson trafalgar t2
+- brush: simpsons trafalgar t2
+- brush: simpson - trafalgar t3
+- brush: simpson trafalgar t3
+- brush: simpson trafalgar t3 synthetic 26mm
+- brush: simpson - 'wee scot' best
+- brush: simpson - wee scott
+- brush: simpson wee scot
+- brush: simpsons wee scot
+- brush: spokar badger
+- brush: stirling 2 band synthetic
+- brush: wald a1
+- brush: walfront travel brush
+- brush: zenith 505bc
+- brush: zenith 506u xse
+- brush: zenith b15
+- brush: zenith b37
+- brush: moar boar
+- brush: moar f'n boar
+- brush: r/wetshaving zenith moar boar
+- brush: r/wetshaving zentih moar boar 31mm
+- brush: zenith - 508a xl/bristle (b35) (moar boar) 31mm boar
+- brush: zenith - moar boar
+- brush: zenith - moar boar 31mm boar
+- brush: zenith - moar boar b35 31mm boar
+- brush: zenith 31mm moar boar
+- brush: zenith 508 moar boar
+- brush: zenith b35 moar boar 31mm boar
+- brush: zenith moar boar
+- brush: zenith moar boar $girth $oldscratchy
+- brush: zenith moar boar sub brush
+- brush: zenith moar boar sub exclusive
+- brush: zenith moar boar sub-exclusive (508a xl) 31mm boar knot
+- brush: zenith r/wetshaving 31mm x 57mm moar boar
+- brush: zenith r/wetshaving exclusive moar badger (silvertip)
+- brush: zenith r/wetshaving exclusive moar boar
+- brush: zenith r/wetshaving exclusive moar boar (31 mm × 57 mm bleached boar)
+- brush: zenith r/wetshaving exclusive moar boar 31 mm
+- brush: zenith r/wetshaving exclusive moar boar 31mm
+- brush: zenith r/wetshaving moar boar
+- brush: zenith r/wetshaving sub exclusive moar boar
+- brush: zentih - moar boar r/wetshaving
+- split_brush: 22mm yaqi synth
+- split_brush: 3d printed - timberwolf 24mm
+- split_brush: 3dogwood w/ dg b12 butterscotch 2 band badger
+- split_brush: a p shaveco faux boar - 30mm
+- split_brush: a p shaveco faux horse brush
+- split_brush: a p shaveco luxury knot
+- split_brush: a p shaveco pure bliss
+- split_brush: aka brushworks never alone 4 with doughman badger
+- split_brush: aka brushworkx 26mm black silk $composite
+- split_brush: aka brushworx ak47 knot in southland 1 in. x 3 in. galvanized nipple handle
+- split_brush: aka brushworx blues stanley cup with 26mm turn n shave quartermoon knot
+- split_brush: aka brushworx g5c
+- split_brush: aka brushworx g5c $frankenbrush
+- split_brush: aka brushworx manchurian $composite
+- split_brush: aka brushworx sea creature 26mm ak7 synthentic knot

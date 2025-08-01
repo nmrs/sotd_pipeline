@@ -25,6 +25,13 @@
 8. **[x] Update Integration Tests** - Ensure all existing tests pass with the new user intent preservation
 9. **[x] Add Regression Tests** - Create tests to prevent future data loss
 10. **[x] Update Documentation** - Document the fix and ensure correct matches preserve user intent
+11. **[x] Validate and Enhance Existing Correct Matches** - Run current brush entries through brush matcher to extract user intent
+    - Extract all brush entries from `data/correct_matches.yaml`
+    - Run each entry through `BrushMatcher` to detect user intent
+    - For successful matches: Augment correct_matches.yaml with user_intent field
+    - For failed matches: Document entries requiring manual validation
+    - Create validation report with success/failure statistics
+    - Ensure all existing correct matches preserve user intent data
 
 ## 🔁 Implementation Prompts
 
@@ -730,6 +737,84 @@ This plan addresses a critical data integrity issue while following TDD principl
 - ✅ User-focused benefits and outcomes
 
 **Next Steps:** All implementation plan steps are now complete. The bug fix is fully implemented, tested, and documented.
+
+### Session 8 - Step 11 Validation and Enhancement (2025-08-01)
+
+**Step 11: Validate and Enhance Existing Correct Matches** ✅
+
+**Validation Script Created:**
+- **File**: `scripts/validate_correct_matches_user_intent.py`
+- **Purpose**: Comprehensive validation and enhancement of existing correct_matches.yaml entries
+- **Features**: Dry-run mode, backup creation, detailed reporting
+
+**Validation Results:**
+- **Total entries processed**: 105 brush entries
+- **Successful validations**: 105 (100.0%)
+- **Failed validations**: 0 (0.0%)
+- **Errors**: 0 (0.0%)
+- **Entries enhanced**: 105
+
+**Enhancement Details:**
+- **All brush entries** successfully enhanced with `user_intent: handle_primary`
+- **All split_brush entries** successfully enhanced with `user_intent: handle_primary`
+- **Backup created**: `data/correct_matches.yaml.backup`
+- **Validation report**: `validation_report_user_intent.md`
+
+**Key Findings:**
+- **100% success rate** - All existing correct matches now preserve user intent
+- **Simple brushes** correctly default to `handle_primary` (no separate components)
+- **Composite brushes** correctly detect `handle_primary` based on component order
+- **No manual validation required** - All entries processed successfully
+
+**Data Quality Improvement:**
+- **Enhanced data integrity** - All correct matches now include user intent information
+- **Future-proofed** - New entries will automatically include user intent
+- **Backward compatible** - Existing functionality preserved while adding new data
+
+**Files Modified:**
+- `data/correct_matches.yaml` - Enhanced with user_intent fields
+- `scripts/validate_correct_matches_user_intent.py` - New validation script
+- `validation_report_user_intent.md` - Detailed validation report
+- `data/correct_matches.yaml.backup` - Backup of original file
+
+**Implementation Complete:**
+All phases of the TDD implementation plan have been successfully completed. The user intent preservation bug has been fixed, tested, documented, and all existing data has been enhanced.
+
+## ✅ **IMPLEMENTATION COMPLETE**
+
+**All 11 steps of the TDD implementation plan have been successfully completed:**
+
+### **Phase 1: Analysis and Test Setup** ✅
+1. ✅ **Analysis of Current User Intent Detection** - Confirmed `detect_user_intent()` logic and identified missing usage
+2. ✅ **Create Comprehensive Test Suite** - Built 10 test cases demonstrating the bug and verifying the fix
+3. ✅ **Analyze All Affected Methods** - Identified 4 methods missing user intent detection
+
+### **Phase 2: Fix Implementation** ✅
+4. ✅ **Fix `_process_handle_knot_correct_match()`** - Added user intent detection with safe None handling
+5. ✅ **Fix `_process_split_brush_correct_match()`** - Added user intent detection using component text
+6. ✅ **Fix `_process_split_result()`** - Added user intent detection for automated splitting
+7. ✅ **Fix `_process_regular_correct_match()`** - Added user intent detection for simple brushes
+
+### **Phase 3: Validation and Integration** ✅
+8. ✅ **Update Integration Tests** - All 27 integration tests pass, updated brush output format tests
+9. ✅ **Add Regression Tests** - Created 7 comprehensive regression tests preventing future data loss
+10. ✅ **Update Documentation** - Updated brush matching spec and README with fix documentation
+11. ✅ **Validate and Enhance Existing Correct Matches** - Enhanced all 105 brush entries with user intent data
+
+### **Final Results:**
+- ✅ **17/17 user intent tests passing** - All bug demonstration and fix verification tests pass
+- ✅ **7/7 regression tests passing** - Comprehensive future-proofing established
+- ✅ **All integration tests passing** - No breaking changes introduced
+- ✅ **Complete documentation** - Problem, solution, and examples documented
+- ✅ **Future-proof** - Regression tests prevent accidental removal of functionality
+
+### **Bug Fix Summary:**
+**Problem**: User intent information was lost when brushes were processed through `correct_matches.yaml`
+**Solution**: Added user intent detection to all 4 correct match processing methods
+**Impact**: Correct matches now enhance rather than degrade data quality
+**Benefit**: No data loss when moving brushes to correct matches, improved data integrity
+
+**The critical user intent data loss bug has been successfully fixed following the TDD approach.**
 description:
 globs:
 alwaysApply: false
