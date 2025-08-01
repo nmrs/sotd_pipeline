@@ -144,10 +144,6 @@ class TestRealCatalogIntegration:
         # This is matched as a split brush due to the "w/" delimiter
         if "knot" in result.matched and result.matched["knot"]:
             knot_brand = result.matched["knot"].get("brand")
-            # Debug: Print the full result structure
-            print(f"DEBUG: Full result structure: {result.matched}")
-            print(f"DEBUG: Knot brand: {knot_brand}")
-            print(f"DEBUG: Handle brand: {result.matched.get('handle', {}).get('brand')}")
             # Fixed expectation: Zenith B2 should be the knot, Elite should be the handle
             assert knot_brand == "Zenith", f"Expected Zenith, got {knot_brand}"
 

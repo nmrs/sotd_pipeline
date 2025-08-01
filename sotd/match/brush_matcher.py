@@ -974,14 +974,6 @@ class BrushMatcher:
         else:
             # Fall back to knot matcher using unified MatchResult structure
             knot_match = self.knot_matcher.match(knot_text)
-            # Debug: Print knot match info
-            if knot_match:
-                print(
-                    f"DEBUG: Knot match from unified matcher: "
-                    f"{knot_match.section}, {knot_match.priority}, {knot_match.pattern}"
-                )
-            else:
-                print(f"DEBUG: No knot match from unified matcher for: {knot_text}")
 
         # If no knot match found, check if it's a generic knot reference
         if not knot_match and knot_text:
