@@ -319,6 +319,61 @@ known_knots:
       knot_size_mm: 27
       patterns:
       - wald.*j4
+  Zenith:
+    fiber: Boar
+    B03 (aka B2):
+      knot_size_mm: 26
+      patterns:
+        - zenith.*\bb0?3\b
+        - zenith.*\bb0?2\b
+    B07:
+      knot_size_mm: 24
+      patterns:
+        - zenith.*\bb0?7\b
+    B10:
+      knot_size_mm: 24
+      patterns:
+        - zenith.*\bb10\b
+    B19:
+      knot_size_mm: 27
+      patterns:
+        - zenith.*\bb19\b
+    B27:
+      knot_size_mm: 28
+      patterns:
+        - zenith.*\bb27\b
+    B28:
+      knot_size_mm: 28
+      patterns:
+        - zenith.*\bb28\b
+    B29:
+      knot_size_mm: 28
+      patterns:
+        - zenith.*\bb29\b
+    B33:
+      knot_size_mm: 28
+      patterns:
+        - zenith.*\bb33\b
+    B34:
+      knot_size_mm: 28
+      patterns:
+        - zenith.*\bb34\b
+    B35:
+      knot_size_mm: 31
+      patterns:
+        - zenith.*\bb35\b
+    B36:
+      knot_size_mm: 28
+      patterns:
+        - zenith.*\bb36\b
+    B37:
+      knot_size_mm: 28
+      patterns:
+        - zenith.*\bb37\b
+    B39:
+      knot_size_mm: 28
+      patterns:
+        - zenith.*\bb39\b
 
 other_knots:
   AKA Brushworx:
@@ -971,3 +1026,4 @@ other_knots:
     default: Boar
     patterns:
     - zenith
+    - zenith.*\bb\d+
