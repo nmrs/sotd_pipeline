@@ -26,95 +26,78 @@ const EnrichPhaseModal: React.FC<EnrichPhaseModalProps> = ({
 
     // For brush field, check the enriched data against matched data
     if (field === 'brush') {
-      // Check fiber changes (enriched data overrides matched)
-      const matchedKnotFiber = originalData?.knot?.fiber;
-      const enrichedFiber = enrichedData?.fiber;
-      if (matchedKnotFiber !== enrichedFiber) {
-        changes.push(`Fiber: ${matchedKnotFiber || 'None'} → ${enrichedFiber || 'None'}`);
-      }
+      const matchedBrush = originalData?.brush;
+      const enrichedBrush = enrichedData?.brush;
 
-      // Check knot size changes
-      const matchedKnotSize = originalData?.knot?.knot_size_mm;
-      const enrichedKnotSize = enrichedData?.knot_size_mm;
-      if (matchedKnotSize !== enrichedKnotSize) {
-        changes.push(`Knot Size: ${matchedKnotSize || 'None'} → ${enrichedKnotSize || 'None'}`);
-      }
+      if (matchedBrush && enrichedBrush) {
+        // Check for actual changes in brush fields
+        const brushFields = ['handle_maker', 'handle_model', 'knot_maker', 'knot_model', 'knot_size_mm', 'fiber'];
+        
+        brushFields.forEach(brushField => {
+          const matchedValue = matchedBrush[brushField];
+          const enrichedValue = enrichedBrush[brushField];
+          
+          // Only show changes if the field exists in enriched data and is different
+          if (enrichedValue !== undefined && enrichedValue !== matchedValue) {
+            const displayMatched = matchedValue ?? 'None';
+            const displayEnriched = enrichedValue ?? 'None';
+            changes.push(`${brushField.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: ${displayMatched} → ${displayEnriched}`);
+          }
+        });
 
-      // For brush enrichment, only fiber and knot_size_mm can change
-      // Brand, model, handle_maker, etc. should remain the same from match phase
-      // Don't check other fields as they shouldn't change during brush enrichment
-    } else {
-      // For other fields, check top-level fields
-      if (originalData.fiber !== enrichedData.fiber) {
-        changes.push(`Fiber: ${originalData.fiber || 'None'} → ${enrichedData.fiber || 'None'}`);
-      }
-      if (originalData.knot_size_mm !== enrichedData.knot_size_mm) {
-        changes.push(
-          `Knot Size: ${originalData.knot_size_mm || 'None'} → ${enrichedData.knot_size_mm || 'None'}`
-        );
-      }
-      if (originalData.handle_maker !== enrichedData.handle_maker) {
-        changes.push(
-          `Handle: ${originalData.handle_maker || 'None'} → ${enrichedData.handle_maker || 'None'}`
-        );
+        // Check for source tracking information
+        const sourceFields = ['_extraction_source', '_fiber_extraction_source', '_handle_extraction_source', '_knot_extraction_source'];
+        sourceFields.forEach(sourceField => {
+          if (enrichedBrush[sourceField]) {
+            changes.push(`Source: ${enrichedBrush[sourceField]}`);
+          }
+        });
       }
     }
 
-    // Add extraction source info if available
-    if (enrichedData?._extraction_source) {
-      changes.push(`Source: ${enrichedData._extraction_source}`);
+    // For other fields, check direct field changes
+    if (field !== 'brush') {
+      const matchedValue = originalData?.[field];
+      const enrichedValue = enrichedData?.[field];
+      
+      // Only show changes if the field exists in enriched data and is different
+      if (enrichedValue !== undefined && enrichedValue !== matchedValue) {
+        const displayMatched = matchedValue ?? 'None';
+        const displayEnriched = enrichedValue ?? 'None';
+        changes.push(`${field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: ${displayMatched} → ${displayEnriched}`);
+      }
     }
 
-    return changes.length > 0 ? changes : ['No enrich-phase changes detected'];
+    return changes.length > 0 ? changes.join('\n') : 'No changes detected';
   };
 
-  const comparisonText = getComparisonText();
-
   return (
-    <div className='fixed inset-0 z-[9999] flex items-center justify-center'>
-      {/* Backdrop */}
-      <div className='absolute inset-0 bg-black bg-opacity-50' onClick={onClose} />
-
-      {/* Modal */}
-      <div className='relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto'>
-        {/* Header */}
-        <div className='flex items-center justify-between p-4 border-b border-gray-200'>
-          <h3 className='text-lg font-semibold text-gray-900'>🔄 Enrich Phase Adjustments</h3>
-          <button onClick={onClose} className='text-gray-400 hover:text-gray-600 transition-colors'>
-            <X className='h-5 w-5' />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className='p-4'>
-          <div className='mb-4'>
-            <h4 className='font-medium text-gray-900 mb-2'>Original Text:</h4>
-            <p className='text-sm text-gray-600 bg-gray-50 p-2 rounded'>{originalText}</p>
-          </div>
-
-          <div>
-            <h4 className='font-medium text-gray-900 mb-2'>Changes Made:</h4>
-            <div className='space-y-2'>
-              {comparisonText.map((change, index) => (
-                <div
-                  key={index}
-                  className='text-sm bg-blue-50 p-2 rounded border-l-4 border-blue-500'
-                >
-                  {change}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className='flex justify-end p-4 border-t border-gray-200'>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Enrich Phase Adjustments</h2>
           <button
             onClick={onClose}
-            className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors'
+            className="text-gray-500 hover:text-gray-700"
           >
-            Close
+            <X size={20} />
           </button>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-medium text-gray-900 mb-2">Original Text:</h3>
+            <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+              {originalText}
+            </p>
+          </div>
+          
+          <div>
+            <h3 className="font-medium text-gray-900 mb-2">Changes:</h3>
+            <pre className="text-sm text-gray-600 bg-gray-50 p-3 rounded whitespace-pre-wrap">
+              {getComparisonText()}
+            </pre>
+          </div>
         </div>
       </div>
     </div>
