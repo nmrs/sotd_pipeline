@@ -68,12 +68,12 @@ class TestBrushUserIntentCorrectMatchesBug:
                 assert "user_intent" in result.matched
                 assert result.matched["user_intent"] == "knot_primary"  # G5C appears first
 
-    def test_correct_matches_missing_user_intent(self, brush_matcher):
+    def test_correct_matches_now_includes_user_intent(self, brush_matcher):
         """
-        Test that correct matches processing methods don't include user intent.
+        Test that correct matches processing methods now include user intent.
 
-        This test verifies the bug by checking that correct match processing
-        methods don't include user_intent field in their output.
+        This test verifies that the bug has been fixed by checking that correct match processing
+        methods now include user_intent field in their output.
         """
         # Test input
         value = "G5C Rad Dinosaur Creation"
@@ -99,10 +99,11 @@ class TestBrushUserIntentCorrectMatchesBug:
 
                 result = brush_matcher.match(value)
 
-                # Verify correct match result is missing user intent
+                # Verify correct match result now includes user intent
                 assert result is not None
                 assert result.matched is not None
-                assert "user_intent" not in result.matched  # BUG: user intent is missing
+                assert "user_intent" in result.matched  # FIXED: user intent is now included
+                assert result.matched["user_intent"] == "knot_primary"  # G5C appears first
 
     def test_fix_verification_handle_knot_correct_match(self, brush_matcher):
         """
@@ -130,11 +131,10 @@ class TestBrushUserIntentCorrectMatchesBug:
             result = brush_matcher._process_handle_knot_correct_match(value, correct_match)
 
             # After fix, this should include user_intent
-            # TODO: This test will fail until the fix is implemented
             assert result is not None
             assert result.matched is not None
-            # assert "user_intent" in result.matched  # Will fail until fix
-            # assert result.matched["user_intent"] == "knot_primary"  # Will fail until fix
+            assert "user_intent" in result.matched  # Should now pass with fix
+            assert result.matched["user_intent"] == "knot_primary"  # Should now pass with fix
 
     def test_fix_verification_split_brush_correct_match(self, brush_matcher):
         """
@@ -164,11 +164,10 @@ class TestBrushUserIntentCorrectMatchesBug:
             result = brush_matcher._process_split_brush_correct_match(value, correct_match)
 
             # After fix, this should include user_intent
-            # TODO: This test will fail until the fix is implemented
             assert result is not None
             assert result.matched is not None
-            # assert "user_intent" in result.matched  # Will fail until fix
-            # assert result.matched["user_intent"] == "handle_primary"  # Will fail until fix
+            assert "user_intent" in result.matched  # Should now pass with fix
+            assert result.matched["user_intent"] == "handle_primary"  # Should now pass with fix
 
     def test_fix_verification_split_result(self, brush_matcher):
         """
@@ -211,11 +210,10 @@ class TestBrushUserIntentCorrectMatchesBug:
                     )
 
                     # After fix, this should include user_intent
-                    # TODO: This test will fail until the fix is implemented
                     assert result is not None
                     assert result.matched is not None
-                    # assert "user_intent" in result.matched  # Will fail until fix
-                    # assert result.matched["user_intent"] == "knot_primary"  # Will fail until fix
+                    assert "user_intent" in result.matched  # Should now pass with fix
+                    assert result.matched["user_intent"] == "knot_primary"  # Should now pass
 
     def test_edge_case_identical_positions(self, brush_matcher):
         """

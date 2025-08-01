@@ -163,9 +163,17 @@ class BrushMatcher:
         knot_info = correct_match.get("knot_info", {})
         # Split the input to get the actual handle and knot text
         handle_text, knot_text, _ = self.brush_splitter.split_handle_and_knot(value)
+
+        # Detect user intent based on component order in original string
+        # Handle None values by providing empty strings
+        handle_text_safe = handle_text or ""
+        knot_text_safe = knot_text or ""
+        user_intent = self.detect_user_intent(value, handle_text_safe, knot_text_safe)
+
         matched = {
             "brand": None,
             "model": None,
+            "user_intent": user_intent,
             "handle": {
                 "brand": handle_maker,
                 "model": handle_model,
@@ -220,11 +228,16 @@ class BrushMatcher:
                     catalog_entry = brand_data[model]
                     break
 
+        # For simple brushes, user intent defaults to handle_primary since there's no separate
+        # handle/knot text to analyze
+        user_intent = "handle_primary"
+
         # For simple brushes, create unified format with nested sections AND preserve top-level
         # fields
         matched = {
             "brand": brand,  # Top-level brand for simple brushes
             "model": model,  # Top-level model for simple brushes
+            "user_intent": user_intent,
             "handle": {
                 "brand": brand,  # Handle brand is the brush brand
                 "model": model,  # Handle model is the brush model
@@ -360,10 +373,17 @@ class BrushMatcher:
                     except Exception:
                         continue
 
+        # Detect user intent based on component order in original string
+        # Handle None values by providing empty strings
+        handle_component_safe = handle_component or ""
+        knot_component_safe = knot_component or ""
+        user_intent = self.detect_user_intent(value, handle_component_safe, knot_component_safe)
+
         # Create unified format with nested sections
         matched = {
             "brand": None,  # Split brushes have no top-level brand
             "model": None,  # Split brushes have no top-level model
+            "user_intent": user_intent,
             "handle": {
                 "brand": handle_match.get("handle_maker") if handle_match else None,
                 "model": handle_match.get("handle_model") if handle_match else None,
@@ -1092,6 +1112,9 @@ class BrushMatcher:
                     pattern="generic_knot",
                 )
 
+        # Detect user intent based on component order in original string
+        user_intent = self.detect_user_intent(value, handle_text, knot_text)
+
         # Get actual patterns from individual matchers
         handle_pattern = handle_match.get("_pattern_used") if handle_match else "split"
         knot_pattern = knot_match.pattern if knot_match else "split"
@@ -1099,6 +1122,7 @@ class BrushMatcher:
         matched = {
             "brand": None,  # Composite brush
             "model": None,  # Composite brush
+            "user_intent": user_intent,
             "handle": {
                 "brand": handle_match.get("handle_maker") if handle_match else None,
                 "model": handle_match.get("handle_model") if handle_match else None,
