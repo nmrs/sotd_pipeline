@@ -47,6 +47,7 @@ class KnownKnotMatchingStrategy:
                     all_patterns.append(
                         {
                             "pattern": pattern,
+                            "compiled": re.compile(pattern, re.IGNORECASE),
                             "brand": brand,
                             "model": model,
                             "fiber": fiber,
@@ -70,8 +71,7 @@ class KnownKnotMatchingStrategy:
             )
 
         for pattern_data in self.patterns:
-            pattern = pattern_data["pattern"]
-            if re.search(pattern, value, re.IGNORECASE):
+            if pattern_data["compiled"].search(value):
                 return create_strategy_result(
                     original_value=value,
                     matched_data={
@@ -80,7 +80,7 @@ class KnownKnotMatchingStrategy:
                         "fiber": pattern_data["fiber"],
                         "knot_size_mm": pattern_data["knot_size_mm"],
                     },
-                    pattern=pattern,
+                    pattern=pattern_data["pattern"],
                     strategy_name="KnownKnotMatchingStrategy",
                     match_type="regex",
                 )

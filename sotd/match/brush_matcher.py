@@ -112,7 +112,7 @@ class BrushMatcher:
 
         # Load human-curated brush splits
         self.brush_splits_loader = BrushSplitsLoader()
-        
+
         # Pre-compile handle patterns for performance optimization
         self._compiled_handle_patterns = self._precompile_handle_patterns()
 
@@ -447,37 +447,32 @@ class BrushMatcher:
     def _precompile_handle_patterns(self) -> Dict[str, list[dict]]:
         """
         Pre-compile all handle patterns for performance optimization.
-        
+
         Returns:
             Dictionary mapping brand names to lists of compiled pattern dictionaries
         """
         import re
-        
+
         compiled_patterns = {}
         handles_data = self.catalog_loader.load_catalog(self.handles_path, "handles")
 
-        # Search through all handle sections for all brands
         for section_name, section_data in handles_data.items():
             if not section_data:
                 continue
-                
+
             for brand, brand_data in section_data.items():
                 if not brand_data:
                     continue
-                    
+
                 if brand not in compiled_patterns:
                     compiled_patterns[brand] = []
 
-                # Get all models for this brand
                 for model_name, model_data in brand_data.items():
                     if not model_data:
                         continue
 
-                    # Handle both dictionary and list structures
                     if isinstance(model_data, dict):
-                        # Dictionary structure with patterns field
                         if model_name == "Unspecified":
-                            # Handle unspecified models
                             for pattern in model_data.get("patterns", []):
                                 compiled_patterns[brand].append(
                                     {
@@ -490,7 +485,6 @@ class BrushMatcher:
                                     }
                                 )
                         else:
-                            # Handle specific models
                             for pattern in model_data.get("patterns", []):
                                 compiled_patterns[brand].append(
                                     {
@@ -503,7 +497,6 @@ class BrushMatcher:
                                     }
                                 )
                     elif isinstance(model_data, list):
-                        # List structure - treat as patterns directly
                         for pattern in model_data:
                             compiled_patterns[brand].append(
                                 {
@@ -515,7 +508,6 @@ class BrushMatcher:
                                     },
                                 }
                             )
-
         return compiled_patterns
 
     def _match_correct_complete_brush(self, value: str) -> Optional["MatchResult"]:
