@@ -585,12 +585,9 @@ brush:
     - alpha bulldog ti
   Aurora Grooming:
     LG24:
-    - aurora grooming lg 2024 synthetic ('lux emerald green'):
-        handle_match: true
-    - aurora grooming lg 2024 synthetic ('lux emerald green') $frankenbrush:
-        handle_match: true
-    - aurora grooming lg2024 synthetic ('lux emerald green' handle) $subroosh $frankenbrush:
-        handle_match: true
+    - aurora grooming lg 2024 synthetic ('lux emerald green')
+    - aurora grooming lg 2024 synthetic ('lux emerald green') $frankenbrush
+    - aurora grooming lg2024 synthetic ('lux emerald green' handle) $subroosh $frankenbrush
     - aurora grooming lg24
   Böker:
     Synthetic:
@@ -748,11 +745,17 @@ handle:
     - aurora grooming lg 2024 synthetic ('lux emerald green')
     - aurora grooming lg 2024 synthetic ('lux emerald green') $frankenbrush
     - aurora grooming lg2024 synthetic ('lux emerald green' handle) $subroosh $frankenbrush
+  Boti:
+    Unspecified:
+    - Boti Unspecified
   Declaration Grooming:
     Jeffington:
     - declaration grooming - cold 2.0 jeffington - 28mm b18
     Washington:
     - declaration grooming washington
+  Omega:
+    Unspecified:
+    - Omega Unspecified
   aka:
     brushworx stanley:
     - aka brushworx stanley
@@ -771,9 +774,15 @@ handle:
     unspecified:
     - yaqi unspecified
 knot:
+  Boti:
+    Synthetic:
+    - Boti Synthetic
   Declaration Grooming:
     B16:
     - declaration grooming b16
+  Omega:
+    Boar:
+    - Omega Boar
   aka:
     brushworx ak47:
     - aka brushworx ak47
@@ -2281,3 +2290,9 @@ split_brush:
   aka brushworx sea creature 26mm ak7 synthentic knot:
     handle: aka brushworx unspecified
     knot: aka brushworx ak7
+  boti boar:
+    handle: boti unspecified
+    knot: boti synthetic
+  omega boar:
+    handle: omega unspecified
+    knot: omega boar

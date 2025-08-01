@@ -32,11 +32,11 @@ const EnrichPhaseModal: React.FC<EnrichPhaseModalProps> = ({
       if (matchedBrush && enrichedBrush) {
         // Check for actual changes in brush fields
         const brushFields = ['handle_maker', 'handle_model', 'knot_maker', 'knot_model', 'knot_size_mm', 'fiber'];
-        
+
         brushFields.forEach(brushField => {
           const matchedValue = matchedBrush[brushField];
           const enrichedValue = enrichedBrush[brushField];
-          
+
           // Only show changes if the field exists in enriched data and is different
           if (enrichedValue !== undefined && enrichedValue !== matchedValue) {
             const displayMatched = matchedValue ?? 'None';
@@ -59,7 +59,7 @@ const EnrichPhaseModal: React.FC<EnrichPhaseModalProps> = ({
     if (field !== 'brush') {
       const matchedValue = originalData?.[field];
       const enrichedValue = enrichedData?.[field];
-      
+
       // Only show changes if the field exists in enriched data and is different
       if (enrichedValue !== undefined && enrichedValue !== matchedValue) {
         const displayMatched = matchedValue ?? 'None';
@@ -83,7 +83,7 @@ const EnrichPhaseModal: React.FC<EnrichPhaseModalProps> = ({
             <X size={20} />
           </button>
         </div>
-        
+
         <div className="space-y-4">
           <div>
             <h3 className="font-medium text-gray-900 mb-2">Original Text:</h3>
@@ -91,7 +91,7 @@ const EnrichPhaseModal: React.FC<EnrichPhaseModalProps> = ({
               {originalText}
             </p>
           </div>
-          
+
           <div>
             <h3 className="font-medium text-gray-900 mb-2">Changes:</h3>
             <pre className="text-sm text-gray-600 bg-gray-50 p-3 rounded whitespace-pre-wrap">
