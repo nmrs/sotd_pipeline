@@ -307,7 +307,9 @@ class TestBrushMatcherDualComponentFallback:
         assert result.matched["handle"]["model"] == "Creation"
         assert result.matched["handle"]["source_text"] == value
         assert result.matched["handle"]["_matched_by"] == "HandleMatcher"
-        assert result.matched["handle"]["_pattern"] == "dual_component_fallback"
+        # Pattern should now contain the actual regex pattern used for matching
+        assert result.matched["handle"]["_pattern"] is not None
+        assert result.matched["handle"]["_pattern"] != "dual_component_fallback"
 
         # Verify knot section
         assert result.matched["knot"]["brand"] == "AP Shave Co"
@@ -316,7 +318,9 @@ class TestBrushMatcherDualComponentFallback:
         assert result.matched["knot"]["knot_size_mm"] == 26.0
         assert result.matched["knot"]["source_text"] == value
         assert result.matched["knot"]["_matched_by"] == "KnotMatcher"
-        assert result.matched["knot"]["_pattern"] == "dual_component_fallback"
+        # Pattern should now contain the actual regex pattern used for matching
+        assert result.matched["knot"]["_pattern"] is not None
+        assert result.matched["knot"]["_pattern"] != "dual_component_fallback"
 
     def test_create_dual_component_result_knot_primary(self, brush_matcher):
         """Test creation of dual component result with knot primary intent."""

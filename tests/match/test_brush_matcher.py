@@ -562,7 +562,7 @@ class TestBrushMatcherPatternFields:
     """Test that pattern fields use actual YAML patterns instead of hardcoded values."""
 
     def test_pattern_fields_use_actual_yaml_patterns(self, brush_matcher):
-        """Test that handle and knot pattern fields use actual YAML patterns, not hardcoded values."""
+        """Test that handle and knot pattern fields use actual YAML patterns."""
         # Test case: "Jayaruh #441 w/ AP Shave Co G5C"
         # This should split into:
         # - Handle: "Jayaruh #441" (matches "jayaruh" pattern from handles.yaml)
@@ -572,7 +572,11 @@ class TestBrushMatcherPatternFields:
 
         assert result is not None
         assert result.match_type == "regex"
-        assert result.pattern == "split"
+        # Pattern should now contain the actual regex pattern used for matching,
+        # not "split"
+        assert result.pattern is not None
+        # The pattern should be the actual YAML pattern from handles.yaml
+        assert result.pattern == "jayaruh", f"Expected 'jayaruh', got '{result.pattern}'"
 
         # Check that we have handle and knot sections
         assert "handle" in result.matched
@@ -585,7 +589,7 @@ class TestBrushMatcherPatternFields:
         assert handle["brand"] == "Jayaruh"
         assert handle["model"] == "Unspecified"  # New structure uses Unspecified for Jayaruh
         assert handle["source_text"] == "Jayaruh #441"
-        # The _matched_by field can be either "HandleMatcher" or "BrushSplitter" depending on the flow
+        # The _matched_by field can be either "HandleMatcher" or "BrushSplitter"
         assert handle["_matched_by"] in ["HandleMatcher", "BrushSplitter"]
 
         # CRITICAL: Pattern should be the actual YAML pattern, not "split"

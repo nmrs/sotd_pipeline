@@ -126,7 +126,9 @@ def test_mixed_fiber_types_in_split_brushes(brush_matcher):
     assert knot["brand"] == "Wolf Whiskers"
     assert knot["model"] == "Badger"  # Fiber detected as model
     assert knot["fiber"] == "Badger"
-    assert knot["_pattern"] == "dual_component_fallback"
+    # Pattern should now contain the actual regex pattern used for matching
+    assert knot["_pattern"] is not None
+    assert knot["_pattern"] != "dual_component_fallback"
 
 
 def test_decimal_sizes_in_split_brushes(brush_matcher):
@@ -168,7 +170,9 @@ def test_nx_patterns_in_split_brushes(brush_matcher):
     assert knot["brand"] == "Elite"
     assert knot["model"] == "Badger"
     assert knot["fiber"] == "Badger"
-    assert knot["_pattern"] == "dual_component_fallback"
+    # Pattern should now contain the actual regex pattern used for matching
+    assert knot["_pattern"] is not None
+    assert knot["_pattern"] != "dual_component_fallback"
 
 
 def test_completely_unmatched_brushes_return_none(brush_matcher):

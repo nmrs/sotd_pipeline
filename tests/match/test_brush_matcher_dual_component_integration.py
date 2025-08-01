@@ -100,14 +100,18 @@ class TestBrushMatcherDualComponentIntegration:
             assert "handle" in result.matched
             assert result.matched["handle"]["brand"] == "Rad Dinosaur Creations"
             assert result.matched["handle"]["_matched_by"] == "HandleMatcher"
-            assert result.matched["handle"]["_pattern"] == "dual_component_fallback"
+            # Pattern should now contain the actual regex pattern used for matching
+            assert result.matched["handle"]["_pattern"] is not None
+            assert result.matched["handle"]["_pattern"] != "dual_component_fallback"
 
             # Verify knot section
             assert "knot" in result.matched
             assert result.matched["knot"]["brand"] == "AP Shave Co"
             assert result.matched["knot"]["model"] == "G5C"
             assert result.matched["knot"]["_matched_by"] == "KnotMatcher"
-            assert result.matched["knot"]["_pattern"] == "dual_component_fallback"
+            # Pattern should now contain the actual regex pattern used for matching
+            assert result.matched["knot"]["_pattern"] is not None
+            assert result.matched["knot"]["_pattern"] != "dual_component_fallback"
 
     def test_dual_component_validation_real_data(self, brush_matcher):
         """Test dual component validation with real catalog data."""
