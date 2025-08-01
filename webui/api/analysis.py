@@ -53,6 +53,7 @@ class MismatchAnalysisRequest(BaseModel):
     field: str = Field(..., description="Field to analyze (razor, blade, brush, soap)")
     month: str = Field(..., description="Month to analyze (YYYY-MM format)")
     threshold: int = Field(default=3, ge=1, le=10, description="Levenshtein distance threshold")
+    use_enriched_data: bool = Field(default=False, description="Use enriched data instead of matched data")
 
 
 class MatchPhaseRequest(BaseModel):
@@ -648,12 +649,18 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 self.clear_field = None
                 self.show_correct = True
                 self.test_correct_matches = None
+                self.use_enriched_data = request.use_enriched_data
 
         args = Args()
 
         # Load data using the analyzer's method
         try:
-            records = analyzer.load_matched_data(args)
+            # Use enriched data if the flag is set, otherwise use matched data
+            if request.use_enriched_data:
+                logger.info("Using enriched data for mismatch analysis")
+                records = analyzer.load_enriched_data(args)
+            else:
+                records = analyzer.load_matched_data(args)
             data = {"data": records}
         except Exception as e:
             logger.error(f"Error loading data: {e}")

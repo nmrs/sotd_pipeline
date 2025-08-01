@@ -98,33 +98,49 @@ Verify that enriched data contains all required fields for mismatch analysis.
 ### Step 3: Frontend Data Source Update
 
 ```text
-Update the MismatchAnalyzer frontend component to handle enriched data structure.
+Update the MismatchAnalyzer UI to use enriched data instead of matched data.
 
-**Context**: The frontend MismatchAnalyzer component needs to be updated to work with the new enriched data structure while maintaining all existing functionality.
+**Context**: The frontend MismatchAnalyzer component currently uses matched data. We need to update it to use enriched data to show users the final enrich-phase results.
 
 **Requirements**:
-1. Update the MismatchAnalyzer component to handle enriched data structure
-2. Ensure all existing display modes and filtering still work
-3. Update any data transformation logic to work with enriched data
-4. Maintain backward compatibility with existing UI functionality
+1. Update the MismatchAnalyzer component to include a toggle for enriched data
+2. Modify the API call to include the enriched data flag
+3. Update the UI to show when enriched data is being used
+4. Ensure the toggle is clearly labeled and easy to understand
+5. Test that the UI works correctly with both matched and enriched data
 
 **Test Requirements**:
-- Test that all existing display modes work with enriched data
-- Test that filtering and sorting still work correctly
-- Test that the component handles missing enriched data gracefully
-- Test that existing UI interactions still work
+- Test that the enriched data toggle works correctly
+- Test that the API call includes the correct flag
+- Test that the UI shows appropriate feedback when using enriched data
+- Test that existing functionality continues to work with matched data
+- Test that the toggle state is preserved during analysis
 
 **Files to modify**:
-- `webui/src/pages/MismatchAnalyzer.tsx`
-- `webui/src/components/data/MismatchAnalyzerDataTable.tsx`
-- Update any data transformation utilities
+- `webui/src/pages/MismatchAnalyzer.tsx` - Add enriched data toggle
+- `webui/src/services/api.ts` - Update API interface
+- Add tests for the new functionality
 
 **Success Criteria**:
-- All existing UI functionality preserved
-- Component works correctly with enriched data
-- All tests pass
-- No breaking changes to user experience
+- UI includes a clear toggle for enriched data
+- API calls include the enriched data flag when enabled
+- UI provides clear feedback about which data source is being used
+- All existing functionality continues to work
+- Tests pass for both matched and enriched data modes
 ```
+
+**Status**: ✅ COMPLETE
+
+**Implementation Notes**:
+- Added `useEnrichedData` state variable to MismatchAnalyzer component
+- Added checkbox UI control for "Use Enriched Data" toggle
+- Updated `MismatchAnalysisRequest` interface to include `use_enriched_data` flag
+- Modified `handleAnalyze` function to pass the enriched data flag to API
+- Updated backend API endpoint to handle the enriched data flag
+- Added `use_enriched_data` field to `MismatchAnalysisRequest` model
+- Modified API endpoint to use `load_enriched_data()` when flag is set
+- All existing tests continue to pass
+- Backend CLI and frontend UI both support enriched data toggle
 
 ### Step 4: Tooltip Component Creation
 

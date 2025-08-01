@@ -35,6 +35,7 @@ const MismatchAnalyzer: React.FC = () => {
   const [selectedField, setSelectedField] = useState<string>('razor');
   const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [threshold, setThreshold] = useState<number>(3);
+  const [useEnrichedData, setUseEnrichedData] = useState<boolean>(false);
   const [displayMode, setDisplayMode] = useState<
     'mismatches' | 'all' | 'unconfirmed' | 'regex' | 'intentionally_unmatched' | 'split_brushes' | 'complete_brushes'
   >('mismatches');
@@ -100,6 +101,7 @@ const MismatchAnalyzer: React.FC = () => {
         field: selectedField,
         month: selectedMonth,
         threshold,
+        use_enriched_data: useEnrichedData,
       });
 
       setResults(result);
@@ -758,6 +760,18 @@ const MismatchAnalyzer: React.FC = () => {
                 </Button>
               )}
             </div>
+          </div>
+          <div className='flex items-center gap-2'>
+            <input
+              type='checkbox'
+              id='useEnrichedData'
+              checked={useEnrichedData}
+              onChange={e => setUseEnrichedData(e.target.checked)}
+              className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
+            />
+            <label htmlFor='useEnrichedData' className='text-sm text-gray-700'>
+              Use Enriched Data
+            </label>
           </div>
           <button
             onClick={handleAnalyze}

@@ -165,6 +165,7 @@ export interface MismatchAnalysisRequest {
   field: string;
   month: string;
   threshold?: number;
+  use_enriched_data?: boolean;
 }
 
 export interface MismatchItem {
