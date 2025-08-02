@@ -69,7 +69,7 @@ describe('HeaderFilter', () => {
         const user = userEvent.setup();
         render(<HeaderFilter {...defaultProps} />);
 
-        const button = screen.getByText('Match Type');
+        const button = screen.getByTitle('Filter Match Type');
         await user.click(button);
 
         const searchInput = screen.getByPlaceholderText('Search...');
