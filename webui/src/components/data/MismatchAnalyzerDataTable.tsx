@@ -841,11 +841,12 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       <DataTable
         columns={columns}
         data={stableData}
-        showPagination={false}
+        showPagination={true}
         resizable={true}
         sortable={true}
         showColumnVisibility={true}
         searchKey='original'
+        initialPageSize={50}
         onVisibleRowsChange={handleVisibleRowsChange}
         sorting={sorting}
         onSortingChange={setSorting}
