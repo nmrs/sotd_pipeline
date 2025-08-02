@@ -1,0 +1,805 @@
+# MismatchAnalyzer Brush Split Correction - TDD Implementation Plan
+
+## 📘 Project Summary
+
+Add brush split correction functionality directly to the MismatchAnalyzer component, allowing users to click on brush text in the "original" column to open a modal for manually splitting brush strings into handle/knot components. This will integrate with the existing brush split validation system and save corrections to `data/brush_splits.yaml`.
+
+**Key Features:**
+- Click-to-edit functionality on brush original text in MismatchAnalyzer
+- Modal interface for handle/knot splitting with validation
+- Integration with existing brush split API endpoints
+- DRY reuse of existing BrushSplitValidator components
+- Real-time validation and confidence scoring
+- Save corrections to YAML with proper metadata
+
+**Technical Approach:**
+- Reuse existing BrushSplitDataTable editing patterns
+- Create new BrushSplitModal component for inline editing
+- Integrate with existing brush split API endpoints
+- Maintain consistent UI/UX with existing components
+- Follow established patterns from BrushSplitValidator
+
+## 🧩 Component Steps
+
+### Phase 1: Core Infrastructure
+1. **Create BrushSplitModal Component** - Reusable modal for brush splitting
+2. **Add Brush Split API Integration** - Connect to existing brush split endpoints
+3. **Extend MismatchAnalyzer Types** - Add brush split related types and interfaces
+
+### Phase 2: UI Integration
+4. **Add Click-to-Edit to MismatchAnalyzer** - Make original column clickable for brushes
+5. **Integrate Modal with MismatchAnalyzer** - Wire up modal to main component
+6. **Add Brush Split Validation** - Real-time validation and confidence scoring
+
+### Phase 3: Data Management
+7. **Implement Save Functionality** - Save corrections to brush_splits.yaml
+8. **Add Success/Error Handling** - User feedback for save operations
+9. **Refresh Data After Save** - Update display after successful saves
+
+### Phase 4: Testing & Polish
+10. **Add Unit Tests** - Test modal component and integration
+11. **Add Integration Tests** - Test full workflow from click to save
+12. **Add E2E Tests** - Test complete user journey
+13. **Polish UI/UX** - Final refinements and accessibility improvements
+
+## 🔁 Implementation Prompts
+
+### Step 1: Create BrushSplitModal Component
+
+```text
+Create a reusable BrushSplitModal component that provides an interface for manually splitting brush strings into handle and knot components. This component should:
+
+**Requirements:**
+- Accept `original` brush string as prop
+- Provide input fields for handle and knot with validation
+- Include "Don't Split" checkbox option
+- Show real-time confidence scoring and reasoning
+- Use existing UI patterns from BrushSplitValidator
+- Support both creation and editing of brush splits
+- Include proper loading states and error handling
+
+**Technical Details:**
+- Create `webui/src/components/forms/BrushSplitModal.tsx`
+- Use ShadCN UI components for consistency
+- Include TypeScript interfaces for props and state
+- Add validation for required fields
+- Show confidence level (high/medium/low) with reasoning
+- Include save/cancel buttons with proper loading states
+- Use existing brush split API endpoints for validation
+
+**Component Structure:**
+```typescript
+interface BrushSplitModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  original: string;
+  existingSplit?: BrushSplit;
+  onSave: (split: BrushSplit) => Promise<void>;
+}
+```
+
+**Features:**
+- Real-time validation as user types
+- Confidence scoring based on delimiter detection and fiber hints
+- Support for "Don't Split" option that clears handle/knot fields
+- Proper form validation and error display
+- Loading states during save operations
+- Accessibility support (ARIA labels, keyboard navigation)
+
+**Reuse Existing Patterns:**
+- Use same validation logic as BrushSplitValidator
+- Follow established UI patterns from existing modals
+- Use consistent error handling patterns
+- Maintain same styling and component structure
+
+Create the component with comprehensive TypeScript types, proper error handling, and integration with existing brush split validation logic.
+```
+
+### Step 2: Add Brush Split API Integration
+
+```text
+Extend the existing API service to support brush split operations within the MismatchAnalyzer context. This should integrate with the existing brush split endpoints while providing a clean interface for the modal component.
+
+**Requirements:**
+- Add brush split API functions to `webui/src/services/api.ts`
+- Support loading existing brush splits for editing
+- Provide save functionality for new/corrected splits
+- Include proper error handling and type safety
+- Reuse existing brush split API endpoints from `webui/api/brush_splits.py`
+
+**API Functions to Add:**
+```typescript
+// Load existing brush split for editing
+export const loadBrushSplit = async (original: string): Promise<BrushSplit | null>
+
+// Save brush split correction
+export const saveBrushSplit = async (split: BrushSplit): Promise<SaveSplitResponse>
+
+// Validate brush split (for real-time validation)
+export const validateBrushSplit = async (original: string, handle: string, knot: string): Promise<ValidationResult>
+```
+
+**Integration Points:**
+- Use existing `/api/brush-splits/yaml` endpoint for loading
+- Use existing `/api/brush-splits/save-split` endpoint for saving
+- Add validation endpoint for real-time feedback
+- Maintain consistent error handling patterns
+
+**Error Handling:**
+- Handle network errors gracefully
+- Provide user-friendly error messages
+- Include retry logic for failed operations
+- Log errors for debugging
+
+**Type Safety:**
+- Add proper TypeScript interfaces for all API responses
+- Include validation for API response structures
+- Use consistent error types across all functions
+- Maintain type safety with existing brush split types
+
+Extend the API service with these functions, ensuring proper integration with existing endpoints and maintaining consistency with current patterns.
+```
+
+### Step 3: Extend MismatchAnalyzer Types
+
+```text
+Add TypeScript interfaces and types needed for brush split functionality in the MismatchAnalyzer. This should extend existing types while maintaining compatibility with current functionality.
+
+**Requirements:**
+- Add brush split related types to existing type definitions
+- Extend MismatchAnalysisResult to include brush split information
+- Add interfaces for brush split modal integration
+- Maintain backward compatibility with existing types
+- Include proper validation types for form handling
+
+**Types to Add:**
+```typescript
+// Brush split validation result
+interface BrushSplitValidationResult {
+  confidence: 'high' | 'medium' | 'low';
+  reasoning: string;
+  isValid: boolean;
+  errors: string[];
+}
+
+// Extended mismatch item for brush splits
+interface BrushMismatchItem extends MismatchAnalysisResult['mismatch_items'][0] {
+  isBrushSplit?: boolean;
+  existingSplit?: BrushSplit;
+  canEdit?: boolean;
+}
+
+// Modal state management
+interface BrushSplitModalState {
+  isOpen: boolean;
+  original: string;
+  existingSplit?: BrushSplit;
+  loading: boolean;
+  error?: string;
+}
+```
+
+**Integration Points:**
+- Extend existing MismatchAnalysisResult type
+- Add brush split specific fields to mismatch items
+- Include modal state management types
+- Add validation result types for real-time feedback
+
+**Type Safety:**
+- Ensure all new types are properly exported
+- Maintain compatibility with existing type definitions
+- Include proper optional fields for backward compatibility
+- Add JSDoc comments for complex types
+
+**File Organization:**
+- Add types to existing type definition files
+- Maintain consistent naming conventions
+- Group related types together
+- Include proper imports/exports
+
+Create the necessary TypeScript types and interfaces, ensuring they integrate properly with existing type definitions and maintain type safety throughout the application.
+```
+
+### Step 4: Add Click-to-Edit to MismatchAnalyzer
+
+```text
+Modify the MismatchAnalyzerDataTable to make the "original" column clickable for brush items, opening the BrushSplitModal for editing. This should integrate seamlessly with existing functionality while adding the new brush split editing capability.
+
+**Requirements:**
+- Make original column clickable only for brush field items
+- Open BrushSplitModal when brush original text is clicked
+- Pass existing brush split data if available
+- Maintain existing functionality for non-brush items
+- Add visual indicators for clickable brush items
+
+**Implementation Details:**
+- Modify the "original" column cell renderer in MismatchAnalyzerDataTable
+- Add conditional click handler for brush items
+- Include visual styling to indicate clickable items
+- Pass proper data to modal (original text, existing split, etc.)
+- Handle modal open/close state management
+
+**UI/UX Considerations:**
+- Add hover effects for clickable brush items
+- Include cursor pointer for clickable items
+- Show loading state while modal opens
+- Maintain accessibility with proper ARIA labels
+- Add keyboard navigation support
+
+**Integration Points:**
+- Connect to BrushSplitModal component
+- Integrate with existing brush split API functions
+- Handle modal state in MismatchAnalyzer component
+- Pass proper callbacks for save/cancel operations
+
+**Error Handling:**
+- Handle cases where brush split data cannot be loaded
+- Provide fallback behavior for failed operations
+- Include proper error messages for users
+- Log errors for debugging purposes
+
+**Code Changes:**
+- Modify `webui/src/components/data/MismatchAnalyzerDataTable.tsx`
+- Add click handler logic for brush items
+- Include modal state management
+- Add visual indicators for clickable items
+
+Update the MismatchAnalyzerDataTable to support click-to-edit functionality for brush items, ensuring proper integration with the modal component and maintaining existing functionality for other item types.
+```
+
+### Step 5: Integrate Modal with MismatchAnalyzer
+
+```text
+Integrate the BrushSplitModal component into the main MismatchAnalyzer component, handling state management, API calls, and user interactions. This should provide a seamless editing experience while maintaining the existing analyzer functionality.
+
+**Requirements:**
+- Add modal state management to MismatchAnalyzer
+- Handle modal open/close from data table clicks
+- Manage loading states during API operations
+- Provide user feedback for save operations
+- Refresh data after successful saves
+
+**State Management:**
+- Add modal open/close state
+- Track current brush split being edited
+- Manage loading states for API operations
+- Handle error states and user feedback
+- Track unsaved changes
+
+**API Integration:**
+- Load existing brush split data when modal opens
+- Save brush split corrections via API
+- Handle API errors gracefully
+- Provide real-time validation feedback
+- Refresh data after successful saves
+
+**User Experience:**
+- Show loading indicators during operations
+- Display success/error messages
+- Prevent multiple simultaneous edits
+- Handle modal cancellation properly
+- Refresh table data after saves
+
+**Error Handling:**
+- Handle API failures gracefully
+- Provide clear error messages
+- Include retry options where appropriate
+- Log errors for debugging
+- Maintain application stability
+
+**Code Changes:**
+- Modify `webui/src/pages/MismatchAnalyzer.tsx`
+- Add modal state management
+- Integrate with brush split API functions
+- Handle save/cancel operations
+- Add data refresh logic
+
+Integrate the BrushSplitModal into the MismatchAnalyzer component, providing proper state management, API integration, and user feedback while maintaining existing functionality.
+```
+
+### Step 6: Add Brush Split Validation
+
+```text
+Implement real-time validation for brush split editing, providing confidence scoring and reasoning to help users make informed decisions about their splits. This should use the same validation logic as the existing BrushSplitValidator.
+
+**Requirements:**
+- Implement real-time validation as user types
+- Show confidence levels (high/medium/low) with reasoning
+- Validate handle/knot combinations
+- Check for delimiter-based splits
+- Provide fiber hint analysis
+- Show validation errors and warnings
+
+**Validation Logic:**
+- Detect delimiter-based splits (w/, with, /, -, etc.)
+- Analyze fiber indicators in components
+- Check component quality and length
+- Validate "Don't Split" scenarios
+- Provide reasoning for confidence levels
+
+**UI Feedback:**
+- Show confidence level with color coding
+- Display reasoning text below inputs
+- Highlight validation errors
+- Show warnings for low confidence splits
+- Provide suggestions for improvement
+
+**Real-time Updates:**
+- Validate on input change
+- Debounce validation calls
+- Show loading state during validation
+- Handle validation errors gracefully
+- Update confidence display immediately
+
+**Integration Points:**
+- Use existing validation logic from BrushSplitValidator
+- Integrate with brush split API validation endpoint
+- Connect to modal component for real-time feedback
+- Maintain consistency with existing validation patterns
+
+**Code Implementation:**
+- Add validation hook for real-time feedback
+- Implement confidence scoring logic
+- Add validation display components
+- Handle validation state management
+- Include proper error handling
+
+Implement comprehensive validation for brush split editing, providing real-time feedback and confidence scoring to help users create accurate splits.
+```
+
+### Step 7: Implement Save Functionality
+
+```text
+Implement the save functionality for brush split corrections, integrating with the existing brush split API to save changes to `data/brush_splits.yaml`. This should provide proper error handling, user feedback, and data refresh after successful saves.
+
+**Requirements:**
+- Save brush split corrections via API
+- Handle both new splits and corrections to existing splits
+- Provide proper loading states during save
+- Show success/error feedback to users
+- Refresh data after successful saves
+- Handle API errors gracefully
+
+**Save Process:**
+- Validate split data before saving
+- Call appropriate API endpoint based on operation type
+- Handle loading states during API calls
+- Process API response and handle errors
+- Update local state after successful save
+- Refresh table data to show updated information
+
+**Error Handling:**
+- Handle network errors during save
+- Validate API responses
+- Show user-friendly error messages
+- Provide retry options where appropriate
+- Log errors for debugging
+- Maintain application stability
+
+**User Feedback:**
+- Show loading indicator during save
+- Display success message after save
+- Show error messages for failures
+- Provide clear next steps for users
+- Handle edge cases gracefully
+
+**Data Management:**
+- Update local state after successful save
+- Refresh table data to reflect changes
+- Handle conflicts with existing data
+- Maintain data consistency
+- Update validation status
+
+**Integration Points:**
+- Connect to brush split save API endpoint
+- Integrate with modal component save handler
+- Update MismatchAnalyzer state after save
+- Refresh data table display
+- Handle modal close after save
+
+Implement comprehensive save functionality for brush split corrections, ensuring proper error handling, user feedback, and data consistency.
+```
+
+### Step 8: Add Success/Error Handling
+
+```text
+Implement comprehensive success and error handling for brush split operations, providing clear user feedback and maintaining application stability. This should cover all user interactions and API operations.
+
+**Requirements:**
+- Show success messages for completed operations
+- Display clear error messages for failures
+- Provide actionable feedback for users
+- Handle edge cases and unexpected errors
+- Maintain application stability during errors
+- Include proper logging for debugging
+
+**Success Handling:**
+- Show success messages after saves
+- Provide confirmation for completed operations
+- Update UI to reflect successful changes
+- Handle multiple success scenarios
+- Include helpful next steps for users
+
+**Error Handling:**
+- Handle API errors gracefully
+- Show user-friendly error messages
+- Provide retry options where appropriate
+- Handle network failures
+- Manage validation errors
+- Handle unexpected errors
+
+**User Feedback:**
+- Use consistent notification patterns
+- Provide clear action items for users
+- Show progress indicators during operations
+- Handle loading states properly
+- Include helpful error recovery suggestions
+
+**Error Recovery:**
+- Provide retry mechanisms for failed operations
+- Handle partial failures gracefully
+- Maintain data consistency during errors
+- Include fallback behaviors
+- Log errors for debugging
+
+**Integration Points:**
+- Connect to existing error handling patterns
+- Integrate with notification system
+- Handle errors in modal component
+- Manage errors in main analyzer component
+- Provide consistent error experience
+
+Implement comprehensive success and error handling for brush split operations, ensuring users receive clear feedback and the application remains stable during errors.
+```
+
+### Step 9: Track Pending Changes and Smart Pipeline Execution
+
+```text
+Implement a system to track brush split corrections and intelligently run the appropriate pipeline phases based on current settings. This ensures accurate results whether using enriched data or not, while allowing users to make multiple corrections before running the pipeline.
+
+**Requirements:**
+- Save brush split corrections to YAML immediately for persistence
+- Track pending changes in local state without re-running pipeline
+- Allow multiple corrections before pipeline execution
+- Intelligently determine which pipeline phases to run
+- Run match phase (always required for brush splits)
+- Run enrich phase if "Use Enriched Data" is checked
+- Provide clear progress indication for each phase
+- Show preview of what will change when pipeline runs
+
+**Pending Changes Tracking:**
+- Track which items have been corrected but pipeline not yet re-run
+- Show visual indicators (badges, icons) for pending changes
+- Maintain list of pending corrections for pipeline execution
+- Allow users to review pending changes before running pipeline
+- Save corrections immediately to prevent data loss
+
+**Pipeline Phase Logic:**
+- Always run match phase (brush splits affect matching)
+- Run enrich phase if "Use Enriched Data" checkbox is checked
+- Show progress for each phase being executed
+- Handle errors during any phase gracefully
+- Provide clear feedback about which phases are running
+
+**User Experience:**
+- Save corrections immediately (no data loss)
+- Show clear indicators for pending changes
+- Allow multiple corrections in one session
+- Provide "Run Pipeline" button with clear feedback
+- Show progress for each pipeline phase
+- Display results after all phases complete
+- Explain which phases were run and why
+
+**Progress Indication:**
+- Show current phase being executed
+- Display progress for multi-phase execution
+- Handle errors during any phase
+- Provide clear completion feedback
+- Show which phases were successful/failed
+
+**Error Handling:**
+- Handle failures in any pipeline phase
+- Provide clear error messages for each phase
+- Allow retry of failed phases
+- Maintain corrections even if pipeline fails
+- Show partial results if some phases succeed
+
+**State Management:**
+- Track pending corrections in local state
+- Track current pipeline execution state
+- Show progress for each phase
+- Handle errors during pipeline execution
+- Clear pending state after successful completion
+- Maintain user's current view and selections
+
+**Visual Indicators:**
+- Badge or icon on corrected items showing "Pending Pipeline"
+- Different styling for items with pending corrections
+- Clear indication of what will change when pipeline runs
+- Count of pending changes in UI
+- Progress indicators during pipeline execution
+
+Implement comprehensive pending changes tracking and smart pipeline execution, ensuring users can make multiple corrections efficiently while maintaining data accuracy and providing clear feedback throughout the process.
+```
+
+### Step 10: Add Unit Tests
+
+```text
+Create comprehensive unit tests for the brush split functionality, covering the modal component, API integration, and validation logic. This should ensure reliability and maintainability of the new features.
+
+**Requirements:**
+- Test BrushSplitModal component functionality
+- Test API integration functions
+- Test validation logic and confidence scoring
+- Test error handling and edge cases
+- Test user interactions and state management
+- Maintain high test coverage
+
+**Test Coverage:**
+- Modal component rendering and interactions
+- Form validation and error display
+- API function calls and error handling
+- Validation logic and confidence scoring
+- State management and updates
+- User interaction flows
+
+**Test Structure:**
+- Unit tests for individual components
+- Integration tests for API functions
+- Mock tests for external dependencies
+- Error scenario tests
+- Edge case tests
+- Accessibility tests
+
+**Testing Tools:**
+- Use React Testing Library for component tests
+- Use Jest for unit and integration tests
+- Mock API calls for isolated testing
+- Test user interactions and accessibility
+- Include snapshot tests for UI components
+
+**Test Files:**
+- `webui/src/components/forms/__tests__/BrushSplitModal.test.tsx`
+- `webui/src/services/__tests__/api.test.ts` (extend existing)
+- `webui/src/pages/__tests__/MismatchAnalyzer.test.tsx` (extend existing)
+- `webui/src/components/data/__tests__/MismatchAnalyzerDataTable.test.tsx` (extend existing)
+
+**Test Scenarios:**
+- Modal open/close functionality
+- Form validation and error display
+- API save operations and error handling
+- Real-time validation feedback
+- User interaction flows
+- Error recovery scenarios
+
+Create comprehensive unit tests for all brush split functionality, ensuring reliability and maintainability of the new features.
+```
+
+### Step 11: Add Integration Tests
+
+```text
+Create integration tests that verify the complete brush split workflow from clicking on a brush item to successfully saving the correction. This should test the full user journey and ensure all components work together properly.
+
+**Requirements:**
+- Test complete workflow from click to save
+- Verify API integration and data flow
+- Test error scenarios and recovery
+- Validate user experience and feedback
+- Test data refresh after saves
+- Ensure proper state management
+
+**Test Scenarios:**
+- Complete brush split creation workflow
+- Edit existing brush split workflow
+- Error handling during save operations
+- Data refresh after successful saves
+- Modal state management
+- User interaction flows
+
+**Integration Points:**
+- Test MismatchAnalyzer with BrushSplitModal
+- Verify API calls and responses
+- Test data table click interactions
+- Validate state management across components
+- Test error handling and recovery
+- Verify data consistency
+
+**Test Structure:**
+- End-to-end workflow tests
+- Component integration tests
+- API integration tests
+- State management tests
+- Error scenario tests
+- User experience tests
+
+**Testing Tools:**
+- Use React Testing Library for integration tests
+- Mock API responses for controlled testing
+- Test user interactions and accessibility
+- Verify component communication
+- Test error boundaries and recovery
+
+**Test Files:**
+- `webui/src/pages/__tests__/MismatchAnalyzer.integration.test.tsx`
+- `webui/src/components/forms/__tests__/BrushSplitModal.integration.test.tsx`
+- `webui/src/services/__tests__/api.integration.test.ts`
+
+**Test Coverage:**
+- Complete user workflows
+- API integration and error handling
+- Component communication
+- State management
+- Error recovery
+- Data consistency
+
+Create comprehensive integration tests for the complete brush split workflow, ensuring all components work together properly and provide a reliable user experience.
+```
+
+### Step 12: Add E2E Tests
+
+```text
+Create end-to-end tests using Playwright to test the complete brush split functionality in a real browser environment. This should verify the full user experience and catch any integration issues that unit tests might miss.
+
+**Requirements:**
+- Test complete user journey in browser
+- Verify modal interactions and form validation
+- Test API calls and data persistence
+- Validate user feedback and error handling
+- Test accessibility and keyboard navigation
+- Ensure cross-browser compatibility (Safari focus)
+
+**Test Scenarios:**
+- Complete brush split creation workflow
+- Edit existing brush split workflow
+- Error handling and recovery
+- Form validation and user feedback
+- Modal accessibility and navigation
+- Data persistence and refresh
+
+**E2E Test Structure:**
+- Browser-based test scenarios
+- Real API calls and responses
+- User interaction testing
+- Accessibility testing
+- Error scenario testing
+- Performance testing
+
+**Testing Tools:**
+- Use Playwright for browser testing
+- Test in Safari (project requirement)
+- Verify accessibility compliance
+- Test keyboard navigation
+- Validate user experience
+- Test error scenarios
+
+**Test Files:**
+- `webui/tests/brush-split-workflow.spec.ts`
+- `webui/tests/brush-split-accessibility.spec.ts`
+- `webui/tests/brush-split-error-handling.spec.ts`
+
+**Test Coverage:**
+- Complete user workflows
+- Browser interactions
+- API integration
+- Accessibility compliance
+- Error handling
+- Performance validation
+
+Create comprehensive E2E tests for the brush split functionality, ensuring the complete user experience works properly in a real browser environment.
+```
+
+### Step 13: Polish UI/UX
+
+```text
+Perform final UI/UX polish on the brush split functionality, ensuring consistency with existing components, proper accessibility, and optimal user experience. This should address any remaining issues and provide a polished, professional interface.
+
+**Requirements:**
+- Ensure consistent styling with existing components
+- Improve accessibility and keyboard navigation
+- Optimize user experience and feedback
+- Address any remaining UI issues
+- Ensure responsive design
+- Validate accessibility compliance
+
+**UI/UX Improvements:**
+- Consistent styling with ShadCN components
+- Proper spacing and typography
+- Clear visual hierarchy
+- Intuitive user interactions
+- Responsive design for different screen sizes
+- Accessibility improvements
+
+**Accessibility Enhancements:**
+- Proper ARIA labels and descriptions
+- Keyboard navigation support
+- Screen reader compatibility
+- Focus management
+- Color contrast compliance
+- Error message accessibility
+
+**User Experience Refinements:**
+- Clear visual feedback for all interactions
+- Intuitive form validation
+- Helpful error messages
+- Smooth transitions and animations
+- Consistent interaction patterns
+- Professional appearance
+
+**Performance Optimizations:**
+- Optimize component rendering
+- Reduce unnecessary re-renders
+- Improve loading states
+- Optimize API calls
+- Enhance error handling
+- Improve overall responsiveness
+
+**Final Validation:**
+- Cross-browser testing (Safari focus)
+- Accessibility audit
+- Performance testing
+- User experience review
+- Code quality review
+- Documentation updates
+
+Perform comprehensive UI/UX polish on the brush split functionality, ensuring a professional, accessible, and user-friendly interface that integrates seamlessly with the existing application.
+```
+
+## 🧠 Critical Analysis
+
+### Prompt Sequence Analysis
+
+**Strengths:**
+- **Incremental Development**: Each step builds logically on the previous one, avoiding large monolithic changes
+- **DRY Principles**: Reuses existing BrushSplitValidator components and patterns
+- **Test-First Approach**: Includes comprehensive testing at unit, integration, and E2E levels
+- **Type Safety**: Maintains strong TypeScript typing throughout
+- **Error Handling**: Comprehensive error handling at each level
+- **User Experience**: Focuses on seamless integration and user feedback
+
+**Risk Mitigation:**
+- **Small Steps**: Each step is small enough to implement safely
+- **Existing Patterns**: Leverages proven patterns from BrushSplitValidator
+- **Comprehensive Testing**: Multiple testing levels ensure reliability
+- **Error Boundaries**: Proper error handling prevents application crashes
+- **Backward Compatibility**: Maintains existing functionality
+
+**Integration Points:**
+- **API Reuse**: Leverages existing brush split API endpoints
+- **Component Reuse**: Reuses BrushSplitValidator patterns and components
+- **Type Consistency**: Maintains consistency with existing type definitions
+- **UI Consistency**: Follows established ShadCN UI patterns
+- **State Management**: Integrates with existing state management patterns
+
+### Implementation Strategy
+
+**Phase 1 (Steps 1-3)**: Establishes core infrastructure with reusable components and API integration
+**Phase 2 (Steps 4-6)**: Integrates UI components and adds validation
+**Phase 3 (Steps 7-9)**: Implements data management and user feedback
+**Phase 4 (Steps 10-13)**: Ensures quality through testing and polish
+
+**Key Success Factors:**
+- Reusing existing BrushSplitValidator patterns reduces development time
+- Comprehensive testing ensures reliability
+- Incremental development allows for early feedback and course correction
+- Strong typing prevents runtime errors
+- Proper error handling maintains application stability
+
+**Potential Challenges:**
+- Ensuring seamless integration with existing MismatchAnalyzer functionality
+- Maintaining performance with real-time validation
+- Handling edge cases in brush split validation
+- Ensuring accessibility compliance
+- Managing state complexity across multiple components
+
+**Mitigation Strategies:**
+- Extensive testing at multiple levels
+- Reusing proven patterns from existing components
+- Incremental development with early feedback
+- Strong typing and error handling
+- Comprehensive documentation and examples
+
+This plan provides a structured, test-driven approach to implementing brush split correction functionality in the MismatchAnalyzer, ensuring reliability, maintainability, and user satisfaction.
+description:
+globs:
+alwaysApply: false
+---
