@@ -125,6 +125,7 @@ interface MismatchAnalyzerDataTableProps {
   isItemConfirmed?: (item: MismatchItem) => boolean;
   onVisibleRowsChange?: (visibleRows: MismatchItem[]) => void;
   matched_data_map?: Record<string, Record<string, any>>;
+  onBrushSplitClick?: (item: MismatchItem) => void;
 }
 
 const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
@@ -137,6 +138,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   isItemConfirmed,
   onVisibleRowsChange,
   matched_data_map: _matched_data_map, // Prefix with underscore to indicate intentionally unused
+  onBrushSplitClick,
 }) => {
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -473,6 +475,20 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         header: 'Original',
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
+
+          // For brush field, add click-to-edit functionality
+          if (field === 'brush' && onBrushSplitClick) {
+            return (
+              <div
+                className='text-sm text-gray-900 max-w-xs whitespace-pre-wrap cursor-pointer hover:bg-blue-50 hover:text-blue-700 p-1 rounded border border-transparent hover:border-blue-200 transition-colors'
+                onClick={() => onBrushSplitClick(item)}
+                title="Click to edit brush split"
+              >
+                ✏️ {item.original}
+              </div>
+            );
+          }
+
           return (
             <div className='text-sm text-gray-900 max-w-xs whitespace-pre-wrap'>
               {item.original}
@@ -783,7 +799,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     );
 
     return baseColumns;
-  }, [onCommentClick, commentLoading, selectedItems, onItemSelection, isItemConfirmed, field]);
+  }, [onCommentClick, commentLoading, selectedItems, onItemSelection, isItemConfirmed, field, onBrushSplitClick]);
 
   return (
     <div className='space-y-4'>
