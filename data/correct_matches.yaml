@@ -663,9 +663,15 @@ brush:
     B14:
     - declaration grooming - artisan's choice - b14
     - declaration grooming - randy watson washington - 28mm b14
+    - declaration grooming bok b14:
+        handle_match: true
+    - declaration grooming know it all 28mm b14 badger knot:
+        handle_match: true
     - declaration grooming washington envy b14 shd badger
+    - dogwood handcrafts ivory dg b14 28mm badger
     B15:
     - declaration grooming jefferson artist's choice b15 shd badger
+    - dogwood handcrafts dg b15 coprolite
     B16:
     - 6dg b16 thaw washington badger
     - declaration grooming - cream jefferson - 28mm b16
@@ -673,18 +679,24 @@ brush:
     - dg jefferson know it all 2.0 28mm b16
     B18:
     - declaration grooming - cold 2.0 jeffington - 28mm b18
-    - declaration grooming blood of kings 28mm b18:
-        handle_match: true
+    - declaration grooming blood of kings 28mm b18
     B3:
-    - declaration grooming - unicorn ivory - b3:
-        handle_match: true
-    - declaration grooming blood of kings b3:
-        handle_match: true
+    - declaration grooming - unicorn ivory - b3
+    - declaration grooming blood of kings b3
     - declaration grooming washington blood of kings b3
+    - heritage shaving ever-ready 500e dg b3 shd badger
     B6:
     - declaration grooming washington b6
+    - that darn rob dg b6
+    B7:
+    - dg b7 badger
+    B8:
+    - declaration grooming fae b8:
+        handle_match: true
     B9A:
     - declaration grooming - lavender jefferson - 28mm b9a+
+    - dg b9a
+    - summer break soaps dg b9a
   Dreadnought:
     Avenger:
     - dreadnought avenger
@@ -895,7 +907,17 @@ handle:
     - declaration grooming - unicorn ivory - b3
     - declaration grooming blood of kings 28mm b18
     - declaration grooming blood of kings b3
+    - declaration grooming bok b14
     - declaration grooming butterscotch b13 badger
+    - declaration grooming fae b8
+    - declaration grooming know it all 28mm b14 badger knot
+    - dg b7 badger
+    - dg b9a
+    - dogwood handcrafts dg b15 coprolite
+    - dogwood handcrafts ivory dg b14 28mm badger
+    - heritage shaving ever-ready 500e dg b3 shd badger
+    - summer break soaps dg b9a
+    - that darn rob dg b6
     Washington:
     - declaration grooming washington
   Semogue:

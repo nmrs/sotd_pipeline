@@ -129,6 +129,8 @@ class MismatchItem(BaseModel):
     count: int
     examples: List[str]
     comment_ids: List[str]
+    # Source file information for each comment ID
+    comment_sources: Dict[str, str] = Field(default_factory=dict)  # comment_id -> source_file
     is_confirmed: Optional[bool] = None
     # Split brush fields
     is_split_brush: Optional[bool] = None
@@ -736,6 +738,11 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 reason = item.get("reason", "")
 
                 # Create API response item
+                source_file = record.get("_source_file", "")
+                comment_sources = {}
+                if record_id and source_file:
+                    comment_sources[str(record_id)] = source_file
+
                 api_item = MismatchItem(
                     original=normalized,
                     matched=matched,
@@ -746,10 +753,9 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                     mismatch_type=mismatch_type,
                     reason=reason,
                     count=1,
-                    examples=(
-                        [str(record.get("_source_file", ""))] if record.get("_source_file") else []
-                    ),
+                    examples=([str(source_file)] if source_file else []),
                     comment_ids=[str(record_id)] if record_id else [],
+                    comment_sources=comment_sources,
                     is_confirmed=is_confirmed,
                     # Split brush fields from analyzer results
                     is_split_brush=item.get("is_split_brush"),
@@ -774,6 +780,8 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 existing.count += item.count
                 existing.examples.extend(item.examples)
                 existing.comment_ids.extend(item.comment_ids)
+                # Merge comment sources
+                existing.comment_sources.update(item.comment_sources)
                 # Keep the highest confidence if available
                 if item.confidence is not None and (
                     existing.confidence is None or item.confidence > existing.confidence

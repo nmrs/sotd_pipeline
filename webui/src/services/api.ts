@@ -180,6 +180,7 @@ export interface MismatchItem {
   count: number;
   examples: string[];
   comment_ids: string[];
+  comment_sources?: Record<string, string>; // comment_id -> source_file
   is_confirmed?: boolean;
   // Split brush fields
   is_split_brush?: boolean;
@@ -250,6 +251,7 @@ export interface SaveBrushSplitRequest {
   knot: string;
   validated_at?: string;
   should_not_split?: boolean;
+  occurrences?: Array<{ file: string; comment_ids: string[] }>;
 }
 
 export interface SaveBrushSplitResponse {

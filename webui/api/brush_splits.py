@@ -366,6 +366,9 @@ class SaveSplitRequest(BaseModel):
         None, description="Corrected knot component (null when should_not_split is true)"
     )
     should_not_split: bool = Field(False, description="Whether this brush should not be split")
+    occurrences: Optional[List[BrushSplitOccurrenceModel]] = Field(
+        default_factory=list, description="List of occurrences for this brush split"
+    )
 
 
 class SaveSplitResponse(BaseModel):
@@ -638,9 +641,16 @@ class BrushSplitValidator:
             # Sort alphabetically by brush name
             sorted_data = dict(sorted(yaml_data.items()))
 
-            # Write to file
+            # Write to file with explicit Unicode handling
             with open(self.yaml_path, "w", encoding="utf-8") as f:
-                yaml.dump(sorted_data, f, default_flow_style=False, sort_keys=False)
+                yaml.dump(
+                    sorted_data,
+                    f,
+                    default_flow_style=False,
+                    sort_keys=False,
+                    allow_unicode=True,  # Explicitly allow Unicode characters
+                    encoding="utf-8",  # Explicitly set encoding
+                )
 
             logger.info(f"Saved {len(splits)} validated splits to {self.yaml_path}")
             return True
@@ -1252,8 +1262,29 @@ async def save_single_split(data: SaveSplitRequest):
             should_not_split=data.should_not_split,
         )
 
-        # Save the updated splits
-        success = validator.save_validated_splits([split])
+        # Add occurrences if provided
+        if data.occurrences:
+            split.occurrences = [
+                BrushSplitOccurrence(file=occ.file, comment_ids=occ.comment_ids)
+                for occ in data.occurrences
+            ]
+
+        # Get all existing validated splits and add/update the new one
+        all_splits = list(validator.validated_splits.values())
+
+        # Check if this split already exists and update it, otherwise add it
+        existing_found = False
+        for i, existing_split in enumerate(all_splits):
+            if existing_split.original.lower() == split.original.lower():
+                all_splits[i] = split  # Replace existing with new
+                existing_found = True
+                break
+
+        if not existing_found:
+            all_splits.append(split)  # Add new split
+
+        # Save all splits (existing + new/updated)
+        success = validator.save_validated_splits(all_splits)
 
         if not success:
             raise HTTPException(status_code=500, detail="Failed to save brush split")

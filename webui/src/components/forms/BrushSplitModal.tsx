@@ -239,7 +239,12 @@ export const BrushSplitModal: React.FC<BrushSplitModalProps> = ({
               <label htmlFor='original' className='block text-sm font-medium text-gray-700'>
                 Original Brush String
               </label>
-              <Input id='original' value={original} disabled className='bg-gray-50' />
+              <Input
+                id='original'
+                value={original}
+                readOnly
+                className='bg-gray-50 cursor-text select-text'
+              />
               <p className='text-sm text-gray-500'>
                 This is the original brush string that needs to be split
               </p>

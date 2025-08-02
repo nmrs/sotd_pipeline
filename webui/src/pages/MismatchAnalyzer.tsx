@@ -13,6 +13,7 @@ import {
   removeMatchesFromCorrect,
   updateFilteredEntries,
   handleApiError,
+  saveBrushSplit,
 } from '@/services/api';
 
 import LoadingSpinner from '@/components/layout/LoadingSpinner';
@@ -199,6 +200,43 @@ const MismatchAnalyzer: React.FC = () => {
     // Create existing split data if available
     let existingSplit: BrushSplit | undefined = undefined;
     if (item.is_split_brush && (item.handle_component || item.knot_component)) {
+      // Convert comment_ids to proper occurrence format using comment_sources
+      const occurrences: Array<{ file: string, comment_ids: string[] }> = [];
+
+      if (item.comment_ids && item.comment_ids.length > 0) {
+        if (item.comment_sources) {
+          // Group comment_ids by source file
+          const fileGroups: Record<string, string[]> = {};
+          for (const commentId of item.comment_ids) {
+            const sourceFile = item.comment_sources[commentId];
+            if (sourceFile) {
+              if (!fileGroups[sourceFile]) {
+                fileGroups[sourceFile] = [];
+              }
+              fileGroups[sourceFile].push(commentId);
+            } else {
+              // Fallback to current month if no source file mapping
+              const fallbackFile = `${selectedMonth}.json`;
+              if (!fileGroups[fallbackFile]) {
+                fileGroups[fallbackFile] = [];
+              }
+              fileGroups[fallbackFile].push(commentId);
+            }
+          }
+
+          // Convert to occurrences format
+          for (const [file, commentIds] of Object.entries(fileGroups)) {
+            occurrences.push({ file, comment_ids: commentIds });
+          }
+        } else {
+          // Fallback: use current month for all comment_ids
+          occurrences.push({
+            file: `${selectedMonth}.json`,
+            comment_ids: item.comment_ids,
+          });
+        }
+      }
+
       existingSplit = {
         original: item.original,
         handle: item.handle_component || null,
@@ -206,7 +244,7 @@ const MismatchAnalyzer: React.FC = () => {
         corrected: false,
         validated_at: null,
         should_not_split: false,
-        occurrences: [],
+        occurrences: occurrences,
       };
     }
     setExistingBrushSplit(existingSplit);
@@ -225,15 +263,29 @@ const MismatchAnalyzer: React.FC = () => {
     try {
       setSavingBrushSplit(true);
 
-      // TODO: Add API call to save brush split
-      // This will be implemented in Step 3
-      console.log('Saving brush split:', split);
+      // Call the API to save the brush split
+      const response = await saveBrushSplit({
+        original: split.original,
+        handle: split.handle,
+        knot: split.knot || split.original, // Use original as knot if knot is null
+        should_not_split: split.should_not_split,
+        occurrences: split.occurrences,
+      });
 
-      // Close modal after successful save
-      handleBrushSplitClose();
+      if (response.success) {
+        // Close modal after successful save
+        handleBrushSplitClose();
+
+        // Re-run analysis to get updated data
+        if (selectedMonth) {
+          await handleAnalyze();
+        }
+      } else {
+        setError(`Failed to save brush split: ${response.message}`);
+      }
     } catch (error) {
       console.error('Failed to save brush split:', error);
-      // TODO: Add error handling
+      setError(handleApiError(error));
     } finally {
       setSavingBrushSplit(false);
     }
