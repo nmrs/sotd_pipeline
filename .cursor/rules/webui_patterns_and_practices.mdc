@@ -47,7 +47,7 @@ jest.mock('../ComponentName', () => ({
 ### ShadCN UI Components
 - **Prefer ShadCN components** over native HTML elements
 - **Use consistent styling** across all form components
-- **Maintain accessibility** with proper ARIA attributes
+- **Support keyboard navigation** for developer efficiency
 - **Handle component behavior** in tests (e.g., checkbox states, input values)
 
 ### Form Patterns
@@ -155,7 +155,7 @@ export const createMockMonths = (months: string[]) =>
 ### Component Anti-Patterns
 - ❌ **Don't create overly complex components** - split into smaller components
 - ❌ **Don't use inline styles** - use CSS classes or styled components
-- ❌ **Don't ignore accessibility** - always include proper ARIA attributes
+- ❌ **Don't ignore keyboard navigation** - support Tab, Enter, Escape keys for developer efficiency
 - ❌ **Don't use any type** - always define proper TypeScript types
 
 ### State Management Anti-Patterns
@@ -171,20 +171,20 @@ export const createMockMonths = (months: string[]) =>
 - [ ] Define TypeScript interfaces for all data structures
 - [ ] Plan component hierarchy and data flow
 - [ ] Identify test scenarios and edge cases
-- [ ] Consider accessibility requirements
+- [ ] Consider keyboard navigation for developer efficiency
 
 ### Development Process
 1. **Write tests first** (TDD approach)
 2. **Implement minimal functionality** to make tests pass
 3. **Refactor for clarity** and maintainability
 4. **Add comprehensive tests** for edge cases
-5. **Verify accessibility** and user experience
+5. **Verify keyboard navigation** for developer efficiency
 
 ### Quality Checks
 - [ ] All tests passing (153/153 React tests)
 - [ ] No TypeScript errors
 - [ ] No linting errors
-- [ ] Accessibility requirements met
+- [ ] Keyboard navigation supported for developer efficiency
 - [ ] No production data files modified
 
 ---
@@ -195,7 +195,7 @@ export const createMockMonths = (months: string[]) =>
 - Use controlled components with state management
 - Implement proper validation and error handling
 - Provide clear user feedback for all interactions
-- Support keyboard navigation and screen readers
+- Support keyboard navigation (Tab, Enter, Escape) for developer efficiency
 
 ### Table Components
 - Use generic DataTable pattern for consistency
@@ -212,7 +212,7 @@ export const createMockMonths = (months: string[]) =>
 ### Navigation Components
 - Use consistent navigation patterns
 - Implement proper active state handling
-- Support keyboard navigation
+- Support keyboard navigation (Tab, Arrow keys, Enter)
 - Provide clear visual feedback
 
 ---
@@ -332,11 +332,12 @@ class ErrorBoundary extends React.Component {
 - Maintain consistent spacing and layout
 - Use proper semantic HTML elements
 
-### Accessibility Standards
-- Follow WCAG 2.1 AA guidelines
-- Implement proper ARIA attributes
-- Support keyboard navigation
-- Provide alternative text for images
+### Keyboard Navigation Standards
+- Support Tab navigation between interactive elements
+- Implement Enter key activation for buttons and links
+- Support Escape key for closing modals and dialogs
+- Support Arrow keys for navigation in lists and tables
+- **Note**: This is a single-user developer app - accessibility features beyond keyboard control are not required
 
 ---
 
@@ -376,11 +377,11 @@ class ErrorBoundary extends React.Component {
 - [ ] Edge cases tested
 - [ ] No production data modified
 
-### Accessibility
-- [ ] ARIA attributes properly implemented
-- [ ] Keyboard navigation supported
-- [ ] Screen reader compatibility
-- [ ] Color contrast meets standards
+### Keyboard Navigation
+- [ ] Tab navigation works between interactive elements
+- [ ] Enter key activates buttons and links
+- [ ] Escape key closes modals and dialogs
+- [ ] Arrow keys work for list/table navigation
 
 ### Performance
 - [ ] No unnecessary re-renders
@@ -396,7 +397,7 @@ class ErrorBoundary extends React.Component {
 - **Test Coverage**: >90% for new code
 - **TypeScript Coverage**: 100% for all new code
 - **Linting Errors**: 0 errors
-- **Accessibility**: WCAG 2.1 AA compliance
+- **Keyboard Navigation**: Full keyboard control support
 
 ### Performance Metrics
 - **Component Render Time**: <16ms for interactive components
@@ -408,7 +409,7 @@ class ErrorBoundary extends React.Component {
 - **Error Rate**: <1% of user interactions
 - **Loading Time**: <2s for data fetching
 - **User Satisfaction**: >4.5/5 rating
-- **Accessibility Score**: 100% on automated tests
+- **Keyboard Navigation**: 100% keyboard control coverage
 
 ---
 
@@ -417,7 +418,6 @@ class ErrorBoundary extends React.Component {
 - [React Best Practices](https://react.dev/learn)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [Testing Library Guidelines](https://testing-library.com/docs/guiding-principles)
-- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
 - [ShadCN UI Documentation](https://ui.shadcn.com/)
 
 ---
@@ -427,7 +427,8 @@ class ErrorBoundary extends React.Component {
 - **2025-07-21**: Initial creation based on DRY refactoring lessons learned
 - **Patterns established**: Component structure, testing patterns, utility patterns
 - **Anti-patterns identified**: Testing anti-patterns, component anti-patterns
-- **Quality standards defined**: Performance, accessibility, security patterns
+- **Quality standards defined**: Performance, keyboard navigation, security patterns
+- **2025-01-27**: Updated to reflect single-user developer app requirements - accessibility not required beyond keyboard control
 
 ---
 
