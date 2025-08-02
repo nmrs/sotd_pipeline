@@ -21,37 +21,29 @@ export const hasEnrichPhaseChanges = (
 
   // For brush field, check the enriched data against matched data
   if (field === 'brush') {
-    // Check fiber changes (enriched data overrides matched)
-    const matchedKnotFiber = matchedData?.knot?.fiber;
-    const enrichedFiber = enrichedData?.fiber;
+    // The enrich phase only adds fiber and knot_size_mm at the top level
+    // We need to compare the matched brush structure with the enriched data
+    
+    const matchedBrush = matchedData;
+    const enrichedBrush = enrichedData;
 
-    // Only consider it a change if both values exist and are different
-    if (matchedKnotFiber !== undefined && enrichedFiber !== undefined && matchedKnotFiber !== enrichedFiber) {
+    // Check fiber changes
+    const matchedFiber = matchedBrush?.knot?.fiber;
+    const enrichedFiber = enrichedBrush?.fiber;
+    
+    if (enrichedFiber !== undefined && enrichedFiber !== matchedFiber) {
       return true;
     }
 
     // Check knot size changes
-    const matchedKnotSize = matchedData?.knot?.knot_size_mm;
-    const enrichedKnotSize = enrichedData?.knot_size_mm;
-
-    // Consider it a change if:
-    // 1. Both values exist and are different, OR
-    // 2. One value exists and the other is null/undefined (indicating a change from no data to data or vice versa)
-    if (matchedKnotSize !== undefined && enrichedKnotSize !== undefined && matchedKnotSize !== enrichedKnotSize) {
-      return true;
-    }
-    if ((matchedKnotSize === null || matchedKnotSize === undefined) && enrichedKnotSize !== undefined && enrichedKnotSize !== null) {
-      return true;
-    }
-    if ((enrichedKnotSize === null || enrichedKnotSize === undefined) && matchedKnotSize !== undefined && matchedKnotSize !== null) {
+    const matchedKnotSize = matchedBrush?.knot?.knot_size_mm;
+    const enrichedKnotSize = enrichedBrush?.knot_size_mm;
+    
+    if (enrichedKnotSize !== undefined && enrichedKnotSize !== matchedKnotSize) {
       return true;
     }
 
-    // For brush enrichment, only fiber and knot_size_mm can change
-    // Brand, model, handle_maker, etc. should remain the same from match phase
-    // Don't check other fields as they shouldn't change during brush enrichment
-
-    // No changes detected for fiber or knot size
+    // No changes detected
     return false;
   } else {
     // For other fields, check top-level fields
@@ -60,8 +52,8 @@ export const hasEnrichPhaseChanges = (
     return fieldsToCheck.some(fieldName => {
       const original = matchedData[fieldName];
       const enriched = enrichedData[fieldName];
-      // Only consider it a change if both values exist and are different
-      return original !== undefined && enriched !== undefined && original !== enriched;
+      // Only consider it a change if the enriched value exists and is different
+      return enriched !== undefined && enriched !== original;
     });
   }
 };
@@ -80,67 +72,32 @@ export const getEnrichPhaseChanges = (
 
   // For brush field, check the enriched data against matched data
   if (field === 'brush') {
-    // Check fiber changes
-    const matchedKnotFiber = matchedData?.knot?.fiber;
-    const enrichedFiber = enrichedData?.fiber;
+    const matchedBrush = matchedData;
+    const enrichedBrush = enrichedData;
 
-    if (matchedKnotFiber !== undefined && enrichedFiber !== undefined && matchedKnotFiber !== enrichedFiber) {
+    // Check fiber changes
+    const matchedFiber = matchedBrush?.knot?.fiber;
+    const enrichedFiber = enrichedBrush?.fiber;
+    
+    if (enrichedFiber !== undefined && enrichedFiber !== matchedFiber) {
       changes.push({
         field: 'fiber',
-        originalValue: matchedKnotFiber,
+        originalValue: matchedFiber,
         enrichedValue: enrichedFiber,
         displayName: 'Fiber'
       });
     }
 
     // Check knot size changes
-    const matchedKnotSize = matchedData?.knot?.knot_size_mm;
-    const enrichedKnotSize = enrichedData?.knot_size_mm;
-
-    if (matchedKnotSize !== undefined && enrichedKnotSize !== undefined && matchedKnotSize !== enrichedKnotSize) {
+    const matchedKnotSize = matchedBrush?.knot?.knot_size_mm;
+    const enrichedKnotSize = enrichedBrush?.knot_size_mm;
+    
+    if (enrichedKnotSize !== undefined && enrichedKnotSize !== matchedKnotSize) {
       changes.push({
         field: 'knot_size_mm',
         originalValue: matchedKnotSize,
         enrichedValue: enrichedKnotSize,
         displayName: 'Knot Size (mm)'
-      });
-    }
-
-    // Check null-to-value changes
-    if ((matchedKnotSize === null || matchedKnotSize === undefined) && enrichedKnotSize !== undefined && enrichedKnotSize !== null) {
-      changes.push({
-        field: 'knot_size_mm',
-        originalValue: matchedKnotSize,
-        enrichedValue: enrichedKnotSize,
-        displayName: 'Knot Size (mm)'
-      });
-    }
-
-    if ((enrichedKnotSize === null || enrichedKnotSize === undefined) && matchedKnotSize !== undefined && matchedKnotSize !== null) {
-      changes.push({
-        field: 'knot_size_mm',
-        originalValue: matchedKnotSize,
-        enrichedValue: enrichedKnotSize,
-        displayName: 'Knot Size (mm)'
-      });
-    }
-
-    // Check null-to-value changes for fiber
-    if ((matchedKnotFiber === null || matchedKnotFiber === undefined) && enrichedFiber !== undefined && enrichedFiber !== null) {
-      changes.push({
-        field: 'fiber',
-        originalValue: matchedKnotFiber,
-        enrichedValue: enrichedFiber,
-        displayName: 'Fiber'
-      });
-    }
-
-    if ((enrichedFiber === null || enrichedFiber === undefined) && matchedKnotFiber !== undefined && matchedKnotFiber !== null) {
-      changes.push({
-        field: 'fiber',
-        originalValue: matchedKnotFiber,
-        enrichedValue: enrichedFiber,
-        displayName: 'Fiber'
       });
     }
   } else {
@@ -151,7 +108,7 @@ export const getEnrichPhaseChanges = (
       const original = matchedData[fieldName];
       const enriched = enrichedData[fieldName];
       
-      if (original !== undefined && enriched !== undefined && original !== enriched) {
+      if (enriched !== undefined && enriched !== original) {
         changes.push({
           field: fieldName,
           originalValue: original,

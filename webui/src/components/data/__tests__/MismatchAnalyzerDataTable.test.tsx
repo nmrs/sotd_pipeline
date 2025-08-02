@@ -603,5 +603,46 @@ describe('MismatchAnalyzerDataTable', () => {
       // Should show the enrich adjustment icon
       expect(screen.getByText('🔄')).toBeInTheDocument();
     });
+
+    test('does not show enrich adjustment icon for Bristle Brushworks B9B (no actual changes)', () => {
+      const brushData: MismatchItem[] = [
+        {
+          original: 'Bristle Brushworks B9B',
+          matched: {
+            brand: 'Declaration Grooming',
+            model: 'B9B',
+            knot: {
+              brand: 'Declaration Grooming',
+              model: 'B9B',
+              fiber: 'Badger',
+              knot_size_mm: 28,  // Matched has knot_size_mm: 28
+            },
+          },
+          enriched: {
+            fiber: 'Badger',  // Enriched only has fiber, no knot_size_mm
+          },
+          pattern: '(declaration|\\bdg\\b)?.*\\bb9b\\+?\\b',
+          match_type: 'regex',
+          confidence: 0.8,
+          mismatch_type: 'exact_matches',
+          reason: 'Exact match',
+          count: 1,
+          examples: ['2025-06.json'],
+          comment_ids: ['abc123'],
+          is_confirmed: true,
+        },
+      ];
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={brushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Should NOT show the enrich adjustment icon since there are no actual changes
+      expect(screen.queryByText('🔄')).not.toBeInTheDocument();
+    });
   });
 });
