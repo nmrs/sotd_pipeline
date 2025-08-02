@@ -415,6 +415,9 @@ class BrushEnricher(BaseEnricher):
 
         Returns:
             str: The brush text extracted from source_text fields
+
+        Raises:
+            ValueError: If no source_text can be found in handle or knot sections
         """
         # Try to get brush text from handle source_text first
         handle_section = field_data.get("handle", {})
@@ -426,8 +429,12 @@ class BrushEnricher(BaseEnricher):
         if isinstance(knot_section, dict) and knot_section.get("source_text"):
             return knot_section["source_text"]
 
-        # If no source_text found, return empty string
-        return ""
+        # Fail fast if no source_text found
+        raise ValueError(
+            f"No source_text found in matched data. "
+            f"Handle section: {handle_section}, "
+            f"Knot section: {knot_section}"
+        )
 
     def applies_to(self, record: dict) -> bool:
         """Check if this enricher applies to the record."""
@@ -458,9 +465,14 @@ class BrushEnricher(BaseEnricher):
             return None
 
         # Extract brush text from source_text fields in matched data
-        brush_extracted = self._extract_brush_text_from_matched_data(field_data)
+        matched_data = field_data.get("matched", {})
+        brush_extracted = self._extract_brush_text_from_matched_data(matched_data)
         if not brush_extracted:
-            return None
+            raise ValueError(
+                f"Failed to extract brush text from matched data. "
+                f"Handle section: {matched_data.get('handle', {})}, "
+                f"Knot section: {matched_data.get('knot', {})}"
+            )
 
         # Extract user data from brush_extracted
         user_knot_size = extract_knot_size(brush_extracted)
@@ -537,11 +549,11 @@ class BrushEnricher(BaseEnricher):
                 enriched_data["_catalog_fiber"] = catalog_fiber
 
         # Add user intent detection for composite brushes
-        if self._should_detect_user_intent(field_data):
+        if self._should_detect_user_intent(matched_data):
             try:
-                # Get handle and knot data from field_data
-                handle_data = field_data.get("handle", {})
-                knot_data = field_data.get("knot", {})
+                # Get handle and knot data from matched_data
+                handle_data = matched_data.get("handle", {})
+                knot_data = matched_data.get("knot", {})
 
                 user_intent = self._detect_user_intent(brush_extracted, handle_data, knot_data)
                 enriched_data["user_intent"] = user_intent

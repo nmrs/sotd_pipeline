@@ -512,8 +512,6 @@ class BrushMatcher:
         Returns:
             Dictionary mapping brand names to lists of compiled pattern dictionaries
         """
-        import re
-
         compiled_patterns = {}
         handles_data = self.catalog_loader.load_catalog(self.handles_path, "handles")
 
