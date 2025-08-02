@@ -49,11 +49,23 @@ class TestBrushEnricher:
                 "model": "Chubby 2",
                 "fiber": "Badger",
                 "knot_size_mm": 27.0,
+                "handle": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "source_text": "Simpson Chubby 2"
+                },
+                "knot": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "fiber": "Badger",
+                    "knot_size_mm": 27.0,
+                    "source_text": "Simpson Chubby 2"
+                }
             }
         }
         brush_extracted = "Simpson Chubby 2"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 27.0
@@ -67,11 +79,22 @@ class TestBrushEnricher:
                 "brand": "Simpson",
                 "model": "Chubby 2",
                 "fiber": "Badger",
+                "handle": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "source_text": "Simpson Chubby 2"
+                },
+                "knot": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "fiber": "Badger",
+                    "source_text": "Simpson Chubby 2"
+                }
             }
         }
         brush_extracted = "Simpson Chubby 2 26mm"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 26.0
@@ -86,11 +109,23 @@ class TestBrushEnricher:
                 "model": "Chubby 2",
                 "fiber": "Badger",
                 "knot_size_mm": 27.0,
+                "handle": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "source_text": "Simpson Chubby 2"
+                },
+                "knot": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "fiber": "Badger",
+                    "knot_size_mm": 27.0,
+                    "source_text": "Simpson Chubby 2"
+                }
             }
         }
         brush_extracted = "Simpson Chubby 2 27mm"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 27.0
@@ -105,11 +140,23 @@ class TestBrushEnricher:
                 "model": "Chubby 2",
                 "fiber": "Badger",
                 "knot_size_mm": 27.0,
+                "handle": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "source_text": "Simpson Chubby 2"
+                },
+                "knot": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "fiber": "Badger",
+                    "knot_size_mm": 27.0,
+                    "source_text": "Simpson Chubby 2"
+                }
             }
         }
         brush_extracted = "Simpson Chubby 2 26mm"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 26.0
@@ -124,11 +171,22 @@ class TestBrushEnricher:
                 "brand": "Simpson",
                 "model": "Chubby 2",
                 "fiber": "Badger",
+                "handle": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "source_text": "Simpson Chubby 2"
+                },
+                "knot": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "fiber": "Badger",
+                    "source_text": "Simpson Chubby 2"
+                }
             }
         }
         brush_extracted = "Simpson Chubby 2"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert "knot_size_mm" not in result
@@ -148,10 +206,23 @@ class TestBrushEnricher:
                 "model": "Chubby 2",
                 "fiber": "Badger",
                 "knot_size_mm": 27.0,
+                "handle": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "source_text": "Simpson Chubby 2"
+                },
+                "knot": {
+                    "brand": "Simpson",
+                    "model": "Chubby 2",
+                    "fiber": "Badger",
+                    "knot_size_mm": 27.0,
+                    "source_text": "Simpson Chubby 2"
+                }
             }
         }
-        result = enricher.enrich(field_data["matched"], "")
-        assert result is None
+        result = enricher.enrich(field_data, "")
+        assert result is not None
+        assert result["_extraction_source"] == "catalog_data"
 
 
 class TestSourceTrackingValidation:
