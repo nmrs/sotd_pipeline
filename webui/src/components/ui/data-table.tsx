@@ -14,6 +14,7 @@ import {
   useReactTable,
   type Table as TanStackTable,
   type RowSelectionState,
+  type Row,
 } from '@tanstack/react-table';
 
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
@@ -61,6 +62,11 @@ interface DataTableProps<TData, TValue> {
   initialPageSize?: number;
   sorting?: SortingState;
   onSortingChange?: (sorting: SortingState) => void;
+  enableRowClickSelection?: boolean;
+  activeRowIndex?: number;
+  keyboardNavigationEnabled?: boolean;
+  externalRowSelection?: Record<string, boolean>;
+  field?: string; // For generating row keys
 }
 
 export function DataTable<TData, TValue>({
@@ -80,6 +86,11 @@ export function DataTable<TData, TValue>({
   initialPageSize = 10,
   sorting: externalSorting,
   onSortingChange,
+  enableRowClickSelection = false,
+  activeRowIndex = -1,
+  keyboardNavigationEnabled = false,
+  externalRowSelection,
+  field,
 }: DataTableProps<TData, TValue>) {
   const [internalSorting, setInternalSorting] = useState<SortingState>([]);
 
@@ -92,28 +103,48 @@ export function DataTable<TData, TValue>({
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [isResizing, setIsResizing] = useState(false);
   const [resizeColumn, setResizeColumn] = useState<string | null>(null);
+  const tableRef = React.useRef<HTMLDivElement>(null);
+
+  // Use external row selection if provided, otherwise use internal
+  const effectiveRowSelection = externalRowSelection !== undefined ? externalRowSelection : rowSelection;
+  const setEffectiveRowSelection = externalRowSelection !== undefined ?
+    (updater: RowSelectionState | ((prev: RowSelectionState) => RowSelectionState)) => {
+      // When using external selection, we need to call onSelectionChange directly
+      // since the table's internal state won't be updated
+      const newSelection = typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
+      if (onSelectionChange) {
+        const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
+        onSelectionChange(selectedRows);
+      }
+      // Also update the internal state so the UI reflects the change immediately
+      setRowSelection(newSelection);
+    } : setRowSelection;
 
   const table = useReactTable({
     data,
     columns,
-    onSortingChange: setSorting,
+    onSortingChange: (updater) => {
+      const newSorting = typeof updater === 'function' ? updater(sorting) : updater;
+      setSorting(newSorting);
+    },
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    initialState: {
-      pagination: {
-        pageSize: initialPageSize,
-      },
-    },
+    onRowSelectionChange: setEffectiveRowSelection,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection,
+      rowSelection: effectiveRowSelection,
+    },
+    initialState: {
+      pagination: {
+        pageSize: initialPageSize,
+      },
+      rowSelection: initialRowSelection,
     },
   });
 
@@ -150,6 +181,31 @@ export function DataTable<TData, TValue>({
     }
   }, [initialRowSelection]);
 
+  // Update row selection when externalRowSelection changes
+  React.useEffect(() => {
+    if (externalRowSelection !== undefined) {
+      setRowSelection(externalRowSelection);
+    }
+  }, [externalRowSelection]);
+
+
+
+  // Scroll to active row when it changes
+  React.useEffect(() => {
+    if (keyboardNavigationEnabled && activeRowIndex >= 0 && tableRef.current) {
+      // Get the active row by index
+      const activeRow = rows[activeRowIndex];
+
+      if (activeRow) {
+        // Scroll the row into view
+        const rowElement = tableRef.current.querySelector(`[data-row-id="${activeRow.id}"]`);
+        if (rowElement) {
+          rowElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }
+  }, [keyboardNavigationEnabled, activeRowIndex, rows]);
+
   // Column resizing handlers
   const handleMouseDown = (columnId: string, e: React.MouseEvent) => {
     if (!resizable) return;
@@ -177,6 +233,27 @@ export function DataTable<TData, TValue>({
     setIsResizing(false);
     setResizeColumn(null);
   }, []);
+
+  // Row click handler for selection
+  const handleRowClick = React.useCallback(
+    (row: Row<TData>, event: React.MouseEvent) => {
+      if (!enableRowClickSelection) return;
+
+      // Check if the click target is an interactive element
+      const target = event.target as HTMLElement;
+      const isInteractive = target.closest(
+        'button, a, input[type="checkbox"], input[type="radio"], select, textarea, [role="button"], [tabindex]'
+      );
+
+      if (isInteractive) {
+        return; // Don't toggle selection for interactive elements
+      }
+
+      // Toggle row selection
+      row.toggleSelected(!row.getIsSelected());
+    },
+    [enableRowClickSelection]
+  );
 
   React.useEffect(() => {
     if (isResizing) {
@@ -226,7 +303,7 @@ export function DataTable<TData, TValue>({
           </DropdownMenu>
         )}
       </div>
-      <div className='rounded-md border overflow-x-auto'>
+      <div ref={tableRef} className='rounded-md border overflow-x-auto'>
         <Table data-table>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
@@ -283,22 +360,37 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {rows.length ? (
-              rows.map(row => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                  {row.getVisibleCells().map(cell => (
-                    <TableCell
-                      key={cell.id}
-                      style={
-                        columnWidths[cell.column.id]
-                          ? { width: columnWidths[cell.column.id] }
-                          : undefined
-                      }
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              rows.map((row, index) => {
+
+
+
+
+                return (
+                  <TableRow
+                    key={row.id}
+                    data-row-id={row.id}
+                    data-state={row.getIsSelected() && 'selected'}
+                    onClick={enableRowClickSelection ? e => handleRowClick(row, e) : undefined}
+                    className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${keyboardNavigationEnabled && activeRowIndex === index
+                      ? 'bg-blue-50 border-l-4 border-l-blue-500'
+                      : ''
+                      }`}
+                  >
+                    {row.getVisibleCells().map(cell => (
+                      <TableCell
+                        key={cell.id}
+                        style={
+                          columnWidths[cell.column.id]
+                            ? { width: columnWidths[cell.column.id] }
+                            : undefined
+                        }
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className='h-24 text-center'>

@@ -1,12 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Filter, Eye, EyeOff } from 'lucide-react';
 import MismatchAnalyzerDataTable from '@/components/data/MismatchAnalyzerDataTable';
 import {
@@ -67,9 +60,15 @@ const MismatchAnalyzer: React.FC = () => {
 
   // Brush split modal state
   const [brushSplitModalOpen, setBrushSplitModalOpen] = useState(false);
-  const [selectedBrushItem, setSelectedBrushItem] = useState<MismatchAnalysisResult['mismatch_items'][0] | null>(null);
+  const [selectedBrushItem, setSelectedBrushItem] = useState<
+    MismatchAnalysisResult['mismatch_items'][0] | null
+  >(null);
   const [existingBrushSplit, setExistingBrushSplit] = useState<BrushSplit | undefined>(undefined);
   const [savingBrushSplit, setSavingBrushSplit] = useState(false);
+
+  // Keyboard navigation state
+  const [activeRowIndex, setActiveRowIndex] = useState<number>(-1);
+  const [keyboardNavigationEnabled, setKeyboardNavigationEnabled] = useState<boolean>(false);
 
   // Clear selections on component mount to ensure clean state
   useEffect(() => {
@@ -196,7 +195,7 @@ const MismatchAnalyzer: React.FC = () => {
   // Brush split handlers
   const handleBrushSplitClick = (item: MismatchAnalysisResult['mismatch_items'][0]) => {
     setSelectedBrushItem(item);
-    
+
     // Create existing split data if available
     let existingSplit: BrushSplit | undefined = undefined;
     if (item.is_split_brush && (item.handle_component || item.knot_component)) {
@@ -246,15 +245,17 @@ const MismatchAnalyzer: React.FC = () => {
 
   const handleItemSelection = useCallback(
     (itemKey: string, selected: boolean) => {
-      const newSelected = new Set(selectedItems);
-      if (selected) {
-        newSelected.add(itemKey);
-      } else {
-        newSelected.delete(itemKey);
-      }
-      setSelectedItems(newSelected);
+      setSelectedItems(prevSelected => {
+        const newSelected = new Set(prevSelected);
+        if (selected) {
+          newSelected.add(itemKey);
+        } else {
+          newSelected.delete(itemKey);
+        }
+        return newSelected;
+      });
     },
-    [selectedItems]
+    []
   );
 
   const handleSelectAll = useCallback(() => {
@@ -273,6 +274,8 @@ const MismatchAnalyzer: React.FC = () => {
 
   const handleVisibleRowsChange = useCallback((rows: MismatchAnalysisResult['mismatch_items']) => {
     setVisibleRows(rows);
+    // Reset active row index when visible rows change
+    setActiveRowIndex(-1);
   }, []);
 
   // Memoize item keys to avoid repeated operations
@@ -515,6 +518,92 @@ const MismatchAnalyzer: React.FC = () => {
     }
   }, [results?.mismatch_items, displayMode, isItemConfirmed]);
 
+  // Keyboard navigation handlers
+
+
+  // Container ref for keyboard navigation
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Enable keyboard navigation when component mounts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Don't handle keyboard navigation if focus is on an input field
+      const activeElement = document.activeElement;
+
+
+      if (activeElement) {
+        const tagName = activeElement.tagName.toLowerCase();
+        const isInput = tagName === 'input' || tagName === 'textarea' || tagName === 'select';
+        const isContentEditable = activeElement.getAttribute('contenteditable') === 'true';
+
+        if (isInput || isContentEditable) {
+          // For space bar specifically, prevent it from reaching input fields
+          if (event.key === ' ') {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          return; // Let the input field handle other events
+        }
+      }
+
+      // Only handle keyboard navigation if enabled
+      if (!keyboardNavigationEnabled) {
+        return;
+      }
+
+
+
+      switch (event.key) {
+        case 'ArrowUp':
+          event.preventDefault();
+          if (activeRowIndex > 0) {
+            setActiveRowIndex(activeRowIndex - 1);
+          } else if (visibleRows.length > 0) {
+            setActiveRowIndex(0);
+          }
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          if (activeRowIndex >= 0 && activeRowIndex < visibleRows.length - 1) {
+            setActiveRowIndex(activeRowIndex + 1);
+          } else if (visibleRows.length > 0 && activeRowIndex === -1) {
+            setActiveRowIndex(0);
+          }
+          break;
+        case ' ':
+          event.preventDefault();
+          if (activeRowIndex >= 0 && activeRowIndex < visibleRows.length) {
+            const item = visibleRows[activeRowIndex];
+            const itemKey = `${selectedField}:${item.original.toLowerCase()}`;
+            const isCurrentlySelected = selectedItems.has(itemKey);
+            handleItemSelection(itemKey, !isCurrentlySelected);
+          }
+          break;
+        case 'Escape':
+          setActiveRowIndex(-1);
+          setKeyboardNavigationEnabled(false);
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [keyboardNavigationEnabled, activeRowIndex, visibleRows, selectedField, selectedItems, handleItemSelection]);
+
+  // Reset active row when data changes
+  useEffect(() => {
+    setActiveRowIndex(-1);
+  }, [filteredResults]);
+
+  // Enable keyboard navigation when results are available
+  useEffect(() => {
+    if (results && filteredResults.length > 0) {
+      setKeyboardNavigationEnabled(true);
+    } else {
+      setKeyboardNavigationEnabled(false);
+    }
+  }, [results, filteredResults.length]);
+
   const getDisplayModeCounts = () => {
     if (!results)
       return {
@@ -602,7 +691,7 @@ const MismatchAnalyzer: React.FC = () => {
   }, [selectedItems, results?.mismatch_items]);
 
   return (
-    <div className='w-full p-4'>
+    <div ref={containerRef} className='w-full p-4'>
       {/* Controls and Header */}
       <div className='mb-4'>
         <h1 className='text-3xl font-bold text-gray-900 mb-2'>Mismatch Analyzer</h1>
@@ -648,14 +737,17 @@ const MismatchAnalyzer: React.FC = () => {
                 <h3 className='text-sm font-medium text-green-800'>Enriched Data Mode Active</h3>
                 <div className='mt-2 text-sm text-green-700'>
                   <p className='mb-2'>
-                    You are viewing data from the <strong>enrich phase</strong>, which shows the final results after all refinements have been applied.
+                    You are viewing data from the <strong>enrich phase</strong>, which shows the
+                    final results after all refinements have been applied.
                   </p>
                   <p className='mb-2'>
-                    <strong>What this means:</strong> Some items that appear as "mismatches" in the match phase are actually correct matches that get refined during the enrich phase.
-                    Hover over the "Matched" column to see enrich-phase adjustments.
+                    <strong>What this means:</strong> Some items that appear as "mismatches" in the
+                    match phase are actually correct matches that get refined during the enrich
+                    phase. Hover over the "Matched" column to see enrich-phase adjustments.
                   </p>
                   <p>
-                    <strong>Tip:</strong> This mode helps distinguish between truly problematic matches and expected enrich-phase corrections.
+                    <strong>Tip:</strong> This mode helps distinguish between truly problematic
+                    matches and expected enrich-phase corrections.
                   </p>
                 </div>
               </div>
@@ -874,9 +966,15 @@ const MismatchAnalyzer: React.FC = () => {
               <div className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm max-w-xs'>
                 <div className='font-medium mb-1'>Match vs Enrich Phases:</div>
                 <div className='space-y-1'>
-                  <div><strong>Match Phase:</strong> Initial product identification</div>
-                  <div><strong>Enrich Phase:</strong> Refines matches with additional data</div>
-                  <div className='text-gray-600'>Some "mismatches" are actually correct enrich-phase adjustments</div>
+                  <div>
+                    <strong>Match Phase:</strong> Initial product identification
+                  </div>
+                  <div>
+                    <strong>Enrich Phase:</strong> Refines matches with additional data
+                  </div>
+                  <div className='text-gray-600'>
+                    Some "mismatches" are actually correct enrich-phase adjustments
+                  </div>
                 </div>
               </div>
             </div>
@@ -944,6 +1042,12 @@ const MismatchAnalyzer: React.FC = () => {
                     <span className='font-medium'>{results.processing_time.toFixed(2)}s</span>
                   </span>
                 </div>
+                {/* Keyboard Navigation Indicator */}
+                {keyboardNavigationEnabled && (
+                  <div className='mt-2 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-200'>
+                    ⌨️ Keyboard Navigation Active: Use ↑↓ to navigate, Space to select, Esc to exit
+                  </div>
+                )}
               </div>
 
               {/* Bulk Actions */}
@@ -1010,6 +1114,8 @@ const MismatchAnalyzer: React.FC = () => {
                 onVisibleRowsChange={handleVisibleRowsChange}
                 matched_data_map={results?.matched_data_map}
                 onBrushSplitClick={handleBrushSplitClick}
+                activeRowIndex={activeRowIndex}
+                keyboardNavigationEnabled={keyboardNavigationEnabled}
               />
             ) : (
               <div className='text-center py-8'>
@@ -1056,7 +1162,6 @@ const MismatchAnalyzer: React.FC = () => {
           original={selectedBrushItem.original}
           existingSplit={existingBrushSplit}
           onSave={handleBrushSplitSave}
-          loading={savingBrushSplit}
         />
       )}
     </div>
