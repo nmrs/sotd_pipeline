@@ -41,6 +41,21 @@ def test_catalog():
                 "handle": {"brand": "Muninn Woodworks"},
             }
         },
+        # Test complete brush with different brand knot and handle
+        "Dogclaration": {
+            "fiber": "Badger",
+            "knot_size_mm": 28,
+            "B9A": {
+                "patterns": ["dog.*\\bb9a\\+?\\b"],
+                "knot": {
+                    "brand": "Declaration Grooming",
+                    "model": "B9A",
+                },
+                "handle": {
+                    "brand": "Dogwood Handcrafts",
+                },
+            },
+        },
         "Declaration Grooming": {
             "fiber": "Badger",
             "knot_size_mm": 28,
@@ -287,6 +302,45 @@ class TestBrushMatcher:
         assert result.matched["knot"]["brand"] is None
         assert result.matched["knot"]["model"] == "26mm"  # Size detected as model
         assert result.matched["knot"]["knot_size_mm"] == 26.0  # Size information preserved
+
+    def test_complete_brush_with_different_brand_components(self, brush_matcher):
+        """Test that complete brushes with different brand knot and handle preserve top-level brand/model."""
+        # Test the Dogclaration B9A scenario - a complete brush with handle and knot from different brands
+        result = brush_matcher.match("Dogclaration 30mm B9A")
+
+        # Should match as a complete brush (regex match)
+        assert result.match_type == "regex"
+        assert result.pattern == "dog.*\\bb9a\\+?\\b"
+
+        # Top-level brand and model should be preserved (this is a complete brush)
+        assert result.matched["brand"] == "Dogclaration"
+        assert result.matched["model"] == "B9A"
+
+        # Handle section should show the component brand from YAML
+        assert result.matched["handle"]["brand"] == "Dogwood Handcrafts"
+        # No handle model specified in YAML
+        assert result.matched["handle"]["model"] is None
+        matched_by = result.matched["handle"]["_matched_by"]
+        assert matched_by == "KnownBrushMatchingStrategy"
+        pattern = result.matched["handle"]["_pattern"]
+        assert pattern == "dog.*\\bb9a\\+?\\b"
+
+        # Knot section should show the component brand and model from YAML
+        assert result.matched["knot"]["brand"] == "Declaration Grooming"
+        assert result.matched["knot"]["model"] == "B9A"
+        # Fiber and knot_size_mm will be set by enrich phase
+        # For now, just verify they exist (may be None initially)
+        assert "fiber" in result.matched["knot"]
+        assert "knot_size_mm" in result.matched["knot"]
+        knot_matched_by = result.matched["knot"]["_matched_by"]
+        assert knot_matched_by == "KnownBrushMatchingStrategy"
+        knot_pattern = result.matched["knot"]["_pattern"]
+        assert knot_pattern == "dog.*\\bb9a\\+?\\b"
+
+        # Verify that the strategy correctly extracted the component brands
+        assert result.matched["handle_brand"] == "Dogwood Handcrafts"
+        assert result.matched["knot_brand"] == "Declaration Grooming"
+        assert result.matched["knot_model"] == "B9A"
 
 
 # Parameterized strategy/fiber tests

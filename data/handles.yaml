@@ -111,14 +111,10 @@ artisan_handles:
       - jeffington(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     Unspecified:
       patterns:
-      - ^(?!.*dogwood)declaration
-      - ^(?!.*dogwood)\bdg\b
+      - ^(?!.*dog).*declaration
+      - ^(?!.*dog).*\bdg\b
       - \bdg\b
-      - ^(?!.*zeni).*\bb(?:[1-8]|9[ab]|1[0-8])\b
-  DISCARD:
-    Unspecified:
-      patterns:
-      - had forever.*mark rubbed off
+      - ^(?!.*(zeni|dog)).*\bb(?:[1-8]|9[ab]|1[0-8])\b
   Dogwood Handcrafts:
     Unspecified:
       patterns:

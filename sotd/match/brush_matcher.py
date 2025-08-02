@@ -704,10 +704,15 @@ class BrushMatcher:
             try:
                 result = strategy.match(value)
                 if result and hasattr(result, "matched") and result.matched:
+                    # Capture fiber and knot_size_mm from original result before extraction
+                    fiber = result.matched.get("fiber")
+                    knot_size_mm = result.matched.get("knot_size_mm")
+
                     # Extract match data and ensure consistent format
                     match_dict = self._extract_match_dict(result, strategy)
 
                     if match_dict is not None:
+
                         # Ensure handle/knot sections are consistent
                         self._ensure_handle_knot_sections(
                             match_dict,
@@ -716,6 +721,8 @@ class BrushMatcher:
                             getattr(result, "matched_from", None),
                             getattr(result, "handle", None),
                             getattr(result, "knot", None),
+                            fiber,
+                            knot_size_mm,
                         )
 
                         # Enrich with additional data
@@ -1446,12 +1453,23 @@ class BrushMatcher:
             m.pop("fiber_strategy", None)
             m.pop("fiber_conflict", None)
 
+            # Capture fiber and knot_size_mm before removing them
+            fiber = m.get("fiber")
+            knot_size_mm = m.get("knot_size_mm")
+
             # Remove top-level fiber (only keep in knot section)
             m.pop("fiber", None)
 
             # Always create handle and knot sections with consistent structure
             self._ensure_handle_knot_sections(
-                m, strategy, result.pattern or "unknown", matched_from, handle, knot
+                m,
+                strategy,
+                result.pattern or "unknown",
+                matched_from,
+                handle,
+                knot,
+                fiber,
+                knot_size_mm,
             )
 
             return m
@@ -1465,17 +1483,24 @@ class BrushMatcher:
         matched_from: Optional[str],
         handle: Optional[str],
         knot: Optional[str],
+        fiber: Optional[str] = None,
+        knot_size_mm: Optional[float] = None,
     ):
         """Ensure all brushes have consistent handle and knot sections."""
         brand = m.get("brand")
         model = m.get("model")
+
+        # Check if this is a composite brush with different handle and knot brands
+        handle_brand = m.get("handle_brand")
+        knot_brand = m.get("knot_brand")
+        is_composite_brush = handle_brand and knot_brand and handle_brand != knot_brand
 
         # For single-brand brushes, create handle and knot sections
         # But if the input contains "handle" keyword and no knot information,
         # treat as composite
         source_text = m.get("source_text", "").lower()
         is_handle_only = "handle" in source_text and not m.get("model")
-        if brand and not matched_from and not is_handle_only:
+        if brand and not matched_from and not is_handle_only and not is_composite_brush:
             # Single-brand brush - both handle and knot are from same brand
             m["handle"] = {
                 "brand": brand,
@@ -1614,6 +1639,38 @@ class BrushMatcher:
             if handle_brand != knot_brand:
                 m["brand"] = None
                 m["model"] = None
+
+        elif is_composite_brush:
+            # Complete brush with handle_brand and knot_brand from strategy
+            # Use the handle_brand and knot_brand fields from the strategy result
+            # but keep the top-level brand and model (this is a complete brush)
+
+            m["handle"] = {
+                "brand": handle_brand,
+                "model": m.get("handle_model"),  # Use handle_model if available
+                "source_text": m.get("source_text", ""),
+                "_matched_by": strategy.__class__.__name__,
+                "_pattern": pattern or "unknown",
+            }
+
+            # Use knot-specific information if available
+            knot_model = m.get("knot_model", model)
+            # Use passed fiber and knot_size_mm values (captured before removal)
+            knot_fiber = fiber
+            knot_size_mm = knot_size_mm
+
+            m["knot"] = {
+                "brand": knot_brand,
+                "model": knot_model,
+                "fiber": knot_fiber,
+                "knot_size_mm": knot_size_mm,
+                "source_text": m.get("source_text", ""),
+                "_matched_by": strategy.__class__.__name__,
+                "_pattern": pattern or "unknown",
+            }
+
+            # Keep top-level brand and model for complete brushes
+            # (don't clear them - this is a complete brush, not a composite)
 
         else:
             # Fallback for other cases - create minimal sections

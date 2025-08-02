@@ -141,8 +141,8 @@ def compile_catalog_patterns(
                 if pattern_metadata["knot_fiber"]:
                     pattern_metadata["fiber"] = pattern_metadata["knot_fiber"]
                 # Use knot size as primary size if available
-                if pattern_metadata["knot_size_mm"]:
-                    pattern_metadata["knot_size_mm"] = pattern_metadata["knot_size_mm"]
+                if knot_data.get("knot_size_mm"):
+                    pattern_metadata["knot_size_mm"] = knot_data["knot_size_mm"]
 
             if "handle" in metadata and isinstance(metadata["handle"], dict):
                 handle_data = metadata["handle"]
