@@ -68,6 +68,7 @@ const MismatchAnalyzer: React.FC = () => {
   // Brush split modal state
   const [brushSplitModalOpen, setBrushSplitModalOpen] = useState(false);
   const [selectedBrushItem, setSelectedBrushItem] = useState<MismatchAnalysisResult['mismatch_items'][0] | null>(null);
+  const [existingBrushSplit, setExistingBrushSplit] = useState<BrushSplit | undefined>(undefined);
   const [savingBrushSplit, setSavingBrushSplit] = useState(false);
 
   // Clear selections on component mount to ensure clean state
@@ -195,12 +196,28 @@ const MismatchAnalyzer: React.FC = () => {
   // Brush split handlers
   const handleBrushSplitClick = (item: MismatchAnalysisResult['mismatch_items'][0]) => {
     setSelectedBrushItem(item);
+    
+    // Create existing split data if available
+    let existingSplit: BrushSplit | undefined = undefined;
+    if (item.is_split_brush && (item.handle_component || item.knot_component)) {
+      existingSplit = {
+        original: item.original,
+        handle: item.handle_component || null,
+        knot: item.knot_component || null,
+        corrected: false,
+        validated_at: null,
+        should_not_split: false,
+        occurrences: [],
+      };
+    }
+    setExistingBrushSplit(existingSplit);
     setBrushSplitModalOpen(true);
   };
 
   const handleBrushSplitClose = () => {
     setBrushSplitModalOpen(false);
     setSelectedBrushItem(null);
+    setExistingBrushSplit(undefined);
   };
 
   const handleBrushSplitSave = async (split: BrushSplit) => {
@@ -1037,6 +1054,7 @@ const MismatchAnalyzer: React.FC = () => {
           isOpen={brushSplitModalOpen}
           onClose={handleBrushSplitClose}
           original={selectedBrushItem.original}
+          existingSplit={existingBrushSplit}
           onSave={handleBrushSplitSave}
           loading={savingBrushSplit}
         />
