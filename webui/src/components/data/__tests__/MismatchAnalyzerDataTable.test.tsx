@@ -562,5 +562,46 @@ describe('MismatchAnalyzerDataTable', () => {
       // Should show the enrich adjustment icon
       expect(screen.getByText('🔄')).toBeInTheDocument();
     });
+
+    test('shows enrich adjustment icon when knot_size_mm changes from null to value', () => {
+      const brushData: MismatchItem[] = [
+        {
+          original: 'C&H + TnS 27mm H8',
+          matched: {
+            brand: 'Turn-N-Shave',
+            model: 'High Density Badger (H*)',
+            knot: {
+              brand: 'Turn-N-Shave',
+              model: 'High Density Badger (H*)',
+              fiber: 'Badger',
+              knot_size_mm: null,  // Matched as null
+            },
+          },
+          enriched: {
+            knot_size_mm: 27.0,  // Enriched as 27.0 (different!)
+          },
+          pattern: 't[&n]s.*h\\d',
+          match_type: 'regex',
+          confidence: 0.8,
+          mismatch_type: 'levenshtein_distance',
+          reason: 'Levenshtein distance',
+          count: 1,
+          examples: ['2025-06.json'],
+          comment_ids: ['abc123'],
+          is_confirmed: false,
+        },
+      ];
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={brushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Should show the enrich adjustment icon
+      expect(screen.getByText('🔄')).toBeInTheDocument();
+    });
   });
 });
