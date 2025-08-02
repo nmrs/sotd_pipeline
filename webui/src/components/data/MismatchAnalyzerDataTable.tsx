@@ -353,7 +353,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       // Check fiber changes (enriched data overrides matched)
       const matchedKnotFiber = matchedData?.knot?.fiber;
       const enrichedFiber = enrichedData?.fiber;
-      
+
       // Only consider it a change if both values exist and are different
       if (matchedKnotFiber !== undefined && enrichedFiber !== undefined && matchedKnotFiber !== enrichedFiber) {
         return true;
@@ -362,7 +362,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       // Check knot size changes
       const matchedKnotSize = matchedData?.knot?.knot_size_mm;
       const enrichedKnotSize = enrichedData?.knot_size_mm;
-      
+
       // Only consider it a change if both values exist and are different
       if (matchedKnotSize !== undefined && enrichedKnotSize !== undefined && matchedKnotSize !== enrichedKnotSize) {
         return true;

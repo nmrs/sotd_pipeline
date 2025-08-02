@@ -521,5 +521,46 @@ describe('MismatchAnalyzerDataTable', () => {
       // Should not show the enrich adjustment icon
       expect(screen.queryByText('🔗 enrich')).not.toBeInTheDocument();
     });
+
+    test('shows enrich adjustment icon when there are actual changes', () => {
+      const brushData: MismatchItem[] = [
+        {
+          original: 'Zenith 506U N (50/50 horse mane/tail)',
+          matched: {
+            brand: 'Zenith',
+            model: '506U SE',
+            knot: {
+              brand: 'Zenith',
+              model: '506U SE',
+              fiber: 'Boar',  // Matched as Boar
+              knot_size_mm: 27,
+            },
+          },
+          enriched: {
+            fiber: 'Horse',  // Enriched as Horse (different!)
+          },
+          pattern: '506u',
+          match_type: 'regex',
+          confidence: 0.8,
+          mismatch_type: 'regex_match',
+          reason: 'Regex match',
+          count: 1,
+          examples: ['2025-06.json'],
+          comment_ids: ['abc123'],
+          is_confirmed: false,
+        },
+      ];
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={brushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Should show the enrich adjustment icon
+      expect(screen.getByText('🔄')).toBeInTheDocument();
+    });
   });
 });
