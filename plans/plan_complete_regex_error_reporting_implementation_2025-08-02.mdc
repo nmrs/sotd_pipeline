@@ -1,0 +1,382 @@
+# Plan: Complete Enhanced Regex Error Reporting Implementation
+
+## 📘 Project Summary
+
+Complete the implementation of enhanced regex error reporting across all matchers in the SOTD Pipeline. Currently, only 4 out of 15 files have been updated with enhanced error reporting that provides detailed context when regex compilation fails. The goal is to ensure all matchers provide clear, actionable error messages that help users identify and fix malformed regex patterns in YAML catalog files.
+
+**Current Status**: 
+- ✅ Updated: razor_matcher.py, blade_matcher.py, handle_matcher.py, brush_matcher.py
+- ✅ Cleaned up: Removed orphaned chisel_and_hound.py
+- ❌ Pending: 10 remaining files including brush matching strategies, soap matcher, base matcher, and tools
+
+**Success Criteria**: All regex compilation errors include file path, brand/model context, and specific pattern information to help users quickly identify and fix malformed patterns.
+
+## 🧩 Component Steps
+
+### Phase 1: Brush Matching Strategies (High Priority)
+1. **Update Known Knot Strategy** - Add enhanced error reporting to known_knot_strategy.py
+2. **Update Other Knot Strategy** - Add enhanced error reporting to other_knot_strategy.py  
+3. **Update Other Brushes Strategy** - Add enhanced error reporting to other_brushes_strategy.py
+4. **Update Pattern Utils** - Add enhanced error reporting to pattern_utils.py
+
+### Phase 2: Core Matchers (Medium Priority)
+5. **Enhance Soap Matcher** - Improve existing error handling in soap_matcher.py
+6. **Enhance Base Matcher** - Improve existing error handling in base_matcher.py
+
+### Phase 3: Tools and Utilities (Lower Priority)
+7. **Update Pattern Manager** - Add enhanced error reporting to pattern_manager.py
+8. **Update Mismatch Analyzer** - Add enhanced error reporting to mismatch_analyzer.py
+9. **Update Analysis Base** - Add enhanced error reporting to analysis_base.py
+
+### Phase 4: Extract Phase (Lower Priority)
+10. **Update Extract Filter** - Add enhanced error reporting to filter.py
+
+### Phase 5: Testing and Validation
+11. **Create Comprehensive Tests** - Test enhanced error reporting across all matchers
+12. **Update Documentation** - Document the enhanced error reporting feature
+
+## 🔁 Implementation Prompts
+
+### Step 1: Update Known Knot Strategy
+
+```text
+Update the KnownKnotMatchingStrategy to use enhanced regex error reporting.
+
+Context: The KnownKnotMatchingStrategy compiles regex patterns from knots.yaml and is used by the brush matcher. Currently it uses direct re.compile() without error context.
+
+Requirements:
+1. Import the enhanced error reporting utilities from sotd.match.utils.regex_error_utils
+2. Update the _compile_known_knot_patterns method to use compile_regex_with_context
+3. Create context dictionary with file path, brand, model, and strategy information
+4. Remove any existing try/catch blocks that silently skip errors
+5. Let errors bubble up with detailed context for user debugging
+
+File: sotd/match/brush_matching_strategies/known_knot_strategy.py
+Method: _compile_known_knot_patterns (around line 49)
+
+Expected error message format:
+"Invalid regex pattern '{pattern}' in File: data/knots.yaml, Brand: {brand}, Model: {model}, Strategy: KnownKnotMatchingStrategy: {error}"
+
+Test with a malformed pattern to verify enhanced error reporting works correctly.
+```
+
+### Step 2: Update Other Knot Strategy
+
+```text
+Update the OtherKnotMatchingStrategy to use enhanced regex error reporting.
+
+Context: The OtherKnotMatchingStrategy compiles regex patterns from the "other_knots" section of knots.yaml. Currently it uses direct re.compile() without error context.
+
+Requirements:
+1. Import the enhanced error reporting utilities from sotd.match.utils.regex_error_utils
+2. Update the pattern compilation to use compile_regex_with_context
+3. Create context dictionary with file path, brand, model, and strategy information
+4. Remove any existing try/catch blocks that silently skip errors
+5. Let errors bubble up with detailed context for user debugging
+
+File: sotd/match/brush_matching_strategies/other_knot_strategy.py
+Method: Pattern compilation around line 40
+
+Expected error message format:
+"Invalid regex pattern '{pattern}' in File: data/knots.yaml, Brand: {brand}, Model: {model}, Strategy: OtherKnotMatchingStrategy: {error}"
+
+Test with a malformed pattern to verify enhanced error reporting works correctly.
+```
+
+### Step 3: Update Other Brushes Strategy
+
+```text
+Update the OtherBrushMatchingStrategy to use enhanced regex error reporting.
+
+Context: The OtherBrushMatchingStrategy compiles regex patterns from the "other_brushes" section of brushes.yaml. Currently it uses direct re.compile() without error context.
+
+Requirements:
+1. Import the enhanced error reporting utilities from sotd.match.utils.regex_error_utils
+2. Update the pattern compilation to use compile_regex_with_context
+3. Create context dictionary with file path, brand, model, and strategy information
+4. Remove any existing try/catch blocks that silently skip errors
+5. Let errors bubble up with detailed context for user debugging
+
+File: sotd/match/brush_matching_strategies/other_brushes_strategy.py
+Method: Pattern compilation around line 38
+
+Expected error message format:
+"Invalid regex pattern '{pattern}' in File: data/brushes.yaml, Brand: {brand}, Model: {model}, Strategy: OtherBrushMatchingStrategy: {error}"
+
+Test with a malformed pattern to verify enhanced error reporting works correctly.
+```
+
+### Step 4: Update Pattern Utils
+
+```text
+Update the pattern_utils module to use enhanced regex error reporting.
+
+Context: The pattern_utils module provides utility functions for compiling patterns with metadata. Currently it uses direct re.compile() without error context.
+
+Requirements:
+1. Import the enhanced error reporting utilities from sotd.match.utils.regex_error_utils
+2. Update the compile_patterns_with_metadata function to use compile_regex_with_context
+3. Create context dictionary with file path and pattern source information
+4. Remove any existing try/catch blocks that silently skip errors
+5. Let errors bubble up with detailed context for user debugging
+
+File: sotd/match/brush_matching_strategies/utils/pattern_utils.py
+Method: compile_patterns_with_metadata (around line 56)
+
+Expected error message format:
+"Invalid regex pattern '{pattern}' in File: {file_path}, Source: pattern_utils: {error}"
+
+Test with a malformed pattern to verify enhanced error reporting works correctly.
+```
+
+### Step 5: Enhance Soap Matcher
+
+```text
+Enhance the existing error handling in SoapMatcher to provide more detailed context.
+
+Context: The SoapMatcher already has try/catch blocks around regex compilation, but the error messages could be more detailed. Update to use the enhanced error reporting utilities.
+
+Requirements:
+1. Import the enhanced error reporting utilities from sotd.match.utils.regex_error_utils
+2. Update the _compile_patterns method to use compile_regex_with_context
+3. Create context dictionary with file path, maker, scent information
+4. Replace existing try/catch blocks with enhanced error reporting
+5. Let errors bubble up with detailed context for user debugging
+
+File: sotd/match/soap_matcher.py
+Methods: _compile_patterns (around lines 83 and 95)
+
+Expected error message format:
+"Invalid regex pattern '{pattern}' in File: data/soaps.yaml, Maker: {maker}, Scent: {scent}: {error}"
+
+Test with a malformed pattern to verify enhanced error reporting works correctly.
+```
+
+### Step 6: Enhance Base Matcher
+
+```text
+Enhance the existing error handling in BaseMatcher to provide more detailed context.
+
+Context: The BaseMatcher already has try/catch blocks around regex compilation, but the error messages could be more detailed. Update to use the enhanced error reporting utilities.
+
+Requirements:
+1. Import the enhanced error reporting utilities from sotd.match.utils.regex_error_utils
+2. Update the _get_compiled_pattern method to use compile_regex_with_context
+3. Create context dictionary with file path and field type information
+4. Replace existing try/catch blocks with enhanced error reporting
+5. Let errors bubble up with detailed context for user debugging
+
+File: sotd/match/base_matcher.py
+Method: _get_compiled_pattern (around line 177)
+
+Expected error message format:
+"Invalid regex pattern '{pattern}' in File: {file_path}, Field: {field_type}: {error}"
+
+Test with a malformed pattern to verify enhanced error reporting works correctly.
+```
+
+### Step 7: Update Pattern Manager
+
+```text
+Update the PatternManager to use enhanced regex error reporting.
+
+Context: The PatternManager is used by analysis tools to compile patterns. Currently it uses direct re.compile() without error context.
+
+Requirements:
+1. Import the enhanced error reporting utilities from sotd.match.utils.regex_error_utils
+2. Update the get_compiled_pattern method to use compile_regex_with_context
+3. Create context dictionary with file path and field information
+4. Remove any existing try/catch blocks that silently skip errors
+5. Let errors bubble up with detailed context for user debugging
+
+File: sotd/match/tools/managers/pattern_manager.py
+Method: get_compiled_pattern (around line 81)
+
+Expected error message format:
+"Invalid regex pattern '{pattern}' in File: {file_path}, Field: {field}: {error}"
+
+Test with a malformed pattern to verify enhanced error reporting works correctly.
+```
+
+### Step 8: Update Mismatch Analyzer
+
+```text
+Update the MismatchAnalyzer to use enhanced regex error reporting.
+
+Context: The MismatchAnalyzer compiles patterns for analysis. Currently it uses direct re.compile() without error context.
+
+Requirements:
+1. Import the enhanced error reporting utilities from sotd.match.utils.regex_error_utils
+2. Update the pattern compilation to use compile_regex_with_context
+3. Create context dictionary with file path and analyzer information
+4. Remove any existing try/catch blocks that silently skip errors
+5. Let errors bubble up with detailed context for user debugging
+
+File: sotd/match/tools/analyzers/mismatch_analyzer.py
+Method: Pattern compilation around line 1034
+
+Expected error message format:
+"Invalid regex pattern '{pattern}' in File: {file_path}, Analyzer: MismatchAnalyzer: {error}"
+
+Test with a malformed pattern to verify enhanced error reporting works correctly.
+```
+
+### Step 9: Update Analysis Base
+
+```text
+Update the analysis_base module to use enhanced regex error reporting.
+
+Context: The analysis_base module provides base functionality for analysis tools. Currently it uses direct re.compile() without error context.
+
+Requirements:
+1. Import the enhanced error reporting utilities from sotd.match.utils.regex_error_utils
+2. Update the pattern compilation to use compile_regex_with_context
+3. Create context dictionary with file path and analysis information
+4. Remove any existing try/catch blocks that silently skip errors
+5. Let errors bubble up with detailed context for user debugging
+
+File: sotd/match/tools/utils/analysis_base.py
+Method: Pattern compilation around line 163
+
+Expected error message format:
+"Invalid regex pattern '{pattern}' in File: {file_path}, Analysis: {analysis_type}: {error}"
+
+Test with a malformed pattern to verify enhanced error reporting works correctly.
+```
+
+### Step 10: Update Extract Filter
+
+```text
+Update the ExtractFilter to use enhanced regex error reporting.
+
+Context: The ExtractFilter compiles patterns for filtering extracted data. Currently it uses direct re.compile() without error context.
+
+Requirements:
+1. Import the enhanced error reporting utilities from sotd.match.utils.regex_error_utils
+2. Update the _compile_patterns method to use compile_regex_with_context
+3. Create context dictionary with file path and filter information
+4. Remove any existing try/catch blocks that silently skip errors
+5. Let errors bubble up with detailed context for user debugging
+
+File: sotd/extract/filter.py
+Methods: _compile_patterns (around lines 82 and 101)
+
+Expected error message format:
+"Invalid regex pattern '{pattern}' in File: {file_path}, Filter: {filter_type}: {error}"
+
+Test with a malformed pattern to verify enhanced error reporting works correctly.
+```
+
+### Step 11: Create Comprehensive Tests
+
+```text
+Create comprehensive tests for the enhanced regex error reporting feature.
+
+Requirements:
+1. Create unit tests for each updated matcher/strategy
+2. Test with malformed regex patterns to verify error messages
+3. Test with valid patterns to ensure normal operation continues
+4. Create integration tests that verify error reporting across the full pipeline
+5. Test error message format and content for accuracy
+
+Test files to create/update:
+- tests/match/test_enhanced_error_reporting.py (new)
+- tests/match/brush_matching_strategies/test_known_knot_strategy.py
+- tests/match/brush_matching_strategies/test_other_knot_strategy.py
+- tests/match/brush_matching_strategies/test_other_brushes_strategy.py
+- tests/match/brush_matching_strategies/utils/test_pattern_utils.py
+- tests/match/test_soap_matcher.py
+- tests/match/test_base_matcher.py
+- tests/match/tools/test_pattern_manager.py
+- tests/match/tools/analyzers/test_mismatch_analyzer.py
+- tests/match/tools/utils/test_analysis_base.py
+- tests/extract/test_filter.py
+
+Test scenarios:
+1. Malformed regex patterns in each YAML file type
+2. Valid regex patterns to ensure no false positives
+3. Error message format validation
+4. Context information accuracy
+5. Integration with full pipeline workflow
+```
+
+### Step 12: Update Documentation
+
+```text
+Update documentation to reflect the enhanced regex error reporting feature.
+
+Requirements:
+1. Update the regex error reporting plan with completion status
+2. Add documentation about the enhanced error reporting feature
+3. Create examples of error messages and how to fix them
+4. Update any relevant README files or documentation
+
+Files to update:
+- plans/plan_regex_error_reporting_improvement_2025-01-27.mdc (mark as complete)
+- docs/regex_error_reporting.md (new)
+- README.md (add section about error reporting)
+- .cursor/rules/match-phase.mdc (add error reporting guidelines)
+
+Documentation should include:
+1. Overview of the enhanced error reporting feature
+2. Examples of error messages and their meaning
+3. How to fix common regex pattern issues
+4. Best practices for regex patterns in YAML files
+5. Troubleshooting guide for regex compilation errors
+```
+
+## 🧠 Critical Analysis
+
+### Prompt Sequence Analysis
+The plan follows a logical progression from high-priority brush matching strategies to lower-priority tools and utilities. Each step builds on the previous ones and uses the same enhanced error reporting utilities, ensuring consistency across the codebase.
+
+### Code Cleanup
+- **Removed orphaned code**: Deleted `sotd/match/chisel_and_hound.py` as it was not used anywhere in the codebase
+- **Reduced scope**: Plan now covers 13 files instead of 14, making it more focused and efficient
+
+### Risk Assessment
+- **Low Risk**: Most changes are isolated to individual files and don't affect core functionality
+- **Medium Risk**: Removing try/catch blocks could expose existing issues, but this is intentional for better debugging
+- **High Value**: Users will get much better error messages for debugging regex issues
+
+### Dependencies
+- All steps depend on the existing `sotd/match/utils/regex_error_utils.py` module
+- Steps 11-12 depend on completion of steps 1-10
+- Testing should be done incrementally after each step
+
+### Success Metrics
+- All 13 files updated with enhanced error reporting (removed orphaned chisel_and_hound.py)
+- Comprehensive test coverage for error scenarios
+- Clear documentation for users
+- No regression in existing functionality
+- Improved user experience when encountering regex errors
+
+## 📋 Implementation Checklist
+
+- [ ] Step 1: Update Known Knot Strategy
+- [ ] Step 2: Update Other Knot Strategy  
+- [ ] Step 3: Update Other Brushes Strategy
+- [ ] Step 4: Update Pattern Utils
+- [ ] Step 5: Enhance Soap Matcher
+- [ ] Step 6: Enhance Base Matcher
+- [ ] Step 7: Update Pattern Manager
+- [ ] Step 8: Update Mismatch Analyzer
+- [ ] Step 9: Update Analysis Base
+- [ ] Step 10: Update Extract Filter
+- [ ] Step 11: Create Comprehensive Tests
+- [ ] Step 12: Update Documentation
+
+## 🎯 Expected Outcome
+
+After completing this plan, all matchers in the SOTD Pipeline will provide detailed, actionable error messages when encountering malformed regex patterns. Users will be able to quickly identify which file, brand, model, and pattern is causing issues, making debugging much more efficient.
+
+**Example Error Message:**
+```
+Invalid regex pattern '^(?!.*(zeni|dog).*\bb(?:[1-8]|9[ab]|1[0-8])\b' in File: data/handles.yaml, Brand: Declaration Grooming, Model: Unspecified, Section: artisan_handles: missing ), unterminated subpattern at position 1
+```
+
+This provides all the context needed to locate and fix the issue quickly.
+description:
+globs:
+alwaysApply: false
+---
