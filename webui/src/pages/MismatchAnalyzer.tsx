@@ -200,13 +200,6 @@ const MismatchAnalyzer: React.FC = () => {
     // Convert comment_ids to proper occurrence format using comment_sources
     const occurrences: Array<{ file: string, comment_ids: string[] }> = [];
 
-    console.log('Brush split click - item data:', {
-      original: item.original,
-      comment_ids: item.comment_ids,
-      comment_sources: item.comment_sources,
-      selectedMonth
-    });
-
     if (item.comment_ids && item.comment_ids.length > 0) {
       if (item.comment_sources) {
         // Group comment_ids by source file
@@ -240,8 +233,6 @@ const MismatchAnalyzer: React.FC = () => {
         });
       }
     }
-
-    console.log('Created occurrences:', occurrences);
 
     // Create existing split data if available
     let existingSplit: BrushSplit | undefined = undefined;
@@ -282,14 +273,6 @@ const MismatchAnalyzer: React.FC = () => {
 
     try {
       setSavingBrushSplit(true);
-
-      console.log('Saving brush split with data:', {
-        original: split.original,
-        handle: split.handle,
-        knot: split.knot || split.original,
-        should_not_split: split.should_not_split,
-        occurrences: split.occurrences,
-      });
 
       // Call the API to save the brush split
       const response = await saveBrushSplit({
