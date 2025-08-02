@@ -23,14 +23,14 @@ export const hasEnrichPhaseChanges = (
   if (field === 'brush') {
     // The enrich phase only adds fiber and knot_size_mm at the top level
     // We need to compare the matched brush structure with the enriched data
-    
+
     const matchedBrush = matchedData;
     const enrichedBrush = enrichedData;
 
     // Check fiber changes
     const matchedFiber = matchedBrush?.knot?.fiber;
     const enrichedFiber = enrichedBrush?.fiber;
-    
+
     if (enrichedFiber !== undefined && enrichedFiber !== matchedFiber) {
       return true;
     }
@@ -38,7 +38,7 @@ export const hasEnrichPhaseChanges = (
     // Check knot size changes
     const matchedKnotSize = matchedBrush?.knot?.knot_size_mm;
     const enrichedKnotSize = enrichedBrush?.knot_size_mm;
-    
+
     if (enrichedKnotSize !== undefined && enrichedKnotSize !== matchedKnotSize) {
       return true;
     }
@@ -78,26 +78,26 @@ export const getEnrichPhaseChanges = (
     // Check fiber changes
     const matchedFiber = matchedBrush?.knot?.fiber;
     const enrichedFiber = enrichedBrush?.fiber;
-    
+
     if (enrichedFiber !== undefined && enrichedFiber !== matchedFiber) {
       changes.push({
         field: 'fiber',
         originalValue: matchedFiber,
         enrichedValue: enrichedFiber,
-        displayName: 'Fiber'
+        displayName: 'Fiber',
       });
     }
 
     // Check knot size changes
     const matchedKnotSize = matchedBrush?.knot?.knot_size_mm;
     const enrichedKnotSize = enrichedBrush?.knot_size_mm;
-    
+
     if (enrichedKnotSize !== undefined && enrichedKnotSize !== matchedKnotSize) {
       changes.push({
         field: 'knot_size_mm',
         originalValue: matchedKnotSize,
         enrichedValue: enrichedKnotSize,
-        displayName: 'Knot Size (mm)'
+        displayName: 'Knot Size (mm)',
       });
     }
   } else {
@@ -107,13 +107,13 @@ export const getEnrichPhaseChanges = (
     fieldsToCheck.forEach(fieldName => {
       const original = matchedData[fieldName];
       const enriched = enrichedData[fieldName];
-      
+
       if (enriched !== undefined && enriched !== original) {
         changes.push({
           field: fieldName,
           originalValue: original,
           enrichedValue: enriched,
-          displayName: fieldName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+          displayName: fieldName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
         });
       }
     });
@@ -131,14 +131,16 @@ export const formatEnrichPhaseChanges = (
   field: string
 ): string => {
   const changes = getEnrichPhaseChanges(matchedData, enrichedData, field);
-  
+
   if (changes.length === 0) {
     return 'No changes detected';
   }
 
-  return changes.map(change => {
-    const displayOriginal = change.originalValue ?? 'None';
-    const displayEnriched = change.enrichedValue ?? 'None';
-    return `${change.displayName}: ${displayOriginal} → ${displayEnriched}`;
-  }).join('\n');
-}; 
+  return changes
+    .map(change => {
+      const displayOriginal = change.originalValue ?? 'None';
+      const displayEnriched = change.enrichedValue ?? 'None';
+      return `${change.displayName}: ${displayOriginal} → ${displayEnriched}`;
+    })
+    .join('\n');
+};

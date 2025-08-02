@@ -532,12 +532,12 @@ describe('MismatchAnalyzerDataTable', () => {
             knot: {
               brand: 'Zenith',
               model: '506U SE',
-              fiber: 'Boar',  // Matched as Boar
+              fiber: 'Boar', // Matched as Boar
               knot_size_mm: 27,
             },
           },
           enriched: {
-            fiber: 'Horse',  // Enriched as Horse (different!)
+            fiber: 'Horse', // Enriched as Horse (different!)
           },
           pattern: '506u',
           match_type: 'regex',
@@ -574,11 +574,11 @@ describe('MismatchAnalyzerDataTable', () => {
               brand: 'Turn-N-Shave',
               model: 'High Density Badger (H*)',
               fiber: 'Badger',
-              knot_size_mm: null,  // Matched as null
+              knot_size_mm: null, // Matched as null
             },
           },
           enriched: {
-            knot_size_mm: 27.0,  // Enriched as 27.0 (different!)
+            knot_size_mm: 27.0, // Enriched as 27.0 (different!)
           },
           pattern: 't[&n]s.*h\\d',
           match_type: 'regex',
@@ -615,11 +615,11 @@ describe('MismatchAnalyzerDataTable', () => {
               brand: 'Declaration Grooming',
               model: 'B9B',
               fiber: 'Badger',
-              knot_size_mm: 28,  // Matched has knot_size_mm: 28
+              knot_size_mm: 28, // Matched has knot_size_mm: 28
             },
           },
           enriched: {
-            fiber: 'Badger',  // Enriched only has fiber, no knot_size_mm
+            fiber: 'Badger', // Enriched only has fiber, no knot_size_mm
           },
           pattern: '(declaration|\\bdg\\b)?.*\\bb9b\\+?\\b',
           match_type: 'regex',

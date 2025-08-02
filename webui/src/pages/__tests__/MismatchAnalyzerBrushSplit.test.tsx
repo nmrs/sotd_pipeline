@@ -6,80 +6,80 @@ import { MismatchItem } from '@/services/api';
 
 // Mock the BrushSplitModal component
 jest.mock('@/components/forms/BrushSplitModal', () => {
-    return function MockBrushSplitModal({ isOpen, onClose, original, onSave }: any) {
-        if (!isOpen) return null;
+  return function MockBrushSplitModal({ isOpen, onClose, original, onSave }: any) {
+    if (!isOpen) return null;
 
-        return (
-            <div data-testid="brush-split-modal">
-                <div>Brush Split Modal</div>
-                <div>Original: {original}</div>
-                <button onClick={() => onSave({ handle: 'Test Handle', knot: 'Test Knot' })}>
-                    Save Split
-                </button>
-                <button onClick={onClose}>Close</button>
-            </div>
-        );
-    };
+    return (
+      <div data-testid='brush-split-modal'>
+        <div>Brush Split Modal</div>
+        <div>Original: {original}</div>
+        <button onClick={() => onSave({ handle: 'Test Handle', knot: 'Test Knot' })}>
+          Save Split
+        </button>
+        <button onClick={onClose}>Close</button>
+      </div>
+    );
+  };
 });
 
 describe('MismatchAnalyzerDataTable Brush Split Functionality', () => {
-    const mockBrushItem: MismatchItem = {
-        original: 'Declaration Grooming B2 Badger',
-        matched: {},
-        mismatch_type: 'no_match',
-        count: 1,
-        comment_ids: [],
-    };
+  const mockBrushItem: MismatchItem = {
+    original: 'Declaration Grooming B2 Badger',
+    matched: {},
+    mismatch_type: 'no_match',
+    count: 1,
+    comment_ids: [],
+  };
 
-    const mockOnBrushSplitClick = jest.fn();
+  const mockOnBrushSplitClick = jest.fn();
 
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    it('should show edit icon for brush field items', () => {
-        render(
-            <MismatchAnalyzerDataTable
-                data={[mockBrushItem]}
-                field="brush"
-                onBrushSplitClick={mockOnBrushSplitClick}
-            />
-        );
+  it('should show edit icon for brush field items', () => {
+    render(
+      <MismatchAnalyzerDataTable
+        data={[mockBrushItem]}
+        field='brush'
+        onBrushSplitClick={mockOnBrushSplitClick}
+      />
+    );
 
-        // Should show edit icon for brush items
-        expect(screen.getByText('✏️ Declaration Grooming B2 Badger')).toBeInTheDocument();
-    });
+    // Should show edit icon for brush items
+    expect(screen.getByText('✏️ Declaration Grooming B2 Badger')).toBeInTheDocument();
+  });
 
-    it('should not show edit icon for non-brush field items', () => {
-        render(
-            <MismatchAnalyzerDataTable
-                data={[mockBrushItem]}
-                field="razor"
-                onBrushSplitClick={mockOnBrushSplitClick}
-            />
-        );
+  it('should not show edit icon for non-brush field items', () => {
+    render(
+      <MismatchAnalyzerDataTable
+        data={[mockBrushItem]}
+        field='razor'
+        onBrushSplitClick={mockOnBrushSplitClick}
+      />
+    );
 
-        // Should not show edit icon for non-brush items
-        expect(screen.queryByText('✏️ Declaration Grooming B2 Badger')).not.toBeInTheDocument();
-        expect(screen.getByText('Declaration Grooming B2 Badger')).toBeInTheDocument();
-    });
+    // Should not show edit icon for non-brush items
+    expect(screen.queryByText('✏️ Declaration Grooming B2 Badger')).not.toBeInTheDocument();
+    expect(screen.getByText('Declaration Grooming B2 Badger')).toBeInTheDocument();
+  });
 
-    it('should call onBrushSplitClick when clicking on brush item', async () => {
-        const user = userEvent.setup();
+  it('should call onBrushSplitClick when clicking on brush item', async () => {
+    const user = userEvent.setup();
 
-        render(
-            <MismatchAnalyzerDataTable
-                data={[mockBrushItem]}
-                field="brush"
-                onBrushSplitClick={mockOnBrushSplitClick}
-            />
-        );
+    render(
+      <MismatchAnalyzerDataTable
+        data={[mockBrushItem]}
+        field='brush'
+        onBrushSplitClick={mockOnBrushSplitClick}
+      />
+    );
 
-        // Click on the brush item
-        const brushText = screen.getByText('✏️ Declaration Grooming B2 Badger');
-        await user.click(brushText);
+    // Click on the brush item
+    const brushText = screen.getByText('✏️ Declaration Grooming B2 Badger');
+    await user.click(brushText);
 
-        // Should call the click handler
-        expect(mockOnBrushSplitClick).toHaveBeenCalledWith(mockBrushItem);
-    });
-}); 
+    // Should call the click handler
+    expect(mockOnBrushSplitClick).toHaveBeenCalledWith(mockBrushItem);
+  });
+});

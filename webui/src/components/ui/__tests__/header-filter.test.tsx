@@ -4,163 +4,169 @@ import userEvent from '@testing-library/user-event';
 import HeaderFilter from '../header-filter';
 
 const mockOptions = [
-    { value: 'exact', label: 'Exact Match', count: 10 },
-    { value: 'regex', label: 'Regex Match', count: 5 },
-    { value: 'levenshtein', label: 'Levenshtein Distance', count: 3 },
-    { value: 'multiple', label: 'Multiple Patterns', count: 2 },
+  { value: 'exact', label: 'Exact Match', count: 10 },
+  { value: 'regex', label: 'Regex Match', count: 5 },
+  { value: 'levenshtein', label: 'Levenshtein Distance', count: 3 },
+  { value: 'multiple', label: 'Multiple Patterns', count: 2 },
 ];
 
 const defaultProps = {
-    title: 'Match Type',
-    options: mockOptions,
-    selectedValues: new Set<string>(),
-    onSelectionChange: jest.fn(),
+  title: 'Match Type',
+  options: mockOptions,
+  selectedValues: new Set<string>(),
+  onSelectionChange: jest.fn(),
 };
 
 describe('HeaderFilter', () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    test('renders filter button with title', () => {
-        render(<HeaderFilter {...defaultProps} onSort={() => { }} />);
+  test('renders filter button with title', () => {
+    render(<HeaderFilter {...defaultProps} onSort={() => {}} />);
 
-        expect(screen.getByText('Match Type')).toBeInTheDocument();
-    });
+    expect(screen.getByText('Match Type')).toBeInTheDocument();
+  });
 
-    test('shows dropdown when clicked', async () => {
-        const user = userEvent.setup();
-        render(<HeaderFilter {...defaultProps} onSort={() => { }} />);
+  test('shows dropdown when clicked', async () => {
+    const user = userEvent.setup();
+    render(<HeaderFilter {...defaultProps} onSort={() => {}} />);
 
-        const filterButton = screen.getByTitle('Filter Match Type');
-        await user.click(filterButton);
+    const filterButton = screen.getByTitle('Filter Match Type');
+    await user.click(filterButton);
 
-        expect(screen.getByText('Match Type Filter')).toBeInTheDocument();
-        expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument();
-    });
+    expect(screen.getByText('Match Type Filter')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument();
+  });
 
-    test('displays all options in dropdown', async () => {
-        const user = userEvent.setup();
-        render(<HeaderFilter {...defaultProps} onSort={() => { }} />);
+  test('displays all options in dropdown', async () => {
+    const user = userEvent.setup();
+    render(<HeaderFilter {...defaultProps} onSort={() => {}} />);
 
-        const filterButton = screen.getByTitle('Filter Match Type');
-        await user.click(filterButton);
+    const filterButton = screen.getByTitle('Filter Match Type');
+    await user.click(filterButton);
 
-        expect(screen.getByText('Exact Match')).toBeInTheDocument();
-        expect(screen.getByText('Regex Match')).toBeInTheDocument();
-        expect(screen.getByText('Levenshtein Distance')).toBeInTheDocument();
-        expect(screen.getByText('Multiple Patterns')).toBeInTheDocument();
-    });
+    expect(screen.getByText('Exact Match')).toBeInTheDocument();
+    expect(screen.getByText('Regex Match')).toBeInTheDocument();
+    expect(screen.getByText('Levenshtein Distance')).toBeInTheDocument();
+    expect(screen.getByText('Multiple Patterns')).toBeInTheDocument();
+  });
 
-    test('shows counts for each option', async () => {
-        const user = userEvent.setup();
-        render(<HeaderFilter {...defaultProps} onSort={() => { }} />);
+  test('shows counts for each option', async () => {
+    const user = userEvent.setup();
+    render(<HeaderFilter {...defaultProps} onSort={() => {}} />);
 
-        const filterButton = screen.getByTitle('Filter Match Type');
-        await user.click(filterButton);
+    const filterButton = screen.getByTitle('Filter Match Type');
+    await user.click(filterButton);
 
-        expect(screen.getByText('10')).toBeInTheDocument();
-        expect(screen.getByText('5')).toBeInTheDocument();
-        expect(screen.getByText('3')).toBeInTheDocument();
-        expect(screen.getByText('2')).toBeInTheDocument();
-    });
+    expect(screen.getByText('10')).toBeInTheDocument();
+    expect(screen.getByText('5')).toBeInTheDocument();
+    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(screen.getByText('2')).toBeInTheDocument();
+  });
 
-    test('filters options when searching', async () => {
-        const user = userEvent.setup();
-        render(<HeaderFilter {...defaultProps} />);
+  test('filters options when searching', async () => {
+    const user = userEvent.setup();
+    render(<HeaderFilter {...defaultProps} />);
 
-        const button = screen.getByTitle('Filter Match Type');
-        await user.click(button);
+    const button = screen.getByTitle('Filter Match Type');
+    await user.click(button);
 
-        const searchInput = screen.getByPlaceholderText('Search...');
-        await user.type(searchInput, 'exact');
+    const searchInput = screen.getByPlaceholderText('Search...');
+    await user.type(searchInput, 'exact');
 
-        // Check that the matching option is still visible
-        expect(screen.getByText('Exact Match')).toBeInTheDocument();
+    // Check that the matching option is still visible
+    expect(screen.getByText('Exact Match')).toBeInTheDocument();
 
-        // Note: The search filtering may not work as expected in tests due to Radix UI complexity
-        // The core functionality is tested in other tests
-    });
+    // Note: The search filtering may not work as expected in tests due to Radix UI complexity
+    // The core functionality is tested in other tests
+  });
 
-    test('calls onSelectionChange when option is selected', async () => {
-        const user = userEvent.setup();
-        const mockOnSelectionChange = jest.fn();
-        render(<HeaderFilter {...defaultProps} onSelectionChange={mockOnSelectionChange} onSort={() => { }} />);
+  test('calls onSelectionChange when option is selected', async () => {
+    const user = userEvent.setup();
+    const mockOnSelectionChange = jest.fn();
+    render(
+      <HeaderFilter {...defaultProps} onSelectionChange={mockOnSelectionChange} onSort={() => {}} />
+    );
 
-        const filterButton = screen.getByTitle('Filter Match Type');
-        await user.click(filterButton);
+    const filterButton = screen.getByTitle('Filter Match Type');
+    await user.click(filterButton);
 
-        // Find the exact match option by its text content
-        const exactMatchOption = screen.getByText('Exact Match');
-        await user.click(exactMatchOption);
+    // Find the exact match option by its text content
+    const exactMatchOption = screen.getByText('Exact Match');
+    await user.click(exactMatchOption);
 
-        expect(mockOnSelectionChange).toHaveBeenCalledWith(new Set(['exact']));
-    });
+    expect(mockOnSelectionChange).toHaveBeenCalledWith(new Set(['exact']));
+  });
 
-    test('shows selected count badge when items are selected', () => {
-        const selectedValues = new Set(['exact', 'regex']);
-        render(<HeaderFilter {...defaultProps} selectedValues={selectedValues} />);
+  test('shows selected count badge when items are selected', () => {
+    const selectedValues = new Set(['exact', 'regex']);
+    render(<HeaderFilter {...defaultProps} selectedValues={selectedValues} />);
 
-        // The badge should show the count of selected items
-        const badge = screen.getByText('2');
-        expect(badge).toBeInTheDocument();
-    });
+    // The badge should show the count of selected items
+    const badge = screen.getByText('2');
+    expect(badge).toBeInTheDocument();
+  });
 
-    test('clears all selections when clear button is clicked', async () => {
-        const user = userEvent.setup();
-        const selectedValues = new Set(['exact', 'regex']);
-        const mockOnSelectionChange = jest.fn();
-        render(
-            <HeaderFilter
-                {...defaultProps}
-                selectedValues={selectedValues}
-                onSelectionChange={mockOnSelectionChange}
-                onSort={() => { }}
-            />
-        );
+  test('clears all selections when clear button is clicked', async () => {
+    const user = userEvent.setup();
+    const selectedValues = new Set(['exact', 'regex']);
+    const mockOnSelectionChange = jest.fn();
+    render(
+      <HeaderFilter
+        {...defaultProps}
+        selectedValues={selectedValues}
+        onSelectionChange={mockOnSelectionChange}
+        onSort={() => {}}
+      />
+    );
 
-        const filterButton = screen.getByTitle('Filter Match Type');
-        await user.click(filterButton);
+    const filterButton = screen.getByTitle('Filter Match Type');
+    await user.click(filterButton);
 
-        const clearButton = screen.getByRole('button', { name: /clear/i });
-        await user.click(clearButton);
+    const clearButton = screen.getByRole('button', { name: /clear/i });
+    await user.click(clearButton);
 
-        expect(mockOnSelectionChange).toHaveBeenCalledWith(new Set());
-    });
+    expect(mockOnSelectionChange).toHaveBeenCalledWith(new Set());
+  });
 
-    test('selects all options when "Select All" is clicked', async () => {
-        const user = userEvent.setup();
-        const mockOnSelectionChange = jest.fn();
-        render(<HeaderFilter {...defaultProps} onSelectionChange={mockOnSelectionChange} onSort={() => { }} />);
+  test('selects all options when "Select All" is clicked', async () => {
+    const user = userEvent.setup();
+    const mockOnSelectionChange = jest.fn();
+    render(
+      <HeaderFilter {...defaultProps} onSelectionChange={mockOnSelectionChange} onSort={() => {}} />
+    );
 
-        const filterButton = screen.getByTitle('Filter Match Type');
-        await user.click(filterButton);
+    const filterButton = screen.getByTitle('Filter Match Type');
+    await user.click(filterButton);
 
-        const selectAllButton = screen.getByRole('button', { name: /select all/i });
-        await user.click(selectAllButton);
+    const selectAllButton = screen.getByRole('button', { name: /select all/i });
+    await user.click(selectAllButton);
 
-        expect(mockOnSelectionChange).toHaveBeenCalledWith(
-            new Set(['exact', 'regex', 'levenshtein', 'multiple'])
-        );
-    });
+    expect(mockOnSelectionChange).toHaveBeenCalledWith(
+      new Set(['exact', 'regex', 'levenshtein', 'multiple'])
+    );
+  });
 
-    test('selects only visible options when "Select Visible" is clicked', async () => {
-        const user = userEvent.setup();
-        const mockOnSelectionChange = jest.fn();
-        render(<HeaderFilter {...defaultProps} onSelectionChange={mockOnSelectionChange} onSort={() => { }} />);
+  test('selects only visible options when "Select Visible" is clicked', async () => {
+    const user = userEvent.setup();
+    const mockOnSelectionChange = jest.fn();
+    render(
+      <HeaderFilter {...defaultProps} onSelectionChange={mockOnSelectionChange} onSort={() => {}} />
+    );
 
-        const filterButton = screen.getByTitle('Filter Match Type');
-        await user.click(filterButton);
+    const filterButton = screen.getByTitle('Filter Match Type');
+    await user.click(filterButton);
 
-        // Search to filter options
-        const searchInput = screen.getByPlaceholderText('Search...');
-        await user.type(searchInput, 'exact');
+    // Search to filter options
+    const searchInput = screen.getByPlaceholderText('Search...');
+    await user.type(searchInput, 'exact');
 
-        const selectVisibleButton = screen.getByRole('button', { name: /select visible/i });
-        await user.click(selectVisibleButton);
+    const selectVisibleButton = screen.getByRole('button', { name: /select visible/i });
+    await user.click(selectVisibleButton);
 
-        // Note: The "Select Visible" functionality may not work as expected in tests due to Radix UI complexity
-        // The core selection functionality is tested in other tests
-        expect(mockOnSelectionChange).toHaveBeenCalled();
-    });
-}); 
+    // Note: The "Select Visible" functionality may not work as expected in tests due to Radix UI complexity
+    // The core selection functionality is tested in other tests
+    expect(mockOnSelectionChange).toHaveBeenCalled();
+  });
+});

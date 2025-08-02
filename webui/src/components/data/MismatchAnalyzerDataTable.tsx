@@ -127,6 +127,8 @@ interface MismatchAnalyzerDataTableProps {
   onVisibleRowsChange?: (visibleRows: MismatchItem[]) => void;
   matched_data_map?: Record<string, Record<string, any>>;
   onBrushSplitClick?: (item: MismatchItem) => void;
+  activeRowIndex?: number;
+  keyboardNavigationEnabled?: boolean;
 }
 
 const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
@@ -140,6 +142,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
   onVisibleRowsChange,
   matched_data_map: _matched_data_map, // Prefix with underscore to indicate intentionally unused
   onBrushSplitClick,
+  activeRowIndex = -1,
+  keyboardNavigationEnabled = false,
 }) => {
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -342,7 +346,63 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     return String(matched);
   };
 
+  const handleVisibleRowsChange = useCallback(
+    (rows: MismatchItem[]) => {
+      onVisibleRowsChange?.(rows);
+    },
+    [onVisibleRowsChange]
+  );
 
+  // Handle row selection changes from DataTable
+  const handleSelectionChange = useCallback(
+    (selectedRows: MismatchItem[]) => {
+      if (!onItemSelection) return;
+
+      // Convert selected rows to item keys
+      const selectedKeys = new Set(
+        selectedRows.map(item => `${field}:${item.original.toLowerCase()}`)
+      );
+
+      // Update all items to match the new selection state
+      filteredData.forEach(item => {
+        const itemKey = `${field}:${item.original.toLowerCase()}`;
+        const shouldBeSelected = selectedKeys.has(itemKey);
+        const isCurrentlySelected = selectedItems.has(itemKey);
+
+        if (shouldBeSelected !== isCurrentlySelected) {
+          onItemSelection(itemKey, shouldBeSelected);
+        }
+      });
+    },
+    [onItemSelection, field, filteredData, selectedItems]
+  );
+
+  // Create initial row selection state for DataTable
+  const initialRowSelection = useMemo(() => {
+    const selection: Record<string, boolean> = {};
+    filteredData.forEach((item, index) => {
+      const itemKey = `${field}:${item.original.toLowerCase()}`;
+      if (selectedItems.has(itemKey)) {
+        selection[index.toString()] = true;
+      }
+    });
+    return selection;
+  }, [filteredData, field, selectedItems]);
+
+  // Create external row selection state for DataTable
+  const externalRowSelection = useMemo(() => {
+    const selection: Record<string, boolean> = {};
+    filteredData.forEach((item, index) => {
+      const itemKey = `${field}:${item.original.toLowerCase()}`;
+      if (selectedItems.has(itemKey)) {
+        selection[index.toString()] = true;
+      }
+    });
+    return selection;
+  }, [filteredData, field, selectedItems]);
+
+  // Stabilize the data to prevent unnecessary re-renders
+  const stableData = useMemo(() => filteredData, [filteredData]);
 
   const columns = useMemo(() => {
     const baseColumns: ColumnDef<MismatchItem>[] = [
@@ -365,6 +425,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
               // Since backend groups by case-insensitive original text, use that as the key
               const itemKey = `${field}:${item.original.toLowerCase()}`;
               const isSelected = selectedItems.has(itemKey);
+
+
 
               return (
                 <input
@@ -446,7 +508,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
               <div
                 className='text-sm text-gray-900 max-w-xs whitespace-pre-wrap cursor-pointer hover:bg-blue-50 hover:text-blue-700 p-1 rounded border border-transparent hover:border-blue-200 transition-colors'
                 onClick={() => onBrushSplitClick(item)}
-                title="Click to edit brush split"
+                title='Click to edit brush split'
               >
                 ✏️ {item.original}
               </div>
@@ -529,11 +591,11 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         accessorKey: 'match_type',
         header: () => (
           <HeaderFilter
-            title="Match Type"
+            title='Match Type'
             options={matchTypeOptions}
             selectedValues={matchTypeFilter}
             onSelectionChange={setMatchTypeFilter}
-            searchPlaceholder="Search match types..."
+            searchPlaceholder='Search match types...'
             onSort={() => {
               const currentSort = sorting.find(s => s.id === 'match_type');
               const newDirection = !currentSort ? 'asc' : currentSort.desc ? null : 'desc';
@@ -568,11 +630,11 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         },
         header: () => (
           <HeaderFilter
-            title="Brush Type"
+            title='Brush Type'
             options={brushTypeOptions}
             selectedValues={brushTypeFilter}
             onSelectionChange={setBrushTypeFilter}
-            searchPlaceholder="Search brush types..."
+            searchPlaceholder='Search brush types...'
             onSort={() => {
               const currentSort = sorting.find(s => s.id === 'brush_type');
               const newDirection = !currentSort ? 'asc' : currentSort.desc ? null : 'desc';
@@ -764,23 +826,36 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     );
 
     return baseColumns;
-  }, [onCommentClick, commentLoading, selectedItems, onItemSelection, isItemConfirmed, field, onBrushSplitClick]);
+  }, [
+    onCommentClick,
+    commentLoading,
+    selectedItems,
+    onItemSelection,
+    isItemConfirmed,
+    field,
+    onBrushSplitClick,
+  ]);
 
   return (
     <div className='space-y-4'>
       <DataTable
-        key={`mismatch-table-${filteredData.length}-${matchTypeFilter.size}-${brushTypeFilter.size}-${sorting.length}`} // Force re-render when data, filters, or sorting change
         columns={columns}
-        data={filteredData}
-        showPagination={true}
+        data={stableData}
+        showPagination={false}
         resizable={true}
         sortable={true}
         showColumnVisibility={true}
         searchKey='original'
-        initialPageSize={50}
-        onVisibleRowsChange={onVisibleRowsChange}
+        onVisibleRowsChange={handleVisibleRowsChange}
         sorting={sorting}
         onSortingChange={setSorting}
+        enableRowClickSelection={true}
+        onSelectionChange={handleSelectionChange}
+        initialRowSelection={initialRowSelection}
+        externalRowSelection={externalRowSelection}
+        activeRowIndex={activeRowIndex}
+        keyboardNavigationEnabled={keyboardNavigationEnabled}
+        field={field}
       />
 
       {/* Enrich Phase Modal */}
