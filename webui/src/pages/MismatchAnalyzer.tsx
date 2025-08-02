@@ -537,12 +537,8 @@ const MismatchAnalyzer: React.FC = () => {
         const isContentEditable = activeElement.getAttribute('contenteditable') === 'true';
 
         if (isInput || isContentEditable) {
-          // For space bar specifically, prevent it from reaching input fields
-          if (event.key === ' ') {
-            event.preventDefault();
-            event.stopPropagation();
-          }
-          return; // Let the input field handle other events
+          // If we're in an input field, let it handle all events including space bar
+          return; // Let the input field handle all events
         }
       }
 
