@@ -634,7 +634,7 @@ const MismatchAnalyzer: React.FC = () => {
                     You are viewing data from the <strong>enrich phase</strong>, which shows the final results after all refinements have been applied.
                   </p>
                   <p className='mb-2'>
-                    <strong>What this means:</strong> Some items that appear as "mismatches" in the match phase are actually correct matches that get refined during the enrich phase. 
+                    <strong>What this means:</strong> Some items that appear as "mismatches" in the match phase are actually correct matches that get refined during the enrich phase.
                     Hover over the "Matched" column to see enrich-phase adjustments.
                   </p>
                   <p>
@@ -713,8 +713,8 @@ const MismatchAnalyzer: React.FC = () => {
                 Mismatches
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getDisplayModeCounts().mismatches}
@@ -733,8 +733,8 @@ const MismatchAnalyzer: React.FC = () => {
                 Unconfirmed
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'unconfirmed'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getDisplayModeCounts().unconfirmed}
@@ -771,8 +771,8 @@ const MismatchAnalyzer: React.FC = () => {
                 Intentionally Unmatched
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'intentionally_unmatched'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
+                    ? 'bg-white text-blue-600'
+                    : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getDisplayModeCounts().intentionally_unmatched}
@@ -793,8 +793,8 @@ const MismatchAnalyzer: React.FC = () => {
                   Split Brushes
                   <span
                     className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'split_brushes'
-                        ? 'bg-white text-blue-600'
-                        : 'bg-gray-100 text-gray-700'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
                       }`}
                   >
                     {getDisplayModeCounts().split_brushes}
@@ -816,8 +816,8 @@ const MismatchAnalyzer: React.FC = () => {
                   Complete Brushes
                   <span
                     className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'complete_brushes'
-                        ? 'bg-white text-blue-600'
-                        : 'bg-gray-100 text-gray-700'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
                       }`}
                   >
                     {getDisplayModeCounts().complete_brushes}
