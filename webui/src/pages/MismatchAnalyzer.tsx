@@ -26,6 +26,8 @@ import LoadingSpinner from '@/components/layout/LoadingSpinner';
 import ErrorDisplay from '@/components/feedback/ErrorDisplay';
 import MonthSelector from '@/components/forms/MonthSelector';
 import CommentModal from '@/components/domain/CommentModal';
+import BrushSplitModal from '@/components/forms/BrushSplitModal';
+import { BrushSplit } from '@/types/brushSplit';
 
 const MismatchAnalyzer: React.FC = () => {
   const [selectedField, setSelectedField] = useState<string>('razor');
@@ -62,6 +64,11 @@ const MismatchAnalyzer: React.FC = () => {
   // Reason for marking as unmatched
   const [reasonText, setReasonText] = useState<string>('');
   const [updatingFiltered, setUpdatingFiltered] = useState(false);
+
+  // Brush split modal state
+  const [brushSplitModalOpen, setBrushSplitModalOpen] = useState(false);
+  const [selectedBrushItem, setSelectedBrushItem] = useState<MismatchAnalysisResult['mismatch_items'][0] | null>(null);
+  const [savingBrushSplit, setSavingBrushSplit] = useState(false);
 
   // Clear selections on component mount to ensure clean state
   useEffect(() => {
@@ -183,6 +190,37 @@ const MismatchAnalyzer: React.FC = () => {
     setAllComments([]);
     setCurrentCommentIndex(0);
     setRemainingCommentIds([]);
+  };
+
+  // Brush split handlers
+  const handleBrushSplitClick = (item: MismatchAnalysisResult['mismatch_items'][0]) => {
+    setSelectedBrushItem(item);
+    setBrushSplitModalOpen(true);
+  };
+
+  const handleBrushSplitClose = () => {
+    setBrushSplitModalOpen(false);
+    setSelectedBrushItem(null);
+  };
+
+  const handleBrushSplitSave = async (split: BrushSplit) => {
+    if (!selectedBrushItem) return;
+
+    try {
+      setSavingBrushSplit(true);
+
+      // TODO: Add API call to save brush split
+      // This will be implemented in Step 3
+      console.log('Saving brush split:', split);
+
+      // Close modal after successful save
+      handleBrushSplitClose();
+    } catch (error) {
+      console.error('Failed to save brush split:', error);
+      // TODO: Add error handling
+    } finally {
+      setSavingBrushSplit(false);
+    }
   };
 
   const handleMonthChange = (months: string[]) => {
@@ -576,6 +614,38 @@ const MismatchAnalyzer: React.FC = () => {
           </div>
         )}
 
+        {/* Enriched Data Info Panel */}
+        {useEnrichedData && (
+          <div className='bg-green-50 border border-green-200 rounded-lg p-4 mb-4'>
+            <div className='flex items-start'>
+              <div className='flex-shrink-0'>
+                <svg className='h-5 w-5 text-green-400' fill='currentColor' viewBox='0 0 20 20'>
+                  <path
+                    fillRule='evenodd'
+                    d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z'
+                    clipRule='evenodd'
+                  />
+                </svg>
+              </div>
+              <div className='ml-3'>
+                <h3 className='text-sm font-medium text-green-800'>Enriched Data Mode Active</h3>
+                <div className='mt-2 text-sm text-green-700'>
+                  <p className='mb-2'>
+                    You are viewing data from the <strong>enrich phase</strong>, which shows the final results after all refinements have been applied.
+                  </p>
+                  <p className='mb-2'>
+                    <strong>What this means:</strong> Some items that appear as "mismatches" in the match phase are actually correct matches that get refined during the enrich phase. 
+                    Hover over the "Matched" column to see enrich-phase adjustments.
+                  </p>
+                  <p>
+                    <strong>Tip:</strong> This mode helps distinguish between truly problematic matches and expected enrich-phase corrections.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className='flex flex-wrap gap-4 items-end mb-4'>
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-1'>Field</label>
@@ -624,9 +694,8 @@ const MismatchAnalyzer: React.FC = () => {
                 <Eye className='h-4 w-4' />
                 All
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().all}
                 </span>
@@ -643,11 +712,10 @@ const MismatchAnalyzer: React.FC = () => {
                 <EyeOff className='h-4 w-4' />
                 Mismatches
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'mismatches'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
                       ? 'bg-white text-blue-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().mismatches}
                 </span>
@@ -664,11 +732,10 @@ const MismatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Unconfirmed
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'unconfirmed'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'unconfirmed'
                       ? 'bg-white text-blue-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().unconfirmed}
                 </span>
@@ -685,9 +752,8 @@ const MismatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Regex
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'regex' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {getDisplayModeCounts().regex}
                 </span>
@@ -704,11 +770,10 @@ const MismatchAnalyzer: React.FC = () => {
                 <Filter className='h-4 w-4' />
                 Intentionally Unmatched
                 <span
-                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                    displayMode === 'intentionally_unmatched'
+                  className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'intentionally_unmatched'
                       ? 'bg-white text-blue-600'
                       : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getDisplayModeCounts().intentionally_unmatched}
                 </span>
@@ -727,11 +792,10 @@ const MismatchAnalyzer: React.FC = () => {
                   <Filter className='h-4 w-4' />
                   Split Brushes
                   <span
-                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                      displayMode === 'split_brushes'
+                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'split_brushes'
                         ? 'bg-white text-blue-600'
                         : 'bg-gray-100 text-gray-700'
-                    }`}
+                      }`}
                   >
                     {getDisplayModeCounts().split_brushes}
                   </span>
@@ -751,11 +815,10 @@ const MismatchAnalyzer: React.FC = () => {
                   <Filter className='h-4 w-4' />
                   Complete Brushes
                   <span
-                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
-                      displayMode === 'complete_brushes'
+                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'complete_brushes'
                         ? 'bg-white text-blue-600'
                         : 'bg-gray-100 text-gray-700'
-                    }`}
+                      }`}
                   >
                     {getDisplayModeCounts().complete_brushes}
                   </span>
@@ -777,6 +840,29 @@ const MismatchAnalyzer: React.FC = () => {
             <label htmlFor='useEnrichedData' className='text-sm text-gray-700'>
               Use Enriched Data
             </label>
+            <div className='relative group'>
+              <button
+                type='button'
+                className='ml-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600'
+                title='Learn about Match vs Enrich phases'
+              >
+                <svg className='h-4 w-4' fill='currentColor' viewBox='0 0 20 20'>
+                  <path
+                    fillRule='evenodd'
+                    d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z'
+                    clipRule='evenodd'
+                  />
+                </svg>
+              </button>
+              <div className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm max-w-xs'>
+                <div className='font-medium mb-1'>Match vs Enrich Phases:</div>
+                <div className='space-y-1'>
+                  <div><strong>Match Phase:</strong> Initial product identification</div>
+                  <div><strong>Enrich Phase:</strong> Refines matches with additional data</div>
+                  <div className='text-gray-600'>Some "mismatches" are actually correct enrich-phase adjustments</div>
+                </div>
+              </div>
+            </div>
           </div>
           <button
             onClick={handleAnalyze}
@@ -906,6 +992,7 @@ const MismatchAnalyzer: React.FC = () => {
                 isItemConfirmed={isItemConfirmed}
                 onVisibleRowsChange={handleVisibleRowsChange}
                 matched_data_map={results?.matched_data_map}
+                onBrushSplitClick={handleBrushSplitClick}
               />
             ) : (
               <div className='text-center py-8'>
@@ -941,6 +1028,17 @@ const MismatchAnalyzer: React.FC = () => {
           currentIndex={currentCommentIndex}
           onNavigate={handleCommentNavigation}
           remainingCommentIds={remainingCommentIds}
+        />
+      )}
+
+      {/* Brush Split Modal */}
+      {selectedBrushItem && (
+        <BrushSplitModal
+          isOpen={brushSplitModalOpen}
+          onClose={handleBrushSplitClose}
+          original={selectedBrushItem.original}
+          onSave={handleBrushSplitSave}
+          loading={savingBrushSplit}
         />
       )}
     </div>
