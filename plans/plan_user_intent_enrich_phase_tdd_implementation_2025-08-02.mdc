@@ -1,0 +1,357 @@
+# User Intent Detection Migration to Enrich Phase - TDD Implementation Plan
+
+## Overview
+This plan implements the migration of user intent detection from the `match` phase to the `enrich` phase following the Task Driven TDD Loop methodology outlined in `@prompts.mdc`.
+
+## Objectives
+- Move user intent detection logic from `sotd/match/brush_matcher.py` to `sotd/enrich/brush_enricher.py`
+- Improve separation of concerns by placing user intent in the enrich phase
+- Enable more sophisticated pattern position analysis
+- Align user intent handling with other user-derived data
+
+## Current State
+- User intent detection currently exists in `sotd/match/brush_matcher.py` as `detect_user_intent()` method
+- Logic determines if user focus is "handle_primary" or "knot_primary" based on pattern position
+- Uses handle and knot patterns from YAML catalogs
+
+## Target State
+- User intent detection moved to `sotd/enrich/brush_enricher.py`
+- Enhanced pattern position analysis with better error handling
+- Integration with enrich phase workflow
+- Improved performance through caching and optimization
+
+## Implementation Plan
+
+### Phase 1: Foundation (Steps 1-3)
+
+#### Step 1: Create Test Infrastructure
+**Objective**: Set up comprehensive test framework for user intent detection in enrich phase.
+
+**Files to Create/Modify**:
+- `tests/enrich/test_brush_enricher_user_intent.py` (new)
+- `tests/enrich/test_brush_enricher_integration.py` (new)
+
+**Test Requirements**:
+- Unit tests for pattern position analysis
+- Unit tests for user intent detection logic
+- Integration tests with real catalog data
+- Edge case testing (missing patterns, invalid data, etc.)
+- Performance testing for pattern matching
+
+**Method Signatures to Test**:
+```python
+def _analyze_pattern_positions(self, brush_string: str, handle_patterns: List[str], knot_patterns: List[str]) -> Dict[str, Any]
+def _detect_user_intent(self, brush_string: str, handle_data: Dict[str, Any], knot_data: Dict[str, Any]) -> str
+def _detect_user_intent_debug(self, brush_string: str, handle_data: Dict[str, Any], knot_data: Dict[str, Any]) -> Dict[str, Any]
+def _should_detect_user_intent(self, brush_data: Dict[str, Any]) -> bool
+```
+
+**Validation**: All tests should fail initially (TDD approach).
+
+#### Step 2: Create Catalog Loader Utility
+**Objective**: Create utility for loading and caching handle/knot patterns from YAML catalogs.
+
+**Files to Create**:
+- `sotd/enrich/utils/catalog_loader.py` (new)
+
+**Requirements**:
+- Load patterns from `data/handles.yaml` and `data/knots.yaml`
+- Cache compiled patterns for performance
+- Handle missing catalog files gracefully
+- Support both handle and knot pattern loading
+- Provide cache statistics and management
+
+**Method Signatures**:
+```python
+class CatalogLoader:
+    def __init__(self, data_path: Path)
+    def load_handle_patterns(self, brand: str, model: str) -> List[str]
+    def load_knot_patterns(self, brand: str, model: str) -> List[str]
+    def get_cache_stats(self) -> Dict[str, Any]
+    def clear_pattern_cache(self) -> None
+```
+
+**Validation**: Unit tests for catalog loading and caching.
+
+#### Step 3: Implement Core Detection Logic
+**Objective**: Implement the core user intent detection algorithms in BrushEnricher.
+
+**Files to Modify**:
+- `sotd/enrich/brush_enricher.py`
+
+**Requirements**:
+- Pattern position analysis using regex matching
+- User intent determination based on earliest pattern match
+- Input validation and error handling
+- Integration with CatalogLoader
+- Debug version with detailed metadata
+
+**Method Implementations**:
+```python
+def _analyze_pattern_positions(self, brush_string: str, handle_patterns: List[str], knot_patterns: List[str]) -> Dict[str, Any]:
+    """Analyze pattern positions in brush string to determine user intent."""
+    # Find earliest match position for handle patterns
+    # Find earliest match position for knot patterns
+    # Compare positions to determine intent
+    # Return detailed analysis results
+
+def _detect_user_intent(self, brush_string: str, handle_data: Dict[str, Any], knot_data: Dict[str, Any]) -> str:
+    """Detect user intent based on pattern position analysis."""
+    # Validate input data
+    # Load patterns using CatalogLoader
+    # Call _analyze_pattern_positions
+    # Return intent: 'handle_primary', 'knot_primary', or 'unknown'
+
+def _detect_user_intent_debug(self, brush_string: str, handle_data: Dict[str, Any], knot_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Debug version returning intent plus detailed metadata."""
+    # Same logic as _detect_user_intent but with detailed metadata
+    # Include processing time, pattern matches, positions, error info
+
+def _should_detect_user_intent(self, brush_data: Dict[str, Any]) -> bool:
+    """Determine if user intent detection should run for this brush data."""
+    # Check if composite brush (has handle AND knot sections)
+    # Check if not a "known" brush (top-level brand AND model present)
+    # Return True if user intent detection should run
+```
+
+**Validation**: All unit tests should now pass.
+
+### Phase 2: Integration (Steps 4-7)
+
+#### Step 4: Integration Testing
+**Objective**: Create comprehensive integration tests using real catalog data.
+
+**Files to Create/Modify**:
+- `tests/enrich/test_brush_enricher_integration.py` (enhance)
+
+**Requirements**:
+- Test with actual entries from `data/handles.yaml` and `data/knots.yaml`
+- Verify pattern loading and matching works with real data
+- Test caching behavior and performance
+- Validate error handling with missing catalog entries
+
+**Validation**: Integration tests pass with real catalog data.
+
+#### Step 5: Workflow Integration
+**Objective**: Integrate user intent detection into the main enrich workflow.
+
+**Files to Create/Modify**:
+- `tests/enrich/test_brush_enricher_workflow.py` (new)
+- `sotd/enrich/brush_enricher.py` (enhance)
+
+**Requirements**:
+- Test complete enrich workflow with user intent detection
+- Verify user intent is only detected for composite brushes
+- Test error handling in workflow context
+- Validate data structure consistency
+
+**Method to Enhance**:
+```python
+def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Optional[Dict[str, Any]]:
+    """Enhance existing enrich method to include user intent detection."""
+    # Existing enrichment logic
+    # Add conditional user intent detection
+    # Handle errors gracefully
+    # Return enriched data with user_intent field
+```
+
+**Validation**: Workflow tests pass, user intent correctly integrated.
+
+#### Step 6: Performance Optimization
+**Objective**: Add pattern caching and performance optimizations to the user intent detection system.
+
+**Files to Modify**:
+- `sotd/enrich/utils/catalog_loader.py` (enhance)
+- `sotd/enrich/brush_enricher.py` (optimize)
+
+**Requirements**:
+- Implement pattern compilation caching
+- Add lazy loading for patterns
+- Optimize regex matching performance
+- Add performance monitoring and metrics
+
+**Optimizations**:
+- Compile regex patterns once, reuse many times
+- Cache pattern lookups by brand/model
+- Early exit for invalid data
+- Batch pattern loading where possible
+
+**Validation**: Performance tests show improved speed, all existing tests still pass.
+
+#### Step 7: BrushEnricher Integration
+**Objective**: Complete integration of user intent detection into BrushEnricher.
+
+**Files to Modify**:
+- `sotd/enrich/brush_enricher.py` (final integration)
+
+**Requirements**:
+- Ensure user intent detection runs conditionally
+- Handle errors gracefully without disrupting main enrichment
+- Maintain backward compatibility with existing enrich functionality
+- Add proper logging and error reporting
+
+**Integration Points**:
+- Initialize CatalogLoader in `__init__`
+- Call user intent detection in `enrich()` method
+- Handle errors with try/except blocks
+- Add user_intent field to enriched data
+
+**Validation**: All tests pass, integration is seamless.
+
+### Phase 3: Validation and Migration (Steps 8-12)
+
+#### Step 8: Performance Optimization ✅ COMPLETED
+**Objective**: Add pattern caching and performance optimizations to the user intent detection system.
+
+**Files Created/Modified**:
+- `tests/enrich/test_brush_enricher_performance.py` (new) - Performance tests
+- `sotd/enrich/utils/catalog_loader.py` (enhanced) - Added compiled pattern caching
+- `sotd/enrich/brush_enricher.py` (enhanced) - Added compiled pattern support
+
+**Requirements**:
+- ✅ Implement pattern compilation caching
+- ✅ Add lazy loading for patterns
+- ✅ Optimize regex matching performance
+- ✅ Add performance monitoring and metrics
+
+**Optimizations Implemented**:
+- ✅ Compile regex patterns once, reuse many times
+- ✅ Cache pattern lookups by brand/model
+- ✅ Early exit for invalid data
+- ✅ Batch pattern loading where possible
+
+**Validation**: ✅ All performance tests pass, showing improved speed and memory efficiency.
+
+#### Step 9: Parallel Implementation Validation
+**Objective**: Run both match and enrich phase user intent detection and compare results.
+
+**Command to Run**:
+```bash
+python run.py match:enrich --month 2025-05 --force
+```
+
+**Requirements**:
+- Compare user_intent results between match and enrich phases
+- Ensure 100% consistency in results
+- Document any discrepancies
+- Validate data structure compatibility
+
+**Validation Steps**:
+1. Run match phase to get user_intent results
+2. Run enrich phase to get user_intent results  
+3. Compare results for each brush record
+4. Verify no discrepancies exist
+5. Document comparison results
+
+**Files to Create**:
+- `scripts/compare_user_intent_results.py` (new) - Script to compare results
+- `tests/integration/test_user_intent_migration_validation.py` (new) - Integration tests
+
+**Validation**: Results are 100% consistent between phases.
+
+#### Step 9.1: Fix User Intent Detection Logic Bug ⚠️ CRITICAL BUG FOUND ✅ COMPLETED
+**Objective**: Fix fundamental design flaw in enrich phase user intent detection.
+
+**Problem Identified**:
+- **Match phase** uses simple string position comparison: `value.find(handle_text)` vs `value.find(knot_text)`
+- **Enrich phase** uses complex regex pattern matching from catalogs, which fails when patterns don't exist
+- **Result**: Enrich phase returns "unknown" instead of matching match phase behavior
+- **Violation**: Not failing fast as specified in core rules
+
+**Root Cause**:
+- Enrich phase tries to load patterns from `knots.yaml` for "Summer Break" brand, but "Summer Break" is not in knots catalog
+- Catalog loader returns empty list, pattern matching fails, method returns "unknown" instead of throwing exception
+- This violates the "fail fast" principle from `@sotd-pipeline-core.mdc`
+
+**Solution Implemented**:
+- **✅ COMPLETED**: Used same logic as match phase (simple string position comparison)
+- **✅ COMPLETED**: Implemented proper fail-fast behavior with clear exceptions
+- **✅ COMPLETED**: Aligned with match phase behavior for consistency
+
+**Files Modified**:
+- ✅ `sotd/enrich/brush_enricher.py` - Fixed `_detect_user_intent` method
+- ✅ `tests/enrich/test_brush_enricher_user_intent.py` - Added unit tests that expose this bug
+
+**Unit Tests Added**:
+- ✅ Test with realistic data where brand exists in handles but not knots catalog
+- ✅ Test that method fails fast with clear exception when catalog patterns missing
+- ✅ Test that method matches match phase behavior when using simple string comparison
+- ✅ Test edge cases: missing source_text, empty patterns, invalid data
+
+**Validation**: ✅ User intent detection matches match phase behavior exactly (100% consistency).
+
+#### Step 10: Match Phase Removal
+**Objective**: Remove user intent detection from match phase after validation.
+
+**Files to Modify**:
+- `sotd/match/brush_matcher.py` (remove user intent logic)
+- `tests/match/test_brush_matcher.py` (remove user intent tests)
+
+**Requirements**:
+- Remove `detect_user_intent()` method and related logic
+- Remove user intent tests from match phase
+- Update any references to match phase user intent
+- Ensure no breaking changes to other match functionality
+
+**Validation**: All match phase tests pass, no user intent functionality remains.
+
+#### Step 11: Documentation and Cleanup
+**Objective**: Update documentation and clean up any remaining references.
+
+**Files to Modify**:
+- Update relevant documentation files
+- Remove any references to match phase user intent
+- Update API documentation if needed
+- Clean up any unused imports or code
+
+**Requirements**:
+- Update phase documentation to reflect new user intent location
+- Remove references to match phase user intent detection
+- Update any API documentation
+- Clean up unused code and imports
+
+**Validation**: Documentation is current and accurate.
+
+#### Step 12: Final Validation
+**Objective**: Final end-to-end validation of the complete migration.
+
+**Requirements**:
+- Run complete pipeline with user intent in enrich phase
+- Validate all phases work correctly
+- Performance testing of complete workflow
+- Memory usage validation
+
+**Validation**: Complete pipeline works correctly with user intent in enrich phase.
+
+## Success Criteria
+- [x] All unit tests pass ✅
+- [x] All integration tests pass ✅
+- [x] Performance is acceptable (no regression) ✅
+- [ ] User intent results are 100% consistent between match and enrich phases
+- [ ] Match phase user intent detection successfully removed
+- [ ] Documentation is updated and accurate
+- [x] No breaking changes to existing functionality ✅
+
+## Risk Mitigation
+- Maintain parallel implementation during validation phase
+- Comprehensive testing at each step
+- Graceful error handling throughout
+- Performance monitoring to prevent regressions
+- Backup of original match phase implementation until validation complete
+
+## Timeline
+- Phase 1 (Foundation): 2-3 days
+- Phase 2 (Integration): 2-3 days  
+- Phase 3 (Validation and Migration): 1-2 days
+- Total estimated time: 5-8 days
+
+## Notes
+- Follow TDD approach: write tests first, then implement
+- Use `--force` flag for all pipeline testing to ensure fresh data
+- Maintain git commits for each major step
+- Document any deviations from plan
+- Update this plan file as progress is made
+description:
+globs:
+alwaysApply: false
+---

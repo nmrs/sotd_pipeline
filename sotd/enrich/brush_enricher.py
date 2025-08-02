@@ -1,12 +1,26 @@
-from typing import Optional
+import re
+import time
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from sotd.enrich.enricher import BaseEnricher
+from sotd.enrich.utils.catalog_loader import CatalogLoader
 from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
 from sotd.match.brush_matching_strategies.utils.pattern_utils import extract_knot_size
 
 
 class BrushEnricher(BaseEnricher):
     """Enricher for brush specifications from user comments."""
+
+    def __init__(self, data_path: Optional[Path] = None):
+        """
+        Initialize BrushEnricher.
+
+        Args:
+            data_path: Path to data directory containing catalogs
+        """
+        super().__init__()
+        self.catalog_loader = CatalogLoader(data_path)
 
     @property
     def target_field(self) -> str:
@@ -15,6 +29,405 @@ class BrushEnricher(BaseEnricher):
     def _extract_knot_size(self, text: str) -> Optional[float]:
         """Extract knot size from text using pattern utils."""
         return extract_knot_size(text)
+
+    def _analyze_pattern_positions(
+        self, brush_string: str, handle_patterns: List[str], knot_patterns: List[str]
+    ) -> Dict[str, Any]:
+        """
+        Analyze pattern positions in brush string to determine user intent.
+
+        Args:
+            brush_string: Normalized brush string to analyze
+            handle_patterns: List of handle patterns to search for
+            knot_patterns: List of knot patterns to search for
+
+        Returns:
+            dict: {
+                'handle_position': int or None,
+                'knot_position': int or None,
+                'intent': str,  # 'handle_primary', 'knot_primary', or 'unknown'
+                'handle_matched_pattern': str or None,
+                'knot_matched_pattern': str or None
+            }
+        """
+        # Normalize brush string to lowercase
+        normalized_string = brush_string.lower()
+
+        # Find earliest match position for handle patterns
+        handle_position = None
+        handle_matched_pattern = None
+        for pattern in handle_patterns:
+            try:
+                match = re.search(pattern, normalized_string, re.IGNORECASE)
+                if match:
+                    pos = match.start()
+                    if handle_position is None or pos < handle_position:
+                        handle_position = pos
+                        handle_matched_pattern = pattern
+            except re.error:
+                # Skip invalid patterns
+                continue
+
+        # Find earliest match position for knot patterns
+        knot_position = None
+        knot_matched_pattern = None
+        for pattern in knot_patterns:
+            try:
+                match = re.search(pattern, normalized_string, re.IGNORECASE)
+                if match:
+                    pos = match.start()
+                    if knot_position is None or pos < knot_position:
+                        knot_position = pos
+                        knot_matched_pattern = pattern
+            except re.error:
+                # Skip invalid patterns
+                continue
+
+        # Determine intent based on position comparison
+        if handle_position is not None and knot_position is not None:
+            if handle_position < knot_position:
+                intent = "handle_primary"
+            elif knot_position < handle_position:
+                intent = "knot_primary"
+            else:
+                intent = "unknown"  # Equal positions
+        else:
+            intent = "unknown"  # Missing patterns
+
+        return {
+            "handle_position": handle_position,
+            "knot_position": knot_position,
+            "intent": intent,
+            "handle_matched_pattern": handle_matched_pattern,
+            "knot_matched_pattern": knot_matched_pattern,
+        }
+
+    def _analyze_pattern_positions_compiled(
+        self, brush_string: str, handle_patterns: List[re.Pattern], knot_patterns: List[re.Pattern]
+    ) -> Dict[str, Any]:
+        """
+        Analyze pattern positions using compiled patterns for better performance.
+
+        Args:
+            brush_string: Normalized brush string to analyze
+            handle_patterns: List of compiled handle patterns to search for
+            knot_patterns: List of compiled knot patterns to search for
+
+        Returns:
+            dict: {
+                'handle_position': int or None,
+                'knot_position': int or None,
+                'intent': str,  # 'handle_primary', 'knot_primary', or 'unknown'
+                'handle_matched_pattern': str or None,
+                'knot_matched_pattern': str or None
+            }
+        """
+        # Normalize brush string to lowercase
+        normalized_string = brush_string.lower()
+
+        # Find earliest match position for handle patterns
+        handle_position = None
+        handle_matched_pattern = None
+        for pattern in handle_patterns:
+            try:
+                match = pattern.search(normalized_string)
+                if match:
+                    pos = match.start()
+                    if handle_position is None or pos < handle_position:
+                        handle_position = pos
+                        handle_matched_pattern = pattern.pattern
+            except Exception:
+                # Skip invalid patterns
+                continue
+
+        # Find earliest match position for knot patterns
+        knot_position = None
+        knot_matched_pattern = None
+        for pattern in knot_patterns:
+            try:
+                match = pattern.search(normalized_string)
+                if match:
+                    pos = match.start()
+                    if knot_position is None or pos < knot_position:
+                        knot_position = pos
+                        knot_matched_pattern = pattern.pattern
+            except Exception:
+                # Skip invalid patterns
+                continue
+
+        # Determine intent based on position comparison
+        if handle_position is not None and knot_position is not None:
+            if handle_position < knot_position:
+                intent = "handle_primary"
+            elif knot_position < handle_position:
+                intent = "knot_primary"
+            else:
+                intent = "unknown"  # Equal positions
+        else:
+            intent = "unknown"  # Missing patterns
+
+        return {
+            "handle_position": handle_position,
+            "knot_position": knot_position,
+            "intent": intent,
+            "handle_matched_pattern": handle_matched_pattern,
+            "knot_matched_pattern": knot_matched_pattern,
+        }
+
+    def _detect_user_intent(
+        self, brush_string: str, handle_data: Dict[str, Any], knot_data: Dict[str, Any]
+    ) -> str:
+        """
+        Detect user intent based on component order in the original string.
+
+        This method uses the same logic as the match phase: simple string position
+        comparison using source_text fields from matched data.
+
+        Args:
+            brush_string: Original brush string to analyze
+            handle_data: Matched handle data with source_text field
+            knot_data: Matched knot data with source_text field
+
+        Returns:
+            str: "handle_primary" or "knot_primary"
+        """
+        # Input validation - fail fast as per core rules
+        if not brush_string:
+            raise ValueError("Missing brush_string for user intent detection")
+        if not handle_data or not isinstance(handle_data, dict):
+            raise ValueError("Missing or invalid handle_data for user intent detection")
+        if not knot_data or not isinstance(knot_data, dict):
+            raise ValueError("Missing or invalid knot_data for user intent detection")
+
+        # Extract handle and knot text from source_text fields
+        handle_text = handle_data.get("source_text", "")
+        knot_text = knot_data.get("source_text", "")
+
+        if not handle_text or not knot_text:
+            # If either component text is missing, default to handle_primary
+            return "handle_primary"
+
+        # Find positions of handle and knot text in original string
+        handle_pos = brush_string.find(handle_text)
+        knot_pos = brush_string.find(knot_text)
+
+        # If either component not found, default to handle_primary
+        if handle_pos == -1 or knot_pos == -1:
+            return "handle_primary"
+
+        # If positions are identical (same text), default to handle_primary
+        if handle_pos == knot_pos:
+            return "handle_primary"
+
+        # Return based on which component appears first
+        return "handle_primary" if handle_pos < knot_pos else "knot_primary"
+
+    def _detect_user_intent_debug(
+        self, brush_string: str, handle_data: Dict[str, Any], knot_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Debug version returning intent plus detailed metadata.
+
+        Args:
+            brush_string: Normalized brush string to analyze
+            handle_data: Matched handle data with brand/model info
+            knot_data: Matched knot data with brand/model info
+
+        Returns:
+            dict: {
+                'intent': str,  # 'handle_primary', 'knot_primary', or 'unknown'
+                'handle_position': int or None,
+                'knot_position': int or None,
+                'handle_patterns': List[str],
+                'knot_patterns': List[str],
+                'handle_matched_pattern': str or None,
+                'knot_matched_pattern': str or None,
+                'brush_string_normalized': str,
+                'processing_time_ms': float,
+                'edge_case_triggered': bool,
+                'error_message': str or None
+            }
+        """
+        start_time = time.time()
+        edge_case_triggered = False
+        error_message = None
+
+        try:
+            # Input validation
+            if not brush_string or not handle_data or not knot_data:
+                edge_case_triggered = True
+                return {
+                    "intent": "unknown",
+                    "handle_position": None,
+                    "knot_position": None,
+                    "handle_patterns": [],
+                    "knot_patterns": [],
+                    "handle_matched_pattern": None,
+                    "knot_matched_pattern": None,
+                    "brush_string_normalized": brush_string.lower() if brush_string else "",
+                    "processing_time_ms": (time.time() - start_time) * 1000,
+                    "edge_case_triggered": edge_case_triggered,
+                    "error_message": "Missing input data",
+                }
+
+            # Validate data structure
+            if not isinstance(handle_data, dict) or not isinstance(knot_data, dict):
+                edge_case_triggered = True
+                return {
+                    "intent": "unknown",
+                    "handle_position": None,
+                    "knot_position": None,
+                    "handle_patterns": [],
+                    "knot_patterns": [],
+                    "handle_matched_pattern": None,
+                    "knot_matched_pattern": None,
+                    "brush_string_normalized": brush_string.lower() if brush_string else "",
+                    "processing_time_ms": (time.time() - start_time) * 1000,
+                    "edge_case_triggered": edge_case_triggered,
+                    "error_message": "Invalid data structure",
+                }
+
+            # Load compiled patterns for better performance
+            handle_patterns = self.catalog_loader.load_compiled_handle_patterns(
+                handle_data.get("brand", ""), handle_data.get("model", "")
+            )
+            knot_patterns = self.catalog_loader.load_compiled_knot_patterns(
+                knot_data.get("brand", ""), knot_data.get("model", "")
+            )
+
+            # Analyze pattern positions with compiled patterns
+            result = self._analyze_pattern_positions_compiled(
+                brush_string, handle_patterns, knot_patterns
+            )
+
+            # Check for edge cases
+            if result["intent"] == "unknown":
+                edge_case_triggered = True
+
+            return {
+                "intent": result["intent"],
+                "handle_position": result["handle_position"],
+                "knot_position": result["knot_position"],
+                "handle_patterns": handle_patterns,
+                "knot_patterns": knot_patterns,
+                "handle_matched_pattern": result["handle_matched_pattern"],
+                "knot_matched_pattern": result["knot_matched_pattern"],
+                "brush_string_normalized": brush_string.lower() if brush_string else "",
+                "processing_time_ms": (time.time() - start_time) * 1000,
+                "edge_case_triggered": edge_case_triggered,
+                "error_message": error_message,
+            }
+
+        except Exception as e:
+            return {
+                "intent": "unknown",
+                "handle_position": None,
+                "knot_position": None,
+                "handle_patterns": [],
+                "knot_patterns": [],
+                "handle_matched_pattern": None,
+                "knot_matched_pattern": None,
+                "brush_string_normalized": brush_string.lower() if brush_string else "",
+                "processing_time_ms": (time.time() - start_time) * 1000,
+                "edge_case_triggered": True,
+                "error_message": str(e),
+            }
+
+    def _should_detect_user_intent(self, brush_data: Dict[str, Any]) -> bool:
+        """
+        Determine if user intent detection should run for this brush data.
+
+        Args:
+            brush_data: Brush data to check
+
+        Returns:
+            bool: True if user intent detection should run, False otherwise
+        """
+        if not brush_data or not isinstance(brush_data, dict):
+            return False
+
+        # Check if this is a known brush (has top-level brand AND model)
+        has_top_level_brand = brush_data.get("brand") is not None
+        has_top_level_model = brush_data.get("model") is not None
+
+        if has_top_level_brand and has_top_level_model:
+            return False  # Known brush, don't detect user intent
+
+        # Check if this is a composite brush (has both handle and knot sections)
+        handle_section = brush_data.get("handle")
+        knot_section = brush_data.get("knot")
+
+        if not handle_section or not knot_section:
+            return False  # Missing sections
+
+        if not isinstance(handle_section, dict) or not isinstance(knot_section, dict):
+            return False  # Invalid section structure
+
+        # Check if sections have required data
+        handle_brand = handle_section.get("brand")
+        knot_brand = knot_section.get("brand")
+
+        if not handle_brand or not knot_brand:
+            return False  # Missing brand information
+
+        # Additional check: if same brand AND same model, it's a single maker brush
+        # (same brand but different models is still a composite brush)
+        handle_model = handle_section.get("model")
+        knot_model = knot_section.get("model")
+
+        if handle_brand == knot_brand and handle_model == knot_model:
+            return False  # Single maker brush, don't detect user intent
+
+        return True
+
+    def _load_handle_patterns(self, brand: str, model: str) -> List[str]:
+        """
+        Load handle patterns for given brand/model combination.
+
+        Args:
+            brand: Handle brand
+            model: Handle model
+
+        Returns:
+            List[str]: List of patterns to search for
+        """
+        return self.catalog_loader.load_handle_patterns(brand, model)
+
+    def _load_knot_patterns(self, brand: str, model: str) -> List[str]:
+        """
+        Load knot patterns for given brand/model combination.
+
+        Args:
+            brand: Knot brand
+            model: Knot model
+
+        Returns:
+            List[str]: List of patterns to search for
+        """
+        return self.catalog_loader.load_knot_patterns(brand, model)
+
+    def _extract_brush_text_from_matched_data(self, field_data: Dict[str, Any]) -> str:
+        """
+        Extract brush text from source_text fields in matched data.
+
+        Args:
+            field_data: The matched brush data from the match phase
+
+        Returns:
+            str: The brush text extracted from source_text fields
+        """
+        # Try to get brush text from handle source_text first
+        handle_section = field_data.get("handle", {})
+        if isinstance(handle_section, dict) and handle_section.get("source_text"):
+            return handle_section["source_text"]
+
+        # Fallback to knot source_text
+        knot_section = field_data.get("knot", {})
+        if isinstance(knot_section, dict) and knot_section.get("source_text"):
+            return knot_section["source_text"]
+
+        # If no source_text found, return empty string
+        return ""
 
     def applies_to(self, record: dict) -> bool:
         """Check if this enricher applies to the record."""
@@ -44,8 +457,8 @@ class BrushEnricher(BaseEnricher):
         if field_data is None or not isinstance(field_data, dict):
             return None
 
-        # All extraction is from the brush_extracted field (passed as original_comment)
-        brush_extracted = original_comment
+        # Extract brush text from source_text fields in matched data
+        brush_extracted = self._extract_brush_text_from_matched_data(field_data)
         if not brush_extracted:
             return None
 
@@ -122,5 +535,19 @@ class BrushEnricher(BaseEnricher):
         if user_fiber is not None and catalog_fiber is not None:
             if user_fiber.lower() != catalog_fiber.lower():
                 enriched_data["_catalog_fiber"] = catalog_fiber
+
+        # Add user intent detection for composite brushes
+        if self._should_detect_user_intent(field_data):
+            try:
+                # Get handle and knot data from field_data
+                handle_data = field_data.get("handle", {})
+                knot_data = field_data.get("knot", {})
+
+                user_intent = self._detect_user_intent(brush_extracted, handle_data, knot_data)
+                enriched_data["user_intent"] = user_intent
+            except Exception:
+                # Log error but don't fail enrichment
+                # Note: We don't have access to logger here, so we'll just set to unknown
+                enriched_data["user_intent"] = "unknown"
 
         return enriched_data

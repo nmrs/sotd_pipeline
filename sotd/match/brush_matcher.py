@@ -712,7 +712,6 @@ class BrushMatcher:
                     match_dict = self._extract_match_dict(result, strategy)
 
                     if match_dict is not None:
-
                         # Ensure handle/knot sections are consistent
                         self._ensure_handle_knot_sections(
                             match_dict,

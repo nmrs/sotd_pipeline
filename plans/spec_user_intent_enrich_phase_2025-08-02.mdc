@@ -1,0 +1,225 @@
+# User Intent Detection Migration to Enrich Phase Specification
+
+**Status**: SPECIFICATION_COMPLETE  
+**Created**: 2025-08-02  
+**Type**: Specification Document  
+**Category**: Refactoring  
+
+## 📋 Overview
+
+This specification defines the migration of user intent detection from the match phase to the enrich phase in the SOTD pipeline brush matcher. User intent determines whether a user's focus is "handle_primary" or "knot_primary" in composite brushes.
+
+## 🎯 Objectives
+
+1. **Separation of Concerns**: Move user intent detection from match phase (component identification) to enrich phase (interpretation)
+2. **Enhanced Logic**: Enable more sophisticated user intent detection using pattern position analysis
+3. **Consistency**: Align user intent handling with other user-derived data in enrich phase
+4. **Performance**: Maintain or improve performance while adding richer context analysis
+
+## 🔄 Current State
+
+### Match Phase User Intent Detection
+- **Location**: `sotd/match/brush_matcher.py`
+- **Method**: `detect_user_intent(value: str, handle_text: str, knot_text: str) -> str`
+- **Logic**: Analyzes component order in original string
+- **Values**: "handle_primary", "knot_primary"
+- **Default**: "handle_primary" when components missing or identical
+
+### Current Usage Points
+1. `_process_handle_knot_correct_match()` - Line 171
+2. `_process_split_brush_correct_match()` - Line 404  
+3. `_match_dual_component()` - Line 771
+4. `_process_split_result()` - Line 1185
+
+## 🎯 Target State
+
+### Enrich Phase User Intent Detection
+- **Location**: `sotd/enrich/brush_enricher.py`
+- **Method**: `_detect_user_intent()` (private method)
+- **Logic**: Pattern position analysis against handle/knot catalogs
+- **Values**: "handle_primary", "knot_primary", "unknown"
+- **Default**: "unknown" when cannot be determined
+
+## 📐 Technical Requirements
+
+### User Intent Values
+- **handle_primary**: Handle component appears first in pattern matching
+- **knot_primary**: Knot component appears first in pattern matching  
+- **unknown**: Cannot determine intent (equal positions, missing data, etc.)
+
+### Detection Logic
+1. **Pattern Matching**: Test normalized brush string against handle and knot patterns
+2. **Position Analysis**: Find earliest pattern match position for each component
+3. **Comparison**: Compare handle vs knot pattern positions
+4. **Decision**: Return intent based on earliest position
+
+### Scope and Filtering
+- **Apply to**: All composite brushes (handle AND knot sections present)
+- **Exclude**: Known brushes (top-level brand AND model present)
+- **Include**: Composite brushes with only top-level brand (no model)
+
+### Performance Requirements
+- **Pattern Compilation**: Compile and cache patterns as needed
+- **No Pre-compilation**: Avoid loading entire catalog files
+- **Fail Fast**: Assume patterns exist, fail immediately if missing
+
+## 🏗️ Architecture Changes
+
+### New Methods in BrushEnricher
+```python
+def _detect_user_intent(self, brush_string: str, handle_data: dict, knot_data: dict) -> str:
+    """Detect user intent based on pattern position analysis."""
+    
+def _detect_user_intent_debug(self, brush_string: str, handle_data: dict, knot_data: dict) -> dict:
+    """Debug version returning intent plus metadata."""
+```
+
+### Integration Points
+- **Main Method**: Called from `enrich()` method in BrushEnricher
+- **Conditional Logic**: Only run when composite brush conditions met
+- **Error Handling**: Fail fast with standard Python exceptions
+
+### Data Flow
+1. **Input**: Normalized brush string + matched handle/knot data
+2. **Processing**: Pattern position analysis against catalogs
+3. **Output**: User intent value added to enriched data
+4. **Metadata**: Source tracking via BaseEnricher patterns
+
+## 🔧 Implementation Details
+
+### Pattern Matching Algorithm
+1. **Extract Patterns**: Get handle/knot patterns for matched brands/models
+2. **Normalize String**: Convert brush string to lowercase for matching
+3. **Find Positions**: Locate earliest match position for each pattern
+4. **Compare Results**: Handle vs knot position comparison
+5. **Return Intent**: "handle_primary", "knot_primary", or "unknown"
+
+### Error Handling
+- **Missing Patterns**: Fail fast with descriptive error
+- **Invalid Data**: Let exceptions bubble up with standard Python info
+- **Edge Cases**: Return "unknown" for equal positions or missing data
+
+### Performance Optimizations
+- **Pattern Caching**: Cache compiled patterns per brand/model
+- **Lazy Loading**: Only load patterns when needed
+- **Early Exit**: Stop processing when intent determined
+
+## 🧪 Testing Requirements
+
+### Unit Tests
+- **Test File**: `tests/enrich/test_brush_enricher_user_intent.py`
+- **Coverage**: All detection scenarios and edge cases
+- **Mock Data**: Handle/knot pattern data for testing
+- **Edge Cases**: Equal positions, missing patterns, invalid data
+
+### Integration Tests  
+- **Test File**: `tests/enrich/test_brush_enricher_integration.py`
+- **Real Data**: Use actual catalog patterns from handles.yaml/knots.yaml
+- **End-to-End**: Test complete enrich workflow with user intent
+- **Performance**: Compare timing with old match phase logic
+
+### Test Scenarios
+1. **Handle Primary**: Handle pattern matches before knot pattern
+2. **Knot Primary**: Knot pattern matches before handle pattern  
+3. **Equal Positions**: Both patterns match at same position
+4. **Missing Patterns**: Handle or knot patterns not found
+5. **Invalid Data**: Malformed handle/knot data
+6. **Composite vs Known**: Test filtering logic
+
+## 📊 Performance Comparison
+
+### Metrics to Track
+- **Detection Time**: Time to determine user intent
+- **Pattern Compilation**: Time to compile/cache patterns
+- **Memory Usage**: Pattern cache memory footprint
+- **Accuracy**: Comparison with old match phase results
+
+### Comparison Method
+- **Dual Implementation**: Keep old method for comparison
+- **Debug Output**: Log both results for analysis
+- **Performance Testing**: Measure both approaches
+- **Validation**: Ensure new logic produces same/similar results
+
+## 🔄 Migration Strategy
+
+### Phase 1: Implementation
+1. Add new user intent detection to BrushEnricher
+2. Integrate with existing enrich() method
+3. Add comprehensive unit and integration tests
+4. Add debug logging for comparison
+
+### Phase 2: Validation
+1. Run both old and new logic in parallel
+2. Compare results across sample data
+3. Measure performance differences
+4. Validate edge case handling
+
+### Phase 3: Cleanup
+1. Remove user intent from match phase
+2. Remove old detect_user_intent() method
+3. Update documentation and tests
+4. Final performance validation
+
+## 📝 Documentation Requirements
+
+### Code Documentation
+- **Method Docstrings**: Clear explanation of pattern position logic
+- **Inline Comments**: Key algorithm steps and decisions
+- **Type Hints**: Complete type annotations for all methods
+
+### Architecture Documentation
+- **Design Rationale**: Why move from match to enrich phase
+- **Algorithm Details**: Pattern position analysis approach
+- **Performance Considerations**: Caching and optimization strategies
+
+## 🚨 Risk Assessment
+
+### Technical Risks
+- **Performance Degradation**: New logic slower than old approach
+- **Accuracy Loss**: Different results from pattern vs component order
+- **Pattern Complexity**: Handle/knot pattern variations and edge cases
+
+### Mitigation Strategies
+- **Performance Testing**: Measure before and after implementation
+- **Result Validation**: Compare outputs across sample data
+- **Incremental Rollout**: Test with subset of data first
+
+## ✅ Success Criteria
+
+1. **Functional**: User intent detection works correctly in enrich phase
+2. **Performance**: No significant performance degradation
+3. **Accuracy**: Results consistent with or better than old approach
+4. **Maintainability**: Clean, well-documented, testable code
+5. **Integration**: Seamless integration with existing enrich workflow
+
+## 📋 Implementation Checklist
+
+- [ ] Create `_detect_user_intent()` method in BrushEnricher
+- [ ] Create `_detect_user_intent_debug()` method for comparison
+- [ ] Integrate with existing `enrich()` method
+- [ ] Add pattern compilation and caching logic
+- [ ] Implement error handling and edge case logic
+- [ ] Add comprehensive unit tests
+- [ ] Add integration tests with real data
+- [ ] Add debug logging for performance comparison
+- [ ] Update documentation and comments
+- [ ] Validate against old match phase logic
+- [ ] Measure performance impact
+- [ ] Remove old user intent logic from match phase
+
+## 🔗 Related Documents
+
+- **Match Phase Rules**: `.cursor/rules/match-phase.mdc`
+- **Brush Matching Strategy**: `sotd/match/brush_matcher.py`
+- **Brush Enricher**: `sotd/enrich/brush_enricher.py`
+- **Handle Catalog**: `data/handles.yaml`
+- **Knot Catalog**: `data/knots.yaml`
+
+---
+
+**Specification Status**: COMPLETE  
+**Next Step**: Implementation planning using TDD approach
+description:
+globs:
+alwaysApply: false
+---

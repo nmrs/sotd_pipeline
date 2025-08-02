@@ -1,0 +1,12 @@
+{
+  "total_match_records": 0,
+  "total_enrich_records": 0,
+  "common_records": 0,
+  "matching_results": 0,
+  "discrepancies": 0,
+  "match_only_records": 0,
+  "enrich_only_records": 0,
+  "discrepancy_details": [],
+  "match_only_ids": [],
+  "enrich_only_ids": []
+}
