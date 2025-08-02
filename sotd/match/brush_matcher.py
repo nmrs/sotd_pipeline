@@ -718,8 +718,13 @@ class BrushMatcher:
                             pattern=getattr(result, "pattern", None),
                         )
             except Exception as e:
+                # Re-raise handle matching failures to fail fast
+                if "Handle matching failed" in str(
+                    e
+                ) or "handle_matching enabled but no handle patterns found" in str(e):
+                    raise
                 # Only print strategy failures in debug mode or for unexpected errors
-                if self.debug or "Handle matching failed" not in str(e):
+                if self.debug:
                     print(f"Strategy {strategy.__class__.__name__} failed: {e}")
                 continue
         return None
@@ -1274,17 +1279,13 @@ class BrushMatcher:
 
         # Attempt handle matching on the full brush text
         try:
-            handle_match = self._attempt_handle_matching_for_brand(value, brand)
+            handle_match = self._attempt_handle_matching_for_brand(value, brand, model)
             if handle_match:
                 # Replace the handle section with the new handle match
                 match_dict["handle"] = handle_match
-        except Exception as e:
-            # Fail fast with exception for debugging
-            error_msg = (
-                f"Handle matching failed for brush '{value}' ({brand} {model}) - "
-                f"attempted handle text '{value}' did not match any handle patterns"
-            )
-            raise ValueError(error_msg) from e
+        except Exception:
+            # Re-raise the original exception to preserve the detailed error message
+            raise
 
     def _is_handle_matching_enabled(self, brand: str, model: str) -> bool:
         """
@@ -1334,7 +1335,7 @@ class BrushMatcher:
         return False
 
     def _attempt_handle_matching_for_brand(
-        self, value: str, brand: str
+        self, value: str, brand: str, model: str
     ) -> Optional[Dict[str, Any]]:
         """
         Attempt handle matching on the full brush text using only the brush brand's handle patterns.
@@ -1342,6 +1343,7 @@ class BrushMatcher:
         Args:
             value: The full brush text to match against
             brand: The brush brand to get handle patterns for
+            model: The brush model to get handle patterns for
 
         Returns:
             Handle match dictionary if found, None otherwise
@@ -1350,9 +1352,13 @@ class BrushMatcher:
             ValueError: If handle matching fails (no patterns match)
         """
         # Get handle patterns for this specific brand
-        handle_patterns = self._get_handle_patterns_for_brand(brand)
+        handle_patterns = self._get_handle_patterns_for_brand(brand, model)
         if not handle_patterns:
-            raise ValueError(f"No handle patterns found for brand: {brand}")
+            raise ValueError(
+                f"Brand '{brand}' has handle_matching enabled but no handle patterns found in "
+                f"handles.yaml. Add handle patterns for '{brand}' to handles.yaml or set "
+                f"handle_matching: false for this brand."
+            )
 
         # Try to match against each pattern
         for pattern_info in handle_patterns:
@@ -1372,18 +1378,29 @@ class BrushMatcher:
         # No match found
         raise ValueError(f"No handle patterns matched for brand: {brand}")
 
-    def _get_handle_patterns_for_brand(self, brand: str) -> list[dict]:
+    def _get_handle_patterns_for_brand(self, brand: str, model: str = None) -> list[dict]:
         """
         Get handle patterns for a specific brand from the handles catalog.
 
         Args:
             brand: The brand to get handle patterns for
+            model: The model to get handle patterns for (optional)
 
         Returns:
             List of pattern dictionaries with compiled patterns and match data
         """
         # Use pre-compiled patterns for performance optimization
-        return self._compiled_handle_patterns.get(brand, [])
+        handle_patterns = self._compiled_handle_patterns.get(brand, [])
+
+        # Fail fast: if handle_matching is enabled but no patterns found, raise an exception
+        if not handle_patterns:
+            raise ValueError(
+                f"Brand '{brand}' has handle_matching enabled but no handle patterns found in "
+                f"handles.yaml. Add handle patterns for '{brand}' to handles.yaml or set "
+                f"handle_matching: false for this brand."
+            )
+
+        return handle_patterns
 
     def _extract_match_dict(
         self,
