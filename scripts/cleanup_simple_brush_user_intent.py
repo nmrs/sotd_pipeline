@@ -6,8 +6,9 @@ Simple brushes should not have user_intent since they are not composite
 (no separate handle/knot components to analyze).
 """
 
-import yaml
 from pathlib import Path
+
+import yaml
 
 
 def cleanup_simple_brush_user_intent():

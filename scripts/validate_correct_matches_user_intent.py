@@ -12,9 +12,10 @@ This script:
 
 import json
 import sys
-import yaml
 from pathlib import Path
-from typing import Dict, List, Tuple, Any
+from typing import Any, Dict, List, Tuple
+
+import yaml
 
 # Add the project root to the path
 project_root = Path(__file__).parent.parent
