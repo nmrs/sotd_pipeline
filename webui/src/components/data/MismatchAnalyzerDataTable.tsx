@@ -5,6 +5,7 @@ import { CommentList } from '../domain/CommentList';
 import { MismatchItem } from '../../services/api';
 import EnrichPhaseModal from '../ui/EnrichPhaseModal';
 import HeaderFilter, { HeaderFilterOption } from '../ui/header-filter';
+import { hasEnrichPhaseChanges } from '../../utils/enrichPhaseUtils';
 
 // Helper function to extract brush component patterns
 const getBrushComponentPattern = (
@@ -341,61 +342,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
     return String(matched);
   };
 
-  // Helper function to check if there are enrich-phase changes
-  const hasEnrichPhaseChanges = (
-    matchedData: Record<string, any>,
-    enrichedData: Record<string, any>
-  ): boolean => {
-    if (!matchedData || !enrichedData) return false;
 
-    // For brush field, check the enriched data against matched data
-    if (field === 'brush') {
-      // Check fiber changes (enriched data overrides matched)
-      const matchedKnotFiber = matchedData?.knot?.fiber;
-      const enrichedFiber = enrichedData?.fiber;
-      
-      // Only consider it a change if both values exist and are different
-      if (matchedKnotFiber !== undefined && enrichedFiber !== undefined && matchedKnotFiber !== enrichedFiber) {
-        return true;
-      }
-
-      // Check knot size changes
-      const matchedKnotSize = matchedData?.knot?.knot_size_mm;
-      const enrichedKnotSize = enrichedData?.knot_size_mm;
-      
-      // Consider it a change if:
-      // 1. Both values exist and are different, OR
-      // 2. One value exists and the other is null/undefined (indicating a change from no data to data or vice versa)
-      if (matchedKnotSize !== undefined && enrichedKnotSize !== undefined && matchedKnotSize !== enrichedKnotSize) {
-        return true;
-      }
-      if ((matchedKnotSize === null || matchedKnotSize === undefined) && enrichedKnotSize !== undefined && enrichedKnotSize !== null) {
-        return true;
-      }
-      if ((enrichedKnotSize === null || enrichedKnotSize === undefined) && matchedKnotSize !== undefined && matchedKnotSize !== null) {
-        return true;
-      }
-
-      // For brush enrichment, only fiber and knot_size_mm can change
-      // Brand, model, handle_maker, etc. should remain the same from match phase
-      // Don't check other fields as they shouldn't change during brush enrichment
-
-      // No changes detected for fiber or knot size
-      return false;
-    } else {
-      // For other fields, check top-level fields
-      const fieldsToCheck = ['fiber', 'knot_size_mm', 'handle_maker', 'brand', 'model'];
-
-      return fieldsToCheck.some(field => {
-        const original = matchedData[field];
-        const enriched = enrichedData[field];
-        // Only consider it a change if both values exist and are different
-        return original !== undefined && enriched !== undefined && original !== enriched;
-      });
-    }
-
-    return false;
-  };
 
   const columns = useMemo(() => {
     const baseColumns: ColumnDef<MismatchItem>[] = [
@@ -530,7 +477,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             item.enriched &&
             hasEnrichPhaseChanges(
               item.matched as Record<string, any>,
-              item.enriched as Record<string, any>
+              item.enriched as Record<string, any>,
+              field
             );
 
           const handleEnrichClick = () => {

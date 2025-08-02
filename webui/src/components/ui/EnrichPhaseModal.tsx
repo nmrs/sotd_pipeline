@@ -1,5 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { formatEnrichPhaseChanges } from '../../utils/enrichPhaseUtils';
 
 interface EnrichPhaseModalProps {
   isOpen: boolean;
@@ -20,56 +21,8 @@ const EnrichPhaseModal: React.FC<EnrichPhaseModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  // Extract relevant fields for comparison
-  const getComparisonText = () => {
-    const changes: string[] = [];
-
-    // For brush field, check the enriched data against matched data
-    if (field === 'brush') {
-      const matchedBrush = originalData?.brush;
-      const enrichedBrush = enrichedData?.brush;
-
-      if (matchedBrush && enrichedBrush) {
-        // Check for actual changes in brush fields
-        const brushFields = ['handle_maker', 'handle_model', 'knot_maker', 'knot_model', 'knot_size_mm', 'fiber'];
-
-        brushFields.forEach(brushField => {
-          const matchedValue = matchedBrush[brushField];
-          const enrichedValue = enrichedBrush[brushField];
-
-          // Only show changes if the field exists in enriched data and is different
-          if (enrichedValue !== undefined && enrichedValue !== matchedValue) {
-            const displayMatched = matchedValue ?? 'None';
-            const displayEnriched = enrichedValue ?? 'None';
-            changes.push(`${brushField.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: ${displayMatched} → ${displayEnriched}`);
-          }
-        });
-
-        // Check for source tracking information
-        const sourceFields = ['_extraction_source', '_fiber_extraction_source', '_handle_extraction_source', '_knot_extraction_source'];
-        sourceFields.forEach(sourceField => {
-          if (enrichedBrush[sourceField]) {
-            changes.push(`Source: ${enrichedBrush[sourceField]}`);
-          }
-        });
-      }
-    }
-
-    // For other fields, check direct field changes
-    if (field !== 'brush') {
-      const matchedValue = originalData?.[field];
-      const enrichedValue = enrichedData?.[field];
-
-      // Only show changes if the field exists in enriched data and is different
-      if (enrichedValue !== undefined && enrichedValue !== matchedValue) {
-        const displayMatched = matchedValue ?? 'None';
-        const displayEnriched = enrichedValue ?? 'None';
-        changes.push(`${field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: ${displayMatched} → ${displayEnriched}`);
-      }
-    }
-
-    return changes.length > 0 ? changes.join('\n') : 'No changes detected';
-  };
+  // Use shared utility to format enrich phase changes
+  const comparisonText = formatEnrichPhaseChanges(originalData, enrichedData, field);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -95,7 +48,7 @@ const EnrichPhaseModal: React.FC<EnrichPhaseModalProps> = ({
           <div>
             <h3 className="font-medium text-gray-900 mb-2">Changes:</h3>
             <pre className="text-sm text-gray-600 bg-gray-50 p-3 rounded whitespace-pre-wrap">
-              {getComparisonText()}
+              {comparisonText}
             </pre>
           </div>
         </div>
