@@ -486,5 +486,40 @@ describe('MismatchAnalyzerDataTable', () => {
       // Should show "ERROR" for the second item (same brands but no top-level brand/model)
       expect(screen.getByText('ERROR')).toBeInTheDocument();
     });
+
+    test('does not show enrich adjustment icon when there are no changes', () => {
+      const brushData: MismatchItem[] = [
+        {
+          original: 'Simpson Chubby 2 Best Badger',
+          matched: {
+            brand: 'Simpson',
+            model: 'Chubby 2',
+            fiber: 'best_badger',
+            knot_size_mm: 27.0,
+            handle_maker: 'Simpson',
+          },
+          pattern: 'simpson.*chubby.*2',
+          match_type: 'exact',
+          confidence: 1.0,
+          mismatch_type: 'exact_matches',
+          reason: 'Exact match from catalog',
+          count: 5,
+          examples: ['2025-06.json'],
+          comment_ids: ['abc123'],
+          is_confirmed: true,
+        },
+      ];
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={brushData}
+          field='brush'
+          onCommentClick={mockOnCommentClick}
+        />
+      );
+
+      // Should not show the enrich adjustment icon
+      expect(screen.queryByText('🔗 enrich')).not.toBeInTheDocument();
+    });
   });
 });
