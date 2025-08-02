@@ -1,9 +1,9 @@
-import re
 from pathlib import Path
 from typing import Optional
 
 from .loaders import CatalogLoader
 from .types import MatchResult, MatchType, create_match_result
+from .utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 
 class RazorMatcher:
@@ -12,6 +12,7 @@ class RazorMatcher:
         catalog_path: Path = Path("data/razors.yaml"),
         correct_matches_path: Optional[Path] = None,
     ):
+        self.catalog_path = catalog_path
         self.loader = CatalogLoader()
         catalogs = self.loader.load_matcher_catalogs(
             catalog_path, "razor", correct_matches_path=correct_matches_path
@@ -32,9 +33,11 @@ class RazorMatcher:
                 patterns = entry.get("patterns", [])
                 fmt = entry.get("format", "DE")
                 for pattern in patterns:
-                    compiled.append(
-                        (brand, model, fmt, pattern, re.compile(pattern, re.IGNORECASE), entry)
+                    context = create_context_dict(
+                        file_path=str(self.catalog_path), brand=brand, model=model, format=fmt
                     )
+                    compiled_pattern = compile_regex_with_context(pattern, context)
+                    compiled.append((brand, model, fmt, pattern, compiled_pattern, entry))
         return sorted(compiled, key=lambda x: len(x[3]), reverse=True)
 
     def _get_normalized_text(self, value: str) -> str:

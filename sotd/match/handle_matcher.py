@@ -5,6 +5,7 @@ from typing import Optional
 import yaml
 
 from sotd.match.types import MatchResult
+from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 
 class HandleMatcher:
@@ -37,19 +38,23 @@ class HandleMatcher:
                 for model_name, model_data in data.items():
                     if isinstance(model_data, dict) and "patterns" in model_data:
                         for pattern in model_data["patterns"]:
-                            try:
-                                patterns.append(
-                                    {
-                                        "maker": handle_maker,
-                                        "model": model_name,
-                                        "pattern": pattern,
-                                        "regex": re.compile(pattern, re.IGNORECASE),
-                                        "section": section_name,
-                                        "priority": priority,
-                                    }
-                                )
-                            except re.error:
-                                continue
+                            context = create_context_dict(
+                                file_path=str(self.handles_path),
+                                brand=handle_maker,
+                                model=model_name,
+                                section=section_name,
+                            )
+                            compiled_regex = compile_regex_with_context(pattern, context)
+                            patterns.append(
+                                {
+                                    "maker": handle_maker,
+                                    "model": model_name,
+                                    "pattern": pattern,
+                                    "regex": compiled_regex,
+                                    "section": section_name,
+                                    "priority": priority,
+                                }
+                            )
 
         # Process all sections
         _process_section(self.handles_data.get("artisan_handles", {}), "artisan_handles", 1)

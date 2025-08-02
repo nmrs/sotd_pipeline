@@ -226,8 +226,8 @@ class MatchType:
 def create_match_result(
     original: str,
     matched: Optional[Dict[str, Any]],
-    match_type: str,
-    pattern: str,
+    match_type: Optional[str],
+    pattern: Optional[str],
 ) -> "MatchResult":
     """Create a MatchResult from legacy match data."""
     # This is a compatibility function for existing code

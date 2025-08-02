@@ -30,6 +30,7 @@ from sotd.match.handle_matcher import HandleMatcher
 from sotd.match.knot_matcher import KnotMatcher
 from sotd.match.loaders import CatalogLoader
 from sotd.match.types import MatchResult
+from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 
 class BrushMatcher:
@@ -534,9 +535,16 @@ class BrushMatcher:
                     if isinstance(model_data, dict):
                         if model_name == "Unspecified":
                             for pattern in model_data.get("patterns", []):
+                                context = create_context_dict(
+                                    file_path=str(self.handles_path),
+                                    brand=brand,
+                                    model=model_name,
+                                    section=section_name,
+                                )
+                                compiled_pattern = compile_regex_with_context(pattern, context)
                                 compiled_patterns[brand].append(
                                     {
-                                        "pattern": re.compile(pattern, re.IGNORECASE),
+                                        "pattern": compiled_pattern,
                                         "original_pattern": pattern,
                                         "match_data": {
                                             "brand": brand,
@@ -546,9 +554,16 @@ class BrushMatcher:
                                 )
                         else:
                             for pattern in model_data.get("patterns", []):
+                                context = create_context_dict(
+                                    file_path=str(self.handles_path),
+                                    brand=brand,
+                                    model=model_name,
+                                    section=section_name,
+                                )
+                                compiled_pattern = compile_regex_with_context(pattern, context)
                                 compiled_patterns[brand].append(
                                     {
-                                        "pattern": re.compile(pattern, re.IGNORECASE),
+                                        "pattern": compiled_pattern,
                                         "original_pattern": pattern,
                                         "match_data": {
                                             "brand": brand,
@@ -558,9 +573,16 @@ class BrushMatcher:
                                 )
                     elif isinstance(model_data, list):
                         for pattern in model_data:
+                            context = create_context_dict(
+                                file_path=str(self.handles_path),
+                                brand=brand,
+                                model=model_name,
+                                section=section_name,
+                            )
+                            compiled_pattern = compile_regex_with_context(pattern, context)
                             compiled_patterns[brand].append(
                                 {
-                                    "pattern": re.compile(pattern, re.IGNORECASE),
+                                    "pattern": compiled_pattern,
                                     "original_pattern": pattern,
                                     "match_data": {
                                         "brand": brand,
