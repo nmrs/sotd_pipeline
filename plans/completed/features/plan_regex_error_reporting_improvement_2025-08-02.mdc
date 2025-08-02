@@ -1,0 +1,163 @@
+# Plan: Improve Regex Error Reporting for Better Debugging
+
+## Problem
+When there's a malformed regex pattern in YAML catalog files, the error message is generic:
+```
+missing ), unterminated subpattern at position 1
+```
+
+This doesn't tell the user:
+- Which file contains the malformed pattern
+- Which line number has the issue
+- Which brand/model/pattern is problematic
+- How to fix it
+
+## Solution
+Enhance error reporting across all matchers to provide specific context when regex compilation fails.
+
+## Implementation Plan
+
+### Phase 1: Identify All Regex Compilation Points
+
+**Files that need error handling enhancement:**
+1. `sotd/match/razor_matcher.py` - Line 35: `re.compile(pattern, re.IGNORECASE)`
+2. `sotd/match/blade_matcher.py` - Line 176: `re.compile(pattern, re.IGNORECASE)`
+3. `sotd/match/brush_matcher.py` - Lines 538, 550, 562: `re.compile(pattern, re.IGNORECASE)`
+4. `sotd/match/brush_matching_strategies/known_knot_strategy.py` - Line 49: `re.compile(pattern, re.IGNORECASE)`
+5. `sotd/match/brush_matching_strategies/other_knot_strategy.py` - Line 40: `re.compile(pattern, re.IGNORECASE)`
+6. `sotd/match/brush_matching_strategies/other_brushes_strategy.py` - Line 38: `re.compile(pattern, re.IGNORECASE)`
+7. `sotd/match/brush_matching_strategies/utils/pattern_utils.py` - Line 56: `re.compile(pattern, re.IGNORECASE)`
+
+**Files that already have good error handling:**
+1. `sotd/match/handle_matcher.py` - Has try/catch but could be enhanced
+2. `sotd/match/soap_matcher.py` - Has try/catch but could be enhanced
+3. `sotd/match/base_matcher.py` - Has try/catch but could be enhanced
+
+### Phase 2: Create Enhanced Error Reporting Function
+
+Create a utility function that provides detailed error context:
+
+```python
+def compile_regex_with_context(pattern: str, context: dict) -> Optional[Any]:
+    """
+    Compile regex pattern with detailed error context.
+    
+    Args:
+        pattern: The regex pattern to compile
+        context: Dict with context info (file, brand, model, line_number, etc.)
+    
+    Returns:
+        Compiled regex pattern or None if compilation fails
+    
+    Raises:
+        ValueError: If pattern compilation fails, with detailed context
+    """
+    try:
+        return re.compile(pattern, re.IGNORECASE)
+    except re.error as e:
+        context_str = f"File: {context.get('file', 'unknown')}"
+        if context.get('brand'):
+            context_str += f", Brand: {context['brand']}"
+        if context.get('model'):
+            context_str += f", Model: {context['model']}"
+        if context.get('line_number'):
+            context_str += f", Line: {context['line_number']}"
+        
+        raise ValueError(
+            f"Invalid regex pattern '{pattern}' in {context_str}: {e}"
+        ) from e
+```
+
+### Phase 3: Update Each Matcher
+
+#### 3.1 Razor Matcher
+- Add try/catch around regex compilation
+- Include file path, brand, model in error context
+- Fail fast with clear error message
+
+#### 3.2 Blade Matcher  
+- Add try/catch around regex compilation
+- Include file path, brand, model, format in error context
+- Fail fast with clear error message
+
+#### 3.3 Brush Matcher
+- Add try/catch around regex compilation in `_precompile_handle_patterns`
+- Include file path, brand, model in error context
+- Fail fast with clear error message
+
+#### 3.4 Brush Matching Strategies
+- Update all strategy classes to use enhanced error reporting
+- Include strategy name in error context
+
+#### 3.5 Pattern Utils
+- Update `compile_patterns_with_metadata` to use enhanced error reporting
+- Include pattern source information in error context
+
+### Phase 4: Enhance Existing Error Handling
+
+#### 4.1 Handle Matcher
+- Enhance existing try/catch to include more context
+- Add file path and section information
+
+#### 4.2 Soap Matcher
+- Enhance existing try/catch to include more context
+- Add file path, maker, scent information
+
+#### 4.3 Base Matcher
+- Enhance existing try/catch to include more context
+- Add field type and pattern source information
+
+### Phase 5: Testing
+
+#### 5.1 Unit Tests
+- Test error reporting with malformed patterns
+- Verify error messages include all necessary context
+- Test that errors are raised immediately (fail fast)
+
+#### 5.2 Integration Tests
+- Test with actual malformed YAML files
+- Verify error messages help identify the problematic pattern
+- Test error handling across all matcher types
+
+## Expected Error Message Format
+
+Instead of:
+```
+missing ), unterminated subpattern at position 1
+```
+
+Users will see:
+```
+Invalid regex pattern 'you (and|\&) i \(?will' in File: data/soaps.yaml, Brand: You & I (Will Die), Line: 1548: missing ), unterminated subpattern at position 1
+```
+
+## Benefits
+
+1. **Faster Debugging**: Users can immediately identify which file and line has the issue
+2. **Clear Context**: Error messages include brand/model information for easier identification
+3. **Fail Fast**: Errors are raised immediately during initialization, not during matching
+4. **Consistent**: All matchers use the same error reporting format
+5. **Actionable**: Error messages provide enough context to fix the issue
+
+## Implementation Order
+
+1. Create the enhanced error reporting utility function
+2. Update razor matcher (simplest case)
+3. Update blade matcher (includes format context)
+4. Update brush matcher and strategies (most complex)
+5. Enhance existing error handling in other matchers
+6. Add comprehensive tests
+7. Update documentation
+
+## Success Criteria
+
+- [ ] All regex compilation errors include file path and line number
+- [ ] Error messages include brand/model context when available
+- [ ] Errors are raised immediately during matcher initialization
+- [ ] All matchers use consistent error reporting format
+- [ ] Comprehensive test coverage for error scenarios
+- [ ] Documentation updated with error handling examples
+description:
+globs:
+alwaysApply: false
+---
