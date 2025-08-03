@@ -165,11 +165,7 @@ class BrushMatcher:
         # Split the input to get the actual handle and knot text
         handle_text, knot_text, _ = self.brush_splitter.split_handle_and_knot(value)
 
-        # Detect user intent based on component order in original string
-        # Handle None values by providing empty strings
-        handle_text_safe = handle_text or ""
-        knot_text_safe = knot_text or ""
-        user_intent = self.detect_user_intent(value, handle_text_safe, knot_text_safe)
+        # User intent detection moved to enrich phase - no longer handled here
 
         # Check if handle and knot have the same brand
         handle_brand = handle_maker
@@ -183,7 +179,6 @@ class BrushMatcher:
         matched = {
             "brand": top_brand,  # Set to same brand if handle/knot match, otherwise None
             "model": None,
-            "user_intent": user_intent,
             "handle": {
                 "brand": handle_maker,
                 "model": handle_model,
@@ -398,11 +393,7 @@ class BrushMatcher:
                     except Exception:
                         continue
 
-        # Detect user intent based on component order in original string
-        # Handle None values by providing empty strings
-        handle_component_safe = handle_component or ""
-        knot_component_safe = knot_component or ""
-        user_intent = self.detect_user_intent(value, handle_component_safe, knot_component_safe)
+        # User intent detection moved to enrich phase - no longer handled here
 
         # Check if handle and knot have the same brand
         handle_brand = handle_match.get("handle_maker") if handle_match else None
@@ -417,7 +408,6 @@ class BrushMatcher:
         matched = {
             "brand": top_brand,  # Set to same brand if handle/knot match, otherwise None
             "model": None,  # Split brushes have no top-level model
-            "user_intent": user_intent,
             "handle": {
                 "brand": handle_match.get("handle_maker") if handle_match else None,
                 "model": handle_match.get("handle_model") if handle_match else None,
@@ -1179,8 +1169,7 @@ class BrushMatcher:
                     pattern="generic_knot",
                 )
 
-        # Detect user intent based on component order in original string
-        user_intent = self.detect_user_intent(value, handle_text, knot_text)
+        # User intent detection moved to enrich phase - no longer handled here
 
         # Get actual patterns from individual matchers
         handle_pattern = handle_match.get("_pattern_used") if handle_match else "split"
@@ -1189,7 +1178,6 @@ class BrushMatcher:
         matched = {
             "brand": None,  # Composite brush
             "model": None,  # Composite brush
-            "user_intent": user_intent,
             "handle": {
                 "brand": handle_match.get("handle_maker") if handle_match else None,
                 "model": handle_match.get("handle_model") if handle_match else None,

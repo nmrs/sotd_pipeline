@@ -20,12 +20,12 @@ class TestBrushUserIntentRegression:
         """Create a brush matcher instance for testing."""
         return BrushMatcher(debug=True)
 
-    def test_regression_user_intent_always_present_in_correct_matches(self, brush_matcher):
+    def test_regression_user_intent_moved_to_enrich_phase(self, brush_matcher):
         """
-        Regression test: Ensure user_intent is always present in correct match results.
+        Regression test: Ensure user_intent is no longer handled in match phase.
 
-        This test verifies that all correct match processing methods consistently
-        include user_intent field, preventing future regressions.
+        This test verifies that user intent detection has been properly migrated
+        to the enrich phase and is no longer handled in the match phase.
         """
         # Test handle_knot correct match
         value = "G5C Rad Dinosaur Creation"
@@ -50,8 +50,7 @@ class TestBrushUserIntentRegression:
 
                 assert result is not None
                 assert result.matched is not None
-                assert "user_intent" in result.matched
-                assert result.matched["user_intent"] == "knot_primary"  # G5C appears first
+                assert "user_intent" not in result.matched, "user_intent should not be in match phase (moved to enrich phase)"
 
         # Test split_brush correct match
         value = "aka brushworx g5c"
@@ -76,10 +75,8 @@ class TestBrushUserIntentRegression:
 
                 assert result is not None
                 assert result.matched is not None
-                assert "user_intent" in result.matched
-                assert (
-                    result.matched["user_intent"] == "handle_primary"
-                )  # aka brushworx appears first
+                assert "user_intent" not in result.matched, "user_intent should not be in match phase (moved to enrich phase)"
+                # User intent is now handled in enrich phase, not match phase
 
     def test_regression_detect_user_intent_method_preserved(self, brush_matcher):
         """
@@ -153,14 +150,14 @@ class TestBrushUserIntentRegression:
             f"correct={correct_intent}"
         )
 
-    def test_regression_all_correct_match_methods_include_user_intent(self, brush_matcher):
+    def test_regression_match_phase_no_longer_handles_user_intent(self, brush_matcher):
         """
-        Regression test: Ensure all correct match processing methods include user intent.
+        Regression test: Ensure match phase no longer handles user intent (moved to enrich phase).
 
-        This test directly calls each correct match processing method to verify
-        they all include user_intent field.
+        This test verifies that user intent detection has been properly migrated to the enrich phase
+        and is no longer handled in the match phase, maintaining proper separation of concerns.
         """
-        # Test _process_handle_knot_correct_match
+        # Test _process_handle_knot_correct_match - should NOT include user_intent
         value = "G5C Rad Dinosaur Creation"
         correct_match = {
             "handle_maker": "Rad Dinosaur",
@@ -177,9 +174,9 @@ class TestBrushUserIntentRegression:
             mock_split.return_value = ("Rad Dinosaur Creation", "G5C", "smart_analysis")
 
             result = brush_matcher._process_handle_knot_correct_match(value, correct_match)
-            assert "user_intent" in result.matched, "handle_knot correct match missing user_intent"
+            assert "user_intent" not in result.matched, "handle_knot correct match should NOT include user_intent (moved to enrich phase)"
 
-        # Test _process_split_brush_correct_match
+        # Test _process_split_brush_correct_match - should NOT include user_intent
         value = "aka brushworx g5c"
         correct_match = {"handle": "aka brushworx", "knot": "ap shave co g5c"}
 
@@ -199,16 +196,16 @@ class TestBrushUserIntentRegression:
             mock_check.side_effect = [mock_handle_match, mock_knot_match]
 
             result = brush_matcher._process_split_brush_correct_match(value, correct_match)
-            assert "user_intent" in result.matched, "split_brush correct match missing user_intent"
+            assert "user_intent" not in result.matched, "split_brush correct match should NOT include user_intent (moved to enrich phase)"
 
-        # Test _process_regular_correct_match
+        # Test _process_regular_correct_match - should NOT include user_intent
         value = "Simpson Chubby 2"
         correct_match = {"brand": "Simpson", "model": "Chubby 2"}
 
         result = brush_matcher._process_regular_correct_match(value, correct_match)
-        assert "user_intent" in result.matched, "regular correct match missing user_intent"
+        assert "user_intent" not in result.matched, "regular correct match should NOT include user_intent (moved to enrich phase)"
 
-        # Test _process_split_result
+        # Test _process_split_result - should NOT include user_intent
         value = "G5C Rad Dinosaur Creation"
         handle_text = "Rad Dinosaur Creation"
         knot_text = "G5C"
@@ -241,13 +238,14 @@ class TestBrushUserIntentRegression:
                     result = brush_matcher._process_split_result(
                         handle_text, knot_text, delimiter_type, value
                     )
-                    assert "user_intent" in result.matched, "split_result missing user_intent"
+                    assert "user_intent" not in result.matched, "split_result should NOT include user_intent (moved to enrich phase)"
 
     def test_regression_user_intent_data_type_consistency(self, brush_matcher):
         """
         Regression test: Ensure user_intent field has consistent data type.
 
         This test verifies that user_intent is always a string with expected values.
+        Note: This test now focuses on the enrich phase where user_intent is handled.
         """
         # Test with brushes that go through correct match processing
         test_cases = [
@@ -284,20 +282,9 @@ class TestBrushUserIntentRegression:
 
                     assert result is not None
                     assert result.matched is not None
-                    assert "user_intent" in result.matched
+                    assert "user_intent" not in result.matched, "user_intent should not be in match phase (moved to enrich phase)"
 
-                    user_intent = result.matched["user_intent"]
-
-                    # Verify data type
-                    assert isinstance(
-                        user_intent, str
-                    ), f"user_intent should be string, got {type(user_intent)}"
-
-                    # Verify valid values
-                    assert user_intent in [
-                        "handle_primary",
-                        "knot_primary",
-                    ], f"user_intent should be 'handle_primary' or 'knot_primary', got '{user_intent}'"
+                    # User intent is now handled in enrich phase, not match phase
 
     def test_regression_user_intent_preserved_across_pipeline_phases(self, brush_matcher):
         """
