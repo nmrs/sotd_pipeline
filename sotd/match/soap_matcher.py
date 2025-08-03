@@ -1,3 +1,5 @@
+"""Soap matcher for SOTD pipeline."""
+
 import difflib
 import re
 from collections import defaultdict
@@ -7,8 +9,9 @@ from typing import Any, Dict, Optional
 from rich.console import Console
 from rich.table import Table
 
-from .loaders import CatalogLoader
-from .types import MatchResult, MatchType, create_match_result
+from sotd.match.types import MatchResult, MatchType, create_match_result
+from sotd.utils.yaml_loader import load_yaml_with_nfc
+from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 
 class SoapMatcher:
@@ -17,12 +20,12 @@ class SoapMatcher:
         catalog_path: Path = Path("data/soaps.yaml"),
         correct_matches_path: Optional[Path] = None,
     ):
-        self.loader = CatalogLoader()
-        catalogs = self.loader.load_matcher_catalogs(
-            catalog_path, "soap", correct_matches_path=correct_matches_path
+        self.catalog_path = catalog_path
+        self.catalog = load_yaml_with_nfc(catalog_path)
+        self.correct_matches_path = correct_matches_path
+        self.correct_matches = (
+            load_yaml_with_nfc(correct_matches_path) if correct_matches_path else {}
         )
-        self.catalog = catalogs["catalog"]
-        self.correct_matches = catalogs["correct_matches"]
         self.scent_patterns, self.brand_patterns = self._compile_patterns()
         self._match_cache = {}
 
@@ -31,40 +34,27 @@ class SoapMatcher:
         self._match_cache.clear()
 
     def _is_sample(self, text: str) -> bool:
-        text = text.lower()
-        return bool(re.search(r"\bsample\b", text)) or bool(
-            re.search(r"\(\s*sample\s*\)", text, re.IGNORECASE)
-        )
+        """Check if text contains sample indicators."""
+        return bool(re.search(r"\b(sample|samp)\b", text.lower()))
 
     def _strip_surrounding_punctuation(self, text: str) -> str:
-        text = re.sub(r"^[\s\-–—/.,:;]+|[\s\-–—/.,:;]+$", "", text).strip()
-        return text
+        """Strip surrounding punctuation from text."""
+        return re.sub(r"^[*_~]+|[*_~]+$", "", text.strip())
 
     def _normalize_common_text(self, text: str) -> str:
-        """
-        Normalize text for brand fields by stripping markdown, punctuation, etc.
-        Does NOT remove "soap" suffixes or use counts.
-        """
-        text = text.strip()
-        text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)  # strip markdown links
-        text = re.sub(r"[*_~`\\]+", "", text).strip()
-        text = self._strip_surrounding_punctuation(text)
+        """Normalize common text patterns."""
+        # Remove sample markers
+        text = re.sub(r"\b(sample|samp)\b", "", text.lower())
+        # Normalize whitespace
+        text = re.sub(r"\s+", " ", text.strip())
         return text
 
     def _normalize_scent_text(self, text: str) -> str:
-        """
-        Normalize text for scent fields by using _normalize_common_text and
-        additionally stripping "soap" suffixes and use counts like (23).
-        """
-        text = self._normalize_common_text(text)
-        text = re.sub(
-            r"(soap( sample)?|croap|puck|cream|shav.*soap|shav.*cream).?\s*$",
-            "",
-            text,
-            flags=re.IGNORECASE,
-        ).strip()
-        text = re.sub(r"\(\d*\)$", "", text).strip()  # remove use counts like (23)
-        text = self._strip_surrounding_punctuation(text)
+        """Normalize scent text for matching."""
+        # Remove common scent indicators
+        text = re.sub(r"\b(soap|cream|splash|balm|aftershave)\b", "", text.lower())
+        # Normalize whitespace
+        text = re.sub(r"\s+", " ", text.strip())
         return text
 
     def _compile_patterns(self):
@@ -75,29 +65,34 @@ class SoapMatcher:
             scents = entry.get("scents", {})
             for scent, scent_data in scents.items():
                 for pattern in scent_data.get("patterns", []):
-                    try:
-                        scent_compiled.append(
-                            {
-                                "maker": maker,
-                                "scent": scent,
-                                "pattern": pattern,
-                                "regex": re.compile(pattern, re.IGNORECASE),
-                            }
-                        )
-                    except re.error:
-                        continue
-            # Brand-level patterns
-            for pattern in entry.get("patterns", []):
-                try:
-                    brand_compiled.append(
+                    context = create_context_dict(
+                        file_path="data/soaps.yaml",
+                        maker=maker,
+                        scent=scent
+                    )
+                    compiled_regex = compile_regex_with_context(pattern, context)
+                    scent_compiled.append(
                         {
                             "maker": maker,
+                            "scent": scent,
                             "pattern": pattern,
-                            "regex": re.compile(pattern, re.IGNORECASE),
+                            "regex": compiled_regex,
                         }
                     )
-                except re.error:
-                    continue
+            # Brand-level patterns
+            for pattern in entry.get("patterns", []):
+                context = create_context_dict(
+                    file_path="data/soaps.yaml",
+                    maker=maker
+                )
+                compiled_regex = compile_regex_with_context(pattern, context)
+                brand_compiled.append(
+                    {
+                        "maker": maker,
+                        "pattern": pattern,
+                        "regex": compiled_regex,
+                    }
+                )
         scent_compiled = sorted(scent_compiled, key=lambda x: len(x["pattern"]), reverse=True)
         brand_compiled = sorted(brand_compiled, key=lambda x: len(x["pattern"]), reverse=True)
         return scent_compiled, brand_compiled

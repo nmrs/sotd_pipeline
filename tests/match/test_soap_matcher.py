@@ -405,3 +405,25 @@ def test_invalid_regex_pattern_handling():
         # Pass just the normalized string to matchers
         result = matcher.match("Test Brand - Test Scent")
         assert result.matched is not None
+
+
+def test_enhanced_regex_error_reporting():
+    """Test that malformed regex patterns produce detailed error messages."""
+    mock_catalog = {
+        "Test Brand": {
+            "patterns": [r"invalid[regex"],  # Malformed regex - missing closing bracket
+            "scents": {"Test Scent": {"patterns": ["test.*scent"]}},
+        }
+    }
+    
+    # Mock the load_yaml_with_nfc function to return our mock catalog
+    with patch("sotd.match.soap_matcher.load_yaml_with_nfc", return_value=mock_catalog):
+        with pytest.raises(ValueError) as exc_info:
+            SoapMatcher()
+        
+        error_message = str(exc_info.value)
+        assert "Invalid regex pattern" in error_message
+        assert "invalid[regex" in error_message
+        assert "File: data/soaps.yaml" in error_message
+        assert "Maker: Test Brand" in error_message
+        assert "unterminated character set" in error_message  # The actual regex error
