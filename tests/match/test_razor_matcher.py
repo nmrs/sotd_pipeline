@@ -85,7 +85,7 @@ def test_enhanced_regex_error_reporting():
     }
 
     # Mock the load_yaml_with_nfc function to return our mock catalog
-    with patch("sotd.utils.yaml_loader.load_yaml_with_nfc", return_value=mock_razors):
+    with patch("sotd.match.loaders.load_yaml_with_nfc", return_value=mock_razors):
         with pytest.raises(ValueError) as exc_info:
             RazorMatcher()
 
