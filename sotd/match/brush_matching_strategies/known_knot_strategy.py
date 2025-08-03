@@ -1,10 +1,9 @@
-import re
-
 from sotd.match.brush_matching_strategies.utils.pattern_utils import (
     create_strategy_result,
     validate_string_input,
 )
 from sotd.match.types import MatchResult
+from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 
 class KnownKnotMatchingStrategy:
@@ -44,10 +43,18 @@ class KnownKnotMatchingStrategy:
                 knot_size_mm = metadata.get("knot_size_mm", brand_default_knot_size)
 
                 for pattern in patterns:
+                    context = create_context_dict(
+                        file_path="data/knots.yaml",
+                        brand=brand,
+                        model=model,
+                        strategy="KnownKnotMatchingStrategy",
+                    )
+                    compiled_pattern = compile_regex_with_context(pattern, context)
+
                     all_patterns.append(
                         {
                             "pattern": pattern,
-                            "compiled": re.compile(pattern, re.IGNORECASE),
+                            "compiled": compiled_pattern,
                             "brand": brand,
                             "model": model,
                             "fiber": fiber,
