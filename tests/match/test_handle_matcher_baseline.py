@@ -46,7 +46,7 @@ class TestHandleMatcherBaseline:
         assert result is not None
         assert result["handle_maker"] == "Declaration Grooming"
         assert result["_matched_by_section"] == "artisan_handles"
-        assert result["_pattern_used"] in ["^(?!.*dogwood)declaration", "^(?!.*dogwood)\\bdg\\b"]
+        assert result["_pattern_used"] in ["^(?!.*dog).*declaration", "^(?!.*dog).*\\bdg\\b"]
 
     def test_declaration_grooming_dg_abbreviation(self, handle_matcher):
         """Test Declaration Grooming DG abbreviation pattern matching."""
@@ -54,7 +54,7 @@ class TestHandleMatcherBaseline:
         assert result is not None
         assert result["handle_maker"] == "Declaration Grooming"
         assert result["_matched_by_section"] == "artisan_handles"
-        assert result["_pattern_used"] == "^(?!.*dogwood)\\bdg\\b"
+        assert result["_pattern_used"] == "^(?!.*dog).*\\bdg\\b"
 
     def test_jayaruh_pattern(self, handle_matcher):
         """Test Jayaruh pattern matching."""
