@@ -10,8 +10,8 @@ from rich.console import Console
 from rich.table import Table
 
 from sotd.match.types import MatchResult, MatchType, create_match_result
-from sotd.utils.yaml_loader import load_yaml_with_nfc
 from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
+from sotd.utils.yaml_loader import load_yaml_with_nfc
 
 
 class SoapMatcher:
@@ -66,9 +66,7 @@ class SoapMatcher:
             for scent, scent_data in scents.items():
                 for pattern in scent_data.get("patterns", []):
                     context = create_context_dict(
-                        file_path="data/soaps.yaml",
-                        maker=maker,
-                        scent=scent
+                        file_path="data/soaps.yaml", maker=maker, scent=scent
                     )
                     compiled_regex = compile_regex_with_context(pattern, context)
                     scent_compiled.append(
@@ -81,10 +79,7 @@ class SoapMatcher:
                     )
             # Brand-level patterns
             for pattern in entry.get("patterns", []):
-                context = create_context_dict(
-                    file_path="data/soaps.yaml",
-                    maker=maker
-                )
+                context = create_context_dict(file_path="data/soaps.yaml", maker=maker)
                 compiled_regex = compile_regex_with_context(pattern, context)
                 brand_compiled.append(
                     {

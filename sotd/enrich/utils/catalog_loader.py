@@ -6,7 +6,7 @@ Loads handle and knot patterns from YAML catalogs for use in enrichment.
 
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 import yaml
 
@@ -223,9 +223,7 @@ class CatalogLoader:
         for pattern in patterns:
             # Create context for enhanced error reporting
             context = create_context_dict(
-                file_path=f"data/{catalog_type}.yaml",
-                brand=brand,
-                model=model
+                file_path=f"data/{catalog_type}.yaml", brand=brand, model=model
             )
             compiled_pattern = compile_regex_with_context(pattern, context)
             compiled_patterns.append(compiled_pattern)

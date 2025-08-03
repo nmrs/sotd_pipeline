@@ -6,7 +6,7 @@ Filters extracted data based on patterns defined in YAML configuration.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional, Tuple
 
 import yaml
 
@@ -92,14 +92,9 @@ class ExtractFilter:
                     reason = f"Matches pattern: {pattern}"
 
                 # Create context for enhanced error reporting
-                context = {
-                    "file": str(self.filter_path),
-                    "field": field
-                }
+                context = {"file": str(self.filter_path), "field": field}
                 compiled_pattern = compile_regex_with_context(pattern, context)
-                compiled["filters"][field].append(
-                    {"pattern": compiled_pattern, "reason": reason}
-                )
+                compiled["filters"][field].append({"pattern": compiled_pattern, "reason": reason})
 
         # Compile global filters
         global_patterns = self.filters.get("global", [])
@@ -113,10 +108,7 @@ class ExtractFilter:
                 reason = f"Global pattern: {pattern}"
 
             # Create context for enhanced error reporting
-            context = {
-                "file": str(self.filter_path),
-                "field": "global"
-            }
+            context = {"file": str(self.filter_path), "field": "global"}
             compiled_pattern = compile_regex_with_context(pattern, context)
             compiled["global_filters"].append({"pattern": compiled_pattern, "reason": reason})
 
