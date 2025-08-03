@@ -103,6 +103,25 @@ class TestCompilePatternsWithMetadata:
         assert result[0]["brand"] == "Valid"
         assert result[1]["brand"] == "AnotherValid"
 
+    def test_enhanced_regex_error_reporting(self):
+        """Test that malformed regex patterns produce detailed error messages."""
+        patterns_data = [
+            {
+                "pattern": r"invalid[regex",  # Malformed regex - missing closing bracket
+                "brand": "TestBrand",
+                "model": "TestModel",
+            }
+        ]
+        
+        with pytest.raises(ValueError) as exc_info:
+            compile_patterns_with_metadata(patterns_data)
+        
+        error_message = str(exc_info.value)
+        assert "Invalid regex pattern" in error_message
+        assert "invalid[regex" in error_message
+        assert "File: pattern_utils" in error_message
+        assert "unterminated character set" in error_message  # The actual regex error
+
 
 class TestCompileCatalogPatterns:
     """Test catalog pattern compilation."""

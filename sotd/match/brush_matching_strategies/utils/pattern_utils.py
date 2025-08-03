@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional
 
 from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
 from sotd.match.types import MatchResult, create_match_result
+from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 
 def validate_string_input(value: Any) -> Optional[str]:
@@ -54,7 +55,10 @@ def compile_patterns_with_metadata(
             continue
 
         pattern = pattern_data["pattern"]
-        compiled = re.compile(pattern, re.IGNORECASE)
+        context = create_context_dict(
+            file_path="pattern_utils"
+        )
+        compiled = compile_regex_with_context(pattern, context)
 
         compiled_pattern = {
             "compiled": compiled,
