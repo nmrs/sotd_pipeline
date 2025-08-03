@@ -1,108 +1,124 @@
 """
 Extract phase filtering module.
 
-This module handles filtering of garbage entries during the extract phase
-using regex patterns defined in data/extract_filters.yaml.
+Filters extracted data based on patterns defined in YAML configuration.
 """
 
 import logging
-import re
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple, Optional
 
 import yaml
+
+from sotd.match.utils.regex_error_utils import compile_regex_with_context
 
 logger = logging.getLogger(__name__)
 
 
 class ExtractFilter:
-    """Filter for garbage entries during extraction."""
+    """
+    Filter extracted data based on patterns defined in YAML configuration.
+
+    Supports field-specific filters and global filters that apply to all fields.
+    """
 
     def __init__(self, filter_path: Path = Path("data/extract_filters.yaml")):
         """
-        Initialize the extract filter.
+        Initialize filter with configuration from YAML file.
 
         Args:
-            filter_path: Path to the filter configuration YAML file
+            filter_path: Path to filter configuration file
         """
         self.filter_path = filter_path
         self.filters = self._load_filters()
         self.compiled_patterns = self._compile_patterns()
 
     def _load_filters(self) -> Dict:
-        """Load filter configuration from YAML file."""
-        try:
-            if not self.filter_path.exists():
-                logger.warning(f"Filter file not found: {self.filter_path}")
-                return {
-                    "razor": {"patterns": []},
-                    "blade": {"patterns": []},
-                    "brush": {"patterns": []},
-                    "soap": {"patterns": []},
-                    "global": [],
-                }
+        """
+        Load filter configuration from YAML file.
 
+        Returns:
+            Dictionary containing filter configuration
+        """
+        default_filters = {
+            "razor": {"patterns": []},
+            "blade": {"patterns": []},
+            "brush": {"patterns": []},
+            "soap": {"patterns": []},
+            "global": [],
+        }
+
+        if not self.filter_path.exists():
+            logger.warning(f"Filter file not found: {self.filter_path}")
+            return default_filters
+
+        try:
             with open(self.filter_path, "r", encoding="utf-8") as f:
-                return yaml.safe_load(f) or {
-                    "razor": {"patterns": []},
-                    "blade": {"patterns": []},
-                    "brush": {"patterns": []},
-                    "soap": {"patterns": []},
-                    "global": [],
-                }
-        except Exception as e:
+                filters = yaml.safe_load(f)
+                if not filters:
+                    return default_filters
+                return filters
+        except yaml.YAMLError as e:
             logger.error(f"Error loading filter file {self.filter_path}: {e}")
-            return {
-                "razor": {"patterns": []},
-                "blade": {"patterns": []},
-                "brush": {"patterns": []},
-                "soap": {"patterns": []},
-                "global": [],
-            }
+            return default_filters
 
     def _compile_patterns(self) -> Dict:
-        """Compile regex patterns for efficient matching."""
-        compiled = {"filters": {}, "global_filters": []}
+        """
+        Compile regex patterns for efficient matching with enhanced error reporting.
+
+        Returns:
+            Dictionary containing compiled patterns
+        """
+        compiled = {
+            "filters": {
+                "razor": [],
+                "blade": [],
+                "brush": [],
+                "soap": [],
+            },
+            "global_filters": [],
+        }
 
         # Compile field-specific filters
         for field in ("razor", "blade", "brush", "soap"):
-            compiled["filters"][field] = []
-            field_config = self.filters.get(field, {})
-            patterns = field_config.get("patterns", [])
-
-            for pattern_str in patterns:
-                try:
-                    # Extract pattern from inline comment format: "pattern # comment"
-                    if "#" in pattern_str:
-                        pattern = pattern_str.split("#")[0].strip()
-                        reason = pattern_str.split("#")[1].strip()
-                    else:
-                        pattern = pattern_str.strip()
-                        reason = f"Matches pattern: {pattern}"
-
-                    compiled_pattern = re.compile(pattern, re.IGNORECASE)
-                    compiled["filters"][field].append(
-                        {"pattern": compiled_pattern, "reason": reason}
-                    )
-                except re.error as e:
-                    logger.error(f"Invalid regex pattern '{pattern_str}': {e}")
-
-        # Compile global filters
-        global_patterns = self.filters.get("global", [])
-        for pattern_str in global_patterns:
-            try:
+            field_patterns = self.filters.get(field, {}).get("patterns", [])
+            for pattern_str in field_patterns:
                 # Extract pattern from inline comment format: "pattern # comment"
                 if "#" in pattern_str:
                     pattern = pattern_str.split("#")[0].strip()
                     reason = pattern_str.split("#")[1].strip()
                 else:
                     pattern = pattern_str.strip()
-                    reason = f"Global pattern: {pattern}"
+                    reason = f"Matches pattern: {pattern}"
 
-                compiled_pattern = re.compile(pattern, re.IGNORECASE)
-                compiled["global_filters"].append({"pattern": compiled_pattern, "reason": reason})
-            except re.error as e:
-                logger.error(f"Invalid global regex pattern '{pattern_str}': {e}")
+                # Create context for enhanced error reporting
+                context = {
+                    "file": str(self.filter_path),
+                    "field": field
+                }
+                compiled_pattern = compile_regex_with_context(pattern, context)
+                compiled["filters"][field].append(
+                    {"pattern": compiled_pattern, "reason": reason}
+                )
+
+        # Compile global filters
+        global_patterns = self.filters.get("global", [])
+        for pattern_str in global_patterns:
+            # Extract pattern from inline comment format: "pattern # comment"
+            if "#" in pattern_str:
+                pattern = pattern_str.split("#")[0].strip()
+                reason = pattern_str.split("#")[1].strip()
+            else:
+                pattern = pattern_str.strip()
+                reason = f"Global pattern: {pattern}"
+
+            # Create context for enhanced error reporting
+            context = {
+                "file": str(self.filter_path),
+                "field": "global"
+            }
+            compiled_pattern = compile_regex_with_context(pattern, context)
+            compiled["global_filters"].append({"pattern": compiled_pattern, "reason": reason})
 
         return compiled
 

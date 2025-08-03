@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import yaml
+import pytest
 
 from sotd.extract.filter import ExtractFilter, filter_extracted_data, should_skip_field
 
@@ -77,6 +78,32 @@ class TestExtractFilter:
         finally:
             filter_path.unlink()
 
+    def test_enhanced_regex_error_reporting(self):
+        """Test that malformed regex patterns produce detailed error messages."""
+        filter_config = {
+            "razor": {
+                "patterns": ["invalid[regex # malformed pattern"]
+            },  # Malformed regex - missing closing bracket
+            "global": ["valid.*pattern # valid pattern"],
+        }
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            yaml.dump(filter_config, f)
+            filter_path = Path(f.name)
+
+        try:
+            with pytest.raises(ValueError) as exc_info:
+                ExtractFilter(filter_path)
+            
+            error_message = str(exc_info.value)
+            assert "Invalid regex pattern" in error_message
+            assert "invalid[regex" in error_message
+            assert "File:" in error_message  # The actual file path will be the temp file
+            assert "Field: razor" in error_message
+            assert "unterminated character set" in error_message  # The actual regex error
+        finally:
+            filter_path.unlink()
+
     def test_compile_patterns_valid(self):
         """Test compiling valid regex patterns."""
         filter_config = {
@@ -104,7 +131,7 @@ class TestExtractFilter:
             filter_path.unlink()
 
     def test_compile_patterns_invalid_regex(self):
-        """Test handling of invalid regex patterns."""
+        """Test handling of invalid regex patterns with enhanced error reporting."""
         filter_config = {"razor": {"patterns": ["[invalid # invalid pattern"]}}
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
@@ -112,10 +139,15 @@ class TestExtractFilter:
             filter_path = Path(f.name)
 
         try:
-            filter_obj = ExtractFilter(filter_path)
-            # Should handle invalid regex gracefully
-            assert "razor" in filter_obj.compiled_patterns["filters"]
-            assert len(filter_obj.compiled_patterns["filters"]["razor"]) == 0
+            with pytest.raises(ValueError) as exc_info:
+                ExtractFilter(filter_path)
+            
+            error_message = str(exc_info.value)
+            assert "Invalid regex pattern" in error_message
+            assert "[invalid" in error_message
+            assert "File:" in error_message
+            assert "Field: razor" in error_message
+            assert "unterminated character set" in error_message
         finally:
             filter_path.unlink()
 

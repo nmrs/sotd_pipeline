@@ -41,6 +41,8 @@ def compile_regex_with_context(pattern: str, context: Dict[str, Any]) -> Optiona
             context_str += f", Section: {context['section']}"
         if context.get("strategy"):
             context_str += f", Strategy: {context['strategy']}"
+        if context.get("field"):
+            context_str += f", Field: {context['field']}"
         if context.get("line_number"):
             context_str += f", Line: {context['line_number']}"
 
