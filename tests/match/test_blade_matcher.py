@@ -570,8 +570,8 @@ def test_enhanced_regex_error_reporting():
         }
     }
 
-    # Mock the load_yaml_with_nfc function to return our mock catalog
-    with patch("sotd.match.loaders.load_yaml_with_nfc", return_value=mock_blades):
+    # Mock the CatalogLoader.load_catalog method to return our mock catalog
+    with patch("sotd.match.loaders.CatalogLoader.load_catalog", return_value=mock_blades):
         with pytest.raises(ValueError) as exc_info:
             BladeMatcher()
 
