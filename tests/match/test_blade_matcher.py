@@ -2,6 +2,7 @@
 
 import pytest
 from pathlib import Path
+from unittest.mock import patch
 
 from sotd.match.blade_matcher import BladeMatcher
 
@@ -554,3 +555,30 @@ def test_shavette_fallback_prioritizes_format_appropriate_blades():
     assert result.matched["format"] == "Hair Shaper"
     assert result.matched["brand"] == "Personna"
     assert result.matched["model"] == "Hair Shaper"
+
+
+def test_enhanced_regex_error_reporting():
+    """Test that malformed regex patterns produce detailed error messages."""
+    mock_blades = {
+        "DE": {
+            "Test Brand": {
+                "Test Model": {
+                    "patterns": [r"invalid[regex"],  # Malformed regex - missing closing bracket
+                    "format": "DE"
+                }
+            }
+        }
+    }
+    
+    # Mock the load_yaml_with_nfc function to return our mock catalog
+    with patch("sotd.utils.yaml_loader.load_yaml_with_nfc", return_value=mock_blades):
+        with pytest.raises(ValueError) as exc_info:
+            BladeMatcher()
+        
+        error_message = str(exc_info.value)
+        assert "Invalid regex pattern" in error_message
+        assert "invalid[regex" in error_message
+        assert "File: data/blades.yaml" in error_message
+        assert "Brand: Test Brand" in error_message
+        assert "Model: Test Model" in error_message
+        assert "unterminated character set" in error_message  # The actual regex error
