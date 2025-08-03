@@ -334,7 +334,7 @@ class SoapMatcher:
         correct_matches_data = self.correct_matches
         if "soap" in self.correct_matches:
             correct_matches_data = self.correct_matches["soap"]
-        
+
         for maker, maker_data in correct_matches_data.items():
             if not isinstance(maker_data, dict):
                 continue

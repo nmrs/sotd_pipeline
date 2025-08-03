@@ -55,53 +55,25 @@ class CorrectMatchesChecker:
         if not normalized_value:
             return None
 
-        # Step 1: Check split_brush section first (highest priority for split brushes)
-        split_brush_match = self._check_split_brush_correct_matches(value, normalized_value)
-        if split_brush_match:
-            return split_brush_match
+        # Use the new priority order: brush → handle/knot → split_brush
+        return self._check_with_new_priority_order(value, normalized_value)
 
-        # Step 2: Check handle/knot sections (for combo brush/handle brushes)
-        handle_knot_match = self._check_handle_knot_correct_matches(value, normalized_value)
-        if handle_knot_match:
-            return handle_knot_match
-
-        # Step 3: Check brush section (for simple brushes)
+    def _check_with_new_priority_order(
+        self, value: str, normalized_value: str
+    ) -> Optional[CorrectMatchData]:
+        """
+        Check correct matches with new priority order: brush → handle/knot → split_brush.
+        This implements the data-driven brush type determination logic.
+        """
+        # Step 1: Check brush section first (highest priority)
         brush_match = self._check_brush_correct_matches(value, normalized_value)
         if brush_match:
             return brush_match
 
-        return None
-
-    def _check_split_brush_correct_matches(
-        self, value: str, normalized_value: str
-    ) -> Optional[CorrectMatchData]:
-        """
-        Check if value matches any split_brush section correct matches entry.
-
-        Args:
-            value: Original input string
-            normalized_value: Normalized input string for comparison
-
-        Returns:
-            CorrectMatchData if found, None otherwise.
-        """
-        split_brush_section = self.correct_matches.get("split_brush", {})
-
-        # Check if normalized value matches any split brush entry
-        for split_brush_string, components in split_brush_section.items():
-            if not isinstance(components, dict):
-                continue
-
-            # Normalize the split brush string for comparison
-            normalized_split_brush = normalize_for_matching(split_brush_string, field="brush")
-            # Use case-insensitive comparison as per match phase rules
-            if normalized_split_brush.lower() == normalized_value.lower():
-                # Return match data with split brush fields
-                return CorrectMatchData(
-                    handle_component=components.get("handle"),
-                    knot_component=components.get("knot"),
-                    match_type="split_brush_section",
-                )
+        # Step 2: Check handle/knot sections (medium priority)
+        handle_knot_match = self._check_handle_knot_correct_matches(value, normalized_value)
+        if handle_knot_match:
+            return handle_knot_match
 
         return None
 
