@@ -24,6 +24,62 @@ The SOTD pipeline is designed for **interactive use by developers**. This means 
 - **Graceful degradation**: When partial results are acceptable
 - **User input validation**: Invalid command line arguments, malformed user input
 
+## Enhanced Regex Error Reporting
+
+The pipeline includes **enhanced regex error reporting** that provides detailed context when regex pattern compilation fails. This is implemented across all phases and follows the fail-fast philosophy.
+
+### Error Message Format
+
+Enhanced regex error messages include comprehensive context:
+
+```
+Invalid regex pattern '[invalid' in File: data/handles.yaml, Brand: Test Maker, Model: Test Model, Section: artisan_handles: unterminated character set at position 7
+```
+
+### Context Information Provided
+
+- **File path**: Exact location of the YAML file containing the pattern
+- **Brand/Maker**: Product brand or maker information
+- **Model/Scent**: Product model or scent information  
+- **Section**: Catalog section (e.g., artisan_handles, known_knots)
+- **Field**: Field name (for filter patterns)
+- **Specific regex error**: Detailed error from Python's re module
+
+### Implementation Pattern
+
+All regex compilation uses the enhanced error reporting utilities:
+
+```python
+from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
+
+# Create context with relevant information
+context = create_context_dict(
+    file_path="data/filename.yaml",
+    brand=brand_name,
+    model=model_name,
+    # Additional context as needed
+)
+
+# Use enhanced compilation
+compiled_regex = compile_regex_with_context(pattern, context)
+```
+
+### Coverage
+
+Enhanced regex error reporting is implemented across:
+
+- **Match Phase**: All product matchers (razors, blades, brushes, soaps, handles)
+- **Enrich Phase**: Catalog loaders and pattern utilities
+- **Extract Phase**: Filter patterns and validation
+- **All YAML Catalogs**: handles.yaml, knots.yaml, razors.yaml, blades.yaml, soaps.yaml, extract_filters.yaml
+
+### Benefits
+
+- **Immediate Issue Identification**: Users can quickly locate the exact file and pattern causing the error
+- **Actionable Error Messages**: Clear guidance on what needs to be fixed
+- **Development Efficiency**: Reduces debugging time for regex-related issues
+- **Consistent Error Handling**: All regex errors follow the same detailed format
+
 ## Error Handling Patterns by Phase
 
 ### Fetch Phase: Defensive for External APIs, Fail-Fast for Configuration

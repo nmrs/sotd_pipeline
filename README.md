@@ -44,6 +44,24 @@ The pipeline consists of 6 sequential phases:
 
 ## 🛠️ Development Features
 
+### Enhanced Error Reporting
+
+The pipeline includes **enhanced regex error reporting** that provides detailed context when regex pattern compilation fails in YAML catalog files. Error messages include:
+
+- **File path** where the error occurred
+- **Brand/maker** information
+- **Model/scent** information
+- **Section** information (for handles)
+- **Field** information (for filters)
+- **Specific regex error** details
+
+Example error message:
+```
+Invalid regex pattern '[invalid' in File: data/handles.yaml, Brand: Test Maker, Model: Test Model, Section: artisan_handles: unterminated character set at position 7
+```
+
+This significantly improves debugging efficiency when working with regex patterns in catalog files.
+
 ### Optimized Testing Strategy
 - **Fast Tests**: `make test-fast` (~4.6s, 57% faster than sequential)
 - **Complete Validation**: `make test` (~10.8s, full coverage)
