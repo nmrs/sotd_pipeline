@@ -1,5 +1,3 @@
-import re
-
 from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
 from sotd.match.brush_matching_strategies.utils.knot_size_utils import parse_knot_size
 from sotd.match.brush_matching_strategies.utils.pattern_utils import (
@@ -9,6 +7,7 @@ from sotd.match.brush_matching_strategies.yaml_backed_strategy import (
     YamlBackedBrushMatchingStrategy,
 )
 from sotd.match.types import MatchResult, create_match_result
+from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 
 class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
@@ -31,12 +30,20 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
         for brand, metadata in self.catalog.items():
             patterns = sorted(metadata["patterns"], key=len, reverse=True)
             for pattern in patterns:
+                context = create_context_dict(
+                    file_path="data/brushes.yaml",
+                    brand=brand,
+                    model=metadata.get("default"),
+                    strategy="OtherBrushMatchingStrategy"
+                )
+                compiled_pattern = compile_regex_with_context(pattern, context)
+                
                 compiled_patterns.append(
                     {
                         "brand": brand,
                         "metadata": metadata,
                         "pattern": pattern,
-                        "compiled": re.compile(pattern, re.IGNORECASE),
+                        "compiled": compiled_pattern,
                     }
                 )
         return compiled_patterns

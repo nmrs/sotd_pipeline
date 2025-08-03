@@ -160,3 +160,24 @@ def test_no_default_fiber():
     )
     with pytest.raises(ValueError, match=expected_msg):
         OtherBrushMatchingStrategy(catalog)
+
+
+def test_enhanced_regex_error_reporting():
+    """Test that malformed regex patterns produce detailed error messages."""
+    malformed_catalog = {
+        "Test Brand": {
+            "default": "Badger",
+            "patterns": [r"invalid[regex"],  # Malformed regex - missing closing bracket
+        }
+    }
+    
+    with pytest.raises(ValueError) as exc_info:
+        OtherBrushMatchingStrategy(malformed_catalog)
+    
+    error_message = str(exc_info.value)
+    assert "Invalid regex pattern" in error_message
+    assert "invalid[regex" in error_message
+    assert "File: data/brushes.yaml" in error_message
+    assert "Brand: Test Brand" in error_message
+    assert "Strategy: OtherBrushMatchingStrategy" in error_message
+    assert "unterminated character set" in error_message  # The actual regex error
