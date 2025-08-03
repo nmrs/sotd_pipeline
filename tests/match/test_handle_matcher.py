@@ -1,5 +1,7 @@
 """Tests for HandleMatcher with unified MatchResult support."""
 
+import pytest
+from unittest.mock import patch
 from sotd.match.handle_matcher import HandleMatcher
 from sotd.match.types import MatchResult
 
@@ -95,6 +97,31 @@ artisan_handles:
         result = matcher.match("Unknown Handle")
 
         assert result is None
+
+    def test_enhanced_regex_error_reporting(self):
+        """Test that malformed regex patterns produce detailed error messages."""
+        mock_handles = {
+            "artisan_handles": {
+                "Test Maker": {
+                    "Test Model": {
+                        "patterns": [r"invalid[regex"]  # Malformed regex - missing closing bracket
+                    }
+                }
+            }
+        }
+        
+        # Mock the yaml.safe_load function to return our mock catalog
+        with patch("yaml.safe_load", return_value=mock_handles):
+            with pytest.raises(ValueError) as exc_info:
+                HandleMatcher()
+            
+            error_message = str(exc_info.value)
+            assert "Invalid regex pattern" in error_message
+            assert "invalid[regex" in error_message
+            assert "File: data/handles.yaml" in error_message
+            assert "Brand: Test Maker" in error_message
+            assert "Model: Test Model" in error_message
+            assert "unterminated character set" in error_message  # The actual regex error
 
     def test_handle_matcher_backward_compatibility(self, tmp_path):
         """Test that match_handle_maker method still works for backward compatibility."""
