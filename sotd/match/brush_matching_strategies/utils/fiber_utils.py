@@ -2,20 +2,25 @@ import re
 from typing import Optional
 
 _FIBER_PATTERNS = {
-    "Badger": (
-        r"(hmw|high.*mo|(2|3|two|three)\s*band|shd|badger|silvertip|super|"
-        r"gelo|gelous|gelousy|finest|best|ultralux|[fm]anchurian|\blod\b)"
-    ),
-    "Boar": r"\b(boar|shoat)\b",
-    "Horse": r"\bhorse(hair)?\b",
+    # Most specific patterns first
     "Mixed Badger/Boar": r"(mix|mixed|mi[sx]tura?|badg.*boar|boar.*badg|hybrid|fusion)",
     "Mixed Badger/Synthetic": r"(badg.*synth|synth.*badg)",
+    
+    # Specific fiber types with detailed patterns
     "Synthetic": (
         r"(acrylic|timber|tux|mew|silk|synt|synbad|2bed|captain|cashmere|"
         r"faux (horse|boar|badger)|black.*(magic|wolf)|g4|boss|st-?(1|2)|trafalgar\s*t[23]|"
         r"\bt[23]\b|kong|hi\s*brush|ak47|g5[abc]|stf|quartermoon|fibre|"
         r"\bmig\b|synthetic badger|motherlode)"
     ),
+    
+    # General fiber types (checked last)
+    "Badger": (
+        r"(hmw|high.*mo|(2|3|two|three)\s*band|shd|badger|silvertip|super|"
+        r"gelo|gelous|gelousy|finest|best|ultralux|[fm]anchurian|\blod\b)"
+    ),
+    "Boar": r"\b(boar|shoat)\b",
+    "Horse": r"\bhorse(hair)?\b",
 }
 
 
