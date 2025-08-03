@@ -2,6 +2,7 @@
 
 import pytest
 import yaml
+from unittest.mock import patch
 
 from sotd.match.brush_matcher import BrushMatcher
 
@@ -746,3 +747,28 @@ class TestBrushMatcherPatternFields:
         # Artisan handles should generally score higher (though exact values depend on patterns)
         assert artisan_handle_score >= 0  # Should be non-negative
         assert other_handle_score >= 0  # Should be non-negative
+
+
+def test_enhanced_regex_error_reporting():
+    """Test that malformed regex patterns produce detailed error messages."""
+    mock_brushes = {
+        "Test Brand": {
+            "Test Model": {
+                "patterns": [r"invalid[regex"],  # Malformed regex - missing closing bracket
+                "fiber": "Badger"
+            }
+        }
+    }
+    
+    # Mock the load_yaml_with_nfc function to return our mock catalog
+    with patch("sotd.utils.yaml_loader.load_yaml_with_nfc", return_value=mock_brushes):
+        with pytest.raises(ValueError) as exc_info:
+            BrushMatcher()
+        
+        error_message = str(exc_info.value)
+        assert "Invalid regex pattern" in error_message
+        assert "invalid[regex" in error_message
+        assert "File: data/brushes.yaml" in error_message
+        assert "Brand: Test Brand" in error_message
+        assert "Model: Test Model" in error_message
+        assert "unterminated character set" in error_message  # The actual regex error
