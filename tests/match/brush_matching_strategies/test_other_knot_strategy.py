@@ -102,10 +102,10 @@ class TestOtherKnotMatchingStrategy:
                 "patterns": [r"invalid[regex"],  # Malformed regex - missing closing bracket
             }
         }
-        
+
         with pytest.raises(ValueError) as exc_info:
             OtherKnotMatchingStrategy(malformed_catalog)
-        
+
         error_message = str(exc_info.value)
         assert "Invalid regex pattern" in error_message
         assert "invalid[regex" in error_message

@@ -52,15 +52,15 @@ class TestBrushEnricher:
                 "handle": {
                     "brand": "Simpson",
                     "model": "Chubby 2",
-                    "source_text": "Simpson Chubby 2"
+                    "source_text": "Simpson Chubby 2",
                 },
                 "knot": {
                     "brand": "Simpson",
                     "model": "Chubby 2",
                     "fiber": "Badger",
                     "knot_size_mm": 27.0,
-                    "source_text": "Simpson Chubby 2"
-                }
+                    "source_text": "Simpson Chubby 2",
+                },
             }
         }
         brush_extracted = "Simpson Chubby 2"
@@ -82,14 +82,14 @@ class TestBrushEnricher:
                 "handle": {
                     "brand": "Simpson",
                     "model": "Chubby 2",
-                    "source_text": "Simpson Chubby 2"
+                    "source_text": "Simpson Chubby 2",
                 },
                 "knot": {
                     "brand": "Simpson",
                     "model": "Chubby 2",
                     "fiber": "Badger",
-                    "source_text": "Simpson Chubby 2"
-                }
+                    "source_text": "Simpson Chubby 2",
+                },
             }
         }
         brush_extracted = "Simpson Chubby 2 26mm"
@@ -112,15 +112,15 @@ class TestBrushEnricher:
                 "handle": {
                     "brand": "Simpson",
                     "model": "Chubby 2",
-                    "source_text": "Simpson Chubby 2"
+                    "source_text": "Simpson Chubby 2",
                 },
                 "knot": {
                     "brand": "Simpson",
                     "model": "Chubby 2",
                     "fiber": "Badger",
                     "knot_size_mm": 27.0,
-                    "source_text": "Simpson Chubby 2"
-                }
+                    "source_text": "Simpson Chubby 2",
+                },
             }
         }
         brush_extracted = "Simpson Chubby 2 27mm"
@@ -143,15 +143,15 @@ class TestBrushEnricher:
                 "handle": {
                     "brand": "Simpson",
                     "model": "Chubby 2",
-                    "source_text": "Simpson Chubby 2"
+                    "source_text": "Simpson Chubby 2",
                 },
                 "knot": {
                     "brand": "Simpson",
                     "model": "Chubby 2",
                     "fiber": "Badger",
                     "knot_size_mm": 27.0,
-                    "source_text": "Simpson Chubby 2"
-                }
+                    "source_text": "Simpson Chubby 2",
+                },
             }
         }
         brush_extracted = "Simpson Chubby 2 26mm"
@@ -174,14 +174,14 @@ class TestBrushEnricher:
                 "handle": {
                     "brand": "Simpson",
                     "model": "Chubby 2",
-                    "source_text": "Simpson Chubby 2"
+                    "source_text": "Simpson Chubby 2",
                 },
                 "knot": {
                     "brand": "Simpson",
                     "model": "Chubby 2",
                     "fiber": "Badger",
-                    "source_text": "Simpson Chubby 2"
-                }
+                    "source_text": "Simpson Chubby 2",
+                },
             }
         }
         brush_extracted = "Simpson Chubby 2"
@@ -209,15 +209,15 @@ class TestBrushEnricher:
                 "handle": {
                     "brand": "Simpson",
                     "model": "Chubby 2",
-                    "source_text": "Simpson Chubby 2"
+                    "source_text": "Simpson Chubby 2",
                 },
                 "knot": {
                     "brand": "Simpson",
                     "model": "Chubby 2",
                     "fiber": "Badger",
                     "knot_size_mm": 27.0,
-                    "source_text": "Simpson Chubby 2"
-                }
+                    "source_text": "Simpson Chubby 2",
+                },
             }
         }
         result = enricher.enrich(field_data, "")

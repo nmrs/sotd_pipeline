@@ -34,10 +34,10 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                     file_path="data/brushes.yaml",
                     brand=brand,
                     model=metadata.get("default"),
-                    strategy="OtherBrushMatchingStrategy"
+                    strategy="OtherBrushMatchingStrategy",
                 )
                 compiled_pattern = compile_regex_with_context(pattern, context)
-                
+
                 compiled_patterns.append(
                     {
                         "brand": brand,

@@ -200,17 +200,17 @@ class TestBrushEnricherWorkflow:
         field_data = {
             "matched": {
                 "handle": {
-                    "brand": "Alpha", 
-                    "model": "T-400", 
+                    "brand": "Alpha",
+                    "model": "T-400",
                     "handle_maker": "Alpha",
-                    "source_text": "Alpha T-400"
+                    "source_text": "Alpha T-400",
                 },
                 "knot": {
                     "brand": "Zenith",
                     "model": "B03 (aka B2)",
                     "fiber": "Boar",
                     "knot_size_mm": 26,
-                    "source_text": "Zenith B03 Boar"
+                    "source_text": "Zenith B03 Boar",
                 },
             }
         }

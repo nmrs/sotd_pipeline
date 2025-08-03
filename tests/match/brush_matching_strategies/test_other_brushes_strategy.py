@@ -170,10 +170,10 @@ def test_enhanced_regex_error_reporting():
             "patterns": [r"invalid[regex"],  # Malformed regex - missing closing bracket
         }
     }
-    
+
     with pytest.raises(ValueError) as exc_info:
         OtherBrushMatchingStrategy(malformed_catalog)
-    
+
     error_message = str(exc_info.value)
     assert "Invalid regex pattern" in error_message
     assert "invalid[regex" in error_message

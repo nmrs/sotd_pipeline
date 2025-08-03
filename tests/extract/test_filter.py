@@ -94,7 +94,7 @@ class TestExtractFilter:
         try:
             with pytest.raises(ValueError) as exc_info:
                 ExtractFilter(filter_path)
-            
+
             error_message = str(exc_info.value)
             assert "Invalid regex pattern" in error_message
             assert "invalid[regex" in error_message
@@ -141,7 +141,7 @@ class TestExtractFilter:
         try:
             with pytest.raises(ValueError) as exc_info:
                 ExtractFilter(filter_path)
-            
+
             error_message = str(exc_info.value)
             assert "Invalid regex pattern" in error_message
             assert "[invalid" in error_message

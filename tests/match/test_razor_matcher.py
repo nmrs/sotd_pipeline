@@ -79,16 +79,16 @@ def test_enhanced_regex_error_reporting():
         "Test Brand": {
             "Test Model": {
                 "patterns": [r"invalid[regex"],  # Malformed regex - missing closing bracket
-                "format": "DE"
+                "format": "DE",
             }
         }
     }
-    
+
     # Mock the load_yaml_with_nfc function to return our mock catalog
     with patch("sotd.utils.yaml_loader.load_yaml_with_nfc", return_value=mock_razors):
         with pytest.raises(ValueError) as exc_info:
             RazorMatcher()
-        
+
         error_message = str(exc_info.value)
         assert "Invalid regex pattern" in error_message
         assert "invalid[regex" in error_message

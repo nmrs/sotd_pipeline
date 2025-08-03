@@ -39,10 +39,10 @@ class OtherKnotMatchingStrategy:
                     file_path="data/knots.yaml",
                     brand=brand,
                     model=default_fiber,
-                    strategy="OtherKnotMatchingStrategy"
+                    strategy="OtherKnotMatchingStrategy",
                 )
                 compiled_pattern = compile_regex_with_context(pattern, context)
-                
+
                 pattern_entry = {
                     "pattern": pattern,
                     "compiled": compiled_pattern,

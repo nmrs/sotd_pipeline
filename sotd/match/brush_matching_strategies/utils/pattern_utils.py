@@ -55,9 +55,7 @@ def compile_patterns_with_metadata(
             continue
 
         pattern = pattern_data["pattern"]
-        context = create_context_dict(
-            file_path="pattern_utils"
-        )
+        context = create_context_dict(file_path="pattern_utils")
         compiled = compile_regex_with_context(pattern, context)
 
         compiled_pattern = {

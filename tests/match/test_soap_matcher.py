@@ -415,12 +415,12 @@ def test_enhanced_regex_error_reporting():
             "scents": {"Test Scent": {"patterns": ["test.*scent"]}},
         }
     }
-    
+
     # Mock the load_yaml_with_nfc function to return our mock catalog
     with patch("sotd.match.soap_matcher.load_yaml_with_nfc", return_value=mock_catalog):
         with pytest.raises(ValueError) as exc_info:
             SoapMatcher()
-        
+
         error_message = str(exc_info.value)
         assert "Invalid regex pattern" in error_message
         assert "invalid[regex" in error_message

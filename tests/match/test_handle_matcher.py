@@ -109,12 +109,12 @@ artisan_handles:
                 }
             }
         }
-        
+
         # Mock the yaml.safe_load function to return our mock catalog
         with patch("yaml.safe_load", return_value=mock_handles):
             with pytest.raises(ValueError) as exc_info:
                 HandleMatcher()
-            
+
             error_message = str(exc_info.value)
             assert "Invalid regex pattern" in error_message
             assert "invalid[regex" in error_message

@@ -112,10 +112,10 @@ class TestCompilePatternsWithMetadata:
                 "model": "TestModel",
             }
         ]
-        
+
         with pytest.raises(ValueError) as exc_info:
             compile_patterns_with_metadata(patterns_data)
-        
+
         error_message = str(exc_info.value)
         assert "Invalid regex pattern" in error_message
         assert "invalid[regex" in error_message
