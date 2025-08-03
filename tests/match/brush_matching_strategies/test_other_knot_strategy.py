@@ -1,4 +1,5 @@
 from sotd.match.brush_matching_strategies.other_knot_strategy import OtherKnotMatchingStrategy
+import pytest
 
 
 class TestOtherKnotMatchingStrategy:
@@ -92,3 +93,23 @@ class TestOtherKnotMatchingStrategy:
         """Test that None input is handled gracefully."""
         result = self.strategy.match("None")
         assert result.matched is None
+
+    def test_enhanced_regex_error_reporting(self):
+        """Test that malformed regex patterns produce detailed error messages."""
+        malformed_catalog = {
+            "Test Brand": {
+                "default": "Synthetic",
+                "patterns": [r"invalid[regex"],  # Malformed regex - missing closing bracket
+            }
+        }
+        
+        with pytest.raises(ValueError) as exc_info:
+            OtherKnotMatchingStrategy(malformed_catalog)
+        
+        error_message = str(exc_info.value)
+        assert "Invalid regex pattern" in error_message
+        assert "invalid[regex" in error_message
+        assert "File: data/knots.yaml" in error_message
+        assert "Brand: Test Brand" in error_message
+        assert "Strategy: OtherKnotMatchingStrategy" in error_message
+        assert "unterminated character set" in error_message  # The actual regex error

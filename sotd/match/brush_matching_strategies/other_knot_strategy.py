@@ -1,9 +1,8 @@
-import re
-
 from sotd.match.brush_matching_strategies.utils.pattern_utils import (
     create_strategy_result,
     validate_string_input,
 )
+from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 
 class OtherKnotMatchingStrategy:
@@ -36,9 +35,17 @@ class OtherKnotMatchingStrategy:
 
             # Create pattern entries
             for pattern in patterns:
+                context = create_context_dict(
+                    file_path="data/knots.yaml",
+                    brand=brand,
+                    model=default_fiber,
+                    strategy="OtherKnotMatchingStrategy"
+                )
+                compiled_pattern = compile_regex_with_context(pattern, context)
+                
                 pattern_entry = {
                     "pattern": pattern,
-                    "compiled": re.compile(pattern, re.IGNORECASE),
+                    "compiled": compiled_pattern,
                     **pattern_metadata,
                 }
                 all_patterns.append(pattern_entry)
