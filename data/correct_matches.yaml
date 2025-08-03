@@ -663,10 +663,8 @@ brush:
     B14:
     - declaration grooming - artisan's choice - b14
     - declaration grooming - randy watson washington - 28mm b14
-    - declaration grooming bok b14:
-        handle_match: true
-    - declaration grooming know it all 28mm b14 badger knot:
-        handle_match: true
+    - declaration grooming bok b14
+    - declaration grooming know it all 28mm b14 badger knot
     - declaration grooming washington envy b14 shd badger
     - dogwood handcrafts ivory dg b14 28mm badger
     B15:
@@ -691,8 +689,7 @@ brush:
     B7:
     - dg b7 badger
     B8:
-    - declaration grooming fae b8:
-        handle_match: true
+    - declaration grooming fae b8
     B9A:
     - declaration grooming - lavender jefferson - 28mm b9a+
     - dg b9a
