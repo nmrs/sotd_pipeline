@@ -1,0 +1,270 @@
+# Correct Matches Brush Type Determination Specification
+
+## Overview
+
+This specification defines the logic for determining brush types based on matches found in the `correct_matches.yaml` file sections. The goal is to eliminate the need for explicit metadata like `handle_match: true` and instead rely on data-driven determination based on which sections contain matches.
+
+## Current Structure Analysis
+
+The current `correct_matches.yaml` has these sections:
+- `brush` - for complete brush matches
+- `handle` - for handle-only matches  
+- `knot` - for knot-only matches
+- `split_brush` - for composite brush mappings (to be eliminated)
+
+## Brush Type Classification
+
+Based on the existing brush data structure from `data/matched/2025-06.json`, there are four distinct brush types:
+
+### 1. Complete Brush
+**Structure:**
+```json
+{
+  "brand": "Zenith",
+  "model": "506U SE",          // ← Has specific model
+  "handle": { ... },
+  "knot": { ... }
+}
+```
+**Determination:** Found in `brush` section only
+
+### 2. Single Maker Brush
+**Structure:**
+```json
+{
+  "brand": "Zenith",           // ← Maker brand only
+  "model": null,               // ← No specific model
+  "handle": { ... },           // ← Handle details with Zenith brand
+  "knot": { ... }              // ← Knot details with Zenith brand
+}
+```
+**Determination:** Found in `handle` + `knot` sections with same maker
+
+### 3. Composite Brush
+**Structure:**
+```json
+{
+  "brand": null,               // ← No maker brand
+  "model": null,               // ← No specific model
+  "handle": { ... },           // ← Handle details with different brand
+  "knot": { ... }              // ← Knot details with different brand
+}
+```
+**Determination:** Found in `handle` + `knot` sections with different makers
+
+### 4. Single Component Brush
+**Structure (Handle Only):**
+```json
+{
+  "brand": null,               // ← No maker brand
+  "model": null,               // ← No specific model
+  "handle": { ... },           // ← Only handle matched
+  "knot": null                 // ← No knot matched
+}
+```
+**Structure (Knot Only):**
+```json
+{
+  "brand": null,               // ← No maker brand  
+  "model": null,               // ← No specific model
+  "handle": null,              // ← No handle matched
+  "knot": { ... }              // ← Only knot matched
+}
+```
+**Determination:** Found in `handle` section only OR `knot` section only
+
+## Search and Determination Logic
+
+### Step 1: Search All Sections
+Always search all sections (`brush`, `handle`, `knot`) for the normalized input string.
+
+### Step 2: Determine Brush Type
+Based on what sections return matches:
+
+1. **Found in `brush` section** → **Complete brush**
+   - Set `brand` and `model` at top level from brush section
+   - Populate `handle` and `knot` details from brush section
+
+2. **Found in `handle` + `knot` sections** → Check if same maker:
+   - **Same maker** → **Single maker brush**
+     - Set `brand` = maker name, `model` = null
+     - Populate `handle` and `knot` details from respective sections
+   - **Different makers** → **Composite brush**
+     - Set `brand` = null, `model` = null
+     - Populate `handle` and `knot` details from respective sections
+
+3. **Found in `handle` section only** → **Single component brush (handle only)**
+   - Set `brand` = null, `model` = null
+   - Populate `handle` details, set `knot` = null
+
+4. **Found in `knot` section only** → **Single component brush (knot only)**
+   - Set `brand` = null, `model` = null
+   - Populate `knot` details, set `handle` = null
+
+5. **Found in `brush` + `handle`/`knot` sections** → **Complete brush with overrides**
+   - Use `brush` section as primary (set `brand` and `model`)
+   - Enhance with `handle`/`knot` details from respective sections
+
+## Catalog Lookup Process
+
+### Two-Step Lookup Mechanism
+When a match is found in `correct_matches.yaml`, the system performs a two-step lookup:
+
+1. **Correct Matches Lookup**: Find the hierarchical path in `correct_matches.yaml`
+2. **Canonical Catalog Lookup**: Use that path to retrieve complete details from the appropriate canonical catalog
+
+### Catalog Mapping
+- **`brush` section** → Look up in `brushes.yaml`
+- **`handle` section** → Look up in `handles.yaml`  
+- **`knot` section** → Look up in `knots.yaml`
+
+### Example Lookup Process
+```yaml
+# Input: "declaration grooming bok b14"
+
+# Step 1: Find in correct_matches.yaml
+brush:
+  Declaration Grooming:
+    B14:
+      - declaration grooming bok b14  # ← MATCH FOUND
+
+# Step 2: Look up in canonical catalog (brushes.yaml)
+Declaration Grooming:
+  B14:
+    fiber: Badger
+    knot_size_mm: 28
+    handle_matching: true
+    patterns:
+      - ^(?!.*dog).*(declaration|\bdg\b).*\bb14\b
+```
+
+### Performance Optimization: Catalog Caching
+- **Cache all canonical catalogs** (`brushes.yaml`, `handles.yaml`, `knots.yaml`) in memory during initialization
+- **Use O(1) dictionary lookups** for brand/model access
+- **Avoid repeated file I/O** during matching operations
+- **Cache structure**: `{catalog_name: {brand: {model: data}}}`
+
+### Complete Result Construction
+After finding the catalog entry, construct the complete result by:
+1. **Extracting base fields** (brand, model, fiber, knot_size_mm)
+2. **Building handle section** from catalog data or handle-specific lookup
+3. **Building knot section** from catalog data or knot-specific lookup
+4. **Applying any overrides** from handle/knot sections if present
+
+## Correct Matches Implementation Requirements
+
+### Core Principles (DRY)
+The correct matches checker should behave **exactly like regex strategies** to maintain consistency and follow the DRY principle.
+
+### Interface Consistency
+- **Return same `MatchResult` structure** as regex strategies
+- **Use `match_type: "exact"`** to indicate validated lookup
+- **Follow same error handling** as regex strategies (fail fast)
+- **Use same priority order** as brush matcher strategies
+- **Support same debug output** as regex strategies
+
+### Performance Optimization
+- **Build flattened lookup dictionary** during initialization for O(1) access
+- **Use hierarchical YAML structure** for human readability
+- **Use `.lower()` for case-insensitive matching** on already-normalized strings
+- **No additional caching needed** (brush matcher's outer cache handles repeat strings)
+
+### Implementation Details
+- **Input**: Receives already-normalized strings from brush matcher
+- **Lookup**: O(1) access via flattened dictionary built during init
+- **Output**: Same `MatchResult` structure as regex strategies
+- **Error handling**: Same as regex strategies (fail fast, bubble up exceptions)
+- **Debug output**: Same as regex strategies (log strategy usage)
+
+## Maker Comparison Logic
+
+### Same Maker Determination
+- Compare the maker names from handle and knot sections using **exact string matching**
+- Maker names come from canonical catalogs - any mismatches are catalog errors to be fixed
+- Use case-insensitive comparison for the comparison itself
+
+### Examples
+
+**Same Maker (Single Maker Brush):**
+```
+Input: "aka brushworx blues stanley cup with 26mm aka brushworx quartermoon knot"
+Found in: handle (aka brushworx) + knot (aka brushworx)
+Result: Single maker brush with brand="aka brushworx", model=null
+```
+
+**Different Makers (Composite Brush):**
+```
+Input: "aka brushworx blues stanley cup with 26mm turn n shave quartermoon knot"
+Found in: handle (aka brushworx) + knot (turn-n-shave)
+Result: Composite brush with brand=null, model=null
+```
+
+## Error Handling
+
+### Fail Fast Principle
+- **Catalog lookup failures** should bubble up clear exceptions that halt the pipeline
+- **Missing catalog entries** should fail fast with descriptive error messages
+- **Data inconsistencies** should fail fast to allow user correction
+- **Follow same error handling** as regex strategies for consistency
+
+### Validation
+- **Separate validation tool** ensures correct_matches.yaml entries match current catalogs
+- **Correct matches checker** assumes data is valid and focuses on fast lookup
+- **No runtime validation** needed in correct matches checker
+
+## Migration Strategy
+
+### Phase 1: Eliminate `split_brush` Section
+- Move all `split_brush` entries to appropriate `handle` and `knot` sections
+- Ensure the same input string appears in both sections for composite brushes
+- Remove `split_brush` section entirely
+
+### Phase 2: Update Correct Matches Checker
+- Modify `CorrectMatchesChecker` to implement the new search logic
+- Remove `_check_split_brush_correct_matches` method
+- Update `check` method to search all sections and determine type
+- Implement flattened lookup dictionary for O(1) access
+- Return same `MatchResult` structure as regex strategies
+
+### Phase 3: Update Brush Matcher
+- Modify brush matching strategies to use the new determination logic
+- Ensure output structure matches the four brush types defined above
+- Integrate correct matches as first strategy in priority order
+
+## Benefits
+
+1. **Data-Driven**: No explicit metadata needed, structure determines behavior
+2. **Simplified**: Eliminates redundant `split_brush` section
+3. **Consistent**: All brush types follow the same determination logic
+4. **Maintainable**: Easier to understand and modify
+5. **Extensible**: Easy to add new brush types by extending the logic
+6. **DRY**: Correct matches behaves exactly like regex strategies
+7. **Performance**: O(1) lookups with pre-computed results
+
+## Testing Requirements
+
+### Unit Tests
+- Test each brush type determination logic
+- Test maker comparison logic (exact string matching)
+- Test edge cases (empty sections, missing data)
+- Test case-insensitive matching
+- Test flattened lookup dictionary construction
+- Test same `MatchResult` structure as regex strategies
+
+### Integration Tests
+- Test with real `correct_matches.yaml` data
+- Test migration of existing `split_brush` entries
+- Test output structure matches expected format
+- Test performance with large datasets
+- Test error handling consistency with regex strategies
+
+### Test Data
+- Create test fixtures for each brush type
+- Include edge cases and error conditions
+- Test with real-world examples from matched data
+- Test catalog lookup failures and error scenarios
+
+description:
+globs:
+alwaysApply: false
+---
