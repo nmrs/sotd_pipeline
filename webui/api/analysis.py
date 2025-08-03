@@ -132,10 +132,6 @@ class MismatchItem(BaseModel):
     # Source file information for each comment ID
     comment_sources: Dict[str, str] = Field(default_factory=dict)  # comment_id -> source_file
     is_confirmed: Optional[bool] = None
-    # Split brush fields
-    is_split_brush: Optional[bool] = None
-    handle_component: Optional[str] = None
-    knot_component: Optional[str] = None
 
 
 class MismatchAnalysisResponse(BaseModel):
@@ -840,17 +836,13 @@ async def get_correct_matches(field: str):
 
         logger.info(f"Loaded data keys: {list(data.keys())}")
 
-        # For brush field, include both brush and split_brush sections
+        # For brush field, use only brush section
         if field == "brush":
             field_data = data.get(field, {})
-            split_brush_data = data.get("split_brush", {})
-            # Combine both sections
-            combined_data = {"brush": field_data, "split_brush": split_brush_data}
+            combined_data = field_data
             logger.info(f"Field data for '{field}': {field_data}")
-            logger.info(f"Split brush data: {split_brush_data}")
         else:
             field_data = data.get(field, {})
-            split_brush_data = {}  # Initialize for non-brush fields
             combined_data = field_data
             logger.info(f"Field data for '{field}': {field_data}")
 
@@ -877,17 +869,13 @@ async def get_correct_matches(field: str):
                             if isinstance(model_data, list):
                                 total_entries += len(model_data)
         elif field == "brush":
-            # For brush field, count both brush and split_brush entries
-            # Count brush section entries
-            brush_entries = sum(
+            # For brush field, count brush section entries only
+            total_entries = sum(
                 len(strings) if isinstance(strings, list) else 0
                 for brand_data in field_data.values()
                 if isinstance(brand_data, dict)
                 for strings in brand_data.values()
             )
-            # Count split_brush section entries
-            split_brush_entries = len(split_brush_data)
-            total_entries = brush_entries + split_brush_entries
         else:
             # Other fields have brand -> model -> strings structure
             total_entries = sum(

@@ -34,7 +34,6 @@ const MismatchAnalyzer: React.FC = () => {
     | 'unconfirmed'
     | 'regex'
     | 'intentionally_unmatched'
-    | 'split_brushes'
     | 'complete_brushes'
   >('mismatches');
   const [loading, setLoading] = useState(false);
@@ -568,13 +567,11 @@ const MismatchAnalyzer: React.FC = () => {
           item => item.mismatch_type === 'intentionally_unmatched'
         );
 
-      case 'split_brushes':
-        // Show only split brush items (when field is brush)
-        return results.mismatch_items.filter(item => item.is_split_brush === true);
+
 
       case 'complete_brushes':
         // Show only complete brush items (when field is brush)
-        return results.mismatch_items.filter(item => item.is_split_brush === false);
+        return results.mismatch_items.filter(item => item.is_complete_brush === true);
 
       default:
         return results.mismatch_items;
@@ -671,7 +668,7 @@ const MismatchAnalyzer: React.FC = () => {
         unconfirmed: 0,
         regex: 0,
         intentionally_unmatched: 0,
-        split_brushes: 0,
+
         complete_brushes: 0,
       };
 
@@ -693,8 +690,8 @@ const MismatchAnalyzer: React.FC = () => {
       intentionally_unmatched: returnedItems.filter(
         item => item.mismatch_type === 'intentionally_unmatched'
       ).length,
-      split_brushes: returnedItems.filter(item => item.is_split_brush === true).length,
-      complete_brushes: returnedItems.filter(item => item.is_split_brush === false).length,
+
+      complete_brushes: returnedItems.filter(item => item.is_complete_brush === true).length,
     };
   };
 
@@ -950,28 +947,7 @@ const MismatchAnalyzer: React.FC = () => {
                 </span>
               </Button>
               {/* Split Brushes filter - only show when field is brush */}
-              {selectedField === 'brush' && (
-                <Button
-                  variant='outline'
-                  onClick={() => setDisplayMode('split_brushes')}
-                  className={`flex items-center gap-1 text-sm relative group ${displayMode === 'split_brushes' ? 'bg-blue-600 text-white' : ''}`}
-                  title='Show only split brush items (handle/knot combinations)'
-                >
-                  <Filter className='h-4 w-4' />
-                  Split Brushes
-                  <span
-                    className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'split_brushes'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
-                      }`}
-                  >
-                    {getDisplayModeCounts().split_brushes}
-                  </span>
-                  <span className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm'>
-                    Show only split brush items (handle/knot combinations)
-                  </span>
-                </Button>
-              )}
+
               {/* Complete Brushes filter - only show when field is brush */}
               {selectedField === 'brush' && (
                 <Button

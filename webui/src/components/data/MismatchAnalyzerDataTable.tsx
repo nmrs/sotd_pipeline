@@ -671,42 +671,17 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       baseColumns.push({
         id: 'brush_pattern',
         accessorFn: row => {
-          const isSplitBrush = row.is_split_brush === true;
-          if (isSplitBrush) {
-            const handleText = row.handle_component || 'N/A';
-            const knotText = row.knot_component || 'N/A';
-            return `split handle: ${handleText} knot: ${knotText}`;
-          } else {
-            return row.pattern || '';
-          }
+          return row.pattern || '';
         },
         header: 'Brush Pattern',
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
-          const isSplitBrush = item.is_split_brush === true;
-
-          if (isSplitBrush) {
-            // For split brushes, show the split format
-            const handleText = item.handle_component || 'N/A';
-            const knotText = item.knot_component || 'N/A';
-            return (
-              <div className='text-sm text-gray-500 max-w-xs font-mono relative'>
-                🔗 split
-                <br />
-                handle: {truncateText(handleText, 30)}
-                <br />
-                knot: {truncateText(knotText, 30)}
-              </div>
-            );
-          } else {
-            // For complete brushes, show the pattern
-            const patternText = item.pattern || '';
-            return (
-              <div className='text-sm text-gray-500 max-w-xs font-mono relative'>
-                {truncateText(patternText, 40)}
-              </div>
-            );
-          }
+          const patternText = item.pattern || '';
+          return (
+            <div className='text-sm text-gray-500 max-w-xs font-mono relative'>
+              {truncateText(patternText, 40)}
+            </div>
+          );
         },
       });
 
@@ -720,7 +695,6 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           header: 'Handle',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
-            // For split brushes, show the matched handle data
             const handleText = formatBrushComponent(item.matched, 'handle');
             return (
               <div className='text-sm text-gray-900 max-w-xs relative'>
@@ -752,7 +726,6 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           header: 'Knot',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
-            // For split brushes, show the matched knot data
             const knotText = formatBrushComponent(item.matched, 'knot');
             return (
               <div className='text-sm text-gray-900 max-w-xs'>{truncateText(knotText, 50)}</div>
