@@ -50,7 +50,9 @@ class TestBrushUserIntentRegression:
 
                 assert result is not None
                 assert result.matched is not None
-                assert "user_intent" not in result.matched, "user_intent should not be in match phase (moved to enrich phase)"
+                assert (
+                    "user_intent" not in result.matched
+                ), "user_intent should not be in match phase (moved to enrich phase)"
 
         # Test split_brush correct match
         value = "aka brushworx g5c"
@@ -75,7 +77,9 @@ class TestBrushUserIntentRegression:
 
                 assert result is not None
                 assert result.matched is not None
-                assert "user_intent" not in result.matched, "user_intent should not be in match phase (moved to enrich phase)"
+                assert (
+                    "user_intent" not in result.matched
+                ), "user_intent should not be in match phase (moved to enrich phase)"
                 # User intent is now handled in enrich phase, not match phase
 
     def test_regression_detect_user_intent_method_preserved(self, brush_matcher):
@@ -174,7 +178,9 @@ class TestBrushUserIntentRegression:
             mock_split.return_value = ("Rad Dinosaur Creation", "G5C", "smart_analysis")
 
             result = brush_matcher._process_handle_knot_correct_match(value, correct_match)
-            assert "user_intent" not in result.matched, "handle_knot correct match should NOT include user_intent (moved to enrich phase)"
+            assert (
+                "user_intent" not in result.matched
+            ), "handle_knot correct match should NOT include user_intent (moved to enrich phase)"
 
         # Test _process_split_brush_correct_match - should NOT include user_intent
         value = "aka brushworx g5c"
@@ -196,14 +202,18 @@ class TestBrushUserIntentRegression:
             mock_check.side_effect = [mock_handle_match, mock_knot_match]
 
             result = brush_matcher._process_split_brush_correct_match(value, correct_match)
-            assert "user_intent" not in result.matched, "split_brush correct match should NOT include user_intent (moved to enrich phase)"
+            assert (
+                "user_intent" not in result.matched
+            ), "split_brush correct match should NOT include user_intent (moved to enrich phase)"
 
         # Test _process_regular_correct_match - should NOT include user_intent
         value = "Simpson Chubby 2"
         correct_match = {"brand": "Simpson", "model": "Chubby 2"}
 
         result = brush_matcher._process_regular_correct_match(value, correct_match)
-        assert "user_intent" not in result.matched, "regular correct match should NOT include user_intent (moved to enrich phase)"
+        assert (
+            "user_intent" not in result.matched
+        ), "regular correct match should NOT include user_intent (moved to enrich phase)"
 
         # Test _process_split_result - should NOT include user_intent
         value = "G5C Rad Dinosaur Creation"
@@ -238,7 +248,9 @@ class TestBrushUserIntentRegression:
                     result = brush_matcher._process_split_result(
                         handle_text, knot_text, delimiter_type, value
                     )
-                    assert "user_intent" not in result.matched, "split_result should NOT include user_intent (moved to enrich phase)"
+                    assert (
+                        "user_intent" not in result.matched
+                    ), "split_result should NOT include user_intent (moved to enrich phase)"
 
     def test_regression_user_intent_data_type_consistency(self, brush_matcher):
         """
@@ -282,7 +294,9 @@ class TestBrushUserIntentRegression:
 
                     assert result is not None
                     assert result.matched is not None
-                    assert "user_intent" not in result.matched, "user_intent should not be in match phase (moved to enrich phase)"
+                    assert (
+                        "user_intent" not in result.matched
+                    ), "user_intent should not be in match phase (moved to enrich phase)"
 
                     # User intent is now handled in enrich phase, not match phase
 

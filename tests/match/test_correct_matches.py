@@ -176,8 +176,8 @@ class TestCorrectMatchesChecker:
         assert stats["total_brush_entries"] == 0
         assert stats["total_handle_entries"] == 0
 
-    def test_check_priority_handle_knot_first(self):
-        """Test that handle/knot section is checked before brush section."""
+    def test_check_priority_brush_first(self):
+        """Test that brush section is checked before handle/knot section."""
         # Create data where the same string could match both sections
         priority_matches = {
             "brush": {"Brush Brand": {"Brush Model": ["test string"]}},
@@ -188,8 +188,8 @@ class TestCorrectMatchesChecker:
         checker = CorrectMatchesChecker(self.config, priority_matches)
         result = checker.check("test string")
 
-        # Should match handle/knot section first (priority)
+        # Should match brush section first (new priority order)
         assert result is not None
-        assert result.match_type == "handle_knot_section"
-        assert result.handle_maker == "Handle Maker"
-        assert result.handle_model == "Handle Model"
+        assert result.match_type == "brush_section"
+        assert result.brand == "Brush Brand"
+        assert result.model == "Brush Model"

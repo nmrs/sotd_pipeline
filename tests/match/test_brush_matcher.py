@@ -760,16 +760,12 @@ def test_enhanced_regex_error_reporting():
                 }
             }
         },
-        "other_brushes": {}
+        "other_brushes": {},
     }
 
     # Mock the load_all_catalogs method to return our mock catalog
     with patch("sotd.match.loaders.CatalogLoader.load_all_catalogs") as mock_load:
-        mock_load.return_value = {
-            "brushes": mock_brushes,
-            "knots": {},
-            "correct_matches": {}
-        }
+        mock_load.return_value = {"brushes": mock_brushes, "knots": {}, "correct_matches": {}}
         with pytest.raises(ValueError) as exc_info:
             BrushMatcher()
 
