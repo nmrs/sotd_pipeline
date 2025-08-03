@@ -12,6 +12,7 @@ from rich.table import Table
 from sotd.match.types import MatchResult, MatchType, create_match_result
 from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 from sotd.utils.yaml_loader import load_yaml_with_nfc
+from sotd.utils.match_filter_utils import strip_trailing_periods
 
 
 class SoapMatcher:
@@ -43,18 +44,22 @@ class SoapMatcher:
 
     def _normalize_common_text(self, text: str) -> str:
         """Normalize common text patterns."""
-        # Remove sample markers
-        text = re.sub(r"\b(sample|samp)\b", "", text.lower())
+        # Remove sample markers (case-insensitive)
+        text = re.sub(r"\b(sample|samp)\b", "", text, flags=re.IGNORECASE)
         # Normalize whitespace
         text = re.sub(r"\s+", " ", text.strip())
+        # Strip trailing periods
+        text = strip_trailing_periods(text)
         return text
 
     def _normalize_scent_text(self, text: str) -> str:
         """Normalize scent text for matching."""
-        # Remove common scent indicators
-        text = re.sub(r"\b(soap|cream|splash|balm|aftershave)\b", "", text.lower())
+        # Remove common scent indicators (case-insensitive)
+        text = re.sub(r"\b(soap|cream|splash|balm|aftershave)\b", "", text, flags=re.IGNORECASE)
         # Normalize whitespace
         text = re.sub(r"\s+", " ", text.strip())
+        # Strip trailing periods
+        text = strip_trailing_periods(text)
         return text
 
     def _compile_patterns(self):
@@ -191,9 +196,9 @@ class SoapMatcher:
                 start, end = match.span()
                 remainder = normalized[:start] + normalized[end:]
                 remainder = re.sub(r"^[\s\-:*/_,~`\\]+", "", remainder).strip()
+                remainder = re.sub(r"[\s\-:*/_,~`\\]+$", "", remainder).strip()
                 remainder = self._normalize_scent_text(remainder)
-                if self._is_sample(original):
-                    remainder = self._remove_sample_marker(remainder)
+                remainder = self._remove_sample_marker(remainder)
                 return {
                     "original": original,
                     "matched": {"maker": pattern_info["maker"], "scent": remainder},
@@ -208,8 +213,7 @@ class SoapMatcher:
             parts = normalized.split("-", 1)
             brand_guess = self._normalize_common_text(parts[0].strip())
             scent_guess = self._normalize_scent_text(parts[1].strip())
-            if self._is_sample(original):
-                scent_guess = self._remove_sample_marker(scent_guess)
+            scent_guess = self._remove_sample_marker(scent_guess)
             if brand_guess and scent_guess:
                 return {
                     "original": original,
@@ -221,7 +225,8 @@ class SoapMatcher:
         return None
 
     def _remove_sample_marker(self, text: str) -> str:
-        return re.sub(r"\(\s*sample\s*\)", "", text, flags=re.IGNORECASE).strip()
+        # Remove sample markers and numeric markers like (23), (24), etc.
+        return re.sub(r"\(\s*(?:sample|\d+)\s*\)", "", text, flags=re.IGNORECASE).strip()
 
     def _no_match_result(self, original: str) -> dict:
         return {
@@ -325,7 +330,12 @@ class SoapMatcher:
             return None
 
         # Search through correct matches structure
-        for maker, maker_data in self.correct_matches.items():
+        # Handle both direct structure and nested "soap" structure
+        correct_matches_data = self.correct_matches
+        if "soap" in self.correct_matches:
+            correct_matches_data = self.correct_matches["soap"]
+        
+        for maker, maker_data in correct_matches_data.items():
             if not isinstance(maker_data, dict):
                 continue
 
@@ -333,9 +343,10 @@ class SoapMatcher:
                 if not isinstance(strings, list):
                     continue
 
-                # Check if normalized value matches any of the correct strings
+                # Check if normalized value matches any of the correct strings (case-insensitive)
                 for correct_string in strings:
-                    if self._normalize_scent_text(correct_string) == normalized_value:
+                    normalized_correct = self._normalize_scent_text(correct_string).lower()
+                    if normalized_correct == normalized_value.lower():
                         # Return match data in the expected format for soaps
                         result = {"maker": maker, "scent": scent}
                         if hasattr(self, "_match_cache"):
