@@ -193,15 +193,67 @@ describe('MismatchAnalyzerDataTable', () => {
       expect(screen.queryByText('Status')).not.toBeInTheDocument();
     });
 
-    test('handles mixed confirmation status', () => {
-      const isItemConfirmed = jest
-        .fn()
-        .mockReturnValueOnce(true) // First item confirmed
-        .mockReturnValueOnce(false); // Second item unconfirmed
+    test('shows confirmed status for confirmed items', () => {
+      const confirmedData = [
+        {
+          original: 'Confirmed Item A',
+          matched: { brand: 'Brand A', model: 'Model A' },
+          mismatch_type: 'good_match',
+          match_type: 'regex',
+          pattern: 'pattern_a',
+          confidence: 0.8,
+          count: 1,
+          comment_ids: ['id1'],
+          examples: ['example1'],
+        }
+      ];
 
-      render(<MismatchAnalyzerDataTable {...defaultProps} isItemConfirmed={isItemConfirmed} />);
+      // Deterministic mock function based on input, not call order
+      const isItemConfirmed = jest.fn((item: MismatchItem) => {
+        return item.original === 'Confirmed Item A';
+      });
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={confirmedData}
+          field="razor"
+          onCommentClick={mockOnCommentClick}
+          isItemConfirmed={isItemConfirmed}
+        />
+      );
 
       expect(screen.getByText('✅ Confirmed')).toBeInTheDocument();
+    });
+
+    test('shows unconfirmed status for unconfirmed items', () => {
+      const unconfirmedData = [
+        {
+          original: 'Unconfirmed Item B',
+          matched: { brand: 'Brand B', model: 'Model B' },
+          mismatch_type: 'potential_mismatch',
+          match_type: 'regex',
+          pattern: 'pattern_b',
+          confidence: 0.6,
+          count: 1,
+          comment_ids: ['id2'],
+          examples: ['example2'],
+        }
+      ];
+
+      // Deterministic mock function based on input, not call order
+      const isItemConfirmed = jest.fn((item: MismatchItem) => {
+        return item.original === 'Confirmed Item A'; // Will return false for this item
+      });
+
+      render(
+        <MismatchAnalyzerDataTable
+          data={unconfirmedData}
+          field="razor"
+          onCommentClick={mockOnCommentClick}
+          isItemConfirmed={isItemConfirmed}
+        />
+      );
+
       expect(screen.getByText('⚠️ Unconfirmed')).toBeInTheDocument();
     });
   });

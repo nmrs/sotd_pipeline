@@ -1,3 +1,7 @@
+---
+description: "Comprehensive testing patterns and guidelines for SOTD Pipeline, covering both Python and React/TypeScript. Includes non-deterministic test prevention, atomic test requirements, mock patterns, and test isolation validation. Apply when writing, reviewing, or debugging tests to ensure consistent, reliable test patterns across the project."
+alwaysApply: false
+---
 # Testing Patterns for SOTD Pipeline
 
 ## Testing Strategy and Requirements
@@ -58,6 +62,1604 @@ When adding or modifying any functionality in the SOTD pipeline, you MUST provid
 - **Add integration tests** when you need to validate real data compatibility
 - **Add E2E tests** only when testing complete user workflows is necessary
 - **Never skip unit tests** - they're the foundation of reliable development
+
+## **MANDATORY**: Non-Deterministic Test Prevention
+
+### **CRITICAL**: Atomic and Deterministic Test Requirements
+All tests MUST be atomic and deterministic. Tests that pass in isolation but fail in the full suite are **strictly forbidden**.
+
+### **FORBIDDEN**: Non-Deterministic Mock Patterns
+The following patterns are **explicitly forbidden** as they create non-deterministic behavior:
+
+#### ❌ **FORBIDDEN**: `mockReturnValueOnce()` for Multi-Item Scenarios
+```typescript
+// ❌ WRONG - Non-deterministic behavior
+const isItemConfirmed = jest
+  .fn()
+  .mockReturnValueOnce(true)  // First item confirmed
+  .mockReturnValueOnce(false); // Second item unconfirmed
+
+// This creates execution order dependencies and state pollution
+```
+
+#### ❌ **FORBIDDEN**: Execution Order Dependencies
+```typescript
+// ❌ WRONG - Depends on test execution order
+test('handles mixed confirmation status', () => {
+  // This test assumes items will be rendered in a specific order
+  // and that mock calls will happen in sequence
+  expect(screen.getByText('✅ Confirmed')).toBeInTheDocument();
+  expect(screen.getByText('⚠️ Unconfirmed')).toBeInTheDocument();
+});
+```
+
+#### ❌ **FORBIDDEN**: External State Dependencies
+```typescript
+// ❌ WRONG - Depends on external state
+test('renders confirmation status', () => {
+  // This test depends on global state or previous test execution
+  render(<Component data={globalTestData} />);
+  // Will fail if other tests modify globalTestData
+});
+```
+
+### **REQUIRED**: Deterministic Test Patterns
+
+#### ✅ **REQUIRED**: Deterministic Mock Functions (React/TypeScript)
+```typescript
+// ✅ CORRECT - Deterministic behavior
+const isItemConfirmed = jest.fn((item: MismatchItem) => {
+  // Return result based on item content, not call order
+  return item.original === 'Item A';
+});
+
+test('handles mixed confirmation status', () => {
+  const testData = [
+    { original: 'Item A', /* ... */ },
+    { original: 'Item B', /* ... */ }
+  ];
+  
+  render(<Component data={testData} isItemConfirmed={isItemConfirmed} />);
+  
+  // Test for both statuses without assuming order
+  expect(screen.getByText('✅ Confirmed')).toBeInTheDocument();
+  expect(screen.getByText('⚠️ Unconfirmed')).toBeInTheDocument();
+});
+```
+
+#### ✅ **REQUIRED**: Deterministic Mock Functions (Python)
+```python
+# ✅ CORRECT - Deterministic behavior
+def test_handle_matcher_with_deterministic_mocks():
+    """Test handle matcher with deterministic mock behavior."""
+    
+    # Mock function that returns results based on input, not call order
+    def mock_is_confirmed(item):
+        return item.get('original', '').startswith('Confirmed')
+    
+    # Test data with clear identifiers
+    test_data = [
+        {'original': 'Confirmed Item A', 'brand': 'Brand A'},
+        {'original': 'Unconfirmed Item B', 'brand': 'Brand B'}
+    ]
+    
+    # Test both confirmed and unconfirmed items
+    confirmed_items = [item for item in test_data if mock_is_confirmed(item)]
+    unconfirmed_items = [item for item in test_data if not mock_is_confirmed(item)]
+    
+    assert len(confirmed_items) == 1
+    assert len(unconfirmed_items) == 1
+    assert confirmed_items[0]['original'] == 'Confirmed Item A'
+    assert unconfirmed_items[0]['original'] == 'Unconfirmed Item B'
+```
+
+#### ✅ **REQUIRED**: Isolated Test Data (React/TypeScript)
+```typescript
+// ✅ CORRECT - Each test has isolated data
+test('shows confirmed status for confirmed items', () => {
+  const confirmedData = [{ original: 'Item A', /* ... */ }];
+  const isItemConfirmed = jest.fn(() => true);
+  
+  render(<Component data={confirmedData} isItemConfirmed={isItemConfirmed} />);
+  expect(screen.getByText('✅ Confirmed')).toBeInTheDocument();
+});
+
+test('shows unconfirmed status for unconfirmed items', () => {
+  const unconfirmedData = [{ original: 'Item B', /* ... */ }];
+  const isItemConfirmed = jest.fn(() => false);
+  
+  render(<Component data={unconfirmedData} isItemConfirmed={isItemConfirmed} />);
+  expect(screen.getByText('⚠️ Unconfirmed')).toBeInTheDocument();
+});
+```
+
+#### ✅ **REQUIRED**: Isolated Test Data (Python)
+```python
+# ✅ CORRECT - Each test has isolated data
+def test_confirmed_items():
+    """Test confirmed items in isolation."""
+    confirmed_data = [
+        {'original': 'Confirmed Item A', 'brand': 'Brand A'}
+    ]
+    
+    def mock_is_confirmed(item):
+        return item['original'].startswith('Confirmed')
+    
+    confirmed_items = [item for item in confirmed_data if mock_is_confirmed(item)]
+    assert len(confirmed_items) == 1
+    assert confirmed_items[0]['original'] == 'Confirmed Item A'
+
+def test_unconfirmed_items():
+    """Test unconfirmed items in isolation."""
+    unconfirmed_data = [
+        {'original': 'Unconfirmed Item B', 'brand': 'Brand B'}
+    ]
+    
+    def mock_is_confirmed(item):
+        return item['original'].startswith('Confirmed')
+    
+    unconfirmed_items = [item for item in unconfirmed_data if not mock_is_confirmed(item)]
+    assert len(unconfirmed_items) == 1
+    assert unconfirmed_items[0]['original'] == 'Unconfirmed Item B'
+```
+
+#### ✅ **REQUIRED**: Clean Test State (React/TypeScript)
+```typescript
+// ✅ CORRECT - Clean state for each test
+describe('Component Tests', () => {
+  beforeEach(() => {
+    // Reset all mocks and state
+    jest.clearAllMocks();
+    // Clear any global state
+    localStorage.clear();
+  });
+  
+  afterEach(() => {
+    // Clean up after each test
+    cleanup();
+  });
+});
+```
+
+#### ✅ **REQUIRED**: Clean Test State (Python)
+```python
+# ✅ CORRECT - Clean state for each test
+import pytest
+from unittest.mock import patch, MagicMock
+
+class TestHandleMatcher:
+    """Test handle matcher with clean state."""
+    
+    def setup_method(self):
+        """Set up clean state before each test."""
+        # Reset any global state
+        self.mock_catalog = {}
+        self.mock_patterns = []
+    
+    def teardown_method(self):
+        """Clean up after each test."""
+        # Clear any test-specific state
+        self.mock_catalog.clear()
+        self.mock_patterns.clear()
+    
+    @patch('sotd.match.loaders.CatalogLoader.load_catalog')
+    def test_handle_matching_with_clean_state(self, mock_load_catalog):
+        """Test handle matching with isolated state."""
+        # Each test gets its own mock state
+        mock_load_catalog.return_value = self.mock_catalog
+        # Test logic here...
+```
+
+### **FORBIDDEN**: Non-Deterministic Mock Patterns (Python)
+
+#### ❌ **FORBIDDEN**: `side_effect` with Call Order Dependencies (Python)
+```python
+# ❌ WRONG - Non-deterministic behavior
+from unittest.mock import Mock
+
+mock_function = Mock()
+mock_function.side_effect = [True, False, True]  # Depends on call order
+
+# This creates execution order dependencies and state pollution
+```
+
+#### ❌ **FORBIDDEN**: Global State Pollution (Python)
+```python
+# ❌ WRONG - Depends on global state
+import global_module
+
+def test_handle_matcher():
+    """Test that depends on global_module.state being set correctly"""
+    # This test depends on global_module.state being set correctly
+    result = global_module.process_data()
+    assert result == expected_value
+```
+
+#### ❌ **FORBIDDEN**: Shared Fixture State (Python)
+```python
+# ❌ WRONG - Shared mutable state between tests
+@pytest.fixture
+def shared_data():
+    return {'items': []}  # Mutable shared state
+
+def test_1(shared_data):
+    shared_data['items'].append('item1')  # Modifies shared state
+
+def test_2(shared_data):
+    # This test depends on test_1 having run first
+    assert len(shared_data['items']) == 1  # Non-deterministic!
+```
+
+### **REQUIRED**: Deterministic Test Patterns (Python)
+
+#### ✅ **REQUIRED**: Deterministic Mock Side Effects (Python)
+```python
+# ✅ CORRECT - Deterministic behavior
+from unittest.mock import Mock
+
+def test_handle_matcher_with_deterministic_mocks():
+    """Test with deterministic mock behavior."""
+    
+    # Mock function that returns results based on input
+    def mock_is_confirmed(item):
+        return item.get('status') == 'confirmed'
+    
+    mock_function = Mock(side_effect=mock_is_confirmed)
+    
+    # Test data
+    test_items = [
+        {'status': 'confirmed', 'name': 'Item A'},
+        {'status': 'unconfirmed', 'name': 'Item B'}
+    ]
+    
+    # Test both confirmed and unconfirmed
+    confirmed = [item for item in test_items if mock_function(item)]
+    unconfirmed = [item for item in test_items if not mock_function(item)]
+    
+    assert len(confirmed) == 1
+    assert len(unconfirmed) == 1
+```
+
+#### ✅ **REQUIRED**: Isolated Fixtures (Python)
+```python
+# ✅ CORRECT - Isolated test data
+@pytest.fixture
+def isolated_test_data():
+    """Provide isolated test data for each test."""
+    return {
+        'confirmed_items': [{'status': 'confirmed', 'name': 'Item A'}],
+        'unconfirmed_items': [{'status': 'unconfirmed', 'name': 'Item B'}]
+    }
+
+def test_confirmed_items(isolated_test_data):
+    """Test confirmed items with isolated data."""
+    confirmed = isolated_test_data['confirmed_items']
+    assert len(confirmed) == 1
+    assert confirmed[0]['status'] == 'confirmed'
+
+def test_unconfirmed_items(isolated_test_data):
+    """Test unconfirmed items with isolated data."""
+    unconfirmed = isolated_test_data['unconfirmed_items']
+    assert len(unconfirmed) == 1
+    assert unconfirmed[0]['status'] == 'unconfirmed'
+```
+
+### **MANDATORY**: Test Isolation Validation (Both Languages)
+
+#### **REQUIRED**: Run Tests Both Individually and in Full Suite
+```bash
+# Python - Individual test
+python -m pytest tests/match/test_handle_matcher.py::TestHandleMatcher::test_confirmed_items -v
+
+# Python - Full suite
+python -m pytest tests/ -v
+
+# React - Individual test
+npm test -- --testNamePattern="handles mixed confirmation status"
+
+# React - Full suite
+npm test
+
+# If individual passes but full suite fails = NON-DETERMINISTIC TEST
+```
+
+#### **REQUIRED**: Test Isolation Checklist (Both Languages)
+Before committing any test, verify:
+
+- [ ] **Test passes in isolation** - Run individual test file/function
+- [ ] **Test passes in full suite** - Run entire test suite
+- [ ] **No external state dependencies** - Test doesn't depend on other tests
+- [ ] **No execution order dependencies** - Test works regardless of run order
+- [ ] **Deterministic mock behavior** - Mocks return predictable results
+- [ ] **Isolated test data** - Each test uses its own data
+- [ ] **Clean state management** - Proper setup/teardown
+
+### **MANDATORY**: Code Review Checklist for Non-Deterministic Tests (Both Languages)
+
+#### **REVIEW CHECKLIST**: Non-Deterministic Test Detection
+- [ ] **No `mockReturnValueOnce()` sequences** (React) or `side_effect` lists (Python) for multi-item scenarios
+- [ ] **No execution order assumptions** in test logic
+- [ ] **No external state dependencies** (global variables, localStorage, global modules)
+- [ ] **No shared mutable state** between tests
+- [ ] **No component/class state pollution** from previous tests
+- [ ] **No mock function state pollution** from previous calls
+- [ ] **Tests are truly atomic** - each test is completely independent
+
+#### **REVIEW CHECKLIST**: Deterministic Test Validation
+- [ ] **Mock functions are deterministic** - return results based on input, not call order
+- [ ] **Test data is isolated** - each test uses its own data
+- [ ] **State is properly reset** - beforeEach/afterEach (React) or setup_method/teardown_method (Python)
+- [ ] **No global state pollution** - tests don't affect each other
+- [ ] **Execution order independent** - tests work in any order
+
+### **MANDATORY**: Non-Deterministic Test Prevention Rules (Both Languages)
+
+#### **RULE 1**: Never Use Call Order Dependencies
+```typescript
+// ❌ FORBIDDEN (React)
+const mock = jest.fn()
+  .mockReturnValueOnce(true)
+  .mockReturnValueOnce(false);
+```
+
+```python
+# ❌ FORBIDDEN (Python)
+mock_function = Mock()
+mock_function.side_effect = [True, False, True]
+```
+
+```typescript
+// ✅ REQUIRED (React)
+const mock = jest.fn((item) => item.id === 'item1');
+```
+
+```python
+# ✅ REQUIRED (Python)
+def mock_function(item):
+    return item.get('status') == 'confirmed'
+mock = Mock(side_effect=mock_function)
+```
+
+#### **RULE 2**: Always Use Deterministic Mock Logic
+```typescript
+// ❌ FORBIDDEN (React) - Depends on call order
+const mock = jest.fn()
+  .mockReturnValueOnce('first')
+  .mockReturnValueOnce('second');
+```
+
+```python
+# ❌ FORBIDDEN (Python) - Depends on call order
+mock_function = Mock()
+mock_function.side_effect = ['first', 'second']
+```
+
+```typescript
+// ✅ REQUIRED (React) - Depends on input
+const mock = jest.fn((input) => input.type === 'confirmed' ? 'confirmed' : 'unconfirmed');
+```
+
+```python
+# ✅ REQUIRED (Python) - Depends on input
+def mock_function(input):
+    return 'confirmed' if input.get('type') == 'confirmed' else 'unconfirmed'
+mock = Mock(side_effect=mock_function)
+```
+
+#### **RULE 3**: Always Test Both Individually and in Full Suite
+```bash
+# REQUIRED workflow before committing any test (Both Languages)
+
+# Python
+python -m pytest tests/module/test_file.py::TestClass::test_method -v  # Individual test
+python -m pytest tests/ -v  # Full suite
+
+# React
+npm test -- --testNamePattern="specific test name"  # Individual test
+npm test  # Full suite
+
+# Both must pass, or the test is non-deterministic
+```
+
+#### **RULE 4**: Always Use Isolated Test Data
+```typescript
+// ❌ FORBIDDEN (React) - Shared data
+const sharedData = [{ id: 1 }, { id: 2 }];
+```
+
+```python
+# ❌ FORBIDDEN (Python) - Shared data
+shared_data = [{'id': 1}, {'id': 2}]
+```
+
+```typescript
+// ✅ REQUIRED (React) - Isolated data
+test('test 1', () => {
+  const data1 = [{ id: 1 }];
+  // ...
+});
+
+test('test 2', () => {
+  const data2 = [{ id: 2 }];
+  // ...
+});
+```
+
+```python
+# ✅ REQUIRED (Python) - Isolated data
+def test_1():
+    data1 = [{'id': 1}]
+    # ...
+
+def test_2():
+    data2 = [{'id': 2}]
+    # ...
+```
+
+### **MANDATORY**: Test Isolation Commands (Both Languages)
+Use these commands to validate test isolation:
+
+```bash
+# Python - Validate individual test isolation
+python -m pytest tests/module/test_file.py::TestClass::test_method -v
+
+# Python - Validate full suite compatibility
+python -m pytest tests/ -v
+
+# Python - Validate no state pollution
+python -m pytest tests/ --tb=short --strict-markers
+
+# React - Validate individual test isolation
+npm test -- --testNamePattern="specific test name"
+
+# React - Validate full suite compatibility
+npm test
+
+# React - Validate no state pollution
+npm test -- --runInBand --detectOpenHandles
+
+# React - Validate React component isolation
+npm test -- --testEnvironment="jsdom" --setupFilesAfterEnv="<rootDir>/src/setupTests.ts"
+```
+
+### **MANDATORY**: Non-Deterministic Test Detection
+If you encounter a test that:
+- ✅ Passes when run individually
+- ❌ Fails when run in full suite
+- ❌ Fails when run in different order
+
+**This is a non-deterministic test and MUST be fixed before committing.**
+
+### **MANDATORY**: Fixing Non-Deterministic Tests
+When fixing non-deterministic tests:
+
+1. **Identify the root cause** - execution order, state pollution, mock dependencies
+2. **Make the test truly atomic** - remove all external dependencies
+3. **Use deterministic mock logic** - base results on input, not call order
+4. **Isolate test data** - each test uses its own data
+5. **Validate the fix** - test passes both individually and in full suite
+6. **Document the pattern** - add to this testing patterns document
+
+This approach follows the project's established patterns for atomic, deterministic tests and prevents the same non-deterministic issues from recurring.
+
+## WebUI Testing Strategy
+
+### **MANDATORY**: React Component Testing with React Testing Library
+For all React components in the webui, follow this testing approach:
+
+1. **Component Unit Tests** - Test individual React components (HIGHEST PRIORITY)
+   - Use React Testing Library for component testing
+   - Mock external dependencies (APIs, services)
+   - Test component rendering, user interactions, and state changes
+   - Located in `webui/src/**/*.{test,spec}.{ts,tsx}`
+   - **Use by default** - provides fastest feedback for UI development
+
+2. **API Integration Tests** - Test API interactions with Jest mocks (MEDIUM PRIORITY)
+   - Use Jest mocking to mock API responses
+   - Test API integration without real server
+   - Validate error handling and loading states
+   - Located in `webui/src/**/*.api.test.{ts,tsx}`
+   - **Use when necessary** - for validating API integration
+
+3. **E2E Tests** - Test complete user workflows (LOWEST PRIORITY)
+   - Use Playwright for browser-based testing
+   - Test complete user journeys and cross-browser compatibility
+   - Located in `webui/tests/`
+   - **Use only when necessary** - for complete workflow validation
+
+### React Testing Library Patterns
+```typescript
+// webui/src/components/__tests__/BrushTable.test.tsx
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import BrushTable from '../BrushTable';
+
+describe('BrushTable', () => {
+  test('should render brush data correctly', () => {
+    render(<BrushTable data={mockBrushData} />);
+    
+    expect(screen.getByText('Simpson Chubby 2')).toBeInTheDocument();
+    expect(screen.getByText('Declaration B15')).toBeInTheDocument();
+  });
+
+  test('should handle user interactions', async () => {
+    const user = userEvent.setup();
+    render(<BrushTable data={mockBrushData} />);
+    
+    const filterInput = screen.getByPlaceholderText(/filter/i);
+    await user.type(filterInput, 'Simpson');
+    
+    expect(screen.getByText('Simpson Chubby 2')).toBeInTheDocument();
+    expect(screen.queryByText('Declaration B15')).not.toBeInTheDocument();
+  });
+});
+```
+
+### Jest Mocking Patterns
+```typescript
+// webui/src/components/__tests__/ApiIntegration.test.tsx
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import Dashboard from '../../pages/Dashboard';
+
+// Mock the API service
+jest.mock('../../services/api', () => ({
+  getAvailableMonths: jest.fn(),
+  getMonthData: jest.fn(),
+  getCatalogs: jest.fn(),
+  checkHealth: jest.fn(),
+}));
+
+// Import the mocked function
+import { getAvailableMonths, checkHealth } from '../../services/api';
+
+describe('API Integration', () => {
+  beforeEach(() => {
+    (getAvailableMonths as jest.Mock).mockClear();
+    (checkHealth as jest.Mock).mockClear();
+  });
+
+  test('should handle API error state', async () => {
+    // Mock health check to pass
+    (checkHealth as jest.Mock).mockResolvedValue(true);
+    // Mock API to fail
+    (getAvailableMonths as jest.Mock).mockRejectedValue(new Error('API Error'));
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+
+    // Should handle error gracefully
+    await waitFor(() => {
+      expect(screen.getByText(/checking system status/i)).toBeInTheDocument();
+    });
+  });
+
+  test('should handle API timeout', async () => {
+    // Mock slow API response
+    (getAvailableMonths as jest.Mock).mockImplementation(() => 
+      new Promise(resolve => setTimeout(() => resolve(['2024-01']), 100))
+    );
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+
+    // Should show loading state
+    expect(screen.getByText(/checking system status/i)).toBeInTheDocument();
+  });
+});
+```
+
+### WebUI Testing Commands
+```bash
+# Unit tests (fastest feedback)
+npm test
+
+# Watch mode for development
+npm test -- --watch
+
+# Coverage report
+npm test -- --coverage
+
+# E2E tests (slowest, complete workflows)
+npm run test:e2e:background
+```
+
+## API Testing Strategy
+
+### **MANDATORY**: API Testing Hierarchy
+When testing APIs in the SOTD pipeline, follow this testing hierarchy:
+
+1. **Backend API Tests** - Test FastAPI endpoints directly (HIGHEST PRIORITY)
+   - Use FastAPI TestClient to test actual API endpoints
+   - Test with real data files and catalogs
+   - Located in `webui/api/test_*.py`
+   - **Use by default** - provides fastest feedback for API development
+
+2. **Frontend API Integration Tests** - Test React components with real API calls (MEDIUM PRIORITY)
+   - Use real API endpoints (not mocks) for integration testing
+   - Test actual API responses and error handling
+   - Located in `webui/src/**/*.integration.test.{ts,tsx}`
+   - **Use when necessary** - for validating frontend-backend integration
+
+3. **Frontend Unit Tests** - Test React components with mocked APIs (LOWEST PRIORITY)
+   - Use Jest mocks for fast component testing
+   - Test component behavior in isolation
+   - Located in `webui/src/**/*.{test,spec}.{ts,tsx}`
+   - **Use for development** - provides fastest feedback for UI development
+
+### Backend API Testing Patterns
+```python
+# webui/api/test_files.py
+import pytest
+from fastapi.testclient import TestClient
+from main import app
+
+@pytest.fixture
+def client():
+    """Create test client."""
+    return TestClient(app)
+
+def test_get_available_months_success(client, temp_data_dir):
+    """Test successful retrieval of available months."""
+    with patch("files.get_data_directory", return_value=temp_data_dir):
+        response = client.get("/api/files/available-months")
+        
+        assert response.status_code == 200
+        data = response.json()
+        assert "months" in data
+        assert data["total_months"] == 2
+```
+
+### Frontend API Integration Testing Patterns
+```typescript
+// webui/src/services/__tests__/api.integration.test.ts
+/**
+ * Tools used:
+ * - Jest (test runner)
+ * - React Testing Library (testing utilities)
+ * - Axios (HTTP client - already used in api.ts)
+ * - Real API endpoints (no mocking)
+ */
+
+import { getAvailableMonths, checkHealth, getCatalogs } from '../api';
+
+describe('API Integration (Real Endpoints)', () => {
+  // These tests use the same tools as unit tests but make real API calls
+  // No mocking - we're testing actual API integration
+  
+  test('should connect to health endpoint', async () => {
+    const health = await checkHealth();
+    expect(health).toBe(true);
+  }, 10000); // Longer timeout for real API calls
+
+  test('should fetch available months from real API', async () => {
+    const months = await getAvailableMonths();
+    expect(Array.isArray(months)).toBe(true);
+    // Should contain actual month data if available
+    if (months.length > 0) {
+      expect(months[0]).toMatch(/^\d{4}-\d{2}$/); // YYYY-MM format
+    }
+  }, 10000);
+});
+```
+
+### API Testing Commands
+```bash
+# Backend API tests (FastAPI endpoints)
+cd webui/api && python -m pytest test_*.py -v
+
+# Frontend integration tests (real API calls)
+npm test -- --testPathPattern=integration
+
+# Frontend unit tests (mocked APIs)
+npm test -- --testPathPattern=test.tsx
+
+# All API-related tests
+cd webui/api && python -m pytest test_*.py -v && cd .. && npm test
+```
+
+## Test File Structure and Naming
+- Test files: `test_{module_name}.py` (Python) or `*.{test,spec}.{ts,tsx}` (React)
+- Test functions: `test_{functionality}_when_{condition}_then_{expected}`
+- Mock classes: `Mock{ServiceName}` (e.g., `MockSubmission`, `MockPRAW`)
+- Mirror source structure in `tests/` directory
+
+```python
+# tests/fetch/test_reddit.py
+import pytest
+from unittest.mock import Mock, patch, MagicMock
+
+from sotd.fetch.reddit import RedditAPI
+
+class TestRedditAPI:
+    """Test Reddit API functionality."""
+    
+    def test_fetch_comments_when_valid_thread_then_returns_comments(self):
+        """Test that valid thread returns expected comments."""
+        pass
+    
+    def test_fetch_comments_when_api_error_then_returns_empty_list(self):
+        """Test graceful handling of API errors."""
+        pass
+```
+
+## Mock Object Patterns
+Create realistic mocks that reflect actual Reddit post patterns:
+
+```python
+class MockSubmission:
+    """Mock Reddit submission for testing."""
+    def __init__(self, id: str, title: str, created_utc: int = 1640995200):
+        self.id = id
+        self.title = title
+        self.created_utc = created_utc
+        self.num_comments = 5
+        self.permalink = f"/r/wetshaving/comments/{id}/"
+
+class MockComment:
+    """Mock Reddit comment for testing."""
+    def __init__(self, id: str, body: str = "Test shave", is_root: bool = True):
+        self.id = id
+        self.body = body
+        self.is_root = is_root
+        self.created_utc = 1640995200
+        self.author = Mock()
+        self.author.name = "test_user"
+```
+
+## Fixture Patterns
+```python
+@pytest.fixture
+def sample_sotd_comment():
+    """Sample SOTD comment for testing."""
+    return {
+        "id": "test123",
+        "author": "test_user", 
+        "body": "Razor: Karve CB\nBlade: Feather\nBrush: Stirling\nSoap: Declaration Grooming",
+        "created_utc": 1640995200,
+        "url": "https://reddit.com/r/wetshaving/comments/test123"
+    }
+
+@pytest.fixture
+def mock_yaml_catalog():
+    """Mock product catalog for testing."""
+    return {
+        "Test Brand": {
+            "patterns": ["test.*brand"],
+            "scents": {
+                "Test Scent": {
+                    "patterns": ["test.*scent"]
+                }
+            }
+        }
+    }
+```
+
+## Parameterized Testing for Product Matching
+Test product matchers with comprehensive input variations:
+
+```python
+@pytest.mark.parametrize("input_text,expected_brand,expected_model", [
+    ("Karve Christopher Bradley", "Karve", "Christopher Bradley"),
+    ("Merkur 34C", "Merkur", "34C"),
+    ("Gillette Tech", "Gillette", "Tech"),
+])
+def test_razor_matching(input_text, expected_brand, expected_model):
+    """Test razor pattern matching with various inputs."""
+    matcher = RazorMatcher()
+    result = matcher.match(input_text)
+    
+    assert result["matched"]["brand"] == expected_brand  
+    assert result["matched"]["model"] == expected_model
+```
+
+## Mocking External APIs
+Mock Reddit API with proper error handling:
+
+```python
+@patch('sotd.fetch.reddit.praw.Reddit')
+def test_fetch_with_rate_limit_error(mock_reddit):
+    """Test handling of Reddit API rate limits."""
+    mock_reddit.return_value.subreddit.return_value.submissions.side_effect = \
+        praw.exceptions.APIException("RATE_LIMIT")
+        
+    api = RedditAPI()
+    result = api.fetch_submissions("2025-01")
+    
+    assert result == []  # Should return empty list on API error
+```
+
+## Testing Coverage Requirements
+- **Regex Patterns**: Test all product matching regex patterns
+- **Error Handling**: Test all exception paths
+- **Data Validation**: Test input validation and edge cases
+- **API Integration**: Mock external services extensively
+- **End-to-End**: Include integration tests for complete workflows
+- **React Components**: Test rendering, user interactions, and state changes
+- **UI Interactions**: Test form submissions, filtering, and navigation
+
+## Performance Testing
+```python
+@pytest.mark.performance
+def test_regex_compilation_performance():
+    """Test that regex compilation is efficient."""
+    patterns = ["test"] * 1000  # Large pattern list
+    
+    start_time = time.time()
+    matcher = SoapMatcher(patterns)
+    compilation_time = time.time() - start_time
+    
+    assert compilation_time < 1.0  # Should compile in under 1 second
+```
+
+## Error Case Testing
+Always test invalid input handling:
+
+```python
+def test_match_with_invalid_regex_pattern():
+    """Test handling of invalid regex patterns in catalog."""
+    invalid_catalog = {
+        "Test Brand": {
+            "patterns": ["[invalid regex"]  # Unclosed bracket
+        }
+    }
+    
+    # Should not raise exception, should log warning and continue
+    matcher = SoapMatcher(catalog_data=invalid_catalog)
+    assert len(matcher.patterns) == 0  # Invalid pattern excluded
+```
+
+## Brush Matching Test Patterns
+Test brush matching strategies with specific patterns:
+
+```python
+@pytest.fixture
+def brush_test_catalog():
+    """Comprehensive brush test catalog."""
+    return {
+        "known_brushes": {
+            "Simpson": {
+                "Chubby 2": {
+                    "fiber": "Badger",
+                    "knot_size_mm": 27,
+                    "patterns": ["simp.*chubby\\s*2"]
+                }
+            }
+        },
+        "other_brushes": {
+            "Elite": {
+                "default": "Badger",
+                "patterns": ["elite"]
+            }
+        }
+    }
+
+def test_brush_strategy_priority(matcher):
+    """Test that strategies are tried in correct priority order."""
+    # Known brushes should match before other_brushes
+    result = matcher.match("Simpson Chubby 2")
+    assert result["matched"]["_matched_by_strategy"] == "KnownBrushMatchingStrategy"
+
+def test_fiber_strategy_detection(matcher):
+    """Test fiber strategy detection (user_input vs yaml vs default)."""
+    # User input matches catalog
+    result = matcher.match("Elite 26mm Boar")
+    assert result["matched"]["fiber_strategy"] == "user_input"
+    
+    # User input conflicts with catalog
+    result = matcher.match("Simpson Chubby 2 Synthetic")  # Catalog says Badger
+    assert result["matched"]["fiber_strategy"] == "yaml"
+    assert result["matched"]["fiber_conflict"] == "Synthetic"
+
+def test_handle_knot_splitting(matcher):
+    """Test handle/knot splitting with various delimiters."""
+    test_cases = [
+        ("Elite handle w/ Declaration knot", "Elite", "Declaration"),
+        ("WW with 26mm knot", "Wolf Whiskers", None),
+        ("Handle / Knot description", "Handle Maker", "Knot Brand")
+    ]
+    
+    for input_text, expected_handle, expected_brand in test_cases:
+        result = matcher.match(input_text)
+        if expected_handle:
+            assert result["matched"]["handle_maker"] == expected_handle
+        if expected_brand:
+            assert result["matched"]["brand"] == expected_brand
+```
+
+## Return Structure Validation
+Always validate complete return structure:
+
+```python
+def test_consistent_return_structure(matcher):
+    """Test that all matches return consistent structure."""
+    test_cases = ["Simpson Chubby 2", "Unknown brush", "Elite handle"]
+    
+    for test_case in test_cases:
+        result = matcher.match(test_case)
+        
+        # Required top-level keys
+        assert "original" in result
+        assert "matched" in result  # Can be None
+        assert "match_type" in result  # Can be None
+        assert "pattern" in result  # Can be None
+        
+        # If matched, validate structure
+        if result["matched"]:
+            required_fields = ["brand", "model", "fiber", "knot_size_mm", 
+                             "handle_maker", "_matched_by_strategy"]
+            for field in required_fields:
+                assert field in result["matched"]
+```
+
+## Integration Test Patterns
+Integration tests validate functionality with real production data:
+
+```python
+# tests/integration/test_real_catalog_integration.py
+class TestRealCatalogIntegration:
+    """Integration tests using actual production YAML catalogs."""
+    
+    def test_real_catalog_loads_successfully(self):
+        """Test that real catalogs load without errors."""
+        matcher = BrushMatcher()  # Uses default paths to real files
+        assert matcher.catalog_data is not None
+        assert len(matcher.strategies) > 0
+    
+    def test_known_patterns_work_with_real_catalog(self):
+        """Test known patterns work with production catalog."""
+        matcher = BrushMatcher()
+        test_cases = [
+            ("Simpson Chubby 2", "Simpson"),
+            ("Declaration B15", "Declaration Grooming"),
+        ]
+        
+        for input_text, expected_brand in test_cases:
+            result = matcher.match(input_text)
+            if result.get("matched"):
+                assert result["matched"]["brand"] == expected_brand
+    
+    def test_catalog_files_exist(self):
+        """Test that all expected catalog files exist."""
+        catalog_files = ["data/brushes.yaml", "data/handles.yaml", "data/soaps.yaml"]
+        for catalog_file in catalog_files:
+            path = Path(catalog_file)
+            assert path.exists(), f"Catalog file {catalog_file} does not exist"
+            assert path.stat().st_size > 0, f"Catalog file {catalog_file} is empty"
+```
+
+## Test Data Management
+
+### **MANDATORY - Production Data Protection**
+**NEVER write to production data files during testing or development.**
+
+- **ALWAYS use temporary files (tmp_path)** for file-writing tests
+- **ALWAYS use test-specific data** for integration tests  
+- **NEVER modify data/brush_splits.yaml, data/brushes.yaml, etc.** in tests
+- **ALWAYS verify test isolation** before committing any test changes
+- **ALWAYS use pytest tmp_path fixture** for any file operations in tests
+- **NEVER assume test data is safe** - always use isolated test environments
+
+### Test Data Isolation Examples
+```python
+# ✅ CORRECT - Use temporary files
+def test_save_and_load_yaml(tmp_path):
+    """Test saving and loading YAML file."""
+    validator = BrushSplitValidator()
+    validator.yaml_path = tmp_path / "test_brush_splits.yaml"  # Temporary file
+    # ... test logic
+
+# ❌ WRONG - Never use production files
+def test_save_and_load_yaml():
+    """Test saving and loading YAML file."""
+    validator = BrushSplitValidator()
+    validator.yaml_path = Path("data/brush_splits.yaml")  # Production file!
+    # ... test logic - DANGEROUS!
+```
+
+### Test Data Realism
+> **Test Data Realism:**
+> All enrich phase tests **must** use realistic, user-like extracted strings for the `extracted_field` argument (e.g., `"Astra SP (3)", "Simpson Chubby 2 26mm boar"`). In registry and integration tests, all `*_extracted` fields **must** be strings, not booleans. Assertions should be updated to match the expected enrichment output for the new, realistic extracted values.
+
+Use temporary files for test catalogs:
+
+```python
+@pytest.fixture
+def temp_catalog(tmp_path):
+    """Create temporary catalog file for testing."""
+    catalog_data = {"Test Brand": {"patterns": ["test"]}}
+    catalog_file = tmp_path / "test_catalog.yaml"
+    
+    with catalog_file.open("w") as f:
+        yaml.dump(catalog_data, f)
+    
+    return catalog_file
+
+def test_with_temp_catalog(temp_catalog):
+    """Test using temporary catalog file."""
+    matcher = BrushMatcher(catalog_path=temp_catalog)
+    result = matcher.match("test input")
+    # Test with isolated catalog data
+```
+
+## Development Workflow Integration
+Follow the test priority hierarchy during development:
+
+```bash
+# 1. Unit tests (fastest feedback loop) - START HERE
+make test-fast  # Python unit tests
+npm test  # React unit tests
+
+# 2. Integration tests (when needed for real data validation)
+python -m pytest tests/integration/ -v  # Python integration tests
+npm run test  # React integration tests
+
+# 3. E2E tests (only when testing complete user workflows)
+npm run test:e2e:background  # For web UI testing
+
+# All tests before committing (includes unit + integration)
+python -m pytest tests/ -v  # All Python tests
+npm run test  # All React tests
+```
+
+### Development Priority
+1. **Write unit tests first** - they provide the best development feedback
+2. **Add integration tests** when you need to validate real data compatibility
+3. **Add E2E tests** only when testing complete user workflows is necessary
+4. **Never skip unit tests** - they're the foundation of reliable development
+
+### WebUI Development Priority
+1. **Write React component unit tests first** - fastest feedback for UI development
+2. **Add API integration tests with Jest mocks** when testing API interactions
+3. **Add E2E tests** only when testing complete user workflows
+4. **Use React Testing Library by default** - provides best debugging and feedback
+# Testing Patterns for SOTD Pipeline
+
+## Testing Strategy and Requirements
+
+### **MANDATORY**: Test Type Priority Hierarchy
+When adding or modifying any functionality in the SOTD pipeline, follow this priority order for test types:
+
+1. **Unit Tests** - Fast, isolated tests with mock dependencies (HIGHEST PRIORITY)
+   - Use mock catalogs and external services
+   - Test individual functions and methods in isolation
+   - Focus on logic validation and edge cases
+   - Located in `tests/{module}/test_{filename}.py` (Python) or `src/**/*.{test,spec}.{ts,tsx}` (React)
+   - **Use by default** - provides fastest feedback and best debugging
+
+2. **Integration Tests** - Tests using real production data (MEDIUM PRIORITY)
+   - Use actual YAML catalog files (`data/*.yaml`)
+   - Test end-to-end workflows with real data
+   - Validate that catalog changes don't break functionality
+   - Located in `tests/integration/`
+   - **Use when necessary** - for validating real data compatibility
+
+3. **End-to-End (E2E) Tests** - Full system tests (LOWEST PRIORITY)
+   - Test complete user workflows and system interactions
+   - Use Playwright for web UI testing
+   - Located in `webui/tests/` and `tests/integration/`
+   - **Use only when necessary** - most expensive and slowest feedback
+
+### **MANDATORY**: Unit and Integration Test Coverage
+When adding or modifying any functionality in the SOTD pipeline, you MUST provide both:
+
+1. **Unit Tests** - Fast, isolated tests with mock dependencies
+   - Use mock catalogs and external services
+   - Test individual functions and methods in isolation
+   - Focus on logic validation and edge cases
+   - Located in `tests/{module}/test_{filename}.py` (Python) or `src/**/*.{test,spec}.{ts,tsx}` (React)
+
+2. **Integration Tests** - Tests using real production data
+   - Use actual YAML catalog files (`data/*.yaml`)
+   - Test end-to-end workflows with real data
+   - Validate that catalog changes don't break functionality
+   - Located in `tests/integration/`
+
+### Testing Strategy Examples
+- **New product matcher**: Add unit tests for regex patterns + integration tests with real catalog
+- **API changes**: Add unit tests with mocked APIs + integration tests with real services
+- **Data processing logic**: Add unit tests for edge cases + integration tests with sample data
+- **Configuration changes**: Add unit tests for validation + integration tests for real config files
+- **React components**: Add unit tests with React Testing Library + integration tests with real API data
+- **UI interactions**: Add unit tests for user interactions + E2E tests for complete workflows
+
+### Why This Priority Order
+- **Unit tests (Priority 1)**: Catch logic bugs, provide fastest feedback, enable isolated debugging, lowest cost
+- **Integration tests (Priority 2)**: Catch production issues, validate real data compatibility, prevent regressions, moderate cost
+- **E2E tests (Priority 3)**: Validate complete user workflows, catch system-level issues, highest cost and slowest feedback
+
+### When to Use Each Test Type
+- **Start with unit tests** - they provide the best feedback loop for development
+- **Add integration tests** when you need to validate real data compatibility
+- **Add E2E tests** only when testing complete user workflows is necessary
+- **Never skip unit tests** - they're the foundation of reliable development
+
+## **MANDATORY**: Non-Deterministic Test Prevention
+
+### **CRITICAL**: Atomic and Deterministic Test Requirements
+All tests MUST be atomic and deterministic. Tests that pass in isolation but fail in the full suite are **strictly forbidden**.
+
+### **FORBIDDEN**: Non-Deterministic Mock Patterns
+The following patterns are **explicitly forbidden** as they create non-deterministic behavior:
+
+#### ❌ **FORBIDDEN**: `mockReturnValueOnce()` for Multi-Item Scenarios
+```typescript
+// ❌ WRONG - Non-deterministic behavior
+const isItemConfirmed = jest
+  .fn()
+  .mockReturnValueOnce(true)  // First item confirmed
+  .mockReturnValueOnce(false); // Second item unconfirmed
+
+// This creates execution order dependencies and state pollution
+```
+
+#### ❌ **FORBIDDEN**: Execution Order Dependencies
+```typescript
+// ❌ WRONG - Depends on test execution order
+test('handles mixed confirmation status', () => {
+  // This test assumes items will be rendered in a specific order
+  // and that mock calls will happen in sequence
+  expect(screen.getByText('✅ Confirmed')).toBeInTheDocument();
+  expect(screen.getByText('⚠️ Unconfirmed')).toBeInTheDocument();
+});
+```
+
+#### ❌ **FORBIDDEN**: External State Dependencies
+```typescript
+// ❌ WRONG - Depends on external state
+test('renders confirmation status', () => {
+  // This test depends on global state or previous test execution
+  render(<Component data={globalTestData} />);
+  // Will fail if other tests modify globalTestData
+});
+```
+
+### **REQUIRED**: Deterministic Test Patterns
+
+#### ✅ **REQUIRED**: Deterministic Mock Functions (React/TypeScript)
+```typescript
+// ✅ CORRECT - Deterministic behavior
+const isItemConfirmed = jest.fn((item: MismatchItem) => {
+  // Return result based on item content, not call order
+  return item.original === 'Item A';
+});
+
+test('handles mixed confirmation status', () => {
+  const testData = [
+    { original: 'Item A', /* ... */ },
+    { original: 'Item B', /* ... */ }
+  ];
+  
+  render(<Component data={testData} isItemConfirmed={isItemConfirmed} />);
+  
+  // Test for both statuses without assuming order
+  expect(screen.getByText('✅ Confirmed')).toBeInTheDocument();
+  expect(screen.getByText('⚠️ Unconfirmed')).toBeInTheDocument();
+});
+```
+
+#### ✅ **REQUIRED**: Deterministic Mock Functions (Python)
+```python
+# ✅ CORRECT - Deterministic behavior
+def test_handle_matcher_with_deterministic_mocks():
+    """Test handle matcher with deterministic mock behavior."""
+    
+    # Mock function that returns results based on input, not call order
+    def mock_is_confirmed(item):
+        return item.get('original', '').startswith('Confirmed')
+    
+    # Test data with clear identifiers
+    test_data = [
+        {'original': 'Confirmed Item A', 'brand': 'Brand A'},
+        {'original': 'Unconfirmed Item B', 'brand': 'Brand B'}
+    ]
+    
+    # Test both confirmed and unconfirmed items
+    confirmed_items = [item for item in test_data if mock_is_confirmed(item)]
+    unconfirmed_items = [item for item in test_data if not mock_is_confirmed(item)]
+    
+    assert len(confirmed_items) == 1
+    assert len(unconfirmed_items) == 1
+    assert confirmed_items[0]['original'] == 'Confirmed Item A'
+    assert unconfirmed_items[0]['original'] == 'Unconfirmed Item B'
+```
+
+#### ✅ **REQUIRED**: Isolated Test Data (React/TypeScript)
+```typescript
+// ✅ CORRECT - Each test has isolated data
+test('shows confirmed status for confirmed items', () => {
+  const confirmedData = [{ original: 'Item A', /* ... */ }];
+  const isItemConfirmed = jest.fn(() => true);
+  
+  render(<Component data={confirmedData} isItemConfirmed={isItemConfirmed} />);
+  expect(screen.getByText('✅ Confirmed')).toBeInTheDocument();
+});
+
+test('shows unconfirmed status for unconfirmed items', () => {
+  const unconfirmedData = [{ original: 'Item B', /* ... */ }];
+  const isItemConfirmed = jest.fn(() => false);
+  
+  render(<Component data={unconfirmedData} isItemConfirmed={isItemConfirmed} />);
+  expect(screen.getByText('⚠️ Unconfirmed')).toBeInTheDocument();
+});
+```
+
+#### ✅ **REQUIRED**: Isolated Test Data (Python)
+```python
+# ✅ CORRECT - Each test has isolated data
+def test_confirmed_items():
+    """Test confirmed items in isolation."""
+    confirmed_data = [
+        {'original': 'Confirmed Item A', 'brand': 'Brand A'}
+    ]
+    
+    def mock_is_confirmed(item):
+        return item['original'].startswith('Confirmed')
+    
+    confirmed_items = [item for item in confirmed_data if mock_is_confirmed(item)]
+    assert len(confirmed_items) == 1
+    assert confirmed_items[0]['original'] == 'Confirmed Item A'
+
+def test_unconfirmed_items():
+    """Test unconfirmed items in isolation."""
+    unconfirmed_data = [
+        {'original': 'Unconfirmed Item B', 'brand': 'Brand B'}
+    ]
+    
+    def mock_is_confirmed(item):
+        return item['original'].startswith('Confirmed')
+    
+    unconfirmed_items = [item for item in unconfirmed_data if not mock_is_confirmed(item)]
+    assert len(unconfirmed_items) == 1
+    assert unconfirmed_items[0]['original'] == 'Unconfirmed Item B'
+```
+
+#### ✅ **REQUIRED**: Clean Test State (React/TypeScript)
+```typescript
+// ✅ CORRECT - Clean state for each test
+describe('Component Tests', () => {
+  beforeEach(() => {
+    // Reset all mocks and state
+    jest.clearAllMocks();
+    // Clear any global state
+    localStorage.clear();
+  });
+  
+  afterEach(() => {
+    // Clean up after each test
+    cleanup();
+  });
+});
+```
+
+#### ✅ **REQUIRED**: Clean Test State (Python)
+```python
+# ✅ CORRECT - Clean state for each test
+import pytest
+from unittest.mock import patch, MagicMock
+
+class TestHandleMatcher:
+    """Test handle matcher with clean state."""
+    
+    def setup_method(self):
+        """Set up clean state before each test."""
+        # Reset any global state
+        self.mock_catalog = {}
+        self.mock_patterns = []
+    
+    def teardown_method(self):
+        """Clean up after each test."""
+        # Clear any test-specific state
+        self.mock_catalog.clear()
+        self.mock_patterns.clear()
+    
+    @patch('sotd.match.loaders.CatalogLoader.load_catalog')
+    def test_handle_matching_with_clean_state(self, mock_load_catalog):
+        """Test handle matching with isolated state."""
+        # Each test gets its own mock state
+        mock_load_catalog.return_value = self.mock_catalog
+        # Test logic here...
+```
+
+### **FORBIDDEN**: Non-Deterministic Mock Patterns (Python)
+
+#### ❌ **FORBIDDEN**: `side_effect` with Call Order Dependencies (Python)
+```python
+# ❌ WRONG - Non-deterministic behavior
+from unittest.mock import Mock
+
+mock_function = Mock()
+mock_function.side_effect = [True, False, True]  # Depends on call order
+
+# This creates execution order dependencies and state pollution
+```
+
+#### ❌ **FORBIDDEN**: Global State Pollution (Python)
+```python
+# ❌ WRONG - Depends on global state
+import global_module
+
+def test_handle_matcher():
+    """Test that depends on global_module.state being set correctly"""
+    # This test depends on global_module.state being set correctly
+    result = global_module.process_data()
+    assert result == expected_value
+```
+
+#### ❌ **FORBIDDEN**: Shared Fixture State (Python)
+```python
+# ❌ WRONG - Shared mutable state between tests
+@pytest.fixture
+def shared_data():
+    return {'items': []}  # Mutable shared state
+
+def test_1(shared_data):
+    shared_data['items'].append('item1')  # Modifies shared state
+
+def test_2(shared_data):
+    # This test depends on test_1 having run first
+    assert len(shared_data['items']) == 1  # Non-deterministic!
+```
+
+### **REQUIRED**: Deterministic Test Patterns (Python)
+
+#### ✅ **REQUIRED**: Deterministic Mock Side Effects (Python)
+```python
+# ✅ CORRECT - Deterministic behavior
+from unittest.mock import Mock
+
+def test_handle_matcher_with_deterministic_mocks():
+    """Test with deterministic mock behavior."""
+    
+    # Mock function that returns results based on input
+    def mock_is_confirmed(item):
+        return item.get('status') == 'confirmed'
+    
+    mock_function = Mock(side_effect=mock_is_confirmed)
+    
+    # Test data
+    test_items = [
+        {'status': 'confirmed', 'name': 'Item A'},
+        {'status': 'unconfirmed', 'name': 'Item B'}
+    ]
+    
+    # Test both confirmed and unconfirmed
+    confirmed = [item for item in test_items if mock_function(item)]
+    unconfirmed = [item for item in test_items if not mock_function(item)]
+    
+    assert len(confirmed) == 1
+    assert len(unconfirmed) == 1
+```
+
+#### ✅ **REQUIRED**: Isolated Fixtures (Python)
+```python
+# ✅ CORRECT - Isolated test data
+@pytest.fixture
+def isolated_test_data():
+    """Provide isolated test data for each test."""
+    return {
+        'confirmed_items': [{'status': 'confirmed', 'name': 'Item A'}],
+        'unconfirmed_items': [{'status': 'unconfirmed', 'name': 'Item B'}]
+    }
+
+def test_confirmed_items(isolated_test_data):
+    """Test confirmed items with isolated data."""
+    confirmed = isolated_test_data['confirmed_items']
+    assert len(confirmed) == 1
+    assert confirmed[0]['status'] == 'confirmed'
+
+def test_unconfirmed_items(isolated_test_data):
+    """Test unconfirmed items with isolated data."""
+    unconfirmed = isolated_test_data['unconfirmed_items']
+    assert len(unconfirmed) == 1
+    assert unconfirmed[0]['status'] == 'unconfirmed'
+```
+
+### **MANDATORY**: Test Isolation Validation (Both Languages)
+
+#### **REQUIRED**: Run Tests Both Individually and in Full Suite
+```bash
+# Python - Individual test
+python -m pytest tests/match/test_handle_matcher.py::TestHandleMatcher::test_confirmed_items -v
+
+# Python - Full suite
+python -m pytest tests/ -v
+
+# React - Individual test
+npm test -- --testNamePattern="handles mixed confirmation status"
+
+# React - Full suite
+npm test
+
+# If individual passes but full suite fails = NON-DETERMINISTIC TEST
+```
+
+#### **REQUIRED**: Test Isolation Checklist (Both Languages)
+Before committing any test, verify:
+
+- [ ] **Test passes in isolation** - Run individual test file/function
+- [ ] **Test passes in full suite** - Run entire test suite
+- [ ] **No external state dependencies** - Test doesn't depend on other tests
+- [ ] **No execution order dependencies** - Test works regardless of run order
+- [ ] **Deterministic mock behavior** - Mocks return predictable results
+- [ ] **Isolated test data** - Each test uses its own data
+- [ ] **Clean state management** - Proper setup/teardown
+
+### **MANDATORY**: Code Review Checklist for Non-Deterministic Tests (Both Languages)
+
+#### **REVIEW CHECKLIST**: Non-Deterministic Test Detection
+- [ ] **No `mockReturnValueOnce()` sequences** (React) or `side_effect` lists (Python) for multi-item scenarios
+- [ ] **No execution order assumptions** in test logic
+- [ ] **No external state dependencies** (global variables, localStorage, global modules)
+- [ ] **No shared mutable state** between tests
+- [ ] **No component/class state pollution** from previous tests
+- [ ] **No mock function state pollution** from previous calls
+- [ ] **Tests are truly atomic** - each test is completely independent
+
+#### **REVIEW CHECKLIST**: Deterministic Test Validation
+- [ ] **Mock functions are deterministic** - return results based on input, not call order
+- [ ] **Test data is isolated** - each test uses its own data
+- [ ] **State is properly reset** - beforeEach/afterEach (React) or setup_method/teardown_method (Python)
+- [ ] **No global state pollution** - tests don't affect each other
+- [ ] **Execution order independent** - tests work in any order
+
+### **MANDATORY**: Non-Deterministic Test Prevention Rules (Both Languages)
+
+#### **RULE 1**: Never Use Call Order Dependencies
+```typescript
+// ❌ FORBIDDEN (React)
+const mock = jest.fn()
+  .mockReturnValueOnce(true)
+  .mockReturnValueOnce(false);
+```
+
+```python
+# ❌ FORBIDDEN (Python)
+mock_function = Mock()
+mock_function.side_effect = [True, False, True]
+```
+
+```typescript
+// ✅ REQUIRED (React)
+const mock = jest.fn((item) => item.id === 'item1');
+```
+
+```python
+# ✅ REQUIRED (Python)
+def mock_function(item):
+    return item.get('status') == 'confirmed'
+mock = Mock(side_effect=mock_function)
+```
+
+#### **RULE 2**: Always Use Deterministic Mock Logic
+```typescript
+// ❌ FORBIDDEN (React) - Depends on call order
+const mock = jest.fn()
+  .mockReturnValueOnce('first')
+  .mockReturnValueOnce('second');
+```
+
+```python
+# ❌ FORBIDDEN (Python) - Depends on call order
+mock_function = Mock()
+mock_function.side_effect = ['first', 'second']
+```
+
+```typescript
+// ✅ REQUIRED (React) - Depends on input
+const mock = jest.fn((input) => input.type === 'confirmed' ? 'confirmed' : 'unconfirmed');
+```
+
+```python
+# ✅ REQUIRED (Python) - Depends on input
+def mock_function(input):
+    return 'confirmed' if input.get('type') == 'confirmed' else 'unconfirmed'
+mock = Mock(side_effect=mock_function)
+```
+
+#### **RULE 3**: Always Test Both Individually and in Full Suite
+```bash
+# REQUIRED workflow before committing any test (Both Languages)
+
+# Python
+python -m pytest tests/module/test_file.py::TestClass::test_method -v  # Individual test
+python -m pytest tests/ -v  # Full suite
+
+# React
+npm test -- --testNamePattern="specific test name"  # Individual test
+npm test  # Full suite
+
+# Both must pass, or the test is non-deterministic
+```
+
+#### **RULE 4**: Always Use Isolated Test Data
+```typescript
+// ❌ FORBIDDEN (React) - Shared data
+const sharedData = [{ id: 1 }, { id: 2 }];
+```
+
+```python
+# ❌ FORBIDDEN (Python) - Shared data
+shared_data = [{'id': 1}, {'id': 2}]
+```
+
+```typescript
+// ✅ REQUIRED (React) - Isolated data
+test('test 1', () => {
+  const data1 = [{ id: 1 }];
+  // ...
+});
+
+test('test 2', () => {
+  const data2 = [{ id: 2 }];
+  // ...
+});
+```
+
+```python
+# ✅ REQUIRED (Python) - Isolated data
+def test_1():
+    data1 = [{'id': 1}]
+    # ...
+
+def test_2():
+    data2 = [{'id': 2}]
+    # ...
+```
+
+### **MANDATORY**: Test Isolation Commands (Both Languages)
+Use these commands to validate test isolation:
+
+```bash
+# Python - Validate individual test isolation
+python -m pytest tests/module/test_file.py::TestClass::test_method -v
+
+# Python - Validate full suite compatibility
+python -m pytest tests/ -v
+
+# Python - Validate no state pollution
+python -m pytest tests/ --tb=short --strict-markers
+
+# React - Validate individual test isolation
+npm test -- --testNamePattern="specific test name"
+
+# React - Validate full suite compatibility
+npm test
+
+# React - Validate no state pollution
+npm test -- --runInBand --detectOpenHandles
+
+# React - Validate React component isolation
+npm test -- --testEnvironment="jsdom" --setupFilesAfterEnv="<rootDir>/src/setupTests.ts"
+```
+
+### **MANDATORY**: Non-Deterministic Test Detection
+If you encounter a test that:
+- ✅ Passes when run individually
+- ❌ Fails when run in full suite
+- ❌ Fails when run in different order
+
+**This is a non-deterministic test and MUST be fixed before committing.**
+
+### **MANDATORY**: Fixing Non-Deterministic Tests
+When fixing non-deterministic tests:
+
+1. **Identify the root cause** - execution order, state pollution, mock dependencies
+2. **Make the test truly atomic** - remove all external dependencies
+3. **Use deterministic mock logic** - base results on input, not call order
+4. **Isolate test data** - each test uses its own data
+5. **Validate the fix** - test passes both individually and in full suite
+6. **Document the pattern** - add to this testing patterns document
+
+This approach follows the project's established patterns for atomic, deterministic tests and prevents the same non-deterministic issues from recurring.
 
 ## WebUI Testing Strategy
 
