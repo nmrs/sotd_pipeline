@@ -5,7 +5,6 @@ _FIBER_PATTERNS = {
     # Most specific patterns first
     "Mixed Badger/Boar": r"(mix|mixed|mi[sx]tura?|badg.*boar|boar.*badg|hybrid|fusion)",
     "Mixed Badger/Synthetic": r"(badg.*synth|synth.*badg)",
-    
     # Specific fiber types with detailed patterns
     "Synthetic": (
         r"(acrylic|timber|tux|mew|silk|synt|synbad|2bed|captain|cashmere|"
@@ -13,7 +12,6 @@ _FIBER_PATTERNS = {
         r"\bt[23]\b|kong|hi\s*brush|ak47|g5[abc]|stf|quartermoon|fibre|"
         r"\bmig\b|synthetic badger|motherlode)"
     ),
-    
     # General fiber types (checked last)
     "Badger": (
         r"(hmw|high.*mo|(2|3|two|three)\s*band|shd|badger|silvertip|super|"
