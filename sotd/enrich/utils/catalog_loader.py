@@ -1,94 +1,97 @@
-"""Catalog loading utilities for user intent detection."""
+"""
+Catalog loader for enrichment phase.
+
+Loads handle and knot patterns from YAML catalogs for use in enrichment.
+"""
 
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 import yaml
 
+from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
+
 
 class CatalogLoader:
-    """Utility class for loading and caching catalog patterns."""
+    """
+    Loads handle and knot patterns from YAML catalogs.
+
+    Provides caching for performance and handles different catalog structures.
+    """
 
     def __init__(self, data_path: Optional[Path] = None):
-        """
-        Initialize catalog loader.
-
-        Args:
-            data_path: Path to data directory containing catalogs
-        """
         self.data_path = data_path or Path("data")
-        self._pattern_cache = {}  # (catalog_type, brand, model) -> List[str]
-        self._compiled_pattern_cache = {}  # (catalog_type, brand, model) -> List[re.Pattern]
+        self._pattern_cache: Dict[str, List[str]] = {}
+        self._compiled_pattern_cache: Dict[str, List[re.Pattern]] = {}
         self._cache_hits = 0
         self._cache_misses = 0
 
     def load_handle_patterns(self, brand: str, model: str) -> List[str]:
         """
-        Load handle patterns for given brand/model combination.
+        Load handle patterns for a specific brand and model.
 
         Args:
-            brand: Handle brand
-            model: Handle model
+            brand: Brand name
+            model: Model name
 
         Returns:
-            List[str]: List of patterns to search for
+            List of pattern strings
         """
         return self._get_cached_patterns("handles", brand, model)
 
     def load_compiled_handle_patterns(self, brand: str, model: str) -> List[re.Pattern]:
         """
-        Load compiled handle patterns for given brand/model combination.
+        Load compiled handle patterns for a specific brand and model.
 
         Args:
-            brand: Handle brand
-            model: Handle model
+            brand: Brand name
+            model: Model name
 
         Returns:
-            List[re.Pattern]: List of compiled patterns to search for
+            List of compiled regex patterns
         """
         return self._get_cached_compiled_patterns("handles", brand, model)
 
     def load_knot_patterns(self, brand: str, model: str) -> List[str]:
         """
-        Load knot patterns for given brand/model combination.
+        Load knot patterns for a specific brand and model.
 
         Args:
-            brand: Knot brand
-            model: Knot model
+            brand: Brand name
+            model: Model name
 
         Returns:
-            List[str]: List of patterns to search for
+            List of pattern strings
         """
         return self._get_cached_patterns("knots", brand, model)
 
     def load_compiled_knot_patterns(self, brand: str, model: str) -> List[re.Pattern]:
         """
-        Load compiled knot patterns for given brand/model combination.
+        Load compiled knot patterns for a specific brand and model.
 
         Args:
-            brand: Knot brand
-            model: Knot model
+            brand: Brand name
+            model: Model name
 
         Returns:
-            List[re.Pattern]: List of compiled patterns to search for
+            List of compiled regex patterns
         """
         return self._get_cached_compiled_patterns("knots", brand, model)
 
     def _get_cached_patterns(self, catalog_type: str, brand: str, model: str) -> List[str]:
         """
-        Get cached patterns or load from catalog if not cached.
+        Get patterns from cache or load from catalog.
 
         Args:
-            catalog_type: Type of catalog ('handles' or 'knots')
+            catalog_type: Type of catalog ("handles" or "knots")
             brand: Brand name
             model: Model name
 
         Returns:
-            List[str]: List of patterns
+            List of pattern strings
         """
-        cache_key = (catalog_type, brand, model)
-
+        cache_key = f"{catalog_type}:{brand}:{model}"
         if cache_key in self._pattern_cache:
             self._cache_hits += 1
             return self._pattern_cache[cache_key]
@@ -102,48 +105,50 @@ class CatalogLoader:
         self, catalog_type: str, brand: str, model: str
     ) -> List[re.Pattern]:
         """
-        Get cached compiled patterns or compile from catalog if not cached.
+        Get compiled patterns from cache or compile from catalog.
 
         Args:
-            catalog_type: Type of catalog ('handles' or 'knots')
+            catalog_type: Type of catalog ("handles" or "knots")
             brand: Brand name
             model: Model name
 
         Returns:
-            List[re.Pattern]: List of compiled patterns
+            List of compiled regex patterns
         """
-        cache_key = (catalog_type, brand, model)
-
+        cache_key = f"{catalog_type}:{brand}:{model}"
         if cache_key in self._compiled_pattern_cache:
+            self._cache_hits += 1
             return self._compiled_pattern_cache[cache_key]
 
-        # Get raw patterns and compile them
-        raw_patterns = self._get_cached_patterns(catalog_type, brand, model)
-        compiled_patterns = self.compile_patterns(raw_patterns)
+        self._cache_misses += 1
+        patterns = self._get_cached_patterns(catalog_type, brand, model)
+        compiled_patterns = self.compile_patterns(patterns, catalog_type, brand, model)
         self._compiled_pattern_cache[cache_key] = compiled_patterns
         return compiled_patterns
 
     def _load_patterns_from_catalog(self, catalog_type: str, brand: str, model: str) -> List[str]:
         """
-        Load patterns from catalog file.
+        Load patterns from YAML catalog file.
 
         Args:
-            catalog_type: Type of catalog ('handles' or 'knots')
+            catalog_type: Type of catalog ("handles" or "knots")
             brand: Brand name
             model: Model name
 
         Returns:
-            List[str]: List of patterns
+            List of pattern strings
         """
-        if not brand:
+        # Determine catalog file path
+        if catalog_type == "handles":
+            catalog_path = self.data_path / "handles.yaml"
+        elif catalog_type == "knots":
+            catalog_path = self.data_path / "knots.yaml"
+        else:
             return []
 
-        catalog_file = self.data_path / f"{catalog_type}.yaml"
-        if not catalog_file.exists():
-            return []
-
+        # Load catalog data
         try:
-            with open(catalog_file, "r", encoding="utf-8") as f:
+            with open(catalog_path, "r", encoding="utf-8") as f:
                 catalog_data = yaml.safe_load(f)
         except (yaml.YAMLError, OSError):
             return []
@@ -199,23 +204,31 @@ class CatalogLoader:
 
         return patterns
 
-    def compile_patterns(self, patterns: List[str]) -> List[re.Pattern]:
+    def compile_patterns(
+        self, patterns: List[str], catalog_type: str, brand: str, model: str
+    ) -> List[re.Pattern]:
         """
-        Compile regex patterns for efficient matching.
+        Compile regex patterns for efficient matching with enhanced error reporting.
 
         Args:
             patterns: List of pattern strings
+            catalog_type: Type of catalog ("handles" or "knots")
+            brand: Brand name
+            model: Model name
 
         Returns:
             List[re.Pattern]: List of compiled patterns
         """
         compiled_patterns = []
         for pattern in patterns:
-            try:
-                compiled_patterns.append(re.compile(pattern, re.IGNORECASE))
-            except re.error:
-                # Skip invalid patterns
-                continue
+            # Create context for enhanced error reporting
+            context = create_context_dict(
+                file_path=f"data/{catalog_type}.yaml",
+                brand=brand,
+                model=model
+            )
+            compiled_pattern = compile_regex_with_context(pattern, context)
+            compiled_patterns.append(compiled_pattern)
         return compiled_patterns
 
     def clear_pattern_cache(self):
