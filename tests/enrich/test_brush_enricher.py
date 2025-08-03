@@ -231,8 +231,10 @@ class TestSourceTrackingValidation:
     def test_catalog_only_data_uses_catalog_source(self, enricher):
         """Test that catalog-only data shows correct source tracking."""
         field_data = {
-            "knot_size_mm": 27.0,
-            "fiber": "Badger",
+            "matched": {
+                "knot_size_mm": 27.0,
+                "fiber": "Badger",
+            }
         }
         brush_extracted = "Simpson Chubby 2"  # No user data extracted
 
@@ -246,7 +248,7 @@ class TestSourceTrackingValidation:
 
     def test_user_only_data_uses_user_source(self, enricher):
         """Test that user-only data shows correct source tracking."""
-        field_data = {}  # No catalog data
+        field_data = {"matched": {}}  # No catalog data
         brush_extracted = "Simpson Chubby 2 26mm Badger"  # User data extracted
 
         result = enricher.enrich(field_data, brush_extracted)
@@ -260,8 +262,10 @@ class TestSourceTrackingValidation:
     def test_mixed_data_uses_combined_source(self, enricher):
         """Test that mixed data shows correct source tracking."""
         field_data = {
-            "knot_size_mm": 27.0,
-            "fiber": "Synthetic",
+            "matched": {
+                "knot_size_mm": 27.0,
+                "fiber": "Synthetic",
+            }
         }
         brush_extracted = "Simpson Chubby 2 26mm Badger"  # User overrides catalog
 
@@ -276,8 +280,10 @@ class TestSourceTrackingValidation:
     def test_user_confirms_catalog_uses_combined_source(self, enricher):
         """Test that user confirming catalog shows correct source tracking."""
         field_data = {
-            "knot_size_mm": 27.0,
-            "fiber": "Badger",
+            "matched": {
+                "knot_size_mm": 27.0,
+                "fiber": "Badger",
+            }
         }
         brush_extracted = "Simpson Chubby 2 27mm Badger"  # User confirms catalog
 
@@ -305,8 +311,10 @@ class TestSourceTrackingValidation:
     def test_user_none_values_dont_override_catalog(self, enricher):
         """Test that user None values don't override catalog values."""
         field_data = {
-            "knot_size_mm": 27.0,
-            "fiber": "Badger",
+            "matched": {
+                "knot_size_mm": 27.0,
+                "fiber": "Badger",
+            }
         }
         brush_extracted = "Simpson Chubby 2"  # No user data extracted (None values)
 
@@ -369,7 +377,7 @@ class TestRealWorldExamples:
         }
         brush_extracted = "Simpson Chubby 2 27mm"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 27.0
@@ -388,7 +396,7 @@ class TestRealWorldExamples:
         }
         brush_extracted = "Omega 10049 24mm"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 24.0
@@ -408,7 +416,7 @@ class TestRealWorldExamples:
         }
         brush_extracted = "Declaration B2 26mm"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 26.0
@@ -498,7 +506,7 @@ class TestFiberConflictResolution:
         }
         brush_extracted = "Simpson Chubby 2 Badger"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["fiber"] == "Badger"
@@ -515,7 +523,7 @@ class TestFiberConflictResolution:
         }
         brush_extracted = "Simpson Chubby 2 Badger"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["fiber"] == "Badger"
@@ -544,7 +552,7 @@ class TestFiberConflictResolution:
         }
         brush_extracted = "Simpson Chubby 2"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["fiber"] == "Badger"
@@ -564,7 +572,7 @@ class TestCustomKnotDetection:
         }
         brush_extracted = "Simpson Chubby 2 27mm Badger"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["_custom_knot"] is True
@@ -582,7 +590,7 @@ class TestCustomKnotDetection:
         }
         brush_extracted = "Simpson Chubby 2 26mm Badger"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["_custom_knot"] is True
@@ -600,7 +608,7 @@ class TestCustomKnotDetection:
         }
         brush_extracted = "Simpson Chubby 2 26mm Badger"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["_custom_knot"] is True
@@ -638,7 +646,7 @@ class TestCombinedKnotSizeAndFiber:
         }
         brush_extracted = "Simpson Chubby 2 26mm Badger"
 
-        result = enricher.enrich(field_data["matched"], brush_extracted)
+        result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
         assert result["knot_size_mm"] == 26.0

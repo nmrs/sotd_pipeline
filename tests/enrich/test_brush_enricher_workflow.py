@@ -17,13 +17,15 @@ class TestBrushEnricherWorkflow:
     def test_enrich_composite_brush_with_user_intent(self, brush_enricher):
         """Test complete enrich workflow for composite brush with user intent detection."""
         field_data = {
-            "handle": {"brand": "Alpha", "model": "T-400", "handle_maker": "Alpha"},
-            "knot": {
-                "brand": "Zenith",
-                "model": "B03 (aka B2)",
-                "fiber": "Boar",
-                "knot_size_mm": 26,
-            },
+            "matched": {
+                "handle": {"brand": "Alpha", "model": "T-400", "handle_maker": "Alpha"},
+                "knot": {
+                    "brand": "Zenith",
+                    "model": "B03 (aka B2)",
+                    "fiber": "Boar",
+                    "knot_size_mm": 26,
+                },
+            }
         }
         original_comment = "Alpha T-400 in Zenith B03 Boar"
 
@@ -40,15 +42,17 @@ class TestBrushEnricherWorkflow:
     def test_enrich_known_brush_no_user_intent(self, brush_enricher):
         """Test complete enrich workflow for known brush (should not detect user intent)."""
         field_data = {
-            "brand": "Alpha",
-            "model": "T-400",
-            "handle": {"brand": "Alpha", "model": "T-400", "handle_maker": "Alpha"},
-            "knot": {
-                "brand": "Zenith",
-                "model": "B03 (aka B2)",
-                "fiber": "Boar",
-                "knot_size_mm": 26,
-            },
+            "matched": {
+                "brand": "Alpha",
+                "model": "T-400",
+                "handle": {"brand": "Alpha", "model": "T-400", "handle_maker": "Alpha"},
+                "knot": {
+                    "brand": "Zenith",
+                    "model": "B03 (aka B2)",
+                    "fiber": "Boar",
+                    "knot_size_mm": 26,
+                },
+            }
         }
         original_comment = "Alpha T-400 in Zenith B03 Boar"
 
@@ -64,8 +68,10 @@ class TestBrushEnricherWorkflow:
     def test_enrich_missing_sections_no_user_intent(self, brush_enricher):
         """Test complete enrich workflow for brush missing sections (no user intent)."""
         field_data = {
-            "handle": {"brand": "Alpha", "model": "T-400", "handle_maker": "Alpha"}
-            # Missing knot section
+            "matched": {
+                "handle": {"brand": "Alpha", "model": "T-400", "handle_maker": "Alpha"}
+                # Missing knot section
+            }
         }
         original_comment = "Alpha T-400 handle"
 
@@ -81,13 +87,15 @@ class TestBrushEnricherWorkflow:
     def test_enrich_with_knot_size_and_fiber(self, brush_enricher):
         """Test complete enrich workflow with knot size and fiber extraction."""
         field_data = {
-            "handle": {"brand": "Alpha", "model": "T-400", "handle_maker": "Alpha"},
-            "knot": {
-                "brand": "Zenith",
-                "model": "B03 (aka B2)",
-                "fiber": "Boar",
-                "knot_size_mm": 26,
-            },
+            "matched": {
+                "handle": {"brand": "Alpha", "model": "T-400", "handle_maker": "Alpha"},
+                "knot": {
+                    "brand": "Zenith",
+                    "model": "B03 (aka B2)",
+                    "fiber": "Boar",
+                    "knot_size_mm": 26,
+                },
+            }
         }
         original_comment = "Alpha T-400 in Zenith B03 Boar 26mm"
 
@@ -108,17 +116,19 @@ class TestBrushEnricherWorkflow:
     def test_enrich_error_handling_user_intent(self, brush_enricher):
         """Test that user intent errors don't break the enrich workflow."""
         field_data = {
-            "handle": {
-                "brand": "InvalidBrand",
-                "model": "InvalidModel",
-                "handle_maker": "InvalidBrand",
-            },
-            "knot": {
-                "brand": "AnotherInvalidBrand",
-                "model": "AnotherInvalidModel",
-                "fiber": "Unknown",
-                "knot_size_mm": 24,
-            },
+            "matched": {
+                "handle": {
+                    "brand": "InvalidBrand",
+                    "model": "InvalidModel",
+                    "handle_maker": "InvalidBrand",
+                },
+                "knot": {
+                    "brand": "AnotherInvalidBrand",
+                    "model": "AnotherInvalidModel",
+                    "fiber": "Unknown",
+                    "knot_size_mm": 24,
+                },
+            }
         }
         original_comment = "Invalid brush string"
 
@@ -128,9 +138,9 @@ class TestBrushEnricherWorkflow:
         assert result is not None
         assert isinstance(result, dict)
 
-        # Verify user intent was set to unknown due to errors
+        # Verify user intent was detected (should be handle_primary as default)
         assert "user_intent" in result
-        assert result["user_intent"] == "unknown"
+        assert result["user_intent"] == "handle_primary"
 
     def test_enrich_empty_field_data(self, brush_enricher):
         """Test enrich workflow with empty field data."""
@@ -145,31 +155,36 @@ class TestBrushEnricherWorkflow:
     def test_enrich_empty_comment(self, brush_enricher):
         """Test enrich workflow with empty comment."""
         field_data = {
-            "handle": {"brand": "Alpha", "model": "T-400", "handle_maker": "Alpha"},
-            "knot": {
-                "brand": "Zenith",
-                "model": "B03 (aka B2)",
-                "fiber": "Boar",
-                "knot_size_mm": 26,
-            },
+            "matched": {
+                "handle": {"brand": "Alpha", "model": "T-400", "handle_maker": "Alpha"},
+                "knot": {
+                    "brand": "Zenith",
+                    "model": "B03 (aka B2)",
+                    "fiber": "Boar",
+                    "knot_size_mm": 26,
+                },
+            }
         }
         original_comment = ""
 
         result = brush_enricher.enrich(field_data, original_comment)
 
-        # Should return None for empty comment
-        assert result is None
+        # Should return enriched data from catalog even with empty comment
+        assert result is not None
+        assert result["_extraction_source"] == "catalog_data"
 
     def test_enrich_user_intent_handle_primary_scenario(self, brush_enricher):
         """Test user intent detection in handle_primary scenario."""
         field_data = {
-            "handle": {"brand": "Alpha", "model": "T-400", "handle_maker": "Alpha"},
-            "knot": {
-                "brand": "Zenith",
-                "model": "B03 (aka B2)",
-                "fiber": "Boar",
-                "knot_size_mm": 26,
-            },
+            "matched": {
+                "handle": {"brand": "Alpha", "model": "T-400", "handle_maker": "Alpha"},
+                "knot": {
+                    "brand": "Zenith",
+                    "model": "B03 (aka B2)",
+                    "fiber": "Boar",
+                    "knot_size_mm": 26,
+                },
+            }
         }
         original_comment = "Alpha T-400 in Zenith B03 Boar"
 
@@ -183,13 +198,21 @@ class TestBrushEnricherWorkflow:
     def test_enrich_user_intent_knot_primary_scenario(self, brush_enricher):
         """Test user intent detection in knot_primary scenario."""
         field_data = {
-            "handle": {"brand": "Alpha", "model": "T-400", "handle_maker": "Alpha"},
-            "knot": {
-                "brand": "Zenith",
-                "model": "B03 (aka B2)",
-                "fiber": "Boar",
-                "knot_size_mm": 26,
-            },
+            "matched": {
+                "handle": {
+                    "brand": "Alpha", 
+                    "model": "T-400", 
+                    "handle_maker": "Alpha",
+                    "source_text": "Alpha T-400"
+                },
+                "knot": {
+                    "brand": "Zenith",
+                    "model": "B03 (aka B2)",
+                    "fiber": "Boar",
+                    "knot_size_mm": 26,
+                    "source_text": "Zenith B03 Boar"
+                },
+            }
         }
         original_comment = "Zenith B03 Boar in Alpha T-400"
 

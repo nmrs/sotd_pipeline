@@ -143,7 +143,8 @@ class TestBrushEnricherIntegration:
         }
 
         intent = brush_enricher._detect_user_intent(brush_string, handle_data, knot_data)
-        assert intent == "unknown"  # Should return unknown when patterns not found
+        # Should return handle_primary as default when patterns not found
+        assert intent == "handle_primary"
 
     def test_user_intent_with_empty_patterns(self, brush_enricher):
         """Test user intent detection when catalog returns empty patterns."""
@@ -161,4 +162,5 @@ class TestBrushEnricherIntegration:
         }
 
         intent = brush_enricher._detect_user_intent(brush_string, handle_data, knot_data)
-        assert intent == "unknown"  # Should return unknown when no patterns found
+        # Should return handle_primary as default when no patterns found
+        assert intent == "handle_primary"
