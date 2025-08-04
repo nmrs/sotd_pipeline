@@ -296,8 +296,8 @@ class TestMismatchAnalyzerSplitBrush:
 
     def test_is_split_brush_confirmed(self):
         """Test that split brush confirmation logic works correctly.
-        
-        A split brush is only considered confirmed if ALL its components 
+
+        A split brush is only considered confirmed if ALL its components
         (both handle and knot) are present in correct_matches.yaml.
         Partial confirmation is not allowed.
         """
