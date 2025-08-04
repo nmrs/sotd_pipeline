@@ -29,12 +29,7 @@ const MismatchAnalyzer: React.FC = () => {
   const [threshold, setThreshold] = useState<number>(3);
   const [useEnrichedData, setUseEnrichedData] = useState<boolean>(false);
   const [displayMode, setDisplayMode] = useState<
-    | 'mismatches'
-    | 'all'
-    | 'unconfirmed'
-    | 'regex'
-    | 'intentionally_unmatched'
-    | 'complete_brushes'
+    'mismatches' | 'all' | 'unconfirmed' | 'regex' | 'intentionally_unmatched' | 'complete_brushes'
   >('mismatches');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -197,7 +192,7 @@ const MismatchAnalyzer: React.FC = () => {
     setSelectedBrushItem(item);
 
     // Convert comment_ids to proper occurrence format using comment_sources
-    const occurrences: Array<{ file: string, comment_ids: string[] }> = [];
+    const occurrences: Array<{ file: string; comment_ids: string[] }> = [];
 
     if (item.comment_ids && item.comment_ids.length > 0) {
       if (item.comment_sources) {
@@ -305,20 +300,17 @@ const MismatchAnalyzer: React.FC = () => {
     setSelectedMonth(months[0] || '');
   };
 
-  const handleItemSelection = useCallback(
-    (itemKey: string, selected: boolean) => {
-      setSelectedItems(prevSelected => {
-        const newSelected = new Set(prevSelected);
-        if (selected) {
-          newSelected.add(itemKey);
-        } else {
-          newSelected.delete(itemKey);
-        }
-        return newSelected;
-      });
-    },
-    []
-  );
+  const handleItemSelection = useCallback((itemKey: string, selected: boolean) => {
+    setSelectedItems(prevSelected => {
+      const newSelected = new Set(prevSelected);
+      if (selected) {
+        newSelected.add(itemKey);
+      } else {
+        newSelected.delete(itemKey);
+      }
+      return newSelected;
+    });
+  }, []);
 
   const handleSelectAll = useCallback(() => {
     if (!visibleRows.length) return;
@@ -567,8 +559,6 @@ const MismatchAnalyzer: React.FC = () => {
           item => item.mismatch_type === 'intentionally_unmatched'
         );
 
-
-
       case 'complete_brushes':
         // Show only complete brush items (when field is brush)
         return results.mismatch_items.filter(item => item.is_complete_brush === true);
@@ -580,7 +570,6 @@ const MismatchAnalyzer: React.FC = () => {
 
   // Keyboard navigation handlers
 
-
   // Container ref for keyboard navigation
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -589,7 +578,6 @@ const MismatchAnalyzer: React.FC = () => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Don't handle keyboard navigation if focus is on an input field
       const activeElement = document.activeElement;
-
 
       if (activeElement) {
         const tagName = activeElement.tagName.toLowerCase();
@@ -606,8 +594,6 @@ const MismatchAnalyzer: React.FC = () => {
       if (!keyboardNavigationEnabled) {
         return;
       }
-
-
 
       switch (event.key) {
         case 'ArrowUp':
@@ -644,7 +630,14 @@ const MismatchAnalyzer: React.FC = () => {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [keyboardNavigationEnabled, activeRowIndex, visibleRows, selectedField, selectedItems, handleItemSelection]);
+  }, [
+    keyboardNavigationEnabled,
+    activeRowIndex,
+    visibleRows,
+    selectedField,
+    selectedItems,
+    handleItemSelection,
+  ]);
 
   // Reset active row when data changes
   useEffect(() => {
@@ -747,7 +740,7 @@ const MismatchAnalyzer: React.FC = () => {
   }, [selectedItems, results?.mismatch_items]);
 
   return (
-    <div ref={containerRef} className='w-full p-4'>
+    <div ref={containerRef} className='w-full p-4 max-w-full overflow-x-hidden'>
       {/* Controls and Header */}
       <div className='mb-4'>
         <h1 className='text-3xl font-bold text-gray-900 mb-2'>Mismatch Analyzer</h1>
@@ -811,45 +804,103 @@ const MismatchAnalyzer: React.FC = () => {
           </div>
         )}
 
-        <div className='flex flex-wrap gap-4 items-end mb-4'>
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Field</label>
-            <select
-              value={selectedField}
-              onChange={e => setSelectedField(e.target.value)}
-              className='px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-            >
-              <option value='razor'>Razor</option>
-              <option value='blade'>Blade</option>
-              <option value='brush'>Brush</option>
-              <option value='soap'>Soap</option>
-            </select>
+        {/* Controls Section - Made responsive */}
+        <div className='space-y-4 mb-4'>
+          {/* First row - Basic controls */}
+          <div className='flex flex-wrap gap-4 items-end'>
+            <div className='min-w-0 flex-1 sm:flex-none'>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>Field</label>
+              <select
+                value={selectedField}
+                onChange={e => setSelectedField(e.target.value)}
+                className='w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+              >
+                <option value='razor'>Razor</option>
+                <option value='blade'>Blade</option>
+                <option value='brush'>Brush</option>
+                <option value='soap'>Soap</option>
+              </select>
+            </div>
+            <div className='min-w-0 flex-1 sm:flex-none'>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>Month</label>
+              <MonthSelector
+                selectedMonths={selectedMonth ? [selectedMonth] : []}
+                onMonthsChange={handleMonthChange}
+                label='Select Month'
+                multiple={false}
+              />
+            </div>
+            <div className='min-w-0 flex-1 sm:flex-none'>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                Levenshtein Threshold
+              </label>
+              <input
+                type='number'
+                min='1'
+                max='10'
+                value={threshold}
+                onChange={e => setThreshold(Number(e.target.value))}
+                className='w-full sm:w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+              />
+            </div>
+            <div className='min-w-0 flex-1 sm:flex-none'>
+              <div className='flex items-center gap-2'>
+                <input
+                  type='checkbox'
+                  id='useEnrichedData'
+                  checked={useEnrichedData}
+                  onChange={e => setUseEnrichedData(e.target.checked)}
+                  className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
+                />
+                <label htmlFor='useEnrichedData' className='text-sm text-gray-700'>
+                  Use Enriched Data
+                </label>
+                <div className='relative group'>
+                  <button
+                    type='button'
+                    className='ml-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600'
+                    title='Learn about Match vs Enrich phases'
+                  >
+                    <svg className='h-4 w-4' fill='currentColor' viewBox='0 0 20 20'>
+                      <path
+                        fillRule='evenodd'
+                        d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z'
+                        clipRule='evenodd'
+                      />
+                    </svg>
+                  </button>
+                  <div className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm max-w-xs'>
+                    <div className='font-medium mb-1'>Match vs Enrich Phases:</div>
+                    <div className='space-y-1'>
+                      <div>
+                        <strong>Match Phase:</strong> Initial product identification
+                      </div>
+                      <div>
+                        <strong>Enrich Phase:</strong> Refines matches with additional data
+                      </div>
+                      <div className='text-gray-600'>
+                        Some "mismatches" are actually correct enrich-phase adjustments
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className='min-w-0 flex-1 sm:flex-none'>
+              <button
+                onClick={handleAnalyze}
+                disabled={loading || !selectedMonth}
+                className='w-full sm:w-auto bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed h-10'
+              >
+                {loading ? 'Analyzing...' : 'Analyze'}
+              </button>
+            </div>
           </div>
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Month</label>
-            <MonthSelector
-              selectedMonths={selectedMonth ? [selectedMonth] : []}
-              onMonthsChange={handleMonthChange}
-              label='Select Month'
-              multiple={false}
-            />
-          </div>
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
-              Levenshtein Threshold
-            </label>
-            <input
-              type='number'
-              min='1'
-              max='10'
-              value={threshold}
-              onChange={e => setThreshold(Number(e.target.value))}
-              className='px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-24'
-            />
-          </div>
-          <div className='flex flex-col gap-1'>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Display Mode</label>
-            <div className='flex gap-2'>
+
+          {/* Second row - Display Mode buttons */}
+          <div className='min-w-0'>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>Display Mode</label>
+            <div className='flex flex-wrap gap-2'>
               <Button
                 variant='outline'
                 onClick={() => setDisplayMode('all')}
@@ -878,8 +929,8 @@ const MismatchAnalyzer: React.FC = () => {
                 Mismatches
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'mismatches'
-                    ? 'bg-white text-blue-600'
-                    : 'bg-gray-100 text-gray-700'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getDisplayModeCounts().mismatches}
@@ -898,8 +949,8 @@ const MismatchAnalyzer: React.FC = () => {
                 Unconfirmed
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'unconfirmed'
-                    ? 'bg-white text-blue-600'
-                    : 'bg-gray-100 text-gray-700'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getDisplayModeCounts().unconfirmed}
@@ -936,8 +987,8 @@ const MismatchAnalyzer: React.FC = () => {
                 Intentionally Unmatched
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'intentionally_unmatched'
-                    ? 'bg-white text-blue-600'
-                    : 'bg-gray-100 text-gray-700'
+                      ? 'bg-white text-blue-600'
+                      : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getDisplayModeCounts().intentionally_unmatched}
@@ -946,8 +997,6 @@ const MismatchAnalyzer: React.FC = () => {
                   Show only intentionally unmatched items
                 </span>
               </Button>
-              {/* Split Brushes filter - only show when field is brush */}
-
               {/* Complete Brushes filter - only show when field is brush */}
               {selectedField === 'brush' && (
                 <Button
@@ -960,8 +1009,8 @@ const MismatchAnalyzer: React.FC = () => {
                   Complete Brushes
                   <span
                     className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${displayMode === 'complete_brushes'
-                      ? 'bg-white text-blue-600'
-                      : 'bg-gray-100 text-gray-700'
+                        ? 'bg-white text-blue-600'
+                        : 'bg-gray-100 text-gray-700'
                       }`}
                   >
                     {getDisplayModeCounts().complete_brushes}
@@ -973,54 +1022,6 @@ const MismatchAnalyzer: React.FC = () => {
               )}
             </div>
           </div>
-          <div className='flex items-center gap-2'>
-            <input
-              type='checkbox'
-              id='useEnrichedData'
-              checked={useEnrichedData}
-              onChange={e => setUseEnrichedData(e.target.checked)}
-              className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
-            />
-            <label htmlFor='useEnrichedData' className='text-sm text-gray-700'>
-              Use Enriched Data
-            </label>
-            <div className='relative group'>
-              <button
-                type='button'
-                className='ml-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600'
-                title='Learn about Match vs Enrich phases'
-              >
-                <svg className='h-4 w-4' fill='currentColor' viewBox='0 0 20 20'>
-                  <path
-                    fillRule='evenodd'
-                    d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z'
-                    clipRule='evenodd'
-                  />
-                </svg>
-              </button>
-              <div className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-sm max-w-xs'>
-                <div className='font-medium mb-1'>Match vs Enrich Phases:</div>
-                <div className='space-y-1'>
-                  <div>
-                    <strong>Match Phase:</strong> Initial product identification
-                  </div>
-                  <div>
-                    <strong>Enrich Phase:</strong> Refines matches with additional data
-                  </div>
-                  <div className='text-gray-600'>
-                    Some "mismatches" are actually correct enrich-phase adjustments
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={handleAnalyze}
-            disabled={loading || !selectedMonth}
-            className='bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed h-10 mt-6'
-          >
-            {loading ? 'Analyzing...' : 'Analyze'}
-          </button>
         </div>
       </div>
 
@@ -1043,20 +1044,20 @@ const MismatchAnalyzer: React.FC = () => {
         <div className='bg-white rounded-lg shadow'>
           <div className='px-6 py-4 border-b border-gray-200'>
             <div className='flex items-center justify-between'>
-              <div>
+              <div className='min-w-0 flex-1'>
                 <h3 className='text-lg font-medium text-gray-900'>Analysis Results</h3>
-                <div className='mt-2 text-sm text-gray-600 flex flex-wrap gap-6'>
-                  <span>
+                <div className='mt-2 text-sm text-gray-600 flex flex-wrap gap-4'>
+                  <span className='whitespace-nowrap'>
                     Field: <span className='font-medium'>{results.field}</span>
                   </span>
-                  <span>
+                  <span className='whitespace-nowrap'>
                     Month: <span className='font-medium'>{results.month}</span>
                   </span>
-                  <span>
+                  <span className='whitespace-nowrap'>
                     Total Matches:{' '}
                     <span className='font-medium'>{results.mismatch_items?.length || 0}</span>
                   </span>
-                  <span>
+                  <span className='whitespace-nowrap'>
                     Total Mismatches:{' '}
                     <span className='font-medium'>
                       {
@@ -1069,10 +1070,10 @@ const MismatchAnalyzer: React.FC = () => {
                       }
                     </span>
                   </span>
-                  <span>
+                  <span className='whitespace-nowrap'>
                     Displayed: <span className='font-medium'>{filteredResults.length}</span>
                   </span>
-                  <span>
+                  <span className='whitespace-nowrap'>
                     Processing Time:{' '}
                     <span className='font-medium'>{results.processing_time.toFixed(2)}s</span>
                   </span>
@@ -1087,30 +1088,30 @@ const MismatchAnalyzer: React.FC = () => {
 
               {/* Bulk Actions */}
               {filteredResults.length > 0 && (
-                <div className='flex gap-2'>
+                <div className='flex flex-wrap gap-2 min-w-0'>
                   <button
                     onClick={handleSelectAll}
-                    className='px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500'
+                    className='px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 whitespace-nowrap'
                   >
                     Select All
                   </button>
                   <button
                     onClick={handleClearSelection}
-                    className='px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500'
+                    className='px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 whitespace-nowrap'
                   >
                     Clear Selection
                   </button>
                   <button
                     onClick={handleMarkAsCorrect}
                     disabled={selectedItems.size === 0 || markingCorrect}
-                    className='px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed'
+                    className='px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap'
                   >
                     {markingCorrect ? 'Marking...' : `Mark ${visibleSelectedCount} as Correct`}
                   </button>
                   <button
                     onClick={handleMarkAsIntentionallyUnmatched}
                     disabled={selectedItems.size === 0 || updatingFiltered}
-                    className='px-3 py-1 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed'
+                    className='px-3 py-1 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap'
                   >
                     {updatingFiltered ? 'Updating...' : getUnmatchedButtonText}
                   </button>

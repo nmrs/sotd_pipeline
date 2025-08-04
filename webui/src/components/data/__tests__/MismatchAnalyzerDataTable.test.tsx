@@ -205,7 +205,7 @@ describe('MismatchAnalyzerDataTable', () => {
           count: 1,
           comment_ids: ['id1'],
           examples: ['example1'],
-        }
+        },
       ];
 
       // Deterministic mock function based on input, not call order
@@ -216,7 +216,7 @@ describe('MismatchAnalyzerDataTable', () => {
       render(
         <MismatchAnalyzerDataTable
           data={confirmedData}
-          field="razor"
+          field='razor'
           onCommentClick={mockOnCommentClick}
           isItemConfirmed={isItemConfirmed}
         />
@@ -237,7 +237,7 @@ describe('MismatchAnalyzerDataTable', () => {
           count: 1,
           comment_ids: ['id2'],
           examples: ['example2'],
-        }
+        },
       ];
 
       // Deterministic mock function based on input, not call order
@@ -248,7 +248,7 @@ describe('MismatchAnalyzerDataTable', () => {
       render(
         <MismatchAnalyzerDataTable
           data={unconfirmedData}
-          field="razor"
+          field='razor'
           onCommentClick={mockOnCommentClick}
           isItemConfirmed={isItemConfirmed}
         />

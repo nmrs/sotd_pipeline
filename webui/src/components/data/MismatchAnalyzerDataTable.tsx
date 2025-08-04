@@ -426,8 +426,6 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
               const itemKey = `${field}:${item.original.toLowerCase()}`;
               const isSelected = selectedItems.has(itemKey);
 
-
-
               return (
                 <input
                   type='checkbox'
@@ -506,18 +504,18 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           if (field === 'brush' && onBrushSplitClick) {
             return (
               <div
-                className='text-sm text-gray-900 max-w-xs whitespace-pre-wrap cursor-pointer hover:bg-blue-50 hover:text-blue-700 p-1 rounded border border-transparent hover:border-blue-200 transition-colors'
+                className='text-sm text-gray-900 max-w-xs truncate cursor-pointer hover:bg-blue-50 hover:text-blue-700 p-1 rounded border border-transparent hover:border-blue-200 transition-colors'
                 onClick={() => onBrushSplitClick(item)}
-                title='Click to edit brush split'
+                title={item.original}
               >
-                ✏️ {item.original}
+                ✏️ {truncateText(item.original, 40)}
               </div>
             );
           }
 
           return (
-            <div className='text-sm text-gray-900 max-w-xs whitespace-pre-wrap'>
-              {item.original}
+            <div className='text-sm text-gray-900 max-w-xs truncate' title={item.original}>
+              {truncateText(item.original, 40)}
             </div>
           );
         },
@@ -560,11 +558,12 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
               <div
                 className={`text-sm text-gray-900 max-w-xs ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
                 onClick={hasChanges ? handleEnrichClick : undefined}
+                title={formattedData}
               >
                 {hasChanges && <span className='text-blue-600 text-xs mr-1'>🔄</span>}
                 {formattedData.split('\n').map((line, index) => (
                   <div key={index} className={index > 0 ? 'mt-1' : ''}>
-                    {truncateText(line, 60)}
+                    {truncateText(line, 40)}
                   </div>
                 ))}
               </div>
@@ -576,11 +575,12 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           // For other fields, use the original rendering
           const content = (
             <div
-              className={`text-sm text-gray-900 max-w-xs ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
+              className={`text-sm text-gray-900 max-w-xs truncate ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
               onClick={hasChanges ? handleEnrichClick : undefined}
+              title={formattedData}
             >
               {hasChanges && <span className='text-blue-600 text-xs mr-1'>🔄</span>}
-              <span>{truncateText(formattedData, 60)}</span>
+              <span>{truncateText(formattedData, 40)}</span>
             </div>
           );
 
@@ -678,7 +678,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           const item = row.original;
           const patternText = item.pattern || '';
           return (
-            <div className='text-sm text-gray-500 max-w-xs font-mono relative'>
+            <div
+              className='text-sm text-gray-500 max-w-xs font-mono relative truncate'
+              title={patternText}
+            >
               {truncateText(patternText, 40)}
             </div>
           );
@@ -697,8 +700,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             const item = row.original;
             const handleText = formatBrushComponent(item.matched, 'handle');
             return (
-              <div className='text-sm text-gray-900 max-w-xs relative'>
-                {truncateText(handleText, 50)}
+              <div className='text-sm text-gray-900 max-w-xs relative truncate' title={handleText}>
+                {truncateText(handleText, 40)}
               </div>
             );
           },
@@ -711,9 +714,13 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           header: 'Handle Pattern',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
+            const patternText = getBrushComponentPattern(item.matched, 'handle');
             return (
-              <div className='text-sm text-gray-500 max-w-xs font-mono relative'>
-                {truncateText(getBrushComponentPattern(item.matched, 'handle'), 40)}
+              <div
+                className='text-sm text-gray-500 max-w-xs font-mono relative truncate'
+                title={patternText}
+              >
+                {truncateText(patternText, 40)}
               </div>
             );
           },
@@ -728,7 +735,9 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             const item = row.original;
             const knotText = formatBrushComponent(item.matched, 'knot');
             return (
-              <div className='text-sm text-gray-900 max-w-xs'>{truncateText(knotText, 50)}</div>
+              <div className='text-sm text-gray-900 max-w-xs truncate' title={knotText}>
+                {truncateText(knotText, 40)}
+              </div>
             );
           },
         },
@@ -740,9 +749,13 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           header: 'Knot Pattern',
           cell: ({ row }: { row: Row<MismatchItem> }) => {
             const item = row.original;
+            const patternText = getBrushComponentPattern(item.matched, 'knot');
             return (
-              <div className='text-sm text-gray-500 max-w-xs font-mono'>
-                {truncateText(getBrushComponentPattern(item.matched, 'knot'), 40)}
+              <div
+                className='text-sm text-gray-500 max-w-xs font-mono truncate'
+                title={patternText}
+              >
+                {truncateText(patternText, 40)}
               </div>
             );
           },

@@ -182,7 +182,6 @@ export interface MismatchItem {
   comment_ids: string[];
   comment_sources?: Record<string, string>; // comment_id -> source_file
   is_confirmed?: boolean;
-
 }
 
 export interface MismatchAnalysisResult {

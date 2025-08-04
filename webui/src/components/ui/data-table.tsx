@@ -106,24 +106,28 @@ export function DataTable<TData, TValue>({
   const tableRef = React.useRef<HTMLDivElement>(null);
 
   // Use external row selection if provided, otherwise use internal
-  const effectiveRowSelection = externalRowSelection !== undefined ? externalRowSelection : rowSelection;
-  const setEffectiveRowSelection = externalRowSelection !== undefined ?
-    (updater: RowSelectionState | ((prev: RowSelectionState) => RowSelectionState)) => {
-      // When using external selection, we need to call onSelectionChange directly
-      // since the table's internal state won't be updated
-      const newSelection = typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
-      if (onSelectionChange) {
-        const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
-        onSelectionChange(selectedRows);
+  const effectiveRowSelection =
+    externalRowSelection !== undefined ? externalRowSelection : rowSelection;
+  const setEffectiveRowSelection =
+    externalRowSelection !== undefined
+      ? (updater: RowSelectionState | ((prev: RowSelectionState) => RowSelectionState)) => {
+        // When using external selection, we need to call onSelectionChange directly
+        // since the table's internal state won't be updated
+        const newSelection =
+          typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
+        if (onSelectionChange) {
+          const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
+          onSelectionChange(selectedRows);
+        }
+        // Also update the internal state so the UI reflects the change immediately
+        setRowSelection(newSelection);
       }
-      // Also update the internal state so the UI reflects the change immediately
-      setRowSelection(newSelection);
-    } : setRowSelection;
+      : setRowSelection;
 
   const table = useReactTable({
     data,
     columns,
-    onSortingChange: (updater) => {
+    onSortingChange: updater => {
       const newSorting = typeof updater === 'function' ? updater(sorting) : updater;
       setSorting(newSorting);
     },
@@ -187,8 +191,6 @@ export function DataTable<TData, TValue>({
       setRowSelection(externalRowSelection);
     }
   }, [externalRowSelection]);
-
-
 
   // Scroll to active row when it changes
   React.useEffect(() => {
@@ -303,7 +305,7 @@ export function DataTable<TData, TValue>({
           </DropdownMenu>
         )}
       </div>
-      <div ref={tableRef} className='rounded-md border overflow-x-auto'>
+      <div ref={tableRef} className='rounded-md border overflow-x-auto max-w-full'>
         <Table data-table>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
@@ -361,10 +363,6 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {rows.length ? (
               rows.map((row, index) => {
-
-
-
-
                 return (
                   <TableRow
                     key={row.id}
@@ -372,8 +370,8 @@ export function DataTable<TData, TValue>({
                     data-state={row.getIsSelected() && 'selected'}
                     onClick={enableRowClickSelection ? e => handleRowClick(row, e) : undefined}
                     className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${keyboardNavigationEnabled && activeRowIndex === index
-                      ? 'bg-blue-50 border-l-4 border-l-blue-500'
-                      : ''
+                        ? 'bg-blue-50 border-l-4 border-l-blue-500'
+                        : ''
                       }`}
                   >
                     {row.getVisibleCells().map(cell => (
