@@ -293,3 +293,62 @@ class TestMismatchAnalyzerSplitBrush:
         assert regular_brush_item["is_split_brush"] is False
         assert regular_brush_item["handle_component"] is None
         assert regular_brush_item["knot_component"] is None
+
+    def test_is_split_brush_confirmed(self):
+        """Test that split brush confirmation logic works correctly."""
+        # Set up correct matches with handle and knot components
+        self.analyzer._correct_matches = {
+            "handle:alpha outlaw",
+            "knot:silver stf++"
+        }
+
+        # Test data for "Alpha Outlaw Silver STF++"
+        matched = {
+            "brand": None,
+            "model": None,
+            "handle": {
+                "brand": "Alpha",
+                "model": "Outlaw",
+                "source_text": "Alpha Outlaw"
+            },
+            "knot": {
+                "brand": "Mühle",
+                "model": "STF",
+                "source_text": "Silver STF++"
+            }
+        }
+
+        # Should be confirmed since both handle and knot are in correct_matches
+        assert self.analyzer._is_split_brush_confirmed(matched) is True
+
+        # Test with missing handle component
+        matched_no_handle = {
+            "brand": None,
+            "model": None,
+            "knot": {
+                "brand": "Mühle",
+                "model": "STF",
+                "source_text": "Silver STF++"
+            }
+        }
+        assert self.analyzer._is_split_brush_confirmed(matched_no_handle) is False
+
+        # Test with missing knot component
+        matched_no_knot = {
+            "brand": None,
+            "model": None,
+            "handle": {
+                "brand": "Alpha",
+                "model": "Outlaw",
+                "source_text": "Alpha Outlaw"
+            }
+        }
+        assert self.analyzer._is_split_brush_confirmed(matched_no_knot) is False
+
+        # Test with only handle confirmed
+        self.analyzer._correct_matches = {"handle:alpha outlaw"}
+        assert self.analyzer._is_split_brush_confirmed(matched) is False
+
+        # Test with only knot confirmed
+        self.analyzer._correct_matches = {"knot:silver stf++"}
+        assert self.analyzer._is_split_brush_confirmed(matched) is False

@@ -546,7 +546,12 @@ class MismatchAnalyzer(AnalysisTool):
             match_key = self._create_match_key(field, normalized, matched)
 
             # Check if this match was previously marked as correct
-            is_confirmed = match_key in self._correct_matches
+            if field == "brush" and is_split_brush:
+                # For split brushes, check if both handle and knot components are confirmed
+                is_confirmed = self._is_split_brush_confirmed(matched)
+            else:
+                # For regular matches, check the standard way
+                is_confirmed = match_key in self._correct_matches
 
             # Skip exact matches (from correct_matches.yaml) - these are already confirmed correct
             # Also check if match_type is "exact" or if the item is in correct_matches.yaml
@@ -2129,6 +2134,51 @@ class MismatchAnalyzer(AnalysisTool):
                 knot_component = knot
 
         return handle_component, knot_component
+
+    def _is_split_brush_confirmed(self, matched: Dict) -> bool:
+        """Check if a split brush is confirmed by checking handle and knot sections."""
+        if not matched:
+            return False
+
+        handle = matched.get("handle")
+        knot = matched.get("knot")
+
+        # Both handle and knot must be present for a split brush to be confirmed
+        if not handle or not knot:
+            return False
+
+        # Check if handle component is confirmed
+        handle_confirmed = False
+        if isinstance(handle, dict):
+            handle_brand = handle.get("brand")
+            handle_model = handle.get("model")
+            handle_source_text = handle.get("source_text")
+            
+            if handle_brand and handle_model:
+                # Check if handle is in correct_matches.yaml
+                if handle_source_text:
+                    handle_key = f"handle:{handle_source_text.lower()}"
+                else:
+                    handle_key = f"handle:{handle_brand.lower()} {handle_model.lower()}"
+                handle_confirmed = handle_key in self._correct_matches
+
+        # Check if knot component is confirmed
+        knot_confirmed = False
+        if isinstance(knot, dict):
+            knot_brand = knot.get("brand")
+            knot_model = knot.get("model")
+            knot_source_text = knot.get("source_text")
+            
+            if knot_brand and knot_model:
+                # Check if knot is in correct_matches.yaml
+                if knot_source_text:
+                    knot_key = f"knot:{knot_source_text.lower()}"
+                else:
+                    knot_key = f"knot:{knot_brand.lower()} {knot_model.lower()}"
+                knot_confirmed = knot_key in self._correct_matches
+
+        # Both components must be confirmed
+        return handle_confirmed and knot_confirmed
 
 
 def main(argv: List[str] | None = None) -> None:
