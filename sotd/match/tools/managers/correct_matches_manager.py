@@ -225,7 +225,7 @@ class CorrectMatchesManager:
                     # Check if this is a split brush (composite brush with handle/knot components)
                     handle = match_data["matched"].get("handle")
                     knot = match_data["matched"].get("knot")
-                    
+
                     if handle or knot:
                         # This is a split brush - save to handle and knot sections
                         if handle:
@@ -239,7 +239,7 @@ class CorrectMatchesManager:
                                     field_data["handle"][handle_brand] = {}
                                 if handle_model not in field_data["handle"][handle_brand]:
                                     field_data["handle"][handle_brand][handle_model] = []
-                                
+
                                 # Use source_text if available, otherwise use original
                                 handle_text = handle.get("source_text", original)
                                 normalized_handle_text = self._normalize_for_matching(
@@ -247,13 +247,13 @@ class CorrectMatchesManager:
                                 )
                                 if (
                                     normalized_handle_text
-                                    and normalized_handle_text 
+                                    and normalized_handle_text
                                     not in field_data["handle"][handle_brand][handle_model]
                                 ):
                                     field_data["handle"][handle_brand][handle_model].append(
                                         normalized_handle_text
                                     )
-                        
+
                         if knot:
                             knot_brand = knot.get("brand")
                             knot_model = knot.get("model")
@@ -265,7 +265,7 @@ class CorrectMatchesManager:
                                     field_data["knot"][knot_brand] = {}
                                 if knot_model not in field_data["knot"][knot_brand]:
                                     field_data["knot"][knot_brand][knot_model] = []
-                                
+
                                 # Use source_text if available, otherwise use original
                                 knot_text = knot.get("source_text", original)
                                 normalized_knot_text = self._normalize_for_matching(
@@ -273,7 +273,7 @@ class CorrectMatchesManager:
                                 )
                                 if (
                                     normalized_knot_text
-                                    and normalized_knot_text 
+                                    and normalized_knot_text
                                     not in field_data["knot"][knot_brand][knot_model]
                                 ):
                                     field_data["knot"][knot_brand][knot_model].append(

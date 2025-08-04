@@ -2153,7 +2153,7 @@ class MismatchAnalyzer(AnalysisTool):
             handle_brand = handle.get("brand")
             handle_model = handle.get("model")
             handle_source_text = handle.get("source_text")
-            
+
             if handle_brand and handle_model:
                 # Check if handle is in correct_matches.yaml
                 if handle_source_text:
@@ -2168,7 +2168,7 @@ class MismatchAnalyzer(AnalysisTool):
             knot_brand = knot.get("brand")
             knot_model = knot.get("model")
             knot_source_text = knot.get("source_text")
-            
+
             if knot_brand and knot_model:
                 # Check if knot is in correct_matches.yaml
                 if knot_source_text:
