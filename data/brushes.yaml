@@ -147,76 +147,76 @@ known_brushes:
       - ^(?!.*dog).*\bb1\b
     B2:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb2\b
-      - ^(?!.*dog).*\bb2\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb2\b
+      - ^(?!.*dog|zen).*\bb2\b
     B3:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb3\b
-      - ^(?!.*dog).*\bb3\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb3\b
+      - ^(?!.*dog|zen).*\bb3\b
     B4:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb4\b
-      - ^(?!.*dog).*\bb4\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb4\b
+      - ^(?!.*dog|zen).*\bb4\b
     B5:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb5\b
-      - ^(?!.*dog).*\bb5\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb5\b
+      - ^(?!.*dog|zen).*\bb5\b
     B6:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb6\b
-      - ^(?!.*dog).*\bb6\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb6\b
+      - ^(?!.*dog|zen).*\bb6\b
     B7:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb7\b
-      - ^(?!.*dog).*\bb7\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb7\b
+      - ^(?!.*dog|zen).*\bb7\b
     B8:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb8\b
-      - ^(?!.*dog).*\bb8\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb8\b
+      - ^(?!.*dog|zen).*\bb8\b
     B9A:
         patterns:
-        - ^(?!.*dog).*(declaration|\bdg\b)?.*\bb9a\+?\b
-        - ^(?!.*dog).*\bb9a\+?\b
+        - ^(?!.*dog|zen).*(declaration|\bdg\b)?.*\bb9a\+?\b
+        - ^(?!.*dog|zen).*\bb9a\+?\b
     B9B:
       patterns:
       - ^(?!.*dog).*(declaration|\bdg\b)?.*\bb9b\+?\b
       - ^(?!.*dog).*\bb9b\+?\b
     B10:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb10\b
-      - ^(?!.*dog).*\bb10\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb10\b
+      - ^(?!.*dog|zen).*\bb10\b
     B11:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb11\b
-      - ^(?!.*dog).*\bb11\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb11\b
+      - ^(?!.*dog|zen).*\bb11\b
     B12:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb12\b
-      - ^(?!.*dog).*\bb12\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb12\b
+      - ^(?!.*dog|zen).*\bb12\b
     B13:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb13\b
-      - ^(?!.*dog).*\bb13\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb13\b
+      - ^(?!.*dog|zen).*\bb13\b
     B14:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb14\b
-      - ^(?!.*dog).*\bb14\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb14\b
+      - ^(?!.*dog|zen).*\bb14\b
     B15:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb15\b
-      - ^(?!.*dog).*\bb15\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb15\b
+      - ^(?!.*dog|zen).*\bb15\b
     B16:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb16\b
-      - ^(?!.*dog).*\bb16\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb16\b
+      - ^(?!.*dog|zen).*\bb16\b
     B17:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb17\b
-      - ^(?!.*dog).*\bb17\b
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb17\b
+      - ^(?!.*dog|zen).*\bb17\b
     B18:
       patterns:
-      - ^(?!.*dog).*(declaration|\bdg\b).*\bb18\b
-      - ^(?!.*dog).*\bb18\b  
+      - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb18\b
+      - ^(?!.*dog|zen).*\bb18\b  
   Dogclaration: 
     fiber: Badger
     knot_size_mm: 28
@@ -758,7 +758,7 @@ known_brushes:
       knot_maker: Zenith
       knot_size_mm: 28
       patterns:
-      - (510(\s*|-*)se|jhdsajkghjkdhagkgkjgkhagdkjagdassd)
+      - 510(\s*|-*)se(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*28).*
     31mmx50mm Boar (510SE-XL):
       knot:
@@ -767,7 +767,7 @@ known_brushes:
         knot_size_mm: 31
         model: B35
       patterns:
-      - (510(\s*|-*)se(\s*|-*)xl|jhdsajkghjkdhagkgkjgkhagdkjagdassd)
+      - 510(\s*|-*)se(\s*|-*)xl(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - ^(?=.*zenith)(?=.*st(i|e)rling)(?=.*31).*
     Boar:
       fiber: Boar
