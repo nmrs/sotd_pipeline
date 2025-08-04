@@ -799,7 +799,6 @@ brush:
     - moar f'n boar
     - r/wetshaving zenith moar boar
     - r/wetshaving zentih moar boar 31mm
-    - zenith - 508a xl/bristle (b35) (moar boar) 31mm boar
     - zenith - moar boar
     - zenith - moar boar 31mm boar
     - zenith - moar boar b35 31mm boar
@@ -823,11 +822,17 @@ brush:
 handle:
   Alpha:
     Outlaw:
-    - Alpha Outlaw Silver STF++
+    - alpha outlaw silver stf++
+  Zenith:
+    r/wetshaving MOAR BOAR:
+    - Zenith - 508A XL/Bristle (B35) (MOAR BOAR) 31mm Boar
 knot:
   Mühle:
     STF:
-    - Alpha Outlaw Silver STF++
+    - alpha outlaw silver stf++
+  Zenith:
+    B35:
+    - Zenith - 508A XL/Bristle (B35) (MOAR BOAR) 31mm Boar
 razor:
   3D Printed:
     DE:
