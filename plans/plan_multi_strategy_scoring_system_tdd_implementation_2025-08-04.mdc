@@ -1,0 +1,592 @@
+# Multi-Strategy Scoring System TDD Implementation Plan
+
+**Date**: 2025-08-04  
+**Status**: IMPLEMENTATION PLAN  
+**Type**: TDD Development Plan
+
+## 📘 Project Summary
+
+Implement a scoring-based **brush matching** system to replace the current "first-match-wins" approach. The system will run all **brush strategies**, score each **brush result**, and return the highest-scoring **brush match**. Includes parallel **brush system** integration, **brush user validation** interface, and **brush learning system** with ChatGPT integration.
+
+**SCOPE**: This implementation applies **ONLY to brush matching**. All other product matching (razors, blades, soaps) will continue to use their existing matching systems unchanged.
+
+## 🧩 Component Steps
+
+### Phase 1: Core Brush Scoring System
+1. **✅ Brush Scoring Configuration System** - YAML-based config with brush weights and criteria
+   - **COMPLETED**: Created `data/brush_scoring_config.yaml` with scoring weights and criteria
+   - **COMPLETED**: Implemented `sotd/match/brush_scoring_config.py` with configuration loader and validation
+   - **COMPLETED**: Added comprehensive unit tests in `tests/match/test_brush_scoring_config.py`
+   - **COMPLETED**: All tests passing, quality checks satisfied
+2. **Brush Scoring Engine** - Core brush scoring logic and strategy execution
+3. **Brush Strategy Result Scoring** - Individual brush strategy scoring functions
+4. **Scoring Brush Matcher** - Main brush matcher that orchestrates scoring system
+
+### Phase 2: Parallel Brush System Integration
+5. **Brush CLI Flag Integration** - Add brush system selection flags to pipeline
+6. **Parallel Brush Data Directories** - Implement brush matched_new directory structure
+7. **Brush A/B Comparison Framework** - Brush system comparison and validation
+
+### Phase 3: Brush User Validation System
+8. **Brush User Actions Data Model** - Data structures for brush validation tracking
+9. **Brush CLI Validation Interface** - Command-line brush validation with sorting options
+10. **Brush WebUI Validation Interface** - Web interface for brush validation with shared logic
+11. **Brush Validation Storage System** - Monthly file storage for brush user actions
+
+### Phase 4: Brush Learning System
+12. **Brush Learning Report Generator** - Brush analysis and report generation
+13. **Brush ChatGPT Integration** - Structured prompts and brush suggestion processing
+14. **Brush Configuration Update Workflow** - Brush weight adjustment and application
+
+### Phase 5: Testing and Validation
+15. **Comprehensive Brush Test Suite** - Unit, integration, and performance tests for brush matching
+16. **Real Brush Data Validation** - Testing with production brush data
+17. **Brush Performance Optimization** - Brush caching and optimization
+
+## 🔁 Implementation Prompts
+
+### Step 1: Brush Scoring Configuration System
+
+```text
+Create a YAML-based configuration system for the brush scoring system. 
+
+Requirements:
+- Create `data/brush_scoring_config.yaml` with initial brush scoring weights and criteria
+- Implement `sotd/match/brush_scoring_config.py` to load and validate brush configuration
+- Support brush base strategy scores, bonus factors, and penalty factors
+- Include brush routing rules for pattern-based shortcuts
+- Add brush configuration validation and error handling
+
+Test Requirements:
+- Unit tests for brush config loading and validation
+- Test with invalid brush configurations (missing fields, invalid values)
+- Test with valid brush configurations and verify structure
+- Test brush configuration reloading and hot-swapping
+
+File Structure:
+- `data/brush_scoring_config.yaml` - Brush configuration file
+- `sotd/match/brush_scoring_config.py` - Brush configuration loader
+- `tests/match/test_brush_scoring_config.py` - Unit tests
+
+Follow SOTD Pipeline patterns:
+- Use pathlib.Path for file operations
+- Include type hints for all functions
+- Follow existing error handling patterns
+- Use descriptive variable names reflecting the domain
+```
+
+### Step 2: Brush Scoring Engine
+
+```text
+Create the core brush scoring engine that executes brush strategies and calculates scores.
+
+Requirements:
+- Implement `sotd/match/brush_scoring_engine.py` with BrushScoringEngine class
+- Support running all brush strategies for a given brush input
+- Calculate brush scores based on configuration weights
+- Handle brush strategy failures with fail-fast approach
+- Return sorted brush results with scores and metadata
+
+Test Requirements:
+- Unit tests for brush scoring calculation with mock brush strategies
+- Test brush strategy execution order and error handling
+- Test brush score calculation with various brush input combinations
+- Test brush result sorting and metadata preservation
+- Mock brush strategy failures and verify fail-fast behavior
+
+File Structure:
+- `sotd/match/brush_scoring_engine.py` - Core brush scoring engine
+- `tests/match/test_brush_scoring_engine.py` - Unit tests
+- `tests/match/fixtures/brush_scoring_test_data.yaml` - Test data
+
+Follow TDD approach:
+- Write failing tests first
+- Implement minimal code to pass tests
+- Refactor for clarity and performance
+- Ensure comprehensive test coverage
+```
+
+### Step 3: Brush Strategy Result Scoring
+
+```text
+Implement individual scoring functions for different brush strategy types and criteria.
+
+Requirements:
+- Create `sotd/match/brush_scoring_functions.py` with brush scoring logic
+- Implement scoring for brush base strategies (complete_brush, dual_component, etc.)
+- Add brush bonus factor scoring (delimiters, brands, fiber words, etc.)
+- Add brush penalty factor scoring (single brand, no fiber, etc.)
+- Support configurable weights from brush_scoring_config.yaml
+
+Test Requirements:
+- Unit tests for each brush scoring function with various brush inputs
+- Test brush bonus factor detection and scoring
+- Test brush penalty factor detection and scoring
+- Test edge cases (empty strings, special characters)
+- Test brush weight application and calculation accuracy
+
+File Structure:
+- `sotd/match/brush_scoring_functions.py` - Brush scoring function implementations
+- `tests/match/test_brush_scoring_functions.py` - Unit tests
+- `tests/match/fixtures/brush_scoring_criteria_test_data.yaml` - Test cases
+
+Integration Requirements:
+- Test with real brush strings from data/matched/2025-05.json
+- Verify brush scoring produces expected results for known cases
+- Test brush performance with large datasets
+```
+
+### Step 4: Scoring Brush Matcher
+
+```text
+Create the main scoring brush matcher that integrates with existing pipeline.
+
+Requirements:
+- Implement `sotd/match/scoring_brush_matcher.py` extending current BrushMatcher
+- Integrate with existing brush strategy system and brush catalog loading
+- Support exact brush match checking from brush_user_actions
+- Implement in-memory caching for brush performance
+- Maintain compatibility with existing BrushMatcher interface
+
+Test Requirements:
+- Unit tests for matcher integration and caching
+- Integration tests with real catalog data
+- Test exact match handling and bypass logic
+- Test caching behavior and performance
+- Test error handling and fail-fast behavior
+
+File Structure:
+- `sotd/match/scoring_brush_matcher.py` - Main scoring matcher
+- `tests/match/test_scoring_brush_matcher.py` - Unit tests
+- `tests/integration/test_scoring_matcher_integration.py` - Integration tests
+
+Integration Requirements:
+- Test with existing brush strategies and catalogs
+- Verify compatibility with current BrushMatcher interface
+- Test performance against current system
+- Validate output format matches existing structure
+```
+
+### Step 5: Brush CLI Flag Integration
+
+```text
+Add CLI flags to support brush system selection in the pipeline.
+
+Requirements:
+- Modify `run.py` to support `--brush-system=new` flag
+- Update match phase CLI to handle brush system selection
+- Add validation for brush system flags and combinations
+- Maintain backward compatibility with existing flags
+- Add help text and documentation for new brush flags
+
+Test Requirements:
+- Unit tests for brush CLI argument parsing and validation
+- Integration tests for brush flag combinations and error cases
+- Test backward compatibility with existing CLI usage
+- Test help text and documentation accuracy
+
+File Structure:
+- `run.py` - Updated CLI with brush system selection
+- `sotd/cli_utils/brush_system_selection.py` - Brush system selection logic
+- `tests/cli_utils/test_brush_system_selection.py` - Unit tests
+- `tests/integration/test_cli_brush_system_flags.py` - Integration tests
+
+Integration Requirements:
+- Test with existing pipeline phases and workflows
+- Verify brush flag behavior across different phase combinations
+- Test error handling for invalid brush flag combinations
+```
+
+### Step 6: Parallel Brush Data Directories
+
+```text
+Implement parallel data directory structure for brush system comparison.
+
+Requirements:
+- Create `data/matched_new/` directory structure for brush data only
+- Update brush save/load logic to support parallel directories
+- Implement brush directory creation and validation
+- Add brush metadata tracking for system identification
+- Maintain existing data/matched/ structure unchanged for other products
+
+Test Requirements:
+- Unit tests for brush directory creation and validation
+- Test brush save/load operations for both directories
+- Test brush metadata tracking and system identification
+- Test error handling for brush directory operations
+
+File Structure:
+- `sotd/match/brush_parallel_data_manager.py` - Brush directory management
+- `tests/match/test_brush_parallel_data_manager.py` - Unit tests
+- `tests/integration/test_brush_parallel_data_flow.py` - Integration tests
+
+Integration Requirements:
+- Test with existing pipeline data flow
+- Verify brush data integrity across parallel directories
+- Test performance impact of brush parallel operations
+```
+
+### Step 7: Brush A/B Comparison Framework
+
+```text
+Create framework for comparing old and new brush system outputs.
+
+Requirements:
+- Implement `sotd/match/brush_comparison_framework.py` for brush A/B testing
+- Support running both brush systems on same brush input
+- Generate brush comparison reports and statistics
+- Track brush agreement/disagreement patterns
+- Provide detailed analysis of brush differences
+
+Test Requirements:
+- Unit tests for brush comparison logic and statistics
+- Integration tests with real brush data comparison
+- Test brush report generation and formatting
+- Test performance of brush comparison operations
+
+File Structure:
+- `sotd/match/brush_comparison_framework.py` - Brush A/B comparison logic
+- `tests/match/test_brush_comparison_framework.py` - Unit tests
+- `tests/integration/test_brush_ab_comparison.py` - Integration tests
+
+Integration Requirements:
+- Test with real brush data from data/matched/2025-05.json
+- Verify brush comparison accuracy and completeness
+- Test brush performance with large datasets
+```
+
+### Step 8: Brush User Actions Data Model
+
+```text
+Create data structures for tracking brush user validation and override actions.
+
+Requirements:
+- Implement `sotd/match/brush_user_actions.py` with brush data models
+- Support brush validation, override, and complete override actions
+- Include brush timestamp tracking and metadata
+- Support brush monthly file organization
+- Add brush data validation and integrity checks
+
+Test Requirements:
+- Unit tests for brush data model creation and validation
+- Test brush action type handling and metadata
+- Test brush timestamp handling and timezone support
+- Test brush data integrity and validation
+
+File Structure:
+- `sotd/match/brush_user_actions.py` - Brush data models and validation
+- `tests/match/test_brush_user_actions.py` - Unit tests
+- `tests/match/fixtures/brush_user_actions_test_data.yaml` - Test data
+
+Integration Requirements:
+- Test with real brush validation scenarios
+- Verify brush data persistence and loading
+- Test brush monthly file organization
+```
+
+### Step 9: Brush CLI Validation Interface
+
+```text
+Create command-line interface for brush user validation with sorting options.
+
+Requirements:
+- Implement `sotd/match/brush_cli_validation.py` for brush validation interface
+- Support sorting by brush ambiguity, validation status, order, and pattern
+- Show all brush strategy results with scores and interpretations
+- Support brush user choice selection and complete override
+- Include brush validation history display
+
+Test Requirements:
+- Unit tests for brush interface logic and sorting
+- Integration tests for brush user interaction flows
+- Test brush sorting algorithms and options
+- Test brush data collection and storage
+
+File Structure:
+- `sotd/match/brush_cli_validation.py` - Brush CLI validation interface
+- `tests/match/test_brush_cli_validation.py` - Unit tests
+- `tests/integration/test_brush_validation_workflow.py` - Integration tests
+
+Integration Requirements:
+- Test with real brush matching scenarios
+- Verify brush user action collection and storage
+- Test brush sorting and filtering performance
+```
+
+### Step 10: Brush WebUI Validation Interface
+
+```text
+Create web interface for brush validation with shared logic from CLI.
+
+Requirements:
+- Implement `webui/src/components/validation/BrushValidation.tsx` for React interface
+- Share brush validation logic with CLI implementation
+- Support same brush sorting and filtering options
+- Provide intuitive user interface for brush validation
+- Include real-time brush validation feedback
+
+Test Requirements:
+- React component unit tests with React Testing Library
+- API integration tests for brush validation endpoints
+- E2E tests for complete brush validation workflow
+- Test shared brush logic integration with CLI
+
+File Structure:
+- `webui/src/components/validation/BrushValidation.tsx` - React component
+- `webui/src/services/brushValidationService.ts` - Shared brush validation logic
+- `webui/src/components/validation/__tests__/BrushValidation.test.tsx` - Unit tests
+- `webui/tests/brush-validation.spec.ts` - E2E tests
+
+Integration Requirements:
+- Test with real brush validation scenarios
+- Verify shared brush logic consistency with CLI
+- Test brush user experience and interface responsiveness
+```
+
+### Step 11: Brush Validation Storage System
+
+```text
+Implement monthly file storage system for brush user actions.
+
+Requirements:
+- Create `sotd/match/brush_validation_storage.py` for brush file management
+- Support monthly file organization (brush_user_actions_YYYY-MM.yaml)
+- Implement brush data persistence and loading
+- Add brush data integrity and backup features
+- Support brush data migration and cleanup
+
+Test Requirements:
+- Unit tests for brush file operations and data integrity
+- Integration tests for brush monthly file organization
+- Test brush data persistence and loading accuracy
+- Test brush error handling and recovery
+
+File Structure:
+- `sotd/match/brush_validation_storage.py` - Brush storage management
+- `tests/match/test_brush_validation_storage.py` - Unit tests
+- `tests/integration/test_brush_storage_workflow.py` - Integration tests
+
+Integration Requirements:
+- Test with real brush validation data
+- Verify brush monthly file organization
+- Test brush data integrity and backup features
+```
+
+### Step 12: Brush Learning Report Generator
+
+```text
+Create system for generating brush learning reports from brush user actions data.
+
+Requirements:
+- Implement `sotd/match/brush_learning_report.py` for brush report generation
+- Support configurable time periods (e.g., last 6 months)
+- Generate human-readable text with YAML data
+- Include brush pattern analysis and statistics
+- Support multiple brush report formats and outputs
+
+Test Requirements:
+- Unit tests for brush report generation logic
+- Integration tests with real brush user actions data
+- Test brush time period filtering and analysis
+- Test brush report formatting and output
+
+File Structure:
+- `sotd/match/brush_learning_report.py` - Brush report generation
+- `tests/match/test_brush_learning_report.py` - Unit tests
+- `tests/integration/test_brush_report_generation.py` - Integration tests
+
+Integration Requirements:
+- Test with real brush user actions data
+- Verify brush report accuracy and completeness
+- Test brush performance with large datasets
+```
+
+### Step 13: Brush ChatGPT Integration
+
+```text
+Implement ChatGPT integration for brush analysis and suggestion processing.
+
+Requirements:
+- Create `sotd/match/brush_chatgpt_integration.py` for brush AI analysis
+- Implement structured prompts for actionable brush recommendations
+- Support brush weight adjustment suggestions
+- Include brush routing rule recommendations
+- Add brush catalog improvement suggestions
+
+Test Requirements:
+- Unit tests for brush prompt generation and response parsing
+- Integration tests with ChatGPT API (mocked)
+- Test brush suggestion processing and validation
+- Test brush error handling and API failures
+
+File Structure:
+- `sotd/match/brush_chatgpt_integration.py` - Brush ChatGPT integration
+- `tests/match/test_brush_chatgpt_integration.py` - Unit tests
+- `tests/integration/test_brush_ai_analysis.py` - Integration tests
+
+Integration Requirements:
+- Test with real brush learning reports
+- Verify brush suggestion quality and relevance
+- Test brush API error handling and retry logic
+```
+
+### Step 14: Brush Configuration Update Workflow
+
+```text
+Create workflow for applying brush ChatGPT suggestions to configuration.
+
+Requirements:
+- Implement `sotd/match/brush_config_updater.py` for applying brush changes
+- Support brush weight adjustments and routing rule updates
+- Include brush validation and preview of changes
+- Add brush rollback and backup capabilities
+- Support manual review and approval process
+
+Test Requirements:
+- Unit tests for brush configuration update logic
+- Integration tests for brush change application
+- Test brush validation and preview functionality
+- Test brush rollback and backup features
+
+File Structure:
+- `sotd/match/brush_config_updater.py` - Brush configuration updates
+- `tests/match/test_brush_config_updater.py` - Unit tests
+- `tests/integration/test_brush_config_workflow.py` - Integration tests
+
+Integration Requirements:
+- Test with real brush ChatGPT suggestions
+- Verify brush configuration update accuracy
+- Test brush rollback and recovery procedures
+```
+
+### Step 15: Comprehensive Brush Test Suite
+
+```text
+Create comprehensive test suite covering all brush system components.
+
+Requirements:
+- Implement unit tests for all new brush components
+- Create integration tests for brush system workflows
+- Add performance tests for brush critical paths
+- Include brush error handling and edge case tests
+- Achieve minimum 90% test coverage for brush components
+
+Test Requirements:
+- Unit tests for all brush functions and classes
+- Integration tests for complete brush workflows
+- Performance tests for brush scoring and matching
+- Error handling tests for all brush failure scenarios
+
+File Structure:
+- `tests/match/` - All brush match phase tests
+- `tests/integration/` - Brush integration tests
+- `tests/performance/` - Brush performance tests
+- `tests/fixtures/` - Brush test data and fixtures
+
+Integration Requirements:
+- Test with real production brush data
+- Verify brush system performance and reliability
+- Test brush error recovery and system stability
+```
+
+### Step 16: Real Brush Data Validation
+
+```text
+Validate brush system with real production brush data and edge cases.
+
+Requirements:
+- Test with brush data from data/matched/2025-05.json and other real datasets
+- Validate brush scoring accuracy against known good brush cases
+- Test brush edge cases and problematic inputs
+- Verify brush system performance with large datasets
+- Compare brush results with current brush system
+
+Test Requirements:
+- Integration tests with real production brush data
+- Performance tests with large brush datasets
+- Brush accuracy validation against known cases
+- Brush edge case testing and error handling
+
+File Structure:
+- `tests/integration/test_real_brush_data_validation.py` - Real brush data tests
+- `tests/performance/test_large_brush_dataset_performance.py` - Brush performance tests
+- `tests/fixtures/real_brush_data_samples/` - Real brush data samples
+
+Integration Requirements:
+- Test with complete production brush datasets
+- Verify brush system accuracy and reliability
+- Test brush performance under load
+```
+
+### Step 17: Brush Performance Optimization
+
+```text
+Optimize brush system performance and implement caching strategies.
+
+Requirements:
+- Implement in-memory caching for brush scoring results
+- Optimize brush strategy execution and scoring calculation
+- Add brush performance monitoring and metrics
+- Implement parallel brush execution where beneficial
+- Profile and optimize brush critical paths
+
+Test Requirements:
+- Performance tests for brush caching effectiveness
+- Load tests for brush system scalability
+- Brush memory usage tests and optimization
+- Brush parallel execution tests
+
+File Structure:
+- `sotd/match/brush_performance_optimizer.py` - Brush performance optimizations
+- `tests/performance/test_brush_caching.py` - Brush caching tests
+- `tests/performance/test_brush_parallel_execution.py` - Brush parallel tests
+
+Integration Requirements:
+- Test with real production brush workloads
+- Verify brush performance improvements
+- Test brush system stability under load
+```
+
+## 🧠 Critical Analysis
+
+### Prompt Sequence Structure
+The plan follows a logical progression from core functionality to integration and optimization:
+
+1. **Foundation First**: Steps 1-4 establish the core scoring system
+2. **Integration Layer**: Steps 5-7 add pipeline integration and comparison
+3. **User Interface**: Steps 8-11 implement validation and user interaction
+4. **Learning System**: Steps 12-14 add AI-powered learning capabilities
+5. **Quality Assurance**: Steps 15-17 ensure reliability and performance
+
+### TDD Approach Validation
+Each step includes comprehensive test requirements:
+- **Unit tests** for individual components
+- **Integration tests** for component interactions
+- **Real data validation** for production readiness
+- **Performance tests** for scalability
+
+### Risk Mitigation
+- **Incremental development** reduces risk of large failures
+- **Parallel system approach** maintains safety during transition
+- **Comprehensive testing** ensures quality at each step
+- **Real data validation** confirms production readiness
+
+### Buildability Assessment
+Each prompt produces:
+- **Coherent, testable output** with clear interfaces
+- **Connected components** that integrate logically
+- **No dangling pieces** - each step builds on previous
+- **Safe implementation** with proper error handling
+
+### Refinement Notes
+The plan is structured to:
+- **Minimize risk** through incremental development
+- **Maximize learning** through real data validation
+- **Ensure quality** through comprehensive testing
+- **Support evolution** through flexible architecture
+
+This TDD implementation plan provides a safe, incremental path to implementing the multi-strategy scoring system while maintaining system reliability and enabling continuous improvement.
+description:
+globs:
+alwaysApply: false
+---

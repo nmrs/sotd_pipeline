@@ -1,0 +1,54 @@
+# Brush Scoring Configuration
+# This file defines weights and criteria for the multi-strategy brush scoring system
+
+# Base strategy scores (higher = better)
+base_strategy_scores:
+  complete_brush: 100.0      # Complete brush match from catalog
+  dual_component: 90.0       # Handle + knot split match
+  known_brush: 85.0          # Known brush strategy match
+  known_knot: 80.0           # Known knot strategy match
+  omega_semogue: 75.0        # Omega/Semogue brand strategy
+  zenith: 70.0               # Zenith brand strategy
+  other_brush: 65.0          # Other brush strategy match
+  other_knot: 60.0           # Other knot strategy match
+  fiber_fallback: 50.0       # Fiber-based fallback
+  knot_size_fallback: 45.0   # Knot size-based fallback
+
+# Bonus factors (add to base score)
+bonus_factors:
+  delimiters_present: 10.0   # " in " or " with " delimiters found
+  brand_match: 15.0          # Brand name explicitly matched
+  fiber_words: 8.0           # Fiber-related words detected
+  size_specification: 12.0   # Knot size specification found
+  handle_maker_match: 10.0   # Handle maker identified
+  knot_maker_match: 10.0     # Knot maker identified
+  exact_pattern_match: 20.0  # Exact pattern match (not fuzzy)
+
+# Penalty factors (subtract from base score)
+penalty_factors:
+  single_brand_only: -15.0   # Only brand matched, no model
+  no_fiber_detected: -10.0   # No fiber information found
+  no_size_detected: -8.0     # No knot size information
+  fuzzy_match: -5.0          # Fuzzy/partial match
+  generic_terms: -12.0       # Generic terms like "brush", "knot"
+  incomplete_specs: -10.0    # Incomplete specifications
+
+# Routing rules for pattern-based shortcuts
+routing_rules:
+  # Skip scoring for exact matches from correct_matches.yaml
+  exact_match_bypass: true
+  
+  # Minimum score threshold for acceptable matches
+  minimum_score_threshold: 30.0
+  
+  # Maximum number of strategies to run before stopping
+  max_strategies_to_run: 10
+  
+  # Whether to continue after finding first match above threshold
+  stop_on_good_match: false
+
+# Performance settings
+performance:
+  enable_caching: true
+  cache_ttl_seconds: 3600    # 1 hour cache TTL
+  max_cache_size: 10000      # Maximum cache entries 
