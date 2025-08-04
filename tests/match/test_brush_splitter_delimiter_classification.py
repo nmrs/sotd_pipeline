@@ -19,7 +19,7 @@ class TestBrushSplitterDelimiterClassification:
 
     def test_high_reliability_delimiters_always_trigger_splitting(self, brush_splitter):
         """Test that high-reliability delimiters always trigger splitting."""
-        # High-reliability delimiters: " w/ ", " with ", " / "
+        # High-reliability delimiters: " w/ ", " with " (removed "/" - now medium-priority)
         test_cases = [
             (
                 "Wolf Whiskers RCE 1301 w/ Omega 10049 Boar",
@@ -31,7 +31,6 @@ class TestBrushSplitterDelimiterClassification:
                 "Carnavis and Richardson",
                 "Declaration B15",
             ),
-            ("Elite handle / Zenith B2", "Elite handle", "Zenith B2"),
         ]
 
         for input_text, expected_handle, expected_knot in test_cases:
@@ -67,7 +66,7 @@ class TestBrushSplitterDelimiterClassification:
     def test_smart_analysis_joint_ventures_and_fiber_mixes(self, brush_splitter):
         """Test smart analysis for joint ventures and fiber mixes.
         Covers medium-reliability delimiters and all '/' variants.
-        All '/' variants (with or without spaces) should be treated as high-reliability delimiters.
+        All '/' variants (with or without spaces) should be treated as medium-priority delimiters.
         """
         test_cases = [
             # All variants of '/' delimiter should be treated identically
@@ -90,10 +89,10 @@ class TestBrushSplitterDelimiterClassification:
                 expected_handle,
                 expected_knot,
             }, f"Handle/knot mismatch for: {input_text} (got: {handle_val}, {knot_val})"
-            # All '/' variants should be high_reliability
+            # All '/' variants should be medium_reliability
             if "/" in input_text and "+" not in input_text:
                 assert (
-                    delimiter_type == "high_reliability"
+                    delimiter_type == "medium_reliability"
                 ), f"Wrong delimiter type for: {input_text}"
             else:
                 assert delimiter_type == "smart_analysis", f"Wrong delimiter type for: {input_text}"
@@ -177,9 +176,9 @@ class TestBrushSplitterDelimiterClassification:
     def test_delimiter_reliability_classification(self, brush_splitter):
         """Test that delimiter reliability is correctly classified."""
         # Test the internal delimiter classification
-        high_reliability = [" w/ ", " with ", " / "]
+        high_reliability = [" w/ ", " with "]  # Removed " / " - now medium-priority
         handle_primary = [" in "]
-        medium_reliability = [" + ", " - "]
+        medium_reliability = [" + ", " - ", " / "]  # Added " / " to medium-priority
         non_delimiters = [" x ", " × ", " & ", "()"]
 
         # This test assumes the implementation will have a method to check delimiter reliability
@@ -193,6 +192,22 @@ class TestBrushSplitterDelimiterClassification:
                 delimiter_type == "high_reliability"
             ), f"Wrong type for high-reliability: {delimiter}"
 
+        # Test medium-reliability delimiters
+        for delimiter in medium_reliability:
+            test_input = f"Handle{delimiter}Knot"
+            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(test_input)
+            assert handle is not None, f"Medium-reliability delimiter failed: {delimiter}"
+            assert knot is not None, f"Medium-reliability delimiter failed: {delimiter}"
+            # Different delimiters return different types in the actual implementation
+            if delimiter == " / ":
+                assert (
+                    delimiter_type == "medium_reliability"
+                ), f"Wrong type for medium-reliability: {delimiter}"
+            else:
+                assert (
+                    delimiter_type == "smart_analysis"
+                ), f"Wrong type for smart analysis: {delimiter}"
+
         for delimiter in handle_primary:
             test_input = f"Handle{delimiter}Knot"
             handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(test_input)
@@ -200,16 +215,6 @@ class TestBrushSplitterDelimiterClassification:
             assert handle is not None, f"Handle-primary delimiter failed: {delimiter}"
             assert knot is not None, f"Handle-primary delimiter failed: {delimiter}"
             assert delimiter_type == "handle_primary", f"Wrong type for handle-primary: {delimiter}"
-
-        for delimiter in medium_reliability:
-            test_input = f"Handle{delimiter}Knot"
-            handle, knot, delimiter_type = brush_splitter.split_handle_and_knot(test_input)
-            # Medium-reliability delimiters should also trigger splitting
-            assert handle is not None, f"Medium-reliability delimiter failed: {delimiter}"
-            assert knot is not None, f"Medium-reliability delimiter failed: {delimiter}"
-            assert (
-                delimiter_type == "smart_analysis"
-            ), f"Wrong type for medium-reliability: {delimiter}"
 
         for delimiter in non_delimiters:
             test_input = f"Handle{delimiter}Knot"

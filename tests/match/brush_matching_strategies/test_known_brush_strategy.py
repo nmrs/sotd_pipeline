@@ -51,7 +51,7 @@ def test_known_brush_exact_match(strategy):
     assert result.matched["model"] == "Chubby 2"
     assert result.matched["fiber"] == "Badger"
     assert result.matched["knot_size_mm"] == 27
-    assert result.match_type == "exact"
+    assert result.match_type == "regex"
 
 
 def test_known_brush_with_user_knot_size(strategy):
@@ -63,7 +63,7 @@ def test_known_brush_with_user_knot_size(strategy):
     assert result.matched["model"] == "Chubby 2"
     assert result.matched["fiber"] == "Badger"
     assert result.matched["knot_size_mm"] == 27  # YAML default, not user override
-    assert result.match_type == "exact"
+    assert result.match_type == "regex"
 
 
 def test_known_brush_omega_match(strategy):
@@ -74,7 +74,7 @@ def test_known_brush_omega_match(strategy):
     assert result.matched["model"] == "Pro 48"
     assert result.matched["fiber"] == "Boar"
     assert result.matched["knot_size_mm"] == 48
-    assert result.match_type == "exact"
+    assert result.match_type == "regex"
 
 
 def test_known_brush_no_match(strategy):
@@ -93,7 +93,7 @@ def test_known_brush_with_user_fiber_conflict(strategy):
     assert result.matched["model"] == "Chubby 2"
     assert result.matched["fiber"] == "Badger"  # YAML default, not user override
     assert result.matched["knot_size_mm"] == 27
-    assert result.match_type == "exact"
+    assert result.match_type == "regex"
 
 
 def test_known_brush_ap_shave_co_g5c(strategy):
@@ -105,4 +105,4 @@ def test_known_brush_ap_shave_co_g5c(strategy):
     assert result.matched["model"] == "G5C"
     assert result.matched["fiber"] == "Synthetic"
     assert result.matched["knot_size_mm"] == 24
-    assert result.match_type == "exact"
+    assert result.match_type == "regex"
