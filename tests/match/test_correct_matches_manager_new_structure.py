@@ -319,3 +319,56 @@ class TestCorrectMatchesManagerNewStructure:
         # Verify the structure is correct: brush -> Alpha -> Outlaw ->
         # [normalized_original]
         # The save operation should have created the proper nested structure
+
+    def test_split_brush_handling_bug_fix(self, correct_matches_manager):
+        """Test that split brushes are saved to handle and knot sections."""
+        # Test data for split brush (composite brush)
+        match_data = {
+            "original": "Alpha Outlaw Silver STF++",
+            "matched": {
+                "brand": None,  # Split brush has null brand/model
+                "model": None,
+                "handle": {
+                    "brand": "Alpha",
+                    "model": "Outlaw",
+                    "source_text": "Alpha Outlaw",
+                },
+                "knot": {
+                    "brand": "Silver",
+                    "model": "STF++",
+                    "source_text": "Silver STF++",
+                },
+            },
+            "field": "brush",
+        }
+
+        # Create match key
+        match_key = correct_matches_manager.create_match_key(
+            "brush", "Alpha Outlaw Silver STF++", match_data["matched"]
+        )
+
+        # Mark as correct
+        correct_matches_manager.mark_match_as_correct(match_key, match_data)
+
+        # Save to file
+        correct_matches_manager.save_correct_matches()
+
+        # Verify the entry was saved correctly
+        correct_matches_manager.load_correct_matches()
+        
+        # Check that the split brush components were saved to handle and knot sections
+        # The original brush key should not exist, but handle and knot keys should
+        assert match_key not in correct_matches_manager._correct_matches
+        
+        # Check that handle component was saved
+        handle_key = "handle:alpha outlaw"
+        assert handle_key in correct_matches_manager._correct_matches
+        
+        # Check that knot component was saved
+        knot_key = "knot:silver stf++"
+        assert knot_key in correct_matches_manager._correct_matches
+        
+        # Verify the structure is correct: 
+        # handle -> Alpha -> Outlaw -> [normalized_handle_text]
+        # knot -> Silver -> STF++ -> [normalized_knot_text]
+        # NOT brush -> null -> null -> [original]
