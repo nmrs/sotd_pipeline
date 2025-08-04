@@ -150,7 +150,6 @@ class CorrectMatchesManager:
                                     for model, strings in brand_data.items():
                                         if isinstance(strings, list):
                                             for original in strings:
-
                                                 match_key = f"{field}:{original.lower().strip()}"
                                                 self._correct_matches.add(match_key)
                                                 self._correct_matches_data[match_key] = {
@@ -226,6 +225,12 @@ class CorrectMatchesManager:
                     # Handle brush field - save all brushes to brush section
                     brand = match_data["matched"]["brand"]
                     model = match_data["matched"]["model"]
+
+                    # Initialize brand and model dictionaries if they don't exist
+                    if brand not in field_data[field]:
+                        field_data[field][brand] = {}
+                    if model not in field_data[field][brand]:
+                        field_data[field][brand][model] = []
 
                     # Normalize the original string before storing to prevent bloat
                     normalized_original = self._normalize_for_matching(original, field)

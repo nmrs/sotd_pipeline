@@ -1,7 +1,6 @@
 """Test CorrectMatchesManager with new brand/model hierarchy structure."""
 
 import pytest
-from pathlib import Path
 from unittest.mock import Mock
 
 from sotd.match.tools.managers.correct_matches_manager import CorrectMatchesManager
@@ -110,7 +109,8 @@ class TestCorrectMatchesManagerNewStructure:
         correct_matches_manager.mark_match_as_correct(match_key, match_data)
         correct_matches_manager.save_correct_matches()
 
-        # The saved structure should preserve "Declaration Grooming" casing, not "declaration grooming"
+        # The saved structure should preserve "Declaration Grooming" casing,
+        # not "declaration grooming"
 
     def test_split_brush_compatibility(self, correct_matches_manager):
         """Test that split_brush section functionality is maintained."""
@@ -286,3 +286,36 @@ class TestCorrectMatchesManagerNewStructure:
 
         # Verify structure is correct
         # Should be able to find the entry with correct brand/model structure
+
+    def test_brush_field_handling_bug_fix(self, correct_matches_manager):
+        """Test that brush field handling properly initializes dictionaries."""
+        # Test data for brush field
+        match_data = {
+            "original": "Alpha Outlaw Silver STF++",
+            "matched": {
+                "brand": "Alpha",
+                "model": "Outlaw",
+            },
+            "field": "brush",
+        }
+
+        # Create match key
+        match_key = correct_matches_manager.create_match_key(
+            "brush", "Alpha Outlaw Silver STF++", match_data["matched"]
+        )
+
+        # Mark as correct - this should not raise KeyError
+        correct_matches_manager.mark_match_as_correct(match_key, match_data)
+
+        # Save to file - this should not raise KeyError
+        correct_matches_manager.save_correct_matches()
+
+        # Verify the entry was saved correctly
+        correct_matches_manager.load_correct_matches()
+
+        # Check that the entry exists in the correct matches
+        assert match_key in correct_matches_manager._correct_matches
+
+        # Verify the structure is correct: brush -> Alpha -> Outlaw ->
+        # [normalized_original]
+        # The save operation should have created the proper nested structure
