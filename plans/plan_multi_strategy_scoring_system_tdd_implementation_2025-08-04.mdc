@@ -24,7 +24,13 @@ Implement a scoring-based **brush matching** system to replace the current "firs
    - **COMPLETED**: Implemented strategy execution, score calculation, and result sorting
    - **COMPLETED**: Added comprehensive unit tests in `tests/match/test_brush_scoring_engine.py`
    - **COMPLETED**: All tests passing with proper error handling and fail-fast behavior
-3. **Brush Strategy Result Scoring** - Individual brush strategy scoring functions
+3. **✅ Brush Strategy Result Scoring** - Individual brush strategy scoring functions
+   - **COMPLETED**: Implemented `sotd/match/brush_scoring_functions.py` with BrushScoringFunctions class
+   - **COMPLETED**: Added individual scoring functions for bonus and penalty factors
+   - **COMPLETED**: Implemented regex pattern compilation for efficient text analysis
+   - **COMPLETED**: Added convenience functions for direct use
+   - **COMPLETED**: Added comprehensive unit tests in `tests/match/test_brush_scoring_functions.py`
+   - **COMPLETED**: All tests passing with proper scoring logic and edge case handling
 4. **Scoring Brush Matcher** - Main brush matcher that orchestrates scoring system
 
 ### Phase 2: Parallel Brush System Integration
