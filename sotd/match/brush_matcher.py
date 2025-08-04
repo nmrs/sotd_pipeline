@@ -161,7 +161,7 @@ class BrushMatcher:
         # Legacy fields
         handle_maker = correct_match.get("handle_maker")
         handle_model = correct_match.get("handle_model")
-        knot_info = correct_match.get("knot_info", {})
+        knot_info = correct_match.get("knot_info") or {}
         # Split the input to get the actual handle and knot text
         handle_text, knot_text, _ = self.brush_splitter.split_handle_and_knot(value)
 
@@ -1389,8 +1389,19 @@ class BrushMatcher:
                     "_pattern": pattern_info["original_pattern"],
                 }
 
-        # No match found
-        raise ValueError(f"No handle patterns matched for brand: {brand}")
+        # No match found - provide detailed error information
+        available_models = []
+        if brand in self._compiled_handle_patterns:
+            for pattern_info in self._compiled_handle_patterns[brand]:
+                model = pattern_info.get("match_data", {}).get("model", "Unknown")
+                available_models.append(model)
+
+        raise ValueError(
+            f"No handle patterns matched for brand '{brand}' in handles.yaml. "
+            f"Input text: '{value}'. "
+            f"Available models for this brand: {available_models}. "
+            f"Check that the handle name in the input matches one of the patterns in handles.yaml."
+        )
 
     def _get_handle_patterns_for_brand(self, brand: str, model: str = None) -> list[dict]:
         """

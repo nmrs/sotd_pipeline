@@ -350,10 +350,38 @@ def process_month(
         }
 
     except Exception as e:
+        # Provide more detailed error information for debugging
+        import traceback
+
+        error_msg = str(e)
+        full_traceback = traceback.format_exc()
+
+        # Add context for brush matching errors
+        if "No handle patterns matched for brand" in error_msg:
+            error_msg = (
+                f"Brush matching error: {error_msg}. This means the brand has "
+                f"handle_matching enabled in brushes.yaml but no corresponding handle "
+                f"patterns were found in handles.yaml. Check that the brand name "
+                f"matches exactly between the two files."
+            )
+        elif "handle_matching enabled but no handle patterns found" in error_msg:
+            error_msg = (
+                f"Brush configuration error: {error_msg}. Add handle patterns for "
+                f"this brand to handles.yaml or set handle_matching: false in "
+                f"brushes.yaml."
+            )
+        elif "'NoneType' object has no attribute 'get'" in error_msg:
+            error_msg = (
+                f"Data structure error: {error_msg}. This usually indicates a "
+                f"missing or malformed YAML file, or a bug in the matching logic. "
+                f"Check that all required YAML files exist and have valid structure. "
+                f"Full traceback: {full_traceback}"
+            )
+
         return {
             "status": "error",
             "month": month,
-            "error": str(e),
+            "error": error_msg,
         }
 
 
