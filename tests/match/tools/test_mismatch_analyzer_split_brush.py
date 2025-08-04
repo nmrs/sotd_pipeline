@@ -295,27 +295,21 @@ class TestMismatchAnalyzerSplitBrush:
         assert regular_brush_item["knot_component"] is None
 
     def test_is_split_brush_confirmed(self):
-        """Test that split brush confirmation logic works correctly."""
+        """Test that split brush confirmation logic works correctly.
+        
+        A split brush is only considered confirmed if ALL its components 
+        (both handle and knot) are present in correct_matches.yaml.
+        Partial confirmation is not allowed.
+        """
         # Set up correct matches with handle and knot components
-        self.analyzer._correct_matches = {
-            "handle:alpha outlaw",
-            "knot:silver stf++"
-        }
+        self.analyzer._correct_matches = {"handle:alpha outlaw", "knot:silver stf++"}
 
         # Test data for "Alpha Outlaw Silver STF++"
         matched = {
             "brand": None,
             "model": None,
-            "handle": {
-                "brand": "Alpha",
-                "model": "Outlaw",
-                "source_text": "Alpha Outlaw"
-            },
-            "knot": {
-                "brand": "Mühle",
-                "model": "STF",
-                "source_text": "Silver STF++"
-            }
+            "handle": {"brand": "Alpha", "model": "Outlaw", "source_text": "Alpha Outlaw"},
+            "knot": {"brand": "Mühle", "model": "STF", "source_text": "Silver STF++"},
         }
 
         # Should be confirmed since both handle and knot are in correct_matches
@@ -325,11 +319,7 @@ class TestMismatchAnalyzerSplitBrush:
         matched_no_handle = {
             "brand": None,
             "model": None,
-            "knot": {
-                "brand": "Mühle",
-                "model": "STF",
-                "source_text": "Silver STF++"
-            }
+            "knot": {"brand": "Mühle", "model": "STF", "source_text": "Silver STF++"},
         }
         assert self.analyzer._is_split_brush_confirmed(matched_no_handle) is False
 
@@ -337,11 +327,7 @@ class TestMismatchAnalyzerSplitBrush:
         matched_no_knot = {
             "brand": None,
             "model": None,
-            "handle": {
-                "brand": "Alpha",
-                "model": "Outlaw",
-                "source_text": "Alpha Outlaw"
-            }
+            "handle": {"brand": "Alpha", "model": "Outlaw", "source_text": "Alpha Outlaw"},
         }
         assert self.analyzer._is_split_brush_confirmed(matched_no_knot) is False
 
