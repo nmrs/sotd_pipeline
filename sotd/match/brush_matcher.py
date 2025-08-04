@@ -670,8 +670,9 @@ class BrushMatcher:
         """Strategy 4: Check brush_splits.yaml and high-priority automated splitting."""
         # Check if this brush should not be split (human-curated decision)
         if self.brush_splits_loader.should_not_split(value):
-            # Treat as complete brush, skip splitting
-            handle_text, knot_text, delimiter_type = None, None, None
+            # Treat as complete brush, skip splitting - return None to let other strategies
+            # handle it
+            return None
         else:
             # Check human-curated brush splits first (highest priority)
             curated_split = self.brush_splits_loader.get_handle_and_knot(value)
@@ -730,7 +731,7 @@ class BrushMatcher:
                         return create_match_result(
                             original=value,
                             matched=match_dict,
-                            match_type="regex",
+                            match_type=getattr(result, "match_type", "regex"),
                             pattern=getattr(result, "pattern", None),
                         )
             except Exception as e:

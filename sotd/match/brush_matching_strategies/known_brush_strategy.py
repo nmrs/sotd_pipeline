@@ -57,7 +57,7 @@ class KnownBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                     original=value,
                     matched=entry_result,
                     pattern=entry["pattern"],
-                    match_type="exact",
+                    match_type="regex",
                 )
 
         return create_match_result(original=value, matched=None, pattern=None, match_type=None)

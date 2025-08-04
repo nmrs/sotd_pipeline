@@ -164,24 +164,6 @@ class BrushSplitter:
             if delimiter in text:
                 return self._split_by_delimiter_smart(text, delimiter, "high_reliability")
 
-        # Special handling for `/` as high-reliability delimiter (any spaces, not part of 'w/')
-        # But first check if `/` is part of a specification rather than a delimiter
-        if self._is_specification_slash(text):
-            return None, None, None
-
-        slash_match = re.search(r"(.+?)(?<!w)\s*/\s*(.+)", text)
-        if slash_match:
-            part1 = slash_match.group(1).strip()
-            part2 = slash_match.group(2).strip()
-            if part1 and part2:
-                # Score both parts to determine which is handle vs knot
-                part1_handle_score = self._score_as_handle(part1)
-                part2_handle_score = self._score_as_handle(part2)
-                if part1_handle_score > part2_handle_score:
-                    return part1, part2, "high_reliability"
-                else:
-                    return part2, part1, "high_reliability"
-
         # Check handle-primary delimiters (first part is knot, second part is handle)
         for delimiter in handle_primary_delimiters:
             if delimiter in text:
@@ -213,6 +195,24 @@ class BrushSplitter:
                     return self._split_by_delimiter_smart(text, delimiter, "smart_analysis")
                 else:
                     return self._split_by_delimiter_smart(text, delimiter, "smart_analysis")
+
+        # Special handling for `/` as medium-priority delimiter (any spaces, not part of 'w/')
+        # But first check if `/` is part of a specification rather than a delimiter
+        if self._is_specification_slash(text):
+            return None, None, None
+
+        slash_match = re.search(r"(.+?)(?<!w)\s*/\s*(.+)", text)
+        if slash_match:
+            part1 = slash_match.group(1).strip()
+            part2 = slash_match.group(2).strip()
+            if part1 and part2:
+                # Score both parts to determine which is handle vs knot
+                part1_handle_score = self._score_as_handle(part1)
+                part2_handle_score = self._score_as_handle(part2)
+                if part1_handle_score > part2_handle_score:
+                    return part1, part2, "medium_reliability"
+                else:
+                    return part2, part1, "medium_reliability"
 
         return None, None, None
 
