@@ -1,0 +1,335 @@
+# Multi-Strategy Scoring System Specification
+
+**Date**: 2025-08-04  
+**Status**: SPECIFICATION  
+**Type**: Brush Matching System Enhancement
+
+## Overview
+
+Replace the current "first-match-wins" **brush matching** approach with a scoring-based system that runs all brush strategies and picks the best result, with a learning system for continuous improvement and evolution.
+
+**SCOPE**: This system applies **ONLY to brush matching**. All other product matching (razors, blades, soaps) will continue to use their existing matching systems unchanged.
+
+## Problem Statement
+
+The current **brush matching system** uses a rigid strategy priority order that leads to:
+- Incorrect matches for composite brushes (e.g., "Chisel & Hound / Omega 10098" matching as complete Omega)
+- Constant strategy ordering tweaks that create new edge cases
+- No learning from user feedback
+- Difficulty handling ambiguous cases
+
+**Note**: This problem is specific to brush matching due to the complexity of handle/knot combinations and the variety of delimiter patterns used in brush descriptions. Other product types (razors, blades, soaps) have simpler matching requirements and do not require this scoring system.
+
+## Solution Architecture
+
+### Core Concept
+- **Brush Scoring System**: Run all applicable **brush strategies**, score each result, return highest-scoring brush match
+- **Parallel Brush Systems**: Keep old and new **brush matching** systems running for comparison
+- **Brush User Validation**: CLI/WebUI for validating/overriding **brush matching** system choices
+- **Brush Learning System**: ChatGPT-assisted analysis and weight adjustments for **brush matching**
+- **Evolutionary Design**: Support for new **brush matching** scoring criteria and strategies
+
+### Data Flow
+```
+fetch → data/fetch/
+extract → data/extract/
+match → data/matched/ (current) + data/matched_new/ (brush scoring only)
+enrich → data/enriched/ (loads from either matched or matched_new)
+aggregate → data/aggregated/ (loads from enriched)
+report → data/reports/ (loads from aggregated)
+```
+
+**Note**: Only brush matching uses the scoring system. Razor, blade, and soap matching continue to use their existing systems and write to the same `data/matched/` directory.
+
+## Detailed Specifications
+
+### 1. Brush Scoring System
+
+#### Strategy Execution
+- **Run all brush strategies** for each brush input string
+- **Score each brush result** based on configurable criteria
+- **Return highest-scoring brush result**
+- **Fail fast** on brush strategy errors (don't mask catalog problems)
+
+#### Scoring Criteria (Initial)
+```yaml
+base_strategy_scores:
+  exact_match: 100
+  complete_brush: 60
+  dual_component: 70
+  single_component: 40
+
+bonus_factors:
+  delimiter_present: 25  # "/", "w/", "with", "+", "in"
+  multiple_brands: 20
+  fiber_words: 15       # "badger", "boar", "synthetic"
+  size_specification: 10 # "26mm", "28mm"
+  handle_knot_words: 10  # "handle", "knot"
+
+penalty_factors:
+  single_brand_only: -20  # When delimiter present
+  no_fiber_spec: -10
+  generic_terms_only: -15
+```
+
+#### Brush Strategy Hierarchy
+1. **Known Split Strategy** (from brush_splits.yaml)
+2. **High Priority Automated Split** (delimiters like "/", "w/")
+3. **Medium Priority Automated Split** (delimiters like "with", "in")
+4. **Dual Component Strategy** (handle/knot matching)
+5. **Complete Brush Strategy** (catalog matching)
+6. **Single Component Fallback** (handle or knot only)
+
+### 2. Parallel Brush System Integration
+
+#### CLI Flags
+```bash
+# Use current brush matching system (default)
+python run.py match --month 2025-05 --force
+
+# Use new brush scoring system
+python run.py match --month 2025-05 --force --brush-system=new
+
+# Use new brush system for entire pipeline
+python run.py match:report --month 2025-05 --force --brush-system=new
+```
+
+**Note**: The `--brush-system` flag only affects brush matching. Razor, blade, and soap matching always use their current systems.
+
+#### Data Organization
+- **Current brush system**: `data/matched/YYYY-MM.json` (brush section only)
+- **New brush system**: `data/matched_new/YYYY-MM.json` (brush section only)
+- **Brush learning data**: `data/learning/brush_user_actions_YYYY-MM.yaml`
+- **Other products**: Continue using `data/matched/YYYY-MM.json` (razor, blade, soap sections)
+
+### 3. Brush User Validation System
+
+#### Validation Interface
+- **CLI and WebUI** with shared logic (DRY principle)
+- **On-demand validation** (user triggers, not automatic)
+- **Show all brush strategy results** with scores and interpretations
+- **Support complete override** if all brush results are wrong
+
+#### Sorting Options
+- **By ambiguity** (close scores)
+- **By validation status** (unvalidated, validated, recently validated)
+- **By order** (chronological, alphabetical, random)
+- **By pattern** (specific delimiters, brands, patterns)
+
+#### Brush Data Collection
+```yaml
+brush_user_actions:
+  - input_text: "Chisel & Hound / Omega 10098 Boar"
+    timestamp: "2025-01-27T14:30:00Z"
+    action: "validated"  # or "overridden"
+    system_choice:
+      strategy: "complete_brush"
+      score: 45
+      result: {...}
+    user_choice:
+      strategy: "dual_component"
+      result: {...}
+    all_brush_strategies:
+      - strategy: "complete_brush", score: 45, result: {...}
+      - strategy: "dual_component", score: 85, result: {...}
+      - strategy: "single_component", score: 30, result: {...}
+```
+
+### 4. Brush Learning System
+
+#### Report Generation
+- **On-demand** via CLI/WebUI
+- **Loads all monthly brush files** for comprehensive analysis
+- **Human-readable text with YAML data** format
+- **Configurable time periods** (e.g., last 6 months)
+
+#### ChatGPT Integration
+- **Manual review and application** of brush matching suggestions
+- **Structured prompt** for actionable brush matching recommendations
+- **Focus on**: brush weight adjustments, brush routing rules, brush catalog improvements
+
+#### Brush Learning Report Format
+```yaml
+brush_learning_report:
+  generated_at: "2025-01-27T15:30:00Z"
+  period: "2025-01-20 to 2025-01-27"
+  summary:
+    total_brush_inputs: 150
+    brush_system_agreements: 120
+    brush_system_disagreements: 30
+    brush_user_overrides: 5
+    
+  analysis:
+    "Brush Pattern Analysis":
+      ".* / .*":  # Slash delimiter
+        count: 8
+        current_brush_system_choice: "complete_brush"
+        brush_scoring_system_choice: "dual_component"
+        brush_user_preference: "dual_component"
+        brush_success_rate: 0%  # Current brush system was wrong 100% of the time
+        
+  suggested_changes:
+    brush_scoring_weights:
+      delimiter_present: 25  # Increase from 20
+      brand_recognition: 15  # Decrease from 20
+    new_brush_routing_rules:
+      - pattern: ".* / .*"
+        strategy: "dual_component"
+        confidence: "high"
+```
+
+### 5. Brush Configuration Management
+
+#### File Organization
+- **Brush scoring config**: `data/brush_scoring_config.yaml`
+- **Brush user actions**: `data/learning/brush_user_actions_YYYY-MM.yaml`
+- **Generated brush correct_matches**: `data/brush_correct_matches.yaml` (auto-generated from brush user actions)
+
+#### Configuration Structure
+```yaml
+# data/brush_scoring_config.yaml
+brush_scoring_weights:
+  base_strategies:
+    exact_match: 100
+    complete_brush: 60
+    dual_component: 70
+    single_component: 40
+  
+  bonus_factors:
+    delimiter_present: 25
+    multiple_brands: 20
+    fiber_words: 15
+    size_specification: 10
+    handle_knot_words: 10
+  
+  penalty_factors:
+    single_brand_only: -20
+    no_fiber_spec: -10
+    generic_terms_only: -15
+
+brush_routing_rules:
+  - pattern: ".* / .*"
+    strategy: "dual_component"
+    confidence: "high"
+```
+
+### 6. Performance and Caching
+
+#### Caching Strategy
+- **In-memory caching** only (no persistence)
+- **Cache scoring results** for repeated inputs within single run
+- **Cache resets** on system restart (acceptable for pipeline use case)
+- **Simple dict-based cache** for performance
+
+#### Performance Considerations
+- **Parallel execution** across multiple cores for strategy evaluation
+- **Early exit** for exact matches from user_actions
+- **Optimized runtime format** for validated matches
+
+## Implementation Plan
+
+### Phase 1: Core Scoring System
+- Implement scoring-based brush matcher
+- Add scoring configuration YAML
+- Basic user actions collection
+- Unit tests for scoring functions
+
+### Phase 2: Parallel System Integration
+- Add CLI flags for system selection
+- Implement parallel data directories
+- Integration tests with real data
+- A/B comparison framework
+
+### Phase 3: User Interface
+- CLI validation interface with sorting options
+- WebUI validation interface (shared logic)
+- User actions storage in monthly files
+- Validation history tracking
+
+### Phase 4: Learning System
+- Learning report generation
+- ChatGPT integration with structured prompts
+- Weight adjustment workflow
+- Performance optimization
+
+### Phase 5: Migration and Cleanup
+- Switch default to new system when confident
+- Remove old system and flags
+- Documentation updates
+
+## Testing Requirements
+
+### Unit Tests
+- **Scoring functions**: Test individual scoring criteria and weight calculations
+- **Strategy execution**: Test each strategy in isolation
+- **Configuration loading**: Test YAML config parsing and validation
+- **User actions**: Test validation data collection and storage
+
+### Integration Tests
+- **Real data validation**: Use `data/matched/2025-05.json` for testing
+- **A/B comparison**: Test scoring system against current system
+- **Pipeline integration**: Test CLI flags and data flow
+- **User validation workflow**: Test complete validation process
+
+### Test Coverage Requirements
+- **Minimum 90% coverage** for scoring system
+- **Critical paths**: Strategy execution, scoring calculation, result selection
+- **Error handling**: Strategy failures, configuration errors, validation errors
+- **Performance**: Strategy execution time, memory usage
+
+## Success Metrics
+
+### Accuracy Metrics
+- **System agreement rate**: % of cases where both systems agree
+- **User validation rate**: % of cases where user validates scoring system choice
+- **Override rate**: % of cases where user overrides scoring system
+
+### Performance Metrics
+- **Match time**: Average time per brush match
+- **Memory usage**: Peak memory during processing
+- **Cache hit rate**: Effectiveness of in-memory caching
+
+### Learning Metrics
+- **Weight adjustment frequency**: How often weights are adjusted
+- **Strategy evolution**: New strategies added, old strategies removed
+- **Pattern recognition**: New routing rules discovered
+
+## Risk Mitigation
+
+### Technical Risks
+- **Performance degradation**: Monitor match times, optimize as needed
+- **Memory usage**: Profile memory usage, implement cleanup if needed
+- **Configuration complexity**: Keep config simple, document clearly
+
+### Data Risks
+- **Data loss**: Git backup strategy for all YAML files
+- **Corruption**: Validate data integrity, implement error recovery
+- **Inconsistency**: Regular validation of parallel system outputs
+
+### User Experience Risks
+- **Validation fatigue**: Make validation interface efficient and optional
+- **Learning curve**: Provide clear documentation and examples
+- **System complexity**: Keep interface simple, hide complexity
+
+## Future Evolution
+
+### Phase 4 Flexibility
+- **New scoring criteria**: Add/remove/modify scoring factors based on learning
+- **New strategies**: Implement new matching strategies as patterns emerge
+- **Routing rules**: Add pattern-based shortcuts for common cases
+- **Weight optimization**: Continuous tuning based on user feedback
+
+### Long-term Vision
+- **Machine learning**: Potential for ML-based scoring (future consideration)
+- **Automated optimization**: Self-tuning weights based on validation patterns
+- **Community feedback**: Integration with user community for validation
+
+## Conclusion
+
+This specification provides a comprehensive framework for replacing the current brush matching system with a more intelligent, learning-based approach. The parallel system design ensures safety during transition while the learning system enables continuous improvement based on real usage patterns.
+
+The evolutionary design ensures the system can adapt to new patterns and requirements discovered during Phase 4, making it a long-term solution for brush matching challenges.
+description:
+globs:
+alwaysApply: false
+---
