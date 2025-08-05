@@ -64,6 +64,9 @@ Implement a scoring-based **brush matching** system to replace the current "firs
 16. **Real Brush Data Validation** - Testing with production brush data
 17. **Brush Performance Optimization** - Brush caching and optimization
 
+### Phase 6: Multi-Split Enhancement
+18. **Multi-Split Automated Splitters Enhancement** - Generate all possible splits for complex delimiter cases
+
 ## 🔁 Implementation Prompts
 
 ### Step 1: Brush Scoring Configuration System (UPDATED)
@@ -493,30 +496,69 @@ Integration Requirements:
 ### Step 13: Brush ChatGPT Integration
 
 ```text
-Implement ChatGPT integration for brush analysis and suggestion processing.
+Implement ChatGPT integration for brush learning system with weight adjustments and modifier discovery.
 
 Requirements:
-- Create `sotd/match/brush_chatgpt_integration.py` for brush AI analysis
-- Implement structured prompts for actionable brush recommendations
-- Support brush weight adjustment suggestions
-- Include brush routing rule recommendations
-- Add brush catalog improvement suggestions
+- Implement `sotd/learning/chatgpt_analyzer.py` for ChatGPT integration
+- Support weight adjustment analysis for existing brush modifiers
+- Support modifier discovery for new brush patterns
+- Generate structured prompts for ChatGPT analysis
+- Process ChatGPT responses and extract suggestions
+- Support manual review and approval workflow
+
+ChatGPT Analysis Capabilities:
+1. **Weight Adjustments**: Analyze user validation data and suggest weight changes for existing modifiers
+2. **Modifier Discovery**: Identify patterns that could become new modifiers:
+   - Text patterns (custom handle, artisan knot, handmade)
+   - Brand combinations (Declaration + Zenith patterns)
+   - Size specifications (26mm vs 28mm preferences)
+   - Semantic patterns in brush descriptions
+
+ChatGPT Output Format:
+```yaml
+weight_adjustments:
+  high_priority_automated_split:
+    multiple_brands: 25  # Increase from 20
+    fiber_words: 18      # Increase from 15
+
+suggested_new_modifiers:
+  - name: "custom_handle"
+    function_name: "_modifier_custom_handle"
+    pattern: "custom|artisan|handmade|turned"
+    logic: "Detect custom handle indicators in text"
+    suggested_weights:
+      high_priority_automated_split: 15
+      medium_priority_automated_split: 10
+      dual_component: 20
+      complete_brush: -10
+    test_cases:
+      - input: "custom handle with Omega knot"
+      - input: "artisan turned handle"
+    python_template: |
+      def _modifier_custom_handle(self, input_text: str, result: dict, strategy_name: str) -> int:
+          if re.search(r"custom|artisan|handmade|turned", input_text.lower()):
+              return self.config.strategy_modifiers[strategy_name]["custom_handle"]
+          return 0
+```
 
 Test Requirements:
-- Unit tests for brush prompt generation and response parsing
-- Integration tests with ChatGPT API (mocked)
-- Test brush suggestion processing and validation
-- Test brush error handling and API failures
+- Unit tests for ChatGPT prompt generation
+- Unit tests for ChatGPT response parsing
+- Integration tests with mock ChatGPT responses
+- Test weight adjustment extraction and validation
+- Test modifier discovery extraction and validation
+- Test manual review workflow
 
 File Structure:
-- `sotd/match/brush_chatgpt_integration.py` - Brush ChatGPT integration
-- `tests/match/test_brush_chatgpt_integration.py` - Unit tests
-- `tests/integration/test_brush_ai_analysis.py` - Integration tests
+- `sotd/learning/chatgpt_analyzer.py` - ChatGPT integration
+- `tests/learning/test_chatgpt_analyzer.py` - Unit tests
+- `tests/integration/test_chatgpt_integration.py` - Integration tests
 
 Integration Requirements:
-- Test with real brush learning reports
-- Verify brush suggestion quality and relevance
-- Test brush API error handling and retry logic
+- Test with real user validation data
+- Verify ChatGPT suggestions are actionable
+- Test manual review and approval process
+- Validate generated code templates
 ```
 
 ### Step 14: Brush Configuration Update Workflow
@@ -634,6 +676,35 @@ Integration Requirements:
 - Test with real production brush workloads
 - Verify brush performance improvements
 - Test brush system stability under load
+```
+
+### Step 18: Multi-Split Automated Splitters Enhancement
+
+```text
+Enhance the multi-split automated splitter to generate all possible splits for complex delimiter cases.
+
+Requirements:
+- Implement `sotd/match/multi_split_enhancer.py` for enhanced splitter logic
+- Support configurable delimiter patterns and priority
+- Generate all possible splits for a given brush input
+- Ensure consistent output format and structure
+- Add robustness against edge cases and malformed inputs
+
+Test Requirements:
+- Unit tests for enhanced splitter logic with various inputs
+- Test robustness against malformed inputs and edge cases
+- Test consistency of output format
+- Test performance with large datasets
+
+File Structure:
+- `sotd/match/multi_split_enhancer.py` - Enhanced splitter implementation
+- `tests/match/test_multi_split_enhancer.py` - Unit tests
+- `tests/integration/test_multi_split_enhancer_integration.py` - Integration tests
+
+Integration Requirements:
+- Test with real brush data from data/matched/2025-05.json
+- Verify enhanced splitter produces all possible splits
+- Test performance with large brush datasets
 ```
 
 ## 🧠 Critical Analysis
