@@ -19,7 +19,7 @@ class BrushScoringConfig:
     Configuration loader and validator for brush scoring system.
 
     Loads configuration from YAML files and provides validated access
-    to scoring weights, bonus factors, penalty factors, and routing rules.
+    to scoring weights, strategy modifiers, and routing rules.
     """
 
     def __init__(self, config_path: Optional[Path] = None):
@@ -80,11 +80,8 @@ class BrushScoringConfig:
             return ValidationResult(is_valid=False, errors=["No configuration data loaded"])
 
         required_sections = [
-            "base_strategy_scores",
-            "bonus_factors",
-            "penalty_factors",
-            "routing_rules",
-            "performance",
+            "brush_scoring_weights",
+            "brush_routing_rules",
         ]
 
         missing_sections = []
@@ -96,6 +93,23 @@ class BrushScoringConfig:
             return ValidationResult(
                 is_valid=False,
                 errors=[f"Missing required configuration sections: {missing_sections}"],
+            )
+
+        # Validate brush_scoring_weights structure
+        brush_weights = self._config_data.get("brush_scoring_weights", {})
+        required_weight_sections = ["base_strategies", "strategy_modifiers"]
+
+        missing_weight_sections = []
+        for section in required_weight_sections:
+            if section not in brush_weights:
+                missing_weight_sections.append(section)
+
+        if missing_weight_sections:
+            return ValidationResult(
+                is_valid=False,
+                errors=[
+                    f"Missing required brush_scoring_weights sections: {missing_weight_sections}"
+                ],
             )
 
         return ValidationResult(is_valid=True)
@@ -112,38 +126,29 @@ class BrushScoringConfig:
         errors = []
 
         # Validate base strategy scores are positive numbers
-        base_scores = self._config_data.get("base_strategy_scores", {})
-        for strategy, score in base_scores.items():
+        brush_weights = self._config_data.get("brush_scoring_weights", {})
+        base_strategies = brush_weights.get("base_strategies", {})
+        for strategy, score in base_strategies.items():
             if not isinstance(score, (int, float)) or score < 0:
                 errors.append(f"Invalid base strategy score for {strategy}: {score}")
 
-        # Validate bonus factors are non-negative numbers
-        bonus_factors = self._config_data.get("bonus_factors", {})
-        for factor, value in bonus_factors.items():
-            if not isinstance(value, (int, float)) or value < 0:
-                errors.append(f"Invalid bonus factor for {factor}: {value}")
+        # Validate strategy modifiers are numbers (can be positive, negative, or zero)
+        strategy_modifiers = brush_weights.get("strategy_modifiers", {})
+        for strategy, modifiers in strategy_modifiers.items():
+            if not isinstance(modifiers, dict):
+                errors.append(f"Invalid strategy modifiers for {strategy}: not a dictionary")
+                continue
+            for modifier, value in modifiers.items():
+                if not isinstance(value, (int, float)):
+                    errors.append(f"Invalid strategy modifier {modifier} for {strategy}: {value}")
 
-        # Validate penalty factors are non-positive numbers
-        penalty_factors = self._config_data.get("penalty_factors", {})
-        for factor, value in penalty_factors.items():
-            if not isinstance(value, (int, float)) or value > 0:
-                errors.append(f"Invalid penalty factor for {factor}: {value}")
-
-        # Validate routing rules
-        routing_rules = self._config_data.get("routing_rules", {})
+        # Validate brush routing rules
+        routing_rules = self._config_data.get("brush_routing_rules", {})
         if not isinstance(routing_rules.get("minimum_score_threshold"), (int, float)):
-            errors.append("Invalid minimum_score_threshold in routing_rules")
+            errors.append("Invalid minimum_score_threshold in brush_routing_rules")
 
         if not isinstance(routing_rules.get("max_strategies_to_run"), int):
-            errors.append("Invalid max_strategies_to_run in routing_rules")
-
-        # Validate performance settings
-        performance = self._config_data.get("performance", {})
-        if not isinstance(performance.get("cache_ttl_seconds"), (int, float)):
-            errors.append("Invalid cache_ttl_seconds in performance")
-
-        if not isinstance(performance.get("max_cache_size"), int):
-            errors.append("Invalid max_cache_size in performance")
+            errors.append("Invalid max_strategies_to_run in brush_routing_rules")
 
         if errors:
             return ValidationResult(is_valid=False, errors=errors)
@@ -162,63 +167,41 @@ class BrushScoringConfig:
         if not self._config_data:
             return 0.0
 
-        return self._config_data["base_strategy_scores"].get(strategy_name, 0.0)
+        brush_weights = self._config_data.get("brush_scoring_weights", {})
+        base_strategies = brush_weights.get("base_strategies", {})
+        return base_strategies.get(strategy_name, 0.0)
 
-    def get_bonus_factor(self, factor_name: str) -> float:
-        """Get bonus factor value.
+    def get_strategy_modifier(self, strategy_name: str, modifier_name: str) -> float:
+        """Get strategy modifier value.
 
         Args:
-            factor_name: Name of the bonus factor.
+            strategy_name: Name of the strategy.
+            modifier_name: Name of the modifier.
 
         Returns:
-            Bonus factor value, or 0.0 if not found.
+            Strategy modifier value, or 0.0 if not found.
         """
         if not self._config_data:
             return 0.0
 
-        return self._config_data["bonus_factors"].get(factor_name, 0.0)
+        brush_weights = self._config_data.get("brush_scoring_weights", {})
+        strategy_modifiers = brush_weights.get("strategy_modifiers", {})
+        strategy_data = strategy_modifiers.get(strategy_name, {})
+        return strategy_data.get(modifier_name, 0.0)
 
-    def get_penalty_factor(self, factor_name: str) -> float:
-        """Get penalty factor value.
-
-        Args:
-            factor_name: Name of the penalty factor.
-
-        Returns:
-            Penalty factor value, or 0.0 if not found.
-        """
-        if not self._config_data:
-            return 0.0
-
-        return self._config_data["penalty_factors"].get(factor_name, 0.0)
-
-    def get_routing_rule(self, rule_name: str) -> Any:
-        """Get routing rule value.
+    def get_brush_routing_rule(self, rule_name: str) -> Any:
+        """Get brush routing rule value.
 
         Args:
             rule_name: Name of the routing rule.
 
         Returns:
-            Routing rule value, or None if not found.
+            Brush routing rule value, or None if not found.
         """
         if not self._config_data:
             return None
 
-        return self._config_data["routing_rules"].get(rule_name)
-
-    def get_performance_setting(self, setting_name: str) -> Any:
-        """Get performance setting value.
-
-        Args:
-            setting_name: Name of the performance setting.
-
-        Returns:
-            Performance setting value, or None if not found.
-        """
-        if not self._config_data:
-            return None
-
-        return self._config_data["performance"].get(setting_name)
+        return self._config_data["brush_routing_rules"].get(rule_name)
 
     def reload_config(self) -> ValidationResult:
         """Reload configuration from file.

@@ -32,19 +32,50 @@ class TestBrushScoringConfig:
     def test_load_config_success(self):
         """Test successful configuration loading."""
         valid_config = {
-            "base_strategy_scores": {"complete_brush": 100.0, "dual_component": 90.0},
-            "bonus_factors": {"delimiters_present": 10.0, "brand_match": 15.0},
-            "penalty_factors": {"single_brand_only": -15.0, "no_fiber_detected": -10.0},
-            "routing_rules": {
+            "brush_scoring_weights": {
+                "base_strategies": {
+                    "correct_complete_brush": 90.0,
+                    "correct_split_brush": 85.0,
+                    "known_split": 80.0,
+                    "high_priority_automated_split": 75.0,
+                    "complete_brush": 70.0,
+                    "dual_component": 65.0,
+                    "medium_priority_automated_split": 60.0,
+                    "single_component_fallback": 55.0,
+                },
+                "strategy_modifiers": {
+                    "high_priority_automated_split": {
+                        "multiple_brands": 0.0,
+                        "fiber_words": 0.0,
+                        "size_specification": 0.0,
+                    },
+                    "medium_priority_automated_split": {
+                        "multiple_brands": 0.0,
+                        "fiber_words": 0.0,
+                        "size_specification": 0.0,
+                    },
+                    "dual_component": {
+                        "high_priority_delimiter": 0.0,
+                        "medium_priority_delimiter": 0.0,
+                        "multiple_brands": 0.0,
+                        "fiber_words": 0.0,
+                        "size_specification": 0.0,
+                        "handle_knot_words": 0.0,
+                    },
+                    "complete_brush": {
+                        "high_priority_delimiter": 0.0,
+                        "medium_priority_delimiter": 0.0,
+                        "multiple_brands": 0.0,
+                        "handle_knot_words": 0.0,
+                        "fiber_words": 0.0,
+                    },
+                },
+            },
+            "brush_routing_rules": {
                 "exact_match_bypass": True,
                 "minimum_score_threshold": 30.0,
                 "max_strategies_to_run": 10,
                 "stop_on_good_match": False,
-            },
-            "performance": {
-                "enable_caching": True,
-                "cache_ttl_seconds": 3600,
-                "max_cache_size": 10000,
             },
         }
 
@@ -96,8 +127,11 @@ class TestBrushScoringConfig:
     def test_load_config_missing_sections(self):
         """Test configuration loading with missing required sections."""
         incomplete_config = {
-            "base_strategy_scores": {"complete_brush": 100.0}
-            # Missing other required sections
+            "brush_scoring_weights": {
+                "base_strategies": {"correct_complete_brush": 90.0},
+                "strategy_modifiers": {},
+            }
+            # Missing brush_routing_rules and performance sections
         }
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
@@ -118,22 +152,22 @@ class TestBrushScoringConfig:
     def test_load_config_invalid_values(self):
         """Test configuration loading with invalid values."""
         invalid_config = {
-            "base_strategy_scores": {
-                "complete_brush": -100.0,  # Invalid: negative score
-                "dual_component": "invalid",  # Invalid: string instead of number
+            "brush_scoring_weights": {
+                "base_strategies": {
+                    "correct_complete_brush": -90.0,  # Invalid: negative score
+                    "correct_split_brush": "invalid",  # Invalid: string instead of number
+                },
+                "strategy_modifiers": {
+                    "high_priority_automated_split": {
+                        "multiple_brands": "invalid",  # Invalid: string instead of number
+                    },
+                },
             },
-            "bonus_factors": {"delimiters_present": -10.0},  # Invalid: negative bonus
-            "penalty_factors": {"single_brand_only": 15.0},  # Invalid: positive penalty
-            "routing_rules": {
+            "brush_routing_rules": {
                 "exact_match_bypass": True,
                 "minimum_score_threshold": "invalid",  # Invalid: string
                 "max_strategies_to_run": 10,
                 "stop_on_good_match": False,
-            },
-            "performance": {
-                "enable_caching": True,
-                "cache_ttl_seconds": "invalid",  # Invalid: string
-                "max_cache_size": 10000,
             },
         }
 
@@ -146,7 +180,7 @@ class TestBrushScoringConfig:
             result = config.load_config()
 
             assert not result.is_valid
-            assert len(result.errors) >= 5  # Multiple validation errors
+            assert len(result.errors) >= 4  # Multiple validation errors
             assert not config.is_loaded
         finally:
             config_path.unlink()
@@ -154,102 +188,75 @@ class TestBrushScoringConfig:
     def test_get_base_strategy_score(self):
         """Test getting base strategy scores."""
         config_data = {
-            "base_strategy_scores": {"complete_brush": 100.0, "dual_component": 90.0},
-            "bonus_factors": {},
-            "penalty_factors": {},
-            "routing_rules": {},
-            "performance": {},
+            "brush_scoring_weights": {
+                "base_strategies": {
+                    "correct_complete_brush": 90.0,
+                    "correct_split_brush": 85.0,
+                },
+                "strategy_modifiers": {},
+            },
+            "brush_routing_rules": {},
         }
 
         config = BrushScoringConfig()
         config._config_data = config_data
         config._validation_result = ValidationResult(is_valid=True)
 
-        assert config.get_base_strategy_score("complete_brush") == 100.0
-        assert config.get_base_strategy_score("dual_component") == 90.0
+        assert config.get_base_strategy_score("correct_complete_brush") == 90.0
+        assert config.get_base_strategy_score("correct_split_brush") == 85.0
         assert config.get_base_strategy_score("unknown_strategy") == 0.0
 
-    def test_get_bonus_factor(self):
-        """Test getting bonus factors."""
+    def test_get_strategy_modifier(self):
+        """Test getting strategy modifiers."""
         config_data = {
-            "base_strategy_scores": {},
-            "bonus_factors": {"delimiters_present": 10.0, "brand_match": 15.0},
-            "penalty_factors": {},
-            "routing_rules": {},
-            "performance": {},
+            "brush_scoring_weights": {
+                "base_strategies": {},
+                "strategy_modifiers": {
+                    "high_priority_automated_split": {
+                        "multiple_brands": 10.0,
+                        "fiber_words": 15.0,
+                    },
+                    "dual_component": {
+                        "high_priority_delimiter": 20.0,
+                    },
+                },
+            },
+            "brush_routing_rules": {},
         }
 
         config = BrushScoringConfig()
         config._config_data = config_data
         config._validation_result = ValidationResult(is_valid=True)
 
-        assert config.get_bonus_factor("delimiters_present") == 10.0
-        assert config.get_bonus_factor("brand_match") == 15.0
-        assert config.get_bonus_factor("unknown_factor") == 0.0
+        assert (
+            config.get_strategy_modifier("high_priority_automated_split", "multiple_brands") == 10.0
+        )
+        assert config.get_strategy_modifier("high_priority_automated_split", "fiber_words") == 15.0
+        assert config.get_strategy_modifier("dual_component", "high_priority_delimiter") == 20.0
+        assert config.get_strategy_modifier("unknown_strategy", "unknown_modifier") == 0.0
 
-    def test_get_penalty_factor(self):
-        """Test getting penalty factors."""
+    def test_get_brush_routing_rule(self):
+        """Test getting brush routing rules."""
         config_data = {
-            "base_strategy_scores": {},
-            "bonus_factors": {},
-            "penalty_factors": {"single_brand_only": -15.0, "no_fiber_detected": -10.0},
-            "routing_rules": {},
-            "performance": {},
-        }
-
-        config = BrushScoringConfig()
-        config._config_data = config_data
-        config._validation_result = ValidationResult(is_valid=True)
-
-        assert config.get_penalty_factor("single_brand_only") == -15.0
-        assert config.get_penalty_factor("no_fiber_detected") == -10.0
-        assert config.get_penalty_factor("unknown_factor") == 0.0
-
-    def test_get_routing_rule(self):
-        """Test getting routing rules."""
-        config_data = {
-            "base_strategy_scores": {},
-            "bonus_factors": {},
-            "penalty_factors": {},
-            "routing_rules": {
+            "brush_scoring_weights": {
+                "base_strategies": {},
+                "strategy_modifiers": {},
+            },
+            "brush_routing_rules": {
                 "exact_match_bypass": True,
                 "minimum_score_threshold": 30.0,
                 "max_strategies_to_run": 10,
             },
-            "performance": {},
         }
 
         config = BrushScoringConfig()
         config._config_data = config_data
         config._validation_result = ValidationResult(is_valid=True)
 
-        assert config.get_routing_rule("exact_match_bypass") is True
-        assert config.get_routing_rule("minimum_score_threshold") == 30.0
-        assert config.get_routing_rule("max_strategies_to_run") == 10
-        assert config.get_routing_rule("unknown_rule") is None
-
-    def test_get_performance_setting(self):
-        """Test getting performance settings."""
-        config_data = {
-            "base_strategy_scores": {},
-            "bonus_factors": {},
-            "penalty_factors": {},
-            "routing_rules": {},
-            "performance": {
-                "enable_caching": True,
-                "cache_ttl_seconds": 3600,
-                "max_cache_size": 10000,
-            },
-        }
-
-        config = BrushScoringConfig()
-        config._config_data = config_data
-        config._validation_result = ValidationResult(is_valid=True)
-
-        assert config.get_performance_setting("enable_caching") is True
-        assert config.get_performance_setting("cache_ttl_seconds") == 3600
-        assert config.get_performance_setting("max_cache_size") == 10000
-        assert config.get_performance_setting("unknown_setting") is None
+        assert config.get_brush_routing_rule("exact_match_bypass") is True
+        assert config.get_brush_routing_rule("minimum_score_threshold") == 30.0
+        assert config.get_brush_routing_rule("max_strategies_to_run") == 10
+        assert config.get_brush_routing_rule("unknown_rule") is None
 
     def test_get_methods_without_config_loaded(self):
         """Test get methods when configuration is not loaded."""
@@ -257,44 +264,34 @@ class TestBrushScoringConfig:
 
         # All get methods should return safe defaults when config not loaded
         assert config.get_base_strategy_score("any_strategy") == 0.0
-        assert config.get_bonus_factor("any_factor") == 0.0
-        assert config.get_penalty_factor("any_factor") == 0.0
-        assert config.get_routing_rule("any_rule") is None
-        assert config.get_performance_setting("any_setting") is None
+        assert config.get_strategy_modifier("any_strategy", "any_modifier") == 0.0
+        assert config.get_brush_routing_rule("any_rule") is None
 
     def test_reload_config(self):
         """Test configuration reloading."""
         initial_config = {
-            "base_strategy_scores": {"complete_brush": 100.0},
-            "bonus_factors": {},
-            "penalty_factors": {},
-            "routing_rules": {
+            "brush_scoring_weights": {
+                "base_strategies": {"correct_complete_brush": 90.0},
+                "strategy_modifiers": {},
+            },
+            "brush_routing_rules": {
                 "exact_match_bypass": True,
                 "minimum_score_threshold": 30.0,
                 "max_strategies_to_run": 10,
                 "stop_on_good_match": False,
-            },
-            "performance": {
-                "enable_caching": True,
-                "cache_ttl_seconds": 3600,
-                "max_cache_size": 10000,
             },
         }
 
         updated_config = {
-            "base_strategy_scores": {"complete_brush": 200.0},  # Changed value
-            "bonus_factors": {},
-            "penalty_factors": {},
-            "routing_rules": {
+            "brush_scoring_weights": {
+                "base_strategies": {"correct_complete_brush": 200.0},  # Changed value
+                "strategy_modifiers": {},
+            },
+            "brush_routing_rules": {
                 "exact_match_bypass": True,
                 "minimum_score_threshold": 30.0,
                 "max_strategies_to_run": 10,
                 "stop_on_good_match": False,
-            },
-            "performance": {
-                "enable_caching": True,
-                "cache_ttl_seconds": 3600,
-                "max_cache_size": 10000,
             },
         }
 
@@ -308,7 +305,7 @@ class TestBrushScoringConfig:
             # Load initial config
             result = config.load_config()
             assert result.is_valid
-            assert config.get_base_strategy_score("complete_brush") == 100.0
+            assert config.get_base_strategy_score("correct_complete_brush") == 90.0
 
             # Update file content
             with open(config_path, "w") as f:
@@ -317,7 +314,7 @@ class TestBrushScoringConfig:
             # Reload config
             result = config.reload_config()
             assert result.is_valid
-            assert config.get_base_strategy_score("complete_brush") == 200.0
+            assert config.get_base_strategy_score("correct_complete_brush") == 200.0
         finally:
             config_path.unlink()
 

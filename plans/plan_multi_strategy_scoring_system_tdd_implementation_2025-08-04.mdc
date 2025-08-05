@@ -14,24 +14,28 @@ Implement a scoring-based **brush matching** system to replace the current "firs
 
 ### Phase 1: Core Brush Scoring System
 1. **✅ Brush Scoring Configuration System** - YAML-based config with brush weights and criteria
-   - **COMPLETED**: Created `data/brush_scoring_config.yaml` with scoring weights and criteria
-   - **COMPLETED**: Implemented `sotd/match/brush_scoring_config.py` with configuration loader and validation
-   - **COMPLETED**: Added comprehensive unit tests in `tests/match/test_brush_scoring_config.py`
-   - **COMPLETED**: All tests passing, quality checks satisfied
-2. **✅ Brush Scoring Engine** - Core brush scoring logic and strategy execution
-   - **COMPLETED**: Implemented `sotd/match/brush_scoring_engine.py` with BrushScoringEngine class
-   - **COMPLETED**: Added BrushScoringResult class for structured scoring results
-   - **COMPLETED**: Implemented strategy execution, score calculation, and result sorting
-   - **COMPLETED**: Added comprehensive unit tests in `tests/match/test_brush_scoring_engine.py`
-   - **COMPLETED**: All tests passing with proper error handling and fail-fast behavior
-3. **✅ Brush Strategy Result Scoring** - Individual brush strategy scoring functions
-   - **COMPLETED**: Implemented `sotd/match/brush_scoring_functions.py` with BrushScoringFunctions class
-   - **COMPLETED**: Added individual scoring functions for bonus and penalty factors
-   - **COMPLETED**: Implemented regex pattern compilation for efficient text analysis
-   - **COMPLETED**: Added convenience functions for direct use
-   - **COMPLETED**: Added comprehensive unit tests in `tests/match/test_brush_scoring_functions.py`
-   - **COMPLETED**: All tests passing with proper scoring logic and edge case handling
-4. **Scoring Brush Matcher** - Main brush matcher that orchestrates scoring system
+   - **COMPLETE**: Updated `data/brush_scoring_config.yaml` with corrected initial weights and strategy modifiers
+   - **COMPLETE**: Updated `sotd/match/brush_scoring_config.py` with corrected configuration structure
+   - **COMPLETE**: Updated unit tests in `tests/match/test_brush_scoring_config.py` for corrected structure
+   - **COMPLETE**: All tests passing, quality checks satisfied
+2. **🔄 Brush Scoring Engine** - Core brush scoring logic and strategy execution
+   - **IN PROGRESS**: Update `sotd/match/brush_scoring_engine.py` with exact match bypass logic
+   - **IN PROGRESS**: Update BrushScoringResult class for corrected strategy names
+   - **IN PROGRESS**: Update strategy execution to match actual strategy priority order
+   - **IN PROGRESS**: Update unit tests in `tests/match/test_brush_scoring_engine.py`
+   - **TODO**: All tests passing with proper error handling and fail-fast behavior
+3. **🔄 Brush Strategy Result Scoring** - Individual brush strategy scoring functions
+   - **IN PROGRESS**: Update `sotd/match/brush_scoring_functions.py` with corrected delimiter definitions
+   - **IN PROGRESS**: Update scoring functions to use actual delimiter types from brush_splitter.py
+   - **IN PROGRESS**: Update modifier functions to be strategy-aware and YAML-driven
+   - **IN PROGRESS**: Update unit tests in `tests/match/test_brush_scoring_functions.py`
+   - **TODO**: All tests passing with proper scoring logic and edge case handling
+4. **🔄 Scoring Brush Matcher** - Main brush matcher that orchestrates scoring system
+   - **IN PROGRESS**: Update `sotd/match/scoring_brush_matcher.py` with exact match bypass
+   - **IN PROGRESS**: Update integration with existing pipeline components
+   - **IN PROGRESS**: Update strategy registration to match actual strategy names
+   - **IN PROGRESS**: Update unit tests in `tests/match/test_scoring_brush_matcher.py`
+   - **TODO**: All tests passing with proper integration and error handling
 
 ### Phase 2: Parallel Brush System Integration
 5. **Brush CLI Flag Integration** - Add brush system selection flags to pipeline
@@ -56,23 +60,62 @@ Implement a scoring-based **brush matching** system to replace the current "firs
 
 ## 🔁 Implementation Prompts
 
-### Step 1: Brush Scoring Configuration System
+### Step 1: Brush Scoring Configuration System (UPDATED)
 
 ```text
-Create a YAML-based configuration system for the brush scoring system. 
+Update the YAML-based configuration system for the brush scoring system with corrected specifications.
 
 Requirements:
-- Create `data/brush_scoring_config.yaml` with initial brush scoring weights and criteria
-- Implement `sotd/match/brush_scoring_config.py` to load and validate brush configuration
-- Support brush base strategy scores, bonus factors, and penalty factors
-- Include brush routing rules for pattern-based shortcuts
+- Update `data/brush_scoring_config.yaml` with corrected initial brush scoring weights and strategy modifiers
+- Update `sotd/match/brush_scoring_config.py` to load and validate corrected brush configuration
+- Support corrected brush base strategy scores that mimic current behavior exactly
+- Include corrected strategy modifiers that all start at 0 for exact behavior matching
+- Add brush routing rules for pattern-based shortcuts
 - Add brush configuration validation and error handling
+
+Corrected Configuration Structure:
+```yaml
+base_strategy_scores:
+  correct_complete_brush: 90
+  correct_split_brush: 85
+  known_split: 80
+  high_priority_automated_split: 75
+  complete_brush: 70
+  dual_component: 65
+  medium_priority_automated_split: 60
+  single_component_fallback: 55
+
+# All modifiers start at 0 to ensure exact behavior matching
+strategy_modifiers:
+  high_priority_automated_split:
+    multiple_brands: 0
+    fiber_words: 0
+    size_specification: 0
+  medium_priority_automated_split:
+    multiple_brands: 0
+    fiber_words: 0
+    size_specification: 0
+  dual_component:
+    high_priority_delimiter: 0
+    medium_priority_delimiter: 0
+    multiple_brands: 0
+    fiber_words: 0
+    size_specification: 0
+    handle_knot_words: 0
+  complete_brush:
+    high_priority_delimiter: 0
+    medium_priority_delimiter: 0
+    multiple_brands: 0
+    handle_knot_words: 0
+    fiber_words: 0
+```
 
 Test Requirements:
 - Unit tests for brush config loading and validation
 - Test with invalid brush configurations (missing fields, invalid values)
-- Test with valid brush configurations and verify structure
+- Test with valid brush configurations and verify corrected structure
 - Test brush configuration reloading and hot-swapping
+- Validate that initial weights produce exact current behavior
 
 File Structure:
 - `data/brush_scoring_config.yaml` - Brush configuration file
@@ -86,24 +129,38 @@ Follow SOTD Pipeline patterns:
 - Use descriptive variable names reflecting the domain
 ```
 
-### Step 2: Brush Scoring Engine
+### Step 2: Brush Scoring Engine (UPDATED)
 
 ```text
-Create the core brush scoring engine that executes brush strategies and calculates scores.
+Update the core brush scoring engine that executes brush strategies and calculates scores with corrected specifications.
 
 Requirements:
-- Implement `sotd/match/brush_scoring_engine.py` with BrushScoringEngine class
+- Update `sotd/match/brush_scoring_engine.py` with BrushScoringEngine class
+- Support exact match bypass logic (return immediately if exact match found)
 - Support running all brush strategies for a given brush input
-- Calculate brush scores based on configuration weights
+- Calculate brush scores based on corrected configuration weights
 - Handle brush strategy failures with fail-fast approach
 - Return sorted brush results with scores and metadata
+- Support strategy-aware modifier functions that receive strategy_name parameter
+
+Corrected Strategy Priority Order:
+1. correct_complete_brush (highest)
+2. correct_split_brush
+3. known_split
+4. high_priority_automated_split
+5. complete_brush
+6. dual_component
+7. medium_priority_automated_split
+8. single_component_fallback (lowest)
 
 Test Requirements:
 - Unit tests for brush scoring calculation with mock brush strategies
+- Test exact match bypass logic and immediate return
 - Test brush strategy execution order and error handling
 - Test brush score calculation with various brush input combinations
 - Test brush result sorting and metadata preservation
 - Mock brush strategy failures and verify fail-fast behavior
+- Test strategy-aware modifier functions
 
 File Structure:
 - `sotd/match/brush_scoring_engine.py` - Core brush scoring engine
@@ -117,24 +174,35 @@ Follow TDD approach:
 - Ensure comprehensive test coverage
 ```
 
-### Step 3: Brush Strategy Result Scoring
+### Step 3: Brush Strategy Result Scoring (UPDATED)
 
 ```text
-Implement individual scoring functions for different brush strategy types and criteria.
+Update individual scoring functions for different brush strategy types and criteria with corrected specifications.
 
 Requirements:
-- Create `sotd/match/brush_scoring_functions.py` with brush scoring logic
-- Implement scoring for brush base strategies (complete_brush, dual_component, etc.)
-- Add brush bonus factor scoring (delimiters, brands, fiber words, etc.)
-- Add brush penalty factor scoring (single brand, no fiber, etc.)
+- Update `sotd/match/brush_scoring_functions.py` with corrected brush scoring logic
+- Implement scoring for corrected brush base strategies
+- Add brush bonus factor scoring with corrected delimiter definitions
+- Add brush penalty factor scoring with corrected criteria
 - Support configurable weights from brush_scoring_config.yaml
+- Support strategy-aware modifier functions
+
+Corrected Delimiter Definitions:
+High Priority Delimiters (checked before known brush validation):
+- " w/ ", " w/", " with " (high-reliability delimiters)
+- " in " (handle-primary delimiter)
+
+Medium Priority Delimiters (checked after known brush validation):
+- " - ", " + " (medium-reliability delimiters)
+- / (any spaces, not part of 'w/') - special handling for specification slashes
 
 Test Requirements:
 - Unit tests for each brush scoring function with various brush inputs
-- Test brush bonus factor detection and scoring
+- Test brush bonus factor detection and scoring with corrected delimiters
 - Test brush penalty factor detection and scoring
 - Test edge cases (empty strings, special characters)
 - Test brush weight application and calculation accuracy
+- Test strategy-aware modifier functions
 
 File Structure:
 - `sotd/match/brush_scoring_functions.py` - Brush scoring function implementations
@@ -145,19 +213,35 @@ Integration Requirements:
 - Test with real brush strings from data/matched/2025-05.json
 - Verify brush scoring produces expected results for known cases
 - Test brush performance with large datasets
+- Validate that initial configuration produces exact current behavior
 ```
 
-### Step 4: Scoring Brush Matcher
+### Step 4: Scoring Brush Matcher (UPDATED)
 
 ```text
-Create the main scoring brush matcher that integrates with existing pipeline.
+Update the main scoring brush matcher that integrates with existing pipeline with corrected specifications.
 
 Requirements:
-- Implement `sotd/match/scoring_brush_matcher.py` extending current BrushMatcher
+- Update `sotd/match/scoring_brush_matcher.py` extending current BrushMatcher
 - Integrate with existing brush strategy system and brush catalog loading
-- Support exact brush match checking from brush_user_actions
+- Support exact brush match checking from brush_user_actions with immediate bypass
 - Implement in-memory caching for brush performance
 - Maintain compatibility with existing BrushMatcher interface
+- Support corrected strategy names and priority order
+
+Exact Match Bypass Logic:
+```python
+def match(self, field_data: dict) -> Optional[dict]:
+    normalized_text = field_data.get("normalized", "").lower()
+    
+    # 1. Exact match bypass - return immediately if found
+    exact_match = self._try_exact_match(normalized_text)
+    if exact_match:
+        return exact_match
+    
+    # 2. Run all strategies with scoring
+    return self._run_scoring_system(normalized_text)
+```
 
 Test Requirements:
 - Unit tests for matcher integration and caching
@@ -165,6 +249,7 @@ Test Requirements:
 - Test exact match handling and bypass logic
 - Test caching behavior and performance
 - Test error handling and fail-fast behavior
+- Validate that initial system produces identical results to current system
 
 File Structure:
 - `sotd/match/scoring_brush_matcher.py` - Main scoring matcher
@@ -176,6 +261,7 @@ Integration Requirements:
 - Verify compatibility with current BrushMatcher interface
 - Test performance against current system
 - Validate output format matches existing structure
+- Validate exact behavior matching with no modifiers
 ```
 
 ### Step 5: Brush CLI Flag Integration
@@ -192,20 +278,6 @@ Requirements:
 
 Test Requirements:
 - Unit tests for brush CLI argument parsing and validation
-- Integration tests for brush flag combinations and error cases
-- Test backward compatibility with existing CLI usage
-- Test help text and documentation accuracy
-
-File Structure:
-- `run.py` - Updated CLI with brush system selection
-- `sotd/cli_utils/brush_system_selection.py` - Brush system selection logic
-- `tests/cli_utils/test_brush_system_selection.py` - Unit tests
-- `tests/integration/test_cli_brush_system_flags.py` - Integration tests
-
-Integration Requirements:
-- Test with existing pipeline phases and workflows
-- Verify brush flag behavior across different phase combinations
-- Test error handling for invalid brush flag combinations
 ```
 
 ### Step 6: Parallel Brush Data Directories
