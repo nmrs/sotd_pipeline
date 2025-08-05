@@ -217,180 +217,180 @@ known_brushes:
       patterns:
       - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb18\b
       - ^(?!.*dog|zen).*\bb18\b  
-  Dogclaration: 
-    fiber: Badger
-    knot_size_mm: 28
-    B1:
-      patterns:
-      - dog.*\bb1\b
-      - \bb1\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B1
-      handle:
-        brand: Dogwood Handcrafts
-    B2:
-      patterns:
-      - dog.*\bb2\b
-      - \bb2\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B2
-      handle:
-        brand: Dogwood Handcrafts
-    B3:
-      patterns:
-      - dog.*\bb3\b
-      - \bb3\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B3
-      handle:
-        brand: Dogwood Handcrafts
-    B4:
-      patterns:
-      - dog.*\bb4\b
-      - \bb4\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B4
-      handle:
-        brand: Dogwood Handcrafts
-    B5:
-      patterns:
-      - dog.*\bb5\b
-      - \bb5\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B5
-      handle:
-        brand: Dogwood Handcrafts
-    B6:
-      patterns:
-      - dog.*\bb6\b
-      - \bb6\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B6
-      handle:
-        brand: Dogwood Handcrafts
-    B7:
-      patterns:
-      - dog.*\bb7\b
-      - \bb7\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B7
-      handle:
-        brand: Dogwood Handcrafts
-    B8:
-      patterns:
-      - dog.*\bb8\b
-      - \bb8\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B8
-      handle:
-        brand: Dogwood Handcrafts
-    B9A:
-      patterns:
-      - dog.*\bb9a\+?\b
-      - \bb9a\+?\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B9A
-      handle:
-        brand: Dogwood Handcrafts
-    B9B:
-      patterns:
-      - dog.*\bb9b\+?\b
-      - \bb9b\+?\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B9B
-      handle:
-        brand: Dogwood Handcrafts
-    B10:
-      patterns:
-      - dog.*\bb10\b
-      - \bb10\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B10
-      handle:
-        brand: Dogwood Handcrafts
-    B11:
-      patterns:
-      - dog.*\bb11\b
-      - \bb11\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B11
-      handle:
-        brand: Dogwood Handcrafts
-    B12:
-      patterns:
-      - dog.*\bb12\b
-      - \bb12\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B12
-      handle:
-        brand: Dogwood Handcrafts
-    B13:
-      patterns:
-      - dog.*\bb13\b
-      - \bb13\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B13
-      handle:
-        brand: Dogwood Handcrafts
-    B14:
-      patterns:
-      - dog.*\bb14\b
-      - \bb14\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B14
-      handle:
-        brand: Dogwood Handcrafts
-    B15:
-      patterns:
-      - dog.*\bb15\b
-      - \bb15\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B15
-      handle:
-        brand: Dogwood Handcrafts
-    B16:
-      patterns:
-      - dog.*\bb16\b
-      - \bb16\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B16
-      handle:
-        brand: Dogwood Handcrafts
-    B17:
-      patterns:
-      - dog.*\bb17\b
-      - \bb17\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B17
-      handle:
-        brand: Dogwood Handcrafts
-    B18:
-      patterns:
-      - dog.*\bb18\b
-      - \bb18\b.*dog
-      knot:
-        brand: Declaration Grooming
-        model: B18
-      handle:
-        brand: Dogwood Handcrafts
+  # Dogclaration: 
+  #   fiber: Badger
+  #   knot_size_mm: 28
+  #   B1:
+  #     patterns:
+  #     - dog.*\bb1\b
+  #     - \bb1\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B1
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B2:
+  #     patterns:
+  #     - dog.*\bb2\b
+  #     - \bb2\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B2
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B3:
+  #     patterns:
+  #     - dog.*\bb3\b
+  #     - \bb3\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B3
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B4:
+  #     patterns:
+  #     - dog.*\bb4\b
+  #     - \bb4\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B4
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B5:
+  #     patterns:
+  #     - dog.*\bb5\b
+  #     - \bb5\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B5
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B6:
+  #     patterns:
+  #     - dog.*\bb6\b
+  #     - \bb6\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B6
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B7:
+  #     patterns:
+  #     - dog.*\bb7\b
+  #     - \bb7\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B7
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B8:
+  #     patterns:
+  #     - dog.*\bb8\b
+  #     - \bb8\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B8
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B9A:
+  #     patterns:
+  #     - dog.*\bb9a\+?\b
+  #     - \bb9a\+?\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B9A
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B9B:
+  #     patterns:
+  #     - dog.*\bb9b\+?\b
+  #     - \bb9b\+?\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B9B
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B10:
+  #     patterns:
+  #     - dog.*\bb10\b
+  #     - \bb10\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B10
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B11:
+  #     patterns:
+  #     - dog.*\bb11\b
+  #     - \bb11\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B11
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B12:
+  #     patterns:
+  #     - dog.*\bb12\b
+  #     - \bb12\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B12
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B13:
+  #     patterns:
+  #     - dog.*\bb13\b
+  #     - \bb13\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B13
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B14:
+  #     patterns:
+  #     - dog.*\bb14\b
+  #     - \bb14\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B14
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B15:
+  #     patterns:
+  #     - dog.*\bb15\b
+  #     - \bb15\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B15
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B16:
+  #     patterns:
+  #     - dog.*\bb16\b
+  #     - \bb16\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B16
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B17:
+  #     patterns:
+  #     - dog.*\bb17\b
+  #     - \bb17\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B17
+  #     handle:
+  #       brand: Dogwood Handcrafts
+  #   B18:
+  #     patterns:
+  #     - dog.*\bb18\b
+  #     - \bb18\b.*dog
+  #     knot:
+  #       brand: Declaration Grooming
+  #       model: B18
+  #     handle:
+  #       brand: Dogwood Handcrafts
   Dreadnought:
     Avenger:
       fiber: Boar

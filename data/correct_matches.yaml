@@ -823,16 +823,22 @@ handle:
   Alpha:
     Outlaw:
     - alpha outlaw silver stf++
+  Declaration Grooming:
+    Unspecified:
+    - DG Unicorn Ivory OG B3
   Zenith:
     r/wetshaving MOAR BOAR:
-    - Zenith - 508A XL/Bristle (B35) (MOAR BOAR) 31mm Boar
+    - zenith - 508a xl/bristle (b35) (moar boar) 31mm boar
 knot:
+  Declaration Grooming:
+    B3:
+    - DG Unicorn Ivory OG B3
   Mühle:
     STF:
     - alpha outlaw silver stf++
   Zenith:
     B35:
-    - Zenith - 508A XL/Bristle (B35) (MOAR BOAR) 31mm Boar
+    - zenith - 508a xl/bristle (b35) (moar boar) 31mm boar
 razor:
   3D Printed:
     DE:
