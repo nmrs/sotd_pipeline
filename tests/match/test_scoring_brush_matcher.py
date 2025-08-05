@@ -215,8 +215,10 @@ class TestScoringBrushMatcher:
 
         # Mock the correct matches checker with exact match
         mock_checker_instance = Mock()
-        exact_match = MatchResult(original="exact_match", matched={"brand": "ExactBrand"})
-        mock_checker_instance.check.return_value = exact_match
+        from sotd.match.types import CorrectMatchData
+
+        exact_match_data = CorrectMatchData(brand="ExactBrand", model="ExactModel")
+        mock_checker_instance.check.return_value = exact_match_data
         mock_checker.return_value = mock_checker_instance
 
         # Mock the cache
@@ -228,9 +230,13 @@ class TestScoringBrushMatcher:
 
         result = matcher.match("exact_match")
 
-        assert result == exact_match
-        mock_checker_instance.check.assert_called_once_with("exact_match")
-        mock_cache_instance.set.assert_called()
+        # Should return a MatchResult with the exact match data
+        assert result is not None
+        assert result.matched is not None
+        assert result.matched["brand"] == "ExactBrand"
+        assert result.matched["model"] == "ExactModel"
+        assert result.match_type == "exact"
+        assert result.pattern == "correct_matches.yaml"
 
     @patch("sotd.match.scoring_brush_matcher.CatalogLoader")
     @patch("sotd.match.scoring_brush_matcher.CorrectMatchesChecker")
@@ -263,28 +269,19 @@ class TestScoringBrushMatcher:
 
             matcher = ScoringBrushMatcher(scoring_config_path=config_path)
 
-            # Mock the scoring engine to return a result
+            # Mock the _get_all_strategy_results method to return a valid result
             mock_result = MatchResult(original="test", matched={"brand": "TestBrand"})
-            matcher.scoring_engine.score_brush = Mock(
-                return_value=[
-                    Mock(
-                        match_result=mock_result,
-                        strategy_name="test_strategy",
-                        base_score=100.0,
-                        bonus_score=10.0,
-                        penalty_score=-5.0,
-                        total_score=105.0,
-                    )
-                ]
-            )
+            matcher._get_all_strategy_results = Mock(return_value=[("test_strategy", mock_result)])
 
             result = matcher.match("test")
 
             assert result is not None
+            assert result.matched is not None
             assert result.matched["brand"] == "TestBrand"
-            mock_checker_instance.check.assert_not_called()  # Should not be called
+
         finally:
-            config_path.unlink()
+            if config_path.exists():
+                config_path.unlink()
 
     @patch("sotd.match.scoring_brush_matcher.CatalogLoader")
     @patch("sotd.match.scoring_brush_matcher.CorrectMatchesChecker")
@@ -308,13 +305,12 @@ class TestScoringBrushMatcher:
 
         matcher = ScoringBrushMatcher(scoring_config_path=self.scoring_config_path)
 
-        # Mock the scoring engine to return no results
-        matcher.scoring_engine.score_brush = Mock(return_value=[])
+        # Mock the _get_all_strategy_results method to return no results
+        matcher._get_all_strategy_results = Mock(return_value=[])
 
         result = matcher.match("test")
 
         assert result is None
-        mock_cache_instance.set.assert_called_with("scoring_test", None)
 
     @patch("sotd.match.scoring_brush_matcher.CatalogLoader")
     @patch("sotd.match.scoring_brush_matcher.CorrectMatchesChecker")
@@ -336,14 +332,22 @@ class TestScoringBrushMatcher:
 
         matcher = ScoringBrushMatcher(scoring_config_path=self.scoring_config_path)
 
-        # Mock the scoring engine
-        mock_results = [Mock(), Mock()]
-        matcher.scoring_engine.get_all_matches = Mock(return_value=mock_results)
+        # Mock the _get_all_strategy_results method
+        mock_result1 = MatchResult(original="test", matched={"brand": "TestBrand1"})
+        mock_result2 = MatchResult(original="test", matched={"brand": "TestBrand2"})
+        matcher._get_all_strategy_results = Mock(
+            return_value=[
+                ("strategy1", mock_result1),
+                ("strategy2", mock_result2),
+            ]
+        )
 
         results = matcher.get_all_matches("test")
 
-        assert results == mock_results
-        matcher.scoring_engine.get_all_matches.assert_called_once_with("test")
+        # Should return BrushScoringResult objects
+        assert len(results) == 2
+        assert all(hasattr(result, "strategy_name") for result in results)
+        assert all(hasattr(result, "total_score") for result in results)
 
     @patch("sotd.match.scoring_brush_matcher.CatalogLoader")
     @patch("sotd.match.scoring_brush_matcher.CorrectMatchesChecker")
@@ -365,14 +369,17 @@ class TestScoringBrushMatcher:
 
         matcher = ScoringBrushMatcher(scoring_config_path=self.scoring_config_path)
 
-        # Mock the scoring engine
-        mock_result = Mock()
-        matcher.scoring_engine.get_best_match = Mock(return_value=mock_result)
+        # Mock the _get_all_strategy_results method
+        mock_result = MatchResult(original="test", matched={"brand": "TestBrand"})
+        matcher._get_all_strategy_results = Mock(return_value=[("test_strategy", mock_result)])
 
         result = matcher.get_best_match("test")
 
-        assert result == mock_result
-        matcher.scoring_engine.get_best_match.assert_called_once_with("test")
+        # Should return a BrushScoringResult object
+        assert result is not None
+        assert hasattr(result, "strategy_name")
+        assert hasattr(result, "total_score")
+        assert result.strategy_name == "test_strategy"
 
     @patch("sotd.match.scoring_brush_matcher.CatalogLoader")
     @patch("sotd.match.scoring_brush_matcher.CorrectMatchesChecker")

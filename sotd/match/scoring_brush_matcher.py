@@ -9,9 +9,9 @@ multiple strategies.
 from pathlib import Path
 from typing import Dict, Optional
 
+from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.brush_scoring_config import BrushScoringConfig
 from sotd.match.brush_scoring_engine import BrushScoringEngine, BrushScoringResult
-from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.cache import MatchCache
 from sotd.match.config import BrushMatcherConfig
 from sotd.match.correct_matches import CorrectMatchesChecker
@@ -115,7 +115,7 @@ class ScoringBrushMatcher:
                     original=value,
                     matched=exact_match.__dict__,
                     match_type="exact",
-                    pattern="correct_matches.yaml"
+                    pattern="correct_matches.yaml",
                 )
                 self.cache.set(cache_key, match_result)
                 return match_result
@@ -171,14 +171,17 @@ class ScoringBrushMatcher:
             ("correct_complete_brush", self.brush_matcher._match_correct_complete_brush),
             ("correct_split_brush", self.brush_matcher._match_correct_split_brush),
             ("known_split", self.brush_matcher._match_known_split),
-            ("high_priority_automated_split", 
-             self.brush_matcher._match_high_priority_automated_split),
+            (
+                "high_priority_automated_split",
+                self.brush_matcher._match_high_priority_automated_split,
+            ),
             ("complete_brush", self.brush_matcher._match_complete_brush),
             ("dual_component", self.brush_matcher._match_dual_component),
-            ("medium_priority_automated_split", 
-             self.brush_matcher._match_medium_priority_automated_split),
-            ("single_component_fallback", 
-             self.brush_matcher._match_single_component_fallback),
+            (
+                "medium_priority_automated_split",
+                self.brush_matcher._match_medium_priority_automated_split,
+            ),
+            ("single_component_fallback", self.brush_matcher._match_single_component_fallback),
         ]
 
         results = []
@@ -195,7 +198,10 @@ class ScoringBrushMatcher:
         return results
 
     def _convert_to_match_result(
-        self, scoring_result: BrushScoringResult, original_value: str, all_scoring_results: list[BrushScoringResult]
+        self,
+        scoring_result: BrushScoringResult,
+        original_value: str,
+        all_scoring_results: list[BrushScoringResult],
     ) -> MatchResult:
         """Convert scoring result to MatchResult format.
 
