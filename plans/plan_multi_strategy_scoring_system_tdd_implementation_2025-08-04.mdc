@@ -18,12 +18,12 @@ Implement a scoring-based **brush matching** system to replace the current "firs
    - **COMPLETE**: Updated `sotd/match/brush_scoring_config.py` with corrected configuration structure
    - **COMPLETE**: Updated unit tests in `tests/match/test_brush_scoring_config.py` for corrected structure
    - **COMPLETE**: All tests passing, quality checks satisfied
-2. **🔄 Brush Scoring Engine** - Core brush scoring logic and strategy execution
-   - **IN PROGRESS**: Update `sotd/match/brush_scoring_engine.py` with exact match bypass logic
-   - **IN PROGRESS**: Update BrushScoringResult class for corrected strategy names
-   - **IN PROGRESS**: Update strategy execution to match actual strategy priority order
-   - **IN PROGRESS**: Update unit tests in `tests/match/test_brush_scoring_engine.py`
-   - **TODO**: All tests passing with proper error handling and fail-fast behavior
+2. **✅ Brush Scoring Engine** - Core brush scoring logic and strategy execution
+   - **COMPLETE**: Updated `sotd/match/brush_scoring_engine.py` with exact match bypass logic
+   - **COMPLETE**: Updated BrushScoringResult class for corrected strategy names
+   - **COMPLETE**: Updated strategy execution to match actual strategy priority order
+   - **COMPLETE**: Updated unit tests in `tests/match/test_brush_scoring_engine.py`
+   - **COMPLETE**: All tests passing with proper error handling and fail-fast behavior
 3. **🔄 Brush Strategy Result Scoring** - Individual brush strategy scoring functions
    - **IN PROGRESS**: Update `sotd/match/brush_scoring_functions.py` with corrected delimiter definitions
    - **IN PROGRESS**: Update scoring functions to use actual delimiter types from brush_splitter.py
