@@ -12,7 +12,7 @@ from sotd.match.blade_matcher import BladeMatcher
 from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.cli import get_parser
 from sotd.match.razor_matcher import RazorMatcher
-from sotd.match.scoring_brush_matcher import ScoringBrushMatcher
+from sotd.match.scoring_brush_matcher import BrushScoringMatcher
 from sotd.match.soap_matcher import SoapMatcher
 from sotd.match.types import MatchResult
 from sotd.match.utils.performance import PerformanceMonitor
@@ -87,7 +87,7 @@ def match_record(
     razor_matcher: RazorMatcher,
     blade_matcher: BladeMatcher,
     soap_matcher: SoapMatcher,
-    brush_matcher: "BrushMatcher | ScoringBrushMatcher",  # type: ignore
+    brush_matcher: "BrushMatcher | BrushScoringMatcher",  # type: ignore
     monitor: PerformanceMonitor,
 ) -> dict:
     result = record.copy()
@@ -247,6 +247,7 @@ def process_month(
 
         # Initialize parallel data manager
         from sotd.match.brush_parallel_data_manager import BrushParallelDataManager
+
         data_manager = BrushParallelDataManager(base_path)
 
         # Load extracted data
@@ -270,10 +271,8 @@ def process_month(
 
         # Initialize brush matcher based on system selection
         if brush_system == "new":
-            brush_matcher = ScoringBrushMatcher(
-                correct_matches_path=correct_matches_path, debug=debug
-            )
-            # ScoringBrushMatcher doesn't have monitor attribute, so we'll handle timing differently
+            brush_matcher = BrushScoringMatcher()
+            # BrushScoringMatcher has its own performance monitoring
         else:
             brush_matcher = BrushMatcher(correct_matches_path=correct_matches_path, debug=debug)
             brush_matcher.monitor = monitor  # Attach monitor for strategy timing
@@ -329,9 +328,9 @@ def process_month(
 
         # Save results using parallel data manager
         monitor.start_file_io_timing()
-        
+
         data_manager.create_directories()
-        
+
         output_data = {
             "metadata": {
                 "month": month,
@@ -341,10 +340,10 @@ def process_month(
             },
             "data": records,
         }
-        
+
         output_path = data_manager.save_data(month, output_data, brush_system)
         monitor.end_file_io_timing()
-        
+
         if debug:
             print(f"Saved data to: {output_path}")
 
