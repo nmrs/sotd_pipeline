@@ -10,6 +10,7 @@ from tqdm import tqdm
 from sotd.cli_utils.date_span import month_span
 from sotd.match.blade_matcher import BladeMatcher
 from sotd.match.brush_matcher import BrushMatcher
+from sotd.match.brush_matcher_entry import BrushMatcherEntryPoint
 from sotd.match.cli import get_parser
 from sotd.match.razor_matcher import RazorMatcher
 from sotd.match.scoring_brush_matcher import BrushScoringMatcher
@@ -87,7 +88,7 @@ def match_record(
     razor_matcher: RazorMatcher,
     blade_matcher: BladeMatcher,
     soap_matcher: SoapMatcher,
-    brush_matcher: "BrushMatcher | BrushScoringMatcher",  # type: ignore
+    brush_matcher: "BrushMatcher | BrushScoringMatcher | BrushMatcherEntryPoint",  # type: ignore
     monitor: PerformanceMonitor,
 ) -> dict:
     result = record.copy()
@@ -269,13 +270,19 @@ def process_month(
         monitor.start_processing_timing()
         blade_matcher = BladeMatcher(correct_matches_path=correct_matches_path)
 
-        # Initialize brush matcher based on system selection
-        if brush_system == "new":
-            brush_matcher = BrushScoringMatcher()
-            # BrushScoringMatcher has its own performance monitoring
-        else:
-            brush_matcher = BrushMatcher(correct_matches_path=correct_matches_path, debug=debug)
-            brush_matcher.monitor = monitor  # Attach monitor for strategy timing
+        # Initialize brush matcher using entry point for system selection
+        use_scoring_system = brush_system == "new"
+        brush_matcher = BrushMatcherEntryPoint(
+            use_scoring_system=use_scoring_system,
+            correct_matches_path=correct_matches_path,
+            debug=debug,
+        )
+
+        # Attach monitor for strategy timing if using legacy system
+        if not use_scoring_system:
+            # Only legacy BrushMatcher has monitor attribute
+            if hasattr(brush_matcher.matcher, "monitor"):
+                brush_matcher.matcher.monitor = monitor  # type: ignore
 
         razor_matcher = RazorMatcher(correct_matches_path=correct_matches_path)
         soap_matcher = SoapMatcher(correct_matches_path=correct_matches_path)
