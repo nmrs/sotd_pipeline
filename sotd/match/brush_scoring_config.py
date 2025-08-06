@@ -1,236 +1,210 @@
 """
-Brush scoring configuration system.
+Brush Scoring Configuration System.
 
-This module handles loading and validation of brush scoring configuration
-from YAML files, providing a centralized configuration system for the
-multi-strategy brush scoring system.
+This module provides YAML-based configuration management for brush scoring
+weights and criteria, supporting hot-reloading and validation.
 """
 
-from pathlib import Path
-from typing import Any, Dict, Optional
-
 import yaml
-
-from sotd.match.types import ValidationResult
+from pathlib import Path
+from typing import Dict, Any, List
 
 
 class BrushScoringConfig:
     """
-    Configuration loader and validator for brush scoring system.
-
-    Loads configuration from YAML files and provides validated access
-    to scoring weights, strategy modifiers, and routing rules.
+    Configuration manager for brush scoring weights and criteria.
+    
+    This class manages YAML-based configuration for brush scoring system,
+    including base strategy scores and strategy-specific modifiers.
     """
 
-    def __init__(self, config_path: Optional[Path] = None):
-        """Initialize configuration loader.
-
+    def __init__(self, config_path: Path | None = None):
+        """
+        Initialize the configuration manager.
+        
         Args:
-            config_path: Path to configuration YAML file. If None, uses default path.
+            config_path: Path to the configuration file. If None, uses default.
         """
         if config_path is None:
             config_path = Path("data/brush_scoring_config.yaml")
-
+        
         self.config_path = config_path
-        self._config_data: Optional[Dict[str, Any]] = None
-        self._validation_result: Optional[ValidationResult] = None
+        self.weights = self._get_default_weights()
+        
+        # Load configuration if file exists
+        if self.config_path.exists():
+            self.load_config()
 
-    def load_config(self) -> ValidationResult:
-        """Load and validate configuration from YAML file.
-
-        Returns:
-            ValidationResult indicating success/failure and any errors.
+    def _get_default_weights(self) -> Dict[str, Any]:
         """
-        try:
-            if not self.config_path.exists():
-                return ValidationResult(
-                    is_valid=False, errors=[f"Configuration file not found: {self.config_path}"]
-                )
-
-            with open(self.config_path, "r", encoding="utf-8") as f:
-                self._config_data = yaml.safe_load(f)
-
-            # Validate configuration structure
-            validation_result = self._validate_config_structure()
-            if not validation_result.is_valid:
-                return validation_result
-
-            # Validate configuration values
-            validation_result = self._validate_config_values()
-            if not validation_result.is_valid:
-                return validation_result
-
-            self._validation_result = ValidationResult(is_valid=True)
-            return self._validation_result
-
-        except yaml.YAMLError as e:
-            return ValidationResult(is_valid=False, errors=[f"YAML parsing error: {str(e)}"])
-        except Exception as e:
-            return ValidationResult(
-                is_valid=False, errors=[f"Configuration loading error: {str(e)}"]
-            )
-
-    def _validate_config_structure(self) -> ValidationResult:
-        """Validate that required configuration sections exist.
-
+        Get default weights that mimic current behavior exactly.
+        
         Returns:
-            ValidationResult indicating structure validity.
+            Dictionary containing default weights structure.
         """
-        if not self._config_data:
-            return ValidationResult(is_valid=False, errors=["No configuration data loaded"])
+        return {
+            "base_strategies": {
+                "correct_complete_brush": 90.0,
+                "correct_split_brush": 85.0,
+                "known_split": 80.0,
+                "high_priority_automated_split": 75.0,
+                "complete_brush": 70.0,
+                "dual_component": 65.0,
+                "medium_priority_automated_split": 60.0,
+                "single_component_fallback": 55.0
+            },
+            "strategy_modifiers": {
+                "high_priority_automated_split": {
+                    "multiple_brands": 0.0,
+                    "fiber_words": 0.0,
+                    "size_specification": 0.0,
+                    "handle_confidence": 0.0,
+                    "knot_confidence": 0.0,
+                    "word_count_balance": 0.0
+                },
+                "medium_priority_automated_split": {
+                    "multiple_brands": 0.0,
+                    "fiber_words": 0.0,
+                    "size_specification": 0.0,
+                    "handle_confidence": 0.0,
+                    "knot_confidence": 0.0,
+                    "word_count_balance": 0.0
+                },
+                "dual_component": {
+                    "multiple_brands": 0.0,
+                    "fiber_words": 0.0,
+                    "size_specification": 0.0
+                },
+                "complete_brush": {
+                    "multiple_brands": 0.0,
+                    "fiber_words": 0.0,
+                    "size_specification": 0.0
+                },
+                "single_component_fallback": {
+                    "multiple_brands": 0.0,
+                    "fiber_words": 0.0,
+                    "size_specification": 0.0
+                }
+            }
+        }
 
-        required_sections = [
-            "brush_scoring_weights",
-            "brush_routing_rules",
-        ]
-
-        missing_sections = []
-        for section in required_sections:
-            if section not in self._config_data:
-                missing_sections.append(section)
-
-        if missing_sections:
-            return ValidationResult(
-                is_valid=False,
-                errors=[f"Missing required configuration sections: {missing_sections}"],
-            )
-
-        # Validate brush_scoring_weights structure
-        brush_weights = self._config_data.get("brush_scoring_weights", {})
-        required_weight_sections = ["base_strategies", "strategy_modifiers"]
-
-        missing_weight_sections = []
-        for section in required_weight_sections:
-            if section not in brush_weights:
-                missing_weight_sections.append(section)
-
-        if missing_weight_sections:
-            return ValidationResult(
-                is_valid=False,
-                errors=[
-                    f"Missing required brush_scoring_weights sections: {missing_weight_sections}"
-                ],
-            )
-
-        return ValidationResult(is_valid=True)
-
-    def _validate_config_values(self) -> ValidationResult:
-        """Validate configuration values are within expected ranges.
-
-        Returns:
-            ValidationResult indicating value validity.
+    def load_config(self) -> None:
         """
-        if not self._config_data:
-            return ValidationResult(is_valid=False, errors=["No configuration data loaded"])
-
-        errors = []
-
-        # Validate base strategy scores are positive numbers
-        brush_weights = self._config_data.get("brush_scoring_weights", {})
-        base_strategies = brush_weights.get("base_strategies", {})
-        for strategy, score in base_strategies.items():
-            if not isinstance(score, (int, float)) or score < 0:
-                errors.append(f"Invalid base strategy score for {strategy}: {score}")
-
-        # Validate strategy modifiers are numbers (can be positive, negative, or zero)
-        strategy_modifiers = brush_weights.get("strategy_modifiers", {})
-        for strategy, modifiers in strategy_modifiers.items():
-            if not isinstance(modifiers, dict):
-                errors.append(f"Invalid strategy modifiers for {strategy}: not a dictionary")
-                continue
-            for modifier, value in modifiers.items():
-                if not isinstance(value, (int, float)):
-                    errors.append(f"Invalid strategy modifier {modifier} for {strategy}: {value}")
-
-        # Validate brush routing rules
-        routing_rules = self._config_data.get("brush_routing_rules", {})
-        if not isinstance(routing_rules.get("minimum_score_threshold"), (int, float)):
-            errors.append("Invalid minimum_score_threshold in brush_routing_rules")
-
-        if not isinstance(routing_rules.get("max_strategies_to_run"), int):
-            errors.append("Invalid max_strategies_to_run in brush_routing_rules")
-
-        if errors:
-            return ValidationResult(is_valid=False, errors=errors)
-
-        return ValidationResult(is_valid=True)
+        Load configuration from YAML file.
+        
+        Raises:
+            FileNotFoundError: If config file doesn't exist
+            yaml.YAMLError: If YAML is invalid
+            ValueError: If configuration structure is invalid
+        """
+        with open(self.config_path, 'r', encoding='utf-8') as f:
+            config_data = yaml.safe_load(f)
+        
+        if "brush_scoring_weights" not in config_data:
+            raise ValueError("Configuration must contain 'brush_scoring_weights' section")
+        
+        self.weights = config_data["brush_scoring_weights"]
+        self.validate_config_structure()
+        self.validate_config_values()
 
     def get_base_strategy_score(self, strategy_name: str) -> float:
-        """Get base score for a strategy.
-
-        Args:
-            strategy_name: Name of the strategy.
-
-        Returns:
-            Base score for the strategy, or 0.0 if not found.
         """
-        if not self._config_data:
-            return 0.0
-
-        brush_weights = self._config_data.get("brush_scoring_weights", {})
-        base_strategies = brush_weights.get("base_strategies", {})
-        return base_strategies.get(strategy_name, 0.0)
+        Get base score for a strategy.
+        
+        Args:
+            strategy_name: Name of the strategy
+            
+        Returns:
+            Base score for the strategy, or 0.0 if not found
+        """
+        return self.weights.get("base_strategies", {}).get(strategy_name, 0.0)
 
     def get_strategy_modifier(self, strategy_name: str, modifier_name: str) -> float:
-        """Get strategy modifier value.
-
+        """
+        Get modifier value for a strategy.
+        
         Args:
-            strategy_name: Name of the strategy.
-            modifier_name: Name of the modifier.
-
+            strategy_name: Name of the strategy
+            modifier_name: Name of the modifier
+            
         Returns:
-            Strategy modifier value, or 0.0 if not found.
+            Modifier value, or 0.0 if not found
         """
-        if not self._config_data:
-            return 0.0
+        strategy_modifiers = self.weights.get("strategy_modifiers", {}).get(strategy_name, {})
+        return strategy_modifiers.get(modifier_name, 0.0)
 
-        brush_weights = self._config_data.get("brush_scoring_weights", {})
-        strategy_modifiers = brush_weights.get("strategy_modifiers", {})
-        strategy_data = strategy_modifiers.get(strategy_name, {})
-        return strategy_data.get(modifier_name, 0.0)
+    def validate_config_structure(self) -> None:
+        """
+        Validate configuration structure.
+        
+        Raises:
+            ValueError: If configuration structure is invalid
+        """
+        if not isinstance(self.weights, dict):
+            raise ValueError("Invalid configuration structure: weights must be a dictionary")
+        
+        if "base_strategies" not in self.weights:
+            raise ValueError("Invalid configuration structure: missing 'base_strategies' section")
+        
+        if "strategy_modifiers" not in self.weights:
+            raise ValueError("Invalid configuration structure: missing 'strategy_modifiers' section")
+        
+        if not isinstance(self.weights["base_strategies"], dict):
+            raise ValueError("Invalid configuration structure: 'base_strategies' must be a dictionary")
+        
+        if not isinstance(self.weights["strategy_modifiers"], dict):
+            raise ValueError("Invalid configuration structure: 'strategy_modifiers' must be a dictionary")
 
-    def get_brush_routing_rule(self, rule_name: str) -> Any:
-        """Get brush routing rule value.
+    def validate_config_values(self) -> None:
+        """
+        Validate configuration values.
+        
+        Raises:
+            ValueError: If configuration values are invalid
+        """
+        # Validate base strategy scores
+        for strategy_name, score in self.weights["base_strategies"].items():
+            if not isinstance(score, (int, float)):
+                raise ValueError(f"Invalid score value for strategy '{strategy_name}': {score}")
+            if score < 0:
+                raise ValueError(f"Score for strategy '{strategy_name}' must be non-negative: {score}")
+        
+        # Validate strategy modifiers
+        for strategy_name, modifiers in self.weights["strategy_modifiers"].items():
+            if not isinstance(modifiers, dict):
+                raise ValueError(f"Invalid modifiers for strategy '{strategy_name}': {modifiers}")
+            
+            for modifier_name, value in modifiers.items():
+                if not isinstance(value, (int, float)):
+                    raise ValueError(f"Invalid modifier value '{modifier_name}' for strategy '{strategy_name}': {value}")
 
+    def get_all_strategy_names(self) -> List[str]:
+        """
+        Get all strategy names from configuration.
+        
+        Returns:
+            List of strategy names
+        """
+        return list(self.weights.get("base_strategies", {}).keys())
+
+    def get_all_modifier_names(self, strategy_name: str) -> List[str]:
+        """
+        Get all modifier names for a strategy.
+        
         Args:
-            rule_name: Name of the routing rule.
-
+            strategy_name: Name of the strategy
+            
         Returns:
-            Brush routing rule value, or None if not found.
+            List of modifier names for the strategy
         """
-        if not self._config_data:
-            return None
+        strategy_modifiers = self.weights.get("strategy_modifiers", {}).get(strategy_name, {})
+        return list(strategy_modifiers.keys())
 
-        return self._config_data["brush_routing_rules"].get(rule_name)
-
-    def reload_config(self) -> ValidationResult:
-        """Reload configuration from file.
-
-        Returns:
-            ValidationResult indicating success/failure.
+    def reload_config(self) -> None:
         """
-        self._config_data = None
-        self._validation_result = None
-        return self.load_config()
-
-    @property
-    def is_loaded(self) -> bool:
-        """Check if configuration is loaded and valid.
-
-        Returns:
-            True if configuration is loaded and valid.
+        Reload configuration from file (hot-reload).
+        
+        This method allows for runtime configuration updates without
+        restarting the application.
         """
-        return (
-            self._config_data is not None
-            and self._validation_result is not None
-            and self._validation_result.is_valid
-        )
-
-    @property
-    def validation_result(self) -> Optional[ValidationResult]:
-        """Get the last validation result.
-
-        Returns:
-            ValidationResult from last load/reload operation.
-        """
-        return self._validation_result
+        self.load_config() 
