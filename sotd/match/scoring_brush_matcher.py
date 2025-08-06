@@ -71,9 +71,57 @@ class BrushScoringMatcher:
         Returns:
             List of strategy objects
         """
-        # For Phase 1, we'll use a simplified approach
-        # In future phases, this will create actual strategy instances
-        return []
+        # Import existing strategy classes to reuse them
+        from sotd.match.brush_matching_strategies.known_brush_strategy import (
+            KnownBrushMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
+            OmegaSemogueBrushMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.zenith_strategy import ZenithBrushMatchingStrategy
+        from sotd.match.brush_matching_strategies.other_brushes_strategy import (
+            OtherBrushMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.known_knot_strategy import (
+            KnownKnotMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.other_knot_strategy import (
+            OtherKnotMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.fiber_fallback_strategy import (
+            FiberFallbackStrategy,
+        )
+        from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import (
+            KnotSizeFallbackStrategy,
+        )
+
+        # Load catalog data for strategies that need it
+        from sotd.match.loaders import CatalogLoader
+        from sotd.match.config import BrushMatcherConfig
+
+        # Create config and load catalogs
+        config = BrushMatcherConfig.create_default()
+        catalog_loader = CatalogLoader(config)
+        catalogs = catalog_loader.load_all_catalogs()
+
+        brush_catalog = catalogs["brushes"]
+        knots_catalog = catalogs["knots"]
+
+        # Create strategies in same order as legacy system
+        strategies = [
+            # Brush strategies (same as legacy)
+            KnownBrushMatchingStrategy(brush_catalog.get("known_brushes", {})),
+            OmegaSemogueBrushMatchingStrategy(),
+            ZenithBrushMatchingStrategy(),
+            OtherBrushMatchingStrategy(brush_catalog.get("other_brushes", {})),
+            # Knot strategies (same as legacy)
+            KnownKnotMatchingStrategy(knots_catalog.get("known_knots", {})),
+            OtherKnotMatchingStrategy(knots_catalog.get("other_knots", {})),
+            FiberFallbackStrategy(),
+            KnotSizeFallbackStrategy(),
+        ]
+
+        return strategies
 
     def match(self, value: str) -> Optional[MatchResult]:
         """

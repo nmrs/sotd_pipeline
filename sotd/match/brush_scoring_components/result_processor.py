@@ -12,7 +12,7 @@ from sotd.match.types import MatchResult
 class ResultProcessor:
     """
     Processor for final brush matching results.
-    
+
     This component ensures output format consistency and applies
     any final processing steps.
     """
@@ -24,47 +24,50 @@ class ResultProcessor:
     def process_result(self, result: Optional[MatchResult], value: str) -> Optional[MatchResult]:
         """
         Process a final result.
-        
+
         Args:
             result: MatchResult to process, or None
             value: Original input string
-            
+
         Returns:
             Processed MatchResult, or None
         """
         if result is None:
             return None
-        
+
         # Ensure consistent structure
         self._ensure_consistent_structure(result)
-        
+
         # Apply any final processing
         self._apply_final_processing(result, value)
-        
+
         return result
 
     def _ensure_consistent_structure(self, result: MatchResult) -> None:
         """
-        Ensure result has consistent structure.
-        
+        Ensure result has consistent structure matching legacy system.
+
         Args:
             result: MatchResult to process
         """
         # Ensure matched field exists
         if result.matched is None:
             result.matched = {}
-        
+
         # Ensure required fields exist
         if "source_text" not in result.matched:
             result.matched["source_text"] = result.original
-        
+
         if "source_type" not in result.matched:
             result.matched["source_type"] = result.match_type or "unknown"
+
+        # Create nested handle and knot sections to match legacy system structure
+        self._create_handle_knot_sections(result)
 
     def _apply_final_processing(self, result: MatchResult, value: str) -> None:
         """
         Apply final processing steps.
-        
+
         Args:
             result: MatchResult to process
             value: Original input string
@@ -72,11 +75,55 @@ class ResultProcessor:
         # Set original field if not already set
         if not result.original:
             result.original = value
-        
+
         # Ensure pattern field exists
         if not result.pattern:
             result.pattern = "unknown"
-        
+
         # Ensure match_type field exists
         if not result.match_type:
-            result.match_type = "unknown" 
+            result.match_type = "unknown"
+
+    def _create_handle_knot_sections(self, result: MatchResult) -> None:
+        """
+        Create nested handle and knot sections to match legacy system structure.
+
+        Args:
+            result: MatchResult to process
+        """
+        if result.matched is None:
+            return
+
+        # Extract fields from the flat structure
+        brand = result.matched.get("brand")
+        model = result.matched.get("model")
+        fiber = result.matched.get("fiber")
+        knot_size_mm = result.matched.get("knot_size_mm")
+        source_text = result.matched.get("source_text", result.original)
+
+        # Create handle section
+        result.matched["handle"] = {
+            "brand": brand,
+            "model": model,
+            "source_text": source_text,
+            "_matched_by": "BrushScoringMatcher",
+            "_pattern": result.pattern or "unknown",
+        }
+
+        # Create knot section
+        result.matched["knot"] = {
+            "brand": brand,
+            "model": model,
+            "fiber": fiber,
+            "knot_size_mm": knot_size_mm,
+            "source_text": source_text,
+            "_matched_by": "BrushScoringMatcher",
+            "_pattern": result.pattern or "unknown",
+        }
+
+        # Remove flat fields that are now in nested sections
+        # Keep brand and model at top level for compatibility
+        result.matched.pop("fiber", None)
+        result.matched.pop("knot_size_mm", None)
+        result.matched.pop("handle_maker", None)
+        result.matched.pop("source_type", None)
