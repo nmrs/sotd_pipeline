@@ -70,6 +70,16 @@ class BrushScoringMatcher:
         handles_path = Path("data/handles.yaml")
         self.handle_matcher = HandleMatcher(handles_path)
 
+        # Initialize KnotMatcher for composite brush matching
+        from sotd.match.knot_matcher import KnotMatcher
+
+        # Get knot strategies from the strategy list
+        knot_strategies = [
+            s for s in self._create_strategies()
+            if any(keyword in s.__class__.__name__ for keyword in ["Knot", "Fiber", "Size"])
+        ]
+        self.knot_matcher = KnotMatcher(knot_strategies)
+
     def _create_strategies(self) -> List:
         """
         Create list of brush matching strategies.
@@ -178,6 +188,108 @@ class BrushScoringMatcher:
             pattern=handle_data.get("_pattern_used"),
         )
 
+    def _combine_handle_and_knot_results(
+        self, handle_result: MatchResult, knot_result: MatchResult
+    ) -> MatchResult:
+        """
+        Combine HandleMatcher and KnotMatcher results into a single brush result.
+        
+        Args:
+            handle_result: MatchResult from HandleMatcher
+            knot_result: MatchResult from KnotMatcher
+            
+        Returns:
+            MatchResult with combined handle and knot data
+        """
+        handle_data = handle_result.matched or {}
+        knot_data = knot_result.matched or {}
+        
+        # Create combined brush data
+        brush_data = {
+            "brand": handle_data.get("handle_maker"),
+            "model": handle_data.get("handle_model"),
+            "source_text": handle_data.get("_source_text", handle_result.original),
+            "_matched_by": "HandleMatcher+KnotMatcher",
+            "_pattern": handle_data.get("_pattern_used"),
+        }
+        
+        # Create handle section
+        brush_data["handle"] = {
+            "brand": handle_data.get("handle_maker"),
+            "model": handle_data.get("handle_model"),
+            "source_text": handle_data.get("_source_text", handle_result.original),
+            "_matched_by": "HandleMatcher",
+            "_pattern": handle_data.get("_pattern_used"),
+        }
+        
+        # Create knot section with knot data
+        brush_data["knot"] = {
+            "brand": knot_data.get("brand"),
+            "model": knot_data.get("model"),
+            "fiber": knot_data.get("fiber"),
+            "knot_size_mm": knot_data.get("knot_size_mm"),
+            "source_text": knot_data.get("source_text", handle_result.original),
+            "_matched_by": "KnotMatcher",
+            "_pattern": knot_data.get("_pattern_used"),
+        }
+        
+        return MatchResult(
+            original=handle_result.original,
+            matched=brush_data,
+            match_type="composite",
+            pattern=handle_data.get("_pattern_used"),
+        )
+
+    def _convert_knot_result_to_brush_result(self, knot_result: MatchResult) -> MatchResult:
+        """
+        Convert KnotMatcher result to brush format for processing.
+        
+        Args:
+            knot_result: MatchResult from KnotMatcher
+            
+        Returns:
+            MatchResult in brush format
+        """
+        knot_data = knot_result.matched or {}
+        
+        # Create brush format result
+        brush_data = {
+            "brand": knot_data.get("brand"),
+            "model": knot_data.get("model"),
+            "fiber": knot_data.get("fiber"),
+            "knot_size_mm": knot_data.get("knot_size_mm"),
+            "source_text": knot_data.get("source_text", knot_result.original),
+            "_matched_by": "KnotMatcher",
+            "_pattern": knot_data.get("_pattern_used"),
+        }
+        
+        # Create empty handle section for knot-only brush
+        brush_data["handle"] = {
+            "brand": None,
+            "model": None,
+            "source_text": knot_data.get("source_text", knot_result.original),
+            "_matched_by": "KnotMatcher",
+            "_pattern": knot_data.get("_pattern_used"),
+        }
+        
+        # Create knot section
+        brush_data["knot"] = {
+            "brand": knot_data.get("brand"),
+            "model": knot_data.get("model"),
+            "fiber": knot_data.get("fiber"),
+            "knot_size_mm": knot_data.get("knot_size_mm"),
+            "source_text": knot_data.get("source_text", knot_result.original),
+            "_matched_by": "KnotMatcher",
+            "_pattern": knot_data.get("_pattern_used"),
+        }
+        
+        return MatchResult(
+            original=knot_result.original,
+            matched=brush_data,
+            match_type="knot",
+            pattern=knot_data.get("_pattern_used"),
+        )
+
     def match(self, value: str) -> Optional[MatchResult]:
         """
         Match a brush string using the enhanced scoring system.
@@ -203,13 +315,27 @@ class BrushScoringMatcher:
             # If no correct match, try strategies
             strategy_results = self.strategy_orchestrator.run_all_strategies(value)
 
-            # If no strategy results, try HandleMatcher for composite brushes
+            # If no strategy results, try HandleMatcher and KnotMatcher for composite brushes
             if not strategy_results:
+                # Try HandleMatcher first
                 handle_result = self.handle_matcher.match(value)
                 if handle_result is not None:
-                    # Convert HandleMatcher result to brush format
-                    brush_result = self._convert_handle_result_to_brush_result(handle_result)
+                    # Try KnotMatcher to enhance the result
+                    knot_result = self.knot_matcher.match(value)
+                    if knot_result is not None:
+                        # Combine handle and knot results
+                        brush_result = self._combine_handle_and_knot_results(handle_result, knot_result)
+                    else:
+                        # Use only handle result
+                        brush_result = self._convert_handle_result_to_brush_result(handle_result)
                     return self.result_processor.process_result(brush_result, value)
+                
+                # If HandleMatcher fails, try KnotMatcher alone
+                knot_result = self.knot_matcher.match(value)
+                if knot_result is not None:
+                    brush_result = self._convert_knot_result_to_brush_result(knot_result)
+                    return self.result_processor.process_result(brush_result, value)
+                
                 return None
 
             # Score the results
