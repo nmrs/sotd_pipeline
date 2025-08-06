@@ -226,6 +226,59 @@ brush_routing_rules:
 - **Early exit** for exact matches from user_actions
 - **Optimized runtime format** for validated matches
 
+#### Multi-Split Automated Splitters Enhancement (Phase 6)
+**Problem**: Complex delimiter cases like `"something - something else - something additional"` currently only evaluate the first valid split, potentially missing better interpretations.
+
+**Solution**: Modify automated splitters to generate all possible split combinations and return each as a separate strategy result for engine scoring.
+
+**Design**:
+- **Generate ALL possible splits** - no limits since there aren't many delimiters
+- **Handle/knot determination internally** - like current behavior, but may eliminate obviously non-viable options
+- **Let engine apply modifiers** - splitter focuses on splitting, engine handles scoring
+- **Both high and medium priority splitters** - both return multiple candidates when multiple splits are possible
+- **Separate strategy results** - each split candidate becomes its own strategy result for consistent scoring
+
+**Split Quality Assessment**:
+To determine which split candidate is most accurate, the engine applies new split quality modifiers:
+- **`handle_confidence`** - Uses existing `_score_as_handle()` logic (0-100%)
+- **`knot_confidence`** - Uses existing `_score_as_knot()` logic (0-100%)
+- **`word_count_balance`** - Calculates balance percentage (0-100%, where 50/50 = 100%)
+
+**YAML Configuration for Split Quality**:
+```yaml
+strategy_modifiers:
+  high_priority_automated_split:
+    handle_confidence: 10   # +10 if handle_confidence = 100%
+    knot_confidence: 15     # +15 if knot_confidence = 100%
+    word_count_balance: 25  # +25 if perfectly balanced (100%)
+  medium_priority_automated_split:
+    handle_confidence: 8    # +8 if handle_confidence = 100%
+    knot_confidence: 12     # +12 if knot_confidence = 100%
+    word_count_balance: 20  # +20 if perfectly balanced (100%)
+```
+
+**Example Flow**:
+```
+Input: "something - something else - something additional"
+
+High Priority Splitter returns:
+- Strategy Result 1: handle="something - something else", knot="something additional"
+- Strategy Result 2: handle="something", knot="something else - something additional"
+
+Engine scores each independently with all modifiers applied:
+- Result 1: base_score + handle_confidence + knot_confidence + word_count_balance + other_modifiers
+- Result 2: base_score + handle_confidence + knot_confidence + word_count_balance + other_modifiers
+
+Highest score wins
+```
+
+**Implementation**:
+- Splitter generates all possible splits using existing delimiter logic
+- Each split becomes a separate strategy result with consistent structure
+- Engine scores each result independently using existing modifier system plus split quality modifiers
+- Highest-scoring result wins regardless of which split it came from
+- Split quality modifiers use percentage-based scoring with integer results
+
 ## Implementation Plan
 
 ### Phase 1: Core Scoring System
@@ -327,8 +380,6 @@ brush_routing_rules:
 ## Conclusion
 
 This specification provides a comprehensive framework for replacing the current brush matching system with a more intelligent, learning-based approach. The parallel system design ensures safety during transition while the learning system enables continuous improvement based on real usage patterns.
-
-The evolutionary design ensures the system can adapt to new patterns and requirements discovered during Phase 4, making it a long-term solution for brush matching challenges.
 description:
 globs:
 alwaysApply: false

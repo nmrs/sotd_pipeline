@@ -44,7 +44,16 @@ Implement a scoring-based **brush matching** system to replace the current "firs
 - Scoring brush matcher with exact match bypass and correct strategy integration
 
 ### Phase 2: Parallel Brush System Integration
-5. **Brush CLI Flag Integration** - Add brush system selection flags to pipeline
+5. **✅ Brush CLI Flag Integration** - Add brush system selection flags to pipeline
+   - **COMPLETE**: Added `--brush-system` flag to match phase CLI with choices `{current,new}`
+   - **COMPLETE**: Updated `sotd/match/cli.py` to include brush system selection argument
+   - **COMPLETE**: Updated `sotd/match/run.py` to pass brush_system parameter through to process_month
+   - **COMPLETE**: Updated process_month function to accept brush_system parameter and initialize appropriate matcher
+   - **COMPLETE**: Added conditional brush matcher initialization (BrushMatcher vs ScoringBrushMatcher)
+   - **COMPLETE**: Updated type annotations to support both matcher types
+   - **COMPLETE**: Created comprehensive unit tests in `tests/match/test_brush_cli_integration.py`
+   - **COMPLETE**: Created integration tests in `tests/match/test_brush_system_integration.py`
+   - **COMPLETE**: All tests passing, CLI integration working correctly
 6. **Parallel Brush Data Directories** - Implement brush matched_new directory structure
 7. **Brush A/B Comparison Framework** - Brush system comparison and validation
 
@@ -681,17 +690,61 @@ Integration Requirements:
 ### Step 18: Multi-Split Automated Splitters Enhancement
 
 ```text
-Enhance the multi-split automated splitter to generate all possible splits for complex delimiter cases.
+Enhance the multi-split automated splitter to generate all possible splits for complex delimiter cases with split quality assessment.
 
 Requirements:
 - Implement `sotd/match/multi_split_enhancer.py` for enhanced splitter logic
 - Support configurable delimiter patterns and priority
 - Generate all possible splits for a given brush input
+- Implement split quality assessment modifiers:
+  - handle_confidence: Uses existing _score_as_handle() logic (0-100%)
+  - knot_confidence: Uses existing _score_as_knot() logic (0-100%)
+  - word_count_balance: Calculates balance percentage (0-100%, where 50/50 = 100%)
 - Ensure consistent output format and structure
 - Add robustness against edge cases and malformed inputs
 
+Split Quality Assessment Implementation:
+```python
+def _modifier_handle_confidence(self, input_text: str, result: dict, strategy_name: str) -> int:
+    handle_text = result.get("handle", "")
+    confidence_score = self._score_as_handle(handle_text)  # 0-100
+    max_bonus = self.config.strategy_modifiers[strategy_name]["handle_confidence"]
+    return int((confidence_score / 100) * max_bonus)
+
+def _modifier_knot_confidence(self, input_text: str, result: dict, strategy_name: str) -> int:
+    knot_text = result.get("knot", "")
+    confidence_score = self._score_as_knot(knot_text)  # 0-100
+    max_bonus = self.config.strategy_modifiers[strategy_name]["knot_confidence"]
+    return int((confidence_score / 100) * max_bonus)
+
+def _modifier_word_count_balance(self, input_text: str, result: dict, strategy_name: str) -> int:
+    handle_words = len(result.get("handle", "").split())
+    knot_words = len(result.get("knot", "").split())
+    total_words = handle_words + knot_words
+    if total_words == 0:
+        return 0
+    balance_percentage = 100 - abs((handle_words - knot_words) / total_words * 100)
+    max_bonus = self.config.strategy_modifiers[strategy_name]["word_count_balance"]
+    return int((balance_percentage / 100) * max_bonus)
+```
+
+YAML Configuration:
+```yaml
+strategy_modifiers:
+  high_priority_automated_split:
+    handle_confidence: 10   # +10 if handle_confidence = 100%
+    knot_confidence: 15     # +15 if knot_confidence = 100%
+    word_count_balance: 25  # +25 if perfectly balanced (100%)
+  medium_priority_automated_split:
+    handle_confidence: 8    # +8 if handle_confidence = 100%
+    knot_confidence: 12     # +12 if knot_confidence = 100%
+    word_count_balance: 20  # +20 if perfectly balanced (100%)
+```
+
 Test Requirements:
 - Unit tests for enhanced splitter logic with various inputs
+- Unit tests for split quality assessment modifiers
+- Test balance calculation with various word count ratios
 - Test robustness against malformed inputs and edge cases
 - Test consistency of output format
 - Test performance with large datasets
@@ -704,7 +757,9 @@ File Structure:
 Integration Requirements:
 - Test with real brush data from data/matched/2025-05.json
 - Verify enhanced splitter produces all possible splits
+- Test split quality assessment with known good/bad splits
 - Test performance with large brush datasets
+- Validate that split quality modifiers improve accuracy
 ```
 
 ## 🧠 Critical Analysis

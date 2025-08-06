@@ -12,6 +12,7 @@ from sotd.match.blade_matcher import BladeMatcher
 from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.cli import get_parser
 from sotd.match.razor_matcher import RazorMatcher
+from sotd.match.scoring_brush_matcher import ScoringBrushMatcher
 from sotd.match.soap_matcher import SoapMatcher
 from sotd.match.types import MatchResult
 from sotd.match.utils.performance import PerformanceMonitor
@@ -86,7 +87,7 @@ def match_record(
     razor_matcher: RazorMatcher,
     blade_matcher: BladeMatcher,
     soap_matcher: SoapMatcher,
-    brush_matcher: BrushMatcher,
+    brush_matcher: "BrushMatcher | ScoringBrushMatcher",  # type: ignore
     monitor: PerformanceMonitor,
 ) -> dict:
     result = record.copy()
@@ -236,6 +237,7 @@ def process_month(
     debug: bool = False,
     max_workers: int = 1,
     correct_matches_path: Optional[Path] = None,
+    brush_system: str = "current",
 ) -> dict:
     """Process a single month of data."""
     try:
@@ -265,8 +267,17 @@ def process_month(
         # Initialize matchers
         monitor.start_processing_timing()
         blade_matcher = BladeMatcher(correct_matches_path=correct_matches_path)
-        brush_matcher = BrushMatcher(correct_matches_path=correct_matches_path, debug=debug)
-        brush_matcher.monitor = monitor  # Attach monitor for strategy timing
+
+        # Initialize brush matcher based on system selection
+        if brush_system == "new":
+            brush_matcher = ScoringBrushMatcher(
+                correct_matches_path=correct_matches_path, debug=debug
+            )
+            # ScoringBrushMatcher doesn't have monitor attribute, so we'll handle timing differently
+        else:
+            brush_matcher = BrushMatcher(correct_matches_path=correct_matches_path, debug=debug)
+            brush_matcher.monitor = monitor  # Attach monitor for strategy timing
+
         razor_matcher = RazorMatcher(correct_matches_path=correct_matches_path)
         soap_matcher = SoapMatcher(correct_matches_path=correct_matches_path)
 
@@ -413,6 +424,8 @@ def run_match(args):
                     args.force,
                     args.debug,
                     max_workers,
+                    None,  # correct_matches_path
+                    args.brush_system,
                 ): f"{year:04d}-{month:02d}"
                 for year, month in months
             }
@@ -483,7 +496,15 @@ def run_match(args):
         print(f"Processing {len(months)} months sequentially...")
 
         for year, month in tqdm(months, desc="Months", unit="month"):
-            result = process_month(f"{year:04d}-{month:02d}", base_path, args.force, args.debug, 1)
+            result = process_month(
+                f"{year:04d}-{month:02d}",
+                base_path,
+                args.force,
+                args.debug,
+                1,
+                None,  # correct_matches_path
+                args.brush_system,
+            )
 
             if result["status"] == "completed":
                 print(f"  {result['month']}: {result['records_processed']:,} records")

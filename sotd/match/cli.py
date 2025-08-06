@@ -27,6 +27,14 @@ def get_parser() -> BaseCLIParser:
         help="Operation mode (default: match)",
     )
 
+    # Add brush system selection flag
+    parser.add_argument(
+        "--brush-system",
+        choices=["current", "new"],
+        default="current",
+        help="Brush matching system to use (default: current)",
+    )
+
     # Add standardized parallel processing arguments
     parser.add_parallel_processing_arguments(
         default_max_workers=4,
