@@ -64,6 +64,12 @@ class BrushScoringMatcher:
         self.result_processor = ResultProcessor()
         self.performance_monitor = PerformanceMonitor()
 
+        # Initialize HandleMatcher for composite brush matching
+        from sotd.match.handle_matcher import HandleMatcher
+
+        handles_path = Path("data/handles.yaml")
+        self.handle_matcher = HandleMatcher(handles_path)
+
     def _create_strategies(self) -> List:
         """
         Create list of brush matching strategies.
@@ -123,6 +129,55 @@ class BrushScoringMatcher:
 
         return strategies
 
+    def _convert_handle_result_to_brush_result(self, handle_result: MatchResult) -> MatchResult:
+        """
+        Convert HandleMatcher result to brush format for processing.
+
+        Args:
+            handle_result: MatchResult from HandleMatcher
+
+        Returns:
+            MatchResult in brush format
+        """
+        # Extract handle data from HandleMatcher result
+        handle_data = handle_result.matched or {}
+
+        # Create brush format result
+        brush_data = {
+            "brand": handle_data.get("handle_maker"),
+            "model": handle_data.get("handle_model"),
+            "source_text": handle_data.get("_source_text", handle_result.original),
+            "_matched_by": "HandleMatcher",
+            "_pattern": handle_data.get("_pattern_used"),
+        }
+
+        # Create nested handle/knot structure to match legacy format
+        brush_data["handle"] = {
+            "brand": handle_data.get("handle_maker"),
+            "model": handle_data.get("handle_model"),
+            "source_text": handle_data.get("_source_text", handle_result.original),
+            "_matched_by": "HandleMatcher",
+            "_pattern": handle_data.get("_pattern_used"),
+        }
+
+        # Create empty knot section for composite brush
+        brush_data["knot"] = {
+            "brand": None,
+            "model": None,
+            "fiber": None,
+            "knot_size_mm": None,
+            "source_text": handle_data.get("_source_text", handle_result.original),
+            "_matched_by": "HandleMatcher",
+            "_pattern": handle_data.get("_pattern_used"),
+        }
+
+        return MatchResult(
+            original=handle_result.original,
+            matched=brush_data,
+            match_type="handle",
+            pattern=handle_data.get("_pattern_used"),
+        )
+
     def match(self, value: str) -> Optional[MatchResult]:
         """
         Match a brush string using the enhanced scoring system.
@@ -148,7 +203,13 @@ class BrushScoringMatcher:
             # If no correct match, try strategies
             strategy_results = self.strategy_orchestrator.run_all_strategies(value)
 
+            # If no strategy results, try HandleMatcher for composite brushes
             if not strategy_results:
+                handle_result = self.handle_matcher.match(value)
+                if handle_result is not None:
+                    # Convert HandleMatcher result to brush format
+                    brush_result = self._convert_handle_result_to_brush_result(handle_result)
+                    return self.result_processor.process_result(brush_result, value)
                 return None
 
             # Score the results
