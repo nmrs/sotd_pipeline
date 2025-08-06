@@ -245,14 +245,17 @@ def process_month(
         monitor = PerformanceMonitor("match", max_workers)
         monitor.start_total_timing()
 
+        # Initialize parallel data manager
+        from sotd.match.brush_parallel_data_manager import BrushParallelDataManager
+        data_manager = BrushParallelDataManager(base_path)
+
         # Load extracted data
         extracted_path = base_path / "extracted" / f"{month}.json"
         if not extracted_path.exists():
             return {"status": "skipped", "month": month, "reason": "missing input file"}
 
         # Check if output already exists and force is not set
-        matched_path = base_path / "matched" / f"{month}.json"
-        if matched_path.exists() and not force:
+        if data_manager.file_exists(month, brush_system) and not force:
             return {"status": "skipped", "month": month, "reason": "output exists"}
 
         # Load data
@@ -260,9 +263,6 @@ def process_month(
         with open(extracted_path) as f:
             data = json.load(f)
         monitor.end_file_io_timing()
-
-        # Set file sizes
-        monitor.set_file_sizes(extracted_path, matched_path)
 
         # Initialize matchers
         monitor.start_processing_timing()
@@ -327,24 +327,26 @@ def process_month(
         brush_cache_stats = brush_matcher.get_cache_stats()
         monitor.record_cache_stats("brush_matcher", brush_cache_stats)
 
-        # Save results
+        # Save results using parallel data manager
         monitor.start_file_io_timing()
-        matched_path.parent.mkdir(exist_ok=True)
-        with open(matched_path, "w") as f:
-            json.dump(
-                {
-                    "metadata": {
-                        "month": month,
-                        "record_count": len(records),
-                        "performance": monitor.get_summary(),
-                    },
-                    "data": records,
-                },
-                f,
-                indent=2,
-                ensure_ascii=False,
-            )
+        
+        data_manager.create_directories()
+        
+        output_data = {
+            "metadata": {
+                "month": month,
+                "record_count": len(records),
+                "performance": monitor.get_summary(),
+                "brush_system": brush_system,
+            },
+            "data": records,
+        }
+        
+        output_path = data_manager.save_data(month, output_data, brush_system)
         monitor.end_file_io_timing()
+        
+        if debug:
+            print(f"Saved data to: {output_path}")
 
         # End timing and get performance summary
         monitor.end_total_timing()
