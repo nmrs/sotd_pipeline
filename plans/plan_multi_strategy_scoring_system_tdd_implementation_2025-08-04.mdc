@@ -6,7 +6,7 @@
 
 ## 📋 Current Status
 
-**PLAN STATUS**: Phase 1 Step 6 (Strategy Integration) completed successfully. Both systems now have 99%+ success rates with identical data structures. Phase 1 is now complete.
+**PLAN STATUS**: Phase 1 Step 6 (Strategy Integration) completed successfully. Both systems now have 99%+ success rates with identical data structures. Phase 2 (Parallel Integration) is complete. **Phase 3 (Alignment) required to achieve 100% agreement between systems.**
 
 **PHASE 1 COMPLETION SUMMARY**:
 - ✅ **Step 1: Brush Matcher Entry Point** - Implemented BrushMatcherEntryPoint with system switching
@@ -28,7 +28,7 @@
 4. Run quality checks (format, lint, typecheck, test)
 5. Commit with clear messages
 
-**NEXT PHASE**: Ready to begin Phase 3 (User Validation and Learning System).
+**NEXT PHASE**: Complete Phase 3 (Alignment) to achieve 100% agreement between systems, then ready for Phase 4.
 
 **CLEANUP COMPLETED**: 
 - ✅ Removed references to "COMPLETE" phases that are no longer relevant
@@ -44,6 +44,12 @@
 - ✅ **Implementation Completed**: Modified `BrushScoringMatcher._create_strategies()` and `ResultProcessor`
 - ✅ **Strategies Integrated**: All 8 strategies from legacy system with proper nested structure
 - 🔍 **Remaining Issue Identified**: Scoring system missing `HandleMatcher` and `KnotMatcher` for composite brushes
+
+**PHASE 3 (ALIGNMENT) - REQUIRED**:
+- 🔄 **Current Agreement Rate**: 60.1% (976/1625 records match exactly)
+- 🔄 **Target Agreement Rate**: 100% (all records must match exactly)
+- 🔄 **Issue**: Scoring system missing `HandleMatcher` and `KnotMatcher` components
+- 🔄 **Required**: Add missing matchers to achieve 100% alignment before proceeding
 
 ## 📘 Project Summary
 
@@ -76,30 +82,42 @@ Implement a scoring-based **brush matching** system to replace the current "firs
 6. **Parallel Brush Data Directories** ✅ - Implement brush matched_new directory structure
 7. **Brush A/B Comparison Framework** ✅ - Brush system comparison and validation
 
-### Phase 3: Brush User Validation System
-8. **Brush User Actions Data Model** - Data structures for brush validation tracking with entry point integration
-9. **Brush CLI Validation Interface** - Command-line brush validation with sorting options and entry point integration
-10. **Brush WebUI Validation Interface** - Web interface for brush validation with shared logic and entry point integration
-11. **Brush Validation Storage System** - Monthly file storage for brush user actions with entry point integration
+### Phase 3: Brush System Alignment 🔄 IN PROGRESS
+8. **HandleMatcher Integration** - Add HandleMatcher component to scoring system for composite brush matching
+9. **KnotMatcher Integration** - Add KnotMatcher component to scoring system for composite brush matching
+10. **Alignment Validation** - Verify 100% agreement between legacy and scoring systems
+11. **Alignment Testing** - Comprehensive tests to ensure both systems produce identical results
 
-### Phase 4: Brush Learning System
-12. **Brush Learning Report Generator** - Brush analysis and report generation with entry point integration
-13. **Brush ChatGPT Integration** - Structured prompts and brush suggestion processing with entry point integration
-14. **Brush Configuration Update Workflow** - Brush weight adjustment and application with entry point integration
+**PHASE 3 OBJECTIVE**: Achieve 100% alignment between legacy and scoring systems by adding missing HandleMatcher and KnotMatcher components.
 
-### Phase 5: Testing and Validation
-15. **Comprehensive Brush Test Suite** - Unit, integration, and performance tests for brush matching with entry point integration
-16. **Real Brush Data Validation** - Testing with production brush data with entry point integration
-17. **Brush Performance Optimization** - Brush caching and optimization with entry point integration
+**CURRENT STATUS**: 60.1% agreement rate (976/1625 records match exactly). Need to add HandleMatcher and KnotMatcher to scoring system to match composite brushes like "Summer Break", "Mountain Hare Shaving", "Maggard".
 
-### Phase 6: Multi-Split Enhancement
-18. **Multi-Split Automated Splitters Enhancement** - Generate all possible splits for complex delimiter cases
-19. **Split Quality Assessment Modifiers** - Add `handle_confidence`, `knot_confidence`, `word_count_balance` modifiers
+**SUCCESS CRITERIA**: 100% agreement rate with both systems producing identical results for all brush inputs.
 
-### Phase 7: Enhanced Data Collection
-20. **Internal Scorer Data Collection** - Collect internal scorer data for split strategies only
-21. **Enhanced User Validation Data Structure** - Add split quality metrics to user actions with entry point integration
-22. **Split Quality Metrics Collection** - Track handle/knot determination accuracy with entry point integration
+### Phase 4: Brush User Validation System
+12. **Brush User Actions Data Model** - Data structures for brush validation tracking with entry point integration
+13. **Brush CLI Validation Interface** - Command-line brush validation with sorting options and entry point integration
+14. **Brush WebUI Validation Interface** - Web interface for brush validation with shared logic and entry point integration
+15. **Brush Validation Storage System** - Monthly file storage for brush user actions with entry point integration
+
+### Phase 5: Brush Learning System
+16. **Brush Learning Report Generator** - Brush analysis and report generation with entry point integration
+17. **Brush ChatGPT Integration** - Structured prompts and brush suggestion processing with entry point integration
+18. **Brush Configuration Update Workflow** - Brush weight adjustment and application with entry point integration
+
+### Phase 6: Testing and Validation
+19. **Comprehensive Brush Test Suite** - Unit, integration, and performance tests for brush matching with entry point integration
+20. **Real Brush Data Validation** - Testing with production brush data with entry point integration
+21. **Brush Performance Optimization** - Brush caching and optimization with entry point integration
+
+### Phase 7: Multi-Split Enhancement
+22. **Multi-Split Automated Splitters Enhancement** - Generate all possible splits for complex delimiter cases
+23. **Split Quality Assessment Modifiers** - Add `handle_confidence`, `knot_confidence`, `word_count_balance` modifiers
+
+### Phase 8: Enhanced Data Collection
+24. **Internal Scorer Data Collection** - Collect internal scorer data for split strategies only
+25. **Enhanced User Validation Data Structure** - Add split quality metrics to user actions with entry point integration
+26. **Split Quality Metrics Collection** - Track handle/knot determination accuracy with entry point integration
 
 ### Phase 8: Internal Scorer Exposure
 23. **Internal Scorer Modifier Exposure** - Expose internal scoring methods as configurable modifiers
@@ -1773,3 +1791,109 @@ The plan is structured to:
 - **Support evolution** through flexible architecture
 
 This TDD implementation plan provides a safe, incremental path to implementing the multi-strategy scoring system while maintaining system reliability and enabling continuous improvement.
+
+## 🔁 Phase 3 Implementation Prompts
+
+### Phase 3 Step 8: HandleMatcher Integration
+
+```text
+Add HandleMatcher component to the BrushScoringMatcher to enable composite brush matching.
+
+**Requirements:**
+- Import and integrate HandleMatcher from legacy system into scoring system
+- Add HandleMatcher initialization in BrushScoringMatcher constructor
+- Ensure HandleMatcher receives proper configuration (handles_path)
+- Integrate HandleMatcher into the matching workflow
+- Maintain compatibility with existing brush strategies
+
+**Implementation:**
+- Import HandleMatcher from `sotd.match.handle_matcher`
+- Add HandleMatcher instance to BrushScoringMatcher
+- Pass handles_path configuration to HandleMatcher
+- Integrate HandleMatcher into the matching process
+- Ensure HandleMatcher results are properly scored and ranked
+
+**Testing:**
+- Test HandleMatcher integration with scoring system
+- Verify composite brushes are now matched correctly
+- Test that HandleMatcher results are properly scored
+- Ensure no regression in existing brush matching
+```
+
+### Phase 3 Step 9: KnotMatcher Integration
+
+```text
+Add KnotMatcher component to the BrushScoringMatcher to complete composite brush matching.
+
+**Requirements:**
+- Import and integrate KnotMatcher from legacy system into scoring system
+- Add KnotMatcher initialization in BrushScoringMatcher constructor
+- Ensure KnotMatcher receives proper configuration (knot strategies)
+- Integrate KnotMatcher into the matching workflow
+- Coordinate with HandleMatcher for complete composite matching
+
+**Implementation:**
+- Import KnotMatcher from `sotd.match.knot_matcher`
+- Add KnotMatcher instance to BrushScoringMatcher
+- Pass knot strategies configuration to KnotMatcher
+- Integrate KnotMatcher into the matching process
+- Ensure HandleMatcher and KnotMatcher work together properly
+
+**Testing:**
+- Test KnotMatcher integration with scoring system
+- Verify composite brushes with both handle and knot are matched correctly
+- Test coordination between HandleMatcher and KnotMatcher
+- Ensure no regression in existing brush matching
+```
+
+### Phase 3 Step 10: Alignment Validation
+
+```text
+Verify 100% agreement between legacy and scoring systems after HandleMatcher and KnotMatcher integration.
+
+**Requirements:**
+- Run comprehensive A/B comparison between systems
+- Verify 100% agreement rate (all records match exactly)
+- Test with specific problematic brushes (Summer Break, Mountain Hare Shaving, Maggard)
+- Validate that both systems produce identical results
+- Document any remaining differences
+
+**Implementation:**
+- Run comparison script with latest data
+- Check agreement rate reaches 100%
+- Verify specific brushes that were failing now match
+- Test edge cases and complex composite brushes
+- Document any remaining alignment issues
+
+**Testing:**
+- Run full A/B comparison test suite
+- Verify 100% agreement rate
+- Test specific problematic brush examples
+- Ensure no regressions in existing functionality
+```
+
+### Phase 3 Step 11: Alignment Testing
+
+```text
+Create comprehensive tests to ensure both systems produce identical results.
+
+**Requirements:**
+- Create integration tests that verify identical output from both systems
+- Test with real production data
+- Test edge cases and complex scenarios
+- Ensure tests catch any future regressions
+- Add performance comparison tests
+
+**Implementation:**
+- Create `tests/match/test_system_alignment.py`
+- Test identical output for various brush inputs
+- Test with real SOTD data samples
+- Add performance benchmarking tests
+- Ensure tests are deterministic and reliable
+
+**Testing:**
+- Verify all alignment tests pass
+- Test with production data samples
+- Ensure performance is acceptable
+- Validate that tests catch regressions
+```
