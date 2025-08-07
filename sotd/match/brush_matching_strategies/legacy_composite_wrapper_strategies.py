@@ -33,9 +33,11 @@ class LegacyDualComponentWrapperStrategy(BaseBrushMatchingStrategy):
             MatchResult or None
         """
         result = self.legacy_matcher._match_dual_component(value)
-        if result:
+        if result and result.matched:
             result.strategy = "dual_component"
-        return result
+            result.match_type = "composite"  # Correct behavior for composite brushes
+            return result
+        return None
 
 
 class LegacySingleComponentFallbackWrapperStrategy(BaseBrushMatchingStrategy):
@@ -62,6 +64,8 @@ class LegacySingleComponentFallbackWrapperStrategy(BaseBrushMatchingStrategy):
             MatchResult or None
         """
         result = self.legacy_matcher._match_single_component_fallback(value)
-        if result:
+        if result and result.matched:
             result.strategy = "single_component_fallback"
-        return result
+            result.match_type = "single_component"
+            return result
+        return None

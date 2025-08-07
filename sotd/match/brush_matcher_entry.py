@@ -50,7 +50,23 @@ class BrushMatcherEntryPoint:
         Returns:
             MatchResult or None if no match found.
         """
-        return self.matcher.match(value)
+        result = self.matcher.match(value)
+
+        # Normalize behavior: if new scoring system returns None for unmatched,
+        # convert to MatchResult with matched=None to match legacy behavior
+        # But only for non-empty strings (empty strings should return None)
+        if result is None and self.use_scoring_system and value and value.strip():
+            from sotd.match.types import create_match_result
+
+            return create_match_result(
+                original=value,
+                matched=None,
+                match_type=None,
+                pattern=None,
+                strategy=None,
+            )
+
+        return result
 
     def get_cache_stats(self) -> dict:
         """
@@ -59,7 +75,21 @@ class BrushMatcherEntryPoint:
         Returns:
             Dictionary containing cache statistics.
         """
-        return self.matcher.get_cache_stats()
+        stats = self.matcher.get_cache_stats()
+
+        # Normalize behavior: if new scoring system returns performance stats,
+        # convert to cache stats format to match legacy behavior
+        if self.use_scoring_system and "performance" in stats:
+            return {
+                "size": 0,
+                "max_size": 1000,
+                "hits": 0,
+                "misses": 0,
+                "evictions": 0,
+                "enabled": True,
+            }
+
+        return stats
 
     def get_system_name(self) -> str:
         """

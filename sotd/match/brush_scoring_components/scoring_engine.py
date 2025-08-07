@@ -54,12 +54,18 @@ class ScoringEngine:
             scored_results: List of scored MatchResult objects
 
         Returns:
-            Highest-scoring MatchResult, or None if list is empty
+            Highest-scoring MatchResult, or None if list is empty or no valid matches
         """
         if not scored_results:
             return None
 
-        return max(scored_results, key=lambda r: r.score)
+        # Filter out results with no valid matches (matched=None or empty matched)
+        valid_results = [r for r in scored_results if r.matched is not None and r.matched]
+
+        if not valid_results:
+            return None
+
+        return max(valid_results, key=lambda r: r.score)
 
     def _calculate_score(self, result: MatchResult, value: str) -> float:
         """

@@ -23,6 +23,7 @@ class MatchResult:
     # DRY scoring fields (optional, for section-based matchers)
     section: Optional[str] = None  # "known_knots", "other_knots", etc.
     priority: Optional[int] = None  # 1 = highest, 2 = medium, 3 = lowest
+    score: Optional[float] = None  # Calculated score for this result
 
     @property
     def matched_bool(self) -> bool:
