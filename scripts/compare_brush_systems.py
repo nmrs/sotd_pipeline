@@ -61,10 +61,20 @@ def main():
 
         summary = report["summary"]
         print(f"Total Records: {summary['total_records']}")
-        print(f"Agreement Rate: {summary['agreement_rate']:.1f}%")
-        print(f"Disagreement Rate: {summary['disagreement_rate']:.1f}%")
-        print(f"Legacy System Success: {summary['old_system_success_rate']:.1f}%")
-        print(f"Scoring System Success: {summary['new_system_success_rate']:.1f}%")
+        
+        # Calculate agreement rate from matching results
+        agreement_rate = summary['matching_results']['percentage']
+        disagreement_rate = summary['different_results']['percentage']
+        
+        print(f"Agreement Rate: {agreement_rate:.1f}%")
+        print(f"Disagreement Rate: {disagreement_rate:.1f}%")
+        
+        # Calculate success rates
+        old_success_rate = summary['matching_results']['percentage'] + summary['old_only_matches']['percentage']
+        new_success_rate = summary['matching_results']['percentage'] + summary['new_only_matches']['percentage']
+        
+        print(f"Legacy System Success: {old_success_rate:.1f}%")
+        print(f"Scoring System Success: {new_success_rate:.1f}%")
 
         # Show detailed breakdown
         print(f"\n📊 DETAILED BREAKDOWN")

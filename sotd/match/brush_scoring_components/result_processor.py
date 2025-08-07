@@ -54,12 +54,14 @@ class ResultProcessor:
         if result.matched is None:
             result.matched = {}
 
-        # Ensure required fields exist
-        if "source_text" not in result.matched:
-            result.matched["source_text"] = result.original
-
-        if "source_type" not in result.matched:
-            result.matched["source_type"] = result.match_type or "unknown"
+        # For Phase 3.1 (Black Box Alignment), don't add extra fields
+        # that the legacy system doesn't have
+        # TODO: Re-enable these fields in Phase 3.2+ when we break down individual strategies
+        # if "source_text" not in result.matched:
+        #     result.matched["source_text"] = result.original
+        # 
+        # if "source_type" not in result.matched:
+        #     result.matched["source_type"] = result.match_type or "unknown"
 
         # Create nested handle and knot sections to match legacy system structure
         # Only if they don't already exist (preserve composite brush structure)
@@ -101,13 +103,11 @@ class ResultProcessor:
         model = result.matched.get("model")
         fiber = result.matched.get("fiber")
         knot_size_mm = result.matched.get("knot_size_mm")
-        source_text = result.matched.get("source_text", result.original)
 
         # Create handle section
         result.matched["handle"] = {
             "brand": brand,
             "model": model,
-            "source_text": source_text,
             "_matched_by": "BrushScoringMatcher",
             "_pattern": result.pattern or "unknown",
         }
@@ -118,7 +118,6 @@ class ResultProcessor:
             "model": model,
             "fiber": fiber,
             "knot_size_mm": knot_size_mm,
-            "source_text": source_text,
             "_matched_by": "BrushScoringMatcher",
             "_pattern": result.pattern or "unknown",
         }
