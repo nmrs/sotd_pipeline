@@ -50,7 +50,7 @@ class TestHandleMatcherIntegration:
         # Should have handle section in matched data
         assert "handle" in result.matched, "Should have handle section for composite brush"
         handle_data = result.matched["handle"]
-        assert handle_data.get("brand") == "Summer Break", "Should match Summer Break brand"
+        assert handle_data.get("lanbrand") == "Summer Break", "Should match Summer Break brand"
 
     def test_handle_matcher_integration_with_scoring(self):
         """Test that HandleMatcher results are properly scored and ranked."""

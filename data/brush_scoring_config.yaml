@@ -2,46 +2,26 @@
 # This file contains weights and criteria for the brush scoring system
 
 brush_scoring_weights:
-  # Base strategy scores (initial weights that mimic current behavior)
+  # Simple strategy weights for Phase 3.1 (wrapper strategies only)
   base_strategies:
-    correct_complete_brush: 90.0
-    correct_split_brush: 85.0
+    # 8 wrapper strategies in legacy system priority order
+    correct_complete_brush: 100.0
+    correct_split_brush: 90.0
     known_split: 80.0
-    high_priority_automated_split: 75.0
-    complete_brush: 70.0
-    dual_component: 65.0
-    medium_priority_automated_split: 60.0
-    single_component_fallback: 55.0
+    high_priority_automated_split: 70.0
+    complete_brush: 60.0
+    dual_component: 50.0
+    medium_priority_automated_split: 40.0
+    single_component_fallback: 30.0
 
-  # Strategy-specific modifiers
+  # Strategy-specific modifiers (disabled for Phase 3.1)
   strategy_modifiers:
-    high_priority_automated_split:
-      multiple_brands: 0.0
-      fiber_words: 0.0
-      size_specification: 0.0
-      handle_confidence: 0.0
-      knot_confidence: 0.0
-      word_count_balance: 0.0
-    
-    medium_priority_automated_split:
-      multiple_brands: 0.0
-      fiber_words: 0.0
-      size_specification: 0.0
-      handle_confidence: 0.0
-      knot_confidence: 0.0
-      word_count_balance: 0.0
-    
-    dual_component:
-      multiple_brands: 0.0
-      fiber_words: 0.0
-      size_specification: 0.0
-    
-    complete_brush:
-      multiple_brands: 0.0
-      fiber_words: 0.0
-      size_specification: 0.0
-    
-    single_component_fallback:
-      multiple_brands: 0.0
-      fiber_words: 0.0
-      size_specification: 0.0 
+    # All modifiers disabled for Phase 3.1 black box approach
+    correct_complete_brush: {}
+    correct_split_brush: {}
+    known_split: {}
+    high_priority_automated_split: {}
+    complete_brush: {}
+    dual_component: {}
+    medium_priority_automated_split: {}
+    single_component_fallback: {} 

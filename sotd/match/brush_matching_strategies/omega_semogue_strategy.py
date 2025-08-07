@@ -44,6 +44,7 @@ class OmegaSemogueBrushMatchingStrategy:
                 matched_data=matched_data,
                 pattern=model_match.re.pattern,
                 strategy_name="OmegaSemogue",
+                match_type="regex",
             )
 
         return create_strategy_result(

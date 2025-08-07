@@ -75,66 +75,64 @@ class BrushScoringMatcher:
 
         # Get knot strategies from the strategy list
         knot_strategies = [
-            s for s in self._create_strategies()
+            s
+            for s in self._create_strategies()
             if any(keyword in s.__class__.__name__ for keyword in ["Knot", "Fiber", "Size"])
         ]
         self.knot_matcher = KnotMatcher(knot_strategies)
 
     def _create_strategies(self) -> List:
         """
-        Create list of brush matching strategies.
+        Create list of wrapper strategies that call legacy methods exactly.
 
         Returns:
-            List of strategy objects
+            List of wrapper strategy objects
         """
-        # Import existing strategy classes to reuse them
-        from sotd.match.brush_matching_strategies.known_brush_strategy import (
-            KnownBrushMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
-            OmegaSemogueBrushMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.zenith_strategy import ZenithBrushMatchingStrategy
-        from sotd.match.brush_matching_strategies.other_brushes_strategy import (
-            OtherBrushMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.known_knot_strategy import (
-            KnownKnotMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.other_knot_strategy import (
-            OtherKnotMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.fiber_fallback_strategy import (
-            FiberFallbackStrategy,
-        )
-        from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import (
-            KnotSizeFallbackStrategy,
-        )
-
-        # Load catalog data for strategies that need it
-        from sotd.match.loaders import CatalogLoader
+        # Create legacy matcher instance for wrapper strategies
+        from sotd.match.brush_matcher import BrushMatcher
         from sotd.match.config import BrushMatcherConfig
 
-        # Create config and load catalogs
         config = BrushMatcherConfig.create_default()
-        catalog_loader = CatalogLoader(config)
-        catalogs = catalog_loader.load_all_catalogs()
+        legacy_matcher = BrushMatcher(config=config)
 
-        brush_catalog = catalogs["brushes"]
-        knots_catalog = catalogs["knots"]
+        # Import wrapper strategies
+        from sotd.match.brush_matching_strategies.correct_matches_wrapper_strategies import (
+            CorrectCompleteBrushWrapperStrategy,
+            CorrectSplitBrushWrapperStrategy,
+        )
+        from sotd.match.brush_matching_strategies.known_split_wrapper_strategy import (
+            KnownSplitWrapperStrategy,
+        )
+        from sotd.match.brush_matching_strategies.automated_split_wrapper_strategies import (
+            HighPriorityAutomatedSplitWrapperStrategy,
+            MediumPriorityAutomatedSplitWrapperStrategy,
+        )
+        from sotd.match.brush_matching_strategies.complete_brush_wrapper_strategy import (
+            CompleteBrushWrapperStrategy,
+        )
+        from sotd.match.brush_matching_strategies.legacy_composite_wrapper_strategies import (
+            LegacyDualComponentWrapperStrategy,
+            LegacySingleComponentFallbackWrapperStrategy,
+        )
 
-        # Create strategies in same order as legacy system
+        # Create wrapper strategies in legacy system priority order
         strategies = [
-            # Brush strategies (same as legacy)
-            KnownBrushMatchingStrategy(brush_catalog.get("known_brushes", {})),
-            OmegaSemogueBrushMatchingStrategy(),
-            ZenithBrushMatchingStrategy(),
-            OtherBrushMatchingStrategy(brush_catalog.get("other_brushes", {})),
-            # Knot strategies (same as legacy)
-            KnownKnotMatchingStrategy(knots_catalog.get("known_knots", {})),
-            OtherKnotMatchingStrategy(knots_catalog.get("other_knots", {})),
-            FiberFallbackStrategy(),
-            KnotSizeFallbackStrategy(),
+            # Priority 0: correct_complete_brush
+            CorrectCompleteBrushWrapperStrategy(legacy_matcher),
+            # Priority 1: correct_split_brush
+            CorrectSplitBrushWrapperStrategy(legacy_matcher),
+            # Priority 2: known_split
+            KnownSplitWrapperStrategy(legacy_matcher),
+            # Priority 3: high_priority_automated_split
+            HighPriorityAutomatedSplitWrapperStrategy(legacy_matcher),
+            # Priority 4: complete_brush
+            CompleteBrushWrapperStrategy(legacy_matcher),
+            # Priority 5: dual_component
+            LegacyDualComponentWrapperStrategy(legacy_matcher),
+            # Priority 6: medium_priority_automated_split
+            MediumPriorityAutomatedSplitWrapperStrategy(legacy_matcher),
+            # Priority 7: single_component_fallback
+            LegacySingleComponentFallbackWrapperStrategy(legacy_matcher),
         ]
 
         return strategies
@@ -193,17 +191,17 @@ class BrushScoringMatcher:
     ) -> MatchResult:
         """
         Combine HandleMatcher and KnotMatcher results into a single brush result.
-        
+
         Args:
             handle_result: MatchResult from HandleMatcher
             knot_result: MatchResult from KnotMatcher
-            
+
         Returns:
             MatchResult with combined handle and knot data
         """
         handle_data = handle_result.matched or {}
         knot_data = knot_result.matched or {}
-        
+
         # Create combined brush data
         brush_data = {
             "brand": handle_data.get("handle_maker"),
@@ -212,7 +210,7 @@ class BrushScoringMatcher:
             "_matched_by": "HandleMatcher+KnotMatcher",
             "_pattern": handle_data.get("_pattern_used"),
         }
-        
+
         # Create handle section
         brush_data["handle"] = {
             "brand": handle_data.get("handle_maker"),
@@ -221,7 +219,7 @@ class BrushScoringMatcher:
             "_matched_by": "HandleMatcher",
             "_pattern": handle_data.get("_pattern_used"),
         }
-        
+
         # Create knot section with knot data
         brush_data["knot"] = {
             "brand": knot_data.get("brand"),
@@ -232,7 +230,7 @@ class BrushScoringMatcher:
             "_matched_by": "KnotMatcher",
             "_pattern": knot_data.get("_pattern_used"),
         }
-        
+
         return MatchResult(
             original=handle_result.original,
             matched=brush_data,
@@ -243,15 +241,15 @@ class BrushScoringMatcher:
     def _convert_knot_result_to_brush_result(self, knot_result: MatchResult) -> MatchResult:
         """
         Convert KnotMatcher result to brush format for processing.
-        
+
         Args:
             knot_result: MatchResult from KnotMatcher
-            
+
         Returns:
             MatchResult in brush format
         """
         knot_data = knot_result.matched or {}
-        
+
         # Create brush format result
         brush_data = {
             "brand": knot_data.get("brand"),
@@ -262,7 +260,7 @@ class BrushScoringMatcher:
             "_matched_by": "KnotMatcher",
             "_pattern": knot_data.get("_pattern_used"),
         }
-        
+
         # Create empty handle section for knot-only brush
         brush_data["handle"] = {
             "brand": None,
@@ -271,7 +269,7 @@ class BrushScoringMatcher:
             "_matched_by": "KnotMatcher",
             "_pattern": knot_data.get("_pattern_used"),
         }
-        
+
         # Create knot section
         brush_data["knot"] = {
             "brand": knot_data.get("brand"),
@@ -282,7 +280,7 @@ class BrushScoringMatcher:
             "_matched_by": "KnotMatcher",
             "_pattern": knot_data.get("_pattern_used"),
         }
-        
+
         return MatchResult(
             original=knot_result.original,
             matched=brush_data,
@@ -312,30 +310,11 @@ class BrushScoringMatcher:
             if result is not None:
                 return self.result_processor.process_result(result, value)
 
-            # If no correct match, try strategies
+            # If no correct match, run all strategies and score them
             strategy_results = self.strategy_orchestrator.run_all_strategies(value)
 
-            # If no strategy results, try HandleMatcher and KnotMatcher for composite brushes
+            # If no strategy results, return None
             if not strategy_results:
-                # Try HandleMatcher first
-                handle_result = self.handle_matcher.match(value)
-                if handle_result is not None:
-                    # Try KnotMatcher to enhance the result
-                    knot_result = self.knot_matcher.match(value)
-                    if knot_result is not None:
-                        # Combine handle and knot results
-                        brush_result = self._combine_handle_and_knot_results(handle_result, knot_result)
-                    else:
-                        # Use only handle result
-                        brush_result = self._convert_handle_result_to_brush_result(handle_result)
-                    return self.result_processor.process_result(brush_result, value)
-                
-                # If HandleMatcher fails, try KnotMatcher alone
-                knot_result = self.knot_matcher.match(value)
-                if knot_result is not None:
-                    brush_result = self._convert_knot_result_to_brush_result(knot_result)
-                    return self.result_processor.process_result(brush_result, value)
-                
                 return None
 
             # Score the results

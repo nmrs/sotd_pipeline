@@ -297,6 +297,16 @@ known_knots:
       patterns:
       - (declaration|\bdg\b).*\bb18\b
       - \bb18\b
+  Generic:
+    default: Synthetic
+    Timberwolf:
+      patterns:
+      - timberwolf
+  Maggard:
+    Timberwolf:
+      fiber: Synthetic
+      patterns:
+      - maggard.*timber
   Mühle:
     fiber: Synthetic
     STF:

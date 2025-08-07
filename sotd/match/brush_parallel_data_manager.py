@@ -51,7 +51,7 @@ class BrushParallelDataManager:
             ValueError: If brush_system is invalid
         """
         self._validate_system_name(brush_system)
-        
+
         if brush_system == "current":
             return self.current_dir / f"{month}.json"
         else:  # brush_system == "new"
@@ -73,14 +73,14 @@ class BrushParallelDataManager:
             ValueError: If brush_system is invalid
         """
         output_path = self.get_output_path(month, brush_system)
-        
+
         # Ensure directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Save data with proper formatting
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-        
+
         return output_path
 
     def load_data(self, month: str, brush_system: str) -> Dict[str, Any]:
@@ -99,11 +99,11 @@ class BrushParallelDataManager:
             ValueError: If brush_system is invalid
         """
         file_path = self.get_output_path(month, brush_system)
-        
+
         if not file_path.exists():
             raise FileNotFoundError(f"Data file not found: {file_path}")
-        
-        with open(file_path, 'r', encoding='utf-8') as f:
+
+        with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
     def file_exists(self, month: str, brush_system: str) -> bool:
@@ -155,21 +155,21 @@ class BrushParallelDataManager:
             ValueError: If brush_system is invalid
         """
         self._validate_system_name(brush_system)
-        
+
         if brush_system == "current":
             directory = self.current_dir
         else:  # brush_system == "new"
             directory = self.new_dir
-        
+
         if not directory.exists():
             return []
-        
+
         months = []
         for file_path in directory.glob("*.json"):
             if file_path.is_file():
                 month = file_path.stem  # Remove .json extension
                 months.append(month)
-        
+
         return sorted(months)
 
     def _validate_system_name(self, brush_system: str) -> None:
@@ -186,4 +186,4 @@ class BrushParallelDataManager:
         if brush_system not in valid_systems:
             raise ValueError(
                 f"Invalid brush system: {brush_system}. Must be one of: {valid_systems}"
-            ) 
+            )

@@ -233,6 +233,7 @@ def create_strategy_result(
         matched=matched_data,
         match_type=match_type,
         pattern=pattern,
+        strategy=strategy_name,
     )
 
 

@@ -12,7 +12,7 @@ from sotd.match.types import MatchResult
 class StrategyOrchestrator:
     """
     Orchestrator for running all brush matching strategies.
-    
+
     This component runs all available strategies and collects their results
     for scoring and selection.
     """
@@ -20,7 +20,7 @@ class StrategyOrchestrator:
     def __init__(self, strategies: List):
         """
         Initialize the strategy orchestrator.
-        
+
         Args:
             strategies: List of brush matching strategies to run
         """
@@ -29,32 +29,42 @@ class StrategyOrchestrator:
     def run_all_strategies(self, value: str) -> List[MatchResult]:
         """
         Run all strategies and collect results.
-        
+
         Args:
             value: The brush string to match
-            
+
         Returns:
             List of MatchResult objects from all strategies
         """
         results = []
-        
+
         for strategy in self.strategies:
             try:
                 result = strategy.match(value)
                 if result is not None:
+                    # Convert dict results to MatchResult objects
+                    if isinstance(result, dict):
+                        from sotd.match.types import create_match_result
+
+                        result = create_match_result(
+                            original=value,
+                            matched=result.get("matched", {}),
+                            match_type=result.get("match_type", "unknown"),
+                            pattern=result.get("pattern", "unknown"),
+                        )
                     results.append(result)
             except Exception as e:
                 # Log error but continue with other strategies
                 # This allows individual strategy failures without breaking the system
                 print(f"Strategy {strategy.__class__.__name__} failed: {e}")
                 continue
-        
+
         return results
 
     def get_strategy_count(self) -> int:
         """
         Get the number of strategies available.
-        
+
         Returns:
             Number of strategies
         """
@@ -63,8 +73,8 @@ class StrategyOrchestrator:
     def get_strategy_names(self) -> List[str]:
         """
         Get names of all strategies.
-        
+
         Returns:
             List of strategy class names
         """
-        return [strategy.__class__.__name__ for strategy in self.strategies] 
+        return [strategy.__class__.__name__ for strategy in self.strategies]

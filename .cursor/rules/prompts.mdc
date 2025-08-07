@@ -1,8 +1,6 @@
-# Development Workflows and Prompts
-
-This file contains reusable development workflows and prompts for the SOTD Pipeline project. Use these with Cursor AI by referencing `@prompts.mdc` followed by the specific section name.
-
 ---
+globs: plans/*.md,plans/*.mdc,plans/**/*.md,plans/**/*.mdc
+alwaysApply: false
 
 ## 🚀 Development Workflows
 
@@ -34,7 +32,6 @@ Proceed through the remaining tasks in the current step one at a time. After com
 8. Proceed *until context limit is reached*
 
 ---
-
 ## 📋 Project Planning Prompts
 
 ### Idea Honing

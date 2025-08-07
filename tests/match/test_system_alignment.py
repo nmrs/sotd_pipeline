@@ -43,9 +43,15 @@ class TestSystemAlignment:
             legacy_matched = legacy_result.matched or {}
             scoring_matched = scoring_result.matched or {}
 
-            assert legacy_matched.get("brand") == scoring_matched.get("brand"), f"Brand mismatch for: {test_input}"
-            assert legacy_matched.get("model") == scoring_matched.get("model"), f"Model mismatch for: {test_input}"
-            assert legacy_matched.get("fiber") == scoring_matched.get("fiber"), f"Fiber mismatch for: {test_input}"
+            assert legacy_matched.get("brand") == scoring_matched.get(
+                "brand"
+            ), f"Brand mismatch for: {test_input}"
+            assert legacy_matched.get("model") == scoring_matched.get(
+                "model"
+            ), f"Model mismatch for: {test_input}"
+            assert legacy_matched.get("fiber") == scoring_matched.get(
+                "fiber"
+            ), f"Fiber mismatch for: {test_input}"
 
     def test_identical_output_for_composite_brushes(self, legacy_matcher, scoring_matcher):
         """Test that both systems produce identical output for composite brushes."""
@@ -73,8 +79,12 @@ class TestSystemAlignment:
             legacy_knot = legacy_matched.get("knot", {})
             scoring_knot = scoring_matched.get("knot", {})
 
-            assert legacy_handle.get("brand") == scoring_handle.get("brand"), f"Handle brand mismatch for: {test_input}"
-            assert legacy_knot.get("fiber") == scoring_knot.get("fiber"), f"Knot fiber mismatch for: {test_input}"
+            assert legacy_handle.get("brand") == scoring_handle.get(
+                "brand"
+            ), f"Handle brand mismatch for: {test_input}"
+            assert legacy_knot.get("fiber") == scoring_knot.get(
+                "fiber"
+            ), f"Knot fiber mismatch for: {test_input}"
 
     def test_identical_output_for_unmatched_brushes(self, legacy_matcher, scoring_matcher):
         """Test that both systems produce identical output for unmatched brushes."""
@@ -134,6 +144,7 @@ class TestSystemAlignment:
 
         # Test legacy system performance
         import time
+
         start_time = time.time()
         for _ in range(100):
             legacy_result = legacy_matcher.match(test_input)
@@ -158,8 +169,8 @@ class TestSystemAlignment:
         """Test that both systems handle edge cases identically."""
         edge_cases = [
             None,  # None input
-            "",    # Empty string
-            "   ", # Whitespace only
+            "",  # Empty string
+            "   ",  # Whitespace only
             "A" * 1000,  # Very long string
         ]
 
@@ -175,4 +186,4 @@ class TestSystemAlignment:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__]) 
+    pytest.main([__file__])

@@ -13,8 +13,8 @@ from .performance_monitor import PerformanceMonitor
 
 __all__ = [
     "CorrectMatchesMatcher",
-    "StrategyOrchestrator", 
+    "StrategyOrchestrator",
     "ScoringEngine",
     "ResultProcessor",
-    "PerformanceMonitor"
-] 
+    "PerformanceMonitor",
+]

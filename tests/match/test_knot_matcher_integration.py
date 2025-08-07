@@ -141,8 +141,10 @@ class TestKnotMatcherIntegration:
             # Should have correct fiber in knot section
             knot_data = result.matched.get("knot", {})
             actual_fiber = knot_data.get("fiber")
-            assert actual_fiber == expected_fiber, f"Expected {expected_fiber}, got {actual_fiber} for {test_input}"
+            assert (
+                actual_fiber == expected_fiber
+            ), f"Expected {expected_fiber}, got {actual_fiber} for {test_input}"
 
 
 if __name__ == "__main__":
-    pytest.main([__file__]) 
+    pytest.main([__file__])

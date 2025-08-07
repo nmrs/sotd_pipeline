@@ -18,6 +18,7 @@ class MatchResult:
     matched: Optional[Dict[str, Any]] = None
     match_type: Optional[str] = None
     pattern: Optional[str] = None
+    strategy: Optional[str] = None  # Name of the strategy that produced this result
 
     # DRY scoring fields (optional, for section-based matchers)
     section: Optional[str] = None  # "known_knots", "other_knots", etc.
@@ -228,6 +229,7 @@ def create_match_result(
     matched: Optional[Dict[str, Any]],
     match_type: Optional[str],
     pattern: Optional[str],
+    strategy: Optional[str] = None,
 ) -> "MatchResult":
     """Create a MatchResult from legacy match data."""
     # This is a compatibility function for existing code
@@ -237,6 +239,7 @@ def create_match_result(
         matched=matched,
         match_type=match_type,
         pattern=pattern,
+        strategy=strategy,
     )
 
 

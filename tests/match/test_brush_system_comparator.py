@@ -17,7 +17,7 @@ class TestBrushSystemComparator:
         """Test that comparator initializes correctly."""
         old_data = {"data": [], "metadata": {}}
         new_data = {"data": [], "metadata": {}}
-        
+
         comparator = BrushSystemComparator(old_data, new_data)
         assert comparator.old_data == old_data
         assert comparator.new_data == new_data
@@ -32,11 +32,11 @@ class TestBrushSystemComparator:
                         "original": "Test Brush",
                         "matched": {"brand": "Test", "model": "Brush", "fiber": "badger"},
                         "match_type": "exact",
-                        "pattern": "test_pattern"
+                        "pattern": "test_pattern",
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
         new_data = {
             "data": [
@@ -45,16 +45,16 @@ class TestBrushSystemComparator:
                         "original": "Test Brush",
                         "matched": {"brand": "Test", "model": "Brush", "fiber": "badger"},
                         "match_type": "exact",
-                        "pattern": "test_pattern"
+                        "pattern": "test_pattern",
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
-        
+
         comparator = BrushSystemComparator(old_data, new_data)
         results = comparator.compare_matches()
-        
+
         assert results["total_records"] == 1
         assert results["matching_results"] == 1
         assert results["different_results"] == 0
@@ -71,11 +71,11 @@ class TestBrushSystemComparator:
                         "original": "Test Brush",
                         "matched": {"brand": "Old", "model": "Brush", "fiber": "badger"},
                         "match_type": "exact",
-                        "pattern": "old_pattern"
+                        "pattern": "old_pattern",
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
         new_data = {
             "data": [
@@ -84,16 +84,16 @@ class TestBrushSystemComparator:
                         "original": "Test Brush",
                         "matched": {"brand": "New", "model": "Brush", "fiber": "badger"},
                         "match_type": "regex",
-                        "pattern": "new_pattern"
+                        "pattern": "new_pattern",
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
-        
+
         comparator = BrushSystemComparator(old_data, new_data)
         results = comparator.compare_matches()
-        
+
         assert results["total_records"] == 1
         assert results["matching_results"] == 0
         assert results["different_results"] == 1
@@ -110,11 +110,11 @@ class TestBrushSystemComparator:
                         "original": "Test Brush",
                         "matched": {"brand": "Test", "model": "Brush", "fiber": "badger"},
                         "match_type": "exact",
-                        "pattern": "test_pattern"
+                        "pattern": "test_pattern",
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
         new_data = {
             "data": [
@@ -123,16 +123,16 @@ class TestBrushSystemComparator:
                         "original": "Test Brush",
                         "matched": None,
                         "match_type": None,
-                        "pattern": None
+                        "pattern": None,
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
-        
+
         comparator = BrushSystemComparator(old_data, new_data)
         results = comparator.compare_matches()
-        
+
         assert results["total_records"] == 1
         assert results["matching_results"] == 0
         assert results["different_results"] == 0
@@ -149,11 +149,11 @@ class TestBrushSystemComparator:
                         "original": "Test Brush",
                         "matched": None,
                         "match_type": None,
-                        "pattern": None
+                        "pattern": None,
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
         new_data = {
             "data": [
@@ -162,16 +162,16 @@ class TestBrushSystemComparator:
                         "original": "Test Brush",
                         "matched": {"brand": "Test", "model": "Brush", "fiber": "badger"},
                         "match_type": "exact",
-                        "pattern": "test_pattern"
+                        "pattern": "test_pattern",
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
-        
+
         comparator = BrushSystemComparator(old_data, new_data)
         results = comparator.compare_matches()
-        
+
         assert results["total_records"] == 1
         assert results["matching_results"] == 0
         assert results["different_results"] == 0
@@ -188,11 +188,11 @@ class TestBrushSystemComparator:
                         "original": "Unknown Brush",
                         "matched": None,
                         "match_type": None,
-                        "pattern": None
+                        "pattern": None,
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
         new_data = {
             "data": [
@@ -201,16 +201,16 @@ class TestBrushSystemComparator:
                         "original": "Unknown Brush",
                         "matched": None,
                         "match_type": None,
-                        "pattern": None
+                        "pattern": None,
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
-        
+
         comparator = BrushSystemComparator(old_data, new_data)
         results = comparator.compare_matches()
-        
+
         assert results["total_records"] == 1
         assert results["matching_results"] == 0
         assert results["different_results"] == 0
@@ -222,9 +222,9 @@ class TestBrushSystemComparator:
         """Test that record count mismatch raises error."""
         old_data = {"data": [{"brush": {}}], "metadata": {}}
         new_data = {"data": [{"brush": {}}, {"brush": {}}], "metadata": {}}
-        
+
         comparator = BrushSystemComparator(old_data, new_data)
-        
+
         with pytest.raises(ValueError, match="Record count mismatch"):
             comparator.compare_matches()
 
@@ -236,11 +236,11 @@ class TestBrushSystemComparator:
                     "brush": {
                         "original": "Test Brush",
                         "matched": {"brand": "Old", "model": "Brush"},
-                        "match_type": "exact"
+                        "match_type": "exact",
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
         new_data = {
             "data": [
@@ -248,21 +248,21 @@ class TestBrushSystemComparator:
                     "brush": {
                         "original": "Test Brush",
                         "matched": {"brand": "New", "model": "Brush"},
-                        "match_type": "regex"
+                        "match_type": "regex",
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
-        
+
         comparator = BrushSystemComparator(old_data, new_data)
         report = comparator.generate_report()
-        
+
         assert "summary" in report
         assert "match_type_changes" in report
         assert "detailed_differences" in report
         assert "total_differences" in report
-        
+
         summary = report["summary"]
         assert summary["total_records"] == 1
         assert summary["different_results"]["count"] == 1
@@ -276,11 +276,11 @@ class TestBrushSystemComparator:
                     "brush": {
                         "original": "Test Brush",
                         "matched": {"brand": "Old", "model": "Brush"},
-                        "match_type": "exact"
+                        "match_type": "exact",
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
         new_data = {
             "data": [
@@ -288,16 +288,16 @@ class TestBrushSystemComparator:
                     "brush": {
                         "original": "Test Brush",
                         "matched": {"brand": "New", "model": "Brush"},
-                        "match_type": "regex"
+                        "match_type": "regex",
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
-        
+
         comparator = BrushSystemComparator(old_data, new_data)
         differences = comparator.identify_differences()
-        
+
         assert len(differences) == 1
         difference = differences[0]
         assert difference["record_index"] == 0
@@ -310,31 +310,23 @@ class TestBrushSystemComparator:
         old_data = {
             "data": [],
             "metadata": {
-                "performance": {
-                    "total_time": 10.0,
-                    "processing_time": 8.0,
-                    "file_io_time": 2.0
-                }
-            }
+                "performance": {"total_time": 10.0, "processing_time": 8.0, "file_io_time": 2.0}
+            },
         }
         new_data = {
             "data": [],
             "metadata": {
-                "performance": {
-                    "total_time": 12.0,
-                    "processing_time": 10.0,
-                    "file_io_time": 2.0
-                }
-            }
+                "performance": {"total_time": 12.0, "processing_time": 10.0, "file_io_time": 2.0}
+            },
         }
-        
+
         comparator = BrushSystemComparator(old_data, new_data)
         performance = comparator.get_performance_comparison()
-        
+
         assert "old_system_performance" in performance
         assert "new_system_performance" in performance
         assert "performance_differences" in performance
-        
+
         differences = performance["performance_differences"]
         assert "total_time" in differences
         assert differences["total_time"]["difference"] == 2.0
@@ -348,11 +340,11 @@ class TestBrushSystemComparator:
                     "brush": {
                         "original": "Test Brush",
                         "matched": {"brand": "Old", "model": "Brush"},
-                        "match_type": "exact"
+                        "match_type": "exact",
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
         new_data = {
             "data": [
@@ -360,16 +352,16 @@ class TestBrushSystemComparator:
                     "brush": {
                         "original": "Test Brush",
                         "matched": {"brand": "New", "model": "Brush"},
-                        "match_type": "regex"
+                        "match_type": "regex",
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
-        
+
         comparator = BrushSystemComparator(old_data, new_data)
         summary = comparator.get_statistical_summary()
-        
+
         assert summary["total_records"] == 1
         assert summary["agreement_rate"] == 0.0
         assert summary["disagreement_rate"] == 100.0
@@ -383,17 +375,18 @@ class TestBrushSystemComparator:
         """Test saving comparison report to file."""
         old_data = {"data": [], "metadata": {}}
         new_data = {"data": [], "metadata": {}}
-        
+
         comparator = BrushSystemComparator(old_data, new_data)
         output_path = tmp_path / "comparison_report.json"
-        
+
         comparator.save_comparison_report(output_path)
-        
+
         assert output_path.exists()
-        
+
         # Verify file contains valid JSON
         with open(output_path, "r") as f:
             import json
+
             report = json.load(f)
             assert "summary" in report
 
@@ -406,11 +399,11 @@ class TestBrushSystemComparator:
                         "original": "Test Brush",
                         "matched": {"brand": "Old", "model": "Brush"},
                         "match_type": "exact",
-                        "pattern": "exact_pattern"
+                        "pattern": "exact_pattern",
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
         new_data = {
             "data": [
@@ -419,15 +412,15 @@ class TestBrushSystemComparator:
                         "original": "Test Brush",
                         "matched": {"brand": "New", "model": "Brush"},
                         "match_type": "regex",
-                        "pattern": "regex_pattern"
+                        "pattern": "regex_pattern",
                     }
                 }
             ],
-            "metadata": {}
+            "metadata": {},
         }
-        
+
         comparator = BrushSystemComparator(old_data, new_data)
         results = comparator.compare_matches()
-        
+
         assert "exact_to_regex" in results["match_type_changes"]
-        assert results["match_type_changes"]["exact_to_regex"] == 1 
+        assert results["match_type_changes"]["exact_to_regex"] == 1

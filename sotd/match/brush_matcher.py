@@ -733,6 +733,7 @@ class BrushMatcher:
                             matched=match_dict,
                             match_type=getattr(result, "match_type", "regex"),
                             pattern=getattr(result, "pattern", None),
+                            strategy=getattr(result, "strategy", "complete_brush"),
                         )
             except Exception as e:
                 # Re-raise handle matching failures to fail fast
@@ -2301,4 +2302,5 @@ class BrushMatcher:
             matched=matched,
             match_type="regex",
             pattern=primary_pattern,
+            strategy="dual_component",
         )

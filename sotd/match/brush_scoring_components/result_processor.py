@@ -62,7 +62,9 @@ class ResultProcessor:
             result.matched["source_type"] = result.match_type or "unknown"
 
         # Create nested handle and knot sections to match legacy system structure
-        self._create_handle_knot_sections(result)
+        # Only if they don't already exist (preserve composite brush structure)
+        if "handle" not in result.matched or "knot" not in result.matched:
+            self._create_handle_knot_sections(result)
 
     def _apply_final_processing(self, result: MatchResult, value: str) -> None:
         """

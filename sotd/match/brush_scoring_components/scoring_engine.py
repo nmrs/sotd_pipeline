@@ -91,15 +91,29 @@ class ScoringEngine:
         Returns:
             Strategy name
         """
+        # If the result has a strategy field, use it directly
+        if result.strategy:
+            return result.strategy
+
+        # Fallback to mapping match_type values to strategy names
+        match_type = result.match_type or "unknown_strategy"
+        matched = result.matched or {}
+
+        # Check if this is a dual component result (has handle and knot sections)
+        if match_type == "regex" and "handle" in matched and "knot" in matched:
+            return "dual_component"
+
         # Map match_type values to strategy names
         match_type_to_strategy = {
             "regex": "complete_brush",  # Known brush strategies use regex
             "fiber_fallback": "single_component_fallback",  # Fiber fallback strategy
             "size_fallback": "single_component_fallback",  # Size fallback strategy
             "handle": "complete_brush",  # Handle matcher results
+            "knot": "single_component_fallback",  # Knot matcher results
+            "composite": "dual_component",  # Composite brush results
+            "single_component": "single_component_fallback",  # Single component fallback results
         }
 
-        match_type = result.match_type or "unknown_strategy"
         return match_type_to_strategy.get(match_type, "single_component_fallback")
 
     def _calculate_modifiers(self, result: MatchResult, value: str, strategy_name: str) -> float:
