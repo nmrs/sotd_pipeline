@@ -59,7 +59,7 @@ class ResultProcessor:
         # TODO: Re-enable these fields in Phase 3.2+ when we break down individual strategies
         # if "source_text" not in result.matched:
         #     result.matched["source_text"] = result.original
-        # 
+        #
         # if "source_type" not in result.matched:
         #     result.matched["source_type"] = result.match_type or "unknown"
 

@@ -1,0 +1,28 @@
+{
+  "summary": {
+    "total_records": 1625,
+    "matching_results": {
+      "count": 1614,
+      "percentage": 99.32307692307693
+    },
+    "different_results": {
+      "count": 0,
+      "percentage": 0.0
+    },
+    "old_only_matches": {
+      "count": 0,
+      "percentage": 0.0
+    },
+    "new_only_matches": {
+      "count": 6,
+      "percentage": 0.3692307692307692
+    },
+    "both_unmatched": {
+      "count": 5,
+      "percentage": 0.3076923076923077
+    }
+  },
+  "match_type_changes": {},
+  "detailed_differences": [],
+  "total_differences": 0
+}

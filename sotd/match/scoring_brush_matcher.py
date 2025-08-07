@@ -43,16 +43,25 @@ class BrushScoringMatcher:
     architecture, performance monitoring, and scoring capabilities.
     """
 
-    def __init__(self, config_path: Path | None = None, **kwargs):
+    def __init__(
+        self, 
+        config_path: Path | None = None, 
+        correct_matches_path: Path | None = None, 
+        **kwargs
+    ):
         """
         Initialize the enhanced brush scoring matcher.
 
         Args:
             config_path: Path to configuration file
+            correct_matches_path: Path to correct_matches.yaml file
             **kwargs: Additional arguments (ignored for now)
         """
         # Initialize configuration
         self.config = BrushScoringConfig(config_path=config_path)
+        
+        # Store correct_matches_path for wrapper strategies
+        self.correct_matches_path = correct_matches_path
 
         # Load correct matches data
         correct_matches_data = load_correct_matches()
@@ -93,7 +102,7 @@ class BrushScoringMatcher:
         from sotd.match.config import BrushMatcherConfig
 
         config = BrushMatcherConfig.create_default()
-        legacy_matcher = BrushMatcher(config=config)
+        legacy_matcher = BrushMatcher(config=config, correct_matches_path=self.correct_matches_path)
 
         # Import wrapper strategies
         from sotd.match.brush_matching_strategies.correct_matches_wrapper_strategies import (
