@@ -4,6 +4,7 @@ Scoring Engine Component.
 This component scores strategy results based on configuration weights and criteria.
 """
 
+import re
 from typing import List, Optional
 
 from sotd.match.types import MatchResult
@@ -65,7 +66,7 @@ class ScoringEngine:
         if not valid_results:
             return None
 
-        return max(valid_results, key=lambda r: r.score)
+        return max(valid_results, key=lambda r: r.score or 0.0)
 
     def _calculate_score(self, result: MatchResult, value: str) -> float:
         """
@@ -140,7 +141,186 @@ class ScoringEngine:
         modifier_names = self.config.get_all_modifier_names(strategy_name)
 
         for modifier_name in modifier_names:
-            modifier_value = self.config.get_strategy_modifier(strategy_name, modifier_name)
-            modifier_score += modifier_value
+            # Get the modifier weight from configuration
+            modifier_weight = self.config.get_strategy_modifier(strategy_name, modifier_name)
+
+            # Apply the modifier function if it exists
+            modifier_function = getattr(self, f"_modifier_{modifier_name}", None)
+            if callable(modifier_function):
+                modifier_value = modifier_function(value, result, strategy_name)
+                modifier_score += modifier_value * modifier_weight
+            else:
+                # If no modifier function exists, just add the weight directly
+                modifier_score += modifier_weight
 
         return modifier_score
+
+    def _modifier_multiple_brands(self, input_text: str, result: dict, strategy_name: str) -> float:
+        """
+        Return score modifier for multiple brand mentions.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if multiple brands detected, 0.0 otherwise)
+        """
+        # Count brand mentions in input text
+        brand_patterns = [
+            r"\bsimpson\b",
+            r"\bomega\b",
+            r"\bsemogue\b",
+            r"\bzenith\b",
+            r"\bdeclaration\b",
+            r"\bchisel\b",
+            r"\bhound\b",
+            r"\bwolf\b",
+            r"\bwhiskers\b",
+            r"\bsummer\b",
+            r"\bbreak\b",
+            r"\bsoaps\b",
+            r"\bmountain\b",
+            r"\bhare\b",
+            r"\bshaving\b",
+            r"\bmaggard\b",
+            r"\belite\b",
+            r"\bmojito\b",
+            r"\bwashington\b",
+            r"\btimberwolf\b",
+        ]
+
+        brand_count = 0
+        for pattern in brand_patterns:
+            if re.search(pattern, input_text.lower()):
+                brand_count += 1
+
+        return 1.0 if brand_count > 1 else 0.0
+
+    def _modifier_fiber_words(self, input_text: str, result: dict, strategy_name: str) -> float:
+        """
+        Return score modifier for fiber-specific terminology.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if fiber words detected, 0.0 otherwise)
+        """
+        fiber_patterns = [
+            r"\bbadger\b",
+            r"\bboar\b",
+            r"\bsynthetic\b",
+            r"\bsyn\b",
+            r"\bnylon\b",
+            r"\bplissoft\b",
+            r"\btuxedo\b",
+            r"\bcashmere\b",
+            r"\bmixed\b",
+            r"\btimberwolf\b",
+        ]
+
+        for pattern in fiber_patterns:
+            if re.search(pattern, input_text.lower()):
+                return 1.0
+
+        return 0.0
+
+    def _modifier_size_specification(
+        self, input_text: str, result: dict, strategy_name: str
+    ) -> float:
+        """
+        Return score modifier for size specifications.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if size specification detected, 0.0 otherwise)
+        """
+        size_patterns = [r"\b\d+mm\b", r"\b\d+\s*mm\b", r"\b\d+x\d+\b", r"\b\d+\s*x\s*\d+\b"]
+
+        for pattern in size_patterns:
+            if re.search(pattern, input_text.lower()):
+                return 1.0
+
+        return 0.0
+
+    def _modifier_delimiter_confidence(
+        self, input_text: str, result: dict, strategy_name: str
+    ) -> float:
+        """
+        Return score modifier for high-confidence delimiters.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if high-confidence delimiter detected, 0.0 otherwise)
+        """
+        high_confidence_delimiters = [r"\s+w/\s+", r"\s+with\s+", r"\s+in\s+"]
+
+        for delimiter in high_confidence_delimiters:
+            if re.search(delimiter, input_text.lower()):
+                return 1.0
+
+        return 0.0
+
+    def _modifier_handle_confidence(
+        self, input_text: str, result: dict, strategy_name: str
+    ) -> float:
+        """
+        Return score modifier for handle confidence.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (0.0 to 1.0 based on handle confidence)
+        """
+        # This is a placeholder for handle confidence scoring
+        # In a full implementation, this would use the existing _score_as_handle logic
+        return 0.0
+
+    def _modifier_knot_confidence(self, input_text: str, result: dict, strategy_name: str) -> float:
+        """
+        Return score modifier for knot confidence.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (0.0 to 1.0 based on knot confidence)
+        """
+        # This is a placeholder for knot confidence scoring
+        # In a full implementation, this would use the existing _score_as_knot logic
+        return 0.0
+
+    def _modifier_word_count_balance(
+        self, input_text: str, result: dict, strategy_name: str
+    ) -> float:
+        """
+        Return score modifier for word count balance.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (0.0 to 1.0 based on word count balance)
+        """
+        # This is a placeholder for word count balance scoring
+        # In a full implementation, this would calculate balance between handle/knot words
+        return 0.0

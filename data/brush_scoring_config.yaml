@@ -36,17 +36,62 @@ brush_scoring_weights:
     # Minimum score threshold for component matches
     minimum_score_threshold: 25
 
-  # Strategy-specific modifiers (disabled for Phase 3.1)
+  # Strategy-specific modifiers (Phase 3.7)
   strategy_modifiers:
-    # All modifiers disabled for Phase 3.1 black box approach
-    correct_complete_brush: {}
-    correct_split_brush: {}
-    known_split: {}
-    high_priority_automated_split: {}
-    known_brush: {}
-    omega_semogue: {}
-    zenith: {}
-    other_brush: {}
-    dual_component: {}
-    medium_priority_automated_split: {}
-    single_component_fallback: {} 
+    # Modifiers for split strategies
+    high_priority_automated_split:
+      multiple_brands: -5.0
+      fiber_words: 3.0
+      size_specification: 2.0
+      delimiter_confidence: 4.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    medium_priority_automated_split:
+      multiple_brands: -3.0
+      fiber_words: 2.0
+      size_specification: 1.0
+      delimiter_confidence: 2.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    # Modifiers for component strategies
+    dual_component:
+      multiple_brands: -2.0
+      fiber_words: 1.0
+      size_specification: 1.0
+    # Modifiers for complete brush strategies
+    known_brush:
+      multiple_brands: -1.0
+      fiber_words: 0.0
+      size_specification: 0.0
+    omega_semogue:
+      multiple_brands: -1.0
+      fiber_words: 0.0
+      size_specification: 0.0
+    zenith:
+      multiple_brands: -1.0
+      fiber_words: 0.0
+      size_specification: 0.0
+    other_brush:
+      multiple_brands: -1.0
+      fiber_words: 0.0
+      size_specification: 0.0
+    # Modifiers for fallback strategies
+    single_component_fallback:
+      multiple_brands: -1.0
+      fiber_words: 0.0
+      size_specification: 0.0
+    # Modifiers for correct match strategies (minimal)
+    correct_complete_brush:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+    correct_split_brush:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+    known_split:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0 
