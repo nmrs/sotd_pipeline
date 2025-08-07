@@ -107,12 +107,26 @@ def main():
         new_perf = performance["new_system_performance"]
 
         if old_perf and new_perf:
-            print(f"Legacy System Processing Time: {old_perf.get('processing_time', 'N/A')}s")
-            print(f"Scoring System Processing Time: {new_perf.get('processing_time', 'N/A')}s")
+            old_processing_time = old_perf.get('processing_time_seconds', 0)
+            new_processing_time = new_perf.get('processing_time_seconds', 0)
+            
+            print(f"Legacy System Processing Time: {old_processing_time:.2f}s")
+            print(f"Scoring System Processing Time: {new_processing_time:.2f}s")
 
-            if "processing_time" in old_perf and "processing_time" in new_perf:
-                speedup = old_perf["processing_time"] / new_perf["processing_time"]
-                print(f"Speedup: {speedup:.1f}x faster with scoring system")
+            if old_processing_time > 0 and new_processing_time > 0:
+                if new_processing_time > old_processing_time:
+                    slowdown = new_processing_time / old_processing_time
+                    print(f"Scoring System is {slowdown:.1f}x slower than Legacy System")
+                else:
+                    speedup = old_processing_time / new_processing_time
+                    print(f"Scoring System is {speedup:.1f}x faster than Legacy System")
+            
+            # Show file I/O times
+            old_io_time = old_perf.get('file_io_time_seconds', 0)
+            new_io_time = new_perf.get('file_io_time_seconds', 0)
+            if old_io_time > 0 or new_io_time > 0:
+                print(f"Legacy System I/O Time: {old_io_time:.3f}s")
+                print(f"Scoring System I/O Time: {new_io_time:.3f}s")
 
         # Show sample differences with strategy information
         if report["detailed_differences"]:

@@ -269,15 +269,19 @@ class BrushSystemComparator:
         """
         differences = {}
 
-        # Compare timing metrics
-        timing_metrics = ["total_time", "processing_time", "file_io_time"]
+        # Compare timing metrics using correct field names from metadata
+        timing_metrics = [
+            ("total_processing_time_seconds", "total_time"),
+            ("processing_time_seconds", "processing_time"), 
+            ("file_io_time_seconds", "file_io_time")
+        ]
 
-        for metric in timing_metrics:
-            old_value = old_performance.get(metric, 0)
-            new_value = new_performance.get(metric, 0)
+        for metadata_field, comparison_field in timing_metrics:
+            old_value = old_performance.get(metadata_field, 0)
+            new_value = new_performance.get(metadata_field, 0)
 
             if old_value != new_value:
-                differences[metric] = {
+                differences[comparison_field] = {
                     "old": old_value,
                     "new": new_value,
                     "difference": new_value - old_value,
