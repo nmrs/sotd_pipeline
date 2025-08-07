@@ -91,6 +91,7 @@ class OtherBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                     matched=result,
                     pattern=pattern,
                     match_type="brand_default",
+                    strategy="other_brush",
                 )
 
         return create_match_result(

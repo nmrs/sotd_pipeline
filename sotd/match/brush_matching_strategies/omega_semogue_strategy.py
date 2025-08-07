@@ -13,7 +13,7 @@ class OmegaSemogueBrushMatchingStrategy:
         normalized_text = validate_string_input(value)
         if normalized_text is None:
             return create_strategy_result(
-                original_value=value, matched_data=None, pattern=None, strategy_name="OmegaSemogue"
+                original_value=value, matched_data=None, pattern=None, strategy_name="omega_semogue"
             )
 
         # Normalize and fix common typo
@@ -43,12 +43,12 @@ class OmegaSemogueBrushMatchingStrategy:
                 original_value=value,
                 matched_data=matched_data,
                 pattern=model_match.re.pattern,
-                strategy_name="OmegaSemogue",
+                strategy_name="omega_semogue",
                 match_type="regex",
             )
 
         return create_strategy_result(
-            original_value=value, matched_data=None, pattern=None, strategy_name="OmegaSemogue"
+            original_value=value, matched_data=None, pattern=None, strategy_name="omega_semogue"
         )
 
     def _get_default_match(self) -> dict:

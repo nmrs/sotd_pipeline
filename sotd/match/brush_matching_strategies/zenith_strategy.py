@@ -14,7 +14,7 @@ class ZenithBrushMatchingStrategy:
         normalized_text = validate_string_input(value)
         if normalized_text is None:
             return create_strategy_result(
-                original_value=value, matched_data=None, pattern=None, strategy_name="Zenith"
+                original_value=value, matched_data=None, pattern=None, strategy_name="zenith"
             )
 
         zenith_re = r"zenith.*([a-wyz]\d{1,3})"
@@ -38,11 +38,11 @@ class ZenithBrushMatchingStrategy:
                 original_value=value,
                 matched_data=matched_data,
                 pattern=zenith_re,
-                strategy_name="Zenith",
+                strategy_name="zenith",
             )
 
         return create_strategy_result(
-            original_value=value, matched_data=None, pattern=None, strategy_name="Zenith"
+            original_value=value, matched_data=None, pattern=None, strategy_name="zenith"
         )
 
     def _get_default_match(self) -> dict:

@@ -89,10 +89,10 @@ class BrushScoringMatcher:
 
     def _create_strategies(self) -> List:
         """
-        Create list of wrapper strategies that call legacy methods exactly.
+        Create list of strategies for Phase 3.2 with individual brush strategies.
 
         Returns:
-            List of wrapper strategy objects
+            List of strategy objects
         """
         # Create legacy matcher instance for wrapper strategies
         from sotd.match.brush_matcher import BrushMatcher
@@ -113,15 +113,29 @@ class BrushScoringMatcher:
             HighPriorityAutomatedSplitWrapperStrategy,
             MediumPriorityAutomatedSplitWrapperStrategy,
         )
-        from sotd.match.brush_matching_strategies.complete_brush_wrapper_strategy import (
-            CompleteBrushWrapperStrategy,
-        )
         from sotd.match.brush_matching_strategies.legacy_composite_wrapper_strategies import (
             LegacyDualComponentWrapperStrategy,
             LegacySingleComponentFallbackWrapperStrategy,
         )
 
-        # Create wrapper strategies in legacy system priority order
+        # Import individual brush strategies for Phase 3.2
+        from sotd.match.brush_matching_strategies.known_brush_strategy import (
+            KnownBrushMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
+            OmegaSemogueBrushMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.zenith_strategy import (
+            ZenithBrushMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.other_brushes_strategy import (
+            OtherBrushMatchingStrategy,
+        )
+
+        # Get catalog data for individual strategies
+        catalog_data = legacy_matcher.catalog_data
+
+        # Create strategies in legacy system priority order
         strategies = [
             # Priority 0: correct_complete_brush
             CorrectCompleteBrushWrapperStrategy(legacy_matcher),
@@ -131,8 +145,11 @@ class BrushScoringMatcher:
             KnownSplitWrapperStrategy(legacy_matcher),
             # Priority 3: high_priority_automated_split
             HighPriorityAutomatedSplitWrapperStrategy(legacy_matcher),
-            # Priority 4: complete_brush
-            CompleteBrushWrapperStrategy(legacy_matcher),
+            # Priority 4: individual brush strategies (replacing complete_brush wrapper)
+            KnownBrushMatchingStrategy(catalog_data.get("known_brushes", {})),
+            OmegaSemogueBrushMatchingStrategy(),
+            ZenithBrushMatchingStrategy(),
+            OtherBrushMatchingStrategy(catalog_data.get("other_brushes", {})),
             # Priority 5: dual_component
             LegacyDualComponentWrapperStrategy(legacy_matcher),
             # Priority 6: medium_priority_automated_split
