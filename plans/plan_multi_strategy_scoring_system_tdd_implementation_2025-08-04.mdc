@@ -45,17 +45,22 @@
 - ✅ **Strategies Integrated**: All 8 strategies from legacy system with proper nested structure
 - 🔍 **Remaining Issue Identified**: Scoring system missing `HandleMatcher` and `KnotMatcher` for composite brushes
 
-**PHASE 3 (ALIGNMENT) - REQUIRED**:
-- 🔄 **Current Agreement Rate**: 60.1% (976/1625 records match exactly)
+**PHASE 3.1 (BLACK BOX ALIGNMENT) - IN PROGRESS**:
+- 🔄 **Current Agreement Rate**: 32.3% (525/1625 records match exactly)
 - 🔄 **Target Agreement Rate**: 100% (all records must match exactly)
-- 🔄 **Issue**: Scoring system missing `HandleMatcher` and `KnotMatcher` components
-- 🔄 **Required**: Add missing matchers to achieve 100% alignment before proceeding
+- 🔄 **Approach**: Using wrapper strategies as black boxes to simplify complexity
+- 🔄 **Required**: Implement wrapper strategies and simple scoring to achieve 100% alignment
 
 ## 📘 Project Summary
 
 Implement a scoring-based **brush matching** system to replace the current "first-match-wins" approach. The system will run all **brush strategies**, score each **brush result**, and return the highest-scoring **brush match**. Includes parallel **brush system** integration, **brush user validation** interface, and **brush learning system** with ChatGPT integration.
 
 **SCOPE**: This implementation applies **ONLY to brush matching**. All other product matching (razors, blades, soaps) will continue to use their existing matching systems unchanged.
+
+## Related Documents
+
+- **Technical Specification**: `@spec_multi_strategy_scoring_system_2025-08-04.mdc` - Contains the new system design and configuration structure
+- **Legacy System Analysis**: `@legacy_brush_matcher_strategy_analysis_for_multi_strategy_scoring_system_2025-08-06.mdc` - Contains detailed analysis of the existing system's behavior
 
 ## 🧩 Component Steps
 
@@ -82,17 +87,54 @@ Implement a scoring-based **brush matching** system to replace the current "firs
 6. **Parallel Brush Data Directories** ✅ - Implement brush matched_new directory structure
 7. **Brush A/B Comparison Framework** ✅ - Brush system comparison and validation
 
-### Phase 3: Brush System Alignment 🔄 IN PROGRESS
-8. **HandleMatcher Integration** - Add HandleMatcher component to scoring system for composite brush matching
-9. **KnotMatcher Integration** - Add KnotMatcher component to scoring system for composite brush matching
-10. **Alignment Validation** - Verify 100% agreement between legacy and scoring systems
-11. **Alignment Testing** - Comprehensive tests to ensure both systems produce identical results
+### Phase 3: Brush System Alignment (PHASED APPROACH)
 
-**PHASE 3 OBJECTIVE**: Achieve 100% alignment between legacy and scoring systems by adding missing HandleMatcher and KnotMatcher components.
+**PHASE 3 OBJECTIVE**: Achieve 100% alignment between legacy and scoring systems using a phased approach that simplifies complexity management.
 
-**CURRENT STATUS**: 60.1% agreement rate (976/1625 records match exactly). Need to add HandleMatcher and KnotMatcher to scoring system to match composite brushes like "Summer Break", "Mountain Hare Shaving", "Maggard".
+**APPROACH**: Break alignment into phases to manage complexity:
+- **Phase 3.1**: Black box strategy alignment using wrapper strategies
+- **Phase 3.2+**: Individual strategy breakdown, one strategy at a time
 
-**SUCCESS CRITERIA**: 100% agreement rate with both systems producing identical results for all brush inputs.
+#### Phase 3.1: Black Box Strategy Alignment (CURRENT)
+**Goal**: 100% alignment using wrapper strategies as black boxes
+**Approach**: Each legacy strategy becomes a wrapper that calls the exact same legacy method
+**Scoring**: Only score the 8 top-level strategies (correct_complete_brush, correct_split_brush, etc.)
+**Advantage**: Eliminates internal complexity, focuses on "first match wins" vs "highest score wins" logic
+
+**Steps**:
+8. **Wrapper Strategy Implementation** - Create wrapper strategies for all 8 legacy strategies
+9. **Simple Scoring Configuration** - Implement pure strategy weights without modifiers
+10. **Black Box Validation** - Verify 100% alignment with legacy system
+11. **Phase 3.1 Completion** - Achieve 100% agreement before proceeding to Phase 3.2
+
+**Success Criteria**: 100% alignment between legacy and scoring systems using wrapper strategies.
+
+#### Phase 3.2+: Individual Strategy Breakdown (FUTURE)
+**Goal**: Replace each wrapper with individual sub-strategies
+**Approach**: One strategy at a time, opening the black box and scoring internal components
+**Example Progression**:
+- **Phase 3.2**: Replace `complete_brush` wrapper with individual brush strategies (known_brush, omega_semogue, zenith, other_brush)
+- **Phase 3.3**: Replace `dual_component` wrapper with individual component matchers
+- **Phase 3.4**: Replace `high_priority_automated_split` wrapper with individual splitting strategies
+- **etc.**
+
+**Success Criteria**: Each phase maintains 100% alignment while incrementally adding complexity.
+
+**CURRENT STATUS**: Phase 3.1 in progress. **APPROACH CHANGE**: Moving from complex flattened strategy list to simple wrapper strategy approach for better complexity management and debugging.
+
+**ROOT CAUSE IDENTIFIED**: 
+- Legacy system has composite brush logic that coordinates HandleMatcher and KnotMatcher
+- Scoring system successfully integrated composite brush strategies using wrapper approach
+- **SOLVED**: Strategy weights now correctly prioritize individual brush strategies (75.0) over composite brush strategies (65.0)
+- **KEY INSIGHT**: Legacy system runs `_match_complete_brush` (individual strategies) BEFORE `_match_dual_component` (composite strategies)
+- **MAJOR BREAKTHROUGH**: Fixed strategy weights to match legacy system priority order
+
+**APPROACH**: Strategy weights now correctly match legacy system priority:
+- Individual brush strategies have higher priority (75.0) than composite brush strategies (65.0)
+- Both "Simpson Chubby 2" and "Summer Break Soaps Maize 26mm Timberwolf" are correctly caught by individual strategies
+- Maintain the "run all strategies and score them" architecture
+
+**SUCCESS CRITERIA**: 100% agreement rate with both systems producing identical results for all brush inputs, while maintaining scoring system's fundamental architecture.
 
 ### Phase 4: Brush User Validation System
 12. **Brush User Actions Data Model** - Data structures for brush validation tracking with entry point integration
@@ -131,53 +173,65 @@ Implement a scoring-based **brush matching** system to replace the current "firs
 
 ## 🔁 Implementation Prompts
 
-### Phase 1 Step 6: Strategy Integration Implementation
+### Phase 3.1 Step 8: Wrapper Strategy Implementation
 
-**Objective**: Complete Phase 1 by integrating existing brush strategies into the scoring system to achieve 100% alignment with the legacy system.
+**Objective**: Implement wrapper strategies for all 8 legacy strategies to achieve 100% alignment using black box approach.
 
 **Current Issue**: 
-- Scoring system `_create_strategies()` returns empty list `[]`
-- Only correct matches matcher is available (10.2% success rate)
-- Legacy system has all 8 strategies (99.3% success rate)
-- Need to reuse existing strategies, not reimplement them
+- Current scoring system has complex flattened strategy list with 15+ individual strategies
+- Complex scoring logic with modifiers makes debugging difficult
+- Need to simplify to 8 wrapper strategies that call exact legacy methods
 
 **Implementation Approach**:
-1. **Modify `BrushScoringMatcher._create_strategies()`** to return actual strategy instances
-2. **Reuse existing strategy classes** from `sotd/match/brush_matching_strategies/`
-3. **Maintain strategy priority order** from legacy system
-4. **Use configured weights** from `brush_scoring_config.yaml`
-5. **Ensure compatibility** with scoring engine and result processor
+1. **Create wrapper strategies** for each of the 8 legacy strategies
+2. **Each wrapper calls the exact legacy method** (e.g., `_match_complete_brush`)
+3. **Use simple strategy weights** without modifiers
+4. **Maintain "run all strategies and score them"** architecture
+5. **Focus on "first match wins" vs "highest score wins"** logic alignment
 
 **Required Changes**:
 ```python
 def _create_strategies(self) -> List:
-    """Create list of brush matching strategies."""
-    # Import existing strategy classes
-    from sotd.match.brush_matching_strategies.known_brush_strategy import KnownBrushMatchingStrategy
-    from sotd.match.brush_matching_strategies.omega_semogue_strategy import OmegaSemogueBrushMatchingStrategy
-    # ... import other strategies
-    
-    # Create strategy instances with catalog data
+    """Create list of wrapper strategies that call legacy methods."""
     strategies = [
-        KnownBrushMatchingStrategy(self.catalog_data.get("known_brushes", {})),
-        OmegaSemogueBrushMatchingStrategy(),
-        # ... other strategies
+        CorrectCompleteBrushWrapperStrategy(self.legacy_matcher),
+        CorrectSplitBrushWrapperStrategy(self.legacy_matcher),
+        KnownSplitWrapperStrategy(self.legacy_matcher),
+        HighPriorityAutomatedSplitWrapperStrategy(self.legacy_matcher),
+        CompleteBrushWrapperStrategy(self.legacy_matcher),
+        DualComponentWrapperStrategy(self.legacy_matcher),
+        MediumPriorityAutomatedSplitWrapperStrategy(self.legacy_matcher),
+        SingleComponentFallbackWrapperStrategy(self.legacy_matcher),
     ]
-    
     return strategies
 ```
 
 **Expected Outcome**:
 - 100% alignment between legacy and scoring systems
-- All 8 strategies available in scoring system
-- Proper scoring and selection of best matches
-- Maintained performance and functionality
+- Simple 8-strategy scoring system
+- Clear debugging and validation
+- Foundation for Phase 3.2+ individual strategy breakdown
 
 **Testing Requirements**:
-- Unit tests for strategy integration
+- Unit tests for each wrapper strategy
 - Integration tests comparing legacy vs scoring results
+- A/B comparison tests to verify 100% alignment
 - Performance tests to ensure no regression
-- A/B comparison tests to verify alignment
+
+### Phase 3.1 Step 9: Simple Scoring Configuration
+
+**Objective**: Implement pure strategy weights without modifiers for Phase 3.1.
+
+**Implementation Approach**:
+1. **Simplify `brush_scoring_config.yaml`** to only include base_strategies
+2. **Remove all modifiers** until Phase 3.2+
+3. **Use simple descending weights** (100, 90, 80, 70, 60, 50, 40, 30)
+4. **Focus on strategy priority order** alignment
+
+**Expected Outcome**:
+- Simple, clear scoring configuration
+- Easy debugging and validation
+- Foundation for Phase 3.2+ modifier introduction
 
 ### Step 1: Brush Matcher Entry Point (NEW)
 
@@ -1873,6 +1927,162 @@ Verify 100% agreement between legacy and scoring systems after HandleMatcher and
 ```
 
 ### Phase 3 Step 11: Alignment Testing
+
+```text
+Create comprehensive tests to ensure both systems produce identical results.
+
+**Requirements:**
+- Create integration tests that verify identical output from both systems
+- Test with real production data
+- Test edge cases and complex scenarios
+- Ensure tests catch any future regressions
+- Add performance comparison tests
+
+**Implementation:**
+- Create `tests/match/test_system_alignment.py`
+- Test identical output for various brush inputs
+- Test with real SOTD data samples
+- Add performance benchmarking tests
+- Ensure tests are deterministic and reliable
+
+**Testing:**
+- Verify all alignment tests pass
+- Test with production data samples
+- Ensure performance is acceptable
+- Validate that tests catch regressions
+```
+
+### Phase 3 Step 10: Composite Brush Strategy Analysis
+
+```text
+Analyze how legacy system handles composite brushes and adapt scoring system approach.
+
+**Requirements:**
+- Document how legacy system identifies and processes composite brushes
+- Identify the specific logic for HandleMatcher and KnotMatcher coordination
+- Analyze how legacy system determines when to use composite brush logic vs individual strategies
+- Document the expected output structure for composite brushes
+- Identify how to adapt this logic to scoring system's "run all strategies and score them" approach
+
+**Implementation:**
+- Analyze `sotd/match/brush_matcher.py` composite brush handling logic
+- Document the conditions that trigger composite brush processing
+- Identify the specific HandleMatcher and KnotMatcher coordination patterns
+- Document the expected output structure (model: None, nested handle/knot sections)
+- Create plan for adapting this to scoring system architecture
+
+**Testing:**
+- Verify analysis covers all composite brush scenarios
+- Test understanding with specific brush examples
+- Ensure analysis explains current misalignment
+- Validate that adaptation plan maintains scoring system architecture
+```
+
+### Phase 3 Step 11: Composite Brush Strategy Integration
+
+```text
+Add composite brush strategies to scoring system that run and score HandleMatcher/KnotMatcher results.
+
+**Requirements:**
+- Create composite brush strategies that run HandleMatcher and KnotMatcher
+- Ensure these strategies return results that can be scored by the scoring engine
+- Maintain the "run all strategies and score them" architecture
+- Ensure composite brush strategies can compete with individual brush strategies
+- Handle both dual-component (handle + knot) and single-component (handle-only or knot-only) scenarios
+
+**Implementation:**
+- Create `CompositeBrushStrategy` class that implements strategy interface
+- Implement `_match_dual_component` logic as a strategy that runs HandleMatcher + KnotMatcher
+- Implement `_match_single_component_fallback` logic as a strategy for handle-only or knot-only
+- Ensure strategies return results in format compatible with scoring engine
+- Add strategies to `_create_strategies()` method in BrushScoringMatcher
+
+**Testing:**
+- Test composite brush strategies with various inputs
+- Verify strategies return results that can be scored
+- Test that strategies compete correctly with individual brush strategies
+- Ensure output structure matches legacy system expectations
+```
+
+### Phase 3 Step 12: Strategy Weight Configuration
+
+```text
+Configure weights for composite brush strategies to match legacy system priority.
+
+**Requirements:**
+- Configure weights for composite brush strategies in brush_scoring_config.yaml
+- Ensure composite brush strategies have appropriate priority relative to individual strategies
+- Match the legacy system's strategy priority order through scoring weights
+- Test that weight configuration produces correct strategy selection
+- Ensure composite brush strategies win when they should
+
+**Implementation:**
+- Add composite brush strategy weights to brush_scoring_config.yaml
+- Configure weights to match legacy system priority order
+- Test weight configuration with specific brush examples
+- Ensure composite brush strategies score higher than individual strategies when appropriate
+- Validate that weight configuration produces 100% alignment
+
+**Testing:**
+- Test weight configuration with composite brush examples
+- Verify composite brush strategies win when they should
+- Test that individual strategies still win for non-composite brushes
+- Ensure weight configuration produces correct alignment
+```
+
+### Phase 3 Step 13: Composite Brush Result Processing
+
+```text
+Ensure composite brush results are processed correctly with model: None when appropriate.
+
+**Requirements:**
+- Ensure composite brush strategies return results with correct structure
+- Process composite brush results to set model: None at top level when appropriate
+- Maintain correct nested handle/knot structure
+- Handle edge cases like "Summer Break Soaps Maize 26mm Timberwolf" correctly
+- Ensure result processing matches legacy system's composite brush logic
+
+**Implementation:**
+- Modify composite brush strategies to return correct result structure
+- Ensure composite brushes with separate handle/knot components get model: None
+- Maintain correct nested structure with handle and knot sections
+- Handle handle-only and knot-only scenarios correctly
+- Test result processing with specific problematic examples
+
+**Testing:**
+- Test composite brush result processing with various inputs
+- Verify model: None is set correctly for composite brushes
+- Test handle-only and knot-only scenarios
+- Ensure nested structure matches legacy system exactly
+```
+
+### Phase 3 Step 14: Alignment Validation
+
+```text
+Verify 100% agreement between legacy and scoring systems after all architectural alignment changes.
+
+**Requirements:**
+- Run comprehensive A/B comparison between systems
+- Verify 100% agreement rate (all records match exactly)
+- Test with specific problematic brushes (Summer Break, Mountain Hare Shaving, Maggard)
+- Validate that both systems produce identical results
+- Document any remaining differences
+
+**Implementation:**
+- Run comparison script with latest data
+- Check agreement rate reaches 100%
+- Verify specific brushes that were failing now match
+- Test edge cases and complex composite brushes
+- Document any remaining alignment issues
+
+**Testing:**
+- Run full A/B comparison test suite
+- Verify 100% agreement rate
+- Test specific problematic brush examples
+- Ensure no regressions in existing functionality
+```
+
+### Phase 3 Step 15: Alignment Testing
 
 ```text
 Create comprehensive tests to ensure both systems produce identical results.

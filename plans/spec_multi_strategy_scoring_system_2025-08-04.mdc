@@ -10,6 +10,11 @@ Replace the current "first-match-wins" **brush matching** approach with a scorin
 
 **SCOPE**: This system applies **ONLY to brush matching**. All other product matching (razors, blades, soaps) will continue to use their existing matching systems unchanged.
 
+## Related Documents
+
+- **Implementation Plan**: `@plan_multi_strategy_scoring_system_tdd_implementation_2025-08-04.mdc` - Contains the phased implementation approach and current status
+- **Legacy System Analysis**: `@legacy_brush_matcher_strategy_analysis_for_multi_strategy_scoring_system_2025-08-06.mdc` - Contains detailed analysis of the existing system's behavior
+
 ## Problem Statement
 
 The current **brush matching system** uses a rigid strategy priority order that leads to:
@@ -23,11 +28,31 @@ The current **brush matching system** uses a rigid strategy priority order that 
 ## Solution Architecture
 
 ### Core Concept
+- **Hybrid Architecture**: Entry point pattern with improved architecture for new system
 - **Brush Scoring System**: Run all applicable **brush strategies**, score each result, return highest-scoring brush match
 - **Parallel Brush Systems**: Keep old and new **brush matching** systems running for comparison
 - **Brush User Validation**: CLI/WebUI for validating/overriding **brush matching** system choices
 - **Brush Learning System**: ChatGPT-assisted analysis and weight adjustments for **brush matching**
 - **Evolutionary Design**: Support for new **brush matching** scoring criteria and strategies
+
+### Architecture Design
+```
+BrushMatcherEntryPoint (Entry Point)
+├── BrushMatcher (Existing - unchanged)
+└── BrushScoringMatcher (New - improved architecture)
+    ├── CorrectMatchesMatcher
+    ├── StrategyOrchestrator  
+    ├── ScoringEngine
+    ├── ResultProcessor
+    └── PerformanceMonitor
+```
+
+**Benefits:**
+- **Zero Risk**: Current `brush_matcher.py` stays completely unchanged
+- **Clean Development**: New system built with proper separation of concerns
+- **Learning Opportunity**: Can apply lessons learned to improve architecture
+- **Easy Comparison**: Both systems run side-by-side for validation
+- **Future Migration**: Once new system is proven, can gradually migrate
 
 ### Data Flow
 ```
@@ -45,40 +70,124 @@ report → data/reports/ (loads from aggregated)
 
 ### 1. Brush Scoring System
 
+#### Entry Point Architecture
+- **BrushMatcherEntryPoint**: Main entry point that chooses between old and new systems
+- **BrushMatcher**: Existing system (unchanged) - continues to use current logic
+- **BrushScoringMatcher**: New system with improved architecture and separation of concerns
+
 #### Strategy Execution
 - **Run all brush strategies** for each brush input string
 - **Score each brush result** based on configurable criteria
 - **Return highest-scoring brush result**
 - **Fail fast** on brush strategy errors (don't mask catalog problems)
 
-#### Scoring Criteria (Initial)
+#### Exact Match Bypass
+- **Check exact matches first** from `user_actions.yaml` data
+- **Return immediately** if exact match found (user has already validated this)
+- **Skip scoring system** for exact matches to improve performance and data quality
+
+#### Component Responsibilities
+- **CorrectMatchesMatcher**: Fast lookup against validated matches (single responsibility)
+- **StrategyOrchestrator**: Runs all applicable strategies (single responsibility)
+- **ScoringEngine**: Scores strategy results (single responsibility)
+- **ResultProcessor**: Processes final results (single responsibility)
+- **PerformanceMonitor**: Tracks performance metrics (single responsibility)
+
+#### Scoring Configuration Structure (Phased Approach)
+
+**Phase 3.1: Black Box Strategy Alignment**
 ```yaml
-base_strategy_scores:
-  exact_match: 100
-  complete_brush: 60
-  dual_component: 70
-  single_component: 40
-
-bonus_factors:
-  delimiter_present: 25  # "/", "w/", "with", "+", "in"
-  multiple_brands: 20
-  fiber_words: 15       # "badger", "boar", "synthetic"
-  size_specification: 10 # "26mm", "28mm"
-  handle_knot_words: 10  # "handle", "knot"
-
-penalty_factors:
-  single_brand_only: -20  # When delimiter present
-  no_fiber_spec: -10
-  generic_terms_only: -15
+brush_scoring_weights:
+  base_strategies:
+    correct_complete_brush: 100.0
+    correct_split_brush: 90.0
+    known_split: 80.0
+    high_priority_automated_split: 70.0
+    complete_brush: 60.0
+    dual_component: 50.0
+    medium_priority_automated_split: 40.0
+    single_component_fallback: 30.0
+  # No modifiers in Phase 3.1 - pure strategy weights only
 ```
 
+**Phase 3.2+: Individual Strategy Breakdown**
+```yaml
+brush_scoring_weights:
+  base_strategies:
+    correct_complete_brush: 100.0
+    correct_split_brush: 90.0
+    known_split: 80.0
+    high_priority_automated_split: 70.0
+    known_brush: 60.0           # Individual brush sub-strategy
+    omega_semogue: 59.0         # Individual brush sub-strategy
+    zenith: 58.0                # Individual brush sub-strategy
+    other_brush: 57.0           # Individual brush sub-strategy
+    dual_component: 50.0        # Strategy with component matchers
+    medium_priority_automated_split: 40.0
+    known_knot: 35.0           # Individual knot component strategy
+    other_knot: 34.0           # Individual knot component strategy
+    fiber_fallback: 33.0       # Individual knot component strategy
+    size_fallback: 32.0        # Individual knot component strategy
+    single_component_fallback: 30.0
+
+  strategy_modifiers:
+    # Modifiers introduced in Phase 3.2+ as individual strategies are opened
+    high_priority_automated_split:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    # ... other modifiers
+```
+```
+
+#### Function-Based Score Modifiers
+- **Modifier functions** return scores, engine applies them
+- **Strategy-aware** modifiers receive `strategy_name` parameter
+- **YAML-driven values** retrieved from configuration
+- **Unified approach** - all modifiers can be positive or negative
+
+```python
+def _modifier_high_priority_delimiter(self, input_text: str, result: dict, strategy_name: str) -> int:
+    """Return score modifier for high priority delimiter detection."""
+    if self._has_high_priority_delimiter(input_text):
+        return self.config.strategy_modifiers[strategy_name]["high_priority_delimiter"]
+    return 0
+
+def _modifier_handle_confidence(self, input_text: str, result: dict, strategy_name: str) -> int:
+    handle_text = result.get("handle", "")
+    confidence_score = self._score_as_handle(handle_text)  # 0-100
+    max_bonus = self.config.strategy_modifiers[strategy_name]["handle_confidence"]
+    return int((confidence_score / 100) * max_bonus)
+```
+
+#### Phased Implementation Approach
+
+**Phase 3.1: Black Box Strategy Alignment**
+- **Goal**: 100% alignment using wrapper strategies as black boxes
+- **Approach**: Each legacy strategy becomes a wrapper that calls the exact same legacy method
+- **Scoring**: Only score the 8 top-level strategies (correct_complete_brush, correct_split_brush, etc.)
+- **Advantage**: Eliminates internal complexity, focuses on "first match wins" vs "highest score wins" logic
+
+**Phase 3.2+: Individual Strategy Breakdown**
+- **Goal**: Replace each wrapper with individual sub-strategies
+- **Approach**: One strategy at a time, opening the black box and scoring internal components
+- **Example Progression**:
+  - **Phase 3.2**: Replace `complete_brush` wrapper with individual brush strategies
+  - **Phase 3.3**: Replace `dual_component` wrapper with individual component matchers
+  - **Phase 3.4**: Replace `high_priority_automated_split` wrapper with individual splitting strategies
+
 #### Brush Strategy Hierarchy
-1. **Known Split Strategy** (from brush_splits.yaml)
-2. **High Priority Automated Split** (delimiters like "/", "w/")
-3. **Medium Priority Automated Split** (delimiters like "with", "in")
-4. **Dual Component Strategy** (handle/knot matching)
+1. **Correct Complete Brush** (from `user_actions.yaml`)
+2. **Correct Split Brush** (from `user_actions.yaml`)
+3. **Known Split Strategy** (from brush_splits.yaml)
+4. **High Priority Automated Split** (delimiters like " w/ ", " with ", " in ")
 5. **Complete Brush Strategy** (catalog matching)
-6. **Single Component Fallback** (handle or knot only)
+6. **Dual Component Strategy** (handle/knot matching)
+7. **Medium Priority Automated Split** (delimiters like " - ", " + ", "/")
+8. **Single Component Fallback** (handle or knot only)
 
 ### 2. Parallel Brush System Integration
 
@@ -119,7 +228,7 @@ python run.py match:report --month 2025-05 --force --brush-system=new
 #### Brush Data Collection
 ```yaml
 brush_user_actions:
-  - input_text: "Chisel & Hound / Omega 10098 Boar"
+  - input_text: "Chisel & Hound 'The Duke' / Omega 10098 Boar"
     timestamp: "2025-01-27T14:30:00Z"
     action: "validated"  # or "overridden"
     system_choice:
@@ -137,75 +246,112 @@ brush_user_actions:
 
 ### 4. Brush Learning System
 
+#### Staged ChatGPT Analysis Approach
+**Stage 1: Strategy Selection Analysis**
+- **Focus**: Which strategies are winning vs. losing
+- **Data**: Strategy win/loss rates, score distributions, common patterns in overrides
+- **ChatGPT Task**: "Analyze which strategies are performing well/poorly and suggest base strategy weight adjustments"
+
+**Stage 2: Modifier Performance Analysis**
+- **Focus**: How well current modifiers are working
+- **Data**: Modifier effectiveness by strategy, correlation between modifier presence and user validation
+- **ChatGPT Task**: "Analyze modifier effectiveness and suggest weight adjustments for existing modifiers"
+
+**Stage 3: Pattern Discovery Analysis**
+- **Focus**: Finding new patterns that need modifiers
+- **Data**: Common patterns in overridden cases, text characteristics that correlate with correct/incorrect matches
+- **ChatGPT Task**: "Identify new patterns that need modifiers and suggest new modifier functions"
+
+**Stage 4: Internal Scorer Analysis (Phase 8+)**
+- **Focus**: Handle/knot determination accuracy
+- **Data**: Handle/knot assignment accuracy, internal scorer performance, split quality assessment
+- **ChatGPT Task**: "Analyze handle/knot determination accuracy and suggest internal scorer weight adjustments"
+
 #### Report Generation
 - **On-demand** via CLI/WebUI
 - **Loads all monthly brush files** for comprehensive analysis
 - **Human-readable text with YAML data** format
 - **Configurable time periods** (e.g., last 6 months)
 
-#### ChatGPT Integration
+#### ChatGPT Modifier Discovery Enhancement
+**Capabilities**:
+1. **Weight Adjustments**: Analyze user validation data and suggest weight changes for existing modifiers
+2. **Modifier Discovery**: Identify patterns that could become new modifiers:
+   - Text patterns (custom handle, artisan knot, handmade)
+   - Brand combinations (Declaration + Zenith patterns)
+   - Size specifications (26mm vs 28mm preferences)
+   - Semantic patterns in brush descriptions
+
+**ChatGPT Output Format**:
+```yaml
+weight_adjustments:
+  high_priority_automated_split:
+    multiple_brands: 25  # Increase from 20
+    fiber_words: 18      # Increase from 15
+
+suggested_new_modifiers:
+  - name: "custom_handle"
+    function_name: "_modifier_custom_handle"
+    pattern: "custom|artisan|handmade|turned"
+    logic: "Detect custom handle indicators in text"
+    suggested_weights:
+      high_priority_automated_split: 15
+      medium_priority_automated_split: 10
+      dual_component: 20
+      complete_brush: -10
+    test_cases:
+      - input: "custom handle with Omega knot"
+      - input: "artisan turned handle"
+    python_template: |
+      def _modifier_custom_handle(self, input_text: str, result: dict, strategy_name: str) -> int:
+          if re.search(r"custom|artisan|handmade|turned", input_text.lower()):
+              return self.config.strategy_modifiers[strategy_name]["custom_handle"]
+          return 0
+```
+
+#### Configuration Update Workflow
 - **Manual review and application** of brush matching suggestions
 - **Structured prompt** for actionable brush matching recommendations
 - **Focus on**: brush weight adjustments, brush routing rules, brush catalog improvements
-
-#### Brush Learning Report Format
-```yaml
-brush_learning_report:
-  generated_at: "2025-01-27T15:30:00Z"
-  period: "2025-01-20 to 2025-01-27"
-  summary:
-    total_brush_inputs: 150
-    brush_system_agreements: 120
-    brush_system_disagreements: 30
-    brush_user_overrides: 5
-    
-  analysis:
-    "Brush Pattern Analysis":
-      ".* / .*":  # Slash delimiter
-        count: 8
-        current_brush_system_choice: "complete_brush"
-        brush_scoring_system_choice: "dual_component"
-        brush_user_preference: "dual_component"
-        brush_success_rate: 0%  # Current brush system was wrong 100% of the time
-        
-  suggested_changes:
-    brush_scoring_weights:
-      delimiter_present: 25  # Increase from 20
-      brand_recognition: 15  # Decrease from 20
-    new_brush_routing_rules:
-      - pattern: ".* / .*"
-        strategy: "dual_component"
-        confidence: "high"
-```
 
 ### 5. Brush Configuration Management
 
 #### File Organization
 - **Brush scoring config**: `data/brush_scoring_config.yaml`
 - **Brush user actions**: `data/learning/brush_user_actions_YYYY-MM.yaml`
-- **Generated brush correct_matches**: `data/brush_correct_matches.yaml` (auto-generated from brush user actions)
+- **Generated brush correct_matches**: `data/correct_matches.yaml` (auto-generated from brush user actions, preserving non-brush sections)
 
 #### Configuration Structure
 ```yaml
-# data/brush_scoring_config.yaml
+# data/brush_scoring_config.yaml (Phase 3.1)
 brush_scoring_weights:
   base_strategies:
-    exact_match: 100
-    complete_brush: 60
-    dual_component: 70
-    single_component: 40
-  
-  bonus_factors:
-    delimiter_present: 25
-    multiple_brands: 20
-    fiber_words: 15
-    size_specification: 10
-    handle_knot_words: 10
-  
-  penalty_factors:
-    single_brand_only: -20
-    no_fiber_spec: -10
-    generic_terms_only: -15
+    correct_complete_brush: 100.0
+    correct_split_brush: 90.0
+    known_split: 80.0
+    high_priority_automated_split: 70.0
+    complete_brush: 60.0
+    dual_component: 50.0
+    medium_priority_automated_split: 40.0
+    single_component_fallback: 30.0
+  # No modifiers in Phase 3.1 - pure strategy weights only
+```
+
+### 6. Validation Requirements
+
+#### Phase 3.1: Black Box Alignment
+- **100% alignment** between legacy and scoring systems
+- **Simple strategy weights** without modifiers
+- **Wrapper strategy validation** - each wrapper calls exact legacy method
+- **A/B comparison testing** to verify identical results
+
+#### Phase 3.2+: Individual Strategy Breakdown
+- **Maintain 100% alignment** at each phase transition
+- **Incremental complexity** addition with validation at each step
+- **Individual strategy testing** as black boxes are opened
+- **Performance validation** to ensure no regression
+      knot_confidence: 0.0
+      word_count_balance: 0.0
 
 brush_routing_rules:
   - pattern: ".* / .*"
@@ -226,7 +372,8 @@ brush_routing_rules:
 - **Early exit** for exact matches from user_actions
 - **Optimized runtime format** for validated matches
 
-#### Multi-Split Automated Splitters Enhancement (Phase 6)
+### 7. Multi-Split Automated Splitters Enhancement (Phase 6)
+
 **Problem**: Complex delimiter cases like `"something - something else - something additional"` currently only evaluate the first valid split, potentially missing better interpretations.
 
 **Solution**: Modify automated splitters to generate all possible split combinations and return each as a separate strategy result for engine scoring.
@@ -272,22 +419,72 @@ Engine scores each independently with all modifiers applied:
 Highest score wins
 ```
 
-**Implementation**:
-- Splitter generates all possible splits using existing delimiter logic
-- Each split becomes a separate strategy result with consistent structure
-- Engine scores each result independently using existing modifier system plus split quality modifiers
-- Highest-scoring result wins regardless of which split it came from
-- Split quality modifiers use percentage-based scoring with integer results
+### 8. Internal Scorer Exposure (Phase 8)
+
+**Purpose**: Expose internal handle/knot determination scoring methods as configurable modifiers for ChatGPT tuning.
+
+**Current Internal Scorers**:
+- **`_score_as_handle(text: str) -> int`**: Scores how likely text is to be a handle
+- **`_score_as_knot(text: str) -> int`**: Scores how likely text is to be a knot
+
+**Exposure Strategy**:
+- **Simplified structure** - common set of modifiers with handle/knot sections for scoring
+- **Unified modifier approach** - all modifiers can be positive or negative
+- **Strategy-agnostic** - same internal scorer modifiers for all split strategies
+- **ChatGPT examples** - provide examples from each strategy type for tuning
+
+**Proposed Internal Scorer Modifiers**:
+```yaml
+strategy_modifiers:
+  high_priority_automated_split:
+    # Existing modifiers
+    multiple_brands: 0.0
+    fiber_words: 0.0
+    
+    # Split quality modifiers (Phase 6)
+    handle_confidence: 0.0
+    knot_confidence: 0.0
+    word_count_balance: 0.0
+    
+    # Internal scorer modifiers (Phase 8) - simplified structure
+    internal_scorer_modifiers:
+      handle:
+        handle_word: 10
+        artisan_handle_match: 12
+        manufacturer_handle_match: 10
+        other_handle_match: 8
+        handle_terms: 2
+        knot_strategy_conflict: -4
+        fiber_detected: -8
+        size_pattern: -6
+        version_pattern: -6
+        knot_terms: -3
+        known_knot_match: -25
+        declaration_pattern: -25
+      knot:
+        handle_word: -10
+        artisan_handle_match: -12
+        manufacturer_handle_match: -10
+        other_handle_match: -8
+        handle_terms: -5
+        knot_strategy_conflict: 8
+        fiber_detected: 10
+        size_pattern: 8
+        version_pattern: 8
+        knot_terms: 3
+        known_knot_match: 25
+        declaration_pattern: 25
+```
 
 ## Implementation Plan
 
-### Phase 1: Core Scoring System
+### Phase 1: Core Scoring System ✅ COMPLETE
 - Implement scoring-based brush matcher
 - Add scoring configuration YAML
 - Basic user actions collection
 - Unit tests for scoring functions
 
-### Phase 2: Parallel System Integration
+### Phase 2: Parallel System Integration ✅ COMPLETE
 - Add CLI flags for system selection
 - Implement parallel data directories
 - Integration tests with real data
@@ -309,6 +506,26 @@ Highest score wins
 - Switch default to new system when confident
 - Remove old system and flags
 - Documentation updates
+
+### Phase 6: Multi-Split Enhancement
+- Generate all possible splits for automated splitters
+- Add split quality modifiers: `handle_confidence`, `knot_confidence`, `word_count_balance`
+- Return all splits as separate strategy results for engine scoring
+
+### Phase 7: Enhanced Data Collection
+- Collect internal scorer data for split strategies
+- Enhanced user validation data structure
+- Split quality metrics collection
+
+### Phase 8: Internal Scorer Exposure
+- Expose internal scoring methods as configurable modifiers
+- ChatGPT integration for internal scorer tuning
+- Comprehensive internal scorer analysis
+
+### Phase 9: Performance Optimization
+- Performance monitoring and optimization
+- Caching improvements
+- System tuning
 
 ## Testing Requirements
 
