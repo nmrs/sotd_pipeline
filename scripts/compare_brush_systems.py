@@ -121,7 +121,7 @@ def main():
             for i, diff in enumerate(report["detailed_differences"][:3]):
                 print(f"\nDifference #{i + 1}:")
                 print(f"  Record Index: {diff['record_index']}")
-                print(f"  Original: {diff['original']}")
+                print(f"  Original: {diff['input_text']}")
                 print(
                     f"  Legacy: {diff['old_match']['brand']} {diff['old_match']['model']} ({diff['old_match']['match_type']})"
                 )
