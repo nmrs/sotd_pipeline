@@ -211,6 +211,19 @@ class BrushScoringConfig:
         strategy_modifiers = self.weights.get("strategy_modifiers", {}).get(strategy_name, {})
         return list(strategy_modifiers.keys())
 
+    def get_component_scoring_weight(self, weight_name: str) -> float:
+        """
+        Get component scoring weight from configuration.
+
+        Args:
+            weight_name: Name of the weight to retrieve
+
+        Returns:
+            Weight value as float
+        """
+        component_scoring = self.weights.get("component_scoring", {})
+        return component_scoring.get(weight_name, 0.0)
+
     def reload_config(self) -> None:
         """
         Reload configuration from file (hot-reload).

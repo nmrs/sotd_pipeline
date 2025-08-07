@@ -19,9 +19,22 @@ brush_scoring_weights:
     # Individual component strategies (replacing dual_component wrapper)
     handle_component: 30.0
     knot_component: 30.0
-    component_coordination: 50.0
+    dual_component: 50.0
     medium_priority_automated_split: 40.0
     single_component_fallback: 30.0
+
+  # Component scoring weights (for individual component strategies)
+  component_scoring:
+    # Base pattern score for component matching
+    base_pattern_score: 5
+    # Bonus for handle/knot indicators (keywords)
+    indicator_bonus: 10
+    # Bonus for actual handle/knot matches
+    actual_match_bonus: 20
+    # Extra bonus for handle-only makers
+    handle_only_bonus: 15
+    # Minimum score threshold for component matches
+    minimum_score_threshold: 25
 
   # Strategy-specific modifiers (disabled for Phase 3.1)
   strategy_modifiers:
