@@ -2,15 +2,22 @@
 # This file contains weights and criteria for the brush scoring system
 
 brush_scoring_weights:
-  # Simple strategy weights for Phase 3.1 (wrapper strategies only)
+  # Individual brush strategy weights for Phase 3.2
   base_strategies:
-    # 8 wrapper strategies in legacy system priority order
+    # Correct matches strategies (highest priority)
     correct_complete_brush: 100.0
     correct_split_brush: 90.0
     known_split: 80.0
     high_priority_automated_split: 70.0
-    complete_brush: 60.0
-    dual_component: 75.0
+    
+    # Individual brush strategies (replacing complete_brush wrapper)
+    known_brush: 66.0
+    omega_semogue: 62.0
+    zenith: 58.0
+    other_brush: 54.0
+    
+    # Composite brush strategies
+    dual_component: 50.0
     medium_priority_automated_split: 40.0
     single_component_fallback: 30.0
 
@@ -21,7 +28,10 @@ brush_scoring_weights:
     correct_split_brush: {}
     known_split: {}
     high_priority_automated_split: {}
-    complete_brush: {}
+    known_brush: {}
+    omega_semogue: {}
+    zenith: {}
+    other_brush: {}
     dual_component: {}
     medium_priority_automated_split: {}
     single_component_fallback: {} 
