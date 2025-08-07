@@ -50,9 +50,10 @@ class ResultProcessor:
         Args:
             result: MatchResult to process
         """
-        # Ensure matched field exists
+        # For Phase 3.1 (Black Box Alignment), preserve None for unmatched cases
+        # Don't convert None to empty dict - this should match legacy behavior
         if result.matched is None:
-            result.matched = {}
+            return  # Preserve None for unmatched cases
 
         # For Phase 3.1 (Black Box Alignment), don't add extra fields
         # that the legacy system doesn't have
@@ -96,7 +97,7 @@ class ResultProcessor:
             result: MatchResult to process
         """
         if result.matched is None:
-            return
+            return  # Preserve None for unmatched cases
 
         # Extract fields from the flat structure
         brand = result.matched.get("brand")

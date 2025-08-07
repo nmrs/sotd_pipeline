@@ -14,12 +14,12 @@
       "percentage": 0.0
     },
     "new_only_matches": {
-      "count": 6,
-      "percentage": 0.3692307692307692
+      "count": 0,
+      "percentage": 0.0
     },
     "both_unmatched": {
-      "count": 5,
-      "percentage": 0.3076923076923077
+      "count": 11,
+      "percentage": 0.676923076923077
     }
   },
   "match_type_changes": {},

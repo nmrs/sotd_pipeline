@@ -314,12 +314,8 @@ class BrushScoringMatcher:
         self.performance_monitor.start_timing()
 
         try:
-            # First, try correct matches matcher (fastest path)
-            result = self.correct_matches_matcher.match(value)
-            if result is not None:
-                return self.result_processor.process_result(result, value)
-
-            # If no correct match, run all strategies and score them
+            # For Phase 3.1 (Black Box Alignment), use wrapper strategies for all matches
+            # This ensures we get the exact same results as the legacy system
             strategy_results = self.strategy_orchestrator.run_all_strategies(value)
 
             # If no strategy results, return None
