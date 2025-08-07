@@ -310,13 +310,21 @@ class TestBrushSystemComparator:
         old_data = {
             "data": [],
             "metadata": {
-                "performance": {"total_time": 10.0, "processing_time": 8.0, "file_io_time": 2.0}
+                "performance": {
+                    "total_processing_time_seconds": 10.0,
+                    "processing_time_seconds": 8.0,
+                    "file_io_time_seconds": 2.0,
+                }
             },
         }
         new_data = {
             "data": [],
             "metadata": {
-                "performance": {"total_time": 12.0, "processing_time": 10.0, "file_io_time": 2.0}
+                "performance": {
+                    "total_processing_time_seconds": 12.0,
+                    "processing_time_seconds": 10.0,
+                    "file_io_time_seconds": 2.0,
+                }
             },
         }
 

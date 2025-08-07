@@ -174,7 +174,8 @@ class TestDataIsolationStrategy:
             production_file = Path("data/brush_splits.yaml")
             if production_file.exists():
                 production_data = yaml.safe_load(production_file.read_text())
-                assert "New Test Brush" not in production_data
+                if production_data is not None:  # Handle case where file is empty/corrupted
+                    assert "New Test Brush" not in production_data
 
     def test_integration_test_with_isolated_data(self, tmp_path):
         """Test integration tests using isolated data."""

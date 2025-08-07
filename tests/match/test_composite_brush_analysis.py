@@ -92,8 +92,8 @@ class TestCompositeBrushAnalysis:
         )
 
         expected_structure = {
-            "brand": None,  # Composite brush
-            "model": None,  # Composite brush
+            "brand": type(None),  # Composite brush
+            "model": type(None),  # Composite brush
             "handle": {
                 "brand": str,  # Handle maker
                 "model": str,  # Handle model
@@ -105,7 +105,7 @@ class TestCompositeBrushAnalysis:
                 "brand": str,  # Knot brand
                 "model": str,  # Knot model
                 "fiber": str,  # Knot fiber
-                "knot_size_mm": float,  # Knot size
+                "knot_size_mm": (float, int, type(None)),  # Knot size (can be float, int, or None)
                 "source_text": str,
                 "_matched_by": str,
                 "_pattern": str,
@@ -115,8 +115,36 @@ class TestCompositeBrushAnalysis:
         # Verify structure matches expected
         for key, expected_type in expected_structure.items():
             assert key in result.matched
-            if expected_type != type(None):
-                assert isinstance(result.matched[key], expected_type) or result.matched[key] is None
+            if expected_type is not type(None):
+                if isinstance(expected_type, dict):
+                    # Handle nested dictionary validation
+                    assert isinstance(result.matched[key], dict)
+                    for nested_key, nested_type in expected_type.items():
+                        assert nested_key in result.matched[key]
+                        if isinstance(nested_type, tuple):
+                            # Handle multiple allowed types
+                            assert (
+                                isinstance(result.matched[key][nested_key], nested_type)
+                                or result.matched[key][nested_key] is None
+                            )
+                        else:
+                            # Handle single type
+                            assert (
+                                isinstance(result.matched[key][nested_key], nested_type)
+                                or result.matched[key][nested_key] is None
+                            )
+                elif isinstance(expected_type, tuple):
+                    # Handle multiple allowed types
+                    assert (
+                        isinstance(result.matched[key], expected_type)
+                        or result.matched[key] is None
+                    )
+                else:
+                    # Handle single type
+                    assert (
+                        isinstance(result.matched[key], expected_type)
+                        or result.matched[key] is None
+                    )
 
     def test_legacy_strategy_execution_order(self):
         """Test that legacy system executes strategies in correct order."""
