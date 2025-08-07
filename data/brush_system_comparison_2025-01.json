@@ -1,0 +1,229 @@
+{
+  "summary": {
+    "total_records": 1544,
+    "matching_results": {
+      "count": 1107,
+      "percentage": 71.69689119170984
+    },
+    "different_results": {
+      "count": 426,
+      "percentage": 27.590673575129532
+    },
+    "old_only_matches": {
+      "count": 0,
+      "percentage": 0.0
+    },
+    "new_only_matches": {
+      "count": 0,
+      "percentage": 0.0
+    },
+    "both_unmatched": {
+      "count": 11,
+      "percentage": 0.7124352331606217
+    }
+  },
+  "match_type_changes": {},
+  "detailed_differences": [
+    {
+      "record_index": 2,
+      "input_text": "AP Shave Co. -26 MiG Synthetic.",
+      "old_match": {
+        "brand": "AP Shave Co",
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "^A.? ?P.? ?\\s*shave",
+        "strategy": "dual_component"
+      },
+      "new_match": {
+        "brand": null,
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "^A.? ?P.? ?\\s*shave",
+        "strategy": "handle_component"
+      }
+    },
+    {
+      "record_index": 3,
+      "input_text": "Maggard Timberwolf Synthetic 24mm",
+      "old_match": {
+        "brand": "Maggard",
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "^.*mag(g?ard)?s?",
+        "strategy": "dual_component"
+      },
+      "new_match": {
+        "brand": null,
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "^.*mag(g?ard)?s?",
+        "strategy": "handle_component"
+      }
+    },
+    {
+      "record_index": 4,
+      "input_text": "Dogwood / DG B14 Mammoth yellow label release",
+      "old_match": {
+        "brand": "Declaration Grooming",
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "\\bdg\\b",
+        "strategy": "dual_component"
+      },
+      "new_match": {
+        "brand": null,
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "\\bdg\\b",
+        "strategy": "handle_component"
+      }
+    },
+    {
+      "record_index": 20,
+      "input_text": "WCS 26mm synth",
+      "old_match": {
+        "brand": "WCS",
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "wcs",
+        "strategy": "dual_component"
+      },
+      "new_match": {
+        "brand": null,
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "wcs",
+        "strategy": "handle_component"
+      }
+    },
+    {
+      "record_index": 24,
+      "input_text": "Elite Razor Trustone W/Long Shaving 26mm Reserve VI Badger",
+      "old_match": {
+        "brand": "Long Shaving",
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "long\\s*shaving",
+        "strategy": "dual_component"
+      },
+      "new_match": {
+        "brand": null,
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "long\\s*shaving",
+        "strategy": "handle_component"
+      }
+    },
+    {
+      "record_index": 26,
+      "input_text": "Grizzly Bay Centurion V5 Fanchurian Badger",
+      "old_match": {
+        "brand": "Grizzly Bay",
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "grizzly.*bay",
+        "strategy": "dual_component"
+      },
+      "new_match": {
+        "brand": null,
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "grizzly.*bay",
+        "strategy": "handle_component"
+      }
+    },
+    {
+      "record_index": 27,
+      "input_text": "Oumo Passion Warhammer 29mm 5th Anniversary Fan",
+      "old_match": {
+        "brand": "Oumo",
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "\\bo(o|u)+mo\\b",
+        "strategy": "dual_component"
+      },
+      "new_match": {
+        "brand": null,
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "\\bo(o|u)+mo\\b",
+        "strategy": "handle_component"
+      }
+    },
+    {
+      "record_index": 31,
+      "input_text": "Paladin 2XL Lavender 28mm",
+      "old_match": {
+        "brand": "Paladin",
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "paladin",
+        "strategy": "dual_component"
+      },
+      "new_match": {
+        "brand": null,
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "paladin",
+        "strategy": "handle_component"
+      }
+    },
+    {
+      "record_index": 32,
+      "input_text": "Rad Dinosaur Creations Cavern Dream board",
+      "old_match": {
+        "brand": "Rad Dinosaur Creations",
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "rad dino(saur)?",
+        "strategy": "dual_component"
+      },
+      "new_match": {
+        "brand": null,
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "rad dino(saur)?",
+        "strategy": "handle_component"
+      }
+    },
+    {
+      "record_index": 37,
+      "input_text": "Wild West Brushworks Deep Pearl 26mm Sweet Spot Badger",
+      "old_match": {
+        "brand": "Wild West Brushworks",
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "wild.*west",
+        "strategy": "dual_component"
+      },
+      "new_match": {
+        "brand": null,
+        "model": null,
+        "fiber": null,
+        "match_type": "regex",
+        "pattern": "wild.*west",
+        "strategy": "handle_component"
+      }
+    }
+  ],
+  "total_differences": 426
+}

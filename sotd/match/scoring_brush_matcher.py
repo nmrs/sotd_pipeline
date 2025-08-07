@@ -122,6 +122,7 @@ class BrushScoringMatcher:
             KnownSplitWrapperStrategy,
         )
         from sotd.match.brush_matching_strategies.legacy_composite_wrapper_strategies import (
+            LegacyDualComponentWrapperStrategy,
             LegacySingleComponentFallbackWrapperStrategy,
         )
 
@@ -164,9 +165,7 @@ class BrushScoringMatcher:
             # Use legacy scoring logic with configurable weights
             LegacyScoredComponentStrategy(legacy_matcher, self.config, "handle"),
             LegacyScoredComponentStrategy(legacy_matcher, self.config, "knot"),
-            ComponentCoordinationStrategy(
-                legacy_matcher.handle_matcher, legacy_matcher.knot_matcher
-            ),  # Strategy name: "dual_component" for perfect compatibility
+            LegacyDualComponentWrapperStrategy(legacy_matcher),  # Strategy name: "dual_component" for perfect compatibility
             # Priority 6: medium_priority_automated_split
             MediumPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
             # Priority 7: single_component_fallback

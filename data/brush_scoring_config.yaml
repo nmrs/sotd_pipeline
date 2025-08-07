@@ -1,42 +1,22 @@
 # Brush Scoring Configuration
-# This file contains weights and criteria for the brush scoring system
+# This file defines the scoring weights and modifiers for the brush matching system
 
 brush_scoring_weights:
-  # Individual brush strategy weights for Phase 3.2
+  # Base strategy scores (Phase 3.1)
   base_strategies:
-    # Correct matches strategies (highest priority)
     correct_complete_brush: 100.0
-    correct_split_brush: 90.0
-    known_split: 80.0
-    high_priority_automated_split: 70.0
-    
-    # Individual brush strategies (replacing complete_brush wrapper)
-    known_brush: 66.0
-    omega_semogue: 62.0
-    zenith: 58.0
-    other_brush: 54.0
-    
-    # Individual component strategies (replacing dual_component wrapper)
-    handle_component: 30.0
-    knot_component: 30.0
-    dual_component: 50.0
-    medium_priority_automated_split: 40.0
-    single_component_fallback: 30.0
+    correct_split_brush: 95.0
+    known_split: 90.0
+    high_priority_automated_split: 85.0
+    known_brush: 80.0
+    omega_semogue: 75.0
+    zenith: 75.0
+    other_brush: 70.0
+    dual_component: 65.0
+    medium_priority_automated_split: 60.0
+    single_component_fallback: 50.0
 
-  # Component scoring weights (for individual component strategies)
-  component_scoring:
-    # Base pattern score for component matching
-    base_pattern_score: 5
-    # Bonus for handle/knot indicators (keywords)
-    indicator_bonus: 10
-    # Bonus for actual handle/knot matches
-    actual_match_bonus: 20
-    # Extra bonus for handle-only makers
-    handle_only_bonus: 15
-    # Minimum score threshold for component matches
-    minimum_score_threshold: 25
-
-  # Strategy-specific modifiers (Phase 3.7)
+  # Strategy-specific modifiers (Phase 3.7 - ENABLED)
   strategy_modifiers:
     # Modifiers for split strategies
     high_priority_automated_split:
@@ -55,43 +35,76 @@ brush_scoring_weights:
       handle_confidence: 0.0
       knot_confidence: 0.0
       word_count_balance: 0.0
-    # Modifiers for component strategies
-    dual_component:
-      multiple_brands: -2.0
-      fiber_words: 1.0
-      size_specification: 1.0
     # Modifiers for complete brush strategies
-    known_brush:
-      multiple_brands: -1.0
-      fiber_words: 0.0
-      size_specification: 0.0
-    omega_semogue:
-      multiple_brands: -1.0
-      fiber_words: 0.0
-      size_specification: 0.0
-    zenith:
-      multiple_brands: -1.0
-      fiber_words: 0.0
-      size_specification: 0.0
-    other_brush:
-      multiple_brands: -1.0
-      fiber_words: 0.0
-      size_specification: 0.0
-    # Modifiers for fallback strategies
-    single_component_fallback:
-      multiple_brands: -1.0
-      fiber_words: 0.0
-      size_specification: 0.0
-    # Modifiers for correct match strategies (minimal)
     correct_complete_brush:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
+      delimiter_confidence: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
     correct_split_brush:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
+      delimiter_confidence: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
     known_split:
       multiple_brands: 0.0
       fiber_words: 0.0
-      size_specification: 0.0 
+      size_specification: 0.0
+      delimiter_confidence: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    known_brush:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      delimiter_confidence: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    omega_semogue:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      delimiter_confidence: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    zenith:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      delimiter_confidence: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    other_brush:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      delimiter_confidence: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    dual_component:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      delimiter_confidence: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    single_component_fallback:
+      multiple_brands: 0.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      delimiter_confidence: 0.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0 

@@ -6,6 +6,7 @@ This script loads data from both systems and performs a comprehensive comparison
 to analyze differences in matching results, performance, and accuracy.
 """
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -30,7 +31,13 @@ def load_system_data(month: str) -> tuple[dict, dict]:
 
 def main():
     """Main comparison function."""
-    month = "2025-05"
+    parser = argparse.ArgumentParser(description="Compare legacy and scoring brush systems")
+    parser.add_argument(
+        "--month", default="2025-01", help="Month to compare (YYYY-MM format, default: 2025-01)"
+    )
+    args = parser.parse_args()
+
+    month = args.month
 
     print(f"🔍 Comparing brush systems for {month}")
     print("=" * 60)
@@ -88,7 +95,8 @@ def main():
         for category, data in summary.items():
             if isinstance(data, dict) and "count" in data and "percentage" in data:
                 print(
-                    f"{category.replace('_', ' ').title()}: {data['count']} ({data['percentage']:.1f}%)"
+                    f"{category.replace('_', ' ').title()}: "
+                    f"{data['count']} ({data['percentage']:.1f}%)"
                 )
 
         # Show match type changes
