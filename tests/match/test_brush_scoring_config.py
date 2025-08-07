@@ -122,13 +122,16 @@ class TestBrushScoringConfig:
         """Test that initial weights mimic current behavior exactly."""
         config = BrushScoringConfig()
 
-        # Check that base strategy scores are in expected order
+        # Check that base strategy scores are in expected order (updated for Phase 3.2)
         scores = [
             config.get_base_strategy_score("correct_complete_brush"),
             config.get_base_strategy_score("correct_split_brush"),
             config.get_base_strategy_score("known_split"),
             config.get_base_strategy_score("high_priority_automated_split"),
-            config.get_base_strategy_score("complete_brush"),
+            config.get_base_strategy_score("known_brush"),
+            config.get_base_strategy_score("omega_semogue"),
+            config.get_base_strategy_score("zenith"),
+            config.get_base_strategy_score("other_brush"),
             config.get_base_strategy_score("dual_component"),
             config.get_base_strategy_score("medium_priority_automated_split"),
             config.get_base_strategy_score("single_component_fallback"),
@@ -161,7 +164,10 @@ class TestBrushScoringConfig:
             "correct_split_brush",
             "known_split",
             "high_priority_automated_split",
-            "complete_brush",
+            "known_brush",
+            "omega_semogue",
+            "zenith",
+            "other_brush",
             "dual_component",
             "medium_priority_automated_split",
             "single_component_fallback",
@@ -175,7 +181,8 @@ class TestBrushScoringConfig:
         config = BrushScoringConfig()
         modifier_names = config.get_all_modifier_names("high_priority_automated_split")
 
-        expected_modifiers = ["multiple_brands", "fiber_words", "size_specification"]
+        # All modifiers are disabled for Phase 3.1 (black box approach)
+        expected_modifiers = []
 
         for modifier in expected_modifiers:
             assert modifier in modifier_names

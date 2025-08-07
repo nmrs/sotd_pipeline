@@ -27,31 +27,38 @@ class TestScoringSystemComprehensive:
         config_data = {
             "brush_scoring_weights": {
                 "base_strategies": {
-                    "correct_complete_brush": 90.0,
-                    "correct_split_brush": 85.0,
+                    "correct_complete_brush": 100.0,
+                    "correct_split_brush": 90.0,
                     "known_split": 80.0,
-                    "high_priority_automated_split": 75.0,
+                    "high_priority_automated_split": 70.0,
+                    "known_brush": 75.0,  # Individual brush strategy
+                    "omega_semogue": 70.0,  # Individual brush strategy
+                    "zenith": 65.0,  # Individual brush strategy
+                    "other_brush": 60.0,  # Individual brush strategy
                     "dual_component": 75.0,  # Composite brush strategy
-                    "complete_brush": 65.0,  # Individual brush strategies
-                    "medium_priority_automated_split": 60.0,
-                    "single_component_fallback": 55.0,
+                    "medium_priority_automated_split": 55.0,
+                    "single_component_fallback": 50.0,
                 },
                 "strategy_modifiers": {
+                    "correct_complete_brush": {},
+                    "correct_split_brush": {},
+                    "known_split": {},
+                    "high_priority_automated_split": {},
+                    "known_brush": {
+                        "multiple_brands": 0.0,
+                        "fiber_words": 0.0,
+                        "size_specification": 0.0,
+                    },
+                    "omega_semogue": {},
+                    "zenith": {},
+                    "other_brush": {},
                     "dual_component": {
                         "multiple_brands": 0.0,
                         "fiber_words": 0.0,
                         "size_specification": 0.0,
                     },
-                    "complete_brush": {
-                        "multiple_brands": 0.0,
-                        "fiber_words": 0.0,
-                        "size_specification": 0.0,
-                    },
-                    "single_component_fallback": {
-                        "multiple_brands": 0.0,
-                        "fiber_words": 0.0,
-                        "size_specification": 0.0,
-                    },
+                    "medium_priority_automated_split": {},
+                    "single_component_fallback": {},
                 },
             }
         }
@@ -78,31 +85,31 @@ class TestScoringSystemComprehensive:
                 "name": "Simpson Chubby 2 (complete brush)",
                 "input": "Simpson Chubby 2",
                 "expected_winner": "regex",
-                "expected_score": 65.0,
+                "expected_score": 75.0,
                 "expected_brand": "Simpson",
                 "expected_model": "Chubby 2",
                 "should_have_handle": False,
                 "should_have_knot": False,
             },
             {
-                "name": "Declaration B2 (composite)",
+                "name": "Declaration B2 (complete brush)",
                 "input": "Declaration B2",
-                "expected_winner": "composite",
+                "expected_winner": "regex",
                 "expected_score": 75.0,
-                "expected_brand": None,
-                "expected_model": None,
-                "should_have_handle": True,
-                "should_have_knot": True,
+                "expected_brand": "Declaration Grooming",
+                "expected_model": "B2",
+                "should_have_handle": False,
+                "should_have_knot": False,
             },
             {
-                "name": "Omega 10049 (composite)",
+                "name": "Omega 10049 (correct match)",
                 "input": "Omega 10049",
-                "expected_winner": "composite",
-                "expected_score": 75.0,
-                "expected_brand": None,
-                "expected_model": None,
-                "should_have_handle": True,
-                "should_have_knot": True,
+                "expected_winner": "exact",
+                "expected_score": 100.0,
+                "expected_brand": "Omega",
+                "expected_model": "10049",
+                "should_have_handle": False,
+                "should_have_knot": False,
             },
         ]
 
@@ -161,7 +168,7 @@ class TestScoringSystemComprehensive:
 
     def test_scoring_system_runs_all_strategies(self):
         """Test that scoring system runs all strategies for each input."""
-        test_string = "Summer Break Soaps Maize 26mm Timberwolf"
+        test_string = "Simpson Chubby 2"
 
         # Run all strategies
         strategy_results = self.matcher.strategy_orchestrator.run_all_strategies(test_string)
@@ -195,10 +202,10 @@ class TestScoringSystemComprehensive:
         # Verify expected scores
         expected_scores = {
             "composite": 75.0,
-            "single_component": 55.0,
-            "regex": 65.0,
-            "fiber_fallback": 55.0,
-            "size_fallback": 55.0,
+            "single_component": 50.0,
+            "regex": 75.0,
+            "fiber_fallback": 50.0,
+            "size_fallback": 50.0,
         }
 
         for result in scored_results:

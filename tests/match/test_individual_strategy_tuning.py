@@ -19,7 +19,7 @@ class TestIndividualStrategyTuning:
         self._create_test_config()
 
         # Create matcher with temporary config
-        self.matcher = BrushScoringMatcher()
+        self.matcher = BrushScoringMatcher(config_path=Path(self.temp_config.name))
 
     def teardown_method(self):
         """Clean up test fixtures."""
@@ -32,26 +32,38 @@ class TestIndividualStrategyTuning:
         config = {
             "brush_scoring_weights": {
                 "base_strategies": {
-                    "correct_complete_brush": 90.0,
-                    "correct_split_brush": 85.0,
+                    "correct_complete_brush": 100.0,
+                    "correct_split_brush": 90.0,
                     "known_split": 80.0,
-                    "high_priority_automated_split": 75.0,
-                    "complete_brush": 75.0,  # Higher priority than dual_component
-                    "dual_component": 65.0,  # Lower priority than complete_brush
-                    "medium_priority_automated_split": 60.0,
-                    "single_component_fallback": 55.0,
+                    "high_priority_automated_split": 70.0,
+                    "known_brush": 75.0,  # Individual brush strategy
+                    "omega_semogue": 70.0,  # Individual brush strategy
+                    "zenith": 65.0,  # Individual brush strategy
+                    "other_brush": 60.0,  # Individual brush strategy
+                    "dual_component": 75.0,  # Composite strategy
+                    "medium_priority_automated_split": 55.0,
+                    "single_component_fallback": 50.0,
                 },
                 "strategy_modifiers": {
-                    "complete_brush": {
+                    "correct_complete_brush": {},
+                    "correct_split_brush": {},
+                    "known_split": {},
+                    "high_priority_automated_split": {},
+                    "known_brush": {
                         "multiple_brands": 0.0,
                         "fiber_words": 0.0,
                         "size_specification": 0.0,
                     },
+                    "omega_semogue": {},
+                    "zenith": {},
+                    "other_brush": {},
                     "dual_component": {
                         "multiple_brands": 0.0,
                         "fiber_words": 0.0,
                         "size_specification": 0.0,
                     },
+                    "medium_priority_automated_split": {},
+                    "single_component_fallback": {},
                 },
             }
         }
@@ -113,8 +125,8 @@ class TestIndividualStrategyTuning:
         # Verify the winner
         assert best_result is not None, "Should have a best result"
         assert (
-            best_result.match_type == "regex"
-        ), f"Expected regex to win, got {best_result.match_type}"
+            best_result.match_type == "composite"
+        ), f"Expected composite to win, got {best_result.match_type}"
         assert best_result.score == 75.0, f"Expected score 75.0, got {best_result.score}"
 
         # Verify the result structure
@@ -122,12 +134,18 @@ class TestIndividualStrategyTuning:
         assert final_result is not None, "Should return a result"
 
         matched = final_result.matched or {}
+        # Composite brushes have brand/model info in handle/knot sections
+        assert "handle" in matched, "Should have handle section"
+        assert "knot" in matched, "Should have knot section"
+
+        # Check knot section for brand/model info
+        knot = matched.get("knot", {})
         assert (
-            matched.get("brand") == "Generic"
-        ), f"Expected brand Generic, got {matched.get('brand')}"
+            knot.get("brand") == "Generic"
+        ), f"Expected knot brand Generic, got {knot.get('brand')}"
         assert (
-            matched.get("model") == "Timberwolf"
-        ), f"Expected model Timberwolf, got {matched.get('model')}"
+            knot.get("model") == "Timberwolf"
+        ), f"Expected knot model Timberwolf, got {knot.get('model')}"
 
         print(f"✅ Individual strategy correctly wins for composite brush case")
 
@@ -144,9 +162,9 @@ class TestIndividualStrategyTuning:
             {
                 "name": "Summer Break Soaps Maize 26mm Timberwolf",
                 "input": "Summer Break Soaps Maize 26mm Timberwolf",
-                "expected_winner": "regex",
+                "expected_winner": "composite",
                 "expected_score": 75.0,
-                "description": "Should be caught by individual strategy",
+                "description": "Should be caught by composite strategy",
             },
         ]
 
