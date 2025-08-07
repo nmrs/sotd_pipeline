@@ -102,11 +102,7 @@ class BrushScoringMatcher:
         config = BrushMatcherConfig.create_default()
         legacy_matcher = BrushMatcher(config=config, correct_matches_path=self.correct_matches_path)
 
-        # Import wrapper strategies
-        from sotd.match.brush_matching_strategies.automated_split_wrapper_strategies import (
-            HighPriorityAutomatedSplitWrapperStrategy,
-            MediumPriorityAutomatedSplitWrapperStrategy,
-        )
+        # Import individual strategies for Phase 3.4/3.5
         from sotd.match.brush_matching_strategies.component_coordination_strategy import (
             ComponentCoordinationStrategy,
         )
@@ -114,10 +110,8 @@ class BrushScoringMatcher:
             CorrectCompleteBrushWrapperStrategy,
             CorrectSplitBrushWrapperStrategy,
         )
-
-        # Import component strategies for Phase 3.3
-        from sotd.match.brush_matching_strategies.legacy_scored_component_strategy import (
-            LegacyScoredComponentStrategy,
+        from sotd.match.brush_matching_strategies.high_priority_automated_split_strategy import (
+            HighPriorityAutomatedSplitStrategy,
         )
 
         # Import individual brush strategies for Phase 3.2
@@ -129,6 +123,14 @@ class BrushScoringMatcher:
         )
         from sotd.match.brush_matching_strategies.legacy_composite_wrapper_strategies import (
             LegacySingleComponentFallbackWrapperStrategy,
+        )
+
+        # Import component strategies for Phase 3.3
+        from sotd.match.brush_matching_strategies.legacy_scored_component_strategy import (
+            LegacyScoredComponentStrategy,
+        )
+        from sotd.match.brush_matching_strategies.medium_priority_automated_split_strategy import (
+            MediumPriorityAutomatedSplitStrategy,
         )
         from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
             OmegaSemogueBrushMatchingStrategy,
@@ -152,7 +154,7 @@ class BrushScoringMatcher:
             # Priority 2: known_split
             KnownSplitWrapperStrategy(legacy_matcher),
             # Priority 3: high_priority_automated_split
-            HighPriorityAutomatedSplitWrapperStrategy(legacy_matcher),
+            HighPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
             # Priority 4: individual brush strategies (replacing complete_brush wrapper)
             KnownBrushMatchingStrategy(catalog_data.get("known_brushes", {})),
             OmegaSemogueBrushMatchingStrategy(),
@@ -166,7 +168,7 @@ class BrushScoringMatcher:
                 legacy_matcher.handle_matcher, legacy_matcher.knot_matcher
             ),  # Strategy name: "dual_component" for perfect compatibility
             # Priority 6: medium_priority_automated_split
-            MediumPriorityAutomatedSplitWrapperStrategy(legacy_matcher),
+            MediumPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
             # Priority 7: single_component_fallback
             LegacySingleComponentFallbackWrapperStrategy(legacy_matcher),
         ]
