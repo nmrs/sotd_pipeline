@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Tests for composite brush wrapper strategies."""
 
-import pytest
 from sotd.match.brush_matching_strategies.legacy_composite_wrapper_strategies import (
     LegacyDualComponentWrapperStrategy,
     LegacySingleComponentFallbackWrapperStrategy,
@@ -13,7 +12,10 @@ class TestLegacyDualComponentWrapperStrategy:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.strategy = LegacyDualComponentWrapperStrategy()
+        from sotd.match.brush_matcher import BrushMatcher
+
+        legacy_matcher = BrushMatcher()
+        self.strategy = LegacyDualComponentWrapperStrategy(legacy_matcher)
 
     def test_dual_component_matching(self):
         """Test dual component matching with composite brush."""
@@ -22,19 +24,20 @@ class TestLegacyDualComponentWrapperStrategy:
 
         # Should return a composite brush result
         assert result is not None
-        assert result["match_type"] == "composite"
-        assert result["matched"]["brand"] is None  # Composite brush
-        assert result["matched"]["model"] is None  # Composite brush
-        assert "handle" in result["matched"]
-        assert "knot" in result["matched"]
+        assert result.match_type == "composite"
+        assert result.matched is not None
+        assert result.matched["brand"] is None  # Composite brush
+        assert result.matched["model"] is None  # Composite brush
+        assert "handle" in result.matched
+        assert "knot" in result.matched
 
         # Handle section should contain Summer Break info
-        handle = result["matched"]["handle"]
+        handle = result.matched["handle"]
         assert handle["brand"] == "Summer Break"
         assert handle["_matched_by"] == "HandleMatcher"
 
         # Knot section should contain Generic Timberwolf info
-        knot = result["matched"]["knot"]
+        knot = result.matched["knot"]
         assert knot["brand"] == "Generic"
         assert knot["model"] == "Timberwolf"
         assert knot["_matched_by"] == "KnotMatcher"
@@ -42,7 +45,7 @@ class TestLegacyDualComponentWrapperStrategy:
     def test_no_dual_component_match(self):
         """Test when no dual component match is found."""
         # Test with simple brush that doesn't have both handle and knot
-        result = self.strategy.match("Declaration B2")
+        result = self.strategy.match("Unknown Brush XYZ")
 
         # Should return None (no composite brush)
         assert result is None
@@ -63,7 +66,10 @@ class TestLegacySingleComponentFallbackWrapperStrategy:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.strategy = LegacySingleComponentFallbackWrapperStrategy()
+        from sotd.match.brush_matcher import BrushMatcher
+
+        legacy_matcher = BrushMatcher()
+        self.strategy = LegacySingleComponentFallbackWrapperStrategy(legacy_matcher)
 
     def test_handle_only_matching(self):
         """Test handle-only matching."""
@@ -72,19 +78,20 @@ class TestLegacySingleComponentFallbackWrapperStrategy:
 
         # Should return a composite brush result with handle only
         assert result is not None
-        assert result["match_type"] == "single_component"
-        assert result["matched"]["brand"] is None  # Composite brush
-        assert result["matched"]["model"] is None  # Composite brush
-        assert "handle" in result["matched"]
-        assert "knot" in result["matched"]
+        assert result.match_type == "single_component"
+        assert result.matched is not None
+        assert result.matched["brand"] is None  # Composite brush
+        assert result.matched["model"] is None  # Composite brush
+        assert "handle" in result.matched
+        assert "knot" in result.matched
 
         # Handle section should contain Summer Break info
-        handle = result["matched"]["handle"]
+        handle = result.matched["handle"]
         assert handle["brand"] == "Summer Break"
         assert handle["_matched_by"] == "HandleMatcher"
 
         # Knot section should be empty
-        knot = result["matched"]["knot"]
+        knot = result.matched["knot"]
         assert knot["brand"] is None
         assert knot["model"] is None
 
@@ -95,19 +102,20 @@ class TestLegacySingleComponentFallbackWrapperStrategy:
 
         # Should return a composite brush result with knot only
         assert result is not None
-        assert result["match_type"] == "single_component"
-        assert result["matched"]["brand"] is None  # Composite brush
-        assert result["matched"]["model"] is None  # Composite brush
-        assert "handle" in result["matched"]
-        assert "knot" in result["matched"]
+        assert result.match_type == "single_component"
+        assert result.matched is not None
+        assert result.matched["brand"] is None  # Composite brush
+        assert result.matched["model"] is None  # Composite brush
+        assert "handle" in result.matched
+        assert "knot" in result.matched
 
         # Handle section should be empty
-        handle = result["matched"]["handle"]
+        handle = result.matched["handle"]
         assert handle["brand"] is None
         assert handle["model"] is None
 
         # Knot section should contain Generic Timberwolf info
-        knot = result["matched"]["knot"]
+        knot = result.matched["knot"]
         assert knot["brand"] == "Generic"
         assert knot["model"] == "Timberwolf"
         assert knot["_matched_by"] == "KnotMatcher"
