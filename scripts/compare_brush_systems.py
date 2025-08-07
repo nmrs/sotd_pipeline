@@ -62,8 +62,10 @@ def main():
         summary = report["summary"]
         print(f"Total Records: {summary['total_records']}")
 
-        # Calculate agreement rate from matching results
-        agreement_rate = summary["matching_results"]["percentage"]
+        # Calculate agreement rate (matching results + both unmatched)
+        agreement_rate = (
+            summary["matching_results"]["percentage"] + summary["both_unmatched"]["percentage"]
+        )
         disagreement_rate = summary["different_results"]["percentage"]
 
         print(f"Agreement Rate: {agreement_rate:.1f}%")
