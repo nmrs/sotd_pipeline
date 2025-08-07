@@ -121,6 +121,190 @@ Implement a scoring-based **brush matching** system to replace the current "firs
 
 **Success Criteria**: Each phase maintains 100% alignment while incrementally adding complexity.
 
+#### Phase 3.2: Complete Brush Strategy Breakdown ✅ **COMPLETE**
+
+**Objective**: Replace `complete_brush` wrapper with individual brush strategies
+**Approach**: Individual strategy implementation with configuration integration
+**Status**: ✅ **COMPLETE** - All 40 tests passing
+
+**Implementation Details**:
+- ✅ **Step 3.2.1**: Individual brush strategy classes implemented and tested
+  - KnownBrushMatchingStrategy: Uses catalog data for known brush patterns
+  - OmegaSemogueBrushMatchingStrategy: Handles Omega and Semogue brushes
+  - ZenithBrushMatchingStrategy: Handles Zenith brush patterns
+  - OtherBrushMatchingStrategy: Handles other brush brands from catalog
+  - All strategies updated to use configuration-compatible strategy names
+
+        - ✅ **Step 3.2.2**: Scoring configuration updated with individual strategy weights
+          - Added individual brush strategy weights: known_brush (66.0), omega_semogue (62.0), zenith (58.0), other_brush (54.0)
+          - Removed complete_brush wrapper from configuration
+          - Maintained correct priority order (highest to lowest)
+          - **CRITICAL FIX**: Updated weights to preserve relative priority relationships with existing strategies
+
+- ✅ **Step 3.2.3**: Complete_brush wrapper removed from strategy list
+  - Updated `_create_strategies()` method in BrushScoringMatcher
+  - Replaced CompleteBrushWrapperStrategy with 4 individual strategies
+  - Maintained correct priority order in strategy list
+
+- ✅ **Step 3.2.4**: 100% alignment validation completed
+  - All individual strategies produce same results as wrapper
+  - Strategy priority order maintained
+  - Scoring weights match priority order
+  - Edge cases handled correctly
+  - Legacy behavior preserved
+
+- ✅ **Step 3.2.5**: Specific examples tested successfully
+  - Simpson Chubby 2: Matches correctly with known_brush strategy
+  - Omega 10049: Matches correctly with omega_semogue strategy
+  - Semogue C3: Matches correctly with omega_semogue strategy
+  - Zenith B2: Matches correctly with zenith strategy
+  - Summer Break Soaps: Handled by dual_component strategy (as expected)
+
+**Test Results**: 40/40 Phase 3.2 tests passing
+        **Configuration**: Updated brush_scoring_config.yaml with individual strategy weights (preserving priority relationships)
+**Strategy Names**: Updated to use configuration-compatible names (known_brush, omega_semogue, zenith, other_brush)
+**Alignment**: 100% maintained with legacy system behavior
+
+        **Success Criteria Met**:
+        - ✅ Individual brush strategies replace complete_brush wrapper
+        - ✅ Configuration includes sub-strategy weights
+        - ✅ Strategy list maintains correct priority order
+        - ✅ 100% alignment with legacy system maintained
+        - ✅ Specific examples work correctly
+        - ✅ **CRITICAL**: Relative priority relationships preserved (no skewing of new vs old matches)
+
+        **Lessons Learned**:
+        - **Priority Relationship Preservation**: When breaking down wrapper strategies, must maintain relative priority relationships with existing strategies to avoid unintended behavior changes
+        - **Weight Selection Strategy**: Individual strategy weights should be set below the next-highest existing strategy to preserve intended matching hierarchy
+        - **Configuration Testing Strategy**: Test relative priority relationships rather than specific values for human-editable YAML configurations to avoid brittle tests
+
+#### Phase 3.3: Dual Component Strategy Breakdown  
+**Goal**: Replace `dual_component` wrapper with individual component matchers
+**Approach**: Break down the `dual_component` strategy into HandleMatcher and KnotMatcher coordination
+**Components to implement**:
+1. **HandleMatcher Integration** - Handle component matching (65.0)
+2. **KnotMatcher Integration** - Knot component matching (65.0)
+3. **Component Coordination Logic** - Handle/knot result combination (65.0)
+
+**Steps**:
+- **Step 3.3.1**: Integrate HandleMatcher into scoring system
+- **Step 3.3.2**: Integrate KnotMatcher into scoring system  
+- **Step 3.3.3**: Implement component coordination strategy
+- **Step 3.3.4**: Update scoring configuration for component strategies
+- **Step 3.3.5**: Remove `dual_component` wrapper from strategy list
+- **Step 3.3.6**: Validate 100% alignment maintained
+
+**Success Criteria**: 100% alignment maintained while scoring individual component matchers.
+
+#### Phase 3.4: High Priority Automated Split Strategy Breakdown
+**Goal**: Replace `high_priority_automated_split` wrapper with individual splitting strategies
+**Approach**: Break down the automated split strategy into delimiter-specific strategies
+**Sub-strategies to implement**:
+1. **HighReliabilityDelimiterStrategy** - " w/ ", " w/", " with " delimiters (70.0)
+2. **HandlePrimaryDelimiterStrategy** - " in " delimiter (70.0)
+3. **SmartSplitAnalysisStrategy** - Smart analysis for handle/knot determination (70.0)
+4. **PositionalSplitAnalysisStrategy** - Positional analysis for handle/knot determination (70.0)
+
+**Steps**:
+- **Step 3.4.1**: Implement high-reliability delimiter strategy
+- **Step 3.4.2**: Implement handle-primary delimiter strategy
+- **Step 3.4.3**: Implement smart split analysis strategy
+- **Step 3.4.4**: Implement positional split analysis strategy
+- **Step 3.4.5**: Update scoring configuration for split strategies
+- **Step 3.4.6**: Remove `high_priority_automated_split` wrapper from strategy list
+- **Step 3.4.7**: Validate 100% alignment maintained
+
+**Success Criteria**: 100% alignment maintained while scoring individual split strategies.
+
+#### Phase 3.5: Medium Priority Automated Split Strategy Breakdown
+**Goal**: Replace `medium_priority_automated_split` wrapper with individual splitting strategies
+**Approach**: Break down the medium priority automated split strategy into delimiter-specific strategies
+**Sub-strategies to implement**:
+1. **MediumReliabilityDelimiterStrategy** - Medium reliability delimiters (60.0)
+2. **MediumPrioritySplitAnalysisStrategy** - Medium priority split analysis (60.0)
+
+**Steps**:
+- **Step 3.5.1**: Implement medium-reliability delimiter strategy
+- **Step 3.5.2**: Implement medium priority split analysis strategy
+- **Step 3.5.3**: Update scoring configuration for medium priority split strategies
+- **Step 3.5.4**: Remove `medium_priority_automated_split` wrapper from strategy list
+- **Step 3.5.5**: Validate 100% alignment maintained
+
+**Success Criteria**: 100% alignment maintained while scoring individual medium priority split strategies.
+
+#### Phase 3.6: Single Component Fallback Strategy Breakdown
+**Goal**: Replace `single_component_fallback` wrapper with individual fallback strategies
+**Approach**: Break down the single component fallback strategy into handle-only and knot-only strategies
+**Sub-strategies to implement**:
+1. **HandleOnlyFallbackStrategy** - Handle-only component matching (55.0)
+2. **KnotOnlyFallbackStrategy** - Knot-only component matching (55.0)
+
+**Steps**:
+- **Step 3.6.1**: Implement handle-only fallback strategy
+- **Step 3.6.2**: Implement knot-only fallback strategy
+- **Step 3.6.3**: Update scoring configuration for fallback strategies
+- **Step 3.6.4**: Remove `single_component_fallback` wrapper from strategy list
+- **Step 3.6.5**: Validate 100% alignment maintained
+
+**Success Criteria**: 100% alignment maintained while scoring individual fallback strategies.
+
+#### Phase 3.7: Strategy Modifier Integration
+**Goal**: Add strategy-specific modifiers to enhance scoring accuracy
+**Approach**: Introduce modifiers that can adjust scores based on input characteristics
+**Modifiers to implement**:
+1. **MultipleBrandsModifier** - Penalty for multiple brand mentions
+2. **FiberWordsModifier** - Bonus for fiber-specific terminology
+3. **SizeSpecificationModifier** - Bonus for size specifications
+4. **DelimiterConfidenceModifier** - Bonus for high-confidence delimiters
+
+**Steps**:
+- **Step 3.7.1**: Implement modifier framework in scoring engine
+- **Step 3.7.2**: Add multiple brands modifier
+- **Step 3.7.3**: Add fiber words modifier
+- **Step 3.7.4**: Add size specification modifier
+- **Step 3.7.5**: Add delimiter confidence modifier
+- **Step 3.7.6**: Update YAML configuration with modifier weights
+- **Step 3.7.7**: Validate 100% alignment maintained with modifiers
+
+**Success Criteria**: 100% alignment maintained while adding intelligent scoring modifiers.
+
+#### Phase 3.8: Advanced Strategy Coordination
+**Goal**: Implement advanced coordination between strategies for optimal results
+**Approach**: Add logic to handle strategy interactions and dependencies
+**Coordination features to implement**:
+1. **StrategyDependencyManager** - Handle strategy dependencies
+2. **ResultConflictResolver** - Resolve conflicts between strategy results
+3. **StrategyPerformanceOptimizer** - Optimize strategy execution order
+
+**Steps**:
+- **Step 3.8.1**: Implement strategy dependency manager
+- **Step 3.8.2**: Implement result conflict resolver
+- **Step 3.8.3**: Implement strategy performance optimizer
+- **Step 3.8.4**: Integrate coordination features into scoring engine
+- **Step 3.8.5**: Validate 100% alignment maintained with coordination
+
+**Success Criteria**: 100% alignment maintained while adding advanced strategy coordination.
+
+#### Phase 3.9: Final Alignment Validation and Optimization
+**Goal**: Comprehensive validation and optimization of the complete scoring system
+**Approach**: Thorough testing and optimization of all implemented strategies and modifiers
+**Validation activities**:
+1. **ComprehensiveAlignmentTesting** - Test all edge cases and scenarios
+2. **PerformanceOptimization** - Optimize strategy execution performance
+3. **ConfigurationTuning** - Fine-tune all weights and modifiers
+4. **DocumentationUpdate** - Update all documentation and specifications
+
+**Steps**:
+- **Step 3.9.1**: Implement comprehensive alignment test suite
+- **Step 3.9.2**: Run performance optimization analysis
+- **Step 3.9.3**: Fine-tune configuration weights and modifiers
+- **Step 3.9.4**: Update all documentation and specifications
+- **Step 3.9.5**: Final validation of 100% alignment
+
+**Success Criteria**: Complete scoring system with 100% alignment, optimized performance, and comprehensive documentation.
+
+**PHASE 3 COMPLETION CRITERIA**: All sub-phases (3.1 through 3.9) completed with 100% alignment maintained throughout the entire process.
+
 **CURRENT STATUS**: Phase 3.1 in progress. **APPROACH CHANGE**: Moving from complex flattened strategy list to simple wrapper strategy approach for better complexity management and debugging.
 
 **ROOT CAUSE IDENTIFIED**: 
@@ -163,14 +347,20 @@ Implement a scoring-based **brush matching** system to replace the current "firs
 26. **Split Quality Metrics Collection** - Track handle/knot determination accuracy with entry point integration
 
 ### Phase 8: Internal Scorer Exposure
-23. **Internal Scorer Modifier Exposure** - Expose internal scoring methods as configurable modifiers
-24. **ChatGPT Internal Scorer Integration** - ChatGPT integration for internal scorer tuning
-25. **Comprehensive Internal Scorer Analysis** - Stage 4 ChatGPT analysis for internal scorers with entry point integration
+27. **Internal Scorer Modifier Exposure** - Expose internal scoring methods as configurable modifiers
+28. **ChatGPT Internal Scorer Integration** - ChatGPT integration for internal scorer tuning
+29. **Comprehensive Internal Scorer Analysis** - Stage 4 ChatGPT analysis for internal scorers with entry point integration
 
-### Phase 9: Performance Optimization
-26. **Performance Monitoring and Optimization** - System performance tuning with entry point integration
-27. **Caching Improvements** - Enhanced caching strategies with entry point integration
-28. **System Tuning** - Final optimization and cleanup with entry point integration
+### Phase 9: System Cleanup and Code Optimization
+26. **Dead Code Removal** - Remove orphaned CompositeBrushStrategy and unused helper methods
+27. **Debug File Cleanup** - Remove all debug files from root directory and test cleanup
+28. **Import and Configuration Optimization** - Optimize imports and simplify YAML configuration
+29. **Test Suite Cleanup** - Remove tests for orphaned functionality and align test coverage
+
+### Phase 10: Performance Optimization
+30. **Performance Monitoring and Optimization** - System performance tuning with entry point integration
+31. **Caching Improvements** - Enhanced caching strategies with entry point integration
+32. **System Tuning** - Final optimization and cleanup with entry point integration
 
 ## 🔁 Implementation Prompts
 
@@ -1745,7 +1935,193 @@ Integration Requirements:
 - Validate system identification in caching strategies
 ```
 
-### Step 28: System Tuning (UPDATED FOR ENTRY POINT)
+### Step 26: Dead Code Removal
+
+```text
+Remove orphaned CompositeBrushStrategy and unused helper methods from the scoring system.
+
+Requirements:
+- Remove orphaned CompositeBrushStrategy class that is not used anywhere
+- Remove unused HandleMatcher and KnotMatcher initialization from BrushScoringMatcher
+- Remove unused helper methods from BrushScoringMatcher:
+  - _convert_handle_result_to_brush_result()
+  - _combine_handle_and_knot_results()
+  - _convert_knot_result_to_brush_result()
+- Ensure no functionality is broken by removal
+- Update imports and dependencies as needed
+
+Dead Code Removal:
+```python
+# Remove from sotd/match/brush_matching_strategies/composite_brush_strategy.py
+# Delete entire file - no usage found in codebase
+
+# Remove from sotd/match/scoring_brush_matcher.py
+# Remove lines 67-82: HandleMatcher and KnotMatcher initialization
+# Remove lines 146-295: Unused helper methods
+```
+
+Test Requirements:
+- Verify no tests depend on removed code
+- Ensure all existing functionality still works
+- Test that wrapper strategies still function correctly
+- Validate that 100% alignment is maintained
+
+File Structure:
+- Delete: `sotd/match/brush_matching_strategies/composite_brush_strategy.py`
+- Update: `sotd/match/scoring_brush_matcher.py` - Remove unused code
+- Update: `tests/match/test_composite_brush_strategies.py` - Remove or update
+
+Integration Requirements:
+- Test with real brush data to ensure no regressions
+- Verify scoring system still produces 100% alignment with legacy system
+- Ensure CLI integration still works correctly
+```
+
+### Step 27: Debug File Cleanup
+
+```text
+Remove all debug files from root directory and clean up test files.
+
+Requirements:
+- Remove all debug files from project root directory
+- Clean up test files that test orphaned functionality
+- Ensure no critical functionality is lost
+- Update .gitignore if needed to prevent future debug file accumulation
+
+Debug Files to Remove:
+```bash
+# Root directory debug files
+debug_strategy_order.py
+debug_scoring.py
+debug_razor_matcher.py
+debug_soap_matcher.py
+debug_test_user_intent.py
+debug_user_intent_enrich.py
+debug_user_intent.py
+debug_catalog_loader.py
+debug_test3.py
+debug_test2.py
+test_real_patterns.py
+debug_api_detailed.py
+debug_api_final.py
+debug_api_specific.py
+debug_api_lookup.py
+debug_api.py
+test_analyzer_detailed_debug.py
+test_analyzer_debug.py
+test_match_key_debug.py
+debug_correct_matches.py
+test_filtered_entries.py
+test_brush_logic.py
+test_extracted_brushes.py
+test_hair_shaper.py
+test_correct_matches.yaml
+test_correct_matches.yaml.backup
+```
+
+Test Requirements:
+- Verify no critical functionality is lost
+- Ensure all tests still pass after cleanup
+- Test that pipeline still works correctly
+- Validate that no imports are broken
+
+File Structure:
+- Remove: All debug files from root directory
+- Update: .gitignore to prevent future debug file accumulation
+- Review: Test files for orphaned functionality
+
+Integration Requirements:
+- Test full pipeline execution to ensure no regressions
+- Verify all CLI commands still work
+- Ensure no critical debugging capabilities are lost
+```
+
+### Step 28: Import and Configuration Optimization
+
+```text
+Optimize imports and simplify YAML configuration for better maintainability.
+
+Requirements:
+- Move yaml import to function scope in scoring_brush_matcher.py
+- Simplify brush_scoring_config.yaml by removing empty modifier sections
+- Optimize other imports for better performance and clarity
+- Ensure no functionality is broken by import changes
+
+Import Optimization:
+```python
+# In sotd/match/scoring_brush_matcher.py
+# Move yaml import from top-level to function scope
+def load_correct_matches() -> dict:
+    import yaml  # Move import here
+    # ... rest of function
+```
+
+Configuration Simplification:
+```yaml
+# In data/brush_scoring_config.yaml
+# Remove empty modifier sections until Phase 3.2+
+brush_scoring_weights:
+  base_strategies:
+    correct_complete_brush: 100.0
+    correct_split_brush: 90.0
+    # ... other strategies
+  # Remove empty strategy_modifiers section until needed
+```
+
+Test Requirements:
+- Verify all imports work correctly after optimization
+- Test that configuration loading still works
+- Ensure no functionality is broken
+- Test performance impact of import changes
+
+File Structure:
+- Update: `sotd/match/scoring_brush_matcher.py` - Optimize imports
+- Update: `data/brush_scoring_config.yaml` - Simplify configuration
+- Test: All affected modules still work correctly
+
+Integration Requirements:
+- Test full system functionality after import optimization
+- Verify configuration changes don't break system
+- Ensure performance is maintained or improved
+```
+
+### Step 29: Test Suite Cleanup
+
+```text
+Remove tests for orphaned functionality and align test coverage with current system.
+
+Requirements:
+- Remove tests for orphaned CompositeBrushStrategy
+- Clean up tests that test unused functionality
+- Ensure test coverage aligns with current system architecture
+- Maintain comprehensive test coverage for working functionality
+
+Test Cleanup:
+```python
+# Remove or update tests for orphaned functionality
+# - tests/match/test_composite_brush_strategies.py
+# - tests/match/test_enhanced_brush_scoring_matcher.py (if testing unused features)
+# - Any other tests for removed functionality
+```
+
+Test Requirements:
+- Verify remaining tests still pass
+- Ensure test coverage is maintained for working functionality
+- Test that no critical functionality is untested
+- Validate that test suite is comprehensive and focused
+
+File Structure:
+- Remove: `tests/match/test_composite_brush_strategies.py`
+- Review: Other test files for orphaned functionality
+- Update: Test coverage documentation
+
+Integration Requirements:
+- Run full test suite to ensure all tests pass
+- Verify test coverage is adequate for current system
+- Ensure no critical functionality is missing test coverage
+```
+
+### Step 32: System Tuning (UPDATED FOR ENTRY POINT)
 
 ```text
 Implement final optimization and cleanup with entry point integration.
