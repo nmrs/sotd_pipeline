@@ -8,7 +8,7 @@ and new brush matching systems to analyze differences and agreement patterns.
 import json
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class BrushComparisonFramework:

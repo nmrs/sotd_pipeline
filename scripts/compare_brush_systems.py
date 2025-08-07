@@ -13,8 +13,8 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from sotd.match.brush_system_comparator import BrushSystemComparator
 from sotd.match.brush_parallel_data_manager import BrushParallelDataManager
+from sotd.match.brush_system_comparator import BrushSystemComparator
 
 
 def load_system_data(month: str) -> tuple[dict, dict]:
@@ -56,7 +56,7 @@ def main():
         report = comparator.generate_report()
 
         # Display key findings
-        print(f"\n📈 COMPARISON RESULTS")
+        print("\n📈 COMPARISON RESULTS")
         print("=" * 60)
 
         summary = report["summary"]
@@ -83,7 +83,7 @@ def main():
         print(f"Scoring System Success: {new_success_rate:.1f}%")
 
         # Show detailed breakdown
-        print(f"\n📊 DETAILED BREAKDOWN")
+        print("\n📊 DETAILED BREAKDOWN")
         print("-" * 40)
         for category, data in summary.items():
             if isinstance(data, dict) and "count" in data and "percentage" in data:
@@ -93,13 +93,13 @@ def main():
 
         # Show match type changes
         if report["match_type_changes"]:
-            print(f"\n🔄 MATCH TYPE CHANGES")
+            print("\n🔄 MATCH TYPE CHANGES")
             print("-" * 40)
             for change_type, count in report["match_type_changes"].items():
                 print(f"{change_type}: {count}")
 
         # Show performance comparison
-        print(f"\n⚡ PERFORMANCE COMPARISON")
+        print("\n⚡ PERFORMANCE COMPARISON")
         print("-" * 40)
         performance = comparator.get_performance_comparison()
 
@@ -107,9 +107,9 @@ def main():
         new_perf = performance["new_system_performance"]
 
         if old_perf and new_perf:
-            old_processing_time = old_perf.get('processing_time_seconds', 0)
-            new_processing_time = new_perf.get('processing_time_seconds', 0)
-            
+            old_processing_time = old_perf.get("processing_time_seconds", 0)
+            new_processing_time = new_perf.get("processing_time_seconds", 0)
+
             print(f"Legacy System Processing Time: {old_processing_time:.2f}s")
             print(f"Scoring System Processing Time: {new_processing_time:.2f}s")
 
@@ -120,17 +120,17 @@ def main():
                 else:
                     speedup = old_processing_time / new_processing_time
                     print(f"Scoring System is {speedup:.1f}x faster than Legacy System")
-            
+
             # Show file I/O times
-            old_io_time = old_perf.get('file_io_time_seconds', 0)
-            new_io_time = new_perf.get('file_io_time_seconds', 0)
+            old_io_time = old_perf.get("file_io_time_seconds", 0)
+            new_io_time = new_perf.get("file_io_time_seconds", 0)
             if old_io_time > 0 or new_io_time > 0:
                 print(f"Legacy System I/O Time: {old_io_time:.3f}s")
                 print(f"Scoring System I/O Time: {new_io_time:.3f}s")
 
         # Show sample differences with strategy information
         if report["detailed_differences"]:
-            print(f"\n🔍 SAMPLE DIFFERENCES (showing first 3)")
+            print("\n🔍 SAMPLE DIFFERENCES (showing first 3)")
             print("-" * 40)
             for i, diff in enumerate(report["detailed_differences"][:3]):
                 print(f"\nDifference #{i + 1}:")
@@ -144,16 +144,16 @@ def main():
                     f"  Scoring: {diff['new_match']['brand']} {diff['new_match']['model']} "
                     f"({diff['new_match']['match_type']} - {diff['new_match']['strategy']})"
                 )
-                
+
                 # Show strategy selection analysis
-                old_strategy = diff['old_match']['strategy']
-                new_strategy = diff['new_match']['strategy']
+                old_strategy = diff["old_match"]["strategy"]
+                new_strategy = diff["new_match"]["strategy"]
                 if old_strategy != new_strategy:
                     print(f"  Strategy Change: {old_strategy} → {new_strategy}")
-                    
+
                     # Show composite brush details if available
                     if new_strategy == "dual_component":
-                        print(f"  Composite Brush: Handle + Knot components")
+                        print("  Composite Brush: Handle + Knot components")
                         # Could add more detailed breakdown here if needed
 
         # Save detailed report
@@ -162,7 +162,7 @@ def main():
         print(f"\n💾 Detailed report saved to: {output_path}")
 
         # Statistical summary
-        print(f"\n📊 STATISTICAL SUMMARY")
+        print("\n📊 STATISTICAL SUMMARY")
         print("-" * 40)
         stats = comparator.get_statistical_summary()
 
@@ -171,7 +171,7 @@ def main():
         print(f"Model Changes: {stats['difference_categories']['model_changes']}")
         print(f"Fiber Changes: {stats['difference_categories']['fiber_changes']}")
 
-        print(f"\n✅ Comparison complete!")
+        print("\n✅ Comparison complete!")
 
     except Exception as e:
         print(f"❌ Error during comparison: {e}")

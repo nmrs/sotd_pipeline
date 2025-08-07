@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """Composite brush matching strategy for scoring system."""
 
-from typing import Optional, Dict, Any
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
 from sotd.match.handle_matcher import HandleMatcher
 from sotd.match.knot_matcher import KnotMatcher
-from sotd.match.types import MatchResult, create_match_result
+from sotd.match.types import MatchResult
 
 
 class CompositeBrushStrategy(BaseBrushMatchingStrategy):

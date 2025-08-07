@@ -5,18 +5,19 @@ This module provides the full implementation of the brush scoring matcher
 that uses all brush scoring components for improved architecture and performance.
 """
 
-import yaml
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 
-from sotd.match.brush_scoring_config import BrushScoringConfig
+import yaml
+
 from sotd.match.brush_scoring_components import (
     CorrectMatchesMatcher,
-    StrategyOrchestrator,
-    ScoringEngine,
-    ResultProcessor,
     PerformanceMonitor,
+    ResultProcessor,
+    ScoringEngine,
+    StrategyOrchestrator,
 )
+from sotd.match.brush_scoring_config import BrushScoringConfig
 from sotd.match.types import MatchResult
 
 
@@ -102,34 +103,34 @@ class BrushScoringMatcher:
         legacy_matcher = BrushMatcher(config=config, correct_matches_path=self.correct_matches_path)
 
         # Import wrapper strategies
-        from sotd.match.brush_matching_strategies.correct_matches_wrapper_strategies import (
-            CorrectCompleteBrushWrapperStrategy,
-            CorrectSplitBrushWrapperStrategy,
-        )
-        from sotd.match.brush_matching_strategies.known_split_wrapper_strategy import (
-            KnownSplitWrapperStrategy,
-        )
         from sotd.match.brush_matching_strategies.automated_split_wrapper_strategies import (
             HighPriorityAutomatedSplitWrapperStrategy,
             MediumPriorityAutomatedSplitWrapperStrategy,
         )
-        from sotd.match.brush_matching_strategies.legacy_composite_wrapper_strategies import (
-            LegacyDualComponentWrapperStrategy,
-            LegacySingleComponentFallbackWrapperStrategy,
+        from sotd.match.brush_matching_strategies.correct_matches_wrapper_strategies import (
+            CorrectCompleteBrushWrapperStrategy,
+            CorrectSplitBrushWrapperStrategy,
         )
 
         # Import individual brush strategies for Phase 3.2
         from sotd.match.brush_matching_strategies.known_brush_strategy import (
             KnownBrushMatchingStrategy,
         )
+        from sotd.match.brush_matching_strategies.known_split_wrapper_strategy import (
+            KnownSplitWrapperStrategy,
+        )
+        from sotd.match.brush_matching_strategies.legacy_composite_wrapper_strategies import (
+            LegacyDualComponentWrapperStrategy,
+            LegacySingleComponentFallbackWrapperStrategy,
+        )
         from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
             OmegaSemogueBrushMatchingStrategy,
         )
-        from sotd.match.brush_matching_strategies.zenith_strategy import (
-            ZenithBrushMatchingStrategy,
-        )
         from sotd.match.brush_matching_strategies.other_brushes_strategy import (
             OtherBrushMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.zenith_strategy import (
+            ZenithBrushMatchingStrategy,
         )
 
         # Get catalog data for individual strategies

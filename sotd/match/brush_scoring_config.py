@@ -5,9 +5,10 @@ This module provides YAML-based configuration management for brush scoring
 weights and criteria, supporting hot-reloading and validation.
 """
 
-import yaml
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
+import yaml
 
 
 class BrushScoringConfig:

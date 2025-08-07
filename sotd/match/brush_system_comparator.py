@@ -8,7 +8,7 @@ of the legacy brush matching system against the new scoring-based system.
 import json
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class BrushSystemComparator:
@@ -272,8 +272,8 @@ class BrushSystemComparator:
         # Compare timing metrics using correct field names from metadata
         timing_metrics = [
             ("total_processing_time_seconds", "total_time"),
-            ("processing_time_seconds", "processing_time"), 
-            ("file_io_time_seconds", "file_io_time")
+            ("processing_time_seconds", "processing_time"),
+            ("file_io_time_seconds", "file_io_time"),
         ]
 
         for metadata_field, comparison_field in timing_metrics:

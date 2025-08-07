@@ -5,7 +5,7 @@ This component tracks performance metrics for brush matching strategies.
 """
 
 import time
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class PerformanceMonitor:

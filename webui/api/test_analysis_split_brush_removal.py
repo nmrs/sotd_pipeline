@@ -1,9 +1,10 @@
-import pytest
-from fastapi.testclient import TestClient
 from unittest.mock import patch
-from fastapi import FastAPI
-from webui.api.analysis import router
 
+import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+
+from webui.api.analysis import router
 
 app = FastAPI()
 app.include_router(router)

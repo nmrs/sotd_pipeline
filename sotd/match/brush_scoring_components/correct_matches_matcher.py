@@ -4,7 +4,7 @@ Correct Matches Matcher Component.
 This component provides fast lookup against validated matches from correct_matches.yaml.
 """
 
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 from sotd.match.types import MatchResult
 

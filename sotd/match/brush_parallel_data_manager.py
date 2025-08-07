@@ -8,7 +8,7 @@ to store data in separate directories.
 
 import json
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 
 class BrushParallelDataManager:

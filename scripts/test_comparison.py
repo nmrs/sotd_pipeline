@@ -8,8 +8,8 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from sotd.match.brush_system_comparator import BrushSystemComparator
 from sotd.match.brush_parallel_data_manager import BrushParallelDataManager
+from sotd.match.brush_system_comparator import BrushSystemComparator
 
 
 def main():
@@ -50,7 +50,7 @@ def main():
 
         # Show summary
         stats = comparator.get_statistical_summary()
-        print(f"\n📊 SUMMARY:")
+        print("\n📊 SUMMARY:")
         print(f"Total Records: {stats['total_records']}")
         print(f"Agreement Rate: {stats['agreement_rate']:.1f}%")
         print(f"Disagreement Rate: {stats['disagreement_rate']:.1f}%")
