@@ -176,7 +176,11 @@ def _modifier_handle_confidence(self, input_text: str, result: dict, strategy_na
 - **Approach**: One strategy at a time, opening the black box and scoring internal components
 - **Example Progression**:
   - **Phase 3.2**: Replace `complete_brush` wrapper with individual brush strategies
-  - **Phase 3.3**: Replace `dual_component` wrapper with individual component matchers
+  - **Phase 3.3**: Replace `dual_component` wrapper with individual component strategies and coordinated composite strategy
+  - **HandleComponentStrategy** (30.0): Handle-only component matching - replaces single_component_fallback handle logic
+  - **KnotComponentStrategy** (30.0): Knot-only component matching - replaces single_component_fallback knot logic  
+  - **ComponentCoordinationStrategy** (50.0): Handle/knot coordination for complete composite result - replaces dual_component wrapper
+  - **Priority Hierarchy**: Complete composite (50.0) > Individual components (30.0) - maintains legacy system priority
   - **Phase 3.4**: Replace `high_priority_automated_split` wrapper with individual splitting strategies
 
 #### Brush Strategy Hierarchy

@@ -107,9 +107,20 @@ class BrushScoringMatcher:
             HighPriorityAutomatedSplitWrapperStrategy,
             MediumPriorityAutomatedSplitWrapperStrategy,
         )
+        from sotd.match.brush_matching_strategies.component_coordination_strategy import (
+            ComponentCoordinationStrategy,
+        )
         from sotd.match.brush_matching_strategies.correct_matches_wrapper_strategies import (
             CorrectCompleteBrushWrapperStrategy,
             CorrectSplitBrushWrapperStrategy,
+        )
+
+        # Import component strategies for Phase 3.3
+        from sotd.match.brush_matching_strategies.handle_component_strategy import (
+            HandleComponentStrategy,
+        )
+        from sotd.match.brush_matching_strategies.knot_component_strategy import (
+            KnotComponentStrategy,
         )
 
         # Import individual brush strategies for Phase 3.2
@@ -120,7 +131,6 @@ class BrushScoringMatcher:
             KnownSplitWrapperStrategy,
         )
         from sotd.match.brush_matching_strategies.legacy_composite_wrapper_strategies import (
-            LegacyDualComponentWrapperStrategy,
             LegacySingleComponentFallbackWrapperStrategy,
         )
         from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
@@ -151,8 +161,12 @@ class BrushScoringMatcher:
             OmegaSemogueBrushMatchingStrategy(),
             ZenithBrushMatchingStrategy(),
             OtherBrushMatchingStrategy(catalog_data.get("other_brushes", {})),
-            # Priority 5: dual_component
-            LegacyDualComponentWrapperStrategy(legacy_matcher),
+            # Priority 5: individual component strategies (replacing dual_component wrapper)
+            HandleComponentStrategy(legacy_matcher.handle_matcher),
+            KnotComponentStrategy(legacy_matcher.knot_matcher),
+            ComponentCoordinationStrategy(
+                legacy_matcher.handle_matcher, legacy_matcher.knot_matcher
+            ),
             # Priority 6: medium_priority_automated_split
             MediumPriorityAutomatedSplitWrapperStrategy(legacy_matcher),
             # Priority 7: single_component_fallback

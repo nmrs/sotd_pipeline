@@ -16,8 +16,10 @@ brush_scoring_weights:
     zenith: 58.0
     other_brush: 54.0
     
-    # Composite brush strategies
-    dual_component: 50.0
+    # Individual component strategies (replacing dual_component wrapper)
+    handle_component: 30.0
+    knot_component: 30.0
+    component_coordination: 50.0
     medium_priority_automated_split: 40.0
     single_component_fallback: 30.0
 
