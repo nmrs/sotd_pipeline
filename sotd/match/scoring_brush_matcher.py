@@ -44,10 +44,7 @@ class BrushScoringMatcher:
     """
 
     def __init__(
-        self, 
-        config_path: Path | None = None, 
-        correct_matches_path: Path | None = None, 
-        **kwargs
+        self, config_path: Path | None = None, correct_matches_path: Path | None = None, **kwargs
     ):
         """
         Initialize the enhanced brush scoring matcher.
@@ -59,7 +56,7 @@ class BrushScoringMatcher:
         """
         # Initialize configuration
         self.config = BrushScoringConfig(config_path=config_path)
-        
+
         # Store correct_matches_path for wrapper strategies
         self.correct_matches_path = correct_matches_path
 
