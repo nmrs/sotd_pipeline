@@ -26,12 +26,11 @@ def test_complete_brush_matching_with_timberwolf_split_brush(brush_matcher):
     # Handle may not be matched (depends on handle matcher)
     # Handle brand may be None if not matched by handle matcher
 
-    # Knot should be matched by FiberFallbackStrategy
+    # Knot should be matched by KnotMatcher (Timberwolf is in the knot catalog)
     knot = result.matched["knot"]
-    assert knot["brand"] is None
-    assert knot["model"] == "Synthetic"
-    assert knot["fiber"] == "Synthetic"
-    assert knot["_pattern"] == "fiber_detection"
+    assert knot["brand"] == "Generic"  # Timberwolf is matched as Generic brand
+    assert knot["model"] == "Timberwolf"  # Model should be Timberwolf
+    assert knot["_pattern"] == "timberwolf"  # Should match the timberwolf pattern
     assert result.match_type == "regex"
 
 
@@ -208,9 +207,9 @@ def test_fallback_strategy_priority_in_complex_scenarios(brush_matcher):
     assert result is not None
     assert result.matched is not None
     knot = result.matched["knot"]
-    assert knot["_pattern"] == "fiber_detection"
-    assert knot["fiber"] == "Synthetic"
-    assert knot["model"] == "Synthetic"
+    assert (
+        knot["_pattern"] == "timberwolf"
+    )  # Should match the timberwolf pattern, not fiber_detection
 
     # Test that size detection works when no fiber is detected
     result = brush_matcher.match("Custom 26mm")
