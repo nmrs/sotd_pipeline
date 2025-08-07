@@ -53,9 +53,14 @@ class TestComponentCoordinationStrategy:
         assert result is not None, "Should return a result when both handle and knot are found"
         assert result.matched is not None, "Should have matched data"
 
-        # Should have top-level brand/model (complete result)
-        assert result.matched["brand"] == "Summer Break", "Should have top-level brand from handle"
-        assert result.matched["model"] == "Maize", "Should have top-level model from handle"
+        # Should have top-level brand based on handle/knot brand matching (like legacy system)
+        # For "Summer Break" handle and "Timberwolf" knot (different brands), brand should be None
+        assert (
+            result.matched["brand"] is None
+        ), "Should have top-level brand as None when handle/knot brands differ (like legacy system)"
+        assert (
+            result.matched["model"] is None
+        ), "Should have top-level model as None (like legacy system)"
         assert (
             result.matched["_matched_by"] == "HandleMatcher+KnotMatcher"
         ), "Should indicate combined source"
@@ -102,8 +107,8 @@ class TestComponentCoordinationStrategy:
         result = self.strategy.match("Chisel & Hound 'The Duke' / Omega 10098 Boar")
         assert result is not None, "Should return a result"
         assert (
-            result.strategy == "component_coordination"
-        ), "Strategy name should be 'component_coordination'"
+            result.strategy == "dual_component"
+        ), "Strategy name should be 'dual_component' for perfect compatibility"
 
     def test_component_coordination_strategy_no_handle_returns_none(self):
         """Test that ComponentCoordinationStrategy returns None when no handle found."""
@@ -281,9 +286,41 @@ class TestComponentCoordinationStrategy:
         # Test match_type
         result = self.strategy.match("Test input")
         assert result is not None, "Should return a result"
+        assert result.match_type == "regex", "Match type should be 'regex' (like legacy system)"
+
+    def test_component_coordination_strategy_same_brand_sets_top_level(self):
+        """Test that ComponentCoordinationStrategy sets top-level brand when handle/knot brands match."""
+        # Setup mock handle match with same brand as knot
+        mock_handle_match = {
+            "handle_maker": "Wolf Whiskers",  # Same brand as knot
+            "handle_model": "Custom Handle",
+            "_matched_by": "HandleMatcher",
+            "_pattern_used": "wolf.*whisker",
+        }
+        self.mock_handle_matcher.match_handle_maker.return_value = mock_handle_match
+
+        # Setup mock knot match with same brand
+        mock_knot_result = MatchResult(
+            original="Test input",
+            matched={
+                "brand": "Wolf Whiskers",  # Same brand as handle
+                "model": "Mixed Badger/Boar",
+                "fiber": "badger",
+                "knot_size_mm": 26.0,
+            },
+            match_type="regex",
+            pattern="wolf.*whisker",
+        )
+        self.mock_knot_matcher.match.return_value = mock_knot_result
+
+        # Should set top-level brand when handle/knot brands match (like legacy system)
+        result = self.strategy.match("Wolf Whiskers - Mixed Badger/Boar")
+        assert result is not None, "Should return a result"
         assert (
-            result.match_type == "component_coordination"
-        ), "Match type should be 'component_coordination'"
+            result.matched["brand"] == "Wolf Whiskers"
+        ), "Should set top-level brand when brands match"
+        assert result.matched["model"] is None, "Should have top-level model as None"
+        assert result.match_type == "regex", "Match type should be 'regex' (like legacy system)"
 
     def test_component_coordination_strategy_handles_missing_patterns(self):
         """Test that ComponentCoordinationStrategy handles missing patterns gracefully."""

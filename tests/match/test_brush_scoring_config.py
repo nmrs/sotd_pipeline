@@ -132,7 +132,7 @@ class TestBrushScoringConfig:
             config.get_base_strategy_score("omega_semogue"),
             config.get_base_strategy_score("zenith"),
             config.get_base_strategy_score("other_brush"),
-            config.get_base_strategy_score("component_coordination"),
+            config.get_base_strategy_score("dual_component"),
             config.get_base_strategy_score("medium_priority_automated_split"),
             config.get_base_strategy_score("single_component_fallback"),
         ]
@@ -170,7 +170,7 @@ class TestBrushScoringConfig:
             "other_brush",
             "handle_component",
             "knot_component",
-            "component_coordination",
+            "dual_component",
             "medium_priority_automated_split",
             "single_component_fallback",
         ]
