@@ -321,6 +321,7 @@ def process_month(
                         "matched": value.matched,
                         "match_type": value.match_type,
                         "pattern": value.pattern,
+                        "strategy": getattr(value, "strategy", None),
                     }
                 else:
                     converted_record[key] = value

@@ -135,7 +135,7 @@ class BrushSystemComparator:
             change_key = f"{old_type}_to_{new_type}"
             metrics["match_type_changes"][change_key] += 1
 
-        # Record detailed difference
+        # Record detailed difference with strategy information
         difference = {
             "record_index": record_index,
             "input_text": old_brush.get("original", "unknown"),
@@ -145,6 +145,7 @@ class BrushSystemComparator:
                 "fiber": old_matched.get("fiber"),
                 "match_type": old_brush.get("match_type"),
                 "pattern": old_brush.get("pattern"),
+                "strategy": old_brush.get("strategy", "legacy_system"),
             },
             "new_match": {
                 "brand": new_matched.get("brand"),
@@ -152,6 +153,7 @@ class BrushSystemComparator:
                 "fiber": new_matched.get("fiber"),
                 "match_type": new_brush.get("match_type"),
                 "pattern": new_brush.get("pattern"),
+                "strategy": new_brush.get("strategy", "unknown_strategy"),
             },
         }
 

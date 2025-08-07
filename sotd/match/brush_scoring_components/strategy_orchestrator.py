@@ -52,7 +52,10 @@ class StrategyOrchestrator:
                             match_type=result.get("match_type", "unknown"),
                             pattern=result.get("pattern", "unknown"),
                         )
-                    results.append(result)
+
+                    # Only include results that have actual matches (matched is not None)
+                    if result.matched is not None:
+                        results.append(result)
             except Exception as e:
                 # Log error but continue with other strategies
                 # This allows individual strategy failures without breaking the system

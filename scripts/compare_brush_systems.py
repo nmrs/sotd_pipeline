@@ -114,7 +114,7 @@ def main():
                 speedup = old_perf["processing_time"] / new_perf["processing_time"]
                 print(f"Speedup: {speedup:.1f}x faster with scoring system")
 
-        # Show sample differences
+        # Show sample differences with strategy information
         if report["detailed_differences"]:
             print(f"\n🔍 SAMPLE DIFFERENCES (showing first 3)")
             print("-" * 40)
@@ -123,11 +123,24 @@ def main():
                 print(f"  Record Index: {diff['record_index']}")
                 print(f"  Original: {diff['input_text']}")
                 print(
-                    f"  Legacy: {diff['old_match']['brand']} {diff['old_match']['model']} ({diff['old_match']['match_type']})"
+                    f"  Legacy: {diff['old_match']['brand']} {diff['old_match']['model']} "
+                    f"({diff['old_match']['match_type']} - {diff['old_match']['strategy']})"
                 )
                 print(
-                    f"  Scoring: {diff['new_match']['brand']} {diff['new_match']['model']} ({diff['new_match']['match_type']})"
+                    f"  Scoring: {diff['new_match']['brand']} {diff['new_match']['model']} "
+                    f"({diff['new_match']['match_type']} - {diff['new_match']['strategy']})"
                 )
+                
+                # Show strategy selection analysis
+                old_strategy = diff['old_match']['strategy']
+                new_strategy = diff['new_match']['strategy']
+                if old_strategy != new_strategy:
+                    print(f"  Strategy Change: {old_strategy} → {new_strategy}")
+                    
+                    # Show composite brush details if available
+                    if new_strategy == "dual_component":
+                        print(f"  Composite Brush: Handle + Knot components")
+                        # Could add more detailed breakdown here if needed
 
         # Save detailed report
         output_path = Path("data") / f"brush_system_comparison_{month}.json"

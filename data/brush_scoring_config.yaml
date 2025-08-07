@@ -10,7 +10,7 @@ brush_scoring_weights:
     known_split: 80.0
     high_priority_automated_split: 70.0
     complete_brush: 60.0
-    dual_component: 50.0
+    dual_component: 75.0
     medium_priority_automated_split: 40.0
     single_component_fallback: 30.0
 
