@@ -151,21 +151,23 @@ class StrategyDependencyManager:
         result = strategy_results[depends_on_strategy]
         return self._check_dependency_satisfaction(dependency, result)
 
-    def _check_requires_any_dependencies(self, dependencies: List[StrategyDependency], strategy_results: Dict[str, Any]) -> bool:
+    def _check_requires_any_dependencies(
+        self, dependencies: List[StrategyDependency], strategy_results: Dict[str, Any]
+    ) -> bool:
         """
         Check if at least one dependency from a list is satisfied.
-        
+
         Args:
             dependencies: List of dependencies to check
             strategy_results: Dictionary of strategy results
-            
+
         Returns:
             True if at least one dependency is satisfied, False otherwise
         """
         # Check if any dependencies have run and succeeded
         any_satisfied = False
         any_checked = False
-        
+
         for dependency in dependencies:
             depends_on_strategy = dependency.depends_on_strategy
             if depends_on_strategy in strategy_results:
@@ -173,11 +175,11 @@ class StrategyDependencyManager:
                 if self._check_single_dependency(dependency, strategy_results):
                     any_satisfied = True
                     break
-        
+
         # If no dependencies have been checked yet, allow execution
         if not any_checked:
             return True
-        
+
         # If some dependencies have been checked, at least one must be satisfied
         return any_satisfied
 
@@ -213,7 +215,9 @@ class StrategyDependencyManager:
             True if dependency is satisfied, False otherwise
         """
         # Determine if the dependency strategy succeeded or failed
-        dependency_succeeded = result is not None and hasattr(result, 'matched') and result.matched is not None
+        dependency_succeeded = (
+            result is not None and hasattr(result, "matched") and result.matched is not None
+        )
 
         if dependency.dependency_type == DependencyType.REQUIRES_SUCCESS:
             return dependency_succeeded
