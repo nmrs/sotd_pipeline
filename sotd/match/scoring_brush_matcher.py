@@ -62,6 +62,22 @@ class BrushScoringMatcher:
         # Load correct matches data
         correct_matches_data = load_correct_matches()
 
+        # Initialize HandleMatcher and KnotMatcher first (needed for strategies)
+        from sotd.match.handle_matcher import HandleMatcher
+        from sotd.match.knot_matcher import KnotMatcher
+
+        handles_path = Path("data/handles.yaml")
+        self.handle_matcher = HandleMatcher(handles_path)
+
+        # Get knot strategies from a temporary strategy list
+        temp_strategies = self._create_temp_strategies()
+        knot_strategies = [
+            s
+            for s in temp_strategies
+            if any(keyword in s.__class__.__name__ for keyword in ["Knot", "Fiber", "Size"])
+        ]
+        self.knot_matcher = KnotMatcher(knot_strategies)
+
         # Initialize components
         self.correct_matches_matcher = CorrectMatchesMatcher(correct_matches_data)
         self.strategy_orchestrator = StrategyOrchestrator(self._create_strategies())
@@ -112,22 +128,7 @@ class BrushScoringMatcher:
             )
         )
 
-        # Initialize HandleMatcher for composite brush matching
-        from sotd.match.handle_matcher import HandleMatcher
-
-        handles_path = Path("data/handles.yaml")
-        self.handle_matcher = HandleMatcher(handles_path)
-
-        # Initialize KnotMatcher for composite brush matching
-        from sotd.match.knot_matcher import KnotMatcher
-
-        # Get knot strategies from the strategy list
-        knot_strategies = [
-            s
-            for s in self._create_strategies()
-            if any(keyword in s.__class__.__name__ for keyword in ["Knot", "Fiber", "Size"])
-        ]
-        self.knot_matcher = KnotMatcher(knot_strategies)
+        # HandleMatcher and KnotMatcher are now initialized above
 
     def _create_strategies(self) -> List:
         """
@@ -204,6 +205,79 @@ class BrushScoringMatcher:
             MediumPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
             # Priority 7: single_component_fallback
             LegacySingleComponentFallbackWrapperStrategy(legacy_matcher),
+            # Priority 6: medium_priority_automated_split
+            MediumPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
+        ]
+
+        return strategies
+
+    def _create_temp_strategies(self) -> List:
+        """
+        Create temporary strategy list for knot matcher initialization.
+
+        This creates strategies without the unified component strategy to avoid circular dependency.
+
+        Returns:
+            List of strategy objects (without unified component strategy)
+        """
+        # Create legacy matcher instance for wrapper strategies
+        from sotd.match.brush_matcher import BrushMatcher
+        from sotd.match.config import BrushMatcherConfig
+
+        config = BrushMatcherConfig.create_default()
+        legacy_matcher = BrushMatcher(config=config, correct_matches_path=self.correct_matches_path)
+
+        # Import individual strategies for Phase 3.4/3.5
+        from sotd.match.brush_matching_strategies.correct_matches_wrapper_strategies import (
+            CorrectCompleteBrushWrapperStrategy,
+            CorrectSplitBrushWrapperStrategy,
+        )
+        from sotd.match.brush_matching_strategies.high_priority_automated_split_strategy import (
+            HighPriorityAutomatedSplitStrategy,
+        )
+
+        # Import individual brush strategies for Phase 3.2
+        from sotd.match.brush_matching_strategies.known_brush_strategy import (
+            KnownBrushMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.known_split_wrapper_strategy import (
+            KnownSplitWrapperStrategy,
+        )
+
+        # Import component strategies for Phase 3.3
+        from sotd.match.brush_matching_strategies.medium_priority_automated_split_strategy import (
+            MediumPriorityAutomatedSplitStrategy,
+        )
+        from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
+            OmegaSemogueBrushMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.other_brushes_strategy import (
+            OtherBrushMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.zenith_strategy import (
+            ZenithBrushMatchingStrategy,
+        )
+
+        # Get catalog data for individual strategies
+        catalog_data = legacy_matcher.catalog_data
+
+        # Create strategies without unified component strategy
+        strategies = [
+            # Priority 0: correct_complete_brush
+            CorrectCompleteBrushWrapperStrategy(legacy_matcher),
+            # Priority 1: correct_split_brush
+            CorrectSplitBrushWrapperStrategy(legacy_matcher),
+            # Priority 2: known_split
+            KnownSplitWrapperStrategy(legacy_matcher),
+            # Priority 3: high_priority_automated_split
+            HighPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
+            # Priority 4: individual brush strategies
+            KnownBrushMatchingStrategy(catalog_data.get("known_brushes", {})),
+            OmegaSemogueBrushMatchingStrategy(),
+            ZenithBrushMatchingStrategy(),
+            OtherBrushMatchingStrategy(catalog_data.get("other_brushes", {})),
+            # Priority 6: medium_priority_automated_split
+            MediumPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
         ]
 
         return strategies

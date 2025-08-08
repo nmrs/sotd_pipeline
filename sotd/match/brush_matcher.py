@@ -2239,6 +2239,99 @@ class BrushMatcher:
 
         return False
 
+    def create_single_component_result(
+        self,
+        handle_match: Optional[dict],
+        knot_match: Optional["MatchResult"],
+        value: str,
+        strategy_name: str,
+    ) -> "MatchResult":
+        """
+        Create a single component result from handle or knot match.
+
+        Args:
+            handle_match: Handle match result dict or None
+            knot_match: Knot match result or None
+            value: Original input string
+            strategy_name: Name of the strategy for the result
+
+        Returns:
+            MatchResult with single component structure
+        """
+        from sotd.match.types import create_match_result
+
+        if handle_match and not knot_match:
+            # Handle-only match
+            matched = {
+                "brand": None,  # Composite brush
+                "model": None,  # Composite brush
+                "handle": {
+                    "brand": handle_match.get("handle_maker"),
+                    "model": handle_match.get("handle_model"),
+                    "source_text": value,
+                    "_matched_by": "HandleMatcher",
+                    "_pattern": handle_match.get("_pattern_used", "handle_only"),
+                },
+                "knot": {
+                    "brand": None,  # No knot information
+                    "model": None,
+                    "fiber": None,
+                    "knot_size_mm": None,
+                    "source_text": value,
+                    "_matched_by": "HandleMatcher",
+                    "_pattern": "handle_only",
+                },
+            }
+            pattern = handle_match.get("_pattern_used", "handle_only")
+        elif knot_match and not handle_match:
+            # Knot-only match
+            matched = {
+                "brand": None,  # Composite brush
+                "model": None,  # Composite brush
+                "handle": {
+                    "brand": None,  # No handle information
+                    "model": None,
+                    "source_text": value,
+                    "_matched_by": "KnotMatcher",
+                    "_pattern": "knot_only",
+                },
+                "knot": {
+                    "brand": knot_match.matched.get("brand") if knot_match.matched else None,
+                    "model": knot_match.matched.get("model") if knot_match.matched else None,
+                    "fiber": knot_match.matched.get("fiber") if knot_match.matched else None,
+                    "knot_size_mm": (
+                        knot_match.matched.get("knot_size_mm") if knot_match.matched else None
+                    ),
+                    "source_text": value,
+                    "_matched_by": (
+                        knot_match.matched.get("_matched_by_strategy", "KnotMatcher")
+                        if knot_match.matched
+                        else "KnotMatcher"
+                    ),
+                    "_pattern": (
+                        knot_match.matched.get("_pattern_used", knot_match.pattern or "knot_only")
+                        if knot_match.matched
+                        else "knot_only"
+                    ),
+                },
+            }
+            pattern = knot_match.pattern or "knot_only"
+        else:
+            # Neither match or both match (shouldn't happen in single component)
+            return create_match_result(
+                original=value,
+                matched=None,
+                match_type=None,
+                pattern=None,
+            )
+
+        return create_match_result(
+            original=value,
+            matched=matched,
+            match_type="regex",
+            pattern=pattern,
+        )
+
     def create_dual_component_result(
         self, handle_match: dict, knot_match: "MatchResult", value: str, user_intent: str
     ) -> "MatchResult":
