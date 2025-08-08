@@ -3312,10 +3312,47 @@ other_brushes:
 - **Strategy comparison**: Validate manufacturer strategies outperform generic
 - **User preference testing**: Validate quality assumptions with user feedback
 
+#### **Alignment Drift Analysis Framework**
+- **Continuous alignment monitoring**: Track alignment percentage and identify specific drift cases
+- **Drift categorization**: Classify each difference as improvement, degradation, or neutral change
+- **Quality assessment criteria**: Define clear metrics for evaluating whether drift represents improvement
+- **Drift case analysis**: For each misaligned case, determine if new result is better than legacy result
+- **Net improvement calculation**: Measure overall quality gain accounting for both positive and negative drift
+- **Drift trend monitoring**: Track drift patterns over time and identify systematic improvements vs regressions
+
+#### **Drift Quality Assessment Metrics**
+```python
+class DriftAssessment:
+    improvement_indicators = [
+        "known_match_over_generic",      # Known catalog match vs generic fallback
+        "manufacturer_over_artisan",     # Specific brand vs generic artisan category
+        "complete_over_partial",         # Complete match vs partial/inferred
+        "high_confidence_over_low",      # High confidence score vs low confidence
+        "specific_over_broad"            # Specific pattern vs broad fallback
+    ]
+    
+    degradation_indicators = [
+        "generic_over_known",            # Generic fallback vs known catalog match
+        "false_positive_increase",       # Incorrect match vs no match/correct match
+        "confidence_decrease",           # Lower confidence vs higher confidence
+        "specificity_loss"               # Less specific vs more specific match
+    ]
+```
+
+#### **Intelligent Drift Classification**
+- **Automatic improvement detection**: Cases where new system chooses higher quality match
+- **Automatic degradation detection**: Cases where new system chooses lower quality match  
+- **Manual review queue**: Edge cases requiring human evaluation
+- **Quality score comparison**: Use quality scores to assess improvement vs degradation
+- **User feedback integration**: Incorporate user preferences to validate drift classifications
+- **Confidence thresholds**: Set thresholds for automatic vs manual drift classification
+
 #### **Quality Improvement Validation**
 - **Measure improvement over legacy**: Track reduction in false positives and increase in match relevance
+- **Alignment drift analysis**: Monitor alignment changes and classify as improvement vs degradation
+- **Intelligent drift assessment**: Analyze each drift case to determine if change represents quality gain or loss
 - **Gradual rollout**: Implement quality scoring incrementally with A/B testing
-- **Rollback capability**: Easy to disable quality modifiers if improvements aren't achieved
+- **Rollback capability**: Easy to disable quality modifiers if net improvements aren't achieved
 - **Performance monitoring**: Track any impact on processing speed
 - **Quality metrics**: Define and measure match quality improvements vs legacy baseline
 
@@ -3326,32 +3363,39 @@ other_brushes:
 - Enhanced MatchResult structure and catalog quality tagging
 - Quality assessment utilities and testing framework
 - **Establish baseline metrics** for legacy system quality measurement
+- **Build drift analysis framework** with automatic improvement/degradation classification
 
 #### **Phase 4.3-4.4**: Scoring Implementation (2-3 weeks)  
 - Quality-based modifier functions and score rebalancing
 - Strategy score adjustments and **quality improvement validation**
 - A/B testing framework comparing quality improvements vs legacy baseline
-- **Measure match quality gains** rather than alignment preservation
+- **Continuous alignment monitoring** with intelligent drift assessment
+- **Measure match quality gains** accounting for both alignment drift and improvement
 
 #### **Phase 4.5**: Advanced Features (1-2 weeks)
 - Composite scoring, tie-breaking, and result explanations
 - Quality-based filtering and ranking enhancements
 - Performance optimization and **final quality validation vs legacy**
+- **Comprehensive drift analysis report** showing net quality improvements
 
 **Key Requirements**:
 - **Improve upon legacy system quality** rather than maintain alignment
+- **Intelligent drift analysis**: Monitor alignment changes and classify as improvement vs degradation
+- **Net improvement focus**: Ensure overall quality gains outweigh any quality losses from drift
 - **Measure quality improvements** with concrete metrics (precision, relevance, user satisfaction)
 - **Data-driven decisions** based on actual match quality analysis vs legacy baseline
-- **User feedback integration** to validate quality improvements
+- **User feedback integration** to validate quality improvements and drift classifications
 - **Performance preservation** - quality improvements shouldn't slow system significantly
-- **Rollback capability** if quality improvements aren't achieved
+- **Rollback capability** if net quality improvements aren't achieved
 
 **Success Criteria**:
 - **Improved match relevance**: Higher quality matches ranked first **compared to legacy system**
 - **Reduced false positives**: Generic matches appropriately deprioritized **vs legacy baseline**
+- **Positive net drift**: Drift analysis shows more improvements than degradations
 - **Quantifiable quality gains**: Measurable improvement in match precision and user satisfaction
 - **Maintained performance**: No significant speed regression
 - **Better than legacy**: New system demonstrably outperforms legacy system in match quality
+- **Drift transparency**: Clear understanding of why alignment changed and whether changes are beneficial
 - **Extensible framework**: Easy to add new quality indicators and modifiers
 
 **Next Steps**: Ready to implement Phase 4.1 (Scoring Research and Analysis) using Task Driven TDD Loop.
