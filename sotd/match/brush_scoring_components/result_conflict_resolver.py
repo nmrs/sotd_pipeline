@@ -9,6 +9,7 @@ from sotd.match.types import MatchResult
 
 class ConflictType(Enum):
     """Types of conflicts that can occur between strategy results."""
+
     BRAND = "brand"
     MODEL = "model"
     FIBER = "fiber"
@@ -20,6 +21,7 @@ class ConflictType(Enum):
 @dataclass
 class Conflict:
     """Represents a conflict between strategy results."""
+
     conflict_type: ConflictType
     field: str
     values: Set[str]
@@ -29,6 +31,7 @@ class Conflict:
 @dataclass
 class ConflictResolution:
     """Represents the resolution of conflicts between strategy results."""
+
     winning_result: Optional[MatchResult]
     resolution_method: str
     resolved_conflicts: List[Conflict] = field(default_factory=list)
@@ -46,10 +49,10 @@ class ResultConflictResolver:
     def detect_conflicts(self, results: List[MatchResult]) -> List[Conflict]:
         """
         Detect conflicts between multiple strategy results.
-        
+
         Args:
             results: List of MatchResult objects from different strategies
-            
+
         Returns:
             List of detected conflicts
         """
@@ -57,7 +60,7 @@ class ResultConflictResolver:
             return []
 
         conflicts = []
-        
+
         # Define fields to check for conflicts
         conflict_fields = {
             "brand": ConflictType.BRAND,
@@ -71,7 +74,7 @@ class ResultConflictResolver:
         # Check each field for conflicts
         for field_name, conflict_type in conflict_fields.items():
             field_values = {}
-            
+
             for result in results:
                 if result.matched and field_name in result.matched:
                     value = result.matched[field_name]
@@ -85,12 +88,12 @@ class ResultConflictResolver:
                 affected_results = []
                 for results_list in field_values.values():
                     affected_results.extend(results_list)
-                
+
                 conflict = Conflict(
                     conflict_type=conflict_type,
                     field=field_name,
                     values=set(field_values.keys()),
-                    affected_results=affected_results
+                    affected_results=affected_results,
                 )
                 conflicts.append(conflict)
 
@@ -98,20 +101,20 @@ class ResultConflictResolver:
         return conflicts
 
     def resolve_conflicts(
-        self, 
-        results: List[MatchResult], 
+        self,
+        results: List[MatchResult],
         resolution_method: str = "score",
-        selected_result: Optional[MatchResult] = None
+        selected_result: Optional[MatchResult] = None,
     ) -> ConflictResolution:
         """
         Resolve conflicts between strategy results.
-        
+
         Args:
             results: List of MatchResult objects
-            resolution_method: Method to use for resolution 
+            resolution_method: Method to use for resolution
                 ("score", "priority", "confidence", "manual")
             selected_result: Manually selected result (for manual resolution)
-            
+
         Returns:
             ConflictResolution object
         """
@@ -119,26 +122,26 @@ class ResultConflictResolver:
             return ConflictResolution(
                 winning_result=None,
                 resolution_method=resolution_method,
-                resolution_notes="No results to resolve"
+                resolution_notes="No results to resolve",
             )
 
         if len(results) == 1:
             return ConflictResolution(
                 winning_result=results[0],
                 resolution_method=resolution_method,
-                resolution_notes="Single result, no conflicts"
+                resolution_notes="Single result, no conflicts",
             )
 
         # Detect conflicts
         conflicts = self.detect_conflicts(results)
-        
+
         if not conflicts:
             # No conflicts, return the highest scoring result
             winning_result = max(results, key=lambda r: r.score or 0.0)
             return ConflictResolution(
                 winning_result=winning_result,
                 resolution_method=resolution_method,
-                resolution_notes="No conflicts detected"
+                resolution_notes="No conflicts detected",
             )
 
         # Resolve conflicts based on method
@@ -160,7 +163,7 @@ class ResultConflictResolver:
             resolved_conflicts=conflicts,
             resolution_notes=(
                 f"Resolved {len(conflicts)} conflicts using {resolution_method} method"
-            )
+            ),
         )
 
     def _resolve_by_score(self, results: List[MatchResult]) -> MatchResult:
@@ -177,10 +180,10 @@ class ResultConflictResolver:
             "KnotMatcher": 2,
             "FiberProcessor": 1,
         }
-        
+
         def get_priority(result: MatchResult) -> int:
             return strategy_priorities.get(result.strategy or "", 0)
-        
+
         return max(results, key=get_priority)
 
     def _resolve_by_confidence(self, results: List[MatchResult]) -> MatchResult:
@@ -190,10 +193,10 @@ class ResultConflictResolver:
     def get_conflict_summary(self, conflicts: List[Conflict]) -> str:
         """
         Generate a human-readable summary of detected conflicts.
-        
+
         Args:
             conflicts: List of conflicts to summarize
-            
+
         Returns:
             String summary of conflicts
         """
@@ -201,7 +204,7 @@ class ResultConflictResolver:
             return "No conflicts detected"
 
         summary_parts = [f"{len(conflicts)} conflicts detected:"]
-        
+
         for conflict in conflicts:
             values_list = sorted(list(conflict.values))
             values_str = " vs ".join(values_list)
@@ -212,10 +215,10 @@ class ResultConflictResolver:
     def validate_resolution(self, resolution: ConflictResolution) -> bool:
         """
         Validate that a conflict resolution is valid.
-        
+
         Args:
             resolution: ConflictResolution to validate
-            
+
         Returns:
             True if resolution is valid, False otherwise
         """
@@ -232,16 +235,12 @@ class ResultConflictResolver:
     def get_conflict_statistics(self) -> Dict[str, Any]:
         """
         Get statistics about detected conflicts.
-        
+
         Returns:
             Dictionary with conflict statistics
         """
         if not self.conflicts:
-            return {
-                "total_conflicts": 0,
-                "conflicts_by_type": {},
-                "most_common_conflict": None
-            }
+            return {"total_conflicts": 0, "conflicts_by_type": {}, "most_common_conflict": None}
 
         conflicts_by_type = {}
         for conflict in self.conflicts:
@@ -251,12 +250,11 @@ class ResultConflictResolver:
             conflicts_by_type[conflict_type] += 1
 
         most_common_conflict = (
-            max(conflicts_by_type.items(), key=lambda x: x[1])[0] 
-            if conflicts_by_type else None
+            max(conflicts_by_type.items(), key=lambda x: x[1])[0] if conflicts_by_type else None
         )
 
         return {
             "total_conflicts": len(self.conflicts),
             "conflicts_by_type": conflicts_by_type,
-            "most_common_conflict": most_common_conflict
+            "most_common_conflict": most_common_conflict,
         }

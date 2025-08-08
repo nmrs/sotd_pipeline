@@ -1,8 +1,7 @@
 """
-Enhanced Brush Scoring Matcher Implementation.
+Enhanced Brush Scoring Matcher.
 
-This module provides the full implementation of the brush scoring matcher
-that uses all brush scoring components for improved architecture and performance.
+This module provides an enhanced brush matching system using scoring components.
 """
 
 from pathlib import Path
@@ -10,28 +9,19 @@ from typing import List, Optional
 
 import yaml
 
-from sotd.match.brush_scoring_components import (
-    CorrectMatchesMatcher,
-    PerformanceMonitor,
-    ResultProcessor,
-    ScoringEngine,
-    StrategyOrchestrator,
-)
+from sotd.match.brush_scoring_components.correct_matches_matcher import CorrectMatchesMatcher
+from sotd.match.brush_scoring_components.performance_monitor import PerformanceMonitor
+from sotd.match.brush_scoring_components.result_conflict_resolver import ResultConflictResolver
+from sotd.match.brush_scoring_components.result_processor import ResultProcessor
+from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
+from sotd.match.brush_scoring_components.strategy_orchestrator import StrategyOrchestrator
 from sotd.match.brush_scoring_config import BrushScoringConfig
 from sotd.match.types import MatchResult
 
 
 def load_correct_matches() -> dict:
-    """
-    Load correct matches data from YAML file.
-
-    Returns:
-        Dictionary containing correct matches data
-    """
+    """Load correct matches data from YAML file."""
     correct_matches_path = Path("data/correct_matches.yaml")
-    if not correct_matches_path.exists():
-        return {"brush": {}, "split_brush": {}}
-
     with open(correct_matches_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
@@ -70,6 +60,7 @@ class BrushScoringMatcher:
         self.scoring_engine = ScoringEngine(self.config)
         self.result_processor = ResultProcessor()
         self.performance_monitor = PerformanceMonitor()
+        self.conflict_resolver = ResultConflictResolver()
 
         # Initialize HandleMatcher for composite brush matching
         from sotd.match.handle_matcher import HandleMatcher
@@ -343,8 +334,21 @@ class BrushScoringMatcher:
             if not strategy_results:
                 return None
 
-            # Score the results
-            scored_results = self.scoring_engine.score_results(strategy_results, value)
+            # Resolve conflicts between strategy results before scoring
+            conflict_resolution = self.conflict_resolver.resolve_conflicts(
+                strategy_results, resolution_method="score"
+            )
+
+            # Use the winning result(s) from conflict resolution
+            if conflict_resolution.winning_result:
+                # If there was a conflict and it was resolved, use the winning result
+                resolved_results = [conflict_resolution.winning_result]
+            else:
+                # No conflicts or no resolution, use all original results
+                resolved_results = strategy_results
+
+            # Score the resolved results
+            scored_results = self.scoring_engine.score_results(resolved_results, value)
 
             # Get the best result
             best_result = self.scoring_engine.get_best_result(scored_results)
