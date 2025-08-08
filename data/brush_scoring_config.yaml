@@ -12,9 +12,8 @@ brush_scoring_weights:
     omega_semogue: 75.0
     zenith: 75.0
     other_brush: 70.0
-    dual_component: 65.0
     medium_priority_automated_split: 60.0
-    single_component_fallback: 50.0
+    unified: 50.0
 
   # Strategy-specific modifiers (Phase 3.7 - ENABLED)
   strategy_modifiers:
@@ -92,16 +91,8 @@ brush_scoring_weights:
       handle_confidence: 0.0
       knot_confidence: 0.0
       word_count_balance: 0.0
-    dual_component:
-      multiple_brands: 0.0
-      fiber_words: 0.0
-      size_specification: 0.0
-      delimiter_confidence: 0.0
-      handle_confidence: 0.0
-      knot_confidence: 0.0
-      word_count_balance: 0.0
-    single_component_fallback:
-      multiple_brands: 0.0
+    unified:
+      dual_component: 15.0
       fiber_words: 0.0
       size_specification: 0.0
       delimiter_confidence: 0.0

@@ -64,9 +64,9 @@ class TestFullInputComponentMatchingStrategy:
         result = self.strategy.match("Declaration Grooming Washington B2")
 
         assert result is not None
-        assert result.strategy == "dual_component"
+        assert result.strategy == "unified"  # Now uses unified strategy name
         assert result.match_type == "composite"
-        # Score is applied by scoring engine, not set in strategy
+        # Score is applied by scoring engine: base 50 + dual_component modifier 15 = 65
 
     def test_single_component_match_handle_only(self):
         """Test single component match when only handle matches."""
@@ -95,9 +95,9 @@ class TestFullInputComponentMatchingStrategy:
         result = self.strategy.match("Declaration Grooming Washington")
 
         assert result is not None
-        assert result.strategy == "single_component_fallback"
+        assert result.strategy == "unified"  # Now uses unified strategy name
         assert result.match_type == "single_component"
-        # Score is applied by scoring engine, not set in strategy
+        # Score is applied by scoring engine: base 50 (no modifier)
 
     def test_single_component_match_knot_only(self):
         """Test single component match when only knot matches."""
@@ -132,9 +132,9 @@ class TestFullInputComponentMatchingStrategy:
         result = self.strategy.match("Declaration Grooming B2")
 
         assert result is not None
-        assert result.strategy == "single_component_fallback"
+        assert result.strategy == "unified"  # Now uses unified strategy name
         assert result.match_type == "single_component"
-        # Score is applied by scoring engine, not set in strategy
+        # Score is applied by scoring engine: base 50 (no modifier)
 
     def test_no_match_neither_handle_nor_knot(self):
         """Test no match when neither handle nor knot matches."""
@@ -181,8 +181,8 @@ class TestFullInputComponentMatchingStrategy:
         result = self.strategy.match("Declaration Grooming B2")
 
         assert result is not None
-        assert result.strategy == "single_component_fallback"
-        # Score is applied by scoring engine, not set in strategy
+        assert result.strategy == "unified"  # Now uses unified strategy name
+        # Score is applied by scoring engine: base 50 (no modifier)
 
     def test_knot_matcher_exception_handling(self):
         """Test handling of knot matcher exceptions."""
@@ -211,8 +211,8 @@ class TestFullInputComponentMatchingStrategy:
         result = self.strategy.match("Declaration Grooming Washington")
 
         assert result is not None
-        assert result.strategy == "single_component_fallback"
-        # Score is applied by scoring engine, not set in strategy
+        assert result.strategy == "unified"  # Now uses unified strategy name
+        # Score is applied by scoring engine: base 50 (no modifier)
 
     def test_empty_string_handling(self):
         """Test handling of empty input string."""

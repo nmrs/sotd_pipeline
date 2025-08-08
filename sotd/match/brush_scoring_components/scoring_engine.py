@@ -324,3 +324,34 @@ class ScoringEngine:
         # This is a placeholder for word count balance scoring
         # In a full implementation, this would calculate balance between handle/knot words
         return 0.0
+
+    def _modifier_dual_component(
+        self, input_text: str, result: dict, strategy_name: str
+    ) -> float:
+        """
+        Return score modifier for dual component matches (unified strategy only).
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if both handle and knot matched, 0.0 otherwise)
+        """
+        if strategy_name != "unified":
+            return 0.0
+
+        # Check if both handle and knot sections exist and have valid matches
+        handle = result.get("handle")
+        knot = result.get("knot")
+        
+        if handle and knot:
+            # Both handle and knot have data
+            handle_brand = handle.get("brand")
+            knot_brand = knot.get("brand")
+            
+            # Return 1.0 if both have brands (indicating successful matches)
+            return 1.0 if handle_brand and knot_brand else 0.0
+        
+        return 0.0
