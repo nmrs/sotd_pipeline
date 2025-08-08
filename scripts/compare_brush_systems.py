@@ -136,33 +136,55 @@ def main():
                 print(f"Legacy System I/O Time: {old_io_time:.3f}s")
                 print(f"Scoring System I/O Time: {new_io_time:.3f}s")
 
-        # Show sample differences with strategy information
-        if report["detailed_differences"]:
-            print("\n🔍 SAMPLE DIFFERENCES (showing first 3)")
-            print("-" * 40)
-            for i, diff in enumerate(report["detailed_differences"][:3]):
-                print(f"\nDifference #{i + 1}:")
-                print(f"  Record Index: {diff['record_index']}")
-                print(f"  Original: {diff['input_text']}")
-                print(
-                    f"  Legacy: {diff['old_match']['brand']} {diff['old_match']['model']} "
-                    f"({diff['old_match']['match_type']} - {diff['old_match']['strategy']})"
-                )
-                print(
-                    f"  Scoring: {diff['new_match']['brand']} {diff['new_match']['model']} "
-                    f"({diff['new_match']['match_type']} - {diff['new_match']['strategy']})"
-                )
+                # Show sample differences with strategy information
+                if report["detailed_differences"]:
+                    print("\n🔍 SAMPLE DIFFERENCES (showing first 3)")
+                    print("-" * 40)
+                    for i, diff in enumerate(report["detailed_differences"][:3]):
+                        print(f"\nDifference #{i + 1}:")
+                        print(f"  Record Index: {diff['record_index']}")
+                        print(f"  Original: {diff['input_text']}")
+                        print(
+                            f"  Legacy: {diff['old_match']['brand']} {diff['old_match']['model']} "
+                            f"({diff['old_match']['match_type']} - {diff['old_match']['strategy']})"
+                        )
+                        print(
+                            f"  Scoring: {diff['new_match']['brand']} {diff['new_match']['model']} "
+                            f"({diff['new_match']['match_type']} - {diff['new_match']['strategy']})"
+                        )
 
-                # Show strategy selection analysis
-                old_strategy = diff["old_match"]["strategy"]
-                new_strategy = diff["new_match"]["strategy"]
-                if old_strategy != new_strategy:
-                    print(f"  Strategy Change: {old_strategy} → {new_strategy}")
+                        # Show nested section differences
+                        old_handle = diff["old_match"].get("handle", {})
+                        new_handle = diff["new_match"].get("handle", {})
+                        old_knot = diff["old_match"].get("knot", {})
+                        new_knot = diff["new_match"].get("knot", {})
 
-                    # Show composite brush details if available
-                    if new_strategy == "dual_component":
-                        print("  Composite Brush: Handle + Knot components")
-                        # Could add more detailed breakdown here if needed
+                        old_handle_model = old_handle.get("model")
+                        new_handle_model = new_handle.get("model")
+                        if old_handle_model != new_handle_model:
+                            print(
+                                f"  Handle Model Difference: '{old_handle_model}' vs "
+                                f"'{new_handle_model}'"
+                            )
+
+                        old_knot_model = old_knot.get("model")
+                        new_knot_model = new_knot.get("model")
+                        if old_knot_model != new_knot_model:
+                            print(
+                                f"  Knot Model Difference: '{old_knot_model}' vs "
+                                f"'{new_knot_model}'"
+                            )
+
+                        # Show strategy selection analysis
+                        old_strategy = diff["old_match"]["strategy"]
+                        new_strategy = diff["new_match"]["strategy"]
+                        if old_strategy != new_strategy:
+                            print(f"  Strategy Change: {old_strategy} → {new_strategy}")
+
+                            # Show composite brush details if available
+                            if new_strategy == "dual_component":
+                                print("  Composite Brush: Handle + Knot components")
+                                # Could add more detailed breakdown here if needed
 
         # Save detailed report
         output_path = Path("data") / f"brush_system_comparison_{month}.json"

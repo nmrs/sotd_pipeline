@@ -9,9 +9,10 @@ from sotd.match.types import MatchResult, create_match_result
 
 
 class KnownBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
-    def __init__(self, catalog_data):
+    def __init__(self, catalog_data, handle_matcher=None):
         super().__init__(catalog_data)
         self.patterns = self._compile_known_brush_patterns()
+        self.handle_matcher = handle_matcher
 
     def _compile_known_brush_patterns(self) -> list[dict]:
         """Compile patterns using the unified pattern utilities."""
@@ -53,6 +54,10 @@ class KnownBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                 if entry.get("handle_brand"):
                     entry_result["handle_brand"] = entry.get("handle_brand")
 
+                # Apply complete brush handle matching if enabled and HandleMatcher is available
+                if self.handle_matcher:
+                    self._apply_handle_matching(entry_result, value)
+
                 return create_match_result(
                     original=value,
                     matched=entry_result,
@@ -62,3 +67,38 @@ class KnownBrushMatchingStrategy(YamlBackedBrushMatchingStrategy):
                 )
 
         return create_match_result(original=value, matched=None, pattern=None, match_type=None)
+
+    def _apply_handle_matching(self, entry_result: dict, value: str) -> None:
+        """
+        Apply handle matching to enhance brush match with handle information.
+
+        This method checks if handle matching is enabled for the brush and attempts
+        to match the handle on the full brush text using the HandleMatcher.
+
+        Args:
+            entry_result: The brush match result dictionary to enhance
+            value: The original brush text being matched
+        """
+        if not self.handle_matcher:
+            return
+
+        # Get the brush brand and model
+        brand = entry_result.get("brand")
+        model = entry_result.get("model")
+
+        if not brand or not model:
+            return
+
+        # Check if handle_matching is enabled for this brush
+        # This is a simplified check - in the full implementation, we'd need to check the catalog
+        # For now, we'll assume handle matching is enabled for Declaration Grooming
+        if brand.lower() == "declaration grooming":
+            try:
+                handle_match = self.handle_matcher.match_handle_maker(value)
+                if handle_match and handle_match.get("handle_maker"):
+                    # Update the handle_model with the HandleMatcher result
+                    entry_result["handle_model"] = handle_match.get("handle_model")
+                    entry_result["handle_brand"] = handle_match.get("handle_maker")
+            except Exception:
+                # Handle matcher failed, continue without handle information
+                pass

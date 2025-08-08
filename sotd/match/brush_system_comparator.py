@@ -84,7 +84,10 @@ class BrushSystemComparator:
 
     def _are_matches_equal(self, old_brush: Dict[str, Any], new_brush: Dict[str, Any]) -> bool:
         """
-        Compare if two brush matches are equivalent.
+        Compare if two brush matches are equivalent based on actual data values.
+
+        Only compares the data values that matter for downstream processing,
+        ignoring metadata like strategy names, match types, patterns, etc.
 
         Args:
             old_brush: Brush match from old system
@@ -93,20 +96,123 @@ class BrushSystemComparator:
         Returns:
             True if matches are equivalent, False otherwise
         """
-        old_matched = old_brush.get("matched", {})
-        new_matched = new_brush.get("matched", {})
+        old_matched = old_brush.get("matched", {}) or {}
+        new_matched = new_brush.get("matched", {}) or {}
 
-        # Compare key fields
+        # Handle both flat and nested structures
+        old_nested = self._is_nested_structure(old_matched)
+        new_nested = self._is_nested_structure(new_matched)
+
+        if old_nested or new_nested:
+            return self._compare_nested_structures(old_matched, new_matched)
+        else:
+            return self._compare_flat_structures(old_matched, new_matched)
+
+    def _is_nested_structure(self, matched_data: Dict[str, Any]) -> bool:
+        """
+        Check if the matched data has a nested structure with handle/knot sections.
+
+        Args:
+            matched_data: The matched data to check
+
+        Returns:
+            True if nested structure, False if flat
+        """
+        return "handle" in matched_data or "knot" in matched_data
+
+    def _compare_nested_structures(
+        self, old_matched: Dict[str, Any], new_matched: Dict[str, Any]
+    ) -> bool:
+        """
+        Compare nested structures (handle/knot sections).
+
+        Args:
+            old_matched: Matched data from old system
+            new_matched: Matched data from new system
+
+        Returns:
+            True if equivalent, False otherwise
+        """
+        # Compare top-level brand and model
+        if not self._compare_values(old_matched.get("brand"), new_matched.get("brand")):
+            return False
+        if not self._compare_values(old_matched.get("model"), new_matched.get("model")):
+            return False
+
+        # Compare handle section
+        old_handle = old_matched.get("handle", {}) or {}
+        new_handle = new_matched.get("handle", {}) or {}
+
+        if not self._compare_values(old_handle.get("brand"), new_handle.get("brand")):
+            return False
+        if not self._compare_values(old_handle.get("model"), new_handle.get("model")):
+            return False
+
+        # Compare knot section
+        old_knot = old_matched.get("knot", {}) or {}
+        new_knot = new_matched.get("knot", {}) or {}
+
+        if not self._compare_values(old_knot.get("brand"), new_knot.get("brand")):
+            return False
+        if not self._compare_values(old_knot.get("model"), new_knot.get("model")):
+            return False
+        if not self._compare_values(old_knot.get("fiber"), new_knot.get("fiber")):
+            return False
+        old_knot_size = old_knot.get("knot_size_mm")
+        new_knot_size = new_knot.get("knot_size_mm")
+        if not self._compare_values(old_knot_size, new_knot_size):
+            return False
+
+        # Note: We intentionally ignore redundant top-level fields like knot_model,
+        # knot_fiber, knot_brand, handle_brand since they duplicate the nested
+        # handle/knot section data and can cause false differences.
+
+        return True
+
+    def _compare_flat_structures(
+        self, old_matched: Dict[str, Any], new_matched: Dict[str, Any]
+    ) -> bool:
+        """
+        Compare flat structures (legacy format).
+
+        Args:
+            old_matched: Matched data from old system
+            new_matched: Matched data from new system
+
+        Returns:
+            True if equivalent, False otherwise
+        """
+        # Compare key fields that matter for downstream processing
         key_fields = ["brand", "model", "fiber", "knot_size_mm", "handle_maker"]
 
         for field in key_fields:
-            old_value = old_matched.get(field)
-            new_value = new_matched.get(field)
-
-            if old_value != new_value:
+            if not self._compare_values(old_matched.get(field), new_matched.get(field)):
                 return False
 
         return True
+
+    def _compare_values(self, old_value: Any, new_value: Any) -> bool:
+        """
+        Compare two values, handling None and type differences.
+
+        Args:
+            old_value: Value from old system
+            new_value: Value from new system
+
+        Returns:
+            True if values are equivalent, False otherwise
+        """
+        # Handle None values
+        if old_value is None and new_value is None:
+            return True
+        if old_value is None or new_value is None:
+            return False
+
+        # Convert to strings for comparison to handle type differences
+        old_str = str(old_value).strip()
+        new_str = str(new_value).strip()
+
+        return old_str == new_str
 
     def _record_detailed_difference(
         self,
@@ -146,6 +252,8 @@ class BrushSystemComparator:
                 "match_type": old_brush.get("match_type"),
                 "pattern": old_brush.get("pattern"),
                 "strategy": old_brush.get("strategy", "legacy_system"),
+                "handle": old_matched.get("handle"),
+                "knot": old_matched.get("knot"),
             },
             "new_match": {
                 "brand": new_matched.get("brand"),
@@ -154,6 +262,8 @@ class BrushSystemComparator:
                 "match_type": new_brush.get("match_type"),
                 "pattern": new_brush.get("pattern"),
                 "strategy": new_brush.get("strategy", "unknown_strategy"),
+                "handle": new_matched.get("handle"),
+                "knot": new_matched.get("knot"),
             },
         }
 
