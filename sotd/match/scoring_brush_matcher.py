@@ -103,9 +103,6 @@ class BrushScoringMatcher:
         legacy_matcher = BrushMatcher(config=config, correct_matches_path=self.correct_matches_path)
 
         # Import individual strategies for Phase 3.4/3.5
-        from sotd.match.brush_matching_strategies.component_coordination_strategy import (
-            ComponentCoordinationStrategy,
-        )
         from sotd.match.brush_matching_strategies.correct_matches_wrapper_strategies import (
             CorrectCompleteBrushWrapperStrategy,
             CorrectSplitBrushWrapperStrategy,
@@ -159,7 +156,9 @@ class BrushScoringMatcher:
             ZenithBrushMatchingStrategy(),
             OtherBrushMatchingStrategy(catalog_data.get("other_brushes", {})),
             # Priority 5: dual component strategy (replacing individual component strategies)
-            LegacyDualComponentWrapperStrategy(legacy_matcher),  # Strategy name: "dual_component" for perfect compatibility
+            LegacyDualComponentWrapperStrategy(
+                legacy_matcher
+            ),  # Strategy name: "dual_component" for perfect compatibility
             # Priority 6: medium_priority_automated_split
             MediumPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
             # Priority 7: single_component_fallback
