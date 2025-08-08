@@ -943,6 +943,10 @@ other_knots:
     default: Synthetic
     patterns:
     - sawdust
+  Semogue:
+    default: Boar
+    patterns:
+    - semogue
   Simpson:
     default: Badger
     patterns:
