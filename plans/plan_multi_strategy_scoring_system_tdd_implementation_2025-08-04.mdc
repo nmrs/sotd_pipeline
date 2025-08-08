@@ -3155,6 +3155,202 @@ dependency_manager.add_dependency(
 
 **Next Steps**: Ready to proceed with Phase 4 (Performance Optimization) or other planned phases.
 
+## 📋 **Phase 4: Intelligent Scoring Hierarchy Optimization - PLANNED**
+
+**Status**: 📋 **PLANNED** - Implement quality-based scoring hierarchy to reflect match confidence and specificity
+
+**Problem**: Current scoring system treats all matches of the same type equally, but some matches are inherently higher quality or more specific than others. A "known" catalog match should score higher than an "other" fallback match, and manufacturer-specific strategies should score higher than generic artisan strategies.
+
+**Proposed Scoring Hierarchy Enhancement**:
+
+### **Match Quality Tiers**
+1. **Highest Quality (Known/Specific)**: Exact catalog matches, human-curated data
+2. **High Quality (Manufacturer-Specific)**: Brand-specific strategies with established patterns  
+3. **Medium Quality (Category-Specific)**: Generic patterns for artisan/manufacturer categories
+4. **Lower Quality (Fallback)**: "Other" strategies, generic matching, size/fiber fallbacks
+
+### **Specific Scoring Adjustments**
+
+#### **Brush Strategies Hierarchy**
+```yaml
+# Current scores → Proposed optimized scores
+correct_complete_brush: 100.0     # Keep (highest - human curated)
+correct_split_brush: 95.0         # Keep (highest - human curated)
+known_split: 90.0                 # Keep (high - curated splits)
+automated_split: 85.0/60.0        # Keep (context-dependent with modifiers)
+known_brush: 80.0                 # Keep (high - catalog match)
+omega_semogue: 75.0 → 78.0        # Increase (manufacturer-specific)
+zenith: 75.0 → 78.0               # Increase (manufacturer-specific)
+other_brush: 70.0 → 55.0          # Decrease (generic fallback)
+unified: 50.0                     # Keep (component-based matching)
+```
+
+#### **Handle/Knot Quality Modifiers**
+```yaml
+strategy_modifiers:
+  # Match specificity modifiers
+  known_match_bonus: +15.0         # For exact catalog matches
+  manufacturer_specific_bonus: +8.0 # For brand-specific pattern matches
+  artisan_category_penalty: -10.0   # For generic artisan category matches
+  fallback_penalty: -15.0          # For "other" fallback strategies
+  
+  # Handle/Knot hierarchy modifiers  
+  exact_handle_match: +10.0        # Known handle from catalog
+  exact_knot_match: +10.0          # Known knot from catalog
+  inferred_handle: +5.0            # Handle inferred from brand patterns
+  inferred_knot: +5.0              # Knot inferred from brand patterns
+  generic_handle: -5.0             # Generic/unknown handle
+  generic_knot: -5.0               # Generic/unknown knot
+```
+
+### **Implementation Strategy**
+
+#### **Phase 4.1: Scoring Research and Analysis**
+1. **Analyze current match distribution** across strategy types
+2. **Identify quality indicators** in existing catalog and match data
+3. **Research user feedback patterns** to validate quality assumptions
+4. **Define quality metrics** for different match types
+5. **Create scoring optimization test plan**
+
+#### **Phase 4.2: Enhanced Match Quality Detection**
+1. **Add quality indicators to MatchResult** (e.g., `match_quality`, `specificity_level`)
+2. **Enhance strategies to report quality metrics** (known vs inferred vs fallback)
+3. **Update catalog loaders** to tag known vs other entries
+4. **Add manufacturer vs artisan classification** to brand data
+5. **Create quality assessment utilities**
+
+#### **Phase 4.3: Intelligent Scoring Modifiers**
+1. **Implement quality-based modifiers** in ScoringEngine
+2. **Add specificity detection functions** (`_modifier_known_match`, `_modifier_manufacturer_specific`)
+3. **Create penalty functions** for generic/fallback matches
+4. **Add handle/knot quality assessment** based on catalog presence
+5. **Implement tiered scoring system**
+
+#### **Phase 4.4: Strategy Score Rebalancing**
+1. **Adjust base strategy scores** based on quality hierarchy
+2. **Lower generic strategy scores** (other_brush, artisan categories)
+3. **Boost manufacturer-specific strategy scores** (omega_semogue, zenith)
+4. **Add quality bonus/penalty modifiers** to configuration
+5. **Validate score distribution maintains alignment**
+
+#### **Phase 4.5: Advanced Match Ranking**
+1. **Implement composite quality scores** combining base + modifiers
+2. **Add tie-breaking logic** for similar scores
+3. **Create match confidence indicators** for user feedback
+4. **Add quality-based result filtering** options
+5. **Implement result ranking explanations**
+
+### **Expected Benefits**
+
+#### **Improved Match Quality**
+- **Higher precision**: Known matches ranked above generic matches
+- **Better user experience**: More relevant results surfaced first
+- **Reduced false positives**: Generic strategies penalized appropriately
+- **Quality feedback**: Users can see why matches were ranked
+
+#### **Maintainable Scoring System**
+- **Hierarchical scoring**: Clear quality tiers for easy adjustment
+- **Modular modifiers**: Individual quality factors can be tuned
+- **Data-driven optimization**: Quality metrics guide scoring decisions
+- **Extensible framework**: Easy to add new quality indicators
+
+#### **Performance Insights**
+- **Strategy effectiveness**: Identify which strategies provide highest quality matches
+- **Catalog coverage**: Find gaps where generic strategies are overused
+- **Quality trends**: Track match quality improvements over time
+- **User satisfaction**: Correlate quality scores with user feedback
+
+### **Technical Approach**
+
+#### **Quality Indicator Framework**
+```python
+@dataclass
+class MatchQuality:
+    specificity: str  # "known", "inferred", "generic", "fallback"
+    source_type: str  # "catalog", "pattern", "heuristic", "default"
+    confidence: float # 0.0-1.0 confidence in match accuracy
+    coverage: str     # "complete", "partial", "minimal"
+```
+
+#### **Enhanced Scoring Logic**
+```python
+def _calculate_quality_score(self, result: MatchResult) -> float:
+    base_score = self.get_base_strategy_score(result.strategy)
+    quality_bonus = self._calculate_quality_bonus(result)
+    specificity_modifier = self._calculate_specificity_modifier(result)
+    return base_score + quality_bonus + specificity_modifier
+```
+
+#### **Catalog Enhancement**
+```yaml
+# Enhanced catalog structure with quality indicators
+known_brushes:
+  "Simpson Chubby 2":
+    quality: "known"          # Known exact match
+    specificity: "complete"   # Complete product specification
+    manufacturer_tier: "established"  # Established manufacturer
+    
+other_brushes:
+  patterns:
+    - pattern: "artisan.*handle"
+      quality: "inferred"     # Inferred from pattern
+      specificity: "partial"  # Partial specification
+      category: "artisan"     # Generic artisan category
+```
+
+### **Validation Strategy**
+
+#### **Quality Metrics**
+- **Match accuracy improvement**: Measure reduction in false positives
+- **User satisfaction**: Track user feedback on match relevance  
+- **Coverage analysis**: Ensure quality hierarchy doesn't create gaps
+- **Performance impact**: Validate scoring changes don't slow system
+
+#### **A/B Testing Framework**
+- **Quality scoring on/off**: Compare results with and without quality modifiers
+- **Score threshold testing**: Find optimal quality thresholds
+- **Strategy comparison**: Validate manufacturer strategies outperform generic
+- **User preference testing**: Validate quality assumptions with user feedback
+
+#### **Alignment Validation**
+- **Maintain current behavior**: Ensure quality improvements don't break existing matches
+- **Gradual rollout**: Implement quality scoring incrementally
+- **Rollback capability**: Easy to disable quality modifiers if needed
+- **Performance monitoring**: Track any impact on processing speed
+
+### **Implementation Timeline**
+
+#### **Phase 4.1-4.2**: Research and Infrastructure (2-3 weeks)
+- Analysis of current match patterns and quality indicators
+- Enhanced MatchResult structure and catalog quality tagging
+- Quality assessment utilities and testing framework
+
+#### **Phase 4.3-4.4**: Scoring Implementation (2-3 weeks)  
+- Quality-based modifier functions and score rebalancing
+- Strategy score adjustments and validation testing
+- A/B testing framework and baseline measurements
+
+#### **Phase 4.5**: Advanced Features (1-2 weeks)
+- Composite scoring, tie-breaking, and result explanations
+- Quality-based filtering and ranking enhancements
+- Performance optimization and final validation
+
+**Key Requirements**:
+- **Maintain 100% current alignment** during transition
+- **Gradual rollout** with ability to disable quality scoring
+- **Data-driven decisions** based on actual match quality analysis
+- **User feedback integration** to validate quality assumptions
+- **Performance preservation** - quality improvements shouldn't slow system
+
+**Success Criteria**:
+- **Improved match relevance**: Higher quality matches ranked first
+- **Reduced false positives**: Generic matches appropriately deprioritized  
+- **Maintained performance**: No significant speed regression
+- **User satisfaction**: Positive feedback on match quality improvements
+- **Extensible framework**: Easy to add new quality indicators and modifiers
+
+**Next Steps**: Ready to implement Phase 4.1 (Scoring Research and Analysis) using Task Driven TDD Loop.
+
 ## ✅ **Phase 3.13: Merge High and Medium Priority Split Strategies - COMPLETE**
 
 **Status**: ✅ **COMPLETE** - Successfully merged automated split strategies using scoring modifiers
