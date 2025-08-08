@@ -3312,11 +3312,12 @@ other_brushes:
 - **Strategy comparison**: Validate manufacturer strategies outperform generic
 - **User preference testing**: Validate quality assumptions with user feedback
 
-#### **Alignment Validation**
-- **Maintain current behavior**: Ensure quality improvements don't break existing matches
-- **Gradual rollout**: Implement quality scoring incrementally
-- **Rollback capability**: Easy to disable quality modifiers if needed
+#### **Quality Improvement Validation**
+- **Measure improvement over legacy**: Track reduction in false positives and increase in match relevance
+- **Gradual rollout**: Implement quality scoring incrementally with A/B testing
+- **Rollback capability**: Easy to disable quality modifiers if improvements aren't achieved
 - **Performance monitoring**: Track any impact on processing speed
+- **Quality metrics**: Define and measure match quality improvements vs legacy baseline
 
 ### **Implementation Timeline**
 
@@ -3324,29 +3325,33 @@ other_brushes:
 - Analysis of current match patterns and quality indicators
 - Enhanced MatchResult structure and catalog quality tagging
 - Quality assessment utilities and testing framework
+- **Establish baseline metrics** for legacy system quality measurement
 
 #### **Phase 4.3-4.4**: Scoring Implementation (2-3 weeks)  
 - Quality-based modifier functions and score rebalancing
-- Strategy score adjustments and validation testing
-- A/B testing framework and baseline measurements
+- Strategy score adjustments and **quality improvement validation**
+- A/B testing framework comparing quality improvements vs legacy baseline
+- **Measure match quality gains** rather than alignment preservation
 
 #### **Phase 4.5**: Advanced Features (1-2 weeks)
 - Composite scoring, tie-breaking, and result explanations
 - Quality-based filtering and ranking enhancements
-- Performance optimization and final validation
+- Performance optimization and **final quality validation vs legacy**
 
 **Key Requirements**:
-- **Maintain 100% current alignment** during transition
-- **Gradual rollout** with ability to disable quality scoring
-- **Data-driven decisions** based on actual match quality analysis
-- **User feedback integration** to validate quality assumptions
-- **Performance preservation** - quality improvements shouldn't slow system
+- **Improve upon legacy system quality** rather than maintain alignment
+- **Measure quality improvements** with concrete metrics (precision, relevance, user satisfaction)
+- **Data-driven decisions** based on actual match quality analysis vs legacy baseline
+- **User feedback integration** to validate quality improvements
+- **Performance preservation** - quality improvements shouldn't slow system significantly
+- **Rollback capability** if quality improvements aren't achieved
 
 **Success Criteria**:
-- **Improved match relevance**: Higher quality matches ranked first
-- **Reduced false positives**: Generic matches appropriately deprioritized  
+- **Improved match relevance**: Higher quality matches ranked first **compared to legacy system**
+- **Reduced false positives**: Generic matches appropriately deprioritized **vs legacy baseline**
+- **Quantifiable quality gains**: Measurable improvement in match precision and user satisfaction
 - **Maintained performance**: No significant speed regression
-- **User satisfaction**: Positive feedback on match quality improvements
+- **Better than legacy**: New system demonstrably outperforms legacy system in match quality
 - **Extensible framework**: Easy to add new quality indicators and modifiers
 
 **Next Steps**: Ready to implement Phase 4.1 (Scoring Research and Analysis) using Task Driven TDD Loop.
