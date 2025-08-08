@@ -132,12 +132,11 @@ class StrategyPerformanceOptimizer:
         if len(strategy_metrics) != len(strategies):
             return strategies.copy()
 
-        # Sort by performance score (combination of speed, success rate, and score)
+        # Sort by performance score (accuracy-only ranking)
         def performance_score(metrics: PerformanceMetrics) -> float:
-            # Normalize execution time (lower is better)
-            time_score = 1.0 / (1.0 + metrics.avg_execution_time)
-            # Success rate and avg_score are already normalized (0-1)
-            return (time_score * 0.4) + (metrics.success_rate * 0.3) + (metrics.avg_score * 0.3)
+            # Focus purely on accuracy: success rate and average score
+            # Execution time is tracked for monitoring but not used in ranking
+            return (metrics.success_rate * 0.6) + (metrics.avg_score * 0.4)
 
         sorted_strategies = sorted(
             strategies,
@@ -201,11 +200,67 @@ class StrategyPerformanceOptimizer:
                     }
                 )
 
-        # Sort by performance score
+        # Sort by performance score (accuracy-only ranking)
         def performance_score(ranking: Dict[str, Any]) -> float:
-            time_score = 1.0 / (1.0 + ranking["avg_execution_time"])
-            return (
-                (time_score * 0.4) + (ranking["success_rate"] * 0.3) + (ranking["avg_score"] * 0.3)
-            )
+            # Focus purely on accuracy: success rate and average score
+            # Execution time is tracked for monitoring but not used in ranking
+            return (ranking["success_rate"] * 0.6) + (ranking["avg_score"] * 0.4)
 
         return sorted(rankings, key=performance_score, reverse=True)
+
+    def get_slow_strategies(self, threshold_seconds: float = 0.1) -> List[Dict[str, Any]]:
+        """
+        Get strategies that are slow and may need optimization.
+
+        Args:
+            threshold_seconds: Execution time threshold in seconds (default: 0.1s)
+
+        Returns:
+            List of slow strategies with their performance metrics
+        """
+        slow_strategies = []
+
+        for strategy_name, performance in self.strategy_performances.items():
+            metrics = self.get_strategy_performance(strategy_name)
+            if metrics is not None and metrics.avg_execution_time > threshold_seconds:
+                slow_strategies.append(
+                    {
+                        "strategy_name": strategy_name,
+                        "avg_execution_time": metrics.avg_execution_time,
+                        "success_rate": metrics.success_rate,
+                        "avg_score": metrics.avg_score,
+                        "total_executions": metrics.total_executions,
+                        "optimization_priority": (
+                            "high" if metrics.success_rate > 0.8 else "medium"
+                        ),
+                    }
+                )
+
+        # Sort by execution time (slowest first)
+        return sorted(slow_strategies, key=lambda x: x["avg_execution_time"], reverse=True)
+
+    def get_performance_report(self) -> Dict[str, Any]:
+        """
+        Get comprehensive performance report for all strategies.
+
+        Returns:
+            Dictionary containing performance summary, rankings, and optimization recommendations
+        """
+        summary = self.get_performance_summary()
+        rankings = self.get_strategy_rankings()
+        slow_strategies = self.get_slow_strategies()
+
+        return {
+            "summary": summary,
+            "rankings": rankings,
+            "slow_strategies": slow_strategies,
+            "optimization_recommendations": {
+                "high_priority": [
+                    s for s in slow_strategies if s["optimization_priority"] == "high"
+                ],
+                "medium_priority": [
+                    s for s in slow_strategies if s["optimization_priority"] == "medium"
+                ],
+                "low_priority": [s for s in slow_strategies if s["optimization_priority"] == "low"],
+            },
+        }

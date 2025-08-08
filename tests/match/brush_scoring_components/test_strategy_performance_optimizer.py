@@ -1,14 +1,12 @@
 """Unit tests for StrategyPerformanceOptimizer component."""
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional
 
 from sotd.match.brush_scoring_components.strategy_performance_optimizer import (
-    StrategyPerformanceOptimizer,
-    StrategyPerformance,
     PerformanceMetrics,
+    StrategyPerformance,
+    StrategyPerformanceOptimizer,
 )
-from sotd.match.types import MatchResult
 
 
 @dataclass
@@ -229,6 +227,114 @@ class TestStrategyPerformanceOptimizer:
 
         rankings = self.optimizer.get_strategy_rankings()
         assert rankings == []
+
+    def test_accuracy_only_ranking(self):
+        """Test that ranking uses only accuracy metrics (success rate and score)."""
+        # Record performance for strategies with different characteristics
+        strategies = ["AccurateSlow", "FastWrong", "AccurateFast"]
+
+        # AccurateSlow: slow but very accurate
+        for i in range(15):
+            self.optimizer.record_strategy_execution("AccurateSlow", 0.20, True, 0.95)
+
+        # FastWrong: fast but inaccurate
+        for i in range(15):
+            self.optimizer.record_strategy_execution("FastWrong", 0.01, False, 0.3)
+
+        # AccurateFast: fast and accurate
+        for i in range(15):
+            self.optimizer.record_strategy_execution("AccurateFast", 0.02, True, 0.9)
+
+        optimized_order = self.optimizer.get_optimized_execution_order(strategies)
+
+        # Should prioritize accuracy over speed
+        assert optimized_order[0] == "AccurateSlow"  # Highest success rate and score
+        assert optimized_order[1] == "AccurateFast"  # Good accuracy, fast
+        assert optimized_order[2] == "FastWrong"  # Fast but wrong
+
+    def test_get_slow_strategies(self):
+        """Test identifying slow strategies that need optimization."""
+        # Record performance for strategies with different speeds
+        for i in range(15):
+            self.optimizer.record_strategy_execution("FastStrategy", 0.01, True, 0.8)
+            self.optimizer.record_strategy_execution("SlowStrategy", 0.15, True, 0.9)
+            self.optimizer.record_strategy_execution("MediumStrategy", 0.05, True, 0.85)
+
+        slow_strategies = self.optimizer.get_slow_strategies(threshold_seconds=0.1)
+
+        assert len(slow_strategies) == 1
+        assert slow_strategies[0]["strategy_name"] == "SlowStrategy"
+        assert slow_strategies[0]["avg_execution_time"] > 0.1
+        assert slow_strategies[0]["optimization_priority"] == "high"  # High success rate
+
+    def test_get_slow_strategies_with_lower_threshold(self):
+        """Test slow strategy detection with lower threshold."""
+        # Record performance for strategies
+        for i in range(15):
+            self.optimizer.record_strategy_execution("FastStrategy", 0.01, True, 0.8)
+            self.optimizer.record_strategy_execution("MediumStrategy", 0.05, True, 0.85)
+
+        slow_strategies = self.optimizer.get_slow_strategies(threshold_seconds=0.02)
+
+        assert len(slow_strategies) == 1
+        assert slow_strategies[0]["strategy_name"] == "MediumStrategy"
+
+    def test_get_slow_strategies_optimization_priority(self):
+        """Test optimization priority based on success rate."""
+        # Record performance for slow strategies with different success rates
+        for i in range(15):
+            # High success rate - high priority
+            self.optimizer.record_strategy_execution("SlowAccurate", 0.15, True, 0.95)
+            # Low success rate - medium priority
+            self.optimizer.record_strategy_execution("SlowInaccurate", 0.15, False, 0.3)
+
+        slow_strategies = self.optimizer.get_slow_strategies(threshold_seconds=0.1)
+
+        assert len(slow_strategies) == 2
+
+        # Find strategies by name
+        slow_accurate = next(s for s in slow_strategies if s["strategy_name"] == "SlowAccurate")
+        slow_inaccurate = next(s for s in slow_strategies if s["strategy_name"] == "SlowInaccurate")
+
+        assert slow_accurate["optimization_priority"] == "high"
+        assert slow_inaccurate["optimization_priority"] == "medium"
+
+    def test_get_performance_report(self):
+        """Test comprehensive performance report generation."""
+        # Record performance for multiple strategies
+        for i in range(15):
+            self.optimizer.record_strategy_execution("FastStrategy", 0.01, True, 0.8)
+            self.optimizer.record_strategy_execution("SlowStrategy", 0.15, True, 0.9)
+
+        report = self.optimizer.get_performance_report()
+
+        assert "summary" in report
+        assert "rankings" in report
+        assert "slow_strategies" in report
+        assert "optimization_recommendations" in report
+
+        # Check optimization recommendations structure
+        recommendations = report["optimization_recommendations"]
+        assert "high_priority" in recommendations
+        assert "medium_priority" in recommendations
+        assert "low_priority" in recommendations
+
+        # Should have one slow strategy in high priority
+        assert len(recommendations["high_priority"]) == 1
+        assert recommendations["high_priority"][0]["strategy_name"] == "SlowStrategy"
+
+    def test_get_performance_report_no_slow_strategies(self):
+        """Test performance report when no slow strategies exist."""
+        # Record performance for fast strategies only
+        for i in range(15):
+            self.optimizer.record_strategy_execution("FastStrategy", 0.01, True, 0.8)
+
+        report = self.optimizer.get_performance_report()
+
+        assert len(report["slow_strategies"]) == 0
+        assert len(report["optimization_recommendations"]["high_priority"]) == 0
+        assert len(report["optimization_recommendations"]["medium_priority"]) == 0
+        assert len(report["optimization_recommendations"]["low_priority"]) == 0
 
 
 class TestStrategyPerformance:
