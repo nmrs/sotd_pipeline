@@ -325,9 +325,7 @@ class ScoringEngine:
         # In a full implementation, this would calculate balance between handle/knot words
         return 0.0
 
-    def _modifier_dual_component(
-        self, input_text: str, result: dict, strategy_name: str
-    ) -> float:
+    def _modifier_dual_component(self, input_text: str, result: dict, strategy_name: str) -> float:
         """
         Return score modifier for dual component matches (unified strategy only).
 
@@ -345,13 +343,37 @@ class ScoringEngine:
         # Check if both handle and knot sections exist and have valid matches
         handle = result.get("handle")
         knot = result.get("knot")
-        
+
         if handle and knot:
             # Both handle and knot have data
             handle_brand = handle.get("brand")
             knot_brand = knot.get("brand")
-            
+
             # Return 1.0 if both have brands (indicating successful matches)
             return 1.0 if handle_brand and knot_brand else 0.0
-        
+
+        return 0.0
+
+    def _modifier_high_confidence(
+        self, input_text: str, result: MatchResult, strategy_name: str
+    ) -> float:
+        """
+        Return score modifier for high confidence delimiter splits.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if high priority delimiter used, 0.0 otherwise)
+        """
+        # Check if this result used a high priority delimiter
+        if hasattr(result, "_delimiter_priority"):
+            return 1.0 if result._delimiter_priority == "high" else 0.0
+
+        # Fallback: check if high_priority_delimiter attribute exists
+        if hasattr(result, "high_priority_delimiter"):
+            return 1.0 if result.high_priority_delimiter else 0.0
+
         return 0.0

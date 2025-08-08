@@ -13,6 +13,7 @@ brush_scoring_weights:
     zenith: 75.0
     other_brush: 70.0
     medium_priority_automated_split: 60.0
+    automated_split: 60.0
     unified: 50.0
 
   # Strategy-specific modifiers (Phase 3.7 - ENABLED)
@@ -27,6 +28,15 @@ brush_scoring_weights:
       knot_confidence: 0.0
       word_count_balance: 0.0
     medium_priority_automated_split:
+      multiple_brands: -3.0
+      fiber_words: 2.0
+      size_specification: 1.0
+      delimiter_confidence: 2.0
+      handle_confidence: 0.0
+      knot_confidence: 0.0
+      word_count_balance: 0.0
+    automated_split:
+      high_confidence: 25.0
       multiple_brands: -3.0
       fiber_words: 2.0
       size_specification: 1.0
