@@ -31,7 +31,7 @@ class TestStrategyDependencyManagerIntegration:
         execution_order = self.dependency_manager.get_execution_order(
             ["StrategyA", "StrategyB", "StrategyC"]
         )
-        
+
         # StrategyA should come first (no dependencies)
         assert execution_order[0] == "StrategyA"
         assert "StrategyB" in execution_order
@@ -50,14 +50,14 @@ class TestStrategyDependencyManagerIntegration:
         # Simulate StrategyA success
         strategy_results = {
             "StrategyA": MatchResult(
-                original="test", 
-                matched={"brand": "test"}, 
-                match_type="regex", 
-                pattern="test", 
-                strategy="StrategyA"
+                original="test",
+                matched={"brand": "test"},
+                match_type="regex",
+                pattern="test",
+                strategy="StrategyA",
             )
         }
-        
+
         # Check which strategies can execute
         assert self.dependency_manager.can_execute_strategy("StrategyA", strategy_results)
         assert self.dependency_manager.can_execute_strategy("StrategyB", strategy_results)
@@ -66,14 +66,14 @@ class TestStrategyDependencyManagerIntegration:
         # Simulate StrategyA failure
         strategy_results = {
             "StrategyA": MatchResult(
-                original="test", 
-                matched=None, 
-                match_type="regex", 
-                pattern="test", 
-                strategy="StrategyA"
+                original="test",
+                matched=None,
+                match_type="regex",
+                pattern="test",
+                strategy="StrategyA",
             )
         }
-        
+
         assert self.dependency_manager.can_execute_strategy("StrategyA", strategy_results)
         assert not self.dependency_manager.can_execute_strategy("StrategyB", strategy_results)
         assert self.dependency_manager.can_execute_strategy("StrategyC", strategy_results)
@@ -98,15 +98,15 @@ class TestStrategyDependencyManagerIntegration:
         execution_order = self.dependency_manager.get_execution_order(
             ["StrategyA", "StrategyB", "StrategyC", "StrategyD", "StrategyE"]
         )
-        
+
         # StrategyA should be first (no dependencies)
         assert execution_order[0] == "StrategyA"
-        
+
         # StrategyB and StrategyC should be after StrategyA
         strategy_a_index = execution_order.index("StrategyA")
         strategy_b_index = execution_order.index("StrategyB")
         strategy_c_index = execution_order.index("StrategyC")
-        
+
         assert strategy_b_index > strategy_a_index
         assert strategy_c_index > strategy_b_index
 
@@ -127,11 +127,11 @@ class TestStrategyDependencyManagerIntegration:
         # Test with StrategyA success (should be able to execute)
         strategy_results = {
             "StrategyA": MatchResult(
-                original="test", 
-                matched={"brand": "test"}, 
-                match_type="regex", 
-                pattern="test", 
-                strategy="StrategyA"
+                original="test",
+                matched={"brand": "test"},
+                match_type="regex",
+                pattern="test",
+                strategy="StrategyA",
             )
         }
         assert self.dependency_manager.can_execute_strategy("StrategyC", strategy_results)
@@ -139,11 +139,11 @@ class TestStrategyDependencyManagerIntegration:
         # Test with StrategyB success (should be able to execute)
         strategy_results = {
             "StrategyB": MatchResult(
-                original="test", 
-                matched={"brand": "test"}, 
-                match_type="regex", 
-                pattern="test", 
-                strategy="StrategyB"
+                original="test",
+                matched={"brand": "test"},
+                match_type="regex",
+                pattern="test",
+                strategy="StrategyB",
             )
         }
         assert self.dependency_manager.can_execute_strategy("StrategyC", strategy_results)
@@ -151,19 +151,19 @@ class TestStrategyDependencyManagerIntegration:
         # Test with both failures (should not be able to execute)
         strategy_results = {
             "StrategyA": MatchResult(
-                original="test", 
-                matched=None, 
-                match_type="regex", 
-                pattern="test", 
-                strategy="StrategyA"
+                original="test",
+                matched=None,
+                match_type="regex",
+                pattern="test",
+                strategy="StrategyA",
             ),
             "StrategyB": MatchResult(
-                original="test", 
-                matched=None, 
-                match_type="regex", 
-                pattern="test", 
-                strategy="StrategyB"
-            )
+                original="test",
+                matched=None,
+                match_type="regex",
+                pattern="test",
+                strategy="StrategyB",
+            ),
         }
         assert not self.dependency_manager.can_execute_strategy("StrategyC", strategy_results)
 
@@ -184,11 +184,11 @@ class TestStrategyDependencyManagerIntegration:
         # Test with only StrategyA success (should not be able to execute)
         strategy_results = {
             "StrategyA": MatchResult(
-                original="test", 
-                matched={"brand": "test"}, 
-                match_type="regex", 
-                pattern="test", 
-                strategy="StrategyA"
+                original="test",
+                matched={"brand": "test"},
+                match_type="regex",
+                pattern="test",
+                strategy="StrategyA",
             )
         }
         assert not self.dependency_manager.can_execute_strategy("StrategyC", strategy_results)
@@ -196,38 +196,38 @@ class TestStrategyDependencyManagerIntegration:
         # Test with both successes (should be able to execute)
         strategy_results = {
             "StrategyA": MatchResult(
-                original="test", 
-                matched={"brand": "test"}, 
-                match_type="regex", 
-                pattern="test", 
-                strategy="StrategyA"
+                original="test",
+                matched={"brand": "test"},
+                match_type="regex",
+                pattern="test",
+                strategy="StrategyA",
             ),
             "StrategyB": MatchResult(
-                original="test", 
-                matched={"brand": "test"}, 
-                match_type="regex", 
-                pattern="test", 
-                strategy="StrategyB"
-            )
+                original="test",
+                matched={"brand": "test"},
+                match_type="regex",
+                pattern="test",
+                strategy="StrategyB",
+            ),
         }
         assert self.dependency_manager.can_execute_strategy("StrategyC", strategy_results)
 
         # Test with one failure (should not be able to execute)
         strategy_results = {
             "StrategyA": MatchResult(
-                original="test", 
-                matched={"brand": "test"}, 
-                match_type="regex", 
-                pattern="test", 
-                strategy="StrategyA"
+                original="test",
+                matched={"brand": "test"},
+                match_type="regex",
+                pattern="test",
+                strategy="StrategyA",
             ),
             "StrategyB": MatchResult(
-                original="test", 
-                matched=None, 
-                match_type="regex", 
-                pattern="test", 
-                strategy="StrategyB"
-            )
+                original="test",
+                matched=None,
+                match_type="regex",
+                pattern="test",
+                strategy="StrategyB",
+            ),
         }
         assert not self.dependency_manager.can_execute_strategy("StrategyC", strategy_results)
 
@@ -260,14 +260,14 @@ class TestStrategyDependencyManagerIntegration:
 
         # Check dependency status for StrategyB (depends on StrategyA)
         status = self.dependency_manager.get_dependency_status("StrategyB", {})
-        
+
         # StrategyB should have dependencies
         assert status["total_dependencies"] == 1
         assert "StrategyA" in status["unsatisfied_dependencies"]
-        
+
         # Check dependency status for StrategyA (no dependencies)
         status = self.dependency_manager.get_dependency_status("StrategyA", {})
-        
+
         # StrategyA should have no dependencies
         assert status["total_dependencies"] == 0
         assert status["can_execute"] is True
@@ -285,7 +285,7 @@ class TestStrategyDependencyManagerIntegration:
         # With no results, StrategyB and StrategyC should be blocked
         strategy_results = {}
         blocked = self.dependency_manager.get_blocked_strategies(strategy_results)
-        
+
         assert "StrategyB" in blocked
         assert "StrategyC" in blocked
         assert "StrategyA" not in blocked
@@ -293,15 +293,15 @@ class TestStrategyDependencyManagerIntegration:
         # With StrategyA success, StrategyC should be blocked
         strategy_results = {
             "StrategyA": MatchResult(
-                original="test", 
-                matched={"brand": "test"}, 
-                match_type="regex", 
-                pattern="test", 
-                strategy="StrategyA"
+                original="test",
+                matched={"brand": "test"},
+                match_type="regex",
+                pattern="test",
+                strategy="StrategyA",
             )
         }
         blocked = self.dependency_manager.get_blocked_strategies(strategy_results)
-        
+
         assert "StrategyC" in blocked
         assert "StrategyB" not in blocked
         assert "StrategyA" not in blocked
@@ -329,10 +329,10 @@ class TestStrategyDependencyManagerIntegration:
         execution_order = self.dependency_manager.get_execution_order(
             ["StrategyA", "StrategyB", "StrategyC", "StrategyD"]
         )
-        
+
         # StrategyA should be first
         assert execution_order[0] == "StrategyA"
-        
+
         # StrategyB should be after StrategyA
         strategy_a_index = execution_order.index("StrategyA")
         strategy_b_index = execution_order.index("StrategyB")
@@ -341,14 +341,14 @@ class TestStrategyDependencyManagerIntegration:
         # Test dependency satisfaction with StrategyA success
         strategy_results = {
             "StrategyA": MatchResult(
-                original="test", 
-                matched={"brand": "test"}, 
-                match_type="regex", 
-                pattern="test", 
-                strategy="StrategyA"
+                original="test",
+                matched={"brand": "test"},
+                match_type="regex",
+                pattern="test",
+                strategy="StrategyA",
             )
         }
-        
+
         assert self.dependency_manager.can_execute_strategy("StrategyA", strategy_results)
         assert self.dependency_manager.can_execute_strategy("StrategyB", strategy_results)
         assert self.dependency_manager.can_execute_strategy("StrategyC", strategy_results)
