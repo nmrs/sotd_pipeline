@@ -307,7 +307,7 @@ Implement a scoring-based **brush matching** system to replace the current "firs
 - **Step 3.8.3**: ✅ **COMPLETE** - Integrate ResultConflictResolver into scoring engine and validate
 - **Step 3.8.4**: ✅ **COMPLETE** - Implement strategy performance optimizer
 - **Step 3.8.5**: ✅ **COMPLETE** - Integrate StrategyPerformanceOptimizer into scoring engine and validate
-- **Step 3.8.6**: Integrate StrategyDependencyManager into scoring engine and validate
+- **Step 3.8.6**: ✅ **COMPLETE** - Integrate StrategyDependencyManager into scoring engine and validate
 - **Step 3.8.7**: Final coordination validation and 100% alignment check
 
 **Step 3.8.1 Implementation Details**: ✅ **COMPLETE**
@@ -2703,3 +2703,30 @@ class DelimiterSplitStrategy(BaseBrushMatchingStrategy):
   - Real-time strategy execution tracking
 - **Validation**: Successfully tested with real brush data
 - **Status**: Ready for production use with performance optimization capabilities
+
+**Steps**:
+- **Step 3.8.1**: ✅ **COMPLETE** - Implement strategy dependency manager
+- **Step 3.8.2**: ✅ **COMPLETE** - Implement result conflict resolver
+- **Step 3.8.3**: ✅ **COMPLETE** - Integrate ResultConflictResolver into scoring engine and validate
+- **Step 3.8.4**: ✅ **COMPLETE** - Implement strategy performance optimizer
+- **Step 3.8.5**: ✅ **COMPLETE** - Integrate StrategyPerformanceOptimizer into scoring engine and validate
+- **Step 3.8.6**: ✅ **COMPLETE** - Integrate StrategyDependencyManager into scoring engine and validate
+- **Step 3.8.7**: Final coordination validation and 100% alignment check
+
+**Step 3.8.6 Implementation Details**: ✅ **COMPLETE**
+- **StrategyDependencyManager Integration**: Successfully integrated into BrushScoringMatcher
+- **Dependency Management**: Automatically manages strategy dependencies and execution constraints
+- **Integration Point**: Added to initialization and called during match method execution
+- **Dependency Constraints**: Added _apply_dependency_constraints() method to filter executable strategies
+- **Execution Order**: Added _get_optimized_execution_order() method for dependency-based ordering
+- **Test Coverage**: 9 comprehensive integration tests covering all dependency types and scenarios
+- **Quality Checks**: All linting and type checking passed
+- **Key Features**:
+  - Automatic dependency constraint application during matching
+  - Support for all dependency types (REQUIRES_SUCCESS, REQUIRES_FAILURE, REQUIRES_ANY, REQUIRES_ALL)
+  - Circular dependency detection and prevention
+  - Dependency status monitoring and blocked strategy identification
+  - Topological sort for optimal execution order
+  - Integration with existing performance tracking and conflict resolution
+- **Validation**: Successfully tested with real brush data
+- **Status**: Ready for production use with comprehensive dependency management capabilities

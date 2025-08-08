@@ -18,6 +18,9 @@ from sotd.match.brush_scoring_components.strategy_orchestrator import StrategyOr
 from sotd.match.brush_scoring_components.strategy_performance_optimizer import (
     StrategyPerformanceOptimizer,
 )
+from sotd.match.brush_scoring_components.strategy_dependency_manager import (
+    StrategyDependencyManager,
+)
 from sotd.match.brush_scoring_config import BrushScoringConfig
 from sotd.match.types import MatchResult
 
@@ -65,6 +68,7 @@ class BrushScoringMatcher:
         self.performance_monitor = PerformanceMonitor()
         self.conflict_resolver = ResultConflictResolver()
         self.performance_optimizer = StrategyPerformanceOptimizer()
+        self.strategy_dependency_manager = StrategyDependencyManager()
 
         # Initialize HandleMatcher for composite brush matching
         from sotd.match.handle_matcher import HandleMatcher
@@ -336,6 +340,44 @@ class BrushScoringMatcher:
                 strategy_name, execution_time, success, score
             )
 
+    def _get_optimized_execution_order(self, strategy_names: List[str]) -> List[str]:
+        """
+        Get an optimized execution order based on strategy dependencies and performance.
+
+        Args:
+            strategy_names: List of strategy names to optimize
+
+        Returns:
+            List of strategy names in optimized order
+        """
+        # Use the strategy dependency manager to get the optimized order
+        return self.strategy_dependency_manager.get_execution_order(strategy_names)
+
+    def _apply_dependency_constraints(self, strategy_results: List[MatchResult]) -> List[MatchResult]:
+        """
+        Apply dependency constraints to filter out strategies that cannot execute.
+
+        Args:
+            strategy_results: List of strategy results
+
+        Returns:
+            Filtered list of strategy results that can execute
+        """
+        # Convert results to dictionary for dependency checking
+        results_dict = {result.strategy: result for result in strategy_results if result.strategy}
+        
+        # Filter out strategies that cannot execute due to dependencies
+        executable_results = []
+        for result in strategy_results:
+            if not result.strategy:
+                executable_results.append(result)
+                continue
+                
+            if self.strategy_dependency_manager.can_execute_strategy(result.strategy, results_dict):
+                executable_results.append(result)
+        
+        return executable_results
+
     def match(self, value: str) -> Optional[MatchResult]:
         """
         Match a brush string using the enhanced scoring system.
@@ -364,9 +406,20 @@ class BrushScoringMatcher:
             # Track strategy performance for optimization
             self._track_strategy_performance(strategy_results, value)
 
+            # Apply dependency constraints to filter executable strategies
+            executable_results = self._apply_dependency_constraints(strategy_results)
+
+            # Get optimized execution order based on dependencies and performance
+            strategy_names = [
+                result.strategy for result in executable_results if result.strategy
+            ]
+            # Note: optimized_order is calculated but not yet used for reordering
+            # This will be used in future iterations when we implement actual reordering
+            self.strategy_dependency_manager.get_execution_order(strategy_names)
+
             # Resolve conflicts between strategy results before scoring
             conflict_resolution = self.conflict_resolver.resolve_conflicts(
-                strategy_results, resolution_method="score"
+                executable_results, resolution_method="score"
             )
 
             # Use the winning result(s) from conflict resolution
@@ -415,10 +468,10 @@ class BrushScoringMatcher:
         """
         # Get basic performance stats
         basic_stats = self.get_cache_stats()
-
+        
         # Get strategy performance data
         strategy_performance = self.performance_optimizer.get_performance_report()
-
+        
         return {
             **basic_stats,
             "strategy_performance": strategy_performance,
@@ -426,4 +479,18 @@ class BrushScoringMatcher:
                 "optimization_recommendations", {}
             ),
             "slow_strategies": strategy_performance.get("slow_strategies", []),
+        }
+
+    def get_dependency_info(self) -> dict:
+        """
+        Get dependency information and status.
+
+        Returns:
+            Dictionary containing dependency information and status
+        """
+        return {
+            "dependency_manager": self.strategy_dependency_manager,
+            "dependencies": self.strategy_dependency_manager.dependencies,
+            "dependency_graph": self.strategy_dependency_manager.dependency_graph,
+            "topological_graph": self.strategy_dependency_manager.topological_graph,
         }
