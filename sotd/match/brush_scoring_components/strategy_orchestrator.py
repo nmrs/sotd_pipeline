@@ -4,7 +4,7 @@ Strategy Orchestrator Component.
 This component runs all applicable brush matching strategies and collects results.
 """
 
-from typing import List
+from typing import List, Optional
 
 from sotd.match.types import MatchResult
 
@@ -26,12 +26,15 @@ class StrategyOrchestrator:
         """
         self.strategies = strategies
 
-    def run_all_strategies(self, value: str) -> List[MatchResult]:
+    def run_all_strategies(
+        self, value: str, cached_results: Optional[dict] = None
+    ) -> List[MatchResult]:
         """
         Run all strategies and collect results.
 
         Args:
             value: The brush string to match
+            cached_results: Optional cached results to pass to strategies
 
         Returns:
             List of MatchResult objects from all strategies
@@ -40,7 +43,19 @@ class StrategyOrchestrator:
 
         for strategy in self.strategies:
             try:
-                result = strategy.match(value)
+                # Pass cached results to strategies that support them
+                if cached_results is not None:
+                    # Check if the strategy's match method accepts cached_results parameter
+                    import inspect
+
+                    sig = inspect.signature(strategy.match)
+                    if len(sig.parameters) > 1:  # Has more than just 'self' and 'value'
+                        result = strategy.match(value, cached_results)
+                    else:
+                        result = strategy.match(value)
+                else:
+                    result = strategy.match(value)
+
                 if result is not None:
                     # Convert dict results to MatchResult objects
                     if isinstance(result, dict):

@@ -14,12 +14,14 @@ from sotd.match.brush_scoring_components.performance_monitor import PerformanceM
 from sotd.match.brush_scoring_components.result_conflict_resolver import ResultConflictResolver
 from sotd.match.brush_scoring_components.result_processor import ResultProcessor
 from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
+from sotd.match.brush_scoring_components.strategy_dependency_manager import (
+    DependencyType,
+    StrategyDependency,
+    StrategyDependencyManager,
+)
 from sotd.match.brush_scoring_components.strategy_orchestrator import StrategyOrchestrator
 from sotd.match.brush_scoring_components.strategy_performance_optimizer import (
     StrategyPerformanceOptimizer,
-)
-from sotd.match.brush_scoring_components.strategy_dependency_manager import (
-    StrategyDependencyManager,
 )
 from sotd.match.brush_scoring_config import BrushScoringConfig
 from sotd.match.types import MatchResult
@@ -69,6 +71,46 @@ class BrushScoringMatcher:
         self.conflict_resolver = ResultConflictResolver()
         self.performance_optimizer = StrategyPerformanceOptimizer()
         self.strategy_dependency_manager = StrategyDependencyManager()
+
+        # Configure handle/knot dependencies for automated split strategies
+
+        # HandleMatcher and KnotMatcher depend on BrushSplitter success
+        self.strategy_dependency_manager.add_dependency(
+            StrategyDependency("HandleMatcher", "BrushSplitter", DependencyType.REQUIRES_SUCCESS)
+        )
+        self.strategy_dependency_manager.add_dependency(
+            StrategyDependency("KnotMatcher", "BrushSplitter", DependencyType.REQUIRES_SUCCESS)
+        )
+
+        # Dual Component depends on both HandleMatcher and KnotMatcher success
+        self.strategy_dependency_manager.add_dependency(
+            StrategyDependency(
+                "LegacyDualComponentWrapperStrategy",
+                "HandleMatcher",
+                DependencyType.REQUIRES_SUCCESS,
+            )
+        )
+        self.strategy_dependency_manager.add_dependency(
+            StrategyDependency(
+                "LegacyDualComponentWrapperStrategy", "KnotMatcher", DependencyType.REQUIRES_SUCCESS
+            )
+        )
+
+        # Single Component depends on any of HandleMatcher or KnotMatcher
+        self.strategy_dependency_manager.add_dependency(
+            StrategyDependency(
+                "LegacySingleComponentFallbackWrapperStrategy",
+                "HandleMatcher",
+                DependencyType.REQUIRES_ANY,
+            )
+        )
+        self.strategy_dependency_manager.add_dependency(
+            StrategyDependency(
+                "LegacySingleComponentFallbackWrapperStrategy",
+                "KnotMatcher",
+                DependencyType.REQUIRES_ANY,
+            )
+        )
 
         # Initialize HandleMatcher for composite brush matching
         from sotd.match.handle_matcher import HandleMatcher
@@ -353,7 +395,9 @@ class BrushScoringMatcher:
         # Use the strategy dependency manager to get the optimized order
         return self.strategy_dependency_manager.get_execution_order(strategy_names)
 
-    def _apply_dependency_constraints(self, strategy_results: List[MatchResult]) -> List[MatchResult]:
+    def _apply_dependency_constraints(
+        self, strategy_results: List[MatchResult]
+    ) -> List[MatchResult]:
         """
         Apply dependency constraints to filter out strategies that cannot execute.
 
@@ -365,18 +409,50 @@ class BrushScoringMatcher:
         """
         # Convert results to dictionary for dependency checking
         results_dict = {result.strategy: result for result in strategy_results if result.strategy}
-        
+
         # Filter out strategies that cannot execute due to dependencies
         executable_results = []
         for result in strategy_results:
             if not result.strategy:
                 executable_results.append(result)
                 continue
-                
+
             if self.strategy_dependency_manager.can_execute_strategy(result.strategy, results_dict):
                 executable_results.append(result)
-        
+
         return executable_results
+
+    def _precompute_handle_knot_results(self, value: str) -> dict:
+        """
+        Pre-compute HandleMatcher and KnotMatcher results for optimization.
+
+        Args:
+            value: The brush string to match
+
+        Returns:
+            Dictionary with cached handle and knot results
+        """
+        cached_results = {}
+
+        # Pre-compute HandleMatcher result
+        try:
+            handle_result = self.handle_matcher.match_handle_maker(value)
+            if handle_result:
+                cached_results["handle_result"] = handle_result
+        except Exception:
+            # Handle matcher failed, continue without handle result
+            pass
+
+        # Pre-compute KnotMatcher result
+        try:
+            knot_result = self.knot_matcher.match(value)
+            if knot_result:
+                cached_results["knot_result"] = knot_result
+        except Exception:
+            # Knot matcher failed, continue without knot result
+            pass
+
+        return cached_results
 
     def match(self, value: str) -> Optional[MatchResult]:
         """
@@ -395,9 +471,12 @@ class BrushScoringMatcher:
         self.performance_monitor.start_timing()
 
         try:
+            # Pre-compute HandleMatcher and KnotMatcher results for optimization
+            cached_results = self._precompute_handle_knot_results(value)
+
             # For Phase 3.1 (Black Box Alignment), use wrapper strategies for all matches
             # This ensures we get the exact same results as the legacy system
-            strategy_results = self.strategy_orchestrator.run_all_strategies(value)
+            strategy_results = self.strategy_orchestrator.run_all_strategies(value, cached_results)
 
             # If no strategy results, return None
             if not strategy_results:
@@ -410,9 +489,7 @@ class BrushScoringMatcher:
             executable_results = self._apply_dependency_constraints(strategy_results)
 
             # Get optimized execution order based on dependencies and performance
-            strategy_names = [
-                result.strategy for result in executable_results if result.strategy
-            ]
+            strategy_names = [result.strategy for result in executable_results if result.strategy]
             # Note: optimized_order is calculated but not yet used for reordering
             # This will be used in future iterations when we implement actual reordering
             self.strategy_dependency_manager.get_execution_order(strategy_names)
@@ -468,10 +545,10 @@ class BrushScoringMatcher:
         """
         # Get basic performance stats
         basic_stats = self.get_cache_stats()
-        
+
         # Get strategy performance data
         strategy_performance = self.performance_optimizer.get_performance_report()
-        
+
         return {
             **basic_stats,
             "strategy_performance": strategy_performance,
