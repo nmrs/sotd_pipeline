@@ -15,6 +15,9 @@ from sotd.match.brush_scoring_components.result_conflict_resolver import ResultC
 from sotd.match.brush_scoring_components.result_processor import ResultProcessor
 from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
 from sotd.match.brush_scoring_components.strategy_orchestrator import StrategyOrchestrator
+from sotd.match.brush_scoring_components.strategy_performance_optimizer import (
+    StrategyPerformanceOptimizer,
+)
 from sotd.match.brush_scoring_config import BrushScoringConfig
 from sotd.match.types import MatchResult
 
@@ -61,6 +64,7 @@ class BrushScoringMatcher:
         self.result_processor = ResultProcessor()
         self.performance_monitor = PerformanceMonitor()
         self.conflict_resolver = ResultConflictResolver()
+        self.performance_optimizer = StrategyPerformanceOptimizer()
 
         # Initialize HandleMatcher for composite brush matching
         from sotd.match.handle_matcher import HandleMatcher
@@ -309,6 +313,29 @@ class BrushScoringMatcher:
             pattern=knot_data.get("_pattern_used"),
         )
 
+    def _track_strategy_performance(self, strategy_results: List[MatchResult], value: str):
+        """
+        Track performance of individual strategies and update the optimizer.
+
+        Args:
+            strategy_results: List of MatchResult objects from strategies
+            value: The brush string being matched
+        """
+        # Track which strategies produced results
+        for result in strategy_results:
+            strategy_name = result.strategy or "unknown_strategy"
+            success = result.matched is not None and bool(result.matched)
+            score = result.score or 0.0
+
+            # For now, use a simple execution time estimate
+            # In a real implementation, this would be measured during strategy execution
+            execution_time = 0.01  # Placeholder - would be actual measured time
+
+            # Record the strategy execution
+            self.performance_optimizer.record_strategy_execution(
+                strategy_name, execution_time, success, score
+            )
+
     def match(self, value: str) -> Optional[MatchResult]:
         """
         Match a brush string using the enhanced scoring system.
@@ -333,6 +360,9 @@ class BrushScoringMatcher:
             # If no strategy results, return None
             if not strategy_results:
                 return None
+
+            # Track strategy performance for optimization
+            self._track_strategy_performance(strategy_results, value)
 
             # Resolve conflicts between strategy results before scoring
             conflict_resolution = self.conflict_resolver.resolve_conflicts(
@@ -374,4 +404,26 @@ class BrushScoringMatcher:
         return {
             "performance": self.performance_monitor.get_performance_stats(),
             "total_time": self.performance_monitor.get_total_time(),
+        }
+
+    def get_performance_stats(self) -> dict:
+        """
+        Get comprehensive performance statistics including strategy optimization data.
+
+        Returns:
+            Dictionary containing performance statistics and optimization data
+        """
+        # Get basic performance stats
+        basic_stats = self.get_cache_stats()
+
+        # Get strategy performance data
+        strategy_performance = self.performance_optimizer.get_performance_report()
+
+        return {
+            **basic_stats,
+            "strategy_performance": strategy_performance,
+            "optimization_recommendations": strategy_performance.get(
+                "optimization_recommendations", {}
+            ),
+            "slow_strategies": strategy_performance.get("slow_strategies", []),
         }
