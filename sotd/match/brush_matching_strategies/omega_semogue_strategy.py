@@ -32,7 +32,7 @@ class OmegaSemogueBrushMatchingStrategy:
             matched_data = {
                 "brand": brand,
                 "model": model_num,
-                "fiber": "boar",
+                "fiber": "Boar",
                 "knot_size_mm": None,
                 "handle_maker": None,
                 "source_text": model_match.group(0),

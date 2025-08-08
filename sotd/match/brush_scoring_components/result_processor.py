@@ -17,9 +17,9 @@ class ResultProcessor:
     any final processing steps.
     """
 
-    def __init__(self):
+    def __init__(self, knot_matcher=None):
         """Initialize the result processor."""
-        pass
+        self.knot_matcher = knot_matcher
 
     def process_result(self, result: Optional[MatchResult], value: str) -> Optional[MatchResult]:
         """
@@ -85,9 +85,9 @@ class ResultProcessor:
         if not result.pattern:
             result.pattern = "unknown"
 
-        # Ensure match_type field exists
+        # Ensure match_type field exists (preserve None to match legacy behavior)
         if not result.match_type:
-            result.match_type = "unknown"
+            result.match_type = None
 
     def _create_handle_knot_sections(self, result: MatchResult) -> None:
         """
@@ -105,21 +105,40 @@ class ResultProcessor:
         fiber = result.matched.get("fiber")
         knot_size_mm = result.matched.get("knot_size_mm")
 
+        # Extract specific handle and knot fields if they exist
+        handle_brand = result.matched.get("handle_brand", brand)
+        handle_model = result.matched.get("handle_model")  # Don't fall back to model
+        knot_brand = result.matched.get("knot_brand", brand)
+        knot_model = result.matched.get("knot_model", model)
+
+        # For known_brush strategy, preserve None for handle_model when not defined
+        # Legacy system correctly sets handle model to None when no specific handle model is defined
+
         # Create handle section
         result.matched["handle"] = {
-            "brand": brand,
-            "model": model,
-            "_matched_by": "BrushScoringMatcher",
+            "brand": handle_brand,
+            "model": handle_model,
+            "source_text": result.matched.get("source_text", result.original),
+            "_matched_by": result.strategy or "BrushScoringMatcher",
             "_pattern": result.pattern or "unknown",
         }
 
+        # If no fiber found, try to get it from knot matcher
+        if fiber is None and self.knot_matcher:
+            # Use the knot matcher to find fiber information for this brand/model
+            search_text = f"{knot_brand} {knot_model}" if knot_model else knot_brand
+            knot_result = self.knot_matcher.match(search_text)
+            if knot_result and knot_result.matched:
+                fiber = knot_result.matched.get("fiber")
+
         # Create knot section
         result.matched["knot"] = {
-            "brand": brand,
-            "model": model,
+            "brand": knot_brand,
+            "model": knot_model,
             "fiber": fiber,
             "knot_size_mm": knot_size_mm,
-            "_matched_by": "BrushScoringMatcher",
+            "source_text": result.matched.get("source_text", result.original),
+            "_matched_by": result.strategy or "BrushScoringMatcher",
             "_pattern": result.pattern or "unknown",
         }
 
@@ -129,3 +148,7 @@ class ResultProcessor:
         result.matched.pop("knot_size_mm", None)
         result.matched.pop("handle_maker", None)
         result.matched.pop("source_type", None)
+        result.matched.pop("handle_brand", None)
+        result.matched.pop("handle_model", None)
+        result.matched.pop("knot_brand", None)
+        result.matched.pop("knot_model", None)

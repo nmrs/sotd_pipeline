@@ -69,12 +69,33 @@ class BrushScoringMatcher:
         handles_path = Path("data/handles.yaml")
         self.handle_matcher = HandleMatcher(handles_path)
 
-        # Get knot strategies from a temporary strategy list
-        temp_strategies = self._create_temp_strategies()
+        # Initialize KnotMatcher with knot-specific strategies like legacy system
+        from sotd.match.brush_matching_strategies.known_knot_strategy import (
+            KnownKnotMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.other_knot_strategy import (
+            OtherKnotMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.fiber_fallback_strategy import (
+            FiberFallbackStrategy,
+        )
+        from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import (
+            KnotSizeFallbackStrategy,
+        )
+
+        # Create legacy matcher to get catalog data
+        from sotd.match.brush_matcher import BrushMatcher
+        from sotd.match.config import BrushMatcherConfig
+
+        config = BrushMatcherConfig.create_default()
+        legacy_matcher = BrushMatcher(config=config, correct_matches_path=self.correct_matches_path)
+
+        # Use same knot strategies as legacy system
         knot_strategies = [
-            s
-            for s in temp_strategies
-            if any(keyword in s.__class__.__name__ for keyword in ["Knot", "Fiber", "Size"])
+            KnownKnotMatchingStrategy(legacy_matcher.knots_data.get("known_knots", {})),
+            OtherKnotMatchingStrategy(legacy_matcher.knots_data.get("other_knots", {})),
+            FiberFallbackStrategy(),
+            KnotSizeFallbackStrategy(),
         ]
         self.knot_matcher = KnotMatcher(knot_strategies)
 
@@ -82,7 +103,7 @@ class BrushScoringMatcher:
         self.correct_matches_matcher = CorrectMatchesMatcher(correct_matches_data)
         self.strategy_orchestrator = StrategyOrchestrator(self._create_strategies())
         self.scoring_engine = ScoringEngine(self.config)
-        self.result_processor = ResultProcessor()
+        self.result_processor = ResultProcessor(self.knot_matcher)
         self.performance_monitor = PerformanceMonitor()
         self.conflict_resolver = ResultConflictResolver()
         self.performance_optimizer = StrategyPerformanceOptimizer()
@@ -160,9 +181,11 @@ class BrushScoringMatcher:
         from sotd.match.brush_matching_strategies.known_split_wrapper_strategy import (
             KnownSplitWrapperStrategy,
         )
-        from sotd.match.brush_matching_strategies.legacy_composite_wrapper_strategies import (
-            LegacyDualComponentWrapperStrategy,
-            LegacySingleComponentFallbackWrapperStrategy,
+        from sotd.match.brush_matching_strategies.full_input_component_matching_strategy import (
+            FullInputComponentMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.automated_split_strategy import (
+            AutomatedSplitStrategy,
         )
 
         # Import component strategies for Phase 3.3
@@ -190,23 +213,21 @@ class BrushScoringMatcher:
             CorrectSplitBrushWrapperStrategy(legacy_matcher),
             # Priority 2: known_split
             KnownSplitWrapperStrategy(legacy_matcher),
-            # Priority 3: high_priority_automated_split
-            HighPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
-            # Priority 4: individual brush strategies (replacing complete_brush wrapper)
-            KnownBrushMatchingStrategy(catalog_data.get("known_brushes", {})),
+            # Priority 3: high_priority_automated_split (REMOVED - replaced by AutomatedSplitStrategy)
+            # HighPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
+            # Priority 4: unified component strategy (before individual brush strategies)
+            FullInputComponentMatchingStrategy(
+                self.handle_matcher, self.knot_matcher, legacy_matcher
+            ),
+            # Priority 5: individual brush strategies (replacing complete_brush wrapper)
+            KnownBrushMatchingStrategy(catalog_data.get("known_brushes", {}), self.handle_matcher),
             OmegaSemogueBrushMatchingStrategy(),
             ZenithBrushMatchingStrategy(),
             OtherBrushMatchingStrategy(catalog_data.get("other_brushes", {})),
-            # Priority 5: dual component strategy (replacing individual component strategies)
-            LegacyDualComponentWrapperStrategy(
-                legacy_matcher
-            ),  # Strategy name: "dual_component" for perfect compatibility
-            # Priority 6: medium_priority_automated_split
-            MediumPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
-            # Priority 7: single_component_fallback
-            LegacySingleComponentFallbackWrapperStrategy(legacy_matcher),
-            # Priority 6: medium_priority_automated_split
-            MediumPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
+            # Priority 6: medium_priority_automated_split (REMOVED - replaced by AutomatedSplitStrategy)
+            # MediumPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
+            # NEW: automated_split (unified high/medium priority strategy)
+            AutomatedSplitStrategy(legacy_matcher, self.config),
         ]
 
         return strategies
@@ -272,7 +293,7 @@ class BrushScoringMatcher:
             # Priority 3: high_priority_automated_split
             HighPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
             # Priority 4: individual brush strategies
-            KnownBrushMatchingStrategy(catalog_data.get("known_brushes", {})),
+            KnownBrushMatchingStrategy(catalog_data.get("known_brushes", {}), self.handle_matcher),
             OmegaSemogueBrushMatchingStrategy(),
             ZenithBrushMatchingStrategy(),
             OtherBrushMatchingStrategy(catalog_data.get("other_brushes", {})),
@@ -568,23 +589,10 @@ class BrushScoringMatcher:
             # This will be used in future iterations when we implement actual reordering
             self.strategy_dependency_manager.get_execution_order(strategy_names)
 
-            # Resolve conflicts between strategy results before scoring
-            conflict_resolution = self.conflict_resolver.resolve_conflicts(
-                executable_results, resolution_method="score"
-            )
+            # Score the results
+            scored_results = self.scoring_engine.score_results(executable_results, value)
 
-            # Use the winning result(s) from conflict resolution
-            if conflict_resolution.winning_result:
-                # If there was a conflict and it was resolved, use the winning result
-                resolved_results = [conflict_resolution.winning_result]
-            else:
-                # No conflicts or no resolution, use all original results
-                resolved_results = strategy_results
-
-            # Score the resolved results
-            scored_results = self.scoring_engine.score_results(resolved_results, value)
-
-            # Get the best result
+            # Get the best result based on score
             best_result = self.scoring_engine.get_best_result(scored_results)
 
             # Process and return the result

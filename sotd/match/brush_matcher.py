@@ -1502,7 +1502,7 @@ class BrushMatcher:
             # Single-brand brush - both handle and knot are from same brand
             m["handle"] = {
                 "brand": brand,
-                "model": model,
+                "model": m.get("handle_model"),  # Use handle_model if available, None if not
                 "source_text": m.get("source_text", ""),
                 "_matched_by": strategy.__class__.__name__,
                 "_pattern": pattern or "unknown",
@@ -1540,13 +1540,24 @@ class BrushMatcher:
                         knot_size_mm = (
                             model_knot_size if model_knot_size is not None else brand_knot_size
                         )
+                else:
+                    # Model not found in catalog, use brand-level defaults
+                    if fiber is None:
+                        fiber = brand_fiber
+                    if knot_size_mm is None:
+                        knot_size_mm = brand_knot_size
 
-                # If still no fiber, check knots catalog for default fiber
-                if fiber is None and brand in self.knots_data:
-                    knot_entry = self.knots_data[brand]
-                    if isinstance(knot_entry, dict) and "default" in knot_entry:
-                        fiber = knot_entry["default"]
-                        print(f"DEBUG: Found default fiber '{fiber}' for brand '{brand}'")
+                # If still no fiber, use knot matcher to find fiber information
+                if fiber is None:
+                    # Use the knot matcher to find fiber information for this brand/model
+                    search_text = f"{brand} {model}" if model else brand
+                    knot_result = self.knot_matcher.match(search_text)
+                    if knot_result and knot_result.matched:
+                        fiber = knot_result.matched.get("fiber")
+                        if fiber:
+                            print(
+                                f"DEBUG: Found fiber '{fiber}' for brand '{brand}' via knot matcher"
+                            )
 
             # Use knot-specific information if available
             # Use knot model if available, otherwise brush model
@@ -1645,7 +1656,7 @@ class BrushMatcher:
 
             m["handle"] = {
                 "brand": handle_brand,
-                "model": m.get("handle_model"),  # Use handle_model if available
+                "model": m.get("handle_model"),  # Use handle_model if available, None if not
                 "source_text": m.get("source_text", ""),
                 "_matched_by": strategy.__class__.__name__,
                 "_pattern": pattern or "unknown",
