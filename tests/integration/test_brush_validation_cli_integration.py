@@ -19,13 +19,13 @@ class TestBrushValidationCLIIntegration:
         """Set up test directories and data."""
         self.test_dir = tempfile.mkdtemp()
         self.test_data_dir = Path(self.test_dir) / "data"
+        self.test_matched_legacy_dir = self.test_data_dir / "matched_legacy"
         self.test_matched_dir = self.test_data_dir / "matched"
-        self.test_matched_new_dir = self.test_data_dir / "matched_new"
         self.test_learning_dir = self.test_data_dir / "learning"
 
         # Create directories
+        self.test_matched_legacy_dir.mkdir(parents=True)
         self.test_matched_dir.mkdir(parents=True)
-        self.test_matched_new_dir.mkdir(parents=True)
         self.test_learning_dir.mkdir(parents=True)
 
         self.cli = BrushValidationCLI(data_path=self.test_data_dir)
@@ -87,7 +87,7 @@ class TestBrushValidationCLIIntegration:
             ]
         }
 
-        scoring_file = self.test_matched_new_dir / "2025-08.json"
+        scoring_file = self.test_matched_dir / "2025-08.json"
         with open(scoring_file, "w") as f:
             json.dump(scoring_data, f)
 
@@ -144,7 +144,7 @@ class TestBrushValidationCLIIntegration:
         scoring_data = {"brush": [{"name": "Scoring Brush 1"}]}
 
         legacy_file = self.test_matched_dir / "2025-08.json"
-        scoring_file = self.test_matched_new_dir / "2025-08.json"
+        scoring_file = self.test_matched_dir / "2025-08.json"
 
         with open(legacy_file, "w") as f:
             json.dump(legacy_data, f)
@@ -317,7 +317,7 @@ class TestBrushValidationCLIIntegration:
         scoring_data = {"brush": [{"name": "Scoring Test"}]}
 
         legacy_file = self.test_matched_dir / "2025-08.json"
-        scoring_file = self.test_matched_new_dir / "2025-08.json"
+        scoring_file = self.test_matched_dir / "2025-08.json"
 
         with open(legacy_file, "w") as f:
             json.dump(legacy_data, f)

@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "month": "2025-01",
+    "record_count": 1544,
+    "performance": {
+      "phase_name": "match",
+      "parallel_workers": 1,
+      "total_processing_time_seconds": 0.0,
+      "file_io_time_seconds": 0.010462760925292969,
+      "processing_time_seconds": 0.8279380798339844,
+      "record_count": 1544,
+      "avg_time_per_record_seconds": 0.0,
+      "records_per_second": 0.0,
+      "memory_usage_mb": {
+        "peak": 0.0,
+        "final": 0.0
+      },
+      "file_sizes_mb": {
+        "input": 0.0,
+        "output": 0.0
+      },
+      "matcher_times": {
+        "razor": {
+          "total_time_seconds": 0.13177108764648438,
+          "avg_time_seconds": 8.562123953637711e-05,
+          "min_time_seconds": 2.3603439331054688e-05,
+          "max_time_seconds": 0.003100872039794922,
+          "count": 1539
+        },
+        "blade": {
+          "total_time_seconds": 0.12355923652648926,
+          "avg_time_seconds": 8.819360208885742e-05,
+          "min_time_seconds": 9.5367431640625e-07,
+          "max_time_seconds": 0.014429807662963867,
+          "count": 1401
+        },
+        "soap": {
+          "total_time_seconds": 0.1478722095489502,
+          "avg_time_seconds": 9.60209152915261e-05,
+          "min_time_seconds": 0.0,
+          "max_time_seconds": 0.0010371208190917969,
+          "count": 1540
+        },
+        "brush": {
+          "total_time_seconds": 0.015898466110229492,
+          "avg_time_seconds": 1.0364058742000973e-05,
+          "min_time_seconds": 2.6226043701171875e-06,
+          "max_time_seconds": 0.0006999969482421875,
+          "count": 1534
+        }
+      },
+      "brush_strategy_times": {},
+      "cache_stats": {
+        "brush_matcher": 

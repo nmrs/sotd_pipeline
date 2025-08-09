@@ -19,10 +19,10 @@ class TestBrushParallelDataIntegration:
         manager.create_directories()
 
         # Verify directory structure
+        assert (tmp_path / "matched_legacy").exists()
+        assert (tmp_path / "matched_legacy").is_dir()
         assert (tmp_path / "matched").exists()
         assert (tmp_path / "matched").is_dir()
-        assert (tmp_path / "matched_new").exists()
-        assert (tmp_path / "matched_new").is_dir()
 
     def test_parallel_data_manager_save_load_cycle(self, tmp_path):
         """Test complete save/load cycle for both brush systems."""
@@ -31,23 +31,23 @@ class TestBrushParallelDataIntegration:
 
         # Test data
         test_data = {
-            "metadata": {"month": "2025-05", "record_count": 100, "brush_system": "current"},
+            "metadata": {"month": "2025-05", "record_count": 100, "brush_system": "legacy"},
             "data": [{"test": "record"}],
         }
 
-        # Save to current system
-        output_path = manager.save_data("2025-05", test_data, "current")
-        assert output_path == tmp_path / "matched" / "2025-05.json"
+        # Save to legacy system
+        output_path = manager.save_data("2025-05", test_data, "legacy")
+        assert output_path == tmp_path / "matched_legacy" / "2025-05.json"
         assert output_path.exists()
 
-        # Load from current system
-        loaded_data = manager.load_data("2025-05", "current")
+        # Load from legacy system
+        loaded_data = manager.load_data("2025-05", "legacy")
         assert loaded_data == test_data
 
         # Save to new system
         test_data["metadata"]["brush_system"] = "new"
         output_path = manager.save_data("2025-05", test_data, "new")
-        assert output_path == tmp_path / "matched_new" / "2025-05.json"
+        assert output_path == tmp_path / "matched" / "2025-05.json"
         assert output_path.exists()
 
         # Load from new system

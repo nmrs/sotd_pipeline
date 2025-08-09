@@ -2,7 +2,7 @@
 Brush parallel data manager for managing parallel data directories.
 
 This module provides functionality for managing parallel data directories
-for brush system comparison, allowing both current and new brush systems
+for brush system comparison, allowing both legacy and new brush systems
 to store data in separate directories.
 """
 
@@ -16,8 +16,8 @@ class BrushParallelDataManager:
     Manager for parallel brush data directories.
 
     Provides functionality for managing data in parallel directories:
-    - data/matched/ (current brush system)
-    - data/matched_new/ (new brush system)
+    - data/matched/ (new brush system - default)
+    - data/matched_legacy/ (legacy brush system)
     """
 
     def __init__(self, base_path: Path | None = None):
@@ -28,8 +28,8 @@ class BrushParallelDataManager:
             base_path: Base path for data directories (default: data/)
         """
         self.base_path = base_path or Path("data")
-        self.legacy_dir = self.base_path / "matched"
-        self.new_dir = self.base_path / "matched_new"
+        self.legacy_dir = self.base_path / "matched_legacy"
+        self.new_dir = self.base_path / "matched"
 
     def create_directories(self) -> None:
         """Create the parallel data directories if they don't exist."""

@@ -25,31 +25,31 @@ class TestBrushParallelDataDirectories:
         assert manager.new_dir.exists()
 
         # Verify directory names
-        assert manager.current_dir.name == "matched"
-        assert manager.new_dir.name == "matched_new"
+        assert manager.legacy_dir.name == "matched_legacy"
+        assert manager.new_dir.name == "matched"
 
     def test_directory_paths_correct(self, tmp_path):
         """Test that directory paths are correctly structured."""
         manager = BrushParallelDataManager(base_path=tmp_path)
 
-        expected_current = tmp_path / "matched"
-        expected_new = tmp_path / "matched_new"
+        expected_legacy = tmp_path / "matched_legacy"
+        expected_new = tmp_path / "matched"
 
-        assert manager.current_dir == expected_current
+        assert manager.legacy_dir == expected_legacy
         assert manager.new_dir == expected_new
 
     def test_output_paths_correct(self, tmp_path):
         """Test that output paths are correctly generated."""
         manager = BrushParallelDataManager(base_path=tmp_path)
 
-        # Test current system path
-        current_path = manager.get_output_path("2025-05", "current")
-        expected_current_path = tmp_path / "matched" / "2025-05.json"
-        assert current_path == expected_current_path
+        # Test legacy system path
+        legacy_path = manager.get_output_path("2025-05", "legacy")
+        expected_legacy_path = tmp_path / "matched_legacy" / "2025-05.json"
+        assert legacy_path == expected_legacy_path
 
         # Test new system path
         new_path = manager.get_output_path("2025-05", "new")
-        expected_new_path = tmp_path / "matched_new" / "2025-05.json"
+        expected_new_path = tmp_path / "matched" / "2025-05.json"
         assert new_path == expected_new_path
 
     def test_data_save_load_cycle(self, tmp_path):
