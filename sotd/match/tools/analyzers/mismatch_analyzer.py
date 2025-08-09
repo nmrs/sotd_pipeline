@@ -231,8 +231,9 @@ class MismatchAnalyzer(AnalysisTool):
 
         # Load data using the parent class method to get _source_file field
         # Set up args.out_dir for the load_matched_data method
-        if not hasattr(args, "out_dir"):
-            args.out_dir = Path("data")
+        # Use absolute path to avoid issues when running from subdirectories
+        if not hasattr(args, "out_dir") or args.out_dir == Path("data"):
+            args.out_dir = project_root / "data"
         if not hasattr(args, "debug"):
             args.debug = False
 
@@ -245,6 +246,9 @@ class MismatchAnalyzer(AnalysisTool):
                 records = self.load_matched_data(args)
             # Convert to the expected format with data wrapper
             data = {"data": records}
+        except FileNotFoundError as e:
+            self.console.print(f"[red]❌ Error: {e}[/red]")
+            return
         except Exception as e:
             self.console.print(f"[red]Error loading data: {e}[/red]")
             return

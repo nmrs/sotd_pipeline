@@ -14,7 +14,7 @@ if str(project_root) not in sys.path:
 from sotd.match.tools.utils.analysis_base import AnalysisTool  # noqa: E402
 
 
-def extract_text(field_data: Any, field: str = "") -> str:
+def extract_text(field_data: Any, field: str = "") -> str:  # noqa: ARG001
     """Extract normalized text from field data.
 
     Args:
@@ -70,7 +70,17 @@ class UnmatchedAnalyzer(AnalysisTool):
 
     def analyze_unmatched(self, args) -> dict:
         """Analyze unmatched products in matched data."""
-        data = self.load_matched_data(args)
+        # Ensure out_dir is set to the project root data directory
+        # This fixes the issue where running from subdirectories fails to find data files
+        if not hasattr(args, "out_dir") or args.out_dir == Path("data"):
+            args.out_dir = project_root / "data"
+
+        try:
+            data = self.load_matched_data(args)
+        except FileNotFoundError as e:
+            print(f"❌ Error: {e}")
+            return {}
+
         all_unmatched = defaultdict(list)
 
         for record in data:
@@ -185,7 +195,8 @@ class UnmatchedAnalyzer(AnalysisTool):
                     },
                 }
             )
-        # If neither handle nor knot issues, check if we have a valid composite brush or knot-only entry
+        # If neither handle nor knot issues, check if we have a valid composite brush
+        # or knot-only entry
         elif matched.get("brand") is None:
             # Check if we have a valid composite brush (both handle and knot are matched)
             # OR a valid knot-only entry (knot is matched, handle is null/empty)

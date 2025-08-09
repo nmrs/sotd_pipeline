@@ -57,6 +57,8 @@ class AnalysisTool(ABC):
     def load_matched_data(self, args) -> List[Dict[str, Any]]:
         """Load matched data from files for the specified time period."""
         all_data = []
+        missing_files = []
+        loaded_files = []
 
         for year, month in month_span(args):
             path = Path(args.out_dir) / "matched" / f"{year:04d}-{month:02d}.json"
@@ -76,15 +78,35 @@ class AnalysisTool(ABC):
                     # The normalized field should already be present in the structured data
 
                 all_data.extend(data)
+                loaded_files.append(f"{year:04d}-{month:02d}")
             else:
+                missing_files.append(f"{year:04d}-{month:02d}")
                 if args.debug:
                     print(f"Skipped (missing): {path}")
+
+        # If no files were found at all, show an error
+        if not loaded_files:
+            if len(missing_files) <= 3:
+                file_list = ", ".join(missing_files)
+            else:
+                file_list = f"{', '.join(missing_files[:3])}... (+{len(missing_files) - 3} more)"
+            raise FileNotFoundError(
+                f"No matched data files found for requested period. "
+                f"Missing files: {file_list}. "
+                f"Check that the match phase has been run for these months."
+            )
+
+        # If some files were missing, show a warning (but continue processing)
+        if missing_files and args.debug:
+            print(f"Warning: Some files missing: {', '.join(missing_files)}")
 
         return all_data
 
     def load_enriched_data(self, args) -> List[Dict[str, Any]]:
         """Load enriched data from files for the specified time period."""
         all_data = []
+        missing_files = []
+        loaded_files = []
 
         for year, month in month_span(args):
             path = Path(args.out_dir) / "enriched" / f"{year:04d}-{month:02d}.json"
@@ -101,9 +123,27 @@ class AnalysisTool(ABC):
                     record["_source_line"] = "unknown"
 
                 all_data.extend(data)
+                loaded_files.append(f"{year:04d}-{month:02d}")
             else:
+                missing_files.append(f"{year:04d}-{month:02d}")
                 if args.debug:
                     print(f"Skipped (missing): {path}")
+
+        # If no files were found at all, show an error
+        if not loaded_files:
+            if len(missing_files) <= 3:
+                file_list = ", ".join(missing_files)
+            else:
+                file_list = f"{', '.join(missing_files[:3])}... (+{len(missing_files) - 3} more)"
+            raise FileNotFoundError(
+                f"No enriched data files found for requested period. "
+                f"Missing files: {file_list}. "
+                f"Check that the enrich phase has been run for these months."
+            )
+
+        # If some files were missing, show a warning (but continue processing)
+        if missing_files and args.debug:
+            print(f"Warning: Some enriched files missing: {', '.join(missing_files)}")
 
         return all_data
 
