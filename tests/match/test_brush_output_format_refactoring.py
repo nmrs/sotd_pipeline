@@ -494,7 +494,9 @@ class TestBrushOutputFormatRefactoring:
 
         # VALIDATION: No data corruption or unexpected values
         assert result.matched["handle"]["brand"] == "Simpson"
-        assert result.matched["handle"]["model"] == "Chubby 2"
+        assert (
+            result.matched["handle"]["model"] is None
+        )  # Complete brushes don't have separate handle models
         assert result.matched["knot"]["brand"] == "Simpson"
         assert result.matched["knot"]["model"] == "Chubby 2"
 
@@ -506,8 +508,8 @@ class TestBrushOutputFormatRefactoring:
         for field, value in handle.items():
             if field == "brand" and value != "Simpson":
                 assert False, f"Handle brand corrupted: {value}"
-            if field == "model" and value != "Chubby 2":
-                assert False, f"Handle model corrupted: {value}"
+            if field == "model" and value is not None:
+                assert False, f"Handle model should be None for complete brushes, got: {value}"
             if field == "_matched_by" and value not in [
                 "KnownBrushMatchingStrategy",
                 "CorrectMatches",

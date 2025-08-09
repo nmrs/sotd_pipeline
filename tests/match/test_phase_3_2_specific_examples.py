@@ -33,11 +33,11 @@ class TestPhase32SpecificExamples:
         matcher = BrushScoringMatcher()
         result = matcher.match("Summer Break Soaps Maize 26mm Timberwolf")
 
-        # This should be handled by dual_component strategy, not individual brush strategies
+        # This should be handled by unified strategy, not individual brush strategies
         # The legacy system returns a match for this case, so scoring system should also return a match
         assert result is not None, "Should return result for Summer Break Soaps"
         assert result.matched is not None, "Should produce match for Summer Break Soaps"
-        assert result.strategy == "dual_component", "Should use dual_component strategy"
+        assert result.strategy == "unified", "Should use unified strategy"
 
     def test_omega_10049_matches_correctly(self):
         """Test that Omega 10049 matches correctly with individual strategies."""
@@ -69,7 +69,7 @@ class TestPhase32SpecificExamples:
 
         # Check fiber in knot section
         knot = result.matched.get("knot", {})
-        assert knot.get("fiber") == "boar", "Should match boar fiber"
+        assert knot.get("fiber") == "Boar", "Should match Boar fiber"
 
     def test_zenith_b2_matches_correctly(self):
         """Test that Zenith B2 matches correctly with individual strategies."""

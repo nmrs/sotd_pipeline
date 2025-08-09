@@ -36,7 +36,7 @@ class TestStrategyModifierIntegration:
             matched={"brand": "Simpson", "model": "Chubby 2"},
             match_type="regex",
             pattern="simpson.*chubby",
-            strategy="high_priority_automated_split",
+            strategy="automated_split",
         )
 
         # Calculate score with modifiers
@@ -45,7 +45,7 @@ class TestStrategyModifierIntegration:
         )
 
         # Verify modifier functions were called
-        self.config.get_all_modifier_names.assert_called_with("high_priority_automated_split")
+        self.config.get_all_modifier_names.assert_called_with("automated_split")
         assert self.config.get_strategy_modifier.call_count == 2
 
         # Verify final score (multiple brands detected, fiber words detected)
@@ -64,7 +64,7 @@ class TestStrategyModifierIntegration:
             matched={"brand": "Simpson", "model": "Chubby 2"},
             match_type="regex",
             pattern="simpson.*chubby",
-            strategy="high_priority_automated_split",
+            strategy="automated_split",
         )
 
         # Calculate score
@@ -86,7 +86,7 @@ class TestStrategyModifierIntegration:
             matched={"brand": "Generic", "model": "Brush"},
             match_type="regex",
             pattern="badger.*brush",
-            strategy="high_priority_automated_split",
+            strategy="automated_split",
         )
 
         # Calculate score
@@ -108,7 +108,7 @@ class TestStrategyModifierIntegration:
             matched={"brand": "Generic", "model": "Brush"},
             match_type="regex",
             pattern="26mm.*brush",
-            strategy="high_priority_automated_split",
+            strategy="automated_split",
         )
 
         # Calculate score
@@ -130,7 +130,7 @@ class TestStrategyModifierIntegration:
             matched={"brand": "Generic", "model": "Brush"},
             match_type="regex",
             pattern="handle.*w/.*knot",
-            strategy="high_priority_automated_split",
+            strategy="automated_split",
         )
 
         # Calculate score
@@ -160,7 +160,7 @@ class TestStrategyModifierIntegration:
             matched={"brand": "Simpson", "model": "Chubby 2"},
             match_type="regex",
             pattern="simpson.*chubby",
-            strategy="high_priority_automated_split",
+            strategy="automated_split",
         )
 
         # Calculate score
@@ -206,7 +206,7 @@ class TestStrategyModifierIntegration:
             matched={"brand": "Test", "model": "Brush"},
             match_type="regex",
             pattern="test.*brush",
-            strategy="high_priority_automated_split",
+            strategy="automated_split",
         )
 
         # Calculate score
@@ -271,7 +271,7 @@ class TestStrategyModifierIntegration:
             matched={"brand": "Brand1", "model": "Brush"},
             match_type="regex",
             pattern="brand1.*brush",
-            strategy="high_priority_automated_split",
+            strategy="automated_split",
         )
 
         # Calculate score
@@ -293,7 +293,7 @@ class TestStrategyModifierIntegration:
             matched={"brand": "Generic", "model": "Brush"},
             match_type="regex",
             pattern="badger.*brush",
-            strategy="high_priority_automated_split",
+            strategy="automated_split",
         )
 
         # Calculate score
@@ -314,15 +314,15 @@ class TestModifierConfiguration:
         assert "strategy_modifiers" in config.weights
 
         # Verify specific strategies have modifiers
-        high_priority_modifiers = config.weights["strategy_modifiers"].get(
-            "high_priority_automated_split", {}
+        automated_split_modifiers = config.weights["strategy_modifiers"].get(
+            "automated_split", {}
         )
-        assert "multiple_brands" in high_priority_modifiers
-        assert "fiber_words" in high_priority_modifiers
-        assert "size_specification" in high_priority_modifiers
-        assert "handle_confidence" in high_priority_modifiers
-        assert "knot_confidence" in high_priority_modifiers
-        assert "word_count_balance" in high_priority_modifiers
+        assert "multiple_brands" in automated_split_modifiers
+        assert "fiber_words" in automated_split_modifiers
+        assert "size_specification" in automated_split_modifiers
+        assert "handle_confidence" in automated_split_modifiers
+        assert "knot_confidence" in automated_split_modifiers
+        assert "word_count_balance" in automated_split_modifiers
 
     def test_modifier_weights_are_configurable(self):
         """Test that modifier weights can be configured via YAML."""
@@ -356,7 +356,7 @@ class TestModifierConfiguration:
         config = BrushScoringConfig()
 
         # Get modifier names for different strategies
-        high_priority_modifiers = config.get_all_modifier_names("high_priority_automated_split")
+        high_priority_modifiers = config.get_all_modifier_names("automated_split")
         medium_priority_modifiers = config.get_all_modifier_names("medium_priority_automated_split")
 
         # Verify common modifiers exist
@@ -383,7 +383,7 @@ class TestModifierIntegrationWithScoringEngine:
                 matched={"brand": "Test", "model": "Brush"},
                 match_type="regex",
                 pattern="test.*brush",
-                strategy="high_priority_automated_split",
+                strategy="automated_split",
             ),
             MatchResult(
                 original="Another brush",
@@ -411,7 +411,7 @@ class TestModifierIntegrationWithScoringEngine:
                 matched={"brand": "High", "model": "Priority"},
                 match_type="regex",
                 pattern="high.*priority",
-                strategy="high_priority_automated_split",
+                strategy="automated_split",
             ),
             MatchResult(
                 original="Complete brush",
@@ -427,7 +427,7 @@ class TestModifierIntegrationWithScoringEngine:
 
         # Verify order is preserved
         assert len(scored_results) == 2
-        assert scored_results[0].strategy == "high_priority_automated_split"
+        assert scored_results[0].strategy == "automated_split"
         assert scored_results[1].strategy == "complete_brush"
 
     def test_scoring_engine_handles_empty_results_with_modifiers(self):
@@ -450,7 +450,7 @@ class TestModifierIntegrationWithScoringEngine:
                 matched=None,
                 match_type=None,
                 pattern=None,
-                strategy="high_priority_automated_split",
+                strategy="automated_split",
             ),
         ]
 

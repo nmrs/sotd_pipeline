@@ -97,7 +97,7 @@ class TestMoarBoarBrushMatching:
     def test_known_brush_strategy_returns_correct_fields(self):
         """Test that KnownBrushMatchingStrategy returns correct handle_model and knot_model."""
         # Get the KnownBrushMatchingStrategy from the scoring system
-        strategy = self.scoring_matcher.strategy_orchestrator.strategies[5]  # known_brush strategy
+        strategy = self.scoring_matcher.strategy_orchestrator.strategies[4]  # known_brush strategy
         result = strategy.match(self.test_input)
 
         assert result is not None

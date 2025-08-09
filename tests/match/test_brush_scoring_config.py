@@ -161,13 +161,11 @@ class TestBrushScoringConfig:
             "correct_complete_brush",
             "correct_split_brush",
             "known_split",
-            "high_priority_automated_split",
             "known_brush",
             "omega_semogue",
             "zenith",
             "other_brush",
             "automated_split",
-            "medium_priority_automated_split",
             "unified",
         ]
 
@@ -177,7 +175,7 @@ class TestBrushScoringConfig:
     def test_get_all_modifier_names(self):
         """Test getting all modifier names for a strategy."""
         config = BrushScoringConfig()
-        modifier_names = config.get_all_modifier_names("high_priority_automated_split")
+        modifier_names = config.get_all_modifier_names("automated_split")
 
         # All modifiers are disabled for Phase 3.1 (black box approach)
         expected_modifiers = []

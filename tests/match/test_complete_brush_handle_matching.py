@@ -244,7 +244,9 @@ class TestCompleteBrushHandleMatching:
         assert result_b16 is not None
         assert result_b16.matched is not None
         # B16 should not have enhanced handle matching
-        assert result_b16.matched["handle"]["model"] == "B16"  # Original brush model
+        assert (
+            result_b16.matched["handle"]["model"] is None
+        )  # No handle model when handle matching disabled
 
     def test_handle_matching_fails_gracefully(self, tmp_path):
         """Test that handle matching fails gracefully when no patterns match."""
