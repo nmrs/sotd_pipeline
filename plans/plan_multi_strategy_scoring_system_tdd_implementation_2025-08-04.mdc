@@ -51,7 +51,7 @@
 - ✅ **AutomatedSplitStrategy** replaces both high/medium priority automated splits
 
 ### **📊 CURRENT IMPLEMENTATION DETAILS**
-- **Total Strategies**: 9 (not 8 as documented)
+- **Total Strategies**: 9 (efficient consolidation: 3 wrapper + 4 individual brush + 2 unified strategies)
 - **Strategy Names**: Uses `unified` instead of `dual_component` for composite brushes
 - **Scoring Configuration**: Advanced with base scores + modifiers in `brush_scoring_config.yaml`
 - **Component Integration**: HandleMatcher and KnotMatcher fully integrated
