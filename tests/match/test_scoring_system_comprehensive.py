@@ -35,7 +35,7 @@ class TestScoringSystemComprehensive:
                     "omega_semogue": 70.0,  # Individual brush strategy
                     "zenith": 65.0,  # Individual brush strategy
                     "other_brush": 60.0,  # Individual brush strategy
-                    "dual_component": 75.0,  # Composite brush strategy
+                    "unified": 65.0,  # Composite brush strategy (lower than individual brush strategies)
                     "medium_priority_automated_split": 55.0,
                     "single_component_fallback": 50.0,
                 },
@@ -52,7 +52,8 @@ class TestScoringSystemComprehensive:
                     "omega_semogue": {},
                     "zenith": {},
                     "other_brush": {},
-                    "dual_component": {
+                    "unified": {
+                        "dual_component": 0.0,  # No bonus in this test
                         "multiple_brands": 0.0,
                         "fiber_words": 0.0,
                         "size_specification": 0.0,
@@ -75,7 +76,7 @@ class TestScoringSystemComprehensive:
                 "name": "Composite brush with handle and knot",
                 "input": "Summer Break Soaps Maize 26mm Timberwolf",
                 "expected_winner": "composite",
-                "expected_score": 75.0,
+                "expected_score": 65.0,
                 "expected_brand": None,
                 "expected_model": None,
                 "should_have_handle": True,
@@ -201,7 +202,7 @@ class TestScoringSystemComprehensive:
 
         # Verify expected scores
         expected_scores = {
-            "composite": 75.0,
+            "composite": 65.0,
             "single_component": 50.0,
             "regex": 75.0,
             "fiber_fallback": 50.0,
@@ -218,4 +219,4 @@ class TestScoringSystemComprehensive:
         # Verify composite strategy wins
         best_result = self.matcher.scoring_engine.get_best_result(scored_results)
         assert best_result.match_type == "composite", "Composite strategy should win"
-        assert best_result.score == 75.0, "Composite strategy should have highest score"
+        assert best_result.score == 65.0, "Composite strategy should have expected score"

@@ -314,9 +314,7 @@ class TestModifierConfiguration:
         assert "strategy_modifiers" in config.weights
 
         # Verify specific strategies have modifiers
-        automated_split_modifiers = config.weights["strategy_modifiers"].get(
-            "automated_split", {}
-        )
+        automated_split_modifiers = config.weights["strategy_modifiers"].get("automated_split", {})
         assert "multiple_brands" in automated_split_modifiers
         assert "fiber_words" in automated_split_modifiers
         assert "size_specification" in automated_split_modifiers
@@ -356,14 +354,14 @@ class TestModifierConfiguration:
         config = BrushScoringConfig()
 
         # Get modifier names for different strategies
-        high_priority_modifiers = config.get_all_modifier_names("automated_split")
-        medium_priority_modifiers = config.get_all_modifier_names("medium_priority_automated_split")
+        automated_split_modifiers = config.get_all_modifier_names("automated_split")
+        known_brush_modifiers = config.get_all_modifier_names("known_brush")
 
-        # Verify common modifiers exist
+        # Verify common modifiers exist across different strategy types
         common_modifiers = ["multiple_brands", "fiber_words", "size_specification"]
         for modifier in common_modifiers:
-            assert modifier in high_priority_modifiers, f"High priority should have {modifier}"
-            assert modifier in medium_priority_modifiers, f"Medium priority should have {modifier}"
+            assert modifier in automated_split_modifiers, f"Automated split should have {modifier}"
+            assert modifier in known_brush_modifiers, f"Known brush should have {modifier}"
 
 
 class TestModifierIntegrationWithScoringEngine:

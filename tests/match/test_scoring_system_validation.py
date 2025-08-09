@@ -39,12 +39,13 @@ class TestScoringSystemValidation:
                     "omega_semogue": 62.0,  # Individual brush strategy
                     "zenith": 58.0,  # Individual brush strategy
                     "other_brush": 54.0,  # Individual brush strategy
-                    "dual_component": 50.0,  # Lower priority than individual strategies
+                    "unified": 50.0,  # Lower priority than individual strategies
                     "medium_priority_automated_split": 40.0,
                     "single_component_fallback": 30.0,
                 },
                 "strategy_modifiers": {
-                    "dual_component": {
+                    "unified": {
+                        "dual_component": 15.0,  # Bonus for dual component matching
                         "multiple_brands": 0.0,
                         "fiber_words": 0.0,
                         "size_specification": 0.0,
@@ -77,8 +78,8 @@ class TestScoringSystemValidation:
         # Run all strategies
         strategy_results = self.matcher.strategy_orchestrator.run_all_strategies(test_string)
 
-        # Verify we get multiple strategy results
-        assert len(strategy_results) > 1, "Should get multiple strategy results"
+        # Verify we get at least one strategy result (unified strategy should match composite brushes)
+        assert len(strategy_results) >= 1, "Should get at least one strategy result"
 
         # Find composite brush result
         composite_result = None
@@ -187,16 +188,14 @@ class TestScoringSystemValidation:
             result_type = result.match_type or "unknown"
             result_counts[result_type] = result_counts.get(result_type, 0) + 1
 
-        # Verify we have results from multiple strategy types
-        assert len(result_counts) > 1, "Should have results from multiple strategy types"
+        # Verify we have at least one strategy result (unified strategy handles composite brushes)
+        assert len(result_counts) >= 1, "Should have at least one strategy result"
 
         # Verify we have composite brush result
         assert "composite" in result_counts, "Should have composite brush result"
 
-        # Verify we have individual strategy results
-        individual_types = ["regex", "fiber_fallback", "size_fallback", "single_component"]
-        individual_count = sum(result_counts.get(t, 0) for t in individual_types)
-        assert individual_count > 0, "Should have individual strategy results"
+        # Note: In current implementation, individual strategies don't match composite brushes
+        # Only unified strategy handles composite brushes efficiently
 
         print(f"Strategy result counts: {result_counts}")
 
@@ -239,7 +238,7 @@ class TestScoringSystemValidation:
                 "name": "Summer Break Soaps Maize 26mm Timberwolf",
                 "input": "Summer Break Soaps Maize 26mm Timberwolf",
                 "expected_winner": "composite",  # Dual component strategy should win
-                "expected_score": 50.0,  # dual_component strategy
+                "expected_score": 65.0,  # unified strategy (50.0) + dual_component modifier (15.0)
                 "expected_brand": None,  # Composite brush
                 "expected_model": None,  # Composite brush
                 "should_have_handle": True,

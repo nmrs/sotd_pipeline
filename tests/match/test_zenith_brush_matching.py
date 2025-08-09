@@ -87,7 +87,7 @@ class TestZenithBrushMatching:
     def test_zenith_strategy_returns_correct_fields(self):
         """Test that ZenithBrushMatchingStrategy returns correct fiber."""
         # Get the ZenithBrushMatchingStrategy from the scoring system
-        strategy = self.scoring_matcher.strategy_orchestrator.strategies[7]  # zenith strategy
+        strategy = self.scoring_matcher.strategy_orchestrator.strategies[6]  # zenith strategy
         result = strategy.match("Zenith Big Scrubby Chrome (B21 28x50mm Boar)")
 
         assert result is not None
