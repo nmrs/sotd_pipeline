@@ -220,13 +220,13 @@ class TestPatternSpecificityAnalyzer:
             score = analyzer.get_pattern_confidence_score(test["pattern"])
 
             if "expected_min" in test:
-                assert score >= test["expected_min"], (
-                    f"Failed for: {test['pattern']} - {test['reason']}"
-                )
+                assert (
+                    score >= test["expected_min"]
+                ), f"Failed for: {test['pattern']} - {test['reason']}"
             if "expected_max" in test:
-                assert score <= test["expected_max"], (
-                    f"Failed for: {test['pattern']} - {test['reason']}"
-                )
+                assert (
+                    score <= test["expected_max"]
+                ), f"Failed for: {test['pattern']} - {test['reason']}"
 
     def test_categorize_pattern_type(self, analyzer):
         """Test pattern type categorization."""

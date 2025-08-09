@@ -23,7 +23,7 @@ class TestBrushConfigurationUpdaterIntegration:
         """Set up test environment with real configuration structure."""
         self.temp_dir = tempfile.mkdtemp()
         self.config_path = Path(self.temp_dir) / "brush_scoring_config.yaml"
-        
+
         # Create realistic test configuration based on actual structure
         self.realistic_config = {
             "brush_scoring_weights": {
@@ -67,11 +67,11 @@ class TestBrushConfigurationUpdaterIntegration:
                         "knot_confidence": 0.0,
                         "word_count_balance": 0.0,
                     },
-                }
+                },
             }
         }
-        
-        with open(self.config_path, 'w') as f:
+
+        with open(self.config_path, "w") as f:
             yaml.dump(self.realistic_config, f, default_flow_style=False, sort_keys=False, indent=2)
 
     def teardown_method(self):
@@ -169,7 +169,7 @@ class TestBrushConfigurationUpdaterIntegration:
 
         # Step 4: Apply configuration updates
         updater = BrushConfigurationUpdater(self.config_path)
-        
+
         # Combine all suggestions into comprehensive update
         comprehensive_suggestions = {
             "weight_adjustments": strategy_analysis.get("weight_adjustments", {}),
@@ -184,7 +184,9 @@ class TestBrushConfigurationUpdaterIntegration:
         # Step 5: Verify all changes were applied correctly
         updated_config = updater.load_configuration()
         base_strategies = updated_config["brush_scoring_weights"]["base_strategies"]
-        auto_split_modifiers = updated_config["brush_scoring_weights"]["strategy_modifiers"]["automated_split"]
+        auto_split_modifiers = updated_config["brush_scoring_weights"]["strategy_modifiers"][
+            "automated_split"
+        ]
         unified_modifiers = updated_config["brush_scoring_weights"]["strategy_modifiers"]["unified"]
 
         # Verify strategy weight changes
@@ -203,10 +205,10 @@ class TestBrushConfigurationUpdaterIntegration:
     def test_rollback_after_failed_validation(self):
         """Test rollback when updated configuration fails validation."""
         updater = BrushConfigurationUpdater(self.config_path)
-        
+
         # Store original config for comparison
         original_config = updater.load_configuration()
-        
+
         # Create malicious suggestions that would break validation
         bad_suggestions = {
             "weight_adjustments": {
@@ -214,16 +216,16 @@ class TestBrushConfigurationUpdaterIntegration:
                 "nonexistent_strategy": 75.0,  # Unknown strategy
             }
         }
-        
+
         # Mock validation to fail for testing rollback
-        with patch.object(updater, 'validate_configuration') as mock_validate:
+        with patch.object(updater, "validate_configuration") as mock_validate:
             mock_validate.return_value = False
-            
+
             result = updater.apply_chatgpt_suggestions(bad_suggestions)
-            
+
             # Should fail and rollback
             assert result is False
-        
+
         # Verify configuration was rolled back to original state
         current_config = updater.load_configuration()
         assert current_config == original_config
@@ -235,12 +237,12 @@ class TestBrushConfigurationUpdaterIntegration:
         if not real_config_path.exists():
             # Skip test if real config doesn't exist
             return
-        
+
         test_config_path = Path(self.temp_dir) / "real_brush_config.yaml"
         shutil.copy2(real_config_path, test_config_path)
-        
+
         updater = BrushConfigurationUpdater(test_config_path)
-        
+
         # Test with realistic adjustments that might come from ChatGPT
         realistic_suggestions = {
             "weight_adjustments": {
@@ -251,17 +253,17 @@ class TestBrushConfigurationUpdaterIntegration:
                 "multiple_brands": -4.0,  # Adjust existing modifier
             },
         }
-        
+
         result = updater.apply_chatgpt_suggestions(realistic_suggestions)
         assert result is True
-        
+
         # Verify changes were applied
         updated_config = updater.load_configuration()
         base_strategies = updated_config["brush_scoring_weights"]["base_strategies"]
-        
+
         assert base_strategies["known_brush"] == 82.0
         assert base_strategies["automated_split"] == 62.0
-        
+
         # Find a strategy that has multiple_brands modifier
         strategy_modifiers = updated_config["brush_scoring_weights"]["strategy_modifiers"]
         found_modifier_update = False
@@ -270,20 +272,20 @@ class TestBrushConfigurationUpdaterIntegration:
                 assert modifiers["multiple_brands"] == -4.0
                 found_modifier_update = True
                 break
-        
+
         assert found_modifier_update, "multiple_brands modifier should have been updated"
 
     def test_backup_and_restore_workflow(self):
         """Test the complete backup and restore workflow."""
         updater = BrushConfigurationUpdater(self.config_path)
-        
+
         # Store original state
         original_config = updater.load_configuration()
-        
+
         # Create backup
         backup_path = updater.create_backup()
         assert backup_path.exists()
-        
+
         # Make changes
         suggestions = {
             "weight_adjustments": {
@@ -291,18 +293,18 @@ class TestBrushConfigurationUpdaterIntegration:
                 "automated_split": 70.0,
             }
         }
-        
+
         result = updater.apply_chatgpt_suggestions(suggestions)
         assert result is True
-        
+
         # Verify changes were applied
         modified_config = updater.load_configuration()
         assert modified_config["brush_scoring_weights"]["base_strategies"]["known_brush"] == 90.0
-        
+
         # Rollback to backup
         rollback_result = updater.rollback_configuration()
         assert rollback_result is True
-        
+
         # Verify rollback worked
         restored_config = updater.load_configuration()
         assert restored_config == original_config
@@ -310,7 +312,7 @@ class TestBrushConfigurationUpdaterIntegration:
     def test_preview_changes_integration(self):
         """Test preview changes functionality with comprehensive suggestions."""
         updater = BrushConfigurationUpdater(self.config_path)
-        
+
         suggestions = {
             "weight_adjustments": {
                 "known_brush": 85.0,
@@ -325,32 +327,32 @@ class TestBrushConfigurationUpdaterIntegration:
                     "name": "custom_handle",
                     "suggested_weights": {
                         "automated_split": 12.0,
-                    }
+                    },
                 }
-            ]
+            ],
         }
-        
+
         # Preview changes without applying them
         changes = updater.preview_changes(suggestions)
-        
+
         # Verify preview structure
         assert "weight_adjustments" in changes
         assert "modifier_adjustments" in changes
         assert "new_modifiers" in changes
-        
+
         # Check weight adjustment previews
         assert "known_brush" in changes["weight_adjustments"]
         assert changes["weight_adjustments"]["known_brush"]["old"] == 80.0
         assert changes["weight_adjustments"]["known_brush"]["new"] == 85.0
-        
+
         # Check modifier adjustment previews
         modifier_changes = changes["modifier_adjustments"]
         assert any("multiple_brands" in key for key in modifier_changes.keys())
-        
+
         # Check new modifiers preview
         assert len(changes["new_modifiers"]) == 1
         assert changes["new_modifiers"][0]["name"] == "custom_handle"
-        
+
         # Verify original config is unchanged
         current_config = updater.load_configuration()
         assert current_config["brush_scoring_weights"]["base_strategies"]["known_brush"] == 80.0
@@ -358,11 +360,11 @@ class TestBrushConfigurationUpdaterIntegration:
     def test_configuration_validation_integration(self):
         """Test configuration validation with various scenarios."""
         updater = BrushConfigurationUpdater(self.config_path)
-        
+
         # Test with valid configuration
         valid_config = updater.load_configuration()
         assert updater.validate_configuration(valid_config) is True
-        
+
         # Test with invalid configuration structures
         invalid_configs = [
             {},  # Empty config
@@ -370,27 +372,27 @@ class TestBrushConfigurationUpdaterIntegration:
             {"brush_scoring_weights": {}},  # Missing sections
             {"brush_scoring_weights": {"base_strategies": {}}},  # Empty strategies
         ]
-        
+
         for invalid_config in invalid_configs:
             assert updater.validate_configuration(invalid_config) is False
 
     def test_error_handling_integration(self):
         """Test error handling in integration scenarios."""
         updater = BrushConfigurationUpdater(self.config_path)
-        
+
         # Test with malformed suggestions
         malformed_suggestions = [
             {"invalid": "structure"},
             {"weight_adjustments": "not_a_dict"},
             {"modifier_adjustments": {"invalid": "value"}},
         ]
-        
+
         for malformed in malformed_suggestions:
             # Should handle gracefully and return False
             result = updater.apply_chatgpt_suggestions(malformed)
             # Implementation should handle errors gracefully
             # Exact behavior depends on implementation choices
-            
+
         # Verify configuration remains valid after error attempts
         current_config = updater.load_configuration()
         assert updater.validate_configuration(current_config) is True
