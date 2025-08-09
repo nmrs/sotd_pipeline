@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 
 from .analysis import router as analysis_router
 from .brush_splits import router as brush_splits_router
+from .brush_validation import router as brush_validation_router
 from .catalogs import router as catalogs_router
 from .files import router as files_router
 from .filtered import router as filtered_router
@@ -88,6 +89,7 @@ app.include_router(catalogs_router)
 app.include_router(analysis_router)
 app.include_router(filtered_router)
 app.include_router(brush_splits_router)
+app.include_router(brush_validation_router)
 
 # Add CORS middleware for local development
 app.add_middleware(
