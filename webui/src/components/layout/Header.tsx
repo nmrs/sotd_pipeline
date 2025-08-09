@@ -39,6 +39,7 @@ const Header: React.FC = () => {
     { path: '/mismatch', label: 'Mismatch', icon: '⚠️' },
     { path: '/catalog-validator', label: 'Catalog Validator', icon: '✅' },
     { path: '/brush-split-validator', label: 'Brush Validator', icon: '🪒' },
+    { path: '/brush-validation', label: 'Brush Validation', icon: '🖊️' },
     { path: '/performance-test', label: 'Performance Test', icon: '⚡' },
   ];
 

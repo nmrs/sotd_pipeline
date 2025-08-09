@@ -586,3 +586,136 @@ export const validateCatalogAgainstCorrectMatches = async (
     throw error;
   }
 };
+
+// Brush validation interfaces
+export interface BrushValidationEntry {
+  input_text: string;
+  system_used: 'legacy' | 'scoring';
+  matched?: {
+    brand: string;
+    model: string;
+    handle?: {
+      brand: string;
+      model: string;
+    };
+    knot?: {
+      brand: string;
+      model: string;
+      fiber?: string;
+    };
+  };
+  match_type?: string;
+  best_result?: {
+    strategy: string;
+    score: number;
+    result: {
+      brand: string;
+      model: string;
+      handle?: {
+        brand: string;
+        model: string;
+      };
+      knot?: {
+        brand: string;
+        model: string;
+        fiber?: string;
+      };
+    };
+  };
+  all_strategies: Array<{
+    strategy: string;
+    score: number;
+    result: Record<string, any>;
+  }>;
+}
+
+export interface BrushValidationResponse {
+  entries: BrushValidationEntry[];
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+    pages: number;
+  };
+}
+
+export interface BrushValidationStatistics {
+  total_entries: number;
+  validated_count: number;
+  overridden_count: number;
+  unvalidated_count: number;
+  validation_rate: number;
+}
+
+export interface BrushValidationActionRequest {
+  input_text: string;
+  month: string;
+  system_used: string;
+  action: 'validate' | 'override';
+  system_choice: {
+    strategy: string;
+    score: number | null;
+    result: Record<string, any>;
+  };
+  user_choice: {
+    strategy: string;
+    score?: number | null;
+    result: Record<string, any>;
+  };
+  all_brush_strategies: Array<{
+    strategy: string;
+    score: number;
+    result: Record<string, any>;
+  }>;
+}
+
+export interface BrushValidationActionResponse {
+  success: boolean;
+  message: string;
+}
+
+// Brush validation API functions
+export const getBrushValidationData = async (
+  month: string,
+  system: 'legacy' | 'scoring',
+  options: {
+    sortBy?: 'unvalidated' | 'validated' | 'ambiguity';
+    page?: number;
+    pageSize?: number;
+  } = {}
+): Promise<BrushValidationResponse> => {
+  try {
+    const params = new URLSearchParams();
+    if (options.sortBy) params.append('sort_by', options.sortBy);
+    if (options.page) params.append('page', options.page.toString());
+    if (options.pageSize) params.append('page_size', options.pageSize.toString());
+
+    const response = await api.get(`/brush-validation/data/${month}/${system}?${params}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error loading brush validation data:', error);
+    throw error;
+  }
+};
+
+export const getBrushValidationStatistics = async (month: string): Promise<BrushValidationStatistics> => {
+  try {
+    const response = await api.get(`/brush-validation/statistics/${month}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error loading brush validation statistics:', error);
+    throw error;
+  }
+};
+
+export const recordBrushValidationAction = async (
+  actionData: BrushValidationActionRequest
+): Promise<BrushValidationActionResponse> => {
+  try {
+    const response = await api.post('/brush-validation/action', actionData);
+    return response.data;
+  } catch (error) {
+    console.error('Error recording brush validation action:', error);
+    throw error;
+  }
+};
