@@ -16,7 +16,7 @@ def test_omega_with_model_number(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Omega"
     assert result.matched["model"] == "10049"
-    assert result.matched["fiber"] == "boar"
+    assert result.matched["fiber"] == "Boar"
     assert result.matched["source_type"] == "exact"
 
 
@@ -36,7 +36,7 @@ def test_semogue_with_c_model(strategy):
     assert result.matched is not None
     assert result.matched["brand"] == "Semogue"
     assert result.matched["model"] == "c3"  # Preserves case from regex
-    assert result.matched["fiber"] == "boar"
+    assert result.matched["fiber"] == "Boar"
 
 
 def test_semogue_with_numeric_model(strategy):

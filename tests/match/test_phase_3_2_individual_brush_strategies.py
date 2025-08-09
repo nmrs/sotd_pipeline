@@ -105,7 +105,7 @@ class TestOmegaSemogueBrushMatchingStrategy:
         assert result.matched is not None
         assert result.matched["brand"] == "Omega"
         assert result.matched["model"] == "10049"
-        assert result.matched["fiber"] == "boar"
+        assert result.matched["fiber"] == "Boar"
         assert result.strategy == "omega_semogue"
 
     def test_omega_semogue_strategy_matches_semogue_c3(self):
@@ -121,7 +121,7 @@ class TestOmegaSemogueBrushMatchingStrategy:
         assert result.matched is not None
         assert result.matched["brand"] == "Semogue"
         assert result.matched["model"] == "c3"  # Fixed: lowercase as returned by strategy
-        assert result.matched["fiber"] == "boar"
+        assert result.matched["fiber"] == "Boar"
         assert result.strategy == "omega_semogue"
 
     def test_omega_semogue_strategy_returns_none_for_no_match(self):

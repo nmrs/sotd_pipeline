@@ -1571,12 +1571,27 @@ Integration Requirements:
 ### Step 18: Multi-Split Automated Splitters Enhancement (UPDATED)
 
 ```text
-Enhance the multi-split automated splitter to generate all possible splits for complex delimiter cases with split quality assessment.
+Enhance the automated_split strategy to evaluate and return all viable splits for complex delimiter cases with split quality assessment.
+
+This step adds functionality to handle cases like:
+```
+Input: "string a - string b w/ string c in string d"
+
+Possible splits generated:
+1. handle: "string a"
+   knot: "string b w/ string c in string d"
+
+2. handle: "string a - string b" 
+   knot: "string c in string d"
+
+3. handle: "string a - string b w/ string c"
+   knot: "string d"
+```
 
 Requirements:
 - Implement `sotd/match/multi_split_enhancer.py` for enhanced splitter logic
-- Support configurable delimiter patterns and priority
-- Generate all possible splits for a given brush input
+- Support configurable delimiter patterns and priority (" - ", " w/ ", " with ", " in ", " / ", " + ")
+- Generate all possible splits for a given brush input by evaluating every delimiter combination
 - Implement split quality assessment modifiers:
   - handle_confidence: Uses existing _score_as_handle() logic (0-100%)
   - knot_confidence: Uses existing _score_as_knot() logic (0-100%)
@@ -1637,10 +1652,11 @@ File Structure:
 
 Integration Requirements:
 - Test with real brush data from data/matched/2025-05.json
-- Verify enhanced splitter produces all possible splits
+- Verify enhanced splitter produces all viable splits for complex delimiter cases
+- Test with examples like "string a - string b w/ string c in string d" to ensure all possible handle/knot combinations are generated
 - Test split quality assessment with known good/bad splits
-- Test performance with large brush datasets
-- Validate that split quality modifiers improve accuracy
+- Test performance with large brush datasets (ensure generating multiple splits doesn't impact performance significantly)
+- Validate that split quality modifiers improve accuracy by ranking better splits higher
 ```
 
 ### Step 19: Enhanced Data Collection (UPDATED FOR ENTRY POINT)

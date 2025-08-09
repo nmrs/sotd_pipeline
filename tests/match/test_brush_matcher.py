@@ -202,7 +202,9 @@ class TestBrushMatcher:
         assert result.matched["model"] == "Chubby 2"
         # Nested handle/knot sections (new unified format)
         assert result.matched["handle"]["brand"] == "Simpson"
-        assert result.matched["handle"]["model"] is None  # Complete brushes don't have separate handle models
+        assert (
+            result.matched["handle"]["model"] is None
+        )  # Complete brushes don't have separate handle models
         assert result.matched["knot"]["brand"] == "Simpson"
         assert result.matched["knot"]["model"] == "Chubby 2"
         # Check fiber and knot_size_mm in knot section
@@ -378,7 +380,9 @@ class TestBrushMatcherCorrectMatches:
         assert result.matched["brand"] == "Simpson"
         assert result.matched["model"] == "Chubby 2"
         assert result.matched["handle"]["brand"] == "Simpson"
-        assert result.matched["handle"]["model"] is None  # Complete brushes don't have separate handle models
+        assert (
+            result.matched["handle"]["model"] is None
+        )  # Complete brushes don't have separate handle models
         assert result.matched["knot"]["brand"] == "Simpson"
         assert result.matched["knot"]["model"] == "Chubby 2"
 
@@ -416,7 +420,9 @@ class TestBrushMatcherCorrectMatches:
         assert result.matched["brand"] == "Simpson"
         assert result.matched["model"] == "Chubby 2"
         assert result.matched["handle"]["brand"] == "Simpson"
-        assert result.matched["handle"]["model"] is None  # Complete brushes don't have separate handle models
+        assert (
+            result.matched["handle"]["model"] is None
+        )  # Complete brushes don't have separate handle models
         assert result.matched["knot"]["brand"] == "Simpson"
         assert result.matched["knot"]["model"] == "Chubby 2"
 
@@ -598,7 +604,9 @@ class TestBrushMatcherPriorityOrder:
         # No delimiter, should match as a complete brush
         result = brush_matcher.match("Simpson Chubby 2")
         assert result.matched["handle"]["brand"] == "Simpson"
-        assert result.matched["handle"]["model"] is None  # Complete brushes don't have separate handle models
+        assert (
+            result.matched["handle"]["model"] is None
+        )  # Complete brushes don't have separate handle models
 
     def test_ambiguous_maker_split_falls_back_to_combo(self, brush_matcher):
         result = brush_matcher.match("UnknownMaker handle w/ Declaration B15")

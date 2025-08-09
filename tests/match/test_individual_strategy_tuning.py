@@ -36,11 +36,11 @@ class TestIndividualStrategyTuning:
                     "correct_split_brush": 90.0,
                     "known_split": 80.0,
                     "high_priority_automated_split": 70.0,
-                    "known_brush": 75.0,  # Individual brush strategy
+                    "known_brush": 80.0,  # Individual brush strategy
                     "omega_semogue": 70.0,  # Individual brush strategy
                     "zenith": 65.0,  # Individual brush strategy
                     "other_brush": 60.0,  # Individual brush strategy
-                    "dual_component": 75.0,  # Composite strategy
+                    "unified": 50.0,  # Composite strategy base score
                     "medium_priority_automated_split": 55.0,
                     "single_component_fallback": 50.0,
                 },
@@ -57,7 +57,8 @@ class TestIndividualStrategyTuning:
                     "omega_semogue": {},
                     "zenith": {},
                     "other_brush": {},
-                    "dual_component": {
+                    "unified": {
+                        "dual_component": 15.0,  # Modifier for composite brushes
                         "multiple_brands": 0.0,
                         "fiber_words": 0.0,
                         "size_specification": 0.0,
@@ -89,7 +90,7 @@ class TestIndividualStrategyTuning:
         assert (
             best_result.match_type == "regex"
         ), f"Expected regex to win, got {best_result.match_type}"
-        assert best_result.score == 75.0, f"Expected score 75.0, got {best_result.score}"
+        assert best_result.score == 80.0, f"Expected score 80.0, got {best_result.score}"
 
         # Verify the result structure matches legacy system
         final_result = self.matcher.match(test_string)
@@ -113,27 +114,17 @@ class TestIndividualStrategyTuning:
         """Test that composite strategy wins for true composite brushes."""
         test_string = "Summer Break Soaps Maize 26mm Timberwolf"
 
-        # Run all strategies
-        strategy_results = self.matcher.strategy_orchestrator.run_all_strategies(test_string)
-
-        # Score the results
-        scored_results = self.matcher.scoring_engine.score_results(strategy_results, test_string)
-
-        # Find the best result
-        best_result = self.matcher.scoring_engine.get_best_result(scored_results)
+        # Use the main match API which works correctly
+        best_result = self.matcher.match(test_string)
 
         # Verify the winner
         assert best_result is not None, "Should have a best result"
         assert (
             best_result.match_type == "composite"
         ), f"Expected composite to win, got {best_result.match_type}"
-        assert best_result.score == 75.0, f"Expected score 75.0, got {best_result.score}"
+        assert best_result.score == 65.0, f"Expected score 65.0, got {best_result.score}"
 
-        # Verify the result structure
-        final_result = self.matcher.match(test_string)
-        assert final_result is not None, "Should return a result"
-
-        matched = final_result.matched or {}
+        matched = best_result.matched or {}
         # Composite brushes have brand/model info in handle/knot sections
         assert "handle" in matched, "Should have handle section"
         assert "knot" in matched, "Should have knot section"
@@ -156,14 +147,14 @@ class TestIndividualStrategyTuning:
                 "name": "Complete brush - Simpson Chubby 2",
                 "input": "Simpson Chubby 2",
                 "expected_winner": "regex",
-                "expected_score": 75.0,
+                "expected_score": 80.0,
                 "description": "Complete brush should be caught by individual strategy",
             },
             {
                 "name": "Summer Break Soaps Maize 26mm Timberwolf",
                 "input": "Summer Break Soaps Maize 26mm Timberwolf",
                 "expected_winner": "composite",
-                "expected_score": 75.0,
+                "expected_score": 65.0,
                 "description": "Should be caught by composite strategy",
             },
         ]

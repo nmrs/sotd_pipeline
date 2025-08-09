@@ -100,19 +100,17 @@ class TestPhase32StrategyList:
         # Get strategy names
         strategy_names = [type(strategy).__name__ for strategy in strategies]
 
-        # Check that all required strategies are present
+        # Check that all required strategies are present (current implementation)
         required_strategies = [
             "CorrectCompleteBrushWrapperStrategy",
             "CorrectSplitBrushWrapperStrategy",
             "KnownSplitWrapperStrategy",
-            "HighPriorityAutomatedSplitWrapperStrategy",
+            "FullInputComponentMatchingStrategy",
             "KnownBrushMatchingStrategy",
             "OmegaSemogueBrushMatchingStrategy",
             "ZenithBrushMatchingStrategy",
             "OtherBrushMatchingStrategy",
-            "LegacyDualComponentWrapperStrategy",
-            "MediumPriorityAutomatedSplitWrapperStrategy",
-            "LegacySingleComponentFallbackWrapperStrategy",
+            "AutomatedSplitStrategy",
         ]
 
         for strategy_name in required_strategies:
@@ -127,11 +125,12 @@ class TestPhase32StrategyList:
         matcher = BrushScoringMatcher()
         strategies = matcher._create_strategies()
 
-        # Should have 11 strategies total:
-        # - 4 correct matches strategies
-        # - 4 individual brush strategies (replacing 1 complete_brush wrapper)
-        # - 3 composite strategies
-        expected_length = 11
+        # Should have 9 strategies total (current implementation):
+        # - 3 wrapper strategies (correct_complete, correct_split, known_split)
+        # - 1 unified component strategy (FullInputComponentMatchingStrategy)
+        # - 4 individual brush strategies (known_brush, omega_semogue, zenith, other_brush)
+        # - 1 automated split strategy (AutomatedSplitStrategy)
+        expected_length = 9
         actual_length = len(strategies)
 
         assert actual_length == expected_length, (
