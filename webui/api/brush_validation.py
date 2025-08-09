@@ -104,7 +104,7 @@ async def get_brush_validation_data(
 ) -> BrushValidationResponse:
     """
     Get brush validation data for a specific month and system.
-    
+
     Args:
         month: Month in YYYY-MM format
         system: System type ('legacy' or 'scoring')
@@ -122,31 +122,33 @@ async def get_brush_validation_data(
 
     try:
         logger.info(f"Loading brush validation data for {month}/{system}")
-        
+
         # Initialize CLI with default data path
         cli = BrushValidationCLI()
-        
+
         # Load and sort data
         entries = cli.load_month_data(month, system)
         sorted_entries = cli.sort_entries(entries, month, sort_by)
-        
+
         # Calculate pagination
         total = len(sorted_entries)
         start_idx = (page - 1) * page_size
         end_idx = start_idx + page_size
         paginated_entries = sorted_entries[start_idx:end_idx]
-        
+
         pagination = {
             "page": page,
             "page_size": page_size,
             "total": total,
             "pages": (total + page_size - 1) // page_size,
         }
-        
-        logger.info(f"Loaded {len(paginated_entries)} entries (page {page} of {pagination['pages']})")
-        
+
+        logger.info(
+            f"Loaded {len(paginated_entries)} entries (page {page} of {pagination['pages']})"
+        )
+
         return BrushValidationResponse(entries=paginated_entries, pagination=pagination)
-        
+
     except Exception as e:
         logger.error(f"Error loading brush validation data: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -156,7 +158,7 @@ async def get_brush_validation_data(
 async def get_validation_statistics(month: str) -> ValidationStatisticsResponse:
     """
     Get validation statistics for a specific month.
-    
+
     Args:
         month: Month in YYYY-MM format
     """
@@ -166,34 +168,36 @@ async def get_validation_statistics(month: str) -> ValidationStatisticsResponse:
 
     try:
         logger.info(f"Getting validation statistics for {month}")
-        
+
         # Initialize CLI
         cli = BrushValidationCLI()
-        
+
         # Get statistics
         stats = cli.get_validation_statistics(month)
-        
+
         return ValidationStatisticsResponse(**stats)
-        
+
     except Exception as e:
         logger.error(f"Error getting validation statistics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/action", response_model=ValidationActionResponse)
-async def record_validation_action(action_data: ValidationActionRequest) -> ValidationActionResponse:
+async def record_validation_action(
+    action_data: ValidationActionRequest,
+) -> ValidationActionResponse:
     """
     Record a user validation or override action.
-    
+
     Args:
         action_data: Validation action data
     """
     try:
         logger.info(f"Recording {action_data.action} action for {action_data.input_text}")
-        
+
         # Initialize CLI
         cli = BrushValidationCLI()
-        
+
         # Record the action
         if action_data.action == "validate":
             cli.user_actions_manager.record_validation(
@@ -215,12 +219,11 @@ async def record_validation_action(action_data: ValidationActionRequest) -> Vali
             )
         else:
             raise HTTPException(status_code=400, detail=f"Invalid action: {action_data.action}")
-        
+
         return ValidationActionResponse(
-            success=True, 
-            message=f"Successfully recorded {action_data.action} action"
+            success=True, message=f"Successfully recorded {action_data.action} action"
         )
-        
+
     except Exception as e:
         logger.error(f"Error recording validation action: {e}")
         raise HTTPException(status_code=500, detail=str(e))

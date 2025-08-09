@@ -137,9 +137,7 @@ class TestBrushValidationAPI:
             mock_cli_class.return_value = mock_cli
             mock_cli.user_actions_manager.record_validation = Mock()
 
-            response = self.client.post(
-                "/api/brush-validation/action", json=validation_data
-            )
+            response = self.client.post("/api/brush-validation/action", json=validation_data)
 
             assert response.status_code == 200
             data = response.json()
@@ -176,9 +174,7 @@ class TestBrushValidationAPI:
             mock_cli_class.return_value = mock_cli
             mock_cli.user_actions_manager.record_override = Mock()
 
-            response = self.client.post(
-                "/api/brush-validation/action", json=override_data
-            )
+            response = self.client.post("/api/brush-validation/action", json=override_data)
 
             assert response.status_code == 200
             data = response.json()
@@ -238,9 +234,7 @@ class TestBrushValidationAPI:
 
     def test_pagination_support(self):
         """Test pagination support for large datasets."""
-        entries = [
-            {"input_text": f"Entry {i}", "system_used": "legacy"} for i in range(50)
-        ]
+        entries = [{"input_text": f"Entry {i}", "system_used": "legacy"} for i in range(50)]
 
         with patch("api.brush_validation.BrushValidationCLI") as mock_cli_class:
             mock_cli = Mock()
