@@ -171,8 +171,7 @@ def main():
                         new_knot_model = new_knot.get("model")
                         if old_knot_model != new_knot_model:
                             print(
-                                f"  Knot Model Difference: '{old_knot_model}' vs "
-                                f"'{new_knot_model}'"
+                                f"  Knot Model Difference: '{old_knot_model}' vs '{new_knot_model}'"
                             )
 
                         # Show strategy selection analysis

@@ -5,9 +5,10 @@ Assesses catalog completeness and quality for brush matches based on Phase 4.1 r
 Implements 5-tier quality classification and catalog presence detection.
 """
 
-import yaml
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+
+import yaml
 
 
 def load_yaml_catalog(file_path: Path) -> Dict[str, Any]:

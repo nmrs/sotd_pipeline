@@ -8,9 +8,10 @@ Tests the catalog completeness assessment capabilities based on Phase 4.1 resear
 - Quality scoring for catalog entries
 """
 
-import pytest
+from typing import Any, Dict
 from unittest.mock import patch
-from typing import Dict, Any
+
+import pytest
 
 from sotd.match.quality.catalog_quality_detector import CatalogQualityDetector
 
@@ -149,7 +150,7 @@ class TestCatalogQualityDetector:
             "knot_size_mm": 3,  # Zenith, Declaration Grooming, AP Shave Co
             "handle_material": 3,  # Zenith, Declaration Grooming, AP Shave Co
             "loft_mm": 1,  # Zenith only
-                }
+        }
 
         assert coverage == expected_coverage
 
@@ -163,7 +164,7 @@ class TestCatalogQualityDetector:
             "moderate": 1,  # AP Shave Co
             "basic": 1,  # Maggard
             "minimal": 1,  # Simpson
-                }
+        }
 
         assert distribution == expected_distribution
 
