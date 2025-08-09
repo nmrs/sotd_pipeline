@@ -23,19 +23,19 @@ class TestCLIIntegration:
         assert args.brush_system == "new"
 
     def test_cli_parser_brush_system_default(self):
-        """Test that CLI parser defaults to current brush system."""
+        """Test that CLI parser defaults to new multi-strategy scoring system."""
         parser = get_parser()
         args = parser.parse_args(["--month", "2025-01"])
 
-        assert args.brush_system == "current"
+        assert args.brush_system == "new"
 
     def test_cli_parser_brush_system_choices(self):
-        """Test that CLI parser accepts both current and new choices."""
+        """Test that CLI parser accepts both legacy and new choices."""
         parser = get_parser()
 
         # Test current
-        args_current = parser.parse_args(["--brush-system", "current", "--month", "2025-01"])
-        assert args_current.brush_system == "current"
+        args_legacy = parser.parse_args(["--brush-system", "legacy", "--month", "2025-01"])
+        assert args_legacy.brush_system == "legacy"
 
         # Test new
         args_new = parser.parse_args(["--brush-system", "new", "--month", "2025-01"])
@@ -48,15 +48,15 @@ class TestCLIIntegration:
         with pytest.raises(SystemExit):
             parser.parse_args(["--brush-system", "invalid", "--month", "2025-01"])
 
-    def test_run_match_phase_with_current_system(self):
-        """Test running match phase with current brush system."""
+    def test_run_match_phase_with_legacy_system(self):
+        """Test running match phase with legacy brush system."""
         with patch("sotd.match.run.BrushMatcherEntryPoint") as mock_entry_point:
             mock_entry = Mock()
             mock_entry_point.return_value = mock_entry
 
             # Mock arguments with all required attributes
             args = Mock()
-            args.brush_system = "current"
+            args.brush_system = "legacy"
             args.month = "2025-01"
             args.force = True
             args.out_dir = "data"
@@ -144,7 +144,7 @@ class TestCLIIntegration:
         help_text = parser.format_help()
 
         assert "brush-system" in help_text
-        assert "current" in help_text
+        assert "legacy" in help_text
         assert "new" in help_text
 
     def test_cli_brush_system_with_other_options(self):
@@ -157,12 +157,12 @@ class TestCLIIntegration:
         assert args.force is True
 
     def test_cli_brush_system_required_argument(self):
-        """Test that brush-system is a required argument."""
+        """Test that brush-system is not a required argument."""
         parser = get_parser()
 
         # Should not require brush-system to be specified
         args = parser.parse_args(["--month", "2025-01"])
-        assert args.brush_system == "current"  # Default value
+        assert args.brush_system == "new"  # Default value
 
     def test_cli_brush_system_conflicts(self):
         """Test that brush-system doesn't conflict with other options."""

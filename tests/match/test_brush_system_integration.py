@@ -25,18 +25,18 @@ class TestBrushSystemIntegration:
         assert args.brush_system == "new"
 
     def test_brush_system_flag_default_value(self):
-        """Test that brush system flag defaults to 'current'."""
+        """Test that brush system flag defaults to 'new' (multi-strategy scoring system)."""
         parser = get_parser()
         args = parser.parse_args(["--month", "2025-05"])
 
-        assert args.brush_system == "current"
+        assert args.brush_system == "new"
 
     def test_brush_system_flag_validation(self):
         """Test that brush system flag validation works correctly."""
         parser = get_parser()
 
         # Valid values
-        valid_values = ["current", "new"]
+        valid_values = ["legacy", "new"]
         for value in valid_values:
             args = parser.parse_args(["--month", "2025-05", "--brush-system", value])
             assert args.brush_system == value

@@ -28,12 +28,12 @@ class BrushParallelDataManager:
             base_path: Base path for data directories (default: data/)
         """
         self.base_path = base_path or Path("data")
-        self.current_dir = self.base_path / "matched"
+        self.legacy_dir = self.base_path / "matched"
         self.new_dir = self.base_path / "matched_new"
 
     def create_directories(self) -> None:
         """Create the parallel data directories if they don't exist."""
-        self.current_dir.mkdir(parents=True, exist_ok=True)
+        self.legacy_dir.mkdir(parents=True, exist_ok=True)
         self.new_dir.mkdir(parents=True, exist_ok=True)
 
     def get_output_path(self, month: str, brush_system: str) -> Path:
@@ -42,7 +42,7 @@ class BrushParallelDataManager:
 
         Args:
             month: Month in YYYY-MM format
-            brush_system: Brush system ('current' or 'new')
+            brush_system: Brush system ('legacy' or 'new')
 
         Returns:
             Path to the output file
@@ -52,8 +52,8 @@ class BrushParallelDataManager:
         """
         self._validate_system_name(brush_system)
 
-        if brush_system == "current":
-            return self.current_dir / f"{month}.json"
+        if brush_system == "legacy":
+            return self.legacy_dir / f"{month}.json"
         else:  # brush_system == "new"
             return self.new_dir / f"{month}.json"
 
@@ -64,7 +64,7 @@ class BrushParallelDataManager:
         Args:
             month: Month in YYYY-MM format
             data: Data to save
-            brush_system: Brush system ('current' or 'new')
+            brush_system: Brush system ('legacy' or 'new')
 
         Returns:
             Path to the saved file
@@ -89,7 +89,7 @@ class BrushParallelDataManager:
 
         Args:
             month: Month in YYYY-MM format
-            brush_system: Brush system ('current' or 'new')
+            brush_system: Brush system ('legacy' or 'new')
 
         Returns:
             Loaded data
@@ -112,7 +112,7 @@ class BrushParallelDataManager:
 
         Args:
             month: Month in YYYY-MM format
-            brush_system: Brush system ('current' or 'new')
+            brush_system: Brush system ('legacy' or 'new')
 
         Returns:
             True if file exists, False otherwise
@@ -129,7 +129,7 @@ class BrushParallelDataManager:
 
         Args:
             month: Month in YYYY-MM format
-            brush_system: Brush system ('current' or 'new')
+            brush_system: Brush system ('legacy' or 'new')
 
         Returns:
             Metadata dictionary
@@ -146,7 +146,7 @@ class BrushParallelDataManager:
         List available months for a specific brush system.
 
         Args:
-            brush_system: Brush system ('current' or 'new')
+            brush_system: Brush system ('legacy' or 'new')
 
         Returns:
             List of available months in YYYY-MM format
@@ -156,8 +156,8 @@ class BrushParallelDataManager:
         """
         self._validate_system_name(brush_system)
 
-        if brush_system == "current":
-            directory = self.current_dir
+        if brush_system == "legacy":
+            directory = self.legacy_dir
         else:  # brush_system == "new"
             directory = self.new_dir
 
@@ -182,7 +182,7 @@ class BrushParallelDataManager:
         Raises:
             ValueError: If brush_system is invalid
         """
-        valid_systems = ["current", "new"]
+        valid_systems = ["legacy", "new"]
         if brush_system not in valid_systems:
             raise ValueError(
                 f"Invalid brush system: {brush_system}. Must be one of: {valid_systems}"

@@ -13,11 +13,11 @@ class TestBrushCLIIntegration:
     """Test brush CLI flag integration."""
 
     def test_brush_system_flag_default(self):
-        """Test that brush system flag defaults to 'current'."""
+        """Test that brush system flag defaults to 'new' (multi-strategy scoring system)."""
         parser = get_parser()
         args = parser.parse_args(["--month", "2025-05"])
 
-        assert args.brush_system == "current"
+        assert args.brush_system == "new"
 
     def test_brush_system_flag_new(self):
         """Test that brush system flag accepts 'new' value."""
@@ -25,6 +25,13 @@ class TestBrushCLIIntegration:
         args = parser.parse_args(["--month", "2025-05", "--brush-system", "new"])
 
         assert args.brush_system == "new"
+
+    def test_brush_system_flag_legacy(self):
+        """Test that brush system flag accepts 'legacy' value."""
+        parser = get_parser()
+        args = parser.parse_args(["--month", "2025-05", "--brush-system", "legacy"])
+
+        assert args.brush_system == "legacy"
 
     def test_brush_system_flag_invalid(self):
         """Test that invalid brush system flag raises error."""
@@ -39,7 +46,7 @@ class TestBrushCLIIntegration:
         help_text = parser.format_help()
 
         assert "brush-system" in help_text
-        assert "current" in help_text
+        assert "legacy" in help_text
         assert "new" in help_text
 
     def test_brush_system_flag_with_other_args(self):
@@ -59,7 +66,7 @@ class TestBrushCLIIntegration:
         parser = get_parser()
 
         # Valid values
-        valid_values = ["current", "new"]
+        valid_values = ["legacy", "new"]
         for value in valid_values:
             args = parser.parse_args(["--month", "2025-05", "--brush-system", value])
             assert args.brush_system == value

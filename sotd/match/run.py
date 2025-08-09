@@ -238,7 +238,7 @@ def process_month(
     debug: bool = False,
     max_workers: int = 1,
     correct_matches_path: Optional[Path] = None,
-    brush_system: str = "current",
+    brush_system: str = "new",
 ) -> dict:
     """Process a single month of data."""
     try:
@@ -271,7 +271,8 @@ def process_month(
         blade_matcher = BladeMatcher(correct_matches_path=correct_matches_path)
 
         # Initialize brush matcher using entry point for system selection
-        use_scoring_system = brush_system == "new"
+        # New multi-strategy scoring system is now the default
+        use_scoring_system = brush_system != "legacy"
         brush_matcher = BrushMatcherEntryPoint(
             use_scoring_system=use_scoring_system,
             correct_matches_path=correct_matches_path,

@@ -6,8 +6,8 @@
       "phase_name": "match",
       "parallel_workers": 1,
       "total_processing_time_seconds": 0.0,
-      "file_io_time_seconds": 0.009018182754516602,
-      "processing_time_seconds": 0.8105559349060059,
+      "file_io_time_seconds": 0.009185075759887695,
+      "processing_time_seconds": 0.7230658531188965,
       "record_count": 1544,
       "avg_time_per_record_seconds": 0.0,
       "records_per_second": 0.0,
@@ -21,31 +21,31 @@
       },
       "matcher_times": {
         "razor": {
-          "total_time_seconds": 0.12935423851013184,
-          "avg_time_seconds": 8.40508372385522e-05,
+          "total_time_seconds": 0.1331038475036621,
+          "avg_time_seconds": 8.6487230346759e-05,
           "min_time_seconds": 2.384185791015625e-05,
-          "max_time_seconds": 0.0029289722442626953,
+          "max_time_seconds": 0.0030493736267089844,
           "count": 1539
         },
         "blade": {
-          "total_time_seconds": 0.10834860801696777,
-          "avg_time_seconds": 7.733662242467364e-05,
-          "min_time_seconds": 9.5367431640625e-07,
-          "max_time_seconds": 0.001917123794555664,
+          "total_time_seconds": 0.1109321117401123,
+          "avg_time_seconds": 7.918066505361335e-05,
+          "min_time_seconds": 7.152557373046875e-07,
+          "max_time_seconds": 0.001940011978149414,
           "count": 1401
         },
         "soap": {
-          "total_time_seconds": 0.14663147926330566,
-          "avg_time_seconds": 9.521524627487381e-05,
+          "total_time_seconds": 0.14780902862548828,
+          "avg_time_seconds": 9.597988871784954e-05,
           "min_time_seconds": 7.152557373046875e-07,
-          "max_time_seconds": 0.001055002212524414,
+          "max_time_seconds": 0.0010533332824707031,
           "count": 1540
         },
         "brush": {
-          "total_time_seconds": 0.01464390754699707,
-          "avg_time_seconds": 9.546223955017647e-06,
-          "min_time_seconds": 9.5367431640625e-07,
-          "max_time_seconds": 0.0007872581481933594,
+          "total_time_seconds": 0.015914201736450195,
+          "avg_time_seconds": 1.0374316646968836e-05,
+          "min_time_seconds": 2.1457672119140625e-06,
+          "max_time_seconds": 0.0009250640869140625,
           "count": 1534
         }
       },

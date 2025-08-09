@@ -84,7 +84,7 @@ class TestBrushScoringConfigIntegration:
         expected_strategies = [
             "correct_complete_brush",
             "correct_split_brush",
-            "known_split", 
+            "known_split",
             "known_brush",
             "omega_semogue",
             "zenith",

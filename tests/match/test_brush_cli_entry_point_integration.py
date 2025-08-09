@@ -22,17 +22,17 @@ class TestBrushCLIEntryPointIntegration:
         assert args.brush_system == "new"
 
     def test_cli_parser_brush_system_default(self):
-        """Test that CLI parser defaults to current system."""
+        """Test that CLI parser defaults to new multi-strategy scoring system."""
         parser = get_parser()
         args = parser.parse_args(["--month", "2025-05"])
-        assert args.brush_system == "current"
+        assert args.brush_system == "new"
 
     def test_cli_parser_brush_system_choices(self):
         """Test that CLI parser accepts valid brush system choices."""
         parser = get_parser()
 
-        args_current = parser.parse_args(["--month", "2025-05", "--brush-system", "current"])
-        assert args_current.brush_system == "current"
+        args_legacy = parser.parse_args(["--month", "2025-05", "--brush-system", "legacy"])
+        assert args_legacy.brush_system == "legacy"
 
         args_new = parser.parse_args(["--month", "2025-05", "--brush-system", "new"])
         assert args_new.brush_system == "new"
@@ -88,7 +88,7 @@ class TestBrushCLIEntryPointIntegration:
         parser = get_parser()
         help_text = parser.format_help()
         assert "brush-system" in help_text
-        assert "current" in help_text
+        assert "legacy" in help_text
         assert "new" in help_text
 
     def test_cli_brush_system_with_other_options(self):
@@ -105,7 +105,7 @@ class TestBrushCLIEntryPointIntegration:
 
         # Should not require brush-system to be specified
         args = parser.parse_args(["--month", "2025-01"])
-        assert args.brush_system == "current"  # Default value
+        assert args.brush_system == "new"  # Default value
 
     def test_cli_brush_system_conflicts(self):
         """Test that brush-system doesn't conflict with other options."""
