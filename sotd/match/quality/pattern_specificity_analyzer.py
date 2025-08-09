@@ -30,7 +30,7 @@ class PatternSpecificityAnalyzer:
             "materials": ["boar", "badger", "synthetic", "silvertip", "super", "finest"],
             "sizes": [r"\d+mm", r"\d+cm"],
             "manufacturers": ["semogue", "omega", "zenith", "simpson"],
-            "artisans": ["declaration", "ap shave", "maggard", "stirling"],
+            "artisans": ["declaration", "ap shave", "maggard", "stirling", "phoenix"],
             "quality_indicators": ["professional", "grade", "premium", "deluxe"],
         }
 
@@ -63,8 +63,8 @@ class PatternSpecificityAnalyzer:
         brand_confidence = brand_result["brand_confidence"]
         has_brand = brand_result["has_brand_identification"]
 
-        if complexity_score >= 60 and brand_confidence >= 60:
-            specificity_level = "high"
+        if complexity_score >= 70 and brand_confidence >= 80:
+            specificity_level = "high"  # High bar for high classification
         elif has_brand and complexity_score >= 30:
             specificity_level = "medium"  # Branded patterns with decent complexity
         elif not has_brand and complexity_score >= 45:
@@ -290,6 +290,7 @@ class PatternSpecificityAnalyzer:
 
         complexity_score = complexity_result["complexity_score"]
         brand_authority = brand_result["brand_authority"]
+        has_brand = brand_result["has_brand_identification"]
 
         # Determine pattern type based on completeness
         # Include brand/model as specification indicators for categorization
@@ -304,14 +305,21 @@ class PatternSpecificityAnalyzer:
             ]
         )
 
+        # Adjust thresholds based on whether pattern has brand identification
         if complexity_score >= 60 and spec_count >= 3:
             pattern_type = "complete_specification"
-        elif complexity_score >= 30 and spec_count >= 2:
-            pattern_type = "partial_specification"
+        elif has_brand and complexity_score >= 30 and spec_count >= 2:
+            pattern_type = "partial_specification"  # Branded patterns get partial easier
+        elif complexity_score >= 50 and spec_count >= 2:
+            pattern_type = "partial_specification"  # Generic patterns need higher complexity
         elif complexity_score >= 15 and spec_count >= 1:
             pattern_type = "minimal_specification"
         else:
             pattern_type = "incomplete_specification"
+
+        # Special case: generic patterns with just material+size should be minimal
+        if not has_brand and spec_count == 2 and complexity_score < 50:
+            pattern_type = "minimal_specification"
 
         # Determine pattern category based on brand and specifications
         if brand_authority == "manufacturer" and pattern_type == "complete_specification":
