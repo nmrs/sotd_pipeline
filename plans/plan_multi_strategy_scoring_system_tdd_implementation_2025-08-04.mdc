@@ -30,7 +30,7 @@
 4. Run quality checks (format, lint, typecheck, test)
 5. Commit with clear messages
 
-**NEXT PHASE**: Phase 4.1 (Scoring Research and Analysis) completed successfully. However, **intelligent quality scoring should be deferred** until after Phase 4 (User Validation System) and Phase 5 (Learning System) to leverage real user feedback data. **Ready to proceed with Phase 4: Brush User Validation System**.
+**NEXT PHASE**: Phase 4.1 (Scoring Research and Analysis) completed successfully. However, **intelligent quality scoring should be deferred** until after Phase 4 (User Validation System) and Phase 5 (Learning System) to leverage real user feedback data. **Phase 4 Step 13 (Brush CLI Validation Interface) completed successfully. Ready to proceed with Phase 4 Step 14: Brush WebUI Validation Interface**.
 
 **CLEANUP COMPLETED**: 
 - ✅ Removed references to "COMPLETE" phases that are no longer relevant
@@ -66,6 +66,39 @@
 - 🎯 **Rationale**: Quality metrics should be based on real user feedback data, not assumptions
 - 📊 **Dependencies**: Requires user validation data from WebUI tools and learning system feedback
 - 📅 **New Timeline**: Move to Phase 7 or later after collecting real usage patterns
+
+**PHASE 4: BRUSH USER VALIDATION SYSTEM**:
+- ✅ **Step 12: Brush User Actions Data Model** - COMPLETED (Data structures for validation tracking)
+- ✅ **Step 13: Brush CLI Validation Interface** - COMPLETED (Command-line validation with sorting)
+- 🔄 **Step 14: Brush WebUI Validation Interface** - PENDING (Web interface for validation)
+- 🔄 **Step 15: Brush Validation Storage System** - PENDING (Monthly file storage)
+
+**PHASE 4 STEP 12 - COMPLETED ✅** (2025-08-09):
+- ✅ **Brush User Actions Data Model**: Implemented comprehensive data model for brush validation tracking
+- ✅ **Current State**: BrushUserAction dataclass, BrushUserActionsStorage, and BrushUserActionsManager complete
+- ✅ **Data Model**: Supports both legacy and scoring system validation data with system identification
+
+**PHASE 4 STEP 13 - COMPLETED ✅** (2025-08-09):
+- ✅ **Brush CLI Validation Interface**: Implemented command-line interface for brush validation
+- ✅ **Current State**: BrushValidationCLI class with comprehensive functionality complete
+- ✅ **Features**: Data loading, sorting (unvalidated/validated/ambiguity), user interaction, action recording
+- ✅ **Systems**: Support for both legacy and scoring system validation with --system flag
+- ✅ **Testing**: 30 total tests (20 unit + 10 integration) - all passing
+- ✅ **CLI Arguments**: --month, --system (legacy/scoring/both), --sort-by options
+- ✅ **Integration**: Full integration with BrushUserActionsManager and BrushMatcherEntryPoint
+- ✅ **Migration Support**: Includes data migration from existing correct_matches.yaml
+- ✅ **Storage System**: Monthly YAML file storage with cross-month retrieval capabilities
+- ✅ **Test Coverage**: 51 comprehensive unit and integration tests (100% pass rate)
+- ✅ **Quality Checks**: All format, lint, typecheck, and test checks passed
+- 🔍 **Implementation Features**: 
+  - Load data from both legacy (matched/) and scoring (matched_new/) directories
+  - Sort entries by validation status (unvalidated first) or ambiguity (scoring system)
+  - Interactive user validation/override with clear choice presentation
+  - Record user actions with comprehensive metadata and timestamps
+  - Statistics tracking with validation rates and progress monitoring
+  - Error handling for missing files and corrupted data
+  - Integration with existing brush matcher entry point for system compatibility
+  - Cross-month data aggregation capabilities
 
 ## 📘 Project Summary
 
