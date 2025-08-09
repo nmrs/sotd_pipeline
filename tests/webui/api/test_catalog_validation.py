@@ -468,11 +468,14 @@ class TestCatalogValidationIntegration:
 
         try:
             # Test API endpoint
-            response = requests.post(
-                "http://localhost:8000/api/analyze/validate-catalog",
-                json={"field": "blade"},
-                timeout=10,
-            )
+            try:
+                response = requests.post(
+                    "http://localhost:8000/api/analyze/validate-catalog",
+                    json={"field": "blade"},
+                    timeout=10,
+                )
+            except requests.exceptions.ConnectionError:
+                pytest.skip("API server not running - skipping integration test")
 
             if response.status_code == 200:
                 data = response.json()

@@ -80,19 +80,17 @@ class TestBrushScoringConfigIntegration:
         assert "base_strategies" in config.weights
         assert "strategy_modifiers" in config.weights
 
-        # Verify all expected strategies are present (updated for Phase 3.2)
+        # Verify all expected strategies are present (updated for current config)
         expected_strategies = [
             "correct_complete_brush",
             "correct_split_brush",
-            "known_split",
-            "high_priority_automated_split",
+            "known_split", 
             "known_brush",
             "omega_semogue",
             "zenith",
             "other_brush",
-            "dual_component",
-            "medium_priority_automated_split",
-            "single_component_fallback",
+            "automated_split",
+            "unified",
         ]
 
         for strategy in expected_strategies:
