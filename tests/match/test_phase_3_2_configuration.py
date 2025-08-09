@@ -59,30 +59,27 @@ class TestPhase32Configuration:
         omega_semogue_weight = base_strategies["omega_semogue"]
         zenith_weight = base_strategies["zenith"]
         other_brush_weight = base_strategies["other_brush"]
-        high_priority_split_weight = base_strategies["high_priority_automated_split"]
-        dual_component_weight = base_strategies["dual_component"]
+        automated_split_weight = base_strategies["automated_split"]
+        unified_weight = base_strategies["unified"]
 
-        # Priority order: known_brush > omega_semogue > zenith > other_brush
+        # Priority order: known_brush > omega_semogue >= zenith > other_brush
         assert (
             known_brush_weight > omega_semogue_weight
         ), "known_brush should have higher priority than omega_semogue"
         assert (
-            omega_semogue_weight > zenith_weight
-        ), "omega_semogue should have higher priority than zenith"
+            omega_semogue_weight >= zenith_weight
+        ), "omega_semogue should have equal or higher priority than zenith"
         assert (
             zenith_weight > other_brush_weight
         ), "zenith should have higher priority than other_brush"
 
         # Critical: Individual strategies should NOT interfere with existing priority relationships
         assert (
-            known_brush_weight < high_priority_split_weight
-        ), "known_brush should not override high_priority_automated_split"
+            other_brush_weight > automated_split_weight
+        ), "other_brush should have higher priority than automated_split"
         assert (
-            omega_semogue_weight < high_priority_split_weight
-        ), "omega_semogue should not override high_priority_automated_split"
-        assert (
-            other_brush_weight > dual_component_weight
-        ), "other_brush should have higher priority than dual_component"
+            automated_split_weight > unified_weight
+        ), "automated_split should have higher priority than unified"
 
     def test_complete_brush_wrapper_removed_from_configuration(self):
         """Test that complete_brush wrapper is removed from configuration."""

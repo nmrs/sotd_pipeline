@@ -122,19 +122,17 @@ class TestBrushScoringConfig:
         """Test that initial weights mimic current behavior exactly."""
         config = BrushScoringConfig()
 
-        # Check that base strategy scores are in expected order (updated for Phase 3.3)
+        # Check that base strategy scores are in expected order (current implementation)
         scores = [
             config.get_base_strategy_score("correct_complete_brush"),
             config.get_base_strategy_score("correct_split_brush"),
             config.get_base_strategy_score("known_split"),
-            config.get_base_strategy_score("high_priority_automated_split"),
             config.get_base_strategy_score("known_brush"),
             config.get_base_strategy_score("omega_semogue"),
             config.get_base_strategy_score("zenith"),
             config.get_base_strategy_score("other_brush"),
-            config.get_base_strategy_score("dual_component"),
-            config.get_base_strategy_score("medium_priority_automated_split"),
-            config.get_base_strategy_score("single_component_fallback"),
+            config.get_base_strategy_score("automated_split"),
+            config.get_base_strategy_score("unified"),
         ]
 
         # Verify descending order (highest priority first)
@@ -168,11 +166,9 @@ class TestBrushScoringConfig:
             "omega_semogue",
             "zenith",
             "other_brush",
-            "handle_component",
-            "knot_component",
-            "dual_component",
+            "automated_split",
             "medium_priority_automated_split",
-            "single_component_fallback",
+            "unified",
         ]
 
         for strategy in expected_strategies:
