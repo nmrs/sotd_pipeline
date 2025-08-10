@@ -1,56 +1,163 @@
 #!/usr/bin/env python3
-"""Test script to verify brush unmatched logic."""
+"""Test script to debug brush matching logic."""
 
-import sys
+import json
 from pathlib import Path
+from collections import defaultdict
 
-# Add project root to Python path
-project_root = Path(__file__).parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
 
-# Import after path setup
-from sotd.match.tools.analyzers.unmatched_analyzer import UnmatchedAnalyzer  # noqa: E402
+def extract_text(field_data, field=""):
+    """Copy of the extract_text function from unmatched_analyzer.py."""
+    if isinstance(field_data, str):
+        # Legacy format - already normalized
+        return field_data
+    elif isinstance(field_data, dict):
+        # New structured format - use normalized field
+        normalized = field_data.get("normalized", "")
+        if normalized:
+            return normalized
+        # Fallback to original if normalized is not available
+        return field_data.get("original", "")
+    else:
+        return ""
 
 
 def test_brush_logic():
-    """Test the brush unmatched logic."""
-    analyzer = UnmatchedAnalyzer()
+    """Test the brush matching logic step by step."""
+    file_path = Path("data/matched/2025-05.json")
 
-    # Create mock args
-    class MockArgs:
-        def __init__(self):
-            self.field = "brush"
-            self.months = ["2025-01"]
-            self.month = "2025-01"  # Required by date_span
-            self.limit = 5
-            self.out_dir = "data"  # Required by analysis_base
-            self.debug = False  # Required by analysis_base
+    with open(file_path) as f:
+        data = json.load(f)
 
-    args = MockArgs()
+    brush_records = [
+        r
+        for r in data["data"]
+        if "brush" in r and r["brush"] and "Chisel and Hound" in str(r["brush"].get("original", ""))
+    ]
 
-    # Test the analyze_unmatched method
-    result = analyzer.analyze_unmatched(args)
+    print(f"Found {len(brush_records)} Chisel and Hound brushes")
 
-    print("=== Brush Unmatched Analysis Result ===")
-    print(f"Field: {result['field']}")
-    print(f"Total unmatched: {result['total_unmatched']}")
-    print(f"Items returned: {len(result['unmatched_items'])}")
+    # Test the exact logic from _process_brush_unmatched
+    for i, r in enumerate(brush_records[:3]):
+        brush = r["brush"]
+        matched = brush.get("matched")
 
-    if result["unmatched_items"]:
-        print("\n=== First Item Structure ===")
-        first_item = result["unmatched_items"][0]
-        print(f"Item: {first_item['item']}")
-        print(f"Count: {first_item['count']}")
-        print(f"Examples: {first_item['examples']}")
-        print(f"Comment IDs: {first_item['comment_ids']}")
+        print(f'\n=== Brush {i+1}: {brush.get("original")} ===')
 
-        if "unmatched" in first_item:
-            print(f"Unmatched structure: {first_item['unmatched']}")
+        if matched is None:
+            print("  matched is None - should be unmatched")
+            continue
 
-        if "matched" in first_item:
-            print(f"Matched structure: {first_item['matched']}")
+        if not isinstance(matched, dict):
+            print("  matched is not dict - should be unmatched")
+            continue
+
+        # Check if we have a valid brand match anywhere
+        handle = matched.get("handle")
+        knot = matched.get("knot")
+
+        has_valid_brand = (
+            # Top level brand (not null and not "Unknown" variants)
+            (matched.get("brand") and matched.get("brand") not in ["Unknown", "UnknownMaker"])
+            or
+            # Handle brand (not null and not "Unknown" variants)
+            (
+                handle
+                and handle.get("brand")
+                and handle.get("brand") not in ["UnknownMaker", "Unknown"]
+            )
+            or
+            # Knot brand (not null and not "Unknown" variants)
+            (knot and knot.get("brand") and knot.get("brand") not in ["UnknownKnot", "Unknown"])
+        )
+
+        print(f'  Top brand: {matched.get("brand")}')
+        print(f'  Handle brand: {handle.get("brand") if handle else None}')
+        print(f'  Knot brand: {knot.get("brand") if knot else None}')
+        print(f"  Has valid brand: {has_valid_brand}")
+
+        if has_valid_brand:
+            print("  → Should be MATCHED (early return)")
+        else:
+            print("  → Should be UNMATCHED (continue processing)")
+
+        # Test extract_text
+        normalized = extract_text(brush, "brush")
+        print(f"  Normalized text: {normalized}")
+
+
+def test_process_brush_unmatched():
+    """Test the exact _process_brush_unmatched method logic."""
+    file_path = Path("data/matched/2025-05.json")
+
+    with open(file_path) as f:
+        data = json.load(f)
+
+    brush_records = [
+        r
+        for r in data["data"]
+        if "brush" in r and r["brush"] and "Chisel and Hound" in str(r["brush"].get("original", ""))
+    ]
+
+    print(f"\n=== Testing _process_brush_unmatched logic ===")
+    print(f"Found {len(brush_records)} Chisel and Hound brushes")
+
+    all_unmatched = defaultdict(list)
+
+    # Simulate the exact logic from _process_brush_unmatched
+    for r in brush_records[:3]:
+        brush = r["brush"]
+        matched = brush.get("matched")
+
+        file_info = {
+            "file": r.get("_source_file", ""),
+            "line": r.get("_source_line", "unknown"),
+            "comment_id": r.get("id", ""),
+        }
+
+        print(f'\n--- Processing: {brush.get("original", "")} ---')
+
+        if matched is None:
+            print("  matched is None - adding to unmatched")
+            normalized = extract_text(brush, "brush")
+            all_unmatched[normalized].append(file_info)
+            continue
+
+        if not isinstance(matched, dict):
+            print("  matched is not dict - adding to unmatched")
+            normalized = extract_text(brush, "brush")
+            all_unmatched[normalized].append(file_info)
+            continue
+
+        # Check if we have a valid brand match anywhere
+        handle = matched.get("handle")
+        knot = matched.get("knot")
+
+        has_valid_brand = (
+            (matched.get("brand") and matched.get("brand") not in ["Unknown", "UnknownMaker"])
+            or (
+                handle
+                and handle.get("brand")
+                and handle.get("brand") not in ["UnknownMaker", "Unknown"]
+            )
+            or (knot and knot.get("brand") and knot.get("brand") not in ["UnknownKnot", "Unknown"])
+        )
+
+        print(f"  has_valid_brand: {has_valid_brand}")
+
+        # If we have a valid brand match anywhere, consider it matched
+        if has_valid_brand:
+            print("  → Early return - brush is MATCHED")
+            continue
+
+        print("  → Continue processing - brush is UNMATCHED")
+        # ... rest of the logic would continue here
+
+    print(f"\nTotal unmatched: {len(all_unmatched)}")
+    for key, value in all_unmatched.items():
+        print(f"  {key}: {len(value)} occurrences")
 
 
 if __name__ == "__main__":
     test_brush_logic()
+    test_process_brush_unmatched()
