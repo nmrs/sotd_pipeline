@@ -13,30 +13,6 @@ import LoadingSpinner from '../components/layout/LoadingSpinner';
 import UnmatchedAnalyzerDataTable from '../components/data/UnmatchedAnalyzerDataTable';
 import PerformanceMonitor from '../components/domain/PerformanceMonitor';
 import CommentModal from '../components/domain/CommentModal';
-import BrushTable from '../components/data/BrushTable';
-
-// Local BrushData interface that matches BrushTable expectations
-interface BrushData {
-  main: {
-    brush: string;
-    count: number;
-    comment_ids?: string[];
-    examples?: string[];
-    status?: 'Matched' | 'Unmatched' | 'Filtered';
-  };
-  components: {
-    handle?: {
-      maker: string;
-      count: number;
-      comment_ids?: string[];
-    };
-    knot?: {
-      maker: string;
-      count: number;
-      comment_ids?: string[];
-    };
-  };
-}
 
 import { useViewState } from '../hooks/useViewState';
 import { useSearchSort } from '../hooks/useSearchSort';
@@ -198,110 +174,6 @@ const UnmatchedAnalyzer: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Transform API response data to BrushTable format
-  const transformApiDataToBrushTable = (
-    items: Array<{
-      item: string;
-      count: number;
-      comment_ids: string[];
-      examples: string[];
-      unmatched?: Record<string, unknown>;
-      matched?: Record<string, unknown>;
-    }>
-  ): BrushData[] => {
-    const result = items.map(item => {
-      // Determine if brush is actually matched based on brand presence
-      let status: 'Matched' | 'Unmatched' = 'Unmatched';
-
-      // Check if the item has matched data (this means it was matched by the analyzer)
-      if (item.matched) {
-        const matched = item.matched as any;
-        const hasTopLevelBrand = matched.brand &&
-          !['Unknown', 'UnknownMaker'].includes(matched.brand);
-        const hasHandleBrand = matched.handle?.brand &&
-          !['UnknownMaker', 'Unknown'].includes(matched.handle.brand);
-        const hasKnotBrand = matched.knot?.brand &&
-          !['UnknownKnot', 'Unknown'].includes(matched.knot.brand);
-
-        if (hasTopLevelBrand || hasHandleBrand || hasKnotBrand) {
-          status = 'Matched';
-        }
-      }
-
-      const transformed = {
-        main: {
-          brush: item.item,  // Changed from 'text' to 'brush' to match BrushTable interface
-          count: item.count,
-          comment_ids: item.comment_ids || [],
-          examples: item.examples || [],
-          status: status,
-        },
-        components: {
-          handle:
-            item.unmatched?.handle &&
-              typeof item.unmatched.handle === 'object' &&
-              'text' in item.unmatched.handle
-              ? {
-                maker: (item.unmatched.handle as { text: string }).text,  // Changed from 'text' to 'maker'
-                count: item.count,  // BrushTable expects count field
-                comment_ids: item.comment_ids || [],  // BrushTable expects comment_ids
-              }
-              : undefined,
-          knot:
-            item.unmatched?.knot &&
-              typeof item.unmatched.knot === 'object' &&
-              'text' in item.unmatched.knot
-              ? {
-                maker: (item.unmatched.knot as { text: string }).text,  // Changed from 'text' to 'maker'
-                count: item.count,  // BrushTable expects count field
-                comment_ids: item.comment_ids || [],  // BrushTable expects comment_ids
-              }
-              : undefined,
-        },
-      };
-
-      return transformed;
-    });
-
-    return result;
-  };
-
-  // Memoize the transformed brush data to prevent unnecessary re-renders
-  const transformedBrushData = useMemo(() => {
-    if (selectedField === 'brush' && searchSort.filteredAndSortedItems) {
-      const data = transformApiDataToBrushTable(
-        searchSort.filteredAndSortedItems as Array<{
-          item: string;
-          count: number;
-          comment_ids: string[];
-          examples: string[];
-          matched?: Record<string, unknown>;
-        }>
-      );
-      return data;
-    }
-    return [];
-  }, [selectedField, searchSort.filteredAndSortedItems]);
-
-  // Column widths for different table types
-  const productColumnWidths = {
-    filtered: 100,
-    item: 200,
-    count: 80,
-    comment_ids: 150,
-    examples: 200,
-  };
-
-  const brushColumnWidths = {
-    filtered: 100,
-    brush: 200,
-    handle: 200,
-    knot: 200,
-    count: 80,
-    comment_ids: 150,
-    examples: 200,
   };
 
   const handleCommentClick = async (commentId: string, allCommentIds?: string[]) => {
@@ -542,10 +414,12 @@ const UnmatchedAnalyzer: React.FC = () => {
     setFilteredStatus({});
   }, [selectedField]);
 
+
+
   return (
-    <div data-testid='unmatched-analyzer' className='h-screen flex flex-col'>
-      {/* Sticky Header */}
-      <div className='sticky top-0 z-20 bg-white border-b border-gray-200 p-4 shadow-sm'>
+    <div data-testid='unmatched-analyzer' className='min-h-screen p-4'>
+      {/* Header */}
+      <div className='bg-white border-b border-gray-200 pb-4 mb-4'>
         <h1 className='text-2xl font-bold text-gray-900 mb-4'>Unmatched Item Analyzer</h1>
         <p className='text-gray-600 mb-4'>
           Analyze unmatched items across selected months to identify patterns and potential catalog
@@ -672,171 +546,153 @@ const UnmatchedAnalyzer: React.FC = () => {
         </div>
       </div>
 
-      {/* Scrollable Content */}
-      <div className='flex-1 overflow-hidden'>
-        {loading ? (
-          <div className='flex items-center justify-center h-full'>
-            <LoadingSpinner message='Analyzing unmatched items...' />
-          </div>
-        ) : results ? (
-          <div className='h-full p-4'>
-            {matchPhaseOutput && (
-              <div className='bg-gray-50 border border-gray-200 rounded-md p-4 mb-4'>
-                <div className='flex items-center justify-between mb-2'>
-                  <h3 className='text-sm font-medium text-gray-900'>Match Phase Output</h3>
-                  <button
-                    onClick={() => setMatchPhaseOutput(null)}
-                    className='text-gray-400 hover:text-gray-600'
-                  >
-                    <svg className='h-4 w-4' viewBox='0 0 20 20' fill='currentColor'>
-                      <path
-                        fillRule='evenodd'
-                        d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
-                        clipRule='evenodd'
-                      />
-                    </svg>
-                  </button>
-                </div>
-                <pre className='text-xs text-gray-700 bg-white p-3 rounded border overflow-x-auto whitespace-pre-wrap'>
-                  {matchPhaseOutput}
-                </pre>
+      {/* Content */}
+      {loading ? (
+        <div className='flex items-center justify-center py-20'>
+          <LoadingSpinner message='Analyzing unmatched items...' />
+        </div>
+      ) : results ? (
+        <div>
+          {matchPhaseOutput && (
+            <div className='bg-gray-50 border border-gray-200 rounded-md p-4 mb-4'>
+              <div className='flex items-center justify-between mb-2'>
+                <h3 className='text-sm font-medium text-gray-900'>Match Phase Output</h3>
+                <button
+                  onClick={() => setMatchPhaseOutput(null)}
+                  className='text-gray-400 hover:text-gray-600'
+                >
+                  <svg className='h-4 w-4' viewBox='0 0 20 20' fill='currentColor'>
+                    <path
+                      fillRule='evenodd'
+                      d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
+                      clipRule='evenodd'
+                    />
+                  </svg>
+                </button>
               </div>
-            )}
+              <pre className='text-xs text-gray-700 bg-white p-3 rounded border overflow-x-auto whitespace-pre-wrap'>
+                {matchPhaseOutput}
+              </pre>
+            </div>
+          )}
 
-            {Array.isArray(results.unmatched_items) ? (
-              results.unmatched_items.length === 0 ? (
-                <div className='flex items-center justify-center h-full'>
-                  <div className='text-center'>
-                    <div className='text-green-600 text-4xl mb-2'>✓</div>
-                    <h3 className='text-base font-medium text-gray-900 mb-1'>No Unmatched Items</h3>
-                    <p className='text-sm text-gray-600'>
-                      All {results.field} items were successfully matched.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className='h-full flex flex-col'>
-                  {/* Search and Apply Controls */}
-                  <div className='flex items-center justify-between mb-4'>
-                    <div className='flex items-center space-x-4'>
-                      <div>
-                        <h3 className='text-base font-medium text-gray-900'>
-                          Top Unmatched Items ({searchSort.searchResultsCount} of{' '}
-                          {searchSort.totalItemsCount})
-                        </h3>
-                      </div>
-                    </div>
-                    <div className='flex items-center space-x-2'>
-                      {/* Apply Changes Button */}
-                      {(() => {
-                        const visibleItems = searchSort.filteredAndSortedItems.map(
-                          item => item.item
-                        );
-                        const visibleChanges = Object.keys(pendingChanges).filter(itemName =>
-                          visibleItems.includes(itemName)
-                        );
-                        const visibleChangesCount = visibleChanges.length;
-
-                        return (
-                          <div className='flex items-center space-x-2'>
-                            {visibleChangesCount > 0 && (
-                              <input
-                                type='text'
-                                placeholder='Reason (optional)...'
-                                value={reasonText}
-                                onChange={e => setReasonText(e.target.value)}
-                                className='px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 w-48'
-                              />
-                            )}
-                            <button
-                              onClick={handleApplyFilteredChanges}
-                              disabled={loading || visibleChangesCount === 0}
-                              className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || visibleChangesCount === 0
-                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                                : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                                }`}
-                            >
-                              {loading ? 'Applying...' : `Apply (${visibleChangesCount})`}
-                            </button>
-                          </div>
-                        );
-                      })()}
-
-                      {/* Search Box */}
-                      <div className='flex items-center space-x-2'>
-                        <input
-                          type='text'
-                          placeholder='Search items...'
-                          value={searchSort.searchTerm}
-                          onChange={e => searchSort.setSearchTerm(e.target.value)}
-                          className='px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500'
-                        />
-                        {searchSort.searchTerm && (
-                          <button
-                            onClick={searchSort.clearSearch}
-                            className='text-gray-400 hover:text-gray-600'
-                          >
-                            <svg className='h-4 w-4' viewBox='0 0 20 20' fill='currentColor'>
-                              <path
-                                fillRule='evenodd'
-                                d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
-                                clipRule='evenodd'
-                              />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Table Content */}
-                  <div className='flex-1 overflow-hidden'>
-                    {selectedField === 'brush' ? (
-                      <BrushTable
-                        items={transformedBrushData}
-                        onBrushFilter={handleFilteredStatusChange}
-                        onComponentFilter={handleFilteredStatusChange}
-                        filteredStatus={filteredStatus}
-                        pendingChanges={pendingChanges}
-                        columnWidths={brushColumnWidths}
-                        onCommentClick={handleCommentClick}
-                        commentLoading={commentLoading}
-                      />
-                    ) : (
-                      <UnmatchedAnalyzerDataTable
-                        data={searchSort.filteredAndSortedItems}
-                        filteredStatus={filteredStatus}
-                        pendingChanges={pendingChanges}
-                        onFilteredStatusChange={handleFilteredStatusChange}
-                        onCommentClick={handleCommentClick}
-                        commentLoading={commentLoading}
-                        fieldType={selectedField as 'razor' | 'blade' | 'soap'}
-                        columnWidths={productColumnWidths}
-                      />
-                    )}
-                  </div>
-                </div>
-              )
-            ) : (
-              <div className='flex items-center justify-center h-full'>
+          {Array.isArray(results.unmatched_items) ? (
+            results.unmatched_items.length === 0 ? (
+              <div className='flex items-center justify-center py-20'>
                 <div className='text-center'>
-                  <div className='text-red-600 text-4xl mb-2'>!</div>
-                  <h3 className='text-base font-medium text-gray-900 mb-1'>Invalid Response</h3>
+                  <div className='text-green-600 text-4xl mb-2'>✓</div>
+                  <h3 className='text-base font-medium text-gray-900 mb-1'>No Unmatched Items</h3>
                   <p className='text-sm text-gray-600'>
-                    The API did not return valid data. Please try again.
+                    All {results.field} items were successfully matched.
                   </p>
                 </div>
               </div>
-            )}
-          </div>
-        ) : (
-          <div className='flex items-center justify-center h-full'>
-            <div className='text-lg text-gray-600'>
-              Please select months and click &quot;Analyze&quot; to begin.
+            ) : (
+              <div>
+                {/* Search and Apply Controls */}
+                <div className='flex items-center justify-between mb-4'>
+                  <div className='flex items-center space-x-4'>
+                    <div>
+                      <h3 className='text-base font-medium text-gray-900'>
+                        Top Unmatched Items ({searchSort.searchResultsCount} of{' '}
+                        {searchSort.totalItemsCount})
+                      </h3>
+                    </div>
+                  </div>
+                  <div className='flex items-center space-x-2'>
+                    {/* Apply Changes Button */}
+                    {(() => {
+                      const visibleItems = searchSort.filteredAndSortedItems.map(
+                        item => item.item
+                      );
+                      const visibleChanges = Object.keys(pendingChanges).filter(itemName =>
+                        visibleItems.includes(itemName)
+                      );
+                      const visibleChangesCount = visibleChanges.length;
+
+                      return (
+                        <div className='flex items-center space-x-2'>
+                          {visibleChangesCount > 0 && (
+                            <input
+                              type='text'
+                              placeholder='Reason (optional)...'
+                              value={reasonText}
+                              onChange={e => setReasonText(e.target.value)}
+                              className='px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 w-48'
+                            />
+                          )}
+                          <button
+                            onClick={handleApplyFilteredChanges}
+                            disabled={loading || visibleChangesCount === 0}
+                            className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || visibleChangesCount === 0
+                              ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                              : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                              }`}
+                          >
+                            {loading ? 'Applying...' : `Apply (${visibleChangesCount})`}
+                          </button>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Search Box */}
+                    <div className='flex items-center space-x-2'>
+                      <input
+                        type='text'
+                        placeholder='Search items...'
+                        value={searchSort.searchTerm}
+                        onChange={e => searchSort.setSearchTerm(e.target.value)}
+                        className='px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500'
+                      />
+                      {searchSort.searchTerm && (
+                        <button
+                          onClick={searchSort.clearSearch}
+                          className='text-gray-400 hover:text-gray-600'
+                        >
+                          <svg className='h-4 w-4' viewBox='0 0 20 20' fill='currentColor'>
+                            <path
+                              fillRule='evenodd'
+                              d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
+                              clipRule='evenodd'
+                            />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Table Content */}
+                <UnmatchedAnalyzerDataTable
+                  data={searchSort.filteredAndSortedItems}
+                  filteredStatus={filteredStatus}
+                  pendingChanges={pendingChanges}
+                  onFilteredStatusChange={handleFilteredStatusChange}
+                  onCommentClick={handleCommentClick}
+                  commentLoading={commentLoading}
+                  fieldType={selectedField as 'razor' | 'blade' | 'brush' | 'soap'}
+                />
+              </div>
+            )
+          ) : (
+            <div className='flex items-center justify-center py-20'>
+              <div className='text-center'>
+                <div className='text-red-600 text-4xl mb-2'>!</div>
+                <h3 className='text-base font-medium text-gray-900 mb-1'>Invalid Response</h3>
+                <p className='text-sm text-gray-600'>
+                  The API did not return valid data. Please try again.
+                </p>
+              </div>
             </div>
+          )}
+        </div>
+      ) : (
+        <div className='flex items-center justify-center py-20'>
+          <div className='text-lg text-gray-600'>
+            Please select months and click &quot;Analyze&quot; to begin.
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Comment Modal */}
       <CommentModal

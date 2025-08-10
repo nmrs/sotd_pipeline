@@ -11,66 +11,9 @@ jest.mock('../../services/api', () => ({
   checkFilteredStatus: jest.fn(),
 }));
 
-// Mock the BrushTable component to verify it receives correct data
-jest.mock('../../components/data/BrushTable', () => ({
-  __esModule: true,
-  default: function MockBrushTable(props: {
-    items?: Array<{
-      main?: { text: string };
-      components?: {
-        handle?: { text: string };
-        knot?: { text: string };
-      };
-    }>;
-  }) {
-    // Log the data structure to help debug
-    console.log('BrushTable received data:', JSON.stringify(props.items, null, 2));
 
-    return (
-      <div data-testid='brush-table'>
-        <div data-testid='brush-table-item-count'>{props.items?.length || 0}</div>
-        <div data-testid='brush-table-has-components'>
-          {props.items?.some(item => item.components?.handle || item.components?.knot)
-            ? 'true'
-            : 'false'}
-        </div>
-        {props.items?.map((item, index: number) => (
-          <div key={index} data-testid={`brush-item-${index}`}>
-            <span data-testid={`brush-item-main-${index}`}>{item.main?.text}</span>
-            <span data-testid={`brush-item-handle-${index}`}>
-              {item.components?.handle?.text || 'no-handle'}
-            </span>
-            <span data-testid={`brush-item-knot-${index}`}>
-              {item.components?.knot?.text || 'no-knot'}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  },
-}));
 
-// Mock the VirtualizedTable component
-jest.mock('../../components/data/VirtualizedTable', () => ({
-  VirtualizedTable: function MockVirtualizedTable(props: {
-    data?: Array<Record<string, unknown>>;
-    columns?: Array<{ key: string; render?: (item: Record<string, unknown>) => React.ReactNode }>;
-  }) {
-    return (
-      <div data-testid='virtualized-table'>
-        {props.data?.map((item, index: number) => (
-          <div key={index} data-testid={`table-row-${index}`}>
-            {props.columns?.map(column => (
-              <div key={column.key} data-testid={`cell-${column.key}-${index}`}>
-                {column.render ? column.render(item) : String(item[column.key] || '')}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    );
-  },
-}));
+
 
 import UnmatchedAnalyzer from '../UnmatchedAnalyzer';
 import * as mockApi from '../../services/api';
@@ -119,7 +62,7 @@ describe('UnmatchedAnalyzer Integration Tests', () => {
     ).mockResolvedValue(['2024-01', '2024-02', '2024-03']);
   });
 
-  test('should transform brush data correctly for BrushTable with sub-rows', async () => {
+  test('should display brush data correctly in standard table format', async () => {
     render(<UnmatchedAnalyzer />);
 
     // Wait for months to load
@@ -148,23 +91,23 @@ describe('UnmatchedAnalyzer Integration Tests', () => {
 
     // Wait for data to load
     await waitFor(() => {
-      expect(screen.getByTestId('brush-table')).toBeInTheDocument();
+      expect(screen.getByTestId('unmatched-analyzer-data-table')).toBeInTheDocument();
     });
 
-    // Verify that BrushTable received data with components
-    expect(screen.getByTestId('brush-table-has-components')).toHaveTextContent('true');
-
     // Verify that we have the expected number of items (2 brushes)
-    expect(screen.getByTestId('brush-table-item-count')).toHaveTextContent('2');
+    expect(screen.getByText('Simpson Chubby 2')).toBeInTheDocument();
+    expect(screen.getByText('Declaration B15')).toBeInTheDocument();
 
-    // Verify that the transformed data has the correct structure
-    expect(screen.getByTestId('brush-item-main-0')).toHaveTextContent('Simpson Chubby 2');
-    expect(screen.getByTestId('brush-item-handle-0')).toHaveTextContent('Elite handle');
-    expect(screen.getByTestId('brush-item-knot-0')).toHaveTextContent('Declaration knot');
+    // Verify the counts are displayed
+    expect(screen.getByText('5')).toBeInTheDocument();
+    expect(screen.getByText('3')).toBeInTheDocument();
 
-    expect(screen.getByTestId('brush-item-main-1')).toHaveTextContent('Declaration B15');
-    expect(screen.getByTestId('brush-item-handle-1')).toHaveTextContent('Declaration handle');
-    expect(screen.getByTestId('brush-item-knot-1')).toHaveTextContent('Declaration knot');
+    // Verify that the table shows the standard format for unmatched items
+    expect(screen.getByText('Filtered')).toBeInTheDocument();
+    expect(screen.getByText('Item')).toBeInTheDocument();
+    expect(screen.getByText('Count')).toBeInTheDocument();
+    expect(screen.getByText('Comments')).toBeInTheDocument();
+    expect(screen.getByText('Examples')).toBeInTheDocument();
   });
 
   test('should render brush field when selected', async () => {
@@ -174,12 +117,11 @@ describe('UnmatchedAnalyzer Integration Tests', () => {
     const fieldSelect = screen.getByRole('combobox');
     fireEvent.change(fieldSelect, { target: { value: 'brush' } });
 
-    // The brush table should not appear until analysis is triggered
+    // The data table should not appear until analysis is triggered
     // Just verify that the field selection worked
     expect(fieldSelect).toHaveValue('brush');
 
     // Verify that no table is rendered initially (since no analysis has been run)
-    expect(screen.queryByTestId('brush-table')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('virtualized-table')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('unmatched-analyzer-data-table')).not.toBeInTheDocument();
   });
 });
