@@ -97,9 +97,6 @@ class UnmatchedItem(BaseModel):
     count: int
     examples: List[str]
     comment_ids: List[str]
-    # Optional fields for brush matching data
-    match_type: Optional[str] = None
-    matched: Optional[dict] = None
     unmatched: Optional[dict] = None
 
 
