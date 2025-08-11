@@ -97,3 +97,6 @@ webui/.pids/*.pid
 webui/.pids/*.log
 *.bk.yaml
 # Learning data files (test artifacts)
+
+# WebUI test data
+webui/data/

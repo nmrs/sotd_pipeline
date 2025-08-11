@@ -1,0 +1,99 @@
+brush_user_actions:
+- input_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+  timestamp: '2025-08-11T15:52:00Z'
+  system_used: scoring
+  action: validated
+  system_choice:
+    strategy: known_brush
+    score: 80
+    result:
+      brand: Zenith
+      model: 506U N
+      source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+      handle:
+        brand: Zenith
+        model: null
+        source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        _matched_by: known_brush
+        _pattern: 506u.*n\b
+      knot:
+        brand: Zenith
+        model: 506U N
+        fiber: Horse
+        knot_size_mm: 27
+        source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        _matched_by: known_brush
+        _pattern: 506u.*n\b
+      strategy: known_brush
+      score: 80
+  user_choice:
+    strategy: known_brush
+    score: 80
+    result:
+      brand: Zenith
+      model: 506U N
+      source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+      handle:
+        brand: Zenith
+        model: null
+        source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        _matched_by: known_brush
+        _pattern: 506u.*n\b
+      knot:
+        brand: Zenith
+        model: 506U N
+        fiber: Horse
+        knot_size_mm: 27
+        source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        _matched_by: known_brush
+        _pattern: 506u.*n\b
+      strategy: known_brush
+      score: 80
+  all_brush_strategies:
+  - strategy: unified
+    score: 65
+    result:
+      brand: Zenith
+      model: null
+      user_intent: dual_component
+      handle:
+        brand: Zenith
+        model: Unspecified
+        source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        _matched_by: HandleMatcher
+        _pattern: zen\w+
+      knot:
+        brand: Zenith
+        model: Boar
+        fiber: Boar
+        knot_size_mm: null
+        source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        _matched_by: KnotMatcher
+        _pattern: zenith
+    match_type: composite
+    pattern: zen\w+
+  - strategy: known_brush
+    score: 80
+    result:
+      brand: Zenith
+      model: 506U N
+      source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+      handle:
+        brand: Zenith
+        model: null
+        source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        _matched_by: known_brush
+        _pattern: 506u.*n\b
+      knot:
+        brand: Zenith
+        model: 506U N
+        fiber: Horse
+        knot_size_mm: 27
+        source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        _matched_by: known_brush
+        _pattern: 506u.*n\b
+      strategy: known_brush
+      score: 80
+    match_type: regex
+    pattern: 506u.*n\b
+  comment_ids: []
