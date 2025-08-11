@@ -24,7 +24,7 @@ describe('BrushValidation - Core Functionality', () => {
         expect(screen.getByText('Brush Validation')).toBeInTheDocument();
 
         // Badge should be present
-        expect(screen.getByText('Multi-System Validation Interface')).toBeInTheDocument();
+        expect(screen.getByText('Scoring System Validation Interface')).toBeInTheDocument();
 
         // Month selection section should be present
         expect(screen.getByText('Month Selection')).toBeInTheDocument();

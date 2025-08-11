@@ -12,19 +12,23 @@ import {
     SortAsc,
     BarChart3,
     Loader2,
+    MessageSquare,
 } from 'lucide-react';
 import MonthSelector from '../components/forms/MonthSelector';
 import ErrorDisplay from '../components/feedback/ErrorDisplay';
+import CommentModal from '../components/domain/CommentModal';
 import {
     getBrushValidationData,
     getBrushValidationStatistics,
     recordBrushValidationAction,
+    getCommentDetail,
     BrushValidationEntry,
     BrushValidationStatistics,
+    CommentDetail,
     handleApiError,
 } from '../services/api';
 
-type SystemType = 'legacy' | 'scoring';
+type SystemType = 'scoring';
 type SortType = 'unvalidated' | 'validated' | 'ambiguity';
 
 interface OverrideState {
@@ -32,10 +36,22 @@ interface OverrideState {
     selectedStrategy: number;
 }
 
+/**
+ * Brush Validation Component
+ * 
+ * This component follows match phase rules by:
+ * - Displaying original text for human readability
+ * - Using normalized text for all matching operations and validation actions
+ * - Ensuring case-insensitive matching through normalized field usage
+ * - Supporting only the scoring system (no legacy system support)
+ * 
+ * According to @match-phase rules: ALWAYS use the normalized field for matching operations,
+ * not the original field. The original field should be preserved for reference but not used in matching logic.
+ */
 const BrushValidation: React.FC = () => {
     // State management
     const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
-    const [selectedSystem, setSelectedSystem] = useState<SystemType>('legacy');
+    const [selectedSystem] = useState<SystemType>('scoring'); // Only scoring system supported
     const [sortBy, setSortBy] = useState<SortType>('unvalidated');
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize] = useState(20);
@@ -57,7 +73,87 @@ const BrushValidation: React.FC = () => {
     const [overrideState, setOverrideState] = useState<OverrideState | null>(null);
     const [actionInProgress, setActionInProgress] = useState<Set<number>>(new Set());
 
+    // Comment modal state
+    const [selectedComment, setSelectedComment] = useState<CommentDetail | null>(null);
+    const [commentModalOpen, setCommentModalOpen] = useState(false);
+    const [commentLoading, setCommentLoading] = useState(false);
+    const [allComments, setAllComments] = useState<CommentDetail[]>([]);
+    const [currentCommentIndex, setCurrentCommentIndex] = useState<number>(0);
+    const [remainingCommentIds, setRemainingCommentIds] = useState<string[]>([]);
+
     const currentMonth = selectedMonths[0] || '';
+
+    // Comment handling functions
+    const handleCommentClick = async (commentId: string, allCommentIds?: string[]) => {
+        if (!commentId) return;
+
+        try {
+            setCommentLoading(true);
+
+            // Always load just the clicked comment initially for fast response
+            const comment = await getCommentDetail(commentId, [currentMonth]);
+            setSelectedComment(comment);
+            setCurrentCommentIndex(0);
+            setCommentModalOpen(true);
+
+            // Store the comment IDs for potential future loading
+            if (allCommentIds && allCommentIds.length > 1) {
+                setAllComments([comment]); // Start with just the first comment
+                // Store the remaining IDs for lazy loading
+                setRemainingCommentIds(allCommentIds.filter(id => id !== commentId));
+            } else {
+                setAllComments([comment]);
+                setRemainingCommentIds([]);
+            }
+        } catch (err: unknown) {
+            setError(handleApiError(err));
+        } finally {
+            setCommentLoading(false);
+        }
+    };
+
+    const handleCommentNavigation = async (direction: 'prev' | 'next') => {
+        if (allComments.length <= 1 && remainingCommentIds.length === 0) return;
+
+        let newIndex = currentCommentIndex;
+        if (direction === 'prev') {
+            newIndex = Math.max(0, currentCommentIndex - 1);
+            setCurrentCommentIndex(newIndex);
+            setSelectedComment(allComments[newIndex]);
+        } else {
+            // Next - check if we need to load more comments
+            if (currentCommentIndex === allComments.length - 1 && remainingCommentIds.length > 0) {
+                // Load the next comment
+                try {
+                    setCommentLoading(true);
+                    const nextCommentId = remainingCommentIds[0];
+                    const nextComment = await getCommentDetail(nextCommentId, [currentMonth]);
+
+                    setAllComments(prev => [...prev, nextComment]);
+                    setRemainingCommentIds(prev => prev.slice(1));
+                    setCurrentCommentIndex(allComments.length);
+                    setSelectedComment(nextComment);
+                } catch (err: unknown) {
+                    setError(handleApiError(err));
+                } finally {
+                    setCommentLoading(false);
+                }
+            } else {
+                // Navigate to existing comment
+                newIndex = Math.min(allComments.length - 1, currentCommentIndex + 1);
+                setCurrentCommentIndex(newIndex);
+                setSelectedComment(allComments[newIndex]);
+            }
+        }
+    };
+
+    const handleCloseCommentModal = () => {
+        setCommentModalOpen(false);
+        setSelectedComment(null);
+        setAllComments([]);
+        setCurrentCommentIndex(0);
+        setRemainingCommentIds([]);
+    };
 
     // Load validation data
     const loadValidationData = useCallback(async () => {
@@ -120,11 +216,7 @@ const BrushValidation: React.FC = () => {
         setCurrentPage(1);
     }, []);
 
-    // Handle system change
-    const handleSystemChange = useCallback((system: SystemType) => {
-        setSelectedSystem(system);
-        setOverrideState(null);
-    }, []);
+
 
     // Handle sort change
     const handleSortChange = useCallback((sort: SortType) => {
@@ -145,19 +237,16 @@ const BrushValidation: React.FC = () => {
             setActionInProgress((prev) => new Set(prev).add(entryIndex));
 
             try {
-                const systemChoice =
-                    entry.system_used === 'legacy'
-                        ? {
-                            strategy: 'legacy',
-                            score: null,
-                            result: entry.matched || {},
-                        }
-                        : entry.best_result || { strategy: '', score: 0, result: {} };
+                const systemChoice = {
+                    strategy: entry.matched?.strategy || '',
+                    score: entry.matched?.score || 0,
+                    result: entry.matched || {},
+                };
 
                 await recordBrushValidationAction({
-                    input_text: entry.input_text,
+                    input_text: entry.normalized_text || entry.input_text, // Use normalized for operations
                     month: currentMonth,
-                    system_used: entry.system_used,
+                    system_used: 'scoring',
                     action: 'validate',
                     system_choice: systemChoice,
                     user_choice: systemChoice,
@@ -184,18 +273,22 @@ const BrushValidation: React.FC = () => {
     const handleOverride = useCallback(
         async (entryIndex: number, strategyIndex: number) => {
             const entry = entries[entryIndex];
-            if (!entry || !currentMonth || entry.system_used === 'legacy') return;
+            if (!entry || !currentMonth) return;
 
             setActionInProgress((prev) => new Set(prev).add(entryIndex));
 
             try {
-                const systemChoice = entry.best_result || { strategy: '', score: 0, result: {} };
+                const systemChoice = {
+                    strategy: entry.matched?.strategy || '',
+                    score: entry.matched?.score || 0,
+                    result: entry.matched || {},
+                };
                 const userChoice = entry.all_strategies[strategyIndex];
 
                 await recordBrushValidationAction({
-                    input_text: entry.input_text,
+                    input_text: entry.normalized_text || entry.input_text, // Use normalized for operations
                     month: currentMonth,
-                    system_used: entry.system_used,
+                    system_used: 'scoring',
                     action: 'override',
                     system_choice: systemChoice,
                     user_choice: userChoice,
@@ -241,7 +334,7 @@ const BrushValidation: React.FC = () => {
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold">Brush Validation</h1>
                 <Badge variant="outline" className="text-sm">
-                    Multi-System Validation Interface
+                    Scoring System Validation Interface
                 </Badge>
             </div>
 
@@ -257,29 +350,8 @@ const BrushValidation: React.FC = () => {
 
             {/* Controls */}
             {currentMonth && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* System Selection */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-sm">System</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                            <Button
-                                variant={selectedSystem === 'legacy' ? 'default' : 'outline'}
-                                onClick={() => handleSystemChange('legacy')}
-                                className="w-full"
-                            >
-                                Legacy System
-                            </Button>
-                            <Button
-                                variant={selectedSystem === 'scoring' ? 'default' : 'outline'}
-                                onClick={() => handleSystemChange('scoring')}
-                                className="w-full"
-                            >
-                                Scoring System
-                            </Button>
-                        </CardContent>
-                    </Card>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
 
                     {/* Sort Options */}
                     <Card>
@@ -304,15 +376,13 @@ const BrushValidation: React.FC = () => {
                             >
                                 Sort by Validated
                             </Button>
-                            {selectedSystem === 'scoring' && (
-                                <Button
-                                    variant={sortBy === 'ambiguity' ? 'default' : 'outline'}
-                                    onClick={() => handleSortChange('ambiguity')}
-                                    className="w-full"
-                                >
-                                    Sort by Ambiguity
-                                </Button>
-                            )}
+                            <Button
+                                variant={sortBy === 'ambiguity' ? 'default' : 'outline'}
+                                onClick={() => handleSortChange('ambiguity')}
+                                className="w-full"
+                            >
+                                Sort by Ambiguity
+                            </Button>
                         </CardContent>
                     </Card>
 
@@ -396,13 +466,17 @@ const BrushValidation: React.FC = () => {
                         <Card key={index} className="relative">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="text-base">{entry.input_text}</CardTitle>
+                                    <div>
+                                        <CardTitle className="text-base">{entry.input_text}</CardTitle>
+                                        {entry.normalized_text && entry.normalized_text !== entry.input_text && (
+                                            <div className="text-sm text-gray-500 mt-1">
+                                                Normalized: {entry.normalized_text}
+                                            </div>
+                                        )}
+                                    </div>
                                     <div className="flex items-center gap-2">
-                                        <Badge variant={entry.system_used === 'legacy' ? 'secondary' : 'default'}>
-                                            {entry.system_used === 'legacy' ? 'Legacy System' : 'Scoring System'}
-                                        </Badge>
-                                        {entry.system_used === 'scoring' && entry.best_result && (
-                                            <Badge variant="outline">Score: {entry.best_result.score}</Badge>
+                                        {entry.matched && entry.matched.score && (
+                                            <Badge variant="outline">Score: {entry.matched.score}</Badge>
                                         )}
                                     </div>
                                 </div>
@@ -413,100 +487,139 @@ const BrushValidation: React.FC = () => {
                                     {/* System Results */}
                                     <div>
                                         <h4 className="font-medium mb-2">System Result:</h4>
-                                        {entry.system_used === 'legacy' ? (
-                                            <div className="text-sm space-y-1">
-                                                <div>
-                                                    <span className="font-medium">Match Type:</span> {entry.match_type || 'Unknown'}
-                                                </div>
-                                                {entry.matched ? (
-                                                    <>
+                                        <div className="text-sm space-y-1">
+                                            {entry.matched ? (
+                                                <>
+                                                    <div>
+                                                        <span className="font-medium">Strategy:</span> {entry.matched.strategy || 'Unknown'}
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-medium">Score:</span> {entry.matched.score || 'Unknown'}
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-medium">Brand:</span> {entry.matched.brand || 'Unknown'}
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-medium">Model:</span> {entry.matched.model || 'Unknown'}
+                                                    </div>
+                                                    {entry.matched.handle && (
                                                         <div>
-                                                            <span className="font-medium">Brand:</span> {entry.matched.brand}
+                                                            <span className="font-medium">Handle:</span>{' '}
+                                                            {entry.matched.handle.brand} {entry.matched.handle.model}
                                                         </div>
+                                                    )}
+                                                    {entry.matched.knot && (
                                                         <div>
-                                                            <span className="font-medium">Model:</span> {entry.matched.model}
+                                                            <span className="font-medium">Knot:</span> {entry.matched.knot.brand}{' '}
+                                                            {entry.matched.knot.model}
+                                                            {entry.matched.knot.fiber && ` (${entry.matched.knot.fiber})`}
                                                         </div>
-                                                        {entry.matched.handle && (
-                                                            <div>
-                                                                <span className="font-medium">Handle:</span> {entry.matched.handle.brand}{' '}
-                                                                {entry.matched.handle.model}
-                                                            </div>
-                                                        )}
-                                                        {entry.matched.knot && (
-                                                            <div>
-                                                                <span className="font-medium">Knot:</span> {entry.matched.knot.brand}{' '}
-                                                                {entry.matched.knot.model}
-                                                                {entry.matched.knot.fiber && ` (${entry.matched.knot.fiber})`}
-                                                            </div>
-                                                        )}
-                                                    </>
-                                                ) : (
-                                                    <div>No match found</div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className="text-sm space-y-1">
-                                                {entry.best_result ? (
-                                                    <>
-                                                        <div>
-                                                            <span className="font-medium">Strategy:</span> {entry.best_result.strategy}
-                                                        </div>
-                                                        <div>
-                                                            <span className="font-medium">Score:</span> {entry.best_result.score}
-                                                        </div>
-                                                        <div>
-                                                            <span className="font-medium">Brand:</span> {entry.best_result.result.brand}
-                                                        </div>
-                                                        <div>
-                                                            <span className="font-medium">Model:</span> {entry.best_result.result.model}
-                                                        </div>
-                                                        {entry.best_result.result.handle && (
-                                                            <div>
-                                                                <span className="font-medium">Handle:</span>{' '}
-                                                                {entry.best_result.result.handle.brand} {entry.best_result.result.handle.model}
-                                                            </div>
-                                                        )}
-                                                        {entry.best_result.result.knot && (
-                                                            <div>
-                                                                <span className="font-medium">Knot:</span> {entry.best_result.result.knot.brand}{' '}
-                                                                {entry.best_result.result.knot.model}
-                                                                {entry.best_result.result.knot.fiber && ` (${entry.best_result.result.knot.fiber})`}
-                                                            </div>
-                                                        )}
-                                                    </>
-                                                ) : (
-                                                    <div>No match found</div>
-                                                )}
-                                            </div>
-                                        )}
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <div>No match found</div>
+                                            )}
+                                        </div>
                                     </div>
 
-                                    {/* Alternative Strategies (Scoring System Only) */}
-                                    {entry.system_used === 'scoring' && entry.all_strategies.length > 0 && (
+                                    {/* Alternative Strategies */}
+                                    {entry.all_strategies.length > 0 && (
                                         <div>
                                             <h4 className="font-medium mb-2">Alternative Strategies:</h4>
-                                            <div className="text-sm space-y-1 max-h-32 overflow-y-auto">
-                                                {entry.all_strategies.map((strategy, strategyIndex) => (
-                                                    <div
-                                                        key={strategyIndex}
-                                                        className={`p-2 rounded ${overrideState?.entryIndex === index && overrideState?.selectedStrategy === strategyIndex
-                                                                ? 'bg-blue-50 border border-blue-200'
-                                                                : 'bg-gray-50'
-                                                            }`}
-                                                    >
-                                                        <div className="flex justify-between items-center">
-                                                            <span className="font-medium">{strategy.strategy}</span>
-                                                            <Badge variant="outline">Score: {strategy.score}</Badge>
+                                            <div className="text-sm space-y-2 max-h-64 overflow-y-auto">
+                                                {entry.all_strategies
+                                                    .filter((strategy) => {
+                                                        // Filter out the winning strategy - compare result data to identify the winner
+                                                        if (!strategy.result || !entry.matched) return true;
+
+                                                        // Check if this strategy's result matches the winning result
+                                                        const isWinner =
+                                                            strategy.result.brand === entry.matched.brand &&
+                                                            strategy.result.model === entry.matched.model &&
+                                                            strategy.strategy === entry.matched.strategy &&
+                                                            strategy.score === entry.matched.score;
+
+                                                        return !isWinner;
+                                                    })
+                                                    .map((strategy, strategyIndex) => (
+                                                        <div
+                                                            key={strategyIndex}
+                                                            className={`p-3 rounded border ${overrideState?.entryIndex === index && overrideState?.selectedStrategy === strategyIndex
+                                                                ? 'bg-blue-50 border-blue-200'
+                                                                : 'bg-gray-50 border-gray-200'
+                                                                }`}
+                                                        >
+                                                            <div className="flex justify-between items-center mb-2">
+                                                                <span className="font-medium capitalize">
+                                                                    {strategy.strategy.replace(/_/g, ' ')}
+                                                                </span>
+                                                                <Badge variant="outline" className="text-xs">
+                                                                    Score: {strategy.score}
+                                                                </Badge>
+                                                            </div>
+                                                            {strategy.result && (
+                                                                <div className="space-y-1 text-gray-700">
+                                                                    <div className="text-xs">
+                                                                        <span className="font-medium">Brand:</span> {strategy.result.brand || 'N/A'}
+                                                                    </div>
+                                                                    <div className="text-xs">
+                                                                        <span className="font-medium">Model:</span> {strategy.result.model || 'N/A'}
+                                                                    </div>
+                                                                    {strategy.result.handle && (
+                                                                        <div className="text-xs">
+                                                                            <span className="font-medium">Handle:</span>{' '}
+                                                                            {strategy.result.handle.brand} {strategy.result.handle.model}
+                                                                        </div>
+                                                                    )}
+                                                                    {strategy.result.knot && (
+                                                                        <div className="text-xs">
+                                                                            <span className="font-medium">Knot:</span> {strategy.result.knot.brand}{' '}
+                                                                            {strategy.result.knot.model}
+                                                                            {strategy.result.knot.fiber && ` (${strategy.result.knot.fiber})`}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    ))}
                                             </div>
                                         </div>
                                     )}
                                 </div>
 
+                                {/* Comment IDs Section */}
+                                {entry.comment_ids && entry.comment_ids.length > 0 && (
+                                    <div className="border-t pt-4">
+                                        <h4 className="font-medium mb-2 flex items-center gap-2">
+                                            <MessageSquare className="h-4 w-4" />
+                                            Comment References ({entry.comment_ids.length})
+                                        </h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {entry.comment_ids.map((commentId, commentIndex) => (
+                                                <Button
+                                                    key={commentIndex}
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handleCommentClick(commentId, entry.comment_ids)}
+                                                    disabled={commentLoading}
+                                                    className="text-xs h-8 px-2"
+                                                >
+                                                    {commentLoading ? (
+                                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                                    ) : (
+                                                        <>
+                                                            <MessageSquare className="h-3 w-3 mr-1" />
+                                                            {commentId}
+                                                        </>
+                                                    )}
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Override Strategy Selection */}
-                                {overrideState?.entryIndex === index && entry.system_used === 'scoring' && (
+                                {overrideState?.entryIndex === index && (
                                     <div className="border-t pt-4">
                                         <h4 className="font-medium mb-2">Select Alternative Strategy:</h4>
                                         <div className="space-y-2">
@@ -563,7 +676,7 @@ const BrushValidation: React.FC = () => {
                                             )}
                                             Validate
                                         </Button>
-                                        {entry.system_used === 'scoring' && entry.all_strategies.length > 0 && (
+                                        {entry.all_strategies.length > 0 && (
                                             <Button
                                                 variant="outline"
                                                 onClick={() =>
@@ -625,7 +738,7 @@ const BrushValidation: React.FC = () => {
                     <CardContent className="p-6 text-center">
                         <div className="text-gray-500">
                             {entries.length === 0
-                                ? 'No validation data found for the selected month and system.'
+                                ? 'No validation data found for the selected month.'
                                 : 'No entries match the current filter criteria.'}
                         </div>
                     </CardContent>
@@ -639,6 +752,19 @@ const BrushValidation: React.FC = () => {
                         <div className="text-gray-500">Please select a month to begin validation.</div>
                     </CardContent>
                 </Card>
+            )}
+
+            {/* Comment Modal */}
+            {selectedComment && (
+                <CommentModal
+                    comment={selectedComment}
+                    isOpen={commentModalOpen}
+                    onClose={handleCloseCommentModal}
+                    comments={allComments}
+                    currentIndex={currentCommentIndex}
+                    onNavigate={handleCommentNavigation}
+                    remainingCommentIds={remainingCommentIds}
+                />
             )}
         </div>
     );
