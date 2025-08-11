@@ -316,7 +316,8 @@ def process_month(
                         original_text = value.original
                         normalized_text = value.original
 
-                    converted_record[key] = {
+                    # Base fields for all product types
+                    base_fields = {
                         "original": original_text,
                         "normalized": normalized_text,
                         "matched": value.matched,
@@ -324,6 +325,16 @@ def process_month(
                         "pattern": value.pattern,
                         "strategy": getattr(value, "strategy", None),
                     }
+
+                    # Add brush-specific strategy scoring fields only for brush records
+                    if key == "brush":
+                        base_fields.update(
+                            {
+                                "all_strategies": getattr(value, "all_strategies", None),
+                            }
+                        )
+
+                    converted_record[key] = base_fields
                 else:
                     converted_record[key] = value
             # Update the record in the list

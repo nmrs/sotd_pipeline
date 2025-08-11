@@ -25,6 +25,10 @@ class MatchResult:
     priority: Optional[int] = None  # 1 = highest, 2 = medium, 3 = lowest
     score: Optional[float] = None  # Calculated score for this result
 
+    # Strategy persistence fields (Phase 4.1)
+    best_result: Optional[Dict[str, Any]] = None  # Best strategy result
+    all_strategies: Optional[List[Dict[str, Any]]] = None  # All strategy results
+
     @property
     def matched_bool(self) -> bool:
         """Check if this represents a successful match."""
@@ -231,6 +235,8 @@ def create_match_result(
     match_type: Optional[str],
     pattern: Optional[str],
     strategy: Optional[str] = None,
+    best_result: Optional[Dict[str, Any]] = None,
+    all_strategies: Optional[List[Dict[str, Any]]] = None,
 ) -> "MatchResult":
     """Create a MatchResult from legacy match data."""
     # This is a compatibility function for existing code
@@ -241,6 +247,8 @@ def create_match_result(
         match_type=match_type,
         pattern=pattern,
         strategy=strategy,
+        best_result=best_result,
+        all_strategies=all_strategies,
     )
 
 

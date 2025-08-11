@@ -189,9 +189,7 @@ class BrushScoringMatcher:
         )
 
         # Import component strategies for Phase 3.3
-        from sotd.match.brush_matching_strategies.medium_priority_automated_split_strategy import (
-            MediumPriorityAutomatedSplitStrategy,
-        )
+        # Removed unused import - strategy replaced by AutomatedSplitStrategy
         from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
             OmegaSemogueBrushMatchingStrategy,
         )
@@ -253,9 +251,8 @@ class BrushScoringMatcher:
             CorrectCompleteBrushWrapperStrategy,
             CorrectSplitBrushWrapperStrategy,
         )
-        from sotd.match.brush_matching_strategies.high_priority_automated_split_strategy import (
-            HighPriorityAutomatedSplitStrategy,
-        )
+
+        # Removed unused import - strategy replaced by AutomatedSplitStrategy
 
         # Import individual brush strategies for Phase 3.2
         from sotd.match.brush_matching_strategies.known_brush_strategy import (
@@ -290,15 +287,13 @@ class BrushScoringMatcher:
             CorrectSplitBrushWrapperStrategy(legacy_matcher),
             # Priority 2: known_split
             KnownSplitWrapperStrategy(legacy_matcher),
-            # Priority 3: high_priority_automated_split
-            HighPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
+            # Priority 3: high_priority_automated_split (REMOVED - replaced by AutomatedSplitStrategy)
             # Priority 4: individual brush strategies
             KnownBrushMatchingStrategy(catalog_data.get("known_brushes", {}), self.handle_matcher),
             OmegaSemogueBrushMatchingStrategy(),
             ZenithBrushMatchingStrategy(),
             OtherBrushMatchingStrategy(catalog_data.get("other_brushes", {})),
-            # Priority 6: medium_priority_automated_split
-            MediumPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
+            # Priority 6: medium_priority_automated_split (REMOVED - replaced by AutomatedSplitStrategy)
         ]
 
         return strategies
@@ -595,8 +590,36 @@ class BrushScoringMatcher:
             # Get the best result based on score
             best_result = self.scoring_engine.get_best_result(scored_results)
 
-            # Process and return the result
-            return self.result_processor.process_result(best_result, value)
+            # Phase 4.1: Capture all strategy results for persistence
+            # Convert strategy results to serializable format for JSON storage
+            all_strategies = []
+            for result in strategy_results:
+                strategy_data = {
+                    "strategy": result.strategy,
+                    "score": result.score,
+                    "result": result.matched,
+                    "match_type": result.match_type,
+                    "pattern": result.pattern,
+                }
+                all_strategies.append(strategy_data)
+
+            # Note: We no longer create separate best_result_data since strategy and score
+            # are now added directly to the matched data
+
+            # Process and return the result with strategy data
+            final_result = self.result_processor.process_result(best_result, value)
+
+            # Add strategy persistence fields
+            if final_result:
+                final_result.all_strategies = all_strategies
+
+                # Add strategy and score directly to the matched data instead of
+                # separate best_result
+                if final_result.matched and best_result:
+                    final_result.matched["strategy"] = best_result.strategy
+                    final_result.matched["score"] = best_result.score
+
+            return final_result
 
         except Exception as e:
             # Log error but don't fail completely
