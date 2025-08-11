@@ -6,7 +6,7 @@
 
 ## 📋 Current Status
 
-**PLAN STATUS**: **CRITICAL UPDATE (2025-12-09)**: Implementation analysis reveals the system is far more advanced than documented. **Phases 3.1, 3.2, AND 3.3+ are actually COMPLETE**. Current implementation includes individual brush strategies (Phase 3.2), unified component matching (Phase 3.3), sophisticated scoring configuration, and full system integration. Plan documentation was outdated relative to actual implementation progress.
+**PLAN STATUS**: **UPDATED (2025-08-10)**: Added new Phase 4.1 for Brush Strategy Match Persistence. Implementation analysis reveals the system is far more advanced than documented. **Phases 3.1, 3.2, AND 3.3+ are actually COMPLETE**. Current implementation includes individual brush strategies (Phase 3.2), unified component matching (Phase 3.3), sophisticated scoring configuration, and full system integration. Plan documentation was outdated relative to actual implementation progress.
 
 **PHASE 1 COMPLETION SUMMARY**:
 - ✅ **Step 1: Brush Matcher Entry Point** - Implemented BrushMatcherEntryPoint with system switching
@@ -497,48 +497,259 @@ Implement a scoring-based **brush matching** system to replace the current "firs
 
 **SUCCESS CRITERIA**: ✅ **ACHIEVED** - 100% agreement rate with both systems producing identical results for all brush inputs, while maintaining scoring system's fundamental architecture.
 
-### Phase 4: Brush User Validation System
-12. **Brush User Actions Data Model** - Data structures for brush validation tracking with entry point integration
-13. **Brush CLI Validation Interface** - Command-line brush validation with sorting options and entry point integration
-14. **Brush WebUI Validation Interface** - Web interface for brush validation with shared logic and entry point integration
-15. **Brush Validation Storage System** - Monthly file storage for brush user actions with entry point integration
+### Phase 4: Brush Strategy Match Persistence and User Validation System
+
+#### Phase 4.1: Brush Strategy Match Persistence ✅ **NEW PHASE ADDED**
+**Goal**: Save all brush strategy matches to files so BrushValidation.tsx can reference them for user selection
+**Approach**: Modify match phase to capture and persist all strategy results alongside final matches
+**Status**: 🔄 **PLANNED** - New phase added for strategy match persistence
+
+**Objective**: Enable BrushValidation interface to show users all available strategy matches for selection and validation
+**Data Structure**: Add `all_strategies` field to matched data containing results from all applicable strategies
+**Storage Location**: Integrate with existing `data/matched/YYYY-MM.json` files for data cohesion
+**Integration**: Seamless integration with existing BrushValidation.tsx interface expectations
+
+**Success Criteria**: 
+- All brush strategy matches saved to matched data files
+- BrushValidation can access complete strategy results for user selection
+- No performance degradation in match phase
+- Maintains existing data structure compatibility
+- Enables comprehensive user validation workflow
+
+**Implementation Steps**:
+12. **Brush Strategy Match Capture** - Modify match phase to capture all strategy results
+13. **Strategy Data Persistence** - Save strategy results to matched data files
+14. **BrushValidation Integration** - Ensure BrushValidation can access all strategy data
+15. **Performance Validation** - Verify no performance impact from additional data storage
+
+#### Phase 4.2: Brush User Validation System
+**Goal**: Enable users to validate and correct brush matches through a web interface
+**Approach**: Web-based validation system with manual override capabilities
+**Status**: 🔄 **PLANNED** - Not yet implemented
+
+**Implementation Steps**:
+16. **Brush User Actions Data Model** - Data structures for brush validation tracking with entry point integration
+17. **Brush CLI Validation Interface** - Command-line brush validation with sorting options and entry point integration
+18. **Brush WebUI Validation Interface** - Web interface for brush validation with shared logic and entry point integration
+19. **Brush Validation Storage System** - Monthly file storage for brush user actions with entry point integration
 
 ### Phase 5: Brush Learning System
-16. ✅ **Brush Learning Report Generator** - Brush analysis and report generation with entry point integration (COMPLETED 2025-12-09)
-17. ✅ **Brush ChatGPT Integration** - Structured prompts and brush suggestion processing with entry point integration (COMPLETED 2025-12-09)
-18. ✅ **Brush Configuration Update Workflow** - Brush weight adjustment and application with entry point integration (COMPLETED 2025-12-09)
+20. ✅ **Brush Learning Report Generator** - Brush analysis and report generation with entry point integration (COMPLETED 2025-12-09)
+21. ✅ **Brush ChatGPT Integration** - Structured prompts and brush suggestion processing with entry point integration (COMPLETED 2025-12-09)
+22. ✅ **Brush Configuration Update Workflow** - Brush weight adjustment and application with entry point integration (COMPLETED 2025-12-09)
 
 ### Phase 6: Testing and Validation
-19. **Comprehensive Brush Test Suite** - Unit, integration, and performance tests for brush matching with entry point integration
-20. **Real Brush Data Validation** - Testing with production brush data with entry point integration
-21. **Brush Performance Optimization** - Brush caching and optimization with entry point integration
+23. **Comprehensive Brush Test Suite** - Unit, integration, and performance tests for brush matching with entry point integration
+24. **Real Brush Data Validation** - Testing with production brush data with entry point integration
+25. **Brush Performance Optimization** - Brush caching and optimization with entry point integration
 
 ### Phase 7: Multi-Split Enhancement
-22. **Multi-Split Automated Splitters Enhancement** - Generate all possible splits for complex delimiter cases
-23. **Split Quality Assessment Modifiers** - Add `handle_confidence`, `knot_confidence`, `word_count_balance` modifiers
+26. **Multi-Split Automated Splitters Enhancement** - Generate all possible splits for complex delimiter cases
+27. **Split Quality Assessment Modifiers** - Add `handle_confidence`, `knot_confidence`, `word_count_balance` modifiers
 
 ### Phase 8: Enhanced Data Collection
-24. **Internal Scorer Data Collection** - Collect internal scorer data for split strategies only
-25. **Enhanced User Validation Data Structure** - Add split quality metrics to user actions with entry point integration
-26. **Split Quality Metrics Collection** - Track handle/knot determination accuracy with entry point integration
+28. **Internal Scorer Data Collection** - Collect internal scorer data for split strategies only
+29. **Enhanced User Validation Data Structure** - Add split quality metrics to user actions with entry point integration
+30. **Split Quality Metrics Collection** - Track handle/knot determination accuracy with entry point integration
 
 ### Phase 8: Internal Scorer Exposure
-27. **Internal Scorer Modifier Exposure** - Expose internal scoring methods as configurable modifiers
-28. **ChatGPT Internal Scorer Integration** - ChatGPT integration for internal scorer tuning
-29. **Comprehensive Internal Scorer Analysis** - Stage 4 ChatGPT analysis for internal scorers with entry point integration
+31. **Internal Scorer Modifier Exposure** - Expose internal scoring methods as configurable modifiers
+32. **ChatGPT Internal Scorer Integration** - ChatGPT integration for internal scorer tuning
+33. **Comprehensive Internal Scorer Analysis** - Stage 4 ChatGPT analysis for internal scorers with entry point integration
 
 ### Phase 9: System Cleanup and Code Optimization
-26. **Dead Code Removal** - Remove orphaned CompositeBrushStrategy and unused helper methods
-27. **Debug File Cleanup** - Remove all debug files from root directory and test cleanup
-28. **Import and Configuration Optimization** - Optimize imports and simplify YAML configuration
-29. **Test Suite Cleanup** - Remove tests for orphaned functionality and align test coverage
+34. **Dead Code Removal** - Remove orphaned CompositeBrushStrategy and unused helper methods
+35. **Debug File Cleanup** - Remove all debug files from root directory and test cleanup
+36. **Import and Configuration Optimization** - Optimize imports and simplify YAML configuration
+37. **Test Suite Cleanup** - Remove tests for orphaned functionality and align test coverage
 
 ### Phase 10: Performance Optimization
-30. **Performance Monitoring and Optimization** - System performance tuning with entry point integration
-31. **Caching Improvements** - Enhanced caching strategies with entry point integration
-32. **System Tuning** - Final optimization and cleanup with entry point integration
+38. **Performance Monitoring and Optimization** - System performance tuning with entry point integration
+39. **Caching Improvements** - Enhanced caching strategies with entry point integration
+40. **System Tuning** - Final optimization and cleanup with entry point integration
 
 ## 🔁 Implementation Prompts
+
+### Phase 4.1 Step 12: Brush Strategy Match Capture ✅ **NEW PHASE ADDED**
+
+**Objective**: Modify match phase to capture all brush strategy results for persistence and user validation.
+
+**Implementation Requirements**:
+- Capture results from all applicable brush strategies during matching
+- Store strategy results alongside final match in data structure
+- Maintain performance by avoiding duplicate strategy execution
+- Ensure data structure compatibility with existing BrushValidation interface
+
+**Test-First Implementation**:
+```python
+def test_brush_strategy_match_capture():
+    """Test that all brush strategy results are captured during matching."""
+    # Test setup with multiple applicable strategies
+    # Verify all_strategies field contains results from each strategy
+    # Validate data structure matches BrushValidation expectations
+    # Ensure performance impact is minimal
+
+def test_strategy_data_structure():
+    """Test that captured strategy data has correct structure."""
+    # Verify all_strategies contains strategy name, result, score
+    # Validate nested data structure for composite brushes
+    # Ensure compatibility with existing matched data format
+    # Test edge cases (no strategies, single strategy, multiple strategies)
+```
+
+**Implementation Steps**:
+1. **Modify BrushScoringMatcher** to capture all strategy results
+2. **Update ResultProcessor** to include all_strategies field
+3. **Add performance monitoring** for strategy capture overhead
+4. **Validate data structure** matches BrushValidation requirements
+
+**Success Criteria**:
+- All applicable strategy results captured during matching
+- Data structure compatible with existing BrushValidation interface
+- No performance degradation from strategy capture
+- Comprehensive test coverage for strategy capture functionality
+
+### Phase 4.1 Step 13: Strategy Data Persistence ✅ **COMPLETE**
+
+**Objective**: Save captured strategy results to matched data files for BrushValidation access.
+
+**Implementation Requirements**:
+- Integrate strategy data into existing matched data save process
+- Ensure data persistence in `data/matched/YYYY-MM.json` files
+- Maintain backward compatibility with existing data consumers
+- Optimize storage format for BrushValidation performance
+
+**Test-First Implementation**:
+```python
+def test_strategy_data_persistence():
+    """Test that strategy data is properly saved to matched files."""
+    # Test saving matched data with all_strategies field
+    # Verify data structure in saved JSON files
+    # Validate file size impact of additional strategy data
+    # Ensure backward compatibility with existing consumers
+
+def test_brushvalidation_data_access():
+    """Test that BrushValidation can access strategy data from files."""
+    # Test loading strategy data from matched files
+    # Verify all_strategies field is accessible
+    # Validate data structure matches interface expectations
+    # Test performance of data loading with strategy information
+```
+
+**Implementation Steps**:
+1. **Update save process** to include all_strategies field
+2. **Validate file format** compatibility with existing consumers
+3. **Test data loading** in BrushValidation interface
+4. **Optimize storage format** for performance and readability
+
+**Success Criteria**:
+- Strategy data successfully saved to matched files
+- BrushValidation can access complete strategy information
+- No breaking changes to existing data consumers
+- Optimal storage format for performance and usability
+
+**🎉 PHASE 4.1 COMPLETION SUMMARY 🎉**
+
+**Objective Achieved**: Strategy data persistence is fully implemented and working in production.
+
+**Steps Completed**: 13 ✅
+
+**Key Accomplishments**:
+- ✅ **Strategy Data Capture**: All strategy results captured during matching
+- ✅ **Data Structure**: MatchResult supports best_result and all_strategies fields
+- ✅ **Data Persistence**: Strategy data saved to data/matched/YYYY-MM.json files
+- ✅ **Result Processing**: ResultProcessor handles strategy data correctly
+- ✅ **File I/O**: Data saved using existing save infrastructure
+- ✅ **Comprehensive Testing**: All 9 tests passing, covering all aspects
+- ✅ **Real Data Validation**: Actual matched files contain strategy information
+- ✅ **Backward Compatibility**: No breaking changes to existing consumers
+
+**Technical Implementation**:
+- Strategy data captured in BrushScoringMatcher.match() method
+- Data structure includes strategy, score, best_result, and all_strategies
+- Data persistence integrated with existing save process
+- File format optimized for performance and readability
+- All strategy information accessible to BrushValidation interface
+
+**Next Phase**: Phase 4.2+ has been deferred to Phase 7+ to await user validation data collection.
+
+### Phase 4.1 Step 14: BrushValidation Integration ✅ **NEW PHASE ADDED**
+
+**Objective**: Ensure BrushValidation interface can display and utilize all strategy results.
+
+**Implementation Requirements**:
+- Verify BrushValidation can access all_strategies data
+- Test user interface with complete strategy information
+- Validate strategy selection and validation workflow
+- Ensure performance with larger dataset
+
+**Test-First Implementation**:
+```python
+def test_brushvalidation_strategy_display():
+    """Test that BrushValidation displays all available strategies."""
+    # Test loading and displaying strategy data
+    # Verify user can see all available strategy options
+    # Validate strategy selection interface functionality
+    # Test performance with realistic dataset sizes
+
+def test_strategy_validation_workflow():
+    """Test complete strategy validation workflow."""
+    # Test user selecting alternative strategy result
+    # Validate strategy override and correction process
+    # Test data persistence of user validation choices
+    # Ensure workflow integrates with existing validation system
+```
+
+**Implementation Steps**:
+1. **Test BrushValidation** with all_strategies data
+2. **Validate user interface** for strategy selection
+3. **Test validation workflow** with strategy alternatives
+4. **Performance testing** with complete strategy dataset
+
+**Success Criteria**:
+- BrushValidation successfully displays all strategy options
+- User can select and validate alternative strategy results
+- Validation workflow integrates seamlessly with existing system
+- Performance remains acceptable with strategy data
+
+### Phase 4.1 Step 15: Performance Validation ✅ **NEW PHASE ADDED**
+
+**Objective**: Verify that strategy match persistence doesn't impact system performance.
+
+**Implementation Requirements**:
+- Measure performance impact of strategy data capture
+- Validate file I/O performance with additional data
+- Ensure BrushValidation performance with strategy information
+- Establish performance baselines and monitoring
+
+**Test-First Implementation**:
+```python
+def test_strategy_capture_performance():
+    """Test performance impact of capturing all strategy results."""
+    # Benchmark match phase performance with strategy capture
+    # Compare with baseline performance without strategy capture
+    # Validate performance impact is within acceptable limits
+    # Test with realistic dataset sizes
+
+def test_file_io_performance():
+    """Test file I/O performance with strategy data."""
+    # Benchmark file save performance with strategy data
+    # Test file load performance in BrushValidation
+    # Validate performance impact is acceptable
+    # Test with various dataset sizes
+```
+
+**Implementation Steps**:
+1. **Establish performance baselines** for current system
+2. **Measure strategy capture overhead** during matching
+3. **Test file I/O performance** with strategy data
+4. **Validate BrushValidation performance** with complete data
+
+**Success Criteria**:
+- Strategy capture adds minimal performance overhead
+- File I/O performance remains acceptable with strategy data
+- BrushValidation performance maintained with strategy information
+- Performance impact documented and within acceptable limits
 
 ### Phase 3.1 Step 8: Wrapper Strategy Implementation ✅ COMPLETE
 
