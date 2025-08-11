@@ -58,11 +58,11 @@ describe('MismatchAnalyzerDataTable - Split Brush Removal', () => {
   };
 
   const defaultProps = {
-    items: mockItems,
+    data: mockItems,
+    field: 'brush',
     correctMatches: mockCorrectMatches,
     selectedItems: new Set<string>(),
-    onItemSelect: jest.fn(),
-    onItemDeselect: jest.fn(),
+    onItemSelection: jest.fn(),
     onCommentClick: jest.fn(),
     onBrushSplitClick: jest.fn(),
     activeRowIndex: -1,
@@ -76,7 +76,7 @@ describe('MismatchAnalyzerDataTable - Split Brush Removal', () => {
         return itemWithoutSplitBrush;
       });
 
-      render(<MismatchAnalyzerDataTable {...defaultProps} items={itemsWithoutSplitBrush} />);
+      render(<MismatchAnalyzerDataTable {...defaultProps} data={itemsWithoutSplitBrush} />);
 
       // Verify that items are displayed correctly
       expect(screen.getByText('Declaration Grooming B2')).toBeInTheDocument();
@@ -121,25 +121,25 @@ describe('MismatchAnalyzerDataTable - Split Brush Removal', () => {
 
   describe('Selection Logic', () => {
     it('should handle item selection without split_brush considerations', () => {
-      const onItemSelect = jest.fn();
+      const onItemSelection = jest.fn();
 
-      render(<MismatchAnalyzerDataTable {...defaultProps} onItemSelect={onItemSelect} />);
+      render(<MismatchAnalyzerDataTable {...defaultProps} onItemSelection={onItemSelection} />);
 
       // Click on the first row to select it
       const firstRow = screen.getByText('Declaration Grooming B2').closest('tr');
       fireEvent.click(firstRow!);
 
-      expect(onItemSelect).toHaveBeenCalledWith('1');
+      expect(onItemSelection).toHaveBeenCalledWith('brush:declaration grooming b2', true);
     });
 
     it('should handle item deselection without split_brush considerations', () => {
-      const onItemDeselect = jest.fn();
+      const onItemSelection = jest.fn();
 
       render(
         <MismatchAnalyzerDataTable
           {...defaultProps}
-          selectedItems={new Set(['1'])}
-          onItemDeselect={onItemDeselect}
+          selectedItems={new Set(['brush:declaration grooming b2'])}
+          onItemSelection={onItemSelection}
         />
       );
 
@@ -147,7 +147,7 @@ describe('MismatchAnalyzerDataTable - Split Brush Removal', () => {
       const firstRow = screen.getByText('Declaration Grooming B2').closest('tr');
       fireEvent.click(firstRow!);
 
-      expect(onItemDeselect).toHaveBeenCalledWith('1');
+      expect(onItemSelection).toHaveBeenCalledWith('brush:declaration grooming b2', false);
     });
   });
 
@@ -219,7 +219,7 @@ describe('MismatchAnalyzerDataTable - Split Brush Removal', () => {
 
   describe('Empty State Handling', () => {
     it('should handle empty items without split_brush logic', () => {
-      render(<MismatchAnalyzerDataTable {...defaultProps} items={[]} />);
+      render(<MismatchAnalyzerDataTable {...defaultProps} data={[]} />);
 
       // Verify that empty state is handled correctly
       expect(screen.getByText(/no.*items/i)).toBeInTheDocument();

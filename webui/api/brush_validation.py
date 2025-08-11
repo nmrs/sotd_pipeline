@@ -39,8 +39,8 @@ class ValidationActionRequest(BaseModel):
     @classmethod
     def validate_system_used(cls, v: str) -> str:
         """Validate system_used is valid."""
-        if v not in ["legacy", "scoring", "migrated"]:
-            raise ValueError("system_used must be 'legacy', 'scoring', or 'migrated'")
+        if v != "scoring":
+            raise ValueError("system_used must be 'scoring'")
         return v
 
     @field_validator("action")
@@ -87,8 +87,8 @@ async def get_validation_months() -> AvailableMonthsResponse:
     """Get available months for brush validation."""
     try:
         logger.info("Getting available months for brush validation")
-        months = await get_available_months()
-        return AvailableMonthsResponse(months=months)
+        available_months = await get_available_months()
+        return AvailableMonthsResponse(months=available_months.months)
     except Exception as e:
         logger.error(f"Error getting available months: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -107,7 +107,7 @@ async def get_brush_validation_data(
 
     Args:
         month: Month in YYYY-MM format
-        system: System type ('legacy' or 'scoring')
+        system: System type ('scoring')
         sort_by: Sort criteria ('unvalidated', 'validated', or 'ambiguity')
         page: Page number (1-based)
         page_size: Number of entries per page
@@ -117,14 +117,17 @@ async def get_brush_validation_data(
         raise HTTPException(status_code=400, detail="Month must be in YYYY-MM format")
 
     # Validate system
-    if system not in ["legacy", "scoring"]:
-        raise HTTPException(status_code=422, detail="System must be 'legacy' or 'scoring'")
+    if system != "scoring":
+        raise HTTPException(status_code=422, detail="System must be 'scoring'")
 
     try:
         logger.info(f"Loading brush validation data for {month}/{system}")
 
-        # Initialize CLI with default data path
-        cli = BrushValidationCLI()
+        # Initialize CLI with correct data path (relative to project root)
+        from pathlib import Path
+
+        project_root = Path(__file__).parent.parent.parent
+        cli = BrushValidationCLI(data_path=project_root / "data")
 
         # Load and sort data
         entries = cli.load_month_data(month, system)
@@ -169,11 +172,12 @@ async def get_validation_statistics(month: str) -> ValidationStatisticsResponse:
     try:
         logger.info(f"Getting validation statistics for {month}")
 
-        # Initialize CLI
-        cli = BrushValidationCLI()
+        # Initialize CLI with correct data path (relative to project root)
+        project_root = Path(__file__).parent.parent.parent
+        cli = BrushValidationCLI(data_path=project_root / "data")
 
         # Get statistics
-        stats = cli.get_validation_statistics(month)
+        stats = cli.get_validation_statistics_no_matcher(month)
 
         return ValidationStatisticsResponse(**stats)
 
@@ -195,8 +199,14 @@ async def record_validation_action(
     try:
         logger.info(f"Recording {action_data.action} action for {action_data.input_text}")
 
-        # Initialize CLI
-        cli = BrushValidationCLI()
+        # Initialize CLI with correct data path (relative to project root)
+        project_root = Path(__file__).parent.parent.parent
+        cli = BrushValidationCLI(data_path=project_root / "data")
+
+        # Get comment IDs for this input text from the matched data
+        comment_ids = cli.get_comment_ids_for_input_text(
+            action_data.input_text, action_data.month, action_data.system_used
+        )
 
         # Record the action
         if action_data.action == "validate":
@@ -207,6 +217,7 @@ async def record_validation_action(
                 system_choice=action_data.system_choice,
                 user_choice=action_data.user_choice,
                 all_brush_strategies=action_data.all_brush_strategies,
+                comment_ids=comment_ids,
             )
         elif action_data.action == "override":
             cli.user_actions_manager.record_override(
@@ -216,6 +227,7 @@ async def record_validation_action(
                 system_choice=action_data.system_choice,
                 user_choice=action_data.user_choice,
                 all_brush_strategies=action_data.all_brush_strategies,
+                comment_ids=comment_ids,
             )
         else:
             raise HTTPException(status_code=400, detail=f"Invalid action: {action_data.action}")

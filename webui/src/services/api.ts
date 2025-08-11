@@ -590,10 +590,13 @@ export const validateCatalogAgainstCorrectMatches = async (
 // Brush validation interfaces
 export interface BrushValidationEntry {
   input_text: string;
-  system_used: 'legacy' | 'scoring';
+  normalized_text?: string; // Normalized text for matching operations
+  system_used: 'scoring';
   matched?: {
     brand: string;
     model: string;
+    strategy?: string;
+    score?: number;
     handle?: {
       brand: string;
       model: string;
@@ -604,29 +607,12 @@ export interface BrushValidationEntry {
       fiber?: string;
     };
   };
-  match_type?: string;
-  best_result?: {
-    strategy: string;
-    score: number;
-    result: {
-      brand: string;
-      model: string;
-      handle?: {
-        brand: string;
-        model: string;
-      };
-      knot?: {
-        brand: string;
-        model: string;
-        fiber?: string;
-      };
-    };
-  };
   all_strategies: Array<{
     strategy: string;
     score: number;
     result: Record<string, any>;
   }>;
+  comment_ids?: string[]; // Comment IDs where this input text was found
 }
 
 export interface BrushValidationResponse {
@@ -650,7 +636,7 @@ export interface BrushValidationStatistics {
 export interface BrushValidationActionRequest {
   input_text: string;
   month: string;
-  system_used: string;
+  system_used: 'scoring';
   action: 'validate' | 'override';
   system_choice: {
     strategy: string;
@@ -677,7 +663,7 @@ export interface BrushValidationActionResponse {
 // Brush validation API functions
 export const getBrushValidationData = async (
   month: string,
-  system: 'legacy' | 'scoring',
+  system: 'scoring',
   options: {
     sortBy?: 'unvalidated' | 'validated' | 'ambiguity';
     page?: number;

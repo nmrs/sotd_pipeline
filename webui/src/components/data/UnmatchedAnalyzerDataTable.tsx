@@ -177,6 +177,8 @@ const UnmatchedAnalyzerDataTable = React.memo<UnmatchedAnalyzerDataTableProps>(
           sortable={true}
           showColumnVisibility={true}
           searchKey='item'
+          showPagination={true}
+          initialPageSize={50}
         />
       </div>
     );

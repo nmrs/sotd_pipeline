@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { render, screen } from '@testing-library/react';
 import UnmatchedAnalyzerDataTable from '../data/UnmatchedAnalyzerDataTable';
 
@@ -75,13 +75,7 @@ const mockPendingChanges = {
   'Test Razor 3': true,
 };
 
-const mockColumnWidths = {
-  filtered: 80,
-  item: 200,
-  count: 100,
-  comment_ids: 200,
-  examples: 200,
-};
+
 
 describe('UnmatchedAnalyzerDataTable', () => {
   describe('ShadCN DataTable Integration', () => {
@@ -95,7 +89,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='razor'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -112,7 +105,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='razor'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -137,7 +129,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='razor'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -159,7 +150,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='razor'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -180,7 +170,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='razor'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -198,7 +187,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='blade'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -216,7 +204,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='soap'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -234,7 +221,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='brush'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -254,7 +240,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='razor'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -271,7 +256,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='razor'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -288,7 +272,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='razor'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -305,7 +288,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='razor'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -324,7 +306,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='razor'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -344,7 +325,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='razor'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -363,7 +343,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='razor'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -389,7 +368,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='razor'
-          columnWidths={mockColumnWidths}
         />
       );
 
@@ -408,7 +386,6 @@ describe('UnmatchedAnalyzerDataTable', () => {
           onCommentClick={jest.fn()}
           commentLoading={false}
           fieldType='razor'
-          columnWidths={mockColumnWidths}
         />
       );
 
