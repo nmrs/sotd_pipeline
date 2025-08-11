@@ -20,10 +20,17 @@ class BrushValidationCLI:
         self.data_path = Path(data_path)
         self.user_actions_manager = BrushUserActionsManager(base_path=self.data_path / "learning")
 
-        # Initialize brush matcher entry point for system integration
-        from sotd.match.brush_matcher_entry import BrushMatcherEntryPoint
+        # Lazy-load brush matcher entry point only when needed
+        self._brush_entry_point = None
 
-        self.brush_entry_point = BrushMatcherEntryPoint()
+    @property
+    def brush_entry_point(self):
+        """Lazy-load brush matcher entry point when first accessed."""
+        if self._brush_entry_point is None:
+            from sotd.match.brush_matcher_entry import BrushMatcherEntryPoint
+
+            self._brush_entry_point = BrushMatcherEntryPoint()
+        return self._brush_entry_point
 
     def load_month_data(self, month: str, system: str) -> List[Dict[str, Any]]:
         """Load monthly brush data for validation.
@@ -35,45 +42,118 @@ class BrushValidationCLI:
         Returns:
             List of brush entries with system metadata
         """
+        # Use correct directories for each system
         if system == "legacy":
-            file_path = self.data_path / "matched" / f"{month}.json"
+            file_path = self.data_path / "matched_legacy" / f"{month}.json"
         elif system == "scoring":
-            file_path = self.data_path / "matched_new" / f"{month}.json"
+            file_path = self.data_path / "matched" / f"{month}.json"
         else:
             raise ValueError(f"Invalid system for single load: {system}")
 
         try:
             data = load_json_data(file_path)
-            brush_data = data.get("brush", [])
+
+            # Handle new file structure with metadata and data array
+            if "data" in data:
+                records = data.get("data", [])
+            else:
+                # Fallback to old structure
+                records = data.get("brush", [])
+
+            if not records:
+                return []
 
             # Normalize data structure for validation interface
             entries = []
-            for brush_entry in brush_data:
+            for record in records:
+                if "brush" not in record:
+                    continue
+
+                brush_entry = record["brush"]
+
+                # Get comment ID from the record
+                comment_id = record.get("id")
+                comment_ids = [comment_id] if comment_id else []
+
                 if system == "legacy":
                     entry = {
-                        "input_text": brush_entry.get("name", ""),
+                        "input_text": brush_entry.get("original", ""),
                         "system_used": "legacy",
                         "matched": brush_entry.get("matched"),
                         "match_type": brush_entry.get("match_type"),
                         "all_strategies": [],  # Legacy system doesn't track all strategies
+                        "comment_ids": comment_ids,
                     }
                 else:  # scoring system
                     entry = {
-                        "input_text": brush_entry.get("name", ""),
+                        "input_text": brush_entry.get("original", ""),
+                        "normalized_text": brush_entry.get("normalized", ""),
                         "system_used": "scoring",
-                        "best_result": brush_entry.get("best_result"),
+                        "matched": brush_entry.get("matched"),  # Now contains strategy and score
                         "all_strategies": brush_entry.get("all_strategies", []),
+                        "comment_ids": comment_ids,
                     }
 
                 entries.append(entry)
 
             return entries
 
-        except FileNotFoundError:
-            print(f"Warning: No data file found for {month} ({system} system)")
-            return []
         except Exception as e:
             print(f"Error loading data for {month} ({system}): {e}")
+            return []
+
+    def get_comment_ids_for_input_text(self, input_text: str, month: str, system: str) -> List[str]:
+        """Get comment IDs for a specific input text from the matched data.
+
+        Args:
+            input_text: The input text to search for
+            month: Month in YYYY-MM format
+            system: 'legacy' or 'scoring'
+
+        Returns:
+            List of comment IDs where this input text was found
+        """
+        # Use correct directories for each system
+        if system == "legacy":
+            file_path = self.data_path / "matched_legacy" / f"{month}.json"
+        elif system == "scoring":
+            file_path = self.data_path / "matched" / f"{month}.json"
+        else:
+            return []
+
+        try:
+            data = load_json_data(file_path)
+
+            # Handle new file structure with metadata and data array
+            if "data" in data:
+                records = data.get("data", [])
+            else:
+                # Fallback to old structure
+                records = data.get("brush", [])
+
+            if not records:
+                return []
+
+            comment_ids = []
+            normalized_input = input_text.lower().strip()
+
+            for record in records:
+                if "brush" not in record:
+                    continue
+
+                brush_entry = record["brush"]
+                brush_text = brush_entry.get("original", "").lower().strip()
+
+                # Case-insensitive comparison
+                if brush_text == normalized_input:
+                    comment_id = record.get("id")
+                    if comment_id:
+                        comment_ids.append(comment_id)
+
+            return comment_ids
+
+        except Exception as e:
+            print(f"Error getting comment IDs for {input_text}: {e}")
             return []
 
     def sort_entries(
@@ -104,14 +184,17 @@ class BrushValidationCLI:
         """Sort entries by validation status."""
         # Get existing user actions for this month
         existing_actions = self.user_actions_manager.get_monthly_actions(month)
-        validated_texts = {action.input_text for action in existing_actions}
+        # Use case-insensitive comparison like in MismatchAnalyzer
+        validated_texts = {action.input_text.lower().strip() for action in existing_actions}
 
         # Separate validated and unvalidated entries
         validated = []
         unvalidated = []
 
         for entry in entries:
-            if entry["input_text"] in validated_texts:
+            # Case-insensitive comparison
+            entry_text = entry["input_text"].lower().strip()
+            if entry_text in validated_texts:
                 validated.append(entry)
             else:
                 unvalidated.append(entry)
@@ -160,13 +243,13 @@ class BrushValidationCLI:
             if matched:
                 print(f"Result: {matched.get('brand', 'N/A')} {matched.get('model', 'N/A')}")
                 if matched.get("handle"):
-                    print(
-                        f"  Handle: {matched['handle'].get('brand', 'N/A')} {matched['handle'].get('model', 'N/A')}"
-                    )
+                    handle_brand = matched["handle"].get("brand", "N/A")
+                    handle_model = matched["handle"].get("model", "N/A")
+                    print(f"  Handle: {handle_brand} {handle_model}")
                 if matched.get("knot"):
-                    print(
-                        f"  Knot: {matched['knot'].get('brand', 'N/A')} {matched['knot'].get('model', 'N/A')}"
-                    )
+                    knot_brand = matched["knot"].get("brand", "N/A")
+                    knot_model = matched["knot"].get("model", "N/A")
+                    print(f"  Knot: {knot_brand} {knot_model}")
             else:
                 print("Result: No match")
 
@@ -178,15 +261,17 @@ class BrushValidationCLI:
 
                 result = best_result.get("result", {})
                 if result:
-                    print(f"Result: {result.get('brand', 'N/A')} {result.get('model', 'N/A')}")
+                    brand = result.get("brand", "N/A")
+                    model = result.get("model", "N/A")
+                    print(f"Result: {brand} {model}")
                     if result.get("handle"):
-                        print(
-                            f"  Handle: {result['handle'].get('brand', 'N/A')} {result['handle'].get('model', 'N/A')}"
-                        )
+                        handle_brand = result["handle"].get("brand", "N/A")
+                        handle_model = result["handle"].get("model", "N/A")
+                        print(f"  Handle: {handle_brand} {handle_model}")
                     if result.get("knot"):
-                        print(
-                            f"  Knot: {result['knot'].get('brand', 'N/A')} {result['knot'].get('model', 'N/A')}"
-                        )
+                        knot_brand = result["knot"].get("brand", "N/A")
+                        knot_model = result["knot"].get("model", "N/A")
+                        print(f"  Knot: {knot_brand} {knot_model}")
 
                 # Show all strategies for context
                 all_strategies = entry.get("all_strategies", [])
@@ -273,6 +358,7 @@ class BrushValidationCLI:
 
         input_text = entry["input_text"]
         system_used = entry["system_used"]
+        comment_ids = entry.get("comment_ids", [])
 
         # Get system choice
         if system_used == "legacy":
@@ -295,6 +381,7 @@ class BrushValidationCLI:
                 system_choice=system_choice,
                 user_choice=choice,
                 all_brush_strategies=all_strategies,
+                comment_ids=comment_ids,
             )
         elif action == "override":
             self.user_actions_manager.record_override(
@@ -304,14 +391,70 @@ class BrushValidationCLI:
                 system_choice=system_choice,
                 user_choice=choice,
                 all_brush_strategies=all_strategies,
+                comment_ids=comment_ids,
             )
 
     def get_validation_statistics(self, month: str) -> Dict[str, Union[int, float]]:
         """Get validation statistics for month."""
-        # Get total entries from data files
-        legacy_entries = self.load_month_data(month, "legacy")
+        # Only load from scoring system to avoid double-counting
+        # Legacy system contains the same data and is no longer needed
         scoring_entries = self.load_month_data(month, "scoring")
-        total_entries = len(legacy_entries) + len(scoring_entries)
+
+        # Count unique brush strings (not total records)
+        unique_brush_strings = set()
+        for entry in scoring_entries:
+            input_text = entry.get("input_text", "")
+            if input_text:
+                # Use normalized text if available, otherwise original
+                normalized_text = entry.get("normalized_text", input_text)
+                unique_brush_strings.add(normalized_text.lower())
+
+        total_entries = len(unique_brush_strings)
+
+        # Get user action statistics
+        user_stats = self.user_actions_manager.get_statistics(month)
+
+        # Calculate combined statistics
+        validated_count = user_stats["validated_count"]
+        overridden_count = user_stats["overridden_count"]
+        total_actions = validated_count + overridden_count
+        unvalidated_count = max(0, total_entries - total_actions)
+
+        validation_rate = total_actions / total_entries if total_entries > 0 else 0.0
+
+        return {
+            "total_entries": total_entries,
+            "validated_count": validated_count,
+            "overridden_count": overridden_count,
+            "total_actions": total_actions,
+            "unvalidated_count": unvalidated_count,
+            "validation_rate": validation_rate,
+        }
+
+    def get_validation_statistics_no_matcher(self, month: str) -> Dict[str, Union[int, float]]:
+        """Get validation statistics for month without loading brush matcher.
+
+        This method provides the same functionality as get_validation_statistics
+        but avoids loading the brush matcher, making it suitable for API endpoints
+        that don't need matching functionality.
+
+        Now only counts unique brush strings from the scoring system to avoid
+        double-counting the same data from legacy system.
+        """
+        # Only load from scoring system to avoid double-counting
+        # Legacy system contains the same data and is no longer needed
+        scoring_entries = self.load_month_data(month, "scoring")
+
+        # Count unique brush strings (not total records)
+        unique_brush_strings = set()
+        for entry in scoring_entries:
+            input_text = entry.get("input_text", "")
+            if input_text:
+                # Use normalized text if available, otherwise original
+                normalized_text = entry.get("normalized_text", input_text)
+                unique_brush_strings.add(normalized_text.lower())
+
+        total_entries = len(unique_brush_strings)
 
         # Get user action statistics
         user_stats = self.user_actions_manager.get_statistics(month)
@@ -364,7 +507,7 @@ class BrushValidationCLI:
 
         # Show initial statistics
         stats = self.get_validation_statistics(month)
-        print(f"\nValidation Statistics:")
+        print("\nValidation Statistics:")
         print(f"  Total entries: {stats['total_entries']}")
         print(f"  Validated: {stats['validated_count']}")
         print(f"  Overridden: {stats['overridden_count']}")
@@ -373,6 +516,7 @@ class BrushValidationCLI:
 
         # Process entries
         entries_processed = 0
+        action = "skip"  # Initialize action to avoid unbound variable
         try:
             for i, entry in enumerate(sorted_entries, 1):
                 self.display_entry(entry, i, len(sorted_entries))
@@ -395,7 +539,7 @@ class BrushValidationCLI:
 
         # Show final statistics
         final_stats = self.get_validation_statistics(month)
-        print(f"\n📊 Final Statistics:")
+        print("\n📊 Final Statistics:")
         print(f"  Entries processed: {entries_processed}")
         print(f"  Validation rate: {final_stats['validation_rate']:.1%}")
 
@@ -456,7 +600,8 @@ def main() -> None:
 
                 result = cli.run_validation_workflow(args.month, system, args.sort_by)
                 print(
-                    f"\n{system.title()} system validation: {result['entries_processed']} entries processed"
+                    f"\n{system.title()} system validation: "
+                    f"{result['entries_processed']} entries processed"
                 )
         else:
             # Validate single system

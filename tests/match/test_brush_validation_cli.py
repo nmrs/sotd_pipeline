@@ -4,9 +4,7 @@ import pytest
 import tempfile
 import shutil
 from pathlib import Path
-from datetime import datetime
-from unittest.mock import Mock, patch, MagicMock
-import sys
+from unittest.mock import Mock, patch
 import io
 
 from sotd.match.brush_validation_cli import (
@@ -38,15 +36,25 @@ class TestBrushValidationCLI:
     @patch("sotd.match.brush_validation_cli.load_json_data")
     def test_load_month_data_legacy_system(self, mock_load_json):
         """Test loading monthly data for legacy system."""
-        # Mock data structure
+        # Mock data structure - records with brush field
         mock_data = {
-            "brush": [
+            "data": [
                 {
-                    "name": "Test Brush 1",
-                    "matched": {"brand": "Test", "model": "Brush1"},
-                    "match_type": "regex",
+                    "id": "comment1",
+                    "brush": {
+                        "original": "Test Brush 1",
+                        "matched": {"brand": "Test", "model": "Brush1"},
+                        "match_type": "regex",
+                    },
                 },
-                {"name": "Test Brush 2", "matched": None, "match_type": "no_match"},
+                {
+                    "id": "comment2",
+                    "brush": {
+                        "original": "Test Brush 2",
+                        "matched": None,
+                        "match_type": "no_match",
+                    },
+                },
             ]
         }
         mock_load_json.return_value = mock_data
@@ -63,20 +71,24 @@ class TestBrushValidationCLI:
     @patch("sotd.match.brush_validation_cli.load_json_data")
     def test_load_month_data_scoring_system(self, mock_load_json):
         """Test loading monthly data for scoring system."""
-        # Mock data structure
+        # Mock data structure - records with brush field
         mock_data = {
-            "brush": [
+            "data": [
                 {
-                    "name": "Test Brush 1",
-                    "best_result": {
-                        "strategy": "dual_component",
-                        "score": 85,
-                        "result": {"brand": "Test", "model": "Brush1"},
+                    "id": "comment1",
+                    "brush": {
+                        "original": "Test Brush 1",
+                        "normalized": "test brush 1",
+                        "matched": {
+                            "strategy": "dual_component",
+                            "score": 85,
+                            "result": {"brand": "Test", "model": "Brush1"},
+                        },
+                        "all_strategies": [
+                            {"strategy": "complete_brush", "score": 45, "result": {}},
+                            {"strategy": "dual_component", "score": 85, "result": {}},
+                        ],
                     },
-                    "all_strategies": [
-                        {"strategy": "complete_brush", "score": 45, "result": {}},
-                        {"strategy": "dual_component", "score": 85, "result": {}},
-                    ],
                 }
             ]
         }
@@ -87,8 +99,8 @@ class TestBrushValidationCLI:
         assert len(result) == 1
         assert result[0]["input_text"] == "Test Brush 1"
         assert result[0]["system_used"] == "scoring"
-        assert result[0]["best_result"]["strategy"] == "dual_component"
-        assert result[0]["best_result"]["score"] == 85
+        assert result[0]["matched"]["strategy"] == "dual_component"
+        assert result[0]["matched"]["score"] == 85
 
     def test_sort_entries_by_unvalidated(self):
         """Test sorting entries by unvalidated status."""
@@ -229,6 +241,7 @@ class TestBrushValidationCLI:
             "system_used": "scoring",
             "best_result": {"strategy": "dual_component", "score": 85, "result": {}},
             "all_strategies": [],
+            "comment_ids": [],
         }
 
         with patch.object(self.cli.user_actions_manager, "record_validation") as mock_record:
@@ -241,6 +254,7 @@ class TestBrushValidationCLI:
                 system_choice=entry["best_result"],
                 user_choice=entry["best_result"],
                 all_brush_strategies=[],
+                comment_ids=[],
             )
 
     def test_record_user_action_override(self):
@@ -250,6 +264,7 @@ class TestBrushValidationCLI:
             "system_used": "scoring",
             "best_result": {"strategy": "dual_component", "score": 85, "result": {}},
             "all_strategies": [],
+            "comment_ids": [],
         }
 
         override_choice = {"strategy": "complete_brush", "score": 45, "result": {}}
@@ -264,16 +279,20 @@ class TestBrushValidationCLI:
                 system_choice=entry["best_result"],
                 user_choice=override_choice,
                 all_brush_strategies=[],
+                comment_ids=[],
             )
 
     def test_get_validation_statistics(self):
         """Test getting validation statistics."""
-        # Mock the load_month_data method to return specific counts
+        # Mock the load_month_data method to return specific data
         with patch.object(self.cli, "load_month_data") as mock_load:
-            mock_load.side_effect = lambda month, system: {
-                ("2025-08", "legacy"): [{"name": "Legacy 1"}, {"name": "Legacy 2"}],
-                ("2025-08", "scoring"): [{"name": "Scoring 1"}],
-            }.get((month, system), [])
+            # Mock scoring system data with some duplicate brush strings
+            mock_load.return_value = [
+                {"input_text": "Brush A", "normalized_text": "brush a"},
+                {"input_text": "Brush B", "normalized_text": "brush b"},
+                {"input_text": "Brush A", "normalized_text": "brush a"},  # Duplicate
+                {"input_text": "Brush C", "normalized_text": "brush c"},
+            ]
 
             # Mock user actions
             with patch.object(self.cli.user_actions_manager, "get_statistics") as mock_stats:
@@ -286,11 +305,116 @@ class TestBrushValidationCLI:
 
                 stats = self.cli.get_validation_statistics("2025-08")
 
-                assert stats["total_entries"] == 3  # 2 legacy + 1 scoring
+                # Should count unique brush strings (3 unique, not 4 total)
+                assert stats["total_entries"] == 3  # 3 unique brush strings
                 assert stats["validated_count"] == 1
                 assert stats["overridden_count"] == 1
                 assert stats["unvalidated_count"] == 1  # 3 total - 2 actions
                 assert stats["validation_rate"] == 2 / 3  # 2 actions / 3 entries
+
+    def test_get_validation_statistics_no_matcher(self):
+        """Test getting validation statistics without matcher."""
+        # Mock the load_month_data method to return specific data
+        with patch.object(self.cli, "load_month_data") as mock_load:
+            # Mock scoring system data with some duplicate brush strings
+            mock_load.return_value = [
+                {"input_text": "Brush A", "normalized_text": "brush a"},
+                {"input_text": "Brush B", "normalized_text": "brush b"},
+                {"input_text": "Brush A", "normalized_text": "brush a"},  # Duplicate
+                {"input_text": "Brush C", "normalized_text": "brush c"},
+            ]
+
+            # Mock user actions
+            with patch.object(self.cli.user_actions_manager, "get_statistics") as mock_stats:
+                mock_stats.return_value = {
+                    "total_actions": 2,
+                    "validated_count": 1,
+                    "overridden_count": 1,
+                    "validation_rate": 0.5,
+                }
+
+                stats = self.cli.get_validation_statistics_no_matcher("2025-08")
+
+                # Should count unique brush strings (3 unique, not 4 total)
+                assert stats["total_entries"] == 3  # 3 unique brush strings
+                assert stats["validated_count"] == 1
+                assert stats["overridden_count"] == 1
+                assert stats["unvalidated_count"] == 1  # 3 total - 2 actions
+                assert stats["validation_rate"] == 2 / 3  # 2 actions / 3 entries
+
+    def test_get_validation_statistics_unique_strings_only(self):
+        """Test that statistics only count unique brush strings."""
+        with patch.object(self.cli, "load_month_data") as mock_load:
+            # Mock data with many duplicates but only 2 unique strings
+            mock_load.return_value = [
+                {"input_text": "Same Brush", "normalized_text": "same brush"},
+                {"input_text": "Same Brush", "normalized_text": "same brush"},  # Duplicate
+                {"input_text": "Same Brush", "normalized_text": "same brush"},  # Duplicate
+                {"input_text": "Another Brush", "normalized_text": "another brush"},
+                {"input_text": "Same Brush", "normalized_text": "same brush"},  # Duplicate
+            ]
+
+            with patch.object(self.cli.user_actions_manager, "get_statistics") as mock_stats:
+                mock_stats.return_value = {
+                    "total_actions": 0,
+                    "validated_count": 0,
+                    "overridden_count": 0,
+                    "validation_rate": 0.0,
+                }
+
+                stats = self.cli.get_validation_statistics("2025-08")
+
+                # Should only count 2 unique brush strings, not 5 total entries
+                assert stats["total_entries"] == 2
+                assert stats["unvalidated_count"] == 2
+
+    def test_get_validation_statistics_case_insensitive(self):
+        """Test that statistics handle case-insensitive unique counting."""
+        with patch.object(self.cli, "load_month_data") as mock_load:
+            # Mock data with same brush in different cases
+            mock_load.return_value = [
+                {"input_text": "Test Brush", "normalized_text": "test brush"},
+                {"input_text": "TEST BRUSH", "normalized_text": "TEST BRUSH"},
+                {"input_text": "Test brush", "normalized_text": "Test brush"},
+            ]
+
+            with patch.object(self.cli.user_actions_manager, "get_statistics") as mock_stats:
+                mock_stats.return_value = {
+                    "total_actions": 0,
+                    "validated_count": 0,
+                    "overridden_count": 0,
+                    "validation_rate": 0.0,
+                }
+
+                stats = self.cli.get_validation_statistics("2025-08")
+
+                # Should count as 1 unique brush string (case-insensitive)
+                assert stats["total_entries"] == 1
+                assert stats["unvalidated_count"] == 1
+
+    def test_get_validation_statistics_fallback_to_input_text(self):
+        """Test that statistics fallback to input_text when normalized_text is missing."""
+        with patch.object(self.cli, "load_month_data") as mock_load:
+            # Mock data with missing normalized_text
+            mock_load.return_value = [
+                {"input_text": "Brush A"},  # No normalized_text
+                {"input_text": "Brush B", "normalized_text": "brush b"},
+                {"input_text": "Brush A"},  # No normalized_text, duplicate
+            ]
+
+            with patch.object(self.cli.user_actions_manager, "get_statistics") as mock_stats:
+                mock_stats.return_value = {
+                    "total_actions": 0,
+                    "validated_count": 0,
+                    "overridden_count": 0,
+                    "validation_rate": 0.0,
+                }
+
+                stats = self.cli.get_validation_statistics("2025-08")
+
+                # Should count 2 unique brush strings
+                assert stats["total_entries"] == 2
+                assert stats["unvalidated_count"] == 2
 
     @patch.object(BrushValidationCLI, "load_month_data")
     @patch.object(BrushValidationCLI, "sort_entries")
