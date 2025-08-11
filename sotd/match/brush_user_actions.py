@@ -91,10 +91,13 @@ class BrushUserActionsStorage:
         self._validate_month_format(month)
 
         file_path = self._get_file_path(month)
+        # Ensure directory exists before saving
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        
         data = {"brush_user_actions": [action.to_dict() for action in actions]}
 
         with open(file_path, "w") as f:
-            yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+            yaml.dump(data, f, default_flow_style=False, sort_keys=True)
 
     def load_monthly_actions(self, month: str) -> List[BrushUserAction]:
         """Load actions for a specific month from YAML file."""
@@ -115,19 +118,34 @@ class BrushUserActionsStorage:
         ]
 
     def append_action(self, month: str, action: BrushUserAction) -> None:
-        """Append a single action to monthly file."""
+        """Append a new action to the monthly actions file."""
+        # Ensure directory exists before saving
+        self._ensure_directory_exists(month)
+
+        # Load existing actions
         existing_actions = self.load_monthly_actions(month)
+
+        # Add new action
         existing_actions.append(action)
+
+        # Save updated actions
         self.save_monthly_actions(month, existing_actions)
 
     def _get_file_path(self, month: str) -> Path:
-        """Get file path for monthly actions file."""
-        return self.base_path / f"brush_user_actions_{month}.yaml"
+        """Get file path for monthly actions."""
+        self._validate_month_format(month)
+        # Use new directory structure: learning/brush_user_actions/YYYY-MM.yaml
+        return self.base_path / "brush_user_actions" / f"{month}.yaml"
 
     def _validate_month_format(self, month: str) -> None:
         """Validate month format (YYYY-MM)."""
         if not re.match(r"^\d{4}-\d{2}$", month):
             raise ValidationError(f"Invalid month format: {month}. Expected YYYY-MM format.")
+
+    def _ensure_directory_exists(self, month: str) -> None:
+        """Ensure the directory for monthly actions exists."""
+        file_path = self._get_file_path(month)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
 
 
 class BrushUserActionsManager:
@@ -161,7 +179,7 @@ class BrushUserActionsManager:
         else:
             # Fallback for legacy system or direct result data
             actual_result_data = result_data
-            
+
         # Determine the field type based on the actual result data structure
         field_type = self._determine_field_type(actual_result_data)
 
@@ -187,7 +205,7 @@ class BrushUserActionsManager:
         if "brand" in result_data and "model" in result_data:
             # This is a complete brush match - store in brush section
             return "brush"
-        
+
         # Check if this is a handle-only result
         if "handle_maker" in result_data or "handle_model" in result_data:
             return "handle"
@@ -198,8 +216,11 @@ class BrushUserActionsManager:
 
         # Check if this is explicitly a split brush result (user chose to split)
         # This should only happen when the user explicitly overrides with a split strategy
-        if ("handle" in result_data and "knot" in result_data and
-                result_data.get("_matched_from") == "split"):
+        if (
+            "handle" in result_data
+            and "knot" in result_data
+            and result_data.get("_matched_from") == "split"
+        ):
             return "split_brush"
 
         # Default to brush for complete brush results
@@ -265,19 +286,25 @@ class BrushUserActionsManager:
         """Get all actions for a specific month."""
         return self.storage.load_monthly_actions(month)
 
+    def _is_valid_month_format(self, month: str) -> bool:
+        """Check if month string is in valid YYYY-MM format."""
+        import re
+
+        return bool(re.match(r"^\d{4}-\d{2}$", month))
+
     def get_all_actions(self) -> List[BrushUserAction]:
         """Get all actions across all months, sorted by timestamp."""
         all_actions = []
 
-        # Find all monthly files
-        for file_path in self.storage.base_path.glob("brush_user_actions_*.yaml"):
-            # Extract month from filename
-            filename = file_path.stem
-            month_match = re.search(r"brush_user_actions_(\d{4}-\d{2})", filename)
-            if month_match:
-                month = month_match.group(1)
-                actions = self.storage.load_monthly_actions(month)
-                all_actions.extend(actions)
+        # Find all monthly files in the new directory structure
+        brush_user_actions_dir = self.storage.base_path / "brush_user_actions"
+        if brush_user_actions_dir.exists():
+            for file_path in brush_user_actions_dir.glob("*.yaml"):
+                # Extract month from filename (YYYY-MM.yaml)
+                month = file_path.stem
+                if self._is_valid_month_format(month):
+                    actions = self.storage.load_monthly_actions(month)
+                    all_actions.extend(actions)
 
         # Sort by timestamp
         all_actions.sort(key=lambda x: x.timestamp)

@@ -37,7 +37,7 @@ class TestBrushUserActionsIntegration:
         )
 
         # Verify file was created in expected location
-        expected_file = self.test_learning_dir / "brush_user_actions_2025-08.yaml"
+        expected_file = self.test_learning_dir / "brush_user_actions" / "2025-08.yaml"
         assert expected_file.exists()
 
         # Use file_io functions to verify file contents
@@ -106,7 +106,7 @@ class TestBrushUserActionsIntegration:
 
         # Verify files follow expected naming pattern
         for month in months:
-            expected_file = self.test_learning_dir / f"brush_user_actions_{month}.yaml"
+            expected_file = self.test_learning_dir / "brush_user_actions" / f"{month}.yaml"
             assert expected_file.exists()
 
         # Test cross-month retrieval

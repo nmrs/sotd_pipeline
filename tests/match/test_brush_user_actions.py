@@ -153,8 +153,14 @@ class TestBrushUserActionsStorage:
 
     def setup_method(self):
         """Set up test directory."""
-        self.test_dir = tempfile.mkdtemp()
-        self.storage = BrushUserActionsStorage(base_path=Path(self.test_dir))
+        self.test_dir = Path(tempfile.mkdtemp())
+        self.learning_dir = self.test_dir / "learning"
+        self.learning_dir.mkdir()
+        # Create brush_user_actions subdirectory
+        self.brush_user_actions_dir = self.learning_dir / "brush_user_actions"
+        self.brush_user_actions_dir.mkdir()
+        
+        self.storage = BrushUserActionsStorage(self.learning_dir)
 
     def teardown_method(self):
         """Clean up test directory."""
@@ -189,7 +195,7 @@ class TestBrushUserActionsStorage:
         self.storage.save_monthly_actions("2025-08", actions)
 
         # Verify file was created
-        file_path = Path(self.test_dir) / "brush_user_actions_2025-08.yaml"
+        file_path = self.brush_user_actions_dir / "2025-08.yaml"
         assert file_path.exists()
 
         # Load and verify
@@ -245,7 +251,7 @@ class TestBrushUserActionsStorage:
     def test_get_file_path(self):
         """Test file path generation."""
         path = self.storage._get_file_path("2025-08")
-        expected = Path(self.test_dir) / "brush_user_actions_2025-08.yaml"
+        expected = self.brush_user_actions_dir / "2025-08.yaml"
         assert path == expected
 
     def test_invalid_month_format(self):
@@ -261,9 +267,15 @@ class TestBrushUserActionsManager:
     """Test BrushUserActionsManager for high-level operations."""
 
     def setup_method(self):
-        """Set up test directory."""
-        self.test_dir = tempfile.mkdtemp()
-        self.manager = BrushUserActionsManager(base_path=Path(self.test_dir))
+        """Set up test environment."""
+        self.test_dir = Path(tempfile.mkdtemp())
+        self.learning_dir = self.test_dir / "learning"
+        self.learning_dir.mkdir()
+        # Create brush_user_actions subdirectory
+        self.brush_user_actions_dir = self.learning_dir / "brush_user_actions"
+        self.brush_user_actions_dir.mkdir()
+
+        self.manager = BrushUserActionsManager(base_path=self.learning_dir)
 
     def teardown_method(self):
         """Clean up test directory."""
@@ -518,30 +530,29 @@ class TestBrushUserActionsManager:
         import tempfile
         import shutil
         from pathlib import Path
-        
+
         # Create temporary directory
         temp_dir = tempfile.mkdtemp()
         temp_learning_dir = Path(temp_dir) / "learning"
         temp_learning_dir.mkdir()
         temp_correct_matches = Path(temp_dir) / "correct_matches.yaml"
-        
+
         try:
             # Initialize manager with temporary paths
             temp_manager = BrushUserActionsManager(
-                base_path=temp_learning_dir,
-                correct_matches_path=temp_correct_matches
+                base_path=temp_learning_dir, correct_matches_path=temp_correct_matches
             )
-            
+
             # Test data that should result in a brush field type
             system_choice = {"strategy": "known_brush", "score": 80, "result": {}}
             user_choice = {
-                "strategy": "known_brush", 
-                "score": 80, 
+                "strategy": "known_brush",
+                "score": 80,
                 "result": {
                     "brand": "Test Brand",
                     "model": "Test Model",
-                    "source_text": "Test Brush Real Dual Update"
-                }
+                    "source_text": "Test Brush Real Dual Update",
+                },
             }
             all_strategies = []
 
@@ -557,42 +568,47 @@ class TestBrushUserActionsManager:
             )
 
             # Verify learning file was created and updated
-            expected_learning_file = (
-                temp_learning_dir / "brush_user_actions_2025-08.yaml"
-            )
+            expected_learning_file = temp_learning_dir / "brush_user_actions" / "2025-08.yaml"
             assert expected_learning_file.exists(), "Learning file should exist"
-            
+
             # Load and verify learning file contents
-            with open(expected_learning_file, 'r') as f:
+            with open(expected_learning_file, "r") as f:
                 learning_data = yaml.safe_load(f)
-            
-            assert "brush_user_actions" in learning_data, "Learning file should have brush_user_actions key"
-            assert len(learning_data["brush_user_actions"]) == 1, "Learning file should have one action"
+
             assert (
-                learning_data["brush_user_actions"][0]["input_text"] == "Test Brush Real Dual Update"
+                "brush_user_actions" in learning_data
+            ), "Learning file should have brush_user_actions key"
+            assert (
+                len(learning_data["brush_user_actions"]) == 1
+            ), "Learning file should have one action"
+            assert (
+                learning_data["brush_user_actions"][0]["input_text"]
+                == "Test Brush Real Dual Update"
             )
 
             # Verify correct_matches.yaml was created and updated
             assert temp_correct_matches.exists(), "correct_matches.yaml should exist"
-            
+
             # Load and verify correct_matches.yaml contents
-            with open(temp_correct_matches, 'r') as f:
+            with open(temp_correct_matches, "r") as f:
                 correct_matches_data = yaml.safe_load(f)
-            
+
             assert "brush" in correct_matches_data, "correct_matches.yaml should have brush section"
-            assert "Test Brand" in correct_matches_data["brush"], "correct_matches.yaml should have Test Brand"
             assert (
-                "Test Model" in correct_matches_data["brush"]["Test Brand"], 
-                "correct_matches.yaml should have Test Model"
+                "Test Brand" in correct_matches_data["brush"]
+            ), "correct_matches.yaml should have Test Brand"
+            assert (
+                "Test Model" in correct_matches_data["brush"]["Test Brand"],
+                "correct_matches.yaml should have Test Model",
             )
-            
+
             # Check that the normalized pattern was added
             patterns = correct_matches_data["brush"]["Test Brand"]["Test Model"]
             assert (
-                "test brush real dual update" in patterns, 
-                "Normalized pattern should be in correct_matches.yaml"
+                "test brush real dual update" in patterns,
+                "Normalized pattern should be in correct_matches.yaml",
             )
-            
+
         finally:
             # Clean up
             shutil.rmtree(temp_dir)
