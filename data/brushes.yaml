@@ -28,6 +28,11 @@ known_brushes:
       fiber: Boar
       patterns:
       - century.*pure.*bristle
+  Certifyd:
+    Boar:
+      fiber: Boar
+      patterns:
+      - certifyd.*boar
   Chisel & Hound:
     fiber: Badger
     knot_size_mm: 26
@@ -217,180 +222,6 @@ known_brushes:
       patterns:
       - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb18\b
       - ^(?!.*dog|zen).*\bb18\b  
-  # Dogclaration: 
-  #   fiber: Badger
-  #   knot_size_mm: 28
-  #   B1:
-  #     patterns:
-  #     - dog.*\bb1\b
-  #     - \bb1\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B1
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B2:
-  #     patterns:
-  #     - dog.*\bb2\b
-  #     - \bb2\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B2
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B3:
-  #     patterns:
-  #     - dog.*\bb3\b
-  #     - \bb3\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B3
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B4:
-  #     patterns:
-  #     - dog.*\bb4\b
-  #     - \bb4\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B4
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B5:
-  #     patterns:
-  #     - dog.*\bb5\b
-  #     - \bb5\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B5
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B6:
-  #     patterns:
-  #     - dog.*\bb6\b
-  #     - \bb6\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B6
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B7:
-  #     patterns:
-  #     - dog.*\bb7\b
-  #     - \bb7\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B7
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B8:
-  #     patterns:
-  #     - dog.*\bb8\b
-  #     - \bb8\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B8
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B9A:
-  #     patterns:
-  #     - dog.*\bb9a\+?\b
-  #     - \bb9a\+?\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B9A
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B9B:
-  #     patterns:
-  #     - dog.*\bb9b\+?\b
-  #     - \bb9b\+?\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B9B
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B10:
-  #     patterns:
-  #     - dog.*\bb10\b
-  #     - \bb10\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B10
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B11:
-  #     patterns:
-  #     - dog.*\bb11\b
-  #     - \bb11\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B11
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B12:
-  #     patterns:
-  #     - dog.*\bb12\b
-  #     - \bb12\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B12
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B13:
-  #     patterns:
-  #     - dog.*\bb13\b
-  #     - \bb13\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B13
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B14:
-  #     patterns:
-  #     - dog.*\bb14\b
-  #     - \bb14\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B14
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B15:
-  #     patterns:
-  #     - dog.*\bb15\b
-  #     - \bb15\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B15
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B16:
-  #     patterns:
-  #     - dog.*\bb16\b
-  #     - \bb16\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B16
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B17:
-  #     patterns:
-  #     - dog.*\bb17\b
-  #     - \bb17\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B17
-  #     handle:
-  #       brand: Dogwood Handcrafts
-  #   B18:
-  #     patterns:
-  #     - dog.*\bb18\b
-  #     - \bb18\b.*dog
-  #     knot:
-  #       brand: Declaration Grooming
-  #       model: B18
-  #     handle:
-  #       brand: Dogwood Handcrafts
   Dreadnought:
     Avenger:
       fiber: Boar
@@ -415,6 +246,11 @@ known_brushes:
       knot_size_mm: 24
       patterns:
       - groomatorium
+  Hot Wheels:
+    Synthetic:
+      fiber: Synthetic
+      patterns:
+      - \bhot ?wheels\b
   Kent:
     INF1:
       fiber: Synthetic
@@ -422,6 +258,15 @@ known_brushes:
       patterns:
       - kent.*inf1
       - kent.*infinity
+  Menesia:
+    Badger:
+      fiber: Badger
+      patterns:
+      - menesia
+    Synthetic:
+      fiber: Synthetic
+      patterns:
+      - menesia.*syn
   Mühle:
     Hexagon:
       knot_size_mm: 21
@@ -532,6 +377,11 @@ known_brushes:
       knot_size_mm: 30
       patterns:
       - pearl.*sbb( |-)?97
+  Power Rangers:
+    Synthetic:
+      fiber: Synthetic
+      patterns:
+      - power.*rangers.*syn
   RazoRock:
     Big Bruce:
       fiber: Synthetic
@@ -794,6 +644,11 @@ known_brushes:
       knot_size_mm: 24
       patterns:
       - wellington
+  True Inline Grooming:
+    Boar:
+      fiber: Boar
+      patterns:
+      - true.*inline.*grooming
   Turn-N-Shave:
     BoBa (50/50 Boar Badger):
       fiber: Mixed Badger/Boar
@@ -816,6 +671,12 @@ known_brushes:
       patterns:
       - turn.{1,5}shave.*m\d
       - t[&n]s.*m\d
+  Tweezerman:
+    Shaving Brush:
+      fiber: Badger
+      knot_size_mm: 20
+      patterns:
+      - tweezerman
   Wald:
     A1:
       fiber: Synthetic
@@ -886,7 +747,7 @@ known_brushes:
       fiber: Horse
       knot_size_mm: 27
       patterns:
-      - 506.*u.*nthi
+      - 506u.*n\b
     506N XS:
       fiber: Horse
       knot_size_mm: 27
@@ -1045,8 +906,30 @@ other_brushes:
   Böker:
     default: Badger
     patterns:
-    - böker
+    - b[öo]ker
+    - \bbö\b
+  Cineen:
+    default: Badger
+    patterns:
+    - cineen
+  London Razors:
+    default: Badger
+    patterns:
+    - london.*razors
+  QSHAVE:
+    default: Badger
+    patterns:
+    - qshave  
+  Shave Factory:
+    default: Boar
+    patterns:
+    - shave.*factory
+    - shaving.*factory
   Spokar:
     default: Synthetic
     patterns:
     - spokar
+  Thäter:
+    default: Badger
+    patterns:
+    - th[aä]ter

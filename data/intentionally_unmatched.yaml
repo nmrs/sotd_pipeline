@@ -60,6 +60,12 @@ brush:
     - file: 2025-06.json
       id: mxi9gdw
       source: user
+  ChronnoCrafts English Lavender:
+    added_date: '2025-08-10'
+    comment_ids:
+    - file: 2025-06.json
+      id: mypjzvi
+      source: user
   Do:
     added_date: '2025-07-28'
     comment_ids:
@@ -71,6 +77,12 @@ brush:
     comment_ids:
     - file: 2025-06.json
       id: mx5zrlm
+      source: user
+  GUM Sulcular brush:
+    added_date: '2025-08-10'
+    comment_ids:
+    - file: 2025-06.json
+      id: mxba65n
       source: user
   Hand:
     added_date: '2025-07-28'
@@ -132,6 +144,12 @@ brush:
     - file: 2025-06.json
       id: mxjuhmv
       source: user
+  N/A:
+    added_date: '2025-08-10'
+    comment_ids:
+    - file: 2025-06.json
+      id: myha7z7
+      source: user
   No Brush Needed for Goop!:
     added_date: '2025-07-28'
     comment_ids:
@@ -185,6 +203,12 @@ brush:
     comment_ids:
     - file: 2025-06.json
       id: mw88dgo
+      source: user
+  u/jwoods23's Hands:
+    added_date: '2025-08-10'
+    comment_ids:
+    - file: 2025-06.json
+      id: mx6lwpn
       source: user
 razor:
   Hot Wheels Play Razor:

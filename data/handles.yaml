@@ -151,6 +151,11 @@ artisan_handles:
     Unspecified:
       patterns:
       - ever.*read
+  Extrò Cosmesi:
+    Italian Flag Synthetic:
+      fiber: Synthetic
+      patterns:
+      - extr[òo].*cosmesi.*flag.*synth
   Farvour Turn Craft:
     Unspecified:
       patterns:
@@ -239,10 +244,18 @@ artisan_handles:
     Unspecified:
       patterns:
       - paragon
+  Power Rangers:
+    Novelty:
+      patterns:
+      - power.*rangers
   Prometheus Handcrafts:
     Unspecified:
       patterns:
       - prometheus.*(?:handcraft)+
+  QED Select:
+    Badger:
+      patterns:
+      - qed.*select.*badger
   Rick Montalvo:
     Unspecified:
       patterns:
@@ -272,6 +285,10 @@ artisan_handles:
     Unspecified:
       patterns:
       - shave.*forge
+  SHAVE⭐DANDY:
+    Unspecified:
+      patterns:
+      - shave.*dandy
   Shavemac:
     Unspecified:
       patterns:
@@ -450,6 +467,10 @@ manufacturer_handles:
     Unspecified:
       patterns:
       - ca\s?yuen
+  Certifyd:
+    Unspecified:
+      patterns:
+      - certifyd
   Chisel & Hound:
     Unspecified:
       patterns:
@@ -694,6 +715,10 @@ manufacturer_handles:
     Unspecified:
       patterns:
       - spiffo
+  Stanhome:
+    Unspecified:
+      patterns:
+      - stanhome
   Stirling:
     Unspecified:
       patterns:
@@ -779,6 +804,26 @@ manufacturer_handles:
       - moar
 
 other_handles:
+  Djed Flanders Leftorium:
+    Unspecified:
+      patterns:
+      - djed.*flanders.*leftorium 
+  Djundjila Brushworx:
+    Unspecified:
+      patterns:
+      - djundjila.*brushworx
+  Generic:
+    Unspecified:
+      patterns:
+      - burl
+  Marco Rinaldi:
+    Unspecified:
+      patterns:
+      - marco.*rinaldi
+  Rx Shaving:
+    Unspecified:
+      patterns:
+      - \brx\b.*shav
   Southland:
     Galvanized Nipple:
       patterns:
