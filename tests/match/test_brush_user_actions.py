@@ -511,3 +511,88 @@ class TestBrushUserActionsManager:
         assert stats["validation_rate"] == 0.6  # 3/5
         assert stats["scoring_system_count"] == 5
         assert stats["legacy_system_count"] == 0
+
+    def test_real_dual_update_validation(self):
+        """Test that validation actions actually write to both learning files and correct_matches.yaml."""
+        # Create a temporary correct_matches.yaml for testing
+        import tempfile
+        import shutil
+        from pathlib import Path
+        
+        # Create temporary directory
+        temp_dir = tempfile.mkdtemp()
+        temp_learning_dir = Path(temp_dir) / "learning"
+        temp_learning_dir.mkdir()
+        temp_correct_matches = Path(temp_dir) / "correct_matches.yaml"
+        
+        try:
+            # Initialize manager with temporary paths
+            temp_manager = BrushUserActionsManager(
+                base_path=temp_learning_dir,
+                correct_matches_path=temp_correct_matches
+            )
+            
+            # Test data that should result in a brush field type
+            system_choice = {"strategy": "known_brush", "score": 80, "result": {}}
+            user_choice = {
+                "strategy": "known_brush", 
+                "score": 80, 
+                "result": {
+                    "brand": "Test Brand",
+                    "model": "Test Model",
+                    "source_text": "Test Brush Real Dual Update"
+                }
+            }
+            all_strategies = []
+
+            # Record validation action
+            temp_manager.record_validation(
+                input_text="Test Brush Real Dual Update",
+                month="2025-08",
+                system_used="scoring",
+                system_choice=system_choice,
+                user_choice=user_choice,
+                all_brush_strategies=all_strategies,
+                comment_ids=["comment1"],
+            )
+
+            # Verify learning file was created and updated
+            expected_learning_file = (
+                temp_learning_dir / "brush_user_actions_2025-08.yaml"
+            )
+            assert expected_learning_file.exists(), "Learning file should exist"
+            
+            # Load and verify learning file contents
+            with open(expected_learning_file, 'r') as f:
+                learning_data = yaml.safe_load(f)
+            
+            assert "brush_user_actions" in learning_data, "Learning file should have brush_user_actions key"
+            assert len(learning_data["brush_user_actions"]) == 1, "Learning file should have one action"
+            assert (
+                learning_data["brush_user_actions"][0]["input_text"] == "Test Brush Real Dual Update"
+            )
+
+            # Verify correct_matches.yaml was created and updated
+            assert temp_correct_matches.exists(), "correct_matches.yaml should exist"
+            
+            # Load and verify correct_matches.yaml contents
+            with open(temp_correct_matches, 'r') as f:
+                correct_matches_data = yaml.safe_load(f)
+            
+            assert "brush" in correct_matches_data, "correct_matches.yaml should have brush section"
+            assert "Test Brand" in correct_matches_data["brush"], "correct_matches.yaml should have Test Brand"
+            assert (
+                "Test Model" in correct_matches_data["brush"]["Test Brand"], 
+                "correct_matches.yaml should have Test Model"
+            )
+            
+            # Check that the normalized pattern was added
+            patterns = correct_matches_data["brush"]["Test Brand"]["Test Model"]
+            assert (
+                "test brush real dual update" in patterns, 
+                "Normalized pattern should be in correct_matches.yaml"
+            )
+            
+        finally:
+            # Clean up
+            shutil.rmtree(temp_dir)
