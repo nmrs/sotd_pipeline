@@ -93,7 +93,7 @@ class BrushUserActionsStorage:
         file_path = self._get_file_path(month)
         # Ensure directory exists before saving
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         data = {"brush_user_actions": [action.to_dict() for action in actions]}
 
         with open(file_path, "w") as f:

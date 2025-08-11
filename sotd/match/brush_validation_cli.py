@@ -18,7 +18,12 @@ class BrushValidationCLI:
             data_path = Path("data")
 
         self.data_path = Path(data_path)
-        self.user_actions_manager = BrushUserActionsManager(base_path=self.data_path / "learning")
+        # Pass the correct correct_matches.yaml path to ensure consistency
+        correct_matches_path = self.data_path / "correct_matches.yaml"
+        self.user_actions_manager = BrushUserActionsManager(
+            base_path=self.data_path / "learning",
+            correct_matches_path=correct_matches_path
+        )
 
         # Lazy-load brush matcher entry point only when needed
         self._brush_entry_point = None
