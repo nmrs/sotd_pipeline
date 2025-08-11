@@ -159,7 +159,7 @@ class TestBrushUserActionsStorage:
         # Create brush_user_actions subdirectory
         self.brush_user_actions_dir = self.learning_dir / "brush_user_actions"
         self.brush_user_actions_dir.mkdir()
-        
+
         self.storage = BrushUserActionsStorage(self.learning_dir)
 
     def teardown_method(self):
@@ -575,16 +575,9 @@ class TestBrushUserActionsManager:
             with open(expected_learning_file, "r") as f:
                 learning_data = yaml.safe_load(f)
 
-            assert (
-                "brush_user_actions" in learning_data
-            ), "Learning file should have brush_user_actions key"
-            assert (
-                len(learning_data["brush_user_actions"]) == 1
-            ), "Learning file should have one action"
-            assert (
-                learning_data["brush_user_actions"][0]["input_text"]
-                == "Test Brush Real Dual Update"
-            )
+            assert "brush_user_actions" in learning_data, "Learning file should have brush_user_actions key"
+            assert len(learning_data["brush_user_actions"]) == 1, "Learning file should have one action"
+            assert learning_data["brush_user_actions"][0]["input_text"] == "Test Brush Real Dual Update"
 
             # Verify correct_matches.yaml was created and updated
             assert temp_correct_matches.exists(), "correct_matches.yaml should exist"
