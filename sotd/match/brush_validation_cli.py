@@ -77,7 +77,8 @@ class BrushValidationCLI:
 
                 if system == "legacy":
                     entry = {
-                        "input_text": brush_entry.get("original", ""),
+                        # Use normalized field for matching
+                        "input_text": brush_entry.get("normalized", ""),
                         "system_used": "legacy",
                         "matched": brush_entry.get("matched"),
                         "match_type": brush_entry.get("match_type"),
@@ -86,7 +87,8 @@ class BrushValidationCLI:
                     }
                 else:  # scoring system
                     entry = {
-                        "input_text": brush_entry.get("original", ""),
+                        # Use normalized field for matching
+                        "input_text": brush_entry.get("normalized", ""),
                         "normalized_text": brush_entry.get("normalized", ""),
                         "system_used": "scoring",
                         "matched": brush_entry.get("matched"),  # Now contains strategy and score

@@ -43,6 +43,7 @@ class TestBrushValidationCLI:
                     "id": "comment1",
                     "brush": {
                         "original": "Test Brush 1",
+                        "normalized": "test brush 1",  # Add normalized field
                         "matched": {"brand": "Test", "model": "Brush1"},
                         "match_type": "regex",
                     },
@@ -51,6 +52,7 @@ class TestBrushValidationCLI:
                     "id": "comment2",
                     "brush": {
                         "original": "Test Brush 2",
+                        "normalized": "test brush 2",  # Add normalized field
                         "matched": None,
                         "match_type": "no_match",
                     },
@@ -62,7 +64,8 @@ class TestBrushValidationCLI:
         result = self.cli.load_month_data("2025-08", "legacy")
 
         assert len(result) == 2
-        assert result[0]["input_text"] == "Test Brush 1"
+        # Now expect normalized text for input_text (matching operations)
+        assert result[0]["input_text"] == "test brush 1"
         assert result[0]["system_used"] == "legacy"
         assert result[0]["matched"] == {"brand": "Test", "model": "Brush1"}
 
@@ -97,7 +100,8 @@ class TestBrushValidationCLI:
         result = self.cli.load_month_data("2025-08", "scoring")
 
         assert len(result) == 1
-        assert result[0]["input_text"] == "Test Brush 1"
+        # Now expect normalized text for input_text (matching operations)
+        assert result[0]["input_text"] == "test brush 1"
         assert result[0]["system_used"] == "scoring"
         assert result[0]["matched"]["strategy"] == "dual_component"
         assert result[0]["matched"]["score"] == 85
