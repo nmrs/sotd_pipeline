@@ -154,13 +154,21 @@ class BrushUserActionsManager:
             result_data: The user's choice result data
             action_type: Type of action ("validated" or "overridden")
         """
-        # Determine the field type based on the result data structure
-        field_type = self._determine_field_type(result_data)
+        # Extract the actual result data from the user choice structure
+        # The brush data is nested under result_data.result for scoring system
+        if "result" in result_data:
+            actual_result_data = result_data["result"]
+        else:
+            # Fallback for legacy system or direct result data
+            actual_result_data = result_data
+            
+        # Determine the field type based on the actual result data structure
+        field_type = self._determine_field_type(actual_result_data)
 
         # Update correct_matches.yaml - fail fast if this fails
         self.correct_matches_updater.add_or_update_entry(
             input_text=input_text,
-            result_data=result_data,
+            result_data=actual_result_data,
             action_type=action_type,
             field_type=field_type,
         )
@@ -175,10 +183,11 @@ class BrushUserActionsManager:
         Returns:
             Field type string ("brush", "handle", "knot", "split_brush")
         """
-        # Check if this is a split brush result
-        if "handle" in result_data and "knot" in result_data:
-            return "split_brush"
-
+        # Check if this is a complete brush result (has brand and model)
+        if "brand" in result_data and "model" in result_data:
+            # This is a complete brush match - store in brush section
+            return "brush"
+        
         # Check if this is a handle-only result
         if "handle_maker" in result_data or "handle_model" in result_data:
             return "handle"
@@ -186,6 +195,12 @@ class BrushUserActionsManager:
         # Check if this is a knot-only result
         if "fiber" in result_data or "knot_size_mm" in result_data:
             return "knot"
+
+        # Check if this is explicitly a split brush result (user chose to split)
+        # This should only happen when the user explicitly overrides with a split strategy
+        if ("handle" in result_data and "knot" in result_data and
+                result_data.get("_matched_from") == "split"):
+            return "split_brush"
 
         # Default to brush for complete brush results
         return "brush"
