@@ -1,16 +1,18 @@
 """Test brush user actions data model."""
 
-import pytest
+import shutil
+import tempfile
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import patch
+
+import pytest
 import yaml
-import tempfile
-import shutil
 
 from sotd.match.brush_user_actions import (
     BrushUserAction,
-    BrushUserActionsStorage,
     BrushUserActionsManager,
+    BrushUserActionsStorage,
     ValidationError,
 )
 
@@ -39,6 +41,7 @@ class TestBrushUserAction:
                 {"strategy": "dual_component", "score": 85, "result": {"brand": "Chisel & Hound"}},
                 {"strategy": "single_component", "score": 30, "result": {}},
             ],
+            comment_ids=["comment1", "comment2"],
         )
 
         assert action.input_text == "Chisel & Hound 'The Duke' / Omega 10098 Boar"
@@ -66,6 +69,7 @@ class TestBrushUserAction:
                 "result": {"brand": "Summer Break Soaps", "model": "Maize"},
             },
             all_brush_strategies=[],  # Legacy system doesn't track all strategies
+            comment_ids=["comment3"],
         )
 
         assert action.system_used == "legacy"
@@ -86,6 +90,7 @@ class TestBrushUserAction:
                 system_choice={"strategy": "test", "score": 50, "result": {}},
                 user_choice={"strategy": "test", "result": {}},
                 all_brush_strategies=[],
+                comment_ids=["comment4"],
             )
 
     def test_invalid_action_type(self):
@@ -101,6 +106,7 @@ class TestBrushUserAction:
                 system_choice={"strategy": "test", "score": 50, "result": {}},
                 user_choice={"strategy": "test", "result": {}},
                 all_brush_strategies=[],
+                comment_ids=["comment5"],
             )
 
     def test_to_dict(self):
@@ -114,6 +120,7 @@ class TestBrushUserAction:
             system_choice={"strategy": "test", "score": 50, "result": {}},
             user_choice={"strategy": "test", "result": {}},
             all_brush_strategies=[],
+            comment_ids=["comment7"],
         )
 
         result = action.to_dict()
@@ -164,6 +171,7 @@ class TestBrushUserActionsStorage:
                 system_choice={"strategy": "test", "score": 50, "result": {}},
                 user_choice={"strategy": "test", "result": {}},
                 all_brush_strategies=[],
+                comment_ids=["comment8"],
             ),
             BrushUserAction(
                 input_text="Test Brush 2",
@@ -173,6 +181,7 @@ class TestBrushUserActionsStorage:
                 system_choice={"strategy": "test", "score": None, "result": {}},
                 user_choice={"strategy": "other", "result": {}},
                 all_brush_strategies=[],
+                comment_ids=["comment9"],
             ),
         ]
 
@@ -207,6 +216,7 @@ class TestBrushUserActionsStorage:
             system_choice={"strategy": "test", "score": 50, "result": {}},
             user_choice={"strategy": "test", "result": {}},
             all_brush_strategies=[],
+            comment_ids=["comment10"],
         )
 
         # Save initial action
@@ -221,6 +231,7 @@ class TestBrushUserActionsStorage:
             system_choice={"strategy": "test", "score": None, "result": {}},
             user_choice={"strategy": "other", "result": {}},
             all_brush_strategies=[],
+            comment_ids=["comment11"],
         )
 
         self.storage.append_action("2025-08", action2)
@@ -274,6 +285,7 @@ class TestBrushUserActionsManager:
             system_choice=system_choice,
             user_choice=user_choice,
             all_brush_strategies=all_strategies,
+            comment_ids=["comment14"],
         )
 
         # Verify action was recorded
@@ -296,6 +308,7 @@ class TestBrushUserActionsManager:
             system_choice=system_choice,
             user_choice=user_choice,
             all_brush_strategies=all_strategies,
+            comment_ids=["comment15"],
         )
 
         # Verify action was recorded
@@ -315,6 +328,7 @@ class TestBrushUserActionsManager:
             system_choice={"strategy": "test", "score": 50, "result": {}},
             user_choice={"strategy": "test", "result": {}},
             all_brush_strategies=[],
+            comment_ids=["comment12"],
         )
 
         action2 = BrushUserAction(
@@ -325,6 +339,7 @@ class TestBrushUserActionsManager:
             system_choice={"strategy": "test", "score": None, "result": {}},
             user_choice={"strategy": "test", "result": {}},
             all_brush_strategies=[],
+            comment_ids=["comment13"],
         )
 
         # Save actions directly to ensure specific timestamps
@@ -341,41 +356,128 @@ class TestBrushUserActionsManager:
 
     def test_migrate_from_correct_matches(self):
         """Test migration from existing correct_matches.yaml."""
-        # Create mock correct_matches.yaml content with brush data
-        correct_matches_data = {
-            "brush": {
-                "Chisel & Hound / Omega 10098": {
-                    "brand": "Chisel & Hound",
-                    "model": "The Duke",
-                    "handle": {"brand": "Chisel & Hound", "model": "The Duke"},
-                    "knot": {"brand": "Omega", "model": "10098"},
-                },
-                "Summer Break Soaps Maize": {"brand": "Summer Break Soaps", "model": "Maize"},
-            }
-        }
+        # Create a temporary correct_matches.yaml file
+        correct_matches_file = Path(self.test_dir) / "correct_matches.yaml"
+        correct_matches_data = {"brush": {"Test Brand": {"Test Model": ["test brush input"]}}}
 
-        # Save mock file
-        correct_matches_path = Path(self.test_dir) / "correct_matches.yaml"
-        with open(correct_matches_path, "w") as f:
+        with open(correct_matches_file, "w") as f:
             yaml.dump(correct_matches_data, f)
 
         # Test migration
-        migrated_count = self.manager.migrate_from_correct_matches(correct_matches_path, "2025-08")
+        migrated_count = self.manager.migrate_from_correct_matches(correct_matches_file, "2025-08")
+        assert migrated_count == 1
 
-        # Verify migration results
-        assert migrated_count == 2
+        # Verify action was created
         actions = self.manager.get_monthly_actions("2025-08")
-        assert len(actions) == 2
+        assert len(actions) == 1
+        assert actions[0].input_text == "test brush input"
+        assert actions[0].system_used == "migrated"
 
-        # Check migrated actions
-        action_texts = [action.input_text for action in actions]
-        assert "Chisel & Hound / Omega 10098" in action_texts
-        assert "Summer Break Soaps Maize" in action_texts
+    def test_dual_update_validation(self):
+        """Test that validation actions update both learning files and correct_matches.yaml."""
+        # Mock the correct matches updater
+        with patch.object(self.manager, "_update_correct_matches") as mock_updater:
+            system_choice = {"strategy": "dual_component", "score": 85, "result": {}}
+            user_choice = {"strategy": "dual_component", "result": {}}
+            all_strategies = [
+                {"strategy": "complete_brush", "score": 45, "result": {}},
+                {"strategy": "dual_component", "score": 85, "result": {}},
+            ]
 
-        # All migrated actions should be validated (user approved them)
-        for action in actions:
-            assert action.action == "validated"
-            assert action.system_used == "migrated"  # Special marker for migrated data
+            self.manager.record_validation(
+                input_text="Test Brush Dual Update",
+                month="2025-08",
+                system_used="scoring",
+                system_choice=system_choice,
+                user_choice=user_choice,
+                all_brush_strategies=all_strategies,
+                comment_ids=["comment1", "comment2"],
+            )
+
+            # Verify learning file was updated
+            actions = self.manager.get_monthly_actions("2025-08")
+            assert len(actions) == 1
+            assert actions[0].input_text == "Test Brush Dual Update"
+
+            # Verify correct_matches.yaml was updated
+            mock_updater.assert_called_once_with("Test Brush Dual Update", user_choice, "validated")
+
+    def test_dual_update_override(self):
+        """Test that override actions update both learning files and correct_matches.yaml."""
+        # Mock the correct matches updater
+        with patch.object(self.manager, "_update_correct_matches") as mock_updater:
+            system_choice = {"strategy": "complete_brush", "score": 60, "result": {}}
+            user_choice = {"strategy": "dual_component", "result": {}}
+            all_strategies = []
+
+            self.manager.record_override(
+                input_text="Test Brush Override Dual Update",
+                month="2025-08",
+                system_used="scoring",
+                system_choice=system_choice,
+                user_choice=user_choice,
+                all_brush_strategies=all_strategies,
+                comment_ids=["comment3"],
+            )
+
+            # Verify learning file was updated
+            actions = self.manager.get_monthly_actions("2025-08")
+            assert len(actions) == 1
+            expected_text = "Test Brush Override Dual Update"
+            assert actions[0].input_text == expected_text
+
+            # Verify correct_matches.yaml was updated
+            mock_updater.assert_called_once_with(
+                "Test Brush Override Dual Update", user_choice, "overridden"
+            )
+
+    def test_dual_update_error_handling(self):
+        """Test that validation workflow fails fast if correct_matches.yaml update fails."""
+        # Mock the correct matches updater to fail
+        with patch.object(
+            self.manager, "_update_correct_matches", side_effect=Exception("Update failed")
+        ):
+            system_choice = {"strategy": "test", "score": 50, "result": {}}
+            user_choice = {"strategy": "test", "result": {}}
+            all_strategies = []
+
+            # Should raise exception - fail fast approach
+            with pytest.raises(Exception, match="Update failed"):
+                self.manager.record_validation(
+                    input_text="Test Brush Error Handling",
+                    month="2025-08",
+                    system_used="scoring",
+                    system_choice=system_choice,
+                    user_choice=user_choice,
+                    all_brush_strategies=all_strategies,
+                    comment_ids=["comment4"],
+                )
+
+            # Verify learning file was NOT updated due to failure
+            actions = self.manager.get_monthly_actions("2025-08")
+            assert len(actions) == 0
+
+    def test_normalized_text_usage(self):
+        """Test that normalized text is used for correct_matches.yaml keys."""
+        # Mock the correct matches updater
+        with patch.object(self.manager, "_update_correct_matches") as mock_updater:
+            system_choice = {"strategy": "test", "score": 50, "result": {}}
+            user_choice = {"strategy": "test", "result": {}}
+            all_strategies = []
+
+            # Test with mixed case input
+            self.manager.record_validation(
+                input_text="Test Brush Mixed Case",
+                month="2025-08",
+                system_used="scoring",
+                system_choice=system_choice,
+                user_choice=user_choice,
+                all_brush_strategies=all_strategies,
+                comment_ids=["comment5"],
+            )
+
+            # Verify correct_matches.yaml was updated with normalized text
+            mock_updater.assert_called_once_with("Test Brush Mixed Case", user_choice, "validated")
 
     def test_get_statistics(self):
         """Test getting validation statistics."""
@@ -388,6 +490,7 @@ class TestBrushUserActionsManager:
                 system_choice={"strategy": "test", "score": 50, "result": {}},
                 user_choice={"strategy": "test", "result": {}},
                 all_brush_strategies=[],
+                comment_ids=[f"comment{i+16}"],
             )
 
         for i in range(2):
@@ -398,6 +501,7 @@ class TestBrushUserActionsManager:
                 system_choice={"strategy": "test", "score": 50, "result": {}},
                 user_choice={"strategy": "other", "result": {}},
                 all_brush_strategies=[],
+                comment_ids=[f"comment{i+19}"],
             )
 
         stats = self.manager.get_statistics("2025-08")

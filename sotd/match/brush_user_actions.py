@@ -1,11 +1,14 @@
 """Brush user actions data model and storage for validation tracking."""
 
 import re
-import yaml
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
+
+import yaml
+
+from .correct_matches_updater import CorrectMatchesUpdater
 
 
 class ValidationError(Exception):
@@ -25,6 +28,7 @@ class BrushUserAction:
     system_choice: Dict[str, Any]  # Strategy choice made by system
     user_choice: Dict[str, Any]  # Strategy choice made by user
     all_brush_strategies: List[Dict[str, Any]]  # All strategy results (scoring system only)
+    comment_ids: List[str]  # List of comment IDs where this input text was found
 
     def __post_init__(self):
         """Validate the data after initialization."""
@@ -51,6 +55,7 @@ class BrushUserAction:
             "system_choice": self.system_choice,
             "user_choice": self.user_choice,
             "all_brush_strategies": self.all_brush_strategies,
+            "comment_ids": self.comment_ids,
         }
 
     @classmethod
@@ -68,6 +73,8 @@ class BrushUserAction:
             system_choice=data["system_choice"],
             user_choice=data["user_choice"],
             all_brush_strategies=data["all_brush_strategies"],
+            comment_ids=data.get("comment_ids", []),  # Handle missing field for
+            # backward compatibility
         )
 
 
@@ -126,12 +133,62 @@ class BrushUserActionsStorage:
 class BrushUserActionsManager:
     """High-level manager for brush user actions operations."""
 
-    def __init__(self, base_path: Optional[Path] = None):
-        """Initialize manager with storage."""
+    def __init__(
+        self, base_path: Optional[Path] = None, correct_matches_path: Optional[Path] = None
+    ):
+        """Initialize manager with storage and correct matches updater."""
         if base_path is None:
             base_path = Path("data/learning")
 
         self.storage = BrushUserActionsStorage(base_path)
+        self.correct_matches_updater = CorrectMatchesUpdater(correct_matches_path)
+
+    def _update_correct_matches(
+        self, input_text: str, result_data: Dict[str, Any], action_type: str
+    ) -> None:
+        """
+        Update correct_matches.yaml with validation decision.
+
+        Args:
+            input_text: The input text that was validated
+            result_data: The user's choice result data
+            action_type: Type of action ("validated" or "overridden")
+        """
+        # Determine the field type based on the result data structure
+        field_type = self._determine_field_type(result_data)
+
+        # Update correct_matches.yaml - fail fast if this fails
+        self.correct_matches_updater.add_or_update_entry(
+            input_text=input_text,
+            result_data=result_data,
+            action_type=action_type,
+            field_type=field_type,
+        )
+
+    def _determine_field_type(self, result_data: Dict[str, Any]) -> str:
+        """
+        Determine the field type for correct_matches.yaml based on result data structure.
+
+        Args:
+            result_data: The user's choice result data
+
+        Returns:
+            Field type string ("brush", "handle", "knot", "split_brush")
+        """
+        # Check if this is a split brush result
+        if "handle" in result_data and "knot" in result_data:
+            return "split_brush"
+
+        # Check if this is a handle-only result
+        if "handle_maker" in result_data or "handle_model" in result_data:
+            return "handle"
+
+        # Check if this is a knot-only result
+        if "fiber" in result_data or "knot_size_mm" in result_data:
+            return "knot"
+
+        # Default to brush for complete brush results
+        return "brush"
 
     def record_validation(
         self,
@@ -141,6 +198,7 @@ class BrushUserActionsManager:
         system_choice: Dict[str, Any],
         user_choice: Dict[str, Any],
         all_brush_strategies: List[Dict[str, Any]],
+        comment_ids: List[str],
     ) -> None:
         """Record a user validation action."""
         action = BrushUserAction(
@@ -151,8 +209,13 @@ class BrushUserActionsManager:
             system_choice=system_choice,
             user_choice=user_choice,
             all_brush_strategies=all_brush_strategies,
+            comment_ids=comment_ids,
         )
 
+        # Update correct_matches.yaml first - fail fast if this fails
+        self._update_correct_matches(input_text, user_choice, "validated")
+
+        # Only update learning file if correct_matches.yaml update succeeds
         self.storage.append_action(month, action)
 
     def record_override(
@@ -163,6 +226,7 @@ class BrushUserActionsManager:
         system_choice: Dict[str, Any],
         user_choice: Dict[str, Any],
         all_brush_strategies: List[Dict[str, Any]],
+        comment_ids: List[str],
     ) -> None:
         """Record a user override action."""
         action = BrushUserAction(
@@ -173,8 +237,13 @@ class BrushUserActionsManager:
             system_choice=system_choice,
             user_choice=user_choice,
             all_brush_strategies=all_brush_strategies,
+            comment_ids=comment_ids,
         )
 
+        # Update correct_matches.yaml first - fail fast if this fails
+        self._update_correct_matches(input_text, user_choice, "overridden")
+
+        # Only update learning file if correct_matches.yaml update succeeds
         self.storage.append_action(month, action)
 
     def get_monthly_actions(self, month: str) -> List[BrushUserAction]:
@@ -213,28 +282,36 @@ class BrushUserActionsManager:
         migrated_actions = []
         brush_data = data["brush"]
 
-        for input_text, result in brush_data.items():
-            # Create action for migrated data
-            action = BrushUserAction(
-                input_text=input_text,
-                timestamp=datetime.now(),
-                system_used="migrated",  # Special marker for migrated data
-                action="validated",  # Assume migrated data was validated
-                system_choice={"strategy": "migrated", "score": None, "result": result},
-                user_choice={"strategy": "migrated", "result": result},
-                all_brush_strategies=[],  # No strategy data available for migrated entries
-            )
-            migrated_actions.append(action)
+        for brand, brand_data in brush_data.items():
+            for model, patterns in brand_data.items():
+                for pattern in patterns:
+                    # Create action for migrated data
+                    action = BrushUserAction(
+                        input_text=pattern,
+                        timestamp=datetime.now(),
+                        system_used="migrated",  # Special marker for migrated data
+                        action="validated",  # Assume migrated data was validated
+                        system_choice={
+                            "strategy": "migrated",
+                            "score": None,
+                            "result": {"brand": brand, "model": model},
+                        },
+                        user_choice={
+                            "strategy": "migrated",
+                            "result": {"brand": brand, "model": model},
+                        },
+                        comment_ids=[],  # Migrated data doesn't have comment IDs
+                        all_brush_strategies=[],  # No strategy data available for migrated entries
+                    )
+                    migrated_actions.append(action)
 
-        # Save all migrated actions
-        if migrated_actions:
-            existing_actions = self.storage.load_monthly_actions(target_month)
-            existing_actions.extend(migrated_actions)
-            self.storage.save_monthly_actions(target_month, existing_actions)
+        # Save migrated actions
+        for action in migrated_actions:
+            self.storage.append_action(target_month, action)
 
         return len(migrated_actions)
 
-    def get_statistics(self, month: str) -> Dict[str, Union[int, float]]:
+    def get_statistics(self, month: str) -> Dict[str, Any]:
         """Get validation statistics for a specific month."""
         actions = self.get_monthly_actions(month)
 
@@ -248,16 +325,19 @@ class BrushUserActionsManager:
                 "legacy_system_count": 0,
             }
 
+        total_actions = len(actions)
         validated_count = sum(1 for action in actions if action.action == "validated")
         overridden_count = sum(1 for action in actions if action.action == "overridden")
-        scoring_count = sum(1 for action in actions if action.system_used == "scoring")
-        legacy_count = sum(1 for action in actions if action.system_used == "legacy")
+        validation_rate = validated_count / total_actions if total_actions > 0 else 0.0
+
+        scoring_system_count = sum(1 for action in actions if action.system_used == "scoring")
+        legacy_system_count = sum(1 for action in actions if action.system_used == "legacy")
 
         return {
-            "total_actions": len(actions),
+            "total_actions": total_actions,
             "validated_count": validated_count,
             "overridden_count": overridden_count,
-            "validation_rate": validated_count / len(actions) if actions else 0.0,
-            "scoring_system_count": scoring_count,
-            "legacy_system_count": legacy_count,
+            "validation_rate": validation_rate,
+            "scoring_system_count": scoring_system_count,
+            "legacy_system_count": legacy_system_count,
         }
