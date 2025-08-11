@@ -42,7 +42,7 @@ def test_brush_logic():
         brush = r["brush"]
         matched = brush.get("matched")
 
-        print(f'\n=== Brush {i+1}: {brush.get("original")} ===')
+        print(f"\n=== Brush {i + 1}: {brush.get('original')} ===")
 
         if matched is None:
             print("  matched is None - should be unmatched")
@@ -71,9 +71,9 @@ def test_brush_logic():
             (knot and knot.get("brand") and knot.get("brand") not in ["UnknownKnot", "Unknown"])
         )
 
-        print(f'  Top brand: {matched.get("brand")}')
-        print(f'  Handle brand: {handle.get("brand") if handle else None}')
-        print(f'  Knot brand: {knot.get("brand") if knot else None}')
+        print(f"  Top brand: {matched.get('brand')}")
+        print(f"  Handle brand: {handle.get('brand') if handle else None}")
+        print(f"  Knot brand: {knot.get('brand') if knot else None}")
         print(f"  Has valid brand: {has_valid_brand}")
 
         if has_valid_brand:
@@ -115,7 +115,7 @@ def test_process_brush_unmatched():
             "comment_id": r.get("id", ""),
         }
 
-        print(f'\n--- Processing: {brush.get("original", "")} ---')
+        print(f"\n--- Processing: {brush.get('original', '')} ---")
 
         if matched is None:
             print("  matched is None - adding to unmatched")
