@@ -46,12 +46,49 @@ class TestOtherKnotMatchingStrategy:
         assert result.match_type == "regex"
 
     def test_other_knot_with_default_fiber(self):
-        """Test that knots use default fiber when specified."""
-        result = self.strategy.match("Alpha")
+        """Test that other knot matching works with default fiber."""
+        catalog_data = {
+            "Test Brand": {
+                "default": "Badger",
+                "patterns": [r"test.*brand"],
+            }
+        }
+        strategy = OtherKnotMatchingStrategy(catalog_data)
+        result = strategy.match("test brand")
+
         assert result.matched is not None
-        assert result.matched["brand"] == "Alpha"
-        assert result.matched["model"] == "Synthetic"  # Now uses fiber as model
-        assert result.matched["fiber"] == "Synthetic"
+        assert result.matched["brand"] == "Test Brand"
+        assert result.matched["model"] == "Badger"
+        assert result.matched["fiber"] == "Badger"
+        assert result.matched["fiber_strategy"] == "default"
+
+    def test_other_knot_user_fiber_override(self):
+        """Test that user-provided fiber information overrides brand default."""
+        catalog_data = {
+            "Ever Ready": {
+                "default": "Badger",
+                "patterns": [r"ever.*read"],
+            }
+        }
+        strategy = OtherKnotMatchingStrategy(catalog_data)
+
+        # Test with "Synth" in the text - should detect as Synthetic
+        result = strategy.match("Ever Ready unnumbered Synth")
+
+        assert result.matched is not None
+        assert result.matched["brand"] == "Ever Ready"
+        assert result.matched["model"] == "Synthetic"  # Should use detected fiber
+        assert result.matched["fiber"] == "Synthetic"  # Should use detected fiber
+        assert result.matched["fiber_strategy"] == "user_input"
+
+        # Test without fiber hint - should use brand default
+        result = strategy.match("Ever Ready unnumbered")
+
+        assert result.matched is not None
+        assert result.matched["brand"] == "Ever Ready"
+        assert result.matched["model"] == "Badger"  # Should use default
+        assert result.matched["fiber"] == "Badger"  # Should use default
+        assert result.matched["fiber_strategy"] == "default"
 
     def test_other_knot_with_knot_size(self):
         """Test that knots with knot_size_mm use it."""

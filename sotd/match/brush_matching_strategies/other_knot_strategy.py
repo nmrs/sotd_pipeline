@@ -2,6 +2,7 @@ from sotd.match.brush_matching_strategies.utils.pattern_utils import (
     create_strategy_result,
     validate_string_input,
 )
+from sotd.match.brush_matching_strategies.utils.fiber_utils import match_fiber
 from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 
@@ -28,8 +29,7 @@ class OtherKnotMatchingStrategy:
             default_fiber = metadata.get("default")
             pattern_metadata = {
                 "brand": brand,
-                "model": default_fiber,  # Use default fiber as model name
-                "fiber": default_fiber,  # Use default fiber
+                "default_fiber": default_fiber,  # Store default for later use
                 "knot_size_mm": metadata.get("knot_size_mm"),
             }
 
@@ -66,13 +66,29 @@ class OtherKnotMatchingStrategy:
 
         for pattern_data in self.patterns:
             if pattern_data["compiled"].search(value):
+                brand = pattern_data["brand"]
+                default_fiber = pattern_data["default_fiber"]
+
+                # Extract fiber from user input or use default
+                # (same logic as OtherBrushMatchingStrategy)
+                user_fiber = match_fiber(value)
+                final_fiber = user_fiber or default_fiber
+
+                # Set model to fiber type (user-provided or default)
+                if user_fiber:
+                    model = user_fiber.title()
+                else:
+                    model = default_fiber
+
                 return create_strategy_result(
                     original_value=value,
                     matched_data={
-                        "brand": pattern_data["brand"],
-                        "model": pattern_data["model"],  # Now uses fiber as model
-                        "fiber": pattern_data["fiber"],
+                        "brand": brand,
+                        "model": model,  # Use detected fiber or default fiber
+                        "fiber": final_fiber,  # Use detected fiber or default fiber
                         "knot_size_mm": pattern_data["knot_size_mm"],
+                        "fiber_strategy": "user_input" if user_fiber else "default",
+                        "_pattern_used": pattern_data["pattern"],
                     },
                     pattern=pattern_data["pattern"],
                     strategy_name="OtherKnotMatchingStrategy",
