@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple, Union
 
 from sotd.match.brush_user_actions import BrushUserActionsManager
+from sotd.match.brush_validation_counting_service import BrushValidationCountingService
 from sotd.utils.file_io import load_json_data
 
 
@@ -21,9 +22,11 @@ class BrushValidationCLI:
         # Pass the correct correct_matches.yaml path to ensure consistency
         correct_matches_path = self.data_path / "correct_matches.yaml"
         self.user_actions_manager = BrushUserActionsManager(
-            base_path=self.data_path / "learning",
-            correct_matches_path=correct_matches_path
+            base_path=self.data_path / "learning", correct_matches_path=correct_matches_path
         )
+
+        # Initialize the shared counting service
+        self.counting_service = BrushValidationCountingService(data_path)
 
         # Lazy-load brush matcher entry point only when needed
         self._brush_entry_point = None
@@ -91,6 +94,19 @@ class BrushValidationCLI:
                         "comment_ids": comment_ids,
                     }
                 else:  # scoring system
+                    # Filter out entries that come from correct_matches.yaml
+                    # These are already validated and don't need user validation
+                    matched = brush_entry.get("matched")
+                    strategy = ""
+
+                    # Only check strategy if matched exists
+                    if matched is not None:
+                        strategy = matched.get("strategy", "")
+
+                    # Skip entries with correct_complete_brush or correct_split_brush strategies
+                    if strategy in ["correct_complete_brush", "correct_split_brush"]:
+                        continue
+
                     entry = {
                         # Use normalized field for matching
                         "input_text": brush_entry.get("normalized", ""),
@@ -403,40 +419,8 @@ class BrushValidationCLI:
 
     def get_validation_statistics(self, month: str) -> Dict[str, Union[int, float]]:
         """Get validation statistics for month."""
-        # Only load from scoring system to avoid double-counting
-        # Legacy system contains the same data and is no longer needed
-        scoring_entries = self.load_month_data(month, "scoring")
-
-        # Count unique brush strings (not total records)
-        unique_brush_strings = set()
-        for entry in scoring_entries:
-            input_text = entry.get("input_text", "")
-            if input_text:
-                # Use normalized text if available, otherwise original
-                normalized_text = entry.get("normalized_text", input_text)
-                unique_brush_strings.add(normalized_text.lower())
-
-        total_entries = len(unique_brush_strings)
-
-        # Get user action statistics
-        user_stats = self.user_actions_manager.get_statistics(month)
-
-        # Calculate combined statistics
-        validated_count = user_stats["validated_count"]
-        overridden_count = user_stats["overridden_count"]
-        total_actions = validated_count + overridden_count
-        unvalidated_count = max(0, total_entries - total_actions)
-
-        validation_rate = total_actions / total_entries if total_entries > 0 else 0.0
-
-        return {
-            "total_entries": total_entries,
-            "validated_count": validated_count,
-            "overridden_count": overridden_count,
-            "total_actions": total_actions,
-            "unvalidated_count": unvalidated_count,
-            "validation_rate": validation_rate,
-        }
+        # Delegate to the shared counting service for consistent statistics
+        return self.counting_service.get_validation_statistics(month)
 
     def get_validation_statistics_no_matcher(self, month: str) -> Dict[str, Union[int, float]]:
         """Get validation statistics for month without loading brush matcher.
@@ -445,43 +429,21 @@ class BrushValidationCLI:
         but avoids loading the brush matcher, making it suitable for API endpoints
         that don't need matching functionality.
 
-        Now only counts unique brush strings from the scoring system to avoid
-        double-counting the same data from legacy system.
+        Now delegates to the shared counting service for consistent statistics.
         """
-        # Only load from scoring system to avoid double-counting
-        # Legacy system contains the same data and is no longer needed
-        scoring_entries = self.load_month_data(month, "scoring")
+        # Delegate to the shared counting service for consistent statistics
+        return self.counting_service.get_validation_statistics(month)
 
-        # Count unique brush strings (not total records)
-        unique_brush_strings = set()
-        for entry in scoring_entries:
-            input_text = entry.get("input_text", "")
-            if input_text:
-                # Use normalized text if available, otherwise original
-                normalized_text = entry.get("normalized_text", input_text)
-                unique_brush_strings.add(normalized_text.lower())
+    def get_strategy_distribution_statistics(self, month: str) -> Dict[str, Any]:
+        """Get strategy distribution statistics for validation interface.
 
-        total_entries = len(unique_brush_strings)
+        This method provides detailed counts of entries by strategy type
+        to help debug filter count mismatches.
 
-        # Get user action statistics
-        user_stats = self.user_actions_manager.get_statistics(month)
-
-        # Calculate combined statistics
-        validated_count = user_stats["validated_count"]
-        overridden_count = user_stats["overridden_count"]
-        total_actions = validated_count + overridden_count
-        unvalidated_count = max(0, total_entries - total_actions)
-
-        validation_rate = total_actions / total_entries if total_entries > 0 else 0.0
-
-        return {
-            "total_entries": total_entries,
-            "validated_count": validated_count,
-            "overridden_count": overridden_count,
-            "total_actions": total_actions,
-            "unvalidated_count": unvalidated_count,
-            "validation_rate": validation_rate,
-        }
+        Now delegates to the shared counting service for consistent statistics.
+        """
+        # Delegate to the shared counting service for consistent statistics
+        return self.counting_service.get_strategy_distribution_statistics(month)
 
     def run_validation_workflow(
         self, month: str, system: str, sort_by: str
