@@ -3,10 +3,11 @@
 import logging
 import time
 from pathlib import Path
-from typing import Dict, Any, Union
+from typing import Any, Dict, Union
+
+import yaml
 
 from sotd.utils.file_io import load_json_data
-import yaml
 
 
 class BrushValidationCountingService:
@@ -106,8 +107,10 @@ class BrushValidationCountingService:
             - total_brush_records: Total unique brush strings
             - correct_matches_count: Count of entries from correct_matches.yaml
             - remaining_entries: Count of unvalidated entries
-            - strategy_counts: Count of each strategy type
-            - all_strategies_lengths: Distribution of strategy array lengths
+            - strategy_counts: Count of each strategy type for ALL entries
+            - all_strategies_lengths: Distribution of strategy array lengths for ALL entries
+            - unvalidated_strategy_counts: Count of each strategy type for UNVALIDATED entries
+            - unvalidated_strategies_lengths: Distribution of strategy array lengths for UNVALIDATED
         """
         start_time = time.time()
         try:
@@ -124,14 +127,17 @@ class BrushValidationCountingService:
 
             # Count user actions to get truly unvalidated count
             user_stats = self._count_user_actions(learning_data)
-            total_user_actions = user_stats["validated_count"] + user_stats["overridden_count"]
 
             # Remaining entries are those not in correct_matches and not user-validated
             remaining_entries = max(
-                0, total_brush_records - correct_matches_count - total_user_actions
+                0,
+                total_brush_records
+                - correct_matches_count
+                - user_stats["validated_count"]
+                - user_stats["overridden_count"],
             )
 
-            # Count strategies and all_strategies lengths for unvalidated entries only
+            # Count strategies and all_strategies lengths for ALL entries
             strategy_counts, all_strategies_lengths = self._analyze_strategies(
                 matched_data, correct_matches, learning_data
             )
