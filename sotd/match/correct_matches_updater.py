@@ -53,31 +53,39 @@ class CorrectMatchesUpdater:
         # Load existing data
         data = self.load_correct_matches()
 
-        # Ensure field section exists
-        if field_type not in data:
-            data[field_type] = {}
-
         # Normalize input text for case-insensitive lookup
         normalized_text = input_text.lower().strip()
 
         # For brush field, use the hierarchical structure
         if field_type == "brush":
+            # Ensure field section exists
+            if field_type not in data:
+                data[field_type] = {}
+
             # Extract brand and model from result data
             brand = result_data.get("brand")
             model = result_data.get("model")
 
-            if brand and model:
+            if brand:
                 # Ensure brand section exists
                 if brand not in data[field_type]:
                     data[field_type][brand] = {}
 
+                # Handle dual-component brushes where model is null
+                if model is None:
+                    # For dual-component brushes, use a special model identifier
+                    # This allows them to be stored in correct_matches.yaml
+                    model_key = "dual_component"
+                else:
+                    model_key = model
+
                 # Ensure model section exists
-                if model not in data[field_type][brand]:
-                    data[field_type][brand][model] = []
+                if model_key not in data[field_type][brand]:
+                    data[field_type][brand][model_key] = []
 
                 # Add the normalized text as a pattern if not already present
-                if normalized_text not in data[field_type][brand][model]:
-                    data[field_type][brand][model].append(normalized_text)
+                if normalized_text not in data[field_type][brand][model_key]:
+                    data[field_type][brand][model_key].append(normalized_text)
 
         # For handle and knot fields, use flat structure
         elif field_type in ["handle", "knot"]:
@@ -90,12 +98,53 @@ class CorrectMatchesUpdater:
 
         # For split_brush field, store handle/knot mapping
         elif field_type == "split_brush":
-            # Ensure split_brush section exists
-            if "split_brush" not in data:
-                data["split_brush"] = {}
+            # Extract handle and knot components from the dual-component brush
+            handle_data = result_data.get("handle", {})
+            knot_data = result_data.get("knot", {})
 
-            # Store the split mapping
-            data["split_brush"][normalized_text] = result_data
+            if handle_data and knot_data:
+                # Store handle component in handle section
+                handle_brand = handle_data.get("brand")
+                handle_model = handle_data.get("model")
+
+                if handle_brand and handle_model:
+                    # Ensure handle section exists
+                    if "handle" not in data:
+                        data["handle"] = {}
+                    if handle_brand not in data["handle"]:
+                        data["handle"][handle_brand] = {}
+                    if handle_model not in data["handle"][handle_brand]:
+                        data["handle"][handle_brand][handle_model] = []
+
+                    # Add the normalized text to handle section if not already present
+                    if normalized_text not in data["handle"][handle_brand][handle_model]:
+                        data["handle"][handle_brand][handle_model].append(normalized_text)
+
+                # Store knot component in knot section
+                knot_brand = knot_data.get("brand")
+                knot_model = knot_data.get("model")
+
+                if knot_brand and knot_model:
+                    # Ensure knot section exists
+                    if "knot" not in data:
+                        data["knot"] = {}
+                    if knot_brand not in data["knot"]:
+                        data["knot"][knot_brand] = {}
+                    if knot_model not in data["knot"][knot_brand]:
+                        data["knot"][knot_brand][knot_model] = []
+
+                    # Add the normalized text to knot section if not already present
+                    if normalized_text not in data["knot"][knot_brand][knot_model]:
+                        data["knot"][knot_brand][knot_model].append(normalized_text)
+            else:
+                # Fallback: if we can't extract components, store as regular brush
+                # This shouldn't happen with proper dual-component data
+                if "brush" not in data:
+                    data["brush"] = {}
+                if "dual_component" not in data["brush"]:
+                    data["brush"]["dual_component"] = []
+                if normalized_text not in data["brush"]["dual_component"]:
+                    data["brush"]["dual_component"].append(normalized_text)
 
         # Save the updated data
         self.save_correct_matches(data)

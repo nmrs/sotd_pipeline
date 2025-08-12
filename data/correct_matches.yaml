@@ -593,6 +593,8 @@ brush:
     Synthetic:
     - böker synthetic
   Chisel & Hound:
+    Rob's Finest Synthetic:
+    - chisel & hound - rob's finest - 25mm synthetic
     v10:
     - chisel and hound - bermuda v10 fanchurian 26mm badger
     v11:
@@ -619,6 +621,7 @@ brush:
     - chisel and hound resolute v20
     v21:
     - chisel & hound acer pearl v21
+    - chisel and hound sakura with v21 fanchurian
     v22:
     - c&h redwood giant (4600rc) 26mm v22 fanchurian
     - chisel & hound gulf short 26mm v22 fanchurian
@@ -682,10 +685,8 @@ brush:
     - declaration grooming - unicorn ivory - b3
     - declaration grooming blood of kings b3
     - declaration grooming washington blood of kings b3
-    - heritage shaving ever-ready 500e dg b3 shd badger
     B6:
     - declaration grooming washington b6
-    - that darn rob dg b6
     B7:
     - dg b7 badger
     B8:
@@ -707,6 +708,11 @@ brush:
       woodworks handle'
     - muninn woodworks "bfm" 50mm motherlode
     - muninn woodworks bfm
+  Mühle:
+    Travel:
+    - muhle 31m530 travel
+    - muhle travel shaving brush
+    - mühle travel
   Omega:
     '10005':
     - omega 10005
@@ -732,13 +738,17 @@ brush:
   Semogue:
     '1305':
     - semogue 1305
+    - semogue 1305 (boar)
     '1800':
     - semogue - 1800 boar
     - semogue 1800
     '2000':
     - semogue 2000
+    '2020':
+    - semogue 2020 best badger
     '610':
     - semogue 610
+    - semogue 610 21mm boar
     '830':
     - semogue - semogue 830, boar bristle 22mm
     - semogue 830
@@ -748,6 +758,7 @@ brush:
     - semogue - owners club 24mm boar
     - semogue - owners club taj
     - semogue - soc boar
+    - semogue owners club - cherry wood boar 24mm
   Simpson:
     Chubby 2:
     - simpson - 'chubby 2' silvertip
@@ -757,6 +768,8 @@ brush:
     - simpsons chubby 2 synthetic
     Chubby 3:
     - simpson butterscotch ch3 manchurian badger
+    Classic 1 Synthetic:
+    - 'simpson classic # 1 synthetic bristle'
     Colonel X2L:
     - simpson - 'colonel' best
     M7:
@@ -779,21 +792,40 @@ brush:
   Stirling:
     2-Band Synthetic:
     - stirling 2 band synthetic
+    - stirling two band synthetic
+    Finest Badger:
+    - stirling finest badger brush
   Wald:
     A1:
     - wald a1
+    - wald shaving "nimbus werther's/ivory" 29mm a1 fan
   Walfront:
     Travel Brush:
     - walfront travel brush
+  West Coast Shaving:
+    Synthetic:
+    - wcs 26mm synth
+  Yaqi:
+    Ferrari:
+    - yaqi ferrari 26mm
+    Sagrada:
+    - yaqi sagrada
+    Synthetic:
+    - yaqi 22mm synth
+    - yaqi cola 22mm synthetic three band
   Zenith:
     505BC SE:
     - zenith 505bc
+    506U N:
+    - zenith 506u n (50/50 horse mane/tail) $horsesass
     506U SE:
     - zenith 506u xse
     B15:
     - zenith b15
     B37:
     - zenith b37
+    Barberpole:
+    - zenith barberpole xse 26mm
     r/wetshaving MOAR BOAR:
     - moar boar
     - moar f'n boar
@@ -823,22 +855,14 @@ handle:
   Alpha:
     Outlaw:
     - alpha outlaw silver stf++
-  Declaration Grooming:
-    Unspecified:
-    - DG Unicorn Ivory OG B3
-  Zenith:
-    r/wetshaving MOAR BOAR:
-    - zenith - 508a xl/bristle (b35) (moar boar) 31mm boar
+    - alpha shaving works outlaw 28mm g5
 knot:
-  Declaration Grooming:
-    B3:
-    - DG Unicorn Ivory OG B3
+  Alpha:
+    G5:
+    - alpha shaving works outlaw 28mm g5
   Mühle:
     STF:
     - alpha outlaw silver stf++
-  Zenith:
-    B35:
-    - zenith - 508a xl/bristle (b35) (moar boar) 31mm boar
 razor:
   3D Printed:
     DE:
