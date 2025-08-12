@@ -127,7 +127,7 @@ const UnmatchedAnalyzer: React.FC = () => {
         if (result.partial_results) {
           messaging.addWarningMessage(
             `Partial results: ${result.error || 'Some items could not be processed'}. ` +
-            'Only available data is shown.'
+              'Only available data is shown.'
           );
         }
 
@@ -414,8 +414,6 @@ const UnmatchedAnalyzer: React.FC = () => {
     setFilteredStatus({});
   }, [selectedField]);
 
-
-
   return (
     <div data-testid='unmatched-analyzer' className='min-h-screen p-4'>
       {/* Header */}
@@ -533,10 +531,11 @@ const UnmatchedAnalyzer: React.FC = () => {
               <div className='flex items-center space-x-2'>
                 <button
                   onClick={viewState.toggleShowFiltered}
-                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${viewState.showFiltered
-                    ? 'bg-gray-600 text-white hover:bg-gray-700'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
+                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                    viewState.showFiltered
+                      ? 'bg-gray-600 text-white hover:bg-gray-700'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
                 >
                   {viewState.showFiltered ? 'Hide Filtered' : 'Show Filtered'}
                 </button>
@@ -602,9 +601,7 @@ const UnmatchedAnalyzer: React.FC = () => {
                   <div className='flex items-center space-x-2'>
                     {/* Apply Changes Button */}
                     {(() => {
-                      const visibleItems = searchSort.filteredAndSortedItems.map(
-                        item => item.item
-                      );
+                      const visibleItems = searchSort.filteredAndSortedItems.map(item => item.item);
                       const visibleChanges = Object.keys(pendingChanges).filter(itemName =>
                         visibleItems.includes(itemName)
                       );
@@ -624,10 +621,11 @@ const UnmatchedAnalyzer: React.FC = () => {
                           <button
                             onClick={handleApplyFilteredChanges}
                             disabled={loading || visibleChangesCount === 0}
-                            className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || visibleChangesCount === 0
-                              ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                              : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                              }`}
+                            className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${
+                              loading || visibleChangesCount === 0
+                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                                : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                            }`}
                           >
                             {loading ? 'Applying...' : `Apply (${visibleChangesCount})`}
                           </button>

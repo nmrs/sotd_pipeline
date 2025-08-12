@@ -1,4 +1,3 @@
-
 import { render, screen } from '@testing-library/react';
 import UnmatchedAnalyzerDataTable from '../data/UnmatchedAnalyzerDataTable';
 
@@ -74,8 +73,6 @@ const mockFilteredStatus = {
 const mockPendingChanges = {
   'Test Razor 3': true,
 };
-
-
 
 describe('UnmatchedAnalyzerDataTable', () => {
   describe('ShadCN DataTable Integration', () => {

@@ -322,7 +322,7 @@ export const saveBrushSplits = async (
       original: split.original,
       handle: split.handle,
       knot: split.knot,
-      validated: split.validated,
+      validated_at: split.validated_at,
       corrected: split.corrected,
       system_handle: split.system_handle,
       system_knot: split.system_knot,
@@ -633,26 +633,21 @@ export interface BrushValidationStatistics {
   validation_rate: number;
 }
 
+export interface StrategyDistributionStatistics {
+  total_brush_records: number;
+  correct_matches_count: number;
+  remaining_entries: number;
+  strategy_counts: Record<string, number>;
+  all_strategies_lengths: Record<string, number>;
+}
+
 export interface BrushValidationActionRequest {
   input_text: string;
   month: string;
   system_used: 'scoring';
   action: 'validate' | 'override';
-  system_choice: {
-    strategy: string;
-    score: number | null;
-    result: Record<string, any>;
-  };
-  user_choice: {
-    strategy: string;
-    score?: number | null;
-    result: Record<string, any>;
-  };
-  all_brush_strategies: Array<{
-    strategy: string;
-    score: number;
-    result: Record<string, any>;
-  }>;
+  // For override actions, specify which strategy index to use
+  strategy_index?: number;
 }
 
 export interface BrushValidationActionResponse {
@@ -684,12 +679,26 @@ export const getBrushValidationData = async (
   }
 };
 
-export const getBrushValidationStatistics = async (month: string): Promise<BrushValidationStatistics> => {
+export const getBrushValidationStatistics = async (
+  month: string
+): Promise<BrushValidationStatistics> => {
   try {
     const response = await api.get(`/brush-validation/statistics/${month}`);
     return response.data;
   } catch (error) {
     console.error('Error loading brush validation statistics:', error);
+    throw error;
+  }
+};
+
+export const getStrategyDistributionStatistics = async (
+  month: string
+): Promise<StrategyDistributionStatistics> => {
+  try {
+    const response = await api.get(`/brush-validation/statistics/${month}/strategy-distribution`);
+    return response.data;
+  } catch (error) {
+    console.error('Error loading strategy distribution statistics:', error);
     throw error;
   }
 };
@@ -702,6 +711,18 @@ export const recordBrushValidationAction = async (
     return response.data;
   } catch (error) {
     console.error('Error recording brush validation action:', error);
+    throw error;
+  }
+};
+
+export const undoLastValidationAction = async (
+  month: string
+): Promise<BrushValidationActionResponse> => {
+  try {
+    const response = await api.post(`/brush-validation/undo?month=${month}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error undoing last validation action:', error);
     throw error;
   }
 };

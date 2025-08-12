@@ -111,17 +111,17 @@ export function DataTable<TData, TValue>({
   const setEffectiveRowSelection =
     externalRowSelection !== undefined
       ? (updater: RowSelectionState | ((prev: RowSelectionState) => RowSelectionState)) => {
-        // When using external selection, we need to call onSelectionChange directly
-        // since the table's internal state won't be updated
-        const newSelection =
-          typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
-        if (onSelectionChange) {
-          const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
-          onSelectionChange(selectedRows);
+          // When using external selection, we need to call onSelectionChange directly
+          // since the table's internal state won't be updated
+          const newSelection =
+            typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
+          if (onSelectionChange) {
+            const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
+            onSelectionChange(selectedRows);
+          }
+          // Also update the internal state so the UI reflects the change immediately
+          setRowSelection(newSelection);
         }
-        // Also update the internal state so the UI reflects the change immediately
-        setRowSelection(newSelection);
-      }
       : setRowSelection;
 
   const table = useReactTable({
@@ -325,8 +325,9 @@ export function DataTable<TData, TValue>({
                         <div className='flex items-center justify-between'>
                           {sortable ? (
                             <button
-                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
-                                }`}
+                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${
+                                header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
+                              }`}
                               onClick={header.column.getToggleSortingHandler()}
                               disabled={!header.column.getCanSort()}
                             >
@@ -369,10 +370,11 @@ export function DataTable<TData, TValue>({
                     data-row-id={row.id}
                     data-state={row.getIsSelected() && 'selected'}
                     onClick={enableRowClickSelection ? e => handleRowClick(row, e) : undefined}
-                    className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${keyboardNavigationEnabled && activeRowIndex === index
+                    className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${
+                      keyboardNavigationEnabled && activeRowIndex === index
                         ? 'bg-blue-50 border-l-4 border-l-blue-500'
                         : ''
-                      }`}
+                    }`}
                   >
                     {row.getVisibleCells().map(cell => (
                       <TableCell

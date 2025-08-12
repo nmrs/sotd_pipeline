@@ -11,10 +11,6 @@ jest.mock('../../services/api', () => ({
   checkFilteredStatus: jest.fn(),
 }));
 
-
-
-
-
 import UnmatchedAnalyzer from '../UnmatchedAnalyzer';
 import * as mockApi from '../../services/api';
 
