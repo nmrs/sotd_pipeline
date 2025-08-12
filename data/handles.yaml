@@ -114,7 +114,9 @@ artisan_handles:
       - ^(?!.*dog).*declaration
       - ^(?!.*dog).*\bdg\b
       - \bdg\b
-      - ^(?!.*(zeni|dog)).*\bb(?:[1-8]|9[ab]|1[0-8])\b
+      - ^(?!.*(zeni|dog)).*\bb[1-8]\b
+      - ^(?!.*(zeni|dog)).*\bb9[ab]\b
+      - ^(?!.*(zeni|dog)).*\bb1[0-8]\b
   Dogwood Handcrafts:
     Unspecified:
       patterns:
@@ -230,7 +232,7 @@ artisan_handles:
   Muninn Woodworks:
     Unspecified:
       patterns:
-      - mun*in.*(?:woodworks+)+
+      - mun+in.*(?:woodworks?)?(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Мужской Материк:
     Unspecified:
       patterns:
@@ -597,7 +599,7 @@ manufacturer_handles:
     Unspecified:
       patterns:
       - mountain.*hare
-  Muhle:
+  Mühle:
     Unspecified:
       patterns:
       - "\\bm[uü]hle\\b"

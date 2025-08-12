@@ -130,96 +130,115 @@ known_knots:
       - chis.*[fh]ou.*v10
       - \bc(?:\&|and|\+)h\b.*v10
       - \bch\b.*v10
+      - \bv10\b
     v11:
       patterns:
       - chis.*[fh]ou.*v11
       - \bc(?:\&|and|\+)h\b.*v11
       - \bch\b.*v11
+      - \bv11\b
     v12:
       patterns:
       - chis.*[fh]ou.*v12
       - \bc(?:\&|and|\+)h\b.*v12
       - \bch\b.*v12
+      - \bv12\b
     v13:
       patterns:
       - chis.*[fh]ou.*v13
       - \bc(?:\&|and|\+)h\b.*v13
       - \bch\b.*v13
+      - \bv13\b
     v14:
       patterns:
       - chis.*[fh]ou.*v14
       - \bc(?:\&|and|\+)h\b.*v14
       - \bch\b.*v14
+      - \bv14\b
     v15:
       patterns:
       - chis.*[fh]ou.*v15
       - \bc(?:\&|and|\+)h\b.*v15
       - \bch\b.*v15
+      - \bv15\b
     v16:
       patterns:
       - chis.*[fh]ou.*v16
       - \bc(?:\&|and|\+)h\b.*v16
       - \bch\b.*v16
+      - \bv16\b
     v17:
       patterns:
       - chis.*[fh]ou.*v17
       - \bc(?:\&|and|\+)h\b.*v17
       - \bch\b.*v17
+      - \bv17\b
     v18:
       patterns:
       - chis.*[fh]ou.*v18
       - \bc(?:\&|and|\+)h\b.*v18
       - \bch\b.*v18
+      - \bv18\b
     v19:
       patterns:
       - chis.*[fh]ou.*v19
       - \bc(?:\&|and|\+)h\b.*v19
       - \bch\b.*v19
+      - \bv19\b
     v20:
       patterns:
       - chis.*[fh]ou.*v20
       - \bc(?:\&|and|\+)h\b.*v20
       - \bch\b.*v20
+      - \bv20\b
     v21:
       patterns:
       - chis.*[fh]ou.*v21
       - \bc(?:\&|and|\+)h\b.*v21
       - \bch\b.*v21
+      - \bv21\b
     v22:
       patterns:
       - chis.*[fh]ou.*v22
       - \bc(?:\&|and|\+)h\b.*v22
       - \bch\b.*v22
+      - \bv22\b
     v23:
       patterns:
       - chis.*[fh]ou.*v23
       - \bc(?:\&|and|\+)h\b.*v23
       - \bch\b.*v23
+      - \bv23\b
     v24:
       patterns:
       - chis.*[fh]ou.*v24
       - \bc(?:\&|and|\+)h\b.*v24
       - \bch\b.*v24
+      - \bv24\b
     v25:
       patterns:
       - chis.*[fh]ou.*v25
       - \bc(?:\&|and|\+)h\b.*v25
       - \bch\b.*v25
+      - \bv25\b
     v26:
       patterns:
       - chis.*[fh]ou.*v26
       - \bc(?:\&|and|\+)h\b.*v26
       - \bch\b.*v26
+      - \bv26\b
     v27:
       patterns:
       - chis.*[fh]ou.*v27
       - \bc(?:\&|and|\+)h\b.*v27
       - \bch\b.*v27
+      - \bv27\b
     v28:
       patterns:
       - chis.*[fh]ou.*v28
       - \bc(?:\&|and|\+)h\b.*v28
       - \bch\b.*v28
+      - \bv28\b
   Declaration Grooming:
     knot_size_mm: 28
     fiber: Badger
@@ -313,11 +332,22 @@ known_knots:
       patterns:
       - m[uü]hle.*stf
       - stf
+  Omega:
+    fiber: Boar
+    '10049':
+      knot_size_mm: 26
+      patterns:
+      - omega.*(pro)*.*49
   Oumo:
     Rorschach:
       fiber: Badger
       patterns:
       - (oumo.*)?rorschach
+  Rad Dinosaur Creations:
+    Raptor:
+      fiber: Synthetic
+      patterns:
+      - raptor
   Rich Man Shaving:
     S2 Innovator:
       fiber: Badger
@@ -658,18 +688,10 @@ other_knots:
     default: Boar
     patterns:
     - erskine
-  Ever Ready:
-    default: Badger
-    patterns:
-    - ever.*read
   Executive Shaving:
     default: Synthetic
     patterns:
     - execut.*shav
-  Farvour Turn Craft:
-    default: Badger
-    patterns:
-    - farvour
   Fendrihan:
     default: Badger
     patterns:
@@ -923,10 +945,6 @@ other_knots:
     default: Synthetic
     patterns:
     - \brubab\b
-  Rubberset:
-    default: Badger
-    patterns:
-    - rubberset
   Rudy Vey:
     default: Badger
     patterns:
@@ -955,10 +973,6 @@ other_knots:
     default: Synthetic
     patterns:
     - strike.*gold
-  Summer Break:
-    default: Badger
-    patterns:
-    - summer.*break
   Supply:
     default: Synthetic
     patterns:
@@ -1054,7 +1068,7 @@ other_knots:
     default: Badger
     patterns:
     - vul?fix
-  WCS:
+  West Coast Shaving:
     default: Synthetic
     patterns:
     - wcs

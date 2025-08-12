@@ -16,78 +16,86 @@ brush_scoring_weights:
 
   # Strategy-specific modifiers (Phase 3.7 - ENABLED)
   strategy_modifiers:
-    # Modifiers for split strategies
+    # Modifiers for split strategies (automated_split, known_split, correct_split_brush)
     automated_split:
-      high_confidence: 25.0
-      multiple_brands: -3.0
-      fiber_words: 2.0
-      size_specification: 1.0
-      delimiter_confidence: 2.0
-      handle_confidence: 0.0
-      knot_confidence: 0.0
-      word_count_balance: 0.0
-    # Modifiers for complete brush strategies
+      high_confidence: 20.0
+      multiple_brands: 25.0
+      fiber_words: 0.0
+      size_specification: 0.0
+      delimiter_confidence: 0.0
+    
+    # Modifiers for complete brush strategies (no splitting needed)
     correct_complete_brush:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
-      delimiter_confidence: 0.0
-      handle_confidence: 0.0
-      knot_confidence: 0.0
-      word_count_balance: 0.0
+    
     correct_split_brush:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
-      delimiter_confidence: 0.0
-      handle_confidence: 0.0
-      knot_confidence: 0.0
-      word_count_balance: 0.0
+    
     known_split:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
-      delimiter_confidence: 0.0
-      handle_confidence: 0.0
-      knot_confidence: 0.0
-      word_count_balance: 0.0
+    
     known_brush:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
-      delimiter_confidence: 0.0
-      handle_confidence: 0.0
-      knot_confidence: 0.0
-      word_count_balance: 0.0
+    
     omega_semogue:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
-      delimiter_confidence: 0.0
-      handle_confidence: 0.0
-      knot_confidence: 0.0
-      word_count_balance: 0.0
+    
     zenith:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
-      delimiter_confidence: 0.0
-      handle_confidence: 0.0
-      knot_confidence: 0.0
-      word_count_balance: 0.0
+    
     other_brush:
       multiple_brands: 0.0
       fiber_words: 0.0
       size_specification: 0.0
-      delimiter_confidence: 0.0
-      handle_confidence: 0.0
-      knot_confidence: 0.0
-      word_count_balance: 0.0
+    
     unified:
       dual_component: 15.0
+      multiple_brands: 20.0
       fiber_words: 0.0
-      size_specification: 0.0
-      delimiter_confidence: 0.0
-      handle_confidence: 0.0
-      knot_confidence: 0.0
-      word_count_balance: 0.0 
+      size_specification: 0.0 
+
+# GLOSSARY OF MODIFIERS
+# =====================
+# 
+# Base Strategy Scores:
+# - correct_complete_brush: Perfect match from correct_matches.yaml (highest confidence)
+# - correct_split_brush: Correct match with handle/knot splitting (very high confidence)  
+# - known_split: Known brush that requires splitting (high confidence)
+# - known_brush: Known brush from catalog (good confidence)
+# - omega_semogue: Special handling for Omega/Semogue brands (medium-high confidence)
+# - zenith: Special handling for Zenith brand (medium-high confidence)
+# - other_brush: Generic brush matching (medium confidence)
+# - automated_split: Automated splitting with confidence scoring (lower confidence)
+# - unified: Unified strategy for complex cases (lowest confidence)
+#
+# Modifier Types and Strategy Applicability:
+# =========================================
+#
+# HIGH CONFIDENCE MODIFIERS (only for splitting strategies):
+# - high_confidence: Bonus when result uses high-priority delimiter (w/, with, in) - ONLY for automated_split
+# - delimiter_confidence: Bonus when input contains high-confidence delimiters (w/, with, in) - ONLY for automated_split
+#
+# GENERAL MODIFIERS (for all strategies):
+# - multiple_brands: Penalty when multiple brands are detected (potential confusion)
+# - fiber_words: Bonus when fiber type words are present (helps identify knot vs handle)
+# - size_specification: Bonus when size specifications are present (more specific match)
+#
+# UNUSED MODIFIERS (currently 0.0 for all strategies):
+# - handle_confidence: Bonus for high-confidence handle matching (placeholder for future use)
+# - knot_confidence: Bonus for high-confidence knot matching (placeholder for future use)
+# - word_count_balance: Bonus for balanced word distribution (placeholder for future use)
+#
+# STRATEGY-SPECIFIC MODIFIERS:
+# - dual_component: Bonus when both handle and knot components are detected (ONLY for unified strategy) 

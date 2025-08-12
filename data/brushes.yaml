@@ -36,6 +36,16 @@ known_brushes:
   Chisel & Hound:
     fiber: Badger
     knot_size_mm: 26
+    Rob's Finest Boar:
+      fiber: Boar
+      knot_size_mm: 25
+      patterns:
+      - rob's.*finest.*boar
+    Rob's Finest Synthetic:
+      fiber: Synthetic
+      knot_size_mm: 25
+      patterns:
+      - rob's.*finest.*syn
     v10:
       patterns:
       - chis.*[fh]ou.*v10
@@ -276,6 +286,13 @@ known_brushes:
       knot_size_mm: 21
       patterns:
       - m[uü]hle.*purist
+    Travel:
+      fiber: Synthetic
+      knot_size_mm: 21
+      patterns:
+      - m[uü]hle.*travel
+      - m[uü]hle.*travel
+      - 31.*M.*530
     Vivo:
       knot_size_mm: 21
       patterns:
@@ -432,11 +449,18 @@ known_brushes:
       patterns:
       - semogue.*2000
     '2015':
+      fiber: Badger
       knot_size_mm: 22
       patterns:
       - semogue.*2015
     '2020':
+      fiber: Badger
       knot_size_mm: 22
+      patterns:
+      - semogue.*2020
+    '2040':
+      fiber: Badger
+      knot_size_mm: 23
       patterns:
       - semogue.*2020
     '610':
@@ -533,6 +557,30 @@ known_brushes:
       patterns:
       - simp.*chubby\s*3
       - simp.*ch3
+    Classic 1:
+      fiber: Badger
+      knot_size_mm: 21
+      patterns:
+      - simp.*classic.*\b1\b
+      - simp.*cl1
+    Classic 1 Synthetic:
+      fiber: Synthetic
+      knot_size_mm: 21
+      patterns:
+      - simp.*classic.*\b1\b.*synth
+      - simp.*cl1.*synth
+    Classic 2:
+      fiber: Badger
+      knot_size_mm: 23
+      patterns:
+      - simp.*classic.*\b2\b
+      - simp.*cl2
+    Classic 2 Synthetic:
+      fiber: Synthetic
+      knot_size_mm: 23
+      patterns:
+      - simp.*classic.*\b2\b.*synth
+      - simp.*cl2.*synth
     Colonel X2L:
       fiber: Badger
       knot_size_mm: 21
@@ -593,6 +641,11 @@ known_brushes:
       knot_size_mm: 24
       patterns:
       - stirl.*(?:2|two)(?:-|\s)+band
+    Finest Badger:
+      fiber: Badger
+      knot_size_mm: 24
+      patterns:
+      - stirling.*finest.*badger
     Li'l Bridder:
       fiber: Synthetic
       knot_size_mm: 22
@@ -718,10 +771,20 @@ known_brushes:
       fiber: Synthetic
       patterns:
       - yaqi.*cashmere
+    Ferrari:
+      fiber: Synthetic
+      knot_size_mm: 26
+      patterns:
+      - yaqi.*ferrari
     Synbad:
       fiber: Synthetic
       patterns:
       - yaqi.*synbad
+    Sagrada:
+      fiber: Synthetic
+      knot_size_mm: 24
+      patterns:
+      - sagrada
   Zenith:
     2006 XSE:
       fiber: Boar
@@ -865,6 +928,17 @@ known_brushes:
       patterns:
       - ^(?!.*moar).*zenith.*\bb35\b
       - 508a
+    Barberpole:
+      fiber: Boar
+      knot_size_mm: 26
+      patterns:
+      - zenith.*barber ?pole
+    Barberpole Silvertip Badger:
+      fiber: Badger
+      knot_size_mm: 26
+      patterns:
+      - zenith.*barber ?pole.*badger
+      - zenith.*badger.*barber ?pole
     Butterscotch Chubby (B34):
       fiber: Boar
       knot_size_mm: 28
@@ -933,3 +1007,12 @@ other_brushes:
     default: Badger
     patterns:
     - th[aä]ter
+  West Coast Shaving:
+    default: Synthetic
+    patterns:
+    - wcs
+    - west.*coast
+  Yaqi:
+    default: Synthetic
+    patterns:
+    - yaqi
