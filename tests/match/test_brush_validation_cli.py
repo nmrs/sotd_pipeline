@@ -100,11 +100,122 @@ class TestBrushValidationCLI:
         result = self.cli.load_month_data("2025-08", "scoring")
 
         assert len(result) == 1
-        # Now expect normalized text for input_text (matching operations)
         assert result[0]["input_text"] == "test brush 1"
+        assert result[0]["normalized_text"] == "test brush 1"
         assert result[0]["system_used"] == "scoring"
         assert result[0]["matched"]["strategy"] == "dual_component"
+
+        mock_load_json.assert_called_once()
+
+    @patch("sotd.match.brush_validation_cli.load_json_data")
+    def test_load_month_data_scoring_system_filters_correct_matches(self, mock_load_json):
+        """Test that correct_complete_brush and correct_split_brush entries are filtered out."""
+        # Mock data structure with entries that should be filtered out
+        mock_data = {
+            "data": [
+                {
+                    "id": "comment1",
+                    "brush": {
+                        "original": "Test Brush 1",
+                        "normalized": "test brush 1",
+                        "matched": {
+                            "strategy": "correct_complete_brush",  # Should be filtered out
+                            "score": 100,
+                            "result": {"brand": "Test", "model": "Brush1"},
+                        },
+                        "all_strategies": [
+                            {"strategy": "correct_complete_brush", "score": 100, "result": {}},
+                        ],
+                    },
+                },
+                {
+                    "id": "comment2",
+                    "brush": {
+                        "original": "Test Brush 2",
+                        "normalized": "test brush 2",
+                        "matched": {
+                            "strategy": "correct_split_brush",  # Should be filtered out
+                            "score": 95,
+                            "result": {"brand": "Test", "model": "Brush2"},
+                        },
+                        "all_strategies": [
+                            {"strategy": "correct_split_brush", "score": 95, "result": {}},
+                        ],
+                    },
+                },
+                {
+                    "id": "comment3",
+                    "brush": {
+                        "original": "Test Brush 3",
+                        "normalized": "test brush 3",
+                        "matched": {
+                            "strategy": "dual_component",  # Should NOT be filtered out
+                            "score": 85,
+                            "result": {"brand": "Test", "model": "Brush3"},
+                        },
+                        "all_strategies": [
+                            {"strategy": "dual_component", "score": 85, "result": {}},
+                        ],
+                    },
+                },
+            ]
+        }
+        mock_load_json.return_value = mock_data
+
+        result = self.cli.load_month_data("2025-08", "scoring")
+
+        # Only the dual_component entry should remain
+        assert len(result) == 1
+        assert result[0]["input_text"] == "test brush 3"
+        assert result[0]["matched"]["strategy"] == "dual_component"
         assert result[0]["matched"]["score"] == 85
+
+        mock_load_json.assert_called_once()
+
+    @patch("sotd.match.brush_validation_cli.load_json_data")
+    def test_load_month_data_scoring_system_handles_null_matched(self, mock_load_json):
+        """Test that entries with matched: null are handled correctly."""
+        # Mock data structure with an entry that has matched: null
+        mock_data = {
+            "data": [
+                {
+                    "id": "comment1",
+                    "brush": {
+                        "original": "Test Brush 1",
+                        "normalized": "test brush 1",
+                        "matched": None,  # This should not cause an error
+                        "all_strategies": [],
+                    },
+                },
+                {
+                    "id": "comment2",
+                    "brush": {
+                        "original": "Test Brush 2",
+                        "normalized": "test brush 2",
+                        "matched": {
+                            "strategy": "dual_component",
+                            "score": 85,
+                            "result": {"brand": "Test", "model": "Brush2"},
+                        },
+                        "all_strategies": [
+                            {"strategy": "dual_component", "score": 85, "result": {}},
+                        ],
+                    },
+                },
+            ]
+        }
+        mock_load_json.return_value = mock_data
+
+        result = self.cli.load_month_data("2025-08", "scoring")
+
+        # Both entries should be loaded (null matched is not filtered out)
+        assert len(result) == 2
+        assert result[0]["input_text"] == "test brush 1"
+        assert result[0]["matched"] is None
+        assert result[1]["input_text"] == "test brush 2"
+        assert result[1]["matched"]["strategy"] == "dual_component"
+
+        mock_load_json.assert_called_once()
 
     def test_sort_entries_by_unvalidated(self):
         """Test sorting entries by unvalidated status."""

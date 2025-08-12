@@ -4,7 +4,7 @@ import shutil
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import pytest
 import yaml
@@ -575,9 +575,16 @@ class TestBrushUserActionsManager:
             with open(expected_learning_file, "r") as f:
                 learning_data = yaml.safe_load(f)
 
-            assert "brush_user_actions" in learning_data, "Learning file should have brush_user_actions key"
-            assert len(learning_data["brush_user_actions"]) == 1, "Learning file should have one action"
-            assert learning_data["brush_user_actions"][0]["input_text"] == "Test Brush Real Dual Update"
+            assert (
+                "brush_user_actions" in learning_data
+            ), "Learning file should have brush_user_actions key"
+            assert (
+                len(learning_data["brush_user_actions"]) == 1
+            ), "Learning file should have one action"
+            assert (
+                learning_data["brush_user_actions"][0]["input_text"]
+                == "Test Brush Real Dual Update"
+            )
 
             # Verify correct_matches.yaml was created and updated
             assert temp_correct_matches.exists(), "correct_matches.yaml should exist"
@@ -605,3 +612,475 @@ class TestBrushUserActionsManager:
         finally:
             # Clean up
             shutil.rmtree(temp_dir)
+
+    def test_undo_last_action_success(self):
+        """Test successfully undoing the last action."""
+        # Record some actions first
+        system_choice = {"strategy": "dual_component", "score": 85, "result": {}}
+        user_choice = {"strategy": "dual_component", "result": {}}
+        all_strategies = [
+            {"strategy": "complete_brush", "score": 45, "result": {}},
+            {"strategy": "dual_component", "score": 85, "result": {}},
+        ]
+
+        # Record first action
+        self.manager.record_validation(
+            input_text="Test Brush 1",
+            month="2025-08",
+            system_used="scoring",
+            system_choice=system_choice,
+            user_choice=user_choice,
+            all_brush_strategies=all_strategies,
+            comment_ids=["comment1"],
+        )
+
+        # Add a small delay to ensure different timestamps
+        import time
+
+        time.sleep(0.1)
+
+        # Record second action
+        self.manager.record_validation(
+            input_text="Test Brush 2",
+            month="2025-08",
+            system_used="scoring",
+            system_choice=system_choice,
+            user_choice=user_choice,
+            all_brush_strategies=all_strategies,
+            comment_ids=["comment2"],
+        )
+
+        # Verify we have 2 actions
+        actions = self.manager.get_monthly_actions("2025-08")
+        assert len(actions) == 2
+
+        # Debug: Print action details
+        print("Actions before undo:")
+        for i, action in enumerate(actions):
+            print(f"  {i}: {action.input_text} at {action.timestamp}")
+
+        # Mock the CLI for correct_matches removal
+        with patch.object(self.manager, "correct_matches_updater") as mock_updater:
+            # Mock the remove_entry method
+            mock_updater.remove_entry.return_value = True
+
+            # Undo last action
+            undone_action = self.manager.undo_last_action("2025-08")
+
+            # Debug: Print what was undone
+            if undone_action:
+                print(f"Undone action: {undone_action.input_text} at {undone_action.timestamp}")
+            else:
+                print("No action was undone")
+
+            # Verify undone action
+            assert undone_action is not None
+            assert undone_action.input_text == "Test Brush 2"
+            assert undone_action.action == "validated"
+
+            # Verify action was removed from storage
+            actions = self.manager.get_monthly_actions("2025-08")
+            assert len(actions) == 1
+            assert actions[0].input_text == "Test Brush 1"
+
+            # Verify correct_matches_updater was called to remove entry
+            mock_updater.remove_entry.assert_called_once_with("Test Brush 2", "brush")
+
+    def test_undo_last_action_no_actions(self):
+        """Test undoing last action when no actions exist."""
+        # Try to undo from month with no actions
+        undone_action = self.manager.undo_last_action("2025-08")
+
+        assert undone_action is None
+
+    def test_undo_last_action_single_action(self):
+        """Test undoing last action when only one action exists."""
+        # Record single action
+        system_choice = {"strategy": "dual_component", "score": 85, "result": {}}
+        user_choice = {"strategy": "dual_component", "result": {}}
+        all_strategies = [
+            {"strategy": "complete_brush", "score": 45, "result": {}},
+            {"strategy": "dual_component", "score": 85, "result": {}},
+        ]
+
+        self.manager.record_validation(
+            input_text="Test Brush Single",
+            month="2025-08",
+            system_used="scoring",
+            system_choice=system_choice,
+            user_choice=user_choice,
+            all_brush_strategies=all_strategies,
+            comment_ids=["comment1"],
+        )
+
+        # Mock the correct_matches_updater for removal
+        with patch.object(self.manager, "correct_matches_updater") as mock_updater:
+            # Mock the remove_entry method
+            mock_updater.remove_entry.return_value = True
+
+            # Undo last action
+            undone_action = self.manager.undo_last_action("2025-08")
+
+            # Verify undone action
+            assert undone_action is not None
+            assert undone_action.input_text == "Test Brush Single"
+
+            # Verify action was removed from storage
+            actions = self.manager.get_monthly_actions("2025-08")
+            assert len(actions) == 0
+
+    def test_undo_last_action_cli_error_handling(self):
+        """Test handling of CLI errors during undo operation."""
+        # Record test action
+        system_choice = {"strategy": "dual_component", "score": 85, "result": {}}
+        user_choice = {"strategy": "dual_component", "result": {}}
+        all_strategies = [
+            {"strategy": "complete_brush", "score": 45, "result": {}},
+            {"strategy": "dual_component", "score": 85, "result": {}},
+        ]
+
+        self.manager.record_validation(
+            input_text="Test Brush CLI Error",
+            month="2025-08",
+            system_used="scoring",
+            system_choice=system_choice,
+            user_choice=user_choice,
+            all_brush_strategies=all_strategies,
+            comment_ids=["comment1"],
+        )
+
+        # Mock the correct_matches_updater to raise an error
+        with patch.object(self.manager, "correct_matches_updater") as mock_updater:
+            # Mock the remove_entry method to raise an error
+            mock_updater.remove_entry.side_effect = Exception("Updater Error")
+
+            # Undo should still work even if updater fails
+            undone_action = self.manager.undo_last_action("2025-08")
+
+            # Verify undone action
+            assert undone_action is not None
+            assert undone_action.input_text == "Test Brush CLI Error"
+
+            # Verify action was removed from storage
+            actions = self.manager.get_monthly_actions("2025-08")
+            assert len(actions) == 0
+
+    def test_undo_last_action_different_months(self):
+        """Test that undo operations are isolated to specific months."""
+        # Record actions for different months
+        system_choice = {"strategy": "dual_component", "score": 85, "result": {}}
+        user_choice = {"strategy": "dual_component", "result": {}}
+        all_strategies = [
+            {"strategy": "complete_brush", "score": 45, "result": {}},
+            {"strategy": "dual_component", "score": 85, "result": {}},
+        ]
+
+        # Record action for 2025-07
+        self.manager.record_validation(
+            input_text="Test Brush July",
+            month="2025-07",
+            system_used="scoring",
+            system_choice=system_choice,
+            user_choice=user_choice,
+            all_brush_strategies=all_strategies,
+            comment_ids=["comment1"],
+        )
+
+        # Record action for 2025-08
+        self.manager.record_validation(
+            input_text="Test Brush August",
+            month="2025-08",
+            system_used="scoring",
+            system_choice=system_choice,
+            user_choice=user_choice,
+            all_brush_strategies=all_strategies,
+            comment_ids=["comment2"],
+        )
+
+        # Mock the correct_matches_updater for removal
+        with patch.object(self.manager, "correct_matches_updater") as mock_updater:
+            # Mock the remove_entry method
+            mock_updater.remove_entry.return_value = True
+
+            # Undo from 2025-07
+            undone_action_07 = self.manager.undo_last_action("2025-07")
+
+            # Verify action was undone from 2025-07
+            assert undone_action_07 is not None
+            assert undone_action_07.input_text == "Test Brush July"
+
+            # Verify 2025-08 actions are unchanged
+            actions_08 = self.manager.get_monthly_actions("2025-08")
+            assert len(actions_08) == 1
+            assert actions_08[0].input_text == "Test Brush August"
+
+    def test_undo_last_action_preserves_order(self):
+        """Test that undo operations preserve the order of remaining actions."""
+        # Record multiple actions
+        system_choice = {"strategy": "dual_component", "score": 85, "result": {}}
+        user_choice = {"strategy": "dual_component", "result": {}}
+        all_strategies = [
+            {"strategy": "complete_brush", "score": 45, "result": {}},
+            {"strategy": "dual_component", "score": 85, "result": {}},
+        ]
+
+        # Record actions in order
+        for i in range(3):
+            self.manager.record_validation(
+                input_text=f"Test Brush {i+1}",
+                month="2025-08",
+                system_used="scoring",
+                system_choice=system_choice,
+                user_choice=user_choice,
+                all_brush_strategies=all_strategies,
+                comment_ids=[f"comment{i+1}"],
+            )
+
+        # Verify we have 3 actions
+        actions = self.manager.get_monthly_actions("2025-08")
+        assert len(actions) == 3
+
+        # Mock the correct_matches_updater for removal
+        with patch.object(self.manager, "correct_matches_updater") as mock_updater:
+            # Mock the remove_entry method
+            mock_updater.remove_entry.return_value = True
+
+            # Undo last action
+            undone_action = self.manager.undo_last_action("2025-08")
+
+            # Verify undone action
+            assert undone_action is not None
+            assert undone_action.input_text == "Test Brush 3"
+
+            # Verify remaining actions preserve order
+            remaining_actions = self.manager.get_monthly_actions("2025-08")
+            assert len(remaining_actions) == 2
+            assert remaining_actions[0].input_text == "Test Brush 1"
+            assert remaining_actions[1].input_text == "Test Brush 2"
+
+    def test_undo_last_action_with_override_actions(self):
+        """Test undoing override actions."""
+        # Record mix of validation and override actions
+        system_choice = {"strategy": "dual_component", "score": 85, "result": {}}
+        user_choice = {"strategy": "dual_component", "result": {}}
+        all_strategies = [
+            {"strategy": "complete_brush", "score": 45, "result": {}},
+            {"strategy": "dual_component", "score": 85, "result": {}},
+        ]
+
+        # Record validation action
+        self.manager.record_validation(
+            input_text="Test Brush Validated",
+            month="2025-08",
+            system_used="scoring",
+            system_choice=system_choice,
+            user_choice=user_choice,
+            all_brush_strategies=all_strategies,
+            comment_ids=["comment1"],
+        )
+
+        # Record override action
+        self.manager.record_override(
+            input_text="Test Brush Overridden",
+            month="2025-08",
+            system_used="scoring",
+            system_choice=system_choice,
+            user_choice=user_choice,
+            all_brush_strategies=all_strategies,
+            comment_ids=["comment2"],
+        )
+
+        # Verify we have 2 actions
+        actions = self.manager.get_monthly_actions("2025-08")
+        assert len(actions) == 2
+
+        # Mock the correct_matches_updater for removal
+        with patch.object(self.manager, "correct_matches_updater") as mock_updater:
+            # Mock the remove_entry method
+            mock_updater.remove_entry.return_value = True
+
+            # Undo last action (should be the override)
+            undone_action = self.manager.undo_last_action("2025-08")
+
+            # Verify undone action
+            assert undone_action is not None
+            assert undone_action.input_text == "Test Brush Overridden"
+            assert undone_action.action == "overridden"
+
+            # Verify remaining action is the validation
+            remaining_actions = self.manager.get_monthly_actions("2025-08")
+            assert len(remaining_actions) == 1
+            assert remaining_actions[0].input_text == "Test Brush Validated"
+            assert remaining_actions[0].action == "validated"
+
+
+class TestBrushUserActionsStorageUndo:
+    """Test undo functionality in BrushUserActionsStorage."""
+
+    def setup_method(self):
+        """Set up test directory."""
+        self.test_dir = Path(tempfile.mkdtemp())
+        self.learning_dir = self.test_dir / "learning"
+        self.learning_dir.mkdir()
+        # Create brush_user_actions subdirectory
+        self.brush_user_actions_dir = self.learning_dir / "brush_user_actions"
+        self.brush_user_actions_dir.mkdir()
+
+        self.storage = BrushUserActionsStorage(self.learning_dir)
+
+    def teardown_method(self):
+        """Clean up test directory."""
+        shutil.rmtree(self.test_dir)
+
+    def test_remove_last_action_success(self):
+        """Test successfully removing the last action."""
+        # Create test actions
+        actions = [
+            BrushUserAction(
+                input_text="Test Brush 1",
+                timestamp=datetime(2025, 8, 6, 14, 30, 0),
+                system_used="scoring",
+                action="validated",
+                system_choice={"strategy": "test", "score": 50, "result": {}},
+                user_choice={"strategy": "test", "result": {}},
+                all_brush_strategies=[],
+                comment_ids=["comment1"],
+            ),
+            BrushUserAction(
+                input_text="Test Brush 2",
+                timestamp=datetime(2025, 8, 6, 15, 30, 0),
+                system_used="legacy",
+                action="overridden",
+                system_choice={"strategy": "test", "score": None, "result": {}},
+                user_choice={"strategy": "other", "result": {}},
+                all_brush_strategies=[],
+                comment_ids=["comment2"],
+            ),
+        ]
+
+        # Save actions
+        self.storage.save_monthly_actions("2025-08", actions)
+
+        # Remove last action
+        removed_action = self.storage.remove_last_action("2025-08")
+
+        # Verify removed action
+        assert removed_action is not None
+        assert removed_action.input_text == "Test Brush 2"
+        assert removed_action.action == "overridden"
+
+        # Verify file was updated
+        loaded_actions = self.storage.load_monthly_actions("2025-08")
+        assert len(loaded_actions) == 1
+        assert loaded_actions[0].input_text == "Test Brush 1"
+
+    def test_remove_last_action_empty_file(self):
+        """Test removing last action from empty file."""
+        # Try to remove from empty month
+        removed_action = self.storage.remove_last_action("2025-08")
+
+        assert removed_action is None
+
+    def test_remove_last_action_single_action(self):
+        """Test removing last action when only one action exists."""
+        # Create single action
+        actions = [
+            BrushUserAction(
+                input_text="Test Brush 1",
+                timestamp=datetime(2025, 8, 6, 14, 30, 0),
+                system_used="scoring",
+                action="validated",
+                system_choice={"strategy": "test", "score": 50, "result": {}},
+                user_choice={"strategy": "test", "result": {}},
+                all_brush_strategies=[],
+                comment_ids=["comment1"],
+            )
+        ]
+
+        # Save action
+        self.storage.save_monthly_actions("2025-08", actions)
+
+        # Remove last action
+        removed_action = self.storage.remove_last_action("2025-08")
+
+        # Verify removed action
+        assert removed_action is not None
+        assert removed_action.input_text == "Test Brush 1"
+
+        # Verify file is now empty
+        loaded_actions = self.storage.load_monthly_actions("2025-08")
+        assert len(loaded_actions) == 0
+
+    def test_remove_last_action_preserves_order(self):
+        """Test that removing last action preserves order of remaining actions."""
+        # Create test actions
+        actions = [
+            BrushUserAction(
+                input_text="Test Brush 1",
+                timestamp=datetime(2025, 8, 6, 14, 30, 0),
+                system_used="scoring",
+                action="validated",
+                system_choice={"strategy": "test", "score": 50, "result": {}},
+                user_choice={"strategy": "test", "result": {}},
+                all_brush_strategies=[],
+                comment_ids=["comment1"],
+            ),
+            BrushUserAction(
+                input_text="Test Brush 2",
+                timestamp=datetime(2025, 8, 6, 15, 30, 0),
+                system_used="legacy",
+                action="overridden",
+                system_choice={"strategy": "test", "score": None, "result": {}},
+                user_choice={"strategy": "other", "result": {}},
+                all_brush_strategies=[],
+                comment_ids=["comment2"],
+            ),
+            BrushUserAction(
+                input_text="Test Brush 3",
+                timestamp=datetime(2025, 8, 6, 16, 30, 0),
+                system_used="scoring",
+                action="validated",
+                system_choice={"strategy": "test", "score": 75, "result": {}},
+                user_choice={"strategy": "test", "result": {}},
+                all_brush_strategies=[],
+                comment_ids=["comment3"],
+            ),
+        ]
+
+        # Save actions
+        self.storage.save_monthly_actions("2025-08", actions)
+
+        # Remove last action
+        removed_action = self.storage.remove_last_action("2025-08")
+
+        # Verify removed action
+        assert removed_action is not None
+        assert removed_action.input_text == "Test Brush 3"
+
+        # Verify remaining actions preserve order
+        loaded_actions = self.storage.load_monthly_actions("2025-08")
+        assert len(loaded_actions) == 2
+        assert loaded_actions[0].input_text == "Test Brush 1"
+        assert loaded_actions[1].input_text == "Test Brush 2"
+
+    def test_remove_last_action_nonexistent_month(self):
+        """Test removing last action from nonexistent month."""
+        # Try to remove from nonexistent month
+        removed_action = self.storage.remove_last_action("2025-99")
+
+        assert removed_action is None
+
+    def test_remove_last_action_corrupted_file(self):
+        """Test handling of corrupted YAML file during undo operation."""
+        # Create a corrupted YAML file
+        corrupted_file = self.brush_user_actions_dir / "2025-08.yaml"
+        corrupted_file.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(corrupted_file, "w") as f:
+            f.write("invalid: yaml: content: [\n  - invalid\n")
+
+        # Try to remove last action from corrupted file
+        # Should handle gracefully and return None
+        removed_action = self.storage.remove_last_action("2025-08")
+
+        assert removed_action is None
