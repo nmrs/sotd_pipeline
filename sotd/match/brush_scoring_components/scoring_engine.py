@@ -146,7 +146,7 @@ class ScoringEngine:
 
             # Apply the modifier function if it exists
             modifier_function = getattr(self, f"_modifier_{modifier_name}", None)
-            if callable(modifier_function):
+            if modifier_function is not None and callable(modifier_function):
                 modifier_value = modifier_function(value, result, strategy_name)
                 modifier_score += modifier_value * modifier_weight
             else:
@@ -155,48 +155,52 @@ class ScoringEngine:
 
         return modifier_score
 
-    def _modifier_multiple_brands(self, input_text: str, result: dict, strategy_name: str) -> float:
+    def _modifier_multiple_brands(self, input_text: str, result, strategy_name: str) -> float:
         """
         Return score modifier for multiple brand mentions.
 
         Args:
             input_text: Original input string
-            result: MatchResult object
+            result: MatchResult object or dict
             strategy_name: Name of the strategy
 
         Returns:
             Modifier value (1.0 if multiple brands detected, 0.0 otherwise)
         """
-        # Count brand mentions in input text
-        brand_patterns = [
-            r"\bsimpson\b",
-            r"\bomega\b",
-            r"\bsemogue\b",
-            r"\bzenith\b",
-            r"\bdeclaration\b",
-            r"\bchisel\b",
-            r"\bhound\b",
-            r"\bwolf\b",
-            r"\bwhiskers\b",
-            r"\bsummer\b",
-            r"\bbreak\b",
-            r"\bsoaps\b",
-            r"\bmountain\b",
-            r"\bhare\b",
-            r"\bshaving\b",
-            r"\bmaggard\b",
-            r"\belite\b",
-            r"\bmojito\b",
-            r"\bwashington\b",
-            r"\btimberwolf\b",
-        ]
+        # Handle both MatchResult objects and dicts
+        if hasattr(result, "matched"):
+            matched = result.matched
+        else:
+            matched = result.get("matched", {}) if isinstance(result, dict) else {}
 
-        brand_count = 0
-        for pattern in brand_patterns:
-            if re.search(pattern, input_text.lower()):
-                brand_count += 1
+        # For unified strategy, check handle and knot sections
+        if strategy_name == "unified":
+            handle = matched.get("handle", {})
+            knot = matched.get("knot", {})
 
-        return 1.0 if brand_count > 1 else 0.0
+            handle_brand = handle.get("brand") if handle else None
+            knot_brand = knot.get("brand") if knot else None
+
+            # Count actual brands found in the result
+            brands_found = set()
+            if handle_brand:
+                brands_found.add(handle_brand)
+            if knot_brand:
+                brands_found.add(knot_brand)
+
+            # Return 1.0 if we have 2+ different brands, 0.0 otherwise
+            return 1.0 if len(brands_found) > 1 else 0.0
+
+        # For other strategies, check if the result has multiple brand fields
+        # This is a fallback for non-unified strategies
+        brand_fields = ["brand", "handle_brand", "knot_brand"]
+        brands_found = set()
+
+        for field in brand_fields:
+            if field in matched and matched[field]:
+                brands_found.add(matched[field])
+
+        return 1.0 if len(brands_found) > 1 else 0.0
 
     def _modifier_fiber_words(self, input_text: str, result: dict, strategy_name: str) -> float:
         """
@@ -369,11 +373,13 @@ class ScoringEngine:
             Modifier value (1.0 if high priority delimiter used, 0.0 otherwise)
         """
         # Check if this result used a high priority delimiter
-        if hasattr(result, "_delimiter_priority"):
-            return 1.0 if result._delimiter_priority == "high" else 0.0
+        delimiter_priority = getattr(result, "_delimiter_priority", None)
+        if delimiter_priority is not None:
+            return 1.0 if delimiter_priority == "high" else 0.0
 
         # Fallback: check if high_priority_delimiter attribute exists
-        if hasattr(result, "high_priority_delimiter"):
-            return 1.0 if result.high_priority_delimiter else 0.0
+        high_priority_delimiter = getattr(result, "high_priority_delimiter", None)
+        if high_priority_delimiter is not None:
+            return 1.0 if high_priority_delimiter else 0.0
 
         return 0.0

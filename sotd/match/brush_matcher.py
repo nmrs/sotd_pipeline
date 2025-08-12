@@ -459,16 +459,28 @@ class BrushMatcher:
             return cached_result
 
         # Define strategies in priority order with names for timing
-        strategies = [
-            ("correct_complete_brush", self._match_correct_complete_brush),
-            ("correct_split_brush", self._match_correct_split_brush),
-            ("known_split", self._match_known_split),
-            ("high_priority_automated_split", self._match_high_priority_automated_split),
-            ("complete_brush", self._match_complete_brush),
-            ("dual_component", self._match_dual_component),
-            ("medium_priority_automated_split", self._match_medium_priority_automated_split),
-            ("single_component_fallback", self._match_single_component_fallback),
-        ]
+        strategies = []
+
+        # Add correct matches strategies only if not bypassing
+        if not self.config.bypass_correct_matches:
+            strategies.extend(
+                [
+                    ("correct_complete_brush", self._match_correct_complete_brush),
+                    ("correct_split_brush", self._match_correct_split_brush),
+                    ("known_split", self._match_known_split),
+                ]
+            )
+
+        # Add remaining strategies
+        strategies.extend(
+            [
+                ("high_priority_automated_split", self._match_high_priority_automated_split),
+                ("complete_brush", self._match_complete_brush),
+                ("dual_component", self._match_dual_component),
+                ("medium_priority_automated_split", self._match_medium_priority_automated_split),
+                ("single_component_fallback", self._match_single_component_fallback),
+            ]
+        )
 
         # Try each strategy in order with timing
         for strategy_name, strategy_func in strategies:

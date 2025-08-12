@@ -126,25 +126,19 @@ class BrushValidationCLI:
             return []
 
     def get_comment_ids_for_input_text(self, input_text: str, month: str, system: str) -> List[str]:
-        """Get comment IDs for a specific input text from the matched data.
-
-        Args:
-            input_text: The input text to search for
-            month: Month in YYYY-MM format
-            system: 'legacy' or 'scoring'
-
-        Returns:
-            List of comment IDs where this input text was found
-        """
-        # Use correct directories for each system
-        if system == "legacy":
-            file_path = self.data_path / "matched_legacy" / f"{month}.json"
-        elif system == "scoring":
-            file_path = self.data_path / "matched" / f"{month}.json"
-        else:
-            return []
-
+        """Get comment IDs for a specific input text from matched data."""
         try:
+            # Load the matched data for the month
+            if system == "legacy":
+                file_path = self.data_path / "matched_legacy" / f"{month}.json"
+            elif system == "scoring":
+                file_path = self.data_path / "matched" / f"{month}.json"
+            else:
+                return []
+
+            if not file_path.exists():
+                return []
+
             data = load_json_data(file_path)
 
             # Handle new file structure with metadata and data array
@@ -154,30 +148,63 @@ class BrushValidationCLI:
                 # Fallback to old structure
                 records = data.get("brush", [])
 
-            if not records:
-                return []
-
-            comment_ids = []
-            normalized_input = input_text.lower().strip()
-
+            # Find the record with matching input text
             for record in records:
-                if "brush" not in record:
-                    continue
+                if "brush" in record:
+                    brush_entry = record["brush"]
+                    normalized_text = brush_entry.get("normalized", "")
+                    if normalized_text.lower() == input_text.lower():
+                        comment_id = record.get("id")
+                        return [comment_id] if comment_id else []
 
-                brush_entry = record["brush"]
-                brush_text = brush_entry.get("original", "").lower().strip()
-
-                # Case-insensitive comparison
-                if brush_text == normalized_input:
-                    comment_id = record.get("id")
-                    if comment_id:
-                        comment_ids.append(comment_id)
-
-            return comment_ids
-
-        except Exception as e:
-            print(f"Error getting comment IDs for {input_text}: {e}")
             return []
+        except Exception as e:
+            print(f"Error getting comment IDs for input text: {e}")
+            return []
+
+    def load_brush_data_for_input_text(
+        self, input_text: str, month: str, system: str
+    ) -> Optional[Dict[str, Any]]:
+        """Load brush data for a specific input text to determine field type and process dual-component brushes."""
+        try:
+            # Load the matched data for the month
+            if system == "legacy":
+                file_path = self.data_path / "matched_legacy" / f"{month}.json"
+            elif system == "scoring":
+                file_path = self.data_path / "matched" / f"{month}.json"
+            else:
+                return None
+
+            if not file_path.exists():
+                return None
+
+            data = load_json_data(file_path)
+
+            # Handle new file structure with metadata and data array
+            if "data" in data:
+                records = data.get("data", [])
+            else:
+                # Fallback to old structure
+                records = data.get("brush", [])
+
+            # Find the record with matching input text
+            for record in records:
+                if "brush" in record:
+                    brush_entry = record["brush"]
+                    normalized_text = brush_entry.get("normalized", "")
+                    if normalized_text.lower() == input_text.lower():
+                        # Return the matched data and all strategies
+                        return {
+                            "matched": brush_entry.get("matched"),
+                            "all_strategies": brush_entry.get("all_strategies", []),
+                            "input_text": input_text,
+                            "normalized_text": normalized_text,
+                        }
+
+            return None
+        except Exception as e:
+            print(f"Error loading brush data for input text: {e}")
+            return None
 
     def sort_entries(
         self, entries: List[Dict[str, Any]], month: str, sort_by: str

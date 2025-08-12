@@ -33,6 +33,9 @@ class BrushMatcherConfig:
     # Validation settings
     strict_validation: bool = False
 
+    # Testing and validation settings
+    bypass_correct_matches: bool = False
+
     def __post_init__(self):
         """Validate configuration after initialization."""
         self._validate_paths()

@@ -249,8 +249,13 @@ class BrushUserActionsManager:
                 return "brush"
             elif brand and model is None:
                 # This is a dual-component brush (brand exists but model is intentionally null)
-                # Store in brush section as a special case
-                return "brush"
+                # Check if it has both handle and knot components
+                if "handle" in result_data and "knot" in result_data:
+                    # This is a dual-component brush - should be split into handle and knot sections
+                    return "split_brush"
+                else:
+                    # This is a partial brush result - store in brush section
+                    return "brush"
 
         # Check if this is a handle-only result
         if "handle_maker" in result_data or "handle_model" in result_data:
@@ -319,6 +324,98 @@ class BrushUserActionsManager:
             system_choice=system_choice,
             user_choice=user_choice,
             all_brush_strategies=all_brush_strategies,
+            comment_ids=comment_ids,
+        )
+
+        # Update correct_matches.yaml first - fail fast if this fails
+        self._update_correct_matches(input_text, user_choice, "overridden")
+
+        # Only update learning file if correct_matches.yaml update succeeds
+        self.storage.append_action(month, action)
+
+    def record_validation_with_data(
+        self,
+        input_text: str,
+        month: str,
+        system_used: str,
+        brush_data: Dict[str, Any],
+        comment_ids: List[str],
+    ) -> None:
+        """Record a user validation action with brush data - backend handles all business logic."""
+        # Extract the matched data and all strategies from brush_data
+        matched = brush_data.get("matched", {})
+        all_strategies = brush_data.get("all_strategies", [])
+
+        # Create system choice from matched data
+        system_choice = {
+            "strategy": matched.get("strategy", ""),
+            "score": matched.get("score", 0),
+            "result": matched,
+        }
+
+        # For validation, user choice is the same as system choice
+        user_choice = system_choice
+
+        # Create the action
+        action = BrushUserAction(
+            input_text=input_text,
+            timestamp=datetime.now(),
+            system_used=system_used,
+            action="validated",
+            system_choice=system_choice,
+            user_choice=user_choice,
+            all_brush_strategies=all_strategies,
+            comment_ids=comment_ids,
+        )
+
+        # Update correct_matches.yaml first - fail fast if this fails
+        self._update_correct_matches(input_text, user_choice, "validated")
+
+        # Only update learning file if correct_matches.yaml update succeeds
+        self.storage.append_action(month, action)
+
+    def record_override_with_data(
+        self,
+        input_text: str,
+        month: str,
+        system_used: str,
+        brush_data: Dict[str, Any],
+        strategy_index: int,
+        comment_ids: List[str],
+    ) -> None:
+        """Record a user override action with brush data - backend handles all business logic."""
+        # Extract the matched data and all strategies from brush_data
+        matched = brush_data.get("matched", {})
+        all_strategies = brush_data.get("all_strategies", [])
+
+        # Create system choice from matched data
+        system_choice = {
+            "strategy": matched.get("strategy", ""),
+            "score": matched.get("score", 0),
+            "result": matched,
+        }
+
+        # Create user choice from selected strategy
+        if strategy_index >= 0 and strategy_index < len(all_strategies):
+            selected_strategy = all_strategies[strategy_index]
+            user_choice = {
+                "strategy": selected_strategy.get("strategy", ""),
+                "score": selected_strategy.get("score", 0),
+                "result": selected_strategy.get("result", {}),
+            }
+        else:
+            # Fallback to system choice if strategy index is invalid
+            user_choice = system_choice
+
+        # Create the action
+        action = BrushUserAction(
+            input_text=input_text,
+            timestamp=datetime.now(),
+            system_used=system_used,
+            action="overridden",
+            system_choice=system_choice,
+            user_choice=user_choice,
+            all_brush_strategies=all_strategies,
             comment_ids=comment_ids,
         )
 

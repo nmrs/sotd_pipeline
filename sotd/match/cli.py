@@ -35,6 +35,13 @@ def get_parser() -> BaseCLIParser:
         help="Brush matching system to use (default: new multi-strategy scoring system)",
     )
 
+    # Add test string argument for direct brush matching
+    parser.add_argument(
+        "--test-string",
+        type=str,
+        help="Test a specific brush string directly through the matcher",
+    )
+
     # Add standardized parallel processing arguments
     parser.add_parallel_processing_arguments(
         default_max_workers=4,
