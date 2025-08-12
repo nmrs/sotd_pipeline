@@ -36,6 +36,45 @@ This is a Python 3.11 data processing pipeline that extracts, processes, and ana
 - **YAML Catalogs**: Store product data in YAML files under `data/` directory
 - **Data Flow**: Each phase reads from previous phase output, writes to `data/{phase}/YYYY-MM.json`
 
+## Business Logic Architecture
+
+### **MANDATORY**: Backend Business Logic Implementation
+- **Business logic MUST be implemented in the backend (Python pipeline or API), not in the frontend UI**
+- **Shared logic between CLI and API should be implemented in shared library components**
+- **API-specific logic should be implemented in the API layer, not duplicated in the UI**
+- **UI should perform minimal processing and focus on presentation and user interaction**
+
+### Implementation Guidelines
+- **Shared Components**: Create reusable modules in `sotd/utils/` or `sotd/shared/` for logic used by both CLI and API
+- **API Layer**: Implement business logic in FastAPI endpoints or service classes, not in React components
+- **UI Responsibilities**: Frontend should handle data formatting, user input validation, and display logic only
+- **Data Processing**: All data transformation, aggregation, and business rules must be handled server-side
+
+### Examples
+```python
+# ✅ CORRECT - Business logic in backend API
+@app.post("/api/brush/validate")
+async def validate_brush(brush_data: dict):
+    # Business logic for brush validation
+    validation_result = brush_validator.validate(brush_data)
+    return validation_result
+
+# ❌ WRONG - Business logic in frontend
+const validateBrush = (brushData) => {
+    # Complex validation logic in React component
+    if (brushData.brand && brushData.model) {
+        # Business rules implemented in UI
+    }
+}
+```
+
+### Rationale
+- **Maintainability**: Business logic changes require backend updates only
+- **Consistency**: Same logic applied across CLI, API, and future interfaces
+- **Testing**: Backend logic can be thoroughly tested with Python testing tools
+- **Performance**: Server-side processing avoids client-side computation overhead
+- **Security**: Business rules cannot be bypassed by client-side manipulation
+
 ## Code Style Rules
 - Use descriptive variable names that reflect the domain (e.g., `soap_matcher`, `blade_patterns`, `sotd_comment`)
 - Follow existing naming conventions: snake_case for functions/variables, PascalCase for classes

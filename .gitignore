@@ -23,6 +23,9 @@ data/aggregated/annual/*.json
 data/correct_matches.yaml.backup
 # Ignore generated report files
 data/reports/*.md
+# Ignore learning data files
+data/learning/brush_user_actions/*.yaml
+
 # Debug and temporary files
 debug_*.py
 *_debug.py
@@ -96,7 +99,6 @@ webui/.pids/
 webui/.pids/*.pid
 webui/.pids/*.log
 *.bk.yaml
-# Learning data files (test artifacts)
 
 # WebUI test data
 webui/data/
