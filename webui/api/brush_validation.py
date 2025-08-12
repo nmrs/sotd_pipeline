@@ -3,7 +3,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Literal
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, field_validator
@@ -21,11 +21,10 @@ class ValidationActionRequest(BaseModel):
 
     input_text: str
     month: str
-    system_used: str
-    action: str
-    system_choice: Dict[str, Any]
-    user_choice: Dict[str, Any]
-    all_brush_strategies: List[Dict[str, Any]]
+    system_used: Literal["legacy", "scoring"]
+    action: Literal["validate", "override"]
+    # For override actions, specify which strategy index to use
+    strategy_index: Optional[int] = None
 
     @field_validator("month")
     @classmethod
@@ -186,6 +185,38 @@ async def get_validation_statistics(month: str) -> ValidationStatisticsResponse:
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/statistics/{month}/strategy-distribution")
+async def get_strategy_distribution_statistics(month: str):
+    """
+    Get strategy distribution statistics for a specific month.
+
+    This endpoint provides detailed counts of entries by strategy type
+    to help debug filter count mismatches.
+
+    Args:
+        month: Month in YYYY-MM format
+    """
+    # Validate month format
+    if not re.match(r"^\d{4}-\d{2}$", month):
+        raise HTTPException(status_code=400, detail="Month must be in YYYY-MM format")
+
+    try:
+        logger.info(f"Getting strategy distribution statistics for {month}")
+
+        # Initialize CLI with correct data path (relative to project root)
+        project_root = Path(__file__).parent.parent.parent
+        cli = BrushValidationCLI(data_path=project_root / "data")
+
+        # Get strategy distribution statistics
+        stats = cli.get_strategy_distribution_statistics(month)
+
+        return stats
+
+    except Exception as e:
+        logger.error(f"Error getting strategy distribution statistics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.post("/action", response_model=ValidationActionResponse)
 async def record_validation_action(
     action_data: ValidationActionRequest,
@@ -194,7 +225,7 @@ async def record_validation_action(
     Record a user validation or override action.
 
     Args:
-        action_data: Validation action data
+        action_data: Validation action data with minimal information
     """
     try:
         logger.info(f"Recording {action_data.action} action for {action_data.input_text}")
@@ -208,25 +239,38 @@ async def record_validation_action(
             action_data.input_text, action_data.month, action_data.system_used
         )
 
-        # Record the action
+        # Load the brush data for this input text to determine field type and process dual-component brushes
+        brush_data = cli.load_brush_data_for_input_text(
+            action_data.input_text, action_data.month, action_data.system_used
+        )
+
+        if not brush_data:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Brush data not found for input text: {action_data.input_text}",
+            )
+
+        # Record the action - the backend handles all the business logic
         if action_data.action == "validate":
-            cli.user_actions_manager.record_validation(
+            cli.user_actions_manager.record_validation_with_data(
                 input_text=action_data.input_text,
                 month=action_data.month,
                 system_used=action_data.system_used,
-                system_choice=action_data.system_choice,
-                user_choice=action_data.user_choice,
-                all_brush_strategies=action_data.all_brush_strategies,
+                brush_data=brush_data,
                 comment_ids=comment_ids,
             )
         elif action_data.action == "override":
-            cli.user_actions_manager.record_override(
+            if action_data.strategy_index is None:
+                raise HTTPException(
+                    status_code=400, detail="strategy_index is required for override actions"
+                )
+
+            cli.user_actions_manager.record_override_with_data(
                 input_text=action_data.input_text,
                 month=action_data.month,
                 system_used=action_data.system_used,
-                system_choice=action_data.system_choice,
-                user_choice=action_data.user_choice,
-                all_brush_strategies=action_data.all_brush_strategies,
+                brush_data=brush_data,
+                strategy_index=action_data.strategy_index,
                 comment_ids=comment_ids,
             )
         else:
@@ -238,4 +282,47 @@ async def record_validation_action(
 
     except Exception as e:
         logger.error(f"Error recording validation action: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/undo", response_model=ValidationActionResponse)
+async def undo_last_validation_action(month: str) -> ValidationActionResponse:
+    """
+    Undo the last validation action for a specific month.
+
+    This removes the last validation/override action from both the learning file
+    and correct_matches.yaml, effectively reverting the last user decision.
+
+    Args:
+        month: Month in YYYY-MM format
+    """
+    try:
+        logger.info(f"Undoing last validation action for {month}")
+
+        # Validate month format
+        if not re.match(r"^\d{4}-\d{2}$", month):
+            raise HTTPException(status_code=400, detail="Month must be in YYYY-MM format")
+
+        # Initialize CLI with correct data path (relative to project root)
+        project_root = Path(__file__).parent.parent.parent
+        cli = BrushValidationCLI(data_path=project_root / "data")
+
+        # Attempt to undo the last action
+        undone_action = cli.user_actions_manager.undo_last_action(month)
+
+        if undone_action:
+            return ValidationActionResponse(
+                success=True,
+                message=(
+                    f"Successfully undone {undone_action.action} action "
+                    f"for '{undone_action.input_text}'"
+                ),
+            )
+        else:
+            return ValidationActionResponse(
+                success=False, message="No actions found to undo for this month"
+            )
+
+    except Exception as e:
+        logger.error(f"Error undoing validation action: {e}")
         raise HTTPException(status_code=500, detail=str(e))
