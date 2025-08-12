@@ -96,8 +96,8 @@ class BrushUserActionsStorage:
 
         data = {"brush_user_actions": [action.to_dict() for action in actions]}
 
-        with open(file_path, "w") as f:
-            yaml.dump(data, f, default_flow_style=False, sort_keys=True)
+        with open(file_path, "w", encoding="utf-8") as f:
+            yaml.dump(data, f, default_flow_style=False, sort_keys=True, allow_unicode=True)
 
     def load_monthly_actions(self, month: str) -> List[BrushUserAction]:
         """Load actions for a specific month from YAML file."""
@@ -107,7 +107,7 @@ class BrushUserActionsStorage:
         if not file_path.exists():
             return []
 
-        with open(file_path, "r") as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
         if not data or "brush_user_actions" not in data:
@@ -146,6 +146,43 @@ class BrushUserActionsStorage:
         """Ensure the directory for monthly actions exists."""
         file_path = self._get_file_path(month)
         file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    def remove_last_action(self, month: str) -> Optional[BrushUserAction]:
+        """
+        Remove the last action from the monthly actions file.
+
+        Args:
+            month: Month in YYYY-MM format
+
+        Returns:
+            The removed action if successful, None if no actions found
+        """
+        try:
+            # Load existing actions
+            actions = self.load_monthly_actions(month)
+            if not actions:
+                return None
+
+            # Get the last action (most recent timestamp, or last in list if timestamps are equal)
+            # Sort by timestamp first, then by list order as fallback
+            sorted_actions = sorted(actions, key=lambda x: (x.timestamp, actions.index(x)))
+            last_action = sorted_actions[-1]
+
+            # Remove the last action
+            actions.remove(last_action)
+
+            # Save updated actions
+            self.save_monthly_actions(month, actions)
+
+            return last_action
+
+        except Exception as e:
+            # Log the error but don't fail - this is a user-facing operation
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error removing last action for {month}: {e}")
+            return None
 
 
 class BrushUserActionsManager:
@@ -201,10 +238,19 @@ class BrushUserActionsManager:
         Returns:
             Field type string ("brush", "handle", "knot", "split_brush")
         """
-        # Check if this is a complete brush result (has brand and model)
+        # Check if this is a complete brush result (has brand and model, both non-null)
         if "brand" in result_data and "model" in result_data:
-            # This is a complete brush match - store in brush section
-            return "brush"
+            brand = result_data.get("brand")
+            model = result_data.get("model")
+
+            # Both brand and model must exist and be non-null for a complete brush
+            if brand and model:
+                # This is a complete brush match - store in brush section
+                return "brush"
+            elif brand and model is None:
+                # This is a dual-component brush (brand exists but model is intentionally null)
+                # Store in brush section as a special case
+                return "brush"
 
         # Check if this is a handle-only result
         if "handle_maker" in result_data or "handle_model" in result_data:
@@ -324,28 +370,77 @@ class BrushUserActionsManager:
         migrated_actions = []
         brush_data = data["brush"]
 
-        for brand, brand_data in brush_data.items():
-            for model, patterns in brand_data.items():
-                for pattern in patterns:
-                    # Create action for migrated data
-                    action = BrushUserAction(
-                        input_text=pattern,
-                        timestamp=datetime.now(),
-                        system_used="migrated",  # Special marker for migrated data
-                        action="validated",  # Assume migrated data was validated
-                        system_choice={
-                            "strategy": "migrated",
-                            "score": None,
-                            "result": {"brand": brand, "model": model},
-                        },
-                        user_choice={
-                            "strategy": "migrated",
-                            "result": {"brand": brand, "model": model},
-                        },
-                        comment_ids=[],  # Migrated data doesn't have comment IDs
-                        all_brush_strategies=[],  # No strategy data available for migrated entries
-                    )
-                    migrated_actions.append(action)
+        for key, value in brush_data.items():
+            if isinstance(value, dict) and "brand" in value and "model" in value:
+                # Handle flat structure: {"input_text": {"brand": "...", "model": "..."}}
+                input_text = key
+                brand = value["brand"]
+                model = value["model"]
+
+                action = BrushUserAction(
+                    input_text=input_text,
+                    timestamp=datetime.now(),
+                    system_used="migrated",  # Special marker for migrated data
+                    action="validated",  # Assume migrated data was validated
+                    system_choice={
+                        "strategy": "migrated",
+                        "score": None,
+                        "result": {"brand": brand, "model": model},
+                    },
+                    user_choice={
+                        "strategy": "migrated",
+                        "result": {"brand": brand, "model": model},
+                    },
+                    comment_ids=[],  # Migrated data doesn't have comment IDs
+                    all_brush_strategies=[],  # No strategy data for migrated entries
+                )
+                migrated_actions.append(action)
+            else:
+                # Handle nested structure: {"brand": {"model": ["input_text1", "input_text2"]}}
+                brand = key
+                for model, input_texts in value.items():
+                    if isinstance(input_texts, list):
+                        # Handle list of input texts
+                        for input_text in input_texts:
+                            action = BrushUserAction(
+                                input_text=input_text,
+                                timestamp=datetime.now(),
+                                system_used="migrated",  # Special marker for migrated data
+                                action="validated",  # Assume migrated data was validated
+                                system_choice={
+                                    "strategy": "migrated",
+                                    "score": None,
+                                    "result": {"brand": brand, "model": model},
+                                },
+                                user_choice={
+                                    "strategy": "migrated",
+                                    "result": {"brand": brand, "model": model},
+                                },
+                                comment_ids=[],  # Migrated data doesn't have comment IDs
+                                all_brush_strategies=[],  # No strategy data for migrated entries
+                            )
+                            migrated_actions.append(action)
+                    else:
+                        # Handle single input text (string)
+                        input_text = input_texts
+                        action = BrushUserAction(
+                            input_text=input_text,
+                            timestamp=datetime.now(),
+                            system_used="migrated",  # Special marker for migrated data
+                            action="validated",  # Assume migrated data was validated
+                            system_choice={
+                                "strategy": "migrated",
+                                "score": None,
+                                "result": {"brand": brand, "model": model},
+                            },
+                            user_choice={
+                                "strategy": "migrated",
+                                "result": {"brand": brand, "model": model},
+                            },
+                            comment_ids=[],  # Migrated data doesn't have comment IDs
+                            all_brush_strategies=[],  # No strategy data for migrated entries
+                        )
+                        migrated_actions.append(action)
 
         # Save migrated actions
         for action in migrated_actions:
@@ -383,3 +478,58 @@ class BrushUserActionsManager:
             "scoring_system_count": scoring_system_count,
             "legacy_system_count": legacy_system_count,
         }
+
+    def undo_last_action(self, month: str) -> Optional[BrushUserAction]:
+        """
+        Undo the last validation action for a specific month.
+
+        This removes the last action from both the learning file and correct_matches.yaml,
+        effectively reverting the last user decision.
+
+        Args:
+            month: Month in YYYY-MM format
+
+        Returns:
+            The undone action if successful, None if no actions found
+        """
+        try:
+            # Get all actions for the month
+            actions = self.get_monthly_actions(month)
+            if not actions:
+                return None
+
+            # Get the last action (most recent timestamp, or last in list if timestamps are equal)
+            # Sort by timestamp first, then by list order as fallback
+            sorted_actions = sorted(actions, key=lambda x: (x.timestamp, actions.index(x)))
+            last_action = sorted_actions[-1]
+
+            # Remove the action from correct_matches.yaml first
+            # If this fails, we'll still try to remove from storage
+            if last_action.action in ["validated", "overridden"]:
+                try:
+                    # Extract the input text that was added to correct_matches.yaml
+                    input_text = last_action.input_text
+
+                    # Remove from correct_matches.yaml using the updater
+                    self.correct_matches_updater.remove_entry(input_text, "brush")
+                except Exception as e:
+                    # Log the error but continue with storage removal
+                    import logging
+
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f"Failed to remove from correct_matches.yaml for {month}: {e}")
+
+            # Remove the action from the learning file
+            # Let the storage method handle finding and removing the last action
+            removed_action = self.storage.remove_last_action(month)
+
+            # Return the action that was actually removed from storage
+            return removed_action
+
+        except Exception as e:
+            # Log the error but don't fail - this is a user-facing operation
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error undoing last action for {month}: {e}")
+            return None

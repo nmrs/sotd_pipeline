@@ -34,6 +34,7 @@ class TestBrushUserActionsIntegration:
             system_choice={"strategy": "dual_component", "score": 85, "result": {}},
             user_choice={"strategy": "dual_component", "result": {}},
             all_brush_strategies=[],
+            comment_ids=["test_comment_1"],
         )
 
         # Verify file was created in expected location
@@ -102,6 +103,7 @@ class TestBrushUserActionsIntegration:
                 system_choice={"strategy": "test", "score": 50, "result": {}},
                 user_choice={"strategy": "test", "result": {}},
                 all_brush_strategies=[],
+                comment_ids=[f"test_comment_{i}"],
             )
 
         # Verify files follow expected naming pattern
@@ -129,6 +131,7 @@ class TestBrushUserActionsIntegration:
                 system_choice={"strategy": "dual_component", "score": 85, "result": {}},
                 user_choice={"strategy": "dual_component", "result": {}},
                 all_brush_strategies=[],
+                comment_ids=[f"scoring_comment_{i}"],
             )
 
         # Scoring system overrides
@@ -140,6 +143,7 @@ class TestBrushUserActionsIntegration:
                 system_choice={"strategy": "complete_brush", "score": 60, "result": {}},
                 user_choice={"strategy": "dual_component", "result": {}},
                 all_brush_strategies=[],
+                comment_ids=[f"override_comment_{i}"],
             )
 
         # Legacy system validation (from migration)
@@ -150,6 +154,7 @@ class TestBrushUserActionsIntegration:
             system_choice={"strategy": "legacy", "score": None, "result": {}},
             user_choice={"strategy": "legacy", "result": {}},
             all_brush_strategies=[],
+            comment_ids=["legacy_comment"],
         )
 
         # Test comprehensive statistics
@@ -191,10 +196,11 @@ class TestBrushUserActionsIntegration:
                 {"strategy": "complete_brush", "score": 45, "result": {}},
                 {"strategy": "dual_component", "score": 85, "result": {}},
             ],
+            comment_ids=["format_test_comment"],
         )
 
         # Load raw YAML to verify format
-        file_path = self.test_learning_dir / "brush_user_actions_2025-08.yaml"
+        file_path = self.test_learning_dir / "brush_user_actions" / "2025-08.yaml"
         with open(file_path, "r") as f:
             data = yaml.safe_load(f)
 
