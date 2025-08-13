@@ -41,6 +41,7 @@ class ValidateCorrectMatches:
         self.correct_matches = None
         self._matchers = {}  # Lazy-loaded matchers cache
         self._fresh_matchers = {}  # Cached fresh matchers for validation
+        self.catalog_cache = {}  # Cache for loaded catalog data
 
         # Get project root directory for absolute paths
         project_root = Path(__file__).parent.parent.parent.parent.parent
@@ -68,6 +69,15 @@ class ValidateCorrectMatches:
             correct_matches_path=project_root / "data/soaps.yaml",
         )
 
+        # Pre-load catalogs for commonly used fields
+        try:
+            self._load_catalog("blade")  # Pre-load blade catalog
+            self._load_catalog("razor")  # Pre-load razor catalog
+        except Exception:
+            # Continue without pre-loading if catalogs aren't available
+            # This allows the validator to work even if some catalogs are missing
+            pass
+
     def _normalize_unicode(self, text: str) -> str:
         """Normalize Unicode text to handle different character encodings.
 
@@ -78,6 +88,45 @@ class ValidateCorrectMatches:
             Normalized text using NFC form
         """
         return unicodedata.normalize("NFC", text)
+
+    def _load_catalog(self, field: str) -> dict:
+        """Load catalog data for a specific field type.
+
+        Args:
+            field: Field type to load (razor, blade, brush, soap)
+
+        Returns:
+            Loaded catalog data
+
+        Raises:
+            ValueError: If field type is unknown
+            RuntimeError: If catalog loading fails
+        """
+        # Use cached data if available
+        if field in self.catalog_cache:
+            return self.catalog_cache[field]
+
+        # Determine catalog path based on field
+        if field == "blade":
+            catalog_path = self.blade_matcher.catalog_path
+        elif field == "razor":
+            catalog_path = self.razor_matcher.catalog_path
+        elif field == "brush":
+            catalog_path = self.brush_matcher.config.catalog_path
+        elif field == "soap":
+            catalog_path = self.soap_matcher.catalog_path
+        else:
+            raise ValueError(f"Unknown field type: {field}")
+
+        # Load catalog using the same pattern as BaseMatcher
+        try:
+            from sotd.utils.yaml_loader import load_yaml_with_nfc, UniqueKeyLoader
+
+            catalog_data = load_yaml_with_nfc(catalog_path, loader_cls=UniqueKeyLoader)
+            self.catalog_cache[field] = catalog_data
+            return catalog_data
+        except Exception as e:
+            raise RuntimeError(f"Failed to load catalog for {field}: {e}")
 
     def get_parser(self) -> argparse.ArgumentParser:
         """Get CLI argument parser.
@@ -557,6 +606,16 @@ class ValidateCorrectMatches:
 
         if self.correct_matches is None or field not in self.correct_matches:
             return issues
+
+        # Ensure catalog is loaded for format-aware validation
+        if field == "blade" and field not in self.catalog_cache:
+            try:
+                self._load_catalog(field)
+            except Exception as e:
+                # Log warning but continue with basic validation
+                if self.console:
+                    self.console.print(f"Warning: Could not load {field} catalog: {e}")
+                # Continue without catalog data - basic duplicate detection will still work
 
         # Track all strings and their locations with format information
         string_locations = {}  # string -> list of (brand, model, format) tuples

@@ -44,7 +44,10 @@ def test_blade_format_aware_duplicate_integration(tmp_path):
     validator = ValidateCorrectMatches()
     validator._data_dir = tmp_path  # type: ignore
     validator.correct_matches = validator._load_correct_matches()
+
+    # Load catalog data properly using the new method
     validator.catalog_cache["blade"] = validator._load_catalog("blade")
+
     print("DEBUG: correct_matches:", validator.correct_matches)
     print("DEBUG: catalog_cache['blade']:", validator.catalog_cache["blade"])
     issues = validator._check_duplicate_strings("blade")
