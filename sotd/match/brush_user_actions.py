@@ -209,6 +209,10 @@ class BrushUserActionsManager:
             result_data: The user's choice result data
             action_type: Type of action ("validated" or "overridden")
         """
+        import logging
+
+        logger = logging.getLogger(__name__)
+
         # Extract the actual result data from the user choice structure
         # The brush data is nested under result_data.result for scoring system
         if "result" in result_data:
@@ -217,8 +221,14 @@ class BrushUserActionsManager:
             # Fallback for legacy system or direct result data
             actual_result_data = result_data
 
+        logger.info(
+            f"Updating correct_matches.yaml for '{input_text}' with action type '{action_type}'"
+        )
+        logger.debug(f"Data structure: {actual_result_data}")
+
         # Determine the field type based on the actual result data structure
         field_type = self._determine_field_type(actual_result_data)
+        logger.info(f"Determined field type: {field_type}")
 
         # Update correct_matches.yaml - fail fast if this fails
         self.correct_matches_updater.add_or_update_entry(
@@ -227,6 +237,21 @@ class BrushUserActionsManager:
             action_type=action_type,
             field_type=field_type,
         )
+
+        logger.info(f"Successfully updated correct_matches.yaml with field type: {field_type}")
+
+        # FAIL-FAST VALIDATION: Immediately verify the entry was actually added
+        if not self.correct_matches_updater.has_entry(input_text, field_type):
+            raise RuntimeError(
+                f"CRITICAL: Failed to add entry '{input_text}' to correct_matches.yaml "
+                f"with field type '{field_type}'. This indicates a silent failure in the "
+                f"update process that must be investigated immediately."
+            )
+
+        logger.info("Entry validation successful - entry confirmed in correct_matches.yaml")
+
+        # No try/except wrapper - let any exceptions bubble up immediately
+        # This ensures failures are visible and stop execution
 
     def _determine_field_type(self, result_data: Dict[str, Any]) -> str:
         """
@@ -238,31 +263,47 @@ class BrushUserActionsManager:
         Returns:
             Field type string ("brush", "handle", "knot", "split_brush")
         """
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        logger.info(f"Determining field type for result_data with keys: {list(result_data.keys())}")
+
         # Check if this is a complete brush result (has brand and model, both non-null)
         if "brand" in result_data and "model" in result_data:
             brand = result_data.get("brand")
             model = result_data.get("model")
 
+            logger.info(f"Brand: {brand}, Model: {model}")
+
             # Both brand and model must exist and be non-null for a complete brush
             if brand and model:
+                logger.info("Returning 'brush' - complete brush with brand and model")
                 # This is a complete brush match - store in brush section
                 return "brush"
-            elif brand and model is None:
-                # This is a dual-component brush (brand exists but model is intentionally null)
+            elif (brand is None or brand) and model is None:
+                logger.info("Checking for dual-component brush (brand may be null, model is null)")
+                # This is a dual-component brush (brand may be null, model is intentionally null)
                 # Check if it has both handle and knot components
                 if "handle" in result_data and "knot" in result_data:
+                    logger.info(
+                        "Returning 'split_brush' - dual-component brush with handle and knot"
+                    )
                     # This is a dual-component brush - should be split into handle and knot sections
                     return "split_brush"
                 else:
+                    logger.info("Returning 'brush' - partial brush result")
                     # This is a partial brush result - store in brush section
                     return "brush"
 
         # Check if this is a handle-only result
         if "handle_maker" in result_data or "handle_model" in result_data:
+            logger.info("Returning 'handle' - handle-only result")
             return "handle"
 
         # Check if this is a knot-only result
         if "fiber" in result_data or "knot_size_mm" in result_data:
+            logger.info("Returning 'knot' - knot-only result")
             return "knot"
 
         # Check if this is explicitly a split brush result (user chose to split)
@@ -272,9 +313,11 @@ class BrushUserActionsManager:
             and "knot" in result_data
             and result_data.get("_matched_from") == "split"
         ):
+            logger.info("Returning 'split_brush' - explicit split brush result")
             return "split_brush"
 
         # Default to brush for complete brush results
+        logger.info("Returning 'brush' - default case")
         return "brush"
 
     def record_validation(
