@@ -40,16 +40,16 @@ class BrushValidationCLI:
             self._brush_entry_point = BrushMatcherEntryPoint()
         return self._brush_entry_point
 
-    def _get_validated_normalized_texts(self, month: str) -> set[str]:
-        """Get all validated normalized texts (correct matches + user validations).
+    def _get_processed_normalized_texts(self, month: str) -> set[str]:
+        """Get all processed normalized texts (correct matches + user actions).
 
         Args:
             month: Month in YYYY-MM format
 
         Returns:
-            Set of normalized texts that are already validated
+            Set of normalized texts that are already processed
         """
-        validated_texts = set()
+        processed_texts = set()
 
         try:
             # Get correct matches from matched data
@@ -97,9 +97,9 @@ class BrushValidationCLI:
                         if is_correct_match:
                             normalized_text = brush_entry.get("normalized", "")
                             if normalized_text:
-                                validated_texts.add(normalized_text.lower().strip())
+                                processed_texts.add(normalized_text.lower().strip())
 
-            # Get user validations from learning data, excluding those already counted
+            # Get user actions from learning data, excluding those already counted
             learning_file_path = (
                 self.data_path / "learning" / "brush_user_actions" / f"{month}.yaml"
             )
@@ -113,20 +113,20 @@ class BrushValidationCLI:
                     actions = learning_data.get("brush_user_actions", [])
                     if actions and isinstance(actions, list):
                         for action in actions:
-                            if action.get("action") == "validated":
+                            if action.get("action") in ["validated", "overridden"]:
                                 input_text = action.get("input_text", "")
                                 if input_text:
                                     normalized_input = input_text.lower().strip()
                                     # Only add if NOT already counted as a correct match
-                                    if normalized_input not in validated_texts:
-                                        validated_texts.add(normalized_input)
+                                    if normalized_input not in processed_texts:
+                                        processed_texts.add(normalized_input)
                 except Exception as e:
-                    print(f"Warning: Could not load validation data: {e}")
+                    print(f"Warning: Could not load processing data: {e}")
 
         except Exception as e:
-            print(f"Warning: Could not load validation data: {e}")
+            print(f"Warning: Could not load processing data: {e}")
 
-        return validated_texts
+        return processed_texts
 
     def load_month_data(self, month: str, system: str) -> List[Dict[str, Any]]:
         """Load monthly brush data for validation using unified classification.
@@ -160,8 +160,8 @@ class BrushValidationCLI:
             if not records:
                 return []
 
-            # Get validated normalized texts (correct matches + user validations)
-            validated_normalized_texts = self._get_validated_normalized_texts(month)
+            # Get processed normalized texts (correct matches + user actions)
+            processed_normalized_texts = self._get_processed_normalized_texts(month)
 
             # Normalize data structure for validation interface
             entries = []
@@ -196,11 +196,11 @@ class BrushValidationCLI:
                     if normalized_text:
                         normalized_lower = normalized_text.lower().strip()
 
-                        # Skip if this entry is already validated (correct match or user validation)
-                        if normalized_lower in validated_normalized_texts:
+                        # Skip if this entry is already processed (correct match or user action)
+                        if normalized_lower in processed_normalized_texts:
                             continue  # Skip to next record
                         else:
-                            pass  # No debug print for unvalidated entries
+                            pass  # No debug print for unprocessed entries
 
                     # For scoring system, use matched field directly
                     # (contains the best result)
@@ -232,17 +232,17 @@ class BrushValidationCLI:
                 try:
                     counting_service = BrushValidationCountingService()
                     stats = counting_service.get_validation_statistics(month)
-                    expected_unvalidated = stats["unvalidated_count"]
+                    expected_unprocessed = stats["unprocessed_count"]
 
-                    if len(entries) != expected_unvalidated:
+                    if len(entries) != expected_unprocessed:
                         print(
                             f"Warning: CLI loaded {len(entries)} entries, but counting "
-                            f"service expects {expected_unvalidated} unvalidated entries"
+                            f"service expects {expected_unprocessed} unprocessed entries"
                         )
                         print("This suggests some user validations may not be properly filtered")
 
                 except Exception as e:
-                    print(f"Warning: Could not verify unvalidated count: {e}")
+                    print(f"Warning: Could not verify unprocessed count: {e}")
 
             return entries
 
@@ -361,24 +361,24 @@ class BrushValidationCLI:
         # Get existing user actions for this month
         existing_actions = self.user_actions_manager.get_monthly_actions(month)
         # Use case-insensitive comparison like in MismatchAnalyzer
-        validated_texts = {action.input_text.lower().strip() for action in existing_actions}
+        processed_texts = {action.input_text.lower().strip() for action in existing_actions}
 
-        # Separate validated and unvalidated entries
-        validated = []
-        unvalidated = []
+        # Separate processed and unprocessed entries
+        processed = []
+        unprocessed = []
 
         for entry in entries:
             # Case-insensitive comparison
             entry_text = entry["input_text"].lower().strip()
-            if entry_text in validated_texts:
-                validated.append(entry)
+            if entry_text in processed_texts:
+                processed.append(entry)
             else:
-                unvalidated.append(entry)
+                unprocessed.append(entry)
 
         if unvalidated_first:
-            return unvalidated + validated
+            return unprocessed + processed
         else:
-            return validated + unvalidated
+            return processed + unprocessed
 
     def _sort_by_ambiguity(self, entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Sort entries by ambiguity (smallest score difference first)."""
@@ -652,15 +652,15 @@ class BrushValidationCLI:
         # Display statistics
         print(f"\n=== Brush Validation Statistics for {month} ===")
         print(f"Total unique brush strings: {stats['total_entries']}")
-        print(f"Validated entries: {stats['validated_count']}")
+        print(f"Processed entries: {stats['total_processed']}")
         print(f"Overridden entries: {stats['overridden_count']}")
-        print(f"Unvalidated entries: {stats['unvalidated_count']}")
-        print(f"Validation rate: {stats['validation_rate']:.1%}")
+        print(f"Unprocessed entries: {stats['unprocessed_count']}")
+        print(f"Processing rate: {stats['processing_rate']:.1%}")
 
         # Display CLI-specific statistics
         print("\n=== CLI Processing Statistics ===")
         print(f"Entries loaded after deduplication: {len(entries)}")
-        print("Note: CLI shows individual brush records for validation, not unique brush strings")
+        print("Note: CLI shows individual brush records for processing, not unique brush strings")
 
         # Sort entries based on sort_by parameter
         if sort_by == "unvalidated":
