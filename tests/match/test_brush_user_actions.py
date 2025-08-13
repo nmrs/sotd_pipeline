@@ -4,7 +4,7 @@ import shutil
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 
 import pytest
 import yaml
@@ -275,7 +275,12 @@ class TestBrushUserActionsManager:
         self.brush_user_actions_dir = self.learning_dir / "brush_user_actions"
         self.brush_user_actions_dir.mkdir()
 
-        self.manager = BrushUserActionsManager(base_path=self.learning_dir)
+        # Create a temporary correct_matches.yaml for testing
+        self.correct_matches_path = self.test_dir / "correct_matches.yaml"
+
+        self.manager = BrushUserActionsManager(
+            base_path=self.learning_dir, correct_matches_path=self.correct_matches_path
+        )
 
     def teardown_method(self):
         """Clean up test directory."""
@@ -575,16 +580,13 @@ class TestBrushUserActionsManager:
             with open(expected_learning_file, "r") as f:
                 learning_data = yaml.safe_load(f)
 
+            # New format: actions stored directly without wrapper
+            assert isinstance(learning_data, dict), "Learning file should be a dictionary"
+            assert len(learning_data) == 1, "Learning file should have one action"
+            # Check that the input_text is a key in the dictionary
             assert (
-                "brush_user_actions" in learning_data
-            ), "Learning file should have brush_user_actions key"
-            assert (
-                len(learning_data["brush_user_actions"]) == 1
-            ), "Learning file should have one action"
-            assert (
-                learning_data["brush_user_actions"][0]["input_text"]
-                == "Test Brush Real Dual Update"
-            )
+                "Test Brush Real Dual Update" in learning_data
+            ), "Learning file should have input_text as key"
 
             # Verify correct_matches.yaml was created and updated
             assert temp_correct_matches.exists(), "correct_matches.yaml should exist"
@@ -598,16 +600,14 @@ class TestBrushUserActionsManager:
                 "Test Brand" in correct_matches_data["brush"]
             ), "correct_matches.yaml should have Test Brand"
             assert (
-                "Test Model" in correct_matches_data["brush"]["Test Brand"],
-                "correct_matches.yaml should have Test Model",
-            )
+                "Test Model" in correct_matches_data["brush"]["Test Brand"]
+            ), "correct_matches.yaml should have Test Model"
 
             # Check that the normalized pattern was added
             patterns = correct_matches_data["brush"]["Test Brand"]["Test Model"]
             assert (
-                "test brush real dual update" in patterns,
-                "Normalized pattern should be in correct_matches.yaml",
-            )
+                "test brush real dual update" in patterns
+            ), "Normalized pattern should be in correct_matches.yaml"
 
         finally:
             # Clean up
