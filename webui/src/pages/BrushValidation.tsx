@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+
 import {
     ChevronLeft,
     ChevronRight,
@@ -58,14 +58,12 @@ interface OverrideState {
  * Only entries that need user validation are displayed in this interface.
  */
 const BrushValidation: React.FC = () => {
-
-
     // State management
     const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
     const [selectedSystem] = useState<SystemType>('scoring'); // Only scoring system supported
     const [sortBy, setSortBy] = useState<SortType>('unvalidated');
     const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize] = useState(20);
+    const [pageSize, setPageSize] = useState(20);
     const [showValidated, setShowValidated] = useState(true);
 
     // Data state
@@ -77,6 +75,7 @@ const BrushValidation: React.FC = () => {
         total: number;
         pages: number;
     } | null>(null);
+    const [totalCount, setTotalCount] = useState<number>(0);
 
     // UI state
     const [loading, setLoading] = useState(false);
@@ -177,30 +176,57 @@ const BrushValidation: React.FC = () => {
 
     // Load validation data
     const loadValidationData = useCallback(async () => {
-        if (!currentMonth) {
-            setEntries([]);
-            setPagination(null);
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
+        if (!currentMonth) return;
 
         try {
-            const response = await getBrushValidationData(currentMonth, selectedSystem, {
+            setLoading(true);
+
+            // Use backend filtering instead of frontend filtering
+            const data = await getBrushValidationData(currentMonth, 'scoring', {
                 sortBy,
-                page: currentPage,
-                pageSize,
+                page: 1,
+                pageSize: 500, // Maximum allowed by backend
+                // Pass filter parameters to backend - avoid conflicts
+                showValidated: showValidated,
+                // Set strategyCount based on filter combination
+                strategyCount: (() => {
+                    if (showSingleStrategy && !showMultipleStrategy) return 1;
+                    if (!showSingleStrategy && showMultipleStrategy) return 2; // Show multiple (2+ strategies)
+                    if (showSingleStrategy && showMultipleStrategy) return undefined; // Show all
+                    return undefined; // Both false - show nothing
+                })(),
+                // Don't send conflicting boolean flags
+                showSingleStrategy: undefined,
+                showMultipleStrategy: undefined
             });
 
-            setEntries(response.entries);
-            setPagination(response.pagination);
-        } catch (err) {
-            setError(handleApiError(err));
+            setEntries(data.entries);
+            setPagination(data.pagination);
+
+            // Store the total count from backend for accurate pagination
+            if (data.pagination && data.pagination.total) {
+                setTotalCount(data.pagination.total);
+            } else {
+                setTotalCount(data.entries.length);
+            }
+
+            // Debug: Log the actual response structure
+            console.log('🔍 Backend API Response:', {
+                entriesLength: data.entries.length,
+                pagination: data.pagination,
+                hasPagination: !!data.pagination,
+                hasTotal: !!(data.pagination && data.pagination.total),
+                totalFromPagination: data.pagination?.total,
+                totalCount: data.pagination?.total || data.entries.length,
+                responseKeys: Object.keys(data)
+            });
+        } catch (error) {
+            console.error('Error loading validation data:', error);
+            setError('Failed to load validation data');
         } finally {
             setLoading(false);
         }
-    }, [currentMonth, selectedSystem, sortBy, currentPage, pageSize]);
+    }, [currentMonth, showValidated, showSingleStrategy, showMultipleStrategy, sortBy]);
 
     // Load statistics
     const loadStatistics = useCallback(async () => {
@@ -219,16 +245,14 @@ const BrushValidation: React.FC = () => {
 
     // Load strategy distribution statistics
     const loadStrategyDistributionStatistics = useCallback(async () => {
-        if (!currentMonth) {
-            setStrategyDistributionStatistics(null);
-            return;
-        }
-
         try {
+            setStrategyDistributionStatistics(null);
+
             const stats = await getStrategyDistributionStatistics(currentMonth);
+
             setStrategyDistributionStatistics(stats);
-        } catch (err) {
-            console.error('Error loading strategy distribution statistics:', err);
+        } catch (error) {
+            console.error('Error loading strategy distribution statistics:', error);
         }
     }, [currentMonth]);
 
@@ -248,6 +272,14 @@ const BrushValidation: React.FC = () => {
     useEffect(() => {
         setCurrentPage(1); // Reset to first page when filters change
     }, [selectedSystem, sortBy]);
+
+    // Reset to page 1 when entries change and current page becomes invalid
+    useEffect(() => {
+        const totalPages = Math.ceil(entries.length / pageSize);
+        if (currentPage > totalPages && totalPages > 0) {
+            setCurrentPage(1);
+        }
+    }, [entries.length, currentPage, pageSize]);
 
     // Handle month selection
     const handleMonthsChange = useCallback((months: string[]) => {
@@ -372,21 +404,23 @@ const BrushValidation: React.FC = () => {
         }
     }, [currentMonth, loadValidationData, loadStatistics]);
 
-    // Memoized filtered entries (for display purposes)
-    const filteredEntries = useMemo(() => {
-        let filtered = entries;
+    // Backend is now handling filtering, so we use entries directly
+    const displayEntries = entries;
 
-        // Filter by strategy count
-        if (!showSingleStrategy) {
-            filtered = filtered.filter(entry => entry.all_strategies.length > 1);
-        }
+    // Calculate pagination for frontend display
+    const totalEntries = totalCount || entries.length; // Use backend total count if available
+    const totalPages = Math.ceil(totalEntries / pageSize);
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedEntries = entries.slice(startIndex, endIndex);
 
-        if (!showMultipleStrategy) {
-            filtered = filtered.filter(entry => entry.all_strategies.length === 1);
-        }
-
-        return filtered;
-    }, [entries, showSingleStrategy, showMultipleStrategy]);
+    // Update pagination state for frontend pagination
+    const frontendPagination = {
+        page: currentPage,
+        page_size: pageSize,
+        total: totalEntries,
+        pages: totalPages
+    };
 
     // Effect to handle validated filter by changing sort order
     useEffect(() => {
@@ -476,44 +510,67 @@ const BrushValidation: React.FC = () => {
                         </CardContent>
                     </Card>
 
-                    {/* Statistics */}
-                    {statistics && (
+                    {/* Page Size and Statistics */}
+                    <div className='space-y-4'>
+                        {/* Page Size Selector */}
                         <Card>
                             <CardHeader>
                                 <CardTitle className='text-sm flex items-center gap-2'>
-                                    <BarChart3 className='h-4 w-4' />
-                                    Statistics
+                                    <Filter className='h-4 w-4' />
+                                    Page Size
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className='space-y-2'>
-                                <div className='text-sm'>
-                                    <div className='flex justify-between'>
-                                        <span>Total Entries:</span>
-                                        <span className='font-medium'>{statistics.total_entries}</span>
-                                    </div>
-                                    <div className='flex justify-between'>
-                                        <span>Validated:</span>
-                                        <span className='font-medium text-green-600'>{statistics.validated_count}</span>
-                                    </div>
-                                    <div className='flex justify-between'>
-                                        <span>Overridden:</span>
-                                        <span className='font-medium text-orange-600'>
-                                            {statistics.overridden_count}
-                                        </span>
-                                    </div>
-                                    <div className='flex justify-between'>
-                                        <span>Unvalidated:</span>
-                                        <span className='font-medium text-red-600'>{statistics.unvalidated_count}</span>
-                                    </div>
-                                    <Separator className='my-2' />
-                                    <div className='flex justify-between font-medium'>
-                                        <span>Validation Rate:</span>
-                                        <span>{(statistics.validation_rate * 100).toFixed(1)}%</span>
-                                    </div>
+                                <div className='flex gap-2'>
+                                    {[10, 20, 50, 100].map((size) => (
+                                        <Button
+                                            key={size}
+                                            variant={pageSize === size ? 'default' : 'outline'}
+                                            size='sm'
+                                            onClick={() => {
+                                                setPageSize(size);
+                                                setCurrentPage(1); // Reset to first page when changing page size
+                                            }}
+                                            className='flex-1'
+                                        >
+                                            {size}
+                                        </Button>
+                                    ))}
+                                </div>
+                                <div className='text-xs text-gray-500'>
+                                    Showing {Math.min(pageSize, entries.length)} of {totalEntries} entries
                                 </div>
                             </CardContent>
                         </Card>
-                    )}
+
+                        {/* Statistics */}
+                        {statistics && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className='text-sm flex items-center gap-2'>
+                                        <BarChart3 className='h-4 w-4' />
+                                        Statistics
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className='space-y-2'>
+                                    <div className='flex items-center gap-4 text-sm text-gray-600'>
+                                        <span>
+                                            <strong>Total:</strong> {statistics.total_entries}
+                                        </span>
+                                        <span>
+                                            <strong>Validated:</strong> {statistics.validated_count}
+                                        </span>
+                                        <span>
+                                            <strong>Unvalidated:</strong> {statistics.unvalidated_count}
+                                        </span>
+                                        <span>
+                                            <strong>Rate:</strong> {statistics.validation_rate.toFixed(1)}%
+                                        </span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
                 </div>
             )}
 
@@ -576,96 +633,139 @@ const BrushValidation: React.FC = () => {
 
             {/* Filter Options */}
             {currentMonth && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle className='text-sm flex items-center gap-2'>
-                            <Filter className='h-4 w-4' />
-                            Display Options
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className='space-y-3'>
-                        <div className='flex flex-wrap gap-2 items-center'>
-                            <Button
-                                variant={showValidated ? 'outline' : 'default'}
-                                onClick={() => setShowValidated(!showValidated)}
-                                className='flex items-center gap-2'
-                            >
-                                {showValidated ? 'Hide Validated' : 'Show Validated'}
-                                <Badge variant='secondary'>{statistics?.validated_count || 0}</Badge>
-                            </Button>
-
-                            <Button
-                                variant={showSingleStrategy ? 'outline' : 'default'}
-                                onClick={() => setShowSingleStrategy(!showSingleStrategy)}
-                                className='flex items-center gap-2'
-                            >
-                                {showSingleStrategy ? 'Hide Single Strategy' : 'Show Single Strategy'}
-                                <Badge variant='secondary'>
-                                    {strategyDistributionStatistics
-                                        ? strategyDistributionStatistics.all_strategies_lengths['1'] || 0
-                                        : 0}
-                                </Badge>
-                            </Button>
-
-                            <Button
-                                variant={showMultipleStrategy ? 'outline' : 'default'}
-                                onClick={() => setShowMultipleStrategy(!showMultipleStrategy)}
-                                className='flex items-center gap-2'
-                            >
-                                {showMultipleStrategy ? 'Hide Multiple Strategy' : 'Show Multiple Strategy'}
-                                <Badge variant='secondary'>
-                                    {strategyDistributionStatistics
-                                        ? Object.entries(strategyDistributionStatistics.all_strategies_lengths)
-                                            .filter(([key]) => key !== 'None' && key !== '1')
-                                            .reduce((sum, [, count]) => sum + count, 0)
-                                        : 0}
-                                </Badge>
-                            </Button>
-
-                            <Button variant='outline' disabled className='flex items-center gap-2'>
-                                Missing Data
-                                <Badge variant='destructive'>
-                                    {strategyDistributionStatistics
-                                        ? strategyDistributionStatistics.all_strategies_lengths['None'] || 0
-                                        : 0}
-                                </Badge>
-                            </Button>
-                        </div>
-
-                        <div className='text-xs text-gray-500'>
-                            <div>
-                                • <strong>Validated:</strong> Entries that have been processed (filtered by backend)
+                <>
+                    {/* Debug Info */}
+                    <Card className='bg-yellow-50 border-yellow-200'>
+                        <CardHeader>
+                            <CardTitle className='text-sm flex items-center gap-2'>🐛 Debug Info</CardTitle>
+                        </CardHeader>
+                        <CardContent className='space-y-2'>
+                            <div className='text-xs text-yellow-800 space-y-1'>
+                                <div>
+                                    <strong>Current Filters:</strong>
+                                </div>
+                                <div>• showValidated: {showValidated ? 'true' : 'false'}</div>
+                                <div>• showSingleStrategy: {showSingleStrategy ? 'true' : 'false'}</div>
+                                <div>• showMultipleStrategy: {showMultipleStrategy ? 'true' : 'false'}</div>
+                                <div>• sortBy: {sortBy}</div>
+                                <div>• Total entries loaded: {entries.length}</div>
+                                <div>• Filtered entries: {entries.length}</div>
+                                {strategyDistributionStatistics && (
+                                    <>
+                                        <div>• Strategy counts from API:</div>
+                                        <div className='ml-4'>
+                                            {Object.entries(strategyDistributionStatistics.all_strategies_lengths).map(
+                                                ([key, count]) => (
+                                                    <div key={key}>
+                                                        {' '}
+                                                        - {key}: {count}
+                                                    </div>
+                                                )
+                                            )}
+                                        </div>
+                                    </>
+                                )}
                             </div>
-                            <div>
-                                • <strong>Single Strategy:</strong> Entries with only one matching strategy
-                                (straightforward cases)
-                            </div>
-                            <div>
-                                • <strong>Multiple Strategies:</strong> Entries with multiple competing strategies
-                                (need validation decisions)
-                            </div>
-                            <div>
-                                • <strong>Missing Data:</strong> Entries without strategy information (need
-                                investigation)
-                            </div>
-                        </div>
+                        </CardContent>
+                    </Card>
 
-                        {strategyDistributionStatistics && (
-                            <div className='text-xs text-blue-600 bg-blue-50 p-2 rounded border border-blue-200'>
-                                <strong>Total Unvalidated:</strong>{' '}
-                                {strategyDistributionStatistics.remaining_entries} •<strong>Single:</strong>{' '}
-                                {strategyDistributionStatistics.all_strategies_lengths['1'] || 0} +
-                                <strong>Multiple:</strong>{' '}
-                                {Object.entries(strategyDistributionStatistics.all_strategies_lengths)
-                                    .filter(([key]) => key !== 'None' && key !== '1')
-                                    .reduce((sum, [, count]) => sum + count, 0)}{' '}
-                                +<strong>Missing:</strong>{' '}
-                                {strategyDistributionStatistics.all_strategies_lengths['None'] || 0} =
-                                {strategyDistributionStatistics.remaining_entries}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className='text-sm flex items-center gap-2'>
+                                <Filter className='h-4 w-4' />
+                                Display Options
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className='space-y-3'>
+                            <div className='flex flex-wrap gap-2 items-center'>
+                                <Button
+                                    variant={showValidated ? 'outline' : 'default'}
+                                    onClick={() => setShowValidated(!showValidated)}
+                                    className='flex items-center gap-2'
+                                >
+                                    {showValidated ? 'Hide Validated' : 'Show Validated'}
+                                    <Badge variant='secondary'>{statistics?.validated_count || 0}</Badge>
+                                </Button>
+
+                                <div className='flex flex-col gap-2'>
+                                    <label className='text-sm font-medium text-gray-700'>Strategy Count</label>
+                                    <div className='flex gap-2'>
+                                        <button
+                                            type='button'
+                                            onClick={() => setShowSingleStrategy(!showSingleStrategy)}
+                                            className={`px-3 py-2 text-sm rounded-md transition-colors ${showSingleStrategy
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                }`}
+                                        >
+                                            {showSingleStrategy ? 'Hide' : 'Show'} Single Strategy
+                                            <span className='ml-2 px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded'>
+                                                {(() => {
+                                                    const count =
+                                                        strategyDistributionStatistics?.all_strategies_lengths['1'] || 0;
+                                                    return count;
+                                                })()}
+                                            </span>
+                                        </button>
+                                        <button
+                                            type='button'
+                                            onClick={() => setShowMultipleStrategy(!showMultipleStrategy)}
+                                            className={`px-3 py-2 text-sm rounded-md transition-colors ${showMultipleStrategy
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                }`}
+                                        >
+                                            {showMultipleStrategy ? 'Hide' : 'Show'} Multiple Strategy
+                                            <span className='ml-2 px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded'>
+                                                {(() => {
+                                                    const count = strategyDistributionStatistics
+                                                        ? Object.entries(strategyDistributionStatistics.all_strategies_lengths)
+                                                            .filter(([key]) => key !== 'None' && key !== '1')
+                                                            .reduce((sum, [, count]) => sum + count, 0)
+                                                        : 0;
+                                                    return count;
+                                                })()}
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Note about strategy counts */}
+                                <div className='text-xs text-gray-500 mt-2'>
+                                    Strategy counts show unvalidated entries only.
+                                </div>
+
+                                <Button variant='outline' disabled className='flex items-center gap-2'>
+                                    Missing Data
+                                    <Badge variant='destructive'>
+                                        {strategyDistributionStatistics
+                                            ? strategyDistributionStatistics.all_strategies_lengths['None'] || 0
+                                            : 0}
+                                    </Badge>
+                                </Button>
                             </div>
-                        )}
-                    </CardContent>
-                </Card>
+
+                            <div className='text-xs text-gray-500'>
+                                <div>
+                                    • <strong>Validated:</strong> Entries that have been processed (filtered by
+                                    backend)
+                                </div>
+                                <div>
+                                    • <strong>Single Strategy:</strong> Entries with only one matching strategy
+                                    (straightforward cases)
+                                </div>
+                                <div>
+                                    • <strong>Multiple Strategies:</strong> Entries with multiple competing strategies
+                                    (need validation decisions)
+                                </div>
+                                <div>
+                                    • <strong>Missing Data:</strong> Entries without strategy information (need
+                                    investigation)
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </>
             )}
 
             {/* Loading State */}
@@ -680,10 +780,26 @@ const BrushValidation: React.FC = () => {
                 </Card>
             )}
 
+            {/* Page Info */}
+            {!loading && entries.length > 0 && (
+                <Card className='bg-gray-50'>
+                    <CardContent className='p-4'>
+                        <div className='flex items-center justify-between text-sm text-gray-600'>
+                            <div>
+                                Showing entries {startIndex + 1}-{Math.min(endIndex, entries.length)} of {totalEntries}
+                            </div>
+                            <div>
+                                Page {currentPage} of {totalPages}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
             {/* Entries List */}
-            {!loading && filteredEntries.length > 0 && (
+            {!loading && paginatedEntries.length > 0 && (
                 <div className='space-y-4'>
-                    {filteredEntries.map((entry, index) => (
+                    {paginatedEntries.map((entry, index) => (
                         <Card key={index} className='relative'>
                             <CardHeader>
                                 <div className='flex items-center justify-between'>
@@ -748,7 +864,7 @@ const BrushValidation: React.FC = () => {
                                     </div>
 
                                     {/* Alternative Strategies */}
-                                    {entry.all_strategies.length > 0 && (
+                                    {entry.all_strategies && entry.all_strategies.length > 0 && (
                                         <div>
                                             <h4 className='font-medium mb-2'>Alternative Strategies:</h4>
                                             <div className='text-sm space-y-2 max-h-64 overflow-y-auto'>
@@ -854,7 +970,7 @@ const BrushValidation: React.FC = () => {
                                 )}
 
                                 {/* Override Strategy Selection */}
-                                {overrideState?.entryIndex === index && (
+                                {overrideState?.entryIndex === index && entry.all_strategies && (
                                     <div className='border-t pt-4'>
                                         <h4 className='font-medium mb-2'>Select Alternative Strategy:</h4>
                                         <div className='space-y-2'>
@@ -937,7 +1053,7 @@ const BrushValidation: React.FC = () => {
                                             )}
                                             Validate
                                         </Button>
-                                        {entry.all_strategies.length > 0 && (
+                                        {entry.all_strategies && entry.all_strategies.length > 0 && (
                                             <Button
                                                 variant='outline'
                                                 onClick={() =>
@@ -961,19 +1077,19 @@ const BrushValidation: React.FC = () => {
             )}
 
             {/* Pagination */}
-            {pagination && pagination.pages > 1 && (
+            {frontendPagination && entries.length > 0 && (
                 <Card>
                     <CardContent className='p-4'>
                         <div className='flex items-center justify-between'>
                             <div className='text-sm text-gray-600'>
-                                Page {pagination.page} of {pagination.pages} • {pagination.total} total entries
+                                Page {frontendPagination.page} of {frontendPagination.pages} • {frontendPagination.total} total entries
                             </div>
                             <div className='flex items-center space-x-2'>
                                 <Button
                                     variant='outline'
                                     size='sm'
-                                    onClick={() => handlePageChange(pagination.page - 1)}
-                                    disabled={pagination.page <= 1}
+                                    onClick={() => handlePageChange(frontendPagination.page - 1)}
+                                    disabled={frontendPagination.page <= 1}
                                 >
                                     <ChevronLeft className='h-4 w-4' />
                                     Previous
@@ -981,8 +1097,8 @@ const BrushValidation: React.FC = () => {
                                 <Button
                                     variant='outline'
                                     size='sm'
-                                    onClick={() => handlePageChange(pagination.page + 1)}
-                                    disabled={pagination.page >= pagination.pages}
+                                    onClick={() => handlePageChange(frontendPagination.page + 1)}
+                                    disabled={frontendPagination.page >= frontendPagination.pages}
                                 >
                                     Next
                                     <ChevronRight className='h-4 w-4' />
@@ -994,13 +1110,15 @@ const BrushValidation: React.FC = () => {
             )}
 
             {/* Empty State */}
-            {!loading && filteredEntries.length === 0 && currentMonth && (
+            {!loading && paginatedEntries.length === 0 && currentMonth && (
                 <Card>
                     <CardContent className='p-6 text-center'>
                         <div className='text-gray-500'>
                             {entries.length === 0
                                 ? 'No validation data found for the selected month.'
-                                : 'No entries match the current filter criteria.'}
+                                : totalPages > 1 && currentPage > totalPages
+                                    ? 'Page number exceeds available pages. Please go back to a valid page.'
+                                    : 'No entries match the current filter criteria.'}
                         </div>
                     </CardContent>
                 </Card>

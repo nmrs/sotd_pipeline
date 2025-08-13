@@ -100,6 +100,17 @@ async def get_brush_validation_data(
     sort_by: str = Query(default="unvalidated", pattern="^(unvalidated|validated|ambiguity)$"),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=50, ge=1, le=500),
+    # New filter parameters for backend filtering
+    strategy_count: Optional[int] = Query(
+        default=None, description="Filter by number of strategies (e.g., 1 for single strategy)"
+    ),
+    show_validated: Optional[bool] = Query(default=None, description="Include validated entries"),
+    show_single_strategy: Optional[bool] = Query(
+        default=None, description="Show only single strategy entries"
+    ),
+    show_multiple_strategy: Optional[bool] = Query(
+        default=None, description="Show only multiple strategy entries"
+    ),
 ) -> BrushValidationResponse:
     """
     Get brush validation data for a specific month and system.
@@ -110,6 +121,10 @@ async def get_brush_validation_data(
         sort_by: Sort criteria ('unvalidated', 'validated', or 'ambiguity')
         page: Page number (1-based)
         page_size: Number of entries per page
+        strategy_count: Filter by specific number of strategies
+        show_validated: Include validated entries
+        show_single_strategy: Show only single strategy entries
+        show_multiple_strategy: Show only multiple strategy entries
     """
     # Validate month format
     if not re.match(r"^\d{4}-\d{2}$", month):
@@ -122,31 +137,223 @@ async def get_brush_validation_data(
     try:
         logger.info(f"Loading brush validation data for {month}/{system}")
 
-        # Initialize CLI with correct data path (relative to project root)
+        # Use counting service as single source of truth instead of CLI
         from pathlib import Path
+        from sotd.match.brush_validation_counting_service import (
+            BrushValidationCountingService,
+        )
 
+        # Initialize counting service with the same data path as the CLI
+        project_root = Path(__file__).parent.parent.parent
+        counting_service = BrushValidationCountingService(data_path=project_root / "data")
+
+        logger.info("Counting service initialized successfully")
+
+        # Get the total count from counting service (single source of truth)
+        stats = counting_service.get_validation_statistics(month)
+        total_entries = stats["total_entries"]
+
+        logger.info(f"Total entries from counting service: {total_entries}")
+
+        # Get the actual data from counting service instead of CLI
+        # This ensures we have the same data that was counted
+        matched_data = counting_service._load_matched_data(month)
+
+        # Convert to the format expected by the frontend
+        # IMPORTANT: Load ALL entries first (including validated ones) to match counting service logic
+        entries = []
+        records = matched_data.get("data", [])
+
+        for record in records:
+            if "brush" not in record:
+                continue
+
+            brush_entry = record["brush"]
+            comment_id = record.get("id")
+            comment_ids = [comment_id] if comment_id else []
+
+            entry = {
+                "input_text": brush_entry.get("normalized", ""),
+                "normalized_text": brush_entry.get("normalized", ""),
+                "system_used": "scoring",
+                "matched": brush_entry.get("matched"),
+                "all_strategies": brush_entry.get("all_strategies", []),
+                "comment_ids": comment_ids,
+            }
+            entries.append(entry)
+
+        logger.info(
+            f"Loaded {len(entries)} total entries from counting service (including validated)"
+        )
+
+        # Apply backend filtering based on parameters
+        filtered_entries = entries
+
+        logger.info(
+            f"Filtering parameters: strategy_count={strategy_count} (type: {type(strategy_count)}), show_validated={show_validated}"
+        )
+        logger.info(f"Initial entries count: {len(filtered_entries)}")
+
+        # Filter by strategy count if specified
+        if strategy_count is not None:
+            logger.info(f"Strategy count filtering enabled with value: {strategy_count}")
+            try:
+                # Use the counting service to get the actual unique brush strings with this strategy count
+                # This ensures we're counting the same way as the strategy distribution endpoint
+                from sotd.match.brush_validation_counting_service import (
+                    BrushValidationCountingService,
+                )
+
+                # Initialize counting service with the same data path as the CLI
+                project_root = Path(__file__).parent.parent.parent
+                counting_service = BrushValidationCountingService(data_path=project_root / "data")
+
+                logger.info("Counting service initialized successfully")
+
+                # Get the actual unique brush strings from the counting service
+                if show_validated:
+                    strategy_stats = (
+                        counting_service.get_all_entries_strategy_distribution_statistics(month)
+                    )
+                else:
+                    strategy_stats = counting_service.get_strategy_distribution_statistics(month)
+
+                logger.info(f"Strategy stats retrieved: {strategy_stats}")
+
+                # Get the count for this specific strategy count
+                target_count = strategy_stats["all_strategies_lengths"].get(str(strategy_count), 0)
+                logger.info(f"Target count for strategy_count={strategy_count}: {target_count}")
+
+                if target_count > 0:
+                    logger.info("Loading raw data for filtering...")
+                    # Load the raw data directly to get the correct structure
+                    import json
+                    from pathlib import Path
+
+                    project_root = Path(__file__).parent.parent.parent
+                    matched_file = project_root / "data" / "matched" / f"{month}.json"
+
+                    with open(matched_file, "r") as f:
+                        raw_data = json.load(f)
+
+                    logger.info(f"Raw data loaded, entries: {len(raw_data['data'])}")
+
+                    # Get unique brush strings with this strategy count from raw data
+                    unique_brush_strings = set()
+                    logger.info(f"Looking for entries with strategy_count={strategy_count}")
+
+                    for entry in raw_data["data"]:
+                        if (
+                            entry.get("brush")
+                            and entry["brush"].get("all_strategies")
+                            and len(entry["brush"]["all_strategies"]) == strategy_count
+                        ):
+                            # Apply validation filtering to raw data to match strategy distribution endpoint
+                            if show_validated is not None and not show_validated:
+                                # Exclude validated entries (same logic as strategy distribution endpoint)
+                                matched = entry["brush"].get("matched", {})
+                                strategy = matched.get("strategy") if matched else None
+                                if strategy in ["correct_complete_brush", "correct_split_brush"]:
+                                    continue  # Skip validated entries
+
+                            normalized_text = entry["brush"].get("normalized", "")
+                            if normalized_text:
+                                unique_brush_strings.add(normalized_text.lower().strip())
+
+                    logger.info(
+                        f"Found {len(unique_brush_strings)} unique brush strings with strategy_count={strategy_count}"
+                    )
+                    logger.info(
+                        f"Unique brush strings: {list(unique_brush_strings)[:5]}..."
+                    )  # Show first 5
+
+                    # Filter the CLI entries to only include those unique brush strings
+                    # CLI entries have normalized_text, raw data has brush.normalized
+                    # We need to deduplicate to get exactly target_count unique entries
+                    filtered_entries_original = filtered_entries  # Store original for deduplication
+                    filtered_entries = []
+                    seen_brush_strings = set()
+
+                    for entry in filtered_entries_original:
+                        normalized_text = entry.get("normalized_text", "").lower().strip()
+                        if (
+                            normalized_text in unique_brush_strings
+                            and normalized_text not in seen_brush_strings
+                        ):
+                            filtered_entries.append(entry)
+                            seen_brush_strings.add(normalized_text)
+                            if len(filtered_entries) >= target_count:
+                                break  # Stop when we have exactly target_count entries
+
+                    logger.info(
+                        f"After deduplication, found {len(filtered_entries)} unique CLI entries"
+                    )
+                else:
+                    logger.info(f"No entries found with strategy_count={strategy_count}")
+                    # No entries with this strategy count
+                    filtered_entries = []
+
+            except Exception as e:
+                logger.error(f"Error in strategy count filtering: {e}")
+                import traceback
+
+                logger.error(f"Traceback: {traceback.format_exc()}")
+                # Fall back to no filtering
+                filtered_entries = entries
+
+        # Filter by validation status if not already filtered by strategy count
+        elif show_validated is not None:
+            if not show_validated:
+                # Exclude validated entries
+                filtered_entries = [
+                    entry
+                    for entry in filtered_entries
+                    if not (
+                        entry.get("matched")
+                        and entry.get("matched", {}).get("strategy")
+                        in ["correct_complete_brush", "correct_split_brush"]
+                    )
+                ]
+
+        # Sort the filtered entries
+        # The counting service does not have a sort_entries method, so we rely on the CLI for sorting
+        # This means we need to re-initialize the CLI to get the sorted data
         project_root = Path(__file__).parent.parent.parent
         cli = BrushValidationCLI(data_path=project_root / "data")
+        sorted_entries = cli.sort_entries(filtered_entries, month, sort_by)
 
-        # Load and sort data
-        entries = cli.load_month_data(month, system)
-        sorted_entries = cli.sort_entries(entries, month, sort_by)
+        # Deduplicate entries by normalized text to match statistics
+        # The CLI loads individual comments, but we want unique brush strings
+        unique_entries = []
+        seen_normalized_texts = set()
 
-        # Calculate pagination
-        total = len(sorted_entries)
+        for entry in sorted_entries:
+            normalized_text = entry.get("normalized_text", "").lower().strip()
+            if normalized_text and normalized_text not in seen_normalized_texts:
+                unique_entries.append(entry)
+                seen_normalized_texts.add(normalized_text)
+
+        logger.info(
+            f"After deduplication: {len(unique_entries)} unique entries (was {len(sorted_entries)})"
+        )
+
+        # Calculate pagination using the counting service total (authoritative)
+        # The counting service gives us the true total (1200), use that for pagination
+        total = total_entries  # This comes from counting service (1200)
         start_idx = (page - 1) * page_size
         end_idx = start_idx + page_size
-        paginated_entries = sorted_entries[start_idx:end_idx]
+        paginated_entries = unique_entries[start_idx:end_idx]
 
         pagination = {
             "page": page,
             "page_size": page_size,
-            "total": total,
+            "total": total,  # Use counting service total (1200)
             "pages": (total + page_size - 1) // page_size,
         }
 
         logger.info(
-            f"Loaded {len(paginated_entries)} entries (page {page} of {pagination['pages']})"
+            f"Pagination: page {page} of {pagination['pages']} "
+            f"from total {total} (counting service authoritative)"
         )
 
         return BrushValidationResponse(entries=paginated_entries, pagination=pagination)

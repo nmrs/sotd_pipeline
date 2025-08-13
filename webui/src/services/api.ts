@@ -663,6 +663,11 @@ export const getBrushValidationData = async (
     sortBy?: 'unvalidated' | 'validated' | 'ambiguity';
     page?: number;
     pageSize?: number;
+    // New filter parameters for backend filtering
+    strategyCount?: number;
+    showValidated?: boolean;
+    showSingleStrategy?: boolean;
+    showMultipleStrategy?: boolean;
   } = {}
 ): Promise<BrushValidationResponse> => {
   try {
@@ -670,6 +675,12 @@ export const getBrushValidationData = async (
     if (options.sortBy) params.append('sort_by', options.sortBy);
     if (options.page) params.append('page', options.page.toString());
     if (options.pageSize) params.append('page_size', options.pageSize.toString());
+    
+    // Add new filter parameters
+    if (options.strategyCount !== undefined) params.append('strategy_count', options.strategyCount.toString());
+    if (options.showValidated !== undefined) params.append('show_validated', options.showValidated.toString());
+    if (options.showSingleStrategy !== undefined) params.append('show_single_strategy', options.showSingleStrategy.toString());
+    if (options.showMultipleStrategy !== undefined) params.append('show_multiple_strategy', options.showMultipleStrategy.toString());
 
     const response = await api.get(`/brush-validation/data/${month}/${system}?${params}`);
     return response.data;
