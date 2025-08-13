@@ -168,7 +168,8 @@ async def get_brush_validation_data(
         matched_data = counting_service._load_matched_data(month)
 
         # Convert to the format expected by the frontend
-        # IMPORTANT: Load ALL entries first (including validated ones) to match counting service logic
+        # IMPORTANT: Load ALL entries first (including validated ones) 
+        # to match counting service logic
         entries = []
         records = matched_data.get("data", [])
 
@@ -191,11 +192,31 @@ async def get_brush_validation_data(
             entries.append(entry)
 
         logger.info(
-            f"Loaded {len(entries)} total entries from counting service (including validated)"
+            f"Loaded {len(entries)} total entries from counting service "
+            f"(including validated)"
         )
 
         # Apply backend filtering based on parameters
         filtered_entries = entries
+
+        # Apply validation filtering first (exclude entries that are already validated)
+        # Always filter out validated entries by default, unless explicitly requested
+        if show_validated is None or not show_validated:
+            logger.info("Applying validation filtering to exclude already validated entries")
+            initial_count = len(filtered_entries)
+            
+            # Filter out entries with correct_complete_brush or correct_split_brush strategies
+            filtered_entries = [
+                entry for entry in filtered_entries
+                if entry.get("matched") and entry["matched"].get("strategy") not in [
+                    "correct_complete_brush", 
+                    "correct_split_brush"
+                ]
+            ]
+            
+            logger.info(f"Validation filtering: {initial_count} -> {len(filtered_entries)} entries")
+        else:
+            logger.info("Showing all entries including validated ones")
 
         logger.info(
             f"Filtering parameters: strategy_count={strategy_count} (type: {type(strategy_count)}), show_validated={show_validated}"
@@ -259,8 +280,7 @@ async def get_brush_validation_data(
                             # Apply validation filtering to raw data to match strategy distribution endpoint
                             if show_validated is not None and not show_validated:
                                 # Exclude validated entries (same logic as strategy distribution endpoint)
-                                matched = entry["brush"].get("matched", {})
-                                strategy = matched.get("strategy") if matched else None
+                                strategy = entry["brush"].get("strategy")
                                 if strategy in ["correct_complete_brush", "correct_split_brush"]:
                                     continue  # Skip validated entries
 
@@ -308,20 +328,6 @@ async def get_brush_validation_data(
                 logger.error(f"Traceback: {traceback.format_exc()}")
                 # Fall back to no filtering
                 filtered_entries = entries
-
-        # Filter by validation status if not already filtered by strategy count
-        elif show_validated is not None:
-            if not show_validated:
-                # Exclude validated entries
-                filtered_entries = [
-                    entry
-                    for entry in filtered_entries
-                    if not (
-                        entry.get("matched")
-                        and entry.get("matched", {}).get("strategy")
-                        in ["correct_complete_brush", "correct_split_brush"]
-                    )
-                ]
 
         # Sort the filtered entries
         # The counting service does not have a sort_entries method, so we rely on the CLI for sorting
