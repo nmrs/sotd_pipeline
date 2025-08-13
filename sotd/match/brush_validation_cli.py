@@ -161,26 +161,6 @@ class BrushValidationCLI:
             # Get validated normalized texts (correct matches + user validations)
             validated_normalized_texts = self._get_validated_normalized_texts(month)
 
-            # Load the matched data for the month
-            if system == "legacy":
-                file_path = self.data_path / "matched_legacy" / f"{month}.json"
-            elif system == "scoring":
-                file_path = self.data_path / "matched" / f"{month}.json"
-            else:
-                return []
-
-            if not file_path.exists():
-                return []
-
-            data = load_json_data(file_path)
-
-            # Handle new file structure with metadata and data array
-            if "data" in data:
-                records = data.get("data", [])
-            else:
-                # Fallback to old structure
-                records = data.get("brush", [])
-
             # Normalize data structure for validation interface
             entries = []
             seen_normalized_texts = set()  # Track seen normalized texts for deduplication
@@ -220,15 +200,16 @@ class BrushValidationCLI:
                         else:
                             pass  # No debug print for unvalidated entries
 
-                    # For scoring system, use best_result as the matched data
-                    matched_data = brush_entry.get("best_result", {})
+                    # For scoring system, use matched field directly
+                    # (contains the best result)
+                    matched_data = brush_entry.get("matched", {})
 
                     entry = {
                         # Use normalized field for matching
                         "input_text": brush_entry.get("normalized", ""),
                         "normalized_text": brush_entry.get("normalized", ""),
                         "system_used": "scoring",
-                        "matched": matched_data,  # Use best_result as matched data
+                        "matched": matched_data,  # Use matched field directly
                         "all_strategies": brush_entry.get("all_strategies", []),
                         "comment_ids": comment_ids,
                     }
@@ -239,6 +220,10 @@ class BrushValidationCLI:
                         if normalized_lower not in seen_normalized_texts:
                             seen_normalized_texts.add(normalized_lower)
                             entries.append(entry)
+                        else:
+                            pass  # Skipping duplicate
+                    else:
+                        pass  # No normalized text, skipping entry
 
             # For scoring system, verify we have the correct count
             if system == "scoring":
@@ -442,35 +427,35 @@ class BrushValidationCLI:
                 print("Result: No match")
 
         else:  # scoring system
-            best_result = entry.get("best_result")
-            if best_result:
-                print(f"Best Strategy: {best_result.get('strategy', 'N/A')}")
-                print(f"Score: {best_result.get('score', 'N/A')}")
+            # Use the actual data structure: strategy and score are at brush level
+            strategy = entry.get("matched", {}).get("strategy", "N/A")
+            score = entry.get("matched", {}).get("score", "N/A")
+            print(f"Best Strategy: {strategy}")
+            print(f"Score: {score}")
 
-                result = best_result.get("result", {})
-                if result:
-                    brand = result.get("brand", "N/A")
-                    model = result.get("model", "N/A")
-                    print(f"Result: {brand} {model}")
-                    if result.get("handle"):
-                        handle_brand = result["handle"].get("brand", "N/A")
-                        handle_model = result["handle"].get("model", "N/A")
-                        print(f"  Handle: {handle_brand} {handle_model}")
-                    if result.get("knot"):
-                        knot_brand = result["knot"].get("brand", "N/A")
-                        knot_model = result["knot"].get("model", "N/A")
-                        print(f"  Knot: {knot_brand} {knot_model}")
+            # The matched field contains the actual result data
+            matched_data = entry.get("matched", {})
+            if matched_data:
+                brand = matched_data.get("brand", "N/A")
+                model = matched_data.get("model", "N/A")
+                print(f"Result: {brand} {model}")
+                if matched_data.get("handle"):
+                    handle_brand = matched_data["handle"].get("brand", "N/A")
+                    handle_model = matched_data["handle"].get("model", "N/A")
+                    print(f"  Handle: {handle_brand} {handle_model}")
+                if matched_data.get("knot"):
+                    knot_brand = matched_data["knot"].get("brand", "N/A")
+                    knot_model = matched_data["knot"].get("model", "N/A")
+                    print(f"  Knot: {knot_brand} {knot_model}")
 
-                # Show all strategies for context
-                all_strategies = entry.get("all_strategies", [])
-                if len(all_strategies) > 1:
-                    print("\nAll Strategies:")
-                    for i, strategy in enumerate(all_strategies):
-                        score = strategy.get("score", "N/A")
-                        name = strategy.get("strategy", "unknown")
-                        print(f"  {i + 1}. {name} (Score: {score})")
-            else:
-                print("Result: No match")
+            # Show all strategies for context
+            all_strategies = entry.get("all_strategies", [])
+            if len(all_strategies) > 1:
+                print("\nAll Strategies:")
+                for i, strategy in enumerate(all_strategies):
+                    score = strategy.get("score", "N/A")
+                    name = strategy.get("strategy", "unknown")
+                    print(f"  {i + 1}. {name} (Score: {score})")
 
     def get_user_choice(self, entry: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
         """Get user validation choice.
@@ -497,7 +482,12 @@ class BrushValidationCLI:
                         "result": entry.get("matched", {}),
                     }
                 else:
-                    result_dict = entry.get("best_result", {})
+                    # Use the actual data structure: matched field contains the result
+                    result_dict = {
+                        "strategy": entry.get("matched", {}).get("strategy", "unknown"),
+                        "score": entry.get("matched", {}).get("score", None),
+                        "result": entry.get("matched", {}),
+                    }
                 return "validate", result_dict
 
             elif choice == "o":
@@ -556,7 +546,12 @@ class BrushValidationCLI:
                 "result": entry.get("matched", {}),
             }
         else:
-            system_choice = entry.get("best_result", {})
+            # Use the actual data structure: matched field contains the result
+            system_choice = {
+                "strategy": entry.get("matched", {}).get("strategy", "unknown"),
+                "score": entry.get("matched", {}).get("score", None),
+                "result": entry.get("matched", {}),
+            }
 
         # Get all strategies
         all_strategies = entry.get("all_strategies", [])
