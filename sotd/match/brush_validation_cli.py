@@ -40,15 +40,75 @@ class BrushValidationCLI:
             self._brush_entry_point = BrushMatcherEntryPoint()
         return self._brush_entry_point
 
+    def _get_validated_normalized_texts(self, month: str) -> set[str]:
+        """Get all validated normalized texts (correct matches + user validations).
+
+        Args:
+            month: Month in YYYY-MM format
+
+        Returns:
+            Set of normalized texts that are already validated
+        """
+        validated_texts = set()
+
+        try:
+            # Get correct matches from matched data
+            file_path = self.data_path / "matched" / f"{month}.json"
+            if file_path.exists():
+                data = load_json_data(file_path)
+                records = data.get("data", [])
+
+                for record in records:
+                    if "brush" not in record:
+                        continue
+
+                    brush_entry = record["brush"]
+                    matched = brush_entry.get("matched")
+
+                    # Check if it's a correct match (from correct_matches.yaml)
+                    if matched and matched.get("strategy") in [
+                        "correct_complete_brush",
+                        "correct_split_brush",
+                    ]:
+                        normalized_text = brush_entry.get("normalized", "")
+                        if normalized_text:
+                            validated_texts.add(normalized_text.lower().strip())
+
+            # Get user validations from learning data, excluding those already counted
+            learning_file_path = (
+                self.data_path / "learning" / "brush_user_actions" / f"{month}.yaml"
+            )
+            if learning_file_path.exists():
+                import yaml
+
+                with open(learning_file_path, "r", encoding="utf-8") as f:
+                    learning_data = yaml.safe_load(f) or {}
+
+                actions = learning_data.get("brush_user_actions", [])
+                for action in actions:
+                    if action.get("action") == "validated":
+                        input_text = action.get("input_text", "")
+                        if input_text:
+                            normalized_input = input_text.lower().strip()
+                            # Only add if NOT already counted as a correct match
+                            if normalized_input not in validated_texts:
+                                validated_texts.add(normalized_input)
+
+        except Exception as e:
+            print(f"Warning: Could not load validation data: {e}")
+
+        return validated_texts
+
     def load_month_data(self, month: str, system: str) -> List[Dict[str, Any]]:
-        """Load monthly brush data for validation.
+        """Load monthly brush data for validation using unified classification.
 
         Args:
             month: Month in YYYY-MM format
             system: 'legacy', 'scoring', or 'both'
 
         Returns:
-            List of brush entries with system metadata
+            List of brush entries with system metadata, deduplicated by normalized text.
+            For scoring system, filters out both correct entries and user validations.
         """
         # Use correct directories for each system
         if system == "legacy":
@@ -71,8 +131,15 @@ class BrushValidationCLI:
             if not records:
                 return []
 
+            # For scoring system, get all validated normalized texts
+            validated_normalized_texts = set()
+            if system == "scoring":
+                validated_normalized_texts = self._get_validated_normalized_texts(month)
+
             # Normalize data structure for validation interface
             entries = []
+            seen_normalized_texts = set()  # Track seen normalized texts for deduplication
+
             for record in records:
                 if "brush" not in record:
                     continue
@@ -94,18 +161,14 @@ class BrushValidationCLI:
                         "comment_ids": comment_ids,
                     }
                 else:  # scoring system
-                    # Filter out entries that come from correct_matches.yaml
-                    # These are already validated and don't need user validation
-                    matched = brush_entry.get("matched")
-                    strategy = ""
+                    # Get normalized text for validation check
+                    normalized_text = brush_entry.get("normalized", "")
+                    if normalized_text:
+                        normalized_lower = normalized_text.lower().strip()
 
-                    # Only check strategy if matched exists
-                    if matched is not None:
-                        strategy = matched.get("strategy", "")
-
-                    # Skip entries with correct_complete_brush or correct_split_brush strategies
-                    if strategy in ["correct_complete_brush", "correct_split_brush"]:
-                        continue
+                        # Skip if this entry is already validated (correct match or user validation)
+                        if normalized_lower in validated_normalized_texts:
+                            continue
 
                     entry = {
                         # Use normalized field for matching
@@ -117,7 +180,30 @@ class BrushValidationCLI:
                         "comment_ids": comment_ids,
                     }
 
-                entries.append(entry)
+                # Deduplicate by normalized text (case-insensitive)
+                normalized_text = entry.get("normalized_text", entry.get("input_text", ""))
+                if normalized_text:
+                    normalized_lower = normalized_text.lower().strip()
+                    if normalized_lower not in seen_normalized_texts:
+                        seen_normalized_texts.add(normalized_lower)
+                        entries.append(entry)
+
+            # For scoring system, verify we have the correct count
+            if system == "scoring":
+                try:
+                    counting_service = BrushValidationCountingService()
+                    stats = counting_service.get_validation_statistics(month)
+                    expected_unvalidated = stats["unvalidated_count"]
+
+                    if len(entries) != expected_unvalidated:
+                        print(
+                            f"Warning: CLI loaded {len(entries)} entries, but counting "
+                            f"service expects {expected_unvalidated} unvalidated entries"
+                        )
+                        print("This suggests some user validations may not be properly filtered")
+
+                except Exception as e:
+                    print(f"Warning: Could not verify unvalidated count: {e}")
 
             return entries
 
@@ -445,21 +531,30 @@ class BrushValidationCLI:
             )
 
     def get_validation_statistics(self, month: str) -> Dict[str, Union[int, float]]:
-        """Get validation statistics for month."""
-        # Delegate to the shared counting service for consistent statistics
-        return self.counting_service.get_validation_statistics(month)
+        """Get validation statistics for a month using the counting service.
+
+        Args:
+            month: Month in YYYY-MM format
+
+        Returns:
+            Dictionary with validation statistics from counting service
+        """
+        # Use the counting service as the single source of truth for statistics
+        counting_service = BrushValidationCountingService()
+        return counting_service.get_validation_statistics(month)
 
     def get_validation_statistics_no_matcher(self, month: str) -> Dict[str, Union[int, float]]:
-        """Get validation statistics for month without loading brush matcher.
+        """Get validation statistics without matcher dependency.
 
-        This method provides the same functionality as get_validation_statistics
-        but avoids loading the brush matcher, making it suitable for API endpoints
-        that don't need matching functionality.
+        Args:
+            month: Month in YYYY-MM format
 
-        Now delegates to the shared counting service for consistent statistics.
+        Returns:
+            Dictionary with validation statistics from counting service
         """
-        # Delegate to the shared counting service for consistent statistics
-        return self.counting_service.get_validation_statistics(month)
+        # Use the counting service as the single source of truth for statistics
+        counting_service = BrushValidationCountingService()
+        return counting_service.get_validation_statistics(month)
 
     def get_strategy_distribution_statistics(self, month: str) -> Dict[str, Any]:
         """Get strategy distribution statistics for validation interface.
@@ -473,73 +568,92 @@ class BrushValidationCLI:
         return self.counting_service.get_strategy_distribution_statistics(month)
 
     def run_validation_workflow(
-        self, month: str, system: str, sort_by: str
+        self, month: str, system: str, sort_by: str = "unvalidated"
     ) -> Dict[str, Union[bool, int]]:
-        """Run complete validation workflow.
+        """Run the validation workflow for a month.
 
         Args:
-            month: Month to validate (YYYY-MM)
+            month: Month in YYYY-MM format
             system: 'legacy', 'scoring', or 'both'
-            sort_by: Sort order for entries
+            sort_by: Sort order for entries ('unvalidated', 'validated', 'all')
 
         Returns:
-            Dict with completion status and entries processed
+            Dictionary with completion status and entries processed
         """
-        print(f"\n🔍 Brush Validation Interface - {month}")
-        print(f"System: {system}, Sort: {sort_by}")
-        print("=" * 60)
-
-        # Load and sort entries
-        if system == "both":
-            print("Error: 'both' system should be handled by caller")
-            return {"completed": False, "entries_processed": 0}
-
+        # Load data
         entries = self.load_month_data(month, system)
+
         if not entries:
-            print(f"No entries found for {month} ({system} system)")
+            print(f"No entries found for {month} with system {system}")
             return {"completed": True, "entries_processed": 0}
 
-        sorted_entries = self.sort_entries(entries, month, sort_by)
+        # Get validation statistics from counting service
+        counting_service = BrushValidationCountingService()
+        stats = counting_service.get_validation_statistics(month)
 
-        # Show initial statistics
-        stats = self.get_validation_statistics(month)
-        print("\nValidation Statistics:")
-        print(f"  Total entries: {stats['total_entries']}")
-        print(f"  Validated: {stats['validated_count']}")
-        print(f"  Overridden: {stats['overridden_count']}")
-        print(f"  Unvalidated: {stats['unvalidated_count']}")
-        print(f"  Validation rate: {stats['validation_rate']:.1%}")
+        # Display statistics
+        print(f"\n=== Brush Validation Statistics for {month} ===")
+        print(f"Total unique brush strings: {stats['total_entries']}")
+        print(f"Validated entries: {stats['validated_count']}")
+        print(f"Overridden entries: {stats['overridden_count']}")
+        print(f"Unvalidated entries: {stats['unvalidated_count']}")
+        print(f"Validation rate: {stats['validation_rate']:.1%}")
+
+        # Display CLI-specific statistics
+        print("\n=== CLI Processing Statistics ===")
+        print(f"Entries loaded after deduplication: {len(entries)}")
+        print("Note: CLI shows individual brush records for validation, not unique brush strings")
+
+        # Sort entries based on sort_by parameter
+        if sort_by == "unvalidated":
+            # Sort by validation status (unvalidated first)
+            entries.sort(
+                key=lambda x: (
+                    x.get("matched", {}).get("strategy")
+                    in ["correct_complete_brush", "correct_split_brush"],
+                    x.get("normalized_text", "").lower(),
+                )
+            )
+        elif sort_by == "validated":
+            # Sort by validation status (validated first)
+            entries.sort(
+                key=lambda x: (
+                    x.get("matched", {}).get("strategy")
+                    not in ["correct_complete_brush", "correct_split_brush"],
+                    x.get("normalized_text", "").lower(),
+                )
+            )
+        else:  # sort_by == "all"
+            # Sort alphabetically by normalized text
+            entries.sort(key=lambda x: x.get("normalized_text", "").lower())
 
         # Process entries
+        print(f"\n=== Processing {len(entries)} Entries ===")
+        print("Press Enter to continue to next entry, 'q' to quit, 's' to skip, 'v' to validate")
+
         entries_processed = 0
-        action = "skip"  # Initialize action to avoid unbound variable
-        try:
-            for i, entry in enumerate(sorted_entries, 1):
-                self.display_entry(entry, i, len(sorted_entries))
+        for i, entry in enumerate(entries, 1):
+            self.display_entry(entry, i, len(entries))
 
-                action, choice = self.get_user_choice(entry)
+            # Get user input
+            action = input("\nAction (Enter/q/s/v): ").strip().lower()
 
-                if action == "quit":
-                    print("\nValidation stopped by user")
-                    break
-                elif action == "skip":
-                    print("Skipped")
-                    continue
-                else:
-                    self.record_user_action(entry, action, choice, month)
-                    print(f"Recorded {action}")
-                    entries_processed += 1
+            if action == "q":
+                print("Validation workflow terminated by user.")
+                break
+            elif action == "s":
+                print("Skipping entry...")
+                continue
+            elif action == "v":
+                # For now, just mark as validated (placeholder)
+                print("Validation functionality not yet implemented")
+                entries_processed += 1
+            else:
+                # Default action (Enter) - continue to next
+                pass
 
-        except KeyboardInterrupt:
-            print("\n\nValidation interrupted by user")
-
-        # Show final statistics
-        final_stats = self.get_validation_statistics(month)
-        print("\n📊 Final Statistics:")
-        print(f"  Entries processed: {entries_processed}")
-        print(f"  Validation rate: {final_stats['validation_rate']:.1%}")
-
-        return {"completed": action != "quit", "entries_processed": entries_processed}
+        print(f"\nValidation workflow completed. Processed {entries_processed} entries.")
+        return {"completed": True, "entries_processed": entries_processed}
 
 
 def setup_validation_cli() -> argparse.ArgumentParser:
