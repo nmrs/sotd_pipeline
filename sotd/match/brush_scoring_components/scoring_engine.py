@@ -27,7 +27,9 @@ class ScoringEngine:
         """
         self.config = config
 
-    def score_results(self, results: List[MatchResult], value: str) -> List[MatchResult]:
+    def score_results(
+        self, results: List[MatchResult], value: str, cached_results: Optional[dict] = None
+    ) -> List[MatchResult]:
         """
         Score all strategy results.
 
@@ -38,6 +40,9 @@ class ScoringEngine:
         Returns:
             List of MatchResult objects with scores added
         """
+        # Store cached_results for use in manufacturer detection
+        self.cached_results = cached_results
+
         scored_results = []
 
         for result in results:
@@ -458,3 +463,71 @@ class ScoringEngine:
             if re.search(pattern, input_text.lower()):
                 return 1.0
         return 0.0
+
+    def _modifier_handle_brand_without_knot_brand(
+        self, input_text: str, result, strategy_name: str
+    ) -> float:
+        """
+        Return score modifier for handle brand without knot brand detection.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object or dict
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if handle brand detected but no knot brand, 0.0 otherwise)
+        """
+        if strategy_name not in ["handle_only", "knot_only"]:
+            return 0.0
+
+        # We need cached_results to check brand balance
+        if not hasattr(self, "cached_results") or not self.cached_results:
+            return 0.0
+
+        unified_result = self.cached_results.get("unified_result")
+        if not unified_result or not unified_result.matched:
+            return 0.0
+
+        handle_data = unified_result.matched.get("handle", {})
+        knot_data = unified_result.matched.get("knot", {})
+
+        handle_brand = handle_data.get("brand")
+        knot_brand = knot_data.get("brand")
+
+        # Return 1.0 if handle brand is populated but knot brand is not
+        return 1.0 if handle_brand and not knot_brand else 0.0
+
+    def _modifier_knot_brand_without_handle_brand(
+        self, input_text: str, result, strategy_name: str
+    ) -> float:
+        """
+        Return score modifier for knot brand without handle brand detection.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object or dict
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if knot brand detected but no handle brand, 0.0 otherwise)
+        """
+        if strategy_name not in ["handle_only", "knot_only"]:
+            return 0.0
+
+        # We need cached_results to check brand balance
+        if not hasattr(self, "cached_results") or not self.cached_results:
+            return 0.0
+
+        unified_result = self.cached_results.get("unified_result")
+        if not unified_result or not unified_result.matched:
+            return 0.0
+
+        handle_data = unified_result.matched.get("handle", {})
+        knot_data = unified_result.matched.get("knot", {})
+
+        handle_brand = handle_data.get("brand")
+        knot_brand = knot_data.get("brand")
+
+        # Return 1.0 if knot brand is populated but handle brand is not
+        return 1.0 if knot_brand and not handle_brand else 0.0

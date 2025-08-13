@@ -16,6 +16,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
+from unittest.mock import Mock
 
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -23,6 +24,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from sotd.enrich.brush_enricher import BrushEnricher
 from sotd.match.brush_matcher import BrushMatcher
 from sotd.match.scoring_brush_matcher import BrushScoringMatcher
+from sotd.match.brush_scoring_config import BrushScoringConfig
+from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
 
 
 def analyze_brush_matching(brush_string: str, debug: bool = False, show_all_matches: bool = True):
@@ -79,10 +82,9 @@ def analyze_brush_matching(brush_string: str, debug: bool = False, show_all_matc
                     print(f"     Base Score: {base_score:.1f}")
                     print(f"     Modifiers: {modifier_score:+.1f}")
 
-                    # Show modifier details if there are any
-                    if modifier_score != 0:
-                        print("     Modifier Details:")
-                        _show_modifier_details(strategy_name, brush_string, matched_data)
+                    # Show modifier details for ALL strategies (even if total effect is 0.0)
+                    print("     Modifier Details:")
+                    _show_modifier_details(strategy_name, brush_string, matched_data)
 
                     if matched_data:
                         print("   📝 Matched Data:")
@@ -154,9 +156,9 @@ def analyze_brush_matching(brush_string: str, debug: bool = False, show_all_matc
                     print(f"    Base Score: {base_score:.1f}")
                     print(f"    Modifiers: {modifier_score:+.1f}")
 
-                    if modifier_score != 0:
-                        print("    Modifier Details:")
-                        _show_modifier_details(strategy, brush_string, result.matched)
+                    # Show modifier details for winner (even if total effect is 0.0)
+                    print("    Modifier Details:")
+                    _show_modifier_details(strategy, brush_string, result.matched)
 
                     print("\n  📝 Final Result:")
                     if "brand" in result.matched and result.matched["brand"]:
@@ -288,35 +290,90 @@ def analyze_brush_matching(brush_string: str, debug: bool = False, show_all_matc
 def _get_base_score_for_strategy(strategy_name: str) -> float:
     """Get the base score for a strategy from the configuration."""
     # Load configuration from the actual YAML file
-    from sotd.match.brush_scoring_config import BrushScoringConfig
-
     config = BrushScoringConfig()
     return config.get_base_strategy_score(strategy_name)
 
 
 def _show_modifier_details(strategy_name: str, input_text: str, matched_data: dict):
-    """Show detailed breakdown of modifiers applied to a strategy."""
-    # Get modifier weights from configuration
-    modifier_weights = _get_modifier_weights_for_strategy(strategy_name)
+    """Show detailed breakdown of modifiers using actual ScoringEngine."""
+    try:
+        # Import the actual ScoringEngine and config
+        config = BrushScoringConfig()
+        engine = ScoringEngine(config)
 
-    for modifier_name, weight in modifier_weights.items():
-        if weight != 0:  # Only show active modifiers
-            modifier_value = _calculate_modifier_value(
-                modifier_name, input_text, matched_data, strategy_name
-            )
-            total_effect = modifier_value * weight
-            if total_effect != 0:
+        # Create a mock result object for the engine to work with
+        mock_result = Mock()
+        mock_result.matched = matched_data
+        mock_result.strategy = strategy_name
+
+        # Get the actual modifier calculation from the engine
+        modifier_score = engine._calculate_modifiers(mock_result, input_text, strategy_name)
+
+        # Show the real modifier breakdown
+        print(f"     Real Modifier Total: {modifier_score:+.1f}")
+
+        # Get individual modifier details from the engine
+        modifier_names = config.get_all_modifier_names(strategy_name)
+        for modifier_name in modifier_names:
+            modifier_weight = config.get_strategy_modifier(strategy_name, modifier_name)
+            modifier_function = getattr(engine, f"_modifier_{modifier_name}", None)
+            if modifier_function and callable(modifier_function):
+                # For manufacturer modifiers, we need to provide cached_results context
+                # We need to get the actual cached results from the scoring process
+                # Since this is a standalone analysis tool, we need to recreate the
+                # scoring process to get the real cached results
+                if strategy_name in ["handle_only", "knot_only"]:
+                    # Create a temporary scoring engine to get the real cached results
+                    temp_engine = ScoringEngine(config)
+
+                    # We need to run the unified strategy first to get its results
+                    # This is what the real scoring process does
+                    try:
+                        # Import the brush matcher to run the unified strategy
+                        from sotd.match.brush_matcher import BrushMatcher
+
+                        # Create a temporary brush matcher to run the unified strategy
+                        temp_matcher = BrushMatcher(
+                            catalog_path=Path("data/brushes.yaml"),
+                            handles_path=Path("data/handles.yaml"),
+                            knots_path=Path("data/knots.yaml"),
+                            correct_matches_path=Path("data/correct_matches.yaml"),
+                            debug=False,
+                        )
+
+                        # Run the unified strategy to get real results
+                        unified_result = temp_matcher.match(input_text)
+
+                        if unified_result and unified_result.matched:
+                            # Store the real unified result in the engine
+                            temp_engine.cached_results = {"unified_result": unified_result}
+                            # Copy the cached results to our main engine
+                            engine.cached_results = temp_engine.cached_results
+                    except Exception as e:
+                        # If we can't get real results, fall back to a reasonable approximation
+                        # based on the input text analysis
+                        print(f"     ⚠️  Could not get real unified results: {e}")
+                        # Create minimal cached results for modifier functions to work
+                        engine.cached_results = {"unified_result": None}
+
+                modifier_value = modifier_function(input_text, mock_result, strategy_name)
+                total_effect = modifier_value * modifier_weight
+
+                # Show ALL modifiers, including those with 0.0 effect
                 print(
-                    f"       {modifier_name}: {modifier_value:.1f} × {weight:+.1f} = "
-                    f"{total_effect:+.1f}"
+                    f"       {modifier_name}: {modifier_value:.1f} × "
+                    f"{modifier_weight:+.1f} = {total_effect:+.1f}"
                 )
+
+    except Exception as e:
+        # Fallback to simplified calculation if engine fails
+        print(f"     ⚠️  Using simplified modifier calculation (engine error: {e})")
+        _show_simplified_modifier_details(strategy_name, input_text, matched_data)
 
 
 def _get_modifier_weights_for_strategy(strategy_name: str) -> dict:
     """Get modifier weights for a strategy from the configuration."""
     # Load configuration from the actual YAML file
-    from sotd.match.brush_scoring_config import BrushScoringConfig
-
     config = BrushScoringConfig()
     return config.weights.get("strategy_modifiers", {}).get(strategy_name, {})
 
@@ -440,6 +497,24 @@ def _calculate_modifier_value(
         return 0.0
 
     return 0.0
+
+
+def _show_simplified_modifier_details(strategy_name: str, input_text: str, matched_data: dict):
+    """Fallback function for simplified modifier calculation when engine fails."""
+    # Get modifier weights from configuration
+    modifier_weights = _get_modifier_weights_for_strategy(strategy_name)
+
+    for modifier_name, weight in modifier_weights.items():
+        if weight != 0:  # Only show active modifiers
+            modifier_value = _calculate_modifier_value(
+                modifier_name, input_text, matched_data, strategy_name
+            )
+            total_effect = modifier_value * weight
+            if total_effect != 0:
+                print(
+                    f"       {modifier_name}: {modifier_value:.1f} × {weight:+.1f} = "
+                    f"{total_effect:+.1f}"
+                )
 
 
 def main():

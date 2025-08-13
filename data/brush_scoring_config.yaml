@@ -71,10 +71,14 @@ brush_scoring_weights:
     handle_only:
       handle_indicators: 30.0
       knot_indicators: -30.0
+      handle_brand_without_knot_brand: 25.0    # Bonus when we detect handle brand but no knot brand
+      knot_brand_without_handle_brand: -25.0   # Penalty when we detect knot brand but no handle brand
     
     knot_only:
       knot_indicators: 30.0
-      handle_indicators: -30.0 
+      handle_indicators: -30.0
+      handle_brand_without_knot_brand: -25.0   # Penalty when we detect handle brand but no knot brand
+      knot_brand_without_handle_brand: 25.0    # Bonus when we detect knot brand but no handle brand 
 
 # GLOSSARY OF MODIFIERS
 # =====================

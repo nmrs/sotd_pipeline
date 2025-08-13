@@ -611,7 +611,9 @@ class BrushScoringMatcher:
             self.strategy_dependency_manager.get_execution_order(strategy_names)
 
             # Score the results
-            scored_results = self.scoring_engine.score_results(executable_results, value)
+            scored_results = self.scoring_engine.score_results(
+                executable_results, value, cached_results
+            )
 
             # Get the best result based on score
             best_result = self.scoring_engine.get_best_result(scored_results)
@@ -619,7 +621,7 @@ class BrushScoringMatcher:
             # Phase 4.1: Capture all strategy results for persistence
             # Convert strategy results to serializable format for JSON storage
             all_strategies = []
-            for result in strategy_results:
+            for result in scored_results:  # Use scored_results from ScoringEngine
                 strategy_data = {
                     "strategy": result.strategy,
                     "score": result.score,
