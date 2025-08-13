@@ -64,12 +64,14 @@ class BrushValidationCLI:
                             continue
 
                         brush_entry = record["brush"]
-                        matched = brush_entry.get("matched")
+                        # Fix: Access strategy from brush_entry directly, not from matched
 
                         # Check if it's a correct match (from correct_matches.yaml)
                         # Check both matched strategy and all_strategies
                         is_correct_match = False
-                        if matched and matched.get("strategy") in [
+                        # Fix: Access strategy from brush_entry directly, not from matched
+                        strategy = brush_entry.get("strategy")
+                        if strategy in [
                             "correct_complete_brush",
                         ]:
                             is_correct_match = True
@@ -288,7 +290,8 @@ class BrushValidationCLI:
     def load_brush_data_for_input_text(
         self, input_text: str, month: str, system: str
     ) -> Optional[Dict[str, Any]]:
-        """Load brush data for a specific input text to determine field type and process dual-component brushes."""
+        """Load brush data for a specific input text to determine field type and
+        process dual-component brushes."""
         try:
             # Load the matched data for the month
             if system == "legacy":
@@ -612,6 +615,17 @@ class BrushValidationCLI:
         # Delegate to the shared counting service for consistent statistics
         return self.counting_service.get_strategy_distribution_statistics(month)
 
+    def get_all_entries_strategy_distribution_statistics(self, month: str) -> Dict[str, Any]:
+        """Get strategy distribution statistics for ALL entries (validated + unvalidated).
+
+        This method provides detailed counts of entries by strategy type
+        for all entries, not just unvalidated ones.
+
+        Now delegates to the shared counting service for consistent statistics.
+        """
+        # Delegate to the shared counting service for consistent statistics
+        return self.counting_service.get_all_entries_strategy_distribution_statistics(month)
+
     def run_validation_workflow(
         self, month: str, system: str, sort_by: str = "unvalidated"
     ) -> Dict[str, Union[bool, int]]:
@@ -710,10 +724,10 @@ def setup_validation_cli() -> argparse.ArgumentParser:
 Examples:
   # Validate scoring system results for August 2025
   python -m sotd.match.brush_validation_cli --month 2025-08 --system scoring
-  
+
   # Validate with ambiguity sorting
   python -m sotd.match.brush_validation_cli --month 2025-08 --sort-by ambiguity
-  
+
   # Validate both systems
   python -m sotd.match.brush_validation_cli --month 2025-08 --system both
         """,

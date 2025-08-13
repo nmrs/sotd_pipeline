@@ -23,7 +23,7 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "declaration b2",
-                        "matched": {"strategy": "correct_complete_brush"},
+                        "strategy": "correct_complete_brush",
                         "all_strategies": [{"strategy": "correct_complete_brush", "score": 100}],
                     }
                 },
@@ -31,7 +31,7 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "declaration b2",
-                        "matched": {"strategy": "correct_complete_brush"},
+                        "strategy": "correct_complete_brush",
                         "all_strategies": [{"strategy": "correct_complete_brush", "score": 100}],
                     }
                 },
@@ -39,7 +39,7 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "zenith b2",
-                        "matched": {"strategy": "automated_split"},
+                        "strategy": "automated_split",
                         "all_strategies": [{"strategy": "automated_split", "score": 85}],
                     }
                 },
@@ -47,7 +47,7 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "simpson chubby",
-                        "matched": {"strategy": "automated_split"},
+                        "strategy": "automated_split",
                         "all_strategies": [
                             {"strategy": "automated_split", "score": 80},
                             {"strategy": "known_brush", "score": 75},
@@ -55,12 +55,18 @@ class TestBrushValidationCLIStrategyDistribution:
                     }
                 },
                 # Record 5: "Unknown Brush" with no strategies (should count as missing)
-                {"brush": {"normalized": "unknown brush", "matched": None, "all_strategies": None}},
+                {
+                    "brush": {
+                        "normalized": "unknown brush",
+                        "strategy": None,
+                        "all_strategies": None,
+                    }
+                },
             ]
         }
 
-        with patch("sotd.match.brush_validation_cli.load_json_data", return_value=mock_data):
-            stats = self.cli.get_strategy_distribution_statistics(self.test_month)
+        with patch.object(self.cli.counting_service, "_load_matched_data", return_value=mock_data):
+            stats = self.cli.get_all_entries_strategy_distribution_statistics(self.test_month)
 
         # ✅ FIXED: Now correctly counts unique brush strings (4) instead of individual records (5)
         assert stats["total_brush_records"] == 4  # Correct: counts unique brush strings
@@ -86,14 +92,14 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "declaration b2",
-                        "matched": {"strategy": "correct_complete_brush"},
+                        "strategy": "correct_complete_brush",
                         "all_strategies": [{"strategy": "correct_complete_brush", "score": 100}],
                     }
                 },
                 {
                     "brush": {
                         "normalized": "declaration b2",  # Same normalized text
-                        "matched": {"strategy": "correct_complete_brush"},
+                        "strategy": "correct_complete_brush",
                         "all_strategies": [{"strategy": "correct_complete_brush", "score": 100}],
                     }
                 },
@@ -101,14 +107,14 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "zenith b2",
-                        "matched": {"strategy": "automated_split"},
+                        "strategy": "automated_split",
                         "all_strategies": [{"strategy": "automated_split", "score": 85}],
                     }
                 },
             ]
         }
 
-        with patch("sotd.match.brush_validation_cli.load_json_data", return_value=mock_data):
+        with patch.object(self.cli.counting_service, "_load_matched_data", return_value=mock_data):
             # Get both types of statistics
             strategy_stats = self.cli.get_strategy_distribution_statistics(self.test_month)
 
@@ -138,21 +144,21 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "declaration b2",
-                        "matched": {"strategy": "correct_complete_brush"},
+                        "strategy": "correct_complete_brush",
                         "all_strategies": [{"strategy": "correct_complete_brush"}],
                     }
                 },
                 {
                     "brush": {
                         "normalized": "declaration b2",
-                        "matched": {"strategy": "correct_complete_brush"},
+                        "strategy": "correct_complete_brush",
                         "all_strategies": [{"strategy": "correct_complete_brush"}],
                     }
                 },
                 {
                     "brush": {
                         "normalized": "declaration b2",
-                        "matched": {"strategy": "correct_complete_brush"},
+                        "strategy": "correct_complete_brush",
                         "all_strategies": [{"strategy": "correct_complete_brush"}],
                     }
                 },
@@ -160,14 +166,14 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "zenith b2",
-                        "matched": {"strategy": "automated_split"},
+                        "strategy": "automated_split",
                         "all_strategies": [{"strategy": "automated_split"}],
                     }
                 },
                 {
                     "brush": {
                         "normalized": "zenith b2",
-                        "matched": {"strategy": "automated_split"},
+                        "strategy": "automated_split",
                         "all_strategies": [{"strategy": "automated_split"}],
                     }
                 },
@@ -175,7 +181,7 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "simpson chubby",
-                        "matched": {"strategy": "automated_split"},
+                        "strategy": "automated_split",
                         "all_strategies": [
                             {"strategy": "automated_split"},
                             {"strategy": "known_brush"},
@@ -185,8 +191,8 @@ class TestBrushValidationCLIStrategyDistribution:
             ]
         }
 
-        with patch("sotd.match.brush_validation_cli.load_json_data", return_value=mock_data):
-            stats = self.cli.get_strategy_distribution_statistics(self.test_month)
+        with patch.object(self.cli.counting_service, "_load_matched_data", return_value=mock_data):
+            stats = self.cli.get_all_entries_strategy_distribution_statistics(self.test_month)
 
         # ✅ FIXED: Now correctly counts unique brush strings (3) instead of individual records (6)
         assert stats["total_brush_records"] == 3  # Correct: counts unique brush strings
