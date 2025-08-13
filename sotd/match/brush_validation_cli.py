@@ -58,41 +58,68 @@ class BrushValidationCLI:
                 data = load_json_data(file_path)
                 records = data.get("data", [])
 
-                for record in records:
-                    if "brush" not in record:
-                        continue
+                if records:  # Only iterate if records is not None and not empty
+                    for record in records:
+                        if "brush" not in record:
+                            continue
 
-                    brush_entry = record["brush"]
-                    matched = brush_entry.get("matched")
+                        brush_entry = record["brush"]
+                        matched = brush_entry.get("matched")
 
-                    # Check if it's a correct match (from correct_matches.yaml)
-                    if matched and matched.get("strategy") in [
-                        "correct_complete_brush",
-                        "correct_split_brush",
-                    ]:
-                        normalized_text = brush_entry.get("normalized", "")
-                        if normalized_text:
-                            validated_texts.add(normalized_text.lower().strip())
+                        # Check if it's a correct match (from correct_matches.yaml)
+                        # Check both matched strategy and all_strategies
+                        is_correct_match = False
+                        if matched and matched.get("strategy") in [
+                            "correct_complete_brush",
+                        ]:
+                            is_correct_match = True
+                        else:
+                            # Also check all_strategies for correct matches
+                            all_strategies = brush_entry.get("all_strategies", [])
+                            if all_strategies:
+                                for strategy_info in all_strategies:
+                                    if (
+                                        isinstance(strategy_info, dict)
+                                        and strategy_info.get("strategy")
+                                        == "correct_complete_brush"
+                                    ):
+                                        is_correct_match = True
+                                        break
+                                    elif (
+                                        isinstance(strategy_info, str)
+                                        and strategy_info == "correct_complete_brush"
+                                    ):
+                                        is_correct_match = True
+                                        break
+
+                        if is_correct_match:
+                            normalized_text = brush_entry.get("normalized", "")
+                            if normalized_text:
+                                validated_texts.add(normalized_text.lower().strip())
 
             # Get user validations from learning data, excluding those already counted
             learning_file_path = (
                 self.data_path / "learning" / "brush_user_actions" / f"{month}.yaml"
             )
             if learning_file_path.exists():
-                import yaml
+                try:
+                    import yaml
 
-                with open(learning_file_path, "r", encoding="utf-8") as f:
-                    learning_data = yaml.safe_load(f) or {}
+                    with open(learning_file_path, "r", encoding="utf-8") as f:
+                        learning_data = yaml.safe_load(f) or {}
 
-                actions = learning_data.get("brush_user_actions", [])
-                for action in actions:
-                    if action.get("action") == "validated":
-                        input_text = action.get("input_text", "")
-                        if input_text:
-                            normalized_input = input_text.lower().strip()
-                            # Only add if NOT already counted as a correct match
-                            if normalized_input not in validated_texts:
-                                validated_texts.add(normalized_input)
+                    actions = learning_data.get("brush_user_actions", [])
+                    if actions and isinstance(actions, list):
+                        for action in actions:
+                            if action.get("action") == "validated":
+                                input_text = action.get("input_text", "")
+                                if input_text:
+                                    normalized_input = input_text.lower().strip()
+                                    # Only add if NOT already counted as a correct match
+                                    if normalized_input not in validated_texts:
+                                        validated_texts.add(normalized_input)
+                except Exception as e:
+                    print(f"Warning: Could not load validation data: {e}")
 
         except Exception as e:
             print(f"Warning: Could not load validation data: {e}")
@@ -131,10 +158,28 @@ class BrushValidationCLI:
             if not records:
                 return []
 
-            # For scoring system, get all validated normalized texts
-            validated_normalized_texts = set()
-            if system == "scoring":
-                validated_normalized_texts = self._get_validated_normalized_texts(month)
+            # Get validated normalized texts (correct matches + user validations)
+            validated_normalized_texts = self._get_validated_normalized_texts(month)
+
+            # Load the matched data for the month
+            if system == "legacy":
+                file_path = self.data_path / "matched_legacy" / f"{month}.json"
+            elif system == "scoring":
+                file_path = self.data_path / "matched" / f"{month}.json"
+            else:
+                return []
+
+            if not file_path.exists():
+                return []
+
+            data = load_json_data(file_path)
+
+            # Handle new file structure with metadata and data array
+            if "data" in data:
+                records = data.get("data", [])
+            else:
+                # Fallback to old structure
+                records = data.get("brush", [])
 
             # Normalize data structure for validation interface
             entries = []
@@ -160,6 +205,9 @@ class BrushValidationCLI:
                         "all_strategies": [],  # Legacy system doesn't track all strategies
                         "comment_ids": comment_ids,
                     }
+
+                    # Add legacy entry to entries list
+                    entries.append(entry)
                 else:  # scoring system
                     # Get normalized text for validation check
                     normalized_text = brush_entry.get("normalized", "")
@@ -168,25 +216,29 @@ class BrushValidationCLI:
 
                         # Skip if this entry is already validated (correct match or user validation)
                         if normalized_lower in validated_normalized_texts:
-                            continue
+                            continue  # Skip to next record
+                        else:
+                            pass  # No debug print for unvalidated entries
+
+                    # For scoring system, use best_result as the matched data
+                    matched_data = brush_entry.get("best_result", {})
 
                     entry = {
                         # Use normalized field for matching
                         "input_text": brush_entry.get("normalized", ""),
                         "normalized_text": brush_entry.get("normalized", ""),
                         "system_used": "scoring",
-                        "matched": brush_entry.get("matched"),  # Now contains strategy and score
+                        "matched": matched_data,  # Use best_result as matched data
                         "all_strategies": brush_entry.get("all_strategies", []),
                         "comment_ids": comment_ids,
                     }
 
-                # Deduplicate by normalized text (case-insensitive)
-                normalized_text = entry.get("normalized_text", entry.get("input_text", ""))
-                if normalized_text:
-                    normalized_lower = normalized_text.lower().strip()
-                    if normalized_lower not in seen_normalized_texts:
-                        seen_normalized_texts.add(normalized_lower)
-                        entries.append(entry)
+                    # Deduplicate by normalized text (case-insensitive)
+                    if normalized_text:
+                        normalized_lower = normalized_text.lower().strip()
+                        if normalized_lower not in seen_normalized_texts:
+                            seen_normalized_texts.add(normalized_lower)
+                            entries.append(entry)
 
             # For scoring system, verify we have the correct count
             if system == "scoring":
@@ -539,9 +591,8 @@ class BrushValidationCLI:
         Returns:
             Dictionary with validation statistics from counting service
         """
-        # Use the counting service as the single source of truth for statistics
-        counting_service = BrushValidationCountingService()
-        return counting_service.get_validation_statistics(month)
+        # Use the CLI's counting service instance that was initialized with the correct data path
+        return self.counting_service.get_validation_statistics(month)
 
     def get_validation_statistics_no_matcher(self, month: str) -> Dict[str, Union[int, float]]:
         """Get validation statistics without matcher dependency.
@@ -552,9 +603,8 @@ class BrushValidationCLI:
         Returns:
             Dictionary with validation statistics from counting service
         """
-        # Use the counting service as the single source of truth for statistics
-        counting_service = BrushValidationCountingService()
-        return counting_service.get_validation_statistics(month)
+        # Use the CLI's counting service instance that was initialized with the correct data path
+        return self.counting_service.get_validation_statistics(month)
 
     def get_strategy_distribution_statistics(self, month: str) -> Dict[str, Any]:
         """Get strategy distribution statistics for validation interface.
@@ -588,8 +638,7 @@ class BrushValidationCLI:
             return {"completed": True, "entries_processed": 0}
 
         # Get validation statistics from counting service
-        counting_service = BrushValidationCountingService()
-        stats = counting_service.get_validation_statistics(month)
+        stats = self.counting_service.get_validation_statistics(month)
 
         # Display statistics
         print(f"\n=== Brush Validation Statistics for {month} ===")
@@ -609,8 +658,7 @@ class BrushValidationCLI:
             # Sort by validation status (unvalidated first)
             entries.sort(
                 key=lambda x: (
-                    x.get("matched", {}).get("strategy")
-                    in ["correct_complete_brush", "correct_split_brush"],
+                    x.get("matched", {}).get("strategy") in ["correct_complete_brush"],
                     x.get("normalized_text", "").lower(),
                 )
             )
@@ -618,8 +666,7 @@ class BrushValidationCLI:
             # Sort by validation status (validated first)
             entries.sort(
                 key=lambda x: (
-                    x.get("matched", {}).get("strategy")
-                    not in ["correct_complete_brush", "correct_split_brush"],
+                    x.get("matched", {}).get("strategy") not in ["correct_complete_brush"],
                     x.get("normalized_text", "").lower(),
                 )
             )
@@ -632,6 +679,8 @@ class BrushValidationCLI:
         print("Press Enter to continue to next entry, 'q' to quit, 's' to skip, 'v' to validate")
 
         entries_processed = 0
+        workflow_completed = True  # Track if workflow completed or was terminated
+
         for i, entry in enumerate(entries, 1):
             self.display_entry(entry, i, len(entries))
 
@@ -640,6 +689,7 @@ class BrushValidationCLI:
 
             if action == "q":
                 print("Validation workflow terminated by user.")
+                workflow_completed = False  # User terminated early
                 break
             elif action == "s":
                 print("Skipping entry...")
@@ -653,7 +703,7 @@ class BrushValidationCLI:
                 pass
 
         print(f"\nValidation workflow completed. Processed {entries_processed} entries.")
-        return {"completed": True, "entries_processed": entries_processed}
+        return {"completed": workflow_completed, "entries_processed": entries_processed}
 
 
 def setup_validation_cli() -> argparse.ArgumentParser:

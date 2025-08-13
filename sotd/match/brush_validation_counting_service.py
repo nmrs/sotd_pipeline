@@ -217,33 +217,46 @@ class BrushValidationCountingService:
             }
 
     def _load_matched_data(self, month: str) -> Dict[str, Any]:
-        """Load matched data for a month.
+        """Load matched data for a month from both legacy and scoring systems.
 
         Args:
             month: Month in YYYY-MM format
 
         Returns:
-            Dictionary containing matched data
+            Dictionary containing combined matched data from both systems
         """
-        file_path = self.data_path / "matched" / f"{month}.json"
+        combined_data = {"data": []}
 
-        if not file_path.exists():
-            self.logger.warning(f"Matched data file not found: {file_path}")
-            return {"data": []}
+        # Load scoring system data
+        scoring_file_path = self.data_path / "matched" / f"{month}.json"
+        if scoring_file_path.exists():
+            try:
+                scoring_data = load_json_data(scoring_file_path)
+                if "data" in scoring_data:
+                    combined_data["data"].extend(scoring_data.get("data", []))
+                else:
+                    # Fallback to old structure
+                    combined_data["data"].extend(scoring_data.get("brush", []))
+            except Exception as e:
+                self.logger.error(f"Error loading scoring data for {month}: {e}")
 
-        try:
-            data = load_json_data(file_path)
+        # Load legacy system data
+        legacy_file_path = self.data_path / "matched_legacy" / f"{month}.json"
+        if legacy_file_path.exists():
+            try:
+                legacy_data = load_json_data(legacy_file_path)
+                if "data" in legacy_data:
+                    combined_data["data"].extend(legacy_data.get("data", []))
+                else:
+                    # Fallback to old structure
+                    combined_data["data"].extend(legacy_data.get("brush", []))
+            except Exception as e:
+                self.logger.error(f"Error loading legacy data for {month}: {e}")
 
-            # Handle new file structure with metadata and data array
-            if "data" in data:
-                return data
-            else:
-                # Fallback to old structure
-                return {"data": data.get("brush", [])}
+        if not combined_data["data"]:
+            self.logger.warning(f"No matched data found for {month} in either system")
 
-        except Exception as e:
-            self.logger.error(f"Error loading matched data for {month}: {e}")
-            return {"data": []}
+        return combined_data
 
     def _load_learning_data(self, month: str) -> Dict[str, Any]:
         """Load learning data for a month.
@@ -336,7 +349,6 @@ class BrushValidationCountingService:
 
             if matched and matched.get("strategy") in [
                 "correct_complete_brush",
-                "correct_split_brush",
             ]:
                 normalized_text = brush_entry.get("normalized", "")
                 if normalized_text:
@@ -369,7 +381,6 @@ class BrushValidationCountingService:
             matched = brush_entry.get("matched")
             if matched and matched.get("strategy") in [
                 "correct_complete_brush",
-                "correct_split_brush",
             ]:
                 normalized_text = brush_entry.get("normalized", "")
                 if normalized_text:
@@ -438,7 +449,6 @@ class BrushValidationCountingService:
                 strategy = matched.get("strategy") if matched else None
                 if matched and strategy in [
                     "correct_complete_brush",
-                    "correct_split_brush",
                 ]:
                     # This is a validated entry, skip it completely
                     validated_count += 1
