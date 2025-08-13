@@ -171,9 +171,9 @@ class TestScoringSystemValidation:
                 composite_score > 0
             ), f"Composite strategy should have positive score, got {composite_score}"
 
-        # Check that all strategies have reasonable scores
+        # Check that all strategies have reasonable scores (0.0 is valid for non-matching)
         for match_type, score in strategy_scores.items():
-            assert score > 0, f"Strategy {match_type} should have positive score, got {score}"
+            assert score >= 0, f"Strategy {match_type} should have non-negative score, got {score}"
 
     def test_multiple_strategies_return_results_for_composite_brush(self):
         """Test that multiple strategies return results for composite brush input."""

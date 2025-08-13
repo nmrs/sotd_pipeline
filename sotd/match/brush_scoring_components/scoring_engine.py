@@ -196,6 +196,10 @@ class ScoringEngine:
         brand_fields = ["brand", "handle_brand", "knot_brand"]
         brands_found = set()
 
+        # Handle case where matched is None
+        if matched is None:
+            return 0.0
+
         for field in brand_fields:
             if field in matched and matched[field]:
                 brands_found.add(matched[field])
@@ -382,4 +386,75 @@ class ScoringEngine:
         if high_priority_delimiter is not None:
             return 1.0 if high_priority_delimiter else 0.0
 
+        return 0.0
+
+    def _modifier_handle_indicators(
+        self, input_text: str, result: dict, strategy_name: str
+    ) -> float:
+        """
+        Return score modifier for handle-specific indicators.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if handle indicators detected, 0.0 otherwise)
+        """
+        handle_indicators = [
+            r"\bhandle\b",
+            r"\bwood\b",
+            r"\bresin\b",
+            r"\bacrylic\b",
+            r"\bmetal\b",
+            r"\bbrass\b",
+            r"\baluminum\b",
+            r"\bsteel\b",
+            r"\btitanium\b",
+            r"\bebonite\b",
+            r"\bivory\b",
+            r"\bhorn\b",
+            r"\bbone\b",
+            r"\bstone\b",
+            r"\bmarble\b",
+            r"\bgranite\b",
+        ]
+        for pattern in handle_indicators:
+            if re.search(pattern, input_text.lower()):
+                return 1.0
+        return 0.0
+
+    def _modifier_knot_indicators(self, input_text: str, result: dict, strategy_name: str) -> float:
+        """
+        Return score modifier for knot-specific indicators.
+
+        Args:
+            input_text: Original input string
+            result: MatchResult object
+            strategy_name: Name of the strategy
+
+        Returns:
+            Modifier value (1.0 if knot indicators detected, 0.0 otherwise)
+        """
+        knot_indicators = [
+            r"\bbadger\b",
+            r"\bboar\b",
+            r"\bsynthetic\b",
+            r"\bsyn\b",
+            r"\bnylon\b",
+            r"\bplissoft\b",
+            r"\btuxedo\b",
+            r"\bcashmere\b",
+            r"\bmixed\b",
+            r"\btimberwolf\b",
+            r"\b26mm\b",
+            r"\b28mm\b",
+            r"\b30mm\b",
+            r"\b24mm\b",
+            r"\b22mm\b",
+        ]
+        for pattern in knot_indicators:
+            if re.search(pattern, input_text.lower()):
+                return 1.0
         return 0.0

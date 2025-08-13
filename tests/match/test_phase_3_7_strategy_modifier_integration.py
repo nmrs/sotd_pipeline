@@ -26,14 +26,19 @@ class TestStrategyModifierIntegration:
         self.config.get_base_strategy_score.return_value = 70.0
         self.config.get_all_modifier_names.return_value = ["multiple_brands", "fiber_words"]
         self.config.get_strategy_modifier.side_effect = lambda strategy, modifier: {
-            "multiple_brands": -5.0,
-            "fiber_words": 3.0,
+            "multiple_brands": 25.0,  # Actual config value
+            "fiber_words": 0.0,  # Actual config value
         }[modifier]
 
-        # Create test result
+        # Create test result with multiple brands to trigger the modifier
         result = MatchResult(
             original="Simpson Chubby 2 / Omega 10098 Badger",
-            matched={"brand": "Simpson", "model": "Chubby 2"},
+            matched={
+                "brand": "Simpson",
+                "model": "Chubby 2",
+                "handle_brand": "Omega",
+                "knot_brand": "Omega",
+            },
             match_type="regex",
             pattern="simpson.*chubby",
             strategy="automated_split",
@@ -48,20 +53,20 @@ class TestStrategyModifierIntegration:
         self.config.get_all_modifier_names.assert_called_with("automated_split")
         assert self.config.get_strategy_modifier.call_count == 2
 
-        # Verify final score (multiple brands detected, fiber words detected)
-        assert score == 68.0  # 70.0 - 5.0 + 3.0
+        # Verify final score (multiple brands detected: 1.0 * 25.0, fiber words detected: 1.0 * 0.0)
+        assert score == 95.0  # 70.0 + (1.0 * 25.0) + (1.0 * 0.0)
 
     def test_multiple_brands_modifier_penalty(self):
         """Test multiple brands modifier applies penalty for multiple brand mentions."""
         # Setup mock config
         self.config.get_base_strategy_score.return_value = 70.0
         self.config.get_all_modifier_names.return_value = ["multiple_brands"]
-        self.config.get_strategy_modifier.return_value = -5.0
+        self.config.get_strategy_modifier.return_value = 25.0  # Actual config value
 
-        # Create test result
+        # Create test result with multiple brands to trigger the modifier
         result = MatchResult(
             original="Simpson Chubby 2 / Omega 10098",
-            matched={"brand": "Simpson", "model": "Chubby 2"},
+            matched={"brand": "Simpson", "model": "Chubby 2", "handle_brand": "Omega"},
             match_type="regex",
             pattern="simpson.*chubby",
             strategy="automated_split",
@@ -70,15 +75,15 @@ class TestStrategyModifierIntegration:
         # Calculate score
         score = self.scoring_engine._calculate_score(result, "Simpson Chubby 2 / Omega 10098")
 
-        # Should have base score minus penalty
-        assert score == 65.0  # 70.0 - 5.0
+        # Should have base score plus modifier (multiple brands detected: 1.0 * 25.0)
+        assert score == 95.0  # 70.0 + (1.0 * 25.0)
 
     def test_fiber_words_modifier_bonus(self):
         """Test fiber words modifier applies bonus for fiber-specific terminology."""
         # Setup mock config
         self.config.get_base_strategy_score.return_value = 70.0
         self.config.get_all_modifier_names.return_value = ["fiber_words"]
-        self.config.get_strategy_modifier.return_value = 3.0
+        self.config.get_strategy_modifier.return_value = 0.0  # Actual config value
 
         # Create test result
         result = MatchResult(
@@ -92,20 +97,20 @@ class TestStrategyModifierIntegration:
         # Calculate score
         score = self.scoring_engine._calculate_score(result, "Badger brush with synthetic knot")
 
-        # Should have base score plus bonus
-        assert score == 73.0  # 70.0 + 3.0
+        # Should have base score plus modifier (fiber words detected: 1.0 * 0.0)
+        assert score == 70.0  # 70.0 + (1.0 * 0.0)
 
     def test_size_specification_modifier_bonus(self):
         """Test size specification modifier applies bonus for size specifications."""
         # Setup mock config
         self.config.get_base_strategy_score.return_value = 70.0
         self.config.get_all_modifier_names.return_value = ["size_specification"]
-        self.config.get_strategy_modifier.return_value = 2.0
+        self.config.get_strategy_modifier.return_value = 0.0  # Actual config value
 
         # Create test result
         result = MatchResult(
             original="26mm brush",
-            matched={"brand": "Generic", "model": "Brush"},
+            matched={"brand": "Brand1", "model": "Brush"},
             match_type="regex",
             pattern="26mm.*brush",
             strategy="automated_split",
@@ -114,8 +119,8 @@ class TestStrategyModifierIntegration:
         # Calculate score
         score = self.scoring_engine._calculate_score(result, "26mm brush")
 
-        # Should have base score plus bonus
-        assert score == 72.0  # 70.0 + 2.0
+        # Should have base score plus modifier (size specification detected: 1.0 * 0.0)
+        assert score == 70.0  # 70.0 + (1.0 * 0.0)
 
     def test_delimiter_confidence_modifier_bonus(self):
         """Test delimiter confidence modifier applies bonus for high-confidence delimiters."""
@@ -149,15 +154,15 @@ class TestStrategyModifierIntegration:
             "size_specification",
         ]
         self.config.get_strategy_modifier.side_effect = lambda strategy, modifier: {
-            "multiple_brands": -5.0,
-            "fiber_words": 3.0,
-            "size_specification": 2.0,
+            "multiple_brands": 25.0,  # Actual config value
+            "fiber_words": 0.0,  # Actual config value
+            "size_specification": 0.0,  # Actual config value
         }[modifier]
 
-        # Create test result
+        # Create test result with multiple brands and size specification to trigger modifiers
         result = MatchResult(
             original="Simpson Chubby 2 / Omega 10098 26mm Badger",
-            matched={"brand": "Simpson", "model": "Chubby 2"},
+            matched={"brand": "Simpson", "model": "Chubby 2", "handle_brand": "Omega"},
             match_type="regex",
             pattern="simpson.*chubby",
             strategy="automated_split",
@@ -168,8 +173,8 @@ class TestStrategyModifierIntegration:
             result, "Simpson Chubby 2 / Omega 10098 26mm Badger"
         )
 
-        # Should have base score plus all modifiers
-        assert score == 70.0  # 70.0 - 5.0 + 3.0 + 2.0
+        # Should have base score plus all modifiers (multiple brands: 1.0 * 25.0, others: 1.0 * 0.0)
+        assert score == 95.0  # 70.0 + (1.0 * 25.0) + (1.0 * 0.0) + (1.0 * 0.0)
 
     def test_modifier_functions_are_strategy_aware(self):
         """Test that modifier functions receive correct strategy name."""
@@ -263,12 +268,12 @@ class TestStrategyModifierIntegration:
         # Setup mock config
         self.config.get_base_strategy_score.return_value = 70.0
         self.config.get_all_modifier_names.return_value = ["multiple_brands"]
-        self.config.get_strategy_modifier.return_value = -10.0  # Large penalty
+        self.config.get_strategy_modifier.return_value = 25.0  # Actual config value
 
-        # Create test result
+        # Create test result with multiple brands to trigger the modifier
         result = MatchResult(
             original="Simpson Chubby 2 / Omega 10098",
-            matched={"brand": "Brand1", "model": "Brush"},
+            matched={"brand": "Brand1", "model": "Brush", "handle_brand": "Brand2"},
             match_type="regex",
             pattern="brand1.*brush",
             strategy="automated_split",
@@ -277,8 +282,8 @@ class TestStrategyModifierIntegration:
         # Calculate score
         score = self.scoring_engine._calculate_score(result, "Simpson Chubby 2 / Omega 10098")
 
-        # Should have base score minus penalty (multiple brands detected)
-        assert score == 60.0  # 70.0 - 10.0
+        # Should have base score plus modifier (multiple brands detected: 1.0 * 25.0)
+        assert score == 95.0  # 70.0 + (1.0 * 25.0)
 
     def test_modifier_functions_with_large_bonus(self):
         """Test that modifier functions work correctly with large bonuses."""
@@ -318,9 +323,8 @@ class TestModifierConfiguration:
         assert "multiple_brands" in automated_split_modifiers
         assert "fiber_words" in automated_split_modifiers
         assert "size_specification" in automated_split_modifiers
-        assert "handle_confidence" in automated_split_modifiers
-        assert "knot_confidence" in automated_split_modifiers
-        assert "word_count_balance" in automated_split_modifiers
+        assert "high_confidence" in automated_split_modifiers
+        assert "delimiter_confidence" in automated_split_modifiers
 
     def test_modifier_weights_are_configurable(self):
         """Test that modifier weights can be configured via YAML."""

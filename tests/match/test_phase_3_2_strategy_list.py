@@ -111,6 +111,8 @@ class TestPhase32StrategyList:
             "ZenithBrushMatchingStrategy",
             "OtherBrushMatchingStrategy",
             "AutomatedSplitStrategy",
+            "HandleOnlyStrategy",
+            "KnotOnlyStrategy",
         ]
 
         for strategy_name in required_strategies:
@@ -125,12 +127,13 @@ class TestPhase32StrategyList:
         matcher = BrushScoringMatcher()
         strategies = matcher._create_strategies()
 
-        # Should have 9 strategies total (current implementation):
+        # Should have 11 strategies total (current implementation):
         # - 3 wrapper strategies (correct_complete, correct_split, known_split)
         # - 1 unified component strategy (FullInputComponentMatchingStrategy)
         # - 4 individual brush strategies (known_brush, omega_semogue, zenith, other_brush)
         # - 1 automated split strategy (AutomatedSplitStrategy)
-        expected_length = 9
+        # - 2 single component strategies (handle_only, knot_only)
+        expected_length = 11
         actual_length = len(strategies)
 
         assert actual_length == expected_length, (
