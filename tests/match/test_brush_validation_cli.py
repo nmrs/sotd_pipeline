@@ -79,8 +79,8 @@ class TestBrushValidationCLI:
     @patch("sotd.match.brush_validation_cli.load_json_data")
     def test_load_month_data_scoring_system(self, mock_load_json, mock_get_processed_texts):
         """Test loading monthly data for scoring system."""
-        # Mock the validated texts to return empty set (no validated texts)
-        mock_get_validated_texts.return_value = set()
+        # Mock the processed texts to return empty set (no processed texts)
+        mock_get_processed_texts.return_value = set()
 
         # Mock data structure - records with brush field
         mock_data = {
@@ -108,8 +108,8 @@ class TestBrushValidationCLI:
         result = self.cli.load_month_data("2025-08", "scoring")
 
         # Debug output
-        print(f"Mock called: {mock_get_validated_texts.called}")
-        print(f"Mock return value: {mock_get_validated_texts.return_value}")
+        print(f"Mock called: {mock_get_processed_texts.called}")
+        print(f"Mock return value: {mock_get_processed_texts.return_value}")
         print(f"Result length: {len(result)}")
         if result:
             print(f"First result: {result[0]}")
@@ -129,8 +129,8 @@ class TestBrushValidationCLI:
     ):
         """Test that correct_complete_brush and correct_split_brush entries are filtered out."""
 
-        # Mock the validated texts to include the correct matches
-        mock_get_validated_texts.return_value = {
+        # Mock the processed texts to include the correct matches
+        mock_get_processed_texts.return_value = {
             "test brush 1",  # correct_complete_brush
             "test brush 2",  # correct_split_brush
         }
@@ -196,7 +196,7 @@ class TestBrushValidationCLI:
         assert result[0]["matched"]["score"] == 85
 
         mock_load_json.assert_called_once()
-        mock_get_validated_texts.assert_called_once_with("2025-08")
+        mock_get_processed_texts.assert_called_once_with("2025-08")
 
     @patch("sotd.match.brush_validation_cli.load_json_data")
     def test_load_month_data_scoring_system_handles_null_matched(self, mock_load_json):
