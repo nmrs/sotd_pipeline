@@ -329,13 +329,13 @@ class BrushValidationCountingService:
         return len(unique_strings)
 
     def _count_correct_matches(self, matched_data: Dict[str, Any]) -> int:
-        """Count entries that are already validated (from correct_matches.yaml).
+        """Count unique brush strings that are correct matches.
 
         Args:
             matched_data: Matched data dictionary
 
         Returns:
-            Count of correct matches
+            Count of unique correct match brush strings
         """
         correct_matches_strings = set()
         records = matched_data.get("data", [])
@@ -345,9 +345,11 @@ class BrushValidationCountingService:
                 continue
 
             brush_entry = record["brush"]
-            matched = brush_entry.get("matched")
+            # Strategy is available at both brush.strategy and brush.matched.strategy
+            # Use brush.strategy for consistency with CLI and other consumers
+            strategy = brush_entry.get("strategy")
 
-            if matched and matched.get("strategy") in [
+            if strategy in [
                 "correct_complete_brush",
             ]:
                 normalized_text = brush_entry.get("normalized", "")
@@ -378,8 +380,10 @@ class BrushValidationCountingService:
             if "brush" not in record:
                 continue
             brush_entry = record["brush"]
-            matched = brush_entry.get("matched")
-            if matched and matched.get("strategy") in [
+            # Strategy is available at both brush.strategy and brush.matched.strategy
+            # Use brush.strategy for consistency with CLI and other consumers
+            strategy = brush_entry.get("strategy")
+            if strategy in [
                 "correct_complete_brush",
             ]:
                 normalized_text = brush_entry.get("normalized", "")
@@ -445,9 +449,10 @@ class BrushValidationCountingService:
 
             # Check if this entry is validated and should be skipped
             if only_unvalidated:
-                matched = brush_entry.get("matched")
-                strategy = matched.get("strategy") if matched else None
-                if matched and strategy in [
+                # Strategy is available at both brush.strategy and brush.matched.strategy
+                # Use brush.strategy for consistency with CLI and other consumers
+                strategy = brush_entry.get("strategy")
+                if strategy in [
                     "correct_complete_brush",
                 ]:
                     # This is a validated entry, skip it completely
@@ -463,10 +468,10 @@ class BrushValidationCountingService:
 
             # Count strategies (only for unvalidated entries when only_unvalidated=True)
             if not only_unvalidated:
-                matched = brush_entry.get("matched")
-                if matched:
-                    strategy = matched.get("strategy", "unknown")
-                    strategy_counts[strategy] = strategy_counts.get(strategy, 0) + 1
+                # Strategy is available at both brush.strategy and brush.matched.strategy
+                # Use brush.strategy for consistency with CLI and other consumers
+                strategy = brush_entry.get("strategy", "unknown")
+                strategy_counts[strategy] = strategy_counts.get(strategy, 0) + 1
 
             # Count all_strategies length for entries (only unvalidated when only_unvalidated=True)
             # Since we've already skipped validated entries above, we can safely count these
