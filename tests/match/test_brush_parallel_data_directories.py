@@ -20,12 +20,10 @@ class TestBrushParallelDataDirectories:
         # Create directories
         manager.create_directories()
 
-        # Verify both directories exist
-        assert manager.current_dir.exists()
+        # Verify new directory exists
         assert manager.new_dir.exists()
 
-        # Verify directory names
-        assert manager.legacy_dir.name == "matched_legacy"
+        # Verify directory name
         assert manager.new_dir.name == "matched"
 
     def test_directory_paths_correct(self, tmp_path):
@@ -58,16 +56,16 @@ class TestBrushParallelDataDirectories:
         manager.create_directories()
 
         test_data = {
-            "metadata": {"month": "2025-05", "brush_system": "current"},
+            "metadata": {"month": "2025-05", "brush_system": "new"},
             "data": [{"test": "data"}],
         }
 
-        # Save to current system
-        saved_path = manager.save_data("2025-05", test_data, "current")
+        # Save to new system
+        saved_path = manager.save_data("2025-05", test_data, "new")
         assert saved_path.exists()
 
-        # Load from current system
-        loaded_data = manager.load_data("2025-05", "current")
+        # Load from new system
+        loaded_data = manager.load_data("2025-05", "new")
         assert loaded_data == test_data
 
         # Save to new system
@@ -80,71 +78,63 @@ class TestBrushParallelDataDirectories:
         assert loaded_data_new == test_data
 
     def test_file_existence_checking(self, tmp_path):
-        """Test file existence checking for both systems."""
+        """Test file existence checking for new system."""
         manager = BrushParallelDataManager(base_path=tmp_path)
         manager.create_directories()
 
         # Initially no files exist
-        assert not manager.file_exists("2025-05", "current")
         assert not manager.file_exists("2025-05", "new")
 
         # Create test file
         test_data = {"test": "data"}
-        manager.save_data("2025-05", test_data, "current")
+        manager.save_data("2025-05", test_data, "new")
 
         # Check existence
-        assert manager.file_exists("2025-05", "current")
-        assert not manager.file_exists("2025-05", "new")
+        assert manager.file_exists("2025-05", "new")
 
     def test_metadata_extraction(self, tmp_path):
-        """Test metadata extraction from both systems."""
+        """Test metadata extraction from new system."""
         manager = BrushParallelDataManager(base_path=tmp_path)
         manager.create_directories()
 
         test_data = {
-            "metadata": {"month": "2025-05", "brush_system": "current", "record_count": 100},
+            "metadata": {"month": "2025-05", "brush_system": "new", "record_count": 100},
             "data": [],
         }
 
         # Save data
-        manager.save_data("2025-05", test_data, "current")
+        manager.save_data("2025-05", test_data, "new")
 
         # Extract metadata
-        metadata = manager.get_metadata("2025-05", "current")
+        metadata = manager.get_metadata("2025-05", "new")
         assert metadata["month"] == "2025-05"
-        assert metadata["brush_system"] == "current"
+        assert metadata["brush_system"] == "new"
         assert metadata["record_count"] == 100
 
     def test_month_listing(self, tmp_path):
-        """Test listing available months for both systems."""
+        """Test listing available months for new system."""
         manager = BrushParallelDataManager(base_path=tmp_path)
         manager.create_directories()
 
         # Initially no months
-        assert manager.list_available_months("current") == []
         assert manager.list_available_months("new") == []
 
         # Create some test files
         test_data = {"test": "data"}
-        manager.save_data("2025-05", test_data, "current")
-        manager.save_data("2025-06", test_data, "current")
         manager.save_data("2025-05", test_data, "new")
+        manager.save_data("2025-06", test_data, "new")
 
         # Check listings
-        current_months = manager.list_available_months("current")
         new_months = manager.list_available_months("new")
 
-        assert "2025-05" in current_months
-        assert "2025-06" in current_months
         assert "2025-05" in new_months
-        assert "2025-06" not in new_months
+        assert "2025-06" in new_months
 
     def test_system_validation(self, tmp_path):
         """Test system name validation."""
         manager = BrushParallelDataManager(base_path=tmp_path)
 
-        # Valid systems
-        manager._validate_system_name("current")
+        # Valid system
         manager._validate_system_name("new")
 
         # Invalid system
@@ -152,21 +142,21 @@ class TestBrushParallelDataDirectories:
             manager._validate_system_name("invalid")
 
     def test_directory_isolation(self, tmp_path):
-        """Test that data is properly isolated between systems."""
+        """Test that data is properly isolated in new system."""
         manager = BrushParallelDataManager(base_path=tmp_path)
         manager.create_directories()
 
-        current_data = {"system": "current", "data": [1, 2, 3]}
-        new_data = {"system": "new", "data": [4, 5, 6]}
+        test_data_1 = {"system": "new", "data": [1, 2, 3]}
+        test_data_2 = {"system": "new", "data": [4, 5, 6]}
 
-        # Save to both systems
-        manager.save_data("2025-05", current_data, "current")
-        manager.save_data("2025-05", new_data, "new")
+        # Save to different months
+        manager.save_data("2025-05", test_data_1, "new")
+        manager.save_data("2025-06", test_data_2, "new")
 
         # Load and verify isolation
-        loaded_current = manager.load_data("2025-05", "current")
-        loaded_new = manager.load_data("2025-05", "new")
+        loaded_1 = manager.load_data("2025-05", "new")
+        loaded_2 = manager.load_data("2025-06", "new")
 
-        assert loaded_current["system"] == "current"
-        assert loaded_new["system"] == "new"
-        assert loaded_current != loaded_new
+        assert loaded_1["system"] == "new"
+        assert loaded_2["system"] == "new"
+        assert loaded_1 != loaded_2

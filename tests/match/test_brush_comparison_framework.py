@@ -17,8 +17,8 @@ class TestBrushComparisonFramework:
         framework = BrushComparisonFramework()
 
         assert framework.base_path == Path("data")
-        assert framework.legacy_dir == Path("data/matched_legacy")
-        assert framework.new_dir == Path("data/matched")
+        assert framework.current_dir == Path("data/matched")
+        assert framework.new_dir == Path("data/matched_new")
 
     def test_init_custom_paths(self):
         """Test initialization with custom paths."""
@@ -26,8 +26,8 @@ class TestBrushComparisonFramework:
         framework = BrushComparisonFramework(base_path=custom_base)
 
         assert framework.base_path == custom_base
-        assert framework.legacy_dir == custom_base / "matched_legacy"
-        assert framework.new_dir == custom_base / "matched"
+        assert framework.current_dir == custom_base / "matched"
+        assert framework.new_dir == custom_base / "matched_new"
 
     def test_compare_month_both_systems_available(self, tmp_path):
         """Test comparing a month when both systems have data."""

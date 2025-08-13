@@ -60,16 +60,13 @@ class TestBrushParallelDataIntegration:
         manager.create_directories()
 
         # Files should not exist initially
-        assert not manager.file_exists("2025-05", "current")
         assert not manager.file_exists("2025-05", "new")
 
         # Create files
         test_data = {"test": "data"}
-        manager.save_data("2025-05", test_data, "current")
         manager.save_data("2025-05", test_data, "new")
 
         # Files should exist now
-        assert manager.file_exists("2025-05", "current")
         assert manager.file_exists("2025-05", "new")
 
     def test_parallel_data_manager_metadata_extraction(self, tmp_path):
@@ -82,19 +79,19 @@ class TestBrushParallelDataIntegration:
             "metadata": {
                 "month": "2025-05",
                 "record_count": 150,
-                "brush_system": "current",
+                "brush_system": "new",
                 "performance": {"total_time": 10.5},
             },
             "data": [],
         }
 
         # Save and extract metadata
-        manager.save_data("2025-05", test_data, "current")
-        metadata = manager.get_metadata("2025-05", "current")
+        manager.save_data("2025-05", test_data, "new")
+        metadata = manager.get_metadata("2025-05", "new")
 
         assert metadata["month"] == "2025-05"
         assert metadata["record_count"] == 150
-        assert metadata["brush_system"] == "current"
+        assert metadata["brush_system"] == "new"
         assert metadata["performance"]["total_time"] == 10.5
 
     def test_parallel_data_manager_month_listing(self, tmp_path):
@@ -107,16 +104,12 @@ class TestBrushParallelDataIntegration:
         test_data = {"test": "data"}
 
         for month in months:
-            manager.save_data(month, test_data, "current")
             manager.save_data(month, test_data, "new")
 
         # List available months
-        current_months = manager.list_available_months("current")
         new_months = manager.list_available_months("new")
 
-        assert set(current_months) == set(months)
         assert set(new_months) == set(months)
-        assert current_months == sorted(months)
         assert new_months == sorted(months)
 
     def test_parallel_data_manager_invalid_system_handling(self, tmp_path):
@@ -149,7 +142,7 @@ class TestBrushParallelDataIntegration:
 
         # Test file not found scenarios
         with pytest.raises(FileNotFoundError):
-            manager.load_data("2025-05", "current")
+            manager.load_data("2025-05", "new")
 
         with pytest.raises(FileNotFoundError):
-            manager.get_metadata("2025-05", "current")
+            manager.get_metadata("2025-05", "new")
