@@ -104,11 +104,8 @@ class CorrectMatchesChecker:
                 # Check if normalized value matches any of the correct strings
                 # Use case-insensitive comparison as per match phase rules
                 for correct_string in strings:
-                    # Normalize the correct string for comparison
-                    normalized_correct_string = normalize_for_matching(
-                        correct_string, field="brush"
-                    )
-                    if normalized_correct_string.lower() == normalized_value.lower():
+                    # Compare normalized versions for case-insensitive matching
+                    if correct_string.lower() == normalized_value.lower():
                         # Return match data in the expected format
                         return CorrectMatchData(
                             brand=brand, model=model, match_type="brush_section"
@@ -207,9 +204,10 @@ class CorrectMatchesChecker:
                     continue
 
                 # Check if normalized value matches any of the correct strings
+                # Use case-insensitive comparison
                 for correct_string in strings:
                     normalized_correct = normalize_for_matching(correct_string, field="brush")
-                    if normalized_correct == normalized_value:
+                    if normalized_correct.lower() == normalized_value.lower():
                         return {
                             "brand": knot_maker,
                             "model": knot_model,

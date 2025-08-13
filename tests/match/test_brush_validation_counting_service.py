@@ -94,7 +94,7 @@ class TestBrushValidationCountingService:
             patch.object(service, "_load_correct_matches", return_value=mock_correct_matches),
         ):
             stats = service.get_validation_statistics("2025-06")
-            
+
             # New unified classification: Total = Correct + User Validations + Unvalidated
             assert (
                 stats["total_entries"]
@@ -140,7 +140,7 @@ class TestBrushValidationCountingService:
             # Debug: Print actual values to understand the discrepancy
             print(f"Strategy distribution remaining_entries: {strategy_stats['remaining_entries']}")
             print(f"Validation statistics unvalidated_count: {stats['unvalidated_count']}")
-            
+
             # For now, just verify both methods return reasonable values
             assert strategy_stats["remaining_entries"] >= 0
             assert stats["unvalidated_count"] >= 0

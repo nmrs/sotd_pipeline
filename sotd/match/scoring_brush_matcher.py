@@ -88,12 +88,14 @@ class BrushScoringMatcher:
         from sotd.match.config import BrushMatcherConfig
 
         config = BrushMatcherConfig.create_default()
-        legacy_matcher = BrushMatcher(config=config, correct_matches_path=self.correct_matches_path)
+        self.legacy_matcher = BrushMatcher(
+            config=config, correct_matches_path=self.correct_matches_path
+        )
 
         # Use same knot strategies as legacy system
         knot_strategies = [
-            KnownKnotMatchingStrategy(legacy_matcher.knots_data.get("known_knots", {})),
-            OtherKnotMatchingStrategy(legacy_matcher.knots_data.get("other_knots", {})),
+            KnownKnotMatchingStrategy(self.legacy_matcher.knots_data.get("known_knots", {})),
+            OtherKnotMatchingStrategy(self.legacy_matcher.knots_data.get("other_knots", {})),
             FiberFallbackStrategy(),
             KnotSizeFallbackStrategy(),
         ]
@@ -200,6 +202,10 @@ class BrushScoringMatcher:
             ZenithBrushMatchingStrategy,
         )
 
+        # Import new single component strategies
+        from sotd.match.brush_matching_strategies.handle_only_strategy import HandleOnlyStrategy
+        from sotd.match.brush_matching_strategies.knot_only_strategy import KnotOnlyStrategy
+
         # Get catalog data for individual strategies
         catalog_data = legacy_matcher.catalog_data
 
@@ -223,9 +229,12 @@ class BrushScoringMatcher:
             ZenithBrushMatchingStrategy(),
             OtherBrushMatchingStrategy(catalog_data.get("other_brushes", {})),
             # Priority 6: medium_priority_automated_split (REMOVED - replaced by AutomatedSplitStrategy)
-            # MediumPriorityAutomatedSplitStrategy(legacy_matcher, self.config),
             # NEW: automated_split (unified high/medium priority strategy)
             AutomatedSplitStrategy(legacy_matcher, self.config),
+            # NEW: handle_only strategy
+            HandleOnlyStrategy(self.handle_matcher),
+            # NEW: knot_only strategy
+            KnotOnlyStrategy(self.knot_matcher),
         ]
 
         return strategies
@@ -540,6 +549,23 @@ class BrushScoringMatcher:
                 cached_results["knot_result"] = knot_result
         except Exception:
             # Knot matcher failed, continue without knot result
+            pass
+
+        # Pre-compute FullInputComponentMatchingStrategy result for unified strategy caching
+        try:
+            # Create a temporary instance of the unified strategy to avoid circular dependency
+            from sotd.match.brush_matching_strategies.full_input_component_matching_strategy import (
+                FullInputComponentMatchingStrategy,
+            )
+
+            unified_strategy = FullInputComponentMatchingStrategy(
+                self.handle_matcher, self.knot_matcher, self.legacy_matcher
+            )
+            unified_result = unified_strategy.match(value)
+            if unified_result:
+                cached_results["unified_result"] = unified_result
+        except Exception:
+            # Unified strategy failed, continue without unified result
             pass
 
         return cached_results

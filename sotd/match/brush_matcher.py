@@ -20,6 +20,8 @@ from sotd.match.brush_matching_strategies.other_brushes_strategy import (
 )
 from sotd.match.brush_matching_strategies.other_knot_strategy import OtherKnotMatchingStrategy
 from sotd.match.brush_matching_strategies.zenith_strategy import ZenithBrushMatchingStrategy
+from sotd.match.brush_matching_strategies.handle_only_strategy import HandleOnlyStrategy
+from sotd.match.brush_matching_strategies.knot_only_strategy import KnotOnlyStrategy
 from sotd.match.brush_splits_loader import BrushSplitsLoader
 from sotd.match.brush_splitter import BrushSplitter
 from sotd.match.cache import MatchCache
@@ -479,20 +481,35 @@ class BrushMatcher:
                 ("dual_component", self._match_dual_component),
                 ("medium_priority_automated_split", self._match_medium_priority_automated_split),
                 ("single_component_fallback", self._match_single_component_fallback),
+                ("handle_only", self._match_handle_only),
+                ("knot_only", self._match_knot_only),
             ]
         )
+
+        # Store unified strategy result for reuse by handle_only and knot_only strategies
+        unified_result = None
 
         # Try each strategy in order with timing
         for strategy_name, strategy_func in strategies:
             import time
 
             start_time = time.time()
-            result = strategy_func(value)
+
+            # Pass unified result to strategies that need it
+            if strategy_name in ["handle_only", "knot_only"]:
+                result = strategy_func(value, unified_result)
+            else:
+                result = strategy_func(value)
+
             duration = time.time() - start_time
 
             # Record strategy timing if monitor is available
             if hasattr(self, "monitor") and self.monitor is not None:
                 self.monitor.record_brush_strategy_timing(strategy_name, duration)
+
+            # Store unified result for reuse by later strategies
+            if strategy_name == "complete_brush" and result is not None:
+                unified_result = result
 
             if result is not None:
                 # Cache successful result
@@ -922,6 +939,20 @@ class BrushMatcher:
             match_type=None,
             pattern=None,
         )
+
+    def _match_handle_only(
+        self, value: str, unified_result: Optional["MatchResult"] = None
+    ) -> Optional["MatchResult"]:
+        """Strategy 9: Try handle-only matching."""
+        handle_strategy = HandleOnlyStrategy(self.handle_matcher)
+        return handle_strategy.match(value, unified_result)
+
+    def _match_knot_only(
+        self, value: str, unified_result: Optional["MatchResult"] = None
+    ) -> Optional["MatchResult"]:
+        """Strategy 10: Try knot-only matching."""
+        knot_strategy = KnotOnlyStrategy(self.knot_matcher)
+        return knot_strategy.match(value, unified_result)
 
     def _try_high_priority_splitting(
         self, value: str

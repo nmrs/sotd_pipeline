@@ -115,21 +115,26 @@ class TestCorrectMatchesUpdater:
             "test split brush input", result_data, "validated", "split_brush"
         )
 
-        # Verify entry was added
+        # Verify entry was added to handle and knot sections
         data = self.updater.load_correct_matches()
-        assert "split_brush" in data
-        assert "test split brush input" in data["split_brush"]
-        assert data["split_brush"]["test split brush input"] == result_data
+        assert "handle" in data
+        assert "knot" in data
+        assert "Unknown" in data["handle"]
+        assert "test handle" in data["handle"]["Unknown"]
+        assert "test split brush input" in data["handle"]["Unknown"]["test handle"]
+        assert "Unknown" in data["knot"]
+        assert "test knot" in data["knot"]["Unknown"]
+        assert "test split brush input" in data["knot"]["Unknown"]["test knot"]
 
     def test_add_or_update_entry_case_insensitive(self):
-        """Test that input text is normalized to lowercase."""
+        """Test that input text preserves original casing."""
         result_data = {"brand": "Test Brand", "model": "Test Model"}
 
         self.updater.add_or_update_entry("TEST BRUSH INPUT", result_data, "validated", "brush")
 
-        # Verify entry was added with lowercase key
+        # Verify entry was added with original casing preserved
         data = self.updater.load_correct_matches()
-        assert "test brush input" in data["brush"]["Test Brand"]["Test Model"]
+        assert "TEST BRUSH INPUT" in data["brush"]["Test Brand"]["Test Model"]
 
     def test_add_or_update_entry_duplicate_brush(self):
         """Test adding duplicate brush entry."""

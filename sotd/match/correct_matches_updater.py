@@ -45,7 +45,7 @@ class CorrectMatchesUpdater:
         Add new entry or update existing one in correct_matches.yaml.
 
         Args:
-            input_text: The input text to match (normalized)
+            input_text: The input text to match (preserves original casing)
             result_data: The result data to store
             action_type: Type of action ("validated" or "overridden")
             field_type: Field type ("brush", "handle", "knot", etc.)
@@ -53,7 +53,8 @@ class CorrectMatchesUpdater:
         # Load existing data
         data = self.load_correct_matches()
 
-        # Normalize input text for case-insensitive lookup
+        # Preserve original casing for storage, but normalize for lookup
+        original_text = input_text.strip()
         normalized_text = input_text.lower().strip()
 
         # For brush field, use the hierarchical structure
@@ -83,9 +84,12 @@ class CorrectMatchesUpdater:
                 if model_key not in data[field_type][brand]:
                     data[field_type][brand][model_key] = []
 
-                # Add the normalized text as a pattern if not already present
-                if normalized_text not in data[field_type][brand][model_key]:
-                    data[field_type][brand][model_key].append(normalized_text)
+                # Add the original text as a pattern if not already present
+                # Check for case-insensitive duplicates to avoid storing the same text
+                # multiple times
+                existing_patterns = data[field_type][brand][model_key]
+                if not any(pattern.lower() == normalized_text for pattern in existing_patterns):
+                    existing_patterns.append(original_text)
 
         # For handle and knot fields, use flat structure
         elif field_type in ["handle", "knot"]:
@@ -93,14 +97,21 @@ class CorrectMatchesUpdater:
             if field_type not in data:
                 data[field_type] = {}
 
-            # Add entry with normalized text as key
-            data[field_type][normalized_text] = result_data
+            # Add entry with original text as key, but check for case-insensitive duplicates
+            if not any(key.lower() == normalized_text for key in data[field_type]):
+                data[field_type][original_text] = result_data
 
         # For split_brush field, store handle/knot mapping
         elif field_type == "split_brush":
             # Extract handle and knot components from the dual-component brush
             handle_data = result_data.get("handle", {})
             knot_data = result_data.get("knot", {})
+
+            # Handle both string and dict formats for backward compatibility
+            if isinstance(handle_data, str):
+                handle_data = {"brand": "Unknown", "model": handle_data}
+            if isinstance(knot_data, str):
+                knot_data = {"brand": "Unknown", "model": knot_data}
 
             if handle_data and knot_data:
                 # Store handle component in handle section
@@ -116,9 +127,10 @@ class CorrectMatchesUpdater:
                     if handle_model not in data["handle"][handle_brand]:
                         data["handle"][handle_brand][handle_model] = []
 
-                    # Add the normalized text to handle section if not already present
-                    if normalized_text not in data["handle"][handle_brand][handle_model]:
-                        data["handle"][handle_brand][handle_model].append(normalized_text)
+                    # Add the original text to handle section if not already present
+                    existing_patterns = data["handle"][handle_brand][handle_model]
+                    if not any(pattern.lower() == normalized_text for pattern in existing_patterns):
+                        existing_patterns.append(original_text)
 
                 # Store knot component in knot section
                 knot_brand = knot_data.get("brand")
@@ -133,9 +145,10 @@ class CorrectMatchesUpdater:
                     if knot_model not in data["knot"][knot_brand]:
                         data["knot"][knot_brand][knot_model] = []
 
-                    # Add the normalized text to knot section if not already present
-                    if normalized_text not in data["knot"][knot_brand][knot_model]:
-                        data["knot"][knot_brand][knot_model].append(normalized_text)
+                    # Add the original text to knot section if not already present
+                    existing_patterns = data["knot"][knot_brand][knot_model]
+                    if not any(pattern.lower() == normalized_text for pattern in existing_patterns):
+                        existing_patterns.append(original_text)
             else:
                 # Fallback: if we can't extract components, store as regular brush
                 # This shouldn't happen with proper dual-component data
@@ -143,8 +156,10 @@ class CorrectMatchesUpdater:
                     data["brush"] = {}
                 if "dual_component" not in data["brush"]:
                     data["brush"]["dual_component"] = []
-                if normalized_text not in data["brush"]["dual_component"]:
-                    data["brush"]["dual_component"].append(normalized_text)
+
+                existing_patterns = data["brush"]["dual_component"]
+                if not any(pattern.lower() == normalized_text for pattern in existing_patterns):
+                    existing_patterns.append(original_text)
 
         # Save the updated data
         self.save_correct_matches(data)
@@ -206,25 +221,29 @@ class CorrectMatchesUpdater:
             return False
 
         if field_type == "brush":
-            # Search through brand/model hierarchy
+            # Search through brand/model hierarchy with case-insensitive lookup
             for brand in data[field_type]:
                 for model in data[field_type][brand]:
-                    if normalized_text in data[field_type][brand][model]:
-                        data[field_type][brand][model].remove(normalized_text)
-                        # Remove empty model sections
-                        if not data[field_type][brand][model]:
-                            del data[field_type][brand][model]
-                        # Remove empty brand sections
-                        if not data[field_type][brand]:
-                            del data[field_type][brand]
-                        self.save_correct_matches(data)
-                        return True
+                    # Find the actual text (preserving case) to remove
+                    for pattern in data[field_type][brand][model]:
+                        if pattern.lower() == normalized_text:
+                            data[field_type][brand][model].remove(pattern)
+                            # Remove empty model sections
+                            if not data[field_type][brand][model]:
+                                del data[field_type][brand][model]
+                            # Remove empty brand sections
+                            if not data[field_type][brand]:
+                                del data[field_type][brand]
+                            self.save_correct_matches(data)
+                            return True
         else:
             # For flat structures like handle, knot, split_brush
-            if normalized_text in data[field_type]:
-                del data[field_type][normalized_text]
-                self.save_correct_matches(data)
-                return True
+            # Find the actual key (preserving case) to remove
+            for key in list(data[field_type].keys()):
+                if key.lower() == normalized_text:
+                    del data[field_type][key]
+                    self.save_correct_matches(data)
+                    return True
 
         return False
 
@@ -246,15 +265,18 @@ class CorrectMatchesUpdater:
             return None
 
         if field_type == "brush":
-            # Search through brand/model hierarchy
+            # Search through brand/model hierarchy with case-insensitive lookup
             for brand in data[field_type]:
                 for model in data[field_type][brand]:
-                    if normalized_text in data[field_type][brand][model]:
-                        return {"brand": brand, "model": model, "pattern": normalized_text}
+                    for pattern in data[field_type][brand][model]:
+                        if pattern.lower() == normalized_text:
+                            return {"brand": brand, "model": model, "pattern": pattern}
         else:
             # For flat structures like handle, knot, split_brush
-            if normalized_text in data[field_type]:
-                return data[field_type][normalized_text]
+            # Find the actual key (preserving case)
+            for key in data[field_type]:
+                if key.lower() == normalized_text:
+                    return data[field_type][key]
 
         return None
 
