@@ -1,0 +1,67 @@
+# Brush Validation Data Consistency Investigation Plan
+
+## Overview
+Investigate and resolve the data consistency issue where the brush validation system shows different counts between the counting service (1200) and the CLI data loading (1026). The goal is to establish a single source of truth and eliminate duplicate counting logic.
+
+## Current Status: ✅ COMPLETE
+
+## Final Resolution: Unified Classification System
+
+### Root Cause Analysis
+The discrepancy was caused by **double counting** of entries that exist in both `correct_matches.yaml` AND learning data as user validations. This happens due to the "transactional dual write" system where user validations are stored in both places.
+
+### Data Breakdown (2025-06) - FINAL UNIFIED CLASSIFICATION
+- **Total unique brush strings**: 1200
+- **Correct entries (from correct_matches.yaml)**: 174
+- **User validations (excluding those already counted as correct)**: 31
+- **Total processed**: 174 + 31 = 205
+- **Unvalidated**: 1200 - 205 = 995
+
+### Why This Eliminates the Discrepancy
+- **Before**: CLI was only filtering out correct matches (174), so it showed 1026 entries
+- **After**: CLI now filters out both correct matches (174) AND user validations (31), so it shows 995 entries
+- **Result**: Perfect consistency between CLI data loading and counting service statistics
+
+### Implementation Changes Made
+1. **Fixed Double Counting in Counting Service**: Modified `_count_user_actions()` to exclude user validations that are already counted as correct matches
+2. **Updated CLI Filtering**: The CLI now properly filters out both correct entries AND user validations, ensuring it loads exactly 995 entries (matching the counting service)
+3. **Unified Statistics**: Both the CLI and counting service now use the same classification system
+4. **Enhanced Deduplication**: Added sophisticated filtering to prevent double counting across data sources
+
+### Final Data Consistency Verification
+- **CLI Statistics**: Total 1200, Correct entries 174, User validations 31, Unvalidated 995
+- **CLI Data Loading**: Exactly 995 entries (perfect match with counting service)
+- **Math Verification**: 1200 - 174 - 31 = 995 ✅
+
+## Lessons Learned
+1. **Double counting can occur** when the same data exists in multiple sources (correct_matches.yaml + learning data)
+2. **Transactional dual write systems** require careful deduplication logic
+3. **Unified classification systems** eliminate discrepancies and provide single source of truth
+4. **Investigation should include** understanding data flow and potential duplicate sources
+5. **Preventing double counting** is more important than trying to reconcile different counting methods
+
+## Files Modified
+- `sotd/match/brush_validation_counting_service.py` - Fixed double counting, added unified classification
+- `sotd/match/brush_validation_cli.py` - Enhanced filtering, unified statistics source
+- `tests/match/test_brush_validation_cli.py` - Updated tests for new unified system
+
+## Testing Completed
+- ✅ Eliminated double counting between correct matches and user validations
+- ✅ CLI now shows exactly 995 entries (matching counting service unvalidated count)
+- ✅ Unified classification system working correctly
+- ✅ Math verification: 1200 - 174 - 31 = 995 ✅
+- ✅ Perfect consistency between CLI, counting service, and WebUI
+
+## Conclusion
+The brush validation system now has a **unified classification system** that eliminates double counting and provides perfect consistency:
+
+- **1200 total unique strings**
+- **174 correct entries** (from correct_matches.yaml)
+- **31 user validations** (excluding those already counted as correct)
+- **995 unvalidated** (remaining entries)
+
+**Data consistency achieved**: Perfect consistency between CLI data loading (995) and counting service unvalidated count (995), with no double counting.
+
+---
+**Completed**: 2025-08-12
+**Status**: ✅ COMPLETE - Unified classification system implemented, double counting eliminated, perfect data consistency achieved
