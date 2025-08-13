@@ -64,7 +64,7 @@ const BrushValidation: React.FC = () => {
     const [sortBy, setSortBy] = useState<SortType>('unvalidated');
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(20);
-    const [showValidated, setShowValidated] = useState(true);
+    const [showProcessed, setShowProcessed] = useState(true);
 
     // Data state
     const [entries, setEntries] = useState<BrushValidationEntry[]>([]);
@@ -187,7 +187,7 @@ const BrushValidation: React.FC = () => {
                 page: 1,
                 pageSize: 500, // Maximum allowed by backend
                 // Pass filter parameters to backend - avoid conflicts
-                showValidated: showValidated,
+                showProcessed: showProcessed,
                 // Set strategyCount based on filter combination
                 strategyCount: (() => {
                     if (showSingleStrategy && !showMultipleStrategy) return 1;
@@ -226,7 +226,7 @@ const BrushValidation: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [currentMonth, showValidated, showSingleStrategy, showMultipleStrategy, sortBy]);
+    }, [currentMonth, showProcessed, showSingleStrategy, showMultipleStrategy, sortBy]);
 
     // Load statistics
     const loadStatistics = useCallback(async () => {
@@ -422,12 +422,12 @@ const BrushValidation: React.FC = () => {
         pages: totalPages
     };
 
-    // Effect to handle validated filter by changing sort order
+    // Effect to handle processed filter by changing sort order
     useEffect(() => {
-        if (!showValidated && sortBy !== 'unvalidated') {
+        if (!showProcessed && sortBy !== 'unvalidated') {
             setSortBy('unvalidated');
         }
-    }, [showValidated, sortBy]);
+    }, [showProcessed, sortBy]);
 
     if (error) {
         return (
@@ -455,7 +455,7 @@ const BrushValidation: React.FC = () => {
                         <code className='bg-blue-100 px-1 rounded'>correct_matches.yaml</code> (with strategies{' '}
                         <code className='bg-blue-100 px-1 rounded'>correct_complete_brush</code> or{' '}
                         <code className='bg-blue-100 px-1 rounded'>correct_split_brush</code>) are filtered out{' '}
-                        since they are already validated and don't require user review.
+                        since they are already processed and don't require user review.
                     </div>
                 </CardContent>
             </Card>
@@ -558,13 +558,13 @@ const BrushValidation: React.FC = () => {
                                             <strong>Total:</strong> {statistics.total_entries}
                                         </span>
                                         <span>
-                                            <strong>Validated:</strong> {statistics.validated_count}
+                                            <strong>Processed:</strong> {statistics.total_processed}
                                         </span>
                                         <span>
-                                            <strong>Unvalidated:</strong> {statistics.unvalidated_count}
+                                            <strong>Unprocessed:</strong> {statistics.unprocessed_count}
                                         </span>
                                         <span>
-                                            <strong>Rate:</strong> {statistics.validation_rate.toFixed(1)}%
+                                            <strong>Rate:</strong> {statistics.processing_rate.toFixed(1)}%
                                         </span>
                                     </div>
                                 </CardContent>
@@ -644,7 +644,7 @@ const BrushValidation: React.FC = () => {
                                 <div>
                                     <strong>Current Filters:</strong>
                                 </div>
-                                <div>• showValidated: {showValidated ? 'true' : 'false'}</div>
+                                <div>• showProcessed: {showProcessed ? 'true' : 'false'}</div>
                                 <div>• showSingleStrategy: {showSingleStrategy ? 'true' : 'false'}</div>
                                 <div>• showMultipleStrategy: {showMultipleStrategy ? 'true' : 'false'}</div>
                                 <div>• sortBy: {sortBy}</div>
@@ -679,12 +679,12 @@ const BrushValidation: React.FC = () => {
                         <CardContent className='space-y-3'>
                             <div className='flex flex-wrap gap-2 items-center'>
                                 <Button
-                                    variant={showValidated ? 'outline' : 'default'}
-                                    onClick={() => setShowValidated(!showValidated)}
+                                    variant={showProcessed ? 'outline' : 'default'}
+                                    onClick={() => setShowProcessed(!showProcessed)}
                                     className='flex items-center gap-2'
                                 >
-                                    {showValidated ? 'Hide Validated' : 'Show Validated'}
-                                    <Badge variant='secondary'>{statistics?.validated_count || 0}</Badge>
+                                    {showProcessed ? 'Hide Processed' : 'Show Processed'}
+                                    <Badge variant='secondary'>{statistics?.total_processed || 0}</Badge>
                                 </Button>
 
                                 <div className='flex flex-col gap-2'>
@@ -732,7 +732,7 @@ const BrushValidation: React.FC = () => {
 
                                 {/* Note about strategy counts */}
                                 <div className='text-xs text-gray-500 mt-2'>
-                                    Strategy counts show unvalidated entries only.
+                                    Strategy counts show unprocessed entries only.
                                 </div>
 
                                 <Button variant='outline' disabled className='flex items-center gap-2'>
@@ -747,7 +747,7 @@ const BrushValidation: React.FC = () => {
 
                             <div className='text-xs text-gray-500'>
                                 <div>
-                                    • <strong>Validated:</strong> Entries that have been processed (filtered by
+                                    • <strong>Processed:</strong> Entries that have been processed (filtered by
                                     backend)
                                 </div>
                                 <div>
@@ -756,7 +756,7 @@ const BrushValidation: React.FC = () => {
                                 </div>
                                 <div>
                                     • <strong>Multiple Strategies:</strong> Entries with multiple competing strategies
-                                    (need validation decisions)
+                                    (need processing decisions)
                                 </div>
                                 <div>
                                     • <strong>Missing Data:</strong> Entries without strategy information (need
