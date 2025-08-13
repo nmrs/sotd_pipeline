@@ -86,10 +86,10 @@ class TestBrushValidationCountingService:
             }
         }
 
-    def test_total_entries_equals_validated_plus_unvalidated(
+    def test_total_entries_equals_processed_plus_unprocessed(
         self, service, mock_matched_data, mock_learning_data, mock_correct_matches
     ):
-        """Total Entries should always equal Correct + User Validations + Unvalidated."""
+        """Total Entries should always equal Correct + User Processed + Unprocessed."""
         with (
             patch.object(service, "_load_matched_data", return_value=mock_matched_data),
             patch.object(service, "_load_learning_data", return_value=mock_learning_data),
@@ -97,16 +97,17 @@ class TestBrushValidationCountingService:
         ):
             stats = service.get_validation_statistics("2025-06")
 
-            # New unified classification: Total = Correct + User Validations + Unvalidated
+            # New unified classification: Total = Correct + User Processed + Unprocessed
             assert (
                 stats["total_entries"]
-                == stats["correct_entries"] + stats["user_validations"] + stats["unvalidated_count"]
+                == stats["correct_entries"] + stats["user_processed"] + stats["unprocessed_count"]
             )
             assert stats["total_entries"] == 3  # 3 unique brush strings
             assert stats["correct_entries"] == 1  # 1 correct_match
-            assert stats["user_validations"] == 1  # 1 user_validated
+            assert stats["user_processed"] == 2  # 1 validated + 1 overridden
             assert stats["overridden_count"] == 1  # 1 user_overridden
-            assert stats["unvalidated_count"] == 1  # 1 unvalidated entry
+            assert stats["unprocessed_count"] == 0  # 0 unprocessed entries
+            # (all have been processed)
 
     def test_already_validated_matches_validated_statistics(
         self, service, mock_matched_data, mock_learning_data, mock_correct_matches
@@ -173,7 +174,8 @@ class TestBrushValidationCountingService:
     def test_correct_matches_counted_as_validated(
         self, service, mock_matched_data, mock_learning_data, mock_correct_matches
     ):
-        """Entries with correct_complete_brush or correct_split_brush strategies should be counted as validated."""
+        """Entries with correct_complete_brush or correct_split_brush strategies
+        should be counted as validated."""
         with (
             patch.object(service, "_load_matched_data", return_value=mock_matched_data),
             patch.object(service, "_load_learning_data", return_value=mock_learning_data),
@@ -238,9 +240,11 @@ class TestBrushValidationCountingService:
             strategy_stats = service.get_strategy_distribution_statistics("2025-06")
 
             # Should have correct counts for each strategy
-            # Note: Strategy distribution only counts unvalidated entries, not correct matches
+            # Note: Strategy distribution only counts unvalidated entries,
+            # not correct matches or user validations/overrides
             assert strategy_stats["total_brush_records"] == 3  # Total records
-            assert strategy_stats["remaining_entries"] == 2  # Unvalidated entries
+            assert strategy_stats["remaining_entries"] == 0  # Unvalidated entries
+            # (excluding correct matches and user validations/overrides)
 
     def test_mathematical_relationships_consistency(
         self, service, mock_matched_data, mock_learning_data, mock_correct_matches

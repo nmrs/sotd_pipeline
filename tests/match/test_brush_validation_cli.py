@@ -33,12 +33,12 @@ class TestBrushValidationCLI:
         assert isinstance(self.cli.user_actions_manager, BrushUserActionsManager)
         assert hasattr(self.cli, "brush_entry_point")
 
-    @patch.object(BrushValidationCLI, "_get_validated_normalized_texts")
+    @patch.object(BrushValidationCLI, "_get_processed_normalized_texts")
     @patch("sotd.match.brush_validation_cli.load_json_data")
-    def test_load_month_data_legacy_system(self, mock_load_json, mock_get_validated_texts):
+    def test_load_month_data_legacy_system(self, mock_load_json, mock_get_processed_texts):
         """Test loading monthly data for legacy system."""
-        # Mock the validated texts to return empty set (no validated texts)
-        mock_get_validated_texts.return_value = set()
+        # Mock the processed texts to return empty set (no processed texts)
+        mock_get_processed_texts.return_value = set()
 
         # Mock data structure - records with brush field
         mock_data = {
@@ -75,9 +75,9 @@ class TestBrushValidationCLI:
 
         mock_load_json.assert_called_once()
 
-    @patch.object(BrushValidationCLI, "_get_validated_normalized_texts")
+    @patch.object(BrushValidationCLI, "_get_processed_normalized_texts")
     @patch("sotd.match.brush_validation_cli.load_json_data")
-    def test_load_month_data_scoring_system(self, mock_load_json, mock_get_validated_texts):
+    def test_load_month_data_scoring_system(self, mock_load_json, mock_get_processed_texts):
         """Test loading monthly data for scoring system."""
         # Mock the validated texts to return empty set (no validated texts)
         mock_get_validated_texts.return_value = set()
@@ -122,10 +122,10 @@ class TestBrushValidationCLI:
 
         mock_load_json.assert_called_once()
 
-    @patch.object(BrushValidationCLI, "_get_validated_normalized_texts")
+    @patch.object(BrushValidationCLI, "_get_processed_normalized_texts")
     @patch("sotd.match.brush_validation_cli.load_json_data")
     def test_load_month_data_scoring_system_filters_correct_matches(
-        self, mock_load_json, mock_get_validated_texts
+        self, mock_load_json, mock_get_processed_texts
     ):
         """Test that correct_complete_brush and correct_split_brush entries are filtered out."""
 

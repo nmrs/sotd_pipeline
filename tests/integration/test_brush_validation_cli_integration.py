@@ -80,15 +80,13 @@ class TestBrushValidationCLIIntegration:
                     "brush": {
                         "name": "Zenith B35 Boar 28mm",
                         "normalized": "Zenith B35 Boar 28mm",
-                        "best_result": {
+                        "matched": {
                             "strategy": "known_brush",
                             "score": 95,
-                            "result": {
-                                "brand": "Zenith",
-                                "model": "B35",
-                                "fiber": "boar",
-                                "knot_size_mm": 28,
-                            },
+                            "brand": "Zenith",
+                            "model": "B35",
+                            "fiber": "boar",
+                            "knot_size_mm": 28,
                         },
                         "all_strategies": [
                             {"strategy": "known_brush", "score": 95, "result": {}},
