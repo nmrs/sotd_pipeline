@@ -62,10 +62,18 @@ class ValidationStatisticsResponse(BaseModel):
     """Response model for validation statistics."""
 
     total_entries: int
-    validated_count: int
+    correct_entries: int
+    user_processed: int
     overridden_count: int
+    total_processed: int
+    unprocessed_count: int
+    processing_rate: float
+    # Legacy fields for backward compatibility
+    validated_count: int
+    user_validations: int
     unvalidated_count: int
     validation_rate: float
+    total_actions: int
 
 
 class ValidationActionResponse(BaseModel):
@@ -102,9 +110,12 @@ async def get_brush_validation_data(
     page_size: int = Query(default=50, ge=1, le=500),
     # New filter parameters for backend filtering
     strategy_count: Optional[int] = Query(
-        default=None, description="Filter by number of strategies (e.g., 1 for single strategy)"
+        default=None, 
+        description="Filter by number of strategies (e.g., 1 for single strategy)"
     ),
-    show_validated: Optional[bool] = Query(default=None, description="Include validated entries"),
+    show_validated: Optional[bool] = Query(
+        default=None, description="Include validated entries"
+    ),
     show_single_strategy: Optional[bool] = Query(
         default=None, description="Show only single strategy entries"
     ),
@@ -378,12 +389,18 @@ async def get_validation_statistics(month: str) -> ValidationStatisticsResponse:
     try:
         logger.info(f"Getting validation statistics for {month}")
 
-        # Initialize CLI with correct data path (relative to project root)
-        project_root = Path(__file__).parent.parent.parent
-        cli = BrushValidationCLI(data_path=project_root / "data")
+        # Use counting service as single source of truth instead of CLI
+        from pathlib import Path
+        from sotd.match.brush_validation_counting_service import (
+            BrushValidationCountingService,
+        )
 
-        # Get statistics
-        stats = cli.get_validation_statistics_no_matcher(month)
+        # Initialize counting service with the same data path as the CLI
+        project_root = Path(__file__).parent.parent.parent
+        counting_service = BrushValidationCountingService(data_path=project_root / "data")
+
+        # Get statistics from counting service (includes both new and legacy fields)
+        stats = counting_service.get_validation_statistics(month)
 
         return ValidationStatisticsResponse(**stats)
 

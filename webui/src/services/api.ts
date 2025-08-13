@@ -627,10 +627,18 @@ export interface BrushValidationResponse {
 
 export interface BrushValidationStatistics {
   total_entries: number;
-  validated_count: number;
+  correct_entries: number;
+  user_processed: number;
   overridden_count: number;
+  total_processed: number;
+  unprocessed_count: number;
+  processing_rate: number;
+  // Legacy fields for backward compatibility
+  validated_count: number;
+  user_validations: number;
   unvalidated_count: number;
   validation_rate: number;
+  total_actions: number;
 }
 
 export interface StrategyDistributionStatistics {
