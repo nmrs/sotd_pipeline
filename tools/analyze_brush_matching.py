@@ -370,12 +370,7 @@ def _calculate_modifier_value(
         return 0.0
 
     elif modifier_name == "size_specification":
-        size_patterns = [
-            r"\b\d+mm\b", 
-            r"\b\d+\s*mm\b", 
-            r"\b\d+x\d+\b", 
-            r"\b\d+\s*x\s*\d+\b"
-        ]
+        size_patterns = [r"\b\d+mm\b", r"\b\d+\s*mm\b", r"\b\d+x\d+\b", r"\b\d+\s*x\s*\d+\b"]
         for pattern in size_patterns:
             if re.search(pattern, input_text.lower()):
                 return 1.0
