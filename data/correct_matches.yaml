@@ -795,6 +795,9 @@ brush:
     - stirling two band synthetic
     Finest Badger:
     - stirling finest badger brush
+  Test:
+    Brush:
+    - Format Test Brush
   Wald:
     A1:
     - wald a1
@@ -856,10 +859,16 @@ handle:
     Outlaw:
     - alpha outlaw silver stf++
     - alpha shaving works outlaw 28mm g5
+  Heritage Collection:
+    Unspecified:
+    - Heritage Shaving C-Mon 28 mm
 knot:
   Alpha:
     G5:
     - alpha shaving works outlaw 28mm g5
+  Heritage Collection:
+    Badger:
+    - Heritage Shaving C-Mon 28 mm
   Mühle:
     STF:
     - alpha outlaw silver stf++

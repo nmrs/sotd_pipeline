@@ -13,6 +13,8 @@ brush_scoring_weights:
     other_brush: 70.0
     automated_split: 60.0
     unified: 50.0
+    handle_only: 40.0
+    knot_only: 40.0
 
   # Strategy-specific modifiers (Phase 3.7 - ENABLED)
   strategy_modifiers:
@@ -64,7 +66,15 @@ brush_scoring_weights:
       dual_component: 15.0
       multiple_brands: 20.0
       fiber_words: 0.0
-      size_specification: 0.0 
+      size_specification: 0.0
+    
+    handle_only:
+      handle_indicators: 30.0
+      knot_indicators: -30.0
+    
+    knot_only:
+      knot_indicators: 30.0
+      handle_indicators: -30.0 
 
 # GLOSSARY OF MODIFIERS
 # =====================
@@ -78,7 +88,9 @@ brush_scoring_weights:
 # - zenith: Special handling for Zenith brand (medium-high confidence)
 # - other_brush: Generic brush matching (medium confidence)
 # - automated_split: Automated splitting with confidence scoring (lower confidence)
-# - unified: Unified strategy for complex cases (lowest confidence)
+# - unified: Unified strategy for complex cases (low confidence)
+# - handle_only: Single component strategy for handle-only input (low confidence)
+# - knot_only: Single component strategy for knot-only input (low confidence)
 #
 # Modifier Types and Strategy Applicability:
 # =========================================
@@ -98,4 +110,6 @@ brush_scoring_weights:
 # - word_count_balance: Bonus for balanced word distribution (placeholder for future use)
 #
 # STRATEGY-SPECIFIC MODIFIERS:
-# - dual_component: Bonus when both handle and knot components are detected (ONLY for unified strategy) 
+# - dual_component: Bonus when both handle and knot components are detected (ONLY for unified strategy)
+# - handle_indicators: Bonus when handle indicators are present (ONLY for handle_only strategy)
+# - knot_indicators: Bonus when knot indicators are present (ONLY for knot_only strategy) 

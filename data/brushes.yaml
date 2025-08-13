@@ -968,6 +968,10 @@ known_brushes:
         brand: Zenith
 
 other_brushes:
+  Alpha:
+    default: Synthetic
+    patterns:
+    - alpha
   Gilette:
     default: Synthetic
     patterns:
