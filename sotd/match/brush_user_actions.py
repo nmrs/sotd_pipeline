@@ -94,7 +94,14 @@ class BrushUserActionsStorage:
         # Ensure directory exists before saving
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
-        data = {"brush_user_actions": [action.to_dict() for action in actions]}
+        # Create dictionary with input_text as keys for better readability
+        # Store actions directly without wrapper
+        data = {}
+        for action in actions:
+            # Use input_text as the key, with all other fields as nested data
+            action_dict = action.to_dict()
+            input_text = action_dict.pop("input_text")  # Remove input_text from nested data
+            data[input_text] = action_dict
 
         with open(file_path, "w", encoding="utf-8") as f:
             yaml.dump(data, f, default_flow_style=False, sort_keys=True, allow_unicode=True)
@@ -110,12 +117,24 @@ class BrushUserActionsStorage:
         with open(file_path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
-        if not data or "brush_user_actions" not in data:
+        if not data:
             return []
 
-        return [
-            BrushUserAction.from_dict(action_data) for action_data in data["brush_user_actions"]
-        ]
+        # New format: dictionary with input_text as keys
+        brush_actions = data
+        if not isinstance(brush_actions, dict):
+            raise ValueError(
+                f"Expected dictionary format in {file_path}, got {type(brush_actions)}"
+            )
+
+        # Convert dictionary format to list of actions
+        actions = []
+        for input_text, action_data in brush_actions.items():
+            # Add input_text back to the action data
+            action_data["input_text"] = input_text
+            actions.append(BrushUserAction.from_dict(action_data))
+
+        return actions
 
     def append_action(self, month: str, action: BrushUserAction) -> None:
         """Append a new action to the monthly actions file."""
@@ -125,8 +144,20 @@ class BrushUserActionsStorage:
         # Load existing actions
         existing_actions = self.load_monthly_actions(month)
 
-        # Add new action
-        existing_actions.append(action)
+        # Check if an action with the same input_text already exists
+        existing_action = None
+        for existing in existing_actions:
+            if existing.input_text == action.input_text:
+                existing_action = existing
+                break
+
+        if existing_action:
+            # Update existing action (replace with new one)
+            existing_actions.remove(existing_action)
+            existing_actions.append(action)
+        else:
+            # Add new action
+            existing_actions.append(action)
 
         # Save updated actions
         self.save_monthly_actions(month, existing_actions)
@@ -134,8 +165,14 @@ class BrushUserActionsStorage:
     def _get_file_path(self, month: str) -> Path:
         """Get file path for monthly actions."""
         self._validate_month_format(month)
-        # Use new directory structure: learning/brush_user_actions/YYYY-MM.yaml
-        return self.base_path / "brush_user_actions" / f"{month}.yaml"
+
+        # Handle both test and production directory structures
+        if (self.base_path / "learning" / "brush_user_actions").exists():
+            # Production structure: data/learning/brush_user_actions/YYYY-MM.yaml
+            return self.base_path / "learning" / "brush_user_actions" / f"{month}.yaml"
+        else:
+            # Test structure: learning/brush_user_actions/YYYY-MM.yaml
+            return self.base_path / "brush_user_actions" / f"{month}.yaml"
 
     def _validate_month_format(self, month: str) -> None:
         """Validate month format (YYYY-MM)."""
@@ -483,7 +520,7 @@ class BrushUserActionsManager:
         all_actions = []
 
         # Find all monthly files in the new directory structure
-        brush_user_actions_dir = self.storage.base_path / "brush_user_actions"
+        brush_user_actions_dir = self.storage.base_path / "learning" / "brush_user_actions"
         if brush_user_actions_dir.exists():
             for file_path in brush_user_actions_dir.glob("*.yaml"):
                 # Extract month from filename (YYYY-MM.yaml)

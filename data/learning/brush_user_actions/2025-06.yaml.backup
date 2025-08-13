@@ -1,0 +1,5920 @@
+brush_user_actions:
+  AKA Brushworx AK47 knot in Southland 1 in. x 3 in. Galvanized Nipple Handle:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: aka.*brush
+      result:
+        brand: AKA Brushworx
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: aka.*brush
+          brand: AKA Brushworx
+          model: Unspecified
+          source_text: AKA Brushworx AK47 knot in Southland 1 in. x 3 in. Galvanized
+            Nipple Handle
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: ak47
+          brand: AKA Brushworx
+          fiber: Synthetic
+          knot_size_mm: 26
+          model: AK47
+          source_text: AKA Brushworx AK47 knot in Southland 1 in. x 3 in. Galvanized
+            Nipple Handle
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: southland.*galvanized.*nipple
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: southland.*galvanized.*nipple
+          brand: Southland
+          model: Galvanized Nipple
+          source_text: Southland 1 in. x 3 in. Galvanized Nipple Handle
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: ak47
+          brand: AKA Brushworx
+          fiber: Synthetic
+          knot_size_mm: 26
+          model: AK47
+          source_text: AKA Brushworx AK47 knot
+        model: null
+        score: 112
+        strategy: automated_split
+      score: 112
+      strategy: automated_split
+    comment_ids: []
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: southland.*galvanized.*nipple
+          brand: Southland
+          model: Galvanized Nipple
+          source_text: Southland 1 in. x 3 in. Galvanized Nipple Handle
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: ak47
+          brand: AKA Brushworx
+          fiber: Synthetic
+          knot_size_mm: 26
+          model: AK47
+          source_text: AKA Brushworx AK47 knot
+        model: null
+        score: 112
+        strategy: automated_split
+      score: 112
+      strategy: automated_split
+    system_used: scoring
+    timestamp: '2025-08-11T19:14:24Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: southland.*galvanized.*nipple
+          brand: Southland
+          model: Galvanized Nipple
+          source_text: Southland 1 in. x 3 in. Galvanized Nipple Handle
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: ak47
+          brand: AKA Brushworx
+          fiber: Synthetic
+          knot_size_mm: 26
+          model: AK47
+          source_text: AKA Brushworx AK47 knot
+        model: null
+        score: 112
+        strategy: automated_split
+      score: 112
+      strategy: automated_split
+  AP SHAVECO AP400B XL 28 mm (G5C):
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: ^A.? ?P.? ?\s*shave
+      result:
+        brand: AP Shave Co
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ^A.? ?P.? ?\s*shave
+          brand: AP Shave Co
+          model: Unspecified
+          source_text: AP SHAVECO AP400B XL 28 mm (G5C)
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \ba[\s.]*p\b.*g5c
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: AP SHAVECO AP400B XL 28 mm (G5C)
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    comment_ids:
+    - mvgpnin
+    - mvmdpog
+    - mvv8hkr
+    - mw50x47
+    - mwf1lt3
+    - mwjk0qk
+    - mwrinaq
+    - mww1cub
+    - mx6rb8z
+    - mxs0f5r
+    - my36ifm
+    - mydc5b3
+    - myqc1pc
+    - myr59up
+    - myvvgbd
+    - mz2hc9d
+    - mz9oubw
+    - mzcsk4u
+    - mzslw5b
+    - mzzxgu5
+    - n04381k
+    - n0hvyrj
+    - n0o8iy9
+    system_choice:
+      result:
+        brand: AP Shave Co
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ^A.? ?P.? ?\s*shave
+          brand: AP Shave Co
+          model: Unspecified
+          source_text: AP SHAVECO AP400B XL 28 mm (G5C)
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \ba[\s.]*p\b.*g5c
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: AP SHAVECO AP400B XL 28 mm (G5C)
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T20:30:30Z'
+    user_choice:
+      result:
+        brand: AP Shave Co
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ^A.? ?P.? ?\s*shave
+          brand: AP Shave Co
+          model: Unspecified
+          source_text: AP SHAVECO AP400B XL 28 mm (G5C)
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \ba[\s.]*p\b.*g5c
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: AP SHAVECO AP400B XL 28 mm (G5C)
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+  Alpha Shaving Works Outlaw 28mm G5:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: alpha.*outlaw
+      result:
+        brand: Alpha
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: alpha.*outlaw
+          brand: Alpha
+          model: Outlaw
+          source_text: Alpha Shaving Works Outlaw 28mm G5
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: alpha.*g5
+          brand: Alpha
+          fiber: Synthetic
+          knot_size_mm: 28
+          model: G5
+          source_text: Alpha Shaving Works Outlaw 28mm G5
+        model: null
+        score: 65.0
+        strategy: unified
+        user_intent: dual_component
+      score: 65.0
+      strategy: unified
+    comment_ids:
+    - mvhrl5f
+    system_choice: &id001
+      result:
+        brand: Alpha
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: alpha.*outlaw
+          brand: Alpha
+          model: Outlaw
+          source_text: Alpha Shaving Works Outlaw 28mm G5
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: alpha.*g5
+          brand: Alpha
+          fiber: Synthetic
+          knot_size_mm: 28
+          model: G5
+          source_text: Alpha Shaving Works Outlaw 28mm G5
+        model: null
+        score: 65.0
+        strategy: unified
+        user_intent: dual_component
+      score: 65.0
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-12T15:58:19Z'
+    user_choice: *id001
+  Auroa Grooming - LG 2024 with AP Shave Co. Pure Bliss 26mm Synthetic:
+    action: validated
+    all_brush_strategies:
+    - match_type: single_component
+      pattern: pure\s*bliss(?!.*shd)
+      result:
+        brand: null
+        handle:
+          _matched_by: KnotMatcher
+          _pattern: knot_only
+          brand: null
+          model: null
+          source_text: Auroa Grooming - LG 2024 with AP Shave Co. Pure Bliss 26mm
+            Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: pure\s*bliss(?!.*shd)
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss
+          source_text: Auroa Grooming - LG 2024 with AP Shave Co. Pure Bliss 26mm
+            Synthetic
+        model: null
+      score: 50
+      strategy: unified
+    - match_type: regex
+      pattern: pure\s*bliss(?!.*shd)
+      result:
+        brand: null
+        handle:
+          _matched_by: BrushSplitter
+          _pattern: split
+          brand: Auroa
+          model: Grooming - LG 2024
+          source_text: Auroa Grooming - LG 2024
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: pure\s*bliss(?!.*shd)
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss
+          source_text: AP Shave Co. Pure Bliss 26mm Synthetic
+        model: null
+        score: 115
+        strategy: automated_split
+      score: 115
+      strategy: automated_split
+    comment_ids: []
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: BrushSplitter
+          _pattern: split
+          brand: Auroa
+          model: Grooming - LG 2024
+          source_text: Auroa Grooming - LG 2024
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: pure\s*bliss(?!.*shd)
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss
+          source_text: AP Shave Co. Pure Bliss 26mm Synthetic
+        model: null
+        score: 115
+        strategy: automated_split
+      score: 115
+      strategy: automated_split
+    system_used: scoring
+    timestamp: '2025-08-11T19:14:07Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: BrushSplitter
+          _pattern: split
+          brand: Auroa
+          model: Grooming - LG 2024
+          source_text: Auroa Grooming - LG 2024
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: pure\s*bliss(?!.*shd)
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss
+          source_text: AP Shave Co. Pure Bliss 26mm Synthetic
+        model: null
+        score: 115
+        strategy: automated_split
+      score: 115
+      strategy: automated_split
+  Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm SHD:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: aylsworth
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: aylsworth
+          brand: Aylsworth Razors
+          model: Unspecified
+          source_text: Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm
+            SHD
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: pure\s*bliss.*shd
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss SHD
+          source_text: Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm
+            SHD
+        model: null
+        score: 85.0
+        strategy: unified
+        user_intent: dual_component
+      score: 85.0
+      strategy: unified
+    - match_type: regex
+      pattern: aylsworth
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: aylsworth
+          brand: Aylsworth Razors
+          model: Unspecified
+          source_text: Aylsworth The Altare Handle
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: pure\s*bliss.*shd
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss SHD
+          source_text: AP Shave Co. Pure Bliss 26mm SHD
+        model: null
+      score: 80.0
+      strategy: automated_split
+    - match_type: handle_only
+      pattern: aylsworth
+      result:
+        _matched_by_strategy: handle_only
+        _pattern_used: aylsworth
+        brand: null
+        handle:
+          _matched_by: HandleOnlyStrategy
+          _pattern: aylsworth
+          brand: Aylsworth Razors
+          model: Unspecified
+          source_text: Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm
+            SHD
+        knot:
+          _matched_by: HandleOnlyStrategy
+          _pattern: handle_only
+          brand: null
+          fiber: null
+          knot_size_mm: null
+          model: null
+          source_text: Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm
+            SHD
+        model: null
+      score: 40.0
+      strategy: handle_only
+    - match_type: knot_only
+      pattern: pure\s*bliss.*shd
+      result:
+        _matched_by_strategy: knot_only
+        _pattern_used: pure\s*bliss.*shd
+        brand: AP Shave Co
+        handle:
+          _matched_by: KnotOnlyStrategy
+          _pattern: knot_only
+          brand: null
+          model: null
+          source_text: Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm
+            SHD
+        knot:
+          _matched_by: KnotOnlyStrategy
+          _pattern: pure\s*bliss.*shd
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss SHD
+          source_text: Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm
+            SHD
+        model: Pure Bliss SHD
+      score: 40.0
+      strategy: knot_only
+    comment_ids:
+    - mvhn6nj
+    system_choice: &id002
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: aylsworth
+          brand: Aylsworth Razors
+          model: Unspecified
+          source_text: Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm
+            SHD
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: pure\s*bliss.*shd
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss SHD
+          source_text: Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm
+            SHD
+        model: null
+        score: 85.0
+        strategy: unified
+        user_intent: dual_component
+      score: 85.0
+      strategy: ''
+    system_used: scoring
+    timestamp: '2025-08-13T16:55:40Z'
+    user_choice: *id002
+  Böker Synthetic:
+    action: validated
+    all_brush_strategies:
+    - match_type: exact
+      pattern: null
+      result:
+        brand: Böker
+        handle:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Böker
+          model: Synthetic
+          source_text: Böker Synthetic
+        knot:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Böker
+          fiber: null
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Böker Synthetic
+        model: Synthetic
+        score: 100
+        strategy: correct_complete_brush
+      score: 100
+      strategy: correct_complete_brush
+    - match_type: exact
+      pattern: null
+      result:
+        brand: Böker
+        handle:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Böker
+          model: Synthetic
+          source_text: Böker Synthetic
+        knot:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Böker
+          fiber: null
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Böker Synthetic
+        model: Synthetic
+      score: 90
+      strategy: known_split
+    - match_type: single_component
+      pattern: b[oö]ker
+      result:
+        brand: null
+        handle:
+          _matched_by: KnotMatcher
+          _pattern: knot_only
+          brand: null
+          model: null
+          source_text: Böker Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: b[oö]ker
+          brand: Böker
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Böker Synthetic
+        model: null
+      score: 50
+      strategy: unified
+    - match_type: brand_default
+      pattern: b[öo]ker
+      result:
+        _matched_by_strategy: OtherBrushMatchingStrategy
+        _pattern_used: b[öo]ker
+        brand: Böker
+        fiber: Synthetic
+        fiber_strategy: user_input
+        model: Synthetic
+      score: 70
+      strategy: other_brush
+    comment_ids:
+    - mve403p
+    - mxcjml2
+    - myfejv7
+    system_choice:
+      result:
+        brand: Böker
+        handle:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Böker
+          model: Synthetic
+          source_text: Böker Synthetic
+        knot:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Böker
+          fiber: null
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Böker Synthetic
+        model: Synthetic
+        score: 100
+        strategy: correct_complete_brush
+      score: 100
+      strategy: correct_complete_brush
+    system_used: scoring
+    timestamp: '2025-08-11T17:12:13Z'
+    user_choice:
+      result:
+        brand: Böker
+        handle:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Böker
+          model: Synthetic
+          source_text: Böker Synthetic
+        knot:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Böker
+          fiber: null
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Böker Synthetic
+        model: Synthetic
+        score: 100
+        strategy: correct_complete_brush
+      score: 100
+      strategy: correct_complete_brush
+  Carnavis and Richardson - Industry w/26mm Frank Shaving Finest XD:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: carn.*rich
+      result:
+        brand: Carnavis & Richardson
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: carn.*rich
+          brand: Carnavis & Richardson
+          model: Unspecified
+          source_text: Carnavis and Richardson - Industry w/26mm Frank Shaving Finest
+            XD
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: carn.*rich
+          brand: Carnavis & Richardson
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Carnavis and Richardson - Industry w/26mm Frank Shaving Finest
+            XD
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: carn.*rich
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: carn.*rich
+          brand: Carnavis & Richardson
+          model: Unspecified
+          source_text: Carnavis and Richardson - Industry
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: frank.*sha
+          brand: Frank Shaving
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: 26mm Frank Shaving Finest XD
+        model: null
+        score: 86
+        strategy: automated_split
+      score: 86
+      strategy: automated_split
+    comment_ids:
+    - mvecbe2
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: carn.*rich
+          brand: Carnavis & Richardson
+          model: Unspecified
+          source_text: Carnavis and Richardson - Industry
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: frank.*sha
+          brand: Frank Shaving
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: 26mm Frank Shaving Finest XD
+        model: null
+        score: 86
+        strategy: automated_split
+      score: 86
+      strategy: automated_split
+    system_used: scoring
+    timestamp: '2025-08-11T17:19:23Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: carn.*rich
+          brand: Carnavis & Richardson
+          model: Unspecified
+          source_text: Carnavis and Richardson - Industry
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: frank.*sha
+          brand: Frank Shaving
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: 26mm Frank Shaving Finest XD
+        model: null
+        score: 86
+        strategy: automated_split
+      score: 86
+      strategy: automated_split
+  Cayuen Abalone w/ 28mm Timberwolf Synthetic:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: ca\s?yuen
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ca\s?yuen
+          brand: CaYuen
+          model: Unspecified
+          source_text: Cayuen Abalone w/ 28mm Timberwolf Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: timberwolf
+          brand: Generic
+          fiber: null
+          knot_size_mm: null
+          model: Timberwolf
+          source_text: Cayuen Abalone w/ 28mm Timberwolf Synthetic
+        model: null
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    - match_type: regex
+      pattern: ca\s?yuen
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ca\s?yuen
+          brand: CaYuen
+          model: Unspecified
+          source_text: Cayuen Abalone
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: timberwolf
+          brand: Generic
+          fiber: null
+          knot_size_mm: null
+          model: Timberwolf
+          source_text: 28mm Timberwolf Synthetic
+        model: null
+        score: 115
+        strategy: automated_split
+      score: 115
+      strategy: automated_split
+    comment_ids: []
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ca\s?yuen
+          brand: CaYuen
+          model: Unspecified
+          source_text: Cayuen Abalone
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: timberwolf
+          brand: Generic
+          fiber: null
+          knot_size_mm: null
+          model: Timberwolf
+          source_text: 28mm Timberwolf Synthetic
+        model: null
+        score: 115
+        strategy: automated_split
+      score: 115
+      strategy: automated_split
+    system_used: scoring
+    timestamp: '2025-08-11T19:14:49Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ca\s?yuen
+          brand: CaYuen
+          model: Unspecified
+          source_text: Cayuen Abalone
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: timberwolf
+          brand: Generic
+          fiber: null
+          knot_size_mm: null
+          model: Timberwolf
+          source_text: 28mm Timberwolf Synthetic
+        model: null
+        score: 115
+        strategy: automated_split
+      score: 115
+      strategy: automated_split
+  Chisel & Hound - Rob's Finest - 25mm Synthetic:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: chisel.*hound
+      result:
+        brand: Chisel & Hound
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: chisel.*hound
+          brand: Chisel & Hound
+          model: Unspecified
+          source_text: Chisel & Hound - Rob's Finest - 25mm Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: chis.*[fh]ou
+          brand: Chisel & Hound
+          fiber: Badger
+          knot_size_mm: 26
+          model: Badger
+          source_text: Chisel & Hound - Rob's Finest - 25mm Synthetic
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: rob's.*finest.*syn
+      result:
+        brand: Chisel & Hound
+        handle:
+          _matched_by: known_brush
+          _pattern: rob's.*finest.*syn
+          brand: Chisel & Hound
+          model: null
+          source_text: Chisel & Hound - Rob's Finest - 25mm Synthetic
+        knot:
+          _matched_by: known_brush
+          _pattern: rob's.*finest.*syn
+          brand: Chisel & Hound
+          fiber: Synthetic
+          knot_size_mm: 25
+          model: Rob's Finest Synthetic
+          source_text: Chisel & Hound - Rob's Finest - 25mm Synthetic
+        model: Rob's Finest Synthetic
+        score: 80
+        source_text: Chisel & Hound - Rob's Finest - 25mm Synthetic
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    - match_type: regex
+      pattern: chisel.*hound
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: chisel.*hound
+          brand: Chisel & Hound
+          model: Unspecified
+          source_text: Chisel & Hound
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: fiber_detection
+          brand: null
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Rob's Finest - 25mm Synthetic
+        model: null
+      score: 60
+      strategy: automated_split
+    comment_ids:
+    - mvebgp6
+    - n01bhxl
+    system_choice:
+      result:
+        brand: Chisel & Hound
+        handle:
+          _matched_by: known_brush
+          _pattern: rob's.*finest.*syn
+          brand: Chisel & Hound
+          model: null
+          source_text: Chisel & Hound - Rob's Finest - 25mm Synthetic
+        knot:
+          _matched_by: known_brush
+          _pattern: rob's.*finest.*syn
+          brand: Chisel & Hound
+          fiber: Synthetic
+          knot_size_mm: 25
+          model: Rob's Finest Synthetic
+          source_text: Chisel & Hound - Rob's Finest - 25mm Synthetic
+        model: Rob's Finest Synthetic
+        score: 80
+        source_text: Chisel & Hound - Rob's Finest - 25mm Synthetic
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T17:19:02Z'
+    user_choice:
+      result:
+        brand: Chisel & Hound
+        handle:
+          _matched_by: known_brush
+          _pattern: rob's.*finest.*syn
+          brand: Chisel & Hound
+          model: null
+          source_text: Chisel & Hound - Rob's Finest - 25mm Synthetic
+        knot:
+          _matched_by: known_brush
+          _pattern: rob's.*finest.*syn
+          brand: Chisel & Hound
+          fiber: Synthetic
+          knot_size_mm: 25
+          model: Rob's Finest Synthetic
+          source_text: Chisel & Hound - Rob's Finest - 25mm Synthetic
+        model: Rob's Finest Synthetic
+        score: 80
+        source_text: Chisel & Hound - Rob's Finest - 25mm Synthetic
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Chisel & Hound / AP Shave Morado w/ G5C:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: chisel.*hound
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: chisel.*hound
+          brand: Chisel & Hound
+          model: Unspecified
+          source_text: Chisel & Hound / AP Shave Morado w/ G5C
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \ba[\s.]*p\b.*g5c
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: Chisel & Hound / AP Shave Morado w/ G5C
+        model: null
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    - match_type: regex
+      pattern: chisel.*hound
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: chisel.*hound
+          brand: Chisel & Hound
+          model: Unspecified
+          source_text: Chisel & Hound / AP Shave Morado
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: \bg5c\b
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: G5C
+        model: null
+        score: 112
+        strategy: automated_split
+      score: 112
+      strategy: automated_split
+    comment_ids:
+    - mvkw796
+    - mvrk41s
+    - mvxyuo8
+    - mw4np7c
+    - mwk6l4u
+    - mwtnzil
+    - mx1jnih
+    - mx6zy69
+    - mxebk1w
+    - mxr35sp
+    - mxxsjkf
+    - my4ybht
+    - my9ad7z
+    - myn5qzy
+    - mz0t9n0
+    - mz7dv5z
+    - mzbhvrt
+    - mzimmhi
+    - mzpfju4
+    - mzxke5b
+    - n036jwu
+    - n0c840n
+    - n0pbqaq
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: chisel.*hound
+          brand: Chisel & Hound
+          model: Unspecified
+          source_text: Chisel & Hound / AP Shave Morado
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: \bg5c\b
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: G5C
+        model: null
+        score: 112
+        strategy: automated_split
+      score: 112
+      strategy: automated_split
+    system_used: scoring
+    timestamp: '2025-08-11T20:10:05Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: chisel.*hound
+          brand: Chisel & Hound
+          model: Unspecified
+          source_text: Chisel & Hound / AP Shave Morado
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: \bg5c\b
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: G5C
+        model: null
+        score: 112
+        strategy: automated_split
+      score: 112
+      strategy: automated_split
+  Chisel and Hound Padauk Wood handle:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: chisel.*hound
+      result:
+        brand: Chisel & Hound
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: chisel.*hound
+          brand: Chisel & Hound
+          model: Unspecified
+          source_text: Chisel and Hound Padauk Wood handle
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: chis.*[fh]ou
+          brand: Chisel & Hound
+          fiber: Badger
+          knot_size_mm: 26
+          model: Badger
+          source_text: Chisel and Hound Padauk Wood handle
+        model: null
+        user_intent: dual_component
+      score: 65.0
+      strategy: unified
+    - match_type: handle_only
+      pattern: chisel.*hound
+      result:
+        _matched_by_strategy: handle_only
+        _pattern_used: chisel.*hound
+        brand: null
+        handle:
+          _matched_by: HandleOnlyStrategy
+          _pattern: chisel.*hound
+          brand: Chisel & Hound
+          model: Unspecified
+          source_text: Chisel and Hound Padauk Wood handle
+        knot:
+          _matched_by: HandleOnlyStrategy
+          _pattern: handle_only
+          brand: null
+          fiber: null
+          knot_size_mm: null
+          model: null
+          source_text: Chisel and Hound Padauk Wood handle
+        model: null
+        score: 70.0
+        strategy: handle_only
+      score: 70.0
+      strategy: handle_only
+    - match_type: knot_only
+      pattern: chis.*[fh]ou
+      result:
+        _matched_by_strategy: knot_only
+        _pattern_used: chis.*[fh]ou
+        brand: Chisel & Hound
+        handle:
+          _matched_by: KnotOnlyStrategy
+          _pattern: knot_only
+          brand: null
+          model: null
+          source_text: Chisel and Hound Padauk Wood handle
+        knot:
+          _matched_by: KnotOnlyStrategy
+          _pattern: chis.*[fh]ou
+          brand: Chisel & Hound
+          fiber: Badger
+          knot_size_mm: 26
+          model: Badger
+          source_text: Chisel and Hound Padauk Wood handle
+        model: Badger
+      score: 10.0
+      strategy: knot_only
+    comment_ids:
+    - mvhu0oy
+    system_choice: &id003
+      result:
+        _matched_by_strategy: handle_only
+        _pattern_used: chisel.*hound
+        brand: null
+        handle:
+          _matched_by: HandleOnlyStrategy
+          _pattern: chisel.*hound
+          brand: Chisel & Hound
+          model: Unspecified
+          source_text: Chisel and Hound Padauk Wood handle
+        knot:
+          _matched_by: HandleOnlyStrategy
+          _pattern: handle_only
+          brand: null
+          fiber: null
+          knot_size_mm: null
+          model: null
+          source_text: Chisel and Hound Padauk Wood handle
+        model: null
+        score: 70.0
+        strategy: handle_only
+      score: 70.0
+      strategy: ''
+    system_used: scoring
+    timestamp: '2025-08-13T17:00:21Z'
+    user_choice: *id003
+  Chisel and Hound Sakura with v21 Fanchurian:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: chisel.*hound
+      result:
+        brand: Chisel & Hound
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: chisel.*hound
+          brand: Chisel & Hound
+          model: Unspecified
+          source_text: Chisel and Hound Sakura with v21 Fanchurian
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: chis.*[fh]ou.*v21
+          brand: Chisel & Hound
+          fiber: Badger
+          knot_size_mm: 26
+          model: v21
+          source_text: Chisel and Hound Sakura with v21 Fanchurian
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: chis.*[fh]ou.*v21
+      result:
+        brand: Chisel & Hound
+        handle:
+          _matched_by: known_brush
+          _pattern: chis.*[fh]ou.*v21
+          brand: Chisel & Hound
+          model: null
+          source_text: Chisel and Hound Sakura with v21 Fanchurian
+        knot:
+          _matched_by: known_brush
+          _pattern: chis.*[fh]ou.*v21
+          brand: Chisel & Hound
+          fiber: Badger
+          knot_size_mm: 26
+          model: v21
+          source_text: Chisel and Hound Sakura with v21 Fanchurian
+        model: v21
+        score: 80
+        source_text: Chisel and Hound Sakura with v21 Fanchurian
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    - match_type: regex
+      pattern: chisel.*hound
+      result:
+        brand: Chisel & Hound
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: chisel.*hound
+          brand: Chisel & Hound
+          model: Unspecified
+          source_text: Chisel and Hound Sakura
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: \bv21\b
+          brand: Chisel & Hound
+          fiber: Badger
+          knot_size_mm: 26
+          model: v21
+          source_text: v21 Fanchurian
+        model: null
+      score: 80
+      strategy: automated_split
+    comment_ids:
+    - mvgjix8
+    - mvnfcel
+    - mvs6txl
+    system_choice:
+      result:
+        brand: Chisel & Hound
+        handle:
+          _matched_by: known_brush
+          _pattern: chis.*[fh]ou.*v21
+          brand: Chisel & Hound
+          model: null
+          source_text: Chisel and Hound Sakura with v21 Fanchurian
+        knot:
+          _matched_by: known_brush
+          _pattern: chis.*[fh]ou.*v21
+          brand: Chisel & Hound
+          fiber: Badger
+          knot_size_mm: 26
+          model: v21
+          source_text: Chisel and Hound Sakura with v21 Fanchurian
+        model: v21
+        score: 80
+        source_text: Chisel and Hound Sakura with v21 Fanchurian
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T20:30:07Z'
+    user_choice:
+      result:
+        brand: Chisel & Hound
+        handle:
+          _matched_by: known_brush
+          _pattern: chis.*[fh]ou.*v21
+          brand: Chisel & Hound
+          model: null
+          source_text: Chisel and Hound Sakura with v21 Fanchurian
+        knot:
+          _matched_by: known_brush
+          _pattern: chis.*[fh]ou.*v21
+          brand: Chisel & Hound
+          fiber: Badger
+          knot_size_mm: 26
+          model: v21
+          source_text: Chisel and Hound Sakura with v21 Fanchurian
+        model: v21
+        score: 80
+        source_text: Chisel and Hound Sakura with v21 Fanchurian
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Dogwood Handcrafts - Svolaer 2023 LG Prize with Maggard 28mm SHD:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: dogwood.*handcrafts+
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: dogwood.*handcrafts+
+          brand: Dogwood Handcrafts
+          model: Unspecified
+          source_text: Dogwood Handcrafts - Svolaer 2023 LG Prize with Maggard 28mm
+            SHD
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: ^.*mag(g?ard)?s?
+          brand: Maggard
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Dogwood Handcrafts - Svolaer 2023 LG Prize with Maggard 28mm
+            SHD
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    - match_type: regex
+      pattern: dogwood.*handcrafts+
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: dogwood.*handcrafts+
+          brand: Dogwood Handcrafts
+          model: Unspecified
+          source_text: Dogwood Handcrafts - Svolaer 2023 LG Prize
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: ^.*mag(g?ard)?s?
+          brand: Maggard
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Maggard 28mm SHD
+        model: null
+      score: 80
+      strategy: automated_split
+    comment_ids: []
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: dogwood.*handcrafts+
+          brand: Dogwood Handcrafts
+          model: Unspecified
+          source_text: Dogwood Handcrafts - Svolaer 2023 LG Prize with Maggard 28mm
+            SHD
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: ^.*mag(g?ard)?s?
+          brand: Maggard
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Dogwood Handcrafts - Svolaer 2023 LG Prize with Maggard 28mm
+            SHD
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T20:30:55Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: dogwood.*handcrafts+
+          brand: Dogwood Handcrafts
+          model: Unspecified
+          source_text: Dogwood Handcrafts - Svolaer 2023 LG Prize with Maggard 28mm
+            SHD
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: ^.*mag(g?ard)?s?
+          brand: Maggard
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Dogwood Handcrafts - Svolaer 2023 LG Prize with Maggard 28mm
+            SHD
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+  Dogwood Handcrafts 26mm APSC Pure Bliss:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: dogwood.*handcrafts+
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: dogwood.*handcrafts+
+          brand: Dogwood Handcrafts
+          model: Unspecified
+          source_text: Dogwood Handcrafts 26mm APSC Pure Bliss
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: pure\s*bliss(?!.*shd)
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss
+          source_text: Dogwood Handcrafts 26mm APSC Pure Bliss
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    comment_ids:
+    - mvfunlv
+    - mvl6jqq
+    - mvrff2t
+    - mw3ocya
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: dogwood.*handcrafts+
+          brand: Dogwood Handcrafts
+          model: Unspecified
+          source_text: Dogwood Handcrafts 26mm APSC Pure Bliss
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: pure\s*bliss(?!.*shd)
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss
+          source_text: Dogwood Handcrafts 26mm APSC Pure Bliss
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T19:21:59Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: dogwood.*handcrafts+
+          brand: Dogwood Handcrafts
+          model: Unspecified
+          source_text: Dogwood Handcrafts 26mm APSC Pure Bliss
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: pure\s*bliss(?!.*shd)
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss
+          source_text: Dogwood Handcrafts 26mm APSC Pure Bliss
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+  Dogwood Handcrafts Declaration Grooming Coprolite B15:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: dogwood.*handcrafts+
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: dogwood.*handcrafts+
+          brand: Dogwood Handcrafts
+          model: Unspecified
+          source_text: Dogwood Handcrafts Declaration Grooming Coprolite B15
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: (declaration|\bdg\b).*\bb15\b
+          brand: Declaration Grooming
+          fiber: Badger
+          knot_size_mm: 28
+          model: B15
+          source_text: Dogwood Handcrafts Declaration Grooming Coprolite B15
+        model: null
+        score: 85.0
+        strategy: unified
+        user_intent: dual_component
+      score: 85.0
+      strategy: unified
+    comment_ids:
+    - mvhsj3c
+    system_choice: &id004
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: dogwood.*handcrafts+
+          brand: Dogwood Handcrafts
+          model: Unspecified
+          source_text: Dogwood Handcrafts Declaration Grooming Coprolite B15
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: (declaration|\bdg\b).*\bb15\b
+          brand: Declaration Grooming
+          fiber: Badger
+          knot_size_mm: 28
+          model: B15
+          source_text: Dogwood Handcrafts Declaration Grooming Coprolite B15
+        model: null
+        score: 85.0
+        strategy: unified
+        user_intent: dual_component
+      score: 85.0
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-12T16:05:35Z'
+    user_choice: *id004
+  Ever Ready unnumbered Synth:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: ever.*read
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ever.*read
+          brand: Ever Ready
+          model: Unspecified
+          source_text: Ever Ready unnumbered Synth
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: fiber_detection
+          brand: null
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Ever Ready unnumbered Synth
+        model: null
+        score: 50
+        strategy: unified
+        user_intent: dual_component
+      score: 50
+      strategy: unified
+    comment_ids:
+    - mvf5mbv
+    - mx701yx
+    - mxx5enp
+    - n08zp54
+    - n0esaf4
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ever.*read
+          brand: Ever Ready
+          model: Unspecified
+          source_text: Ever Ready unnumbered Synth
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: fiber_detection
+          brand: null
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Ever Ready unnumbered Synth
+        model: null
+        score: 50
+        strategy: unified
+        user_intent: dual_component
+      score: 50
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T19:13:40Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ever.*read
+          brand: Ever Ready
+          model: Unspecified
+          source_text: Ever Ready unnumbered Synth
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: fiber_detection
+          brand: null
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Ever Ready unnumbered Synth
+        model: null
+        score: 50
+        strategy: unified
+        user_intent: dual_component
+      score: 50
+      strategy: unified
+  Farvour Turn Craft W a 26MM Badger Knot:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: farvour.*(?:turn).*(?:craft)
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: farvour.*(?:turn).*(?:craft)
+          brand: Farvour Turn Craft
+          model: Unspecified
+          source_text: Farvour Turn Craft W a 26MM Badger Knot
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: fiber_detection
+          brand: null
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Farvour Turn Craft W a 26MM Badger Knot
+        model: null
+        score: 50
+        strategy: unified
+        user_intent: dual_component
+      score: 50
+      strategy: unified
+    comment_ids:
+    - mvhare0
+    - mzhx4kn
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: farvour.*(?:turn).*(?:craft)
+          brand: Farvour Turn Craft
+          model: Unspecified
+          source_text: Farvour Turn Craft W a 26MM Badger Knot
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: fiber_detection
+          brand: null
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Farvour Turn Craft W a 26MM Badger Knot
+        model: null
+        score: 50
+        strategy: unified
+        user_intent: dual_component
+      score: 50
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T20:40:14Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: farvour.*(?:turn).*(?:craft)
+          brand: Farvour Turn Craft
+          model: Unspecified
+          source_text: Farvour Turn Craft W a 26MM Badger Knot
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: fiber_detection
+          brand: null
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Farvour Turn Craft W a 26MM Badger Knot
+        model: null
+        score: 50
+        strategy: unified
+        user_intent: dual_component
+      score: 50
+      strategy: unified
+  Heritage Shaving C-Mon 28 mm:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: heritage
+      result:
+        brand: Heritage Collection
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: heritage
+          brand: Heritage Collection
+          model: Unspecified
+          source_text: Heritage Shaving C-Mon 28 mm
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: heritage
+          brand: Heritage Collection
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Heritage Shaving C-Mon 28 mm
+        model: null
+        score: 65.0
+        strategy: unified
+        user_intent: dual_component
+      score: 65.0
+      strategy: unified
+    comment_ids:
+    - mvhmyla
+    system_choice: &id005
+      result:
+        brand: Heritage Collection
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: heritage
+          brand: Heritage Collection
+          model: Unspecified
+          source_text: Heritage Shaving C-Mon 28 mm
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: heritage
+          brand: Heritage Collection
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Heritage Shaving C-Mon 28 mm
+        model: null
+        score: 65.0
+        strategy: unified
+        user_intent: dual_component
+      score: 65.0
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-12T17:45:56Z'
+    user_choice: *id005
+  Maggard Synthetic:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: ^.*mag(g?ard)?s?
+      result:
+        brand: Maggard
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ^.*mag(g?ard)?s?
+          brand: Maggard
+          model: Unspecified
+          source_text: Maggard Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: ^.*mag(g?ard)?s?
+          brand: Maggard
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Maggard Synthetic
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    comment_ids:
+    - mvftuio
+    - mwb4ci8
+    - mxd8vix
+    - mxrvfif
+    - mxxr89c
+    - mxyb4d9
+    - n024qlc
+    - n08bt8p
+    system_choice:
+      result:
+        brand: Maggard
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ^.*mag(g?ard)?s?
+          brand: Maggard
+          model: Unspecified
+          source_text: Maggard Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: ^.*mag(g?ard)?s?
+          brand: Maggard
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Maggard Synthetic
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T19:21:52Z'
+    user_choice:
+      result:
+        brand: Maggard
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ^.*mag(g?ard)?s?
+          brand: Maggard
+          model: Unspecified
+          source_text: Maggard Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: ^.*mag(g?ard)?s?
+          brand: Maggard
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Maggard Synthetic
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+  Muhle 31m530 Travel:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: \bm[uü]hle\b
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: \bm[uü]hle\b
+          brand: Muhle
+          model: Unspecified
+          source_text: Muhle 31m530 Travel
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \bm[uü]hle\b
+          brand: Mühle
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Muhle 31m530 Travel
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: m[uü]hle.*travel
+      result:
+        brand: Mühle
+        handle:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          model: null
+          source_text: Muhle 31m530 Travel
+        knot:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: 21
+          model: Travel
+          source_text: Muhle 31m530 Travel
+        model: Travel
+        score: 80
+        source_text: Muhle 31m530 Travel
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    comment_ids: []
+    system_choice:
+      result:
+        brand: Mühle
+        handle:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          model: null
+          source_text: Muhle 31m530 Travel
+        knot:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: 21
+          model: Travel
+          source_text: Muhle 31m530 Travel
+        model: Travel
+        score: 80
+        source_text: Muhle 31m530 Travel
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T18:28:27Z'
+    user_choice:
+      result:
+        brand: Mühle
+        handle:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          model: null
+          source_text: Muhle 31m530 Travel
+        knot:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: 21
+          model: Travel
+          source_text: Muhle 31m530 Travel
+        model: Travel
+        score: 80
+        source_text: Muhle 31m530 Travel
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Muhle STF XL 25mm:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: \bm[uü]hle\b
+      result:
+        brand: Mühle
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: \bm[uü]hle\b
+          brand: Mühle
+          model: Unspecified
+          source_text: Muhle STF XL 25mm
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: m[uü]hle.*stf
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: null
+          model: STF
+          source_text: Muhle STF XL 25mm
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    comment_ids:
+    - mvf2o8c
+    - mvjwo6i
+    - mvqrr3k
+    - mvxayt1
+    - mw3958u
+    - mwacl50
+    - mwg6uu4
+    - mwm7ick
+    - mwtn55l
+    - mwz935w
+    - mx627dg
+    - mxc6e1m
+    - mxjr6ck
+    - mxpnsgw
+    - my3ksqa
+    - my83fcp
+    - myfi3r1
+    - myn028f
+    - mytn76p
+    - myy3dwf
+    - mz4etjt
+    - mzavyh7
+    - mzhs4j7
+    - mzohyth
+    - mzu9q4v
+    - n00vujn
+    - n075h6p
+    - n0dev9b
+    - n0nuiyt
+    system_choice:
+      result:
+        brand: Mühle
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: \bm[uü]hle\b
+          brand: Mühle
+          model: Unspecified
+          source_text: Muhle STF XL 25mm
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: m[uü]hle.*stf
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: null
+          model: STF
+          source_text: Muhle STF XL 25mm
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T19:02:44Z'
+    user_choice:
+      result:
+        brand: Mühle
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: \bm[uü]hle\b
+          brand: Mühle
+          model: Unspecified
+          source_text: Muhle STF XL 25mm
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: m[uü]hle.*stf
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: null
+          model: STF
+          source_text: Muhle STF XL 25mm
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+  Muhle Travel Shaving Brush:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: \bm[uü]hle\b
+      result:
+        brand: Mühle
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: \bm[uü]hle\b
+          brand: Mühle
+          model: Unspecified
+          source_text: Muhle Travel Shaving Brush
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \bm[uü]hle\b
+          brand: Mühle
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Muhle Travel Shaving Brush
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: m[uü]hle.*travel
+      result:
+        brand: Mühle
+        handle:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          model: null
+          source_text: Muhle Travel Shaving Brush
+        knot:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: 21
+          model: Travel
+          source_text: Muhle Travel Shaving Brush
+        model: Travel
+        score: 80
+        source_text: Muhle Travel Shaving Brush
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    comment_ids: []
+    system_choice:
+      result:
+        brand: Mühle
+        handle:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          model: null
+          source_text: Muhle Travel Shaving Brush
+        knot:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: 21
+          model: Travel
+          source_text: Muhle Travel Shaving Brush
+        model: Travel
+        score: 80
+        source_text: Muhle Travel Shaving Brush
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T19:22:09Z'
+    user_choice:
+      result:
+        brand: Mühle
+        handle:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          model: null
+          source_text: Muhle Travel Shaving Brush
+        knot:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: 21
+          model: Travel
+          source_text: Muhle Travel Shaving Brush
+        model: Travel
+        score: 80
+        source_text: Muhle Travel Shaving Brush
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Muninn Woodworks Amboyna Burl B14:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: mun+in.*(?:woodworks?)?(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: mun+in.*(?:woodworks?)?(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+          brand: Muninn Woodworks
+          model: Unspecified
+          source_text: Muninn Woodworks Amboyna Burl B14
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \bb14\b
+          brand: Declaration Grooming
+          fiber: Badger
+          knot_size_mm: 28
+          model: B14
+          source_text: Muninn Woodworks Amboyna Burl B14
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    - match_type: regex
+      pattern: ^(?!.*dog|zen).*\bb14\b
+      result:
+        brand: Declaration Grooming
+        fiber: Badger
+        handle_brand: Muninn Woodworks
+        handle_maker: null
+        handle_model: Unspecified
+        knot_size_mm: 28
+        model: B14
+        source_text: Muninn Woodworks Amboyna Burl B14
+      score: 80
+      strategy: known_brush
+    comment_ids:
+    - mvfq2rr
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: mun+in.*(?:woodworks?)?(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+          brand: Muninn Woodworks
+          model: Unspecified
+          source_text: Muninn Woodworks Amboyna Burl B14
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \bb14\b
+          brand: Declaration Grooming
+          fiber: Badger
+          knot_size_mm: 28
+          model: B14
+          source_text: Muninn Woodworks Amboyna Burl B14
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T19:21:41Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: mun+in.*(?:woodworks?)?(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+          brand: Muninn Woodworks
+          model: Unspecified
+          source_text: Muninn Woodworks Amboyna Burl B14
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \bb14\b
+          brand: Declaration Grooming
+          fiber: Badger
+          knot_size_mm: 28
+          model: B14
+          source_text: Muninn Woodworks Amboyna Burl B14
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+  MÜHLE Travel:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: \bm[uü]hle\b
+      result:
+        brand: Mühle
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: \bm[uü]hle\b
+          brand: Mühle
+          model: Unspecified
+          source_text: MÜHLE Travel
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \bm[uü]hle\b
+          brand: Mühle
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: MÜHLE Travel
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: m[uü]hle.*travel
+      result:
+        brand: Mühle
+        handle:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          model: null
+          source_text: MÜHLE Travel
+        knot:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: 21
+          model: Travel
+          source_text: MÜHLE Travel
+        model: Travel
+        score: 80
+        source_text: MÜHLE Travel
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    comment_ids: []
+    system_choice:
+      result:
+        brand: Mühle
+        handle:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          model: null
+          source_text: MÜHLE Travel
+        knot:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: 21
+          model: Travel
+          source_text: MÜHLE Travel
+        model: Travel
+        score: 80
+        source_text: MÜHLE Travel
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T20:10:09Z'
+    user_choice:
+      result:
+        brand: Mühle
+        handle:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          model: null
+          source_text: MÜHLE Travel
+        knot:
+          _matched_by: known_brush
+          _pattern: m[uü]hle.*travel
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: 21
+          model: Travel
+          source_text: MÜHLE Travel
+        model: Travel
+        score: 80
+        source_text: MÜHLE Travel
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Omega - Orange handle mini 24mm Boar:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: omega
+      result:
+        brand: Omega
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: omega
+          brand: Omega
+          model: Unspecified
+          source_text: Omega - Orange handle mini 24mm Boar
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: omega
+          brand: Omega
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: Omega - Orange handle mini 24mm Boar
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: omega
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: omega
+          brand: Omega
+          model: Unspecified
+          source_text: Omega
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: fiber_detection
+          brand: null
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: Orange handle mini 24mm Boar
+        model: null
+      score: 60
+      strategy: automated_split
+    comment_ids:
+    - mzr2qwl
+    - n0g1387
+    system_choice:
+      result:
+        brand: Omega
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: omega
+          brand: Omega
+          model: Unspecified
+          source_text: Omega - Orange handle mini 24mm Boar
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: omega
+          brand: Omega
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: Omega - Orange handle mini 24mm Boar
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T20:30:19Z'
+    user_choice:
+      result:
+        brand: Omega
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: omega
+          brand: Omega
+          model: Unspecified
+          source_text: Omega - Orange handle mini 24mm Boar
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: omega
+          brand: Omega
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: Omega - Orange handle mini 24mm Boar
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+  Oumo O4 Venus SHD Badger Brush 26MM:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: \bo(o|u)+mo\b
+      result:
+        brand: Oumo
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: \bo(o|u)+mo\b
+          brand: Oumo
+          model: Unspecified
+          source_text: Oumo O4 Venus SHD Badger Brush 26MM
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \bo(o|u)+mo\b
+          brand: Oumo
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Oumo O4 Venus SHD Badger Brush 26MM
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    comment_ids:
+    - mvheklg
+    - mvkjztp
+    - mvvbxmz
+    - mw1sayg
+    - mw8p3f4
+    - mwjxste
+    - mwqyoif
+    - mwxasrf
+    - mxa7wjl
+    - mxesgpq
+    - mxny4a0
+    - mxtg0qi
+    system_choice:
+      result:
+        brand: Oumo
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: \bo(o|u)+mo\b
+          brand: Oumo
+          model: Unspecified
+          source_text: Oumo O4 Venus SHD Badger Brush 26MM
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \bo(o|u)+mo\b
+          brand: Oumo
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Oumo O4 Venus SHD Badger Brush 26MM
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T20:41:01Z'
+    user_choice:
+      result:
+        brand: Oumo
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: \bo(o|u)+mo\b
+          brand: Oumo
+          model: Unspecified
+          source_text: Oumo O4 Venus SHD Badger Brush 26MM
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \bo(o|u)+mo\b
+          brand: Oumo
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Oumo O4 Venus SHD Badger Brush 26MM
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+  Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: rad dino(saur)?
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: synbad
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synbad
+          source_text: Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan
+        model: null
+        score: 85.0
+        strategy: unified
+        user_intent: dual_component
+      score: 85.0
+      strategy: unified
+    - match_type: handle_only
+      pattern: rad dino(saur)?
+      result:
+        _matched_by_strategy: handle_only
+        _pattern_used: rad dino(saur)?
+        brand: null
+        handle:
+          _matched_by: HandleOnlyStrategy
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan
+        knot:
+          _matched_by: HandleOnlyStrategy
+          _pattern: handle_only
+          brand: null
+          fiber: null
+          knot_size_mm: null
+          model: null
+          source_text: Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan
+        model: null
+      score: 10.0
+      strategy: handle_only
+    - match_type: knot_only
+      pattern: synbad
+      result:
+        _matched_by_strategy: knot_only
+        _pattern_used: synbad
+        brand: AP Shave Co
+        handle:
+          _matched_by: KnotOnlyStrategy
+          _pattern: knot_only
+          brand: null
+          model: null
+          source_text: Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan
+        knot:
+          _matched_by: KnotOnlyStrategy
+          _pattern: synbad
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synbad
+          source_text: Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan
+        model: Synbad
+      score: 70.0
+      strategy: knot_only
+    comment_ids:
+    - mvhu6n0
+    system_choice: &id006
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: synbad
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synbad
+          source_text: Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan
+        model: null
+        score: 85.0
+        strategy: unified
+        user_intent: dual_component
+      score: 85.0
+      strategy: ''
+    system_used: scoring
+    timestamp: '2025-08-13T17:00:38Z'
+    user_choice: *id006
+  Rad Dinosaur Creations - Blue Flame Raptor Synthetic:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: rad dino(saur)?
+      result:
+        brand: Rad Dinosaur Creations
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations - Blue Flame Raptor Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: raptor
+          brand: Rad Dinosaur Creations
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Raptor
+          source_text: Rad Dinosaur Creations - Blue Flame Raptor Synthetic
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: rad dino(saur)?
+      result:
+        brand: Rad Dinosaur Creations
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: raptor
+          brand: Rad Dinosaur Creations
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Raptor
+          source_text: Blue Flame Raptor Synthetic
+        model: null
+      score: 62
+      strategy: automated_split
+    comment_ids: []
+    system_choice:
+      result:
+        brand: Rad Dinosaur Creations
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations - Blue Flame Raptor Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: raptor
+          brand: Rad Dinosaur Creations
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Raptor
+          source_text: Rad Dinosaur Creations - Blue Flame Raptor Synthetic
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T17:11:59Z'
+    user_choice:
+      result:
+        brand: Rad Dinosaur Creations
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations - Blue Flame Raptor Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: raptor
+          brand: Rad Dinosaur Creations
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Raptor
+          source_text: Rad Dinosaur Creations - Blue Flame Raptor Synthetic
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+  Rad Dinosaur Creations - Cirrostratus w./ AP Shave Co. Cashmere 28mm Synthetic:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: rad dino(saur)?
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations - Cirrostratus w./ AP Shave Co. Cashmere
+            28mm Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \ba[\s.]*p\b.*cashmere
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Cashmere
+          source_text: Rad Dinosaur Creations - Cirrostratus w./ AP Shave Co. Cashmere
+            28mm Synthetic
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    - match_type: regex
+      pattern: rad dino(saur)?
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: \ba[\s.]*p\b.*cashmere
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Cashmere
+          source_text: Cirrostratus w./ AP Shave Co. Cashmere 28mm Synthetic
+        model: null
+      score: 63
+      strategy: automated_split
+    comment_ids: []
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations - Cirrostratus w./ AP Shave Co. Cashmere
+            28mm Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \ba[\s.]*p\b.*cashmere
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Cashmere
+          source_text: Rad Dinosaur Creations - Cirrostratus w./ AP Shave Co. Cashmere
+            28mm Synthetic
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T19:22:15Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations - Cirrostratus w./ AP Shave Co. Cashmere
+            28mm Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \ba[\s.]*p\b.*cashmere
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Cashmere
+          source_text: Rad Dinosaur Creations - Cirrostratus w./ AP Shave Co. Cashmere
+            28mm Synthetic
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+  Rad Dinosaur Creations - Jetson - 25mm Muhle STF:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: rad dino(saur)?
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations - Jetson - 25mm Muhle STF
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: m[uü]hle.*stf
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: null
+          model: STF
+          source_text: Rad Dinosaur Creations - Jetson - 25mm Muhle STF
+        model: null
+        score: 85.0
+        strategy: unified
+        user_intent: dual_component
+      score: 85.0
+      strategy: unified
+    - match_type: regex
+      pattern: rad dino(saur)?
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: m[uü]hle.*stf
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: null
+          model: STF
+          source_text: Jetson - 25mm Muhle STF
+        model: null
+      score: 60.0
+      strategy: automated_split
+    - match_type: handle_only
+      pattern: rad dino(saur)?
+      result:
+        _matched_by_strategy: handle_only
+        _pattern_used: rad dino(saur)?
+        brand: null
+        handle:
+          _matched_by: HandleOnlyStrategy
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations - Jetson - 25mm Muhle STF
+        knot:
+          _matched_by: HandleOnlyStrategy
+          _pattern: handle_only
+          brand: null
+          fiber: null
+          knot_size_mm: null
+          model: null
+          source_text: Rad Dinosaur Creations - Jetson - 25mm Muhle STF
+        model: null
+      score: 40.0
+      strategy: handle_only
+    - match_type: knot_only
+      pattern: m[uü]hle.*stf
+      result:
+        _matched_by_strategy: knot_only
+        _pattern_used: m[uü]hle.*stf
+        brand: Mühle
+        handle:
+          _matched_by: KnotOnlyStrategy
+          _pattern: knot_only
+          brand: null
+          model: null
+          source_text: Rad Dinosaur Creations - Jetson - 25mm Muhle STF
+        knot:
+          _matched_by: KnotOnlyStrategy
+          _pattern: m[uü]hle.*stf
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: null
+          model: STF
+          source_text: Rad Dinosaur Creations - Jetson - 25mm Muhle STF
+        model: STF
+      score: 40.0
+      strategy: knot_only
+    comment_ids:
+    - mvdtovb
+    system_choice: &id007
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations - Jetson - 25mm Muhle STF
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: m[uü]hle.*stf
+          brand: Mühle
+          fiber: Synthetic
+          knot_size_mm: null
+          model: STF
+          source_text: Rad Dinosaur Creations - Jetson - 25mm Muhle STF
+        model: null
+        score: 85.0
+        strategy: unified
+        user_intent: dual_component
+      score: 85.0
+      strategy: ''
+    system_used: scoring
+    timestamp: '2025-08-13T14:45:09Z'
+    user_choice: *id007
+  Rad Dinosaur Creations -Blue Skys- 26mm G5C Synthetic:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: rad dino(saur)?
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations -Blue Skys- 26mm G5C Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \bg5c\b
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: Rad Dinosaur Creations -Blue Skys- 26mm G5C Synthetic
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    comment_ids:
+    - mvejdjs
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations -Blue Skys- 26mm G5C Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \bg5c\b
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: Rad Dinosaur Creations -Blue Skys- 26mm G5C Synthetic
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T17:19:41Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations -Blue Skys- 26mm G5C Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \bg5c\b
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: Rad Dinosaur Creations -Blue Skys- 26mm G5C Synthetic
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+  Rad Dinosaur Creations >!EXPUNGED!< w/ Raptor Synthetic:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: rad dino(saur)?
+      result:
+        brand: Rad Dinosaur Creations
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations >!EXPUNGED!< w/ Raptor Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: raptor
+          brand: Rad Dinosaur Creations
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Raptor
+          source_text: Rad Dinosaur Creations >!EXPUNGED!< w/ Raptor Synthetic
+        model: null
+        user_intent: dual_component
+      score: 65.0
+      strategy: unified
+    - match_type: regex
+      pattern: rad dino(saur)?
+      result:
+        brand: Rad Dinosaur Creations
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations >!EXPUNGED!<
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: raptor
+          brand: Rad Dinosaur Creations
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Raptor
+          source_text: Raptor Synthetic
+        model: null
+        score: 80.0
+        strategy: automated_split
+      score: 80.0
+      strategy: automated_split
+    - match_type: handle_only
+      pattern: rad dino(saur)?
+      result:
+        _matched_by_strategy: handle_only
+        _pattern_used: rad dino(saur)?
+        brand: null
+        handle:
+          _matched_by: HandleOnlyStrategy
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations >!EXPUNGED!< w/ Raptor Synthetic
+        knot:
+          _matched_by: HandleOnlyStrategy
+          _pattern: handle_only
+          brand: null
+          fiber: null
+          knot_size_mm: null
+          model: null
+          source_text: Rad Dinosaur Creations >!EXPUNGED!< w/ Raptor Synthetic
+        model: null
+      score: 10.0
+      strategy: handle_only
+    - match_type: knot_only
+      pattern: raptor
+      result:
+        _matched_by_strategy: knot_only
+        _pattern_used: raptor
+        brand: Rad Dinosaur Creations
+        handle:
+          _matched_by: KnotOnlyStrategy
+          _pattern: knot_only
+          brand: null
+          model: null
+          source_text: Rad Dinosaur Creations >!EXPUNGED!< w/ Raptor Synthetic
+        knot:
+          _matched_by: KnotOnlyStrategy
+          _pattern: raptor
+          brand: Rad Dinosaur Creations
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Raptor
+          source_text: Rad Dinosaur Creations >!EXPUNGED!< w/ Raptor Synthetic
+        model: Raptor
+      score: 70.0
+      strategy: knot_only
+    comment_ids:
+    - mvho4v3
+    system_choice: &id008
+      result:
+        brand: Rad Dinosaur Creations
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations >!EXPUNGED!<
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: raptor
+          brand: Rad Dinosaur Creations
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Raptor
+          source_text: Raptor Synthetic
+        model: null
+        score: 80.0
+        strategy: automated_split
+      score: 80.0
+      strategy: ''
+    system_used: scoring
+    timestamp: '2025-08-13T17:00:30Z'
+    user_choice: *id008
+  Rad Dinosaur Creations Atlas II 26mm Raptor Synthentic Knot:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: rad dino(saur)?
+      result:
+        brand: Rad Dinosaur Creations
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Atlas II 26mm Raptor Synthentic Knot
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: raptor
+          brand: Rad Dinosaur Creations
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Raptor
+          source_text: Rad Dinosaur Creations Atlas II 26mm Raptor Synthentic Knot
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    comment_ids: []
+    system_choice:
+      result:
+        brand: Rad Dinosaur Creations
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Atlas II 26mm Raptor Synthentic Knot
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: raptor
+          brand: Rad Dinosaur Creations
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Raptor
+          source_text: Rad Dinosaur Creations Atlas II 26mm Raptor Synthentic Knot
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T20:10:20Z'
+    user_choice:
+      result:
+        brand: Rad Dinosaur Creations
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Atlas II 26mm Raptor Synthentic Knot
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: raptor
+          brand: Rad Dinosaur Creations
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Raptor
+          source_text: Rad Dinosaur Creations Atlas II 26mm Raptor Synthentic Knot
+        model: null
+        score: 65
+        strategy: unified
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+  Rad Dinosaur Creations Black River w/ AP Shave Co G5C:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: rad dino(saur)?
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Black River w/ AP Shave Co G5C
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \ba[\s.]*p\b.*g5c
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: Rad Dinosaur Creations Black River w/ AP Shave Co G5C
+        model: null
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    - match_type: regex
+      pattern: rad dino(saur)?
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Black River
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: \ba[\s.]*p\b.*g5c
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: AP Shave Co G5C
+        model: null
+        score: 112
+        strategy: automated_split
+      score: 112
+      strategy: automated_split
+    comment_ids:
+    - mvf7krh
+    - mvvrvy6
+    - mz1k43h
+    - mzmgl0o
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Black River
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: \ba[\s.]*p\b.*g5c
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: AP Shave Co G5C
+        model: null
+        score: 112
+        strategy: automated_split
+      score: 112
+      strategy: automated_split
+    system_used: scoring
+    timestamp: '2025-08-11T19:14:02Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Black River
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: \ba[\s.]*p\b.*g5c
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: AP Shave Co G5C
+        model: null
+        score: 112
+        strategy: automated_split
+      score: 112
+      strategy: automated_split
+  Rad Dinosaur Creations Gold Mine w/v19 Fanchurian Badger:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: rad dino(saur)?
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Gold Mine w/v19 Fanchurian Badger
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \bv19\b
+          brand: Chisel & Hound
+          fiber: Badger
+          knot_size_mm: 26
+          model: v19
+          source_text: Rad Dinosaur Creations Gold Mine w/v19 Fanchurian Badger
+        model: null
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    - match_type: regex
+      pattern: rad dino(saur)?
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Gold Mine
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: \bv19\b
+          brand: Chisel & Hound
+          fiber: Badger
+          knot_size_mm: 26
+          model: v19
+          source_text: v19 Fanchurian Badger
+        model: null
+        score: 112
+        strategy: automated_split
+      score: 112
+      strategy: automated_split
+    comment_ids:
+    - mx3jc5n
+    - mz7ac92
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Gold Mine
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: \bv19\b
+          brand: Chisel & Hound
+          fiber: Badger
+          knot_size_mm: 26
+          model: v19
+          source_text: v19 Fanchurian Badger
+        model: null
+        score: 112
+        strategy: automated_split
+      score: 112
+      strategy: automated_split
+    system_used: scoring
+    timestamp: '2025-08-11T20:09:54Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Gold Mine
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: \bv19\b
+          brand: Chisel & Hound
+          fiber: Badger
+          knot_size_mm: 26
+          model: v19
+          source_text: v19 Fanchurian Badger
+        model: null
+        score: 112
+        strategy: automated_split
+      score: 112
+      strategy: automated_split
+  Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: rad dino(saur)?
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: turn.{1,5}shave
+          brand: Turn-N-Shave
+          fiber: Badger
+          knot_size_mm: null
+          model: Tip (Badger)
+          source_text: Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip
+        model: null
+        score: 85.0
+        strategy: unified
+        user_intent: dual_component
+      score: 85.0
+      strategy: unified
+    - match_type: regex
+      pattern: rad dino(saur)?
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Magma
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: turn.{1,5}shave
+          brand: Turn-N-Shave
+          fiber: Badger
+          knot_size_mm: null
+          model: Tip (Badger)
+          source_text: 26mm Turn-n-Shave V9 Tip
+        model: null
+      score: 80.0
+      strategy: automated_split
+    - match_type: handle_only
+      pattern: rad dino(saur)?
+      result:
+        _matched_by_strategy: handle_only
+        _pattern_used: rad dino(saur)?
+        brand: null
+        handle:
+          _matched_by: HandleOnlyStrategy
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip
+        knot:
+          _matched_by: HandleOnlyStrategy
+          _pattern: handle_only
+          brand: null
+          fiber: null
+          knot_size_mm: null
+          model: null
+          source_text: Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip
+        model: null
+      score: 10.0
+      strategy: handle_only
+    - match_type: knot_only
+      pattern: turn.{1,5}shave
+      result:
+        _matched_by_strategy: knot_only
+        _pattern_used: turn.{1,5}shave
+        brand: Turn-N-Shave
+        handle:
+          _matched_by: KnotOnlyStrategy
+          _pattern: knot_only
+          brand: null
+          model: null
+          source_text: Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip
+        knot:
+          _matched_by: KnotOnlyStrategy
+          _pattern: turn.{1,5}shave
+          brand: Turn-N-Shave
+          fiber: Badger
+          knot_size_mm: null
+          model: Tip (Badger)
+          source_text: Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip
+        model: Tip (Badger)
+      score: 70.0
+      strategy: knot_only
+    comment_ids:
+    - mvhneeu
+    system_choice: &id009
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: turn.{1,5}shave
+          brand: Turn-N-Shave
+          fiber: Badger
+          knot_size_mm: null
+          model: Tip (Badger)
+          source_text: Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip
+        model: null
+        score: 85.0
+        strategy: unified
+        user_intent: dual_component
+      score: 85.0
+      strategy: ''
+    system_used: scoring
+    timestamp: '2025-08-13T16:57:27Z'
+    user_choice: *id009
+  Rad Dinosaur Creations Ore-Not handle (No. 43) w/ AP Shave Co. 26mm Pure Bliss SHD Premium Synthetic Knot:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: rad dino(saur)?
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Ore-Not handle (No. 43) w/ AP Shave
+            Co. 26mm Pure Bliss SHD Premium Synthetic Knot
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: pure\s*bliss.*shd
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss SHD
+          source_text: Rad Dinosaur Creations Ore-Not handle (No. 43) w/ AP Shave
+            Co. 26mm Pure Bliss SHD Premium Synthetic Knot
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    - match_type: regex
+      pattern: rad dino(saur)?
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Ore-Not handle (No. 43)
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: pure\s*bliss.*shd
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss SHD
+          source_text: AP Shave Co. 26mm Pure Bliss SHD Premium Synthetic Knot
+        model: null
+      score: 80
+      strategy: automated_split
+    comment_ids:
+    - mvgq11w
+    - mvpru32
+    - mvw0jx3
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Ore-Not handle (No. 43) w/ AP Shave
+            Co. 26mm Pure Bliss SHD Premium Synthetic Knot
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: pure\s*bliss.*shd
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss SHD
+          source_text: Rad Dinosaur Creations Ore-Not handle (No. 43) w/ AP Shave
+            Co. 26mm Pure Bliss SHD Premium Synthetic Knot
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T20:30:39Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rad dino(saur)?
+          brand: Rad Dinosaur Creations
+          model: Unspecified
+          source_text: Rad Dinosaur Creations Ore-Not handle (No. 43) w/ AP Shave
+            Co. 26mm Pure Bliss SHD Premium Synthetic Knot
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: pure\s*bliss.*shd
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Pure Bliss SHD
+          source_text: Rad Dinosaur Creations Ore-Not handle (No. 43) w/ AP Shave
+            Co. 26mm Pure Bliss SHD Premium Synthetic Knot
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+  RadDinosaurCreations "Reznor" w/26mm AP Shave Co G5C:
+    action: validated
+    all_brush_strategies:
+    - match_type: single_component
+      pattern: \ba[\s.]*p\b.*g5c
+      result:
+        brand: null
+        handle:
+          _matched_by: KnotMatcher
+          _pattern: knot_only
+          brand: null
+          model: null
+          source_text: RadDinosaurCreations "Reznor" w/26mm AP Shave Co G5C
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: \ba[\s.]*p\b.*g5c
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: RadDinosaurCreations "Reznor" w/26mm AP Shave Co G5C
+        model: null
+      score: 50
+      strategy: unified
+    - match_type: regex
+      pattern: \ba[\s.]*p\b.*g5c
+      result:
+        brand: null
+        handle:
+          _matched_by: BrushSplitter
+          _pattern: split
+          brand: RadDinosaurCreations
+          model: '"Reznor"'
+          source_text: RadDinosaurCreations "Reznor"
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: \ba[\s.]*p\b.*g5c
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: 26mm AP Shave Co G5C
+        model: null
+        score: 86
+        strategy: automated_split
+      score: 86
+      strategy: automated_split
+    comment_ids:
+    - mxct72q
+    - mzav6jl
+    - mzhhde0
+    - mzvg6qt
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: BrushSplitter
+          _pattern: split
+          brand: RadDinosaurCreations
+          model: '"Reznor"'
+          source_text: RadDinosaurCreations "Reznor"
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: \ba[\s.]*p\b.*g5c
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: 26mm AP Shave Co G5C
+        model: null
+        score: 86
+        strategy: automated_split
+      score: 86
+      strategy: automated_split
+    system_used: scoring
+    timestamp: '2025-08-11T17:26:17Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: BrushSplitter
+          _pattern: split
+          brand: RadDinosaurCreations
+          model: '"Reznor"'
+          source_text: RadDinosaurCreations "Reznor"
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: \ba[\s.]*p\b.*g5c
+          brand: AP Shave Co
+          fiber: Synthetic
+          knot_size_mm: null
+          model: G5C
+          source_text: 26mm AP Shave Co G5C
+        model: null
+        score: 86
+        strategy: automated_split
+      score: 86
+      strategy: automated_split
+  Rubberset 400 - Silvertip Badger 24mm:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: rubberset
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rubberset
+          brand: Rubberset
+          model: Unspecified
+          source_text: Rubberset 400 - Silvertip Badger 24mm
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: fiber_detection
+          brand: null
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Rubberset 400 - Silvertip Badger 24mm
+        model: null
+        user_intent: dual_component
+      score: 50
+      strategy: unified
+    - match_type: regex
+      pattern: rubberset
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rubberset
+          brand: Rubberset
+          model: Unspecified
+          source_text: Rubberset 400
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: fiber_detection
+          brand: null
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Silvertip Badger 24mm
+        model: null
+        score: 63
+        strategy: automated_split
+      score: 63
+      strategy: automated_split
+    comment_ids: []
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rubberset
+          brand: Rubberset
+          model: Unspecified
+          source_text: Rubberset 400
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: fiber_detection
+          brand: null
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Silvertip Badger 24mm
+        model: null
+        score: 63
+        strategy: automated_split
+      score: 63
+      strategy: automated_split
+    system_used: scoring
+    timestamp: '2025-08-11T19:04:42Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: rubberset
+          brand: Rubberset
+          model: Unspecified
+          source_text: Rubberset 400
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: fiber_detection
+          brand: null
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Silvertip Badger 24mm
+        model: null
+        score: 63
+        strategy: automated_split
+      score: 63
+      strategy: automated_split
+  Semogue 1305 (Boar):
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: semogue
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: semogue
+          brand: Semogue
+          model: Unspecified
+          source_text: Semogue 1305 (Boar)
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: semogue
+          brand: Semogue
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: Semogue 1305 (Boar)
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: semogue.*1305
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: known_brush
+          _pattern: semogue.*1305
+          brand: Semogue
+          model: null
+          source_text: Semogue 1305 (Boar)
+        knot:
+          _matched_by: known_brush
+          _pattern: semogue.*1305
+          brand: Semogue
+          fiber: Boar
+          knot_size_mm: 21
+          model: '1305'
+          source_text: Semogue 1305 (Boar)
+        model: '1305'
+        score: 80
+        source_text: Semogue 1305 (Boar)
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    - match_type: regex
+      pattern: (omega|semogue)[^\]\n\d]*(c\d{1,3}|\d{3,6})
+      result:
+        brand: Semogue
+        fiber: Boar
+        handle_maker: null
+        knot_size_mm: null
+        model: '1305'
+        source_text: semogue 1305
+        source_type: exact
+      score: 75
+      strategy: omega_semogue
+    comment_ids: []
+    system_choice:
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: known_brush
+          _pattern: semogue.*1305
+          brand: Semogue
+          model: null
+          source_text: Semogue 1305 (Boar)
+        knot:
+          _matched_by: known_brush
+          _pattern: semogue.*1305
+          brand: Semogue
+          fiber: Boar
+          knot_size_mm: 21
+          model: '1305'
+          source_text: Semogue 1305 (Boar)
+        model: '1305'
+        score: 80
+        source_text: Semogue 1305 (Boar)
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T17:12:17Z'
+    user_choice:
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: known_brush
+          _pattern: semogue.*1305
+          brand: Semogue
+          model: null
+          source_text: Semogue 1305 (Boar)
+        knot:
+          _matched_by: known_brush
+          _pattern: semogue.*1305
+          brand: Semogue
+          fiber: Boar
+          knot_size_mm: 21
+          model: '1305'
+          source_text: Semogue 1305 (Boar)
+        model: '1305'
+        score: 80
+        source_text: Semogue 1305 (Boar)
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Semogue 2020 Best Badger:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: semogue
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: semogue
+          brand: Semogue
+          model: Unspecified
+          source_text: Semogue 2020 Best Badger
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: semogue
+          brand: Semogue
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Semogue 2020 Best Badger
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: semogue.*2020
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: known_brush
+          _pattern: semogue.*2020
+          brand: Semogue
+          model: null
+          source_text: Semogue 2020 Best Badger
+        knot:
+          _matched_by: known_brush
+          _pattern: semogue.*2020
+          brand: Semogue
+          fiber: Badger
+          knot_size_mm: 22
+          model: '2020'
+          source_text: Semogue 2020 Best Badger
+        model: '2020'
+        score: 80
+        source_text: Semogue 2020 Best Badger
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    - match_type: regex
+      pattern: (omega|semogue)[^\]\n\d]*(c\d{1,3}|\d{3,6})
+      result:
+        brand: Semogue
+        fiber: Boar
+        handle_maker: null
+        knot_size_mm: null
+        model: '2020'
+        source_text: semogue 2020
+        source_type: exact
+      score: 75
+      strategy: omega_semogue
+    comment_ids:
+    - mvnv2va
+    - mwbj024
+    - mwolpie
+    - mz6gx7w
+    system_choice:
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: known_brush
+          _pattern: semogue.*2020
+          brand: Semogue
+          model: null
+          source_text: Semogue 2020 Best Badger
+        knot:
+          _matched_by: known_brush
+          _pattern: semogue.*2020
+          brand: Semogue
+          fiber: Badger
+          knot_size_mm: 22
+          model: '2020'
+          source_text: Semogue 2020 Best Badger
+        model: '2020'
+        score: 80
+        source_text: Semogue 2020 Best Badger
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T20:05:06Z'
+    user_choice:
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: known_brush
+          _pattern: semogue.*2020
+          brand: Semogue
+          model: null
+          source_text: Semogue 2020 Best Badger
+        knot:
+          _matched_by: known_brush
+          _pattern: semogue.*2020
+          brand: Semogue
+          fiber: Badger
+          knot_size_mm: 22
+          model: '2020'
+          source_text: Semogue 2020 Best Badger
+        model: '2020'
+        score: 80
+        source_text: Semogue 2020 Best Badger
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Semogue 610 21mm Boar:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: semogue
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: semogue
+          brand: Semogue
+          model: Unspecified
+          source_text: Semogue 610 21mm Boar
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: semogue
+          brand: Semogue
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: Semogue 610 21mm Boar
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: semogue\s*610
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: known_brush
+          _pattern: semogue\s*610
+          brand: Semogue
+          model: null
+          source_text: Semogue 610 21mm Boar
+        knot:
+          _matched_by: known_brush
+          _pattern: semogue\s*610
+          brand: Semogue
+          fiber: Boar
+          knot_size_mm: 21
+          model: '610'
+          source_text: Semogue 610 21mm Boar
+        model: '610'
+        score: 80
+        source_text: Semogue 610 21mm Boar
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    - match_type: regex
+      pattern: (omega|semogue)[^\]\n\d]*(c\d{1,3}|\d{3,6})
+      result:
+        brand: Semogue
+        fiber: Boar
+        handle_maker: null
+        knot_size_mm: null
+        model: '610'
+        source_text: semogue 610
+        source_type: exact
+      score: 75
+      strategy: omega_semogue
+    comment_ids:
+    - mveeq6x
+    - mvkcgxp
+    - mwt2f49
+    - mwzqlff
+    - mxwc8xy
+    system_choice:
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: known_brush
+          _pattern: semogue\s*610
+          brand: Semogue
+          model: null
+          source_text: Semogue 610 21mm Boar
+        knot:
+          _matched_by: known_brush
+          _pattern: semogue\s*610
+          brand: Semogue
+          fiber: Boar
+          knot_size_mm: 21
+          model: '610'
+          source_text: Semogue 610 21mm Boar
+        model: '610'
+        score: 80
+        source_text: Semogue 610 21mm Boar
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T17:19:30Z'
+    user_choice:
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: known_brush
+          _pattern: semogue\s*610
+          brand: Semogue
+          model: null
+          source_text: Semogue 610 21mm Boar
+        knot:
+          _matched_by: known_brush
+          _pattern: semogue\s*610
+          brand: Semogue
+          fiber: Boar
+          knot_size_mm: 21
+          model: '610'
+          source_text: Semogue 610 21mm Boar
+        model: '610'
+        score: 80
+        source_text: Semogue 610 21mm Boar
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Semogue Owners Club - Cherry Wood Boar 24mm:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: owner.*club
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: owner.*club
+          brand: Semogue
+          model: Unspecified
+          source_text: Semogue Owners Club - Cherry Wood Boar 24mm
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: semogue
+          brand: Semogue
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: Semogue Owners Club - Cherry Wood Boar 24mm
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*boar
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: known_brush
+          _pattern: (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*boar
+          brand: Semogue
+          model: null
+          source_text: Semogue Owners Club - Cherry Wood Boar 24mm
+        knot:
+          _matched_by: known_brush
+          _pattern: (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*boar
+          brand: Semogue
+          fiber: Boar
+          knot_size_mm: 24
+          model: SOC Boar
+          source_text: Semogue Owners Club - Cherry Wood Boar 24mm
+        model: SOC Boar
+        score: 80
+        source_text: Semogue Owners Club - Cherry Wood Boar 24mm
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    - match_type: regex
+      pattern: owner.*club
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: owner.*club
+          brand: Semogue
+          model: Unspecified
+          source_text: Semogue Owners Club
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: fiber_detection
+          brand: null
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: Cherry Wood Boar 24mm
+        model: null
+      score: 63
+      strategy: automated_split
+    comment_ids:
+    - mwotz2b
+    - mxhz6e3
+    - mxnlhfs
+    - mycyvtq
+    - myt0o5j
+    - mz5xnna
+    - mzmkql0
+    - n09566p
+    - n0gfpw4
+    system_choice:
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: known_brush
+          _pattern: (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*boar
+          brand: Semogue
+          model: null
+          source_text: Semogue Owners Club - Cherry Wood Boar 24mm
+        knot:
+          _matched_by: known_brush
+          _pattern: (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*boar
+          brand: Semogue
+          fiber: Boar
+          knot_size_mm: 24
+          model: SOC Boar
+          source_text: Semogue Owners Club - Cherry Wood Boar 24mm
+        model: SOC Boar
+        score: 80
+        source_text: Semogue Owners Club - Cherry Wood Boar 24mm
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T19:22:03Z'
+    user_choice:
+      result:
+        brand: Semogue
+        handle:
+          _matched_by: known_brush
+          _pattern: (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*boar
+          brand: Semogue
+          model: null
+          source_text: Semogue Owners Club - Cherry Wood Boar 24mm
+        knot:
+          _matched_by: known_brush
+          _pattern: (semogue\s*owner.*club|s\.?\s*o\.?\s*c\.?\s*).*boar
+          brand: Semogue
+          fiber: Boar
+          knot_size_mm: 24
+          model: SOC Boar
+          source_text: Semogue Owners Club - Cherry Wood Boar 24mm
+        model: SOC Boar
+        score: 80
+        source_text: Semogue Owners Club - Cherry Wood Boar 24mm
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Shore Shave - Player Custom with 24mm Blond Boar:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: shore.*shav
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: shore.*shav
+          brand: Shore Shaving
+          model: Unspecified
+          source_text: Shore Shave - Player Custom with 24mm Blond Boar
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: fiber_detection
+          brand: null
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: Shore Shave - Player Custom with 24mm Blond Boar
+        model: null
+        user_intent: dual_component
+      score: 50
+      strategy: unified
+    - match_type: regex
+      pattern: shore.*shav
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: shore.*shav
+          brand: Shore Shaving
+          model: Unspecified
+          source_text: Shore Shave - Player Custom
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: fiber_detection
+          brand: null
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: 24mm Blond Boar
+        model: null
+        score: 115
+        strategy: automated_split
+      score: 115
+      strategy: automated_split
+    comment_ids:
+    - mvg5k55
+    - mvwxzay
+    - mzvd4ui
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: shore.*shav
+          brand: Shore Shaving
+          model: Unspecified
+          source_text: Shore Shave - Player Custom
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: fiber_detection
+          brand: null
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: 24mm Blond Boar
+        model: null
+        score: 115
+        strategy: automated_split
+      score: 115
+      strategy: automated_split
+    system_used: scoring
+    timestamp: '2025-08-11T20:05:20Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: shore.*shav
+          brand: Shore Shaving
+          model: Unspecified
+          source_text: Shore Shave - Player Custom
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: fiber_detection
+          brand: null
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: 24mm Blond Boar
+        model: null
+        score: 115
+        strategy: automated_split
+      score: 115
+      strategy: automated_split
+  'Simpson Classic # 1 Synthetic bristle':
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: simpson
+      result:
+        brand: Simpson
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: simpson
+          brand: Simpson
+          model: Unspecified
+          source_text: 'Simpson Classic # 1 Synthetic bristle'
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: simpson
+          brand: Simpson
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: 'Simpson Classic # 1 Synthetic bristle'
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: simp.*classic.*\b1\b.*synth
+      result:
+        brand: Simpson
+        handle:
+          _matched_by: known_brush
+          _pattern: simp.*classic.*\b1\b.*synth
+          brand: Simpson
+          model: null
+          source_text: 'Simpson Classic # 1 Synthetic bristle'
+        knot:
+          _matched_by: known_brush
+          _pattern: simp.*classic.*\b1\b.*synth
+          brand: Simpson
+          fiber: Synthetic
+          knot_size_mm: 21
+          model: Classic 1 Synthetic
+          source_text: 'Simpson Classic # 1 Synthetic bristle'
+        model: Classic 1 Synthetic
+        score: 80
+        source_text: 'Simpson Classic # 1 Synthetic bristle'
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    comment_ids:
+    - mvgqri2
+    - mvlufa0
+    - mydd4xk
+    - myr8we3
+    - mzk6yx2
+    - mzqyttc
+    - mzxfbxi
+    system_choice:
+      result:
+        brand: Simpson
+        handle:
+          _matched_by: known_brush
+          _pattern: simp.*classic.*\b1\b.*synth
+          brand: Simpson
+          model: null
+          source_text: 'Simpson Classic # 1 Synthetic bristle'
+        knot:
+          _matched_by: known_brush
+          _pattern: simp.*classic.*\b1\b.*synth
+          brand: Simpson
+          fiber: Synthetic
+          knot_size_mm: 21
+          model: Classic 1 Synthetic
+          source_text: 'Simpson Classic # 1 Synthetic bristle'
+        model: Classic 1 Synthetic
+        score: 80
+        source_text: 'Simpson Classic # 1 Synthetic bristle'
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T20:38:15Z'
+    user_choice:
+      result:
+        brand: Simpson
+        handle:
+          _matched_by: known_brush
+          _pattern: simp.*classic.*\b1\b.*synth
+          brand: Simpson
+          model: null
+          source_text: 'Simpson Classic # 1 Synthetic bristle'
+        knot:
+          _matched_by: known_brush
+          _pattern: simp.*classic.*\b1\b.*synth
+          brand: Simpson
+          fiber: Synthetic
+          knot_size_mm: 21
+          model: Classic 1 Synthetic
+          source_text: 'Simpson Classic # 1 Synthetic bristle'
+        model: Classic 1 Synthetic
+        score: 80
+        source_text: 'Simpson Classic # 1 Synthetic bristle'
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Stirling Finest Badger Brush:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: ^(?!.*zeni).*st[ie]rl
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ^(?!.*zeni).*st[ie]rl
+          brand: Stirling
+          model: Unspecified
+          source_text: Stirling Finest Badger Brush
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: fiber_detection
+          brand: null
+          fiber: Badger
+          knot_size_mm: null
+          model: Badger
+          source_text: Stirling Finest Badger Brush
+        model: null
+        user_intent: dual_component
+      score: 50
+      strategy: unified
+    - match_type: regex
+      pattern: stirling.*finest.*badger
+      result:
+        brand: Stirling
+        handle:
+          _matched_by: known_brush
+          _pattern: stirling.*finest.*badger
+          brand: Stirling
+          model: null
+          source_text: Stirling Finest Badger Brush
+        knot:
+          _matched_by: known_brush
+          _pattern: stirling.*finest.*badger
+          brand: Stirling
+          fiber: Badger
+          knot_size_mm: 24
+          model: Finest Badger
+          source_text: Stirling Finest Badger Brush
+        model: Finest Badger
+        score: 80
+        source_text: Stirling Finest Badger Brush
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    comment_ids: []
+    system_choice:
+      result:
+        brand: Stirling
+        handle:
+          _matched_by: known_brush
+          _pattern: stirling.*finest.*badger
+          brand: Stirling
+          model: null
+          source_text: Stirling Finest Badger Brush
+        knot:
+          _matched_by: known_brush
+          _pattern: stirling.*finest.*badger
+          brand: Stirling
+          fiber: Badger
+          knot_size_mm: 24
+          model: Finest Badger
+          source_text: Stirling Finest Badger Brush
+        model: Finest Badger
+        score: 80
+        source_text: Stirling Finest Badger Brush
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T17:14:43Z'
+    user_choice:
+      result:
+        brand: Stirling
+        handle:
+          _matched_by: known_brush
+          _pattern: stirling.*finest.*badger
+          brand: Stirling
+          model: null
+          source_text: Stirling Finest Badger Brush
+        knot:
+          _matched_by: known_brush
+          _pattern: stirling.*finest.*badger
+          brand: Stirling
+          fiber: Badger
+          knot_size_mm: 24
+          model: Finest Badger
+          source_text: Stirling Finest Badger Brush
+        model: Finest Badger
+        score: 80
+        source_text: Stirling Finest Badger Brush
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Stirling Two Band Synthetic:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: ^(?!.*zeni).*st[ie]rl
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: ^(?!.*zeni).*st[ie]rl
+          brand: Stirling
+          model: Unspecified
+          source_text: Stirling Two Band Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: fiber_detection
+          brand: null
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Stirling Two Band Synthetic
+        model: null
+        user_intent: dual_component
+      score: 50
+      strategy: unified
+    - match_type: regex
+      pattern: stirl.*(?:2|two)(?:-|\s)+band
+      result:
+        brand: Stirling
+        handle:
+          _matched_by: known_brush
+          _pattern: stirl.*(?:2|two)(?:-|\s)+band
+          brand: Stirling
+          model: null
+          source_text: Stirling Two Band Synthetic
+        knot:
+          _matched_by: known_brush
+          _pattern: stirl.*(?:2|two)(?:-|\s)+band
+          brand: Stirling
+          fiber: Synthetic
+          knot_size_mm: 24
+          model: 2-Band Synthetic
+          source_text: Stirling Two Band Synthetic
+        model: 2-Band Synthetic
+        score: 80
+        source_text: Stirling Two Band Synthetic
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    comment_ids:
+    - mvf5ypt
+    - mvkupjj
+    - mvuf8ue
+    - mw13il4
+    - mw7of7c
+    - mwb2as6
+    - mwij2h2
+    - mwnmj3w
+    - mwwfkwa
+    - mx1xr61
+    - mx5l0nh
+    - mxer14r
+    - mxlsyrs
+    - mxrvrku
+    - mxy1jf1
+    - my4y8fk
+    - myawmr6
+    - myowh3q
+    - myu6x71
+    - myzs6rh
+    - mz7m66t
+    - mzf0qpk
+    - mzletux
+    - mzs8zwk
+    - mzypdrb
+    - n01s03y
+    - n0bgrfw
+    - n0h7a7s
+    - n0o1bf9
+    system_choice:
+      result:
+        brand: Stirling
+        handle:
+          _matched_by: known_brush
+          _pattern: stirl.*(?:2|two)(?:-|\s)+band
+          brand: Stirling
+          model: null
+          source_text: Stirling Two Band Synthetic
+        knot:
+          _matched_by: known_brush
+          _pattern: stirl.*(?:2|two)(?:-|\s)+band
+          brand: Stirling
+          fiber: Synthetic
+          knot_size_mm: 24
+          model: 2-Band Synthetic
+          source_text: Stirling Two Band Synthetic
+        model: 2-Band Synthetic
+        score: 80
+        source_text: Stirling Two Band Synthetic
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T19:13:46Z'
+    user_choice:
+      result:
+        brand: Stirling
+        handle:
+          _matched_by: known_brush
+          _pattern: stirl.*(?:2|two)(?:-|\s)+band
+          brand: Stirling
+          model: null
+          source_text: Stirling Two Band Synthetic
+        knot:
+          _matched_by: known_brush
+          _pattern: stirl.*(?:2|two)(?:-|\s)+band
+          brand: Stirling
+          fiber: Synthetic
+          knot_size_mm: 24
+          model: 2-Band Synthetic
+          source_text: Stirling Two Band Synthetic
+        model: 2-Band Synthetic
+        score: 80
+        source_text: Stirling Two Band Synthetic
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Summer Break Soaps:
+    action: validated
+    all_brush_strategies:
+    - match_type: single_component
+      pattern: summer.*break
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: summer.*break
+          brand: Summer Break
+          model: Unspecified
+          source_text: Summer Break Soaps
+        knot:
+          _matched_by: HandleMatcher
+          _pattern: handle_only
+          brand: null
+          fiber: null
+          knot_size_mm: null
+          model: null
+          source_text: Summer Break Soaps
+        model: null
+        score: 70
+        strategy: unified
+      score: 70
+      strategy: unified
+    comment_ids:
+    - mvf10qu
+    - mzbit73
+    - mzil4yz
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: summer.*break
+          brand: Summer Break
+          model: Unspecified
+          source_text: Summer Break Soaps
+        knot:
+          _matched_by: HandleMatcher
+          _pattern: handle_only
+          brand: null
+          fiber: null
+          knot_size_mm: null
+          model: null
+          source_text: Summer Break Soaps
+        model: null
+        score: 70
+        strategy: unified
+      score: 70
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T18:53:02Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: summer.*break
+          brand: Summer Break
+          model: Unspecified
+          source_text: Summer Break Soaps
+        knot:
+          _matched_by: HandleMatcher
+          _pattern: handle_only
+          brand: null
+          fiber: null
+          knot_size_mm: null
+          model: null
+          source_text: Summer Break Soaps
+        model: null
+        score: 70
+        strategy: unified
+      score: 70
+      strategy: unified
+  The Body Shop Brush:
+    action: validated
+    all_brush_strategies:
+    - match_type: brand_default
+      pattern: body.*shop
+      result:
+        _matched_by_strategy: OtherBrushMatchingStrategy
+        _pattern_used: body.*shop
+        brand: Body Shop
+        fiber_strategy: default
+        handle:
+          _matched_by: other_brush
+          _pattern: body.*shop
+          brand: Body Shop
+          model: null
+          source_text: The Body Shop Brush
+        knot:
+          _matched_by: other_brush
+          _pattern: body.*shop
+          brand: Body Shop
+          fiber: Synthetic
+          knot_size_mm: 22
+          model: Synthetic
+          source_text: The Body Shop Brush
+        model: Synthetic
+        score: 70.0
+        strategy: other_brush
+      score: 70.0
+      strategy: other_brush
+    comment_ids:
+    - mwb9kzy
+    system_choice: &id010
+      result:
+        _matched_by_strategy: OtherBrushMatchingStrategy
+        _pattern_used: body.*shop
+        brand: Body Shop
+        fiber_strategy: default
+        handle:
+          _matched_by: other_brush
+          _pattern: body.*shop
+          brand: Body Shop
+          model: null
+          source_text: The Body Shop Brush
+        knot:
+          _matched_by: other_brush
+          _pattern: body.*shop
+          brand: Body Shop
+          fiber: Synthetic
+          knot_size_mm: 22
+          model: Synthetic
+          source_text: The Body Shop Brush
+        model: Synthetic
+        score: 70.0
+        strategy: other_brush
+      score: 70.0
+      strategy: ''
+    system_used: scoring
+    timestamp: '2025-08-13T10:39:27Z'
+    user_choice: *id010
+  WCS 26mm synth:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: wcs
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: wcs
+          brand: WCS
+          model: Unspecified
+          source_text: WCS 26mm synth
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: wcs
+          brand: West Coast Shaving
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: WCS 26mm synth
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: brand_default
+      pattern: wcs
+      result:
+        _matched_by_strategy: OtherBrushMatchingStrategy
+        _pattern_used: wcs
+        brand: West Coast Shaving
+        fiber_strategy: user_input
+        handle:
+          _matched_by: other_brush
+          _pattern: wcs
+          brand: West Coast Shaving
+          model: null
+          source_text: WCS 26mm synth
+        knot:
+          _matched_by: other_brush
+          _pattern: wcs
+          brand: West Coast Shaving
+          fiber: Synthetic
+          knot_size_mm: 26
+          model: Synthetic
+          source_text: WCS 26mm synth
+        model: Synthetic
+        score: 70
+        strategy: other_brush
+      score: 70
+      strategy: other_brush
+    comment_ids:
+    - mvek6dk
+    - mvl7j0p
+    - mvr877x
+    - mvzsiou
+    - mw4fjov
+    - mwdx0n5
+    - mwtpu8u
+    - mx1r3t7
+    - mxgn1pm
+    - mygmw9d
+    - mymee3h
+    - mysr52b
+    - myzx97y
+    - mz5ueyd
+    - mzbdmk6
+    - mzi6izp
+    - mzoqyhs
+    - mzvfiyy
+    - n0210ql
+    - n098o3w
+    system_choice:
+      result:
+        _matched_by_strategy: OtherBrushMatchingStrategy
+        _pattern_used: wcs
+        brand: West Coast Shaving
+        fiber_strategy: user_input
+        handle:
+          _matched_by: other_brush
+          _pattern: wcs
+          brand: West Coast Shaving
+          model: null
+          source_text: WCS 26mm synth
+        knot:
+          _matched_by: other_brush
+          _pattern: wcs
+          brand: West Coast Shaving
+          fiber: Synthetic
+          knot_size_mm: 26
+          model: Synthetic
+          source_text: WCS 26mm synth
+        model: Synthetic
+        score: 70
+        strategy: other_brush
+      score: 70
+      strategy: other_brush
+    system_used: scoring
+    timestamp: '2025-08-11T17:26:10Z'
+    user_choice:
+      result:
+        _matched_by_strategy: OtherBrushMatchingStrategy
+        _pattern_used: wcs
+        brand: West Coast Shaving
+        fiber_strategy: user_input
+        handle:
+          _matched_by: other_brush
+          _pattern: wcs
+          brand: West Coast Shaving
+          model: null
+          source_text: WCS 26mm synth
+        knot:
+          _matched_by: other_brush
+          _pattern: wcs
+          brand: West Coast Shaving
+          fiber: Synthetic
+          knot_size_mm: 26
+          model: Synthetic
+          source_text: WCS 26mm synth
+        model: Synthetic
+        score: 70
+        strategy: other_brush
+      score: 70
+      strategy: other_brush
+  Wald Shaving "Nimbus Werther's/Ivory" 29mm A1 Fan:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: wald
+      result:
+        brand: Wald
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: wald
+          brand: Wald
+          model: Unspecified
+          source_text: Wald Shaving "Nimbus Werther's/Ivory" 29mm A1 Fan
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: wald.*a1
+          brand: Wald
+          fiber: Synthetic
+          knot_size_mm: 29
+          model: A1
+          source_text: Wald Shaving "Nimbus Werther's/Ivory" 29mm A1 Fan
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: wald.*a1
+      result:
+        brand: Wald
+        handle:
+          _matched_by: known_brush
+          _pattern: wald.*a1
+          brand: Wald
+          model: null
+          source_text: Wald Shaving "Nimbus Werther's/Ivory" 29mm A1 Fan
+        knot:
+          _matched_by: known_brush
+          _pattern: wald.*a1
+          brand: Wald
+          fiber: Synthetic
+          knot_size_mm: 29
+          model: A1
+          source_text: Wald Shaving "Nimbus Werther's/Ivory" 29mm A1 Fan
+        model: A1
+        score: 80
+        source_text: Wald Shaving "Nimbus Werther's/Ivory" 29mm A1 Fan
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    comment_ids:
+    - mvf2ajm
+    system_choice:
+      result:
+        brand: Wald
+        handle:
+          _matched_by: known_brush
+          _pattern: wald.*a1
+          brand: Wald
+          model: null
+          source_text: Wald Shaving "Nimbus Werther's/Ivory" 29mm A1 Fan
+        knot:
+          _matched_by: known_brush
+          _pattern: wald.*a1
+          brand: Wald
+          fiber: Synthetic
+          knot_size_mm: 29
+          model: A1
+          source_text: Wald Shaving "Nimbus Werther's/Ivory" 29mm A1 Fan
+        model: A1
+        score: 80
+        source_text: Wald Shaving "Nimbus Werther's/Ivory" 29mm A1 Fan
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T18:53:30Z'
+    user_choice:
+      result:
+        brand: Wald
+        handle:
+          _matched_by: known_brush
+          _pattern: wald.*a1
+          brand: Wald
+          model: null
+          source_text: Wald Shaving "Nimbus Werther's/Ivory" 29mm A1 Fan
+        knot:
+          _matched_by: known_brush
+          _pattern: wald.*a1
+          brand: Wald
+          fiber: Synthetic
+          knot_size_mm: 29
+          model: A1
+          source_text: Wald Shaving "Nimbus Werther's/Ivory" 29mm A1 Fan
+        model: A1
+        score: 80
+        source_text: Wald Shaving "Nimbus Werther's/Ivory" 29mm A1 Fan
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Wolf Whiskers RCE 1301 / Omega 10049 Boar:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: wolf.*whisker
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: wolf.*whisker
+          brand: Wolf Whiskers
+          model: Unspecified
+          source_text: Wolf Whiskers RCE 1301 / Omega 10049 Boar
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: omega.*(pro)*.*49
+          brand: Omega
+          fiber: Boar
+          knot_size_mm: 26
+          model: '10049'
+          source_text: Wolf Whiskers RCE 1301 / Omega 10049 Boar
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    - match_type: regex
+      pattern: omega.*(pro)*.*49
+      result:
+        brand: Omega
+        fiber: Boar
+        handle_maker: null
+        knot_size_mm: 26
+        model: '10049'
+        source_text: Wolf Whiskers RCE 1301 / Omega 10049 Boar
+      score: 80
+      strategy: known_brush
+    - match_type: regex
+      pattern: (omega|semogue)[^\]\n\d]*(c\d{1,3}|\d{3,6})
+      result:
+        brand: Omega
+        fiber: Boar
+        handle_maker: null
+        knot_size_mm: null
+        model: '10049'
+        source_text: omega 10049
+        source_type: exact
+      score: 75
+      strategy: omega_semogue
+    comment_ids:
+    - mvep5po
+    - mvriqoc
+    - mw4rxxv
+    - mxdtcmf
+    - my2ycfz
+    - mzp3n6f
+    - n0kzwrd
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: wolf.*whisker
+          brand: Wolf Whiskers
+          model: Unspecified
+          source_text: Wolf Whiskers RCE 1301 / Omega 10049 Boar
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: omega.*(pro)*.*49
+          brand: Omega
+          fiber: Boar
+          knot_size_mm: 26
+          model: '10049'
+          source_text: Wolf Whiskers RCE 1301 / Omega 10049 Boar
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T18:02:15Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: wolf.*whisker
+          brand: Wolf Whiskers
+          model: Unspecified
+          source_text: Wolf Whiskers RCE 1301 / Omega 10049 Boar
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: omega.*(pro)*.*49
+          brand: Omega
+          fiber: Boar
+          knot_size_mm: 26
+          model: '10049'
+          source_text: Wolf Whiskers RCE 1301 / Omega 10049 Boar
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+  Wolf Whiskers/Paragon Synthetic:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: wolf.*whisker
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: wolf.*whisker
+          brand: Wolf Whiskers
+          model: Unspecified
+          source_text: Wolf Whiskers/Paragon Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: paragon(?:aldkjgajklk)*
+          brand: Paragon
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Wolf Whiskers/Paragon Synthetic
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    comment_ids:
+    - mvggarf
+    - mvtoinn
+    - mw5ziv0
+    - mwj27cs
+    - mwv9a7m
+    - mx98n9s
+    - my49kg7
+    - myo2eo6
+    - myzr5d6
+    - mzcey3a
+    system_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: wolf.*whisker
+          brand: Wolf Whiskers
+          model: Unspecified
+          source_text: Wolf Whiskers/Paragon Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: paragon(?:aldkjgajklk)*
+          brand: Paragon
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Wolf Whiskers/Paragon Synthetic
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+    system_used: scoring
+    timestamp: '2025-08-11T20:10:25Z'
+    user_choice:
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: wolf.*whisker
+          brand: Wolf Whiskers
+          model: Unspecified
+          source_text: Wolf Whiskers/Paragon Synthetic
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: paragon(?:aldkjgajklk)*
+          brand: Paragon
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Wolf Whiskers/Paragon Synthetic
+        model: null
+        score: 85
+        strategy: unified
+        user_intent: dual_component
+      score: 85
+      strategy: unified
+  Yaqi 22mm Synth:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: yaqu*i\b
+      result:
+        brand: Yaqi
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: yaqu*i\b
+          brand: Yaqi
+          model: Unspecified
+          source_text: Yaqi 22mm Synth
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: yaqu*i
+          brand: Yaqi
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Yaqi 22mm Synth
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: brand_default
+      pattern: yaqi
+      result:
+        _matched_by_strategy: OtherBrushMatchingStrategy
+        _pattern_used: yaqi
+        brand: Yaqi
+        fiber_strategy: user_input
+        handle:
+          _matched_by: other_brush
+          _pattern: yaqi
+          brand: Yaqi
+          model: null
+          source_text: Yaqi 22mm Synth
+        knot:
+          _matched_by: other_brush
+          _pattern: yaqi
+          brand: Yaqi
+          fiber: Synthetic
+          knot_size_mm: 22
+          model: Synthetic
+          source_text: Yaqi 22mm Synth
+        model: Synthetic
+        score: 70
+        strategy: other_brush
+      score: 70
+      strategy: other_brush
+    comment_ids:
+    - mveopwt
+    - mw48uh1
+    - mwna1lt
+    - my2lpmd
+    - mym9zsb
+    - myzl4am
+    - mziis0v
+    system_choice:
+      result:
+        _matched_by_strategy: OtherBrushMatchingStrategy
+        _pattern_used: yaqi
+        brand: Yaqi
+        fiber_strategy: user_input
+        handle:
+          _matched_by: other_brush
+          _pattern: yaqi
+          brand: Yaqi
+          model: null
+          source_text: Yaqi 22mm Synth
+        knot:
+          _matched_by: other_brush
+          _pattern: yaqi
+          brand: Yaqi
+          fiber: Synthetic
+          knot_size_mm: 22
+          model: Synthetic
+          source_text: Yaqi 22mm Synth
+        model: Synthetic
+        score: 70
+        strategy: other_brush
+      score: 70
+      strategy: other_brush
+    system_used: scoring
+    timestamp: '2025-08-11T17:43:40Z'
+    user_choice:
+      result:
+        _matched_by_strategy: OtherBrushMatchingStrategy
+        _pattern_used: yaqi
+        brand: Yaqi
+        fiber_strategy: user_input
+        handle:
+          _matched_by: other_brush
+          _pattern: yaqi
+          brand: Yaqi
+          model: null
+          source_text: Yaqi 22mm Synth
+        knot:
+          _matched_by: other_brush
+          _pattern: yaqi
+          brand: Yaqi
+          fiber: Synthetic
+          knot_size_mm: 22
+          model: Synthetic
+          source_text: Yaqi 22mm Synth
+        model: Synthetic
+        score: 70
+        strategy: other_brush
+      score: 70
+      strategy: other_brush
+  Yaqi Cola 22mm Synthetic Three Band:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: yaqu*i\b
+      result:
+        brand: Yaqi
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: yaqu*i\b
+          brand: Yaqi
+          model: Unspecified
+          source_text: Yaqi Cola 22mm Synthetic Three Band
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: yaqu*i
+          brand: Yaqi
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Yaqi Cola 22mm Synthetic Three Band
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: brand_default
+      pattern: yaqi
+      result:
+        _matched_by_strategy: OtherBrushMatchingStrategy
+        _pattern_used: yaqi
+        brand: Yaqi
+        fiber_strategy: user_input
+        handle:
+          _matched_by: other_brush
+          _pattern: yaqi
+          brand: Yaqi
+          model: null
+          source_text: Yaqi Cola 22mm Synthetic Three Band
+        knot:
+          _matched_by: other_brush
+          _pattern: yaqi
+          brand: Yaqi
+          fiber: Synthetic
+          knot_size_mm: 22
+          model: Synthetic
+          source_text: Yaqi Cola 22mm Synthetic Three Band
+        model: Synthetic
+        score: 70
+        strategy: other_brush
+      score: 70
+      strategy: other_brush
+    comment_ids: []
+    system_choice:
+      result:
+        _matched_by_strategy: OtherBrushMatchingStrategy
+        _pattern_used: yaqi
+        brand: Yaqi
+        fiber_strategy: user_input
+        handle:
+          _matched_by: other_brush
+          _pattern: yaqi
+          brand: Yaqi
+          model: null
+          source_text: Yaqi Cola 22mm Synthetic Three Band
+        knot:
+          _matched_by: other_brush
+          _pattern: yaqi
+          brand: Yaqi
+          fiber: Synthetic
+          knot_size_mm: 22
+          model: Synthetic
+          source_text: Yaqi Cola 22mm Synthetic Three Band
+        model: Synthetic
+        score: 70
+        strategy: other_brush
+      score: 70
+      strategy: other_brush
+    system_used: scoring
+    timestamp: '2025-08-11T19:13:58Z'
+    user_choice:
+      result:
+        _matched_by_strategy: OtherBrushMatchingStrategy
+        _pattern_used: yaqi
+        brand: Yaqi
+        fiber_strategy: user_input
+        handle:
+          _matched_by: other_brush
+          _pattern: yaqi
+          brand: Yaqi
+          model: null
+          source_text: Yaqi Cola 22mm Synthetic Three Band
+        knot:
+          _matched_by: other_brush
+          _pattern: yaqi
+          brand: Yaqi
+          fiber: Synthetic
+          knot_size_mm: 22
+          model: Synthetic
+          source_text: Yaqi Cola 22mm Synthetic Three Band
+        model: Synthetic
+        score: 70
+        strategy: other_brush
+      score: 70
+      strategy: other_brush
+  Yaqi Sagrada:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: yaqu*i\b
+      result:
+        brand: Yaqi
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: yaqu*i\b
+          brand: Yaqi
+          model: Unspecified
+          source_text: Yaqi Sagrada
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: yaqu*i
+          brand: Yaqi
+          fiber: Synthetic
+          knot_size_mm: null
+          model: Synthetic
+          source_text: Yaqi Sagrada
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: sagrada
+      result:
+        brand: Yaqi
+        handle:
+          _matched_by: known_brush
+          _pattern: sagrada
+          brand: Yaqi
+          model: null
+          source_text: Yaqi Sagrada
+        knot:
+          _matched_by: known_brush
+          _pattern: sagrada
+          brand: Yaqi
+          fiber: Synthetic
+          knot_size_mm: 24
+          model: Sagrada
+          source_text: Yaqi Sagrada
+        model: Sagrada
+        score: 80
+        source_text: Yaqi Sagrada
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    - match_type: brand_default
+      pattern: yaqi
+      result:
+        _matched_by_strategy: OtherBrushMatchingStrategy
+        _pattern_used: yaqi
+        brand: Yaqi
+        fiber: Synthetic
+        fiber_strategy: default
+        model: Synthetic
+      score: 70
+      strategy: other_brush
+    comment_ids:
+    - mvesyvf
+    system_choice:
+      result:
+        brand: Yaqi
+        handle:
+          _matched_by: known_brush
+          _pattern: sagrada
+          brand: Yaqi
+          model: null
+          source_text: Yaqi Sagrada
+        knot:
+          _matched_by: known_brush
+          _pattern: sagrada
+          brand: Yaqi
+          fiber: Synthetic
+          knot_size_mm: 24
+          model: Sagrada
+          source_text: Yaqi Sagrada
+        model: Sagrada
+        score: 80
+        source_text: Yaqi Sagrada
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T18:19:27Z'
+    user_choice:
+      result:
+        brand: Yaqi
+        handle:
+          _matched_by: known_brush
+          _pattern: sagrada
+          brand: Yaqi
+          model: null
+          source_text: Yaqi Sagrada
+        knot:
+          _matched_by: known_brush
+          _pattern: sagrada
+          brand: Yaqi
+          fiber: Synthetic
+          knot_size_mm: 24
+          model: Sagrada
+          source_text: Yaqi Sagrada
+        model: Sagrada
+        score: 80
+        source_text: Yaqi Sagrada
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Zenith - MOAR BOAR:
+    action: validated
+    all_brush_strategies:
+    - match_type: exact
+      pattern: null
+      result:
+        brand: Zenith
+        handle:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Zenith
+          model: r/wetshaving MOAR BOAR
+          source_text: Zenith - MOAR BOAR
+        knot:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Zenith
+          fiber: Boar
+          knot_size_mm: 31
+          model: r/wetshaving MOAR BOAR
+          source_text: Zenith - MOAR BOAR
+        model: r/wetshaving MOAR BOAR
+        score: 100
+        strategy: correct_complete_brush
+      score: 100
+      strategy: correct_complete_brush
+    - match_type: exact
+      pattern: null
+      result:
+        brand: Zenith
+        handle:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Zenith
+          model: r/wetshaving MOAR BOAR
+          source_text: Zenith - MOAR BOAR
+        knot:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Zenith
+          fiber: Boar
+          knot_size_mm: 31
+          model: r/wetshaving MOAR BOAR
+          source_text: Zenith - MOAR BOAR
+        model: r/wetshaving MOAR BOAR
+      score: 90
+      strategy: known_split
+    - match_type: composite
+      pattern: zen\w+
+      result:
+        brand: Zenith
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: zen\w+
+          brand: Zenith
+          model: Unspecified
+          source_text: Zenith - MOAR BOAR
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: zenith
+          brand: Zenith
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: Zenith - MOAR BOAR
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: moar(.*boar)?
+      result:
+        brand: Zenith
+        fiber: Boar
+        handle_brand: Zenith
+        handle_maker: null
+        knot_brand: Zenith
+        knot_fiber: Boar
+        knot_model: B35
+        knot_size_mm: 31
+        model: r/wetshaving MOAR BOAR
+        source_text: Zenith - MOAR BOAR
+      score: 80
+      strategy: known_brush
+    - match_type: regex
+      pattern: zen\w+
+      result:
+        brand: null
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: zen\w+
+          brand: Zenith
+          model: Unspecified
+          source_text: Zenith
+        knot:
+          _matched_by: BrushSplitter
+          _pattern: correct_matches_knot
+          brand: null
+          fiber: null
+          knot_size_mm: null
+          model: null
+          source_text: MOAR BOAR
+        model: null
+      score: 62
+      strategy: automated_split
+    comment_ids:
+    - mvef37u
+    - mvvxyzo
+    - mwkv89r
+    - mwm4gh7
+    - mwscnab
+    - mxc3usb
+    - myclbqg
+    system_choice:
+      result:
+        brand: Zenith
+        handle:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Zenith
+          model: r/wetshaving MOAR BOAR
+          source_text: Zenith - MOAR BOAR
+        knot:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Zenith
+          fiber: Boar
+          knot_size_mm: 31
+          model: r/wetshaving MOAR BOAR
+          source_text: Zenith - MOAR BOAR
+        model: r/wetshaving MOAR BOAR
+        score: 100
+        strategy: correct_complete_brush
+      score: 100
+      strategy: correct_complete_brush
+    system_used: scoring
+    timestamp: '2025-08-11T17:19:37Z'
+    user_choice:
+      result:
+        brand: Zenith
+        handle:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Zenith
+          model: r/wetshaving MOAR BOAR
+          source_text: Zenith - MOAR BOAR
+        knot:
+          _matched_by: CorrectMatches
+          _pattern: correct_matches_brush
+          brand: Zenith
+          fiber: Boar
+          knot_size_mm: 31
+          model: r/wetshaving MOAR BOAR
+          source_text: Zenith - MOAR BOAR
+        model: r/wetshaving MOAR BOAR
+        score: 100
+        strategy: correct_complete_brush
+      score: 100
+      strategy: correct_complete_brush
+  Zenith 506U N (50/50 horse mane/tail) $HORSESASS:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: zen\w+
+      result:
+        brand: Zenith
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: zen\w+
+          brand: Zenith
+          model: Unspecified
+          source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: zenith
+          brand: Zenith
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: 506u.*n\b
+      result:
+        brand: Zenith
+        handle:
+          _matched_by: known_brush
+          _pattern: 506u.*n\b
+          brand: Zenith
+          model: null
+          source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        knot:
+          _matched_by: known_brush
+          _pattern: 506u.*n\b
+          brand: Zenith
+          fiber: Horse
+          knot_size_mm: 27
+          model: 506U N
+          source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        model: 506U N
+        score: 80
+        source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    comment_ids: []
+    system_choice:
+      result:
+        brand: Zenith
+        handle:
+          _matched_by: known_brush
+          _pattern: 506u.*n\b
+          brand: Zenith
+          model: null
+          source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        knot:
+          _matched_by: known_brush
+          _pattern: 506u.*n\b
+          brand: Zenith
+          fiber: Horse
+          knot_size_mm: 27
+          model: 506U N
+          source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        model: 506U N
+        score: 80
+        source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T17:06:52Z'
+    user_choice:
+      result:
+        brand: Zenith
+        handle:
+          _matched_by: known_brush
+          _pattern: 506u.*n\b
+          brand: Zenith
+          model: null
+          source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        knot:
+          _matched_by: known_brush
+          _pattern: 506u.*n\b
+          brand: Zenith
+          fiber: Horse
+          knot_size_mm: 27
+          model: 506U N
+          source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        model: 506U N
+        score: 80
+        source_text: Zenith 506U N (50/50 horse mane/tail) $HORSESASS
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+  Zenith Barberpole XSE 26mm:
+    action: validated
+    all_brush_strategies:
+    - match_type: composite
+      pattern: zen\w+
+      result:
+        brand: Zenith
+        handle:
+          _matched_by: HandleMatcher
+          _pattern: zen\w+
+          brand: Zenith
+          model: Unspecified
+          source_text: Zenith Barberpole XSE 26mm
+        knot:
+          _matched_by: KnotMatcher
+          _pattern: zenith
+          brand: Zenith
+          fiber: Boar
+          knot_size_mm: null
+          model: Boar
+          source_text: Zenith Barberpole XSE 26mm
+        model: null
+        user_intent: dual_component
+      score: 65
+      strategy: unified
+    - match_type: regex
+      pattern: zenith.*barber ?pole
+      result:
+        brand: Zenith
+        handle:
+          _matched_by: known_brush
+          _pattern: zenith.*barber ?pole
+          brand: Zenith
+          model: null
+          source_text: Zenith Barberpole XSE 26mm
+        knot:
+          _matched_by: known_brush
+          _pattern: zenith.*barber ?pole
+          brand: Zenith
+          fiber: Boar
+          knot_size_mm: 26
+          model: Barberpole
+          source_text: Zenith Barberpole XSE 26mm
+        model: Barberpole
+        score: 80
+        source_text: Zenith Barberpole XSE 26mm
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    comment_ids:
+    - mvf2lnt
+    - mwbexiy
+    - mx6q1mc
+    - my2ekqg
+    - myzfd9p
+    - mzvf9gy
+    system_choice:
+      result:
+        brand: Zenith
+        handle:
+          _matched_by: known_brush
+          _pattern: zenith.*barber ?pole
+          brand: Zenith
+          model: null
+          source_text: Zenith Barberpole XSE 26mm
+        knot:
+          _matched_by: known_brush
+          _pattern: zenith.*barber ?pole
+          brand: Zenith
+          fiber: Boar
+          knot_size_mm: 26
+          model: Barberpole
+          source_text: Zenith Barberpole XSE 26mm
+        model: Barberpole
+        score: 80
+        source_text: Zenith Barberpole XSE 26mm
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
+    system_used: scoring
+    timestamp: '2025-08-11T18:59:52Z'
+    user_choice:
+      result:
+        brand: Zenith
+        handle:
+          _matched_by: known_brush
+          _pattern: zenith.*barber ?pole
+          brand: Zenith
+          model: null
+          source_text: Zenith Barberpole XSE 26mm
+        knot:
+          _matched_by: known_brush
+          _pattern: zenith.*barber ?pole
+          brand: Zenith
+          fiber: Boar
+          knot_size_mm: 26
+          model: Barberpole
+          source_text: Zenith Barberpole XSE 26mm
+        model: Barberpole
+        score: 80
+        source_text: Zenith Barberpole XSE 26mm
+        strategy: known_brush
+      score: 80
+      strategy: known_brush
