@@ -683,7 +683,7 @@ export const getBrushValidationData = async (
     if (options.sortBy) params.append('sort_by', options.sortBy);
     if (options.page) params.append('page', options.page.toString());
     if (options.pageSize) params.append('page_size', options.pageSize.toString());
-    
+
     // Add new filter parameters
     if (options.strategyCount !== undefined) params.append('strategy_count', options.strategyCount.toString());
     if (options.showValidated !== undefined) params.append('show_validated', options.showValidated.toString());

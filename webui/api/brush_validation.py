@@ -110,12 +110,9 @@ async def get_brush_validation_data(
     page_size: int = Query(default=50, ge=1, le=500),
     # New filter parameters for backend filtering
     strategy_count: Optional[int] = Query(
-        default=None, 
-        description="Filter by number of strategies (e.g., 1 for single strategy)"
+        default=None, description="Filter by number of strategies (e.g., 1 for single strategy)"
     ),
-    show_validated: Optional[bool] = Query(
-        default=None, description="Include validated entries"
-    ),
+    show_validated: Optional[bool] = Query(default=None, description="Include validated entries"),
     show_single_strategy: Optional[bool] = Query(
         default=None, description="Show only single strategy entries"
     ),
