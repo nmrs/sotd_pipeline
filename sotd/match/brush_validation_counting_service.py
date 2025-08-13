@@ -31,7 +31,7 @@ class BrushValidationCountingService:
         self.logger = logging.getLogger(__name__)
 
     def get_validation_statistics(self, month: str) -> Dict[str, Union[int, float]]:
-        """Get validation statistics for a month.
+        """Get validation statistics for a month with unified classification.
 
         Args:
             month: Month in YYYY-MM format
@@ -39,10 +39,10 @@ class BrushValidationCountingService:
         Returns:
             Dictionary with validation statistics including:
             - total_entries: Total unique brush strings
-            - validated_count: Count of validated entries (correct_matches + user_validated)
-            - overridden_count: Count of overridden entries
+            - correct_entries: Count of correct entries (from correct_matches.yaml)
+            - user_validations: Count of user validation actions
             - unvalidated_count: Count of unvalidated entries
-            - validation_rate: Percentage of validated entries
+            - validation_rate: Percentage of processed entries (correct + user validations)
         """
         start_time = time.time()
         try:
@@ -54,92 +54,81 @@ class BrushValidationCountingService:
             total_entries = self._count_unique_brush_strings(matched_data)
 
             # Count correct matches (already validated)
-            correct_matches_count = self._count_correct_matches(matched_data)
+            correct_entries = self._count_correct_matches(matched_data)
 
             # Count user actions
-            user_stats = self._count_user_actions(learning_data)
-            validated_count = correct_matches_count + user_stats["validated_count"]
+            user_stats = self._count_user_actions(matched_data, learning_data)
+            user_validations = user_stats["validated_count"]
             overridden_count = user_stats["overridden_count"]
 
             # Calculate unvalidated count
-            # Both validated and overridden count as "processed" for this calculation
-            total_processed = validated_count + overridden_count
+            # Only correct entries and user validations count as "processed"
+            total_processed = correct_entries + user_validations
             unvalidated_count = max(0, total_entries - total_processed)
 
-            # Calculate validation rate
+            # Calculate validation rate (correct entries + user validations)
             validation_rate = total_processed / total_entries if total_entries > 0 else 0.0
 
             processing_time = time.time() - start_time
             self.logger.info(
                 f"Validation statistics for {month} completed in {processing_time:.3f}s "
-                f"(entries: {total_entries}, validated: {validated_count}, "
-                f"overridden: {overridden_count}, unvalidated: {unvalidated_count})"
+                f"(total: {total_entries}, correct: {correct_entries}, "
+                f"user_validations: {user_validations}, unvalidated: {unvalidated_count})"
             )
 
             return {
                 "total_entries": total_entries,
-                "validated_count": validated_count,
+                "correct_entries": correct_entries,
+                "user_validations": user_validations,
                 "overridden_count": overridden_count,
-                "total_actions": total_processed,
+                "total_processed": total_processed,
                 "unvalidated_count": unvalidated_count,
                 "validation_rate": validation_rate,
+                # Legacy fields for backward compatibility
+                "validated_count": total_processed,
+                "total_actions": total_processed + overridden_count,
             }
 
         except Exception as e:
             self.logger.error(f"Error getting validation statistics for {month}: {e}")
             return {
                 "total_entries": 0,
-                "validated_count": 0,
+                "correct_entries": 0,
+                "user_validations": 0,
                 "overridden_count": 0,
-                "total_actions": 0,
+                "total_processed": 0,
                 "unvalidated_count": 0,
                 "validation_rate": 0.0,
+                # Legacy fields for backward compatibility
+                "validated_count": 0,
+                "total_actions": 0,
             }
 
     def get_strategy_distribution_statistics(self, month: str) -> Dict[str, Any]:
-        """Get strategy distribution statistics for validation interface.
+        """Get strategy distribution statistics for UNVALIDATED entries only.
 
         Args:
             month: Month in YYYY-MM format
 
         Returns:
-            Dictionary with strategy distribution statistics including:
-            - total_brush_records: Total unique brush strings
-            - correct_matches_count: Count of entries from correct_matches.yaml
-            - remaining_entries: Count of unvalidated entries
-            - strategy_counts: Count of each strategy type for ALL entries
-            - all_strategies_lengths: Distribution of strategy array lengths for ALL entries
-            - unvalidated_strategy_counts: Count of each strategy type for UNVALIDATED entries
-            - unvalidated_strategies_lengths: Distribution of strategy array lengths for UNVALIDATED
+            Dictionary with strategy distribution statistics for unvalidated entries
         """
         start_time = time.time()
+
         try:
-            # Load data from all sources
+            # Load data
             matched_data = self._load_matched_data(month)
-            learning_data = self._load_learning_data(month)
             correct_matches = self._load_correct_matches()
+            learning_data = self._load_learning_data(month)
 
-            # Count unique brush strings (case-insensitive)
+            # Count total brush records
             total_brush_records = self._count_unique_brush_strings(matched_data)
-
-            # Count correct matches (already validated)
             correct_matches_count = self._count_correct_matches(matched_data)
+            remaining_entries = total_brush_records - correct_matches_count
 
-            # Count user actions to get truly unvalidated count
-            user_stats = self._count_user_actions(learning_data)
-
-            # Remaining entries are those not in correct_matches and not user-validated
-            remaining_entries = max(
-                0,
-                total_brush_records
-                - correct_matches_count
-                - user_stats["validated_count"]
-                - user_stats["overridden_count"],
-            )
-
-            # Count strategies and all_strategies lengths for ALL entries
+            # Count strategies and all_strategies lengths for UNVALIDATED entries only
             strategy_counts, all_strategies_lengths = self._analyze_strategies(
-                matched_data, correct_matches, learning_data
+                matched_data, correct_matches, learning_data, only_unvalidated=True
             )
 
             processing_time = time.time() - start_time
@@ -161,6 +150,62 @@ class BrushValidationCountingService:
             processing_time = time.time() - start_time
             self.logger.error(
                 f"Error getting strategy distribution statistics for {month} "
+                f"(after {processing_time:.3f}s): {e}"
+            )
+            return {
+                "total_brush_records": 0,
+                "correct_matches_count": 0,
+                "remaining_entries": 0,
+                "strategy_counts": {},
+                "all_strategies_lengths": {},
+            }
+
+    def get_all_entries_strategy_distribution_statistics(self, month: str) -> Dict[str, Any]:
+        """Get strategy distribution statistics for ALL entries (validated + unvalidated).
+
+        Args:
+            month: Month in YYYY-MM format
+
+        Returns:
+            Dictionary with strategy distribution statistics for all entries
+        """
+        start_time = time.time()
+
+        try:
+            # Load data
+            matched_data = self._load_matched_data(month)
+            correct_matches = self._load_correct_matches()
+            learning_data = self._load_learning_data(month)
+
+            # Count total brush records
+            total_brush_records = self._count_unique_brush_strings(matched_data)
+            correct_matches_count = self._count_correct_matches(matched_data)
+            remaining_entries = total_brush_records - correct_matches_count
+
+            # Count strategies and all_strategies lengths for ALL entries
+            strategy_counts, all_strategies_lengths = self._analyze_strategies(
+                matched_data, correct_matches, learning_data, only_unvalidated=False
+            )
+
+            processing_time = time.time() - start_time
+            self.logger.info(
+                f"All entries strategy distribution for {month} completed in "
+                f"{processing_time:.3f}s (total: {total_brush_records}, "
+                f"strategies: {len(strategy_counts)})"
+            )
+
+            return {
+                "total_brush_records": total_brush_records,
+                "correct_matches_count": correct_matches_count,
+                "remaining_entries": remaining_entries,
+                "strategy_counts": strategy_counts,
+                "all_strategies_lengths": all_strategies_lengths,
+            }
+
+        except Exception as e:
+            processing_time = time.time() - start_time
+            self.logger.error(
+                f"Error getting all entries strategy distribution statistics for {month} "
                 f"(after {processing_time:.3f}s): {e}"
             )
             return {
@@ -299,10 +344,13 @@ class BrushValidationCountingService:
 
         return len(correct_matches_strings)
 
-    def _count_user_actions(self, learning_data: Dict[str, Any]) -> Dict[str, int]:
-        """Count user validation actions.
+    def _count_user_actions(
+        self, matched_data: Dict[str, Any], learning_data: Dict[str, Any]
+    ) -> Dict[str, int]:
+        """Count user validation actions, excluding those already counted as correct matches.
 
         Args:
+            matched_data: Matched data dictionary (to identify correct matches)
             learning_data: Learning data dictionary
 
         Returns:
@@ -311,11 +359,32 @@ class BrushValidationCountingService:
         validated_count = 0
         overridden_count = 0
 
+        # Get the set of normalized texts that are already correct matches
+        correct_match_texts = set()
+        records = matched_data.get("data", [])
+        for record in records:
+            if "brush" not in record:
+                continue
+            brush_entry = record["brush"]
+            matched = brush_entry.get("matched")
+            if matched and matched.get("strategy") in [
+                "correct_complete_brush",
+                "correct_split_brush",
+            ]:
+                normalized_text = brush_entry.get("normalized", "")
+                if normalized_text:
+                    correct_match_texts.add(normalized_text.lower().strip())
+
         actions = learning_data.get("brush_user_actions", [])
 
         for action in actions:
             if action.get("action") == "validated":
-                validated_count += 1
+                input_text = action.get("input_text", "")
+                if input_text:
+                    normalized_input = input_text.lower().strip()
+                    # Only count if NOT already a correct match
+                    if normalized_input not in correct_match_texts:
+                        validated_count += 1
             elif action.get("action") == "overridden":
                 overridden_count += 1
 
@@ -329,13 +398,15 @@ class BrushValidationCountingService:
         matched_data: Dict[str, Any],
         correct_matches: Dict[str, Any],
         learning_data: Dict[str, Any],
+        only_unvalidated: bool = False,
     ) -> tuple[Dict[str, int], Dict[str, int]]:
-        """Analyze strategies for all entries.
+        """Analyze strategies for entries.
 
         Args:
             matched_data: Matched data dictionary
             correct_matches: Correct matches dictionary
             learning_data: Learning data dictionary
+            only_unvalidated: If True, only count unvalidated entries
 
         Returns:
             Tuple of (strategy_counts, all_strategies_lengths)
@@ -344,6 +415,10 @@ class BrushValidationCountingService:
         all_strategies_lengths = {}
 
         records = matched_data.get("data", [])
+
+        # Debug logging
+        validated_count = 0
+        unvalidated_count = 0
 
         for record in records:
             if "brush" not in record:
@@ -357,13 +432,34 @@ class BrushValidationCountingService:
 
             normalized_lower = normalized_text.lower().strip()
 
-            # Count ALL strategies (not just unvalidated ones)
-            matched = brush_entry.get("matched")
-            if matched:
-                strategy = matched.get("strategy", "unknown")
-                strategy_counts[strategy] = strategy_counts.get(strategy, 0) + 1
+            # Check if this entry is validated and should be skipped
+            if only_unvalidated:
+                matched = brush_entry.get("matched")
+                strategy = matched.get("strategy") if matched else None
+                if matched and strategy in [
+                    "correct_complete_brush",
+                    "correct_split_brush",
+                ]:
+                    # This is a validated entry, skip it completely
+                    validated_count += 1
+                    print(
+                        f"DEBUG: Skipping validated entry '{normalized_lower}' "
+                        f"with strategy '{strategy}'"
+                    )
+                    continue  # Skip this entry completely
 
-            # Count all_strategies length for ALL entries
+            # If we get here, the entry is not validated (or we're counting all entries)
+            unvalidated_count += 1
+
+            # Count strategies (only for unvalidated entries when only_unvalidated=True)
+            if not only_unvalidated:
+                matched = brush_entry.get("matched")
+                if matched:
+                    strategy = matched.get("strategy", "unknown")
+                    strategy_counts[strategy] = strategy_counts.get(strategy, 0) + 1
+
+            # Count all_strategies length for entries (only unvalidated when only_unvalidated=True)
+            # Since we've already skipped validated entries above, we can safely count these
             all_strategies = brush_entry.get("all_strategies", [])
             if all_strategies is not None:
                 length = len(all_strategies)
@@ -371,10 +467,19 @@ class BrushValidationCountingService:
                 if length_key not in all_strategies_lengths:
                     all_strategies_lengths[length_key] = set()
                 all_strategies_lengths[length_key].add(normalized_lower)
+                print(f"DEBUG: Counting entry '{normalized_lower}' with {length} strategies")
             else:
                 if "None" not in all_strategies_lengths:
                     all_strategies_lengths["None"] = set()
                 all_strategies_lengths["None"].add(normalized_lower)
+                print(f"DEBUG: Counting entry '{normalized_lower}' with no strategies")
+
+        # Debug logging
+        if only_unvalidated:
+            self.logger.info(
+                f"Validation filtering: {validated_count} validated entries skipped, "
+                f"{unvalidated_count} unvalidated entries counted"
+            )
 
         # Convert sets to counts
         all_strategies_lengths_counts = {}
