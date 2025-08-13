@@ -33,9 +33,13 @@ class TestBrushValidationCLI:
         assert isinstance(self.cli.user_actions_manager, BrushUserActionsManager)
         assert hasattr(self.cli, "brush_entry_point")
 
+    @patch.object(BrushValidationCLI, "_get_validated_normalized_texts")
     @patch("sotd.match.brush_validation_cli.load_json_data")
-    def test_load_month_data_legacy_system(self, mock_load_json):
+    def test_load_month_data_legacy_system(self, mock_load_json, mock_get_validated_texts):
         """Test loading monthly data for legacy system."""
+        # Mock the validated texts to return empty set (no validated texts)
+        mock_get_validated_texts.return_value = set()
+
         # Mock data structure - records with brush field
         mock_data = {
             "data": [
@@ -71,9 +75,13 @@ class TestBrushValidationCLI:
 
         mock_load_json.assert_called_once()
 
+    @patch.object(BrushValidationCLI, "_get_validated_normalized_texts")
     @patch("sotd.match.brush_validation_cli.load_json_data")
-    def test_load_month_data_scoring_system(self, mock_load_json):
+    def test_load_month_data_scoring_system(self, mock_load_json, mock_get_validated_texts):
         """Test loading monthly data for scoring system."""
+        # Mock the validated texts to return empty set (no validated texts)
+        mock_get_validated_texts.return_value = set()
+
         # Mock data structure - records with brush field
         mock_data = {
             "data": [
@@ -98,6 +106,13 @@ class TestBrushValidationCLI:
         mock_load_json.return_value = mock_data
 
         result = self.cli.load_month_data("2025-08", "scoring")
+
+        # Debug output
+        print(f"Mock called: {mock_get_validated_texts.called}")
+        print(f"Mock return value: {mock_get_validated_texts.return_value}")
+        print(f"Result length: {len(result)}")
+        if result:
+            print(f"First result: {result[0]}")
 
         assert len(result) == 1
         assert result[0]["input_text"] == "test brush 1"
@@ -331,14 +346,20 @@ class TestBrushValidationCLI:
         entry = {
             "input_text": "Test Brush",
             "system_used": "scoring",
-            "best_result": {"strategy": "dual_component", "score": 85, "result": {}},
+            "matched": {"strategy": "dual_component", "score": 85, "result": {}},
         }
 
         with patch("builtins.input", return_value="v"):
             action, choice = self.cli.get_user_choice(entry)
 
             assert action == "validate"
-            assert choice == entry["best_result"]
+            # The CLI now constructs the result_dict from the matched field
+            expected_choice = {
+                "strategy": "dual_component",
+                "score": 85,
+                "result": {"strategy": "dual_component", "score": 85, "result": {}},
+            }
+            assert choice == expected_choice
 
     def test_get_user_choice_override(self):
         """Test user choice override."""
@@ -365,20 +386,26 @@ class TestBrushValidationCLI:
         entry = {
             "input_text": "Test Brush",
             "system_used": "scoring",
-            "best_result": {"strategy": "dual_component", "score": 85, "result": {}},
+            "matched": {"strategy": "dual_component", "score": 85, "result": {}},
             "all_strategies": [],
             "comment_ids": [],
         }
 
         with patch.object(self.cli.user_actions_manager, "record_validation") as mock_record:
-            self.cli.record_user_action(entry, "validate", entry["best_result"], "2025-08")
+            # The CLI now constructs system_choice from the matched field
+            expected_system_choice = {
+                "strategy": "dual_component",
+                "score": 85,
+                "result": {"strategy": "dual_component", "score": 85, "result": {}},
+            }
+            self.cli.record_user_action(entry, "validate", expected_system_choice, "2025-08")
 
             mock_record.assert_called_once_with(
                 input_text="Test Brush",
                 month="2025-08",
                 system_used="scoring",
-                system_choice=entry["best_result"],
-                user_choice=entry["best_result"],
+                system_choice=expected_system_choice,
+                user_choice=expected_system_choice,
                 all_brush_strategies=[],
                 comment_ids=[],
             )
@@ -388,7 +415,7 @@ class TestBrushValidationCLI:
         entry = {
             "input_text": "Test Brush",
             "system_used": "scoring",
-            "best_result": {"strategy": "dual_component", "score": 85, "result": {}},
+            "matched": {"strategy": "dual_component", "score": 85, "result": {}},
             "all_strategies": [],
             "comment_ids": [],
         }
@@ -396,13 +423,19 @@ class TestBrushValidationCLI:
         override_choice = {"strategy": "complete_brush", "score": 45, "result": {}}
 
         with patch.object(self.cli.user_actions_manager, "record_override") as mock_record:
+            # The CLI now constructs system_choice from the matched field
+            expected_system_choice = {
+                "strategy": "dual_component",
+                "score": 85,
+                "result": {"strategy": "dual_component", "score": 85, "result": {}},
+            }
             self.cli.record_user_action(entry, "override", override_choice, "2025-08")
 
             mock_record.assert_called_once_with(
                 input_text="Test Brush",
                 month="2025-08",
                 system_used="scoring",
-                system_choice=entry["best_result"],
+                system_choice=expected_system_choice,
                 user_choice=override_choice,
                 all_brush_strategies=[],
                 comment_ids=[],
@@ -410,9 +443,8 @@ class TestBrushValidationCLI:
 
     def test_get_validation_statistics(self):
         """Test getting validation statistics."""
-        # Mock the counting service to return expected statistics
-        with patch("sotd.match.brush_validation_cli.BrushValidationCountingService") as mock_cls:
-            mock_service = mock_cls.return_value
+        # Mock the CLI's internal counting service instance
+        with patch.object(self.cli, "counting_service") as mock_service:
             mock_service.get_validation_statistics.return_value = {
                 "total_entries": 3,
                 "validated_count": 1,
@@ -426,19 +458,12 @@ class TestBrushValidationCLI:
 
             # Verify the counting service was called correctly
             mock_service.get_validation_statistics.assert_called_once_with("2025-08")
-
-            # Verify the returned statistics
-            assert stats["total_entries"] == 3
-            assert stats["validated_count"] == 1
-            assert stats["overridden_count"] == 1
-            assert stats["unvalidated_count"] == 1
-            assert stats["validation_rate"] == 2 / 3
+            assert stats == mock_service.get_validation_statistics.return_value
 
     def test_get_validation_statistics_no_matcher(self):
         """Test getting validation statistics without matcher."""
-        # Mock the counting service to return expected statistics
-        with patch("sotd.match.brush_validation_cli.BrushValidationCountingService") as mock_cls:
-            mock_service = mock_cls.return_value
+        # Mock the CLI's internal counting service instance
+        with patch.object(self.cli, "counting_service") as mock_service:
             mock_service.get_validation_statistics.return_value = {
                 "total_entries": 3,
                 "validated_count": 1,
@@ -452,19 +477,12 @@ class TestBrushValidationCLI:
 
             # Verify the counting service was called correctly
             mock_service.get_validation_statistics.assert_called_once_with("2025-08")
-
-            # Verify the returned statistics
-            assert stats["total_entries"] == 3
-            assert stats["validated_count"] == 1
-            assert stats["overridden_count"] == 1
-            assert stats["unvalidated_count"] == 1
-            assert stats["validation_rate"] == 2 / 3
+            assert stats == mock_service.get_validation_statistics.return_value
 
     def test_get_validation_statistics_unique_strings_only(self):
         """Test that statistics only count unique brush strings."""
-        # Mock the counting service to return expected statistics
-        with patch("sotd.match.brush_validation_cli.BrushValidationCountingService") as mock_cls:
-            mock_service = mock_cls.return_value
+        # Mock the CLI's internal counting service instance
+        with patch.object(self.cli, "counting_service") as mock_service:
             mock_service.get_validation_statistics.return_value = {
                 "total_entries": 2,
                 "validated_count": 0,
@@ -478,16 +496,12 @@ class TestBrushValidationCLI:
 
             # Verify the counting service was called correctly
             mock_service.get_validation_statistics.assert_called_once_with("2025-08")
-
-            # Verify the returned statistics
-            assert stats["total_entries"] == 2
-            assert stats["unvalidated_count"] == 2
+            assert stats == mock_service.get_validation_statistics.return_value
 
     def test_get_validation_statistics_case_insensitive(self):
         """Test that statistics handle case-insensitive unique counting."""
-        # Mock the counting service to return expected statistics
-        with patch("sotd.match.brush_validation_cli.BrushValidationCountingService") as mock_cls:
-            mock_service = mock_cls.return_value
+        # Mock the CLI's internal counting service instance
+        with patch.object(self.cli, "counting_service") as mock_service:
             mock_service.get_validation_statistics.return_value = {
                 "total_entries": 1,
                 "validated_count": 0,
@@ -501,16 +515,12 @@ class TestBrushValidationCLI:
 
             # Verify the counting service was called correctly
             mock_service.get_validation_statistics.assert_called_once_with("2025-08")
-
-            # Verify the returned statistics
-            assert stats["total_entries"] == 1
-            assert stats["unvalidated_count"] == 1
+            assert stats == mock_service.get_validation_statistics.return_value
 
     def test_get_validation_statistics_fallback_to_input_text(self):
         """Test that statistics fallback to input_text when normalized_text is missing."""
-        # Mock the counting service to return expected statistics
-        with patch("sotd.match.brush_validation_cli.BrushValidationCountingService") as mock_cls:
-            mock_service = mock_cls.return_value
+        # Mock the CLI's internal counting service instance
+        with patch.object(self.cli, "counting_service") as mock_service:
             mock_service.get_validation_statistics.return_value = {
                 "total_entries": 2,
                 "validated_count": 0,
@@ -524,10 +534,7 @@ class TestBrushValidationCLI:
 
             # Verify the counting service was called correctly
             mock_service.get_validation_statistics.assert_called_once_with("2025-08")
-
-            # Verify the returned statistics
-            assert stats["total_entries"] == 2
-            assert stats["unvalidated_count"] == 2
+            assert stats == mock_service.get_validation_statistics.return_value
 
     @patch.object(BrushValidationCLI, "load_month_data")
     @patch.object(BrushValidationCLI, "sort_entries")
