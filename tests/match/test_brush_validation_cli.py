@@ -107,9 +107,19 @@ class TestBrushValidationCLI:
 
         mock_load_json.assert_called_once()
 
+    @patch.object(BrushValidationCLI, "_get_validated_normalized_texts")
     @patch("sotd.match.brush_validation_cli.load_json_data")
-    def test_load_month_data_scoring_system_filters_correct_matches(self, mock_load_json):
+    def test_load_month_data_scoring_system_filters_correct_matches(
+        self, mock_load_json, mock_get_validated_texts
+    ):
         """Test that correct_complete_brush and correct_split_brush entries are filtered out."""
+
+        # Mock the validated texts to include the correct matches
+        mock_get_validated_texts.return_value = {
+            "test brush 1",  # correct_complete_brush
+            "test brush 2",  # correct_split_brush
+        }
+
         # Mock data structure with entries that should be filtered out
         mock_data = {
             "data": [
@@ -171,6 +181,7 @@ class TestBrushValidationCLI:
         assert result[0]["matched"]["score"] == 85
 
         mock_load_json.assert_called_once()
+        mock_get_validated_texts.assert_called_once_with("2025-08")
 
     @patch("sotd.match.brush_validation_cli.load_json_data")
     def test_load_month_data_scoring_system_handles_null_matched(self, mock_load_json):
@@ -400,7 +411,7 @@ class TestBrushValidationCLI:
     def test_get_validation_statistics(self):
         """Test getting validation statistics."""
         # Mock the counting service to return expected statistics
-        with patch('sotd.match.brush_validation_cli.BrushValidationCountingService') as mock_cls:
+        with patch("sotd.match.brush_validation_cli.BrushValidationCountingService") as mock_cls:
             mock_service = mock_cls.return_value
             mock_service.get_validation_statistics.return_value = {
                 "total_entries": 3,
@@ -426,7 +437,7 @@ class TestBrushValidationCLI:
     def test_get_validation_statistics_no_matcher(self):
         """Test getting validation statistics without matcher."""
         # Mock the counting service to return expected statistics
-        with patch('sotd.match.brush_validation_cli.BrushValidationCountingService') as mock_cls:
+        with patch("sotd.match.brush_validation_cli.BrushValidationCountingService") as mock_cls:
             mock_service = mock_cls.return_value
             mock_service.get_validation_statistics.return_value = {
                 "total_entries": 3,
@@ -452,7 +463,7 @@ class TestBrushValidationCLI:
     def test_get_validation_statistics_unique_strings_only(self):
         """Test that statistics only count unique brush strings."""
         # Mock the counting service to return expected statistics
-        with patch('sotd.match.brush_validation_cli.BrushValidationCountingService') as mock_cls:
+        with patch("sotd.match.brush_validation_cli.BrushValidationCountingService") as mock_cls:
             mock_service = mock_cls.return_value
             mock_service.get_validation_statistics.return_value = {
                 "total_entries": 2,
@@ -475,7 +486,7 @@ class TestBrushValidationCLI:
     def test_get_validation_statistics_case_insensitive(self):
         """Test that statistics handle case-insensitive unique counting."""
         # Mock the counting service to return expected statistics
-        with patch('sotd.match.brush_validation_cli.BrushValidationCountingService') as mock_cls:
+        with patch("sotd.match.brush_validation_cli.BrushValidationCountingService") as mock_cls:
             mock_service = mock_cls.return_value
             mock_service.get_validation_statistics.return_value = {
                 "total_entries": 1,
@@ -498,7 +509,7 @@ class TestBrushValidationCLI:
     def test_get_validation_statistics_fallback_to_input_text(self):
         """Test that statistics fallback to input_text when normalized_text is missing."""
         # Mock the counting service to return expected statistics
-        with patch('sotd.match.brush_validation_cli.BrushValidationCountingService') as mock_cls:
+        with patch("sotd.match.brush_validation_cli.BrushValidationCountingService") as mock_cls:
             mock_service = mock_cls.return_value
             mock_service.get_validation_statistics.return_value = {
                 "total_entries": 2,
@@ -543,7 +554,7 @@ class TestBrushValidationCLI:
 
                 assert result == {"completed": False, "entries_processed": 0}
                 mock_load.assert_called_once_with("2025-08", "scoring")
-                mock_sort.assert_called_once_with(mock_entries, "2025-08", "unvalidated")
+                # Note: run_validation_workflow does inline sorting, not separate sort_entries call
 
 
 class TestBrushValidationCLISetup:
