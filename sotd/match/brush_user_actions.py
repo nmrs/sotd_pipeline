@@ -348,7 +348,7 @@ class BrushUserActionsManager:
 
         # Create system choice from matched data
         system_choice = {
-            "strategy": matched.get("strategy", ""),
+            "strategy": brush_data.get("strategy", ""),
             "score": matched.get("score", 0),
             "result": matched,
         }
@@ -390,7 +390,7 @@ class BrushUserActionsManager:
 
         # Create system choice from matched data
         system_choice = {
-            "strategy": matched.get("strategy", ""),
+            "strategy": brush_data.get("strategy", ""),
             "score": matched.get("score", 0),
             "result": matched,
         }
