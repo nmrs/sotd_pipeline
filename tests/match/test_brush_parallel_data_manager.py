@@ -157,39 +157,6 @@ class TestBrushParallelDataManager:
         # File should exist now
         assert manager.file_exists("2025-05", "new")
 
-    def test_file_exists_new_system(self, tmp_path):
-        """Test checking if file exists for new brush system."""
-        manager = BrushParallelDataManager(base_path=tmp_path)
-        manager.create_directories()
-
-        # File should not exist initially
-        assert not manager.file_exists("2025-05", "new")
-
-        # Create file
-        file_path = tmp_path / "matched" / "2025-05.json"
-        with open(file_path, "w") as f:
-            json.dump({"test": "data"}, f)
-
-        # File should exist now
-        assert manager.file_exists("2025-05", "new")
-
-    def test_get_metadata_new_system(self, tmp_path):
-        """Test getting metadata for new brush system."""
-        manager = BrushParallelDataManager(base_path=tmp_path)
-        manager.create_directories()
-
-        data = {
-            "metadata": {"month": "2025-05", "record_count": 100, "brush_system": "new"},
-            "data": [],
-        }
-        file_path = tmp_path / "matched" / "2025-05.json"
-
-        with open(file_path, "w") as f:
-            json.dump(data, f)
-
-        metadata = manager.get_metadata("2025-05", "new")
-        assert metadata == data["metadata"]
-
     def test_get_metadata_new_system(self, tmp_path):
         """Test getting metadata for new brush system."""
         manager = BrushParallelDataManager(base_path=tmp_path)
@@ -223,7 +190,7 @@ class TestBrushParallelDataManager:
         # Create some test files
         months = ["2025-01", "2025-02", "2025-03"]
         for month in months:
-            file_path = tmp_path / "matched" / f"{month}.json"
+            file_path = tmp_path / "matched_legacy" / f"{month}.json"
             with open(file_path, "w") as f:
                 json.dump({"month": month}, f)
 

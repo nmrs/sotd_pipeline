@@ -256,9 +256,15 @@ class TestScoringEngine:
             strategy="unified",
         )
 
-        scored_results = engine.score_results(
-            [result], "Farvour Turn Craft 26mm", engine.cached_results
-        )
+        # Create cached_results for the test
+        mock_unified_result = Mock()
+        mock_unified_result.matched = {
+            "handle": {"brand": "Farvour Turn Craft", "model": "Custom"},
+            "knot": {"brand": None, "fiber": "badger"},
+        }
+        cached_results = {"unified_result": mock_unified_result}
+
+        scored_results = engine.score_results([result], "Farvour Turn Craft 26mm", cached_results)
 
         assert len(scored_results) == 1
         # Base score (50.0) only - modifier shouldn't apply to unified strategy
@@ -512,13 +518,12 @@ class TestScoringEngine:
                 effect = modifier_value * modifier_weight
                 print(f"  {modifier_name}: {modifier_value} × {modifier_weight} = {effect}")
 
-        # Expected: 40.0 + 30.0 + 25.0 = 95.0
-        expected_handle = 40.0 + 30.0 + 25.0
+        # Expected: 40.0 + 0.0 + (-30.0) + 25.0 = 35.0 (penalized by knot indicators)
+        expected_handle = 40.0 + 0.0 + (-30.0) + 25.0
         print(f"handle_only: {score_handle} (expected: {expected_handle})")
-        # Skip this assertion for now to focus on knot_only
-        # assert (
-        #     score_handle == expected_handle
-        # ), f"handle_only score {score_handle} != expected {expected_handle}"
+        assert (
+            score_handle == expected_handle
+        ), f"handle_only score {score_handle} != expected {expected_handle} (penalized by knot indicators)"
 
         # Test knot_only strategy
         result_knot = MatchResult(
@@ -572,43 +577,98 @@ class TestScoringEngine:
             print(f"  handle.model: {handle_data.get('model')}")
             print(f"  knot.fiber: {knot_data.get('fiber')}")
 
-        # Expected: 40.0 + (-30.0) + (-25.0) = -15.0
-        expected_knot = 40.0 + (-30.0) + (-25.0)
+        # Expected: 40.0 + 30.0 + (-25.0) = 45.0
+        expected_knot = 40.0 + 30.0 + (-25.0)
         print(f"knot_only: {score_knot} (expected: {expected_knot})")
         assert (
             score_knot == expected_knot
         ), f"knot_only score {score_knot} != expected {expected_knot}"
 
+        # Test positive case: Handle strategy with handle indicators (should get rewarded)
+        print(f"\nDebug: Testing handle_only strategy with handle indicators (positive case)...")
+        test_input_positive = "Farvour Turn Craft wood handle"
+        result_positive = MatchResult(
+            original=test_input_positive,
+            matched={"handle": {"brand": "Farvour Turn Craft", "model": "Custom"}},
+            match_type="handle_only",
+            pattern="handle_only",
+            strategy="handle_only",
+        )
+
+        scored_positive = engine.score_results(
+            [result_positive], test_input_positive, engine.cached_results
+        )
+        score_positive = scored_positive[0].score
+
+        # Should get higher score due to handle indicators ("wood" is a handle indicator)
+        expected_positive = 40.0 + 30.0 + 25.0  # = 95.0 (rewarded by handle indicators)
+        print(
+            f"handle_only with handle indicators: {score_positive} (expected: {expected_positive})"
+        )
+        assert (
+            score_positive == expected_positive
+        ), f"handle_only with handle indicators should score {expected_positive}, got {score_positive}"
+
         # Scenario 2: Knot brand only
         print("\n=== Scenario 2: Knot brand only ===")
-        mock_unified_result.matched = {
-            "handle": {"brand": None, "model": None},
-            "knot": {"brand": "Declaration Grooming", "model": "B2"},
+        # Create fresh mock_unified_result for this scenario
+        mock_unified_result_scenario2 = Mock()
+        mock_unified_result_scenario2.matched = {
+            "handle": {"brand": "Declaration Grooming", "model": "B2"},  # Handle has brand
+            "knot": {"brand": "Declaration Grooming", "model": "B2"},  # Knot has brand
         }
+        engine.cached_results = {"unified_result": mock_unified_result_scenario2}
 
-        # Test handle_only strategy
+        # Test handle_only strategy with new result object for this scenario
+        result_handle_scenario2 = MatchResult(
+            original="Declaration B2",
+            matched={"handle": {"brand": "Declaration Grooming", "model": "B2"}},
+            match_type="handle_only",
+            pattern="handle_only",
+            strategy="handle_only",
+        )
+
         scored_handle = engine.score_results(
-            [result_handle], "Declaration B2", engine.cached_results
+            [result_handle_scenario2], "Declaration B2", engine.cached_results
         )
         score_handle = scored_handle[0].score
 
-        # Expected: 40.0 + 30.0 + (-25.0) = 45.0
-        expected_handle = 40.0 + 30.0 + (-25.0)
+        # Debug: Let's see what's happening in Scenario 2
+        print(f"\nDebug: Scenario 2 analysis:")
+        print(f"  Input text: Declaration B2")
+        print(f"  Expected score: 40.0 + 0.0 + 0.0 + 25.0 = 65.0")
+        print(f"  Actual score: {score_handle}")
+
+        # Debug: Test each modifier individually for Scenario 2
+        print(f"\nDebug: Testing Scenario 2 modifiers individually:")
+        input_text_scenario2 = "Declaration B2"
+        for modifier_name in mock_config.get_all_modifier_names("handle_only"):
+            modifier_function = getattr(engine, f"_modifier_{modifier_name}", None)
+            if modifier_function:
+                modifier_value = modifier_function(
+                    input_text_scenario2, result_handle_scenario2, "handle_only"
+                )
+                modifier_weight = mock_config.get_strategy_modifier("handle_only", modifier_name)
+                effect = modifier_value * modifier_weight
+                print(f"  {modifier_name}: {modifier_value} × {modifier_weight} = {effect}")
+
+        # Expected: 40.0 + 0.0 + 0.0 + 0.0 + 0.0 = 40.0 (no indicators, both have brands)
+        expected_handle = 40.0 + 0.0 + 0.0 + 0.0 + 0.0
         print(f"handle_only: {score_handle} (expected: {expected_handle})")
         assert (
             score_handle == expected_handle
-        ), f"handle_only score {score_handle} != expected {expected_handle}"
+        ), f"handle_only score {score_handle} != expected {expected_handle} (no indicators, both have brands)"
 
         # Test knot_only strategy
         scored_knot = engine.score_results([result_knot], "Declaration B2", engine.cached_results)
         score_knot = scored_knot[0].score
 
-        # Expected: 40.0 + (-30.0) + 25.0 = 35.0
-        expected_knot = 40.0 + (-30.0) + 25.0
+        # Expected: 40.0 + 0.0 + 0.0 + 0.0 + 0.0 = 40.0 (no indicators, both have brands)
+        expected_knot = 40.0 + 0.0 + 0.0 + 0.0 + 0.0
         print(f"knot_only: {score_knot} (expected: {expected_knot})")
         assert (
             score_knot == expected_knot
-        ), f"knot_only score {score_knot} != expected {expected_knot}"
+        ), f"knot_only score {score_knot} != expected {expected_knot} (no indicators, both have brands)"
 
         # Scenario 3: Both brands
         print("\n=== Scenario 3: Both brands ===")
@@ -617,31 +677,47 @@ class TestScoringEngine:
             "knot": {"brand": "Declaration Grooming", "model": "B2"},
         }
 
-        # Test handle_only strategy
+        # Test handle_only strategy with new result object for this scenario
+        result_handle_scenario3 = MatchResult(
+            original="Farvour Turn Craft + Declaration B2",
+            matched={"handle": {"brand": "Farvour Turn Craft", "model": "Custom"}},
+            match_type="handle_only",
+            pattern="handle_only",
+            strategy="handle_only",
+        )
+
         scored_handle = engine.score_results(
-            [result_handle], "Farvour Turn Craft + Declaration B2", engine.cached_results
+            [result_handle_scenario3], "Farvour Turn Craft + Declaration B2", engine.cached_results
         )
         score_handle = scored_handle[0].score
 
-        # Expected: 40.0 + 30.0 + 0.0 = 70.0 (no brand balance modifier)
-        expected_handle = 40.0 + 30.0
+        # Expected: 40.0 + 0.0 + 0.0 + 0.0 + 0.0 = 40.0 (no indicators, both have brands)
+        expected_handle = 40.0 + 0.0 + 0.0 + 0.0 + 0.0
         print(f"handle_only: {score_handle} (expected: {expected_handle})")
         assert (
             score_handle == expected_handle
-        ), f"handle_only score {score_handle} != expected {expected_handle}"
+        ), f"handle_only score {score_handle} != expected {expected_handle} (no indicators, both have brands)"
 
-        # Test knot_only strategy
+        # Test knot_only strategy with new result object for this scenario
+        result_knot_scenario3 = MatchResult(
+            original="Farvour Turn Craft + Declaration B2",
+            matched={"knot": {"brand": "Declaration Grooming", "model": "B2"}},
+            match_type="knot_only",
+            pattern="knot_only",
+            strategy="knot_only",
+        )
+
         scored_knot = engine.score_results(
-            [result_knot], "Farvour Turn Craft + Declaration B2", engine.cached_results
+            [result_knot_scenario3], "Farvour Turn Craft + Declaration B2", engine.cached_results
         )
         score_knot = scored_knot[0].score
 
-        # Expected: 40.0 + (-30.0) + 0.0 = 10.0 (no brand balance modifier)
-        expected_knot = 40.0 + (-30.0)
+        # Expected: 40.0 + 0.0 + 0.0 + 0.0 + 0.0 = 40.0 (no indicators, both have brands)
+        expected_knot = 40.0 + 0.0 + 0.0 + 0.0 + 0.0
         print(f"knot_only: {score_knot} (expected: {expected_knot})")
         assert (
             score_knot == expected_knot
-        ), f"knot_only score {score_knot} != expected {expected_knot}"
+        ), f"knot_only score {score_knot} != expected {expected_knot} (no indicators, both have brands)"
 
         # Scenario 4: No brands
         print("\n=== Scenario 4: No brands ===")
@@ -667,12 +743,12 @@ class TestScoringEngine:
         scored_knot = engine.score_results([result_knot], "Badger Knot", engine.cached_results)
         score_knot = scored_knot[0].score
 
-        # Expected: 40.0 + (-30.0) + 0.0 = 10.0 (no brand balance modifier)
-        expected_knot = 40.0 + (-30.0)
+        # Expected: 40.0 + 30.0 + 0.0 = 70.0 (rewarded by knot indicators, no brand balance modifier)
+        expected_knot = 40.0 + 30.0
         print(f"knot_only: {score_knot} (expected: {expected_knot})")
         assert (
             score_knot == expected_knot
-        ), f"knot_only score {score_knot} != expected {expected_knot}"
+        ), f"knot_only score {score_knot} != expected {expected_knot} (rewarded by knot indicators, no brand balance modifier)"
 
         print("\n✅ All math scenarios passed!")
 

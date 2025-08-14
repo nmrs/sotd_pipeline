@@ -68,8 +68,11 @@ class TestHandleMatcherBaseline:
         """Test Dogwood Handcrafts pattern matching."""
         # Test various Dogwood patterns
         test_cases = [
-            ("Dogwood handle", "dogwoo"),
-            ("Dogwood Handcrafts handle", "dogwood.*handcrafts+"),
+            ("Dogwood handle", "dogwood.*(handcrafts+)?(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)"),
+            (
+                "Dogwood Handcrafts handle",
+                "dogwood.*(handcrafts+)?(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)",
+            ),
             ("VOA handle", "^voa"),
             ("DW handle", "\\bdw\\b"),
         ]
@@ -225,7 +228,7 @@ class TestHandleMatcherBaseline:
             ("Simpson handle", "Simpson"),
             ("Omega handle", "Omega"),
             ("Semogue handle", "Semogue"),
-            ("Muhle handle", "Muhle"),
+            ("Muhle handle", "Mühle"),  # Note: actual catalog uses "Mühle"
         ]
 
         for text, expected_maker in manufacturer_test_cases:

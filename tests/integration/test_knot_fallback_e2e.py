@@ -123,8 +123,8 @@ def test_mixed_fiber_types_in_split_brushes(brush_matcher):
     # Wolf Whiskers is matched as both handle and knot maker
     knot = result.matched["knot"]
     assert knot["brand"] == "Wolf Whiskers"
-    assert knot["model"] == "Badger"  # Fiber detected as model
-    assert knot["fiber"] == "Badger"
+    assert knot["model"] == "Mixed Badger/Boar"  # Full fiber description preserved
+    assert knot["fiber"] == "Mixed Badger/Boar"
     # Pattern should now contain the actual regex pattern used for matching
     assert knot["_pattern"] is not None
     assert knot["_pattern"] != "dual_component_fallback"

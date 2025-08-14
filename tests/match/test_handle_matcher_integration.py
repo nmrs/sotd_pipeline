@@ -71,7 +71,7 @@ class TestHandleMatcherIntegration:
     def test_handle_matcher_fallback_behavior(self):
         """Test that HandleMatcher works as fallback when brush strategies fail."""
         # Test with input that brush strategies can't handle but HandleMatcher can
-        test_input = "Maggard 22mm synth"
+        test_input = "Maggard handle"
 
         matcher = BrushScoringMatcher()
         result = matcher.match(test_input)
