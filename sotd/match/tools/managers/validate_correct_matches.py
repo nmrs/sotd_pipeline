@@ -25,9 +25,9 @@ logger = logging.getLogger(__name__)
 class ValidateCorrectMatches:
     """Validate correct_matches.yaml against current catalog patterns."""
 
-    def __init__(self):
+    def __init__(self, correct_matches_path: Optional[Path] = None):
         """Initialize validation tool with all matchers."""
-        self.correct_matches_path = Path("data/correct_matches.yaml")
+        self.correct_matches_path = correct_matches_path or Path("data/correct_matches.yaml")
         self.correct_matches = self._load_correct_matches()
 
         # Don't initialize matchers upfront - lazy load them when needed
@@ -278,14 +278,31 @@ class ValidateCorrectMatches:
     ) -> bool:
         """Check if a brand exists in the current catalog."""
         try:
+            import unicodedata
+            
+            # Normalize both the brand name and catalog keys to NFC form
+            normalized_brand = unicodedata.normalize('NFC', brand_name)
+            
             if field == "blade" and format_name:
                 # For blades, check in the specific format section
                 catalog_data = self._load_catalog_data(field)
-                return format_name in catalog_data and brand_name in catalog_data[format_name]
+                if format_name not in catalog_data:
+                    return False
+                # Check against normalized catalog keys
+                for catalog_brand in catalog_data[format_name].keys():
+                    normalized_catalog_brand = unicodedata.normalize('NFC', catalog_brand)
+                    if normalized_catalog_brand == normalized_brand:
+                        return True
+                return False
             else:
                 # For other fields, check directly in catalog
                 catalog_data = self._load_catalog_data(field)
-                return brand_name in catalog_data
+                # Check against normalized catalog keys
+                for catalog_brand in catalog_data.keys():
+                    normalized_catalog_brand = unicodedata.normalize('NFC', catalog_brand)
+                    if normalized_catalog_brand == normalized_brand:
+                        return True
+                return False
         except Exception:
             return False
 
@@ -294,18 +311,40 @@ class ValidateCorrectMatches:
     ) -> bool:
         """Check if a model exists for a brand in the current catalog."""
         try:
+            import unicodedata
+            
+            # Normalize names to NFC form
+            normalized_brand = unicodedata.normalize('NFC', brand_name)
+            normalized_model = unicodedata.normalize('NFC', model_name)
+            
             if field == "blade" and format_name:
                 # For blades, check in the specific format section
                 catalog_data = self._load_catalog_data(field)
-                return (
-                    format_name in catalog_data
-                    and brand_name in catalog_data[format_name]
-                    and model_name in catalog_data[format_name][brand_name]
-                )
+                if format_name not in catalog_data:
+                    return False
+                # Check against normalized catalog keys
+                for catalog_brand in catalog_data[format_name].keys():
+                    normalized_catalog_brand = unicodedata.normalize('NFC', catalog_brand)
+                    if normalized_catalog_brand == normalized_brand:
+                        brand_section = catalog_data[format_name][catalog_brand]
+                        for catalog_model in brand_section.keys():
+                            normalized_catalog_model = unicodedata.normalize('NFC', catalog_model)
+                            if normalized_catalog_model == normalized_model:
+                                return True
+                return False
             else:
                 # For other fields, check directly in catalog
                 catalog_data = self._load_catalog_data(field)
-                return brand_name in catalog_data and model_name in catalog_data[brand_name]
+                # Check against normalized catalog keys
+                for catalog_brand in catalog_data.keys():
+                    normalized_catalog_brand = unicodedata.normalize('NFC', catalog_brand)
+                    if normalized_catalog_brand == normalized_brand:
+                        brand_section = catalog_data[catalog_brand]
+                        for catalog_model in brand_section.keys():
+                            normalized_catalog_model = unicodedata.normalize('NFC', catalog_model)
+                            if normalized_catalog_model == normalized_model:
+                                return True
+                return False
         except Exception:
             return False
 
