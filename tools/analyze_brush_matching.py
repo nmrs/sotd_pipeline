@@ -10,6 +10,7 @@ Usage:
     python tools/analyze_brush_matching.py "brush string here"
     python tools/analyze_brush_matching.py --debug "brush string here"
     python tools/analyze_brush_matching.py --legacy "brush string here"
+    python tools/analyze_brush_matching.py --bypass-correct-matches "brush string here"
 """
 
 import argparse
@@ -21,18 +22,33 @@ from unittest.mock import Mock
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from sotd.enrich.brush_enricher import BrushEnricher
-from sotd.match.brush_matcher import BrushMatcher
-from sotd.match.scoring_brush_matcher import BrushScoringMatcher
-from sotd.match.brush_scoring_config import BrushScoringConfig
-from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
+try:
+    from sotd.enrich.brush_enricher import BrushEnricher
+    from sotd.match.brush_matcher import BrushMatcher
+    from sotd.match.scoring_brush_matcher import BrushScoringMatcher
+    from sotd.match.brush_scoring_config import BrushScoringConfig
+    from sotd.match.brush_scoring_components.scoring_engine import ScoringEngine
+except ImportError:
+    print(
+        "Error: Could not import required modules. Make sure you're running from the project root."
+    )
+    sys.exit(1)
 
 
-def analyze_brush_matching(brush_string: str, debug: bool = False, show_all_matches: bool = True):
+def analyze_brush_matching(
+    brush_string: str,
+    debug: bool = False,
+    show_all_matches: bool = True,
+    bypass_correct_matches: bool = False,
+):
     """Analyze how a brush string is matched and enriched through the SOTD pipeline."""
 
     print(f"Testing brush string: '{brush_string}'")
     print("=" * 60)
+
+    if bypass_correct_matches:
+        print("\n🚫 BYPASSING correct_matches.yaml - Testing raw matchers only")
+        print("=" * 60)
 
     if show_all_matches:
         # Use the scoring brush matcher to show all possible matches and scores
@@ -41,7 +57,72 @@ def analyze_brush_matching(brush_string: str, debug: bool = False, show_all_matc
 
         try:
             scoring_matcher = BrushScoringMatcher()
+
+            # If bypassing correct_matches, temporarily patch multiple components
+            original_match_method = None
+            original_legacy_methods = {}
+            if bypass_correct_matches:
+                # Store the original match method from correct_matches_matcher
+                original_match_method = scoring_matcher.correct_matches_matcher.match
+
+                # Create a dummy method that always returns None
+                def dummy_match(value):
+                    return None
+
+                # Replace the match method temporarily
+                scoring_matcher.correct_matches_matcher.match = dummy_match
+
+                # Also patch the legacy matcher methods that wrapper strategies call
+                # We need to find the legacy matcher instance used by the strategies
+                if hasattr(scoring_matcher, "strategy_orchestrator") and hasattr(
+                    scoring_matcher.strategy_orchestrator, "strategies"
+                ):
+                    for strategy in scoring_matcher.strategy_orchestrator.strategies:
+                        if hasattr(strategy, "legacy_matcher"):
+                            legacy_matcher = strategy.legacy_matcher
+
+                            # Store original methods
+                            if hasattr(legacy_matcher, "_match_correct_complete_brush"):
+                                original_legacy_methods["_match_correct_complete_brush"] = (
+                                    legacy_matcher._match_correct_complete_brush
+                                )
+                                legacy_matcher._match_correct_complete_brush = dummy_match
+
+                            if hasattr(legacy_matcher, "_match_correct_split_brush"):
+                                original_legacy_methods["_match_correct_split_brush"] = (
+                                    legacy_matcher._match_correct_split_brush
+                                )
+                                legacy_matcher._match_correct_split_brush = dummy_match
+
+                            # Only need to patch the first legacy matcher we find
+                            break
+
+                print(
+                    "  📝 Temporarily patched correct_matches_matcher and legacy matcher methods to bypass all matches"
+                )
+
             result = scoring_matcher.match(brush_string)
+
+            # Restore all original methods if we bypassed them
+            if bypass_correct_matches:
+                if original_match_method is not None:
+                    scoring_matcher.correct_matches_matcher.match = original_match_method
+
+                # Restore legacy matcher methods
+                if hasattr(scoring_matcher, "strategy_orchestrator") and hasattr(
+                    scoring_matcher.strategy_orchestrator, "strategies"
+                ):
+                    for strategy in scoring_matcher.strategy_orchestrator.strategies:
+                        if hasattr(strategy, "legacy_matcher"):
+                            legacy_matcher = strategy.legacy_matcher
+
+                            # Restore original methods
+                            for method_name, original_method in original_legacy_methods.items():
+                                if hasattr(legacy_matcher, method_name):
+                                    setattr(legacy_matcher, method_name, original_method)
+
+                            # Only need to restore the first legacy matcher we find
+                            break
 
             if result and hasattr(result, "all_strategies") and result.all_strategies:
                 print("\n📊 ALL STRATEGY RESULTS (sorted by score)")
@@ -213,6 +294,13 @@ def analyze_brush_matching(brush_string: str, debug: bool = False, show_all_matc
             debug=debug,
         )
 
+        # If bypassing correct_matches, temporarily clear them
+        original_correct_matches = None
+        if bypass_correct_matches:
+            original_correct_matches = brush_matcher.correct_matches
+            brush_matcher.correct_matches = {}
+            print("  📝 Temporarily cleared correct_matches for raw strategy testing")
+
         # Test each strategy individually
         if debug:
             print("\n🧪 Testing individual strategies:")
@@ -234,6 +322,10 @@ def analyze_brush_matching(brush_string: str, debug: bool = False, show_all_matc
 
         # Test brush matching
         result = brush_matcher.match(brush_string)
+
+        # Restore correct_matches if we bypassed them
+        if bypass_correct_matches and original_correct_matches is not None:
+            brush_matcher.correct_matches = original_correct_matches
 
         print("\n📊 Brush matching result:")
         if result:
@@ -260,7 +352,19 @@ def analyze_brush_matching(brush_string: str, debug: bool = False, show_all_matc
     if show_all_matches:
         try:
             scoring_matcher = BrushScoringMatcher()
+
+            # If bypassing correct_matches, temporarily clear them
+            original_correct_matches = None
+            if bypass_correct_matches:
+                original_correct_matches = scoring_matcher.correct_matches_matcher.correct_matches
+                scoring_matcher.correct_matches_matcher.correct_matches = {}
+
             result = scoring_matcher.match(brush_string)
+
+            # Restore correct_matches if we bypassed them
+            if bypass_correct_matches and original_correct_matches is not None:
+                scoring_matcher.correct_matches_matcher.correct_matches = original_correct_matches
+
         except Exception:
             result = None
     else:
@@ -271,7 +375,18 @@ def analyze_brush_matching(brush_string: str, debug: bool = False, show_all_matc
             correct_matches_path=Path("data/correct_matches.yaml"),
             debug=debug,
         )
+
+        # If bypassing correct_matches, temporarily clear them
+        original_correct_matches = None
+        if bypass_correct_matches:
+            original_correct_matches = brush_matcher.correct_matches
+            brush_matcher.correct_matches = {}
+
         result = brush_matcher.match(brush_string)
+
+        # Restore correct_matches if we bypassed them
+        if bypass_correct_matches and original_correct_matches is not None:
+            brush_matcher.correct_matches = original_correct_matches
 
     if result and result.matched:
         enricher = BrushEnricher()
@@ -537,9 +652,16 @@ def main():
         action="store_true",
         help="Use legacy brush matcher (first match wins) instead of scoring system",
     )
+    parser.add_argument(
+        "--bypass-correct-matches",
+        action="store_true",
+        help="Bypass correct_matches.yaml lookup to test raw matchers only",
+    )
 
     args = parser.parse_args()
-    analyze_brush_matching(args.brush_string, args.debug, not args.legacy)
+    analyze_brush_matching(
+        args.brush_string, args.debug, not args.legacy, args.bypass_correct_matches
+    )
 
 
 if __name__ == "__main__":
