@@ -317,7 +317,11 @@ class ValidateCorrectMatches:
                 and normalized_brand in validation_cache[format_name]
             )
         else:
-            return normalized_brand in validation_cache
+            exists = normalized_brand in validation_cache
+            if field == "brush" and brand_name == "Yaqi":
+                logger.debug(f"Checking Yaqi brand existence: {exists}")
+                logger.debug(f"Available brands: {list(validation_cache.keys())}")
+            return exists
 
     def _model_exists_in_catalog(
         self, field: str, brand_name: str, model_name: str, format_name: str = None
@@ -340,10 +344,19 @@ class ValidateCorrectMatches:
                 and normalized_model in validation_cache[format_name][normalized_brand]
             )
         else:
-            return (
+            exists = (
                 normalized_brand in validation_cache
                 and normalized_model in validation_cache[normalized_brand]
             )
+            if field == "brush" and brand_name == "Yaqi" and model_name in ["Ferrari", "Sagrada"]:
+                logger.debug(f"Checking Yaqi {model_name} model existence: {exists}")
+                if normalized_brand in validation_cache:
+                    logger.debug(
+                        f"Available models for Yaqi: {list(validation_cache[normalized_brand])}"
+                    )
+                else:
+                    logger.debug("Yaqi brand not found in validation cache")
+            return exists
 
     def _load_catalog_data(self, field: str) -> Dict[str, Any]:
         """Load catalog data for a specific field."""
@@ -574,8 +587,6 @@ class ValidateCorrectMatches:
 
                 print()
 
-
-
     def _find_current_location(self, field: str, pattern: str) -> Optional[str]:
         """Find where a pattern currently exists in correct_matches.yaml."""
         if field not in self.correct_matches:
@@ -716,6 +727,8 @@ class ValidateCorrectMatches:
         # Get normalized catalog
         normalized_catalog = self._get_normalized_catalog(field)
 
+
+
         # Build existence cache
         existence_cache = {}
 
@@ -737,16 +750,24 @@ class ValidateCorrectMatches:
         """Get cached normalized catalog with pre-computed keys."""
         if field not in self._normalized_catalogs:
             catalog_data = self._load_catalog_data(field)
+
             normalized = self._normalize_catalog_keys(catalog_data)
             self._normalized_catalogs[field] = normalized
+
         return self._normalized_catalogs[field]
 
     def _normalize_catalog_keys(self, catalog_data: Dict[str, Any]) -> Dict[str, Any]:
         """Normalize all catalog keys for efficient lookup."""
         import unicodedata
+        import copy
 
         if not catalog_data:
             return {}
+
+        # Create a deep copy to avoid mutating the original data
+        catalog_data = copy.deepcopy(catalog_data)
+
+
 
         normalized = {}
 
@@ -760,16 +781,9 @@ class ValidateCorrectMatches:
                         normalized_model = unicodedata.normalize("NFC", model_name)
                         normalized[format_name][normalized_brand][normalized_model] = model_section
         elif "known_brushes" in catalog_data:  # Brush format with nested structure
-            # Handle known_brushes section
+            # For validation, ONLY use known_brushes - these are the actual catalog entries
+            # other_brushes are fallback patterns, not catalog products to validate against
             for brand_name, brand_section in catalog_data["known_brushes"].items():
-                normalized_brand = unicodedata.normalize("NFC", brand_name)
-                normalized[normalized_brand] = {}
-                for model_name, model_section in brand_section.items():
-                    normalized_model = unicodedata.normalize("NFC", model_name)
-                    normalized[normalized_brand][normalized_model] = model_section
-
-            # Handle other_brushes section
-            for brand_name, brand_section in catalog_data["other_brushes"].items():
                 normalized_brand = unicodedata.normalize("NFC", brand_name)
                 normalized[normalized_brand] = {}
                 for model_name, model_section in brand_section.items():
@@ -787,9 +801,6 @@ class ValidateCorrectMatches:
 
     def _matcher_can_handle_combination(self, field: str, brand_name: str, model_name: str) -> bool:
         """Check if the matcher can actually handle this brand/model combination."""
-        if field != "brush":
-            return False
-
         try:
             matcher = self._get_matcher(field)
             if not matcher:
@@ -797,17 +808,23 @@ class ValidateCorrectMatches:
 
             # Test if matcher can actually match this combination
             test_input = f"{brand_name} {model_name}"
-            result = matcher.match(test_input)
-
+            
+            if field == "blade":
+                # For blades, we need a format - use a common one for testing
+                result = matcher.match_with_context(test_input, "DE")
+            else:
+                # For other fields, use the standard match method
+                result = matcher.match(test_input)
+            
+            # Check if it matched
             if result and hasattr(result, "matched") and result.matched:
                 return True
-
-            # Also check if it's a dict with matched data
+            
+            # Also check if it's a dict with matched data (for backward compatibility)
             if isinstance(result, dict) and result.get("matched"):
                 return True
-
+            
             return False
-
         except Exception as e:
             logger.debug(f"Error testing matcher coverage for {brand_name} {model_name}: {e}")
             return False
