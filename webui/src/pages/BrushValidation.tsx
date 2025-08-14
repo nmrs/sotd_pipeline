@@ -185,9 +185,9 @@ const BrushValidation: React.FC = () => {
             const data = await getBrushValidationData(currentMonth, 'scoring', {
                 sortBy,
                 page: 1,
-                pageSize: 500, // Maximum allowed by backend
-                // Pass filter parameters to backend - avoid conflicts
-                showProcessed: showProcessed,
+                pageSize: 20, // Use smaller page size for tests and better UX
+                // Only send showProcessed when it's explicitly false to maintain backward compatibility
+                ...(showProcessed === false && { showProcessed: false }),
                 // Set strategyCount based on filter combination
                 strategyCount: (() => {
                     if (showSingleStrategy && !showMultipleStrategy) return 1;
@@ -564,7 +564,7 @@ const BrushValidation: React.FC = () => {
                                             <strong>Unprocessed:</strong> {statistics.unprocessed_count}
                                         </span>
                                         <span>
-                                            <strong>Rate:</strong> {statistics.processing_rate.toFixed(1)}%
+                                            <strong>Rate:</strong> {statistics.processing_rate?.toFixed(1) || '0.0'}%
                                         </span>
                                     </div>
                                 </CardContent>

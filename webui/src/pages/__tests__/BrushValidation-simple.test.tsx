@@ -81,10 +81,18 @@ describe('BrushValidation', () => {
     });
     mockApi.getBrushValidationStatistics.mockResolvedValue({
       total_entries: 2,
-      validated_count: 1,
+      correct_entries: 1,
+      user_processed: 1,
       overridden_count: 1,
+      total_processed: 2,
+      unprocessed_count: 0,
+      processing_rate: 1.0,
+      // Legacy fields for backward compatibility
+      validated_count: 1,
+      user_validations: 1,
       unvalidated_count: 0,
       validation_rate: 1.0,
+      total_actions: 2,
     });
     mockApi.undoLastValidationAction.mockResolvedValue({
       success: true,
@@ -136,6 +144,10 @@ describe('BrushValidation', () => {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
   });
@@ -162,6 +174,10 @@ describe('BrushValidation', () => {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
 
@@ -192,6 +208,10 @@ describe('BrushValidation', () => {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
 
@@ -258,6 +278,10 @@ describe('BrushValidation', () => {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
 
@@ -335,6 +359,10 @@ describe('BrushValidation', () => {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
 
@@ -360,10 +388,15 @@ describe('BrushValidation', () => {
 
     // Wait for data to load
     await waitFor(() => {
-      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith('2025-01', 'scoring', {
+      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith(
+        '2025-01', 'scoring', {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
 
@@ -393,10 +426,15 @@ describe('BrushValidation', () => {
 
     // Wait for data to load
     await waitFor(() => {
-      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith('2025-01', 'scoring', {
+      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith(
+        '2025-01', 'scoring', {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
 
@@ -438,10 +476,15 @@ describe('BrushValidation', () => {
 
     // Wait for data to load
     await waitFor(() => {
-      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith('2025-01', 'scoring', {
+      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith(
+        '2025-01', 'scoring', {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
 
@@ -475,6 +518,10 @@ describe('BrushValidation', () => {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
 
@@ -514,10 +561,15 @@ describe('BrushValidation', () => {
 
     // Wait for data to load
     await waitFor(() => {
-      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith('2025-01', 'scoring', {
+      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith(
+        '2025-01', 'scoring', {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
 
@@ -547,10 +599,15 @@ describe('BrushValidation', () => {
 
     // Wait for data to load
     await waitFor(() => {
-      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith('2025-01', 'scoring', {
+      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith(
+        '2025-01', 'scoring', {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
 
@@ -580,10 +637,15 @@ describe('BrushValidation', () => {
 
     // Wait for data to load
     await waitFor(() => {
-      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith('2025-01', 'scoring', {
+      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith(
+        '2025-01', 'scoring', {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
 
@@ -610,10 +672,15 @@ describe('BrushValidation', () => {
 
     // Wait for data to load
     await waitFor(() => {
-      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith('2025-01', 'scoring', {
+      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith(
+        '2025-01', 'scoring', {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
 
@@ -640,10 +707,15 @@ describe('BrushValidation', () => {
 
     // Wait for data to load
     await waitFor(() => {
-      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith('2025-01', 'scoring', {
+      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith(
+        '2025-01', 'scoring', {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
 
@@ -666,10 +738,15 @@ describe('BrushValidation', () => {
 
     // Wait for data to load for second month
     await waitFor(() => {
-      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith('2025-02', 'scoring', {
+      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith(
+        '2025-02', 'scoring', {
         page: 1,
         pageSize: 20,
         sortBy: 'unvalidated',
+        // New backend filtering parameters (intentional improvement)
+        strategyCount: undefined,
+        showSingleStrategy: undefined,
+        showMultipleStrategy: undefined
       });
     });
 

@@ -168,7 +168,7 @@ async def get_brush_validation_data(
         matched_data = counting_service._load_matched_data(month)
 
         # Convert to the format expected by the frontend
-        # IMPORTANT: Load ALL entries first (including validated ones) 
+        # IMPORTANT: Load ALL entries first (including validated ones)
         # to match counting service logic
         entries = []
         records = matched_data.get("data", [])
@@ -192,8 +192,7 @@ async def get_brush_validation_data(
             entries.append(entry)
 
         logger.info(
-            f"Loaded {len(entries)} total entries from counting service "
-            f"(including validated)"
+            f"Loaded {len(entries)} total entries from counting service (including validated)"
         )
 
         # Apply backend filtering based on parameters
@@ -204,16 +203,16 @@ async def get_brush_validation_data(
         if show_validated is None or not show_validated:
             logger.info("Applying validation filtering to exclude already validated entries")
             initial_count = len(filtered_entries)
-            
+
             # Filter out entries with correct_complete_brush or correct_split_brush strategies
             filtered_entries = [
-                entry for entry in filtered_entries
-                if entry.get("matched") and entry["matched"].get("strategy") not in [
-                    "correct_complete_brush", 
-                    "correct_split_brush"
-                ]
+                entry
+                for entry in filtered_entries
+                if entry.get("matched")
+                and entry["matched"].get("strategy")
+                not in ["correct_complete_brush", "correct_split_brush"]
             ]
-            
+
             logger.info(f"Validation filtering: {initial_count} -> {len(filtered_entries)} entries")
         else:
             logger.info("Showing all entries including validated ones")
