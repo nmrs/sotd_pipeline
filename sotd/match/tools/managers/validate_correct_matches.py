@@ -727,8 +727,6 @@ class ValidateCorrectMatches:
         # Get normalized catalog
         normalized_catalog = self._get_normalized_catalog(field)
 
-
-
         # Build existence cache
         existence_cache = {}
 
@@ -766,8 +764,6 @@ class ValidateCorrectMatches:
 
         # Create a deep copy to avoid mutating the original data
         catalog_data = copy.deepcopy(catalog_data)
-
-
 
         normalized = {}
 
@@ -808,22 +804,28 @@ class ValidateCorrectMatches:
 
             # Test if matcher can actually match this combination
             test_input = f"{brand_name} {model_name}"
-            
+
             if field == "blade":
                 # For blades, we need a format - use a common one for testing
                 result = matcher.match_with_context(test_input, "DE")
+            elif field == "handle":
+                # Use the handle matcher component
+                result = matcher.handle_matcher.match(test_input)
+            elif field == "knot":
+                # Use the knot matcher component
+                result = matcher.knot_matcher.match(test_input)
             else:
-                # For other fields, use the standard match method
+                # For other fields (brush, razor, soap), use the standard match method
                 result = matcher.match(test_input)
-            
+
             # Check if it matched
             if result and hasattr(result, "matched") and result.matched:
                 return True
-            
+
             # Also check if it's a dict with matched data (for backward compatibility)
             if isinstance(result, dict) and result.get("matched"):
                 return True
-            
+
             return False
         except Exception as e:
             logger.debug(f"Error testing matcher coverage for {brand_name} {model_name}: {e}")
@@ -836,7 +838,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Validate correct_matches.yaml for catalog drift")
     parser.add_argument(
-        "--field", choices=["razor", "blade", "brush", "soap"], help="Specific field to validate"
+        "--field", choices=["razor", "blade", "brush", "soap", "handle", "knot"], help="Specific field to validate"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging")
 
