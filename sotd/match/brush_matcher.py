@@ -625,13 +625,15 @@ class BrushMatcher:
                     if isinstance(pattern, dict):
                         # Dictionary with handle_match flag
                         pattern_text = list(pattern.keys())[0]  # Get the key
-                        if normalized_text == pattern_text:
+                        # Use case-insensitive comparison as per match phase rules
+                        if normalized_text == pattern_text.lower():
                             pattern_matched = True
                             handle_match_enabled = pattern[pattern_text].get("handle_match", False)
                             break
                     else:
                         # Simple string pattern
-                        if normalized_text == pattern:
+                        # Use case-insensitive comparison as per match phase rules
+                        if normalized_text == pattern.lower():
                             pattern_matched = True
                             break
 
@@ -654,16 +656,19 @@ class BrushMatcher:
         split_brush_correct_matches = self.correct_matches_checker.correct_matches.get(
             "split_brush", {}
         )
-        if normalized_text in split_brush_correct_matches:
-            split_data = split_brush_correct_matches[normalized_text]
-            return self._process_split_brush_correct_match(
-                value,
-                {
-                    "match_type": "split_brush_section",
-                    "handle": split_data.get("handle", ""),
-                    "knot": split_data.get("knot", ""),
-                },
-            )
+
+        # Use case-insensitive comparison as per match phase rules
+        for key in split_brush_correct_matches:
+            if normalized_text == key.lower():
+                split_data = split_brush_correct_matches[key]
+                return self._process_split_brush_correct_match(
+                    value,
+                    {
+                        "match_type": "split_brush_section",
+                        "handle": split_data.get("handle", ""),
+                        "knot": split_data.get("knot", ""),
+                    },
+                )
         return None
 
     def _match_known_split(self, value: str) -> Optional["MatchResult"]:
