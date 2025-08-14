@@ -77,6 +77,26 @@ class ValidateCorrectMatches:
                 )
             elif field == "soap":
                 self._matchers[field] = SoapMatcher(bypass_correct_matches=True)
+            elif field == "knot":
+                # For knots, use BrushMatcher since it handles knot matching
+                self._matchers[field] = BrushMatcher(
+                    BrushMatcherConfig(
+                        catalog_path=Path("data/brushes.yaml"),
+                        handles_path=Path("data/handles.yaml"),
+                        knots_path=Path("data/knots.yaml"),
+                        bypass_correct_matches=True,
+                    )
+                )
+            elif field == "handle":
+                # For handles, use BrushMatcher since it handles handle matching
+                self._matchers[field] = BrushMatcher(
+                    BrushMatcherConfig(
+                        catalog_path=Path("data/brushes.yaml"),
+                        handles_path=Path("data/handles.yaml"),
+                        knots_path=Path("data/knots.yaml"),
+                        bypass_correct_matches=True,
+                    )
+                )
 
         return self._matchers.get(field)
 
@@ -269,8 +289,8 @@ class ValidateCorrectMatches:
                 for model_name in original_section[brand_name]:
                     # Check if model exists for this brand in current catalog
                     if not self._model_exists_in_catalog(field, brand_name, model_name):
-                        # For brush field, also check if matcher can handle this combination
-                        if field == "brush" and self._matcher_can_handle_combination(
+                        # For brush and knot fields, also check if matcher can handle this combination
+                        if field in ["brush", "knot"] and self._matcher_can_handle_combination(
                             field, brand_name, model_name
                         ):
                             issues.append(
@@ -281,7 +301,7 @@ class ValidateCorrectMatches:
                                     "model": model_name,
                                     "message": (
                                         f"Model '{model_name}' for brand '{brand_name}' is missing from "
-                                        f"catalog but CAN be matched by brush matcher strategies"
+                                        f"catalog but CAN be matched by {field} matcher strategies"
                                     ),
                                 }
                             )
