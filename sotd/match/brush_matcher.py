@@ -1598,9 +1598,8 @@ class BrushMatcher:
                     if knot_result and knot_result.matched:
                         fiber = knot_result.matched.get("fiber")
                         if fiber:
-                            print(
-                                f"DEBUG: Found fiber '{fiber}' for brand '{brand}' via knot matcher"
-                            )
+                            # Fiber found via knot matcher - no debug output needed
+                            pass
 
             # Use knot-specific information if available
             # Use knot model if available, otherwise brush model
@@ -1675,7 +1674,7 @@ class BrushMatcher:
             }
             m["handle"]["_matched_by"] = handle_matched_by
             m["handle"]["_pattern"] = handle_pattern
-            print("DEBUG handle dict:", m["handle"])  # DEBUG
+            # Debug output removed - no debug output needed
 
             m["knot"] = {
                 "brand": knot_brand,

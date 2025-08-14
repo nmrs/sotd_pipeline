@@ -360,6 +360,7 @@ class BrushValidationCountingService:
 
             if strategy in [
                 "correct_complete_brush",
+                "correct_split_brush",
             ]:
                 normalized_text = brush_entry.get("normalized", "")
                 if normalized_text:
@@ -394,6 +395,7 @@ class BrushValidationCountingService:
             strategy = brush_entry.get("strategy")
             if strategy in [
                 "correct_complete_brush",
+                "correct_split_brush",
             ]:
                 normalized_text = brush_entry.get("normalized", "")
                 if normalized_text:
@@ -457,7 +459,7 @@ class BrushValidationCountingService:
                     continue
                 brush_entry = record["brush"]
                 strategy = brush_entry.get("strategy")
-                if strategy in ["correct_complete_brush"]:
+                if strategy in ["correct_complete_brush", "correct_split_brush"]:
                     normalized_text = brush_entry.get("normalized", "")
                     if normalized_text:
                         processed_texts.add(normalized_text.lower().strip())

@@ -15,7 +15,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 import argparse  # noqa: E402
-from typing import Dict, List, Optional  # noqa: E402
+from typing import Dict, List, Optional, Any  # noqa: E402
 
 from rich.console import Console  # noqa: E402
 
@@ -191,7 +191,7 @@ class ValidateCorrectMatches:
         for field in fields_to_validate:
             try:
                 if args.catalog_validation:
-                    issues = self.validate_correct_matches_against_catalog(field)
+                    issues = self.validate_correct_matches_against_catalog(field, args.verbose)
                 else:
                     issues = self._validate_field(field)
                 all_issues[field] = issues
@@ -233,9 +233,9 @@ class ValidateCorrectMatches:
             self.console.print("-" * 40)
 
             for issue in issues:
-                severity = issue.get("severity", "unknown")
-                issue_type = issue.get("issue_type", "unknown")
-                suggested_action = issue.get("suggested_action", "")
+                # Handle both old and new issue formats
+                issue_type = issue.get("issue_type") or issue.get("type", "unknown")
+                severity = issue.get("severity", "medium")  # Default to medium for new format
 
                 # Color coding based on severity
                 if severity == "high":
@@ -245,12 +245,27 @@ class ValidateCorrectMatches:
                 else:
                     severity_icon = "🔵"
 
-                # For catalog validation issues, show the essential details in the main message
-                if issue_type in ["catalog_pattern_mismatch", "catalog_pattern_no_match"]:
+                # For new catalog validation issues, show the essential details
+                if issue_type in ["missing_brand", "missing_model", "wrong_location"]:
+                    string = issue.get("string", "unknown")
+                    expected_location = issue.get("expected_location", "unknown")
+                    actual_location = issue.get("actual_location", "unknown")
+                    message = issue.get("message", "")
+
+                    main_message = f"'{string}' should be at {expected_location}"
+                    if actual_location != "not found":
+                        main_message += f" (currently at {actual_location})"
+
+                    self.console.print(f"{severity_icon} {issue_type}: {main_message}")
+                    if message:
+                        self.console.print(f"   {message}")
+
+                # For old catalog validation issues, show the essential details in the main message
+                elif issue_type in ["catalog_pattern_mismatch", "catalog_pattern_no_match"]:
                     correct_match = issue.get("correct_match", "unknown")
                     expected_brand = issue.get("expected_brand", "unknown")
                     expected_model = issue.get("expected_model", "unknown")
-                    
+
                     if issue_type == "catalog_pattern_mismatch":
                         actual_brand = issue.get("actual_brand", "unknown")
                         actual_model = issue.get("actual_model", "unknown")
@@ -263,10 +278,11 @@ class ValidateCorrectMatches:
                             f"'{correct_match}' expected: {expected_brand} "
                             f"{expected_model}, actual: NO MATCH"
                         )
-                    
+
                     self.console.print(f"{severity_icon} {issue_type}: {main_message}")
                 else:
                     # For other issue types, show the suggested action
+                    suggested_action = issue.get("suggested_action", "")
                     self.console.print(f"{severity_icon} {issue_type}: {suggested_action}")
 
                 if verbose and "details" in issue:
@@ -304,171 +320,184 @@ class ValidateCorrectMatches:
 
         # MOST IMPORTANT: Validate that every string still matches to the same categorization
         # This ensures catalog updates don't break previously approved matches
-        catalog_validation_issues = self.validate_correct_matches_against_catalog(field)
+        catalog_validation_issues = self.validate_correct_matches_against_catalog(
+            field, False
+        )  # No verbose in this context
         issues.extend(catalog_validation_issues)
 
         return issues
 
-    def validate_correct_matches_against_catalog(self, field: str) -> List[Dict]:
+    def validate_correct_matches_against_catalog(
+        self, field: str, verbose: bool = False
+    ) -> List[Dict]:
         """
         Validate that existing correct_matches.yaml entries would still match
-        to the same brand/model combinations using current catalog patterns.
+        to the same categorization by generating a "what should be" version
+        and diffing it against the current one.
 
-        This is for backward validation when catalog patterns are updated to ensure
-        existing correct matches haven't been broken by pattern changes.
+        This ensures catalog updates don't break previously approved matches
+        by reusing the existing matcher logic to determine where strings should be saved.
 
         Args:
-            field: Field type to validate (razor, blade, brush, soap)
+            field: Field type to validate
+            verbose: Whether to show verbose debug output
 
         Returns:
-            List of validation issues where correct matches would now map to
-            different brand/model
+            List of validation issues found
         """
-        if self.correct_matches is None:
-            try:
-                self.correct_matches = self._load_correct_matches()
-            except FileNotFoundError:
-                return []
+        if field != "brush":
+            # Only brush field is supported for now
+            return []
+
+        # Ensure correct_matches is loaded
+        if not self.correct_matches:
+            self._load_correct_matches()
 
         issues = []
 
-        # Check if field exists in correct matches
-        if field not in self.correct_matches:
-            return issues
-
-        # Create fresh matchers with correct_matches bypassed for validation
-        # Note: These are not used directly - the _match_using_catalog_patterns
-        # method creates properly configured fresh matchers as needed
-
-        # Get the matcher for this field
+        # Get the brush matcher to determine where strings should be saved
         matcher = self._get_matcher(field)
 
-        # Validate each correct match entry
-        if field == "blade":
-            # Special handling for blade structure: format -> brand -> model -> strings
-            for format, brands in self.correct_matches[field].items():
-                for brand, models in brands.items():
-                    for model, correct_matches in models.items():
-                        for correct_match in correct_matches:
-                            # Use the actual matcher to see what this would match to
-                            match_result = self._match_using_catalog_patterns(
-                                matcher, correct_match
-                            )
+        # Generate "what should be" correct_matches.yaml by running all strings through matchers
+        expected_structure = self._generate_expected_correct_matches_structure(matcher, verbose)
 
-                            # Check if the match result matches our expected brand/model
-                            if match_result and "brand" in match_result and "model" in match_result:
-                                actual_brand = match_result["brand"]
-                                actual_model = match_result["model"]
-                                conflicting_pattern = match_result.get("pattern", "unknown")
+        # Compare expected vs actual structure
+        comparison_issues = self._compare_structures(
+            expected_structure, self.correct_matches or {}, verbose
+        )
+        issues.extend(comparison_issues)
 
-                                if actual_brand != brand or actual_model != model:
-                                    issues.append(
-                                        {
-                                            "issue_type": "catalog_pattern_mismatch",
-                                            "field": field,
-                                            "correct_match": correct_match,
-                                            "expected_brand": brand,
-                                            "expected_model": model,
-                                            "actual_brand": actual_brand,
-                                            "actual_model": actual_model,
-                                            "severity": "high",
-                                            "suggested_action": (
-                                                f"Catalog pattern update has broken this correct "
-                                                f"match. Either update the correct match to "
-                                                f"{actual_brand} {actual_model} or adjust the "
-                                                f"catalog pattern to maintain the original mapping."
-                                            ),
-                                            "details": (
-                                                f"Correct match '{correct_match}' was expected to "
-                                                f"map to {brand} {model} but now maps to "
-                                                f"{actual_brand} {actual_model} "
-                                                f"due to catalog pattern changes. "
-                                                f"Conflicting pattern: '{conflicting_pattern}'"
-                                            ),
-                                        }
-                                    )
-                            else:
-                                # No match found - this is also a problem
-                                issues.append(
-                                    {
-                                        "issue_type": "catalog_pattern_no_match",
-                                        "field": field,
-                                        "correct_match": correct_match,
-                                        "expected_brand": brand,
-                                        "expected_model": model,
-                                        "severity": "high",
-                                        "suggested_action": (
-                                            f"Correct match '{correct_match}' no longer matches "
-                                            f"any catalog pattern. Either add a pattern for this "
-                                            f"entry or remove it from correct_matches.yaml."
-                                        ),
-                                        "details": (
-                                            f"Correct match '{correct_match}' was expected to "
-                                            f"map to {brand} {model} but no longer matches any "
-                                            f"catalog pattern."
-                                        ),
-                                    }
-                                )
-        else:
-            # Standard handling for other fields: brand -> model -> strings
-            for brand, models in self.correct_matches[field].items():
-                for model, correct_matches in models.items():
-                    for correct_match in correct_matches:
-                        # Use the actual matcher to see what this would match to
-                        match_result = self._match_using_catalog_patterns(matcher, correct_match)
+        return issues
 
-                        # Check if the match result matches our expected brand/model
-                        if match_result and "brand" in match_result and "model" in match_result:
-                            actual_brand = match_result["brand"]
+    def _generate_expected_correct_matches_structure(
+        self, matcher, verbose: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Generate the expected correct_matches.yaml structure by running all strings
+        through the matchers (bypassing correct_matches.yaml).
+
+        Returns:
+            Dictionary representing what the correct_matches.yaml should look like
+        """
+        expected_structure = {"brush": {}}
+
+        # Get all brush entries from current correct_matches.yaml
+        brush_section = (self.correct_matches or {}).get("brush", {})
+
+        for brand, brand_data in brush_section.items():
+            if not isinstance(brand_data, dict):
+                continue
+
+            for model, strings in brand_data.items():
+                if not isinstance(strings, list):
+                    continue
+
+                for correct_match in strings:
+                    # Run through matcher to see where this string should be saved
+                    match_result = self._match_using_catalog_patterns(matcher, correct_match)
+
+                    if verbose:
+                        print(f"\n🔍 DEBUG: Testing '{correct_match}'")
+                        print(f"   Expected: {brand} {model}")
+                        print(f"   Match result: {match_result}")
+
+                    if match_result and "brand" in match_result:
+                        actual_brand = match_result["brand"]
+
+                        # For brush matches, check both top-level model and knot.model
+                        actual_model = None
+                        if "model" in match_result and match_result["model"] is not None:
                             actual_model = match_result["model"]
+                        elif "knot" in match_result and isinstance(match_result["knot"], dict):
+                            # Check if model info is in the knot field when top-level is None
+                            knot_data = match_result["knot"]
+                            if "model" in knot_data and knot_data["model"] is not None:
+                                actual_model = knot_data["model"]
 
-                            if actual_brand != brand or actual_model != model:
-                                issues.append(
-                                    {
-                                        "issue_type": "catalog_pattern_mismatch",
-                                        "field": field,
-                                        "correct_match": correct_match,
-                                        "expected_brand": brand,
-                                        "expected_model": model,
-                                        "actual_brand": actual_brand,
-                                        "actual_model": actual_model,
-                                        "severity": "high",
-                                        "suggested_action": (
-                                            f"Catalog pattern update has broken this correct "
-                                            f"match. Either update the correct match to "
-                                            f"{actual_brand} {actual_model} or adjust the "
-                                            f"catalog pattern to maintain the original mapping."
-                                        ),
-                                        "details": (
-                                            f"Correct match '{correct_match}' was expected to "
-                                            f"map to {brand} {model} but now maps to "
-                                            f"{actual_brand} {actual_model} "
-                                            f"due to catalog pattern changes."
-                                        ),
-                                    }
-                                )
-                        else:
-                            # No match found - this is also a problem
-                            issues.append(
-                                {
-                                    "issue_type": "catalog_pattern_no_match",
-                                    "field": field,
-                                    "correct_match": correct_match,
-                                    "expected_brand": brand,
-                                    "expected_model": model,
-                                    "severity": "high",
-                                    "suggested_action": (
-                                        f"Correct match '{correct_match}' no longer matches any "
-                                        f"catalog pattern. Either add a pattern for this entry "
-                                        f"or remove it from correct_matches.yaml."
-                                    ),
-                                    "details": (
-                                        f"Correct match '{correct_match}' was expected to "
-                                        f"map to {brand} {model} but no longer matches any "
-                                        f"catalog pattern."
-                                    ),
-                                }
-                            )
+                        # Add to expected structure
+                        if actual_brand not in expected_structure["brush"]:
+                            expected_structure["brush"][actual_brand] = {}
+
+                        if actual_model not in expected_structure["brush"][actual_brand]:
+                            expected_structure["brush"][actual_brand][actual_model] = []
+
+                        expected_structure["brush"][actual_brand][actual_model].append(
+                            correct_match
+                        )
+
+        return expected_structure
+
+    def _compare_structures(
+        self, expected: Dict[str, Any], actual: Dict[str, Any], verbose: bool = False
+    ) -> List[Dict]:
+        """
+        Compare expected vs actual correct_matches.yaml structures and return issues.
+
+        Args:
+            expected: Expected structure from matcher output
+            actual: Current correct_matches.yaml structure
+            verbose: Whether to show verbose output
+
+        Returns:
+            List of validation issues found
+        """
+        issues = []
+
+        # Compare brush section
+        expected_brush = expected.get("brush", {})
+        actual_brush = actual.get("brush", {})
+
+        # Check for strings that should be in different locations
+        for brand, brand_data in expected_brush.items():
+            if brand not in actual_brush:
+                # Brand doesn't exist in actual
+                for model, strings in brand_data.items():
+                    for string in strings:
+                        issue = {
+                            "type": "missing_brand",
+                            "string": string,
+                            "expected_location": f"{brand} {model}",
+                            "actual_location": "not found",
+                            "message": f"String '{string}' should be saved under brand '{brand}' "
+                            f"model '{model}' but this brand doesn't exist in "
+                            f"correct_matches.yaml. This suggests a new brand needs "
+                            f"to be added.",
+                        }
+                        issues.append(issue)
+                continue
+
+            actual_brand_data = actual_brush[brand]
+            for model, strings in brand_data.items():
+                if model not in actual_brand_data:
+                    # Model doesn't exist in actual
+                    for string in strings:
+                        issue = {
+                            "type": "missing_model",
+                            "string": string,
+                            "expected_location": f"{brand} {model}",
+                            "actual_location": f"{brand} (model not found)",
+                            "message": f"String '{string}' should be saved under brand '{brand}' "
+                            f"model '{model}' but this model doesn't exist in "
+                            f"correct_matches.yaml. This suggests a new model needs "
+                            f"to be added.",
+                        }
+                        issues.append(issue)
+                    continue
+
+                actual_strings = actual_brand_data[model]
+                for string in strings:
+                    if string not in actual_strings:
+                        # String is in wrong location
+                        issue = {
+                            "type": "wrong_location",
+                            "string": string,
+                            "expected_location": f"{brand} {model}",
+                            "actual_location": "not found in expected location",
+                            "message": f"String '{string}' should be saved under brand '{brand}' "
+                            f"model '{model}' but it's not found there. "
+                            f"This suggests the string needs to be moved.",
+                        }
+                        issues.append(issue)
 
         return issues
 

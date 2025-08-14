@@ -50,119 +50,166 @@ class CorrectMatchesUpdater:
             action_type: Type of action ("validated" or "overridden")
             field_type: Field type ("brush", "handle", "knot", etc.)
         """
-        # Load existing data
-        data = self.load_correct_matches()
+        import logging
 
-        # Preserve original casing for storage, but normalize for lookup
-        original_text = input_text.strip()
-        normalized_text = input_text.lower().strip()
+        logger = logging.getLogger(__name__)
 
-        # For brush field, use the hierarchical structure
-        if field_type == "brush":
-            # Ensure field section exists
-            if field_type not in data:
-                data[field_type] = {}
+        try:
+            logger.debug(
+                f"Adding/updating entry: input_text='{input_text}', field_type='{field_type}'"
+            )
 
-            # Extract brand and model from result data
-            brand = result_data.get("brand")
-            model = result_data.get("model")
+            # Load existing data
+            data = self.load_correct_matches()
 
-            if brand:
-                # Ensure brand section exists
-                if brand not in data[field_type]:
-                    data[field_type][brand] = {}
+            # Preserve original casing for storage, but normalize for lookup
+            original_text = input_text.strip()
+            normalized_text = input_text.lower().strip()
 
-                # Handle dual-component brushes where model is null
-                if model is None:
-                    # For dual-component brushes, use a special model identifier
-                    # This allows them to be stored in correct_matches.yaml
-                    model_key = "dual_component"
+            # For brush field, use the hierarchical structure
+            if field_type == "brush":
+                logger.debug("Processing brush field type")
+                # Ensure field section exists
+                if field_type not in data:
+                    data[field_type] = {}
+
+                # Extract brand and model from result data
+                brand = result_data.get("brand")
+                model = result_data.get("model")
+
+                if brand:
+                    # Ensure brand section exists
+                    if brand not in data[field_type]:
+                        data[field_type][brand] = {}
+
+                    # Handle dual-component brushes where model is null
+                    if model is None:
+                        # For dual-component brushes, use a special model identifier
+                        # This allows them to be stored in correct_matches.yaml
+                        model_key = "dual_component"
+                    else:
+                        model_key = model
+
+                    # Ensure model section exists
+                    if model_key not in data[field_type][brand]:
+                        data[field_type][brand][model_key] = []
+
+                    # Add the original text as a pattern if not already present
+                    # Check for case-insensitive duplicates to avoid storing the same text
+                    # multiple times
+                    existing_patterns = data[field_type][brand][model_key]
+                    if not any(pattern.lower() == normalized_text for pattern in existing_patterns):
+                        existing_patterns.append(original_text)
+                        logger.debug(
+                            f"Added pattern '{original_text}' to brush/{brand}/{model_key}"
+                        )
+
+            # For handle and knot fields, use flat structure
+            elif field_type in ["handle", "knot"]:
+                logger.debug(f"Processing {field_type} field type")
+                # Ensure field section exists
+                if field_type not in data:
+                    data[field_type] = {}
+
+                # Add entry with original text as key, but check for case-insensitive duplicates
+                if not any(key.lower() == normalized_text for key in data[field_type]):
+                    data[field_type][original_text] = result_data
+                    logger.debug(f"Added entry '{original_text}' to {field_type} section")
+
+            # For split_brush field, store handle/knot mapping
+            elif field_type == "split_brush":
+                logger.debug("Processing split_brush field type")
+                # Extract handle and knot components from the dual-component brush
+                handle_data = result_data.get("handle", {})
+                knot_data = result_data.get("knot", {})
+
+                logger.debug(f"Handle data: {handle_data}")
+                logger.debug(f"Knot data: {knot_data}")
+
+                # Handle both string and dict formats for backward compatibility
+                if isinstance(handle_data, str):
+                    handle_data = {"brand": "Unknown", "model": handle_data}
+                if isinstance(knot_data, str):
+                    knot_data = {"brand": "Unknown", "model": knot_data}
+
+                if handle_data and knot_data:
+                    # Store handle component in handle section
+                    handle_brand = handle_data.get("brand")
+                    handle_model = handle_data.get("model")
+
+                    logger.debug(
+                        f"Processing handle: brand='{handle_brand}', model='{handle_model}'"
+                    )
+
+                    if handle_brand and handle_model:
+                        # Ensure handle section exists
+                        if "handle" not in data:
+                            data["handle"] = {}
+                        if handle_brand not in data["handle"]:
+                            data["handle"][handle_brand] = {}
+                        if handle_model not in data["handle"][handle_brand]:
+                            data["handle"][handle_brand][handle_model] = []
+
+                        # Add the original text to handle section if not already present
+                        existing_patterns = data["handle"][handle_brand][handle_model]
+                        if not any(
+                            pattern.lower() == normalized_text for pattern in existing_patterns
+                        ):
+                            existing_patterns.append(original_text)
+                            logger.debug(
+                                f"Added pattern '{original_text}' to handle/{handle_brand}/{handle_model}"
+                            )
+
+                    # Store knot component in knot section
+                    knot_brand = knot_data.get("brand")
+                    knot_model = knot_data.get("model")
+
+                    logger.debug(f"Processing knot: brand='{knot_brand}', model='{knot_model}'")
+
+                    if knot_brand and knot_model:
+                        # Ensure knot section exists
+                        if "knot" not in data:
+                            data["knot"] = {}
+                        if knot_brand not in data["knot"]:
+                            data["knot"][knot_brand] = {}
+                        if knot_model not in data["knot"][knot_brand]:
+                            data["knot"][knot_brand][knot_model] = []
+
+                        # Add the original text to knot section if not already present
+                        existing_patterns = data["knot"][knot_brand][knot_model]
+                        if not any(
+                            pattern.lower() == normalized_text for pattern in existing_patterns
+                        ):
+                            existing_patterns.append(original_text)
+                            logger.debug(
+                                f"Added pattern '{original_text}' to knot/{knot_brand}/{knot_model}"
+                            )
                 else:
-                    model_key = model
+                    logger.warning(
+                        f"Missing handle or knot data for split_brush: handle={handle_data}, knot={knot_data}"
+                    )
+                    # Fallback: if we can't extract components, store as regular brush
+                    # This shouldn't happen with proper dual-component data
+                    if "brush" not in data:
+                        data["brush"] = {}
+                    if "dual_component" not in data["brush"]:
+                        data["brush"]["dual_component"] = []
 
-                # Ensure model section exists
-                if model_key not in data[field_type][brand]:
-                    data[field_type][brand][model_key] = []
-
-                # Add the original text as a pattern if not already present
-                # Check for case-insensitive duplicates to avoid storing the same text
-                # multiple times
-                existing_patterns = data[field_type][brand][model_key]
-                if not any(pattern.lower() == normalized_text for pattern in existing_patterns):
-                    existing_patterns.append(original_text)
-
-        # For handle and knot fields, use flat structure
-        elif field_type in ["handle", "knot"]:
-            # Ensure field section exists
-            if field_type not in data:
-                data[field_type] = {}
-
-            # Add entry with original text as key, but check for case-insensitive duplicates
-            if not any(key.lower() == normalized_text for key in data[field_type]):
-                data[field_type][original_text] = result_data
-
-        # For split_brush field, store handle/knot mapping
-        elif field_type == "split_brush":
-            # Extract handle and knot components from the dual-component brush
-            handle_data = result_data.get("handle", {})
-            knot_data = result_data.get("knot", {})
-
-            # Handle both string and dict formats for backward compatibility
-            if isinstance(handle_data, str):
-                handle_data = {"brand": "Unknown", "model": handle_data}
-            if isinstance(knot_data, str):
-                knot_data = {"brand": "Unknown", "model": knot_data}
-
-            if handle_data and knot_data:
-                # Store handle component in handle section
-                handle_brand = handle_data.get("brand")
-                handle_model = handle_data.get("model")
-
-                if handle_brand and handle_model:
-                    # Ensure handle section exists
-                    if "handle" not in data:
-                        data["handle"] = {}
-                    if handle_brand not in data["handle"]:
-                        data["handle"][handle_brand] = {}
-                    if handle_model not in data["handle"][handle_brand]:
-                        data["handle"][handle_brand][handle_model] = []
-
-                    # Add the original text to handle section if not already present
-                    existing_patterns = data["handle"][handle_brand][handle_model]
+                    existing_patterns = data["brush"]["dual_component"]
                     if not any(pattern.lower() == normalized_text for pattern in existing_patterns):
                         existing_patterns.append(original_text)
+                        logger.debug(
+                            f"Added pattern '{original_text}' to brush/dual_component (fallback)"
+                        )
 
-                # Store knot component in knot section
-                knot_brand = knot_data.get("brand")
-                knot_model = knot_data.get("model")
+            # Save the updated data
+            logger.debug("Saving updated correct_matches.yaml")
+            self.save_correct_matches(data)
+            logger.debug("Successfully saved correct_matches.yaml")
 
-                if knot_brand and knot_model:
-                    # Ensure knot section exists
-                    if "knot" not in data:
-                        data["knot"] = {}
-                    if knot_brand not in data["knot"]:
-                        data["knot"][knot_brand] = {}
-                    if knot_model not in data["knot"][knot_brand]:
-                        data["knot"][knot_brand][knot_model] = []
-
-                    # Add the original text to knot section if not already present
-                    existing_patterns = data["knot"][knot_brand][knot_model]
-                    if not any(pattern.lower() == normalized_text for pattern in existing_patterns):
-                        existing_patterns.append(original_text)
-            else:
-                # Fallback: if we can't extract components, store as regular brush
-                # This shouldn't happen with proper dual-component data
-                if "brush" not in data:
-                    data["brush"] = {}
-                if "dual_component" not in data["brush"]:
-                    data["brush"]["dual_component"] = []
-
-                existing_patterns = data["brush"]["dual_component"]
-                if not any(pattern.lower() == normalized_text for pattern in existing_patterns):
-                    existing_patterns.append(original_text)
-
-        # Save the updated data
-        self.save_correct_matches(data)
+        except Exception as e:
+            logger.error(f"Error in add_or_update_entry: {e}")
+            raise
 
     def save_correct_matches(self, data: Optional[Dict[str, Any]] = None) -> None:
         """
@@ -291,4 +338,40 @@ class CorrectMatchesUpdater:
         Returns:
             True if entry exists, False otherwise
         """
-        return self.get_entry(input_text, field_type) is not None
+        data = self.load_correct_matches()
+        normalized_text = input_text.lower().strip()
+
+        if field_type not in data and field_type != "split_brush":
+            return False
+
+        if field_type == "brush":
+            # Search through brand/model hierarchy with case-insensitive lookup
+            for brand in data[field_type]:
+                for model in data[field_type][brand]:
+                    for pattern in data[field_type][brand][model]:
+                        if pattern.lower() == normalized_text:
+                            return True
+        elif field_type == "split_brush":
+            # For split_brush, check both handle and knot sections
+            # since the entry is stored in both sections
+            if "handle" in data:
+                for brand in data["handle"]:
+                    for model in data["handle"][brand]:
+                        for pattern in data["handle"][brand][model]:
+                            if pattern.lower() == normalized_text:
+                                return True
+
+            if "knot" in data:
+                for brand in data["knot"]:
+                    for model in data["knot"][brand]:
+                        for pattern in data["knot"][brand][model]:
+                            if pattern.lower() == normalized_text:
+                                return True
+        else:
+            # For flat structures like handle, knot
+            # Find the actual key (preserving case)
+            for key in data[field_type]:
+                if key.lower() == normalized_text:
+                    return True
+
+        return False
