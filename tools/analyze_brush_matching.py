@@ -178,6 +178,11 @@ def analyze_brush_matching(
 
                     if matched_data:
                         print("   📝 Matched Data:")
+
+                        # Debug: Show all available fields for this strategy
+                        if debug:
+                            print(f"     🔍 Available fields: {list(matched_data.keys())}")
+
                         # Show key information in a clean way
                         if "brand" in matched_data and matched_data["brand"]:
                             print(f"     🏷️  Brand: {matched_data['brand']}")
@@ -195,6 +200,8 @@ def analyze_brush_matching(
                                 print(f"     🖐️  Handle: {handle['brand']}")
                                 if handle.get("model"):
                                     print(f"        Model: {handle['model']}")
+                                if handle.get("material"):
+                                    print(f"        Material: {handle['material']}")
 
                         if "knot" in matched_data and matched_data["knot"]:
                             knot = matched_data["knot"]
@@ -207,20 +214,39 @@ def analyze_brush_matching(
                                 if knot.get("knot_size_mm"):
                                     print(f"        Size: {knot['knot_size_mm']}mm")
 
+                        # Show strategy-specific fields
+                        if "user_intent" in matched_data and matched_data["user_intent"]:
+                            print(f"     🎯 User Intent: {matched_data['user_intent']}")
+                        if "strategy" in matched_data and matched_data["strategy"]:
+                            print(f"     🔧 Strategy: {matched_data['strategy']}")
+                        if "score" in matched_data and matched_data["score"]:
+                            print(f"     💯 Score: {matched_data['score']}")
+                        if (
+                            "_matched_by_strategy" in matched_data
+                            and matched_data["_matched_by_strategy"]
+                        ):
+                            print(
+                                f"     🔧 Matched By Strategy: {matched_data['_matched_by_strategy']}"
+                            )
+                        if "_pattern_used" in matched_data and matched_data["_pattern_used"]:
+                            print(f"     🔍 Pattern Used: {matched_data['_pattern_used']}")
+
                         # Show other relevant fields
+                        excluded_keys = [
+                            "brand",
+                            "model",
+                            "fiber",
+                            "knot_size_mm",
+                            "handle",
+                            "knot",
+                            "_matched_by",
+                            "_pattern_used",
+                            "_matched_from",
+                            "source_text",
+                            "strategy",
+                            "score",
+                        ]
                         for key, value in matched_data.items():
-                            excluded_keys = [
-                                "brand",
-                                "model",
-                                "fiber",
-                                "knot_size_mm",
-                                "handle",
-                                "knot",
-                                "_matched_by",
-                                "_pattern_used",
-                                "_matched_from",
-                                "source_text",
-                            ]
                             if key not in excluded_keys:
                                 if value and value != "Unknown":
                                     print(f"     🔧 {key.replace('_', ' ').title()}: {value}")
@@ -251,33 +277,59 @@ def analyze_brush_matching(
                     _show_modifier_details(strategy, brush_string, result.matched)
 
                     print("\n  📝 Final Result:")
-                    if "brand" in result.matched and result.matched["brand"]:
-                        print(f"     🏷️  Brand: {result.matched['brand']}")
-                    if "model" in result.matched and result.matched["model"]:
-                        print(f"     🏷️  Model: {result.matched['model']}")
-                    if "fiber" in result.matched and result.matched["fiber"]:
-                        print(f"     🧶 Fiber: {result.matched['fiber']}")
-                    if "knot_size_mm" in result.matched and result.matched["knot_size_mm"]:
-                        print(f"     📏 Size: {result.matched['knot_size_mm']}mm")
 
-                    # Show handle/knot structure
+                    # Show complete brush structure clearly
+                    print("     🪮 BRUSH COMPONENTS:")
+
+                    # Top-level brush info - ALWAYS show these fields
+                    print("       🏷️  TOP-LEVEL:")
+                    print(f"         Brand: {result.matched.get('brand', 'None')}")
+                    print(f"         Model: {result.matched.get('model', 'None')}")
+                    print(f"         Fiber: {result.matched.get('fiber', 'None')}")
+                    print(f"         Size: {result.matched.get('knot_size_mm', 'None')}mm")
+
+                    # Handle component - ALWAYS show all fields
+                    print("       🖐️  HANDLE:")
                     if "handle" in result.matched and result.matched["handle"]:
                         handle = result.matched["handle"]
-                        if handle.get("brand"):
-                            print(f"     🖐️  Handle: {handle['brand']}")
-                            if handle.get("model"):
-                                print(f"        Model: {handle['model']}")
+                        print(f"         Brand: {handle.get('brand', 'None')}")
+                        print(f"         Model: {handle.get('model', 'None')}")
+                        print(f"         Material: {handle.get('material', 'None')}")
+                    else:
+                        print("         (No handle data)")
 
+                    # Knot component - ALWAYS show all fields
+                    print("       🧶 KNOT:")
                     if "knot" in result.matched and result.matched["knot"]:
                         knot = result.matched["knot"]
-                        if knot.get("brand"):
-                            print(f"     🧶 Knot: {knot['brand']}")
-                            if knot.get("model"):
-                                print(f"        Model: {knot['model']}")
-                            if knot.get("fiber"):
-                                print(f"        Fiber: {knot['fiber']}")
-                            if knot.get("knot_size_mm"):
-                                print(f"        Size: {knot['knot_size_mm']}mm")
+                        print(f"         Brand: {knot.get('brand', 'None')}")
+                        print(f"         Model: {knot.get('model', 'None')}")
+                        print(f"         Fiber: {knot.get('fiber', 'None')}")
+                        print(f"         Size: {knot.get('knot_size_mm', 'None')}mm")
+                    else:
+                        print("         (No knot data)")
+
+                    # Show other relevant fields
+                    other_fields = []
+                    for key, value in result.matched.items():
+                        excluded_keys = [
+                            "brand",
+                            "model",
+                            "fiber",
+                            "knot_size_mm",
+                            "handle",
+                            "knot",
+                            "strategy",
+                            "score",
+                        ]
+                        if key not in excluded_keys:
+                            if value and value != "Unknown":
+                                other_fields.append(f"{key.replace('_', ' ').title()}: {value}")
+
+                    if other_fields:
+                        print("       🔧 OTHER FIELDS:")
+                        for field in other_fields:
+                            print(f"         {field}")
                 else:
                     print("  ❌ No final result")
 
