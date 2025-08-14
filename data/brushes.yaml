@@ -232,6 +232,42 @@ known_brushes:
       patterns:
       - ^(?!.*dog|zen).*(declaration|\bdg\b).*\bb18\b
       - ^(?!.*dog|zen).*\bb18\b  
+  Dogwood:
+    Boar:
+      patterns:
+      - dogwood.*boar
+      knot:
+        brand: Maggard
+        fiber: Boar
+        model: Boar
+    SHD Badger:
+      patterns:
+      - dogwood.*\bshd\b
+      knot:
+        brand: Maggard
+        fiber: Badger
+        model: SHD Badger
+    Synthetic:
+      patterns:
+      - dogwood.*syn
+      knot:
+        brand: Maggard
+        fiber: Synthetic
+        model: Synthetic
+    Timberwolf:
+      patterns:
+      - dogwood.*timberwolf
+      knot:
+        brand: Maggard
+        fiber: Synthetic
+        model: Timberwolf
+    Tuxedo:
+      patterns:
+      - dogwood.*tuxedo
+      knot:
+        brand: Maggard
+        fiber: Synthetic
+        model: Tuxedo
   Dreadnought:
     Avenger:
       fiber: Boar
@@ -399,6 +435,11 @@ known_brushes:
       fiber: Synthetic
       patterns:
       - power.*rangers.*syn
+  Rad Dinosaur Creations:
+    Raptor:
+      fiber: Synthetic
+      patterns:
+      - rad.*dinosaur.*raptor
   RazoRock:
     Big Bruce:
       fiber: Synthetic

@@ -578,11 +578,6 @@ brush:
   All-Star Grooming Co.:
     Shave Brush:
     - all-star grooming company - badger
-  Alpha:
-    Amber:
-    - alpha amber
-    Bulldog:
-    - alpha bulldog ti
   Aurora Grooming:
     LG24:
     - aurora grooming lg 2024 synthetic ('lux emerald green')
@@ -616,8 +611,8 @@ brush:
     v19:
     - chisel & hound mighty duck v19 fanchurian badger
     - chisel & hound the diplomat 26mm v19 fanchurian badger knot
-    v20:
     - chisel & hound desert ranger v20
+    v20:
     - chisel & hound fu dao flare 26mm v20 fanchurian badger knot
     - chisel and hound - bangalore v20 26mm badger
     - chisel and hound desert ranger v20
@@ -672,10 +667,8 @@ brush:
     - declaration grooming bok b14
     - declaration grooming know it all 28mm b14 badger knot
     - declaration grooming washington envy b14 shd badger
-    - dogwood handcrafts ivory dg b14 28mm badger
     B15:
     - declaration grooming jefferson artist's choice b15 shd badger
-    - dogwood handcrafts dg b15 coprolite
     B16:
     - 6dg b16 thaw washington badger
     - declaration grooming - cream jefferson - 28mm b16
@@ -697,7 +690,6 @@ brush:
     B9A:
     - declaration grooming - lavender jefferson - 28mm b9a+
     - dg b9a
-    - summer break soaps dg b9a
   Dreadnought:
     Avenger:
     - dreadnought avenger
@@ -862,10 +854,27 @@ handle:
     Outlaw:
     - alpha outlaw silver stf++
     - alpha shaving works outlaw 28mm g5
+  Aylsworth Razors:
+    Unspecified:
+    - Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm SHD
+  Chisel & Hound:
+    Unspecified:
+    - Chisel and Hound Padauk Wood handle
   Heritage Collection:
     Unspecified:
     - Heritage Shaving C-Mon 28 mm
+  Rad Dinosaur Creations:
+    Unspecified:
+    - Rad Dinosaur Creations - Jetson - 25mm Muhle STF
+    - Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip
+    - Rad Dinosaur Creations >!EXPUNGED!< w/ Raptor Synthetic
+    - Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan
 knot:
+  AP Shave Co:
+    Pure Bliss SHD:
+    - Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm SHD
+    Synbad:
+    - Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan
   Alpha:
     G5:
     - alpha shaving works outlaw 28mm g5
@@ -875,6 +884,13 @@ knot:
   Mühle:
     STF:
     - alpha outlaw silver stf++
+    - Rad Dinosaur Creations - Jetson - 25mm Muhle STF
+  Rad Dinosaur Creations:
+    Raptor:
+    - Rad Dinosaur Creations >!EXPUNGED!< w/ Raptor Synthetic
+  Turn-N-Shave:
+    Tip (Badger):
+    - Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip
 razor:
   3D Printed:
     DE:

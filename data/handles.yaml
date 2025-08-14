@@ -121,7 +121,7 @@ artisan_handles:
     Unspecified:
       patterns:
       - dogwoo
-      - dogwood.*handcrafts+
+      - dogwood.*(handcrafts+)?(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - dogc*l
       - ^voa
       - \bdw\b
@@ -314,7 +314,7 @@ artisan_handles:
   Summer Break:
     Unspecified:
       patterns:
-      - summer.*break
+      - summer.*break(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - \bsbs\b
   Surrey:
     Unspecified:
@@ -582,7 +582,7 @@ manufacturer_handles:
   Maggard:
     Unspecified:
       patterns:
-      - ^.*mag(g?ard)?s?
+      - maggard
   Maritime Brush Co.:
     Unspecified:
       patterns:
