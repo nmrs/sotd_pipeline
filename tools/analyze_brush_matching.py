@@ -94,6 +94,15 @@ def analyze_brush_matching(
                                 )
                                 legacy_matcher._match_correct_split_brush = dummy_match
 
+                            # Also patch the correct_matches_checker.check method
+                            if hasattr(legacy_matcher, "correct_matches_checker") and hasattr(
+                                legacy_matcher.correct_matches_checker, "check"
+                            ):
+                                original_legacy_methods["correct_matches_checker.check"] = (
+                                    legacy_matcher.correct_matches_checker.check
+                                )
+                                legacy_matcher.correct_matches_checker.check = dummy_match
+
                             # Only need to patch the first legacy matcher we find
                             break
 
