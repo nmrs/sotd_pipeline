@@ -8,8 +8,8 @@ alwaysApply: false
 **Use when**: Implementing features with test-driven development approach.
 
 ```
-Proceed through the remaining tasks in the current step one at a time. After completing each task:
-1. Update the implementation plan to reflect the completed work.
+Proceed through the remaining tasks in the current step one at a time. After completing **each** task:
+1. Update the implementation plan to reflect your findings and progress.
 2. Commit the changes with a clear message summarizing the task completed per .cursor/rules/git-and-cleanup.mdc
 3. Move to the next task.
 4. Run quality checks (for example "make format lint typecheck test" but use whatever is appropriate for the current work) only before commits, not after every task.
