@@ -193,6 +193,149 @@ class ValidateCorrectMatches:
 
         return expected_structure
 
+    def _validate_catalog_existence(
+        self, field: str, original: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        """Validate that brands and models in correct_matches.yaml exist in current catalogs."""
+        issues = []
+
+        if field not in original:
+            return issues
+
+        original_section = original[field]
+
+        if field == "blade":
+            # For blades: validate format -> brand -> model existence
+            for format_name in original_section:
+                for brand_name in original_section[format_name]:
+                    # Check if brand exists in current blade catalog
+                    if not self._brand_exists_in_catalog(field, brand_name, format_name):
+                        issues.append(
+                            {
+                                "type": "invalid_brand",
+                                "field": field,
+                                "format": format_name,
+                                "brand": brand_name,
+                                "message": (
+                                    f"Brand '{brand_name}' does not exist in current {field} "
+                                    f"catalog for format '{format_name}'"
+                                ),
+                            }
+                        )
+                        continue
+
+                    for model_name in original_section[format_name][brand_name]:
+                        # Check if model exists for this brand in current catalog
+                        if not self._model_exists_in_catalog(
+                            field, brand_name, model_name, format_name
+                        ):
+                            issues.append(
+                                {
+                                    "type": "invalid_model",
+                                    "field": field,
+                                    "format": format_name,
+                                    "brand": brand_name,
+                                    "model": model_name,
+                                    "message": (
+                                        f"Model '{model_name}' does not exist for brand "
+                                        f"'{brand_name}' in current {field} catalog for "
+                                        f"format '{format_name}'"
+                                    ),
+                                }
+                            )
+        else:
+            # For other fields: validate brand -> model existence
+            for brand_name in original_section:
+                # Check if brand exists in current catalog
+                if not self._brand_exists_in_catalog(field, brand_name):
+                    issues.append(
+                        {
+                            "type": "invalid_brand",
+                            "field": field,
+                            "brand": brand_name,
+                            "message": f"Brand '{brand_name}' does not exist in current {field} catalog",
+                        }
+                    )
+                    continue
+
+                for model_name in original_section[brand_name]:
+                    # Check if model exists for this brand in current catalog
+                    if not self._model_exists_in_catalog(field, brand_name, model_name):
+                        issues.append(
+                            {
+                                "type": "invalid_model",
+                                "field": field,
+                                "brand": brand_name,
+                                "model": model_name,
+                                "message": f"Model '{model_name}' does not exist for brand '{brand_name}' in current {field} catalog",
+                            }
+                        )
+
+        return issues
+
+    def _brand_exists_in_catalog(
+        self, field: str, brand_name: str, format_name: str = None
+    ) -> bool:
+        """Check if a brand exists in the current catalog."""
+        try:
+            if field == "blade" and format_name:
+                # For blades, check in the specific format section
+                catalog_data = self._load_catalog_data(field)
+                return format_name in catalog_data and brand_name in catalog_data[format_name]
+            else:
+                # For other fields, check directly in catalog
+                catalog_data = self._load_catalog_data(field)
+                return brand_name in catalog_data
+        except Exception:
+            return False
+
+    def _model_exists_in_catalog(
+        self, field: str, brand_name: str, model_name: str, format_name: str = None
+    ) -> bool:
+        """Check if a model exists for a brand in the current catalog."""
+        try:
+            if field == "blade" and format_name:
+                # For blades, check in the specific format section
+                catalog_data = self._load_catalog_data(field)
+                return (
+                    format_name in catalog_data
+                    and brand_name in catalog_data[format_name]
+                    and model_name in catalog_data[format_name][brand_name]
+                )
+            else:
+                # For other fields, check directly in catalog
+                catalog_data = self._load_catalog_data(field)
+                return brand_name in catalog_data and model_name in catalog_data[brand_name]
+        except Exception:
+            return False
+
+    def _load_catalog_data(self, field: str) -> Dict[str, Any]:
+        """Load catalog data for a specific field."""
+        try:
+            # Use _data_dir if set (for testing), otherwise use default data/ directory
+            base_dir = getattr(self, "_data_dir", None) or Path("data")
+
+            if field == "blade":
+                catalog_path = base_dir / "blades.yaml"
+            elif field == "brush":
+                catalog_path = base_dir / "brushes.yaml"
+            elif field == "razor":
+                catalog_path = base_dir / "razors.yaml"
+            elif field == "soap":
+                catalog_path = base_dir / "soaps.yaml"
+            else:
+                return {}
+
+            if not catalog_path.exists():
+                return {}
+
+            import yaml
+
+            with open(catalog_path, "r", encoding="utf-8") as f:
+                return yaml.safe_load(f) or {}
+        except Exception:
+            return {}
+
     def _compare_structures(
         self, field: str, original: Dict[str, Any], expected: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
@@ -316,13 +459,19 @@ class ValidateCorrectMatches:
 
         logger.info(f"Validating field: {field}")
 
+        # First validate catalog existence (check for invalid brands/models)
+        catalog_issues = self._validate_catalog_existence(field, self.correct_matches)
+
         # Create expected structure using current matchers
         expected_structure = self._create_temp_correct_matches(field, self.correct_matches)
 
         # Compare structures to find drift
-        issues = self._compare_structures(field, self.correct_matches, expected_structure)
+        drift_issues = self._compare_structures(field, self.correct_matches, expected_structure)
 
-        return issues, expected_structure
+        # Combine all issues
+        all_issues = catalog_issues + drift_issues
+
+        return all_issues, expected_structure
 
     def validate_all_fields(self) -> Dict[str, List[Dict[str, Any]]]:
         """Validate all fields for catalog drift."""
