@@ -747,7 +747,23 @@ class ValidateCorrectMatches:
                     for model_name, model_section in brand_section.items():
                         normalized_model = unicodedata.normalize("NFC", model_name)
                         normalized[format_name][normalized_brand][normalized_model] = model_section
-        else:  # Other fields
+        elif "known_brushes" in catalog_data:  # Brush format with nested structure
+            # Handle known_brushes section
+            for brand_name, brand_section in catalog_data["known_brushes"].items():
+                normalized_brand = unicodedata.normalize("NFC", brand_name)
+                normalized[normalized_brand] = {}
+                for model_name, model_section in brand_section.items():
+                    normalized_model = unicodedata.normalize("NFC", model_name)
+                    normalized[normalized_brand][normalized_model] = model_section
+            
+            # Handle other_brushes section
+            for brand_name, brand_section in catalog_data["other_brushes"].items():
+                normalized_brand = unicodedata.normalize("NFC", brand_name)
+                normalized[normalized_brand] = {}
+                for model_name, model_section in brand_section.items():
+                    normalized_model = unicodedata.normalize("NFC", model_name)
+                    normalized[normalized_brand][normalized_model] = model_section
+        else:  # Other fields (razor, soap)
             for brand_name, brand_section in catalog_data.items():
                 normalized_brand = unicodedata.normalize("NFC", brand_name)
                 normalized[normalized_brand] = {}
