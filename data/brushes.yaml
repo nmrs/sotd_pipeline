@@ -1057,6 +1057,10 @@ other_brushes:
     patterns:
     - wcs
     - west.*coast
+  Wolf Whiskers:
+    default: Badger
+    patterns:
+    - wolf.*whiskers
   Yaqi:
     default: Synthetic
     patterns:
