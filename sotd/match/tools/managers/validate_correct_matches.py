@@ -5,6 +5,7 @@ This tool validates correct_matches.yaml against current catalog files to ensure
 previously approved matches are still aligned with catalog updates.
 """
 
+import re
 import sys
 import unicodedata
 from pathlib import Path
@@ -761,7 +762,10 @@ class ValidateCorrectMatches:
                         for check_format, indicators in format_indicators.items():
                             if check_format.lower() != expected_format_lower:
                                 for indicator in indicators:
-                                    if indicator in correct_match_lower:
+                                    # Use word boundary regex to avoid false positives like
+                                    # "blade" containing "de"
+                                    pattern = r"\b" + re.escape(indicator) + r"\b"
+                                    if re.search(pattern, correct_match_lower):
                                         issues.append(
                                             {
                                                 "issue_type": "format_mismatch",
