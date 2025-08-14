@@ -288,11 +288,26 @@ class TestBrushUserActionsManager:
 
     def test_record_validation(self):
         """Test recording a validation action."""
-        system_choice = {"strategy": "dual_component", "score": 85, "result": {}}
-        user_choice = {"strategy": "dual_component", "result": {}}
+        system_choice = {
+            "strategy": "dual_component",
+            "score": 85,
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
+        user_choice = {
+            "strategy": "dual_component",
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
         all_strategies = [
-            {"strategy": "complete_brush", "score": 45, "result": {}},
-            {"strategy": "dual_component", "score": 85, "result": {}},
+            {
+                "strategy": "complete_brush",
+                "score": 45,
+                "result": {"brand": "Test Brand", "model": "Test Model"},
+            },
+            {
+                "strategy": "dual_component",
+                "score": 85,
+                "result": {"brand": "Test Brand", "model": "Test Model"},
+            },
         ]
 
         self.manager.record_validation(
@@ -314,8 +329,15 @@ class TestBrushUserActionsManager:
 
     def test_record_override(self):
         """Test recording an override action."""
-        system_choice = {"strategy": "complete_brush", "score": 60, "result": {}}
-        user_choice = {"strategy": "dual_component", "result": {}}
+        system_choice = {
+            "strategy": "complete_brush",
+            "score": 60,
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
+        user_choice = {
+            "strategy": "dual_component",
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
         all_strategies = []
 
         self.manager.record_override(
@@ -342,8 +364,15 @@ class TestBrushUserActionsManager:
             timestamp=datetime(2025, 7, 1, 12, 0, 0),
             system_used="scoring",
             action="validated",
-            system_choice={"strategy": "test", "score": 50, "result": {}},
-            user_choice={"strategy": "test", "result": {}},
+            system_choice={
+                "strategy": "test",
+                "score": 50,
+                "result": {"brand": "Test Brand 1", "model": "Test Model 1"},
+            },
+            user_choice={
+                "strategy": "test",
+                "result": {"brand": "Test Brand 1", "model": "Test Model 1"},
+            },
             all_brush_strategies=[],
             comment_ids=["comment12"],
         )
@@ -353,8 +382,15 @@ class TestBrushUserActionsManager:
             timestamp=datetime(2025, 8, 1, 12, 0, 0),
             system_used="legacy",
             action="validated",
-            system_choice={"strategy": "test", "score": None, "result": {}},
-            user_choice={"strategy": "test", "result": {}},
+            system_choice={
+                "strategy": "test",
+                "score": None,
+                "result": {"brand": "Test Brand 2", "model": "Test Model 2"},
+            },
+            user_choice={
+                "strategy": "test",
+                "result": {"brand": "Test Brand 2", "model": "Test Model 2"},
+            },
             all_brush_strategies=[],
             comment_ids=["comment13"],
         )
@@ -504,8 +540,15 @@ class TestBrushUserActionsManager:
                 input_text=f"Validated Brush {i}",
                 month="2025-08",
                 system_used="scoring",
-                system_choice={"strategy": "test", "score": 50, "result": {}},
-                user_choice={"strategy": "test", "result": {}},
+                system_choice={
+                    "strategy": "test",
+                    "score": 50,
+                    "result": {"brand": f"Test Brand {i}", "model": f"Test Model {i}"},
+                },
+                user_choice={
+                    "strategy": "test",
+                    "result": {"brand": f"Test Brand {i}", "model": f"Test Model {i}"},
+                },
                 all_brush_strategies=[],
                 comment_ids=[f"comment{i+16}"],
             )
@@ -515,8 +558,15 @@ class TestBrushUserActionsManager:
                 input_text=f"Overridden Brush {i}",
                 month="2025-08",
                 system_used="scoring",
-                system_choice={"strategy": "test", "score": 50, "result": {}},
-                user_choice={"strategy": "other", "result": {}},
+                system_choice={
+                    "strategy": "test",
+                    "score": 50,
+                    "result": {"brand": f"Test Brand {i}", "model": f"Test Model {i}"},
+                },
+                user_choice={
+                    "strategy": "other",
+                    "result": {"brand": f"Test Brand {i}", "model": f"Test Model {i}"},
+                },
                 all_brush_strategies=[],
                 comment_ids=[f"comment{i+19}"],
             )
@@ -549,7 +599,15 @@ class TestBrushUserActionsManager:
             )
 
             # Test data that should result in a brush field type
-            system_choice = {"strategy": "known_brush", "score": 80, "result": {}}
+            system_choice = {
+                "strategy": "known_brush",
+                "score": 80,
+                "result": {
+                    "brand": "Test Brand",
+                    "model": "Test Model",
+                    "source_text": "Test Brush Real Dual Update",
+                },
+            }
             user_choice = {
                 "strategy": "known_brush",
                 "score": 80,
@@ -603,11 +661,11 @@ class TestBrushUserActionsManager:
                 "Test Model" in correct_matches_data["brush"]["Test Brand"]
             ), "correct_matches.yaml should have Test Model"
 
-            # Check that the normalized pattern was added
+            # Check that the original input text was added (not normalized)
             patterns = correct_matches_data["brush"]["Test Brand"]["Test Model"]
             assert (
-                "test brush real dual update" in patterns
-            ), "Normalized pattern should be in correct_matches.yaml"
+                "Test Brush Real Dual Update" in patterns
+            ), "Original input text should be in correct_matches.yaml"
 
         finally:
             # Clean up
@@ -616,11 +674,26 @@ class TestBrushUserActionsManager:
     def test_undo_last_action_success(self):
         """Test successfully undoing the last action."""
         # Record some actions first
-        system_choice = {"strategy": "dual_component", "score": 85, "result": {}}
-        user_choice = {"strategy": "dual_component", "result": {}}
+        system_choice = {
+            "strategy": "dual_component",
+            "score": 85,
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
+        user_choice = {
+            "strategy": "dual_component",
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
         all_strategies = [
-            {"strategy": "complete_brush", "score": 45, "result": {}},
-            {"strategy": "dual_component", "score": 85, "result": {}},
+            {
+                "strategy": "complete_brush",
+                "score": 45,
+                "result": {"brand": "Test Brand", "model": "Test Model"},
+            },
+            {
+                "strategy": "dual_component",
+                "score": 85,
+                "result": {"brand": "Test Brand", "model": "Test Model"},
+            },
         ]
 
         # Record first action
@@ -696,11 +769,26 @@ class TestBrushUserActionsManager:
     def test_undo_last_action_single_action(self):
         """Test undoing last action when only one action exists."""
         # Record single action
-        system_choice = {"strategy": "dual_component", "score": 85, "result": {}}
-        user_choice = {"strategy": "dual_component", "result": {}}
+        system_choice = {
+            "strategy": "dual_component",
+            "score": 85,
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
+        user_choice = {
+            "strategy": "dual_component",
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
         all_strategies = [
-            {"strategy": "complete_brush", "score": 45, "result": {}},
-            {"strategy": "dual_component", "score": 85, "result": {}},
+            {
+                "strategy": "complete_brush",
+                "score": 45,
+                "result": {"brand": "Test Brand", "model": "Test Model"},
+            },
+            {
+                "strategy": "dual_component",
+                "score": 85,
+                "result": {"brand": "Test Brand", "model": "Test Model"},
+            },
         ]
 
         self.manager.record_validation(
@@ -732,11 +820,26 @@ class TestBrushUserActionsManager:
     def test_undo_last_action_cli_error_handling(self):
         """Test handling of CLI errors during undo operation."""
         # Record test action
-        system_choice = {"strategy": "dual_component", "score": 85, "result": {}}
-        user_choice = {"strategy": "dual_component", "result": {}}
+        system_choice = {
+            "strategy": "dual_component",
+            "score": 85,
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
+        user_choice = {
+            "strategy": "dual_component",
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
         all_strategies = [
-            {"strategy": "complete_brush", "score": 45, "result": {}},
-            {"strategy": "dual_component", "score": 85, "result": {}},
+            {
+                "strategy": "complete_brush",
+                "score": 45,
+                "result": {"brand": "Test Brand", "model": "Test Model"},
+            },
+            {
+                "strategy": "dual_component",
+                "score": 85,
+                "result": {"brand": "Test Brand", "model": "Test Model"},
+            },
         ]
 
         self.manager.record_validation(
@@ -768,11 +871,26 @@ class TestBrushUserActionsManager:
     def test_undo_last_action_different_months(self):
         """Test that undo operations are isolated to specific months."""
         # Record actions for different months
-        system_choice = {"strategy": "dual_component", "score": 85, "result": {}}
-        user_choice = {"strategy": "dual_component", "result": {}}
+        system_choice = {
+            "strategy": "dual_component",
+            "score": 85,
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
+        user_choice = {
+            "strategy": "dual_component",
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
         all_strategies = [
-            {"strategy": "complete_brush", "score": 45, "result": {}},
-            {"strategy": "dual_component", "score": 85, "result": {}},
+            {
+                "strategy": "complete_brush",
+                "score": 45,
+                "result": {"brand": "Test Brand", "model": "Test Model"},
+            },
+            {
+                "strategy": "dual_component",
+                "score": 85,
+                "result": {"brand": "Test Brand", "model": "Test Model"},
+            },
         ]
 
         # Record action for 2025-07
@@ -817,11 +935,26 @@ class TestBrushUserActionsManager:
     def test_undo_last_action_preserves_order(self):
         """Test that undo operations preserve the order of remaining actions."""
         # Record multiple actions
-        system_choice = {"strategy": "dual_component", "score": 85, "result": {}}
-        user_choice = {"strategy": "dual_component", "result": {}}
+        system_choice = {
+            "strategy": "dual_component",
+            "score": 85,
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
+        user_choice = {
+            "strategy": "dual_component",
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
         all_strategies = [
-            {"strategy": "complete_brush", "score": 45, "result": {}},
-            {"strategy": "dual_component", "score": 85, "result": {}},
+            {
+                "strategy": "complete_brush",
+                "score": 45,
+                "result": {"brand": "Test Brand", "model": "Test Model"},
+            },
+            {
+                "strategy": "dual_component",
+                "score": 85,
+                "result": {"brand": "Test Brand", "model": "Test Model"},
+            },
         ]
 
         # Record actions in order
@@ -861,11 +994,26 @@ class TestBrushUserActionsManager:
     def test_undo_last_action_with_override_actions(self):
         """Test undoing override actions."""
         # Record mix of validation and override actions
-        system_choice = {"strategy": "dual_component", "score": 85, "result": {}}
-        user_choice = {"strategy": "dual_component", "result": {}}
+        system_choice = {
+            "strategy": "dual_component",
+            "score": 85,
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
+        user_choice = {
+            "strategy": "dual_component",
+            "result": {"brand": "Test Brand", "model": "Test Model"},
+        }
         all_strategies = [
-            {"strategy": "complete_brush", "score": 45, "result": {}},
-            {"strategy": "dual_component", "score": 85, "result": {}},
+            {
+                "strategy": "complete_brush",
+                "score": 45,
+                "result": {"brand": "Test Brand", "model": "Test Model"},
+            },
+            {
+                "strategy": "dual_component",
+                "score": 85,
+                "result": {"brand": "Test Brand", "model": "Test Model"},
+            },
         ]
 
         # Record validation action
@@ -878,6 +1026,11 @@ class TestBrushUserActionsManager:
             all_brush_strategies=all_strategies,
             comment_ids=["comment1"],
         )
+
+        # Add a small delay to ensure different timestamps
+        import time
+
+        time.sleep(0.1)
 
         # Record override action
         self.manager.record_override(

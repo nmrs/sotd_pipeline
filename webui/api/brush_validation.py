@@ -218,7 +218,8 @@ async def get_brush_validation_data(
             logger.info("Showing all entries including validated ones")
 
         logger.info(
-            f"Filtering parameters: strategy_count={strategy_count} (type: {type(strategy_count)}), show_validated={show_validated}"
+            f"Filtering parameters: strategy_count={strategy_count} "
+            f"(type: {type(strategy_count)}), show_validated={show_validated}"
         )
         logger.info(f"Initial entries count: {len(filtered_entries)}")
 
@@ -288,7 +289,8 @@ async def get_brush_validation_data(
                                 unique_brush_strings.add(normalized_text.lower().strip())
 
                     logger.info(
-                        f"Found {len(unique_brush_strings)} unique brush strings with strategy_count={strategy_count}"
+                        f"Found {len(unique_brush_strings)} unique brush strings "
+                        f"with strategy_count={strategy_count}"
                     )
                     logger.info(
                         f"Unique brush strings: {list(unique_brush_strings)[:5]}..."
@@ -465,7 +467,8 @@ async def record_validation_action(
             action_data.input_text, action_data.month, action_data.system_used
         )
 
-        # Load the brush data for this input text to determine field type and process dual-component brushes
+        # Load the brush data for this input text to determine field type and
+        # process dual-component brushes
         brush_data = cli.load_brush_data_for_input_text(
             action_data.input_text, action_data.month, action_data.system_used
         )
@@ -508,47 +511,4 @@ async def record_validation_action(
 
     except Exception as e:
         logger.error(f"Error recording validation action: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/undo", response_model=ValidationActionResponse)
-async def undo_last_validation_action(month: str) -> ValidationActionResponse:
-    """
-    Undo the last validation action for a specific month.
-
-    This removes the last validation/override action from both the learning file
-    and correct_matches.yaml, effectively reverting the last user decision.
-
-    Args:
-        month: Month in YYYY-MM format
-    """
-    try:
-        logger.info(f"Undoing last validation action for {month}")
-
-        # Validate month format
-        if not re.match(r"^\d{4}-\d{2}$", month):
-            raise HTTPException(status_code=400, detail="Month must be in YYYY-MM format")
-
-        # Initialize CLI with correct data path (relative to project root)
-        project_root = Path(__file__).parent.parent.parent
-        cli = BrushValidationCLI(data_path=project_root / "data")
-
-        # Attempt to undo the last action
-        undone_action = cli.user_actions_manager.undo_last_action(month)
-
-        if undone_action:
-            return ValidationActionResponse(
-                success=True,
-                message=(
-                    f"Successfully undone {undone_action.action} action "
-                    f"for '{undone_action.input_text}'"
-                ),
-            )
-        else:
-            return ValidationActionResponse(
-                success=False, message="No actions found to undo for this month"
-            )
-
-    except Exception as e:
-        logger.error(f"Error undoing validation action: {e}")
         raise HTTPException(status_code=500, detail=str(e))

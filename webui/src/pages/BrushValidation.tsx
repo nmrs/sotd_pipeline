@@ -7,7 +7,6 @@ import {
     ChevronLeft,
     ChevronRight,
     Check,
-    RotateCcw,
     Filter,
     SortAsc,
     BarChart3,
@@ -24,7 +23,6 @@ import {
     getBrushValidationStatistics,
     getStrategyDistributionStatistics,
     recordBrushValidationAction,
-    undoLastValidationAction,
     getCommentDetail,
     BrushValidationEntry,
     BrushValidationStatistics,
@@ -39,6 +37,14 @@ type SortType = 'unvalidated' | 'validated' | 'ambiguity';
 interface OverrideState {
     entryIndex: number;
     selectedStrategy: number;
+}
+
+interface ChangeRecord {
+    input_text: string;           // The original text that was processed
+    action: 'validate' | 'override';
+    timestamp: string;
+    result: string;               // What it was changed to (e.g., "Brand Model")
+    storage_file: string;         // Which file it's stored in
 }
 
 /**
@@ -99,6 +105,9 @@ const BrushValidation: React.FC = () => {
     const [strategyDistributionModalOpen, setStrategyDistributionModalOpen] = useState(false);
     const [strategyDistributionStatistics, setStrategyDistributionStatistics] =
         useState<StrategyDistributionStatistics | null>(null);
+
+    // Change tracking state
+    const [changes, setChanges] = useState<ChangeRecord[]>([]);
 
     const currentMonth = selectedMonths[0] || '';
 
@@ -320,6 +329,18 @@ const BrushValidation: React.FC = () => {
                     action: 'validate',
                 });
 
+                // Capture change metadata
+                const changeRecord: ChangeRecord = {
+                    input_text: entry.normalized_text || entry.input_text,
+                    action: 'validate',
+                    timestamp: new Date().toISOString(),
+                    result: `${entry.brand || ''} ${entry.model || ''}`.trim(),
+                    storage_file: 'correct_matches.yaml'
+                };
+
+                // Add to change tracking
+                addChange(changeRecord);
+
                 // Reload data to reflect changes
                 await loadValidationData();
                 await loadStatistics();
@@ -360,6 +381,18 @@ const BrushValidation: React.FC = () => {
                     strategy_index: strategyIndex,
                 });
 
+                // Capture change metadata
+                const changeRecord: ChangeRecord = {
+                    input_text: entry.normalized_text || entry.input_text,
+                    action: 'override',
+                    timestamp: new Date().toISOString(),
+                    result: `${entry.brand || ''} ${entry.model || ''}`.trim(),
+                    storage_file: 'correct_matches.yaml'
+                };
+
+                // Add to change tracking
+                addChange(changeRecord);
+
                 // Reload data to reflect changes
                 await loadValidationData();
                 await loadStatistics();
@@ -377,32 +410,14 @@ const BrushValidation: React.FC = () => {
         [entries, currentMonth, loadValidationData, loadStatistics]
     );
 
-    // Handle undo action
-    const handleUndo = useCallback(async () => {
-        if (!currentMonth) return;
+    // Change tracking functions
+    const addChange = useCallback((change: ChangeRecord) => {
+        setChanges(prev => [...prev, change]);
+    }, []);
 
-        setActionInProgress(prev => new Set(prev).add(-1)); // Use -1 as special index for undo
-
-        try {
-            const response = await undoLastValidationAction(currentMonth);
-
-            if (response.success) {
-                // Reload data to reflect changes
-                await loadValidationData();
-                await loadStatistics();
-            } else {
-                setError(response.message || 'Failed to undo last action');
-            }
-        } catch (err) {
-            setError(handleApiError(err));
-        } finally {
-            setActionInProgress(prev => {
-                const newSet = new Set(prev);
-                newSet.delete(-1);
-                return newSet;
-            });
-        }
-    }, [currentMonth, loadValidationData, loadStatistics]);
+    const clearChanges = useCallback(() => {
+        setChanges([]);
+    }, []);
 
     // Backend is now handling filtering, so we use entries directly
     const displayEntries = entries;
@@ -576,36 +591,7 @@ const BrushValidation: React.FC = () => {
 
             {/* Action Buttons */}
             {currentMonth && (
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                    {/* Undo Button */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className='text-sm flex items-center gap-2'>
-                                <RotateCcw className='h-4 w-4' />
-                                Undo Last Action
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Button
-                                variant='outline'
-                                onClick={handleUndo}
-                                disabled={actionInProgress.has(-1)} // Use -1 as special index for undo
-                                className='flex items-center gap-2 text-orange-600 border-orange-200 hover:bg-orange-50'
-                            >
-                                {actionInProgress.has(-1) ? (
-                                    <Loader2 className='h-4 w-4 animate-spin' />
-                                ) : (
-                                    <RotateCcw className='h-4 w-4' />
-                                )}
-                                Undo Last Validation
-                            </Button>
-                            <div className='text-xs text-gray-500 mt-2'>
-                                Removes the last validation/override action from both the learning file and
-                                correct_matches.yaml
-                            </div>
-                        </CardContent>
-                    </Card>
-
+                <div className='grid grid-cols-1 gap-4'>
                     {/* Strategy Distribution Button */}
                     <Card>
                         <CardHeader>
@@ -1064,7 +1050,7 @@ const BrushValidation: React.FC = () => {
                                                 }
                                                 className='flex items-center gap-2'
                                             >
-                                                <RotateCcw className='h-4 w-4' />
+                                                <Check className='h-4 w-4' />
                                                 Override
                                             </Button>
                                         )}
@@ -1074,6 +1060,36 @@ const BrushValidation: React.FC = () => {
                         </Card>
                     ))}
                 </div>
+            )}
+
+            {/* Changes Made This Session */}
+            {changes.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className='text-lg'>Changes Made This Session</CardTitle>
+                    </CardHeader>
+                    <CardContent className='p-4'>
+                        <div className='space-y-2'>
+                            {changes.map((change, index) => (
+                                <div key={index} className='p-3 bg-gray-50 rounded border'>
+                                    <div className='font-medium'>"{change.input_text}"</div>
+                                    <div className='text-sm text-gray-600'>
+                                        → {change.result} (stored in {change.storage_file})
+                                    </div>
+                                    <div className='text-xs text-gray-500 mt-1'>
+                                        {new Date(change.timestamp).toLocaleTimeString()}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <Button
+                            onClick={clearChanges}
+                            className='mt-3 px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded'
+                        >
+                            Clear Changes
+                        </Button>
+                    </CardContent>
+                </Card>
             )}
 
             {/* Pagination */}

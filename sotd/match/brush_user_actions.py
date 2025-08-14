@@ -184,12 +184,15 @@ class BrushUserActionsStorage:
         file_path = self._get_file_path(month)
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    def remove_last_action(self, month: str) -> Optional[BrushUserAction]:
+    def remove_specific_action(
+        self, month: str, action_to_remove: BrushUserAction
+    ) -> Optional[BrushUserAction]:
         """
-        Remove the last action from the monthly actions file.
+        Remove a specific action from the monthly actions file.
 
         Args:
             month: Month in YYYY-MM format
+            action_to_remove: The specific action to remove
 
         Returns:
             The removed action if successful, None if no actions found
@@ -200,25 +203,28 @@ class BrushUserActionsStorage:
             if not actions:
                 return None
 
-            # Get the last action (most recent timestamp, or last in list if timestamps are equal)
-            # Sort by timestamp first, then by list order as fallback
-            sorted_actions = sorted(actions, key=lambda x: (x.timestamp, actions.index(x)))
-            last_action = sorted_actions[-1]
+            # Find and remove the specific action
+            for action in actions:
+                if (
+                    action.input_text == action_to_remove.input_text
+                    and action.timestamp == action_to_remove.timestamp
+                    and action.action == action_to_remove.action
+                ):
+                    actions.remove(action)
 
-            # Remove the last action
-            actions.remove(last_action)
+                    # Save updated actions
+                    self.save_monthly_actions(month, actions)
+                    return action
 
-            # Save updated actions
-            self.save_monthly_actions(month, actions)
-
-            return last_action
+            # Action not found
+            return None
 
         except Exception as e:
             # Log the error but don't fail - this is a user-facing operation
             import logging
 
             logger = logging.getLogger(__name__)
-            logger.error(f"Error removing last action for {month}: {e}")
+            logger.error(f"Error removing specific action for {month}: {e}")
             return None
 
 
@@ -520,7 +526,7 @@ class BrushUserActionsManager:
         all_actions = []
 
         # Find all monthly files in the new directory structure
-        brush_user_actions_dir = self.storage.base_path / "learning" / "brush_user_actions"
+        brush_user_actions_dir = self.storage.base_path / "brush_user_actions"
         if brush_user_actions_dir.exists():
             for file_path in brush_user_actions_dir.glob("*.yaml"):
                 # Extract month from filename (YYYY-MM.yaml)
@@ -655,58 +661,3 @@ class BrushUserActionsManager:
             "scoring_system_count": scoring_system_count,
             "legacy_system_count": legacy_system_count,
         }
-
-    def undo_last_action(self, month: str) -> Optional[BrushUserAction]:
-        """
-        Undo the last validation action for a specific month.
-
-        This removes the last action from both the learning file and correct_matches.yaml,
-        effectively reverting the last user decision.
-
-        Args:
-            month: Month in YYYY-MM format
-
-        Returns:
-            The undone action if successful, None if no actions found
-        """
-        try:
-            # Get all actions for the month
-            actions = self.get_monthly_actions(month)
-            if not actions:
-                return None
-
-            # Get the last action (most recent timestamp, or last in list if timestamps are equal)
-            # Sort by timestamp first, then by list order as fallback
-            sorted_actions = sorted(actions, key=lambda x: (x.timestamp, actions.index(x)))
-            last_action = sorted_actions[-1]
-
-            # Remove the action from correct_matches.yaml first
-            # If this fails, we'll still try to remove from storage
-            if last_action.action in ["validated", "overridden"]:
-                try:
-                    # Extract the input text that was added to correct_matches.yaml
-                    input_text = last_action.input_text
-
-                    # Remove from correct_matches.yaml using the updater
-                    self.correct_matches_updater.remove_entry(input_text, "brush")
-                except Exception as e:
-                    # Log the error but continue with storage removal
-                    import logging
-
-                    logger = logging.getLogger(__name__)
-                    logger.warning(f"Failed to remove from correct_matches.yaml for {month}: {e}")
-
-            # Remove the action from the learning file
-            # Let the storage method handle finding and removing the last action
-            removed_action = self.storage.remove_last_action(month)
-
-            # Return the action that was actually removed from storage
-            return removed_action
-
-        except Exception as e:
-            # Log the error but don't fail - this is a user-facing operation
-            import logging
-
-            logger = logging.getLogger(__name__)
-            logger.error(f"Error undoing last action for {month}: {e}")
-            return None

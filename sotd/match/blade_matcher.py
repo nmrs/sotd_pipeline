@@ -192,20 +192,20 @@ class BladeMatcher(BaseMatcher):
         # Also prioritize non-DE formats to prevent generic DE patterns from overriding specific patterns
         def pattern_sort_key(item):
             brand, model, fmt, pattern, compiled, entry = item
-            
+
             # Primary: format priority (non-DE formats get higher priority)
             if fmt.upper() == "DE":
                 format_priority = 1  # DE gets lower priority
             else:
                 format_priority = 0  # Non-DE formats get higher priority
-            
+
             # Secondary: pattern length (longer = more specific)
             length_score = len(pattern)
             # Tertiary: pattern complexity (more special chars = more specific)
             complexity_score = sum(1 for c in pattern if c in r"[].*+?{}()|^$\\")
             # Quaternary: prefer patterns with word boundaries
             boundary_score = pattern.count(r"\b") + pattern.count(r"\s")
-            
+
             return (format_priority, -length_score, -complexity_score, -boundary_score)
 
         return sorted(compiled, key=pattern_sort_key)
