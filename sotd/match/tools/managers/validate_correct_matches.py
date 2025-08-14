@@ -5,7 +5,6 @@ This tool validates correct_matches.yaml against current catalog files to ensure
 previously approved matches are still aligned with catalog updates.
 """
 
-import re
 import sys
 import unicodedata
 from pathlib import Path
@@ -720,7 +719,11 @@ class ValidateCorrectMatches:
         return issues
 
     def _check_format_mismatches(self, field: str) -> List[Dict]:
-        """Check for format mismatches in blade field.
+        """Check for format mismatches by running actual matchers against correct matches.
+
+        This validates that when we run the actual matchers against previously approved
+        correct matches, they still return the same categorization. This ensures that
+        catalog updates don't break previously approved matches.
 
         Args:
             field: Field type to check
@@ -736,61 +739,103 @@ class ValidateCorrectMatches:
         if "blade" not in self.correct_matches:
             return issues
 
-        # Check each blade entry for format consistency
+        # Check each blade entry by running it through the actual blade matcher
         for format_name, brands in self.correct_matches["blade"].items():
             for brand, models in brands.items():
                 for model, correct_matches in models.items():
                     for correct_match in correct_matches:
-                        # Check if the correct match contains format indicators that don't match
-                        # the expected format
-                        format_indicators = {
-                            "DE": ["de", "double edge", "double-edge", "double edge razor"],
-                            "SE": ["se", "single edge", "single-edge", "single edge razor"],
-                            "AC": ["ac", "artist club", "artist club razor"],
-                            "GEM": ["gem", "gem razor"],
-                            "Injector": ["injector", "injector razor"],
-                            "Cartridge": ["cartridge", "cart", "cartridge razor"],
-                            "Half DE": ["half de", "half de razor", "half double edge"],
-                            "FHS": ["fhs", "feather artist club"],
-                            "Hair Shaper": ["hair shaper", "hair shaper blade"],
-                        }
-
-                        expected_format_lower = format_name.lower()
-                        correct_match_lower = correct_match.lower()
-
-                        # Check if the correct match contains indicators for a different format
-                        for check_format, indicators in format_indicators.items():
-                            if check_format.lower() != expected_format_lower:
-                                for indicator in indicators:
-                                    # Use word boundary regex to avoid false positives like
-                                    # "blade" containing "de"
-                                    pattern = r"\b" + re.escape(indicator) + r"\b"
-                                    if re.search(pattern, correct_match_lower):
-                                        issues.append(
-                                            {
-                                                "issue_type": "format_mismatch",
-                                                "field": field,
-                                                "correct_match": correct_match,
-                                                "expected_format": format_name,
-                                                "conflicting_format": check_format,
-                                                "conflicting_indicator": indicator,
-                                                "severity": "medium",
-                                                "suggested_action": (
-                                                    f"Correct match '{correct_match}' contains "
-                                                    f"'{indicator}' which suggests {check_format} "
-                                                    f"format, but it's categorized under "
-                                                    f"{format_name}. Either move this entry to the "
-                                                    f"{check_format} section or remove the "
-                                                    f"conflicting format indicator."
-                                                ),
-                                                "details": (
-                                                    f"Format mismatch detected: '{correct_match}' "
-                                                    f"contains '{indicator}' (suggesting "
-                                                    f"{check_format}) but is categorized under "
-                                                    f"{format_name}."
-                                                ),
-                                            }
-                                        )
+                        # Run the actual blade matcher to see what it returns
+                        try:
+                            match_result = self.blade_matcher.match(
+                                correct_match.lower(), 
+                                original=correct_match
+                            )
+                            
+                            if match_result and match_result.matched:
+                                matched_data = match_result.matched
+                                
+                                # Check if the matcher returned a different format than expected
+                                if "format" in matched_data:
+                                    actual_format = matched_data["format"]
+                                    if actual_format != format_name:
+                                        issues.append({
+                                            "issue_type": "format_mismatch",
+                                            "field": field,
+                                            "correct_match": correct_match,
+                                            "expected_format": format_name,
+                                            "actual_format": actual_format,
+                                            "severity": "high",
+                                            "suggested_action": (
+                                                f"Correct match '{correct_match}' was categorized as "
+                                                f"'{format_name}' but the current matcher returns "
+                                                f"'{actual_format}'. This suggests catalog changes "
+                                                f"have broken this previously approved match."
+                                            ),
+                                            "details": (
+                                                f"Matcher validation failed: '{correct_match}' "
+                                                f"expected format '{format_name}' but got "
+                                                f"'{actual_format}' from current catalog."
+                                            ),
+                                        })
+                                else:
+                                    # No format field returned - this might indicate a problem
+                                    issues.append({
+                                        "issue_type": "missing_format",
+                                        "field": field,
+                                        "correct_match": correct_match,
+                                        "expected_format": format_name,
+                                        "severity": "medium",
+                                        "suggested_action": (
+                                            f"Correct match '{correct_match}' was categorized as "
+                                            f"'{format_name}' but the current matcher doesn't "
+                                            f"return a format field. Check if catalog structure "
+                                            f"has changed."
+                                        ),
+                                        "details": (
+                                            f"Matcher returned no format field for '{correct_match}' "
+                                            f"which was expected to be '{format_name}'."
+                                        ),
+                                    })
+                            else:
+                                # Matcher failed to match - this is a problem
+                                issues.append({
+                                    "issue_type": "match_failure",
+                                    "field": field,
+                                    "correct_match": correct_match,
+                                    "expected_format": format_name,
+                                    "severity": "high",
+                                    "suggested_action": (
+                                        f"Correct match '{correct_match}' was categorized as "
+                                        f"'{format_name}' but the current matcher fails to "
+                                        f"match it at all. This suggests catalog changes "
+                                        f"have broken this previously approved match."
+                                    ),
+                                    "details": (
+                                        f"Matcher failed to match '{correct_match}' which was "
+                                        f"expected to be '{format_name}'. This indicates "
+                                        f"catalog changes have broken the match."
+                                    ),
+                                })
+                                
+                        except Exception as e:
+                            # Matcher threw an error - this is a problem
+                            issues.append({
+                                "issue_type": "matcher_error",
+                                "field": field,
+                                "correct_match": correct_match,
+                                "expected_format": format_name,
+                                "error": str(e),
+                                "severity": "high",
+                                "suggested_action": (
+                                    f"Correct match '{correct_match}' caused an error in the "
+                                    f"current matcher: {e}. This suggests catalog changes "
+                                    f"have broken this previously approved match."
+                                ),
+                                "details": (
+                                    f"Matcher error for '{correct_match}': {e}. This indicates "
+                                    f"catalog changes have broken the match."
+                                ),
+                            })
 
         return issues
 
