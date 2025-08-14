@@ -1,24 +1,32 @@
 from pathlib import Path
 from typing import Optional
 
+from .base_matcher import BaseMatcher
 from .loaders import CatalogLoader
 from .types import MatchResult, MatchType, create_match_result
 from .utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 
-class RazorMatcher:
+class RazorMatcher(BaseMatcher):
     def __init__(
         self,
         catalog_path: Path = Path("data/razors.yaml"),
         correct_matches_path: Optional[Path] = None,
+        bypass_correct_matches: bool = False,
     ):
-        self.catalog_path = catalog_path
+        super().__init__(
+            catalog_path=catalog_path,
+            field_type="razor",
+            correct_matches_path=correct_matches_path,
+            bypass_correct_matches=bypass_correct_matches,
+        )
         self.loader = CatalogLoader()
         catalogs = self.loader.load_matcher_catalogs(
             catalog_path, "razor", correct_matches_path=correct_matches_path
         )
+        # Override catalog and correct_matches from BaseMatcher with loader results
         self.catalog = catalogs["catalog"]
-        self.correct_matches = catalogs["correct_matches"]
+        self.correct_matches = catalogs["correct_matches"] if not bypass_correct_matches else {}
         self.patterns = self._compile_patterns()
         self._match_cache = {}
 

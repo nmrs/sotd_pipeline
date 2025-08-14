@@ -9,23 +9,32 @@ from typing import Any, Dict, Optional
 from rich.console import Console
 from rich.table import Table
 
-from sotd.match.types import MatchResult, MatchType, create_match_result
-from sotd.match.utils.regex_error_utils import compile_regex_with_context, create_context_dict
+from .base_matcher import BaseMatcher
+from .types import MatchResult, MatchType, create_match_result
+from .utils.regex_error_utils import compile_regex_with_context, create_context_dict
 from sotd.utils.match_filter_utils import strip_trailing_periods
 from sotd.utils.yaml_loader import load_yaml_with_nfc
 
 
-class SoapMatcher:
+class SoapMatcher(BaseMatcher):
     def __init__(
         self,
         catalog_path: Path = Path("data/soaps.yaml"),
         correct_matches_path: Optional[Path] = None,
+        bypass_correct_matches: bool = False,
     ):
-        self.catalog_path = catalog_path
+        super().__init__(
+            catalog_path=catalog_path,
+            field_type="soap",
+            correct_matches_path=correct_matches_path,
+            bypass_correct_matches=bypass_correct_matches,
+        )
+        # Override catalog and correct_matches from BaseMatcher with direct loading
         self.catalog = load_yaml_with_nfc(catalog_path)
-        self.correct_matches_path = correct_matches_path
         self.correct_matches = (
-            load_yaml_with_nfc(correct_matches_path) if correct_matches_path else {}
+            load_yaml_with_nfc(correct_matches_path)
+            if correct_matches_path and not bypass_correct_matches
+            else {}
         )
         self.scent_patterns, self.brand_patterns = self._compile_patterns()
         self._match_cache = {}

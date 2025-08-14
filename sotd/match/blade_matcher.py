@@ -1,24 +1,32 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from .base_matcher import BaseMatcher
 from .loaders import CatalogLoader
 from .types import MatchResult, MatchType, create_match_result
 from .utils.regex_error_utils import compile_regex_with_context, create_context_dict
 
 
-class BladeMatcher:
+class BladeMatcher(BaseMatcher):
     def __init__(
         self,
         catalog_path: Path = Path("data/blades.yaml"),
         correct_matches_path: Optional[Path] = None,
+        bypass_correct_matches: bool = False,
     ):
-        self.catalog_path = catalog_path
+        super().__init__(
+            catalog_path=catalog_path,
+            field_type="blade",
+            correct_matches_path=correct_matches_path,
+            bypass_correct_matches=bypass_correct_matches,
+        )
         self.loader = CatalogLoader()
         catalogs = self.loader.load_matcher_catalogs(
             catalog_path, "blade", correct_matches_path=correct_matches_path
         )
+        # Override catalog and correct_matches from BaseMatcher with loader results
         self.catalog = catalogs["catalog"]
-        self.correct_matches = catalogs["correct_matches"]
+        self.correct_matches = catalogs["correct_matches"] if not bypass_correct_matches else {}
         self.patterns = self._compile_patterns()
         # Pre-compute normalized correct matches for performance
         self._normalized_correct_matches = self._precompute_normalized_correct_matches()
@@ -181,15 +189,24 @@ class BladeMatcher:
                         compiled.append((brand, model, fmt, pattern, compiled_pattern, entry))
 
         # Sort by pattern specificity: longer patterns first, then by pattern complexity
+        # Also prioritize non-DE formats to prevent generic DE patterns from overriding specific patterns
         def pattern_sort_key(item):
-            pattern = item[3]
-            # Primary sort: pattern length (longer = more specific)
+            brand, model, fmt, pattern, compiled, entry = item
+            
+            # Primary: format priority (non-DE formats get higher priority)
+            if fmt.upper() == "DE":
+                format_priority = 1  # DE gets lower priority
+            else:
+                format_priority = 0  # Non-DE formats get higher priority
+            
+            # Secondary: pattern length (longer = more specific)
             length_score = len(pattern)
-            # Secondary sort: pattern complexity (more special chars = more specific)
+            # Tertiary: pattern complexity (more special chars = more specific)
             complexity_score = sum(1 for c in pattern if c in r"[].*+?{}()|^$\\")
-            # Tertiary sort: prefer patterns with word boundaries
+            # Quaternary: prefer patterns with word boundaries
             boundary_score = pattern.count(r"\b") + pattern.count(r"\s")
-            return (-length_score, -complexity_score, -boundary_score)
+            
+            return (format_priority, -length_score, -complexity_score, -boundary_score)
 
         return sorted(compiled, key=pattern_sort_key)
 
@@ -297,15 +314,15 @@ class BladeMatcher:
 
         return normalized_matches
 
-    def _match_with_regex(self, value: str) -> MatchResult:
+    def _match_with_regex(self, normalized_text: str, original_text: str) -> MatchResult:
         """Match blade using regex patterns."""
         # Check cache first
-        if value in self._match_cache:
-            cached_result = self._match_cache[value]
+        if normalized_text in self._match_cache:
+            cached_result = self._match_cache[normalized_text]
             # Convert cached dict to MatchResult for backward compatibility
             if isinstance(cached_result, dict):
                 return create_match_result(
-                    original=cached_result.get("original", value),
+                    original=cached_result.get("original", original_text),
                     matched=cached_result.get("matched"),
                     match_type=cached_result.get("match_type"),
                     pattern=cached_result.get("pattern"),
@@ -314,11 +331,11 @@ class BladeMatcher:
 
         from sotd.utils.match_filter_utils import normalize_for_matching
 
-        original = value
+        original = original_text
 
         # All correct match lookups must use normalize_for_matching
         # (see docs/product_matching_validation.md)
-        normalized = normalize_for_matching(value, field="blade")
+        normalized = normalize_for_matching(normalized_text, field="blade")
         if not normalized:
             result = create_match_result(
                 original=original,
@@ -326,7 +343,7 @@ class BladeMatcher:
                 match_type=None,
                 pattern=None,
             )
-            self._match_cache[value] = result
+            self._match_cache[normalized_text] = result
             return result
 
         blade_text = normalized
@@ -340,9 +357,9 @@ class BladeMatcher:
                 }
 
                 # Preserve all additional specifications from the catalog entry
-                for key, value in entry.items():
+                for key, val in entry.items():
                     if key not in ["patterns", "format"]:
-                        match_data[key] = value
+                        match_data[key] = val
 
                 result = create_match_result(
                     original=original,
@@ -350,7 +367,7 @@ class BladeMatcher:
                     pattern=raw_pattern,
                     match_type=MatchType.REGEX,
                 )
-                self._match_cache[value] = result
+                self._match_cache[normalized_text] = result
                 return result
 
         result = create_match_result(
@@ -359,7 +376,7 @@ class BladeMatcher:
             match_type=None,
             pattern=None,
         )
-        self._match_cache[value] = result
+        self._match_cache[normalized_text] = result
         return result
 
     def _collect_all_correct_matches(self, value: str) -> List[Dict[str, Any]]:
