@@ -466,7 +466,7 @@ DE:
   Personna:
     '74':
       patterns:
-      - p(?:ersonn*a)?\s*74
+      - p(?:ersonn*a)?\s*74(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - pseventy-four
       - p74
     Lab Blue:
@@ -478,18 +478,18 @@ DE:
       - ^(?!.*(atra|gem|pfte|plat|stain|ss)).*accuforge
     Med Prep:
       patterns:
-      - person.*med
+      - person.*med(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - med.*prep
       - accu-?thrive
     Platinum:
       patterns:
-      - person.*plat
-      - person.*red
+      - person.*plat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - person.*red(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     Super Stainless:
       patterns:
-      - person.*stainless
-      - person.*\bss\b
-      - person.*super
+      - person.*stainless(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - person.*\bss\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - ^(?!.*comfort).*person.*super(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     TOMY:
       patterns:
       - \btomy\b
