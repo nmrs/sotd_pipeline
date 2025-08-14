@@ -27,9 +27,10 @@ from sotd.match.brush_scoring_config import BrushScoringConfig
 from sotd.match.types import MatchResult
 
 
-def load_correct_matches() -> dict:
+def load_correct_matches(correct_matches_path: Path | None = None) -> dict:
     """Load correct matches data from YAML file."""
-    correct_matches_path = Path("data/correct_matches.yaml")
+    if correct_matches_path is None:
+        correct_matches_path = Path("data/correct_matches.yaml")
     with open(correct_matches_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
@@ -60,7 +61,7 @@ class BrushScoringMatcher:
         self.correct_matches_path = correct_matches_path
 
         # Load correct matches data
-        correct_matches_data = load_correct_matches()
+        correct_matches_data = load_correct_matches(correct_matches_path)
 
         # Initialize HandleMatcher and KnotMatcher first (needed for strategies)
         from sotd.match.handle_matcher import HandleMatcher
