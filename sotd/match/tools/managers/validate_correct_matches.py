@@ -372,6 +372,10 @@ class ValidateCorrectMatches:
                 catalog_path = base_dir / "razors.yaml"
             elif field == "soap":
                 catalog_path = base_dir / "soaps.yaml"
+            elif field == "handle":
+                catalog_path = base_dir / "handles.yaml"
+            elif field == "knot":
+                catalog_path = base_dir / "knots.yaml"
             else:
                 return {}
 
@@ -482,22 +486,23 @@ class ValidateCorrectMatches:
                         )
                         continue
 
-                    # Check patterns
-                    original_patterns = original_section[brand_name][model_name]
-                    expected_patterns = expected_section[brand_name][model_name]
+                    # Check patterns - SKIP for handle and knot fields since these are composite references
+                    if field not in ["handle", "knot"]:
+                        original_patterns = original_section[brand_name][model_name]
+                        expected_patterns = expected_section[brand_name][model_name]
 
-                    for pattern in original_patterns:
-                        if pattern not in expected_patterns:
-                            issues.append(
-                                {
-                                    "type": "missing_pattern",
-                                    "field": field,
-                                    "brand": brand_name,
-                                    "model": model_name,
-                                    "pattern": pattern,
-                                    "message": f"Pattern '{pattern}' missing from expected structure",
-                                }
-                            )
+                        for pattern in original_patterns:
+                            if pattern not in expected_patterns:
+                                issues.append(
+                                    {
+                                        "type": "missing_pattern",
+                                        "field": field,
+                                        "brand": brand_name,
+                                        "model": model_name,
+                                        "pattern": pattern,
+                                        "message": f"Pattern '{pattern}' missing from expected structure",
+                                    }
+                                )
 
         return issues
 
@@ -526,7 +531,7 @@ class ValidateCorrectMatches:
         """Validate all fields for catalog drift."""
         all_issues = {}
 
-        for field in ["razor", "blade", "brush", "soap"]:
+        for field in ["razor", "blade", "brush", "soap", "handle", "knot"]:
             if field in self.correct_matches:
                 issues, _ = self.validate_field(field)
                 if issues:
@@ -701,10 +706,8 @@ class ValidateCorrectMatches:
 
         for field, issues in all_issues.items():
             print(f"📋 {field}: {len(issues)} issues")
-            for issue in issues[:3]:  # Show first 3 issues per field
+            for issue in issues:  # Show ALL issues per field - no truncation
                 print(f"   • {issue['message']}")
-            if len(issues) > 3:
-                print(f"   ... and {len(issues) - 3} more")
             print()
 
     def _precompute_validation_structures(self):
@@ -712,7 +715,7 @@ class ValidateCorrectMatches:
         logger.info("Pre-computing validation structures...")
         start_time = time.perf_counter()
 
-        for field in ["razor", "blade", "brush", "soap"]:
+        for field in ["razor", "blade", "brush", "soap", "handle", "knot"]:
             if field in self.correct_matches:
                 self._build_validation_cache(field)
 
@@ -777,14 +780,47 @@ class ValidateCorrectMatches:
                         normalized_model = unicodedata.normalize("NFC", model_name)
                         normalized[format_name][normalized_brand][normalized_model] = model_section
         elif "known_brushes" in catalog_data:  # Brush format with nested structure
-            # For validation, ONLY use known_brushes - these are the actual catalog entries
-            # other_brushes are fallback patterns, not catalog products to validate against
-            for brand_name, brand_section in catalog_data["known_brushes"].items():
-                normalized_brand = unicodedata.normalize("NFC", brand_name)
-                normalized[normalized_brand] = {}
-                for model_name, model_section in brand_section.items():
-                    normalized_model = unicodedata.normalize("NFC", model_name)
-                    normalized[normalized_brand][normalized_model] = model_section
+            # LINEAR FALLBACK: Include BOTH known_brushes AND other_brushes for validation
+            # This matches how BrushMatcher actually works - it tries known_brushes first, then other_brushes
+            for section_name in ["known_brushes", "other_brushes"]:
+                if section_name in catalog_data:
+                    for brand_name, brand_section in catalog_data[section_name].items():
+                        normalized_brand = unicodedata.normalize("NFC", brand_name)
+                        # If brand already exists from previous section, merge models
+                        if normalized_brand not in normalized:
+                            normalized[normalized_brand] = {}
+
+                        for model_name, model_section in brand_section.items():
+                            normalized_model = unicodedata.normalize("NFC", model_name)
+                            normalized[normalized_brand][normalized_model] = model_section
+        elif "artisan_handles" in catalog_data:  # Handle format with nested structure
+            # LINEAR FALLBACK: Include ALL handle sections for validation
+            # This matches how HandleMatcher actually works
+            for section_name in ["artisan_handles", "manufacturer_handles", "other_handles"]:
+                if section_name in catalog_data:
+                    for brand_name, brand_section in catalog_data[section_name].items():
+                        normalized_brand = unicodedata.normalize("NFC", brand_name)
+                        # If brand already exists from previous section, merge models
+                        if normalized_brand not in normalized:
+                            normalized[normalized_brand] = {}
+
+                        for model_name, model_section in brand_section.items():
+                            normalized_model = unicodedata.normalize("NFC", model_name)
+                            normalized[normalized_brand][normalized_model] = model_section
+        elif "known_knots" in catalog_data:  # Knot format with nested structure
+            # LINEAR FALLBACK: Include BOTH known_knots AND other_knots for validation
+            # This matches how KnotMatcher actually works
+            for section_name in ["known_knots", "other_knots"]:
+                if section_name in catalog_data:
+                    for brand_name, brand_section in catalog_data[section_name].items():
+                        normalized_brand = unicodedata.normalize("NFC", brand_name)
+                        # If brand already exists from previous section, merge models
+                        if normalized_brand not in normalized:
+                            normalized[normalized_brand] = {}
+
+                        for model_name, model_section in brand_section.items():
+                            normalized_model = unicodedata.normalize("NFC", model_name)
+                            normalized[normalized_brand][normalized_model] = model_section
         else:  # Other fields (razor, soap)
             for brand_name, brand_section in catalog_data.items():
                 normalized_brand = unicodedata.normalize("NFC", brand_name)
@@ -838,7 +874,9 @@ def main():
 
     parser = argparse.ArgumentParser(description="Validate correct_matches.yaml for catalog drift")
     parser.add_argument(
-        "--field", choices=["razor", "blade", "brush", "soap", "handle", "knot"], help="Specific field to validate"
+        "--field",
+        choices=["razor", "blade", "brush", "soap", "handle", "knot"],
+        help="Specific field to validate",
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging")
 
