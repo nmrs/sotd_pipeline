@@ -245,7 +245,29 @@ class ValidateCorrectMatches:
                 else:
                     severity_icon = "🔵"
 
-                self.console.print(f"{severity_icon} {issue_type}: {suggested_action}")
+                # For catalog validation issues, show the essential details in the main message
+                if issue_type in ["catalog_pattern_mismatch", "catalog_pattern_no_match"]:
+                    correct_match = issue.get("correct_match", "unknown")
+                    expected_brand = issue.get("expected_brand", "unknown")
+                    expected_model = issue.get("expected_model", "unknown")
+                    
+                    if issue_type == "catalog_pattern_mismatch":
+                        actual_brand = issue.get("actual_brand", "unknown")
+                        actual_model = issue.get("actual_model", "unknown")
+                        main_message = (
+                            f"'{correct_match}' expected: {expected_brand} "
+                            f"{expected_model}, actual: {actual_brand} {actual_model}"
+                        )
+                    else:  # catalog_pattern_no_match
+                        main_message = (
+                            f"'{correct_match}' expected: {expected_brand} "
+                            f"{expected_model}, actual: NO MATCH"
+                        )
+                    
+                    self.console.print(f"{severity_icon} {issue_type}: {main_message}")
+                else:
+                    # For other issue types, show the suggested action
+                    self.console.print(f"{severity_icon} {issue_type}: {suggested_action}")
 
                 if verbose and "details" in issue:
                     self.console.print(f"   Details: {issue['details']}")
