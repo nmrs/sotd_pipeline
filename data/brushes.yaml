@@ -357,6 +357,14 @@ known_brushes:
       knot_size_mm: 26
       patterns:
       - omega.*(pro)*.*49
+    '10065':
+      knot_size_mm: 23
+      patterns:
+      - omega.*10065
+    '10066':
+      knot_size_mm: 28
+      patterns:
+      - omega.*10066
     '10077':
       knot_size_mm: 23
       patterns:
@@ -364,24 +372,29 @@ known_brushes:
     '10098':
       knot_size_mm: 27
       patterns:
-      - '10098'
+      - omega.*10098
     '11047':
       fiber: Mixed Badger/Boar
       knot_size_mm: 22
       patterns:
-      - '11047'
+      - omega.*11047
     '11126':
       knot_size_mm: 24
       patterns:
-      - '11126'
+      - omega.*11126
     '11137':
       knot_size_mm: 24
       patterns:
       - '11137'
+    '146818':
+      fiber: Synthetic
+      knot_size_mm: 25
+      patterns:
+      - omega.*146818
     '20102':
       knot_size_mm: 28
       patterns:
-      - '20102'
+      - omega.*20102'
     '20106':
       knot_size_mm: 28
       patterns:
@@ -394,7 +407,12 @@ known_brushes:
     '80005':
       knot_size_mm: 24
       patterns:
-      - '80005'
+      - omega.*80005
+    '81151':
+      fiber: Synthetic
+      knot_size_mm: 28
+      patterns:
+      - omega.*81151
     EVO Sythetic:
       fiber: Synthetic
       patterns:
@@ -969,6 +987,13 @@ known_brushes:
       patterns:
       - ^(?!.*moar).*zenith.*\bb35\b
       - 508a
+    B37:
+      fiber: Boar
+      knot_size_mm: 28
+      knot_loft_mm: 57
+      patterns:
+      - zenith.*\bb37\b
+      - 506.*copper
     Barberpole:
       fiber: Boar
       knot_size_mm: 26
