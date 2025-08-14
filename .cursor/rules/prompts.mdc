@@ -310,3 +310,73 @@ use ### Tracked Implementation Development Process to proceed with @plan_webui_l
 
 run all react tests and lint and build to validate that there are no remaining issues. Update plan status and add additional steps (or modify additional steps) if issues are found. Then use the process to continue the implementation if necessary
 ''' -->
+
+### python-test-triage-analysis-only
+
+**Instruction:**  
+Run the full Python test suite and identify all failing tests. For each failure:  
+
+1. **Locate and review** all relevant source and test files involved in the failure.  
+2. **Inspect the Git history** of these files to understand the context and recent changes.  
+3. **Classify the failure** as one of the following:  
+   - **Test drift** – the test is outdated compared to current intended behavior.  
+   - **Code regression** – functionality broke after previously working.  
+   - **Incomplete implementation** – the feature was never fully implemented.  
+4. **Document your reasoning** for the classification.  
+5. **Propose a clear, actionable resolution plan** for each issue, including recommended code or test changes.  
+
+**Important:**  
+Do **not** modify any files before presenting your analysis and plan to the user.
+
+
+---
+
+### python-test-triage-confirm-before-fixing
+
+**Instruction:**  
+Run the full Python test suite and identify all failing tests. Then:  
+
+1. **Group failures** by root cause (shared code paths, dependencies, or similar error messages).  
+2. For each group:  
+   - **Review sources & tests** involved.  
+   - **Inspect Git history** to decide if the cause is test drift, regression, or incomplete implementation.  
+   - **Document a concise diagnosis** and **proposed fix plan** (code changes, test updates, refactors, docs).  
+3. **Validate with the user before making any edits:**  
+   - If any part of the diagnosis or plan is uncertain, explicitly call that out.  
+   - Present a brief, numbered checklist of changes you intend to make.  
+   - **Wait for user approval** before touching the repo.  
+4. After approval, **apply fixes incrementally**, re-running tests after each change to confirm resolution.  
+5. **Summarize outcomes** and any follow-ups (tech debt, flaky tests, missing coverage).  
+
+**Important:**  
+- No file modifications until the user confirms the plan.  
+- Keep changes minimal and scoped to resolving the failures.
+
+
+---
+
+### python-test-triage-autonomous
+
+**Instruction:**  
+Run the full Python test suite and identify all failing tests. Then:  
+
+1. **Group failures** by root cause (shared code paths, shared dependencies, or similar error messages).  
+2. For each group:  
+   - **Review all relevant source and test files**.  
+   - **Inspect the Git history** to determine if the cause is test drift, code regression, or incomplete implementation.  
+   - **Document the classification** and reasoning.  
+   - **If classification is uncertain or evidence is inconclusive, pause and validate your reasoning with the user before proceeding.**  
+3. **Prioritize issues** by:  
+   - Number of dependent tests or modules affected.  
+   - Criticality of functionality impacted.  
+4. **Draft a resolution plan** that includes:  
+   - Recommended code changes.  
+   - Recommended test updates or additions.  
+   - Potential refactoring or documentation updates if relevant.  
+5. **Apply the proposed fixes** in a safe, minimal-impact way, running the test suite after each change to confirm resolution.  
+6. **Summarize the changes** made and remaining recommendations for the user.  
+
+**Important:**  
+- Always present your reasoning before applying changes.  
+- Validate uncertain findings with the user before making modifications.  
+- Limit changes to directly resolving test failures; do not make unrelated modifications.
