@@ -1,0 +1,138 @@
+# Validation Tool: Catalog Drift Detection
+
+**Date**: 2025-08-13  
+**Type**: Specification  
+**Status**: DRAFT  
+**Priority**: HIGH  
+
+## Overview
+
+Create a validation tool that detects when strings in `correct_matches.yaml` are in the wrong location due to catalog drift. The tool bypasses `correct_matches.yaml` for all field types and runs each string through the actual matchers to determine where it should be saved, then compares this with where it's currently located.
+
+## Primary Use Case
+
+**Catch catalog drift** - detect when underlying catalog patterns have changed and strings need to be moved to different brand/model locations.
+
+## Functional Requirements
+
+### Core Functionality
+- **Bypass `correct_matches.yaml` for all field types** (brush, razor, blade, soap)
+- **Run each string through actual matchers** to determine where they should be saved
+- **Compare "should be" vs "currently is" locations**
+- **Flag mismatches as validation issues**
+- **Flag unmatched strings as validation errors** - strings that don't match any catalog patterns indicate catalog changes
+
+### Validation Scope
+- **Field-specific when `--field` is specified** - only validate the specified field
+- **All fields when no field specified** - comprehensive validation across all fields
+
+### Output Behavior
+- **Only report issues** - show what strings are in wrong places and where they should be, but leave manual fixes to the user
+- **Minimal info normally** - "String X should be at Brand Y Model Z (currently at Brand A Model B)"
+- **Full context in --verbose mode** - include matcher output, patterns used, catalog entries found, etc.
+- **Standalone CLI tool only** - console output for manual review
+- **Just report the facts** - no suggestions on how to fix issues
+
+### Error Handling
+- **Fail fast on matcher errors** - stop validation immediately to allow fixing matcher bugs
+- **Prioritize thoroughness** - run every single string through matchers, even if it takes several minutes for large catalogs
+
+## Technical Requirements
+
+### Matcher Integration
+- **Brush Matcher**: Use `bypass_correct_matches=True` configuration
+- **Razor Matcher**: Use `bypass_correct_matches=True` parameter
+- **Blade Matcher**: Set `correct_matches = {}` after creation
+- **Soap Matcher**: Set `correct_matches = {}` after creation
+
+### Data Flow
+1. **Load current `correct_matches.yaml`** structure
+2. **For each field to validate**:
+   - Create fresh matcher with `correct_matches.yaml` bypassed
+   - Run each string through the matcher
+   - Capture where the matcher says the string should be saved
+3. **Compare expected vs actual locations**:
+   - Generate "what should be" structure from matcher output
+   - Compare with current `correct_matches.yaml` structure
+   - Identify mismatches and unmatched strings
+4. **Report validation issues** with clear location information
+
+### Issue Types
+- **Missing Brand**: String should be under a brand that doesn't exist
+- **Missing Model**: String should be under a model that doesn't exist  
+- **Wrong Location**: String is in the wrong brand/model location
+- **No Match**: String doesn't match any catalog patterns
+
+## User Experience
+
+### CLI Interface
+```bash
+# Validate all fields
+python sotd/match/tools/managers/validate_correct_matches.py
+
+# Validate specific field
+python sotd/match/tools/managers/validate_correct_matches.py --field razor
+
+# Verbose output with full context
+python sotd/match/tools/managers/validate_correct_matches.py --field brush --verbose
+
+# Catalog validation mode (bypass correct_matches.yaml)
+python sotd/match/tools/managers/validate_correct_matches.py --field razor --catalog-validation
+```
+
+### Output Format
+```
+❌ Found 3 validation issues:
+============================================================
+
+RAZOR (2 issues):
+----------------------------------------
+🟡 wrong_location: 'art razors capitaine 19/16 full hollow square tip' should be at Art Razor Straight (currently at Alpha Outlaw)
+🟡 wrong_location: 'alpha outlaw evolution ti' should be at Alpha Outlaw (currently at Alpha Claymore)
+
+BRUSH (1 issues):
+----------------------------------------
+🔴 no_match: 'chisel & hound mystery brush' doesn't match any catalog patterns
+```
+
+## Success Criteria
+
+- [ ] **Detects all catalog drift** - catches strings in wrong locations
+- [ ] **Handles all field types** - brush, razor, blade, soap validation works
+- [ ] **Bypasses correct_matches.yaml** - uses actual matcher logic for validation
+- [ ] **Fails fast on errors** - stops validation when matcher errors occur
+- [ ] **Thorough validation** - checks every string, even if it takes time
+- [ ] **Clear reporting** - shows exactly what's wrong and where it should be
+- **No false positives** - only reports real drift issues, not validation tool bugs
+
+## Implementation Notes
+
+### Current Issues to Fix
+1. **Field parameter not passed through** - `_find_actual_location` needs field context
+2. **Hardcoded field references** - several methods still reference "brush" specifically
+3. **Matcher bypass not working** - razor/blade/soap matchers not properly bypassing correct_matches.yaml
+4. **MatchResult vs Dict handling** - need proper conversion for all matcher types
+
+### Architecture Changes Needed
+1. **Extend validation logic** from brush-only to all fields
+2. **Fix matcher creation** to properly bypass correct_matches.yaml for all types
+3. **Update comparison logic** to work with any field structure
+4. **Add proper error handling** for matcher failures
+
+## Dependencies
+
+- **Existing matchers**: BrushMatcher, RazorMatcher, BladeMatcher, SoapMatcher
+- **Correct matches data**: `data/correct_matches.yaml`
+- **Catalog files**: `data/brushes.yaml`, `data/razors.yaml`, `data/blades.yaml`, `data/soaps.yaml`
+- **Validation framework**: Existing `validate_correct_matches.py` structure
+
+## Future Enhancements
+
+- **Performance optimization** - parallel processing for large catalogs
+- **Incremental validation** - only validate changed sections
+- **Integration with CI/CD** - automated validation in deployment pipelines
+- **Historical tracking** - track drift over time to identify patterns
+description:
+globs:
+alwaysApply: false
+---
