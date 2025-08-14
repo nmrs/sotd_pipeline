@@ -36,11 +36,11 @@ class ValidateCorrectMatches:
 
         # Initialize the updater for creating temp files
         self.updater = CorrectMatchesUpdater()
-        
+
         # Performance optimization: Pre-compute normalized catalogs
         self._normalized_catalogs = {}
         self._validation_cache = {}
-        
+
         # Pre-compute all validation data structures
         self._precompute_validation_structures()
 
@@ -269,15 +269,32 @@ class ValidateCorrectMatches:
                 for model_name in original_section[brand_name]:
                     # Check if model exists for this brand in current catalog
                     if not self._model_exists_in_catalog(field, brand_name, model_name):
-                        issues.append(
-                            {
-                                "type": "invalid_model",
-                                "field": field,
-                                "brand": brand_name,
-                                "model": model_name,
-                                "message": f"Model '{model_name}' does not exist for brand '{brand_name}' in current {field} catalog",
-                            }
-                        )
+                        # For brush field, also check if matcher can handle this combination
+                        if field == "brush" and self._matcher_can_handle_combination(
+                            field, brand_name, model_name
+                        ):
+                            issues.append(
+                                {
+                                    "type": "missing_from_catalog",
+                                    "field": field,
+                                    "brand": brand_name,
+                                    "model": model_name,
+                                    "message": (
+                                        f"Model '{model_name}' for brand '{brand_name}' is missing from "
+                                        f"catalog but CAN be matched by brush matcher strategies"
+                                    ),
+                                }
+                            )
+                        else:
+                            issues.append(
+                                {
+                                    "type": "invalid_model",
+                                    "field": field,
+                                    "brand": brand_name,
+                                    "model": model_name,
+                                    "message": f"Model '{model_name}' does not exist for brand '{brand_name}' in current {field} catalog",
+                                }
+                            )
 
         return issues
 
@@ -286,14 +303,14 @@ class ValidateCorrectMatches:
     ) -> bool:
         """Optimized brand existence check using cached validation data."""
         import unicodedata
-        
+
         # Use cached validation data for O(1) lookup
         if field not in self._validation_cache:
             self._build_validation_cache(field)
-        
+
         normalized_brand = unicodedata.normalize("NFC", brand_name)
         validation_cache = self._validation_cache[field]
-        
+
         if field == "blade" and format_name:
             return (
                 format_name in validation_cache
@@ -307,15 +324,15 @@ class ValidateCorrectMatches:
     ) -> bool:
         """Optimized model existence check using cached validation data."""
         import unicodedata
-        
+
         # Use cached validation data for O(1) lookup
         if field not in self._validation_cache:
             self._build_validation_cache(field)
-        
+
         normalized_brand = unicodedata.normalize("NFC", brand_name)
         normalized_model = unicodedata.normalize("NFC", model_name)
         validation_cache = self._validation_cache[field]
-        
+
         if field == "blade" and format_name:
             return (
                 format_name in validation_cache
@@ -557,12 +574,7 @@ class ValidateCorrectMatches:
 
                 print()
 
-        # Show structure comparison
-        print("📊 Structure Comparison:")
-        print("   Original structure (from correct_matches.yaml):")
-        self._print_structure_summary(self.correct_matches.get(field, {}))
-        print("   Expected structure (from current matcher):")
-        self._print_structure_summary(expected_structure.get(field, {}))
+
 
     def _find_current_location(self, field: str, pattern: str) -> Optional[str]:
         """Find where a pattern currently exists in correct_matches.yaml."""
@@ -688,11 +700,11 @@ class ValidateCorrectMatches:
         """Pre-compute all validation data structures for performance."""
         logger.info("Pre-computing validation structures...")
         start_time = time.perf_counter()
-        
+
         for field in ["razor", "blade", "brush", "soap"]:
             if field in self.correct_matches:
                 self._build_validation_cache(field)
-        
+
         precompute_time = time.perf_counter() - start_time
         logger.info(f"Validation structures pre-computed in {precompute_time*1000:.2f}ms")
 
@@ -700,13 +712,13 @@ class ValidateCorrectMatches:
         """Build validation cache for a specific field."""
         if field in self._validation_cache:
             return self._validation_cache[field]
-        
+
         # Get normalized catalog
         normalized_catalog = self._get_normalized_catalog(field)
-        
+
         # Build existence cache
         existence_cache = {}
-        
+
         if field == "blade":
             # For blades: format -> brand -> model
             for format_name, format_section in normalized_catalog.items():
@@ -717,7 +729,7 @@ class ValidateCorrectMatches:
             # For other fields: brand -> model
             for brand_name, brand_section in normalized_catalog.items():
                 existence_cache[brand_name] = set(brand_section.keys())
-        
+
         self._validation_cache[field] = existence_cache
         return existence_cache
 
@@ -732,12 +744,12 @@ class ValidateCorrectMatches:
     def _normalize_catalog_keys(self, catalog_data: Dict[str, Any]) -> Dict[str, Any]:
         """Normalize all catalog keys for efficient lookup."""
         import unicodedata
-        
+
         if not catalog_data:
             return {}
-        
+
         normalized = {}
-        
+
         if "74" in catalog_data:  # Blade format
             for format_name, format_section in catalog_data.items():
                 normalized[format_name] = {}
@@ -755,7 +767,7 @@ class ValidateCorrectMatches:
                 for model_name, model_section in brand_section.items():
                     normalized_model = unicodedata.normalize("NFC", model_name)
                     normalized[normalized_brand][normalized_model] = model_section
-            
+
             # Handle other_brushes section
             for brand_name, brand_section in catalog_data["other_brushes"].items():
                 normalized_brand = unicodedata.normalize("NFC", brand_name)
@@ -770,8 +782,35 @@ class ValidateCorrectMatches:
                 for model_name, model_section in brand_section.items():
                     normalized_model = unicodedata.normalize("NFC", model_name)
                     normalized[normalized_brand][normalized_model] = model_section
-        
+
         return normalized
+
+    def _matcher_can_handle_combination(self, field: str, brand_name: str, model_name: str) -> bool:
+        """Check if the matcher can actually handle this brand/model combination."""
+        if field != "brush":
+            return False
+
+        try:
+            matcher = self._get_matcher(field)
+            if not matcher:
+                return False
+
+            # Test if matcher can actually match this combination
+            test_input = f"{brand_name} {model_name}"
+            result = matcher.match(test_input)
+
+            if result and hasattr(result, "matched") and result.matched:
+                return True
+
+            # Also check if it's a dict with matched data
+            if isinstance(result, dict) and result.get("matched"):
+                return True
+
+            return False
+
+        except Exception as e:
+            logger.debug(f"Error testing matcher coverage for {brand_name} {model_name}: {e}")
+            return False
 
 
 def main():
