@@ -3,6 +3,7 @@
 
 import logging
 import sys
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -35,6 +36,13 @@ class ValidateCorrectMatches:
 
         # Initialize the updater for creating temp files
         self.updater = CorrectMatchesUpdater()
+        
+        # Performance optimization: Pre-compute normalized catalogs
+        self._normalized_catalogs = {}
+        self._validation_cache = {}
+        
+        # Pre-compute all validation data structures
+        self._precompute_validation_structures()
 
     def _load_correct_matches(self) -> Dict[str, Any]:
         """Load correct_matches.yaml file."""
@@ -276,77 +284,49 @@ class ValidateCorrectMatches:
     def _brand_exists_in_catalog(
         self, field: str, brand_name: str, format_name: str = None
     ) -> bool:
-        """Check if a brand exists in the current catalog."""
-        try:
-            import unicodedata
-            
-            # Normalize both the brand name and catalog keys to NFC form
-            normalized_brand = unicodedata.normalize('NFC', brand_name)
-            
-            if field == "blade" and format_name:
-                # For blades, check in the specific format section
-                catalog_data = self._load_catalog_data(field)
-                if format_name not in catalog_data:
-                    return False
-                # Check against normalized catalog keys
-                for catalog_brand in catalog_data[format_name].keys():
-                    normalized_catalog_brand = unicodedata.normalize('NFC', catalog_brand)
-                    if normalized_catalog_brand == normalized_brand:
-                        return True
-                return False
-            else:
-                # For other fields, check directly in catalog
-                catalog_data = self._load_catalog_data(field)
-                # Check against normalized catalog keys
-                for catalog_brand in catalog_data.keys():
-                    normalized_catalog_brand = unicodedata.normalize('NFC', catalog_brand)
-                    if normalized_catalog_brand == normalized_brand:
-                        return True
-                return False
-        except Exception:
-            return False
+        """Optimized brand existence check using cached validation data."""
+        import unicodedata
+        
+        # Use cached validation data for O(1) lookup
+        if field not in self._validation_cache:
+            self._build_validation_cache(field)
+        
+        normalized_brand = unicodedata.normalize("NFC", brand_name)
+        validation_cache = self._validation_cache[field]
+        
+        if field == "blade" and format_name:
+            return (
+                format_name in validation_cache
+                and normalized_brand in validation_cache[format_name]
+            )
+        else:
+            return normalized_brand in validation_cache
 
     def _model_exists_in_catalog(
         self, field: str, brand_name: str, model_name: str, format_name: str = None
     ) -> bool:
-        """Check if a model exists for a brand in the current catalog."""
-        try:
-            import unicodedata
-            
-            # Normalize names to NFC form
-            normalized_brand = unicodedata.normalize('NFC', brand_name)
-            normalized_model = unicodedata.normalize('NFC', model_name)
-            
-            if field == "blade" and format_name:
-                # For blades, check in the specific format section
-                catalog_data = self._load_catalog_data(field)
-                if format_name not in catalog_data:
-                    return False
-                # Check against normalized catalog keys
-                for catalog_brand in catalog_data[format_name].keys():
-                    normalized_catalog_brand = unicodedata.normalize('NFC', catalog_brand)
-                    if normalized_catalog_brand == normalized_brand:
-                        brand_section = catalog_data[format_name][catalog_brand]
-                        for catalog_model in brand_section.keys():
-                            normalized_catalog_model = unicodedata.normalize('NFC', catalog_model)
-                            if normalized_catalog_model == normalized_model:
-                                return True
-                return False
-            else:
-                # For other fields, check directly in catalog
-                catalog_data = self._load_catalog_data(field)
-                # Check against normalized catalog keys
-                for catalog_brand in catalog_data.keys():
-                    normalized_catalog_brand = unicodedata.normalize('NFC', catalog_brand)
-                    if normalized_catalog_brand == normalized_brand:
-                        brand_section = catalog_data[catalog_brand]
-                        for catalog_model in brand_section.keys():
-                            normalized_catalog_model = unicodedata.normalize('NFC', catalog_model)
-                            if normalized_catalog_model == normalized_model:
-                                return True
-                return False
-        except Exception:
-            return False
+        """Optimized model existence check using cached validation data."""
+        import unicodedata
+        
+        # Use cached validation data for O(1) lookup
+        if field not in self._validation_cache:
+            self._build_validation_cache(field)
+        
+        normalized_brand = unicodedata.normalize("NFC", brand_name)
+        normalized_model = unicodedata.normalize("NFC", model_name)
+        validation_cache = self._validation_cache[field]
+        
+        if field == "blade" and format_name:
+            return (
+                format_name in validation_cache
+                and normalized_brand in validation_cache[format_name]
+                and normalized_model in validation_cache[format_name][normalized_brand]
+            )
+        else:
+            return (
+                normalized_brand in validation_cache
+                and normalized_model in validation_cache[normalized_brand]
+            )
 
     def _load_catalog_data(self, field: str) -> Dict[str, Any]:
         """Load catalog data for a specific field."""
@@ -703,6 +683,79 @@ class ValidateCorrectMatches:
             if len(issues) > 3:
                 print(f"   ... and {len(issues) - 3} more")
             print()
+
+    def _precompute_validation_structures(self):
+        """Pre-compute all validation data structures for performance."""
+        logger.info("Pre-computing validation structures...")
+        start_time = time.perf_counter()
+        
+        for field in ["razor", "blade", "brush", "soap"]:
+            if field in self.correct_matches:
+                self._build_validation_cache(field)
+        
+        precompute_time = time.perf_counter() - start_time
+        logger.info(f"Validation structures pre-computed in {precompute_time*1000:.2f}ms")
+
+    def _build_validation_cache(self, field: str):
+        """Build validation cache for a specific field."""
+        if field in self._validation_cache:
+            return self._validation_cache[field]
+        
+        # Get normalized catalog
+        normalized_catalog = self._get_normalized_catalog(field)
+        
+        # Build existence cache
+        existence_cache = {}
+        
+        if field == "blade":
+            # For blades: format -> brand -> model
+            for format_name, format_section in normalized_catalog.items():
+                existence_cache[format_name] = {}
+                for brand_name, brand_section in format_section.items():
+                    existence_cache[format_name][brand_name] = set(brand_section.keys())
+        else:
+            # For other fields: brand -> model
+            for brand_name, brand_section in normalized_catalog.items():
+                existence_cache[brand_name] = set(brand_section.keys())
+        
+        self._validation_cache[field] = existence_cache
+        return existence_cache
+
+    def _get_normalized_catalog(self, field: str) -> Dict[str, Any]:
+        """Get cached normalized catalog with pre-computed keys."""
+        if field not in self._normalized_catalogs:
+            catalog_data = self._load_catalog_data(field)
+            normalized = self._normalize_catalog_keys(catalog_data)
+            self._normalized_catalogs[field] = normalized
+        return self._normalized_catalogs[field]
+
+    def _normalize_catalog_keys(self, catalog_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Normalize all catalog keys for efficient lookup."""
+        import unicodedata
+        
+        if not catalog_data:
+            return {}
+        
+        normalized = {}
+        
+        if "74" in catalog_data:  # Blade format
+            for format_name, format_section in catalog_data.items():
+                normalized[format_name] = {}
+                for brand_name, brand_section in format_section.items():
+                    normalized_brand = unicodedata.normalize("NFC", brand_name)
+                    normalized[format_name][normalized_brand] = {}
+                    for model_name, model_section in brand_section.items():
+                        normalized_model = unicodedata.normalize("NFC", model_name)
+                        normalized[format_name][normalized_brand][normalized_model] = model_section
+        else:  # Other fields
+            for brand_name, brand_section in catalog_data.items():
+                normalized_brand = unicodedata.normalize("NFC", brand_name)
+                normalized[normalized_brand] = {}
+                for model_name, model_section in brand_section.items():
+                    normalized_model = unicodedata.normalize("NFC", model_name)
+                    normalized[normalized_brand][normalized_model] = model_section
+        
+        return normalized
 
 
 def main():
