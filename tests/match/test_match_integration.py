@@ -100,7 +100,12 @@ soap:
 
     # Process the month
     result = process_month(
-        "2025-01", base_path, force=True, debug=False, correct_matches_path=correct_matches_file
+        "2025-01",
+        base_path,
+        force=True,
+        debug=False,
+        correct_matches_path=correct_matches_file,
+        brush_system="legacy",
     )
 
     # Print error details if processing failed
@@ -113,7 +118,8 @@ soap:
     assert result["records_processed"] == 3
 
     # Load and verify the matched data
-    matched_file = base_path / "matched" / "2025-01.json"
+    # When using brush_system="legacy", the file is saved to matched_legacy/
+    matched_file = base_path / "matched_legacy" / "2025-01.json"
     assert matched_file.exists()
 
     with matched_file.open("r") as f:
