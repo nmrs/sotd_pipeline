@@ -487,19 +487,49 @@ class ValidateCorrectMatches:
                 actual_strings = actual_brand_data[model]
                 for string in strings:
                     if string not in actual_strings:
-                        # String is in wrong location
+                        # String is in wrong location - find where it actually is
+                        actual_location = self._find_actual_location(string)
+
                         issue = {
                             "type": "wrong_location",
                             "string": string,
                             "expected_location": f"{brand} {model}",
-                            "actual_location": "not found in expected location",
+                            "actual_location": actual_location,
                             "message": f"String '{string}' should be saved under brand '{brand}' "
-                            f"model '{model}' but it's not found there. "
+                            f"model '{model}' but it's currently saved elsewhere. "
                             f"This suggests the string needs to be moved.",
                         }
                         issues.append(issue)
 
         return issues
+
+    def _find_actual_location(self, string: str) -> str:
+        """
+        Find where a string is actually located in the current correct_matches.yaml.
+
+        Args:
+            string: The string to find
+
+        Returns:
+            String describing where the string is currently located
+        """
+        if not self.correct_matches:
+            return "not found"
+
+        brush_section = self.correct_matches.get("brush", {})
+
+        for brand, brand_data in brush_section.items():
+            if not isinstance(brand_data, dict):
+                continue
+
+            for model, strings in brand_data.items():
+                if not isinstance(strings, list):
+                    continue
+
+                if string in strings:
+                    return f"{brand} {model}"
+
+        return "not found"
 
     def _get_matcher(self, field: str):
         """Get matcher for field, using pre-created matchers with bypass config.
