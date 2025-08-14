@@ -18,11 +18,16 @@ def clear_catalog_cache() -> None:
 
 class BaseMatcher:
     def __init__(
-        self, catalog_path: Path, field_type: str, correct_matches_path: Optional[Path] = None
+        self,
+        catalog_path: Path,
+        field_type: str,
+        correct_matches_path: Optional[Path] = None,
+        bypass_correct_matches: bool = False,
     ):
         self.catalog_path = catalog_path
         self.field_type = field_type  # "razor", "blade", "brush", "soap"
         self.correct_matches_path = correct_matches_path or Path("data/correct_matches.yaml")
+        self.bypass_correct_matches = bypass_correct_matches
         self.catalog = self._load_catalog()
         self.correct_matches = self._load_correct_matches()
 
@@ -43,6 +48,9 @@ class BaseMatcher:
 
     def _load_correct_matches(self) -> Dict[str, Dict[str, Any]]:
         """Load correct matches for this field type from correct_matches.yaml (or injected path)."""
+        if self.bypass_correct_matches:
+            return {}
+
         if not self.correct_matches_path.exists():
             return {}
 
