@@ -74,14 +74,14 @@ class TestAnnualDeltaCalculator:
         # Razor A: moved from position 2 to 1 (improved by 1)
         assert razors[0]["name"] == "Razor A"
         assert razors[0]["delta"] == 1
-        assert razors[0]["delta_symbol"] == "↑"
-        assert razors[0]["delta_text"] == "↑"
+        assert razors[0]["delta_symbol"] == "↑1"  # Improved by 1 position
+        assert razors[0]["delta_text"] == "↑1"  # Improved by 1 position
 
         # Razor B: moved from position 1 to 2 (worsened by 1)
         assert razors[1]["name"] == "Razor B"
         assert razors[1]["delta"] == -1
-        assert razors[1]["delta_symbol"] == "↓"
-        assert razors[1]["delta_text"] == "↓"
+        assert razors[1]["delta_symbol"] == "↓1"  # Worsened by 1 position
+        assert razors[1]["delta_text"] == "↓1"  # Worsened by 1 position
 
         # Razor C: stayed at position 3 (no change)
         assert razors[2]["name"] == "Razor C"

@@ -39,14 +39,14 @@ class TestDeltaCalculator:
         # Razor A: moved from position 2 to 1 (improved by 1)
         assert result[0]["name"] == "Razor A"
         assert result[0]["delta"] == 1
-        assert result[0]["delta_symbol"] == "↑"
-        assert result[0]["delta_text"] == "↑"
+        assert result[0]["delta_symbol"] == "↑1"  # Improved by 1 position
+        assert result[0]["delta_text"] == "↑1"  # Improved by 1 position
 
         # Razor B: moved from position 1 to 2 (worsened by 1)
         assert result[1]["name"] == "Razor B"
         assert result[1]["delta"] == -1
-        assert result[1]["delta_symbol"] == "↓"
-        assert result[1]["delta_text"] == "↓"
+        assert result[1]["delta_symbol"] == "↓1"  # Worsened by 1 position
+        assert result[1]["delta_text"] == "↓1"  # Worsened by 1 position
 
         # Razor C: stayed at position 3 (no change)
         assert result[2]["name"] == "Razor C"
@@ -165,8 +165,8 @@ class TestDeltaCalculator:
         """Test delta symbol generation."""
         calculator = DeltaCalculator()
 
-        assert calculator._get_delta_symbol(1) == "↑"  # Improved
-        assert calculator._get_delta_symbol(-1) == "↓"  # Worsened
+        assert calculator._get_delta_symbol(1) == "↑1"  # Improved by 1 position
+        assert calculator._get_delta_symbol(-1) == "↓1"  # Worsened by 1 position
         assert calculator._get_delta_symbol(0) == "="  # No change
         assert calculator._get_delta_symbol(None) == "n/a"  # New item
 
@@ -243,8 +243,8 @@ class TestDeltaCalculator:
     def test_format_delta_column(self):
         """Test delta column formatting."""
         items = [
-            {"name": "Item A", "delta_text": "↑", "delta_symbol": "↑"},
-            {"name": "Item B", "delta_text": "↓", "delta_symbol": "↓"},
+            {"name": "Item A", "delta_text": "↑1", "delta_symbol": "↑1"},
+            {"name": "Item B", "delta_text": "↓2", "delta_symbol": "↓2"},
             {"name": "Item C", "delta_text": "=", "delta_symbol": "="},
             {"name": "Item D", "delta_text": "n/a", "delta_symbol": "n/a"},
         ]
@@ -252,7 +252,7 @@ class TestDeltaCalculator:
         calculator = DeltaCalculator()
         formatted = calculator.format_delta_column(items)
 
-        assert formatted == ["↑", "↓", "=", "n/a"]
+        assert formatted == ["↑1", "↓2", "=", "n/a"]
 
     def test_format_delta_column_missing_keys(self):
         """Test delta column formatting with missing keys."""

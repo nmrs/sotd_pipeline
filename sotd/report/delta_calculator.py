@@ -114,14 +114,14 @@ class DeltaCalculator:
             delta: Position delta (positive = moved up, negative = moved down)
 
         Returns:
-            Unicode arrow symbol
+            Unicode arrow symbol with magnitude
         """
         if delta is None:
             return "n/a"  # Not available (new item)
         elif delta > 0:
-            return "↑"  # Moved up (better position)
+            return f"↑{delta}"  # Moved up (better position) with magnitude
         elif delta < 0:
-            return "↓"  # Moved down (worse position)
+            return f"↓{abs(delta)}"  # Moved down (worse position) with magnitude
         else:
             return "="  # No change
 
@@ -205,6 +205,11 @@ class DeltaCalculator:
             # For symbol-only format, just return the symbol
             if delta_text in ["↑", "↓", "=", "n/a"]:
                 formatted_deltas.append(delta_text)
+            elif delta_text.startswith(("↑", "↓")) and len(delta_text) > 1:
+                # Handle new format with magnitude (e.g., ↑2, ↓3)
+                formatted_deltas.append(delta_text)
+            elif delta_text == "=":
+                formatted_deltas.append("=")
             else:
                 # Fallback for any legacy format
                 formatted_deltas.append("n/a")
