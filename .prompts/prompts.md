@@ -331,6 +331,91 @@ Do **not** modify any files before presenting your analysis and plan to the user
 
 ---
 
+### python-test-triage-analysis-only (JSON artifact)
+
+**Goal:**  
+Run the full Python test suite, save results in a structured JSON file, and analyze all failures.  
+The JSON artifact allows re-analysis without re-running tests, keeping results outside chat context.
+
+---
+
+## Artifact location & naming
+- Run dir: `.reports/runs/<YYYYMMDD-HHMMSS>/`
+- Symlink/text pointer to latest: `.reports/latest`
+- Main file: `.reports/latest/results.json`
+- Additional files:
+  - `pytest.log` — full stdout/stderr from the run
+  - `failure_inventory.jsonl` — normalized list of failing tests
+  - `failure_groups.json` — grouped root causes with classification, confidence, and evidence
+  - `triage.md` / `triage.json` — human and machine-readable summaries
+  - `pip-freeze.txt` — dependency snapshot
+  - `run_meta.json` — run metadata (start/end, python version, branch, commit)
+
+---
+
+## Steps (analysis-only)
+1) **Preflight**
+   - Ensure `.reports/` exists.
+   - Capture `python --version`, `pip freeze > .reports/runs/<ts>/pip-freeze.txt`.
+   - Record `git rev-parse --abbrev-ref HEAD` and `git rev-parse --short HEAD` into run_meta.json.
+
+2) **Run tests (or reuse)**
+   - If `.reports/latest/results.json` exists and is < 30 min old, reuse it.
+   - Else run:
+     ```bash
+     mkdir -p .reports/runs/<ts>
+     ln -fnsv runs/<ts> .reports/latest
+     PYTHONPATH=. pytest tests/ -q -ra \
+       --json-report \
+       --json-report-file=.reports/latest/results.json \
+       2>&1 | tee .reports/latest/pytest.log
+     ```
+     *(Requires `pip install pytest-json-report`.)*
+
+3) **Inventory failures**
+   - Parse `.reports/latest/results.json` to create `failure_inventory.jsonl`.
+   - Each JSON line: nodeid, error_type, top_project_frame, message_first_line, duration.
+
+4) **Group & classify**
+   - Build `failure_groups.json` with grouped failures and:
+     - category: `test_drift`, `regression`, `incomplete`, `flaky`, `env`, or `fixture`
+     - confidence: 0–1
+     - tests[], files[], evidence (blame, commits, stack snippet)
+   - Classification heuristics:
+     - **Test drift**: API renamed or semantics changed intentionally; test not updated.
+     - **Regression**: unintended change broke intended behavior.
+     - **Incomplete**: feature never fully implemented.
+     - **Flaky**: intermittent failures, time/state-dependent.
+     - **Env**: dependency or platform mismatch.
+     - **Fixture**: faulty test setup/teardown.
+
+5) **Plans (no edits)**
+   - For each group, propose a minimal resolution plan:
+     - If drift: update expectations/renames/fixtures.
+     - If regression: smallest code fix + regression test.
+     - If incomplete: define acceptance criteria and tasks.
+     - If flaky: seed RNG/freeze time/fix teardown.
+     - If env: pin/bump dependency or add skip guard.
+     - If fixture: stabilize setup/teardown.
+
+6) **Human & machine summaries**
+   - `triage.md`: run meta, counts per category, table of groups, checklist.
+   - `triage.json`: structured equivalent.
+
+7) **Console output**
+   - Print path to `.reports/latest/results.json`, counts per category, and brief summary.
+
+---
+
+## Important constraints
+- **No file modifications** — analysis only.
+- Always write new artifacts to `.reports/runs/<ts>/`, update `.reports/latest`.
+- Prefer absolute file paths in JSON for reproducibility.
+- If parsing fails, still write partial results and note limitations in triage.md.
+
+---
+
+
 ### python-test-triage-confirm-before-fixing
 
 **Instruction:**  
