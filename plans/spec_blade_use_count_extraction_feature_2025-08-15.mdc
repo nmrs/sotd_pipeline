@@ -121,6 +121,39 @@ Implement priority-based extraction logic on top of existing patterns:
 - **Missing data**: Return `None` for missing patterns
 - **No valid pattern**: Return `(None, None)`
 
+##### **Usage Count Validation**
+**Critical Business Rule**: All extracted usage counts must be validated for realistic ranges.
+
+**Validation Logic:**
+- **< 800**: Always legitimate blade usage counts ✅
+- **≥ 800**: Almost certainly model numbers, inventory, or other non-usage data ❌
+- **4+ digits**: Never legitimate usage counts ❌
+
+**Analysis Basis:**
+Our analysis of `analysis/20250815-known-blade-patterns.yaml` revealed:
+- **Legitimate high usage**: Numbers 500-800 represent "marathon" users pushing blade limits
+- **Model numbers**: Numbers ≥800 include `Feather (3003135)`, `Rolls Razor (152138)`, `Perma-Sharp (9999)`
+- **Inventory numbers**: Numbers like `Wizamet (1000)` represent inventory/model identifiers
+- **Data quality**: 1,694 strings have 3+ digit numbers, but only <800 are realistic usage counts
+
+**Implementation Note:**
+```python
+def validate_usage_count(number: int) -> bool:
+    """
+    Validate if a number represents a legitimate blade usage count.
+    
+    Args:
+        number: The extracted number
+        
+    Returns:
+        True if legitimate usage count, False otherwise
+    """
+    if number < 800:
+        return True  # Always legitimate usage count
+    
+    return False  # Never legitimate usage count
+```
+
 ##### **Return Structure**
 ```python
 def extract_blade_counts(text: str) -> tuple[Optional[int], Optional[int]]:
@@ -138,6 +171,8 @@ def extract_blade_counts(text: str) -> tuple[Optional[int], Optional[int]]:
         "Astra SP (3)" → (None, 3)
         "(3x)" → (None, 3)
         "BIC" → (None, None)
+        "Feather (3003135)" → (None, None)  # Invalid: too high
+        "Gillette - Nacet (Marathon) (747)" → (None, 747)  # Valid: <800
     """
 ```
 
@@ -206,7 +241,29 @@ def extract_blade_counts(text: str) -> tuple[Optional[int], Optional[int]]:
     if use_count is None:
         use_count = _extract_lower_priority_patterns(text)  # Reuse existing patterns
     
+    # Step 5: Validate extracted usage counts
+    if use_count is not None:
+        use_count = _validate_usage_count(use_count)
+    
+    if blade_count is not None:
+        blade_count = _validate_usage_count(blade_count)
+    
     return blade_count, use_count
+
+def _validate_usage_count(number: int) -> Optional[int]:
+    """
+    Validate if a number represents a legitimate blade usage count.
+    
+    Args:
+        number: The extracted number
+        
+    Returns:
+        The number if valid, None if invalid
+    """
+    if number < 800:
+        return number  # Always legitimate usage count
+    
+    return None  # Never legitimate usage count
 ```
 
 #### 3. **Helper Functions (Reusing Existing Patterns)**
@@ -278,6 +335,12 @@ if blade_count is not None or use_count is not None:
 3. **Context tests**: Test multiplier context logic
 4. **Edge case tests**: Test unusual but valid inputs
 5. **Error tests**: Test error handling and fail-fast behavior
+6. **Validation tests**: Test usage count validation logic
+   - **Valid ranges**: Test numbers <800 are accepted
+   - **Invalid ranges**: Test numbers ≥800 are rejected
+   - **Boundary conditions**: Test 799 (valid) vs 800 (invalid)
+   - **Model numbers**: Test `Feather (3003135)` returns None
+   - **Marathon usage**: Test `(Marathon) (747)` returns 747
 
 ### Integration Tests
 1. **Real data tests**: Test with actual SOTD data samples
