@@ -19,6 +19,22 @@ class RazorFormatsTableGenerator(StandardProductTableGenerator):
         """Return the key to use for matching items in delta calculations."""
         return "format"
 
+    def get_column_config(self) -> dict[str, dict[str, Any]]:
+        """Return column configuration for razor formats table.
+
+        Override to use 'format' field instead of 'name' field.
+        """
+        return {
+            "format": {"display_name": "name"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
+        }
+
 
 class RazorsTableGenerator(StandardProductTableGenerator):
     """Table generator for individual razors in the hardware report."""
@@ -48,6 +64,22 @@ class RazorManufacturersTableGenerator(StandardProductTableGenerator):
     def get_name_key(self) -> str:
         """Return the key to use for matching items in delta calculations."""
         return "brand"
+
+    def get_column_config(self) -> dict[str, dict[str, Any]]:
+        """Return column configuration for razor manufacturers table.
+
+        Override to use 'brand' field instead of 'name' field.
+        """
+        return {
+            "brand": {"display_name": "name"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
+        }
 
 
 # Factory method alternatives for simplified table creation
