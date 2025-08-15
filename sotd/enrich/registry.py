@@ -100,10 +100,10 @@ class EnricherRegistry:
                 # These fields are only needed during matching and scoring, not for downstream
                 # analysis
                 filtered_field_data = self._filter_match_phase_fields(field_data)
-                
+
                 # Add enriched data to the product field
                 filtered_field_data["enriched"] = field_enriched_data
-                
+
                 # Update the record with the filtered and enriched field data
                 enriched_record[field] = filtered_field_data
             else:
@@ -118,10 +118,10 @@ class EnricherRegistry:
     def _filter_match_phase_fields(self, field_data: Dict[str, Any]) -> Dict[str, Any]:
         """Filter out match-phase-specific fields that shouldn't carry over to enriched
         phase.
-        
+
         Args:
             field_data: The field data from the match phase
-            
+
         Returns:
             Filtered field data with match-phase-specific fields removed
         """
@@ -131,12 +131,12 @@ class EnricherRegistry:
             "_matched_by_strategy",  # Strategy identification
             "_pattern_used",  # Pattern used for matching
         }
-        
+
         filtered_data = {}
         for key, value in field_data.items():
             if key not in match_phase_fields:
                 filtered_data[key] = value
-        
+
         return filtered_data
 
     def enrich_records(
