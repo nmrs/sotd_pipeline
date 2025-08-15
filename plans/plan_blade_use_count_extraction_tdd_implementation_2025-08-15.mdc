@@ -33,6 +33,73 @@ This plan implements the blade use count extraction feature using Test-Driven De
 
 ## Implementation Phases
 
+### **Phase 0: Existing Test Coverage Analysis (Week 0 - Analysis Only)**
+
+#### **0.1 Analyze Current Test Coverage**
+**Goal**: Understand existing test coverage to avoid duplication and identify gaps
+
+**Tasks**:
+- [ ] Analyze `tests/enrich/test_blade_enricher.py` for existing test coverage
+- [ ] Map existing test cases to planned functionality
+- [ ] Identify test gaps and areas needing new coverage
+- [ ] Document existing test patterns and approaches
+- [ ] Evaluate test quality and coverage completeness
+
+**Analysis to Perform**:
+```python
+# Review existing test coverage in test_blade_enricher.py
+# Current tests cover:
+# - Basic pattern extraction: (3), [4], {5}
+# - Multiplier patterns: x4, 2x, (x2), (2X)
+# - Case insensitivity: (X3), (x3)
+# - Edge cases: whitespace, mixed text, multiple numbers
+# - Integration: enricher.enrich() method
+# - Real-world examples: 11 test cases with actual comment formats
+```
+
+**Test Coverage Mapping**:
+- [ ] **Simple delimiters**: ✅ `(3)`, `[4]`, `{5}` - FULLY COVERED
+- [ ] **Multiplier patterns**: ✅ `x4`, `2x`, `(x2)`, `(2X)` - FULLY COVERED  
+- [ ] **Case insensitivity**: ✅ `(X3)`, `(x3)` - FULLY COVERED
+- [ ] **Edge cases**: ✅ Whitespace, mixed text, multiple numbers - FULLY COVERED
+- [ ] **Integration**: ✅ `enricher.enrich()` method - FULLY COVERED
+- [ ] **Real-world examples**: ✅ 11 test cases - FULLY COVERED
+
+**Gaps Identified**:
+- [ ] **Priority logic**: No tests for pattern priority conflicts
+- [ ] **Multiplier context**: No tests for blade_count vs use_count logic
+- [ ] **Usage count validation**: No tests for <800 validation rule
+- [ ] **New pattern types**: No tests for ordinal, hash, semantic patterns
+- [ ] **Integer output**: Current tests expect string output, need integer validation
+
+**Existing Test Quality Assessment**:
+- **Coverage**: Comprehensive for current functionality
+- **Structure**: Well-organized with clear test methods
+- **Examples**: Good real-world test cases
+- **Maintainability**: Clear test names and assertions
+
+#### **0.2 Test Strategy Planning**
+**Goal**: Plan testing approach based on existing coverage analysis
+
+**Strategy**:
+1. **Preserve existing tests**: Keep all current test cases working
+2. **Extend existing tests**: Add new assertions for integer output
+3. **Add new test categories**: Focus on gaps identified above
+4. **Maintain test structure**: Follow existing test organization patterns
+
+**Test Categories to Add**:
+- **Priority logic tests**: Test pattern priority conflicts
+- **Multiplier context tests**: Test blade_count vs use_count logic  
+- **Validation tests**: Test usage count validation (<800 rule)
+- **New pattern tests**: Test ordinal, hash, semantic patterns
+- **Integration tests**: Test complete extraction flow
+
+**Test Organization**:
+- **Keep existing test methods**: Preserve current test structure
+- **Add new test methods**: Follow existing naming conventions
+- **Extend existing assertions**: Update string expectations to integer
+- **Maintain test fixtures**: Keep existing enricher fixture
+
 ### **Phase 1: Pattern Extraction and Reuse (Week 1)**
 
 #### **1.1 Extract Existing Pattern Logic**
@@ -89,6 +156,43 @@ def test_pattern_integration():
     # Test pattern priority when multiple exist
     # Test edge cases from real data
 ```
+
+**Success Criteria**:
+- [ ] All existing patterns extracted and working
+- [ ] 99.8% coverage maintained
+- [ ] Unit tests passing for each pattern type
+
+#### **1.3 Update Existing Tests for Integer Output**
+**Goal**: Modify existing tests to expect integer output instead of strings
+
+**Tasks**:
+- [ ] Update existing test assertions from string to integer expectations
+- [ ] Preserve all existing test cases and coverage
+- [ ] Ensure backward compatibility during transition
+- [ ] Validate test structure and organization maintained
+
+**Test Updates Required**:
+```python
+# Before (string output):
+assert result["use_count"] == "3"
+
+# After (integer output):
+assert result["use_count"] == 3
+```
+
+**Tests to Update**:
+- [ ] `test_enrich_with_parentheses_count` - change "3" to 3
+- [ ] `test_enrich_with_brackets_count` - change "5" to 5
+- [ ] `test_enrich_with_braces_count` - change "2" to 2
+- [ ] `test_enrich_with_x_prefix` - change "4" to 4
+- [ ] `test_enrich_with_x_suffix` - change "2" to 2
+- [ ] All other existing test methods with string assertions
+
+**Success Criteria**:
+- [ ] All existing tests updated for integer output
+- [ ] No test coverage lost during transition
+- [ ] Test structure and organization preserved
+- [ ] All tests passing with new integer format
 
 ### **Phase 2: Priority Logic Implementation (Week 2)**
 
@@ -313,21 +417,23 @@ def test_error_handling():
 
 ## Timeline
 
+- **Week 0**: Existing test coverage analysis (analysis only)
 - **Week 1**: Pattern extraction and reuse
 - **Week 2**: Priority logic implementation
 - **Week 3**: Enricher integration
 - **Week 4**: Quality assurance and documentation
 
-**Total Estimated Time**: 4 weeks
-**Critical Path**: Pattern extraction → Priority logic → Integration → Testing
+**Total Estimated Time**: 4 weeks + 1 week analysis
+**Critical Path**: Analysis → Pattern extraction → Priority logic → Integration → Testing
 
 ## Next Steps
 
-1. **Start with Phase 1.1**: Extract existing pattern logic
-2. **Write tests first** for each pattern type
-3. **Implement minimal code** to make tests pass
-4. **Iterate through phases** following TDD methodology
-5. **Validate each phase** before proceeding to next
+1. **Start with Phase 0**: Analyze existing test coverage in `test_blade_enricher.py`
+2. **Plan test strategy**: Identify gaps and plan new test categories
+3. **Proceed to Phase 1.1**: Extract existing pattern logic
+4. **Write tests first** for each pattern type
+5. **Iterate through phases** following TDD methodology
+6. **Validate each phase** before proceeding to next
 
 ## Conclusion
 
