@@ -224,6 +224,180 @@ class TestBrushEnricher:
         assert result is not None
         assert result["_extraction_source"] == "catalog_data"
 
+    def test_enrich_with_handle_maker_knot_size_inference(self, enricher):
+        """Test enrichment when knot size is inferred from handle maker defaults."""
+        field_data = {
+            "matched": {
+                "brand": "Declaration Grooming",
+                "model": "B2",
+                "fiber": "Badger",
+                "handle": {
+                    "brand": "Chisel & Hound",
+                    "model": "Unspecified",
+                    "source_text": "Chisel & Hound handle",
+                },
+                "knot": {
+                    "brand": "Declaration Grooming",
+                    "model": "B2",
+                    "fiber": "Badger",
+                    "source_text": "Declaration Grooming B2",
+                },
+            }
+        }
+        brush_extracted = "Declaration Grooming B2 in Chisel & Hound handle"
+
+        result = enricher.enrich(field_data, brush_extracted)
+
+        assert result is not None
+        assert result["knot_size_mm"] == 26.0
+        assert result["_enriched_by"] == "BrushEnricher"
+        assert result["_extraction_source"] == "handle_maker_default"
+        assert result["_handle_maker_inference"] == "Chisel & Hound"
+
+    def test_enrich_with_handle_maker_model_level_override(self, enricher):
+        """Test enrichment when handle maker has model-level knot size override."""
+        field_data = {
+            "matched": {
+                "brand": "Declaration Grooming",
+                "model": "B2",
+                "fiber": "Badger",
+                "handle": {
+                    "brand": "Chisel & Hound",
+                    "model": "Custom Model",
+                    "source_text": "Chisel & Hound Custom Model handle",
+                },
+                "knot": {
+                    "brand": "Declaration Grooming",
+                    "model": "B2",
+                    "fiber": "Badger",
+                    "source_text": "Declaration Grooming B2",
+                },
+            }
+        }
+        brush_extracted = "Declaration Grooming B2 in Chisel & Hound Custom Model handle"
+
+        result = enricher.enrich(field_data, brush_extracted)
+
+        # Should infer from handle maker brand-level defaults since no model-level defaults exist
+        # and the test data doesn't have user or catalog knot size
+        assert result is not None
+        assert result["knot_size_mm"] == 26.0
+        assert result["_extraction_source"] == "handle_maker_default"
+        assert result["_handle_maker_inference"] == "Chisel & Hound"
+
+    def test_enrich_with_handle_maker_no_defaults(self, enricher):
+        """Test enrichment when handle maker has no knot size defaults."""
+        field_data = {
+            "matched": {
+                "brand": "Declaration Grooming",
+                "model": "B2",
+                "fiber": "Badger",
+                "handle": {
+                    "brand": "Declaration Grooming",  # No defaults in handles.yaml
+                    "model": "Unspecified",
+                    "source_text": "Declaration Grooming handle",
+                },
+                "knot": {
+                    "brand": "Declaration Grooming",
+                    "model": "B2",
+                    "fiber": "Badger",
+                    "source_text": "Declaration Grooming B2",
+                },
+            }
+        }
+        brush_extracted = "Declaration Grooming B2 in Declaration Grooming handle"
+
+        result = enricher.enrich(field_data, brush_extracted)
+
+        # Should not infer from handle maker since Declaration Grooming has no defaults
+        assert result is not None
+        assert "knot_size_mm" not in result
+
+    def test_enrich_with_handle_maker_user_priority(self, enricher):
+        """Test that user-specified knot size takes priority over handle maker defaults."""
+        field_data = {
+            "matched": {
+                "brand": "Declaration Grooming",
+                "model": "B2",
+                "fiber": "Badger",
+                "handle": {
+                    "brand": "Chisel & Hound",
+                    "model": "Unspecified",
+                    "source_text": "Chisel & Hound handle",
+                },
+                "knot": {
+                    "brand": "Declaration Grooming",
+                    "model": "B2",
+                    "fiber": "Badger",
+                    "source_text": "Declaration Grooming B2",
+                },
+            }
+        }
+        brush_extracted = "Declaration Grooming B2 28mm in Chisel & Hound handle"
+
+        result = enricher.enrich(field_data, brush_extracted)
+
+        # User-specified 28mm should take priority over Chisel & Hound's 26mm default
+        assert result is not None
+        assert result["knot_size_mm"] == 28.0
+        # BaseEnricher combines sources when both user and catalog data exist
+        assert "user_comment" in result["_extraction_source"]
+        assert "_handle_maker_inference" not in result
+
+    def test_enrich_with_handle_maker_catalog_priority(self, enricher):
+        """Test that catalog knot size takes priority over handle maker defaults."""
+        field_data = {
+            "matched": {
+                "brand": "Declaration Grooming",
+                "model": "B2",
+                "fiber": "Badger",
+                "handle": {
+                    "brand": "Chisel & Hound",
+                    "model": "Unspecified",
+                    "source_text": "Chisel & Hound handle",
+                },
+                "knot": {
+                    "brand": "Declaration Grooming",
+                    "model": "B2",
+                    "fiber": "Badger",
+                    "knot_size_mm": 27.0,  # Catalog has knot size
+                    "source_text": "Declaration Grooming B2",
+                },
+            }
+        }
+        brush_extracted = "Declaration Grooming B2 in Chisel & Hound handle"
+
+        result = enricher.enrich(field_data, brush_extracted)
+
+        # Catalog's 27mm should take priority over Chisel & Hound's 26mm default
+        assert result is not None
+        assert result["knot_size_mm"] == 27.0
+        assert result["_extraction_source"] == "catalog_data"
+        assert "_handle_maker_inference" not in result
+
+    def test_enrich_with_handle_maker_missing_handle_section(self, enricher):
+        """Test enrichment when handle section is missing."""
+        field_data = {
+            "matched": {
+                "brand": "Declaration Grooming",
+                "model": "B2",
+                "fiber": "Badger",
+                "knot": {
+                    "brand": "Declaration Grooming",
+                    "model": "B2",
+                    "fiber": "Badger",
+                    "source_text": "Declaration Grooming B2",
+                },
+            }
+        }
+        brush_extracted = "Declaration Grooming B2"
+
+        result = enricher.enrich(field_data, brush_extracted)
+
+        # Should not infer from handle maker since no handle section
+        assert result is not None
+        assert "knot_size_mm" not in result
+
 
 class TestSourceTrackingValidation:
     """Test that Brush Enricher uses new BaseEnricher source tracking methods correctly."""

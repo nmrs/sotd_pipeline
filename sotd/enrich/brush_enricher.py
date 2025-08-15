@@ -174,6 +174,38 @@ class BrushEnricher(BaseEnricher):
             "knot_matched_pattern": knot_matched_pattern,
         }
 
+    def _infer_knot_size_from_handle_maker(self, matched_data: Dict[str, Any]) -> Optional[float]:
+        """
+        Infer knot size from handle maker defaults when knot size is missing.
+
+        Args:
+            matched_data: The matched brush data from the match phase
+
+        Returns:
+            float: Inferred knot size in mm, or None if no inference possible
+        """
+        # Check if we have handle information
+        handle_section = matched_data.get("handle", {})
+        if not handle_section or not isinstance(handle_section, dict):
+            return None
+
+        handle_brand = handle_section.get("brand")
+        handle_model = handle_section.get("model")
+
+        if not handle_brand:
+            return None
+
+        # Try to get handle maker defaults
+        try:
+            handle_defaults = self.catalog_loader.load_handle_maker_defaults(
+                handle_brand, handle_model
+            )
+            return handle_defaults.get("knot_size_mm")
+        except Exception:
+            # If there's any error loading defaults, return None
+            # This maintains robustness and doesn't break enrichment
+            return None
+
     def _detect_user_intent(
         self, brush_string: str, handle_data: Dict[str, Any], knot_data: Dict[str, Any]
     ) -> str:
@@ -490,8 +522,26 @@ class BrushEnricher(BaseEnricher):
         if catalog_fiber is not None:
             catalog_data["fiber"] = catalog_fiber
 
+        # Handle maker knot size inference (fallback when user and catalog don't have knot size)
+        handle_maker_knot_size = None
+        handle_maker_brand = None
+        if user_knot_size is None and catalog_knot_size is None:
+            handle_maker_knot_size = self._infer_knot_size_from_handle_maker(matched_data)
+            if handle_maker_knot_size is not None:
+                # Get handle brand for metadata
+                handle_section = matched_data.get("handle", {})
+                if isinstance(handle_section, dict):
+                    handle_maker_brand = handle_section.get("brand")
+                # Add to catalog data for enrichment
+                catalog_data["knot_size_mm"] = handle_maker_knot_size
+
         # Use BaseEnricher's source tracking method
         enriched_data = self._create_enriched_data(user_data, catalog_data)
+
+        # Add handle maker inference metadata if used
+        if handle_maker_knot_size is not None:
+            enriched_data["_extraction_source"] = "handle_maker_default"
+            enriched_data["_handle_maker_inference"] = handle_maker_brand
 
         # Handle _fiber_extraction_source separately for backward compatibility
         if user_fiber is not None or catalog_fiber is not None:
