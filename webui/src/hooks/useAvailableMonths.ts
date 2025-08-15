@@ -23,7 +23,13 @@ export const useAvailableMonths = () => {
       if (cachePromise !== null) {
         try {
           const months = await cachePromise;
-          setAvailableMonths(months);
+          if (months && Array.isArray(months)) {
+            setAvailableMonths(months);
+          } else {
+            // Handle case where cached promise resolves with unexpected data
+            console.warn('Cached promise returned unexpected data:', months);
+            setAvailableMonths([]);
+          }
         } catch (err: unknown) {
           const errorMessage =
             err instanceof Error ? err.message : 'Failed to load available months';
@@ -42,9 +48,16 @@ export const useAvailableMonths = () => {
         cachePromise = getAvailableMonths();
         const months = await cachePromise;
 
-        // Cache the result
-        monthsCache = months.sort().reverse(); // Sort newest first
-        setAvailableMonths(monthsCache);
+        // Cache the result - handle case where months might be undefined
+        if (months && Array.isArray(months)) {
+          monthsCache = months.sort().reverse(); // Sort newest first
+          setAvailableMonths(monthsCache);
+        } else {
+          // Handle case where API returns unexpected data
+          console.warn('getAvailableMonths returned unexpected data:', months);
+          monthsCache = [];
+          setAvailableMonths([]);
+        }
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load available months';
         setError(errorMessage);
@@ -66,8 +79,15 @@ export const useAvailableMonths = () => {
 
     try {
       const months = await getAvailableMonths();
-      monthsCache = months.sort().reverse();
-      setAvailableMonths(monthsCache);
+      if (months && Array.isArray(months)) {
+        monthsCache = months.sort().reverse();
+        setAvailableMonths(monthsCache);
+      } else {
+        // Handle case where API returns unexpected data
+        console.warn('getAvailableMonths returned unexpected data:', months);
+        monthsCache = [];
+        setAvailableMonths([]);
+      }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load available months';
       setError(errorMessage);

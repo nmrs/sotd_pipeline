@@ -118,6 +118,7 @@ export const SelectInput: React.FC<SelectInputProps> = ({
     <FormField label={label} error={error} required={required}>
       <Select value={value} onValueChange={onChange} disabled={disabled}>
         <SelectTrigger
+          aria-label={label || placeholder}
           className={cn(
             'w-full',
             error && 'border-red-300 focus:border-red-500 focus:ring-red-500',

@@ -834,8 +834,9 @@ const MismatchAnalyzer: React.FC = () => {
           {/* First row - Basic controls */}
           <div className='flex flex-wrap gap-4 items-end'>
             <div className='min-w-0 flex-1 sm:flex-none'>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Field</label>
+              <label htmlFor='field-select' className='block text-sm font-medium text-gray-700 mb-1'>Field</label>
               <select
+                id='field-select'
                 value={selectedField}
                 onChange={e => setSelectedField(e.target.value)}
                 className='w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
@@ -847,8 +848,9 @@ const MismatchAnalyzer: React.FC = () => {
               </select>
             </div>
             <div className='min-w-0 flex-1 sm:flex-none'>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Month</label>
+              <label htmlFor='month-selector' className='block text-sm font-medium text-gray-700 mb-1'>Month</label>
               <MonthSelector
+                id='month-selector'
                 selectedMonths={selectedMonth ? [selectedMonth] : []}
                 onMonthsChange={handleMonthChange}
                 label='Select Month'
@@ -856,10 +858,11 @@ const MismatchAnalyzer: React.FC = () => {
               />
             </div>
             <div className='min-w-0 flex-1 sm:flex-none'>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label htmlFor='levenshtein-threshold' className='block text-sm font-medium text-gray-700 mb-1'>
                 Levenshtein Threshold
               </label>
               <input
+                id='levenshtein-threshold'
                 type='number'
                 min='1'
                 max='10'
