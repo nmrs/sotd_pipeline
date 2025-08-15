@@ -51,11 +51,20 @@ class TableGenerator:
         """Initialize the table generator.
 
         Args:
-            data: Data from aggregated data
+            data: Data from aggregated data (can be full structure with meta/data or just data)
             comparison_data: Historical data for delta calculations
             debug: Enable debug logging
         """
-        self.data = data
+        # Extract data section if full structure is passed (meta + data)
+        if "meta" in data and "data" in data:
+            self.data = data["data"]
+            if debug:
+                print("[DEBUG] TableGenerator: Extracted data section from full structure")
+        else:
+            self.data = data
+            if debug:
+                print("[DEBUG] TableGenerator: Using data directly (no meta section)")
+
         self.comparison_data = comparison_data or {}
         self.debug = debug
 

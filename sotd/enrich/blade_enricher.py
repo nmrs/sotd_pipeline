@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from sotd.utils.match_filter_utils import extract_blade_and_use_count
+from sotd.utils.blade_patterns import extract_blade_counts
 
 from .enricher import BaseEnricher
 
@@ -41,7 +41,7 @@ class BladeCountEnricher(BaseEnricher):
             Dictionary with use_count and/or blade_count if found, or None if no count detected.
             Includes _enriched_by and _extraction_source metadata fields.
         """
-        blade_count, use_count = extract_blade_and_use_count(original_comment)
+        blade_count, use_count = extract_blade_counts(original_comment)
 
         if blade_count is not None or use_count is not None:
             enriched = {
@@ -49,9 +49,9 @@ class BladeCountEnricher(BaseEnricher):
                 "_extraction_source": "user_comment",
             }
             if blade_count is not None:
-                enriched["blade_count"] = str(blade_count)
+                enriched["blade_count"] = blade_count  # Integer, not string
             if use_count is not None:
-                enriched["use_count"] = str(use_count)
+                enriched["use_count"] = use_count  # Integer, not string
             return enriched
 
         return None

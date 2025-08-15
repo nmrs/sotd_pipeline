@@ -67,6 +67,13 @@ class HardwareReportGenerator(BaseReportGenerator):
         }
 
         # Create table generator for table placeholders
+        if self.debug:
+            print(f"[DEBUG] HardwareReport: Creating TableGenerator")
+            print(f"[DEBUG] HardwareReport: self.data keys: {list(self.data.keys())}")
+            print(
+                f"[DEBUG] HardwareReport: self.comparison_data keys: {list(self.comparison_data.keys()) if self.comparison_data else 'None'}"
+            )
+
         table_generator = TableGenerator(self.data, self.comparison_data, self.debug)
 
         # Create template processor with custom path if provided

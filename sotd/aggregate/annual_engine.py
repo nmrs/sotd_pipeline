@@ -17,6 +17,12 @@ from .aggregators.annual_aggregator import (
     aggregate_annual_razors,
     aggregate_annual_soaps,
 )
+from .aggregators.brush_specialized import (
+    aggregate_fibers,
+    aggregate_handle_makers,
+    aggregate_knot_makers,
+    aggregate_knot_sizes,
+)
 from .annual_loader import load_annual_data
 
 logger = logging.getLogger(__name__)
@@ -151,6 +157,121 @@ class AnnualAggregationEngine:
         """
         return aggregate_annual_soaps(monthly_data)
 
+    def aggregate_brush_fibers(self, monthly_data: Dict[str, Dict]) -> List[Dict[str, Any]]:
+        """
+        Aggregate brush fiber data from monthly data.
+
+        Args:
+            monthly_data: Dictionary of monthly data keyed by month
+
+        Returns:
+            List of aggregated brush fiber data sorted by shaves desc, unique_users desc
+        """
+        return self._aggregate_specialized_brush_category(monthly_data, "brush_fibers")
+
+    def aggregate_brush_knot_sizes(self, monthly_data: Dict[str, Dict]) -> List[Dict[str, Any]]:
+        """
+        Aggregate brush knot size data from monthly data.
+
+        Args:
+            monthly_data: Dictionary of monthly data keyed by month
+
+        Returns:
+            List of aggregated brush knot size data sorted by shaves desc, unique_users desc
+        """
+        return self._aggregate_specialized_brush_category(monthly_data, "brush_knot_sizes")
+
+    def aggregate_brush_handle_makers(self, monthly_data: Dict[str, Dict]) -> List[Dict[str, Any]]:
+        """
+        Aggregate brush handle maker data from monthly data.
+
+        Args:
+            monthly_data: Dictionary of monthly data keyed by month
+
+        Returns:
+            List of aggregated brush handle maker data sorted by shaves desc, unique_users desc
+        """
+        return self._aggregate_specialized_brush_category(monthly_data, "brush_handle_makers")
+
+    def aggregate_brush_knot_makers(self, monthly_data: Dict[str, Dict]) -> List[Dict[str, Any]]:
+        """
+        Aggregate brush knot maker data from monthly data.
+
+        Args:
+            monthly_data: Dictionary of monthly data keyed by month
+
+        Returns:
+            List of aggregated brush knot maker data sorted by shaves desc, unique_users desc
+        """
+        return self._aggregate_specialized_brush_category(monthly_data, "brush_knot_makers")
+
+    def _aggregate_specialized_brush_category(
+        self, monthly_data: Dict[str, Dict], category: str
+    ) -> List[Dict[str, Any]]:
+        """
+        Helper method to aggregate specialized brush categories from monthly data.
+
+        Args:
+            monthly_data: Dictionary of monthly data keyed by month
+            category: Category name to aggregate (e.g., "brush_fibers")
+
+        Returns:
+            List of aggregated data sorted by shaves desc, unique_users desc
+        """
+        if not monthly_data:
+            return []
+
+        # Collect all records from all months
+        all_records = []
+        for month, data in monthly_data.items():
+            if "data" in data and category in data["data"]:
+                category_data = data["data"][category]
+                if isinstance(category_data, list):
+                    all_records.extend(category_data)
+
+        if not all_records:
+            return []
+
+        # Convert to the format expected by specialized aggregators
+        # Each record should have the structure expected by the aggregator
+        # For brush categories, we need to reconstruct the brush structure
+        enriched_records = []
+        for record in all_records:
+            # Create a mock enriched record structure that the aggregator expects
+            # This is a workaround since we're working with pre-aggregated data
+            enriched_record = {
+                "author": f"user_{record.get('shaves', 0)}",  # Mock author for counting
+                "brush": {
+                    "matched": {
+                        "knot": {
+                            "fiber": record.get("fiber"),
+                            "knot_size_mm": record.get("knot_size_mm"),
+                            "brand": record.get("brand"),
+                        },
+                        "handle": {
+                            "brand": record.get("brand"),
+                        },
+                    },
+                    "enriched": {
+                        "fiber": record.get("fiber"),
+                        "knot_size_mm": record.get("knot_size_mm"),
+                    },
+                },
+            }
+            enriched_records.append(enriched_record)
+
+        # Use the appropriate specialized aggregator
+        if category == "brush_fibers":
+            return aggregate_fibers(enriched_records)
+        elif category == "brush_knot_sizes":
+            return aggregate_knot_sizes(enriched_records)
+        elif category == "brush_handle_makers":
+            return aggregate_handle_makers(enriched_records)
+        elif category == "brush_knot_makers":
+            return aggregate_knot_makers(enriched_records)
+        else:
+            return []
+
     def generate_metadata(
         self,
         monthly_data: Dict[str, Dict],
@@ -227,6 +348,10 @@ class AnnualAggregationEngine:
             "blades": self.aggregate_blades(monthly_data),
             "brushes": self.aggregate_brushes(monthly_data),
             "soaps": self.aggregate_soaps(monthly_data),
+            "brush_fibers": self.aggregate_brush_fibers(monthly_data),
+            "brush_knot_sizes": self.aggregate_brush_knot_sizes(monthly_data),
+            "brush_handle_makers": self.aggregate_brush_handle_makers(monthly_data),
+            "brush_knot_makers": self.aggregate_brush_knot_makers(monthly_data),
         }
 
 

@@ -121,6 +121,10 @@ class BrushFibersTableGenerator(StandardProductTableGenerator):
         """Return the table title."""
         return "Knot Fibers"
 
+    def get_category_name(self) -> str:
+        """Return the category name for data matching in delta calculations."""
+        return "brush_fibers"
+
     def get_name_key(self) -> str:
         """Return the key to use for matching items in delta calculations."""
         return "fiber"
@@ -180,6 +184,10 @@ class BrushKnotSizesTableGenerator(StandardProductTableGenerator):
     def get_table_title(self) -> str:
         """Return the table title."""
         return "Knot Sizes"
+
+    def get_category_name(self) -> str:
+        """Return the category name for data matching in delta calculations."""
+        return "brush_knot_sizes"
 
     def get_name_key(self) -> str:
         """Return the key to use for matching items in delta calculations."""
