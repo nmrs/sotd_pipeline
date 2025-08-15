@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for Phase 3.4 HighPriorityAutomatedSplitStrategy.
+"""Tests for HighPriorityAutomatedSplitStrategy.
 
 This strategy wraps the legacy system's high_priority_automated_split logic
 to integrate with the scoring system architecture.

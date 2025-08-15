@@ -1,8 +1,8 @@
 """
-Tests for Phase 3.2: Individual Brush Strategy Classes.
+Tests for Individual Brush Strategy Classes.
 
-This test file implements the TDD approach for Phase 3.2, testing the individual
-brush strategies that will replace the complete_brush wrapper strategy.
+This test file tests the individual brush strategies that replace the
+complete_brush wrapper strategy.
 """
 
 

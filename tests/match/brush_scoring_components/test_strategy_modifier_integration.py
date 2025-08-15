@@ -1,5 +1,5 @@
 """
-Tests for Phase 3.7: Strategy Modifier Integration.
+Tests for Strategy Modifier Integration.
 
 This module tests the implementation of strategy-specific modifiers
 that can adjust scores based on input characteristics.

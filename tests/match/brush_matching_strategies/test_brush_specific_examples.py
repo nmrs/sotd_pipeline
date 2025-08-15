@@ -1,13 +1,13 @@
 """
-Tests for Phase 3.2: Specific Examples.
+Tests for Brush Specific Examples.
 
-This test file implements the TDD approach for Phase 3.2 specific examples,
-testing the specific brush examples mentioned in the plan (Simpson Chubby 2, Summer Break Soaps).
+This test file tests the specific brush examples mentioned in the plan
+(Simpson Chubby 2, Summer Break Soaps).
 """
 
 
-class TestPhase32SpecificExamples:
-    """Test Phase 3.2 specific examples."""
+class TestBrushSpecificExamples:
+    """Test brush specific examples."""
 
     def test_simpson_chubby_2_matches_correctly(self):
         """Test that Simpson Chubby 2 matches correctly with individual strategies."""
@@ -34,7 +34,8 @@ class TestPhase32SpecificExamples:
         result = matcher.match("Summer Break Soaps Maize 26mm Timberwolf")
 
         # This should be handled by unified strategy, not individual brush strategies
-        # The legacy system returns a match for this case, so scoring system should also return a match
+        # The legacy system returns a match for this case, so scoring system should
+        # also return a match
         assert result is not None, "Should return result for Summer Break Soaps"
         assert result.matched is not None, "Should produce match for Summer Break Soaps"
         assert result.strategy == "unified", "Should use unified strategy"

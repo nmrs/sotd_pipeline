@@ -1,13 +1,12 @@
 """
-Tests for Phase 3.2: Strategy List Updates.
+Tests for Brush Strategy List Updates.
 
-This test file implements the TDD approach for Phase 3.2 strategy list updates,
-testing that the complete_brush wrapper is removed and individual strategies are added.
+This test file tests that the complete_brush wrapper is removed and individual strategies are added.
 """
 
 
-class TestPhase32StrategyList:
-    """Test Phase 3.2 strategy list updates."""
+class TestBrushStrategyList:
+    """Test brush strategy list updates."""
 
     def test_complete_brush_wrapper_removed_from_strategy_list(self):
         """Test that complete_brush wrapper is removed from strategy list."""

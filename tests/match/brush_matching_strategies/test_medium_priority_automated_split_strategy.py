@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for Phase 3.5 MediumPriorityAutomatedSplitStrategy.
+"""Tests for MediumPriorityAutomatedSplitStrategy.
 
 This strategy wraps the legacy system's medium_priority_automated_split logic
 to integrate with the scoring system architecture.

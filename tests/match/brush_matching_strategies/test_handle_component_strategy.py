@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for Phase 3.3: HandleComponentStrategy for handle-only matching."""
+"""Tests for HandleComponentStrategy for handle-only matching."""
 
 from unittest.mock import Mock
 from sotd.match.brush_matching_strategies.handle_component_strategy import HandleComponentStrategy

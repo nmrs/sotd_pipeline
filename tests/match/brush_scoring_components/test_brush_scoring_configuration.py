@@ -1,16 +1,15 @@
 """
-Tests for Phase 3.2: Configuration Updates.
+Tests for Brush Scoring Configuration.
 
-This test file implements the TDD approach for Phase 3.2 configuration updates,
-testing the scoring configuration structure for individual brush strategies.
+This test file tests the scoring configuration structure for individual brush strategies.
 """
 
 import yaml
 from pathlib import Path
 
 
-class TestPhase32Configuration:
-    """Test Phase 3.2 configuration updates."""
+class TestBrushScoringConfiguration:
+    """Test brush scoring configuration updates."""
 
     def test_configuration_structure_includes_individual_brush_strategies(self):
         """Test that configuration includes individual brush strategy weights."""
