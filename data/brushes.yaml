@@ -1052,6 +1052,11 @@ other_brushes:
     patterns:
     - b[öo]ker
     - \bbö\b
+  Chisel & Hound:
+    default: Badger
+    patterns:
+    - chisel.*hound
+    - \bc(?:\&|and|\+)h\b
   Cineen:
     default: Badger
     patterns:

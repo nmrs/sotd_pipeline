@@ -351,6 +351,10 @@ known_knots:
       knot_size_mm: 26
       patterns:
       - omega.*(pro)*.*49
+    '10098':
+      knot_size_mm: 27
+      patterns:
+      - omega.*10098
   Oumo:
     Rorschach:
       fiber: Badger
@@ -368,12 +372,6 @@ known_knots:
       patterns:
       - rich.*man.*shav.*s-?2.*innovator
   Turn-N-Shave:
-    Tip (Badger):
-      fiber: Badger
-      patterns:
-      - turn.{1,5}shave
-      - t[&n]s
-      - \btip\b v[1-9]
     BoBa (50/50 Boar Badger):
       fiber: Mixed Badger/Boar
       patterns:
@@ -405,6 +403,17 @@ known_knots:
       patterns:
       - turn.{1,5}shave.*shoat
       - t[&n]s.*shoat
+    Tip (Badger):
+      fiber: Badger
+      patterns:
+      - turn.{1,5}shave
+      - t[&n]s
+      - \btip\b v[1-9]
+    Tuxedo:
+      fiber: Synthetic
+      patterns:
+      - turn.{1,5}shave.*tuxedo
+      - t[&n]s.*tuxedo
   Wald:
     A1:
       fiber: Synthetic
@@ -569,7 +578,7 @@ other_knots:
     patterns:
     - b[oö]ker
   Boti:
-    default: Synthetic
+    default: Badger
     patterns:
     - boti
   Brad Sears:

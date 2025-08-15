@@ -1,66 +1,4 @@
 blade:
-  A77:
-    Cloud:
-      A77:
-      - cloud a77 full blade
-    RhinoceRos:
-      A77:
-      - rhinoceros a77 blade
-  AC:
-    Feather:
-      Pro:
-      - feather - professional
-      - feather artist club pro
-      - feather artist club professional
-      - feather artist club professional (se)
-      - feather pro
-      - feather pro (ac)
-      - feather professional
-      - feather professional ac blade
-      Pro Super:
-      - feather pro super
-      - feather professional super
-      ProGuard:
-      - feather - pro guard
-      - feather - pro guard artis club
-      - feather artist club pro guard
-      - feather pro guard
-      - feather proguard
-    Generic:
-      Kai Clone:
-      - chinese kai clone
-    Kai:
-      Captain Blade:
-      - kai - captain original
-      Captain ProGuard:
-      - kai proguard m
-      - kai proguard mg
-      Captain ProTouch:
-      - kai - captain titan mild pro touch mg
-      - kai - captain titan mild protouch mg
-      - kai - kai - captain titan mild pro touch mg
-      - kai captain mild protouch mg (ancient)
-      - kai captain titan mild protouch mg
-      - kai captain titan protouch mg
-      - kai protouch mg
-      Captain Titan Mild:
-      - kai - captain titan mild pink (se)
-      - kai captain mild
-      - kai captain titan mild
-      - kai captain titan mild pink (se)
-      Salon Select Premium Guard:
-      - kai salon select premium guard
-    Schick:
-      Proline (AC):
-      - schick p-30
-      - schick p-30 proline artist club (se)
-      - schick proline
-      - schick proline b-20
-      - schick proline p-series artist club
-  Cartridge:
-    Cartridge:
-      Cartridge:
-      - personna twin pivot plus (atra) cart
   DE:
     7 O'Clock:
       Sharpedge (Yellow):
@@ -92,6 +30,10 @@ blade:
     AMC:
       De-Luxe Thin:
       - vintage amc thin
+    Annie:
+      Hair Shaper:
+      - annie hair shaper
+      - annie hair shaper blade
     Asco:
       Platinum:
       - asco orange platinum
@@ -148,7 +90,12 @@ blade:
       - bolzano
       - bolzano - superinox
       - bolzano superinox
+    Cartridge:
+      Cartridge:
+      - personna twin pivot plus (atra) cart
     Cloud:
+      A77:
+      - cloud a77 full blade
       Super Stainless:
       - cloud super blades
     Crown:
@@ -164,6 +111,8 @@ blade:
       Premium:
       - derby premium
     Dorco:
+      HST-300:
+      - dorco hst-300-p1 1/2 de
       Prime Platinum:
       - dorco prime platinum
       ST-300:
@@ -185,6 +134,28 @@ blade:
       - feather new hi stainless
       - feather new hi-stainless
       - feather stainless
+      FHS-1:
+      - feather asd-10
+      - feather fhs-10
+      - fhs-10
+      Pro:
+      - feather - professional
+      - feather artist club pro
+      - feather artist club professional
+      - feather artist club professional (se)
+      - feather pro
+      - feather pro (ac)
+      - feather professional
+      - feather professional ac blade
+      Pro Super:
+      - feather pro super
+      - feather professional super
+      ProGuard:
+      - feather - pro guard
+      - feather - pro guard artis club
+      - feather artist club pro guard
+      - feather pro guard
+      - feather proguard
     Filoso:
       Platinum:
       - filoso
@@ -195,6 +166,23 @@ blade:
       - flydear
       - flydear - 9/10
       - modified flydear 🤦🏻♂️
+    Fromm:
+      Hair Shaper:
+      - fromm
+      - fromm - hair shaper
+      - fromm hair shaper blade
+    GEM:
+      Blue Star:
+      - gem - blue star uncoated blade
+      - gem - blue star uncoated blades
+      - gem blue star
+    Generic:
+      Injector:
+      - unbranded vintage injector
+      - vintage generic injector
+      - vintage unbranded injector
+      Kai Clone:
+      - chinese kai clone
     Gillette:
       '365':
       - gillette 365
@@ -222,6 +210,8 @@ blade:
       - perma-sharp stainless
       - perma-sharp super
       - permasharp
+      Perma-Sharp SE:
+      - permasharp 1/2 de
       Platinum:
       - gillette - platinum
       - gillette - platinum (half in kamisori new, whole in overlander new)
@@ -249,14 +239,48 @@ blade:
     Glätz:
       Super Platinum:
       - glatz
+    Gutche:
+      Hair Shaper:
+      - gutche hair shaper blade
     Kai:
+      Captain Blade:
+      - kai - captain original
+      Captain ProGuard:
+      - kai proguard m
+      - kai proguard mg
+      Captain ProTouch:
+      - kai - captain titan mild pro touch mg
+      - kai - captain titan mild protouch mg
+      - kai - kai - captain titan mild pro touch mg
+      - kai captain mild protouch mg (ancient)
+      - kai captain titan mild protouch mg
+      - kai captain titan protouch mg
+      - kai protouch mg
+      Captain Titan Mild:
+      - kai - captain titan mild pink (se)
+      - kai captain mild
+      - kai captain titan mild
+      - kai captain titan mild pink (se)
       DE:
       - kai
       - kai - stainless
+      Salon Select Premium Guard:
+      - kai salon select premium guard
+    Kampfe:
+      Wedge:
+      - kampfe bros saturday
     King C Gillette:
       DE:
       - gillette - king c gillette blades
       - king c. gillette
+    Kismet:
+      Hair Shaper:
+      - kismet
+      - kismet blade
+      - kismet blade corked
+      - kismet hair shaper
+      - kismet rostfrei
+      - kismet rostfrei, polymer beschichtet
     Ladas:
       Super Stainless:
       - ladas
@@ -265,6 +289,10 @@ blade:
       - laser super platinum
       - laser ultra
       - lazer triple coated
+    Leaf:
+      SE:
+      - leaf single-edge blades
+      - leaf super platinum
     Leningrad:
       DE:
       - ленинград
@@ -278,13 +306,65 @@ blade:
     Merkur:
       Super Platinum:
       - merkur super platinum
+    Misaki:
+      Platinum SE:
+      - misaka - platinum
     OK:
       Super Stainless:
       - ok (stainless steel, manufactured by lord, )
+    OneBlade:
+      HiCarbon SE:
+      - oneblade - hicarbon se
+    PAL:
+      Blue Blade:
+      - pal | single edge carbon steel blue blades
+    Parker:
+      Injector:
+      - parker injector
+      - parker ss injector
     Personna:
       '74':
       - personna 74
       - personna p74
+      74 Injector:
+      - personna - 74 - injector
+      GEM PTFE:
+      - accuforge - gem microcoat
+      - accuforge coated
+      - accuforge gem coated stainless steel
+      - accuforge gem microcoat
+      - accuforge pro ptfe gem
+      - accutec - pro premium coated
+      - accutec pro premium
+      - accutec pro premium (gem)
+      - gem
+      - gem blade
+      - gem ptfe
+      - gem ptfe / schick injector
+      - gem ss ptfe
+      - personna - gem ptfe
+      - personna gem
+      - personna gem ptfe
+      - personna gem ptfe coated
+      - personna gem ptfe, crown half blade, parker injector
+      - personna gem stainless ptfe
+      - personna ptfe
+      - personna ptfe stainless steel gem
+      - ptfe
+      GEM Stainless:
+      - gem stainless
+      Hair Shaper:
+      - personna
+      - personna - hair shaper
+      - personna - platinum
+      - personna hair shaper
+      - personna hair shaper blade
+      - personna specimen prep
+      Injector:
+      - personna injector
+      - personna injector (se)
+      - personna injector blade
+      - personna stainless coated injector blades
       Lab Blue:
       - accuforge
       - persona
@@ -325,10 +405,39 @@ blade:
       - rapira super stainless
       Swedish:
       - rapira sweedish super steel
+    RhinoceRos:
+      A77:
+      - rhinoceros a77 blade
     Rockwell:
       Swedish Stainless:
       - rockwell swedish stainless steel
+    Rolls Razor:
+      Blade:
+      - rolls (not this kind of rolls) razor wedge blade
+      - rolls blade
+      - rolls razor
     Schick:
+      Injector:
+      - injector
+      - schick
+      - schick - chinese schick plus
+      - schick - injector
+      - schick injector
+      - schick injector blade
+      - schick injector yellow
+      - schick krona
+      - schick stainless steel injector
+      - schick yellow
+      - shick injector blade
+      Proline (AC):
+      - schick p-30
+      - schick p-30 proline artist club (se)
+      - schick proline
+      - schick proline b-20
+      - schick proline p-series artist club
+      Proline (Injector):
+      - schick - proline b-20
+      - shick proline b20
       Stainless (DE):
       - schick stainless
     Shark:
@@ -369,6 +478,12 @@ blade:
       Platinum:
       - czech blades tatra platinum stainless
       - tatra platinum
+    Ted Pella:
+      Injector:
+      - ted pella - injector
+      - ted pella injector blade
+      - ted pella ptfe
+      - ted pella single edge injector
     Tiger:
       Platinum:
       - tiger
@@ -408,6 +523,10 @@ blade:
     V12:
       Super Platinum:
       - v12
+    Valet:
+      Blade:
+      - valet auto strop
+      - valet se blade
     Van Der Hagen:
       Stainless:
       - van der hagen stainless
@@ -416,6 +535,9 @@ blade:
       - voskhod
       - voskhod - teflon coated
       - voskhod teflon coated
+    Weck:
+      Sextoblade:
+      - weck hair shaper
     Wilkinson Sword:
       Classic:
       - wilkinson sword
@@ -431,149 +553,6 @@ blade:
       - wizamet half
       - wizamet iridium
       - wizamet super iridium
-  FHS:
-    Feather:
-      FHS-1:
-      - feather asd-10
-      - feather fhs-10
-      - fhs-10
-    OneBlade:
-      HiCarbon SE:
-      - oneblade - hicarbon se
-  GEM:
-    GEM:
-      Blue Star:
-      - gem - blue star uncoated blade
-      - gem - blue star uncoated blades
-      - gem blue star
-    PAL:
-      Blue Blade:
-      - pal | single edge carbon steel blue blades
-    Personna:
-      GEM PTFE:
-      - accuforge - gem microcoat
-      - accuforge coated
-      - accuforge gem coated stainless steel
-      - accuforge gem microcoat
-      - accuforge pro ptfe gem
-      - accutec - pro premium coated
-      - accutec pro premium
-      - accutec pro premium (gem)
-      - gem
-      - gem blade
-      - gem ptfe
-      - gem ptfe / schick injector
-      - gem ss ptfe
-      - personna - gem ptfe
-      - personna gem
-      - personna gem ptfe
-      - personna gem ptfe coated
-      - personna gem ptfe, crown half blade, parker injector
-      - personna gem stainless ptfe
-      - personna ptfe
-      - personna ptfe stainless steel gem
-      - ptfe
-      GEM Stainless:
-      - gem stainless
-  Hair Shaper:
-    Annie:
-      Hair Shaper:
-      - annie hair shaper
-      - annie hair shaper blade
-    Fromm:
-      Hair Shaper:
-      - fromm
-      - fromm - hair shaper
-      - fromm hair shaper blade
-    Gutche:
-      Hair Shaper:
-      - gutche hair shaper blade
-    Kismet:
-      Hair Shaper:
-      - kismet
-      - kismet blade
-      - kismet blade corked
-      - kismet hair shaper
-      - kismet rostfrei
-      - kismet rostfrei, polymer beschichtet
-    Personna:
-      Hair Shaper:
-      - personna
-      - personna - hair shaper
-      - personna - platinum
-      - personna hair shaper
-      - personna hair shaper blade
-      - personna specimen prep
-    Weck:
-      Sextoblade:
-      - weck hair shaper
-  Half DE:
-    Dorco:
-      HST-300:
-      - dorco hst-300-p1 1/2 de
-    Gillette:
-      Perma-Sharp SE:
-      - permasharp 1/2 de
-    Leaf:
-      SE:
-      - leaf single-edge blades
-      - leaf super platinum
-    Misaki:
-      Platinum SE:
-      - misaka - platinum
-  Injector:
-    Generic:
-      Injector:
-      - unbranded vintage injector
-      - vintage generic injector
-      - vintage unbranded injector
-    Parker:
-      Injector:
-      - parker injector
-      - parker ss injector
-    Personna:
-      74 Injector:
-      - personna - 74 - injector
-      Injector:
-      - personna injector
-      - personna injector (se)
-      - personna injector blade
-      - personna stainless coated injector blades
-    Schick:
-      Injector:
-      - injector
-      - schick
-      - schick - chinese schick plus
-      - schick - injector
-      - schick injector
-      - schick injector blade
-      - schick injector yellow
-      - schick krona
-      - schick stainless steel injector
-      - schick yellow
-      - shick injector blade
-      Proline (Injector):
-      - schick - proline b-20
-      - shick proline b20
-    Ted Pella:
-      Injector:
-      - ted pella - injector
-      - ted pella injector blade
-      - ted pella ptfe
-      - ted pella single edge injector
-  Other:
-    Kampfe:
-      Wedge:
-      - kampfe bros saturday
-    Rolls Razor:
-      Blade:
-      - rolls (not this kind of rolls) razor wedge blade
-      - rolls blade
-      - rolls razor
-    Valet:
-      Blade:
-      - valet auto strop
-      - valet se blade
 brush:
   All-Star Grooming Co.:
     Shave Brush:
@@ -591,11 +570,22 @@ brush:
     Synthetic:
     - böker synthetic
   Chisel & Hound:
+    Badger:
+    - chisel & hound commodore 26mm badger knot
+    - chisel & hound x house of mammoth "rumble" brush
+    - chisel and hound "everett"
+    Boar:
+    - chisel and hound bloodoath boar
     Rob's Finest Boar:
     - chisel & hound 'rob's finest' boar
+    - chisel and hound 'rob's finest' boar
+    - chisel and hound - rob's finest boar
     Rob's Finest Synthetic:
     - chisel & hound - rob's finest - 25mm synthetic
     - chisel & hound - rob's finest synthetic
+    Synthetic:
+    - chisel & hound ivory mortar 30mm mother lode
+    - chisel & hound root beer float 26mm black cashmere synth
     v10:
     - chisel and hound - bermuda v10 fanchurian 26mm badger
     v11:
@@ -603,6 +593,7 @@ brush:
     - chisel and hound elm v11
     v13:
     - chisel & hound lost nativ 26mm fanchurian v13
+    - chisel and hound "silent night" w/v13 fanchurian
     v15:
     - chisel and hound - fu dao v15 fanchurian 26mm badger
     - chisel and hound fú dào fanchurian v15 badger
@@ -611,6 +602,7 @@ brush:
     - chisel & hound - 'manga' v16
     v18:
     - chisel & hound - 'eyespot' v18
+    - chisel & hound w/ v18 fanchurian badger 26mm
     v19:
     - chisel & hound "drake" w/ 26mm v19
     - chisel & hound mighty duck v19 fanchurian badger
@@ -618,21 +610,28 @@ brush:
     v20:
     - chisel & hound desert ranger v20
     - chisel & hound fu dao flare 26mm v20 fanchurian badger knot
+    - chisel & hound mint smoke with fanchurian v20
     - chisel and hound - bangalore v20 26mm badger
     - chisel and hound desert ranger v20
     - chisel and hound resolute v20
     v21:
     - chisel & hound acer pearl v21
+    - chisel & hound cosmo handle (5146sc) w/ 26mm v21 fanchurian badger knot
     - chisel and hound sakura with v21 fanchurian
     v22:
     - c&h redwood giant (4600rc) 26mm v22 fanchurian
     - chisel & hound gulf short 26mm v22 fanchurian
     v23:
+    - chisel & hound "salvage" / v23 fanchurian
     - chisel & hound - bonehive (4766gc) - 26mm v23 fanchurian
     - chisel & hound brilliance 26mm v23 fanchurian badger knot
     - chisel & hound classic 26mm v23 fanchurian
+    - chisel & hound rc zebra w/ 26mm v23 fanchurian badger
+    - chisel & hound spice blow handle (4815cc) w/ 26mm v23 fanchurian badger knot
     - chisel & hound v23 fanchurian
+    - chisel & hound x briar brushworks "tobacconist" w/ v23 fanchurian 26mm badger
     v24:
+    - chisel & hound / house of mammoth "ausflug" v24 fanchurian 26mm
     - chisel & hound carbon lily v24 fanchurian badger
     - chisel & hound desperado v24 fanchurian badger
     - chisel & hound emerald smoke v24 fanchurian badger
@@ -645,22 +644,29 @@ brush:
     - grizzly bay - chisel & hound v24 fanchurian badger
     v25:
     - chisel & hound - 'xenomorph' v25
+    - chisel & hound - cherry w/ v25 fanchurian badger
     - chisel & hound - fanchurian v25
     - chisel & hound - peridot - v25
     - chisel & hound amboyna glory v25 fanchurian badger
     - chisel & hound pyinma v25 fanchurian badger
+    - chisel & hound redcoat handle (5018rc) w/ 26mm v25 fanchurian badger knot
     - chisel & hound walnut v25 fanchurian badger
     v26:
     - chisel & hound perfect pint 26mm v26 badger
     - chisel & hound raven 26mm v26 fanchurian
     - chisel & hound stalwart fanchurian v26
     - chisel & hound stalwart fanchurian v26 badger
+    - chisel and hound - flame on with v26 fanchurian
     - chisel and hound bulldog v26
     v27:
     - c&h x mammoth dinos'mores (5407mc) 26mm v27 fanchurian
     - chisel & hound - dinos'mores - 26mm v27 fanchurian
     - chisel & hound - green velvet (5356gc) - 26mm v27 fanchurian
+    - chisel & hound texas pearl handle with 26mm v27 fanchurian knot
+    - chisel and hound - dinos'mores handle w/v27 fanchurian knot
     - chisel and hound deep night handle and fanchurian 26mm v27 knot
+    - chisel and hound deep night handle w/26mm v27 fanchurian badger
+    - chisel and hound dinos'mores handle w/v27 fanchurian
   Declaration Grooming:
     B13:
     - declaration grooming - roil jefferson - 28mm b13
@@ -709,10 +715,10 @@ brush:
     - muninn woodworks bfm
   Legacy Brand 0:
     Legacy Model 0:
-    - Legacy Brush 0
+    - legacy brush 0
   Legacy Brand 1:
     Legacy Model 1:
-    - Legacy Brush 1
+    - legacy brush 1
   Mühle:
     Travel:
     - muhle 31m530 travel
@@ -742,13 +748,13 @@ brush:
     - omega 81151
   Scoring Brand 0:
     Scoring Model 0:
-    - Scoring Brush 0
+    - scoring brush 0
   Scoring Brand 1:
     Scoring Model 1:
-    - Scoring Brush 1
+    - scoring brush 1
   Scoring Brand 2:
     Scoring Model 2:
-    - Scoring Brush 2
+    - scoring brush 2
   Semogue:
     '1305':
     - semogue 1305
@@ -811,19 +817,19 @@ brush:
     - stirling finest badger brush
   Test:
     Brush:
-    - YAML Test Brush
+    - yaml test brush
   Test Brand:
     Test Model:
-    - Test Brush Integration
+    - test brush integration
   Test Brand 0:
     Test Model 0:
-    - Test Brush 0
+    - test brush 0
   Test Brand 1:
     Test Model 1:
-    - Test Brush 1
+    - test brush 1
   Test Brand 2:
     Test Model 2:
-    - Test Brush 2
+    - test brush 2
   Wald:
     A1:
     - wald a1
@@ -895,9 +901,33 @@ handle:
     - chisel & hound "chocolate drop" / 26mm maggard razors faux horse
     - chisel & hound "cobalt short" / 26mm turnnshave quartermoon
     - chisel & hound "diplomat" w/ turn n shave tip v1 bulb 26mm
-    - Chisel & Hound "Espresso" 26mm Maggard Razors G5
-    - Chisel & Hound "Nice" W/Maggard 26mm 2 Band Badger
-    - Chisel & Hound "Propane" / 26mm AP Shave Co. G5B
+    - chisel & hound "espresso" 26mm maggard razors g5
+    - chisel & hound "nice" w/maggard 26mm 2 band badger
+    - chisel & hound "propane" / 26mm ap shave co. g5b
+    - chisel & hound "rainbow" 26mm timberwolf
+    - chisel & hound "ruby" w/ 26mm maggard mixed knot
+    - chisel & hound "ruby" w/ maggard mixed knot
+    - chisel & hound "spice lily" - turnnshave tuxedo 26mm synthetic
+    - chisel & hound "swamper" / 26mm turnnshave v9 tip badger
+    - chisel & hound "the duke" / omega 10098 boar
+    - chisel & hound "twilight" / 26mm long shaving reserve vi fan
+    - chisel & hound - 'abominable'
+    - chisel & hound - abominable chalice
+    - chisel & hound 26mm tns shoat (boar)
+    - chisel & hound 5449sc w/ ap shave co pure bliss
+    - chisel & hound broomstick
+    - chisel & hound esmeralda w/oumo rorschach badger
+    - chisel & hound hive 28mm maggard silver tip badger
+    - chisel & hound ice pagoda
+    - chisel & hound ivy w/ tns 26mm v9
+    - Chisel & Hound Season of the Witch w/ 26mm Paragon Boar
+    - Chisel & Hound Strata TnS M8 Fan Badger
+    - Chisel & Hound Strata TurnNShave M8 Fan Badger
+    - Chisel & Hound T&S Quartermoon
+    - Chisel and Hound "Rob's Finest" - Paragon Synthetic 25mm Synthetic
+    - Chisel and Hound - Tahitian Pearl 26mm Maggard SHD Fan
+    - Chisel and Hound Ambrosia Maple with 26 mm synthetic Maggard knot
+    - Chisel and Hound Azurite with 26 mm Maggard Tuxedo knot
     - chisel and hound padauk wood handle
   Heritage Collection:
     Unspecified:
@@ -911,40 +941,83 @@ handle:
 knot:
   AP Shave Co:
     G5B:
-    - Chisel & Hound "Propane" / 26mm AP Shave Co. G5B
+    - chisel & hound "propane" / 26mm ap shave co. g5b
+    Pure Bliss:
+    - chisel & hound 5449sc w/ ap shave co pure bliss
     Pure Bliss SHD:
     - ap shave co. pure bliss shd 26mm x chisel & hound "reef" hybrid handle
     - aylsworth the altare handle w/ ap shave co. pure bliss 26mm shd
     Synbad:
     - rad dinosaur creations "mackie" 26mm ap shave co. synbad fan
+    Timberwolf:
+    - chisel & hound "rainbow" 26mm timberwolf
   Alpha:
     G5:
     - alpha shaving works outlaw 28mm g5
+  Boti:
+    Badger:
+    - 26mm boti n3c bulb knot
+    - 26mm boti n3c fan knot
+  Chisel & Hound:
+    Badger:
+    - chisel & hound - abominable chalice
+    - chisel & hound broomstick
   Heritage Collection:
     Badger:
     - heritage shaving c-mon 28 mm
+  Long Shaving:
+    Badger:
+    - chisel & hound "twilight" / 26mm long shaving reserve vi fan
   Maggard:
     Badger:
-    - Chisel & Hound "Nice" W/Maggard 26mm 2 Band Badger
+    - chisel & hound "nice" w/maggard 26mm 2 band badger
+    - chisel & hound hive 28mm maggard silver tip badger
+    - Chisel and Hound - Tahitian Pearl 26mm Maggard SHD Fan
     Boar:
     - chisel & hound "americana" / 26mm maggard razors premium boar
     G5:
-    - Chisel & Hound "Espresso" 26mm Maggard Razors G5
+    - chisel & hound "espresso" 26mm maggard razors g5
+    Mixed Badger/Boar:
+    - chisel & hound "ruby" w/ 26mm maggard mixed knot
+    - chisel & hound "ruby" w/ maggard mixed knot
     Synthetic:
     - chisel & hound "chocolate drop" / 26mm maggard razors faux horse
+    - Chisel and Hound Ambrosia Maple with 26 mm synthetic Maggard knot
+    - Chisel and Hound Azurite with 26 mm Maggard Tuxedo knot
   Mühle:
     STF:
     - alpha outlaw silver stf++
     - rad dinosaur creations - jetson - 25mm muhle stf
+  Omega:
+    '10098':
+    - chisel & hound "the duke" / omega 10098 boar
+  Oumo:
+    Rorschach:
+    - chisel & hound esmeralda w/oumo rorschach badger
+  Paragon:
+    Boar:
+    - Chisel & Hound Season of the Witch w/ 26mm Paragon Boar
+    Synthetic:
+    - Chisel and Hound "Rob's Finest" - Paragon Synthetic 25mm Synthetic
   Rad Dinosaur Creations:
     Raptor:
     - rad dinosaur creations >!expunged!< w/ raptor synthetic
   Turn-N-Shave:
+    Medium Density Badger (M*):
+    - Chisel & Hound Strata TnS M8 Fan Badger
+    - Chisel & Hound Strata TurnNShave M8 Fan Badger
     Quartermoon:
     - chisel & hound "cobalt short" / 26mm turnnshave quartermoon
+    - Chisel & Hound T&S Quartermoon
+    Shoat:
+    - chisel & hound 26mm tns shoat (boar)
     Tip (Badger):
     - chisel & hound "diplomat" w/ turn n shave tip v1 bulb 26mm
+    - chisel & hound "swamper" / 26mm turnnshave v9 tip badger
+    - chisel & hound ivy w/ tns 26mm v9
     - rad dinosaur creations magma w/ 26mm turn-n-shave v9 tip
+    Tuxedo:
+    - chisel & hound "spice lily" - turnnshave tuxedo 26mm synthetic
 razor:
   3D Printed:
     DE:

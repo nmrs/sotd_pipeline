@@ -85,7 +85,7 @@ artisan_handles:
     knot_size_mm: 26
     Unspecified:
       patterns:
-      - chisel.*hound
+      - chisel.*hound(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
       - chis.*fou
       - \bc(?:\&|and|\+\s)?h\b
   Cool Dog:
