@@ -740,7 +740,7 @@ class ValidateCorrectMatches:
                 self._build_validation_cache(field)
 
         precompute_time = time.perf_counter() - start_time
-        logger.info(f"Validation structures pre-computed in {precompute_time*1000:.2f}ms")
+        logger.info(f"Validation structures pre-computed in {precompute_time * 1000:.2f}ms")
 
     def _build_validation_cache(self, field: str):
         """Build validation cache for a specific field."""

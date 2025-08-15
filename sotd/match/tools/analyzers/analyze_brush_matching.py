@@ -20,7 +20,8 @@ from pathlib import Path
 from unittest.mock import Mock
 
 # Add the project root to the path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+project_root = Path(__file__).parent.parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 try:
     from sotd.enrich.brush_enricher import BrushEnricher
@@ -107,7 +108,8 @@ def analyze_brush_matching(
                             break
 
                 print(
-                    "  📝 Temporarily patched correct_matches_matcher and legacy matcher methods to bypass all matches"
+                    "  📝 Temporarily patched correct_matches_matcher and legacy "
+                    "matcher methods to bypass all matches"
                 )
 
             result = scoring_matcher.match(brush_string)
@@ -226,7 +228,8 @@ def analyze_brush_matching(
                             and matched_data["_matched_by_strategy"]
                         ):
                             print(
-                                f"     🔧 Matched By Strategy: {matched_data['_matched_by_strategy']}"
+                                f"     🔧 Matched By Strategy: "
+                                f"{matched_data['_matched_by_strategy']}"
                             )
                         if "_pattern_used" in matched_data and matched_data["_pattern_used"]:
                             print(f"     🔍 Pattern Used: {matched_data['_pattern_used']}")
@@ -532,14 +535,17 @@ def _show_modifier_details(strategy_name: str, input_text: str, matched_data: di
                         # Create minimal cached results for modifier functions to work
                         engine.cached_results = {"unified_result": None}
 
-                modifier_value = modifier_function(input_text, mock_result, strategy_name)
-                total_effect = modifier_value * modifier_weight
+                try:
+                    modifier_value = modifier_function(input_text, mock_result, strategy_name)
+                    total_effect = modifier_value * modifier_weight
 
-                # Show ALL modifiers, including those with 0.0 effect
-                print(
-                    f"       {modifier_name}: {modifier_value:.1f} × "
-                    f"{modifier_weight:+.1f} = {total_effect:+.1f}"
-                )
+                    # Show ALL modifiers, including those with 0.0 effect
+                    print(
+                        f"       {modifier_name}: {modifier_value:.1f} × "
+                        f"{modifier_weight:+.1f} = {total_effect:+.1f}"
+                    )
+                except Exception as e:
+                    print(f"       {modifier_name}: Error calculating modifier: {e}")
 
     except Exception as e:
         # Fallback to simplified calculation if engine fails

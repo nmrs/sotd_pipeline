@@ -77,9 +77,14 @@ class CorrectMatchesManager:
                                             for model, strings in brand_data.items():
                                                 if isinstance(strings, list):
                                                     for original in strings:
-                                                        # Use simplified key format
-                                                        match_key = (
-                                                            f"{field}:{original.lower().strip()}"
+                                                        # Use consistent normalization for key generation
+                                                        match_key = self.create_match_key(
+                                                            field,
+                                                            original,
+                                                            {
+                                                                "brand": brand,
+                                                                "model": model,
+                                                            },
                                                         )
                                                         self._correct_matches.add(match_key)
                                                         self._correct_matches_data[match_key] = {
@@ -87,7 +92,6 @@ class CorrectMatchesManager:
                                                             "matched": {
                                                                 "brand": brand,
                                                                 "model": model,
-                                                                "format": format_name,
                                                             },
                                                             "field": field,
                                                         }
@@ -98,8 +102,15 @@ class CorrectMatchesManager:
                                     for model, strings in brand_data.items():
                                         if isinstance(strings, list):
                                             for original in strings:
-                                                # Use simplified key format
-                                                match_key = f"{field}:{original.lower().strip()}"
+                                                # Use consistent normalization for key generation
+                                                match_key = self.create_match_key(
+                                                    field,
+                                                    original,
+                                                    {
+                                                        "brand": brand,
+                                                        "model": model,
+                                                    },
+                                                )
                                                 self._correct_matches.add(match_key)
                                                 self._correct_matches_data[match_key] = {
                                                     "original": original,
@@ -128,9 +139,14 @@ class CorrectMatchesManager:
                                                     original_text = pattern
                                                     handle_match_enabled = False
 
-                                                # Use simplified key format
-                                                match_key = (
-                                                    f"{field}:{original_text.lower().strip()}"
+                                                # Use consistent normalization for key generation
+                                                match_key = self.create_match_key(
+                                                    field,
+                                                    original_text,
+                                                    {
+                                                        "brand": brand,
+                                                        "model": model,
+                                                    },
                                                 )
                                                 self._correct_matches.add(match_key)
                                                 self._correct_matches_data[match_key] = {
@@ -150,7 +166,15 @@ class CorrectMatchesManager:
                                     for model, strings in brand_data.items():
                                         if isinstance(strings, list):
                                             for original in strings:
-                                                match_key = f"{field}:{original.lower().strip()}"
+                                                # Use consistent normalization for key generation
+                                                match_key = self.create_match_key(
+                                                    field,
+                                                    original,
+                                                    {
+                                                        "brand": brand,
+                                                        "model": model,
+                                                    },
+                                                )
                                                 self._correct_matches.add(match_key)
                                                 self._correct_matches_data[match_key] = {
                                                     "original": original,
