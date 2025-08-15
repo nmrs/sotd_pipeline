@@ -1,0 +1,348 @@
+# Blade Use Count Extraction Feature Specification
+
+**Specification Date**: 2025-08-15  
+**Type**: Feature Specification  
+**Status**: READY_FOR_IMPLEMENTATION  
+
+## Overview
+
+This specification defines a new blade use count extraction feature to replace the existing `BladeCountEnricher` implementation. The new feature will **reuse the existing, tested patterns** from `scripts/extract_blade_count_strings.py` and **add a priority logic layer** on top to provide significantly improved extraction accuracy and context handling.
+
+## Goals
+
+1. **Replace the current `extract_blade_and_use_count` function** with a new, more effective implementation
+2. **Reuse existing, tested patterns** from `extract_blade_count_strings.py` rather than reimplementing
+3. **Add priority logic layer** for consistent, predictable extraction behavior
+4. **Maintain the same output structure** as the current enricher
+5. **Return integer values** instead of strings for better data representation
+
+## Current State Analysis
+
+### Existing Implementation
+- **Function**: `extract_blade_and_use_count()` in `sotd/utils/match_filter_utils.py`
+- **Current Output**: Returns `(blade_count: Optional[int], use_count: Optional[int])`
+- **Current Issues**: Poor pattern recognition, limited coverage, inconsistent results
+
+### Existing Pattern Infrastructure
+- **File**: `scripts/extract_blade_count_strings.py`
+- **Status**: **WELL-TESTED AND WORKING** - contains comprehensive pattern recognition
+- **Coverage**: 99.8% of all numbered blade strings successfully categorized
+- **Pattern Types**: All major pattern categories already implemented and validated
+
+### Current Output Structure
+```json
+{
+  "_enriched_by": "BladeCountEnricher",
+  "_extraction_source": "user_comment",
+  "blade_count": "2",  // Currently string, should be int
+  "use_count": "1"     // Currently string, should be int
+}
+```
+
+## Requirements
+
+### Functional Requirements
+
+#### 1. **REUSE EXISTING PATTERNS (HIGHEST PRIORITY)**
+The new implementation **MUST reuse all existing, tested patterns** from `extract_blade_count_strings.py`:
+
+##### **Pattern Categories to Reuse:**
+- **Simple blade count**: `(3)`, `[4]`, `{5}` - 25,537 strings (93.3%)
+- **Explicit usage count**: `(3rd use)`, `(10th shave)` - 1,019 strings (3.7%)
+- **Multiplier count**: `(5X)`, `(6x)` - 313 strings (1.1%)
+- **Hash number**: `#15`, `#2` - 255 strings (0.9%)
+- **Semantic usage count**: `(NEW)`, `(fresh)` - 78 strings (0.3%)
+- **Month usage count**: `15/31`, `20/31` - 59 strings (0.2%)
+- **Blade inventory count**: `#101 of 104` - 33 strings (0.1%)
+- **Straight razor width**: `5/8`, `13/16` - 78 strings (0.3%)
+- **Price patterns**: `$0.19` - 11 strings (0.0%)
+
+#### 2. **ADD PRIORITY LOGIC LAYER**
+Implement priority-based extraction logic on top of existing patterns:
+
+##### **Priority 1: Simple Delimiter Patterns (Highest Priority)**
+- **Parentheses**: `(3)`, `(4)`, `(5)` → extract `3`, `4`, `5`
+- **Brackets**: `[9]`, `[10]`, `[15]` → extract `9`, `10`, `15`
+- **Braces**: `{5}`, `{7}`, `{12}` → extract `5`, `7`, `12`
+
+##### **Priority 2: Explicit Usage Count Patterns**
+- **Ordinal patterns**: `(3rd use)`, `(10th shave)`, `(2nd use)` → extract `3`, `10`, `2`
+- **Written ordinals**: `(first use)`, `(second use)`, `(third use)` → map to `1`, `2`, `3`
+- **Shave patterns**: `(shave #2)`, `(shave 3)`, `(10th shave)` → extract `2`, `3`, `10`
+- **Edge patterns**: `(Edge 1 - 10th shave)` → extract `10` from `10th shave)`
+
+##### **Priority 3: Multiplier Patterns (Context-Dependent)**
+- **Simple multipliers**: `(5X)`, `(6x)`, `(7X)` → extract `5`, `6`, `7`
+- **Order variations**: `(2X)` and `(x2)` → extract `2`
+- **Context-dependent meaning**:
+  - **If multiplier + usage count exist**: multiplier becomes `blade_count`, usage becomes `use_count`
+  - **If only multiplier exists**: multiplier becomes `use_count`
+
+##### **Priority 4: Hash Number Patterns**
+- **Hash notation**: `#15`, `#2`, `#1` → extract `15`, `2`, `1`
+
+##### **Priority 5: Decimal Usage Patterns**
+- **Fractional usage**: `(3.5)`, `(2.5)`, `(4.5)` → extract `3`, `2`, `4` (truncated)
+
+##### **Priority 6: Range/Approximate Patterns**
+- **Uncertainty patterns**: `(4-5?)`, `(3 or 4)`, `(4ish)` → extract first number: `4`, `3`, `4`
+
+##### **Priority 7: Month Usage Patterns**
+- **Day tracking**: `15/31`, `20/31`, `30/31` → extract day number: `15`, `20`, `30`
+
+##### **Priority 8: Semantic Patterns**
+- **First-time indicators**: `(NEW)`, `(new)`, `(fresh)`, `(new blade)` → extract `1`
+
+##### **Priority 9: Uncertainty Indicators**
+- **Question marks**: `(6?)`, `(~100)`, `(?+1)` → extract `6`, `100`, `1`
+
+##### **Priority 10: Dice Notation**
+- **Dice patterns**: `(D3)`, `(d5)` → extract `3`, `5`
+
+#### 3. **Extraction Logic**
+
+##### **Primary Extraction Flow**
+1. **First**: Look for simple delimiter patterns `(3)`, `[4]`, `{5}` → if found, set as `use_count`
+2. **Second**: Look for multiplier patterns `(2x)`, `[3x]`, `{4x}`
+3. **If multiplier found**:
+   - **If we already have `use_count`**: multiplier becomes `blade_count`
+   - **If no `use_count` yet**: multiplier becomes `use_count`
+4. **Fallback**: If no simple delimiters or multipliers, check lower priority patterns
+
+##### **Pattern Priority Enforcement**
+- **Strict priority order**: Higher priority patterns always win over lower priority patterns
+- **No pattern conflicts**: Only one pattern type can contribute to each count field
+- **Left-to-right processing**: Within same priority level, first pattern found wins
+
+#### 4. **Return Values**
+
+##### **Data Types**
+- **All counts**: Return as `int` values (not strings)
+- **Missing data**: Return `None` for missing patterns
+- **No valid pattern**: Return `(None, None)`
+
+##### **Return Structure**
+```python
+def extract_blade_counts(text: str) -> tuple[Optional[int], Optional[int]]:
+    """
+    Extract blade_count and use_count following priority logic.
+    
+    Args:
+        text: Input string that may contain blade count and use count patterns
+        
+    Returns:
+        Tuple of (blade_count, use_count), where each can be None
+        
+    Examples:
+        "(2x) Treet DuraSharp (1)." → (2, 1)
+        "Astra SP (3)" → (None, 3)
+        "(3x)" → (None, 3)
+        "BIC" → (None, None)
+    """
+```
+
+### Non-Functional Requirements
+
+#### 1. Performance
+- **Processing speed**: Must handle large volumes of data efficiently
+- **Memory usage**: Minimal memory overhead during extraction
+- **Scalability**: Performance should not degrade significantly with pattern complexity
+
+#### 2. Reliability
+- **Fail fast**: Raise exceptions for malformed input or invalid regex patterns
+- **Error handling**: Clear error messages for debugging
+- **Edge case handling**: Graceful handling of unusual but valid inputs
+
+#### 3. Maintainability
+- **Code clarity**: Clear, readable implementation following Python best practices
+- **Documentation**: Comprehensive docstrings and inline comments
+- **Testing**: Full test coverage for all pattern types and edge cases
+
+## Technical Design
+
+### Architecture
+
+#### 1. **Pattern Reuse Strategy**
+```python
+# Import and reuse existing pattern functions from extract_blade_count_strings.py
+from scripts.extract_blade_count_strings import (
+    categorize_known_patterns,
+    # ... other existing pattern functions
+)
+
+# OR extract the pattern logic into a shared module
+from sotd.utils.blade_patterns import (
+    extract_simple_delimiters,
+    extract_explicit_usage,
+    extract_multipliers,
+    # ... etc
+)
+```
+
+#### 2. **Single Extraction Function with Priority Logic**
+```python
+def extract_blade_counts(text: str) -> tuple[Optional[int], Optional[int]]:
+    """
+    Main extraction function implementing the complete priority logic.
+    Reuses existing patterns and adds priority handling.
+    """
+    use_count = None
+    blade_count = None
+    
+    # Step 1: Extract simple delimiter patterns (highest priority)
+    use_count = _extract_simple_delimiters(text)  # Reuse existing pattern
+    
+    # Step 2: Extract multiplier patterns
+    multiplier = _extract_multiplier_patterns(text)  # Reuse existing pattern
+    
+    # Step 3: Apply multiplier logic
+    if multiplier is not None:
+        if use_count is not None:
+            blade_count = multiplier  # We have both patterns
+        else:
+            use_count = multiplier    # Only multiplier found
+    
+    # Step 4: Fallback to lower priority patterns if no use_count yet
+    if use_count is None:
+        use_count = _extract_lower_priority_patterns(text)  # Reuse existing patterns
+    
+    return blade_count, use_count
+```
+
+#### 3. **Helper Functions (Reusing Existing Patterns)**
+```python
+def _extract_simple_delimiters(text: str) -> Optional[int]:
+    """Extract from (3), [4], {5} patterns - REUSE EXISTING LOGIC."""
+    
+def _extract_multiplier_patterns(text: str) -> Optional[int]:
+    """Extract from (2x), [3x], {4x} patterns - REUSE EXISTING LOGIC."""
+    
+def _extract_lower_priority_patterns(text: str) -> Optional[int]:
+    """Extract from ordinal, hash, decimal, range, semantic patterns - REUSE EXISTING LOGIC."""
+```
+
+### Integration Points
+
+#### 1. **Enricher Integration**
+```python
+# In BladeCountEnricher.enrich()
+blade_count, use_count = extract_blade_counts(original_comment)
+
+if blade_count is not None or use_count is not None:
+    enriched = {
+        "_enriched_by": self.get_enricher_name(),
+        "_extraction_source": "user_comment",
+    }
+    if blade_count is not None:
+        enriched["blade_count"] = blade_count  # Now int, not str
+    if use_count is not None:
+        enriched["use_count"] = use_count      # Now int, not str
+    return enriched
+```
+
+#### 2. **Output Structure**
+```json
+{
+  "_enriched_by": "BladeCountEnricher",
+  "_extraction_source": "user_comment",
+  "blade_count": 2,    // Integer, not string
+  "use_count": 1       // Integer, not string
+}
+```
+
+## Implementation Plan
+
+### Phase 1: **Pattern Extraction and Reuse**
+1. **Extract pattern logic** from `extract_blade_count_strings.py` into reusable functions
+2. **Create shared pattern module** in `sotd/utils/blade_patterns.py`
+3. **Validate pattern extraction** with existing test data
+4. **Ensure 99.8% coverage** is maintained
+
+### Phase 2: **Priority Logic Implementation**
+1. **Implement `extract_blade_counts()` function** with priority logic
+2. **Implement simple delimiter extraction** (highest priority)
+3. **Implement multiplier pattern extraction** with context logic
+4. **Basic testing** with core patterns
+
+### Phase 3: **Integration and Testing**
+1. **Update enricher** to use new extraction function
+2. **Update output format** to use integers instead of strings
+3. **Comprehensive testing** with real data
+4. **Performance validation** and optimization
+
+## Testing Requirements
+
+### Unit Tests
+1. **Pattern reuse validation**: Verify existing patterns still work correctly
+2. **Priority tests**: Verify priority order is respected
+3. **Context tests**: Test multiplier context logic
+4. **Edge case tests**: Test unusual but valid inputs
+5. **Error tests**: Test error handling and fail-fast behavior
+
+### Integration Tests
+1. **Real data tests**: Test with actual SOTD data samples
+2. **Enricher integration**: Test complete enrichment flow
+3. **Output format tests**: Verify integer output format
+4. **Performance tests**: Test with large datasets
+
+### Test Data Requirements
+1. **Coverage validation**: Test all documented pattern types (99.8% coverage)
+2. **Priority validation**: Test pattern priority conflicts
+3. **Edge case validation**: Test complex, multi-pattern strings
+4. **Performance validation**: Test with representative data volumes
+
+## Success Criteria
+
+### Quantitative Measures
+1. **Pattern coverage**: Maintain 99.8% coverage from existing implementation
+2. **Accuracy**: 95%+ correct extraction rate on real data
+3. **Performance**: <100ms processing time per 1000 strings
+4. **Integration**: Seamless replacement of current enricher
+
+### Qualitative Measures
+1. **Code quality**: Clean, maintainable implementation
+2. **Documentation**: Comprehensive technical documentation
+3. **Testing**: Full test coverage with clear test cases
+4. **Maintainability**: Easy to extend with new patterns
+
+## Risks and Mitigation
+
+### Technical Risks
+1. **Pattern extraction complexity**: Extracting patterns from existing script may be complex
+   - **Mitigation**: Create clear, modular pattern extraction functions
+2. **Priority logic bugs**: Complex priority handling may introduce bugs
+   - **Mitigation**: Comprehensive testing of priority scenarios
+3. **Performance degradation**: Adding priority logic may impact performance
+   - **Mitigation**: Profile and optimize critical paths
+
+### Integration Risks
+1. **Pattern compatibility**: Existing patterns may not work in new context
+   - **Mitigation**: Thorough testing with existing pattern data
+2. **Output format changes**: Integer vs string output may break downstream code
+   - **Mitigation**: Update all dependent code and validate integration
+
+## Future Enhancements
+
+### Potential Improvements
+1. **Pattern learning**: Automatically discover new patterns from data
+2. **Confidence scoring**: Provide confidence scores for extracted values
+3. **Pattern validation**: Validate extracted patterns against known catalogs
+
+### Extension Points
+1. **New pattern types**: Easy addition of new pattern recognition
+2. **Custom priority rules**: Configurable priority ordering
+3. **Pattern customization**: User-configurable pattern matching
+
+## Conclusion
+
+This specification provides a comprehensive roadmap for implementing a significantly improved blade use count extraction feature by **reusing existing, tested patterns** and **adding a priority logic layer**. 
+
+The approach of reusing existing patterns ensures we maintain the proven 99.8% coverage while the new priority logic provides consistent, predictable behavior. The integer output format improves data quality and downstream processing capabilities.
+
+**Key Implementation Principle**: **DO NOT reimplement patterns** - extract and reuse the working logic from `extract_blade_count_strings.py` and focus development effort on the priority logic layer.
+
+Implementation should proceed in phases to ensure pattern reuse is successful before adding the priority logic layer.
+description:
+globs:
+alwaysApply: false
+---
