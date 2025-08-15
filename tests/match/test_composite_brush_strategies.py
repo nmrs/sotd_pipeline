@@ -36,9 +36,9 @@ class TestLegacyDualComponentWrapperStrategy:
         assert handle["brand"] == "Summer Break"
         assert handle["_matched_by"] == "HandleMatcher"
 
-        # Knot section should contain Generic Timberwolf info
+        # Knot section should contain AP Shave Co Timberwolf info
         knot = result.matched["knot"]
-        assert knot["brand"] == "Generic"
+        assert knot["brand"] == "AP Shave Co"
         assert knot["model"] == "Timberwolf"
         assert knot["_matched_by"] == "KnotMatcher"
 
@@ -98,7 +98,7 @@ class TestLegacySingleComponentFallbackWrapperStrategy:
     def test_knot_only_matching(self):
         """Test knot-only matching."""
         # Test with knot-only input
-        result = self.strategy.match("Generic Timberwolf")
+        result = self.strategy.match("Timberwolf")
 
         # Should return a composite brush result with knot only
         assert result is not None
@@ -114,9 +114,9 @@ class TestLegacySingleComponentFallbackWrapperStrategy:
         assert handle["brand"] is None
         assert handle["model"] is None
 
-        # Knot section should contain Generic Timberwolf info
+        # Knot section should contain AP Shave Co Timberwolf info
         knot = result.matched["knot"]
-        assert knot["brand"] == "Generic"
+        assert knot["brand"] == "AP Shave Co"
         assert knot["model"] == "Timberwolf"
         assert knot["_matched_by"] == "KnotMatcher"
 

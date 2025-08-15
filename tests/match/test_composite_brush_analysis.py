@@ -57,9 +57,9 @@ class TestCompositeBrushAnalysis:
         assert handle["brand"] == "Summer Break"
         assert handle["_matched_by"] == "HandleMatcher"
 
-        # Knot section should contain Generic Timberwolf info
+        # Knot section should contain AP Shave Co Timberwolf info
         knot = result.matched["knot"]
-        assert knot["brand"] == "Generic"
+        assert knot["brand"] == "AP Shave Co"
         assert knot["model"] == "Timberwolf"
         assert knot["_matched_by"] == "KnotMatcher"
 

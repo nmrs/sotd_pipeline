@@ -132,8 +132,8 @@ class TestIndividualStrategyTuning:
         # Check knot section for brand/model info
         knot = matched.get("knot", {})
         assert (
-            knot.get("brand") == "Generic"
-        ), f"Expected knot brand Generic, got {knot.get('brand')}"
+            knot.get("brand") == "AP Shave Co"
+        ), f"Expected knot brand AP Shave Co, got {knot.get('brand')}"
         assert (
             knot.get("model") == "Timberwolf"
         ), f"Expected knot model Timberwolf, got {knot.get('model')}"

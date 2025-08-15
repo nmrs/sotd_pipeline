@@ -160,6 +160,24 @@ class TestBladeFormatAwareValidation:
         with correct_matches_file.open("w") as f:
             yaml.dump(correct_matches_data, f)
 
+        # Create minimal catalog files for testing
+        minimal_catalog = {"Test": {"Model": {"patterns": ["test pattern"]}}}
+
+        # Create minimal catalog files for each field type
+        catalog_files = {
+            "brushes.yaml": minimal_catalog,
+            "razors.yaml": minimal_catalog,
+            "blades.yaml": {"DE": minimal_catalog},
+            "soaps.yaml": minimal_catalog,
+            "handles.yaml": minimal_catalog,
+            "knots.yaml": minimal_catalog,
+        }
+
+        for filename, catalog_data in catalog_files.items():
+            catalog_file = tmp_path / filename
+            with catalog_file.open("w") as f:
+                yaml.dump(catalog_data, f)
+
         validator = ValidateCorrectMatches(correct_matches_path=correct_matches_file)
         validator._data_dir = tmp_path  # type: ignore
 
@@ -249,6 +267,24 @@ class TestErrorHandling:
         correct_matches_file = tmp_path / "correct_matches.yaml"
         with correct_matches_file.open("w") as f:
             yaml.dump(correct_matches_data, f)
+
+        # Create minimal catalog files for testing
+        minimal_catalog = {"TestBrand": {"TestModel": {"patterns": ["test pattern"]}}}
+
+        # Create minimal catalog files for each field type
+        catalog_files = {
+            "brushes.yaml": minimal_catalog,
+            "razors.yaml": minimal_catalog,
+            "blades.yaml": {"DE": minimal_catalog},
+            "soaps.yaml": minimal_catalog,
+            "handles.yaml": minimal_catalog,
+            "knots.yaml": minimal_catalog,
+        }
+
+        for filename, catalog_data in catalog_files.items():
+            catalog_file = tmp_path / filename
+            with catalog_file.open("w") as f:
+                yaml.dump(catalog_data, f)
 
         validator = ValidateCorrectMatches()
         validator._data_dir = tmp_path  # type: ignore
@@ -449,6 +485,18 @@ class TestCatalogValidation:
         brushes_file = tmp_path / "brushes.yaml"
         with brushes_file.open("w") as f:
             yaml.dump(brushes_catalog, f)
+
+        # Create minimal handles.yaml and knots.yaml files for testing
+        handles_catalog = {"Simpson": {"Chubby 2": {"patterns": ["simpson chubby 2", "chubby 2"]}}}
+        knots_catalog = {"Simpson": {"Chubby 2": {"patterns": ["simpson chubby 2", "chubby 2"]}}}
+
+        handles_file = tmp_path / "handles.yaml"
+        knots_file = tmp_path / "knots.yaml"
+
+        with handles_file.open("w") as f:
+            yaml.dump(handles_catalog, f)
+        with knots_file.open("w") as f:
+            yaml.dump(knots_catalog, f)
 
         # Create validator with test-specific correct_matches.yaml
         validator = ValidateCorrectMatches(correct_matches_path=correct_matches_file)

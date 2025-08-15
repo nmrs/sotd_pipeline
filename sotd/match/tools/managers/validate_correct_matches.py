@@ -44,6 +44,18 @@ class ValidateCorrectMatches:
         # Pre-compute all validation data structures
         self._precompute_validation_structures()
 
+    @property
+    def _data_dir(self):
+        """Get the data directory for testing."""
+        return getattr(self, "_data_dir_value", None)
+
+    @_data_dir.setter
+    def _data_dir(self, value):
+        """Set the data directory and clear cache for testing."""
+        self._data_dir_value = value
+        if value is not None:
+            self._clear_validation_cache()
+
     def _load_correct_matches(self) -> Dict[str, Any]:
         """Load correct_matches.yaml file."""
         if not self.correct_matches_path.exists():
@@ -62,6 +74,9 @@ class ValidateCorrectMatches:
     def _get_matcher(self, field: str) -> Optional[BaseMatcher]:
         """Get the appropriate matcher for a field, lazy-loading if needed."""
         if field not in self._matchers:
+            # Use _data_dir if set (for testing), otherwise use default data/ directory
+            base_dir = self._data_dir or Path("data")
+
             if field == "razor":
                 self._matchers[field] = RazorMatcher(bypass_correct_matches=True)
             elif field == "blade":
@@ -69,9 +84,9 @@ class ValidateCorrectMatches:
             elif field == "brush":
                 self._matchers[field] = BrushMatcher(
                     BrushMatcherConfig(
-                        catalog_path=Path("data/brushes.yaml"),
-                        handles_path=Path("data/handles.yaml"),
-                        knots_path=Path("data/knots.yaml"),
+                        catalog_path=base_dir / "brushes.yaml",
+                        handles_path=base_dir / "handles.yaml",
+                        knots_path=base_dir / "knots.yaml",
                         bypass_correct_matches=True,
                     )
                 )
@@ -81,9 +96,9 @@ class ValidateCorrectMatches:
                 # For knots, use BrushMatcher since it handles knot matching
                 self._matchers[field] = BrushMatcher(
                     BrushMatcherConfig(
-                        catalog_path=Path("data/brushes.yaml"),
-                        handles_path=Path("data/handles.yaml"),
-                        knots_path=Path("data/knots.yaml"),
+                        catalog_path=base_dir / "brushes.yaml",
+                        handles_path=base_dir / "handles.yaml",
+                        knots_path=base_dir / "knots.yaml",
                         bypass_correct_matches=True,
                     )
                 )
@@ -91,14 +106,20 @@ class ValidateCorrectMatches:
                 # For handles, use BrushMatcher since it handles handle matching
                 self._matchers[field] = BrushMatcher(
                     BrushMatcherConfig(
-                        catalog_path=Path("data/brushes.yaml"),
-                        handles_path=Path("data/handles.yaml"),
-                        knots_path=Path("data/knots.yaml"),
+                        catalog_path=base_dir / "brushes.yaml",
+                        handles_path=base_dir / "handles.yaml",
+                        knots_path=base_dir / "knots.yaml",
                         bypass_correct_matches=True,
                     )
                 )
 
         return self._matchers.get(field)
+
+    def _clear_validation_cache(self):
+        """Clear validation cache when _data_dir is set for testing."""
+        self._validation_cache.clear()
+        self._normalized_catalogs.clear()
+        self._matchers.clear()
 
     def _create_temp_correct_matches(
         self, field: str, correct_matches: Dict[str, Any]
@@ -382,7 +403,7 @@ class ValidateCorrectMatches:
         """Load catalog data for a specific field."""
         try:
             # Use _data_dir if set (for testing), otherwise use default data/ directory
-            base_dir = getattr(self, "_data_dir", None) or Path("data")
+            base_dir = self._data_dir or Path("data")
 
             if field == "blade":
                 catalog_path = base_dir / "blades.yaml"
@@ -732,6 +753,11 @@ class ValidateCorrectMatches:
 
     def _precompute_validation_structures(self):
         """Pre-compute all validation data structures for performance."""
+        # Skip pre-computation if _data_dir is set (for testing)
+        if hasattr(self, "_data_dir") and self._data_dir is not None:
+            logger.info("Skipping validation structure pre-computation for testing")
+            return
+
         logger.info("Pre-computing validation structures...")
         start_time = time.perf_counter()
 

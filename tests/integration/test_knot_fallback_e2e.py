@@ -28,7 +28,7 @@ def test_complete_brush_matching_with_timberwolf_split_brush(brush_matcher):
 
     # Knot should be matched by KnotMatcher (Timberwolf is in the knot catalog)
     knot = result.matched["knot"]
-    assert knot["brand"] == "Generic"  # Timberwolf is matched as Generic brand
+    assert knot["brand"] == "AP Shave Co"  # Timberwolf is matched as AP Shave Co brand
     assert knot["model"] == "Timberwolf"  # Model should be Timberwolf
     assert knot["_pattern"] == "timberwolf"  # Should match the timberwolf pattern
     assert result.match_type == "regex"
