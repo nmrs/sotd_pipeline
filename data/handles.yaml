@@ -82,6 +82,7 @@ artisan_handles:
       patterns:
       - century
   Chisel & Hound:
+    knot_size_mm: 26
     Unspecified:
       patterns:
       - chisel.*hound

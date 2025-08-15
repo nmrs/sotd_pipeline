@@ -586,13 +586,16 @@ brush:
     - aurora grooming lg24
   Body Shop:
     Synthetic:
-    - The Body Shop Brush
+    - the body shop brush
   Böker:
     Synthetic:
     - böker synthetic
   Chisel & Hound:
+    Rob's Finest Boar:
+    - chisel & hound 'rob's finest' boar
     Rob's Finest Synthetic:
     - chisel & hound - rob's finest - 25mm synthetic
+    - chisel & hound - rob's finest synthetic
     v10:
     - chisel and hound - bermuda v10 fanchurian 26mm badger
     v11:
@@ -609,6 +612,7 @@ brush:
     v18:
     - chisel & hound - 'eyespot' v18
     v19:
+    - chisel & hound "drake" w/ 26mm v19
     - chisel & hound mighty duck v19 fanchurian badger
     - chisel & hound the diplomat 26mm v19 fanchurian badger knot
     v20:
@@ -703,6 +707,12 @@ brush:
       woodworks handle'
     - muninn woodworks "bfm" 50mm motherlode
     - muninn woodworks bfm
+  Legacy Brand 0:
+    Legacy Model 0:
+    - Legacy Brush 0
+  Legacy Brand 1:
+    Legacy Model 1:
+    - Legacy Brush 1
   Mühle:
     Travel:
     - muhle 31m530 travel
@@ -730,6 +740,15 @@ brush:
     - omega 20102
     '81151':
     - omega 81151
+  Scoring Brand 0:
+    Scoring Model 0:
+    - Scoring Brush 0
+  Scoring Brand 1:
+    Scoring Model 1:
+    - Scoring Brush 1
+  Scoring Brand 2:
+    Scoring Model 2:
+    - Scoring Brush 2
   Semogue:
     '1305':
     - semogue 1305
@@ -790,6 +809,21 @@ brush:
     - stirling two band synthetic
     Finest Badger:
     - stirling finest badger brush
+  Test:
+    Brush:
+    - YAML Test Brush
+  Test Brand:
+    Test Model:
+    - Test Brush Integration
+  Test Brand 0:
+    Test Model 0:
+    - Test Brush 0
+  Test Brand 1:
+    Test Model 1:
+    - Test Brush 1
+  Test Brand 2:
+    Test Model 2:
+    - Test Brush 2
   Wald:
     A1:
     - wald a1
@@ -853,41 +887,64 @@ handle:
     - alpha shaving works outlaw 28mm g5
   Aylsworth Razors:
     Unspecified:
-    - Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm SHD
+    - aylsworth the altare handle w/ ap shave co. pure bliss 26mm shd
   Chisel & Hound:
     Unspecified:
-    - Chisel and Hound Padauk Wood handle
+    - ap shave co. pure bliss shd 26mm x chisel & hound "reef" hybrid handle
+    - chisel & hound "americana" / 26mm maggard razors premium boar
+    - chisel & hound "chocolate drop" / 26mm maggard razors faux horse
+    - chisel & hound "cobalt short" / 26mm turnnshave quartermoon
+    - chisel & hound "diplomat" w/ turn n shave tip v1 bulb 26mm
+    - Chisel & Hound "Espresso" 26mm Maggard Razors G5
+    - Chisel & Hound "Nice" W/Maggard 26mm 2 Band Badger
+    - Chisel & Hound "Propane" / 26mm AP Shave Co. G5B
+    - chisel and hound padauk wood handle
   Heritage Collection:
     Unspecified:
-    - Heritage Shaving C-Mon 28 mm
+    - heritage shaving c-mon 28 mm
   Rad Dinosaur Creations:
     Unspecified:
-    - Rad Dinosaur Creations - Jetson - 25mm Muhle STF
-    - Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip
-    - Rad Dinosaur Creations >!EXPUNGED!< w/ Raptor Synthetic
-    - Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan
+    - rad dinosaur creations "mackie" 26mm ap shave co. synbad fan
+    - rad dinosaur creations - jetson - 25mm muhle stf
+    - rad dinosaur creations >!expunged!< w/ raptor synthetic
+    - rad dinosaur creations magma w/ 26mm turn-n-shave v9 tip
 knot:
   AP Shave Co:
+    G5B:
+    - Chisel & Hound "Propane" / 26mm AP Shave Co. G5B
     Pure Bliss SHD:
-    - Aylsworth The Altare Handle w/ AP Shave Co. Pure Bliss 26mm SHD
+    - ap shave co. pure bliss shd 26mm x chisel & hound "reef" hybrid handle
+    - aylsworth the altare handle w/ ap shave co. pure bliss 26mm shd
     Synbad:
-    - Rad Dinosaur Creations "Mackie" 26mm AP Shave Co. Synbad Fan
+    - rad dinosaur creations "mackie" 26mm ap shave co. synbad fan
   Alpha:
     G5:
     - alpha shaving works outlaw 28mm g5
   Heritage Collection:
     Badger:
-    - Heritage Shaving C-Mon 28 mm
+    - heritage shaving c-mon 28 mm
+  Maggard:
+    Badger:
+    - Chisel & Hound "Nice" W/Maggard 26mm 2 Band Badger
+    Boar:
+    - chisel & hound "americana" / 26mm maggard razors premium boar
+    G5:
+    - Chisel & Hound "Espresso" 26mm Maggard Razors G5
+    Synthetic:
+    - chisel & hound "chocolate drop" / 26mm maggard razors faux horse
   Mühle:
     STF:
     - alpha outlaw silver stf++
-    - Rad Dinosaur Creations - Jetson - 25mm Muhle STF
+    - rad dinosaur creations - jetson - 25mm muhle stf
   Rad Dinosaur Creations:
     Raptor:
-    - Rad Dinosaur Creations >!EXPUNGED!< w/ Raptor Synthetic
+    - rad dinosaur creations >!expunged!< w/ raptor synthetic
   Turn-N-Shave:
+    Quartermoon:
+    - chisel & hound "cobalt short" / 26mm turnnshave quartermoon
     Tip (Badger):
-    - Rad Dinosaur Creations Magma w/ 26mm Turn-n-Shave V9 Tip
+    - chisel & hound "diplomat" w/ turn n shave tip v1 bulb 26mm
+    - rad dinosaur creations magma w/ 26mm turn-n-shave v9 tip
 razor:
   3D Printed:
     DE:

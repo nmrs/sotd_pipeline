@@ -109,6 +109,10 @@ known_knots:
       patterns:
       - pure\s*bliss.*shd
       - \bpb\b.*shd
+    Timberwolf:
+      fiber: Synthetic
+      patterns:
+      - timberwolf
     Titanium:
       fiber: Synthetic
       patterns:
@@ -239,6 +243,16 @@ known_knots:
       - \bc(?:\&|and|\+)h\b.*v28
       - \bch\b.*v28
       - \bv28\b
+    Soot Sprite:
+      fiber: Synthetic
+      patterns:
+      - soot.*sprite
+    White Boar:
+      fiber: Boar
+      patterns:
+      - chis.*[fh]ou.*white.*boar
+      - \bc(?:\&|and|\+)h\b.*white.*boar
+      - \bch\b.*white.*boar
   Declaration Grooming:
     knot_size_mm: 28
     fiber: Badger
@@ -316,12 +330,11 @@ known_knots:
       patterns:
       - (declaration|\bdg\b).*\bb18\b
       - \bb18\b
-  Generic:
-    default: Synthetic
-    Timberwolf:
-      patterns:
-      - timberwolf
   Maggard:
+    G5:
+      default: Synthetic
+      patterns:
+      - mag(g?ard)?s?.*g5\b
     Timberwolf:
       fiber: Synthetic
       patterns:
@@ -796,7 +809,7 @@ other_knots:
   Maggard:
     default: Synthetic
     patterns:
-    - ^.*mag(g?ard)?s?
+    - mag(g?ard)?s?
   Maritime Brush Co.:
     default: Synthetic
     patterns:
