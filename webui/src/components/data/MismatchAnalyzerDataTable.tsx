@@ -409,63 +409,63 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
       // Selection column
       ...(onItemSelection
         ? [
-            {
-              id: 'selection',
-              header: () => {
-                // For now, use all data since we can't easily access visible rows from header
-                // This will be fixed in a future update when we can pass table context
-                return (
-                  <div className='flex items-center gap-2'>
-                    <span>Select</span>
-                  </div>
-                );
-              },
-              cell: ({ row }: { row: Row<MismatchItem> }) => {
-                const item = row.original;
-                // Since backend groups by case-insensitive original text, use that as the key
-                const itemKey = `${field}:${item.original.toLowerCase()}`;
-                const isSelected = selectedItems.has(itemKey);
-
-                return (
-                  <input
-                    type='checkbox'
-                    checked={isSelected}
-                    onChange={e => onItemSelection?.(itemKey, e.target.checked)}
-                    className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
-                  />
-                );
-              },
-              enableSorting: false,
+          {
+            id: 'selection',
+            header: () => {
+              // For now, use all data since we can't easily access visible rows from header
+              // This will be fixed in a future update when we can pass table context
+              return (
+                <div className='flex items-center gap-2'>
+                  <span>Select</span>
+                </div>
+              );
             },
-          ]
+            cell: ({ row }: { row: Row<MismatchItem> }) => {
+              const item = row.original;
+              // Since backend groups by case-insensitive original text, use that as the key
+              const itemKey = `${field}:${item.original.toLowerCase()}`;
+              const isSelected = selectedItems.has(itemKey);
+
+              return (
+                <input
+                  type='checkbox'
+                  checked={isSelected}
+                  onChange={e => onItemSelection?.(itemKey, e.target.checked)}
+                  className='rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                />
+              );
+            },
+            enableSorting: false,
+          },
+        ]
         : []),
 
       // Status column
       ...(isItemConfirmed
         ? [
-            {
-              id: 'status',
-              header: 'Status',
-              cell: ({ row }: { row: Row<MismatchItem> }) => {
-                const item = row.original;
-                const isConfirmed = isItemConfirmed(item);
+          {
+            id: 'status',
+            header: 'Status',
+            cell: ({ row }: { row: Row<MismatchItem> }) => {
+              const item = row.original;
+              const isConfirmed = isItemConfirmed(item);
 
-                return (
-                  <div className='flex items-center'>
-                    {isConfirmed ? (
-                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
-                        ✅ Confirmed
-                      </span>
-                    ) : (
-                      <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
-                        ⚠️ Unconfirmed
-                      </span>
-                    )}
-                  </div>
-                );
-              },
+              return (
+                <div className='flex items-center'>
+                  {isConfirmed ? (
+                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'>
+                      ✅ Confirmed
+                    </span>
+                  ) : (
+                    <span className='inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'>
+                      ⚠️ Unconfirmed
+                    </span>
+                  )}
+                </div>
+              );
             },
-          ]
+          },
+        ]
         : []),
       {
         accessorKey: 'count',
@@ -504,18 +504,18 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           if (field === 'brush' && onBrushSplitClick) {
             return (
               <div
-                className='text-sm text-gray-900 max-w-xs truncate cursor-pointer hover:bg-blue-50 hover:text-blue-700 p-1 rounded border border-transparent hover:border-blue-200 transition-colors'
+                className='text-sm text-gray-900 cursor-pointer hover:bg-blue-50 hover:text-blue-700 p-1 rounded border border-transparent hover:border-blue-200 transition-colors'
                 onClick={() => onBrushSplitClick(item)}
                 title={item.original}
               >
-                ✏️ {truncateText(item.original, 40)}
+                ✏️ {item.original}
               </div>
             );
           }
 
           return (
-            <div className='text-sm text-gray-900 max-w-xs truncate' title={item.original}>
-              {truncateText(item.original, 40)}
+            <div className='text-sm text-gray-900' title={item.original}>
+              {item.original}
             </div>
           );
         },
@@ -556,14 +556,14 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           if (field === 'brush' && formattedData.includes('\n')) {
             const content = (
               <div
-                className={`text-sm text-gray-900 max-w-xs ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
+                className={`text-sm text-gray-900 ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
                 onClick={hasChanges ? handleEnrichClick : undefined}
                 title={formattedData}
               >
                 {hasChanges && <span className='text-blue-600 text-xs mr-1'>🔄</span>}
                 {formattedData.split('\n').map((line, index) => (
                   <div key={index} className={index > 0 ? 'mt-1' : ''}>
-                    {truncateText(line, 40)}
+                    {line}
                   </div>
                 ))}
               </div>
@@ -575,12 +575,12 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           // For other fields, use the original rendering
           const content = (
             <div
-              className={`text-sm text-gray-900 max-w-xs truncate ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
+              className={`text-sm text-gray-900 ${hasChanges ? 'border-l-4 border-blue-500 pl-2 bg-blue-50 cursor-pointer hover:bg-blue-100' : ''}`}
               onClick={hasChanges ? handleEnrichClick : undefined}
               title={formattedData}
             >
               {hasChanges && <span className='text-blue-600 text-xs mr-1'>🔄</span>}
-              <span>{truncateText(formattedData, 40)}</span>
+              <span>{formattedData}</span>
             </div>
           );
 
@@ -654,9 +654,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <div className='text-sm max-w-xs'>
               <span
-                className={`inline-flex items-center justify-center text-center px-2 py-1 text-xs font-semibold rounded-full whitespace-normal ${
-                  brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}
+                className={`inline-flex items-center justify-center text-center px-2 py-1 text-xs font-semibold rounded-full whitespace-normal ${brushType.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}
               >
                 {brushType.type}
               </span>
@@ -701,8 +700,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             const item = row.original;
             const handleText = formatBrushComponent(item.matched, 'handle');
             return (
-              <div className='text-sm text-gray-900 max-w-xs relative truncate' title={handleText}>
-                {truncateText(handleText, 40)}
+              <div className='text-sm text-gray-900' title={handleText}>
+                {handleText}
               </div>
             );
           },
@@ -718,10 +717,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             const patternText = getBrushComponentPattern(item.matched, 'handle');
             return (
               <div
-                className='text-sm text-gray-500 max-w-xs font-mono relative truncate'
+                className='text-sm text-gray-500 font-mono'
                 title={patternText}
               >
-                {truncateText(patternText, 40)}
+                {patternText}
               </div>
             );
           },
@@ -736,8 +735,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             const item = row.original;
             const knotText = formatBrushComponent(item.matched, 'knot');
             return (
-              <div className='text-sm text-gray-900 max-w-xs truncate' title={knotText}>
-                {truncateText(knotText, 40)}
+              <div className='text-sm text-gray-900' title={knotText}>
+                {knotText}
               </div>
             );
           },
@@ -753,10 +752,10 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
             const patternText = getBrushComponentPattern(item.matched, 'knot');
             return (
               <div
-                className='text-sm text-gray-500 max-w-xs font-mono truncate'
+                className='text-sm text-gray-500 font-mono'
                 title={patternText}
               >
-                {truncateText(patternText, 40)}
+                {patternText}
               </div>
             );
           },
@@ -770,8 +769,8 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
         cell: ({ row }: { row: Row<MismatchItem> }) => {
           const item = row.original;
           return (
-            <div className='text-sm text-gray-500 max-w-xs font-mono'>
-              {truncateText(item.pattern, 40)}
+            <div className='text-sm text-gray-500 font-mono'>
+              {item.pattern}
             </div>
           );
         },
@@ -802,7 +801,7 @@ const MismatchAnalyzerDataTable: React.FC<MismatchAnalyzerDataTableProps> = ({
           return (
             <CommentList
               commentIds={commentIds}
-              onCommentClick={onCommentClick || (() => {})}
+              onCommentClick={onCommentClick || (() => { })}
               commentLoading={commentLoading}
               maxDisplay={3}
               aria-label={`${commentIds.length} comment${commentIds.length !== 1 ? 's' : ''} available`}
