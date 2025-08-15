@@ -52,13 +52,13 @@ class TestBrushMatcherEntryPointIntegration:
         assert result_old is not None
         assert result_new is not None
         assert result_old.original == result_new.original
-        
+
         # The new scoring system may use different match types for the same input
         # due to more sophisticated strategy selection. This is expected behavior.
         # Both systems should still produce valid, compatible results.
-        assert result_old.match_type in ['regex', 'exact', 'brand_default', 'composite']
-        assert result_new.match_type in ['regex', 'exact', 'brand_default', 'composite']
-        
+        assert result_old.match_type in ["regex", "exact", "brand_default", "composite"]
+        assert result_new.match_type in ["regex", "exact", "brand_default", "composite"]
+
         # Both systems should provide matched data
         assert result_old.matched is not None
         assert result_new.matched is not None
