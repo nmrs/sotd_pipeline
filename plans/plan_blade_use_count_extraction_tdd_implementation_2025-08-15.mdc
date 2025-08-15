@@ -1,0 +1,340 @@
+# Blade Use Count Extraction Feature - TDD Implementation Plan
+
+**Plan Date**: 2025-08-15  
+**Type**: TDD Implementation Plan  
+**Status**: READY_FOR_IMPLEMENTATION  
+
+## Overview
+
+This plan implements the blade use count extraction feature using Test-Driven Development (TDD) methodology. The feature will replace the existing `BladeCountEnricher` implementation with a new, priority-based extraction system that reuses existing patterns and adds validation logic.
+
+## Goals
+
+1. **Replace current `extract_blade_and_use_count` function** with improved implementation
+2. **Reuse existing, tested patterns** from `extract_blade_count_strings.py`
+3. **Implement priority logic layer** for consistent extraction behavior
+4. **Add usage count validation** (critical business rule: <800 only)
+5. **Maintain 99.8% pattern coverage** while improving accuracy
+6. **Return integer values** instead of strings for better data quality
+
+## TDD Approach
+
+### **Test-First Development Cycle**
+1. **Write failing test** for each feature/pattern
+2. **Implement minimal code** to make test pass
+3. **Refactor** for clarity and maintainability
+4. **Repeat** for next feature/pattern
+
+### **Test Structure**
+- **Unit tests**: Test individual extraction functions
+- **Integration tests**: Test complete extraction flow
+- **Validation tests**: Test usage count validation logic
+- **Edge case tests**: Test unusual but valid inputs
+
+## Implementation Phases
+
+### **Phase 1: Pattern Extraction and Reuse (Week 1)**
+
+#### **1.1 Extract Existing Pattern Logic**
+**Goal**: Extract working patterns from `extract_blade_count_strings.py` into reusable functions
+
+**Tasks**:
+- [ ] Create `sotd/utils/blade_patterns.py` module
+- [ ] Extract simple delimiter patterns: `(3)`, `[4]`, `{5}`
+- [ ] Extract explicit usage patterns: `(3rd use)`, `(10th shave)`
+- [ ] Extract multiplier patterns: `(2x)`, `(x3)`
+- [ ] Extract hash number patterns: `#15`, `#2`
+- [ ] Extract semantic patterns: `(NEW)`, `(fresh)`
+- [ ] Extract month usage patterns: `15/31`, `20/31`
+- [ ] Extract other pattern types
+
+**Tests to Write First**:
+```python
+def test_extract_simple_delimiters():
+    """Test extraction of (3), [4], {5} patterns."""
+    assert extract_simple_delimiters("Astra SP (3)") == 3
+    assert extract_simple_delimiters("Feather [4]") == 4
+    assert extract_simple_delimiters("BIC {5}") == 5
+
+def test_extract_explicit_usage():
+    """Test extraction of (3rd use), (10th shave) patterns."""
+    assert extract_explicit_usage("Astra (3rd use)") == 3
+    assert extract_explicit_usage("Feather (10th shave)") == 10
+
+def test_extract_multipliers():
+    """Test extraction of (2x), (x3) patterns."""
+    assert extract_multipliers("Astra (2x)") == 2
+    assert extract_multipliers("Feather (x3)") == 3
+```
+
+**Success Criteria**:
+- [ ] All existing patterns extracted and working
+- [ ] 99.8% coverage maintained
+- [ ] Unit tests passing for each pattern type
+
+#### **1.2 Pattern Integration Testing**
+**Goal**: Verify extracted patterns work correctly in new module
+
+**Tasks**:
+- [ ] Test pattern extraction against known data samples
+- [ ] Validate pattern accuracy matches original implementation
+- [ ] Test edge cases and unusual inputs
+- [ ] Performance testing with large datasets
+
+**Tests to Write First**:
+```python
+def test_pattern_integration():
+    """Test that extracted patterns work together correctly."""
+    # Test multiple patterns in same string
+    # Test pattern priority when multiple exist
+    # Test edge cases from real data
+```
+
+### **Phase 2: Priority Logic Implementation (Week 2)**
+
+#### **2.1 Core Extraction Function**
+**Goal**: Implement main `extract_blade_counts()` function with priority logic
+
+**Tasks**:
+- [ ] Implement priority-based extraction flow
+- [ ] Add simple delimiter priority (highest)
+- [ ] Add multiplier context logic (blade_count vs use_count)
+- [ ] Add fallback to lower priority patterns
+
+**Tests to Write First**:
+```python
+def test_priority_logic():
+    """Test that priority order is respected."""
+    # Simple delimiters should win over other patterns
+    assert extract_blade_counts("(2x) Astra (3)") == (2, 3)
+    assert extract_blade_counts("Astra (3) #15") == (None, 3)
+
+def test_multiplier_context():
+    """Test multiplier context logic."""
+    # If both patterns exist: multiplier = blade_count, simple = use_count
+    assert extract_blade_counts("(2x) Astra (3)") == (2, 3)
+    # If only multiplier: multiplier = use_count
+    assert extract_blade_counts("Astra (3x)") == (None, 3)
+```
+
+**Success Criteria**:
+- [ ] Priority logic correctly implemented
+- [ ] Multiplier context logic working
+- [ ] All test cases passing
+
+#### **2.2 Usage Count Validation**
+**Goal**: Implement critical business rule for realistic usage counts
+
+**Tasks**:
+- [ ] Implement `validate_usage_count()` function
+- [ ] Add <800 validation rule
+- [ ] Add 4+ digit validation rule
+- [ ] Integrate validation into extraction flow
+
+**Tests to Write First**:
+```python
+def test_usage_count_validation():
+    """Test usage count validation logic."""
+    # Valid ranges
+    assert validate_usage_count(799) == 799  # Valid
+    assert validate_usage_count(747) == 747  # Valid marathon
+    # Invalid ranges
+    assert validate_usage_count(800) is None  # Invalid
+    assert validate_usage_count(3003135) is None  # Invalid model number
+
+def test_validation_integration():
+    """Test validation integrated with extraction."""
+    # High numbers should return None
+    assert extract_blade_counts("Feather (3003135)") == (None, None)
+    # Valid numbers should work normally
+    assert extract_blade_counts("Astra (3)") == (None, 3)
+```
+
+**Success Criteria**:
+- [ ] Validation logic correctly implemented
+- [ ] High numbers properly filtered out
+- [ ] Valid marathon usage counts preserved
+
+### **Phase 3: Enricher Integration (Week 3)**
+
+#### **3.1 Update BladeCountEnricher**
+**Goal**: Integrate new extraction function with existing enricher
+
+**Tasks**:
+- [ ] Update enricher to use new `extract_blade_counts()` function
+- [ ] Change output format from strings to integers
+- [ ] Maintain same output structure and metadata
+- [ ] Test complete enrichment flow
+
+**Tests to Write First**:
+```python
+def test_enricher_integration():
+    """Test complete enricher integration."""
+    enricher = BladeCountEnricher()
+    result = enricher.enrich({}, "(2x) Astra (3)")
+    
+    assert result["blade_count"] == 2  # Integer, not string
+    assert result["use_count"] == 3    # Integer, not string
+    assert result["_enriched_by"] == "BladeCountEnricher"
+    assert result["_extraction_source"] == "user_comment"
+
+def test_enricher_output_format():
+    """Test that output format matches requirements."""
+    # Verify integers instead of strings
+    # Verify same metadata structure
+    # Verify validation working
+```
+
+**Success Criteria**:
+- [ ] Enricher uses new extraction function
+- [ ] Output format uses integers instead of strings
+- [ ] All existing functionality preserved
+- [ ] Integration tests passing
+
+#### **3.2 End-to-End Testing**
+**Goal**: Test complete pipeline with real data
+
+**Tasks**:
+- [ ] Test with actual SOTD data samples
+- [ ] Validate extraction accuracy on real data
+- [ ] Performance testing with large datasets
+- [ ] Compare results with current implementation
+
+**Tests to Write First**:
+```python
+def test_real_data_samples():
+    """Test extraction with real SOTD data."""
+    # Test known patterns from analysis
+    # Test edge cases from real data
+    # Test validation with high numbers
+
+def test_performance():
+    """Test performance with large datasets."""
+    # Test processing time for 1000+ strings
+    # Test memory usage
+    # Test scalability
+```
+
+### **Phase 4: Quality Assurance and Documentation (Week 4)**
+
+#### **4.1 Comprehensive Testing**
+**Goal**: Ensure full test coverage and quality
+
+**Tasks**:
+- [ ] Complete unit test coverage
+- [ ] Integration test coverage
+- [ ] Edge case testing
+- [ ] Performance validation
+
+**Tests to Write First**:
+```python
+def test_edge_cases():
+    """Test edge cases and unusual inputs."""
+    # Empty strings, None values
+    # Very long strings
+    # Special characters
+    # Mixed pattern types
+
+def test_error_handling():
+    """Test error handling and fail-fast behavior."""
+    # Malformed input
+    # Invalid regex patterns
+    # Exception handling
+```
+
+#### **4.2 Documentation and Cleanup**
+**Goal**: Complete documentation and code cleanup
+
+**Tasks**:
+- [ ] Update function docstrings
+- [ ] Add inline comments
+- [ ] Update README and documentation
+- [ ] Code formatting and linting
+- [ ] Final code review
+
+## Testing Requirements
+
+### **Unit Test Coverage**
+- **Target**: 95%+ coverage for all new code
+- **Pattern tests**: Test each pattern type individually
+- **Priority tests**: Test priority logic and conflicts
+- **Validation tests**: Test usage count validation
+- **Edge case tests**: Test unusual but valid inputs
+
+### **Integration Test Coverage**
+- **Enricher integration**: Test complete enrichment flow
+- **Pattern reuse**: Test extracted patterns work correctly
+- **Real data validation**: Test with actual SOTD data
+- **Performance validation**: Test with large datasets
+
+### **Test Data Requirements**
+- **Pattern coverage**: Test all documented pattern types
+- **Priority validation**: Test pattern priority conflicts
+- **Edge case validation**: Test complex, multi-pattern strings
+- **Performance validation**: Test with representative data volumes
+
+## Success Criteria
+
+### **Quantitative Measures**
+- **Pattern coverage**: Maintain 99.8% coverage from existing implementation
+- **Test coverage**: 95%+ coverage for all new code
+- **Accuracy**: 95%+ correct extraction rate on real data
+- **Performance**: <100ms processing time per 1000 strings
+- **Integration**: Seamless replacement of current enricher
+
+### **Qualitative Measures**
+- **Code quality**: Clean, maintainable implementation
+- **Documentation**: Comprehensive technical documentation
+- **Testing**: Full test coverage with clear test cases
+- **Maintainability**: Easy to extend with new patterns
+
+## Risk Mitigation
+
+### **Technical Risks**
+1. **Pattern extraction complexity**: Break down into small, testable functions
+2. **Priority logic bugs**: Comprehensive testing of priority scenarios
+3. **Performance degradation**: Profile and optimize critical paths
+
+### **Integration Risks**
+1. **Pattern compatibility**: Thorough testing with existing pattern data
+2. **Output format changes**: Update all dependent code and validate
+
+## Dependencies
+
+### **Required Dependencies**
+- Existing `extract_blade_count_strings.py` script (for pattern reuse)
+- `sotd/enrich/blade_enricher.py` (for integration)
+- `sotd/utils/` module structure (for new pattern module)
+
+### **External Dependencies**
+- Python 3.11+ (enforced by pyrightconfig.json)
+- pytest for testing
+- Existing test infrastructure
+
+## Timeline
+
+- **Week 1**: Pattern extraction and reuse
+- **Week 2**: Priority logic implementation
+- **Week 3**: Enricher integration
+- **Week 4**: Quality assurance and documentation
+
+**Total Estimated Time**: 4 weeks
+**Critical Path**: Pattern extraction → Priority logic → Integration → Testing
+
+## Next Steps
+
+1. **Start with Phase 1.1**: Extract existing pattern logic
+2. **Write tests first** for each pattern type
+3. **Implement minimal code** to make tests pass
+4. **Iterate through phases** following TDD methodology
+5. **Validate each phase** before proceeding to next
+
+## Conclusion
+
+This TDD implementation plan provides a structured approach to building the blade use count extraction feature. By following the test-first methodology and reusing existing patterns, we can ensure high quality, maintainable code while achieving the goal of replacing the current enricher with a significantly improved implementation.
+
+The phased approach allows for iterative development and validation, ensuring each component works correctly before moving to the next phase. The focus on testing and validation will result in a robust, reliable feature that maintains the existing 99.8% pattern coverage while adding the new priority logic and validation capabilities.
+description:
+globs:
+alwaysApply: false
+---
