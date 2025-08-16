@@ -1,11 +1,10 @@
 from typing import Any, Dict
 
-from sotd.utils.match_filter_utils import (
+from .enricher import BaseEnricher
+from sotd.utils.blade_extraction import (
     extract_blade_and_use_count,
     extract_blade_use_count_via_normalization,
 )
-
-from .enricher import BaseEnricher
 
 
 class BladeCountEnricher(BaseEnricher):
