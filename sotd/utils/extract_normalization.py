@@ -143,27 +143,24 @@ def strip_blade_count_patterns(value: str) -> str:
     cleaned = re.sub(decimal_usage_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for hash usage counts: (#3), (#12), etc.
-    # But preserve numeric hashtags that represent blade use counts
-    # TEMPORARILY DISABLED: hash_usage_pattern = (
-    #     r"(?:[\(\[\{])\s*#(?![0-9]+(?:\.[0-9]+)?\b)[a-zA-Z0-9_]+\s*[\)\]\}]"
-    # )
-    # cleaned = re.sub(hash_usage_pattern, "", cleaned, flags=re.IGNORECASE)
+    hash_usage_pattern = r"(?:[\(\[\{])\s*#(?![0-9]+(?:\.[0-9]+)?\b)[a-zA-Z0-9_]+\s*[\)\]\}]"
+    cleaned = re.sub(hash_usage_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for "shave #n" usage counts: (shave #3), (shave #12), etc.
-    # But preserve numeric hashtags that represent blade use counts
-    # TEMPORARILY DISABLED: shave_hash_pattern = (
-    #     r"(?:[\(\[\{])\s*shave\s+#(?![0-9]+(?:\.[0-9]+)?\b)[a-zA-Z0-9_]+\s*[\)\]\}]"
-    # )
-    # cleaned = re.sub(shave_hash_pattern, "", cleaned, flags=re.IGNORECASE)
+    shave_hash_pattern = (
+        r"(?:[\(\[\{])\s*shave\s+#(?![0-9]+(?:\.[0-9]+)?\b)[a-zA-Z0-9_]+\s*[\)\]\}]"
+    )
+    cleaned = re.sub(shave_hash_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Now preserve numeric hashtags by removing the # symbol but keeping the number
     # This converts (shave #4) to (shave 4) so it can be processed by other patterns
     # TEMPORARILY DISABLED: numeric_hashtag_pattern = r"#(\d+(?:\.\d+)?)"
     # cleaned = re.sub(numeric_hashtag_pattern, r"\1", cleaned)
 
-    # Pattern for approximate number patterns: (10ish), (5ish?), (3ish), etc.
+    # Pattern for approximate number patterns: (10ish), (5ish?), (11-ish), ( 10ish ?), etc.
     # These are user approximations that should be normalized out
-    approximate_number_pattern = r"(?:[\(\[\{])\s*\d+ish\??\s*[\)\]\}]"
+    # Catches variations like: (10ish), (5ish?), (11-ish), ( 10ish ?), [3ish], {2ish}, etc.
+    approximate_number_pattern = r"[\(\[\{]\s*\d+\s*[-]?\s*ish\s*\??\s*[\)\]\}]"
     cleaned = re.sub(approximate_number_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Special case: remove any double spaces left behind

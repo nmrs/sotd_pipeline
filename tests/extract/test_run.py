@@ -214,7 +214,7 @@ def test_blade_normalization_hash_usage_counts(monkeypatch):
         blade_data_2 = result["data"][1]
         blade_data_3 = result["data"][2]
 
-        # Gillette Silver Blue (#3) -> Gillette Silver Blue (#3) 
+        # Gillette Silver Blue (#3) -> Gillette Silver Blue (#3)
         # (preserved since hash patterns are disabled)
         assert blade_data_1["blade"]["original"] == "Gillette Silver Blue (#3)"
         assert blade_data_1["blade"]["normalized"] == "Gillette Silver Blue (#3)"
@@ -234,6 +234,8 @@ def test_blade_normalization_approximate_numbers(monkeypatch):
         {"id": "1", "body": "* **Blade:** Wizamet Iridium Super Extra Stainless (10ish)"},
         {"id": "2", "body": "* **Blade:** Gilette Platinum (10ish?)"},
         {"id": "3", "body": "* **Blade:** Feather (5ish)"},
+        {"id": "4", "body": "* **Blade:** Kai Captain (11-ish)"},
+        {"id": "5", "body": "* **Blade:** Astra [3ish]"},
     ]
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -252,12 +254,14 @@ def test_blade_normalization_approximate_numbers(monkeypatch):
         result = run_extraction_for_month("2025-04")
 
         assert result is not None
-        assert len(result["data"]) == 3
+        assert len(result["data"]) == 5
 
         # Check that approximate number patterns are normalized out
         blade_data_1 = result["data"][0]
         blade_data_2 = result["data"][1]
         blade_data_3 = result["data"][2]
+        blade_data_4 = result["data"][3]
+        blade_data_5 = result["data"][4]
 
         # Wizamet Iridium Super Extra Stainless (10ish) -> Wizamet Iridium Super Extra Stainless
         assert blade_data_1["blade"]["original"] == "Wizamet Iridium Super Extra Stainless (10ish)"
@@ -270,6 +274,14 @@ def test_blade_normalization_approximate_numbers(monkeypatch):
         # Feather (5ish) -> Feather
         assert blade_data_3["blade"]["original"] == "Feather (5ish)"
         assert blade_data_3["blade"]["normalized"] == "Feather"
+
+        # Kai Captain (11-ish) -> Kai Captain
+        assert blade_data_4["blade"]["original"] == "Kai Captain (11-ish)"
+        assert blade_data_4["blade"]["normalized"] == "Kai Captain"
+
+        # Astra [3ish] -> Astra
+        assert blade_data_5["blade"]["original"] == "Astra [3ish]"
+        assert blade_data_5["blade"]["normalized"] == "Astra"
 
 
 def test_blade_normalization_asterisk_stripping(monkeypatch):
