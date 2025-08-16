@@ -61,6 +61,9 @@ def strip_blade_count_patterns(value: str) -> str:
     # Start with the original value
     cleaned = value
 
+    # Remove all asterisks (markdown formatting and product name asterisks)
+    cleaned = re.sub(r"\*+", "", cleaned)
+
     # Pattern for leading blade count: e.g. [2x], (2x), {2x}, [X2], (x2), etc.
     leading_blade_count_pattern = r"^\s*(?:[\(\[\{])\s*(?:x)?(\d+)(?:x)?\s*[\)\]\}]"
     cleaned = re.sub(leading_blade_count_pattern, "", cleaned, flags=re.IGNORECASE)
@@ -138,6 +141,19 @@ def strip_blade_count_patterns(value: str) -> str:
     # This catches decimal patterns like [3.5], [.5], (1.5), etc.
     decimal_usage_pattern = r"(?:[\(\[\{])\s*\d*\.\d+\s*[\)\]\}]"
     cleaned = re.sub(decimal_usage_pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Pattern for common product variants/descriptors: (Marathon), (Green), (Yellow), etc.
+    # These are common patterns that should be normalized out
+    product_variant_patterns = [
+        r"(?:[\(\[\{])\s*Marathon\s*[\)\]\}]",  # (Marathon)
+        r"(?:[\(\[\{])\s*Green\s*[\)\]\}]",  # (Green)
+        r"(?:[\(\[\{])\s*Yellow\s*[\)\]\}]",  # (Yellow)
+        r"(?:[\(\[\{])\s*Black\s*[\)\]\}]",  # (Black)
+        r"(?:[\(\[\{])\s*AC\s*[\)\]\}]",  # (AC)
+    ]
+
+    for pattern in product_variant_patterns:
+        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Special case: remove any double spaces left behind
     cleaned = re.sub(r"\s+", " ", cleaned).strip()

@@ -181,3 +181,47 @@ def test_blade_normalization_decimal_usage_counts(monkeypatch):
         original_3 = "Personna Super (1.5)"
         assert blade_data_3["blade"]["original"] == original_3
         assert blade_data_3["blade"]["normalized"] == "Personna Super"
+
+
+def test_blade_normalization_asterisk_stripping(monkeypatch):
+    """Test that asterisks are stripped during blade normalization."""
+    comments = [
+        {"id": "1", "body": "* **Blade:** * **Gillette - Nacet** (Marathon) (541)"},
+        {"id": "2", "body": "* **Blade:** Razo*Rock Mission"},
+        {"id": "3", "body": "* **Blade:** * **Timeless - Stainless Steel .68** Open Comb"},
+    ]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        path = Path(tmpdir) / "data/comments/2025-04.json"
+        path.parent.mkdir(parents=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"data": comments}, f, ensure_ascii=False)
+
+        # Create competition tags file in the right location
+        competition_tags = {"strip_tags": ["DOORKNOB", "CNC", "ARTISTCLUB"], "preserve_tags": []}
+        tags_path = Path(tmpdir) / "data/competition_tags.yaml"
+        with open(tags_path, "w", encoding="utf-8") as f:
+            yaml.dump(competition_tags, f)
+
+        monkeypatch.chdir(tmpdir)
+        result = run_extraction_for_month("2025-04")
+
+        assert result is not None
+        assert len(result["data"]) == 3
+
+        # Check that asterisks are stripped
+        blade_data_1 = result["data"][0]
+        blade_data_2 = result["data"][1]
+        blade_data_3 = result["data"][2]
+
+        # * **Gillette - Nacet** (Marathon) (541) -> Gillette - Nacet
+        assert blade_data_1["blade"]["original"] == "* **Gillette - Nacet** (Marathon) (541)"
+        assert blade_data_1["blade"]["normalized"] == "Gillette - Nacet"
+
+        # Razo*Rock Mission -> RazoRock Mission
+        assert blade_data_2["blade"]["original"] == "Razo*Rock Mission"
+        assert blade_data_2["blade"]["normalized"] == "RazoRock Mission"
+
+        # * **Timeless - Stainless Steel .68** Open Comb -> Timeless - Stainless Steel .68 Open Comb
+        assert blade_data_3["blade"]["original"] == "* **Timeless - Stainless Steel .68** Open Comb"
+        assert blade_data_3["blade"]["normalized"] == "Timeless - Stainless Steel .68 Open Comb"
