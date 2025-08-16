@@ -75,6 +75,12 @@ def test_run_extraction_for_month_with_normalization(monkeypatch):
             json.dump({"data": comments}, f, ensure_ascii=False)
 
         monkeypatch.chdir(tmpdir)
+
+        # Clear competition tags cache to ensure fresh loading
+        from sotd.utils.competition_tags import clear_competition_tags_cache
+
+        clear_competition_tags_cache()
+
         result = run_extraction_for_month("2025-04")
 
         assert result is not None
@@ -325,3 +331,89 @@ def test_blade_normalization_asterisk_stripping(monkeypatch):
         # * **Timeless - Stainless Steel .68** Open Comb -> Timeless - Stainless Steel .68 Open Comb
         assert blade_data_3["blade"]["original"] == "* **Timeless - Stainless Steel .68** Open Comb"
         assert blade_data_3["blade"]["normalized"] == "Timeless - Stainless Steel .68 Open Comb"
+
+
+def test_blade_normalization_comprehensive_shave_counts(monkeypatch):
+    """Test that all comprehensive shave count patterns are normalized out during blade extraction."""
+    comments = [
+        # Basic usage counts
+        {"id": "1", "body": "* **Blade:** Parker (1 use)"},
+        {"id": "2", "body": "* **Blade:** Gillette Nacet (2 use)"},
+        {"id": "3", "body": "* **Blade:** Parker (#2 use)"},
+        # Ordinal usage patterns
+        {"id": "4", "body": "* **Blade:** Wizamet (1st shave)"},
+        {"id": "5", "body": "* **Blade:** Feather (2nd shave)"},
+        {"id": "6", "body": "* **Blade:** Accuforge GEM (10th shave)"},
+        {"id": "7", "body": "* **Blade:** Schick (13th shave)"},
+        {"id": "8", "body": "* **Blade:** Dorco ST300 (16th shave)"},
+        # Completion/status indicators
+        {"id": "9", "body": "* **Blade:** Treet Falcon (1 and done)"},
+        {"id": "10", "body": "* **Blade:** Van der Hagen (1 and last)"},
+        {"id": "11", "body": "* **Blade:** Personna Hair Shaper (1st and final)"},
+        {"id": "12", "body": "* **Blade:** Personna Red (2nd and last)"},
+        {"id": "13", "body": "* **Blade:** Gillette Goal (11 and final)"},
+        {"id": "14", "body": "* **Blade:** Shaving Revolution (11 and probably last)"},
+        # User speculation/approximation
+        {"id": "15", "body": "* **Blade:** Personna GEM PTFE (10 I think)"},
+        {"id": "16", "body": "* **Blade:** Voshkod (3 I think)"},
+        {"id": "17", "body": "* **Blade:** Kai Captain (7, I think)"},
+        {"id": "18", "body": "* **Blade:** Blue Sword Platinum (30+ I think)"},
+        {"id": "19", "body": "* **Blade:** Persona platinum (5? I think)"},
+        # Complex usage descriptions
+        {"id": "20", "body": "* **Blade:** Rapira Platinum Lux (10+?; At least four months old)"},
+        {"id": "21", "body": "* **Blade:** Astra (100...woohoo!)"},
+        {"id": "22", "body": "* **Blade:** Pro 500 (1st use and done)"},
+        {"id": "23", "body": "* **Blade:** Seagull (<1 and done)"},
+    ]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        path = Path(tmpdir) / "data/comments/2025-04.json"
+        path.parent.mkdir(parents=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"data": comments}, f, ensure_ascii=False)
+
+        # Create competition tags file in the right location
+        competition_tags = {"strip_tags": ["DOORKNOB", "CNC", "ARTISTCLUB"], "preserve_tags": []}
+        tags_path = Path(tmpdir) / "data/competition_tags.yaml"
+        with open(tags_path, "w", encoding="utf-8") as f:
+            yaml.dump(competition_tags, f)
+
+        monkeypatch.chdir(tmpdir)
+        result = run_extraction_for_month("2025-04")
+
+        assert result is not None
+        assert len(result["data"]) == 23
+
+        # Check that all shave count patterns are normalized out
+        # Basic usage counts
+        assert result["data"][0]["blade"]["normalized"] == "Parker"
+        assert result["data"][1]["blade"]["normalized"] == "Gillette Nacet"
+        assert result["data"][2]["blade"]["normalized"] == "Parker"
+
+        # Ordinal usage patterns
+        assert result["data"][3]["blade"]["normalized"] == "Wizamet"
+        assert result["data"][4]["blade"]["normalized"] == "Feather"
+        assert result["data"][5]["blade"]["normalized"] == "Accuforge GEM"
+        assert result["data"][6]["blade"]["normalized"] == "Schick"
+        assert result["data"][7]["blade"]["normalized"] == "Dorco ST300"
+
+        # Completion/status indicators
+        assert result["data"][8]["blade"]["normalized"] == "Treet Falcon"
+        assert result["data"][9]["blade"]["normalized"] == "Van der Hagen"
+        assert result["data"][10]["blade"]["normalized"] == "Personna Hair Shaper"
+        assert result["data"][11]["blade"]["normalized"] == "Personna Red"
+        assert result["data"][12]["blade"]["normalized"] == "Gillette Goal"
+        assert result["data"][13]["blade"]["normalized"] == "Shaving Revolution"
+
+        # User speculation/approximation
+        assert result["data"][14]["blade"]["normalized"] == "Personna GEM PTFE"
+        assert result["data"][15]["blade"]["normalized"] == "Voshkod"
+        assert result["data"][16]["blade"]["normalized"] == "Kai Captain"
+        assert result["data"][17]["blade"]["normalized"] == "Blue Sword Platinum"
+        assert result["data"][18]["blade"]["normalized"] == "Persona platinum"
+
+        # Complex usage descriptions
+        assert result["data"][19]["blade"]["normalized"] == "Rapira Platinum Lux"
+        assert result["data"][20]["blade"]["normalized"] == "Astra"
+        assert result["data"][21]["blade"]["normalized"] == "Pro 500"
+        assert result["data"][22]["blade"]["normalized"] == "Seagull"
