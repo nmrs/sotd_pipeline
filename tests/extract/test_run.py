@@ -183,6 +183,50 @@ def test_blade_normalization_decimal_usage_counts(monkeypatch):
         assert blade_data_3["blade"]["normalized"] == "Personna Super"
 
 
+def test_blade_normalization_hash_usage_counts(monkeypatch):
+    """Test that hash usage count patterns are normalized out during blade extraction."""
+    comments = [
+        {"id": "1", "body": "* **Blade:** Gillette Silver Blue (#3)"},
+        {"id": "2", "body": "* **Blade:** Feather (#12)"},
+        {"id": "3", "body": "* **Blade:** Astra (shave #5)"},
+    ]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        path = Path(tmpdir) / "data/comments/2025-04.json"
+        path.parent.mkdir(parents=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"data": comments}, f, ensure_ascii=False)
+
+        # Create competition tags file in the right location
+        competition_tags = {"strip_tags": ["DOORKNOB", "CNC", "ARTISTCLUB"], "preserve_tags": []}
+        tags_path = Path(tmpdir) / "data/competition_tags.yaml"
+        with open(tags_path, "w", encoding="utf-8") as f:
+            yaml.dump(competition_tags, f)
+
+        monkeypatch.chdir(tmpdir)
+        result = run_extraction_for_month("2025-04")
+
+        assert result is not None
+        assert len(result["data"]) == 3
+
+        # Check that hash usage count patterns are normalized out
+        blade_data_1 = result["data"][0]
+        blade_data_2 = result["data"][1]
+        blade_data_3 = result["data"][2]
+
+        # Gillette Silver Blue (#3) -> Gillette Silver Blue
+        assert blade_data_1["blade"]["original"] == "Gillette Silver Blue (#3)"
+        assert blade_data_1["blade"]["normalized"] == "Gillette Silver Blue"
+
+        # Feather (#12) -> Feather
+        assert blade_data_2["blade"]["original"] == "Feather (#12)"
+        assert blade_data_2["blade"]["normalized"] == "Feather"
+
+        # Astra (shave #5) -> Astra
+        assert blade_data_3["blade"]["original"] == "Astra (shave #5)"
+        assert blade_data_3["blade"]["normalized"] == "Astra"
+
+
 def test_blade_normalization_asterisk_stripping(monkeypatch):
     """Test that asterisks are stripped during blade normalization."""
     comments = [

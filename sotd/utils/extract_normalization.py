@@ -142,6 +142,14 @@ def strip_blade_count_patterns(value: str) -> str:
     decimal_usage_pattern = r"(?:[\(\[\{])\s*\d*\.\d+\s*[\)\]\}]"
     cleaned = re.sub(decimal_usage_pattern, "", cleaned, flags=re.IGNORECASE)
 
+    # Pattern for hash usage counts: (#3), (#12), etc.
+    hash_usage_pattern = r"(?:[\(\[\{])\s*#\d+\s*[\)\]\}]"
+    cleaned = re.sub(hash_usage_pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Pattern for "shave #n" usage counts: (shave #3), (shave #12), etc.
+    shave_hash_pattern = r"(?:[\(\[\{])\s*shave\s+#\d+\s*[\)\]\}]"
+    cleaned = re.sub(shave_hash_pattern, "", cleaned, flags=re.IGNORECASE)
+
     # Special case: remove any double spaces left behind
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
 
