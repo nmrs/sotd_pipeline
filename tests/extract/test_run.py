@@ -214,18 +214,17 @@ def test_blade_normalization_hash_usage_counts(monkeypatch):
         blade_data_2 = result["data"][1]
         blade_data_3 = result["data"][2]
 
-        # Gillette Silver Blue (#3) -> Gillette Silver Blue (#3)
-        # (preserved since hash patterns are disabled)
+        # Gillette Silver Blue (#3) -> Gillette Silver Blue
         assert blade_data_1["blade"]["original"] == "Gillette Silver Blue (#3)"
-        assert blade_data_1["blade"]["normalized"] == "Gillette Silver Blue (#3)"
+        assert blade_data_1["blade"]["normalized"] == "Gillette Silver Blue"
 
-        # Feather (#12) -> Feather (#12) (preserved since hash patterns are disabled)
+        # Feather (#12) -> Feather
         assert blade_data_2["blade"]["original"] == "Feather (#12)"
-        assert blade_data_2["blade"]["normalized"] == "Feather (#12)"
+        assert blade_data_2["blade"]["normalized"] == "Feather"
 
-        # Astra (shave #5) -> Astra (shave #5) (preserved since hash patterns are disabled)
+        # Astra (shave #5) -> Astra
         assert blade_data_3["blade"]["original"] == "Astra (shave #5)"
-        assert blade_data_3["blade"]["normalized"] == "Astra (shave #5)"
+        assert blade_data_3["blade"]["normalized"] == "Astra"
 
 
 def test_blade_normalization_approximate_numbers(monkeypatch):

@@ -125,13 +125,15 @@ def strip_blade_count_patterns(value: str) -> str:
     # Pattern for country of origin indicators: (Indian), (Russian), (Made in Germany), etc.
     # This catches the specific country patterns we found in the analysis
     country_origin_patterns = [
-        r"(?:[\(\[\{])\s*Indian\s*[\)\]\}]",  # (Indian)
-        r"(?:[\(\[\{])\s*Russian\s*[\)\]\}]",  # (Russian)
+        r"(?:[\(\[\{])\s*Indian?\s*[\)\]\}]",  # (Indian)
+        r"(?:[\(\[\{])\s*Russian?\s*[\)\]\}]",  # (Russian)
         r"(?:[\(\[\{])\s*Made\s+in\s+Germany\s*[\)\]\}]",  # (Made in Germany)
+        r"(?:[\(\[\{])\s*Germany?\s*[\)\]\}]",  # (Germany)
         r"(?:[\(\[\{])\s*Made\s+in\s+China\s*[\)\]\}]",  # (Made in China)
         r"(?:[\(\[\{])\s*russia\s+green\s*[\)\]\}]",  # (russia green)
         r"(?:[\(\[\{])\s*Czechoslovakian\s*[\)\]\}]",  # (Czechoslovakian)
         r"(?:[\(\[\{])\s*Poland\s*[\)\]\}]",  # (Poland)
+        r"(?:[\(\[\{])\s*English\s*[\)\]\}]",  # (English)
     ]
 
     for pattern in country_origin_patterns:
@@ -143,13 +145,13 @@ def strip_blade_count_patterns(value: str) -> str:
     cleaned = re.sub(decimal_usage_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for hash usage counts: (#3), (#12), etc.
-    hash_usage_pattern = r"(?:[\(\[\{])\s*#(?![0-9]+(?:\.[0-9]+)?\b)[a-zA-Z0-9_]+\s*[\)\]\}]"
+    # These are semantically equivalent to (3), (12) - blade usage counts that should be stripped
+    hash_usage_pattern = r"(?:[\(\[\{])\s*#\d+\s*[\)\]\}]"
     cleaned = re.sub(hash_usage_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for "shave #n" usage counts: (shave #3), (shave #12), etc.
-    shave_hash_pattern = (
-        r"(?:[\(\[\{])\s*shave\s+#(?![0-9]+(?:\.[0-9]+)?\b)[a-zA-Z0-9_]+\s*[\)\]\}]"
-    )
+    # These are also blade usage counts that should be stripped
+    shave_hash_pattern = r"(?:[\(\[\{])\s*shave\s+#\d+\s*[\)\]\}]"
     cleaned = re.sub(shave_hash_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Now preserve numeric hashtags by removing the # symbol but keeping the number
