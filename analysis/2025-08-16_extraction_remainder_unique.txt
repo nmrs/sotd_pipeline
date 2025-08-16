@@ -1,28 +1,4 @@
-#foreversafety #stainlessless
-#foreversafety #stainlessless #revenant
-#stainlessless
-#stainlessless (2)
-#stainlessless (3)
-#stainlessless (4)
-$stainless
-$wooden
-( 1 )
-( 10 )
-( 11 )
-( 12 )
-( 14 )
-( 16 )
-( 2 )
-( 2)
-( 3)
-( 4 )
-( 5 )
-( 6 )
-( 7 )
-( 8 )
-( 9 )
-( 9)
-( vintage ) [4]
+()
 (0)
 (01)
 (02)
@@ -34,11 +10,8 @@ $wooden
 (07)
 (08)
 (09)
-(1 )
 (1)
-(1) $stainlessless
 (1) (india)
-(10 )
 (10)
 (100)
 (1000)
@@ -94,7 +67,6 @@ $wooden
 (139)
 (13th)
 (13x)
-(14 )
 (14)
 (14) (china)
 (140)
@@ -175,7 +147,6 @@ $wooden
 (1st use)
 (1st)
 (1x)
-(2 )
 (2)
 (2) (2)
 (2) (5)
@@ -309,13 +280,9 @@ $wooden
 (2st use)
 (2x)
 (2x) (1)
-(2x) (2)
-(2x) (3)
-(2x) (4)
-(3 )
 (3)
+(3) ()
 (3) (3)
-(3) (?)
 (3) (india)
 (30)
 (300)
@@ -438,7 +405,6 @@ $wooden
 (3rd)
 (3x)
 (3x) (1)
-(4 )
 (4)
 (4) (7)
 (40)
@@ -484,8 +450,20 @@ $wooden
 (436)
 (437)
 (438)
+(439)
 (44)
+(440)
+(441)
+(442)
+(443)
+(444)
+(445)
+(446)
+(447)
+(448)
+(449)
 (45)
+(450)
 (451)
 (452)
 (453)
@@ -512,14 +490,36 @@ $wooden
 (472)
 (473)
 (474)
+(475)
+(476)
+(477)
+(478)
+(479)
 (48)
+(480)
+(481)
+(482)
+(483)
+(484)
+(485)
+(486)
+(487)
+(488)
+(489)
 (49)
+(490)
+(491)
+(492)
+(493)
+(494)
+(495)
+(496)
+(497)
 (498)
+(499)
 (4th use)
 (4th)
 (4x)
-(4x?)
-(5 )
 (5)
 (50)
 (501)
@@ -554,7 +554,20 @@ $wooden
 (528)
 (529)
 (53)
+(530)
+(531)
+(532)
+(533)
+(535)
+(537)
+(538)
+(539)
 (54)
+(540)
+(541)
+(542)
+(543)
+(544)
 (545)
 (546)
 (547)
@@ -594,7 +607,6 @@ $wooden
 (5th use)
 (5th)
 (5x)
-(6 )
 (6)
 (60)
 (61)
@@ -609,13 +621,13 @@ $wooden
 (6th use)
 (6th)
 (6x)
-(7 )
 (7)
 (70)
 (71)
 (72)
 (73)
 (74)
+(747)
 (75)
 (76)
 (77)
@@ -624,7 +636,6 @@ $wooden
 (7th use)
 (7th)
 (7x)
-(8 )
 (8)
 (80)
 (81)
@@ -640,7 +651,6 @@ $wooden
 (8th use)
 (8th)
 (8x)
-(9 )
 (9)
 (90)
 (91)
@@ -659,17 +669,18 @@ $wooden
 (9th use)
 (9th)
 (9x)
-(?)
+(brand new)
 (china)
 (china) (1)
 (china) (2)
 (china) [1]
 (china) [2]
-(china, yellow pk) (2)
-(china, yellow pk) (3)
 (fifth use)
+(first time)
 (first use)
 (fourth use)
+(fresh blade)
+(fresh)
 (germany)
 (germany) (1)
 (germany) (2)
@@ -726,17 +737,12 @@ $wooden
 (india) [1]
 (india) [2]
 (india)(2)
-(india)[1]
-(india)[2]
 (india, 3rd or 4th use)
 (japan)
 (japan) [1]
 (japan) [2]
 (japan) [3]
-(japan) [4]
-(japan)[1]
-(japan)[2]
-(japan)[3]
+(new blade)
 (new)
 (russia)
 (russia) (1)
@@ -744,9 +750,6 @@ $wooden
 (russia) [1]
 (russia) [2]
 (russia) [3]
-(russia)[1]
-(russia)[2]
-(russia)[3]
 (second use)
 (thailand) (1)
 (thailand) (2)
@@ -756,7 +759,7 @@ $wooden
 (third use)
 (usa)
 (usa, blue box)
-(vintage) (1)
+(vintage) [4]
 (x1)
 (x2)
 (x3)
@@ -793,10 +796,6 @@ $wooden
 7th use
 8th use
 9th use
-[ (5)]()
-[ ]() (1)
-[(1)]()
-[(5)]()
 [0]
 [10]
 [11]
@@ -810,6 +809,7 @@ $wooden
 [18]
 [19]
 [1]
+[1] [first time]
 [20]
 [21]
 [22]
@@ -865,7 +865,7 @@ $wooden
 [7]
 [8]
 [9]
-[?]
+[]
 [china] (1)
 [germany] (1)
 [india] (1)
