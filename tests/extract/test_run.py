@@ -214,9 +214,9 @@ def test_blade_normalization_asterisk_stripping(monkeypatch):
         blade_data_2 = result["data"][1]
         blade_data_3 = result["data"][2]
 
-        # * **Gillette - Nacet** (Marathon) (541) -> Gillette - Nacet
+        # * **Gillette - Nacet** (Marathon) (541) -> Gillette - Nacet (Marathon)
         assert blade_data_1["blade"]["original"] == "* **Gillette - Nacet** (Marathon) (541)"
-        assert blade_data_1["blade"]["normalized"] == "Gillette - Nacet"
+        assert blade_data_1["blade"]["normalized"] == "Gillette - Nacet (Marathon)"
 
         # Razo*Rock Mission -> RazoRock Mission
         assert blade_data_2["blade"]["original"] == "Razo*Rock Mission"
