@@ -119,6 +119,26 @@ def strip_blade_count_patterns(value: str) -> str:
     )
     cleaned = re.sub(location_condition_pattern, "", cleaned, flags=re.IGNORECASE)
 
+    # Pattern for country of origin indicators: (Indian), (Russian), (Made in Germany), etc.
+    # This catches the specific country patterns we found in the analysis
+    country_origin_patterns = [
+        r"(?:[\(\[\{])\s*Indian\s*[\)\]\}]",  # (Indian)
+        r"(?:[\(\[\{])\s*Russian\s*[\)\]\}]",  # (Russian)
+        r"(?:[\(\[\{])\s*Made\s+in\s+Germany\s*[\)\]\}]",  # (Made in Germany)
+        r"(?:[\(\[\{])\s*Made\s+in\s+China\s*[\)\]\}]",  # (Made in China)
+        r"(?:[\(\[\{])\s*russia\s+green\s*[\)\]\}]",  # (russia green)
+        r"(?:[\(\[\{])\s*Czechoslovakian\s*[\)\]\}]",  # (Czechoslovakian)
+        r"(?:[\(\[\{])\s*Poland\s*[\)\]\}]",  # (Poland)
+    ]
+
+    for pattern in country_origin_patterns:
+        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Pattern for decimal usage counts: [3.5], [.5], (2.5), etc.
+    # This catches decimal patterns like [3.5], [.5], (1.5), etc.
+    decimal_usage_pattern = r"(?:[\(\[\{])\s*\d*\.\d+\s*[\)\]\}]"
+    cleaned = re.sub(decimal_usage_pattern, "", cleaned, flags=re.IGNORECASE)
+
     # Special case: remove any double spaces left behind
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
 
