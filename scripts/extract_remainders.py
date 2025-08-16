@@ -4,12 +4,22 @@
 import argparse
 import json
 import re
-from pathlib import Path
-from typing import Dict, List, Any, Optional
+import sys
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from sotd.utils.extract_normalization import normalize_remainder_text
-from sotd.utils.parallel_processor import create_parallel_processor
+# Add the project root to the Python path so we can import from sotd
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+try:
+    from sotd.utils.extract_normalization import normalize_remainder_text
+    from sotd.utils.parallel_processor import create_parallel_processor
+except ImportError:
+    print("Error: Could not import from sotd. Make sure you're running from the project root.")
+    print("Try: python scripts/extract_remainders.py")
+    sys.exit(1)
 
 
 def extract_remainders_from_records(records: List[Dict[str, Any]]) -> List[str]:
