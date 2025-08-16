@@ -24,6 +24,4 @@ def save_month_file(month: str, result: dict, out_dir: Path = Path("data/extract
     - out_dir: Directory where the file will be saved
     """
     out_path = out_dir / f"{month}.json"
-
-    print(f"[DEBUG] Saving extraction result to: {out_path}")
     save_json_data(result, out_path, indent=2)

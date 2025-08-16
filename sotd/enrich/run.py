@@ -3,13 +3,12 @@ import json
 from pathlib import Path
 from typing import Optional, Sequence
 
-from tqdm import tqdm
-
 from sotd.cli_utils.date_span import month_span
 from sotd.enrich.cli import get_parser
 from sotd.enrich.enrich import enrich_comments, setup_enrichers
 from sotd.enrich.save import calculate_enrichment_stats, load_matched_data, save_enriched_data
 from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
+from sotd.utils.parallel_processor import create_parallel_processor
 
 
 def _process_month(
@@ -96,17 +95,29 @@ def run(args: argparse.Namespace) -> None:
     # Set up enrichers once at the start - this is a major performance optimization
     setup_enrichers()
 
-    # Show progress bar for processing
-    print(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
+    # Create parallel processor for enrich phase
+    processor = create_parallel_processor("enrich")
 
-    results = []
-    for year, month in tqdm(months, desc="Months", unit="month"):
-        result = _process_month(year, month, base_path, debug=args.debug, force=args.force)
-        if result:
-            if result.get("status") == "skipped":
-                print(f"  {result['month']}: {result['reason']}")
-            else:
-                results.append(result)
+    # Determine if we should use parallel processing
+    use_parallel = processor.should_use_parallel(months, args, args.debug)
+
+    if use_parallel:
+        # Get max workers for parallel processing
+        max_workers = processor.get_max_workers(months, args, default=4)
+
+        # Process months in parallel
+        results = processor.process_months_parallel(
+            months, _process_month, (base_path, args.debug, args.force), max_workers, "Processing"
+        )
+
+        # Print parallel processing summary
+        processor.print_parallel_summary(results, "enrich")
+
+    else:
+        # Process months sequentially
+        results = processor.process_months_sequential(
+            months, _process_month, (base_path, args.debug, args.force), "Months"
+        )
 
     # Print summary using standardized formatter
     if not months:

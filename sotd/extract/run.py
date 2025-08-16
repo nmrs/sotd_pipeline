@@ -2,10 +2,9 @@ import logging
 from pathlib import Path
 from typing import Optional, Sequence
 
-from tqdm import tqdm
-
 from sotd.cli_utils.date_span import month_span
 from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
+from sotd.utils.parallel_processor import create_parallel_processor
 
 from .cli import get_parser
 from .comment import run_extraction_for_month
@@ -58,8 +57,6 @@ def _process_month(
     out_path = base_path / "extracted" / f"{year:04d}-{month:02d}.json"
     monitor.set_record_count(len(extracted))
     monitor.set_file_sizes(base_path / "comments" / f"{ym}.json", out_path)
-    if debug:
-        logging.debug("Saving extraction result to: %s", out_path)
     if force and out_path.exists():
         out_path.unlink()
     monitor.start_file_io_timing()
@@ -76,16 +73,37 @@ def run(args) -> None:
     months = list(month_span(args))
     base_path = Path(args.out_dir)
 
-    # Show progress bar for processing
-    print(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
+    # Create parallel processor for extract phase
+    processor = create_parallel_processor("extract")
 
-    results = []
-    for year, month in tqdm(months, desc="Months", unit="month"):
-        result = _process_month(year, month, base_path, debug=args.debug, force=args.force)
-        if result:
-            results.append(
+    # Determine if we should use parallel processing
+    use_parallel = processor.should_use_parallel(months, args, args.debug)
+
+    if use_parallel:
+        # Get max workers for parallel processing
+        max_workers = processor.get_max_workers(months, args, default=4)
+
+        # Process months in parallel
+        results = processor.process_months_parallel(
+            months, _process_month, (base_path, args.debug, args.force), max_workers, "Processing"
+        )
+
+        # Print parallel processing summary
+        processor.print_parallel_summary(results, "extract")
+
+    else:
+        # Process months sequentially
+        results = processor.process_months_sequential(
+            months, _process_month, (base_path, args.debug, args.force), "Months"
+        )
+
+    # Convert results to expected format for summary
+    summary_results = []
+    for result in results:
+        if "error" not in result and result:
+            summary_results.append(
                 {
-                    "month": f"{year:04d}-{month:02d}",
+                    "month": result["meta"]["month"],
                     "shave_count": result["meta"]["shave_count"],
                     "missing_count": result["meta"]["missing_count"],
                     "skipped_count": result["meta"]["skipped_count"],
@@ -97,8 +115,8 @@ def run(args) -> None:
         # Single month summary
         year, month = months[0]
         month_str = f"{year:04d}-{month:02d}"
-        if results:
-            stats = results[0]
+        if summary_results:
+            stats = summary_results[0]
             summary = PipelineOutputFormatter.format_single_month_summary(
                 "extract", month_str, stats
             )
@@ -111,9 +129,9 @@ def run(args) -> None:
         end_str = f"{end_year:04d}-{end_month:02d}"
 
         total_stats = {
-            "total_records": sum(r["shave_count"] for r in results),
-            "total_missing": sum(r["missing_count"] for r in results),
-            "total_skipped": sum(r["skipped_count"] for r in results),
+            "total_records": sum(r["shave_count"] for r in summary_results),
+            "total_missing": sum(r["missing_count"] for r in summary_results),
+            "total_skipped": sum(r["skipped_count"] for r in summary_results),
         }
         summary = PipelineOutputFormatter.format_multi_month_summary(
             "extract", start_str, end_str, total_stats

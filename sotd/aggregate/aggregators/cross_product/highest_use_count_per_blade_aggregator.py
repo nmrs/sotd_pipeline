@@ -81,11 +81,22 @@ def aggregate_highest_use_count_per_blade(records: List[Dict[str, Any]]) -> List
     )
 
     # Find the highest use count per blade
-    blade_max_usage = (
-        user_max_usage.groupby(["blade_name", "blade_format"])
-        .agg({"uses": "max", "author": "first"})  # Get the first author who achieved this max
-        .reset_index()
-    )
+    # We need to get the author associated with the maximum use count, not just the first author
+    blade_max_usage = []
+    for (blade_name, blade_format), group in user_max_usage.groupby(["blade_name", "blade_format"]):
+        # Find the row with the maximum uses for this blade
+        max_uses_row = group.loc[group["uses"].idxmax()]
+        blade_max_usage.append(
+            {
+                "blade_name": blade_name,
+                "blade_format": blade_format,
+                "uses": max_uses_row["uses"],
+                "author": max_uses_row["author"],
+            }
+        )
+
+    # Convert back to DataFrame and sort
+    blade_max_usage = pd.DataFrame(blade_max_usage)
 
     # Sort by uses desc
     blade_max_usage = blade_max_usage.sort_values("uses", ascending=False)

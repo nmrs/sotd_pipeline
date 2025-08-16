@@ -17,8 +17,10 @@ def get_parser() -> BaseCLIParser:
     """
     parser = BaseCLIParser(description="Enrich SOTD data with detailed specifications")
 
-    # Enrich phase doesn't need any additional arguments beyond the base ones
-    # All common arguments (month, year, range, start/end, out-dir, debug, force)
-    # are provided by BaseCLIParser
+    # Add standardized parallel processing arguments
+    parser.add_parallel_processing_arguments(
+        default_max_workers=4,
+        help_max_workers="Maximum parallel workers for month processing (default: 4)",
+    )
 
     return parser

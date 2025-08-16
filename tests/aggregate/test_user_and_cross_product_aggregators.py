@@ -82,3 +82,52 @@ def test_aggregate_highest_use_count_per_blade():
     assert result[1]["format"] == "DE"
     assert result[1]["uses"] == 12
     assert result[1]["position"] == 2
+
+
+def test_aggregate_highest_use_count_per_blade_multiple_users_same_blade():
+    """Test that when multiple users have the same blade, the user with highest use count
+    is correctly attributed."""
+    records = [
+        {
+            "author": "AdWorried2804",  # Alphabetically first
+            "blade": {
+                "matched": {"brand": "Gillette", "model": "Platinum", "format": "DE"},
+                "enriched": {"use_count": 7},
+            },
+        },
+        {
+            "author": "B_S80",  # Alphabetically second, but has higher use count
+            "blade": {
+                "matched": {"brand": "Gillette", "model": "Platinum", "format": "DE"},
+                "enriched": {"use_count": 275},
+            },
+        },
+        {
+            "author": "user3",
+            "blade": {
+                "matched": {"brand": "Personna", "model": "Lab Blue", "format": "DE"},
+                "enriched": {"use_count": 50},
+            },
+        },
+    ]
+
+    result = aggregate_highest_use_count_per_blade(records)
+
+    # Should have 2 unique blades
+    assert len(result) == 2
+
+    # Gillette Platinum should be first (highest use count: 275)
+    gillette_platinum = next(item for item in result if item["blade"] == "Gillette Platinum")
+    assert gillette_platinum["uses"] == 275
+    # BUG: This should be "B_S80" but currently returns "AdWorried2804"
+    # due to alphabetical ordering
+    expected_user = "B_S80"
+    actual_user = gillette_platinum["user"]
+    assert (
+        actual_user == expected_user
+    ), f"Expected user '{expected_user}' but got '{actual_user}' - this exposes the bug!"
+
+    # Personna Lab Blue should be second
+    personna_lab_blue = next(item for item in result if item["blade"] == "Personna Lab Blue")
+    assert personna_lab_blue["uses"] == 50
+    assert personna_lab_blue["user"] == "user3"

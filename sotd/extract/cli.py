@@ -19,8 +19,10 @@ def get_parser() -> BaseCLIParser:
         description="Extract razors, blades, soaps, and brushes from SOTD comments"
     )
 
-    # Extract phase doesn't need any additional arguments beyond the base ones
-    # All common arguments (month, year, range, start/end, out-dir, debug, force)
-    # are provided by BaseCLIParser
+    # Add standardized parallel processing arguments
+    parser.add_parallel_processing_arguments(
+        default_max_workers=4,
+        help_max_workers="Maximum parallel workers for month processing (default: 4)",
+    )
 
     return parser

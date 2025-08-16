@@ -522,6 +522,45 @@ class TestExtractBladeAndUseCount:
         assert blade_count == 2
         assert use_count == 2
 
+    def test_extract_blade_and_use_count_model_number_false_positive(self):
+        """Test that model numbers are not extracted as use counts."""
+        # Test case: "Gillette 365" should NOT extract 365 as use_count
+        # This is a model number, not a usage count
+        blade_count, use_count = extract_blade_and_use_count("Gillette 365", blade_model="365")
+        assert blade_count is None
+        assert use_count is None, (
+            f"Expected no use_count for model number 'Gillette 365', " f"but got {use_count}"
+        )
+
+        # Test case: "Feather 3003135" should NOT extract 3003135 as use_count
+        blade_count, use_count = extract_blade_and_use_count(
+            "Feather 3003135", blade_model="3003135"
+        )
+        assert blade_count is None
+        assert use_count is None, (
+            f"Expected no use_count for model number 'Feather 3003135', " f"but got {use_count}"
+        )
+
+        # Test case: "Gillette Platinum 12" should NOT extract 12 as use_count
+        # (assuming this is a model name, not a usage count)
+        blade_count, use_count = extract_blade_and_use_count(
+            "Gillette Platinum 12", blade_model="Platinum 12"
+        )
+        assert blade_count is None
+        assert use_count is None, (
+            f"Expected no use_count for model name 'Gillette Platinum 12', " f"but got {use_count}"
+        )
+
+        # Test case: "Gillette Platinum (12)" SHOULD extract 12 as use_count
+        # This is a legitimate usage count in parentheses
+        blade_count, use_count = extract_blade_and_use_count(
+            "Gillette Platinum (12)", blade_model="Platinum"
+        )
+        assert blade_count is None
+        assert use_count == 12, (
+            f"Expected use_count 12 for 'Gillette Platinum (12)', " f"but got {use_count}"
+        )
+
 
 class TestStripHandleIndicators:
     """Test handle indicator stripping for razors."""
