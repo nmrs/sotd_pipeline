@@ -12,7 +12,7 @@ from rich.table import Table
 from .base_matcher import BaseMatcher
 from .types import MatchResult, MatchType, create_match_result
 from .utils.regex_error_utils import compile_regex_with_context, create_context_dict
-from sotd.utils.match_filter_utils import strip_trailing_periods
+from sotd.utils.extract_normalization import strip_trailing_periods
 from sotd.utils.yaml_loader import load_yaml_with_nfc
 
 

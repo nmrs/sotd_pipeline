@@ -7,6 +7,38 @@ from typing import Dict, List
 from .competition_tags import strip_competition_tags
 
 
+def normalize_parentheses_whitespace(value: str) -> str:
+    """
+    Normalize whitespace inside parentheses, brackets, and braces.
+
+    This function:
+    - Removes leading/trailing whitespace inside parentheses: ( fresh ) → (fresh)
+    - Removes leading/trailing whitespace inside brackets: [ new ] → [new]
+    - Removes leading/trailing whitespace inside braces: { fresh } → {fresh}
+    - Preserves internal whitespace in multi-word content: (fresh blade) stays (fresh blade)
+
+    Args:
+        value: Input string that may contain parentheses with whitespace
+
+    Returns:
+        String with normalized parentheses whitespace
+    """
+    if not isinstance(value, str):
+        return value
+
+    # Pattern to match parentheses/brackets/braces with optional leading/trailing whitespace
+    # Group 1: opening bracket, Group 2: content, Group 3: closing bracket
+    pattern = r"([\(\[\{])\s*([^\)\]\}]*?)\s*([\)\]\}])"
+
+    def normalize_match(match):
+        opening = match.group(1)
+        content = match.group(2).strip()  # Strip leading/trailing whitespace from content
+        closing = match.group(3)
+        return f"{opening}{content}{closing}"
+
+    return re.sub(pattern, normalize_match, value)
+
+
 def strip_blade_count_patterns(value: str) -> str:
     """
     Strip blade count and usage count patterns from blade strings.
@@ -348,31 +380,44 @@ def normalize_for_storage(
     return normalize_for_matching(value, competition_tags, field)
 
 
-def normalize_remainder_text(value: str) -> str:
+def normalize_remainder_text_preserve_locations(value: str) -> str:
     """
-    Normalize remainder text by stripping asterisks, trailing periods, and cleaning up
-    separator patterns.
+    Normalize remainder text while preserving location information for future enrichment.
 
-    This function is designed to clean up extraction remainders that may contain
-    asterisk separators, trailing punctuation, or other formatting artifacts. Examples:
-    - "*****(20)" -> "(20)"
-    - "****" -> ""
-    - "*** (15)" -> " (15)"
-    - "2nd use." -> "2nd use"
-    - "3rd use." -> "3rd use"
-    - "Normal text (5)" -> "Normal text (5)" (unchanged)
+    This function is similar to normalize_remainder_text but keeps location indicators
+    like (china), (germany), etc. so they can be extracted during blade enrichment.
 
     Args:
-        value: Input remainder text that may contain asterisks and trailing punctuation
+        value: The remainder text to normalize
 
     Returns:
-        Cleaned remainder text with asterisks and trailing punctuation removed
+        Cleaned remainder text with locations preserved for enrichment
+
+    Examples:
+        >>> normalize_remainder_text_preserve_locations("(3) (china)")
+        "(3) (china)"
+        >>> normalize_remainder_text_preserve_locations("*****(10) (germany)")
+        "(10) (germany)"
+        >>> normalize_remainder_text_preserve_locations("(2x) (india) .")
+        "(2x) (india)"
     """
     if not isinstance(value, str):
         return ""
 
+    # Remove all hashtags (#sometag) and dollar-tags ($sometag) - but NOT location tags
+    cleaned = re.sub(r"[#\$][a-zA-Z0-9_]+", "", value)
+
+    # Remove all URLs (http://, https://, www.)
+    cleaned = re.sub(r"https?://[^\s]+", "", cleaned)
+    cleaned = re.sub(r"www\.[^\s]+", "", cleaned)
+
+    # Remove empty parentheses, brackets, and braces
+    cleaned = re.sub(r"\(\s*\)", "", cleaned)  # Empty parentheses
+    cleaned = re.sub(r"\[\s*\]", "", cleaned)  # Empty brackets
+    cleaned = re.sub(r"\{\s*}", "", cleaned)  # Empty braces
+
     # Remove all asterisks
-    cleaned = value.replace("*", "")
+    cleaned = cleaned.replace("*", "")
 
     # Standardize × to x for consistency
     cleaned = cleaned.replace("×", "x")
@@ -380,9 +425,85 @@ def normalize_remainder_text(value: str) -> str:
     # Remove trailing periods and other common trailing punctuation
     cleaned = re.sub(r"[\.\!\?]+$", "", cleaned)
 
-    # Clean up any extra whitespace that might result
-    cleaned = re.sub(r"\s+", " ", cleaned)
-    cleaned = cleaned.strip()
+    # Remove ~ and ? characters that don't provide meaningful value
+    cleaned = cleaned.replace("~", "").replace("?", "")
+
+    # Normalize whitespace inside parentheses/brackets/braces
+    cleaned = normalize_parentheses_whitespace(cleaned)
+
+    # Final cleanup: normalize whitespace and strip
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+
+    return cleaned
+
+
+def normalize_remainder_text(value: str) -> str:
+    """
+    Normalize remainder text by stripping asterisks, trailing punctuation, hashtags,
+    dollar-tags, URLs, empty parentheses, and location indicators for clean analysis.
+
+    This function is designed for analysis purposes and strips location information
+    to focus on blade count patterns. For enrichment purposes, use
+    normalize_remainder_text_preserve_locations instead.
+
+    Args:
+        value: The remainder text to normalize
+
+    Returns:
+        Cleaned remainder text with asterisks, trailing punctuation, hashtags,
+        dollar-tags, URLs, empty parentheses, and location indicators removed
+
+    Examples:
+        >>> normalize_remainder_text("(3) (china)")
+        "(3)"
+        >>> normalize_remainder_text("*****(10) (germany)")
+        "(10)"
+        >>> normalize_remainder_text("(2x) (india) .")
+        "(2x)"
+    """
+    if not isinstance(value, str):
+        return ""
+
+    # Remove all hashtags (#sometag) and dollar-tags ($sometag)
+    cleaned = re.sub(r"[#\$][a-zA-Z0-9_]+", "", value)
+
+    # Remove all URLs (http://, https://, www.)
+    cleaned = re.sub(r"https?://[^\s]+", "", cleaned)
+    cleaned = re.sub(r"www\.[^\s]+", "", cleaned)
+
+    # Remove condition indicators for clean analysis
+    # These will be preserved in normalize_remainder_text_preserve_locations
+    condition_patterns = [
+        r"\(vintage\)",
+        r"\(sample\)",
+        r"\(test\)",
+        r"\(old\)",
+    ]
+    for pattern in condition_patterns:
+        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Remove empty parentheses, brackets, and braces
+    cleaned = re.sub(r"\(\s*\)", "", cleaned)  # Empty parentheses
+    cleaned = re.sub(r"\[\s*\]", "", cleaned)  # Empty brackets
+    cleaned = re.sub(r"\{\s*}", "", cleaned)  # Empty braces
+
+    # Remove all asterisks
+    cleaned = cleaned.replace("*", "")
+
+    # Standardize × to x for consistency
+    cleaned = cleaned.replace("×", "x")
+
+    # Remove trailing periods and other common trailing punctuation
+    cleaned = re.sub(r"[\.\!\?]+$", "", cleaned)
+
+    # Remove ~ and ? characters that don't provide meaningful value
+    cleaned = cleaned.replace("~", "").replace("?", "")
+
+    # Normalize whitespace inside parentheses/brackets/braces
+    cleaned = normalize_parentheses_whitespace(cleaned)
+
+    # Final cleanup: normalize whitespace and strip
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
 
     return cleaned
 

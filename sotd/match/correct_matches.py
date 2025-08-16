@@ -10,7 +10,7 @@ from typing import Any, Dict, Optional
 
 from sotd.match.config import BrushMatcherConfig
 from sotd.match.types import CorrectMatchData
-from sotd.utils.match_filter_utils import normalize_for_matching
+from sotd.utils.extract_normalization import normalize_for_matching
 
 
 class CorrectMatchesChecker:

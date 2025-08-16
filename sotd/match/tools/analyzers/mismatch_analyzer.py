@@ -20,11 +20,8 @@ from rich.table import Table  # noqa: E402
 
 from sotd.cli_utils.base_parser import BaseCLIParser  # noqa: E402
 from sotd.match.tools.utils.analysis_base import AnalysisTool  # noqa: E402
-from sotd.utils.match_filter_utils import (  # noqa: E402
-    load_competition_tags,
-    normalize_for_matching,
-    strip_competition_tags,
-)
+from sotd.utils.competition_tags import load_competition_tags, strip_competition_tags
+from sotd.utils.extract_normalization import normalize_for_matching
 from sotd.utils.yaml_loader import load_yaml_with_nfc  # noqa: E402
 
 

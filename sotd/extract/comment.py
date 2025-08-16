@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from sotd.extract.fields import extract_field
-from sotd.utils.match_filter_utils import normalize_for_matching
+from sotd.utils.extract_normalization import normalize_for_matching
 from sotd.utils.text import preprocess_body
 
 logger = logging.getLogger(__name__)

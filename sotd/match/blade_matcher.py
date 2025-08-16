@@ -5,6 +5,7 @@ from .base_matcher import BaseMatcher
 from .loaders import CatalogLoader
 from .types import MatchResult, MatchType, create_match_result
 from .utils.regex_error_utils import compile_regex_with_context, create_context_dict
+from sotd.utils.extract_normalization import normalize_for_matching
 
 
 class BladeMatcher(BaseMatcher):
@@ -189,7 +190,8 @@ class BladeMatcher(BaseMatcher):
                         compiled.append((brand, model, fmt, pattern, compiled_pattern, entry))
 
         # Sort by pattern specificity: longer patterns first, then by pattern complexity
-        # Also prioritize non-DE formats to prevent generic DE patterns from overriding specific patterns
+        # Also prioritize non-DE formats to prevent generic DE patterns from overriding
+        # specific patterns
         def pattern_sort_key(item):
             brand, model, fmt, pattern, compiled, entry = item
 
@@ -260,8 +262,6 @@ class BladeMatcher(BaseMatcher):
 
         Returns a dictionary mapping normalized strings to their match data.
         """
-        from sotd.utils.match_filter_utils import normalize_for_matching
-
         if not self.correct_matches:
             return {}
 
@@ -329,8 +329,6 @@ class BladeMatcher(BaseMatcher):
                 )
             return cached_result
 
-        from sotd.utils.match_filter_utils import normalize_for_matching
-
         original = original_text
 
         # All correct match lookups must use normalize_for_matching
@@ -390,8 +388,6 @@ class BladeMatcher(BaseMatcher):
         if cache_key in self._match_cache:
             return self._match_cache[cache_key]
 
-        from sotd.utils.match_filter_utils import normalize_for_matching
-
         if not value or not self._normalized_correct_matches:
             self._match_cache[cache_key] = []
             return []
@@ -431,8 +427,6 @@ class BladeMatcher(BaseMatcher):
         Returns:
             List of correct matches in the target format
         """
-        from sotd.utils.match_filter_utils import normalize_for_matching
-
         if not value or not self._normalized_correct_matches:
             return []
 

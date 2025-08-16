@@ -7,11 +7,8 @@ from typing import Dict, Set
 import yaml
 from rich.console import Console
 
-from sotd.utils.match_filter_utils import (
-    load_competition_tags,
-    normalize_for_matching,
-    strip_competition_tags,
-)
+from sotd.utils.competition_tags import load_competition_tags, strip_competition_tags
+from sotd.utils.extract_normalization import normalize_for_matching
 
 # Delimiter for item keys to avoid conflicts with characters in original text
 # Simplified key format - no longer need delimiter
