@@ -8,6 +8,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import yaml
 
 # Add the project root to the Python path so we can import from sotd
 project_root = Path(__file__).parent.parent
@@ -116,7 +117,14 @@ def analyze_remainders(all_remainders: List[str]) -> Dict[str, Any]:
             pattern_categories["ordinal_text"] += 1
         elif re.match(r"^x\d+$", remainder) or re.match(r"\d+x$", remainder):
             pattern_categories["multiplier_text"] += 1
-        elif re.match(r"^\(new\)$", remainder) or remainder.lower() == "new":
+        elif re.match(r"^\(new\)$", remainder) or re.match(r"^\(fresh\)$", remainder):
+            pattern_categories["new_text"] += 1
+        elif (
+            re.match(r"^\(fresh blade\)$", remainder)
+            or re.match(r"^\(new blade\)$", remainder)
+            or re.match(r"^\(brand new\)$", remainder)
+            or re.match(r"^\(first time\)$", remainder)
+        ):
             pattern_categories["new_text"] += 1
         else:
             pattern_categories["other_patterns"] += 1
@@ -129,145 +137,297 @@ def analyze_remainders(all_remainders: List[str]) -> Dict[str, Any]:
     }
 
 
-def create_bucketed_yaml(
-    analysis: Dict[str, Any], all_remainders: List[str], output_file: str
-) -> str:
-    """Create a bucketed YAML file grouping remainders by pattern type."""
-    yaml_file = output_file.replace(".txt", "_bucketed.yaml")
+def create_bucketed_yaml(analysis, all_remainders):
+    """Create a YAML file with patterns grouped into logical buckets."""
 
-    # Define pattern buckets with descriptive names
-    pattern_buckets = {
-        "simple-paren": [],  # (39), (256), (2x)
-        "simple-bracket": [],  # [1], [18], [4]
-        "simple-brace": [],  # {2}
-        "ordinal-use": [],  # 4th use, 10th use, 3rd use
-        "multiplier": [],  # x4, x1, 3x, 2x
-        "new-indicator": [],  # (new), new
-        "complex-paren": [],  # (2x) (2)., (India) (1)
-        "complex-bracket": [],  # [2x] (3)
-        "complex-mixed": [],  # Mixed patterns
-        "other": [],  # Everything else
+    # Define pattern buckets for blade count patterns
+    blade_count_buckets = {
+        "simple-numeric": [],  # (4), (10), (100), [4], {4}, (1], [2), etc.
+        "multiplier": [],  # x4, x1, 3x, 2x, (x4), (4x)
+        "ordinal-use": [],  # (1st use), (2nd), (10th use)
+        "complex-paren": [],  # (2) (2), (3) (3)
+        "complex-bracket": [],  # Currently empty - [2x] (1) patterns moved to multiplication-plus-simple
+        "multiplication-plus-simple": [],  # x2 (1), (2x) (1)
+        "location-plus-simple": [],  # (china) (1), (germany) [2], (india) (3)
+        "location-plus-new-indicator": [],  # (thailand, new), (india, new)
+        "simple-plus-simple": [],  # (2) (2), (3) (3)
+        "simple-plus-ordinal": [],  # [1] [first time], [2] [second use]
+        "ordinal-plus-multiplier": [],  # 1st use x2, 2nd use x3
+        "new-indicator": [],  # (fresh), (new blade), (brand new), (first time), (new), [new]
     }
 
-    # Categorize each unique remainder into buckets
+    # Define pattern buckets for non blade count patterns
+    non_blade_count_buckets = {
+        "location-indicator": [],  # (china), (germany), (india), (japan), (russia), (thailand), (usa), (uk), (turkey), [usa], [china], etc.
+        "condition-indicator": [],  # (vintage), (sample), (test), (old)
+        "url-link": [],  # https://..., web links
+        "hashtag": [],  # #stainlessless, #foreversafety
+        "other": [],  # Everything else that doesn't fit above categories
+    }
+
+    # Categorize each unique remainder using two-phase approach
     for remainder in analysis["unique_remainder_list"]:
-        if re.match(r"^\(x\d+\)$", remainder):  # (x1), (x2), (x3), (x4)
-            pattern_buckets["multiplier"].append(remainder)
-        elif re.match(r"^\(\d+x\)$", remainder):  # (2x), (3x), (4x)
-            pattern_buckets["multiplier"].append(remainder)
-        elif re.match(r"^\(\d+\)$", remainder):  # (39), (256) - only pure numbers
-            pattern_buckets["simple-paren"].append(remainder)
-        elif re.match(r"^\[\d+\]$", remainder):  # [5], [12]
-            pattern_buckets["simple-bracket"].append(remainder)
-        elif re.match(r"^\[\d+\\\]$", remainder):  # [2\]
-            pattern_buckets["simple-bracket"].append(remainder)
-        elif re.match(r"^\{\d+\}$", remainder):  # {1}, {2}, {3}, etc.
-            pattern_buckets["simple-brace"].append(remainder)
-        elif re.match(r"\d+(?:st|nd|rd|th)\s+use$", remainder):  # 1st use, 2nd use
-            pattern_buckets["ordinal-use"].append(remainder)
-        elif re.match(r"^2\^\\(nd\\)$", remainder):  # 2^(nd)
-            pattern_buckets["ordinal-use"].append(remainder)
-        elif re.match(r"^x\d+$", remainder):  # x4, x1
-            pattern_buckets["multiplier"].append(remainder)
-        elif re.match(r"\d+x$", remainder):  # 3x, 2x
-            pattern_buckets["multiplier"].append(remainder)
-        elif re.match(r"^\(new\)$", remainder) or remainder.lower() == "new":
-            pattern_buckets["new-indicator"].append(remainder)
-        elif re.match(r"^\(\d+x\)\s+\(\d+\)\.?$", remainder):  # (2x) (2).
-            pattern_buckets["complex-paren"].append(remainder)
-        elif re.match(r"^\([^)]+\)\s+\(\d+\)$", remainder):  # (India) (1)
-            pattern_buckets["complex-paren"].append(remainder)
-        elif re.match(r"^\[\d+x\]\s+\(\d+\)$", remainder):  # [2x] (3)
-            pattern_buckets["complex-bracket"].append(remainder)
-        elif re.search(r"[\[\]\(\)]\d+[xX]?[\]\)]", remainder):  # Mixed bracket/paren patterns
-            pattern_buckets["complex-mixed"].append(remainder)
-        else:
-            pattern_buckets["other"].append(remainder)
-
-    # Write YAML file
-    with open(yaml_file, "w", encoding="utf-8") as f:
-        f.write("# BLADE COUNT EXTRACTION REMAINDER PATTERNS\n")
-        f.write(f"# Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-
-        f.write("metadata:\n")
-        f.write(f"  total_remainders: {analysis['total_remainders']}\n")
-        f.write(f"  unique_remainders: {analysis['unique_remainders']}\n")
-        duplication_rate = (
-            (analysis["total_remainders"] - analysis["unique_remainders"])
-            / analysis["total_remainders"]
-            * 100
-        )
-        f.write(f"  duplication_rate: {duplication_rate:.1f}%\n")
-        f.write("  pattern_categories:\n")
-        f.write("    # Percentages of unique patterns (pattern variety)\n")
-        for category, count in analysis["pattern_categories"].items():
-            if analysis["unique_remainders"] > 0:
-                percentage = (count / analysis["unique_remainders"]) * 100
-            else:
-                percentage = 0
-            f.write(f"    {category}: {count} ({percentage:.1f}% of unique)\n")
-
-        f.write("    # Percentages of total occurrences (usage frequency)\n")
-        # Count actual occurrences of each pattern type in the raw data
-        pattern_usage_counts = {
-            "parentheses_count": 0,
-            "brackets_count": 0,
-            "braces_count": 0,
-            "ordinal_text": 0,
-            "multiplier_text": 0,
-            "new_text": 0,
-            "other_patterns": 0,
-        }
-
-        # Count actual usage by categorizing each remainder in the raw data
-        for remainder in all_remainders:
-            if re.match(r"^\(x\d+\)$", remainder):  # (x1), (x2), (x3), (x4)
-                pattern_usage_counts["multiplier_text"] += 1
-            elif re.match(r"^\(\d+x\)$", remainder):  # (2x), (3x), (4x)
-                pattern_usage_counts["multiplier_text"] += 1
-            elif re.match(r"^\(\d+\)$", remainder):  # (39), (256) - only pure numbers
-                pattern_usage_counts["parentheses_count"] += 1
-            elif re.match(r"^\[\d+\]$", remainder) or re.match(r"^\[\d+\\\]$", remainder):
-                pattern_usage_counts["brackets_count"] += 1
-            elif re.match(r"^\{\d+\}$", remainder):
-                pattern_usage_counts["braces_count"] += 1
-            elif re.match(r"\d+(?:st|nd|rd|th)\s+use$", remainder) or re.match(
-                r"^2\^\\(nd\\)$", remainder
+        # Phase 1: Pre-normalization bucketing for simple, clean patterns
+        if re.match(r"^\(\d+\)$", remainder):  # (4), (10), (100)
+            blade_count_buckets["simple-numeric"].append(remainder)
+        elif re.match(r"^\[\d+\]$", remainder):  # [4], [10], [100)
+            blade_count_buckets["simple-numeric"].append(remainder)
+        elif re.match(r"^\{\d+\}$", remainder):  # {4}, {10}, {100}
+            blade_count_buckets["simple-numeric"].append(remainder)
+        elif re.match(r"^[\(\[\{]\d+[\)\]\}]$", remainder):  # (1], [2), {3}, (4}, [5}, etc.
+            blade_count_buckets["simple-numeric"].append(remainder)
+        elif re.match(r"^x\d+$", remainder) or re.match(r"\d+x$", remainder):
+            # x4, x1, 3x, 2x
+            blade_count_buckets["multiplier"].append(remainder)
+        elif re.match(r"^\d+(?:st|nd|rd|th)\s+use$", remainder):
+            # 1st use, 2nd use, 3rd use
+            blade_count_buckets["ordinal-use"].append(remainder)
+        elif re.match(r"^\(new\)$", remainder) or re.match(r"^\(fresh\)$", remainder):
+            # (new), (fresh)
+            blade_count_buckets["new-indicator"].append(remainder)
+        elif re.match(r"^\(fresh blade\)$", remainder) or re.match(r"^\(new blade\)$", remainder):
+            # (fresh blade), (new blade)
+            blade_count_buckets["new-indicator"].append(remainder)
+        elif re.match(r"^\(brand new\)$", remainder) or re.match(r"^\(first time\)$", remainder):
+            # (brand new), (first time)
+            blade_count_buckets["new-indicator"].append(remainder)
+        elif re.match(r"^\[new\]$", remainder):
+            # [new]
+            blade_count_buckets["new-indicator"].append(remainder)
+        elif re.match(r"^\[\d+\]\s+\[[a-z\s]+\]$", remainder):  # [1] [first time], [2] [second use]
+            # [number] [ordinal] - simple numeric + ordinal indicator
+            blade_count_buckets["simple-plus-ordinal"].append(remainder)
+        elif re.match(r"^\([a-z]+\)$", remainder) and remainder.lower() in [
+            "(china)",
+            "(germany)",
+            "(india)",
+            "(japan)",
+            "(russia)",
+            "(thailand)",
+            "(usa)",
+            "(uk)",
+            "(turkey)",
+        ]:
+            # (china), (germany), (india), etc. - just location
+            non_blade_count_buckets["location-indicator"].append(remainder)
+        elif re.match(r"^\([a-z]+,\s*new\)$", remainder):  # (thailand, new), (india, new)
+            # (location, new) - location plus new indicator (equivalent to (1))
+            blade_count_buckets["location-plus-new-indicator"].append(remainder)
+        # Note: (usa, blue box) type patterns will fall through to 'other' bucket
+        elif re.match(r"^\[[a-z]+\]$", remainder) and remainder.lower() in [
+            "[usa]",
+            "[china]",
+            "[germany]",
+            "[india]",
+            "[japan]",
+            "[russia]",
+            "[thailand]",
+            "[uk]",
+            "[turkey]",
+        ]:
+            # [usa], [china], [germany], etc.
+            blade_count_buckets["location-plus-simple"].append(remainder)
+        elif re.match(r"^\[[a-z]+\]\s+\(\d+\)$", remainder):  # [china] (1), [germany] (2)
+            blade_count_buckets["location-plus-simple"].append(remainder)
+        elif re.match(r"^https?://", remainder) or re.match(r"^www\.", remainder):
+            # URLs
+            non_blade_count_buckets["url-link"].append(remainder)
+        elif re.match(r"^[#\$][a-zA-Z0-9_]+$", remainder):
+            # Hashtags and dollar-tags
+            non_blade_count_buckets["hashtag"].append(remainder)
+        elif re.match(r"^\([a-z]+\)\s+\[\d+\]$", remainder):  # (china) [1]
+            # Check if this is a condition indicator first
+            if (
+                re.match(r"^\(vintage\)", remainder)
+                or re.match(r"^\(sample\)", remainder)
+                or re.match(r"^\(test\)", remainder)
+                or re.match(r"^\(old\)", remainder)
             ):
-                pattern_usage_counts["ordinal_text"] += 1
-            elif re.match(r"^\(new\)$", remainder) or remainder.lower() == "new":
-                pattern_usage_counts["new_text"] += 1
-            elif re.match(r"^x\d+$", remainder) or re.match(r"\d+x$", remainder):  # x4, x1, 3x, 2x
-                pattern_usage_counts["multiplier_text"] += 1
+                # Strip condition indicator and categorize the remaining pattern
+                cleaned = re.sub(r"^\(vintage\)\s*", "", remainder)
+                cleaned = re.sub(r"^\(sample\)\s*", "", cleaned)
+                cleaned = re.sub(r"^\(test\)\s*", "", cleaned)
+                cleaned = re.sub(r"^\(old\)\s*", "", cleaned)
+                if re.match(r"^\[\d+\]$", cleaned):  # Now it's just [4]
+                    blade_count_buckets["simple-numeric"].append(
+                        cleaned
+                    )  # Store the cleaned result
+                else:
+                    non_blade_count_buckets["other"].append(remainder)
             else:
-                pattern_usage_counts["other_patterns"] += 1
+                # This is a location indicator, categorize normally
+                blade_count_buckets["location-plus-simple"].append(remainder)
 
-        # Write actual usage counts
-        for category, count in pattern_usage_counts.items():
-            if analysis["total_remainders"] > 0:
-                percentage = (count / analysis["total_remainders"]) * 100
+        # Phase 2: Post-normalization bucketing for complex patterns that need cleaning
+        else:
+            # Normalize the remainder for complex pattern matching
+            normalized_remainder = normalize_remainder_text(remainder)
+
+            # Skip if the remainder becomes empty after normalization
+            if not normalized_remainder:
+                continue
+
+            # Categorize the normalized remainder into appropriate buckets
+            if re.match(r"^\(\d+\)$", normalized_remainder):  # (4), (10), (100) - simple-paren
+                print(f"DEBUG: Phase 2 matched {normalized_remainder} -> simple-numeric")  # Debug
+                blade_count_buckets["simple-numeric"].append(normalized_remainder)
+            elif re.match(r"^\[\d+\]$", normalized_remainder):  # [4], [10], [100] - simple-bracket
+                blade_count_buckets["simple-numeric"].append(normalized_remainder)
+            elif re.match(r"^\{\d+\}$", normalized_remainder):  # {4}, {10}, {100} - simple-brace
+                blade_count_buckets["simple-numeric"].append(normalized_remainder)
+            elif re.match(
+                r"^[\(\[\{]\d+[\)\]\}]$", normalized_remainder
+            ):  # (1], [2), {3}, (4}, [5}, etc.
+                blade_count_buckets["simple-numeric"].append(normalized_remainder)
+            elif re.match(
+                r"^\(\d+(?:st|nd|rd|th)\s+use\)$", normalized_remainder
+            ):  # (1st use), (2nd use)
+                blade_count_buckets["ordinal-use"].append(normalized_remainder)
+            elif re.match(r"^\(\d+(?:st|nd|rd|th)\)$", normalized_remainder):  # (1st), (2nd)
+                blade_count_buckets["ordinal-use"].append(normalized_remainder)
+            elif re.match(r"^\([a-z]+\s+use\)$", normalized_remainder):  # (first use), (second use)
+                blade_count_buckets["ordinal-use"].append(normalized_remainder)
+            elif re.match(r"^2\^\(nd\)$", normalized_remainder):  # 2^(nd)
+                print(f"DEBUG: Matched 2^(nd) -> ordinal-use")  # Debug
+                blade_count_buckets["ordinal-use"].append(normalized_remainder)
+            elif re.match(r"^\(\d+x\)$", normalized_remainder) or re.match(
+                r"^\(x\d+\)$", normalized_remainder
+            ):  # (4x), (x4)
+                blade_count_buckets["multiplier"].append(normalized_remainder)
+            elif re.match(r"^\(\d+x\?\)$", normalized_remainder):  # (4x?)
+                blade_count_buckets["multiplier"].append(normalized_remainder)
+            elif re.match(r"^\(\d+x\)\s+\(\d+\)\.?$", normalized_remainder):  # (2x) (2).
+                blade_count_buckets["multiplication-plus-simple"].append(normalized_remainder)
+            elif re.match(r"^\(\d+\)\s+\(\d+\)\.?$", normalized_remainder):  # (2) (2).
+                blade_count_buckets["simple-plus-simple"].append(normalized_remainder)
+            elif re.match(r"^\[\d+x\]\s+\(\d+\)$", normalized_remainder):  # [2x] (3)
+                blade_count_buckets["multiplication-plus-simple"].append(normalized_remainder)
+            elif re.match(r"^\(\d+\)\s+\([a-z]+\)$", normalized_remainder):  # (1) (india)
+                blade_count_buckets["location-plus-simple"].append(normalized_remainder)
+            elif re.match(r"^\([a-z]+\)\s+\(\d+\)$", normalized_remainder):  # (china) (1)
+                blade_count_buckets["location-plus-simple"].append(normalized_remainder)
+            elif re.match(r"^\([a-z]+\)\s+\[\d+\]$", normalized_remainder):  # (china) [1]
+                blade_count_buckets["location-plus-simple"].append(normalized_remainder)
+            elif re.match(r"^\[[a-z]+\]\s+\(\d+\)$", normalized_remainder):  # [china] (1)
+                blade_count_buckets["location-plus-simple"].append(normalized_remainder)
+            elif re.match(r"^\[\d+\]\s+\([a-z]+\)$", normalized_remainder):  # [1] (india)
+                blade_count_buckets["location-plus-simple"].append(normalized_remainder)
+            elif re.match(r"^x\d+\s+\(\d+\)$", normalized_remainder):  # x2 (1), x3 (2)
+                blade_count_buckets["multiplication-plus-simple"].append(normalized_remainder)
+            elif re.match(r"^\d+(?:st|nd|rd|th)\s+use\s+x\d+$", normalized_remainder):  # 1st use x2
+                blade_count_buckets["ordinal-plus-multiplier"].append(normalized_remainder)
+            elif re.match(r"^\(2\^\(nd\)\s+use\)$", normalized_remainder):  # (2^(nd) use)
+                print(f"DEBUG: Matched (2^(nd) use) -> ordinal-use")  # Debug
+                blade_count_buckets["ordinal-use"].append(normalized_remainder)
+            elif re.match(r"^\(2\^\(nd\)\)$", normalized_remainder):  # (2^(nd))
+                print(f"DEBUG: Matched (2^(nd)) -> ordinal-use")  # Debug
+                blade_count_buckets["ordinal-use"].append(normalized_remainder)
+            elif re.match(r"^\([a-z]+\)\(\d+\)$", normalized_remainder):  # (india)(2)
+                blade_count_buckets["location-plus-simple"].append(normalized_remainder)
+            elif re.match(r"^\(fresh blade\)$", normalized_remainder) or re.match(
+                r"^\(new blade\)$", normalized_remainder
+            ):
+                blade_count_buckets["new-indicator"].append(normalized_remainder)
+            elif re.match(r"^\(brand new\)$", normalized_remainder) or re.match(
+                r"^\(first time\)$", normalized_remainder
+            ):
+                blade_count_buckets["new-indicator"].append(normalized_remainder)
+            elif re.match(r"^\[new\]$", normalized_remainder):
+                blade_count_buckets["new-indicator"].append(normalized_remainder)
+            elif re.match(
+                r"^\([a-z]+\)$", normalized_remainder
+            ) and normalized_remainder.lower() in [
+                "(china)",
+                "(germany)",
+                "(india)",
+                "(japan)",
+                "(russia)",
+                "(thailand)",
+                "(usa)",
+                "(uk)",
+                "(turkey)",
+            ]:
+                # (china), (germany), (india), etc. - just location
+                non_blade_count_buckets["location-indicator"].append(normalized_remainder)
+            elif re.match(
+                r"^\([a-z]+,\s*new\)$", normalized_remainder
+            ):  # (thailand, new), (india, new)
+                # (location, new) - location plus new indicator (equivalent to (1))
+                blade_count_buckets["location-plus-new-indicator"].append(normalized_remainder)
+            # Note: (usa, blue box) type patterns will fall through to 'other' bucket
+            elif re.match(
+                r"^\([a-z]+\)$", normalized_remainder
+            ) and normalized_remainder.lower() in [
+                "(vintage)",
+                "(sample)",
+                "(test)",
+                "(old)",
+            ]:
+                non_blade_count_buckets["condition-indicator"].append(normalized_remainder)
             else:
-                percentage = 0
-            f.write(f"    {category}_usage: {count} ({percentage:.1f}% of total)\n")
-        f.write("\n")
+                non_blade_count_buckets["other"].append(normalized_remainder)
 
-        f.write("  # Key Insights:\n")
-        f.write("  # - Pattern variety shows how many different types of patterns exist\n")
-        f.write("  # - Usage frequency shows how often each pattern type is actually used\n")
-        f.write("  # - High variety + low usage = many edge cases, ")
-        f.write("low variety + high usage = common patterns\n")
-        f.write("\n")
+    # Create the structured YAML data
+    duplication_rate = f"{((analysis['total_remainders'] - analysis['unique_remainders']) / analysis['total_remainders'] * 100):.1f}%"
 
-        f.write("data:\n")
-        for bucket_name, patterns in pattern_buckets.items():
-            if patterns:  # Only write buckets that have patterns
-                f.write(f"  {bucket_name}:\n")
-                # Sort patterns for consistent output
-                for pattern in sorted(patterns):
-                    f.write(f"    - {pattern}\n")
-                f.write("\n")
+    # Deduplicate all bucket contents to remove duplicates like (3) appearing multiple times
+    for bucket_name, bucket_contents in blade_count_buckets.items():
+        blade_count_buckets[bucket_name] = list(
+            dict.fromkeys(bucket_contents)
+        )  # Preserve order, remove duplicates
 
-    return yaml_file
+    for bucket_name, bucket_contents in non_blade_count_buckets.items():
+        non_blade_count_buckets[bucket_name] = list(
+            dict.fromkeys(bucket_contents)
+        )  # Preserve order, remove duplicates
+
+    # Create the structured YAML data
+    yaml_data = {
+        "metadata": {
+            "summary": {
+                "total_remainders": analysis["total_remainders"],
+                "unique_remainders": analysis["unique_remainders"],
+                "duplication_rate": duplication_rate,
+            },
+            "blade_count_patterns": {
+                "total_unique": sum(len(bucket) for bucket in blade_count_buckets.values()),
+                "categories": {
+                    "simple-numeric": len(blade_count_buckets["simple-numeric"]),
+                    "multiplier": len(blade_count_buckets["multiplier"]),
+                    "ordinal-use": len(blade_count_buckets["ordinal-use"]),
+                    "complex-paren": len(blade_count_buckets["complex-paren"]),
+                    "complex-bracket": len(blade_count_buckets["complex-bracket"]),
+                    "multiplication-plus-simple": len(
+                        blade_count_buckets["multiplication-plus-simple"]
+                    ),
+                    "location-plus-simple": len(blade_count_buckets["location-plus-simple"]),
+                    "location-plus-new-indicator": len(
+                        blade_count_buckets["location-plus-new-indicator"]
+                    ),
+                    "simple-plus-simple": len(blade_count_buckets["simple-plus-simple"]),
+                    "simple-plus-ordinal": len(blade_count_buckets["simple-plus-ordinal"]),
+                    "ordinal-plus-multiplier": len(blade_count_buckets["ordinal-plus-multiplier"]),
+                    "new-indicator": len(blade_count_buckets["new-indicator"]),
+                },
+            },
+            "non_blade_count_patterns": {
+                "total_unique": sum(len(bucket) for bucket in non_blade_count_buckets.values()),
+                "categories": {
+                    "location-indicator": len(non_blade_count_buckets["location-indicator"]),
+                    "condition-indicator": len(non_blade_count_buckets["condition-indicator"]),
+                    "url-link": len(non_blade_count_buckets["url-link"]),
+                    "hashtag": len(non_blade_count_buckets["hashtag"]),
+                    "other": len(non_blade_count_buckets["other"]),
+                },
+            },
+        },
+        "data": {
+            "blade_count_patterns": blade_count_buckets,
+            "non_blade_count_patterns": non_blade_count_buckets,
+        },
+    }
+
+    return yaml_data
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -414,7 +574,13 @@ def main():
 
     # Create bucketed YAML file
     print("\n🗂️  Creating bucketed YAML file...")
-    yaml_file = create_bucketed_yaml(analysis, all_remainders, raw_output_file)
+    yaml_data = create_bucketed_yaml(analysis, all_remainders)
+
+    # Write YAML file
+    yaml_file = raw_output_file.replace(".txt", "_bucketed.yaml")
+    with open(yaml_file, "w", encoding="utf-8") as f:
+        yaml.dump(yaml_data, f, default_flow_style=False, indent=2, sort_keys=False)
+
     print(f"✅ Bucketed YAML created: {yaml_file}")
 
     # Print summary
