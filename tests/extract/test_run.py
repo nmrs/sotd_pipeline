@@ -214,17 +214,62 @@ def test_blade_normalization_hash_usage_counts(monkeypatch):
         blade_data_2 = result["data"][1]
         blade_data_3 = result["data"][2]
 
-        # Gillette Silver Blue (#3) -> Gillette Silver Blue
+        # Gillette Silver Blue (#3) -> Gillette Silver Blue (#3) 
+        # (preserved since hash patterns are disabled)
         assert blade_data_1["blade"]["original"] == "Gillette Silver Blue (#3)"
-        assert blade_data_1["blade"]["normalized"] == "Gillette Silver Blue"
+        assert blade_data_1["blade"]["normalized"] == "Gillette Silver Blue (#3)"
 
-        # Feather (#12) -> Feather
+        # Feather (#12) -> Feather (#12) (preserved since hash patterns are disabled)
         assert blade_data_2["blade"]["original"] == "Feather (#12)"
-        assert blade_data_2["blade"]["normalized"] == "Feather"
+        assert blade_data_2["blade"]["normalized"] == "Feather (#12)"
 
-        # Astra (shave #5) -> Astra
+        # Astra (shave #5) -> Astra (shave #5) (preserved since hash patterns are disabled)
         assert blade_data_3["blade"]["original"] == "Astra (shave #5)"
-        assert blade_data_3["blade"]["normalized"] == "Astra"
+        assert blade_data_3["blade"]["normalized"] == "Astra (shave #5)"
+
+
+def test_blade_normalization_approximate_numbers(monkeypatch):
+    """Test that approximate number patterns are normalized out during blade extraction."""
+    comments = [
+        {"id": "1", "body": "* **Blade:** Wizamet Iridium Super Extra Stainless (10ish)"},
+        {"id": "2", "body": "* **Blade:** Gilette Platinum (10ish?)"},
+        {"id": "3", "body": "* **Blade:** Feather (5ish)"},
+    ]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        path = Path(tmpdir) / "data/comments/2025-04.json"
+        path.parent.mkdir(parents=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"data": comments}, f, ensure_ascii=False)
+
+        # Create competition tags file in the right location
+        competition_tags = {"strip_tags": ["DOORKNOB", "CNC", "ARTISTCLUB"], "preserve_tags": []}
+        tags_path = Path(tmpdir) / "data/competition_tags.yaml"
+        with open(tags_path, "w", encoding="utf-8") as f:
+            yaml.dump(competition_tags, f)
+
+        monkeypatch.chdir(tmpdir)
+        result = run_extraction_for_month("2025-04")
+
+        assert result is not None
+        assert len(result["data"]) == 3
+
+        # Check that approximate number patterns are normalized out
+        blade_data_1 = result["data"][0]
+        blade_data_2 = result["data"][1]
+        blade_data_3 = result["data"][2]
+
+        # Wizamet Iridium Super Extra Stainless (10ish) -> Wizamet Iridium Super Extra Stainless
+        assert blade_data_1["blade"]["original"] == "Wizamet Iridium Super Extra Stainless (10ish)"
+        assert blade_data_1["blade"]["normalized"] == "Wizamet Iridium Super Extra Stainless"
+
+        # Gilette Platinum (10ish?) -> Gilette Platinum
+        assert blade_data_2["blade"]["original"] == "Gilette Platinum (10ish?)"
+        assert blade_data_2["blade"]["normalized"] == "Gilette Platinum"
+
+        # Feather (5ish) -> Feather
+        assert blade_data_3["blade"]["original"] == "Feather (5ish)"
+        assert blade_data_3["blade"]["normalized"] == "Feather"
 
 
 def test_blade_normalization_asterisk_stripping(monkeypatch):

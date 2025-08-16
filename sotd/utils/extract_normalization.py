@@ -137,18 +137,34 @@ def strip_blade_count_patterns(value: str) -> str:
     for pattern in country_origin_patterns:
         cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
 
-    # Pattern for decimal usage counts: [3.5], [.5], (2.5), etc.
+        # Pattern for decimal usage counts: [3.5], [.5], (2.5), etc.
     # This catches decimal patterns like [3.5], [.5], (1.5), etc.
     decimal_usage_pattern = r"(?:[\(\[\{])\s*\d*\.\d+\s*[\)\]\}]"
     cleaned = re.sub(decimal_usage_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for hash usage counts: (#3), (#12), etc.
-    hash_usage_pattern = r"(?:[\(\[\{])\s*#\d+\s*[\)\]\}]"
-    cleaned = re.sub(hash_usage_pattern, "", cleaned, flags=re.IGNORECASE)
+    # But preserve numeric hashtags that represent blade use counts
+    # TEMPORARILY DISABLED: hash_usage_pattern = (
+    #     r"(?:[\(\[\{])\s*#(?![0-9]+(?:\.[0-9]+)?\b)[a-zA-Z0-9_]+\s*[\)\]\}]"
+    # )
+    # cleaned = re.sub(hash_usage_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for "shave #n" usage counts: (shave #3), (shave #12), etc.
-    shave_hash_pattern = r"(?:[\(\[\{])\s*shave\s+#\d+\s*[\)\]\}]"
-    cleaned = re.sub(shave_hash_pattern, "", cleaned, flags=re.IGNORECASE)
+    # But preserve numeric hashtags that represent blade use counts
+    # TEMPORARILY DISABLED: shave_hash_pattern = (
+    #     r"(?:[\(\[\{])\s*shave\s+#(?![0-9]+(?:\.[0-9]+)?\b)[a-zA-Z0-9_]+\s*[\)\]\}]"
+    # )
+    # cleaned = re.sub(shave_hash_pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Now preserve numeric hashtags by removing the # symbol but keeping the number
+    # This converts (shave #4) to (shave 4) so it can be processed by other patterns
+    # TEMPORARILY DISABLED: numeric_hashtag_pattern = r"#(\d+(?:\.\d+)?)"
+    # cleaned = re.sub(numeric_hashtag_pattern, r"\1", cleaned)
+
+    # Pattern for approximate number patterns: (10ish), (5ish?), (3ish), etc.
+    # These are user approximations that should be normalized out
+    approximate_number_pattern = r"(?:[\(\[\{])\s*\d+ish\??\s*[\)\]\}]"
+    cleaned = re.sub(approximate_number_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Special case: remove any double spaces left behind
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
@@ -495,8 +511,9 @@ def normalize_remainder_text(value: str) -> str:
     if not isinstance(value, str):
         return ""
 
-    # Remove all hashtags (#sometag) and dollar-tags ($sometag)
-    cleaned = re.sub(r"[#\$][a-zA-Z0-9_]+", "", value)
+    # Remove hashtags (#sometag) and dollar-tags ($sometag), but preserve numeric hashtags
+    # like #4, #2.5. This preserves blade use count indicators while removing other tags
+    cleaned = re.sub(r"[#\$](?![0-9]+(?:\.[0-9]+)?\b)[a-zA-Z0-9_]+", "", value)
 
     # Remove all URLs (http://, https://, www.)
     cleaned = re.sub(r"https?://[^\s]+", "", cleaned)
