@@ -65,7 +65,21 @@ class TableGenerator:
             if debug:
                 print("[DEBUG] TableGenerator: Using data directly (no meta section)")
 
-        self.comparison_data = comparison_data or {}
+        # Extract data section from comparison data if it has the full structure
+        if comparison_data:
+            self.comparison_data = {}
+            for period, (metadata, period_data) in comparison_data.items():
+                if "meta" in period_data and "data" in period_data:
+                    self.comparison_data[period] = (metadata, period_data["data"])
+                    if debug:
+                        print(f"[DEBUG] TableGenerator: Extracted data section from {period}")
+                else:
+                    self.comparison_data[period] = (metadata, period_data)
+                    if debug:
+                        print(f"[DEBUG] TableGenerator: Using {period} data directly")
+        else:
+            self.comparison_data = {}
+
         self.debug = debug
 
         # Map table names to generator classes

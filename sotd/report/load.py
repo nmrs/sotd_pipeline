@@ -145,7 +145,8 @@ def load_comparison_data(
     """Load all available comparison data for delta calculations.
 
     Args:
-        base_dir: Base directory containing aggregated data
+        base_dir: Base directory containing aggregated data (should already be the
+        aggregated directory)
         year: Current year
         month: Current month
         debug: Enable debug logging
@@ -157,7 +158,8 @@ def load_comparison_data(
     periods = get_comparison_periods(year, month)
 
     for comp_year, comp_month, description in periods:
-        data = load_historical_data(base_dir, comp_year, comp_month, debug)
+        # Use base_dir directly since it should already point to the aggregated directory
+        data = load_historical_data_from_dir(base_dir, comp_year, comp_month, debug)
         if data is not None:
             comparison_data[description] = data
             if debug:
@@ -173,3 +175,32 @@ def load_comparison_data(
                 )
 
     return comparison_data
+
+
+def load_historical_data_from_dir(
+    base_dir: Path, year: int, month: int, debug: bool = False
+) -> Optional[Tuple[Dict[str, Any], Dict[str, Any]]]:
+    """Load historical aggregated data from a specific directory for delta calculations.
+
+    Args:
+        base_dir: Directory containing aggregated data files
+        year: Year of the historical data
+        month: Month of the historical data
+        debug: Enable debug logging
+
+    Returns:
+        Tuple of (metadata, data) if file exists, None otherwise
+    """
+    file_path = base_dir / f"{year:04d}-{month:02d}.json"
+
+    if not file_path.exists():
+        if debug:
+            print(f"[DEBUG] Historical data not found: {file_path}")
+        return None
+
+    try:
+        return load_aggregated_data(file_path, debug)
+    except Exception as e:
+        if debug:
+            print(f"[DEBUG] Failed to load historical data from {file_path}: {e}")
+        return None

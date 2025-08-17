@@ -257,8 +257,8 @@ class TestComparisonDataLoading:
             with open(file_path, "w") as f:
                 json.dump(data, f, ensure_ascii=False)
 
-        # Test loading comparison data
-        comparison_data = load.load_comparison_data(tmp_path, 2025, 3)
+        # Test loading comparison data - pass the aggregated directory path
+        comparison_data = load.load_comparison_data(aggregated_dir, 2025, 3)
 
         assert len(comparison_data) == 3
         assert "previous month" in comparison_data
@@ -278,13 +278,14 @@ class TestComparisonDataLoading:
         }
 
         # Write test file for previous year only
-        file_path = tmp_path / "aggregated" / "2024-03.json"
-        file_path.parent.mkdir(parents=True)
+        aggregated_dir = tmp_path / "aggregated"
+        aggregated_dir.mkdir(parents=True)
+        file_path = aggregated_dir / "2024-03.json"
         with open(file_path, "w") as f:
             json.dump(test_data, f, ensure_ascii=False)
 
-        # Test loading comparison data
-        comparison_data = load.load_comparison_data(tmp_path, 2025, 3)
+        # Test loading comparison data - pass the aggregated directory path
+        comparison_data = load.load_comparison_data(aggregated_dir, 2025, 3)
 
         assert len(comparison_data) == 1
         assert "previous year" in comparison_data
@@ -293,13 +294,21 @@ class TestComparisonDataLoading:
 
     def test_load_comparison_data_no_periods_exist(self, tmp_path: Path) -> None:
         """Test loading comparison data when no periods exist."""
-        comparison_data = load.load_comparison_data(tmp_path, 2025, 3)
+        # Create the aggregated directory structure but no files
+        aggregated_dir = tmp_path / "aggregated"
+        aggregated_dir.mkdir(parents=True)
+
+        comparison_data = load.load_comparison_data(aggregated_dir, 2025, 3)
         assert len(comparison_data) == 0
 
     def test_load_comparison_data_with_debug(self, tmp_path: Path) -> None:
         """Test loading comparison data with debug output."""
+        # Create the aggregated directory structure but no files
+        aggregated_dir = tmp_path / "aggregated"
+        aggregated_dir.mkdir(parents=True)
+
         # Should not raise any exceptions with debug=True
-        comparison_data = load.load_comparison_data(tmp_path, 2025, 3, debug=True)
+        comparison_data = load.load_comparison_data(aggregated_dir, 2025, 3, debug=True)
         assert len(comparison_data) == 0
 
 
