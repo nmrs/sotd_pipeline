@@ -1,7 +1,8 @@
 from typing import Any, Dict
 
-from .enricher import BaseEnricher
 from sotd.utils.blade_extraction import extract_blade_use_count_via_normalization
+
+from .enricher import BaseEnricher
 
 
 class BladeCountEnricher(BaseEnricher):
@@ -19,7 +20,13 @@ class BladeCountEnricher(BaseEnricher):
 
     Uses the normalization-difference approach to avoid confusion between model numbers
     and actual use counts by leveraging the already-done normalization work.
+
+    Maximum use count is capped at 899 to prevent interpreting large model numbers
+    or other identifiers as legitimate use counts.
     """
+
+    # Maximum reasonable use count for a blade
+    MAX_USE_COUNT = 899
 
     @property
     def target_field(self) -> str:
@@ -44,6 +51,12 @@ class BladeCountEnricher(BaseEnricher):
         result = extract_blade_use_count_via_normalization(original, normalized, model)
         use_count = result[0] if result else None
         extraction_remainder = result[1] if result else None
+
+        # Apply maximum use count limit to prevent interpreting large model numbers
+        # or other identifiers as legitimate use counts
+        if use_count is not None and use_count > self.MAX_USE_COUNT:
+            use_count = None
+            extraction_remainder = f"Exceeded max use count limit ({self.MAX_USE_COUNT})"
 
         # Create enriched data
         enriched_data = {
