@@ -27,7 +27,10 @@ class RazorBladeCombinationsTableGenerator(StandardProductTableGenerator, NoDelt
         """Return column configuration for the razor-blade combinations table."""
         from .base import STANDARD_PRODUCT_COLUMNS
 
-        return STANDARD_PRODUCT_COLUMNS
+        # Override the name column to show "Razor + Blade"
+        config = STANDARD_PRODUCT_COLUMNS.copy()
+        config["name"]["display_name"] = "Razor + Blade"
+        return config
 
 
 class HighestUseCountPerBladeTableGenerator(StandardProductTableGenerator, NoDeltaMixin):

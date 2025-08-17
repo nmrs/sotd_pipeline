@@ -38,7 +38,7 @@ class BrushHandleMakersTableGenerator(StandardProductTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration with handle_maker mapped to name."""
         return {
-            "handle_maker": {"display_name": "name"},
+            "handle_maker": {"display_name": "Maker"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -68,7 +68,7 @@ class BrushKnotMakersTableGenerator(StandardProductTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration with brand mapped to name."""
         return {
-            "brand": {"display_name": "name"},
+            "brand": {"display_name": "Maker"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -132,7 +132,7 @@ class BrushFibersTableGenerator(StandardProductTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration with fiber mapped to name."""
         return {
-            "fiber": {"display_name": "name"},
+            "fiber": {"display_name": "Fiber"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -196,7 +196,7 @@ class BrushKnotSizesTableGenerator(StandardProductTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Return column configuration with custom knot size formatting."""
         return {
-            "knot_size_mm": {"display_name": "name", "format": "smart_decimal", "decimals": 1},
+            "knot_size_mm": {"display_name": "Size", "format": "smart_decimal", "decimals": 1},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {

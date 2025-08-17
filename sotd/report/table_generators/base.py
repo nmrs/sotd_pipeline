@@ -88,7 +88,7 @@ class NoDeltaMixin:
 
 # Standard column configurations
 STANDARD_PRODUCT_COLUMNS = {
-    "name": {"display_name": "name"},
+    "name": {"display_name": "Razor"},
     "shaves": {"display_name": "shaves", "format": "number"},
     "unique_users": {"display_name": "unique users", "format": "number"},
     "avg_shaves_per_user": {
@@ -99,7 +99,7 @@ STANDARD_PRODUCT_COLUMNS = {
 }
 
 STANDARD_MANUFACTURER_COLUMNS = {
-    "brand": {"display_name": "name"},
+    "brand": {"display_name": "Manufacturer"},
     "shaves": {"display_name": "shaves", "format": "number"},
     "unique_users": {"display_name": "unique users", "format": "number"},
     "avg_shaves_per_user": {
@@ -110,7 +110,7 @@ STANDARD_MANUFACTURER_COLUMNS = {
 }
 
 STANDARD_SPECIALIZED_COLUMNS = {
-    "plate": {"display_name": "name", "format": "text"},
+    "plate": {"display_name": "Plate", "format": "text"},
     "shaves": {"display_name": "shaves", "format": "number"},
     "unique_users": {"display_name": "unique users", "format": "number"},
     "avg_shaves_per_user": {
@@ -121,20 +121,20 @@ STANDARD_SPECIALIZED_COLUMNS = {
 }
 
 STANDARD_USER_COLUMNS = {
-    "user_display": {"display_name": "user", "format": "text"},
+    "user_display": {"display_name": "User", "format": "text"},
     "shaves": {"display_name": "shaves", "format": "number"},
     "missed_days": {"display_name": "missed days", "format": "number"},
 }
 
 STANDARD_DIVERSITY_COLUMNS = {
-    "maker": {"display_name": "name"},
+    "maker": {"display_name": "Maker"},
     "unique_soaps": {"display_name": "unique soaps", "format": "number"},
 }
 
 STANDARD_USE_COUNT_COLUMNS = {
-    "user": {"display_name": "user"},
-    "blade": {"display_name": "blade"},
-    "format": {"display_name": "format"},
+    "user": {"display_name": "User"},
+    "blade": {"display_name": "Blade"},
+    "format": {"display_name": "Format"},
     "uses": {"display_name": "uses", "format": "number"},
 }
 

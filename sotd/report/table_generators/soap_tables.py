@@ -1,7 +1,6 @@
 from typing import Any, Dict, List
 
 from .base import (
-    STANDARD_DIVERSITY_COLUMNS,
     BaseTableGenerator,
     StandardProductTableGenerator,
 )
@@ -19,6 +18,15 @@ class SoapMakersTableGenerator(StandardProductTableGenerator):
         """Return the table title."""
         return "Soap Makers"
 
+    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
+        """Return column configuration for soap makers table."""
+        from .base import STANDARD_MANUFACTURER_COLUMNS
+
+        # Override to use "Brand" instead of "Manufacturer"
+        config = STANDARD_MANUFACTURER_COLUMNS.copy()
+        config["brand"]["display_name"] = "Brand"
+        return config
+
     def get_name_key(self) -> str:
         """Return the key to use for matching items in delta calculations."""
         return "maker"
@@ -35,6 +43,15 @@ class SoapsTableGenerator(StandardProductTableGenerator):
     def get_table_title(self) -> str:
         """Return the table title."""
         return "Soaps"
+
+    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
+        """Return column configuration for soaps table."""
+        from .base import STANDARD_PRODUCT_COLUMNS
+
+        # Override to use "Soap" instead of "Razor"
+        config = STANDARD_PRODUCT_COLUMNS.copy()
+        config["name"]["display_name"] = "Soap"
+        return config
 
 
 class BrandDiversityTableGenerator(StandardProductTableGenerator):
@@ -61,7 +78,12 @@ class BrandDiversityTableGenerator(StandardProductTableGenerator):
 
     def get_column_config(self) -> Dict[str, Dict[str, Any]]:
         """Return column configuration for the brand diversity table."""
-        return STANDARD_DIVERSITY_COLUMNS
+        from .base import STANDARD_DIVERSITY_COLUMNS
+
+        # Override to use "Brand" instead of "Maker"
+        config = STANDARD_DIVERSITY_COLUMNS.copy()
+        config["maker"]["display_name"] = "Brand"
+        return config
 
     def get_name_key(self) -> str:
         """Return the key to use for matching items in delta calculations."""

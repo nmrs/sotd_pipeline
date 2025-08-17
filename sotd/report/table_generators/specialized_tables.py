@@ -362,7 +362,7 @@ class StraightWidthsTableGenerator(DataTransformingTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Get column configuration with width field mapped to name."""
         return {
-            "width": {"display_name": "name", "format": "text"},
+            "width": {"display_name": "Width", "format": "text"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -412,7 +412,7 @@ class StraightGrindsTableGenerator(DataTransformingTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Get column configuration with grind field mapped to name."""
         return {
-            "grind": {"display_name": "name", "format": "text"},
+            "grind": {"display_name": "Grind", "format": "text"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -462,7 +462,7 @@ class StraightPointsTableGenerator(DataTransformingTableGenerator):
     def get_column_config(self) -> dict[str, dict[str, Any]]:
         """Get column configuration with point field mapped to name."""
         return {
-            "point": {"display_name": "name", "format": "text"},
+            "point": {"display_name": "Point", "format": "text"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {

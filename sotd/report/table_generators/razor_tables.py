@@ -25,7 +25,7 @@ class RazorFormatsTableGenerator(StandardProductTableGenerator):
         Override to use 'format' field instead of 'name' field.
         """
         return {
-            "format": {"display_name": "name"},
+            "format": {"display_name": "Format"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
@@ -71,7 +71,7 @@ class RazorManufacturersTableGenerator(StandardProductTableGenerator):
         Override to use 'brand' field instead of 'name' field.
         """
         return {
-            "brand": {"display_name": "name"},
+            "brand": {"display_name": "Manufacturer"},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
