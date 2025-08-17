@@ -20,11 +20,11 @@ class BrushAggregator(BaseAggregator):
         brush_data = []
         for record in records:
             brush = record.get("brush")
-            
+
             # Skip if no brush data or brush is None
             if not brush:
                 continue
-                
+
             matched = brush.get("matched", {})
 
             # Skip if no matched brush data

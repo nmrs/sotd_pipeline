@@ -23,11 +23,11 @@ def aggregate_handle_makers(records: List[Dict[str, Any]]) -> List[Dict[str, Any
     handle_maker_data = []
     for record in records:
         brush = record.get("brush")
-        
+
         # Skip if no brush data or brush is None
         if not brush:
             continue
-            
+
         matched = brush.get("matched")
 
         # Skip if no matched brush data
