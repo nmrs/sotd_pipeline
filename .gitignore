@@ -14,6 +14,8 @@ htmlcov/
 # Keep data files
 !data/*.yaml
 # Ignore JSON files in data subdirectories
+analysis/*.txt
+analysis/*.json
 data/comments/*.json
 data/enriched/*.json
 data/extracted/*.json
@@ -104,3 +106,7 @@ webui/.pids/*.log
 
 # WebUI test data
 webui/data/
+
+# Analysis directory - exclude all txt and yaml files
+analysis/*.txt
+analysis/*.yaml
