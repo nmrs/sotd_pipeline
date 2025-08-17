@@ -160,7 +160,7 @@ class TestTemplateProcessor:
     def test_init_with_default_path(self):
         """Test initialization with default path."""
         processor = TemplateProcessor()
-        assert processor.templates_path == Path("data/report_templates.yaml")
+        assert processor.templates_path == Path("data/report_templates")
 
     def test_init_with_custom_path(self, tmp_path):
         """Test initialization with custom path."""
@@ -321,6 +321,46 @@ test:
 - None: None"""
 
         assert result.strip() == expected.strip()
+
+    def test_load_templates_directory_success(self, tmp_path):
+        """Test loading templates from directory successfully."""
+        # Create a template directory
+        template_dir = tmp_path / "report_templates"
+        template_dir.mkdir()
+        
+        # Create hardware template
+        hardware_file = template_dir / "hardware.md"
+        hardware_file.write_text("# Hardware Report\n\n{{tables.razors}}")
+        
+        # Create software template
+        software_file = template_dir / "software.md"
+        software_file.write_text("# Software Report\n\n{{tables.soaps}}")
+        
+        processor = TemplateProcessor(template_dir)
+        templates = processor._load_templates()
+        
+        assert "hardware" in templates
+        assert "software" in templates
+        assert "report_template" in templates["hardware"]
+        assert "report_template" in templates["software"]
+        assert "# Hardware Report" in templates["hardware"]["report_template"]
+        assert "# Software Report" in templates["software"]["report_template"]
+
+    def test_load_templates_directory_not_found(self, tmp_path):
+        """Test loading templates from non-existent directory."""
+        non_existent_dir = tmp_path / "nonexistent_templates"
+        processor = TemplateProcessor(non_existent_dir)
+        templates = processor._load_templates()
+        assert templates == {}
+
+    def test_load_templates_directory_empty(self, tmp_path):
+        """Test loading templates from empty directory."""
+        empty_dir = tmp_path / "empty_templates"
+        empty_dir.mkdir()
+        
+        processor = TemplateProcessor(empty_dir)
+        templates = processor._load_templates()
+        assert templates == {}
 
 
 class DummyTableGenerator:

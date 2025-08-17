@@ -3,7 +3,7 @@ from io import StringIO
 import sys
 from sotd.match.tools.legacy.analyze_unmatched import main
 from sotd.match.tools.analyzers.unmatched_analyzer import UnmatchedAnalyzer
-from sotd.utils.match_filter_utils import strip_blade_count_patterns
+from sotd.utils.extract_normalization import strip_blade_count_patterns
 
 
 def test_strip_use_count_function():
@@ -63,7 +63,10 @@ def test_analyzer_synchronization_with_enrich():
         # Analyzer returns text as-is since normalization happens in extraction
         assert (
             analyzer_result == expected_output
-        ), f"Analyzer failed for '{input_text}': got '{analyzer_result}', expected '{expected_output}'"
+        ), (
+            f"Analyzer failed for '{input_text}': got '{analyzer_result}', "
+            f"expected '{expected_output}'"
+        )
         # Shared function still does normalization for backward compatibility
         assert (
             shared_result != input_text

@@ -1,0 +1,117 @@
+# Annual Hardware Report - {{year}}
+
+Welcome to your Annual SOTD Hardware Report for {{year}}
+
+## Annual Summary
+
+* {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during {{year}} were analyzed to produce this report.
+* Data includes {{included_months}} months of the year.
+{% if missing_months > 0 %}
+* Note: {{missing_months}} months were missing from the data set.
+{% endif %}
+
+## Notes & Caveats
+
+* I only show the top n results per category to keep the tables readable and avoid max post length issues.
+
+* Blade Format stats now differentiate between DE and half DE razors.
+
+* "Other" in the Blade Format table includes vintage reusable blades (including Rolls, Valet Auto Strop, and old-style lather catchers with wedge blades) as well as other antique proprietary blade formats (e.g. Enders Speed Blade)
+
+* Blades recorded as just 'GEM' will be matched to 'Personna GEM PTFE' per guidance [here](https://www.reddit.com/r/Wetshaving/comments/19a43q7/comment/kil95r8/)
+
+* The Personna name is [going away](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.badgerandblade.com/forum/threads/what-do-you-know-about-this-personna-no-longer-exists.647703/&ved=2ahUKEwiyi4n7pPKFAxXeLtAFHfNVDz8QFnoECAQQAQ&usg=AOvVaw38QYgjzknuIIIV94b6VDP5) for blades manufactured in the USA, but the majority of entries are still coming in under Personna, so I am sticking to that for this report. Once more than 50% of the entries come in under the new names, I will reverse this and map any old Personna entries to the new name.
+
+    * Personna GEM PTFE is now Accutec Pro Premium (GEM)
+  
+    * Personna Lab Blue is now Accuforge Super Stainless MicroCoat
+  
+    * Personna Med Prep is now Accuthrive Super Med Prep
+
+    * The German-made Personna Platinums (aka "Personna Reds") will continue to use the Personna brand
+
+* In the case of most brush makers (eg Maggard) - knots are split into synthetic / badger / boar and attributed to the maker - eg 'Maggard Synthetic', though for particularly popular brush models (e.g. specific models from Semogue and Omega) or knots (e.g. DG, Chisel & Hound, or AP Shave Co.) they are reported on indvidually.
+
+* The unique user column shows the number of different users who used a given razor / brush etc during the year. We can combine this with the total number of shaves to get the average number of times a user used a razor / brush etc
+
+* The change Δ vs columns show how an item has moved up or down the rankings since the previous year. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to the previous year. n/a means the item was not present in the previous year.
+
+## Razor Formats
+
+{{tables.razor-formats}}
+
+## Razors
+
+{{tables.razors}}
+
+## Razor Manufacturers
+
+{{tables.razor-manufacturers}}
+
+## Blades
+
+{{tables.blades}}
+
+## Blade Manufacturers
+
+{{tables.blade-manufacturers}}
+
+## Brushes
+
+{{tables.brushes}}
+
+## Brush Handle Makers
+
+{{tables.brush-handle-makers}}
+
+## Brush Knot Makers
+
+{{tables.brush-knot-makers}}
+
+## Knot Fibers
+
+{{tables.knot-fibers}}
+
+## Knot Sizes
+
+{{tables.knot-sizes}}
+
+## Blackbird Plates
+
+{{tables.blackbird-plates}}
+
+## Christopher Bradley Plates
+
+{{tables.christopher-bradley-plates}}
+
+## Game Changer Plates
+
+{{tables.game-changer-plates}}
+
+## Super Speed Tips
+
+{{tables.super-speed-tips}}
+
+## Straight Widths
+
+{{tables.straight-widths}}
+
+## Straight Grinds
+
+{{tables.straight-grinds}}
+
+## Straight Points
+
+{{tables.straight-points}}
+
+## Most Used Blades in Most Used Razors
+
+{{tables.razor-blade-combinations}}
+
+## Highest Use Count per Blade
+
+{{tables.highest-use-count-per-blade}}
+
+## Top Shavers
+
+{{tables.top-shavers}}

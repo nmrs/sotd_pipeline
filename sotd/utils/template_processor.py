@@ -10,24 +10,54 @@ from .yaml_loader import load_yaml_with_nfc
 class TemplateProcessor:
     """Template processor with mustache-style variable replacement and table placeholders."""
 
-    def __init__(self, templates_path: Path = Path("data/report_templates.yaml")):
+    def __init__(self, templates_path: Path = Path("data/report_templates")):
         """Initialize the template processor.
 
         Args:
-            templates_path: Path to the YAML templates file
+            templates_path: Path to templates directory or YAML file (backward compatibility)
         """
         self.templates_path = templates_path
         self._templates = None
 
     def _load_templates(self) -> Dict[str, Any]:
-        """Load templates from YAML file."""
+        """Load templates from directory or YAML file."""
         if self._templates is None:
             try:
-                self._templates = load_yaml_with_nfc(self.templates_path)
+                if self.templates_path.is_dir():
+                    # New directory-based approach
+                    self._templates = self._load_templates_from_directory()
+                else:
+                    # Backward compatibility: load from YAML file
+                    self._templates = load_yaml_with_nfc(self.templates_path)
             except FileNotFoundError:
-                # Return empty dict if templates file doesn't exist
+                # Return empty dict if templates don't exist
                 self._templates = {}
         return self._templates
+
+    def _load_templates_from_directory(self) -> Dict[str, Any]:
+        """Load templates from individual .md files in a directory."""
+        templates = {}
+        
+        if not self.templates_path.exists():
+            return templates
+            
+        for md_file in self.templates_path.glob("*.md"):
+            template_name = md_file.stem  # Remove .md extension
+            
+            try:
+                with open(md_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    
+                # Store the content under the 'report_template' section for compatibility
+                templates[template_name] = {
+                    "report_template": content
+                }
+            except Exception as e:
+                # Log error but continue loading other templates
+                print(f"Warning: Failed to load template {md_file}: {e}")
+                continue
+                
+        return templates
 
     def render_template(
         self,
