@@ -19,6 +19,7 @@ from .aggregators.cross_product import (
 from .aggregators.formats import aggregate_razor_formats
 from .aggregators.manufacturers import (
     aggregate_blade_manufacturers,
+    aggregate_brand_diversity,
     aggregate_razor_manufacturers,
     aggregate_soap_makers,
 )
@@ -123,7 +124,7 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
     }
 
     if debug:
-        print("[DEBUG] Running 22 aggregators...")
+        print("[DEBUG] Running 23 aggregators...")
 
     # Core product aggregations
     aggregated_data["data"]["razors"] = aggregate_razors(records)
@@ -135,6 +136,11 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
     aggregated_data["data"]["razor_manufacturers"] = aggregate_razor_manufacturers(records)
     aggregated_data["data"]["blade_manufacturers"] = aggregate_blade_manufacturers(records)
     aggregated_data["data"]["soap_makers"] = aggregate_soap_makers(records)
+
+    # Brand diversity aggregation (depends on soap_makers and soaps)
+    aggregated_data["data"]["brand_diversity"] = aggregate_brand_diversity(
+        aggregated_data["data"]["soap_makers"], aggregated_data["data"]["soaps"]
+    )
 
     # Format aggregations
     aggregated_data["data"]["razor_formats"] = aggregate_razor_formats(records)

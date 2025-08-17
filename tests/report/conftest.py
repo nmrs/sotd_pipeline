@@ -33,14 +33,14 @@ def template_dir(tmp_path, template_directory):
     """Create a temporary template directory with the shared template content."""
     temp_dir = tmp_path / "report_templates"
     temp_dir.mkdir()
-    
+
     # Copy all template files from the fixture directory
     for template_file in template_directory.glob("*.md"):
-        with open(template_file, 'r', encoding='utf-8') as f:
+        with open(template_file, "r", encoding="utf-8") as f:
             content = f.read()
-        
+
         temp_template_file = temp_dir / template_file.name
-        with open(temp_template_file, 'w', encoding='utf-8') as f:
+        with open(temp_template_file, "w", encoding="utf-8") as f:
             f.write(content)
-    
+
     return temp_dir

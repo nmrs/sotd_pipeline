@@ -4,15 +4,34 @@ from .base import (
     BaseTableGenerator,
     StandardProductTableGenerator,
 )
+from .specialized_tables import DataTransformingTableGenerator
 
 
-class SoapMakersTableGenerator(StandardProductTableGenerator):
+class SoapMakersTableGenerator(DataTransformingTableGenerator):
     """Generates a table of soap makers with usage statistics."""
+
+    def _transform_soap_maker_data(self, record: Dict[str, Any]) -> Dict[str, Any]:
+        """Transform soap maker data by mapping maker field to brand field.
+
+        This method ensures consistent data transformation for both current and
+        historical data in delta calculations.
+        """
+        transformed_record = record.copy()
+        if "maker" in record:
+            transformed_record["brand"] = record["maker"]
+        return transformed_record
 
     def get_table_data(self) -> List[Dict[str, Any]]:
         """Get soap makers data from aggregated data."""
         data = self.data.get("soap_makers", [])
-        return self._validate_data_records(data, "soap_makers", ["maker", "shaves"])
+        validated_data = self._validate_data_records(data, "soap_makers", ["maker", "shaves"])
+
+        # Transform maker field to brand field to work with STANDARD_MANUFACTURER_COLUMNS
+        transformed_data = []
+        for record in validated_data:
+            transformed_data.append(self._transform_soap_maker_data(record))
+
+        return transformed_data
 
     def get_table_title(self) -> str:
         """Return the table title."""
@@ -29,7 +48,19 @@ class SoapMakersTableGenerator(StandardProductTableGenerator):
 
     def get_name_key(self) -> str:
         """Return the key to use for matching items in delta calculations."""
+        return "brand"  # Changed from "maker" to "brand" to match transformed data
+
+    def _get_category_name(self) -> str:
+        """Get the category name for this table generator."""
+        return "soap_makers"
+
+    def _get_source_field(self) -> str:
+        """Get the source field name in historical data."""
         return "maker"
+
+    def _get_target_field(self) -> str:
+        """Get the target field name in current data."""
+        return "brand"
 
 
 class SoapsTableGenerator(StandardProductTableGenerator):
@@ -59,18 +90,12 @@ class BrandDiversityTableGenerator(StandardProductTableGenerator):
 
     def get_table_data(self) -> List[Dict[str, Any]]:
         """Get brand diversity data from aggregated data."""
-        soaps = self.data.get("soaps", [])
-        # Extract maker from soap name (assume first word is maker)
-        diversity: Dict[str, int] = {}
-        for s in soaps:
-            if "name" in s and s["name"]:
-                maker = s["name"].split()[0]
-                diversity[maker] = diversity.get(maker, 0) + 1
-        # Convert to list of dicts
-        return [
-            {"maker": maker, "unique_soaps": count}
-            for maker, count in sorted(diversity.items(), key=lambda x: x[1], reverse=True)
-        ]
+        data = self.data.get("brand_diversity", [])
+        # Filter for brands with 5+ unique soaps (as requested by user)
+        filtered_data = [item for item in data if item.get("unique_soaps", 0) >= 5]
+        return self._validate_data_records(
+            filtered_data, "brand_diversity", ["maker", "unique_soaps"]
+        )
 
     def get_table_title(self) -> str:
         """Return the table title."""
@@ -88,6 +113,10 @@ class BrandDiversityTableGenerator(StandardProductTableGenerator):
     def get_name_key(self) -> str:
         """Return the key to use for matching items in delta calculations."""
         return "maker"
+
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting since we want to show all brands that meet the 5+ threshold."""
+        return False
 
 
 # Factory method alternatives for simplified table creation

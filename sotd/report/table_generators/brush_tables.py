@@ -18,6 +18,19 @@ class BrushesTableGenerator(StandardProductTableGenerator):
         """Return the table title."""
         return "Brushes"
 
+    def get_column_config(self) -> dict[str, dict[str, Any]]:
+        """Return custom column configuration with 'Brush' instead of 'Name'."""
+        return {
+            "name": {"display_name": "Brush"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
+        }
+
 
 class BrushHandleMakersTableGenerator(StandardProductTableGenerator):
     """Table generator for brush handle makers in the hardware report."""

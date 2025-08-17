@@ -3,7 +3,7 @@
 
 from typing import Any
 
-from .base import BaseTableGenerator, StandardProductTableGenerator
+from .base import BaseTableGenerator, StandardProductTableGenerator, ManufacturerTableGenerator
 
 
 class BladesTableGenerator(StandardProductTableGenerator):
@@ -18,8 +18,21 @@ class BladesTableGenerator(StandardProductTableGenerator):
         """Return the table title."""
         return "Blades"
 
+    def get_column_config(self) -> dict[str, dict[str, Any]]:
+        """Return custom column configuration with 'Blade' instead of 'Name'."""
+        return {
+            "name": {"display_name": "Blade"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
+        }
 
-class BladeManufacturersTableGenerator(StandardProductTableGenerator):
+
+class BladeManufacturersTableGenerator(ManufacturerTableGenerator):
     """Table generator for blade manufacturers in the hardware report."""
 
     def get_table_data(self) -> list[dict[str, Any]]:
@@ -30,10 +43,6 @@ class BladeManufacturersTableGenerator(StandardProductTableGenerator):
     def get_table_title(self) -> str:
         """Return the table title."""
         return "Blade Manufacturers"
-
-    def get_name_key(self) -> str:
-        """Return the key to use for matching items in delta calculations."""
-        return "brand"
 
 
 # Factory method alternatives for simplified table creation

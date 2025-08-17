@@ -92,10 +92,10 @@ class TestAnnualReportGenerator:
         # Create a template directory with only monthly templates (missing annual_hardware)
         template_dir = tmp_path / "test_templates"
         template_dir.mkdir()
-        
+
         # Create a hardware template but not annual_hardware
         (template_dir / "hardware.md").write_text("Monthly hardware report")
-        
+
         # Create valid annual data file
         test_data = {
             "metadata": {
@@ -173,7 +173,7 @@ class TestAnnualReportGenerator:
         # Create template with extra fields
         template_dir = tmp_path / "test_templates"
         template_dir.mkdir()
-        
+
         template_content = (
             "Welcome to your Annual SOTD Hardware Report for {{year}}\n\n"
             "* {{total_shaves}} shaves from {{unique_shavers}} "
@@ -357,7 +357,7 @@ class TestAnnualReportGenerator:
         # Create custom template to test template processor integration
         template_dir = tmp_path / "test_templates"
         template_dir.mkdir()
-        
+
         template_content = (
             "# Annual SOTD Hardware Report for {{year}}\n\n"
             "## Overview\n\n"

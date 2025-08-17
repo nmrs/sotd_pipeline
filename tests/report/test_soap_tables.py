@@ -137,32 +137,33 @@ class TestBrandDiversityTableGenerator:
     def test_valid_data(self):
         """Test with valid data."""
         sample_data = {
-            "soaps": [
-                {"name": "Declaration Grooming Sellout"},
-                {"name": "Declaration Grooming Darkfall"},
-                {"name": "Stirling Executive Man"},
-                {"name": "Stirling Sharp Dressed Man"},
+            "brand_diversity": [
+                {"maker": "Declaration Grooming", "unique_soaps": 5, "position": 1},
+                {"maker": "Stirling Soap Co.", "unique_soaps": 6, "position": 2},
             ]
         }
         generator = BrandDiversityTableGenerator(sample_data, debug=False)
         data = generator.get_table_data()
         assert len(data) == 2
-        # Should extract makers from soap names and count them
-        makers = [item["maker"] for item in data]
-        assert "Declaration" in makers
-        assert "Stirling" in makers
+        assert data[0]["maker"] == "Declaration Grooming"
+        assert data[0]["unique_soaps"] == 5
+        assert data[1]["maker"] == "Stirling Soap Co."
+        assert data[1]["unique_soaps"] == 6
 
     def test_missing_required_fields(self):
         """Test with missing required fields."""
         sample_data = {
-            "soaps": [
-                {"name": ""},  # Empty name
-                {"name": "Stirling Executive Man"},  # Valid
+            "brand_diversity": [
+                {"maker": "", "unique_soaps": 5},  # Empty maker but field present
+                {"maker": "Stirling Soap Co.", "unique_soaps": 6},  # Valid
             ]
         }
         generator = BrandDiversityTableGenerator(sample_data, debug=False)
         data = generator.get_table_data()
-        assert len(data) == 1  # Only the valid record should be included
+        # Both records should be included since they have required fields
+        assert len(data) == 2
+        assert data[0]["maker"] == ""
+        assert data[1]["maker"] == "Stirling Soap Co."
 
     def test_table_title(self):
         """Test table title."""

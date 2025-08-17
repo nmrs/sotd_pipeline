@@ -1,0 +1,364 @@
+# Brand Diversity Aggregation Implementation Plan
+
+## 📘 Project Summary
+
+**Problem**: The current `BrandDiversityTableGenerator` truncates brand names to their first word (e.g., "Barrister and Mann" → "Barrister") because it tries to reconstruct brand diversity by parsing soap names instead of using properly aggregated data.
+
+**Solution**: Add a proper `brand_diversity` aggregation to the aggregate phase that:
+1. Uses full brand names from existing `soap_makers` data
+2. Counts unique soaps per brand from the `soaps` data
+3. Preserves complete brand names for accurate reporting
+4. Follows the existing aggregation patterns in the codebase
+
+**Impact**: Fixes brand name truncation, improves report accuracy, and provides comprehensive brand diversity data for users.
+
+## 🧩 Component Steps
+
+### Phase 1: Core Brand Diversity Aggregator
+- **1.1**: Create `BrandDiversityAggregator` class following existing patterns
+- **1.2**: Implement aggregation logic using `soap_makers` and `soaps` data
+- **1.3**: Add to aggregate phase processor
+- **1.4**: Update table generator to use new aggregation
+
+### Phase 2: Testing and Integration
+- **2.1**: Unit tests for `BrandDiversityAggregator`
+- **2.2**: Integration tests for complete workflow
+- **2.3**: Update existing tests to reflect new data structure
+- **2.4**: Verify report generation works correctly
+
+### Phase 3: Documentation and Cleanup
+- **3.1**: Update aggregate phase specification
+- **3.2**: Update table generator documentation
+- **3.3**: Remove old parsing logic from table generator
+- **3.4**: Update test fixtures and examples
+
+## 🔁 Implementation Prompts
+
+### **Phase 1.1: Create BrandDiversityAggregator Class**
+
+```text
+Create a new BrandDiversityAggregator class in `sotd/aggregate/aggregators/manufacturers/brand_diversity_aggregator.py` that follows the existing aggregator patterns.
+
+Requirements:
+1. Follow the same structure as other manufacturer aggregators (see `soap_maker_aggregator.py`)
+2. Use the existing `soap_makers` data to get full brand names
+3. Count unique soaps per brand from the `soaps` data
+4. Return data in format: `{"position": N, "brand": "Full Brand Name", "unique_soaps": N}`
+5. Sort by unique_soaps desc, then by brand name asc for tie-breaking
+6. Include position field for delta calculations
+7. Handle edge cases (empty data, missing fields, etc.)
+
+The aggregator should:
+- Extract brand names from `soap_makers` data (which has full names like "Barrister and Mann")
+- Count unique soaps per brand from the `soaps` data
+- Include all brands from the soap_makers data
+- Preserve complete brand names instead of truncating them
+
+Follow the existing code patterns:
+- Use pandas for efficient aggregation
+- Include proper type hints and docstrings
+- Follow the same error handling patterns
+- Use the same field naming conventions
+```
+
+### **Phase 1.2: Implement Aggregation Logic**
+
+```text
+Implement the core aggregation logic in the BrandDiversityAggregator class.
+
+The logic should:
+1. Take the existing `soap_makers` data as input (already aggregated with full brand names)
+2. Take the existing `soaps` data as input (individual soap entries)
+3. For each brand in `soap_makers`, count how many unique soaps exist in `soaps`
+4. Filter to only include brands with 5+ unique soaps
+5. Sort by unique_soaps desc, then by brand name asc
+6. Add position field for delta calculations
+
+Key implementation details:
+- Use the `maker` field from `soap_makers` as the brand name
+- Parse soap names to extract the brand (first part before " - ")
+- Count unique soaps per brand
+- Handle edge cases like empty data, missing fields
+- Ensure the output matches the expected format for the table generator
+
+Example input/output:
+Input: 
+- soap_makers: [{"maker": "Barrister and Mann", "shaves": 172, "unique_users": 86}]
+- soaps: [{"name": "Barrister and Mann - Fougère Angelique"}, {"name": "Barrister and Mann - Seville"}]
+
+Output: [{"position": 1, "brand": "Barrister and Mann", "unique_soaps": 2}]
+```
+
+### **Phase 1.3: Add to Aggregate Phase Processor**
+
+```text
+Integrate the BrandDiversityAggregator into the main aggregate phase processor.
+
+Requirements:
+1. Import the new BrandDiversityAggregator in `sotd/aggregate/processor.py`
+2. Add it to the `aggregate_all` function after the soap_makers aggregation
+3. Ensure it receives the correct data (soap_makers and soaps)
+4. Add it to the output data structure under the "brand_diversity" key
+5. Update any debug output to include the new aggregator
+
+The integration should:
+- Run after soap_makers and soaps aggregations (since it depends on them)
+- Pass the aggregated soap_makers and soaps data to the brand_diversity aggregator
+- Store the result in `aggregated_data["data"]["brand_diversity"]`
+- Follow the same pattern as other aggregators in the processor
+
+Update the debug output to show "Running 23 aggregators..." instead of "Running 22 aggregators..."
+```
+
+### **Phase 1.4: Update Table Generator**
+
+```text
+Update the BrandDiversityTableGenerator to use the new brand_diversity aggregation instead of parsing soap names.
+
+Requirements:
+1. Modify `get_table_data()` to use `self.data.get("brand_diversity", [])` instead of parsing soaps
+2. Remove the old parsing logic that was truncating brand names
+3. Update the field mapping to use "brand" instead of "maker" for consistency
+4. Ensure the table generator still filters for 5+ unique soaps (though this should now be handled by the aggregator)
+5. Keep the `should_limit_rows() = False` behavior for comprehensive coverage
+
+The updated table generator should:
+- Read from the new "brand_diversity" data section
+- Use the full brand names provided by the aggregator
+- Maintain the same table structure and column configuration
+- Keep the row limiting disabled for comprehensive coverage
+
+This change will fix the brand name truncation issue while maintaining all existing functionality.
+```
+
+### **Phase 2.1: Unit Tests for BrandDiversityAggregator**
+
+```text
+Create comprehensive unit tests for the BrandDiversityAggregator in `tests/aggregate/test_manufacturers/test_brand_diversity_aggregator.py`.
+
+Test cases should include:
+1. **Basic functionality**: Normal aggregation with valid data
+2. **Edge cases**: Empty data, missing fields, single brand
+3. **Filtering**: Brands with <5 unique soaps should be excluded
+4. **Sorting**: Correct ordering by unique_soaps desc, then brand name asc
+5. **Position field**: Correct 1-based position assignment
+6. **Brand name preservation**: Full brand names should be preserved (not truncated)
+7. **Data validation**: Proper handling of malformed or missing data
+
+Test data should include realistic examples:
+- soap_makers: [{"maker": "Barrister and Mann", "shaves": 172, "unique_users": 86}]
+- soaps: [{"name": "Barrister and Mann - Fougère Angelique"}, {"name": "Barrister and Mann - Seville"}]
+
+Expected output: [{"position": 1, "brand": "Barrister and Mann", "unique_soaps": 2}]
+
+Follow the existing test patterns from other manufacturer aggregator tests.
+```
+
+### **Phase 2.2: Integration Tests**
+
+```text
+Create integration tests to verify the complete workflow from aggregation to report generation.
+
+Test scenarios:
+1. **End-to-end workflow**: enriched data → aggregate → report generation
+2. **Data flow**: Verify brand_diversity data flows correctly through all phases
+3. **Table generation**: Ensure the updated table generator produces correct output
+4. **Brand name preservation**: Verify full brand names appear in final reports
+5. **Filtering**: Ensure only brands with 5+ unique soaps are included
+
+Test files to create/update:
+- `tests/aggregate/test_integration.py` - Add brand_diversity integration tests
+- `tests/report/test_soap_tables.py` - Update existing tests to use new data structure
+- `tests/report/test_integration.py` - Verify complete report generation workflow
+
+The integration tests should verify that:
+- Brand diversity aggregation works correctly
+- Full brand names are preserved throughout the pipeline
+- Reports display complete brand information
+- The 5+ unique soaps filter is applied correctly
+```
+
+### **Phase 2.3: Update Existing Tests**
+
+```text
+Update existing tests to reflect the new data structure and remove references to the old parsing logic.
+
+Files to update:
+1. **`tests/report/test_soap_tables.py`**: 
+   - Update BrandDiversityTableGenerator tests to use new data structure
+   - Remove tests for the old name parsing logic
+   - Add tests for the new brand_diversity data source
+
+2. **`tests/fixtures/report_template.yaml`**: 
+   - Add brand_diversity test data if needed
+   - Ensure test fixtures match the new data structure
+
+3. **`tests/aggregate/test_processor.py`**: 
+   - Add tests for brand_diversity aggregation in the main processor
+   - Verify the new aggregator is called correctly
+
+4. **`tests/aggregate/test_core_aggregators.py`**: 
+   - Update any tests that might reference the old structure
+
+The updated tests should:
+- Use the new "brand_diversity" data section
+- Expect full brand names instead of truncated ones
+- Verify the correct data flow through the pipeline
+- Maintain backward compatibility for other functionality
+```
+
+### **Phase 2.4: Verify Report Generation**
+
+```text
+Create tests to verify that the complete report generation workflow produces correct output with full brand names.
+
+Test requirements:
+1. **Report content**: Verify brand diversity table shows full brand names
+2. **Data accuracy**: Ensure unique soap counts are correct
+3. **Filtering**: Verify only brands with 5+ unique soaps are shown
+4. **Formatting**: Ensure table formatting and alignment are correct
+5. **Integration**: Test with real aggregated data to verify end-to-end functionality
+
+Test approach:
+- Use sample aggregated data that includes the new brand_diversity section
+- Generate reports using the updated table generators
+- Verify the output contains full brand names (e.g., "Barrister and Mann" not "Barrister")
+- Check that the unique soap counts match the expected values
+- Ensure the table structure and formatting are correct
+
+This verification step ensures that the complete solution works as intended and produces accurate, readable reports.
+```
+
+### **Phase 3.1: Update Aggregate Phase Specification**
+
+```text
+Update the aggregate phase specification documentation to include the new brand_diversity aggregation.
+
+Files to update:
+1. **`docs/aggregate_phase_spec.md`**: Add brand_diversity to the core categories
+2. **`.cursor/rules/aggregate-phase.mdc`**: Update the rules to include brand_diversity
+
+Documentation should include:
+- **Purpose**: Brand diversity aggregation for accurate brand reporting
+- **Data source**: Uses soap_makers and soaps data for comprehensive coverage
+- **Output format**: `{"position": N, "brand": "Full Brand Name", "unique_soaps": N}`
+- **Filtering**: Only includes brands with 5+ unique soaps
+- **Sorting**: By unique_soaps desc, then brand name asc
+- **Dependencies**: Requires soap_makers and soaps aggregations to run first
+
+The documentation should explain:
+- Why this aggregation is needed (fixes brand name truncation)
+- How it improves report accuracy
+- The relationship to existing aggregations
+- The expected data flow and dependencies
+```
+
+### **Phase 3.2: Update Table Generator Documentation**
+
+```text
+Update the table generator documentation to reflect the new implementation approach.
+
+Files to update:
+1. **`sotd/report/table_generators/soap_tables.py`**: Update docstrings and comments
+2. **`tests/report/test_soap_tables.py`**: Update test documentation
+3. **Any relevant README files**: Document the new approach
+
+Documentation should explain:
+- **New data source**: Uses pre-aggregated brand_diversity data instead of parsing
+- **Benefits**: Full brand names, better performance, more accurate data
+- **Data structure**: Expects brand_diversity section with full brand names
+- **Backward compatibility**: Maintains same table output format
+- **Filtering**: 5+ unique soaps filter now handled at aggregation level
+
+The documentation should clarify:
+- How the new approach fixes the truncation issue
+- Why this is better than the previous parsing approach
+- What data structure is expected
+- How to use the updated table generator
+```
+
+### **Phase 3.3: Remove Old Parsing Logic**
+
+```text
+Clean up the old parsing logic from the BrandDiversityTableGenerator since it's no longer needed.
+
+Changes to make:
+1. **Remove old parsing code**: Delete the logic that was splitting soap names and truncating brands
+2. **Simplify get_table_data()**: Now just reads from brand_diversity data section
+3. **Update comments**: Remove references to the old parsing approach
+4. **Clean up imports**: Remove any unused imports related to the old logic
+
+The cleaned-up table generator should:
+- Be simpler and more focused
+- Have better performance (no parsing at report time)
+- Be easier to maintain and debug
+- Follow the same pattern as other table generators
+
+This cleanup ensures:
+- No dead code remains
+- The implementation is clean and maintainable
+- Future developers understand the current approach
+- The codebase follows consistent patterns
+```
+
+### **Phase 3.4: Update Test Fixtures and Examples**
+
+```text
+Update test fixtures and examples to reflect the new data structure and provide realistic test data.
+
+Files to update:
+1. **`tests/fixtures/report_template.yaml`**: Add brand_diversity test data
+2. **`tests/fixtures/`**: Update any other relevant test fixtures
+3. **Example data**: Ensure test data includes realistic brand diversity scenarios
+
+Test fixtures should include:
+- **Realistic brand names**: Full names like "Barrister and Mann", "House of Mammoth"
+- **Varied unique soap counts**: Some brands with 5+ soaps, some with fewer
+- **Edge cases**: Brands with exactly 5 soaps, brands with many soaps
+- **Data structure**: Proper format matching the new aggregation output
+
+The updated fixtures should:
+- Support comprehensive testing of the new functionality
+- Provide realistic scenarios for edge case testing
+- Ensure tests cover all the new functionality
+- Maintain consistency with existing test patterns
+
+This ensures that all tests have access to realistic, comprehensive test data.
+```
+
+## 🧠 Critical Analysis
+
+### **Prompt Sequence Analysis**
+The plan follows a logical progression from core implementation to testing to cleanup, ensuring each step builds on the previous one. The sequence addresses the root cause (missing aggregation) rather than just fixing symptoms.
+
+### **Implementation Strategy**
+- **Incremental approach**: Each phase can be implemented and tested independently
+- **Consistent patterns**: Follows existing aggregator and table generator patterns
+- **Backward compatibility**: Maintains existing functionality while improving accuracy
+- **Comprehensive testing**: Covers unit, integration, and end-to-end scenarios
+
+### **Risk Assessment**
+- **Low risk**: Adding new aggregation follows established patterns
+- **Data dependency**: Requires soap_makers and soaps to run first
+- **Testing coverage**: Comprehensive testing ensures quality and prevents regressions
+- **Documentation**: Clear documentation prevents future confusion
+
+### **Success Criteria**
+- ✅ Brand names no longer truncated in reports
+- ✅ Brand diversity data accurately reflects actual usage
+- ✅ Performance improved (no parsing at report time)
+- ✅ Code follows existing patterns and is maintainable
+- ✅ All tests pass and provide good coverage
+- ✅ Documentation is clear and up-to-date
+
+### **Dependencies and Order**
+1. **Phase 1.1-1.3** must be completed before Phase 1.4
+2. **Phase 1** must be completed before Phase 2
+3. **Phase 2** validates the implementation before Phase 3
+4. **Phase 3** cleans up and documents the final solution
+
+This plan provides a safe, incremental path to implementing the brand diversity aggregation while maintaining code quality and comprehensive testing coverage.
+description:
+globs:
+alwaysApply: false
+---

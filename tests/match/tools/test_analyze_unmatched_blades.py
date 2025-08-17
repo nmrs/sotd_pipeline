@@ -61,9 +61,7 @@ def test_analyzer_synchronization_with_enrich():
         shared_result = strip_blade_count_patterns(input_text)
 
         # Analyzer returns text as-is since normalization happens in extraction
-        assert (
-            analyzer_result == expected_output
-        ), (
+        assert analyzer_result == expected_output, (
             f"Analyzer failed for '{input_text}': got '{analyzer_result}', "
             f"expected '{expected_output}'"
         )

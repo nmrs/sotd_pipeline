@@ -88,7 +88,7 @@ class NoDeltaMixin:
 
 # Standard column configurations
 STANDARD_PRODUCT_COLUMNS = {
-    "name": {"display_name": "Razor"},
+    "name": {"display_name": "Name"},
     "shaves": {"display_name": "shaves", "format": "number"},
     "unique_users": {"display_name": "unique users", "format": "number"},
     "avg_shaves_per_user": {

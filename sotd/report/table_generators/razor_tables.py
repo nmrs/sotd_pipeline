@@ -48,6 +48,19 @@ class RazorsTableGenerator(StandardProductTableGenerator):
         """Return the table title."""
         return "Razors"
 
+    def get_column_config(self) -> dict[str, dict[str, Any]]:
+        """Return custom column configuration with 'Razor' instead of 'Name'."""
+        return {
+            "name": {"display_name": "Razor"},
+            "shaves": {"display_name": "shaves", "format": "number"},
+            "unique_users": {"display_name": "unique users", "format": "number"},
+            "avg_shaves_per_user": {
+                "display_name": "avg shaves per user",
+                "format": "decimal",
+                "decimals": 2,
+            },
+        }
+
 
 class RazorManufacturersTableGenerator(StandardProductTableGenerator):
     """Table generator for razor manufacturers in the hardware report."""
