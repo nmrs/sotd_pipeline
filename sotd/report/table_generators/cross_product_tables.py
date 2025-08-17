@@ -23,6 +23,12 @@ class RazorBladeCombinationsTableGenerator(StandardProductTableGenerator, NoDelt
         """Return the table title."""
         return "Most Used Blades in Most Used Razors"
 
+    def get_column_config(self) -> dict[str, dict[str, Any]]:
+        """Return column configuration for the razor-blade combinations table."""
+        from .base import STANDARD_PRODUCT_COLUMNS
+
+        return STANDARD_PRODUCT_COLUMNS
+
 
 class HighestUseCountPerBladeTableGenerator(StandardProductTableGenerator, NoDeltaMixin):
     """Table generator for highest use count per blade in the hardware report."""

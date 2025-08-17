@@ -451,6 +451,14 @@ class BaseTableGenerator(ABC):
                         df[col] = (
                             df[col].astype(object).apply(lambda x: _format_decimal(x, decimals))
                         )  # pyright: ignore[reportAttributeAccessIssue]
+                elif config.get("format") == "smart_decimal":
+                    decimals = config.get("decimals", 1)
+                    if col in df:
+                        df[col] = (
+                            df[col]
+                            .astype(object)
+                            .apply(lambda x: _format_smart_decimal(x, decimals))
+                        )  # pyright: ignore[reportAttributeAccessIssue]
                 elif config.get("format") == "delta":
                     # Delta columns are already formatted by the delta calculator
                     # Just ensure they're properly converted to strings
@@ -777,7 +785,8 @@ class BaseTableGenerator(ABC):
                 max_width = max(max_width, 6)  # Minimum width for delta symbols
 
             # Apply reasonable maximum width to prevent extremely wide columns
-            max_width = min(max_width, 30)
+            # Increased from 30 to allow proper display of longer content
+            max_width = min(max_width, 80)
 
             column_widths[col] = max_width
 
@@ -1195,5 +1204,21 @@ def _format_decimal(x: Any, decimals: int) -> str:
         return "0.0"
     try:
         return f"{float(x):.{decimals}f}"
+    except (ValueError, TypeError):
+        return "0.0"
+
+
+def _format_smart_decimal(x: Any, decimals: int) -> str:
+    """Format a decimal value, showing only decimals if they exist."""
+    if pd.isna(x):
+        return "0.0"
+    try:
+        # Convert to float to handle potential non-numeric values
+        float_val = float(x)
+        # Check if the float value is an integer
+        if float_val.is_integer():
+            return f"{int(float_val)}"
+        else:
+            return f"{float_val:.{decimals}f}"
     except (ValueError, TypeError):
         return "0.0"

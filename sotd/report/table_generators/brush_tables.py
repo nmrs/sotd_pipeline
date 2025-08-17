@@ -194,9 +194,9 @@ class BrushKnotSizesTableGenerator(StandardProductTableGenerator):
         return "knot_size_mm"
 
     def get_column_config(self) -> dict[str, dict[str, Any]]:
-        """Return column configuration with knot_size_mm mapped to name."""
+        """Return column configuration with custom knot size formatting."""
         return {
-            "knot_size_mm": {"display_name": "name"},
+            "knot_size_mm": {"display_name": "name", "format": "smart_decimal", "decimals": 1},
             "shaves": {"display_name": "shaves", "format": "number"},
             "unique_users": {"display_name": "unique users", "format": "number"},
             "avg_shaves_per_user": {
