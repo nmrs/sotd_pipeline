@@ -7,10 +7,12 @@ from sotd.report.table_generators.base import BaseTableGenerator, SpecializedTab
 
 
 class DataTransformingTableGenerator(SpecializedTableGenerator):
-    """Base class for specialized table generators that need data transformation for delta calculations.
+    """Base class for specialized table generators that need data transformation for delta
+    calculations.
 
-    This class handles the common pattern where specialized generators transform data structure
-    in get_table_data() but need to apply the same transformation to historical data for deltas.
+    This class handles the common pattern where specialized generators transform data
+    structure in get_table_data() but need to apply the same transformation to historical
+    data for deltas.
     """
 
     def _transform_historical_data_for_deltas(
@@ -189,13 +191,26 @@ class ChristopherBradleyPlatesTableGenerator(DataTransformingTableGenerator):
     def _transform_plate_data(self, record: dict[str, Any]) -> dict[str, Any]:
         """Transform plate data by combining plate_type + plate_level into plate field.
 
-        This method ensures consistent data transformation for both current and historical data.
+        This method ensures consistent data transformation for both current and
+        historical data. For SB plates, shows just the plate level (e.g., "D", "C",
+        "B", "AA"). For OC plates, shows "OC-[plate]" format (e.g., "OC-F").
         """
         plate_type = record.get("plate_type")
         plate_level = record.get("plate_level")
         if plate_type and plate_level:
+            # Format plate name based on type
+            if plate_type == "SB":
+                # For SB plates, show just the plate level
+                plate_name = plate_level
+            elif plate_type == "OC":
+                # For OC plates, show "OC-[plate]" format
+                plate_name = f"OC-{plate_level}"
+            else:
+                # Fallback for any other plate types
+                plate_name = f"{plate_type}{plate_level}"
+
             return {
-                "plate": f"{plate_type}{plate_level}",
+                "plate": plate_name,
                 "shaves": record.get("shaves", 0),
                 "unique_users": record.get("unique_users", 0),
             }
