@@ -24,7 +24,13 @@ class SoapMakersTableGenerator(DataTransformingTableGenerator):
     def get_table_data(self) -> List[Dict[str, Any]]:
         """Get soap makers data from aggregated data."""
         data = self.data.get("soap_makers", [])
-        validated_data = self._validate_data_records(data, "soap_makers", ["maker", "shaves"])
+        # Filter for brands with 5+ shaves (as requested by user)
+        filtered_data = [
+            item for item in data if item.get("shaves", 0) >= 5
+        ]
+        validated_data = self._validate_data_records(
+            filtered_data, "soap_makers", ["maker", "shaves"]
+        )
 
         # Transform maker field to brand field to work with STANDARD_MANUFACTURER_COLUMNS
         transformed_data = []
@@ -73,7 +79,9 @@ class SoapsTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> List[Dict[str, Any]]:
         """Get soaps data from aggregated data."""
         data = self.data.get("soaps", [])
-        return self._validate_data_records(data, "soaps", ["name", "shaves"])
+        # Filter for soaps with 5+ shaves (as requested by user)
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
+        return self._validate_data_records(filtered_data, "soaps", ["name", "shaves"])
 
     def get_table_title(self) -> str:
         """Return the table title."""
