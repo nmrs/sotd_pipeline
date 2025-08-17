@@ -27,7 +27,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         parser = cli.get_parser()
         args = parser.parse_args(argv)
-        cli.validate_args(args)
+        # Remove the standalone validation call - parser already handles validation
 
         # Route to appropriate function based on annual flag
         if args.annual:

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from sotd.cli_utils.date_span import month_span
 from sotd.utils.performance import PerformanceMonitor
 
 
@@ -11,27 +12,18 @@ def run_report(args) -> None:
     # Determine which report types to generate
     if args.type == "all":
         report_types = ["hardware", "software"]
-        print(f"Processing reports for {args.month} (both hardware and software)...")
+        print("Processing reports for date range (both hardware and software)...")
     else:
         report_types = [args.type]
-        print(f"Processing {args.type} report for {args.month}...")
+        print(f"Processing {args.type} reports for date range...")
 
     if args.debug:
         print("[DEBUG] Report phase started")
-        print(f"[DEBUG] Month: {args.month}")
         print(f"[DEBUG] Report type: {args.type}")
         print(f"[DEBUG] Report types to generate: {report_types}")
         print(f"[DEBUG] Data root: {args.data_root}")
         print(f"[DEBUG] Output directory: {args.out_dir}")
         print(f"[DEBUG] Force overwrite: {args.force}")
-
-    # Parse month to get year and month
-    try:
-        year_str, month_str = args.month.split("-")
-        year = int(year_str)
-        month = int(month_str)
-    except ValueError:
-        raise ValueError(f"Invalid month format: {args.month}. Expected YYYY-MM format.")
 
     # Convert data root and output directory to Path
     data_root = Path(args.data_root)
@@ -40,82 +32,103 @@ def run_report(args) -> None:
     # Import modules needed for processing
     from . import load, process, save
 
-    # Load aggregated data (always from data_root/aggregated)
-    if args.debug:
-        print(f"[DEBUG] Loading aggregated data for {args.month}")
+    # Get months to process using month_span
     try:
-        monitor.start_file_io_timing()
-        aggregated_file_path = load.get_aggregated_file_path(data_root, year, month)
-        metadata, data = load.load_aggregated_data(aggregated_file_path, args.debug)
-        monitor.end_file_io_timing()
-    except FileNotFoundError as e:
-        monitor.end_file_io_timing()
-        raise FileNotFoundError(
-            f"Aggregated data not found for {args.month}. "
-            f"Run the aggregate phase first to generate the required data."
-        ) from e
-    except Exception as e:
-        monitor.end_file_io_timing()
-        raise RuntimeError(f"Failed to load aggregated data: {e}") from e
+        month_tuples = month_span(args)
+        months = [f"{year:04d}-{month:02d}" for year, month in month_tuples]
+        if args.debug:
+            print(f"[DEBUG] Processing months: {months}")
+    except ValueError as e:
+        raise ValueError(f"Invalid date specification: {e}")
 
-    # Load historical data for delta calculations (always from data_root/aggregated)
-    if args.debug:
-        print("[DEBUG] Loading historical data for delta calculations")
-    try:
-        monitor.start_file_io_timing()
-        # Pass the aggregated directory since load_comparison_data expects the base
-        # aggregated directory
-        comparison_data = load.load_comparison_data(
-            data_root / "aggregated", year, month, args.debug
-        )
-        monitor.end_file_io_timing()
+    # Process each month
+    total_reports_generated = 0
+    for month in months:
         if args.debug:
-            print(f"[DEBUG] Loaded {len(comparison_data)} comparison periods")
-            for period, (period_meta, _) in comparison_data.items():
-                print(f"[DEBUG] {period}: {period_meta['month']}")
-    except Exception as e:
-        monitor.end_file_io_timing()
-        if args.debug:
-            print(f"[DEBUG] Warning: Failed to load historical data: {e}")
-        comparison_data = {}
-
-    # Generate reports for each type
-    for report_type in report_types:
-        if args.debug:
-            print(f"[DEBUG] Generating {report_type} report content")
+            print(f"[DEBUG] Processing month: {month}")
         
-        # Check if output already exists and force is not set
-        output_path = save.get_report_file_path(out_dir, year, month, report_type)
-        if output_path.exists() and not args.force:
-            print(f"  {args.month} {report_type}: output exists")
-            continue
-
+        # Parse month to get year and month
         try:
-            report_content = process.generate_report_content(
-                report_type, metadata, data, comparison_data, args.debug
-            )
-        except Exception as e:
-            raise RuntimeError(f"Failed to generate {report_type} report content: {e}") from e
+            year_str, month_str = month.split("-")
+            year = int(year_str)
+            month_int = int(month_str)
+        except ValueError:
+            raise ValueError(f"Invalid month format: {month}. Expected YYYY-MM format.")
 
-        # Save report to file (output always goes to out_dir)
+        # Load aggregated data for this month
         if args.debug:
-            print(f"[DEBUG] Saving {report_type} report to file")
+            print(f"[DEBUG] Loading aggregated data for {month}")
         try:
             monitor.start_file_io_timing()
-            output_path = save.generate_and_save_report(
-                report_content, out_dir, year, month, report_type, args.force, args.debug
-            )
+            aggregated_file_path = load.get_aggregated_file_path(data_root, year, month_int)
+            metadata, data = load.load_aggregated_data(aggregated_file_path, args.debug)
             monitor.end_file_io_timing()
-            print(f"  {args.month} {report_type}: {output_path.name}")
+        except FileNotFoundError:
+            monitor.end_file_io_timing()
+            print(f"  {month}: aggregated data not found, skipping")
+            continue
         except Exception as e:
             monitor.end_file_io_timing()
-            raise RuntimeError(f"Failed to save {report_type} report: {e}") from e
+            print(f"  {month}: failed to load aggregated data: {e}")
+            continue
+
+        # Load historical data for delta calculations
+        if args.debug:
+            print(f"[DEBUG] Loading historical data for {month}")
+        try:
+            monitor.start_file_io_timing()
+            comparison_data = load.load_comparison_data(
+                data_root / "aggregated", year, month_int, args.debug
+            )
+            monitor.end_file_io_timing()
+            if args.debug:
+                print(f"[DEBUG] Loaded {len(comparison_data)} comparison periods for {month}")
+        except Exception as e:
+            monitor.end_file_io_timing()
+            if args.debug:
+                print(f"[DEBUG] Warning: Failed to load historical data for {month}: {e}")
+            comparison_data = {}
+
+        # Generate reports for each type
+        for report_type in report_types:
+            if args.debug:
+                print(f"[DEBUG] Generating {report_type} report for {month}")
+            
+            # Check if output already exists and force is not set
+            output_path = save.get_report_file_path(out_dir, year, month_int, report_type)
+            if output_path.exists() and not args.force:
+                print(f"  {month} {report_type}: output exists")
+                continue
+
+            try:
+                report_content = process.generate_report_content(
+                    report_type, metadata, data, comparison_data, args.debug
+                )
+            except Exception as e:
+                print(f"  {month} {report_type}: failed to generate content: {e}")
+                continue
+
+            # Save report to file
+            if args.debug:
+                print(f"[DEBUG] Saving {report_type} report for {month}")
+            try:
+                monitor.start_file_io_timing()
+                output_path = save.generate_and_save_report(
+                    report_content, out_dir, year, month_int, report_type, args.force, args.debug
+                )
+                monitor.end_file_io_timing()
+                print(f"  {month} {report_type}: {output_path.name}")
+                total_reports_generated += 1
+            except Exception as e:
+                monitor.end_file_io_timing()
+                print(f"  {month} {report_type}: failed to save: {e}")
+                continue
 
     # Show completion message
-    if len(report_types) > 1:
-        print(f"Generated {len(report_types)} reports for {args.month}")
+    if total_reports_generated > 0:
+        print(f"Generated {total_reports_generated} reports across {len(months)} months")
     else:
-        print(f"Generated {report_types[0]} report for {args.month}")
+        print("No reports were generated")
 
     # End timing and show performance summary
     monitor.end_total_timing()
