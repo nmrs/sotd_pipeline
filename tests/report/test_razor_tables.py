@@ -66,8 +66,8 @@ class TestRazorFormatsTableGenerator:
         assert "shaves" in config
         assert "unique_users" in config
         assert "avg_shaves_per_user" in config
-        # Check that format maps to "name" display name
-        assert config["format"]["display_name"] == "name"
+        # Check that format maps to "Format" display name
+        assert config["format"]["display_name"] == "Format"
 
 
 class TestRazorsTableGenerator:
@@ -178,5 +178,6 @@ class TestRazorManufacturersTableGenerator:
         assert "brand" in config  # Actual data field
         assert "shaves" in config
         assert "unique_users" in config
-        # Check that brand maps to "name" display name
-        assert config["brand"]["display_name"] == "name"
+        assert "avg_shaves_per_user" in config
+        # Check that brand maps to "Manufacturer" display name
+        assert config["brand"]["display_name"] == "Manufacturer"

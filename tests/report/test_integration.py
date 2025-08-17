@@ -83,7 +83,12 @@ class TestReportIntegration:
         assert "## Top Shavers" in report_content
 
         # Verify that tables are generated (should contain actual table content)
-        assert "| name" in report_content  # Table headers
+        assert "| Format" in report_content  # Razor Formats table header
+        assert "| Razor" in report_content  # Razors table header (also used for blades, brushes)
+        assert "| Manufacturer" in report_content  # Razor/Blade Manufacturers table header
+        assert "| Maker" in report_content  # Brush Handle/Knot Makers table headers
+        assert "| Fiber" in report_content  # Knot Fibers table header
+        assert "| User" in report_content  # User tables headers
         assert "Gillette Super Speed" in report_content
         assert "Gillette Nacet" in report_content
         assert "Simpson Chubby 2" in report_content
@@ -138,7 +143,9 @@ class TestReportIntegration:
         assert "## Top Shavers" in report_content
 
         # Verify that tables are generated
-        assert "| name" in report_content
+        assert "| Brand" in report_content  # Soap Makers table header
+        assert "| Soap" in report_content  # Soaps table header
+        assert "| Brand" in report_content  # Brand Diversity table header
         assert "Declaration Grooming" in report_content
         assert "Stirling Soap Co" in report_content
         assert "user1" in report_content

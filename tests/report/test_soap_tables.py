@@ -117,9 +117,12 @@ class TestSoapMakersTableGenerator:
         """Test column configuration."""
         generator = SoapMakersTableGenerator({}, debug=False)
         config = generator.get_column_config()
-        assert "name" in config
+        assert "brand" in config  # Actual data field
         assert "shaves" in config
         assert "unique_users" in config
+        assert "avg_shaves_per_user" in config
+        # Check that brand maps to "Brand" display name
+        assert config["brand"]["display_name"] == "Brand"
 
 
 class TestBrandDiversityTableGenerator:
