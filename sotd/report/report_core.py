@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
+from sotd.utils.performance import PerformanceMonitor
 
 
 def run_report(args) -> None:
@@ -8,13 +8,19 @@ def run_report(args) -> None:
     monitor = PerformanceMonitor("report")
     monitor.start_total_timing()
 
-    # Show progress indication
-    print(f"Processing report for {args.month}...")
+    # Determine which report types to generate
+    if args.type == "all":
+        report_types = ["hardware", "software"]
+        print(f"Processing reports for {args.month} (both hardware and software)...")
+    else:
+        report_types = [args.type]
+        print(f"Processing {args.type} report for {args.month}...")
 
     if args.debug:
         print("[DEBUG] Report phase started")
         print(f"[DEBUG] Month: {args.month}")
         print(f"[DEBUG] Report type: {args.type}")
+        print(f"[DEBUG] Report types to generate: {report_types}")
         print(f"[DEBUG] Data root: {args.data_root}")
         print(f"[DEBUG] Output directory: {args.out_dir}")
         print(f"[DEBUG] Force overwrite: {args.force}")
@@ -33,12 +39,6 @@ def run_report(args) -> None:
 
     # Import modules needed for processing
     from . import load, process, save
-
-    # Check if output already exists and force is not set
-    output_path = save.get_report_file_path(out_dir, year, month, args.type)
-    if output_path.exists() and not args.force:
-        print(f"  {args.month}: output exists")
-        return
 
     # Load aggregated data (always from data_root/aggregated)
     if args.debug:
@@ -79,40 +79,47 @@ def run_report(args) -> None:
             print(f"[DEBUG] Warning: Failed to load historical data: {e}")
         comparison_data = {}
 
-    # Generate report content
-    if args.debug:
-        print(f"[DEBUG] Generating {args.type} report content")
-    try:
-        report_content = process.generate_report_content(
-            args.type, metadata, data, comparison_data, args.debug
-        )
-    except Exception as e:
-        raise RuntimeError(f"Failed to generate report content: {e}") from e
+    # Generate reports for each type
+    for report_type in report_types:
+        if args.debug:
+            print(f"[DEBUG] Generating {report_type} report content")
+        
+        # Check if output already exists and force is not set
+        output_path = save.get_report_file_path(out_dir, year, month, report_type)
+        if output_path.exists() and not args.force:
+            print(f"  {args.month} {report_type}: output exists")
+            continue
 
-    # Save report to file (output always goes to out_dir)
-    if args.debug:
-        print("[DEBUG] Saving report to file")
-    try:
-        monitor.start_file_io_timing()
-        output_path = save.generate_and_save_report(
-            report_content, out_dir, year, month, args.type, args.force, args.debug
-        )
-        monitor.end_file_io_timing()
-    except Exception as e:
-        monitor.end_file_io_timing()
-        raise RuntimeError(f"Failed to save report: {e}") from e
+        try:
+            report_content = process.generate_report_content(
+                report_type, metadata, data, comparison_data, args.debug
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to generate {report_type} report content: {e}") from e
 
+        # Save report to file (output always goes to out_dir)
+        if args.debug:
+            print(f"[DEBUG] Saving {report_type} report to file")
+        try:
+            monitor.start_file_io_timing()
+            output_path = save.generate_and_save_report(
+                report_content, out_dir, year, month, report_type, args.force, args.debug
+            )
+            monitor.end_file_io_timing()
+            print(f"  {args.month} {report_type}: {output_path.name}")
+        except Exception as e:
+            monitor.end_file_io_timing()
+            raise RuntimeError(f"Failed to save {report_type} report: {e}") from e
+
+    # Show completion message
+    if len(report_types) > 1:
+        print(f"Generated {len(report_types)} reports for {args.month}")
+    else:
+        print(f"Generated {report_types[0]} report for {args.month}")
+
+    # End timing and show performance summary
     monitor.end_total_timing()
     if args.debug:
+        print("[DEBUG] Report generation completed")
+        print("[DEBUG] Performance summary:")
         monitor.print_summary()
-
-    # Print standardized summary
-    stats = {
-        "report_type": args.type,
-        "record_count": metadata.get("total_shaves", 0),
-    }
-    summary = PipelineOutputFormatter.format_single_month_summary("report", args.month, stats)
-    print(summary)
-
-    if args.debug:
-        print(f"[DEBUG] Report saved to: {output_path}")

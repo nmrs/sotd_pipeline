@@ -32,9 +32,9 @@ class ReportCLIParser(BaseCLIParser):
         """Add report-specific arguments."""
         self.add_argument(
             "--type",
-            choices=["hardware", "software"],
-            default="hardware",
-            help="Report type (default: hardware)",
+            choices=["hardware", "software", "all"],
+            default="all",
+            help="Report type: hardware, software, or all (default: all)",
         )
 
         self.add_argument(
@@ -136,11 +136,11 @@ def get_parser() -> ReportCLIParser:
         epilog="""
 CLI matrix
 ──────────
-(no flags)                 → current month, hardware report
---month YYYY-MM            → that single month
---annual --year YYYY       → annual report for specific year
---annual --range YYYY:YYYY → annual reports for year range
---type hardware|software   → report type (default: hardware)
+(no flags)                 → current month, both hardware and software reports
+--month YYYY-MM            → that single month, both report types
+--annual --year YYYY       → annual reports for specific year, both report types
+--annual --range YYYY:YYYY → annual reports for year range, both report types
+--type hardware|software|all → report type (default: all)
 --data-root DIR            → root directory for all input data (default: data)
 --out-dir DIR              → output directory for report file (default: data)
 --debug                    → enable debug logging

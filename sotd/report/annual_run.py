@@ -67,66 +67,81 @@ def run_annual_report(args) -> None:
         else:
             raise ValueError("Annual reports require either --year or --range")
 
+        # Determine which report types to generate
+        if args.type == "all":
+            report_types = ["hardware", "software"]
+            print(f"Generating annual reports for years {years} (both hardware and software)...")
+        else:
+            report_types = [args.type]
+            print(f"Generating annual {args.type} reports for years {years}...")
+
         if args.debug:
             logger.info(f"Processing years: {years}")
             print(f"[DEBUG] Processing years: {years}")
+            logger.info(f"Report types: {report_types}")
+            print(f"[DEBUG] Report types: {report_types}")
 
         # Process each year in the range
         for year in years:
             if args.debug:
-                logger.info(f"Generating annual {args.type} report for {year}")
-                print(f"[DEBUG] Generating annual {args.type} report for {year}")
+                logger.info(f"Generating annual reports for {year}")
+                print(f"[DEBUG] Generating annual reports for {year}")
 
-            try:
-                # Generate annual report content
-                report_content = generate_annual_report(
-                    args.type, year, data_root, args.debug, None
-                )
-                total_report_size_chars += len(report_content)
-            except FileNotFoundError as e:
-                years_failed += 1
-                print(
-                    f"[ERROR] Annual data not found for {year}. "
-                    f"Run the aggregate phase first with --annual --year {year} "
-                    f"to generate the required data."
-                )
-                raise FileNotFoundError(
-                    f"Annual data not found for {year}. "
-                    f"Run the aggregate phase first with --annual --year {year} "
-                    f"to generate the required data."
-                ) from e
-            except Exception as e:
-                years_failed += 1
-                print(f"[ERROR] Failed to generate annual report content: {e}")
-                raise RuntimeError(f"Failed to generate annual report content: {e}") from e
-
-            try:
-                # Save report to file
+            # Generate reports for each type
+            for report_type in report_types:
                 if args.debug:
-                    logger.info(f"Saving annual report for {year}")
-                    print(f"[DEBUG] Saving annual report for {year}")
-                monitor.start_file_io_timing()
-                output_path = save_annual_report(
-                    report_content, out_dir, year, args.type, args.force, args.debug
-                )
-                monitor.end_file_io_timing()
-                years_successful += 1
-            except OSError:
-                monitor.end_file_io_timing()
-                years_failed += 1
-                print(f"[ERROR] Failed to save annual report for {year}")
-                raise
-            except Exception as e:
-                monitor.end_file_io_timing()
-                years_failed += 1
-                print(f"[ERROR] Failed to save annual report: {e}")
-                raise RuntimeError(f"Failed to save annual report: {e}") from e
+                    logger.info(f"Generating annual {report_type} report for {year}")
+                    print(f"[DEBUG] Generating annual {report_type} report for {year}")
 
-            # Success message for this year
-            print(f"[INFO] Successfully generated {args.type} report for {year}")
-            print(f"[INFO] Report saved to: {output_path}")
-            logger.info(f"Successfully generated {args.type} report for {year}")
-            logger.info(f"Report saved to: {output_path}")
+                try:
+                    # Generate annual report content
+                    report_content = generate_annual_report(
+                        report_type, year, data_root, args.debug, None
+                    )
+                    total_report_size_chars += len(report_content)
+                    print(f"  {year} {report_type}: generated")
+                except FileNotFoundError as e:
+                    years_failed += 1
+                    print(
+                        f"[ERROR] Annual data not found for {year}. "
+                        f"Run the aggregate phase first with --annual --year {year} "
+                        f"to generate the required data."
+                    )
+                    raise FileNotFoundError(
+                        f"Annual data not found for {year}. "
+                        f"Run the aggregate phase first with --annual --year {year} "
+                        f"to generate the required data."
+                    ) from e
+                except Exception as e:
+                    years_failed += 1
+                    print(f"[ERROR] Failed to generate annual {report_type} report content: {e}")
+                    raise RuntimeError(
+                        f"Failed to generate annual {report_type} report content: {e}"
+                    ) from e
+
+                try:
+                    # Save report to file
+                    if args.debug:
+                        logger.info(f"Saving annual {report_type} report for {year}")
+                        print(f"[DEBUG] Saving annual {report_type} report for {year}")
+                    monitor.start_file_io_timing()
+                    output_path = save_annual_report(
+                        report_content, out_dir, year, report_type, args.force, args.debug
+                    )
+                    monitor.end_file_io_timing()
+                    print(f"  {year} {report_type}: {output_path.name}")
+                except OSError:
+                    monitor.end_file_io_timing()
+                    years_failed += 1
+                    print(f"[ERROR] Failed to save annual {report_type} report for {year}")
+                    raise
+                except Exception as e:
+                    monitor.end_file_io_timing()
+                    years_failed += 1
+                    print(f"[ERROR] Failed to save annual {report_type} report: {e}")
+                    raise RuntimeError(f"Failed to save annual {report_type} report: {e}") from e
+
+            years_successful += 1
 
         # Final success message
         if len(years) == 1:
