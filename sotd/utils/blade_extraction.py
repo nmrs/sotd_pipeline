@@ -335,5 +335,13 @@ def extract_blade_use_count_via_normalization(
         except ValueError:
             pass
 
+    # Pattern 7: Hashtag patterns like #4, #2.5, etc.
+    hashtag_match = re.search(r"#(\d+(?:\.\d+)?)", remainder)
+    if hashtag_match:
+        try:
+            return int(float(hashtag_match.group(1))), remainder
+        except ValueError:
+            pass
+
     # No count pattern found in remainder
     return None, remainder

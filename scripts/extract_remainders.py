@@ -168,7 +168,7 @@ def create_bucketed_yaml(analysis, all_remainders):
     # Categorize each unique remainder using two-phase approach
     for remainder in analysis["unique_remainder_list"]:
         # Phase 1: Pre-normalization bucketing for simple, clean patterns
-        if re.match(r"^\(\d+\)$", remainder):  # (4), (10), (100)
+        if re.match(r"^\(\d+(?:\.\d+)?\)$", remainder):  # (4), (10), (100), (1.5), (2.5)
             blade_count_buckets["simple-numeric"].append(remainder)
         elif re.match(r"^\[\d+\]$", remainder):  # [4], [10], [100)
             blade_count_buckets["simple-numeric"].append(remainder)
@@ -207,12 +207,22 @@ def create_bucketed_yaml(analysis, all_remainders):
             "(usa)",
             "(uk)",
             "(turkey)",
+            "(czechoslovakian)",
+            "(indian)",
+            "(poland)",
+            "(russian)",
         ]:
             # (china), (germany), (india), etc. - just location
+            non_blade_count_buckets["location-indicator"].append(remainder)
+        elif re.match(r"^\(made in [a-z]+\)$", remainder):  # (made in china), (made in germany)
+            # Complex location patterns
             non_blade_count_buckets["location-indicator"].append(remainder)
         elif re.match(r"^\([a-z]+,\s*new\)$", remainder):  # (thailand, new), (india, new)
             # (location, new) - location plus new indicator (equivalent to (1))
             blade_count_buckets["location-plus-new-indicator"].append(remainder)
+        elif re.match(r"^\([a-z]+,\s*[a-z\s]+\)$", remainder):  # (india, 3rd or 4th use)
+            # (location, description) - location plus description
+            non_blade_count_buckets["other"].append(remainder)
         # Note: (usa, blue box) type patterns will fall through to 'other' bucket
         elif re.match(r"^\[[a-z]+\]$", remainder) and remainder.lower() in [
             "[usa]",
@@ -257,6 +267,9 @@ def create_bucketed_yaml(analysis, all_remainders):
             else:
                 # This is a location indicator, categorize normally
                 blade_count_buckets["location-plus-simple"].append(remainder)
+        elif re.match(r"^\(made in [a-z]+\)\s+\[\d+\]$", remainder):  # (made in china) [1]
+            # Complex location + simple numeric - categorize as location-plus-simple
+            blade_count_buckets["location-plus-simple"].append(remainder)
 
         # Phase 2: Post-normalization bucketing for complex patterns that need cleaning
         else:
@@ -268,8 +281,9 @@ def create_bucketed_yaml(analysis, all_remainders):
                 continue
 
             # Categorize the normalized remainder into appropriate buckets
-            if re.match(r"^\(\d+\)$", normalized_remainder):  # (4), (10), (100) - simple-paren
-                print(f"DEBUG: Phase 2 matched {normalized_remainder} -> simple-numeric")  # Debug
+            if re.match(
+                r"^\(\d+(?:\.\d+)?\)$", normalized_remainder
+            ):  # (4), (10), (100), (1.5), (2.5)
                 blade_count_buckets["simple-numeric"].append(normalized_remainder)
             elif re.match(r"^\[\d+\]$", normalized_remainder):  # [4], [10], [100] - simple-bracket
                 blade_count_buckets["simple-numeric"].append(normalized_remainder)
@@ -308,6 +322,7 @@ def create_bucketed_yaml(analysis, all_remainders):
                 blade_count_buckets["location-plus-simple"].append(normalized_remainder)
             elif re.match(r"^\([a-z]+\)\s+\[\d+\]$", normalized_remainder):  # (china) [1]
                 blade_count_buckets["location-plus-simple"].append(normalized_remainder)
+            # Note: (made in china) [1] patterns are now handled in Phase 1
             elif re.match(r"^\[[a-z]+\]\s+\(\d+\)$", normalized_remainder):  # [china] (1)
                 blade_count_buckets["location-plus-simple"].append(normalized_remainder)
             elif re.match(r"^\[\d+\]\s+\([a-z]+\)$", normalized_remainder):  # [1] (india)
@@ -346,8 +361,17 @@ def create_bucketed_yaml(analysis, all_remainders):
                 "(usa)",
                 "(uk)",
                 "(turkey)",
+                "(czechoslovakian)",
+                "(indian)",
+                "(poland)",
+                "(russian)",
             ]:
                 # (china), (germany), (india), etc. - just location
+                non_blade_count_buckets["location-indicator"].append(normalized_remainder)
+            elif re.match(
+                r"^\(made in [a-z]+\)$", normalized_remainder
+            ):  # (made in china), (made in germany)
+                # Complex location patterns
                 non_blade_count_buckets["location-indicator"].append(normalized_remainder)
             elif re.match(
                 r"^\([a-z]+,\s*new\)$", normalized_remainder
