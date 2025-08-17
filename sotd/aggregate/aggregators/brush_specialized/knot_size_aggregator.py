@@ -23,7 +23,12 @@ def aggregate_knot_sizes(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     # Extract knot size data from records
     knot_size_data = []
     for record in records:
-        brush = record.get("brush", {})
+        brush = record.get("brush")
+
+        # Skip if no brush data or brush is None
+        if not brush:
+            continue
+
         matched = brush.get("matched")
         enriched = brush.get("enriched")
 

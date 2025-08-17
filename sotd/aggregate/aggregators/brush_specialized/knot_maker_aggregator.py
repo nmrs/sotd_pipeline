@@ -25,8 +25,13 @@ def aggregate_knot_makers(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]
     # Extract knot maker data from records
     knot_maker_data = []
     for record in records:
-        brush = record.get("brush", {})
-        matched = brush.get("matched", {})
+        brush = record.get("brush")
+        
+        # Skip if no brush data or brush is None
+        if not brush:
+            continue
+            
+        matched = brush.get("matched")
         enriched = brush.get("enriched", {})
 
         # Skip if no matched brush data
