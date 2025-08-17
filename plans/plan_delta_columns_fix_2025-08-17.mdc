@@ -3,12 +3,12 @@
 ## Overview
 Investigate and fix issues with delta columns in the SOTD Pipeline report generation system.
 
-## Investigation Status: COMPLETE ✅
+## Investigation Status: IN_PROGRESS 🔍
 
-### Root Cause Analysis: COMPLETE ✅
-- **Issue Identified**: The plan incorrectly stated that the base class was calling a non-existent method `calculate_deltas` instead of `calculate_deltas_for_period`
-- **Actual Finding**: The `DeltaCalculator` class DOES have a `calculate_deltas` method, and the calls in the base class are correct
-- **Real Issue**: Path construction problems in the report core causing double "aggregated" subdirectory paths
+### Root Cause Analysis: IN_PROGRESS 🔍
+- **Issue Identified**: Delta columns (Δ vs previous month, Δ vs previous year, Δ vs 5 years ago) are showing "n/a" for many tables
+- **Current Status**: Path construction issues were fixed, but the core delta calculation problem remains unresolved
+- **Evidence**: June 2025 report shows all delta columns as "n/a" for most tables (Christopher Bradley Plates, Game Changer Plates, Straight Widths, etc.)
 
 ### Path Construction Issues: FIXED ✅
 - **Problem**: Report core was constructing paths like `data/aggregated/aggregated/2024-10.json` instead of `data/aggregated/2024-10.json`
@@ -21,14 +21,17 @@ Investigate and fix issues with delta columns in the SOTD Pipeline report genera
 - **Method Signature**: `calculate_deltas(current_data, historical_data, name_key="name", max_items=20)`
 - **Base Class Calls**: All calls use correct method signature and parameters
 
-### Delta Column Functionality: VERIFIED ✅
-- **Status**: Delta columns are working correctly in generated reports
-- **Columns Present**: All three delta columns are generated:
-  - Δ vs previous month
-  - Δ vs previous year  
-  - Δ vs 5 years ago
-- **Delta Indicators**: Working correctly (↑, ↓, =, n/a)
-- **Test Coverage**: All 283 report tests passing
+### Delta Column Functionality: NOT WORKING ❌
+- **Status**: Delta columns are NOT working correctly in generated reports
+- **Problem**: All three delta columns show "n/a" for most table types
+- **Evidence**: June 2025 report shows:
+  - Christopher Bradley Plates: All delta columns = "n/a"
+  - Game Changer Plates: All delta columns = "n/a"  
+  - Straight Widths: All delta columns = "n/a"
+  - Straight Grinds: All delta columns = "n/a"
+  - Straight Points: All delta columns = "n/a"
+  - Most Used Blades in Most Used Razors: All delta columns = "n/a"
+  - Highest Use Count per Blade: All delta columns = "n/a"
 
 ### Test Results: ALL PASSING ✅
 - **Total Tests**: 283
@@ -51,28 +54,51 @@ Investigate and fix issues with delta columns in the SOTD Pipeline report genera
 ### Verification Steps Completed
 1. ✅ **Path Construction**: Fixed double "aggregated" subdirectory issue
 2. ✅ **Report Generation**: Successfully generates reports with correct data loading
-3. ✅ **Delta Columns**: All three delta columns working correctly in generated reports
+3. ❌ **Delta Columns**: Delta columns are NOT working correctly - showing "n/a" for most tables
 4. ✅ **Test Suite**: All 283 tests passing
 5. ✅ **Integration**: Report generation works end-to-end with debug output
 
+## Current Status: CORE ISSUE UNRESOLVED ❌
+
+The investigation has **NOT** resolved the main problem. While path construction issues were fixed, the delta columns are still showing "n/a" for most tables. This indicates that:
+
+1. **Data is loading correctly** (no more path errors)
+2. **Delta calculation infrastructure exists** (tests pass)
+3. **But delta calculations are not producing results** (all showing "n/a")
+
+## Next Steps: Continue Investigation 🔍
+
+### 1. Investigate Delta Calculation Logic (IMMEDIATE)
+- Check why `DeltaCalculator.calculate_deltas` is returning empty results
+- Verify that historical data is being passed correctly to delta calculations
+- Debug the actual delta calculation process in table generation
+
+### 2. Examine Data Flow in Table Generation
+- Trace how comparison data flows from report core to table generators
+- Verify that historical data is being extracted and passed correctly
+- Check if table generators are calling delta calculations with proper parameters
+
+### 3. Debug Delta Calculation Execution
+- Add debug output to see what data is being passed to delta calculations
+- Verify that historical data contains the expected structure
+- Check if delta calculations are receiving the right data types and formats
+
+### 4. Investigate Historical Data Loading
+- Verify that comparison data loading is working correctly
+- Check if historical data files exist and contain expected data
+- Ensure that data structure matches what delta calculations expect
+
 ## Conclusion
 
-The delta columns fix investigation is **COMPLETE**. The original issue was incorrectly diagnosed as a method call problem, but the real issue was path construction problems in the report core. After fixing the path construction issues:
-
-- ✅ Delta columns are working correctly
-- ✅ All tests are passing  
-- ✅ Report generation is working end-to-end
-- ✅ Path construction is correct and consistent
-
-The system is now fully functional with proper delta column generation and all tests passing.
+The delta columns fix investigation is **NOT COMPLETE**. While path construction issues were resolved, the core problem of delta columns showing "n/a" remains unresolved. The investigation must continue to find why delta calculations are not producing results despite the infrastructure being in place and tests passing.
 
 ## Lessons Learned
 
-1. **Investigation Accuracy**: Always verify the actual code before accepting reported issues
-2. **Path Construction**: Be careful with path construction to avoid double subdirectory issues
-3. **Test Validation**: Use comprehensive testing to verify fixes work end-to-end
-4. **Method Verification**: Check actual method existence before assuming method call issues
+1. **Path fixes ≠ functional fixes**: Resolving path issues doesn't guarantee functional fixes
+2. **Test passing ≠ feature working**: All tests can pass while the actual feature fails
+3. **Investigation depth**: Need to verify actual functionality, not just infrastructure
+4. **Evidence-based debugging**: Use actual report output to verify fixes work
 
-## Next Steps
+## Next Session
 
-No further action required. The delta columns fix investigation is complete and all issues have been resolved.
+Continue investigation to find why delta calculations are returning "n/a" despite all infrastructure being in place and tests passing.
