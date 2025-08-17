@@ -63,8 +63,11 @@ def run_report(args) -> None:
         print("[DEBUG] Loading historical data for delta calculations")
     try:
         monitor.start_file_io_timing()
-        # Pass the data root since get_aggregated_file_path adds the aggregated subdirectory
-        comparison_data = load.load_comparison_data(data_root, year, month, args.debug)
+        # Pass the aggregated directory since load_comparison_data expects the base
+        # aggregated directory
+        comparison_data = load.load_comparison_data(
+            data_root / "aggregated", year, month, args.debug
+        )
         monitor.end_file_io_timing()
         if args.debug:
             print(f"[DEBUG] Loaded {len(comparison_data)} comparison periods")
