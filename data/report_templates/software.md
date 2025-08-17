@@ -13,11 +13,11 @@ Welcome to your SOTD Lather Log for {{month_year}}
 
 ## Notes & Caveats
 
-* I only show the top n results per category to keep the tables readable and avoid max post length issues.
+* Tables show all entries with 5 or more shaves to provide comprehensive coverage without artificial row limits.
 
 * The unique user column shows the number of different users who used a given brand/soap/etc in the month.
 
-* The Brand Diversity table details the number of distinct soaps used during the month from that particular brand.
+* The Brand Diversity table details the number of distinct soaps used during the month from that particular brand, showing all brands with 5+ unique soaps.
 
 * The change Δ vs columns show how an item has moved up or down the rankings since that month. = means no change in position, up or down arrows indicate how many positions up or down the rankings an item has moved compared to that month. n/a means the item was not present in that month.
 
