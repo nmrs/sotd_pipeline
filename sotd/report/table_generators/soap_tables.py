@@ -132,6 +132,10 @@ class BrandDiversityTableGenerator(StandardProductTableGenerator):
         """Return the key to use for matching items in delta calculations."""
         return "maker"
 
+    def get_category_name(self) -> str:
+        """Get the category name for this table generator."""
+        return "brand_diversity"
+
     def _get_category_name(self) -> str:
         """Get the category name for this table generator."""
         return "brand_diversity"
