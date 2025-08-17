@@ -264,6 +264,14 @@ def extract_blade_use_count_via_normalization(
     # Look for common count patterns in the remainder
     import re
 
+    # Pattern 0: Number followed by x (2x, 3x, etc.)
+    number_x_match = re.search(r"(\d+)x", remainder, re.IGNORECASE)
+    if number_x_match:
+        try:
+            return int(number_x_match.group(1)), remainder
+        except ValueError:
+            pass
+
     # Pattern 1: Simple parentheses with number (39), (2x), etc.
     paren_match = re.search(r"\((\d+(?:x)?)\)", remainder)
     if paren_match:

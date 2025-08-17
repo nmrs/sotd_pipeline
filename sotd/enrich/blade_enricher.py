@@ -1,10 +1,7 @@
 from typing import Any, Dict
 
 from .enricher import BaseEnricher
-from sotd.utils.blade_extraction import (
-    extract_blade_and_use_count,
-    extract_blade_use_count_via_normalization,
-)
+from sotd.utils.blade_extraction import extract_blade_use_count_via_normalization
 
 
 class BladeCountEnricher(BaseEnricher):
@@ -20,8 +17,8 @@ class BladeCountEnricher(BaseEnricher):
     - "astra green [2\\]" -> use_count: 2
     - "Feather Hi-Stainless (2nd)" -> use_count: 2
 
-    A/B TESTING: This enricher now outputs both the current regex-based approach
-    and the new normalization-difference approach for comparison.
+    Uses the normalization-difference approach to avoid confusion between model numbers
+    and actual use counts by leveraging the already-done normalization work.
     """
 
     @property
@@ -34,7 +31,7 @@ class BladeCountEnricher(BaseEnricher):
         return "blade" in record and record["blade"] is not None
 
     def enrich(self, field_data: Dict[str, Any], original_comment: str) -> Dict[str, Any]:
-        """Enrich blade data with use count information using both approaches."""
+        """Enrich blade data with use count information using normalization approach."""
         original = field_data.get("original", "")
         normalized = field_data.get("normalized", "")
         matched = field_data.get("matched", {})
@@ -43,25 +40,15 @@ class BladeCountEnricher(BaseEnricher):
         if not original or not normalized:
             return {}
 
-        # Extract counts using both approaches
-        # Approach A: Current regex-based method
-        result_a = extract_blade_and_use_count(original_comment, model)
-        use_count_a = result_a[1] if result_a and result_a[1] else None
-
-        # Approach B: New normalization-difference method
-        result_b = extract_blade_use_count_via_normalization(original, normalized, model)
-        use_count_b = result_b[0] if result_b else None
-        extraction_remainder = result_b[1] if result_b else None
+        # Extract use count using normalization-difference method
+        result = extract_blade_use_count_via_normalization(original, normalized, model)
+        use_count = result[0] if result else None
+        extraction_remainder = result[1] if result else None
 
         # Create enriched data
         enriched_data = {
-            "use_count": use_count_a,
-            "use_count_b": use_count_b,
+            "use_count": use_count,
             "extraction_remainder": extraction_remainder,
         }
-
-        # Add blade_count if available from Approach A
-        if result_a and result_a[0]:
-            enriched_data["blade_count"] = result_a[0]
 
         return enriched_data
