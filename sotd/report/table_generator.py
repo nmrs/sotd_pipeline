@@ -135,15 +135,23 @@ class TableGenerator:
         # Check if we have comparison data for delta calculations
         include_delta = bool(self.comparison_data)
 
+        # Determine max_rows based on table generator preference
+        if hasattr(generator, 'should_limit_rows') and not generator.should_limit_rows():
+            max_rows = 10000  # Effectively unlimited
+        else:
+            max_rows = 20  # Default limit
+
         # Generate the table (without header since template provides section headers)
         if self.comparison_data:
             table_content = generator.generate_table(
+                max_rows=max_rows,
                 include_delta=include_delta,
                 comparison_data=self.comparison_data,
                 include_header=False,
             )
         else:
             table_content = generator.generate_table(
+                max_rows=max_rows,
                 include_delta=include_delta,
                 comparison_data=None,
                 include_header=False,

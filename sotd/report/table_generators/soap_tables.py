@@ -62,6 +62,10 @@ class SoapMakersTableGenerator(DataTransformingTableGenerator):
         """Get the target field name in current data."""
         return "brand"
 
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all soap makers."""
+        return False
+
 
 class SoapsTableGenerator(StandardProductTableGenerator):
     """Generates a table of soaps with usage statistics."""
@@ -83,6 +87,10 @@ class SoapsTableGenerator(StandardProductTableGenerator):
         config = STANDARD_PRODUCT_COLUMNS.copy()
         config["name"]["display_name"] = "Soap"
         return config
+
+    def should_limit_rows(self) -> bool:
+        """Disable row limiting to show all soaps."""
+        return False
 
 
 class BrandDiversityTableGenerator(StandardProductTableGenerator):
