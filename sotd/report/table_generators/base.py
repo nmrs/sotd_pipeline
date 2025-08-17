@@ -326,8 +326,7 @@ class BaseTableGenerator(ABC):
             max_rows: Maximum number of rows to include
             include_delta: Whether to include delta columns
             comparison_data: Historical data for delta calculations
-                           (dict mapping period to (metadata, data))
-            include_header: Whether to include the table header (default: True)
+            include_header: Whether to include the table header
 
         Returns:
             Markdown table as a string
@@ -335,7 +334,10 @@ class BaseTableGenerator(ABC):
         if self.debug:
             print(f"[DEBUG] Generating table: {self.get_table_title()}")
 
-        # Get the data
+        # Store comparison_data for use by specialized table generators
+        self.comparison_data = comparison_data
+
+        # Get the table data
         table_data = self.get_table_data()
 
         if not table_data:
@@ -499,11 +501,14 @@ class BaseTableGenerator(ABC):
 
         return "\n".join(markdown_lines)
 
-    def _add_positions(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _add_positions(
+        self, data: List[Dict[str, Any]], name_field: str = "name"
+    ) -> List[Dict[str, Any]]:
         """Add position information to data for delta calculations.
 
         Args:
             data: List of data items
+            name_field: Field name to use for identifying items in debug output
 
         Returns:
             Data with position information added
@@ -524,6 +529,10 @@ class BaseTableGenerator(ABC):
 
         if self.debug:
             print(f"[DEBUG] Added positions to {len(data)} items")
+            assignments = [
+                (item.get(name_field, "unknown"), item.get("position")) for item in sorted_data
+            ]
+            print(f"[DEBUG] Position assignments: {assignments}")
 
         return data
 
@@ -663,12 +672,28 @@ class BaseTableGenerator(ABC):
         for period, (metadata, historical_data) in comparison_data.items():
             # Get the historical data for this category
             category_name = self.get_category_name()
+            if self.debug:
+                print(f"[DEBUG] Looking for category '{category_name}' in historical data")
+                # Check if historical_data is a dict and get its keys
+                if isinstance(historical_data, dict):
+                    keys_str = str(list(historical_data.keys()))
+                else:
+                    keys_str = "Not a dict"
+
+                print(f"[DEBUG] Historical data keys: {keys_str}")
+
             historical_category_data = historical_data.get(category_name, [])
 
             if not historical_category_data:
                 if self.debug:
                     print(f"[DEBUG] No historical data found for category: {category_name}")
                 continue
+
+            if self.debug:
+                print(
+                    f"[DEBUG] Found {len(historical_category_data)} "
+                    f"historical records for category: {category_name}"
+                )
 
             # Add positions to historical data if not present
             if not any("position" in item for item in historical_category_data):
@@ -677,9 +702,31 @@ class BaseTableGenerator(ABC):
             # Calculate deltas for this period
             try:
                 name_key = self.get_name_key()
+                if self.debug:
+                    print(f"[DEBUG] Using name_key: {name_key}")
+                    print(f"[DEBUG] Current data sample: {result[:2] if result else 'No data'}")
+                    print(
+                        f"[DEBUG] Historical data sample: "
+                        f"{historical_category_data[:2] if historical_category_data else 'No data'}"
+                    )
+                    print(f"[DEBUG] Delta calculator type: {type(self.delta_calculator)}")
+                    # Get available methods for debugging
+                    if self.delta_calculator:
+                        methods = [m for m in dir(self.delta_calculator) if not m.startswith("_")]
+                        methods_str = str(methods)
+                    else:
+                        methods_str = "None"
+                    print(f"[DEBUG] Delta calculator methods: {methods_str}")
+
                 period_deltas = self.delta_calculator.calculate_deltas(
                     result, historical_category_data, name_key=name_key, max_items=len(result)
                 )
+
+                if self.debug:
+                    print(
+                        f"[DEBUG] Delta calculation result: "
+                        f"{period_deltas[:2] if period_deltas else 'No deltas'}"
+                    )
 
                 # Update the result with delta information for this period
                 for i, item in enumerate(result):
