@@ -108,7 +108,9 @@ class BrandDiversityTableGenerator(StandardProductTableGenerator):
         """Get brand diversity data from aggregated data."""
         data = self.data.get("brand_diversity", [])
         # Filter for brands with 5+ unique soaps (as requested by user)
-        filtered_data = [item for item in data if item.get("unique_soaps", 0) >= 5]
+        filtered_data = [
+            item for item in data if item.get("unique_soaps", 0) >= 5
+        ]
         return self._validate_data_records(
             filtered_data, "brand_diversity", ["maker", "unique_soaps"]
         )
@@ -128,6 +130,18 @@ class BrandDiversityTableGenerator(StandardProductTableGenerator):
 
     def get_name_key(self) -> str:
         """Return the key to use for matching items in delta calculations."""
+        return "maker"
+
+    def _get_category_name(self) -> str:
+        """Get the category name for this table generator."""
+        return "brand_diversity"
+
+    def _get_source_field(self) -> str:
+        """Get the source field name in historical data."""
+        return "maker"
+
+    def _get_target_field(self) -> str:
+        """Get the target field name in current data."""
         return "maker"
 
     def should_limit_rows(self) -> bool:
