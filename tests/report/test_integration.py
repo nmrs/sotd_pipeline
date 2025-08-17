@@ -6,7 +6,7 @@ from sotd.report.process import generate_report_content
 class TestReportIntegration:
     """Integration tests for report generation."""
 
-    def test_hardware_report_generation(self, template_file):
+    def test_hardware_report_generation(self, template_dir):
         """Test complete hardware report generation with sample data."""
         # Sample aggregated data
         metadata = {
@@ -65,7 +65,7 @@ class TestReportIntegration:
 
         # Generate report content with custom template
         report_content = generate_report_content(
-            "hardware", metadata, data, template_path=str(template_file), debug=False
+            "hardware", metadata, data, template_path=str(template_dir), debug=False
         )
 
         # Verify report structure
@@ -94,7 +94,7 @@ class TestReportIntegration:
         assert "Simpson Chubby 2" in report_content
         assert "user1" in report_content
 
-    def test_software_report_generation(self, template_file):
+    def test_software_report_generation(self, template_dir):
         """Test complete software report generation with sample data."""
         # Sample aggregated data
         metadata = {
@@ -126,7 +126,7 @@ class TestReportIntegration:
 
         # Generate report content with custom template
         report_content = generate_report_content(
-            "software", metadata, data, template_path=str(template_file), debug=False
+            "software", metadata, data, template_path=str(template_dir), debug=False
         )
 
         # Verify report structure
@@ -150,7 +150,7 @@ class TestReportIntegration:
         assert "Stirling Soap Co" in report_content
         assert "user1" in report_content
 
-    def test_report_with_empty_data(self, template_file):
+    def test_report_with_empty_data(self, template_dir):
         """Test report generation with empty data."""
         metadata = {
             "month": "2025-01",
@@ -162,7 +162,7 @@ class TestReportIntegration:
 
         # Should not raise exceptions
         report_content = generate_report_content(
-            "hardware", metadata, data, template_path=str(template_file), debug=False
+            "hardware", metadata, data, template_path=str(template_dir), debug=False
         )
 
         # Should still have basic structure
@@ -173,7 +173,7 @@ class TestReportIntegration:
         # Should handle empty data gracefully
         assert "*No data available" in report_content
 
-    def test_report_with_delta_calculations(self, template_file):
+    def test_report_with_delta_calculations(self, template_dir):
         """Test report generation with historical data for delta calculations."""
         metadata = {
             "month": "2025-01",
@@ -211,7 +211,7 @@ class TestReportIntegration:
             metadata,
             data,
             comparison_data,
-            template_path=str(template_file),
+            template_path=str(template_dir),
             debug=False,
         )
 

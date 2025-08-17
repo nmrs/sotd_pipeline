@@ -89,16 +89,13 @@ class TestAnnualReportGenerator:
 
     def test_generate_annual_report_invalid_template(self, tmp_path: Path):
         """Test error handling for invalid/malformed template."""
-        # Remove/rename the template file so the template is missing
-        # Use a custom template path that does not contain annual_hardware
-        import yaml
-
-        # Create a template file with only monthly templates
-        template_content = {"hardware": {"report_template": "Monthly hardware report"}}
-        template_file = tmp_path / "test_templates.yaml"
-        with open(template_file, "w") as f:
-            yaml.dump(template_content, f)
-
+        # Create a template directory with only monthly templates (missing annual_hardware)
+        template_dir = tmp_path / "test_templates"
+        template_dir.mkdir()
+        
+        # Create a hardware template but not annual_hardware
+        (template_dir / "hardware.md").write_text("Monthly hardware report")
+        
         # Create valid annual data file
         test_data = {
             "metadata": {
@@ -125,7 +122,7 @@ class TestAnnualReportGenerator:
                 year="2024",
                 data_dir=tmp_path,
                 debug=False,
-                template_path=str(template_file),
+                template_path=str(template_dir),
             )
 
     def test_generate_annual_report_with_extra_fields(self, tmp_path: Path):
@@ -174,23 +171,17 @@ class TestAnnualReportGenerator:
             json.dump(test_data, f, ensure_ascii=False)
 
         # Create template with extra fields
-        import yaml
-
-        template_content = {
-            "annual_hardware": {
-                "report_template": (
-                    "Welcome to your Annual SOTD Hardware Report for {{year}}\n\n"
-                    "* {{total_shaves}} shave reports from {{unique_shavers}} "
-                    "distinct shavers during {{year}}.\n\n"
-                    "## Razors\n\n{{tables.razors}}\n\n"
-                    "## Extra Section\n\nThis is an extra section that should be included."
-                ),
-                "extra_template_field": "should be ignored",
-            }
-        }
-        template_file = tmp_path / "test_templates.yaml"
-        with open(template_file, "w") as f:
-            yaml.dump(template_content, f)
+        template_dir = tmp_path / "test_templates"
+        template_dir.mkdir()
+        
+        template_content = (
+            "Welcome to your Annual SOTD Hardware Report for {{year}}\n\n"
+            "* {{total_shaves}} shaves from {{unique_shavers}} "
+            "distinct shavers during {{year}}.\n\n"
+            "## Razors\n\n{{tables.razors}}\n\n"
+            "## Extra Section\n\nThis is an extra section that should be included."
+        )
+        (template_dir / "annual_hardware.md").write_text(template_content)
 
         # Generate annual hardware report
         result = annual_generator.generate_annual_report(
@@ -198,13 +189,13 @@ class TestAnnualReportGenerator:
             year="2024",
             data_dir=tmp_path,
             debug=False,
-            template_path=str(template_file),
+            template_path=str(template_dir),
         )
 
         # Verify the report was generated correctly despite extra fields
         assert result is not None
         assert "Welcome to your Annual SOTD Hardware Report for 2024" in result
-        assert "1,200 shave reports from 100 distinct shavers during 2024" in result
+        assert "1,200 shaves from 100 distinct shavers during 2024" in result
         assert "Rockwell 6C" in result
         assert "Extra Section" in result  # Extra template content should be included
         # Extra fields should not cause errors or appear in output
@@ -364,32 +355,27 @@ class TestAnnualReportGenerator:
             json.dump(test_data, f, ensure_ascii=False)
 
         # Create custom template to test template processor integration
-        import yaml
-
-        template_content = {
-            "annual_hardware": {
-                "report_template": (
-                    "# Annual SOTD Hardware Report for {{year}}\n\n"
-                    "## Overview\n\n"
-                    "* {{total_shaves}} shave reports from {{unique_shavers}} "
-                    "distinct shavers during {{year}}.\n"
-                    "* Data includes {{included_months}} months of the year.\n"
-                    "* Missing data for {{missing_months}} months.\n\n"
-                    "## Top Razors\n\n"
-                    "{{tables.razors}}\n\n"
-                    "## Top Blades\n\n"
-                    "{{tables.blades}}\n\n"
-                    "## Top Brushes\n\n"
-                    "{{tables.brushes}}\n\n"
-                    "## Summary\n\n"
-                    "This report covers {{included_months}} months of {{year}} "
-                    "with {{total_shaves}} total shaves."
-                )
-            }
-        }
-        template_file = tmp_path / "test_templates.yaml"
-        with open(template_file, "w") as f:
-            yaml.dump(template_content, f)
+        template_dir = tmp_path / "test_templates"
+        template_dir.mkdir()
+        
+        template_content = (
+            "# Annual SOTD Hardware Report for {{year}}\n\n"
+            "## Overview\n\n"
+            "* {{total_shaves}} shaves from {{unique_shavers}} "
+            "distinct shavers during {{year}}.\n"
+            "* Data includes {{included_months}} months of the year.\n"
+            "* Missing data for {{missing_months}} months.\n\n"
+            "## Top Razors\n\n"
+            "{{tables.razors}}\n\n"
+            "## Top Blades\n\n"
+            "{{tables.blades}}\n\n"
+            "## Top Brushes\n\n"
+            "{{tables.brushes}}\n\n"
+            "## Summary\n\n"
+            "This report covers {{included_months}} months of {{year}} "
+            "with {{total_shaves}} total shaves."
+        )
+        (template_dir / "annual_hardware.md").write_text(template_content)
 
         # Generate annual hardware report with integration testing
         result = annual_generator.generate_annual_report(
@@ -397,13 +383,13 @@ class TestAnnualReportGenerator:
             year="2024",
             data_dir=tmp_path,
             debug=True,  # Enable debug to test logging integration
-            template_path=str(template_file),
+            template_path=str(template_dir),
         )
 
         # Verify complete integration workflow
         assert result is not None
         assert "# Annual SOTD Hardware Report for 2024" in result
-        assert "15,000 shave reports from 500 distinct shavers during 2024" in result
+        assert "15,000 shaves from 500 distinct shavers during 2024" in result
         assert "Data includes 6 months of the year" in result
         assert "Missing data for 6 months" in result
 

@@ -71,6 +71,16 @@ class SoftwareReportGenerator(BaseReportGenerator):
         # Create table generator for table placeholders
         table_generator = TableGenerator(self.data, self.comparison_data, self.debug)
 
+        # Generate all tables for the template
+        tables = {}
+        for table_name in table_generator.get_available_table_names():
+            try:
+                tables[table_name] = table_generator.generate_table_by_name(table_name)
+            except Exception as e:
+                if self.debug:
+                    print(f"[DEBUG] SoftwareReport: Error generating table {table_name}: {e}")
+                tables[table_name] = f"*Error generating table {table_name}: {e}*"
+
         # Create template processor with custom path if provided
         if self.template_path:
             processor = TemplateProcessor(Path(self.template_path))
@@ -78,7 +88,7 @@ class SoftwareReportGenerator(BaseReportGenerator):
             processor = TemplateProcessor()
 
         # Use the new template structure - this now returns the complete report
-        return processor.render_template("software", "report_template", variables, table_generator)
+        return processor.process_template("software", variables, tables)
 
     def generate_tables(self) -> List[str]:
         """Generate all tables for the software report.
