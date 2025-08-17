@@ -333,8 +333,43 @@ def test_blade_normalization_asterisk_stripping(monkeypatch):
         assert blade_data_3["blade"]["normalized"] == "Timeless - Stainless Steel .68 Open Comb"
 
 
+def test_blade_normalization_x_usage_counts():
+    """Test normalization of X usage count patterns like (16X), (17X)"""
+    from sotd.utils.extract_normalization import strip_blade_count_patterns
+    
+    test_cases = [
+        ("FROMM Hair Shaper Blade (16X)", "FROMM Hair Shaper Blade"),
+        ("Wilkinson (16X)", "Wilkinson"),
+        ("KAI PINK Feather Cut Blade (16X)", "KAI PINK Feather Cut Blade"),
+        ("Cloud A77 Full Blade (16X)", "Cloud A77 Full Blade"),
+        ("Cloud A77 Mini Blade (17X)", "Cloud A77 Mini Blade"),
+        ("KAI PINK Feather Cut Blade (17X)", "KAI PINK Feather Cut Blade"),
+        ("Wilkinson (17X)", "Wilkinson"),
+    ]
+    
+    for original, expected in test_cases:
+        result = strip_blade_count_patterns(original)
+        assert result == expected, f"Expected '{expected}', got '{result}' for '{original}'"
+
+
+def test_blade_normalization_maybe_usage_counts():
+    """Test normalization of maybe usage count patterns like (17 maybe)"""
+    from sotd.utils.extract_normalization import strip_blade_count_patterns
+    
+    test_cases = [
+        ("Gillette Silver Blue (17 maybe)", "Gillette Silver Blue"),
+        ("Astra SP (5 maybe)", "Astra SP"),
+        ("Feather (10 maybe)", "Feather"),
+    ]
+    
+    for original, expected in test_cases:
+        result = strip_blade_count_patterns(original)
+        assert result == expected, f"Expected '{expected}', got '{result}' for '{original}'"
+
+
 def test_blade_normalization_comprehensive_shave_counts(monkeypatch):
-    """Test that all comprehensive shave count patterns are normalized out during blade extraction."""
+    """Test that all comprehensive shave count patterns are
+    normalized out during blade extraction."""
     comments = [
         # Basic usage counts
         {"id": "1", "body": "* **Blade:** Parker (1 use)"},

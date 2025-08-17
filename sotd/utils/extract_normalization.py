@@ -126,9 +126,17 @@ def strip_blade_count_patterns(value: str) -> str:
     cleaned = re.sub(hash_usage_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for "shave #n" usage counts: (shave #3), (shave #12), etc.
-    # These are also blade usage counts that should be stripped
-    shave_hash_pattern = r"(?:[\(\[\{])\s*shave\s+#\d+\s*[\)\]\}]"
+    shave_hash_pattern = r"(?:[\(\[\{])\s*shave\s+#\d+(?:\s+[^\)\]\}]+)?\s*[\)\]\}]"
     cleaned = re.sub(shave_hash_pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Pattern for "X" usage counts: (16X), (17X), etc.
+    # These are semantically equivalent to (16), (17) - blade usage counts that should be stripped
+    x_usage_pattern = r"(?:[\(\[\{])\s*\d+X\s*[\)\]\}]"
+    cleaned = re.sub(x_usage_pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Pattern for "maybe" usage counts: (17 maybe), etc.
+    maybe_usage_pattern = r"(?:[\(\[\{])\s*\d+\s+maybe\s*[\)\]\}]"
+    cleaned = re.sub(maybe_usage_pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Pattern for approximate number patterns: (10ish), (5ish?), (11-ish), ( 10ish ?), etc.
     # These are user approximations that should be normalized out
