@@ -227,6 +227,7 @@ def strip_soap_patterns(value: str) -> str:
     This removes patterns like:
     - Sample indicators: (sample), (tester), etc.
     - Size indicators: (travel size), (mini), etc.
+    - Product type indicators: "Shave Soap", "Shaving Soap", "soap", etc.
 
     Args:
         value: Input string that may contain soap-related patterns
@@ -237,7 +238,25 @@ def strip_soap_patterns(value: str) -> str:
     if not isinstance(value, str):
         return value
 
-    # Pattern for soap-related indicators
+    cleaned = value
+
+    # First remove complete phrases like "Shave Soap", "Shaving Soap", etc.
+    shaving_patterns = [
+        r"\b(shave soap|shaving soap|shave cream|shaving cream|"
+        r"shave splash|shaving splash|shave balm|shaving balm|"
+        r"shave aftershave|shaving aftershave)\b",
+    ]
+    for pattern in shaving_patterns:
+        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Then remove individual product type indicators
+    product_patterns = [
+        r"\b(soap|cream|splash|balm|aftershave|puck|croap)\b",
+    ]
+    for pattern in product_patterns:
+        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Pattern for soap-related indicators in parentheses
     soap_patterns = [
         r"\s*\(sample\)",
         r"\s*\(tester\)",
@@ -245,10 +264,15 @@ def strip_soap_patterns(value: str) -> str:
         r"\s*\(mini\)",
         r"\s*\(small\)",
     ]
-
-    cleaned = value
     for pattern in soap_patterns:
         cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Clean up any trailing punctuation and whitespace left behind
+    # Include periods in the punctuation cleanup for better handling
+    cleaned = re.sub(r"[\s\-:*/_,~`\\\.]+$", "", cleaned)
+
+    # Clean up any leading punctuation and whitespace left behind
+    cleaned = re.sub(r"^[\s\-:*/_,~`\\\.]+", "", cleaned)
 
     # Clean up extra whitespace
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
