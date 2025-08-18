@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+"""Razor format user aggregator for the SOTD pipeline."""
+
+from typing import Any, Dict, List
+import pandas as pd
+
+from ..base_aggregator import BaseAggregator
+
+
+class RazorFormatUserAggregator(BaseAggregator):
+    """Aggregator for tracking top users within each razor format category."""
+
+    def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Extract razor format data from enriched records."""
+        extracted = []
+        
+        for record in records:
+            razor_data = record.get("razor", {})
+            matched = razor_data.get("matched", {})
+            
+            # Skip records without matched razor data
+            if not matched:
+                continue
+                
+            # Extract format and author
+            format_type = matched.get("format")
+            author = record.get("author")
+            
+            # Skip if no format or author
+            if not format_type or not author:
+                continue
+                
+            extracted.append({
+                "author": author,
+                "format": format_type,
+            })
+            
+        return extracted
+
+    def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
+        """Create composite names for grouping (not used in this aggregator)."""
+        # This aggregator doesn't use composite names in the traditional sense
+        # We group by format first, then by user
+        return df["format"]
+
+    def _group_and_aggregate(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Group data by format first, then by user within each format."""
+        # Group by format and author to count shaves per user per format
+        grouped = df.groupby(["format", "author"]).size().reset_index(name="shaves")  # type: ignore
+        
+        # Add unique_users field (always 1 for user aggregators)
+        grouped["unique_users"] = 1
+        
+        return grouped
+
+    def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
+        """Sort grouped data by format, then by shaves, and add position rankings."""
+        # Sort by format asc, then shaves desc, then unique_users desc
+        grouped = grouped.sort_values(
+            ["format", "shaves", "unique_users"], 
+            ascending=[True, False, False]
+        )
+        
+        # Add position field within each format group
+        result = []
+        current_format = None
+        current_position = 1
+        
+        for _, row in grouped.iterrows():
+            format_type = str(row["format"])
+            
+            # Reset position counter for new format
+            if format_type != current_format:
+                current_format = format_type
+                current_position = 1
+            
+            item = {
+                "position": current_position,
+                "format": format_type,
+                "user": str(row["author"]),
+                "shaves": int(row["shaves"]),
+                "unique_users": int(row["unique_users"]),
+            }
+            result.append(item)
+            
+            current_position += 1
+            
+        return result
+
+    def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
+        """Get columns for grouping."""
+        return ["format", "author"]
+
+
+def aggregate_razor_format_users(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Aggregate razor format usage by user from enriched records."""
+    aggregator = RazorFormatUserAggregator()
+    return aggregator.aggregate(records)
