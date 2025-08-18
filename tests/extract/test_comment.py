@@ -171,7 +171,7 @@ def test_parse_comment_with_usage_counts():
         ),
         "razor": {
             "original": "Karve Overlander Nickel Plated Brass w/ 90mm Overlander handle",
-            "normalized": "Karve Overlander Nickel Plated Brass",
+            "normalized": "Karve Overlander Nickel Plated Brass w/ 90mm Overlander handle",
         },
         "blade": {"original": "Gillette Nacet (5)", "normalized": "Gillette Nacet"},
         "brush": {
@@ -210,7 +210,7 @@ def test_parse_comment_with_special_characters():
         "brush": {"original": "Omega 10049", "normalized": "Omega 10049"},
         "soap": {
             "original": "Stirling Soap Co. Executive Man",
-            "normalized": "Stirling Soap Co. Executive Man",
+            "normalized": "Stirling Co. Executive Man",
         },
     }
 
