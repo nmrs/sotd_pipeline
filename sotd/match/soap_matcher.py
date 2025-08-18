@@ -64,6 +64,12 @@ class SoapMatcher(BaseMatcher):
     def _normalize_scent_text(self, text: str) -> str:
         """Normalize scent text for matching."""
         # Remove common scent indicators (case-insensitive)
+        # First remove complete phrases like "Shaving Soap"
+        shaving_patterns = (
+            r"\b(shaving soap|shaving cream|shaving splash|" r"shaving balm|shaving aftershave)\b"
+        )
+        text = re.sub(shaving_patterns, "", text, flags=re.IGNORECASE)
+        # Then remove individual scent indicators
         text = re.sub(r"\b(soap|cream|splash|balm|aftershave)\b", "", text, flags=re.IGNORECASE)
         # Clean up any trailing punctuation and whitespace left behind
         text = re.sub(r"[\s\-:*/_,~`\\]+$", "", text)
