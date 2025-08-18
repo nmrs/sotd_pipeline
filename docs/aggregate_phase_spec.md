@@ -33,6 +33,8 @@ The Aggregate phase processes enriched SOTD data to generate statistical summari
 ### Software Categories
 - **Soaps**: Individual soap scents with maker/scent
 - **Soap Makers**: Maker-level aggregation from `soap.matched.maker`
+- **Soap Sample Brands**: Brand-level aggregation from `soap.enriched.sample_brand` (sample usage only)
+- **Soap Sample Brand Scents**: Brand+scent aggregation from `soap.enriched.sample_brand` + `soap.enriched.sample_scent` (sample usage only)
 
 ### Specialized Categories
 - **Blackbird Plates**: Plate type aggregation from `razor.enriched.plate`
@@ -45,6 +47,14 @@ The Aggregate phase processes enriched SOTD data to generate statistical summari
 
 ### User Categories
 - **Users**: Individual user aggregation from `author`
+- **Soap Sample Users**: User aggregation from `author` for sample usage (sample usage only)
+- **Soap Brand Diversity**: User diversity metrics from `author` counting unique soap brands per user
+- **Soap Brand Scent Diversity**: User diversity metrics from `author` counting unique soap brand+scent combinations per user
+- **Razor Diversity**: User diversity metrics from `author` counting unique razor brand+model combinations per user
+- **Blade Diversity**: User diversity metrics from `author` counting unique blade brand+model combinations per user
+- **Brush Diversity**: User diversity metrics from `author` counting unique brush combinations per user
+- **Razor Format Users**: User aggregation by razor format, ranking users within each format by shaves
+- **Brush Fiber Users**: User aggregation by brush fiber type, ranking users within each fiber by shaves
 
 ### Cross-Product Categories
 - **Razor Blade Combinations**: Most used blades in most used razors
@@ -82,6 +92,8 @@ All aggregations must be sorted according to the following rules:
 | brush_knot_sizes | shaves desc | unique_users desc |
 | soaps | shaves desc | unique_users desc |
 | soap_makers | shaves desc | unique_users desc |
+| soap_sample_brands | shaves desc | unique_users desc |
+| soap_sample_brand_scents | shaves desc | unique_users desc |
 | blackbird_plates | shaves desc | unique_users desc |
 | christopher_bradley_plates | shaves desc | unique_users desc |
 | game_changer_plates | shaves desc | unique_users desc |
@@ -90,6 +102,14 @@ All aggregations must be sorted according to the following rules:
 | straight_grinds | shaves desc | unique_users desc |
 | straight_points | shaves desc | unique_users desc |
 | users | shaves desc | missed_days desc |
+| soap_sample_users | shaves desc | unique_users desc |
+| soap_brand_diversity | unique_brands desc | total_shaves desc |
+| soap_brand_scent_diversity | unique_combinations desc | total_shaves desc |
+| razor_diversity | unique_razors desc | total_shaves desc |
+| blade_diversity | unique_blades desc | total_shaves desc |
+| brush_diversity | unique_brushes desc | total_shaves desc |
+| razor_format_users | format asc, shaves desc | unique_users desc |
+| brush_fiber_users | fiber asc, shaves desc | unique_users desc |
 | razor_blade_combinations | shaves desc | unique_users desc |
 | highest_use_count_per_blade | uses desc | - |
 
@@ -244,9 +264,51 @@ All aggregations must be sorted according to the following rules:
       {"position": 1, "maker": "Grooming Dept", "shaves": 200, "unique_users": 30},
       {"position": 2, "maker": "Declaration Grooming", "shaves": 180, "unique_users": 25}
     ],
+    "soap_sample_brands": [
+      {"position": 1, "brand": "Declaration Grooming", "shaves": 45, "unique_users": 12},
+      {"position": 2, "brand": "Grooming Dept", "shaves": 30, "unique_users": 8}
+    ],
+    "soap_sample_brand_scents": [
+      {"position": 1, "name": "Declaration Grooming - Persephone", "shaves": 25, "unique_users": 8},
+      {"position": 2, "name": "Grooming Dept - Laundry II", "shaves": 20, "unique_users": 6}
+    ],
     "users": [
       {"position": 1, "user": "user1", "shaves": 31, "missed_days": 0, "missed_dates": []},
       {"position": 2, "user": "user2", "shaves": 31, "missed_days": 2, "missed_dates": []}
+    ],
+    "soap_sample_users": [
+      {"position": 1, "user": "user1", "shaves": 15, "unique_users": 1},
+      {"position": 2, "user": "user2", "shaves": 12, "unique_users": 1}
+    ],
+    "soap_brand_diversity": [
+      {"position": 1, "user": "user1", "unique_brands": 8, "total_shaves": 31, "unique_users": 1},
+      {"position": 2, "user": "user2", "unique_brands": 6, "total_shaves": 31, "unique_users": 1}
+    ],
+    "soap_brand_scent_diversity": [
+      {"position": 1, "user": "user1", "unique_combinations": 12, "total_shaves": 31, "unique_users": 1},
+      {"position": 2, "user": "user2", "unique_combinations": 10, "total_shaves": 31, "unique_users": 1}
+    ],
+    "razor_diversity": [
+      {"position": 1, "user": "user1", "unique_razors": 5, "total_shaves": 31, "unique_users": 1},
+      {"position": 2, "user": "user2", "unique_razors": 4, "total_shaves": 31, "unique_users": 1}
+    ],
+    "blade_diversity": [
+      {"position": 1, "user": "user1", "unique_blades": 7, "total_shaves": 31, "unique_users": 1},
+      {"position": 2, "user": "user2", "unique_blades": 6, "total_shaves": 31, "unique_users": 1}
+    ],
+    "brush_diversity": [
+      {"position": 1, "user": "user1", "unique_brushes": 4, "total_shaves": 31, "unique_users": 1},
+      {"position": 2, "user": "user2", "unique_brushes": 3, "total_shaves": 31, "unique_users": 1}
+    ],
+    "razor_format_users": [
+      {"position": 1, "format": "DE", "user": "user1", "shaves": 25, "unique_users": 1},
+      {"position": 2, "format": "DE", "user": "user2", "shaves": 20, "unique_users": 1},
+      {"position": 1, "format": "Straight", "user": "user3", "shaves": 15, "unique_users": 1}
+    ],
+    "brush_fiber_users": [
+      {"position": 1, "fiber": "Synthetic", "user": "user1", "shaves": 20, "unique_users": 1},
+      {"position": 2, "fiber": "Synthetic", "user": "user2", "shaves": 18, "unique_users": 1},
+      {"position": 1, "fiber": "Boar", "user": "user3", "shaves": 15, "unique_users": 1}
     ],
     "razor_blade_combinations": [
       {"position": 1, "name": "Fatip Grande + Gillette Minora", "shaves": 25, "unique_users": 8},
@@ -267,6 +329,7 @@ All aggregations must be sorted according to the following rules:
 - **Blades**: `blade.matched.brand`, `blade.matched.model`, `blade.matched.format`
 - **Brushes**: `brush.matched.brand`, `brush.matched.model`, `brush.matched.fiber`
 - **Soaps**: `soap.matched.maker`, `soap.matched.scent`
+- **Soap Sample Data**: `soap.enriched.sample_brand`, `soap.enriched.sample_scent`
 
 ### Specialized Fields
 - **Blackbird Plates**: `razor.enriched.plate`
@@ -283,6 +346,8 @@ All aggregations must be sorted according to the following rules:
 
 ### User Fields
 - **Users**: `author`
+- **User Diversity Metrics**: `author` + product-specific matched fields for counting unique combinations per user
+- **Format Usage Metrics**: `author` + product format/fiber fields for ranking users within each category
 
 ### Cross-Product Fields
 - **Razor Blade Combinations**: `razor.matched.brand` + `razor.matched.model` + `blade.matched.brand` + `blade.matched.model`
