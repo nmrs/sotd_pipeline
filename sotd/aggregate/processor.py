@@ -11,6 +11,7 @@ from .aggregators.core import (
     aggregate_brushes,
     aggregate_razors,
     aggregate_soaps,
+    aggregate_soap_samples,
 )
 from .aggregators.cross_product import (
     aggregate_highest_use_count_per_blade,
@@ -124,13 +125,14 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
     }
 
     if debug:
-        print("[DEBUG] Running 23 aggregators...")
+        print("[DEBUG] Running 24 aggregators...")
 
     # Core product aggregations
     aggregated_data["data"]["razors"] = aggregate_razors(records)
     aggregated_data["data"]["blades"] = aggregate_blades(records)
     aggregated_data["data"]["brushes"] = aggregate_brushes(records)
     aggregated_data["data"]["soaps"] = aggregate_soaps(records)
+    aggregated_data["data"]["soap_samples"] = aggregate_soap_samples(records)
 
     # Manufacturer aggregations
     aggregated_data["data"]["razor_manufacturers"] = aggregate_razor_manufacturers(records)
