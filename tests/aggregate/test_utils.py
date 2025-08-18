@@ -4,6 +4,10 @@ from sotd.aggregate.utils.metrics import (
     calculate_metadata,
     calculate_unique_soaps,
     calculate_unique_brands,
+    calculate_total_samples,
+    calculate_unique_razors,
+    calculate_unique_blades,
+    calculate_unique_brushes,
 )
 
 
@@ -27,6 +31,10 @@ class TestMetrics:
         assert meta["avg_shaves_per_user"] == 1.33  # Rounded to 2 decimal places
         assert meta["unique_soaps"] == 0  # No soap data in these records
         assert meta["unique_brands"] == 0  # No soap data in these records
+        assert meta["total_samples"] == 0  # No sample data in these records
+        assert meta["unique_razors"] == 0  # No razor data in these records
+        assert meta["unique_blades"] == 0  # No blade data in these records
+        assert meta["unique_brushes"] == 0  # No brush data in these records
 
     def test_calculate_metadata_empty(self):
         """Test metadata calculation with empty records."""
@@ -38,6 +46,10 @@ class TestMetrics:
         assert meta["avg_shaves_per_user"] == 0.0
         assert meta["unique_soaps"] == 0
         assert meta["unique_brands"] == 0
+        assert meta["total_samples"] == 0
+        assert meta["unique_razors"] == 0
+        assert meta["unique_blades"] == 0
+        assert meta["unique_brushes"] == 0
 
     def test_calculate_metadata_single_user(self):
         """Test metadata calculation with single user."""
@@ -54,6 +66,148 @@ class TestMetrics:
         assert meta["avg_shaves_per_user"] == 3.0
         assert meta["unique_soaps"] == 0
         assert meta["unique_brands"] == 0
+        assert meta["total_samples"] == 0
+        assert meta["unique_razors"] == 0
+        assert meta["unique_blades"] == 0
+        assert meta["unique_brushes"] == 0
+
+    def test_calculate_unique_razors_basic(self):
+        """Test basic unique razors calculation."""
+        records = [
+            {
+                "author": "user1",
+                "razor": {
+                    "matched": {"brand": "Gillette", "model": "Super Speed"},
+                },
+            },
+            {
+                "author": "user2",
+                "razor": {
+                    "matched": {"brand": "Gillette", "model": "Super Speed"},
+                },
+            },
+            {
+                "author": "user3",
+                "razor": {
+                    "matched": {"brand": "Merkur", "model": "34C"},
+                },
+            },
+        ]
+
+        unique_razors = calculate_unique_razors(records)
+        assert unique_razors == 2  # 2 unique razor combinations
+
+    def test_calculate_unique_razors_no_matches(self):
+        """Test unique razors calculation with no matched data."""
+        records = [
+            {
+                "author": "user1",
+                "razor": {
+                    # No matched section
+                },
+            },
+            {
+                "author": "user2",
+                "razor": {
+                    "matched": {"brand": "Gillette"},  # Missing model
+                },
+            },
+        ]
+
+        unique_razors = calculate_unique_razors(records)
+        assert unique_razors == 0
+
+    def test_calculate_unique_blades_basic(self):
+        """Test basic unique blades calculation."""
+        records = [
+            {
+                "author": "user1",
+                "blade": {
+                    "matched": {"brand": "Astra", "model": "Superior Platinum"},
+                },
+            },
+            {
+                "author": "user2",
+                "blade": {
+                    "matched": {"brand": "Astra", "model": "Superior Platinum"},
+                },
+            },
+            {
+                "author": "user3",
+                "blade": {
+                    "matched": {"brand": "Feather", "model": "Hi-Stainless"},
+                },
+            },
+        ]
+
+        unique_blades = calculate_unique_blades(records)
+        assert unique_blades == 2  # 2 unique blade combinations
+
+    def test_calculate_unique_blades_no_matches(self):
+        """Test unique blades calculation with no matched data."""
+        records = [
+            {
+                "author": "user1",
+                "blade": {
+                    # No matched section
+                },
+            },
+            {
+                "author": "user2",
+                "blade": {
+                    "matched": {"brand": "Astra"},  # Missing model
+                },
+            },
+        ]
+
+        unique_blades = calculate_unique_blades(records)
+        assert unique_blades == 0
+
+    def test_calculate_unique_brushes_basic(self):
+        """Test basic unique brushes calculation."""
+        records = [
+            {
+                "author": "user1",
+                "brush": {
+                    "matched": {"brand": "Simpson", "model": "Chubby 2"},
+                },
+            },
+            {
+                "author": "user2",
+                "brush": {
+                    "matched": {"brand": "Simpson", "model": "Chubby 2"},
+                },
+            },
+            {
+                "author": "user3",
+                "brush": {
+                    "matched": {"brand": "Omega", "model": "10049"},
+                },
+            },
+        ]
+
+        unique_brushes = calculate_unique_brushes(records)
+        assert unique_brushes == 2  # 2 unique brush combinations
+
+    def test_calculate_unique_brushes_no_matches(self):
+        """Test unique brushes calculation with no matched data."""
+        records = [
+            {
+                "author": "user1",
+                "brush": {
+                    # No matched section
+                },
+            },
+            {
+                "author": "user2",
+                "brush": {
+                    "matched": {"brand": "Simpson"},  # Missing model
+                },
+            },
+        ]
+
+        unique_brushes = calculate_unique_brushes(records)
+        assert unique_brushes == 0
 
     def test_calculate_unique_soaps_basic(self):
         """Test unique soaps calculation."""
@@ -117,7 +271,10 @@ class TestMetrics:
         """Test unique brands calculation with no matched soaps."""
         records = [
             {"author": "user1", "soap": {"original": "Unknown Soap"}},
-            {"author": "user2", "soap": {"matched": {"scent": "Some Scent"}}},  # Missing maker
+            {
+                "author": "user2",
+                "soap": {"matched": {"scent": "Some Scent"}},
+            },  # Missing maker
         ]
 
         unique_brands = calculate_unique_brands(records)
@@ -128,28 +285,117 @@ class TestMetrics:
         unique_brands = calculate_unique_brands([])
         assert unique_brands == 0
 
-    def test_calculate_metadata_with_soap_data(self):
-        """Test metadata calculation with soap data."""
+    def test_calculate_total_samples_basic(self):
+        """Test basic total samples calculation."""
         records = [
             {
                 "author": "user1",
-                "soap": {"matched": {"maker": "Declaration Grooming", "scent": "Sellout"}},
+                "soap": {
+                    "enriched": {"sample_type": "sample"},
+                },
             },
             {
                 "author": "user2",
-                "soap": {"matched": {"maker": "Declaration Grooming", "scent": "Darkfall"}},
+                "soap": {
+                    "enriched": {"sample_type": "tester"},
+                },
             },
             {
+                "author": "user3",
+                "soap": {
+                    "enriched": {"sample_type": "sample"},
+                },
+            },
+            {
+                "author": "user4",
+                "soap": {
+                    # No enriched section
+                },
+            },
+        ]
+
+        total_samples = calculate_total_samples(records)
+        assert total_samples == 3  # 2 samples + 1 tester
+
+    def test_calculate_total_samples_no_samples(self):
+        """Test total samples calculation with no sample data."""
+        records = [
+            {
                 "author": "user1",
-                "soap": {"matched": {"maker": "Stirling", "scent": "Executive Man"}},
+                "soap": {
+                    "matched": {"maker": "B&M", "scent": "Seville"},
+                },
+            },
+            {
+                "author": "user2",
+                "soap": {
+                    "matched": {"maker": "Declaration Grooming", "scent": "Persephone"},
+                },
+            },
+        ]
+
+        total_samples = calculate_total_samples(records)
+        assert total_samples == 0
+
+    def test_calculate_total_samples_empty_records(self):
+        """Test total samples calculation with empty records."""
+        total_samples = calculate_total_samples([])
+        assert total_samples == 0
+
+    def test_calculate_total_samples_missing_soap(self):
+        """Test total samples calculation with records missing soap data."""
+        records = [
+            {"author": "user1"},  # No soap section
+            {
+                "author": "user2",
+                "soap": {
+                    "enriched": {"sample_type": "sample"},
+                },
+            },
+        ]
+
+        total_samples = calculate_total_samples(records)
+        assert total_samples == 1  # Only the second record has sample data
+
+    def test_calculate_metadata_with_hardware_data(self):
+        """Test metadata calculation with hardware data."""
+        records = [
+            {
+                "author": "user1",
+                "soap": {
+                    "matched": {"maker": "B&M", "scent": "Seville"},
+                },
+                "razor": {
+                    "matched": {"brand": "Gillette", "model": "Super Speed"},
+                },
+                "blade": {
+                    "matched": {"brand": "Astra", "model": "Superior Platinum"},
+                },
+                "brush": {
+                    "matched": {"brand": "Simpson", "model": "Chubby 2"},
+                },
+            },
+            {
+                "author": "user2",
+                "soap": {
+                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
+                },
+                "razor": {
+                    "matched": {"brand": "Merkur", "model": "34C"},
+                },
+                "blade": {
+                    "matched": {"brand": "Feather", "model": "Hi-Stainless"},
+                },
+                "brush": {
+                    "matched": {"brand": "Omega", "model": "10049"},
+                },
             },
         ]
 
         meta = calculate_metadata(records, "2025-01")
 
-        assert meta["month"] == "2025-01"
-        assert meta["total_shaves"] == 3
-        assert meta["unique_shavers"] == 2
-        assert meta["avg_shaves_per_user"] == 1.5
-        assert meta["unique_soaps"] == 3  # 3 unique soap names
-        assert meta["unique_brands"] == 2  # 2 unique makers
+        assert meta["unique_soaps"] == 2  # 2 unique soap combinations
+        assert meta["unique_brands"] == 2  # 2 unique soap makers
+        assert meta["unique_razors"] == 2  # 2 unique razor combinations
+        assert meta["unique_blades"] == 2  # 2 unique blade combinations
+        assert meta["unique_brushes"] == 2  # 2 unique brush combinations

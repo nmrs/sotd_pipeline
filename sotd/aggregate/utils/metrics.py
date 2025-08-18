@@ -65,6 +65,80 @@ def calculate_unique_brands(records: List[Dict[str, Any]]) -> int:
     return len(brands)
 
 
+def calculate_total_samples(records: List[Dict[str, Any]]) -> int:
+    """Calculate total number of sample shaves from records."""
+    total_samples = 0
+    for record in records:
+        soap = record.get("soap", {})
+        enriched = soap.get("enriched", {})
+        if enriched.get("sample_type"):
+            total_samples += 1
+    return total_samples
+
+
+def calculate_unique_razors(records: List[Dict[str, Any]]) -> int:
+    """Calculate number of unique razors from records."""
+    razors = set()
+    for record in records:
+        razor = record.get("razor", {})
+        matched = razor.get("matched", {})
+
+        # Skip if no matched razor data or no brand/model
+        if not matched or not matched.get("brand") or not matched.get("model"):
+            continue
+
+        brand = matched.get("brand", "").strip()
+        model = matched.get("model", "").strip()
+
+        if brand and model:
+            razor_name = f"{brand} {model}"
+            razors.add(razor_name)
+
+    return len(razors)
+
+
+def calculate_unique_blades(records: List[Dict[str, Any]]) -> int:
+    """Calculate number of unique blades from records."""
+    blades = set()
+    for record in records:
+        blade = record.get("blade", {})
+        matched = blade.get("matched", {})
+
+        # Skip if no matched blade data or no brand/model
+        if not matched or not matched.get("brand") or not matched.get("model"):
+            continue
+
+        brand = matched.get("brand", "").strip()
+        model = matched.get("model", "").strip()
+
+        if brand and model:
+            blade_name = f"{brand} {model}"
+            blades.add(blade_name)
+
+    return len(blades)
+
+
+def calculate_unique_brushes(records: List[Dict[str, Any]]) -> int:
+    """Calculate number of unique brushes from records."""
+    brushes = set()
+    for record in records:
+        brush = record.get("brush", {})
+        matched = brush.get("matched", {})
+
+        # Skip if no matched brush data or no brand/model
+        if not matched or not matched.get("brand") or not matched.get("model"):
+            continue
+
+        brand = matched.get("brand", "").strip()
+        model = matched.get("model", "").strip()
+
+        if brand and model:
+            brush_name = f"{brand} {model}"
+            brushes.add(brush_name)
+
+    return len(brushes)
+
+
 def add_position_field(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Add position field (1-based rank) to list of items."""
     for i, item in enumerate(items, 1):
@@ -81,13 +155,18 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
 
     Returns:
         Dictionary containing metadata with month, total_shaves, unique_shavers,
-        avg_shaves_per_user, unique_soaps, and unique_brands
+        avg_shaves_per_user, unique_soaps, unique_brands, total_samples,
+        unique_razors, unique_blades, and unique_brushes
     """
     total_shaves = calculate_shaves(records)
     unique_shavers = calculate_unique_users(records)
     avg_shaves_per_user = calculate_avg_shaves_per_user(records)
     unique_soaps = calculate_unique_soaps(records)
     unique_brands = calculate_unique_brands(records)
+    total_samples = calculate_total_samples(records)
+    unique_razors = calculate_unique_razors(records)
+    unique_blades = calculate_unique_blades(records)
+    unique_brushes = calculate_unique_brushes(records)
 
     return {
         "month": month,
@@ -96,4 +175,8 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
         "avg_shaves_per_user": avg_shaves_per_user,
         "unique_soaps": unique_soaps,
         "unique_brands": unique_brands,
+        "total_samples": total_samples,
+        "unique_razors": unique_razors,
+        "unique_blades": unique_blades,
+        "unique_brushes": unique_brushes,
     }
