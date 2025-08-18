@@ -6,6 +6,7 @@ from .soap_brand_diversity_aggregator import aggregate_soap_brand_diversity
 from .soap_brand_scent_diversity_aggregator import aggregate_soap_brand_scent_diversity
 from .razor_diversity_aggregator import aggregate_razor_diversity
 from .blade_diversity_aggregator import aggregate_blade_diversity
+from .brush_diversity_aggregator import aggregate_brush_diversity
 
 __all__ = [
     "aggregate_users",
@@ -14,4 +15,5 @@ __all__ = [
     "aggregate_soap_brand_scent_diversity",
     "aggregate_razor_diversity",
     "aggregate_blade_diversity",
+    "aggregate_brush_diversity",
 ]
