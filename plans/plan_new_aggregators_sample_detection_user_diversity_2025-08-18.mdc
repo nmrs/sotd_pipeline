@@ -7,11 +7,12 @@
 
 ## 📘 Project Summary
 
-Implement 8 new aggregators to enhance the SOTD Pipeline's analytical capabilities:
+Implement 10 new aggregators to enhance the SOTD Pipeline's analytical capabilities:
 
 **Sample Aggregators (3)**: Leverage soap sample detection enrichment data to analyze sample usage patterns
 **Soap Diversity Aggregators (2)**: Track user diversity in soap usage (brands and brand+scent combinations)  
 **Hardware Diversity Aggregators (3)**: Track user diversity in hardware usage (razors, blades, brushes)
+**Format Usage Aggregators (2)**: Track top users for specific product formats and fiber types
 
 **Key Benefits**:
 - Enable sample usage analysis and insights
@@ -19,32 +20,58 @@ Implement 8 new aggregators to enhance the SOTD Pipeline's analytical capabiliti
 - Follow established aggregation patterns and architecture
 - Integrate seamlessly with existing pipeline phases
 
-**Dependencies**: Requires completion of `plan_soap_sample_detection_enrichment_2025-08-18.mdc` for sample data
-
 ## 🧩 Component Steps
 
+**Data Source**: All aggregators read from the relevant month file in `data/enriched/YYYY-MM.json` (e.g., `data/enriched/2025-06.json`). This ensures consistent data access across all aggregators.
+
 ### Phase 1: Sample Aggregators Foundation
-1. **Create SoapSampleBrandAggregator** - Most sampled brands by total sample shaves
-2. **Create SoapSampleBrandScentAggregator** - Most sampled brand+scent combinations by total sample shaves  
-3. **Create SoapSampleUserAggregator** - Users by total sample shaves across all soaps
+1. **Remove Existing SoapSampleAggregator** - Remove the general sample aggregator from the pipeline
+2. **Create SoapSampleBrandAggregator** - Most sampled brands by total sample shaves
+3. **Create SoapSampleBrandScentAggregator** - Most sampled brand+scent combinations by total sample shaves  
+4. **Create SoapSampleUserAggregator** - Users by total sample shaves across all soaps
+
+**Note**: The existing SoapSampleAggregator will be removed as part of this plan since the new specialized aggregators provide more focused and useful analysis.
 
 ### Phase 2: Soap Diversity Aggregators
-4. **Create SoapBrandDiversityAggregator** - Users by distinct soap brands
-5. **Create SoapBrandScentDiversityAggregator** - Users by distinct brand+scent combinations
+5. **Create SoapBrandDiversityAggregator** - Users by distinct soap brands
+6. **Create SoapBrandScentDiversityAggregator** - Users by distinct brand+scent combinations
 
 ### Phase 3: Hardware Diversity Aggregators
-6. **Create RazorDiversityAggregator** - Users by distinct razor brand+model combinations
-7. **Create BladeDiversityAggregator** - Users by distinct blade brand+model combinations
-8. **Create BrushDiversityAggregator** - Users by distinct brush combinations (brand+model+knot+handle)
+7. **Create RazorDiversityAggregator** - Users by distinct razor brand+model combinations
+8. **Create BladeDiversityAggregator** - Users by distinct blade brand+model combinations
+9. **Create BrushDiversityAggregator** - Users by distinct brush combinations (brand+model+knot+handle)
 
-### Phase 4: Integration and Testing
-9. **Processor Integration** - Add all aggregators to `sotd/aggregate/processor.py`
-10. **Comprehensive Testing** - Unit and integration tests for all new aggregators
-11. **Documentation Updates** - Update aggregate phase documentation and specifications
+### Phase 4: Format Usage Aggregators
+10. **Create RazorFormatUserAggregator** - Top users for each razor format (DE, Straight, GEM, AC, etc.)
+11. **Create BrushFiberUserAggregator** - Top users for each brush fiber type (badger, boar, synthetic, etc.)
+
+### Phase 5: Integration and Testing
+12. **Processor Integration** - Add all aggregators to `sotd/aggregate/processor.py`
+13. **Comprehensive Testing** - Unit and integration tests for all new aggregators
+14. **Documentation Updates** - Update aggregate phase documentation and specifications
 
 ## 🔁 Implementation Prompts
 
-### Step 1: Create SoapSampleBrandAggregator
+### Step 1: Remove Existing SoapSampleAggregator
+
+```text
+Remove the existing SoapSampleAggregator from the pipeline as it will be replaced by more specialized aggregators. This involves:
+
+1. Remove the import of `aggregate_soap_samples` from `sotd/aggregate/processor.py`
+2. Remove the call to `aggregate_soap_samples(records)` from the `aggregate_all` function
+3. Update the debug count from "24 aggregators" to "23 aggregators" (temporarily)
+4. Remove the aggregator from the core aggregators module exports if needed
+5. Update any tests that depend on the existing soap sample aggregation
+
+The existing SoapSampleAggregator provides 3-dimensional grouping (sample_type + maker + scent) which is less useful than the new specialized aggregators that provide:
+- Brand-focused sample analysis
+- Brand+scent focused sample analysis  
+- User-focused sample analysis
+
+This removal will be replaced by the new specialized aggregators in the following steps.
+```
+
+### Step 2: Create SoapSampleBrandAggregator
 
 ```text
 Create a new SoapSampleBrandAggregator class in `sotd/aggregate/aggregators/core/soap_sample_brand_aggregator.py` that follows the BaseAggregator pattern. This aggregator should:
@@ -74,7 +101,7 @@ Output structure should match:
 Use the same patterns as existing aggregators for data extraction, validation, and output formatting.
 ```
 
-### Step 2: Create SoapSampleBrandScentAggregator
+### Step 3: Create SoapSampleBrandScentAggregator
 
 ```text
 Create a new SoapSampleBrandScentAggregator class in `sotd/aggregate/aggregators/core/soap_sample_brand_scent_aggregator.py` that follows the BaseAggregator pattern. This aggregator should:
@@ -105,7 +132,7 @@ Output structure should match:
 Use the same patterns as existing aggregators for composite name creation and output formatting.
 ```
 
-### Step 3: Create SoapSampleUserAggregator
+### Step 4: Create SoapSampleUserAggregator
 
 ```text
 Create a new SoapSampleUserAggregator class in `sotd/aggregate/aggregators/users/soap_sample_user_aggregator.py` that follows the BaseAggregator pattern. This aggregator should:
@@ -135,7 +162,7 @@ Output structure should match:
 Use the same patterns as existing user aggregators for data extraction and output formatting.
 ```
 
-### Step 4: Create SoapBrandDiversityAggregator
+### Step 5: Create SoapBrandDiversityAggregator
 
 ```text
 Create a new SoapBrandDiversityAggregator class in `sotd/aggregate/aggregators/users/soap_brand_diversity_aggregator.py` that follows the BaseAggregator pattern. This aggregator should:
@@ -165,7 +192,7 @@ Output structure should match:
 Use the same patterns as existing user aggregators for data extraction and output formatting.
 ```
 
-### Step 5: Create SoapBrandScentDiversityAggregator
+### Step 6: Create SoapBrandScentDiversityAggregator
 
 ```text
 Create a new SoapBrandScentDiversityAggregator class in `sotd/aggregate/aggregators/users/soap_brand_scent_diversity_aggregator.py` that follows the BaseAggregator pattern. This aggregator should:
@@ -196,7 +223,7 @@ Output structure should match:
 Use the same patterns as existing user aggregators for data extraction and output formatting.
 ```
 
-### Step 6: Create RazorDiversityAggregator
+### Step 7: Create RazorDiversityAggregator
 
 ```text
 Create a new RazorDiversityAggregator class in `sotd/aggregate/aggregators/users/razor_diversity_aggregator.py` that follows the BaseAggregator pattern. This aggregator should:
@@ -227,7 +254,7 @@ Output structure should match:
 Use the same patterns as existing user aggregators for data extraction and output formatting.
 ```
 
-### Step 7: Create BladeDiversityAggregator
+### Step 8: Create BladeDiversityAggregator
 
 ```text
 Create a new BladeDiversityAggregator class in `sotd/aggregate/aggregators/users/blade_diversity_aggregator.py` that follows the BaseAggregator pattern. This aggregator should:
@@ -258,7 +285,7 @@ Output structure should match:
 Use the same patterns as existing user aggregators for data extraction and output formatting.
 ```
 
-### Step 8: Create BrushDiversityAggregator
+### Step 9: Create BrushDiversityAggregator
 
 ```text
 Create a new BrushDiversityAggregator class in `sotd/aggregate/aggregators/users/brush_diversity_aggregator.py` that follows the BaseAggregator pattern. This aggregator should:
@@ -295,10 +322,81 @@ Output structure should match:
 Use the same patterns as existing user aggregators for data extraction and output formatting.
 ```
 
-### Step 9: Processor Integration
+### Step 10: Create RazorFormatUserAggregator
 
 ```text
-Integrate all 8 new aggregators into the existing aggregate phase processor. Update `sotd/aggregate/processor.py` to:
+Create a new RazorFormatUserAggregator class in `sotd/aggregate/aggregators/users/razor_format_user_aggregator.py` that follows the BaseAggregator pattern. This aggregator should:
+
+1. Inherit from BaseAggregator
+2. Extract razor format data from razor.matched.format (successful matches only)
+3. Group by format to show top users for each razor format (DE, Straight, GEM, AC, etc.)
+4. Return data with position, format, user, shaves, and unique_users fields
+5. Sort by format asc, then shaves desc, then unique_users desc (format groups, then by usage within each format)
+
+The aggregator should:
+- Only process records where razor.matched.format exists (successful matches)
+- Extract format from razor.matched.format and author from record.author
+- Group by format first, then by user within each format
+- Count total shaves per user per format
+- Include unique_users as secondary metric for tie-breaking
+- Handle cases where format is missing or invalid
+
+Output structure should match:
+```json
+{
+  "position": 1,
+  "format": "DE",
+  "user": "username123",
+  "shaves": 25,
+  "unique_users": 1
+}
+```
+
+This aggregator will show which users are the top users for each razor format, providing insights into format preferences and usage patterns across the community.
+
+Use the same patterns as existing user aggregators for data extraction and output formatting.
+```
+
+### Step 11: Create BrushFiberUserAggregator
+
+```text
+Create a new BrushFiberUserAggregator class in `sotd/aggregate/aggregators/users/brush_fiber_user_aggregator.py` that follows the BaseAggregator pattern. This aggregator should:
+
+1. Inherit from BaseAggregator
+2. Extract brush fiber data from brush.matched.fiber (successful matches only)
+3. Group by fiber type to show top users for each brush fiber (badger, boar, synthetic, etc.)
+4. Return data with position, fiber, user, shaves, and unique_users fields
+5. Sort by fiber asc, then shaves desc, then unique_users desc (fiber groups, then by usage within each fiber)
+
+The aggregator should:
+- Only process records where brush.matched.fiber exists (successful matches)
+- Extract fiber from brush.matched.fiber and author from record.author
+- Group by fiber first, then by user within each fiber
+- Count total shaves per user per fiber type
+- Include unique_users as secondary metric for tie-breaking
+- Handle cases where fiber is missing or invalid
+- Support common fiber types: badger, boar, synthetic, horse, mixed, etc.
+
+Output structure should match:
+```json
+{
+  "position": 1,
+  "fiber": "badger",
+  "user": "username123",
+  "shaves": 30,
+  "unique_users": 1
+}
+```
+
+This aggregator will show which users are the top users for each brush fiber type, providing insights into fiber preferences and usage patterns across the community.
+
+Use the same patterns as existing user aggregators for data extraction and output formatting.
+```
+
+### Step 12: Processor Integration
+
+```text
+Remove the existing SoapSampleAggregator and integrate all 10 new aggregators into the existing aggregate phase processor. Update `sotd/aggregate/processor.py` to:
 
 1. Import all new aggregator functions:
    - aggregate_soap_sample_brands
@@ -309,25 +407,28 @@ Integrate all 8 new aggregators into the existing aggregate phase processor. Upd
    - aggregate_razor_diversity
    - aggregate_blade_diversity
    - aggregate_brush_diversity
+   - aggregate_razor_format_users
+   - aggregate_brush_fiber_users
 
-2. Add all aggregators to the aggregate_all function in the appropriate sections:
+2. Remove the existing SoapSampleAggregator from the pipeline
+3. Add all new aggregators to the aggregate_all function in the appropriate sections:
    - Sample aggregators in a new "Sample aggregations" section
    - Soap diversity aggregators in the "Software Categories" section
    - Hardware diversity aggregators in a new "User Diversity" section
 
-3. Update the debug count from "23 aggregators" to "31 aggregators"
+4. Update the debug count from "24 aggregators" to "33 aggregators" (removed 1, added 10 = net +9)
 
-4. Ensure proper dependency order (sample aggregators after soaps, diversity aggregators after core product aggregations)
+5. Ensure proper dependency order (sample aggregators after soaps, diversity aggregators after core product aggregations)
 
-5. Maintain the existing structure and organization of the processor
+6. Maintain the existing structure and organization of the processor
 
 The integration should follow the same pattern as existing aggregators and maintain the current output structure.
 ```
 
-### Step 10: Comprehensive Testing
+### Step 13: Comprehensive Testing
 
 ```text
-Create comprehensive test coverage for all 8 new aggregators. This includes:
+Create comprehensive test coverage for all 10 new aggregators. This includes:
 
 1. **Unit Tests for Each Aggregator**:
    - Test data extraction logic
@@ -362,7 +463,7 @@ Create comprehensive test coverage for all 8 new aggregators. This includes:
 All tests should follow the project's testing patterns and ensure the aggregators work correctly in production scenarios.
 ```
 
-### Step 11: Documentation Updates
+### Step 14: Documentation Updates
 
 ```text
 Update all relevant documentation to reflect the new aggregators. This includes:
@@ -404,9 +505,9 @@ The documentation should maintain consistency with existing patterns and provide
 
 **Implementation Considerations**:
 - **Sample data dependency**: Requires completion of soap sample enrichment before these aggregators can be tested
-- **Data source complexity**: Sample aggregators use enriched data while diversity aggregators use matched data
-- **Field handling**: Brush diversity aggregator must handle multiple nullable fields gracefully
-- **Performance impact**: Adding 8 new aggregators increases processing time and memory usage
+- **Data source consistency**: ✅ **All aggregators read from the same enriched data files** (`data/enriched/YYYY-MM.json`), ensuring consistent data access and structure
+- **Field handling**: Brush diversity aggregator must handle multiple nullable fields gracefully (null values become "none" in composite keys)
+- **Performance impact**: Replacing 1 general aggregator with 10 specialized aggregators increases processing time and memory usage (will increase from 24 to 33 total aggregators)
 
 **Risk Mitigation**:
 - **Incremental implementation**: Each aggregator can be built and tested independently
@@ -421,14 +522,12 @@ The documentation should maintain consistency with existing patterns and provide
 - Testing framework (already exists)
 
 **Success Criteria**:
-- All 8 aggregators produce correct output following established patterns
+- All 10 aggregators produce correct output following established patterns
 - Sample aggregators correctly process enriched sample data
 - Diversity aggregators correctly count unique combinations per user
+- Razor format usage aggregator correctly shows top users per format
+- Brush fiber usage aggregator correctly shows top users per fiber type
 - Integration with existing processor maintains performance and reliability
 - Comprehensive test coverage ensures long-term maintainability
 
 This plan provides a clear, incremental path to implementing the new aggregators while maintaining the project's architectural principles and quality standards. Each step builds logically on the previous one, ensuring safe and reliable implementation.
-description:
-globs:
-alwaysApply: false
----
