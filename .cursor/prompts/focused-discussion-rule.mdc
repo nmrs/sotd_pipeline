@@ -1,11 +1,15 @@
-### Task Driven TDD Loop
-**Use when**: Implementing features with test-driven development approach.
-
+### Focused Discussion Rule
+**Use when**: Discussing a single question, recommendation, or specific topic that requires resolution.
+**Goal**: Ensure complete resolution of the current topic before moving to any other questions or topics.
 ```
-Proceed through the remaining tasks in the current step one at a time. After completing **each** task:
-1. Update the implementation plan to reflect your findings and progress.
-2. Commit the changes with a clear message summarizing the task completed per .cursor/rules/git-and-cleanup.mdc
-3. Move to the next task.
-4. Run quality checks (for example "make format lint typecheck test" but use whatever is appropriate for the current work) only before commits, not after every task.
-5. If new issues are detected while working on a task, add additional tasks to the plan to address those issues.
+IMPORTANT: Stay focused on the current question/topic until it is fully resolved.
+
+- Do NOT move on to the next question or topic until the current one is completely addressed
+- Do NOT introduce new questions or topics while the current one is still being discussed
+- Do NOT summarize or skip ahead to other issues
+- Complete the current discussion thoroughly before proceeding
+
+If you have additional questions or topics to discuss, wait until the current topic is fully resolved before introducing them.
+
+Current topic: [INSERT CURRENT TOPIC HERE]
 ```
