@@ -6,6 +6,7 @@ from .brush_enricher import BrushEnricher
 from .christopher_bradley_enricher import ChristopherBradleyEnricher
 from .game_changer_enricher import GameChangerEnricher
 from .registry import enricher_registry
+from .soap_sample_enricher import SoapSampleEnricher
 from .straight_razor_enricher import StraightRazorEnricher
 from .super_speed_tip_enricher import SuperSpeedTipEnricher
 
@@ -26,6 +27,7 @@ def setup_enrichers():
     enricher_registry.register(GameChangerEnricher())
     enricher_registry.register(ChristopherBradleyEnricher())
     enricher_registry.register(BlackbirdPlateEnricher())
+    enricher_registry.register(SoapSampleEnricher())
     enricher_registry.register(SuperSpeedTipEnricher())
 
     _enrichers_setup = True
