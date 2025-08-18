@@ -40,9 +40,21 @@ Implement aggregation for these categories:
 - Soap makers (from soap.matched.maker)
 - Soaps (from soap.matched - combine maker and scent)
 - Brand diversity (count unique scents per soap maker)
+- Soap sample brands (from soap.enriched.sample_brand - sample usage only)
+- Soap sample brand scents (from soap.enriched.sample_brand + soap.enriched.sample_scent - sample usage only)
 
 **User Categories:**
 - Top shavers (group by author, count shaves)
+- Soap sample users (from author for sample usage - sample usage only)
+- User diversity metrics (count unique product combinations per user):
+  - Soap brand diversity (unique soap brands per user)
+  - Soap brand scent diversity (unique soap brand+scent combinations per user)
+  - Razor diversity (unique razor brand+model combinations per user)
+  - Blade diversity (unique blade brand+model combinations per user)
+  - Brush diversity (unique brush combinations per user)
+- Format usage metrics (rank users within each product category):
+  - Razor format users (rank users by shaves within each razor format)
+  - Brush fiber users (rank users by shaves within each brush fiber type)
 
 ### Metrics Calculation
 For each category, calculate:
@@ -79,6 +91,11 @@ def calculate_category_metrics(records: list[dict], category_field: str) -> list
 - CLI tests for argument parsing
 - Error handling tests for various scenarios
 - Performance tests for large datasets
+- **New Aggregator Testing**:
+  - Sample aggregators: Test with mock enriched sample data
+  - User diversity aggregators: Test edge cases (single user, multiple users, missing data)
+  - Format usage aggregators: Test multi-category sorting and ranking logic
+  - All aggregators must maintain consistent output structure with position field
 
 ## CLI Interface
 Follow the same pattern as other phases:
