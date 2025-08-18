@@ -29,8 +29,10 @@ class SoapBrandDiversityAggregator(BaseAggregator):
             if not matched or not matched.get("brand"):
                 continue
 
-            brand = matched.get("brand", "").strip()
-            author = record.get("author", "").strip()
+            brand = matched.get("brand") or ""
+            brand = brand.strip() if brand else ""
+            author = record.get("author") or ""
+            author = author.strip() if author else ""
 
             if brand and author:
                 soap_data.append({"brand": brand, "author": author})

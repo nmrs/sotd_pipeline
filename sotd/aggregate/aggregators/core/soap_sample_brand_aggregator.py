@@ -31,13 +31,16 @@ class SoapSampleBrandAggregator(BaseAggregator):
                 continue
 
             # Extract sample information
-            sample_type = enriched.get("sample_type", "").strip()
+            sample_type = enriched.get("sample_type") or ""
+            sample_type = sample_type.strip() if sample_type else ""
             sample_number = enriched.get("sample_number")
             total_samples = enriched.get("total_samples")
 
             # Extract soap identification
-            brand = matched.get("brand", "").strip() if matched else ""
-            author = record.get("author", "").strip()
+            brand = matched.get("brand") or "" if matched else ""
+            brand = brand.strip() if brand else ""
+            author = record.get("author") or ""
+            author = author.strip() if author else ""
 
             if sample_type and author:
                 sample_data.append(

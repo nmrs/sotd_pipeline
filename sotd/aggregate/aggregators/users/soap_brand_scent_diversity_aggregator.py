@@ -29,9 +29,12 @@ class SoapBrandScentDiversityAggregator(BaseAggregator):
             if not matched or not matched.get("brand") or not matched.get("scent"):
                 continue
 
-            brand = matched.get("brand", "").strip()
-            scent = matched.get("scent", "").strip()
-            author = record.get("author", "").strip()
+            brand = matched.get("brand") or ""
+            brand = brand.strip() if brand else ""
+            scent = matched.get("scent") or ""
+            scent = scent.strip() if scent else ""
+            author = record.get("author") or ""
+            author = author.strip() if author else ""
 
             if brand and scent and author:
                 soap_data.append({"brand": brand, "scent": scent, "author": author})
@@ -109,7 +112,9 @@ class SoapBrandScentDiversityAggregator(BaseAggregator):
         )
 
         # Add position field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(position=lambda df: range(1, len(df) + 1))  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(
+            position=lambda df: range(1, len(df) + 1)
+        )  # type: ignore
 
         # Convert to list of dictionaries
         result = []

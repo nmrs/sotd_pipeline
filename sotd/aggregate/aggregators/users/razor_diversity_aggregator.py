@@ -29,9 +29,12 @@ class RazorDiversityAggregator(BaseAggregator):
             if not matched or not matched.get("brand") or not matched.get("model"):
                 continue
 
-            brand = matched.get("brand", "").strip()
-            model = matched.get("model", "").strip()
-            author = record.get("author", "").strip()
+            brand = matched.get("brand") or ""
+            brand = brand.strip() if brand else ""
+            model = matched.get("model") or ""
+            model = model.strip() if model else ""
+            author = record.get("author") or ""
+            author = author.strip() if author else ""
 
             if brand and model and author:
                 razor_data.append({"brand": brand, "model": model, "author": author})
@@ -107,7 +110,9 @@ class RazorDiversityAggregator(BaseAggregator):
         grouped = grouped.sort_values(["unique_razors", "total_shaves"], ascending=[False, False])
 
         # Add position field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(position=lambda df: range(1, len(df) + 1))  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(
+            position=lambda df: range(1, len(df) + 1)
+        )  # type: ignore
 
         # Convert to list of dictionaries
         result = []

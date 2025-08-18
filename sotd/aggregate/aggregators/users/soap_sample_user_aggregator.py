@@ -31,14 +31,18 @@ class SoapSampleUserAggregator(BaseAggregator):
                 continue
 
             # Extract sample information
-            sample_type = enriched.get("sample_type", "").strip()
+            sample_type = enriched.get("sample_type") or ""
+            sample_type = sample_type.strip() if sample_type else ""
             sample_number = enriched.get("sample_number")
             total_samples = enriched.get("total_samples")
 
             # Extract soap identification
-            brand = matched.get("brand", "").strip() if matched else ""
-            scent = matched.get("scent", "").strip() if matched else ""
-            author = record.get("author", "").strip()
+            brand = matched.get("brand") or "" if matched else ""
+            brand = brand.strip() if brand else ""
+            scent = matched.get("scent") or "" if matched else ""
+            scent = scent.strip() if scent else ""
+            author = record.get("author") or ""
+            author = author.strip() if author else ""
 
             if sample_type and author:
                 sample_data.append(
@@ -116,7 +120,9 @@ class SoapSampleUserAggregator(BaseAggregator):
         grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
 
         # Add position field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(position=lambda df: range(1, len(df) + 1))  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(
+            position=lambda df: range(1, len(df) + 1)
+        )  # type: ignore
 
         # Convert to list of dictionaries
         result = []

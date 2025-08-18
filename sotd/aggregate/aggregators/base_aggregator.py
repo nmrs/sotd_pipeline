@@ -120,7 +120,9 @@ class BaseAggregator(ABC):
         grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
 
         # Add position field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(position=lambda df: range(1, len(df) + 1))  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(
+            position=lambda df: range(1, len(df) + 1)
+        )  # type: ignore
 
         # Convert to list of dictionaries
         result = []
@@ -163,9 +165,12 @@ class BaseAggregator(ABC):
         if value is None:
             return default
 
-        # Strip whitespace and return default if empty
-        stripped_value = str(value).strip()
-        return stripped_value if stripped_value else default
+        # Convert to string and strip whitespace, return default if empty
+        try:
+            stripped_value = str(value).strip()
+            return stripped_value if stripped_value else default
+        except (AttributeError, TypeError):
+            return default
 
     def _validate_required_fields(self, data: Dict[str, Any], required_fields: List[str]) -> bool:
         """Validate that all required fields are present and non-empty.
