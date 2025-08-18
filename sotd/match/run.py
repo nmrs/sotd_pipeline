@@ -473,6 +473,14 @@ def run_match(args):
         print(f"  Skipped: {len(skipped)} months")
         print(f"  Errors: {len(errors)} months")
 
+        # Display error details for failed months
+        if errors:
+            print("\nError Details:")
+            for error_result in errors:
+                month = error_result.get("month", "unknown")
+                error_msg = error_result.get("error", "unknown error")
+                print(f"  {month}: {error_msg}")
+
         if completed:
             total_records = sum(r.get("records_processed", 0) for r in completed)
             total_time = sum(
