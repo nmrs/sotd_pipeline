@@ -192,6 +192,13 @@ Azalea City Suds:
     Pink Peppercorn:
       patterns:
         - azalea.*pink peppercorn
+Azalane:
+  patterns:
+    - azalane
+  scents:
+    Donkey Milk:
+      patterns:
+        - azalane.*donkey.*milk
 Back to Basics Log Cabin:
   patterns:
     - back to basics log cabin
@@ -882,6 +889,9 @@ D.R. Harris:
     Windsor:
       patterns:
         - "d.?r.? ?harris.*windsor"
+Daisho:
+  patterns:
+    - daisho
 Dapper Dragon:
   patterns:
     - dapper dragon
@@ -1991,6 +2001,10 @@ Natural Suds & Body:
 Nawal's:
   patterns:
     - \bnawal'?s?\b
+  scents:
+    Summer Bliss:
+      patterns:
+        - summer.*bliss
 Night Watch:
   patterns:
     - "^night watch( soap( company|co.?)?)?"
@@ -2010,6 +2024,9 @@ Noble Otter:
     "'Tis the Season":
       patterns:
         - tis the season
+    Bare:
+      patterns:
+        - noble.*\bbare\b
     BarrBarr:
       patterns:
         - "bar+ ?bar"
@@ -2019,18 +2036,30 @@ Noble Otter:
     Eros' Ambrosia:
       patterns:
         - eros'? ambrosia
+    Firefighter:
+      patterns:
+        - noble.*firefighter
     Hamam:
       patterns:
         - '\bhamami?\b'
+    Jack:
+      patterns:
+        - noble.*\bjack\b
     Jasmine Green Tea:
       patterns:
         - jasmine green tea
         - noble.*jasmine.*tea
         - "茉莉綠茶"
+    Jungle Warrior:
+      patterns:
+        - noble.*jungle.*warrior
     King:
       patterns:
         - "nob.*otter.*king(?!s)"
         - '^\W*no\b.*king(?!s)'
+    Logbook:
+      patterns:
+        - noble.*logbook
     Lonestar:
       patterns:
         - "noble.*lone ?star"
@@ -2041,6 +2070,12 @@ Noble Otter:
     Monoi De Tahiti:
       patterns:
         - 'm.no.*tahi\wi'
+    Nectar Amissa:
+      patterns:
+        - noble.*nectar amissa
+    Neon Sun:
+      patterns:
+        - noble.*neon sun
     Northern Elixir:
       patterns:
         - north.*elix(i|e)r
@@ -2048,6 +2083,9 @@ Noble Otter:
       patterns:
         - 'noble.*or?bit\b'
         - '\bor?bit$'
+    Plunder:
+      patterns:
+        - noble.*plunder
     Rawr:
       patterns:
         - '\brawr\b'
@@ -2059,9 +2097,13 @@ Noble Otter:
         - nob.*otter.*noir.*vanil
         - '^\W*no\b.*noir.*vanil'
         - no tnev
+        - nior \bet\b
     Toons & Spoons:
       patterns:
         - toons.*spoons
+    Two Kings:
+      patterns:
+        - noble.*two kings
 Nõberu of Sweden:
   patterns:
     - "n[õo]beru( of sweden)?"
@@ -3258,6 +3300,13 @@ Williams:
     Tonsorial:
       patterns:
         - "william'?s.*tonso"
+Wooly Wash Soapery:
+  patterns:
+    - wooly wash
+  scents:
+    Outbacl:
+      patterns:
+        - wooly wash.*outback
 Xabons Xavieiro:
   patterns:
     - xabons xavieiro

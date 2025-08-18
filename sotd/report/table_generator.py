@@ -136,7 +136,7 @@ class TableGenerator:
         include_delta = bool(self.comparison_data)
 
         # Determine max_rows based on table generator preference
-        if hasattr(generator, 'should_limit_rows') and not generator.should_limit_rows():
+        if hasattr(generator, "should_limit_rows") and not generator.should_limit_rows():
             max_rows = 10000  # Effectively unlimited
         else:
             max_rows = 20  # Default limit

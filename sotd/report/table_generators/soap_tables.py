@@ -25,9 +25,7 @@ class SoapMakersTableGenerator(DataTransformingTableGenerator):
         """Get soap makers data from aggregated data."""
         data = self.data.get("soap_makers", [])
         # Filter for brands with 5+ shaves (as requested by user)
-        filtered_data = [
-            item for item in data if item.get("shaves", 0) >= 5
-        ]
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
         validated_data = self._validate_data_records(
             filtered_data, "soap_makers", ["maker", "shaves"]
         )
@@ -108,9 +106,7 @@ class BrandDiversityTableGenerator(StandardProductTableGenerator):
         """Get brand diversity data from aggregated data."""
         data = self.data.get("brand_diversity", [])
         # Filter for brands with 5+ unique soaps (as requested by user)
-        filtered_data = [
-            item for item in data if item.get("unique_soaps", 0) >= 5
-        ]
+        filtered_data = [item for item in data if item.get("unique_soaps", 0) >= 5]
         return self._validate_data_records(
             filtered_data, "brand_diversity", ["maker", "unique_soaps"]
         )

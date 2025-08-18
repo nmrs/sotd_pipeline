@@ -46,7 +46,7 @@ def run_report(args) -> None:
     for month in months:
         if args.debug:
             print(f"[DEBUG] Processing month: {month}")
-        
+
         # Parse month to get year and month
         try:
             year_str, month_str = month.split("-")
@@ -93,7 +93,7 @@ def run_report(args) -> None:
         for report_type in report_types:
             if args.debug:
                 print(f"[DEBUG] Generating {report_type} report for {month}")
-            
+
             # Check if output already exists and force is not set
             output_path = save.get_report_file_path(out_dir, year, month_int, report_type)
             if output_path.exists() and not args.force:
