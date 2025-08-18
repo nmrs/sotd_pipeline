@@ -226,7 +226,7 @@ class TestSoapSampleAggregator:
     def test_aggregate_soap_samples_complex_grouping(self):
         """Test that grouping works correctly with multiple fields."""
         aggregator = SoapSampleAggregator()
-        
+
         records = [
             {
                 "author": "user1",
@@ -257,6 +257,6 @@ class TestSoapSampleAggregator:
         assert len(result) == 2
         sample_entry = next(r for r in result if "sample" in r["name"])
         tester_entry = next(r for r in result if "tester" in r["name"])
-        
+
         assert sample_entry["shaves"] == 2
         assert tester_entry["shaves"] == 1

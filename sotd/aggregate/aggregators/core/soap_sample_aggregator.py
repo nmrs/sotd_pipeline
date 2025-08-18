@@ -34,21 +34,23 @@ class SoapSampleAggregator(BaseAggregator):
             sample_type = enriched.get("sample_type", "").strip()
             sample_number = enriched.get("sample_number")
             total_samples = enriched.get("total_samples")
-            
+
             # Extract soap identification
             maker = matched.get("maker", "").strip() if matched else ""
             scent = matched.get("scent", "").strip() if matched else ""
             author = record.get("author", "").strip()
 
             if sample_type and author:
-                sample_data.append({
-                    "sample_type": sample_type,
-                    "sample_number": sample_number,
-                    "total_samples": total_samples,
-                    "maker": maker,
-                    "scent": scent,
-                    "author": author,
-                })
+                sample_data.append(
+                    {
+                        "sample_type": sample_type,
+                        "sample_number": sample_number,
+                        "total_samples": total_samples,
+                        "maker": maker,
+                        "scent": scent,
+                        "author": author,
+                    }
+                )
 
         return sample_data
 
@@ -65,22 +67,18 @@ class SoapSampleAggregator(BaseAggregator):
         sample_type = df["sample_type"].fillna("")
         maker = df["maker"].fillna("")
         scent = df["scent"].fillna("")
-        
+
         # Create composite name using pandas operations
         # Use numpy.where for conditional logic on Series
         import numpy as np
-        
+
         # Create the composite name based on whether maker and scent exist
         composite_name = np.where(
             (maker != "") & (scent != ""),
             sample_type + " - " + maker + " - " + scent,
-            np.where(
-                maker != "",
-                sample_type + " - " + maker,
-                sample_type
-            )
+            np.where(maker != "", sample_type + " - " + maker, sample_type),
         )
-        
+
         return pd.Series(composite_name)
 
     def _group_and_aggregate(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -94,21 +92,21 @@ class SoapSampleAggregator(BaseAggregator):
         """
         # Group by sample type, maker, and scent
         group_columns = ["sample_type", "maker", "scent"]
-        
+
         # Group by columns and calculate metrics
         grouped = df.groupby(group_columns).agg({"author": ["count", "nunique"]}).reset_index()
-        
+
         # Flatten column names
         grouped.columns = ["sample_type", "maker", "scent", "shaves", "unique_users"]
-        
+
         # Create composite name for consistent interface
         grouped["name"] = grouped.apply(
             lambda row: self._create_single_composite_name(
                 row["sample_type"], row["maker"], row["scent"]
             ),
-            axis=1
+            axis=1,
         )
-        
+
         return grouped
 
     def _create_single_composite_name(self, sample_type: str, maker: str, scent: str) -> str:
