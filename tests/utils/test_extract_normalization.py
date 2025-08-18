@@ -202,12 +202,12 @@ class TestStripSoapPatterns:
             ("B&M Seville soap", "B&M Seville"),  # "soap" is stripped
             (
                 "Stirling Bay Rum sample",
-                "Stirling Bay Rum sample",
-            ),  # "sample" is NOT stripped (standalone)
+                "Stirling Bay Rum",
+            ),  # "sample" is stripped (standalone at end)
             (
                 "Declaration Grooming soap sample",
-                "Declaration Grooming sample",
-            ),  # Only "soap" stripped
+                "Declaration Grooming",
+            ),  # Both "soap" and "sample" stripped
             ("Cella croap", "Cella"),  # "croap" is stripped
             ("Proraso cream", "Proraso"),  # "cream" is stripped
             ("MWF puck", "MWF"),  # "puck" is stripped
@@ -242,6 +242,22 @@ class TestStripSoapPatterns:
                 "Declaration Grooming ( Sample )",
                 "Declaration Grooming ( Sample )",
             ),  # "( Sample )" with spaces NOT stripped
+        ]
+        for input_str, expected in test_cases:
+            result = strip_soap_patterns(input_str)
+            assert (
+                result == expected
+            ), f"Failed for '{input_str}': got '{result}', expected '{expected}'"
+
+    def test_strip_soap_patterns_standalone_sample_indicators(self):
+        """Test soap pattern stripping with standalone sample indicators at the end."""
+        test_cases = [
+            ("Stirling Bay Rum sample", "Stirling Bay Rum"),  # "sample" at end is stripped
+            ("Declaration Grooming tester", "Declaration Grooming"),  # "tester" at end is stripped
+            ("B&M Seville SAMPLE", "B&M Seville"),  # "SAMPLE" at end is stripped (case insensitive)
+            ("Stirling Bay Rum sample ", "Stirling Bay Rum"),  # trailing space stripped
+            ("Declaration Grooming sample.", "Declaration Grooming"),  # "sample." stripped
+            ("B&M Seville sample!", "B&M Seville"),  # "sample!" stripped
         ]
         for input_str, expected in test_cases:
             result = strip_soap_patterns(input_str)

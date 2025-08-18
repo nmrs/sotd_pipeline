@@ -226,6 +226,7 @@ def strip_soap_patterns(value: str) -> str:
 
     This removes patterns like:
     - Sample indicators: (sample), (tester), etc.
+    - Standalone sample indicators: "sample", "tester" at the end
     - Size indicators: (travel size), (mini), etc.
     - Product type indicators: "Shave Soap", "Shaving Soap", "soap", etc.
     - Delimiters and punctuation: leading/trailing -, :, /, etc.
@@ -266,6 +267,14 @@ def strip_soap_patterns(value: str) -> str:
         r"\s*\(small\)",
     ]
     for pattern in soap_patterns:
+        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+
+    # Pattern for standalone sample indicators at the end
+    standalone_sample_patterns = [
+        r"\s+sample\s*[.!?]*\s*$",  # "sample" at the end (with optional punctuation)
+        r"\s+tester\s*[.!?]*\s*$",  # "tester" at the end (with optional punctuation)
+    ]
+    for pattern in standalone_sample_patterns:
         cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
 
     # Clean up any leading/trailing delimiters and punctuation that the matcher needs
