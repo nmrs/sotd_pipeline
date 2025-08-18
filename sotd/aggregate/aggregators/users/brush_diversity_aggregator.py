@@ -75,9 +75,7 @@ class BrushDiversityAggregator(BaseAggregator):
         if isinstance(result, pd.Series):
             return result
         else:
-            return pd.Series(
-                result, index=df.index
-            )
+            return pd.Series(result, index=df.index)
 
     def _group_and_aggregate(self, df: pd.DataFrame) -> pd.DataFrame:
         """Group data and calculate aggregation metrics."""
@@ -97,9 +95,7 @@ class BrushDiversityAggregator(BaseAggregator):
         grouped.columns = ["author", "unique_brushes"]
 
         # Get total shaves per user
-        shave_counts = (
-            df.groupby("author").size().reset_index(name="total_shaves")  # type: ignore
-        )
+        shave_counts = df.groupby("author").size().reset_index(name="total_shaves")  # type: ignore
         grouped = grouped.merge(shave_counts, on="author")
 
         # Add unique_users field (always 1 for user aggregators)
@@ -109,13 +105,10 @@ class BrushDiversityAggregator(BaseAggregator):
 
     def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
         """Sort grouped data and add position rankings."""
-        grouped = grouped.sort_values(
-            ["unique_brushes", "total_shaves"], ascending=[False, False]
-        )
-        grouped = (
-            grouped.reset_index(drop=True)
-            .assign(position=lambda df: range(1, len(df) + 1))  # type: ignore
-        )
+        grouped = grouped.sort_values(["unique_brushes", "total_shaves"], ascending=[False, False])
+        grouped = grouped.reset_index(drop=True).assign(
+            position=lambda df: range(1, len(df) + 1)
+        )  # type: ignore
 
         result = []
         for _, row in grouped.iterrows():

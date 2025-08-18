@@ -112,9 +112,7 @@ class SoapBrandScentDiversityAggregator(BaseAggregator):
         )
 
         # Add position field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(
-            position=lambda df: range(1, len(df) + 1)
-        )  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(position=lambda df: range(1, len(df) + 1))  # type: ignore
 
         # Convert to list of dictionaries
         result = []
