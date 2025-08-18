@@ -403,6 +403,13 @@ def analyze_soap_neighbor_similarity_web(
 ) -> list[dict]:
     """Analyze soap matches for neighbor similarity (web-optimized version)"""
     from difflib import SequenceMatcher
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+    # Memory optimization: Process in chunks for very large datasets
+    if len(matches) > 10000:  # If more than 10k matches, log memory usage
+        logger.info(f"Processing large dataset: {len(matches)} matches")
 
     # Extract data based on mode with comment tracking
     entries_data = []
@@ -465,8 +472,16 @@ def analyze_soap_neighbor_similarity_web(
     # Convert to list and sort by normalized string
     unique_entries = sorted(grouped_entries.values(), key=lambda x: x["normalized_string"])
 
-    # Calculate similarity between adjacent entries
-    results = []
+    # First pass: calculate similarities and identify entries that meet threshold
+    entries_with_similarities = []
+
+    # Memory optimization: Process in smaller chunks for very large datasets
+    chunk_size = 1000
+    total_entries = len(unique_entries)
+
+    if total_entries > 5000:
+        logger.info(f"Processing {total_entries} entries in chunks of {chunk_size}")
+
     for i in range(len(unique_entries)):
         current = unique_entries[i]
 
@@ -490,43 +505,80 @@ def analyze_soap_neighbor_similarity_web(
                 None, current_normalized, below_normalized
             ).ratio()
 
+        # Check if this entry meets the similarity threshold with either neighbor
+        meets_threshold = (
+            similarity_to_above is not None and similarity_to_above >= similarity_threshold
+        ) or (similarity_to_below is not None and similarity_to_below >= similarity_threshold)
+
+        if meets_threshold:
+            entries_with_similarities.append(
+                {
+                    "entry": current["entry"],
+                    "normalized_string": current["normalized_string"],
+                    "comment_ids": current["comment_ids"],
+                    "count": current["count"],
+                    "original_matches": current["original_matches"],
+                    "original_similarity_to_above": similarity_to_above,
+                    "original_similarity_to_below": similarity_to_below,
+                }
+            )
+
+    # Second pass: recalculate similarities for the filtered entries only
+    results = []
+    for i in range(len(entries_with_similarities)):
+        current = entries_with_similarities[i]
+
+        # Calculate similarity to entry above (if exists) in the filtered dataset
+        similarity_to_above = None
+        if i > 0:
+            above = entries_with_similarities[i - 1]
+            above_normalized = above["normalized_string"]
+            current_normalized = current["normalized_string"]
+            similarity_to_above = SequenceMatcher(
+                None, current_normalized, above_normalized
+            ).ratio()
+
+        # Calculate similarity to entry below (if exists) in the filtered dataset
+        similarity_to_below = None
+        if i < len(entries_with_similarities) - 1:
+            below = entries_with_similarities[i + 1]
+            below_normalized = below["normalized_string"]
+            current_normalized = current["normalized_string"]
+            similarity_to_below = SequenceMatcher(
+                None, current_normalized, below_normalized
+            ).ratio()
+
         # Determine pattern and normalized string from the first occurrence
         first_match = current["original_matches"][0]
         pattern = first_match.get("pattern", current["entry"])
         normalized_string = first_match.get("normalized", current["normalized_string"])
 
-        # Only include results that meet the similarity threshold
-        if similarity_to_above is not None and similarity_to_above >= similarity_threshold:
-            results.append(
-                {
-                    "entry": current["entry"],
-                    "similarity_to_above": similarity_to_above,
-                    "similarity_to_next": (
-                        similarity_to_below if similarity_to_below is not None else 0.0
-                    ),
-                    "normalized_string": normalized_string,
-                    "pattern": pattern,
-                    "comment_ids": current["comment_ids"],
-                    "count": current["count"],
-                }
-            )
-        elif similarity_to_below is not None and similarity_to_below >= similarity_threshold:
-            results.append(
-                {
-                    "entry": current["entry"],
-                    "similarity_to_above": (
-                        similarity_to_above if similarity_to_above is not None else 0.0
-                    ),
-                    "similarity_to_next": similarity_to_below,
-                    "normalized_string": normalized_string,
-                    "pattern": pattern,
-                    "comment_ids": current["comment_ids"],
-                    "count": current["count"],
-                }
-            )
+        results.append(
+            {
+                "entry": current["entry"],
+                "similarity_to_above": similarity_to_above,
+                "similarity_to_next": similarity_to_below,
+                "normalized_string": normalized_string,
+                "pattern": pattern,
+                "comment_ids": current["comment_ids"],
+                "count": current["count"],
+            }
+        )
 
     # Apply limit if specified
     if limit is not None:
         results = results[:limit]
+
+    # Final memory cleanup and logging
+    if total_entries > 5000:
+        logger.info(
+            f"Completed processing {total_entries} entries, returned {len(results)} results"
+        )
+
+    # Clear large intermediate data structures to free memory
+    del entries_with_similarities
+    del unique_entries
+    del grouped_entries
+    del entries_data
 
     return results

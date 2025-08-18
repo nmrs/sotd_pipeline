@@ -29,7 +29,7 @@ interface SoapPatternSuggestion {
 
 interface SoapNeighborSimilarityResult {
     entry: string;
-    similarity_to_next: number;
+    similarity_to_next: number | null;
     similarity_to_above: number | null;
     normalized_string: string;
     pattern: string;
@@ -264,7 +264,7 @@ const SoapAnalyzer: React.FC = () => {
         setSelectedComment(null);
     };
 
-    // Filtered results for neighbor similarity
+    // Filtered results for neighbor similarity (text search only - similarity filtering is now server-side)
     const filteredNeighborResults = useMemo(() => {
         if (!neighborSimilarityResult?.results) {
             return [];
@@ -272,15 +272,7 @@ const SoapAnalyzer: React.FC = () => {
 
         let results = neighborSimilarityResult.results;
 
-        // First apply similarity threshold filtering
-        results = results.filter(result => {
-            const meetsThreshold =
-                (result.similarity_to_above !== null && result.similarity_to_above >= similarityThreshold) ||
-                (result.similarity_to_next !== null && result.similarity_to_next >= similarityThreshold);
-            return meetsThreshold;
-        });
-
-        // Then apply text search filtering if there's filter text
+        // Apply text search filtering if there's filter text
         if (filterText.trim()) {
             const searchTerm = filterText.toLowerCase();
             results = results.filter(result =>
@@ -292,7 +284,7 @@ const SoapAnalyzer: React.FC = () => {
         }
 
         return results;
-    }, [neighborSimilarityResult, filterText, similarityThreshold]);
+    }, [neighborSimilarityResult, filterText]);
 
     return (
         <div className="container mx-auto p-6 space-y-6">
@@ -341,6 +333,9 @@ const SoapAnalyzer: React.FC = () => {
                                 />
                                 <span className="text-sm font-mono w-12">{similarityThreshold}</span>
                             </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                                For neighbor analysis: Controls server-side filtering. Only entries meeting this threshold are returned.
+                            </p>
                         </div>
 
                         <div>
@@ -588,6 +583,9 @@ const SoapAnalyzer: React.FC = () => {
 
                                 {/* Filter Text Box */}
                                 <div className="mb-4">
+                                    <div className="mb-2 text-xs text-gray-500">
+                                        Note: Results are filtered server-side by similarity threshold. Only entries meeting the threshold are shown.
+                                    </div>
                                     <label htmlFor="filter-input" className="block text-sm font-medium text-gray-700 mb-2">
                                         Filter Results
                                     </label>
@@ -628,9 +626,13 @@ const SoapAnalyzer: React.FC = () => {
                                                             )}
                                                         </td>
                                                         <td className="border border-gray-300 px-3 py-2">
-                                                            <Badge className={getNeighborSimilarityColor(result.similarity_to_next)}>
-                                                                {result.similarity_to_next.toFixed(3)}
-                                                            </Badge>
+                                                            {result.similarity_to_next !== null ? (
+                                                                <Badge className={getNeighborSimilarityColor(result.similarity_to_next)}>
+                                                                    {result.similarity_to_next.toFixed(3)}
+                                                                </Badge>
+                                                            ) : (
+                                                                <span className="text-gray-400">-</span>
+                                                            )}
                                                         </td>
                                                         <td className="border border-gray-300 px-3 py-2 text-sm text-gray-600">
                                                             {result.normalized_string || result.entry.toLowerCase()}
@@ -713,6 +715,9 @@ const SoapAnalyzer: React.FC = () => {
 
                                 {/* Filter Text Box */}
                                 <div className="mb-4">
+                                    <div className="mb-2 text-xs text-gray-500">
+                                        Note: Results are filtered server-side by similarity threshold. Only entries meeting the threshold are shown.
+                                    </div>
                                     <label htmlFor="filter-input-brand-scent" className="block text-sm font-medium text-gray-700 mb-2">
                                         Filter Results
                                     </label>
@@ -754,16 +759,20 @@ const SoapAnalyzer: React.FC = () => {
                                                             <td className="border border-gray-300 px-3 py-2">
                                                                 {index > 0 ? (
                                                                     <Badge className={getNeighborSimilarityColor(result.similarity_to_above || 0)}>
-                                                                        {(result.similarity_to_next || 0).toFixed(3)}
+                                                                        {(result.similarity_to_above || 0).toFixed(3)}
                                                                     </Badge>
                                                                 ) : (
                                                                     <span className="text-gray-400">-</span>
                                                                 )}
                                                             </td>
                                                             <td className="border border-gray-300 px-3 py-2">
-                                                                <Badge className={getNeighborSimilarityColor(result.similarity_to_next)}>
-                                                                    {result.similarity_to_next.toFixed(3)}
-                                                                </Badge>
+                                                                {result.similarity_to_next !== null ? (
+                                                                    <Badge className={getNeighborSimilarityColor(result.similarity_to_next)}>
+                                                                        {result.similarity_to_next.toFixed(3)}
+                                                                    </Badge>
+                                                                ) : (
+                                                                    <span className="text-gray-400">-</span>
+                                                                )}
                                                             </td>
                                                             <td className="border border-gray-300 px-3 py-2 text-sm text-gray-600">
                                                                 {result.normalized_string || result.entry.toLowerCase()}
@@ -847,6 +856,9 @@ const SoapAnalyzer: React.FC = () => {
 
                                 {/* Filter Text Box */}
                                 <div className="mb-4">
+                                    <div className="mb-2 text-xs text-gray-500">
+                                        Note: Results are filtered server-side by similarity threshold. Only entries meeting the threshold are shown.
+                                    </div>
                                     <label htmlFor="filter-input-scents" className="block text-sm font-medium text-gray-700 mb-2">
                                         Filter Results
                                     </label>
@@ -887,9 +899,13 @@ const SoapAnalyzer: React.FC = () => {
                                                             )}
                                                         </td>
                                                         <td className="border border-gray-300 px-3 py-2">
-                                                            <Badge className={getNeighborSimilarityColor(result.similarity_to_next)}>
-                                                                {result.similarity_to_next.toFixed(3)}
-                                                            </Badge>
+                                                            {result.similarity_to_next !== null ? (
+                                                                <Badge className={getNeighborSimilarityColor(result.similarity_to_next)}>
+                                                                    {result.similarity_to_next.toFixed(3)}
+                                                                </Badge>
+                                                            ) : (
+                                                                <span className="text-gray-400">-</span>
+                                                            )}
                                                         </td>
                                                         <td className="border border-gray-300 px-3 py-2 text-sm text-gray-600">
                                                             {result.normalized_string || result.entry.toLowerCase()}
