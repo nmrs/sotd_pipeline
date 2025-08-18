@@ -159,6 +159,89 @@ async def get_soap_pattern_suggestions(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/neighbor-similarity")
+async def get_soap_neighbor_similarity(
+    months: str = Query(..., description="Comma-separated months (e.g., '2025-05,2025-06')"),
+    mode: str = Query(..., description="Analysis mode: brands, brand_scent, or scents"),
+    similarity_threshold: float = Query(
+        0.5, ge=0.0, le=1.0, description="Similarity threshold for filtering results"
+    ),
+    limit: Optional[int] = Query(None, ge=1, le=100, description="Maximum number of results"),
+):
+    """Get soap neighbor similarity analysis"""
+    try:
+        # Validate mode parameter
+        valid_modes = ["brands", "brand_scent", "scents"]
+        if mode not in valid_modes:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid mode: {mode}. Must be one of: {', '.join(valid_modes)}",
+            )
+
+        # Parse months
+        month_list = [m.strip() for m in months.split(",")]
+        for month in month_list:
+            if not is_valid_month(month):
+                raise HTTPException(status_code=400, detail=f"Invalid month format: {month}")
+
+        logger.info(f"🔍 Analyzing soap neighbor similarity for months: {month_list}, mode: {mode}")
+
+        # Load data from all specified months
+        all_matches = []
+        data_dir = Path(__file__).parent.parent.parent / "data" / "matched"
+
+        for month in month_list:
+            month_file = data_dir / f"{month}.json"
+            if not month_file.exists():
+                logger.warning(f"No match data found for month: {month}")
+                continue
+
+            try:
+                with open(month_file, "r") as f:
+                    match_data = json.load(f)
+
+                # Extract soap data from the data array
+                if "data" in match_data and isinstance(match_data["data"], list):
+                    for record in match_data["data"]:
+                        if "soap" in record and record["soap"]:
+                            # Add the record ID as comment_id to the soap object
+                            soap_data = record["soap"].copy()
+                            soap_data["comment_id"] = record.get("id", "")
+                            all_matches.append(soap_data)
+
+            except Exception as e:
+                logger.error(f"Error loading month {month}: {e}")
+                continue
+
+        if not all_matches:
+            return {
+                "message": "No soap matches found for the specified months",
+                "results": [],
+                "mode": mode,
+                "total_entries": 0,
+                "months_processed": month_list,
+            }
+
+        logger.info(f"Processing {len(all_matches)} total soap matches for neighbor similarity")
+
+        # Analyze neighbor similarity
+        results = analyze_soap_neighbor_similarity_web(
+            all_matches, mode, similarity_threshold, limit
+        )
+
+        return {
+            "message": f"Neighbor similarity analysis completed for {mode} mode",
+            "mode": mode,
+            "results": results,
+            "total_entries": len(results),
+            "months_processed": month_list,
+        }
+
+    except Exception as e:
+        logger.error(f"Error in soap neighbor similarity analysis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 def analyze_soap_duplicates_web(
     matches: List[dict], similarity_threshold: float = 0.9, limit: Optional[int] = None
 ) -> List[dict]:
@@ -311,5 +394,139 @@ def analyze_soap_patterns_web(matches: List[dict], limit: Optional[int] = None) 
             "examples": pattern_examples[pattern][:3],
         }
         results.append(result)
+
+    return results
+
+
+def analyze_soap_neighbor_similarity_web(
+    matches: list[dict], mode: str, similarity_threshold: float = 0.5, limit: Optional[int] = None
+) -> list[dict]:
+    """Analyze soap matches for neighbor similarity (web-optimized version)"""
+    from difflib import SequenceMatcher
+
+    # Extract data based on mode with comment tracking
+    entries_data = []
+    for match in matches:
+        # Handle both direct fields and nested matched fields
+        if "matched" in match and match["matched"]:
+            maker = match["matched"].get("maker", "")
+            scent = match["matched"].get("scent", "")
+        else:
+            maker = match.get("maker", "")
+            scent = match.get("scent", "")
+
+        if maker and scent:  # Only add if both fields exist
+            comment_id = match.get("comment_id", "")
+            entry = ""
+            normalized = ""
+
+            if mode == "brands":
+                entry = maker
+                normalized = maker.lower().strip()
+            elif mode == "brand_scent":
+                entry = f"{maker} - {scent}"
+                maker_lower = maker.lower().strip()
+                scent_lower = scent.lower().strip()
+                normalized = f"{maker_lower} - {scent_lower}"
+            elif mode == "scents":
+                entry = scent
+                normalized = scent.lower().strip()
+
+            if entry and normalized:  # Only add if we have valid data
+                entries_data.append(
+                    {
+                        "entry": entry,
+                        "normalized": normalized,
+                        "comment_id": comment_id,
+                        "original_match": match,
+                    }
+                )
+
+    if not entries_data:
+        return []
+
+    # Group by normalized string (case-insensitive grouping)
+    grouped_entries = {}
+    for entry_data in entries_data:
+        normalized = entry_data["normalized"]
+        if normalized not in grouped_entries:
+            grouped_entries[normalized] = {
+                "entry": entry_data["entry"],
+                "normalized_string": normalized,
+                "comment_ids": [],
+                "count": 0,
+                "original_matches": [],
+            }
+
+        grouped_entries[normalized]["comment_ids"].append(entry_data["comment_id"])
+        grouped_entries[normalized]["count"] += 1
+        grouped_entries[normalized]["original_matches"].append(entry_data["original_match"])
+
+    # Convert to list and sort by normalized string
+    unique_entries = sorted(grouped_entries.values(), key=lambda x: x["normalized_string"])
+
+    # Calculate similarity between adjacent entries
+    results = []
+    for i in range(len(unique_entries)):
+        current = unique_entries[i]
+
+        # Calculate similarity to entry above (if exists)
+        similarity_to_above = None
+        if i > 0:
+            above = unique_entries[i - 1]
+            above_normalized = above["normalized_string"]
+            current_normalized = current["normalized_string"]
+            similarity_to_above = SequenceMatcher(
+                None, current_normalized, above_normalized
+            ).ratio()
+
+        # Calculate similarity to entry below (if exists)
+        similarity_to_below = None
+        if i < len(unique_entries) - 1:
+            below = unique_entries[i + 1]
+            below_normalized = below["normalized_string"]
+            current_normalized = current["normalized_string"]
+            similarity_to_below = SequenceMatcher(
+                None, current_normalized, below_normalized
+            ).ratio()
+
+        # Determine pattern and normalized string from the first occurrence
+        first_match = current["original_matches"][0]
+        pattern = first_match.get("pattern", current["entry"])
+        normalized_string = first_match.get("normalized", current["normalized_string"])
+
+        # Only include results that meet the similarity threshold
+        if similarity_to_above is not None and similarity_to_above >= similarity_threshold:
+            results.append(
+                {
+                    "entry": current["entry"],
+                    "similarity_to_above": similarity_to_above,
+                    "similarity_to_next": (
+                        similarity_to_below if similarity_to_below is not None else 0.0
+                    ),
+                    "normalized_string": normalized_string,
+                    "pattern": pattern,
+                    "comment_ids": current["comment_ids"],
+                    "count": current["count"],
+                }
+            )
+        elif similarity_to_below is not None and similarity_to_below >= similarity_threshold:
+            results.append(
+                {
+                    "entry": current["entry"],
+                    "similarity_to_above": (
+                        similarity_to_above if similarity_to_above is not None else 0.0
+                    ),
+                    "similarity_to_next": similarity_to_below,
+                    "normalized_string": normalized_string,
+                    "pattern": pattern,
+                    "comment_ids": current["comment_ids"],
+                    "count": current["count"],
+                }
+            )
+
+    # Apply limit if specified
+    if limit is not None:
+        results = results[:limit]
 
     return results
