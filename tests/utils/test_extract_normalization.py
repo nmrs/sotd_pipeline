@@ -200,8 +200,14 @@ class TestStripSoapPatterns:
         """Test basic soap pattern stripping."""
         test_cases = [
             ("B&M Seville soap", "B&M Seville"),  # "soap" is stripped
-            ("Stirling Bay Rum sample", "Stirling Bay Rum sample"),  # "sample" is NOT stripped (standalone)
-            ("Declaration Grooming soap sample", "Declaration Grooming sample"),  # Only "soap" stripped
+            (
+                "Stirling Bay Rum sample",
+                "Stirling Bay Rum sample",
+            ),  # "sample" is NOT stripped (standalone)
+            (
+                "Declaration Grooming soap sample",
+                "Declaration Grooming sample",
+            ),  # Only "soap" stripped
             ("Cella croap", "Cella"),  # "croap" is stripped
             ("Proraso cream", "Proraso"),  # "cream" is stripped
             ("MWF puck", "MWF"),  # "puck" is stripped
@@ -232,7 +238,10 @@ class TestStripSoapPatterns:
         test_cases = [
             ("B&M Seville (sample)", "B&M Seville"),  # "(sample)" is stripped
             ("Stirling Bay Rum (SAMPLE)", "Stirling Bay Rum"),  # "(SAMPLE)" is stripped
-            ("Declaration Grooming ( Sample )", "Declaration Grooming ( Sample )"),  # "( Sample )" with spaces NOT stripped
+            (
+                "Declaration Grooming ( Sample )",
+                "Declaration Grooming ( Sample )",
+            ),  # "( Sample )" with spaces NOT stripped
         ]
         for input_str, expected in test_cases:
             result = strip_soap_patterns(input_str)
@@ -243,9 +252,18 @@ class TestStripSoapPatterns:
     def test_strip_soap_patterns_complex_combinations(self):
         """Test soap pattern stripping with complex combinations."""
         test_cases = [
-            ("B&M Seville soap (sample) (23)", "B&M Seville (23)"),  # Both "soap" and "(sample)" stripped
-            ("Stirling Bay Rum cream (SAMPLE) (5)", "Stirling Bay Rum (5)"),  # Both "cream" and "(SAMPLE)" stripped
-            ("Declaration Grooming croap ( Sample ) ()", "Declaration Grooming ( Sample ) ()"),  # Only "croap" stripped
+            (
+                "B&M Seville soap (sample) (23)",
+                "B&M Seville (23)",
+            ),  # Both "soap" and "(sample)" stripped
+            (
+                "Stirling Bay Rum cream (SAMPLE) (5)",
+                "Stirling Bay Rum (5)",
+            ),  # Both "cream" and "(SAMPLE)" stripped
+            (
+                "Declaration Grooming croap ( Sample ) ()",
+                "Declaration Grooming ( Sample ) ()",
+            ),  # Only "croap" stripped
         ]
         for input_str, expected in test_cases:
             result = strip_soap_patterns(input_str)
@@ -265,7 +283,9 @@ class TestStripSoapPatterns:
             result = strip_soap_patterns(input_str)
             if "soap" in input_str.lower():
                 # If "soap" is in the input, it should be stripped
-                assert "soap" not in result.lower(), f"Expected 'soap' to be stripped from '{input_str}', but got '{result}'"
+                assert (
+                    "soap" not in result.lower()
+                ), f"Expected 'soap' to be stripped from '{input_str}', but got '{result}'"
             else:
                 # Otherwise, should not change
                 assert result == input_str, f"Should not change '{input_str}', but got '{result}'"
@@ -273,8 +293,14 @@ class TestStripSoapPatterns:
     def test_strip_soap_patterns_whitespace_cleanup(self):
         """Test that whitespace is properly cleaned up after stripping."""
         test_cases = [
-            ("B&M Seville   soap   (sample)   ", "B&M Seville"),  # Both "soap" and "(sample)" stripped
-            ("Stirling Bay Rum  cream  (23)  ", "Stirling Bay Rum (23)"),  # "cream" stripped + whitespace normalized
+            (
+                "B&M Seville   soap   (sample)   ",
+                "B&M Seville",
+            ),  # Both "soap" and "(sample)" stripped
+            (
+                "Stirling Bay Rum  cream  (23)  ",
+                "Stirling Bay Rum (23)",
+            ),  # "cream" stripped + whitespace normalized
             ("Declaration Grooming  croap  ", "Declaration Grooming"),  # Only "croap" stripped
         ]
         for input_str, expected in test_cases:
