@@ -73,10 +73,11 @@ class SoapMatcher(BaseMatcher):
         scent_patterns = r"\b(soap|cream|splash|balm|aftershave|puck)\b"
         text = re.sub(scent_patterns, "", text, flags=re.IGNORECASE)
         # Clean up any trailing punctuation and whitespace left behind
-        text = re.sub(r"[\s\-:*/_,~`\\]+$", "", text)
+        # Include periods in the punctuation cleanup for better handling
+        text = re.sub(r"[\s\-:*/_,~`\\\.]+$", "", text)
         # Normalize whitespace
         text = re.sub(r"\s+", " ", text.strip())
-        # Strip trailing periods
+        # Strip trailing periods (additional cleanup)
         text = strip_trailing_periods(text)
         return text
 
