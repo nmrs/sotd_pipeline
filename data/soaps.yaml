@@ -39,7 +39,7 @@ Abbate Y La Mantia:
         - 'abbate.*fuf\w+ns'
     Garibaldi:
       patterns:
-        - abbate.*garibaldi
+        - abbate.*gar+ibaldi
     Ishtar:
       patterns:
         - abbate.*ishtar
@@ -130,12 +130,18 @@ Ariana & Evans:
     London Gin Club:
       patterns:
         - arian+a?.*london
+    Matcha Tea:
+      patterns:
+        - arian.*matcha tea
     Maullu:
       patterns:
         - \bmaullu\b
     Monte Carlo:
       patterns:
         - ariana.*monte carlo
+    Ouddiction:
+      patterns:
+        - oud+iction
     Peach & Cognac:
       patterns:
         - peach.*cognac
@@ -330,6 +336,9 @@ Barrister and Mann:
       patterns:
         - '\bb ?(and|&|\+) ?m\b.*h|oallows'
         - barris.*ha|ollows
+    Kalyptos:
+      patterns:
+        - kalyp[st]os
     Lavanille:
       patterns:
         - lavani|elle
@@ -355,7 +364,7 @@ Barrister and Mann:
       patterns:
         - '\bb ?(and|&|\+) ?m\b.*mar\w*n'
         - 'barris.*mar\w*n'
-    "Mélange":
+    Mélange:
       patterns:
         - '\bb ?(and|&|\+) ?m\b.*m\wlange'
         - 'barris.*m\wlange'
@@ -652,6 +661,9 @@ Catie's Bubbles:
     Le Piment de la Vie:
       patterns:
         - 'p\w+ment.*vie'
+    Literal Lilac:
+      patterns:
+        - literal lilac
     Maggards MeetUp 2023:
       patterns:
         - cat.*bubb.*maggard
@@ -660,7 +672,7 @@ Catie's Bubbles:
         - "(catie|cb).*mass(e|é)pain"
     Menage a Lavande:
       patterns:
-        - "m(e|é)nage.*lavand"
+        - "m[eé]n.*lav"
     Mille Chypre:
       patterns:
         - (catie|cb).*mille chypre
@@ -735,6 +747,7 @@ Chicago Grooming Co.:
     Caoba:
       patterns:
         - caoba
+        - caboa
     Gold Coast:
       patterns:
         - 'gold c\w+st'
@@ -1791,6 +1804,9 @@ Maggard Razors:
     Limes & Bergamot:
       patterns:
         - magg.*lime.*berg
+    London Barbershop:
+      patterns:
+        - magg.*london.*barber
     Mango Sage Tea:
       patterns:
         - magg.*mango.*tea
@@ -2593,7 +2609,7 @@ Stirling Soap Co.:
         - stirl.*alighieri
     Almond Creme:
       patterns:
-        - 'stirl.*almond cre\w?m'
+        - stirl.*almond cr\wme
     Arkadia:
       patterns:
         - arkadia
@@ -2736,6 +2752,9 @@ Strike Gold Shave:
   patterns:
     - "strike gold( shave)?"
   scents:
+    Jelly Rings:
+      patterns:
+        - strike.*jelly ring
     Nostalgia:
       patterns:
         - strike gold.*nostalgia
@@ -2801,6 +2820,7 @@ Summer Break Soaps:
         - summer.*lather.*2024
         - sbs.*lather.*2024
         - roty.*2024
+        - summer.*rookie.*2024
     Mountain Laurel:
       patterns:
         - mountain laurel
@@ -2854,7 +2874,7 @@ Talent Soap Factory:
   scents:
     Cakehole:
       patterns:
-        - cakehole
+        - cake ?hole
     Daddy Longlegs:
       patterns:
         - "daddy long ?legs"
@@ -3156,11 +3176,15 @@ Viking:
     - viking( shaving (soap)?)?
 Vitos:
   patterns:
-    - '^\W*vitos'
+    - \bvito['’]?s\b
   scents:
     Extra Super:
       patterns:
-        - vitos.*extra super
+        - vito['’]?s.*extra super
+        - vito['’]?s.*super extra
+    Vegetale:
+      patterns:
+        - vito['’]?s.*vegetale?
 Váli:
   default format: Cream
   patterns:
@@ -3269,6 +3293,9 @@ Wholly Kaw:
     Merchant of Tobacco:
       patterns:
         - '\bkaw\b.*merchant'
+    Noce di Cocco:
+      patterns:
+        - wholly.*noce
     Valentynka:
       patterns:
         - valentynka
@@ -3314,6 +3341,9 @@ Yaqi:
   patterns:
     - yaqi
   scents:
+    Lemon, Lime & Cedarwood:
+      patterns:
+        - yaqi.*lime.*cedar
     Velvet Rose:
       patterns:
         - yaqi.*velvet rose
