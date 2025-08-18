@@ -341,7 +341,7 @@ Use the same patterns as existing user aggregators for data extraction and outpu
 - Committed as feat(aggregate): implement BrushDiversityAggregator for complex brush component tracking
 ```
 
-### Step 10: Create RazorFormatUserAggregator
+### Step 10: Create RazorFormatUserAggregator ✅ COMPLETE
 
 ```text
 Create a new RazorFormatUserAggregator class in `sotd/aggregate/aggregators/users/razor_format_user_aggregator.py` that follows the BaseAggregator pattern. This aggregator should:
@@ -374,6 +374,16 @@ Output structure should match:
 This aggregator will show which users are the top users for each razor format, providing insights into format preferences and usage patterns across the community.
 
 Use the same patterns as existing user aggregators for data extraction and output formatting.
+```
+
+**Implementation Notes:**
+- Created `sotd/aggregate/aggregators/users/razor_format_user_aggregator.py` with RazorFormatUserAggregator class
+- Implemented format-first grouping logic that shows top users within each razor format category
+- Created sophisticated sorting that groups by format alphabetically, then ranks users by shaves within each format
+- Added comprehensive test coverage in `tests/aggregate/test_razor_format_user_aggregator.py`
+- All tests passing - 11 test cases covering edge cases, multiple formats, and main functionality
+- Added to users `__init__.py` exports
+- Committed as feat(aggregate): implement RazorFormatUserAggregator for format-based user ranking
 ```
 
 ### Step 11: Create BrushFiberUserAggregator
