@@ -70,7 +70,8 @@ class SoapMatcher(BaseMatcher):
         )
         text = re.sub(shaving_patterns, "", text, flags=re.IGNORECASE)
         # Then remove individual scent indicators
-        text = re.sub(r"\b(soap|cream|splash|balm|aftershave)\b", "", text, flags=re.IGNORECASE)
+        scent_patterns = r"\b(soap|cream|splash|balm|aftershave|puck)\b"
+        text = re.sub(scent_patterns, "", text, flags=re.IGNORECASE)
         # Clean up any trailing punctuation and whitespace left behind
         text = re.sub(r"[\s\-:*/_,~`\\]+$", "", text)
         # Normalize whitespace
