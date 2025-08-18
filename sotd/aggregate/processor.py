@@ -11,6 +11,8 @@ from .aggregators.core import (
     aggregate_brushes,
     aggregate_razors,
     aggregate_soaps,
+    aggregate_soap_sample_brands,
+    aggregate_soap_sample_brand_scents,
 )
 from .aggregators.cross_product import (
     aggregate_highest_use_count_per_blade,
@@ -32,7 +34,17 @@ from .aggregators.razor_specialized import (
     aggregate_straight_widths,
     aggregate_super_speed_tips,
 )
-from .aggregators.users import aggregate_users
+from .aggregators.users import (
+    aggregate_users,
+    aggregate_soap_sample_users,
+    aggregate_soap_brand_diversity,
+    aggregate_soap_brand_scent_diversity,
+    aggregate_razor_diversity,
+    aggregate_blade_diversity,
+    aggregate_brush_diversity,
+    aggregate_razor_format_users,
+    aggregate_brush_fiber_users,
+)
 from .utils.metrics import calculate_metadata
 
 
@@ -124,13 +136,19 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
     }
 
     if debug:
-        print("[DEBUG] Running 23 aggregators...")
+        print("[DEBUG] Running 33 aggregators...")
 
     # Core product aggregations
     aggregated_data["data"]["razors"] = aggregate_razors(records)
     aggregated_data["data"]["blades"] = aggregate_blades(records)
     aggregated_data["data"]["brushes"] = aggregate_brushes(records)
     aggregated_data["data"]["soaps"] = aggregate_soaps(records)
+
+    # Sample aggregations
+    aggregated_data["data"]["soap_sample_brands"] = aggregate_soap_sample_brands(records)
+    aggregated_data["data"]["soap_sample_brand_scents"] = (
+        aggregate_soap_sample_brand_scents(records)
+    )
 
     # Manufacturer aggregations
     aggregated_data["data"]["razor_manufacturers"] = aggregate_razor_manufacturers(records)
@@ -140,6 +158,12 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
     # Brand diversity aggregation (depends on soap_makers and soaps)
     aggregated_data["data"]["brand_diversity"] = aggregate_brand_diversity(
         aggregated_data["data"]["soap_makers"], aggregated_data["data"]["soaps"]
+    )
+
+    # Soap diversity aggregations
+    aggregated_data["data"]["soap_brand_diversity"] = aggregate_soap_brand_diversity(records)
+    aggregated_data["data"]["soap_brand_scent_diversity"] = (
+        aggregate_soap_brand_scent_diversity(records)
     )
 
     # Format aggregations
@@ -164,6 +188,14 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
 
     # User aggregations
     aggregated_data["data"]["users"] = aggregate_users(records)
+
+    # User diversity aggregations
+    aggregated_data["data"]["soap_sample_users"] = aggregate_soap_sample_users(records)
+    aggregated_data["data"]["razor_diversity"] = aggregate_razor_diversity(records)
+    aggregated_data["data"]["blade_diversity"] = aggregate_blade_diversity(records)
+    aggregated_data["data"]["brush_diversity"] = aggregate_brush_diversity(records)
+    aggregated_data["data"]["razor_format_users"] = aggregate_razor_format_users(records)
+    aggregated_data["data"]["brush_fiber_users"] = aggregate_brush_fiber_users(records)
 
     # Cross-product aggregations
     aggregated_data["data"]["razor_blade_combinations"] = aggregate_razor_blade_combos(records)
