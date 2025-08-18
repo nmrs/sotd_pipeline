@@ -49,7 +49,7 @@ class TestBrushDiversityAggregator:
         assert extracted[0]["knot_model"] == "B2"
         assert extracted[0]["handle_brand"] == "Dogwood"
         assert extracted[0]["author"] == "user1"
-        
+
         assert extracted[1]["brand"] == "Simpson"
         assert extracted[1]["model"] == "Chubby 2"
         assert extracted[1]["knot_brand"] == "Simpson"
@@ -137,21 +137,22 @@ class TestBrushDiversityAggregator:
     def test_create_composite_name_with_full_info(self):
         """Test composite name creation with complete brush information."""
         aggregator = BrushDiversityAggregator()
-        
+
         import pandas as pd
-        df = pd.DataFrame({
-            "brand": ["Declaration", "Simpson"],
-            "model": ["B2", "Chubby 2"],
-            "knot_brand": ["Declaration", "Simpson"],
-            "knot_model": ["B2", "Best Badger"],
-            "handle_brand": ["Dogwood", "Simpson"],
-        })
-        
-        composite_names = aggregator._create_composite_name(df)
-        
-        assert composite_names.iloc[0] == (
-            "Declaration B2 knot:Declaration knot:B2 handle:Dogwood"
+
+        df = pd.DataFrame(
+            {
+                "brand": ["Declaration", "Simpson"],
+                "model": ["B2", "Chubby 2"],
+                "knot_brand": ["Declaration", "Simpson"],
+                "knot_model": ["B2", "Best Badger"],
+                "handle_brand": ["Dogwood", "Simpson"],
+            }
         )
+
+        composite_names = aggregator._create_composite_name(df)
+
+        assert composite_names.iloc[0] == ("Declaration B2 knot:Declaration knot:B2 handle:Dogwood")
         assert composite_names.iloc[1] == (
             "Simpson Chubby 2 knot:Simpson knot:Best Badger handle:Simpson"
         )
@@ -159,18 +160,21 @@ class TestBrushDiversityAggregator:
     def test_create_composite_name_with_partial_info(self):
         """Test composite name creation with partial brush information."""
         aggregator = BrushDiversityAggregator()
-        
+
         import pandas as pd
-        df = pd.DataFrame({
-            "brand": ["Declaration", "Simpson"],
-            "model": ["B2", "Chubby 2"],
-            "knot_brand": ["Declaration", None],
-            "knot_model": ["B2", None],
-            "handle_brand": [None, "Simpson"],
-        })
-        
+
+        df = pd.DataFrame(
+            {
+                "brand": ["Declaration", "Simpson"],
+                "model": ["B2", "Chubby 2"],
+                "knot_brand": ["Declaration", None],
+                "knot_model": ["B2", None],
+                "handle_brand": [None, "Simpson"],
+            }
+        )
+
         composite_names = aggregator._create_composite_name(df)
-        
+
         assert composite_names.iloc[0] == "Declaration B2 knot:Declaration knot:B2"
         assert composite_names.iloc[1] == "Simpson Chubby 2 handle:Simpson"
 
@@ -230,14 +234,14 @@ class TestBrushDiversityAggregator:
         result = aggregate_brush_diversity(records)
 
         assert len(result) == 2
-        
+
         # Check first result (user1 with 2 unique brushes, 3 total shaves)
         assert result[0]["position"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["unique_brushes"] == 2
         assert result[0]["total_shaves"] == 3
         assert result[0]["unique_users"] == 1
-        
+
         # Check second result (user2 with 1 unique brush, 1 total shave)
         assert result[1]["position"] == 2
         assert result[1]["user"] == "user2"

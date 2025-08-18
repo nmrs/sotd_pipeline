@@ -98,32 +98,38 @@ class TestSoapSampleBrandAggregator:
     def test_create_composite_name_with_brand(self):
         """Test composite name creation with brand."""
         aggregator = SoapSampleBrandAggregator()
-        
+
         # Mock DataFrame
         import pandas as pd
-        df = pd.DataFrame({
-            "sample_type": ["Sample", "Sample"],
-            "brand": ["Declaration Grooming", "Barrister & Mann"],
-        })
-        
+
+        df = pd.DataFrame(
+            {
+                "sample_type": ["Sample", "Sample"],
+                "brand": ["Declaration Grooming", "Barrister & Mann"],
+            }
+        )
+
         composite_names = aggregator._create_composite_name(df)
-        
+
         assert composite_names.iloc[0] == "Sample - Declaration Grooming"
         assert composite_names.iloc[1] == "Sample - Barrister & Mann"
 
     def test_create_composite_name_without_brand(self):
         """Test composite name creation without brand."""
         aggregator = SoapSampleBrandAggregator()
-        
+
         # Mock DataFrame
         import pandas as pd
-        df = pd.DataFrame({
-            "sample_type": ["Sample", "Sample"],
-            "brand": ["", ""],
-        })
-        
+
+        df = pd.DataFrame(
+            {
+                "sample_type": ["Sample", "Sample"],
+                "brand": ["", ""],
+            }
+        )
+
         composite_names = aggregator._create_composite_name(df)
-        
+
         assert composite_names.iloc[0] == "Sample"
         assert composite_names.iloc[1] == "Sample"
 
@@ -168,13 +174,13 @@ class TestSoapSampleBrandAggregator:
         result = aggregate_soap_sample_brands(records)
 
         assert len(result) == 2
-        
+
         # Check first result (Declaration Grooming)
         assert result[0]["position"] == 1
         assert result[0]["name"] == "Sample - Declaration Grooming"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 2
-        
+
         # Check second result (Barrister & Mann)
         assert result[1]["position"] == 2
         assert result[1]["name"] == "Sample - Barrister & Mann"

@@ -146,8 +146,8 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
 
     # Sample aggregations
     aggregated_data["data"]["soap_sample_brands"] = aggregate_soap_sample_brands(records)
-    aggregated_data["data"]["soap_sample_brand_scents"] = (
-        aggregate_soap_sample_brand_scents(records)
+    aggregated_data["data"]["soap_sample_brand_scents"] = aggregate_soap_sample_brand_scents(
+        records
     )
 
     # Manufacturer aggregations
@@ -162,8 +162,8 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
 
     # Soap diversity aggregations
     aggregated_data["data"]["soap_brand_diversity"] = aggregate_soap_brand_diversity(records)
-    aggregated_data["data"]["soap_brand_scent_diversity"] = (
-        aggregate_soap_brand_scent_diversity(records)
+    aggregated_data["data"]["soap_brand_scent_diversity"] = aggregate_soap_brand_scent_diversity(
+        records
     )
 
     # Format aggregations

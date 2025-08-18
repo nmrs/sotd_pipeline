@@ -111,16 +111,19 @@ class TestSoapBrandScentDiversityAggregator:
     def test_create_composite_name(self):
         """Test composite name creation."""
         aggregator = SoapBrandScentDiversityAggregator()
-        
+
         # Mock DataFrame
         import pandas as pd
-        df = pd.DataFrame({
-            "brand": ["Declaration Grooming", "Barrister & Mann"],
-            "scent": ["B2", "Seville"],
-        })
-        
+
+        df = pd.DataFrame(
+            {
+                "brand": ["Declaration Grooming", "Barrister & Mann"],
+                "scent": ["B2", "Seville"],
+            }
+        )
+
         composite_names = aggregator._create_composite_name(df)
-        
+
         assert composite_names.iloc[0] == "Declaration Grooming - B2"
         assert composite_names.iloc[1] == "Barrister & Mann - Seville"
 
@@ -156,14 +159,14 @@ class TestSoapBrandScentDiversityAggregator:
         result = aggregate_soap_brand_scent_diversity(records)
 
         assert len(result) == 2
-        
+
         # Check first result (user1 with 3 unique combinations, 3 total shaves)
         assert result[0]["position"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["unique_combinations"] == 3
         assert result[0]["total_shaves"] == 3
         assert result[0]["unique_users"] == 1
-        
+
         # Check second result (user2 with 1 unique combination, 1 total shave)
         assert result[1]["position"] == 2
         assert result[1]["user"] == "user2"

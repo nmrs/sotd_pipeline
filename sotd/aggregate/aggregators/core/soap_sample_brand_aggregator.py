@@ -97,9 +97,7 @@ class SoapSampleBrandAggregator(BaseAggregator):
 
         # Create composite name for consistent interface
         grouped["name"] = grouped.apply(
-            lambda row: self._create_single_composite_name(
-                row["sample_type"], row["brand"]
-            ),
+            lambda row: self._create_single_composite_name(row["sample_type"], row["brand"]),
             axis=1,
         )
 

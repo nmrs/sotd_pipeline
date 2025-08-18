@@ -108,15 +108,18 @@ class TestBrushFiberUserAggregator:
     def test_group_and_aggregate_by_fiber_and_user(self):
         """Test grouping by fiber and user."""
         aggregator = BrushFiberUserAggregator()
-        
+
         import pandas as pd
-        df = pd.DataFrame({
-            "fiber": ["badger", "badger", "synthetic", "synthetic"],
-            "author": ["user1", "user2", "user1", "user3"],
-        })
-        
+
+        df = pd.DataFrame(
+            {
+                "fiber": ["badger", "badger", "synthetic", "synthetic"],
+                "author": ["user1", "user2", "user1", "user3"],
+            }
+        )
+
         grouped = aggregator._group_and_aggregate(df)
-        
+
         assert len(grouped) == 4
         assert grouped.iloc[0]["fiber"] == "badger"
         assert grouped.iloc[0]["author"] == "user1"
@@ -128,41 +131,44 @@ class TestBrushFiberUserAggregator:
     def test_sort_and_rank_with_multiple_fibers(self):
         """Test sorting and ranking with multiple fiber types."""
         aggregator = BrushFiberUserAggregator()
-        
+
         import pandas as pd
-        df = pd.DataFrame({
-            "fiber": ["badger", "badger", "boar", "boar", "synthetic"],
-            "author": ["user1", "user2", "user1", "user3", "user4"],
-            "shaves": [5, 3, 8, 2, 1],
-            "unique_users": [1, 1, 1, 1, 1],
-        })
-        
+
+        df = pd.DataFrame(
+            {
+                "fiber": ["badger", "badger", "boar", "boar", "synthetic"],
+                "author": ["user1", "user2", "user1", "user3", "user4"],
+                "shaves": [5, 3, 8, 2, 1],
+                "unique_users": [1, 1, 1, 1, 1],
+            }
+        )
+
         result = aggregator._sort_and_rank(df)
-        
+
         assert len(result) == 5
-        
+
         # Check badger fiber (alphabetically first)
         assert result[0]["fiber"] == "badger"
         assert result[0]["position"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 5
-        
+
         assert result[1]["fiber"] == "badger"
         assert result[1]["position"] == 2
         assert result[1]["user"] == "user2"
         assert result[1]["shaves"] == 3
-        
+
         # Check boar fiber
         assert result[2]["fiber"] == "boar"
         assert result[2]["position"] == 1
         assert result[2]["user"] == "user1"
         assert result[2]["shaves"] == 8
-        
+
         assert result[3]["fiber"] == "boar"
         assert result[3]["position"] == 2
         assert result[3]["user"] == "user3"
         assert result[3]["shaves"] == 2
-        
+
         # Check synthetic fiber
         assert result[4]["fiber"] == "synthetic"
         assert result[4]["position"] == 1
@@ -207,27 +213,27 @@ class TestBrushFiberUserAggregator:
         result = aggregate_brush_fiber_users(records)
 
         assert len(result) == 4
-        
+
         # Check badger fiber (alphabetically first)
         assert result[0]["fiber"] == "badger"
         assert result[0]["position"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 1
-        
+
         assert result[1]["fiber"] == "badger"
         assert result[1]["position"] == 2
         assert result[1]["user"] == "user2"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
-        
+
         # Check synthetic fiber
         assert result[2]["fiber"] == "synthetic"
         assert result[2]["position"] == 1
         assert result[2]["user"] == "user1"
         assert result[2]["shaves"] == 1
         assert result[2]["unique_users"] == 1
-        
+
         assert result[3]["fiber"] == "synthetic"
         assert result[3]["position"] == 2
         assert result[3]["user"] == "user3"
@@ -362,14 +368,14 @@ class TestBrushFiberUserAggregator:
         result = aggregate_brush_fiber_users(records)
 
         assert len(result) == 5
-        
+
         # Check alphabetical ordering
         assert result[0]["fiber"] == "badger"
         assert result[1]["fiber"] == "boar"
         assert result[2]["fiber"] == "horse"
         assert result[3]["fiber"] == "mixed"
         assert result[4]["fiber"] == "synthetic"
-        
+
         # All should have position 1 since only one user per fiber
         for item in result:
             assert item["position"] == 1

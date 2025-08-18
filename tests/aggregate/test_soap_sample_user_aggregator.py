@@ -114,34 +114,40 @@ class TestSoapSampleUserAggregator:
     def test_create_composite_name_with_brand_and_scent(self):
         """Test composite name creation with brand and scent."""
         aggregator = SoapSampleUserAggregator()
-        
+
         # Mock DataFrame
         import pandas as pd
-        df = pd.DataFrame({
-            "sample_type": ["Sample", "Sample"],
-            "brand": ["Declaration Grooming", "Barrister & Mann"],
-            "scent": ["B2", "Seville"],
-        })
-        
+
+        df = pd.DataFrame(
+            {
+                "sample_type": ["Sample", "Sample"],
+                "brand": ["Declaration Grooming", "Barrister & Mann"],
+                "scent": ["B2", "Seville"],
+            }
+        )
+
         composite_names = aggregator._create_composite_name(df)
-        
+
         assert composite_names.iloc[0] == "Sample - Declaration Grooming - B2"
         assert composite_names.iloc[1] == "Sample - Barrister & Mann - Seville"
 
     def test_create_composite_name_with_brand_only(self):
         """Test composite name creation with brand only."""
         aggregator = SoapSampleUserAggregator()
-        
+
         # Mock DataFrame
         import pandas as pd
-        df = pd.DataFrame({
-            "sample_type": ["Sample", "Sample"],
-            "brand": ["Declaration Grooming", ""],
-            "scent": ["", ""],
-        })
-        
+
+        df = pd.DataFrame(
+            {
+                "sample_type": ["Sample", "Sample"],
+                "brand": ["Declaration Grooming", ""],
+                "scent": ["", ""],
+            }
+        )
+
         composite_names = aggregator._create_composite_name(df)
-        
+
         assert composite_names.iloc[0] == "Sample - Declaration Grooming"
         assert composite_names.iloc[1] == "Sample"
 
@@ -186,13 +192,13 @@ class TestSoapSampleUserAggregator:
         result = aggregate_soap_sample_users(records)
 
         assert len(result) == 2
-        
+
         # Check first result (user1 with 2 sample shaves)
         assert result[0]["position"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 1
-        
+
         # Check second result (user2 with 1 sample shave)
         assert result[1]["position"] == 2
         assert result[1]["user"] == "user2"

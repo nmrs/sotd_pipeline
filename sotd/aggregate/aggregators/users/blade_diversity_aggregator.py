@@ -62,9 +62,15 @@ class BladeDiversityAggregator(BaseAggregator):
             DataFrame with grouped and aggregated data
         """
         # Group by author to count unique blade brand+model combinations per user
-        grouped = df.groupby("author").agg({
-            "brand": "nunique",  # Count unique brands (for reference)
-        }).reset_index()
+        grouped = (
+            df.groupby("author")
+            .agg(
+                {
+                    "brand": "nunique",  # Count unique brands (for reference)
+                }
+            )
+            .reset_index()
+        )
 
         # Rename columns for consistency
         grouped.columns = ["author", "unique_brands"]
@@ -77,7 +83,7 @@ class BladeDiversityAggregator(BaseAggregator):
 
         # Count total shaves per user
         shave_counts = df.groupby("author").size().reset_index(name="total_shaves")  # type: ignore
-        
+
         # Merge all the data
         grouped = grouped.merge(blade_counts, on="author")
         grouped = grouped.merge(shave_counts, on="author")
@@ -98,14 +104,10 @@ class BladeDiversityAggregator(BaseAggregator):
             and unique_users fields
         """
         # Sort by unique_blades desc, total_shaves desc
-        grouped = grouped.sort_values(
-            ["unique_blades", "total_shaves"], ascending=[False, False]
-        )
+        grouped = grouped.sort_values(["unique_blades", "total_shaves"], ascending=[False, False])
 
         # Add position field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(
-            position=lambda df: range(1, len(df) + 1)
-        )  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(position=lambda df: range(1, len(df) + 1))  # type: ignore
 
         # Convert to list of dictionaries
         result = []

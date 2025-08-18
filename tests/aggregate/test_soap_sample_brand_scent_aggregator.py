@@ -114,34 +114,40 @@ class TestSoapSampleBrandScentAggregator:
     def test_create_composite_name_with_brand_and_scent(self):
         """Test composite name creation with brand and scent."""
         aggregator = SoapSampleBrandScentAggregator()
-        
+
         # Mock DataFrame
         import pandas as pd
-        df = pd.DataFrame({
-            "sample_type": ["Sample", "Sample"],
-            "brand": ["Declaration Grooming", "Barrister & Mann"],
-            "scent": ["B2", "Seville"],
-        })
-        
+
+        df = pd.DataFrame(
+            {
+                "sample_type": ["Sample", "Sample"],
+                "brand": ["Declaration Grooming", "Barrister & Mann"],
+                "scent": ["B2", "Seville"],
+            }
+        )
+
         composite_names = aggregator._create_composite_name(df)
-        
+
         assert composite_names.iloc[0] == "Sample - Declaration Grooming - B2"
         assert composite_names.iloc[1] == "Sample - Barrister & Mann - Seville"
 
     def test_create_composite_name_with_brand_only(self):
         """Test composite name creation with brand only."""
         aggregator = SoapSampleBrandScentAggregator()
-        
+
         # Mock DataFrame
         import pandas as pd
-        df = pd.DataFrame({
-            "sample_type": ["Sample", "Sample"],
-            "brand": ["Declaration Grooming", ""],
-            "scent": ["", ""],
-        })
-        
+
+        df = pd.DataFrame(
+            {
+                "sample_type": ["Sample", "Sample"],
+                "brand": ["Declaration Grooming", ""],
+                "scent": ["", ""],
+            }
+        )
+
         composite_names = aggregator._create_composite_name(df)
-        
+
         assert composite_names.iloc[0] == "Sample - Declaration Grooming"
         assert composite_names.iloc[1] == "Sample"
 
@@ -186,13 +192,13 @@ class TestSoapSampleBrandScentAggregator:
         result = aggregate_soap_sample_brand_scents(records)
 
         assert len(result) == 2
-        
+
         # Check first result (Declaration Grooming - B2)
         assert result[0]["position"] == 1
         assert result[0]["name"] == "Sample - Declaration Grooming - B2"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 2
-        
+
         # Check second result (Barrister & Mann - Seville)
         assert result[1]["position"] == 2
         assert result[1]["name"] == "Sample - Barrister & Mann - Seville"

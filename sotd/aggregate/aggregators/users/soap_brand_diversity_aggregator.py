@@ -47,8 +47,12 @@ class SoapBrandDiversityAggregator(BaseAggregator):
             Series with brand names
         """
         # Handle None values by converting to empty strings
-        brand = df["brand"].fillna("")
-        return brand
+        result = df["brand"].fillna("")
+        # Ensure we return a Series
+        if isinstance(result, pd.Series):
+            return result
+        else:
+            return pd.Series(result, index=df.index)
 
     def _group_and_aggregate(self, df: pd.DataFrame) -> pd.DataFrame:
         """Group data and calculate aggregation metrics.
@@ -60,16 +64,24 @@ class SoapBrandDiversityAggregator(BaseAggregator):
             DataFrame with grouped and aggregated data
         """
         # Group by author to count unique brands per user
-        grouped = df.groupby("author").agg({
-            "brand": "nunique",  # Count unique brands
-        }).reset_index()
+        grouped = (
+            df.groupby("author")
+            .agg(
+                {
+                    "brand": "nunique",  # Count unique brands
+                }
+            )
+            .reset_index()
+        )
 
         # Rename columns for consistency
         grouped.columns = ["author", "unique_brands"]
 
         # Count total shaves per user
-        shave_counts = df.groupby("author").size().reset_index(name="total_shaves")  # type: ignore
-        
+        shave_counts = (
+            df.groupby("author").size().reset_index(name="total_shaves")  # type: ignore
+        )
+
         # Merge the data
         grouped = grouped.merge(shave_counts, on="author")
 
@@ -89,14 +101,13 @@ class SoapBrandDiversityAggregator(BaseAggregator):
             and unique_users fields
         """
         # Sort by unique_brands desc, total_shaves desc
-        grouped = grouped.sort_values(
-            ["unique_brands", "total_shaves"], ascending=[False, False]
-        )
+        grouped = grouped.sort_values(["unique_brands", "total_shaves"], ascending=[False, False])
 
         # Add position field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(
-            position=lambda df: range(1, len(df) + 1)
-        )  # type: ignore
+        grouped = (
+            grouped.reset_index(drop=True)
+            .assign(position=lambda df: range(1, len(df) + 1))  # type: ignore
+        )
 
         # Convert to list of dictionaries
         result = []

@@ -108,15 +108,18 @@ class TestRazorFormatUserAggregator:
     def test_group_and_aggregate_by_format_and_user(self):
         """Test grouping by format and user."""
         aggregator = RazorFormatUserAggregator()
-        
+
         import pandas as pd
-        df = pd.DataFrame({
-            "format": ["DE", "DE", "Straight", "Straight"],
-            "author": ["user1", "user2", "user1", "user3"],
-        })
-        
+
+        df = pd.DataFrame(
+            {
+                "format": ["DE", "DE", "Straight", "Straight"],
+                "author": ["user1", "user2", "user1", "user3"],
+            }
+        )
+
         grouped = aggregator._group_and_aggregate(df)
-        
+
         assert len(grouped) == 4
         assert grouped.iloc[0]["format"] == "DE"
         assert grouped.iloc[0]["author"] == "user1"
@@ -128,42 +131,45 @@ class TestRazorFormatUserAggregator:
     def test_sort_and_rank_with_multiple_formats(self):
         """Test sorting and ranking with multiple formats."""
         aggregator = RazorFormatUserAggregator()
-        
+
         import pandas as pd
-        df = pd.DataFrame({
-            "format": ["DE", "DE", "Straight", "Straight", "GEM"],
-            "author": ["user1", "user2", "user1", "user3", "user4"],
-            "shaves": [5, 3, 8, 2, 1],
-            "unique_users": [1, 1, 1, 1, 1],
-        })
-        
+
+        df = pd.DataFrame(
+            {
+                "format": ["DE", "DE", "Straight", "Straight", "GEM"],
+                "author": ["user1", "user2", "user1", "user3", "user4"],
+                "shaves": [5, 3, 8, 2, 1],
+                "unique_users": [1, 1, 1, 1, 1],
+            }
+        )
+
         result = aggregator._sort_and_rank(df)
-        
+
         assert len(result) == 5
-        
+
         # Check DE format (alphabetically first)
         assert result[0]["format"] == "DE"
         assert result[0]["position"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 5
-        
+
         assert result[1]["format"] == "DE"
         assert result[1]["position"] == 2
         assert result[1]["user"] == "user2"
         assert result[1]["shaves"] == 3
-        
+
         # Check GEM format
         assert result[2]["format"] == "GEM"
         assert result[2]["position"] == 1
         assert result[2]["user"] == "user4"
         assert result[2]["shaves"] == 1
-        
+
         # Check Straight format
         assert result[3]["format"] == "Straight"
         assert result[3]["position"] == 1
         assert result[3]["user"] == "user1"
         assert result[3]["shaves"] == 8
-        
+
         assert result[4]["format"] == "Straight"
         assert result[4]["position"] == 2
         assert result[4]["user"] == "user3"
@@ -207,27 +213,27 @@ class TestRazorFormatUserAggregator:
         result = aggregate_razor_format_users(records)
 
         assert len(result) == 4
-        
+
         # Check DE format (alphabetically first)
         assert result[0]["format"] == "DE"
         assert result[0]["position"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 1
-        
+
         assert result[1]["format"] == "DE"
         assert result[1]["position"] == 2
         assert result[1]["user"] == "user2"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
-        
+
         # Check Straight format
         assert result[2]["format"] == "Straight"
         assert result[2]["position"] == 1
         assert result[2]["user"] == "user1"
         assert result[2]["shaves"] == 1
         assert result[2]["unique_users"] == 1
-        
+
         assert result[3]["format"] == "Straight"
         assert result[3]["position"] == 2
         assert result[3]["user"] == "user3"
