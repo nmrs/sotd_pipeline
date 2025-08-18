@@ -65,6 +65,8 @@ class SoapMatcher(BaseMatcher):
         """Normalize scent text for matching."""
         # Remove common scent indicators (case-insensitive)
         text = re.sub(r"\b(soap|cream|splash|balm|aftershave)\b", "", text, flags=re.IGNORECASE)
+        # Clean up any trailing punctuation and whitespace left behind
+        text = re.sub(r"[\s\-:*/_,~`\\]+$", "", text)
         # Normalize whitespace
         text = re.sub(r"\s+", " ", text.strip())
         # Strip trailing periods
