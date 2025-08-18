@@ -358,13 +358,12 @@ def test_brand_match_with_missing_scent(soap_matcher_with_mock):
 
 def test_unusual_delimiters(soap_matcher_with_mock):
     # Slash delimiter
-    # Pass just the normalized string to matchers
     result = soap_matcher_with_mock.match("House of Mammoth / Alive")
     assert result.matched is not None
     assert result.matched["maker"] == "House of Mammoth"
     assert result.matched["scent"] == "Alive"
+
     # Colon delimiter
-    # Pass just the normalized string to matchers
     result = soap_matcher_with_mock.match("House of Mammoth: Alive")
     assert result.matched is not None
     assert result.matched["maker"] == "House of Mammoth"
