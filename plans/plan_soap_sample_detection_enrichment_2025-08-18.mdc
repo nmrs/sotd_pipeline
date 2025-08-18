@@ -1,0 +1,173 @@
+# Soap Sample Detection Enrichment Implementation Plan
+
+**Plan Date**: 2025-08-18  
+**Type**: Feature Implementation Plan  
+**Status**: READY_FOR_IMPLEMENTATION  
+
+## 📘 Project Summary
+
+Implement a soap sample detection enrichment step that extracts sample information from original soap strings (before normalization). This follows the same pattern as blade count extraction: strip the normalized string from the original, parse the remainder for sample indicators, and provide structured sample data for downstream aggregation.
+
+**Key Benefits**:
+- Moves sample detection from match phase (where it was ineffective) to enrich phase (where it can work on original text)
+- Provides structured sample data for aggregation and reporting
+- Follows established enrichment patterns (blade count extraction)
+- Enables sample usage statistics and analysis
+
+## 🧩 Component Steps
+
+1. **Create SoapSampleEnricher class** - Core enrichment logic following BaseEnricher pattern
+2. **Implement sample pattern extraction** - Parse remainder text for sample indicators
+3. **Add sample enricher to enrich phase** - Integrate with existing enrichment workflow
+4. **Create sample aggregator** - Aggregate sample usage statistics
+5. **Add sample aggregation to aggregate phase** - Include in monthly/annual aggregation
+6. **Update tests and validation** - Ensure comprehensive test coverage
+
+## 🔁 Implementation Prompts
+
+### Step 1: Create SoapSampleEnricher Class
+
+```text
+Create a new SoapSampleEnricher class in `sotd/enrich/soap_sample_enricher.py` that follows the BaseEnricher pattern. This enricher should:
+
+1. Inherit from BaseEnricher
+2. Target the "soap" field
+3. Apply to any record with a matched soap
+4. Use the same pattern as BladeCountEnricher: strip normalized from original, parse remainder
+
+The enricher should detect these sample patterns:
+- (sample) → sample_type: "sample"
+- (sample #23) → sample_type: "sample", sample_number: 23  
+- (sample 5 of 10) → sample_type: "sample", sample_number: 5, total_samples: 10
+- (tester) → sample_type: "tester"
+- "H&M - Seville - sample" → sample_type: "sample" (after stripping "H&M - Seville")
+
+Output structure should match:
+```json
+"enriched": {
+    "sample_type": "sample",
+    "sample_number": 23,
+    "total_samples": 10,
+    "extraction_remainder": "(sample #23)",
+    "_enriched_by": "SoapSampleEnricher",
+    "_extraction_source": "remainder_parsing"
+}
+```
+
+Use the same remainder parsing approach as BladeCountEnricher: find normalized text in original, extract remainder, parse for sample patterns.
+```
+
+### Step 2: Implement Sample Pattern Extraction
+
+```text
+Implement the core sample pattern extraction logic in the SoapSampleEnricher. This should:
+
+1. Use regex patterns to detect sample indicators in remainder text
+2. Handle numeric sample numbers: (sample #23), (sample 5 of 10)
+3. Handle basic sample types: (sample), (tester)
+4. Handle trailing sample indicators: "Brand - Scent - sample"
+5. Return structured sample data with proper validation
+
+The extraction should be robust and handle edge cases:
+- Multiple sample indicators in same text
+- Invalid numeric patterns
+- Mixed case variations
+- Whitespace variations
+
+Follow the same validation patterns as blade count extraction for numeric fields.
+```
+
+### Step 3: Add Sample Enricher to Enrich Phase
+
+```text
+Integrate the SoapSampleEnricher into the existing enrich phase workflow. This involves:
+
+1. Adding the enricher to the enrich phase's enricher list
+2. Ensuring it runs after soap matching but before aggregation
+3. Updating enrich phase tests to include sample enrichment
+4. Validating that sample data flows correctly through the pipeline
+
+The enricher should be added to the same location as BladeCountEnricher and other product enrichers.
+```
+
+### Step 4: Create Sample Aggregator
+
+```text
+Create a new SoapSampleAggregator in `sotd/aggregate/aggregators/core/soap_sample_aggregator.py` that:
+
+1. Follows the BaseAggregator pattern
+2. Aggregates sample usage statistics by sample type
+3. Provides metrics like:
+   - Total sample shaves
+   - Sample usage by type (sample vs tester)
+   - Sample usage by brand/scent
+   - Sample completion tracking (sample #5 of 10)
+
+The aggregator should integrate with existing soap aggregation and provide sample-specific insights.
+```
+
+### Step 5: Add Sample Aggregation to Aggregate Phase
+
+```text
+Integrate the SoapSampleAggregator into the aggregate phase workflow. This involves:
+
+1. Adding sample aggregation to the monthly aggregation processor
+2. Including sample data in annual aggregation
+3. Updating aggregate phase tests to validate sample aggregation
+4. Ensuring sample metrics are included in final output files
+
+The sample aggregation should be added alongside other core product aggregations.
+```
+
+### Step 6: Update Tests and Validation
+
+```text
+Create comprehensive test coverage for the soap sample enrichment feature. This includes:
+
+1. Unit tests for SoapSampleEnricher with various sample patterns
+2. Integration tests for the complete enrich → aggregate flow
+3. Test data validation for sample extraction accuracy
+4. Performance tests for sample aggregation with large datasets
+5. Edge case testing for malformed sample indicators
+
+All tests should follow the project's testing patterns and ensure the feature works correctly in production scenarios.
+```
+
+## 🧠 Critical Analysis
+
+**Architecture Strengths**:
+- ✅ Follows established enrichment patterns (blade count extraction)
+- ✅ Proper separation of concerns (match phase for matching, enrich phase for metadata)
+- ✅ Reuses proven remainder parsing approach
+- ✅ Integrates cleanly with existing pipeline phases
+
+**Implementation Considerations**:
+- **Sample pattern complexity**: The regex patterns need to handle various formats while avoiding false positives
+- **Numeric validation**: Sample numbers should be validated for realistic ranges (similar to blade use counts)
+- **Performance impact**: Sample aggregation adds another aggregator to the pipeline
+- **Data consistency**: Sample data must flow correctly through all phases
+
+**Risk Mitigation**:
+- **Incremental implementation**: Each step builds on the previous, allowing for early validation
+- **Test-first approach**: Comprehensive testing ensures reliability
+- **Pattern reuse**: Leveraging proven blade count extraction patterns reduces risk
+- **Integration testing**: Validating complete data flow prevents phase misalignment
+
+**Dependencies**:
+- BaseEnricher infrastructure (already exists)
+- Enrich phase workflow (already exists)
+- BaseAggregator infrastructure (already exists)
+- Aggregate phase workflow (already exists)
+
+**Success Criteria**:
+- Sample detection works on original text (before normalization)
+- Sample data is properly structured and validated
+- Sample aggregation provides meaningful insights
+- Feature integrates seamlessly with existing pipeline
+- All tests pass and performance remains acceptable
+
+This plan provides a clear, incremental path to implementing soap sample detection enrichment while maintaining the project's architectural principles and quality standards.
+description:
+globs:
+alwaysApply: false
+---
