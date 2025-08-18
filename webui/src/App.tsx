@@ -10,6 +10,7 @@ import { useMessaging } from './hooks/useMessaging';
 import './App.css';
 import MismatchAnalyzer from './pages/MismatchAnalyzer';
 import CatalogValidator from './pages/CatalogValidator';
+import SoapAnalyzer from './pages/SoapAnalyzer';
 
 function App() {
   const messaging = useMessaging();
@@ -27,6 +28,7 @@ function App() {
             <Route path='/performance-test' element={<PerformanceTest />} />
             <Route path='/mismatch' element={<MismatchAnalyzer />} />
             <Route path='/catalog-validator' element={<CatalogValidator />} />
+            <Route path='/soap-analyzer' element={<SoapAnalyzer />} />
           </Routes>
         </main>
         <MessageDisplay messages={messaging.messages} onRemoveMessage={messaging.removeMessage} />
