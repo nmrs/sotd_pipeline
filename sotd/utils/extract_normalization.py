@@ -349,6 +349,10 @@ def normalize_for_matching(
     # For soap strings, also strip soap-related patterns
     if field == "soap":
         normalized = strip_soap_patterns(normalized)
+        # Remove empty parentheses, brackets, and braces for soap fields
+        normalized = re.sub(r"\(\s*\)", "", normalized)  # Empty parentheses
+        normalized = re.sub(r"\[\s*\]", "", normalized)  # Empty brackets
+        normalized = re.sub(r"\{\s*}", "", normalized)  # Empty braces
 
     # Final cleanup
     normalized = re.sub(r"\s+", " ", normalized).strip()
