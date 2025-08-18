@@ -5,6 +5,7 @@ import LoadingSpinner from '../layout/LoadingSpinner';
 import ErrorDisplay from '../feedback/ErrorDisplay';
 import { SelectInput } from '../ui/reusable-forms';
 import { SecondaryButton } from '../ui/reusable-buttons';
+import { getYearToDateMonths, getLast12Months } from '../../utils/dateUtils';
 
 interface MonthSelectorProps {
   selectedMonths: string[];
@@ -31,11 +32,20 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
       }
     };
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [isOpen]);
 
   const handleMonthChange = (month: string, checked: boolean) => {
     if (multiple) {
@@ -55,6 +65,19 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
 
   const clearAll = () => {
     onMonthsChange([]);
+  };
+
+  const selectYearToDate = () => {
+    const ytdMonths = getYearToDateMonths();
+    // Only select months that are available in the system
+    const availableYtdMonths = ytdMonths.filter(month => availableMonths.includes(month));
+    onMonthsChange(availableYtdMonths);
+  };
+
+  const selectLast12Months = () => {
+    const last12Months = getLast12Months();
+    // Select full last 12 months range
+    onMonthsChange(last12Months);
   };
 
   const getDisplayText = () => {
@@ -118,11 +141,17 @@ const MonthSelector: React.FC<MonthSelectorProps> = ({
       </div>
 
       {isOpen && (
-        <div className='absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto'>
+        <div className='absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto min-w-[300px]'>
           <div className='p-2'>
-            <div className='flex justify-between items-center mb-2 pb-2 border-b border-gray-200'>
+            <div className='flex items-center gap-2 mb-2 pb-2 border-b border-gray-200'>
               <SecondaryButton onClick={selectAll} className='text-xs'>
                 Select All
+              </SecondaryButton>
+              <SecondaryButton onClick={selectYearToDate} className='text-xs'>
+                Year to Date
+              </SecondaryButton>
+              <SecondaryButton onClick={selectLast12Months} className='text-xs'>
+                Last 12 Months
               </SecondaryButton>
               <SecondaryButton onClick={clearAll} className='text-xs'>
                 Clear All
