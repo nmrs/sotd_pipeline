@@ -67,6 +67,7 @@ interface DataTableProps<TData, TValue> {
   keyboardNavigationEnabled?: boolean;
   externalRowSelection?: Record<string, boolean>;
   field?: string; // For generating row keys
+  totalCount?: number; // Total count from backend for external pagination
 }
 
 export function DataTable<TData, TValue>({
@@ -91,12 +92,14 @@ export function DataTable<TData, TValue>({
   keyboardNavigationEnabled = false,
   externalRowSelection,
   field,
+  totalCount,
 }: DataTableProps<TData, TValue>) {
   const [internalSorting, setInternalSorting] = useState<SortingState>([]);
 
   // Use external sorting if provided, otherwise use internal
   const sorting = externalSorting !== undefined ? externalSorting : internalSorting;
   const setSorting = onSortingChange || setInternalSorting;
+
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>(initialRowSelection);
@@ -111,17 +114,17 @@ export function DataTable<TData, TValue>({
   const setEffectiveRowSelection =
     externalRowSelection !== undefined
       ? (updater: RowSelectionState | ((prev: RowSelectionState) => RowSelectionState)) => {
-          // When using external selection, we need to call onSelectionChange directly
-          // since the table's internal state won't be updated
-          const newSelection =
-            typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
-          if (onSelectionChange) {
-            const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
-            onSelectionChange(selectedRows);
-          }
-          // Also update the internal state so the UI reflects the change immediately
-          setRowSelection(newSelection);
+        // When using external selection, we need to call onSelectionChange directly
+        // since the table's internal state won't be updated
+        const newSelection =
+          typeof updater === 'function' ? updater(effectiveRowSelection) : updater;
+        if (onSelectionChange) {
+          const selectedRows = data.filter((_, index) => newSelection[index.toString()]);
+          onSelectionChange(selectedRows);
         }
+        // Also update the internal state so the UI reflects the change immediately
+        setRowSelection(newSelection);
+      }
       : setRowSelection;
 
   const table = useReactTable({
@@ -138,6 +141,14 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setEffectiveRowSelection,
+    enableRowSelection: true,
+    enableSorting: sortable,
+    enableColumnFilters: true,
+    enableColumnResizing: resizable,
+    enableMultiSort: true,
+    enableSortingRemoval: true,
+    enableGlobalFilter: !!searchKey,
+    globalFilterFn: 'includesString',
     state: {
       sorting,
       columnFilters,
@@ -325,9 +336,8 @@ export function DataTable<TData, TValue>({
                         <div className='flex items-center justify-between'>
                           {sortable ? (
                             <button
-                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${
-                                header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
-                              }`}
+                              className={`flex items-center gap-1 hover:text-blue-600 transition-colors ${header.column.getCanSort() ? 'cursor-pointer' : 'cursor-default'
+                                }`}
                               onClick={header.column.getToggleSortingHandler()}
                               disabled={!header.column.getCanSort()}
                             >
@@ -370,11 +380,10 @@ export function DataTable<TData, TValue>({
                     data-row-id={row.id}
                     data-state={row.getIsSelected() && 'selected'}
                     onClick={enableRowClickSelection ? e => handleRowClick(row, e) : undefined}
-                    className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${
-                      keyboardNavigationEnabled && activeRowIndex === index
-                        ? 'bg-blue-50 border-l-4 border-l-blue-500'
-                        : ''
-                    }`}
+                    className={`${enableRowClickSelection ? 'cursor-pointer hover:bg-gray-50' : ''} ${keyboardNavigationEnabled && activeRowIndex === index
+                      ? 'bg-blue-50 border-l-4 border-l-blue-500'
+                      : ''
+                      }`}
                   >
                     {row.getVisibleCells().map(cell => (
                       <TableCell
@@ -401,16 +410,20 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      {showPagination && <DataTablePagination table={table} />}
+      {showPagination && <DataTablePagination table={table} totalCount={totalCount} />}
     </div>
   );
 }
 
 interface DataTablePaginationProps<TData> {
   table: TanStackTable<TData>;
+  totalCount?: number; // Total count from backend for external pagination
 }
 
-export function DataTablePagination<TData>({ table }: DataTablePaginationProps<TData>) {
+export function DataTablePagination<TData>({
+  table,
+  totalCount,
+}: DataTablePaginationProps<TData>) {
   return (
     <div className='flex items-center justify-between px-2'>
       <div className='flex-1 text-sm text-muted-foreground'>
@@ -439,13 +452,15 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
           </Select>
         </div>
         <div className='flex w-[100px] items-center justify-center text-sm font-medium'>
-          {`${table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}-${Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length)} of ${table.getFilteredRowModel().rows.length}`}
+          {`${table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}-${Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length)} of ${totalCount !== undefined ? totalCount : table.getFilteredRowModel().rows.length}`}
         </div>
         <div className='flex items-center space-x-2'>
           <Button
             variant='outline'
             className='hidden h-8 w-8 p-0 lg:flex'
-            onClick={() => table.setPageIndex(0)}
+            onClick={() => {
+              table.setPageIndex(0);
+            }}
             disabled={!table.getCanPreviousPage()}
           >
             <span className='sr-only'>Go to first page</span>
@@ -454,7 +469,9 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
           <Button
             variant='outline'
             className='h-8 w-8 p-0'
-            onClick={() => table.previousPage()}
+            onClick={() => {
+              table.previousPage();
+            }}
             disabled={!table.getCanPreviousPage()}
           >
             <span className='sr-only'>Go to previous page</span>
@@ -463,7 +480,9 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
           <Button
             variant='outline'
             className='h-8 w-8 p-0'
-            onClick={() => table.nextPage()}
+            onClick={() => {
+              table.nextPage();
+            }}
             disabled={!table.getCanNextPage()}
           >
             <span className='sr-only'>Go to next page</span>
@@ -472,7 +491,9 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
           <Button
             variant='outline'
             className='hidden h-8 w-8 p-0 lg:flex'
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            onClick={() => {
+              table.setPageIndex(table.getPageCount() - 1);
+            }}
             disabled={!table.getCanNextPage()}
           >
             <span className='sr-only'>Go to last page</span>

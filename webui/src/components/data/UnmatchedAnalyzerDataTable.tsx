@@ -19,7 +19,7 @@ interface UnmatchedAnalyzerDataTableProps {
   onFilteredStatusChange?: (itemName: string, isFiltered: boolean) => void;
   onCommentClick: (commentId: string, allCommentIds?: string[]) => void;
   commentLoading: boolean;
-  fieldType: 'razor' | 'blade' | 'soap' | 'brush';
+  fieldType: 'razor' | 'blade' | 'soap' | 'soap_brand' | 'brush';
   /** Enable performance logging */
   enablePerformanceLogging?: boolean;
   /** Test ID for testing */

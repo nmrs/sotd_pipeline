@@ -42,7 +42,7 @@ router = APIRouter(prefix="/api/analyze", tags=["analysis"])
 class UnmatchedAnalysisRequest(BaseModel):
     """Request model for unmatched analysis."""
 
-    field: str = Field(..., description="Field to analyze (razor, blade, brush, soap)")
+    field: str = Field(..., description="Field to analyze (razor, blade, brush, soap, soap_brand)")
     months: List[str] = Field(..., description="List of months to analyze (YYYY-MM format)")
     limit: int = Field(default=50, ge=1, le=1000, description="Maximum number of results to return")
 
@@ -223,7 +223,7 @@ class CatalogValidationResponse(BaseModel):
 
 def validate_field(field: str) -> None:
     """Validate that the field is supported."""
-    supported_fields = ["razor", "blade", "brush", "soap"]
+    supported_fields = ["razor", "blade", "brush", "soap", "soap_brand"]
     if field not in supported_fields:
         raise HTTPException(
             status_code=400,

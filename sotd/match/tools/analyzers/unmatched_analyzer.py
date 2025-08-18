@@ -51,7 +51,7 @@ class UnmatchedAnalyzer(AnalysisTool):
         )
         parser.add_argument(
             "--field",
-            choices=["razor", "blade", "soap", "brush"],
+            choices=["razor", "blade", "soap", "soap_brand", "brush"],
             default="blade",
             help="Field to analyze (default: blade)",
         )
@@ -93,6 +93,9 @@ class UnmatchedAnalyzer(AnalysisTool):
         if field == "brush":
             # Use new brush-specific logic for handle/knot granularity
             self._process_brush_unmatched(record, all_unmatched)
+        elif field == "soap_brand":
+            # Use soap brand-specific logic for brand-level analysis
+            self._process_soap_brand_unmatched(record, all_unmatched)
         else:
             # Use existing simple logic for razor, blade, soap
             self._process_simple_field_unmatched(record, field, all_unmatched)
@@ -121,10 +124,69 @@ class UnmatchedAnalyzer(AnalysisTool):
 
             # Check if matched field is missing, empty, or doesn't contain valid match data
             matched = field_val.get("matched")
-            if not matched or (isinstance(matched, dict) and not matched.get("brand")):
+            if not matched:
                 # Use extract_text helper for consistency
                 normalized = extract_text(field_val, field)
                 all_unmatched[normalized].append(file_info)
+                return
+
+            # Field-specific validation logic
+            if field == "soap":
+                # For soap fields, show items that need brand-level attention
+                # This includes: truly unmatched (no maker) + brand-only fallbacks
+                if not isinstance(matched, dict):
+                    normalized = extract_text(field_val, field)
+                    all_unmatched[normalized].append(file_info)
+                    return
+
+                maker = matched.get("maker")
+                scent = matched.get("scent")
+                match_type = field_val.get("match_type")
+
+                # If no maker at all, it's unmatched
+                if not maker:
+                    normalized = extract_text(field_val, field)
+                    all_unmatched[normalized].append(file_info)
+                    return
+
+                # If we have a maker but no scent, it's a brand-only fallback
+                if maker and not scent:
+                    normalized = extract_text(field_val, field)
+                    all_unmatched[normalized].append(
+                        {**file_info, "brand_only": True, "maker": maker, "match_type": match_type}
+                    )
+                    return
+
+                # If we have both maker and scent but match_type is "brand", it's a brand-only
+                # fallback that successfully matched both fields - this should be counted as
+                # unmatched for soap field
+                if maker and scent and match_type == "brand":
+                    normalized = extract_text(field_val, field)
+                    all_unmatched[normalized].append(
+                        {
+                            **file_info,
+                            "brand_only": True,
+                            "maker": maker,
+                            "scent": scent,
+                            "match_type": match_type,
+                        }
+                    )
+                    return
+
+                # If we have both maker and scent with match_type other than "brand", it's a
+                # full match - This is NOT unmatched - these are properly matched soaps
+                # So we don't add them to the unmatched list
+
+            elif field in ["razor", "blade"]:
+                # For razor and blade fields, check for brand field
+                if not isinstance(matched, dict) or not matched.get("brand"):
+                    normalized = extract_text(field_val, field)
+                    all_unmatched[normalized].append(file_info)
+            else:
+                # Generic fallback for other fields
+                if not isinstance(matched, dict) or not matched.get("brand"):
+                    normalized = extract_text(field_val, field)
+                    all_unmatched[normalized].append(file_info)
 
     def _process_brush_unmatched(self, record: Dict, all_unmatched: Dict) -> None:
         """Process unmatched brush records with handle/knot granularity."""
@@ -215,6 +277,45 @@ class UnmatchedAnalyzer(AnalysisTool):
             # No unmatched components and no valid brand - it's a general brush issue
             normalized = extract_text(brush, "brush")
             all_unmatched[normalized].append(file_info)
+
+    def _process_soap_brand_unmatched(self, record: Dict, all_unmatched: Dict) -> None:
+        """Process soap records for brand-level unmatched analysis."""
+        soap = record.get("soap")
+        if not isinstance(soap, dict):
+            return
+
+        matched = soap.get("matched")
+        file_info = {
+            "file": record.get("_source_file", ""),
+            "line": record.get("_source_line", "unknown"),
+            "comment_id": record.get("id", ""),
+        }
+
+        # If nothing matched at all, count as unmatched
+        if not matched:
+            normalized = extract_text(soap, "soap")
+            all_unmatched[normalized].append(file_info)
+            return
+
+        if not isinstance(matched, dict):
+            normalized = extract_text(soap, "soap")
+            all_unmatched[normalized].append(file_info)
+            return
+
+        # For soap_brand analysis, we ONLY want truly unmatched items (no maker at all)
+        # We do NOT want brand-only fallbacks - those go in the regular soap field
+
+        maker = matched.get("maker")
+
+        # If no maker at all, it's truly unmatched
+        if not maker:
+            normalized = extract_text(soap, "soap")
+            all_unmatched[normalized].append(file_info)
+            return
+
+        # If we have a maker (even if no scent), it's NOT truly unmatched
+        # Brand-only fallbacks are handled by the regular soap field
+        # So we don't add anything to the unmatched list
 
     def _strip_use_count(self, text: str) -> str:
         """Strip use count from blade text.

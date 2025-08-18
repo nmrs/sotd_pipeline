@@ -23,7 +23,7 @@ import { checkFilteredStatus } from '../services/api';
 const UnmatchedAnalyzer: React.FC = () => {
   const [selectedField, setSelectedField] = useState<string>('razor');
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
-  const [limit, setLimit] = useState<number>(50);
+  const [limit, setLimit] = useState<number>(1000);
   const [loading, setLoading] = useState(false);
   const [matchPhaseOutput, setMatchPhaseOutput] = useState<string | null>(null);
   const [results, setResults] = useState<UnmatchedAnalysisResult | null>(null);
@@ -100,6 +100,7 @@ const UnmatchedAnalyzer: React.FC = () => {
     { value: 'blade', label: 'Blade' },
     { value: 'brush', label: 'Brush' },
     { value: 'soap', label: 'Soap' },
+    { value: 'soap_brand', label: 'Soap Brand' },
   ];
 
   const handleAnalyze = async (retryCount = 0) => {
@@ -127,7 +128,7 @@ const UnmatchedAnalyzer: React.FC = () => {
         if (result.partial_results) {
           messaging.addWarningMessage(
             `Partial results: ${result.error || 'Some items could not be processed'}. ` +
-              'Only available data is shown.'
+            'Only available data is shown.'
           );
         }
 
@@ -531,14 +532,52 @@ const UnmatchedAnalyzer: React.FC = () => {
               <div className='flex items-center space-x-2'>
                 <button
                   onClick={viewState.toggleShowFiltered}
-                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                    viewState.showFiltered
-                      ? 'bg-gray-600 text-white hover:bg-gray-700'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${viewState.showFiltered
+                    ? 'bg-gray-600 text-white hover:bg-gray-700'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
                 >
                   {viewState.showFiltered ? 'Hide Filtered' : 'Show Filtered'}
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* Soap Insights Panel */}
+          {results && selectedField === 'soap' && (
+            <div className='bg-blue-50 border border-blue-200 rounded-md p-4 mb-4'>
+              <h3 className='text-sm font-medium text-blue-900 mb-2'>🧼 Soap Analysis Insights</h3>
+              <div className='text-xs text-blue-700 space-y-1'>
+                <p>
+                  <strong>Two-Phase Matching:</strong> Soap matching uses a two-phase approach:
+                </p>
+                <ul className='list-disc list-inside ml-4 space-y-1'>
+                  <li><strong>Phase 1:</strong> Full soap matching (maker + scent) using exact patterns and regex</li>
+                  <li><strong>Phase 2:</strong> Brand fallback matching (maker only) when scent patterns fail</li>
+                </ul>
+                <p className='mt-2'>
+                  <strong>Tip:</strong> Use "Soap Brand" field to analyze only brand-level matches and fallbacks.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Soap Brand Insights Panel */}
+          {results && selectedField === 'soap_brand' && (
+            <div className='bg-green-50 border border-green-200 rounded-md p-4 mb-4'>
+              <h3 className='text-sm font-medium text-green-900 mb-2'>🏷️ Soap Brand Analysis</h3>
+              <div className='text-xs text-green-700 space-y-1'>
+                <p>
+                  <strong>Brand-Level Analysis:</strong> This view shows items that:
+                </p>
+                <ul className='list-disc list-inside ml-4 space-y-1'>
+                  <li>Have a maker but no scent (brand-only fallback matches)</li>
+                  <li>Are truly unmatched (no maker at all)</li>
+                  <li>May need scent pattern additions to the catalog</li>
+                </ul>
+                <p className='mt-2'>
+                  <strong>Use Case:</strong> Identify soaps that need scent pattern improvements in the catalog.
+                </p>
               </div>
             </div>
           )}
@@ -594,8 +633,14 @@ const UnmatchedAnalyzer: React.FC = () => {
                     <div>
                       <h3 className='text-base font-medium text-gray-900'>
                         Top Unmatched Items ({searchSort.searchResultsCount} of{' '}
-                        {searchSort.totalItemsCount})
+                        {results.total_unmatched || results.unmatched_items?.length || 0})
                       </h3>
+                      {results.total_unmatched && results.total_unmatched > results.unmatched_items?.length && (
+                        <p className='text-sm text-gray-600 mt-1'>
+                          Showing top {results.unmatched_items?.length || 0} items.
+                          Use the limit control above to see more items.
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className='flex items-center space-x-2'>
@@ -621,11 +666,10 @@ const UnmatchedAnalyzer: React.FC = () => {
                           <button
                             onClick={handleApplyFilteredChanges}
                             disabled={loading || visibleChangesCount === 0}
-                            className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${
-                              loading || visibleChangesCount === 0
-                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                                : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                            }`}
+                            className={`py-1 px-3 rounded text-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed ${loading || visibleChangesCount === 0
+                              ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                              : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                              }`}
                           >
                             {loading ? 'Applying...' : `Apply (${visibleChangesCount})`}
                           </button>
@@ -668,7 +712,7 @@ const UnmatchedAnalyzer: React.FC = () => {
                   onFilteredStatusChange={handleFilteredStatusChange}
                   onCommentClick={handleCommentClick}
                   commentLoading={commentLoading}
-                  fieldType={selectedField as 'razor' | 'blade' | 'brush' | 'soap'}
+                  fieldType={selectedField as 'razor' | 'blade' | 'brush' | 'soap' | 'soap_brand'}
                 />
               </div>
             )
