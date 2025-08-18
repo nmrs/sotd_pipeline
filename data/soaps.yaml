@@ -578,6 +578,10 @@ Bundubeard:
   patterns:
     - 'bund\wbeard'
     - boendoebaard
+  scents:
+    Kletterkees:
+      patterns:
+        - kletter[bk]ees
 Burke Avenue:
   default format: Cream
   patterns:
@@ -1764,7 +1768,7 @@ La Toja:
         - la toja
 Lakewood Soap Company:
   patterns:
-    - "lakewood soap( company)?"
+    - 'lakewood(?: soap)?(?: co\.?(?:mpany)?)?'
   scents:
     Blue Skies:
       patterns:
@@ -1816,6 +1820,10 @@ Long Rifle Soap Co.:
 Los Jabones de Joserra:
   patterns:
     - "(los )?jabr?ones.*joser+a"
+  scents:
+    Noir:
+      patterns:
+        - jabon.*noir
 Løthur:
   patterns:
     - l[oø]thur( grooming)?
@@ -2025,7 +2033,7 @@ Mike's Natural Soaps:
         - mike.*honey.*grapefruit
     Hungarian Lavender:
       patterns:
-        - mike.*hungarian.*lavender
+        - mike.*hungarian.*lavend
     Lemongrass & Eucalyptus:
       patterns:
         - mike.*lemongrass.*euc
@@ -2740,7 +2748,7 @@ St. James of London:
         - james.*mandarin.*patch
 Stirling Soap Co.:
   patterns:
-    - st[ie]rling( soaps? (co\.?(mpany)?)?)?
+    - 'st[ie]rling((?: soaps?)?(?: co\.?(?:mpany)?)?)?'
   scents:
     Alighieri:
       patterns:
@@ -2811,9 +2819,15 @@ Stirling Soap Co.:
     Lavender:
       patterns:
         - stirling.*lavender
+    Light-ish Red:
+      patterns:
+        - light-?ish.*red
     Margaritas in the Arctic:
       patterns:
         - "marg.*arc?tic"
+    Naked & Smooth:
+      patterns:
+        - naked.*smooth
     Oro Valley:
       patterns:
         - oro valley
