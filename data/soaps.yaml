@@ -302,6 +302,9 @@ Barrister and Mann:
       patterns:
         - '\bb ?(and|&|\+) ?m\b.*chesh?ire'
         - "barris.*chesh?ire"
+    Citricuyá:
+      patterns:
+        - citricuy[aá]
     Classic:
       patterns:
         - '\bb ?(and|&|\+) ?m\b.*classic'
@@ -1841,7 +1844,7 @@ MORE FOR YOU:
         - '^\W*more for you'
 MacDuff's Soap Co.:
   patterns:
-    - 'ma?c ?duff''?s?( soap co(?:\.|mpany)?)?'
+    - ma?c\s*duff['’]?s?(?:\s+(?:soap\s+)?co\.?(?:mpany)?)?
     - '\bmcd\b'
   scents:
     Almond Biscottie:
@@ -2048,7 +2051,7 @@ Mitchell's:
         - '^\W*mwf\b'
 Moon Soap:
   patterns:
-    - '^\W*moon( ?soaps?( co.?)?)?'
+    - '^moon(?:\s+soaps?)?(?:\s+co\.?(?:mpany)?)?'
   scents:
     Union:
       patterns:
@@ -2454,7 +2457,7 @@ Red House Farm:
         - '\bno ?scrub\b'
     Prarie Dog:
       patterns:
-        - red house.*prar.*dog
+        - red house.*prair.*dog
     Sandalwood & Bourbon:
       patterns:
         - red house.*sandalwood.*bourbon
@@ -2654,7 +2657,7 @@ Southern Witchcrafts:
         - witch.*pomona
     Samhain:
       patterns:
-        - witch.*samhai
+        - witch.*sa[hm]{2}ai
     Tres Matres:
       patterns:
         - tres ma(t|r)
@@ -2737,7 +2740,7 @@ St. James of London:
         - james.*mandarin.*patch
 Stirling Soap Co.:
   patterns:
-    - st[ie]rling( soaps? (co.?(mpany)?)?)?
+    - st[ie]rling( soaps? (co\.?(mpany)?)?)?
   scents:
     Alighieri:
       patterns:
