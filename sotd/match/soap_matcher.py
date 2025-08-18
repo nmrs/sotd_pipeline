@@ -62,23 +62,13 @@ class SoapMatcher(BaseMatcher):
         return text
 
     def _normalize_scent_text(self, text: str) -> str:
-        """Normalize scent text for matching."""
-        # Remove common scent indicators (case-insensitive)
-        # First remove complete phrases like "Shaving Soap"
-        shaving_patterns = (
-            r"\b(shaving soap|shaving cream|shaving splash|" r"shaving balm|shaving aftershave)\b"
-        )
-        text = re.sub(shaving_patterns, "", text, flags=re.IGNORECASE)
-        # Then remove individual scent indicators
-        scent_patterns = r"\b(soap|cream|splash|balm|aftershave|puck|croap)\b"
-        text = re.sub(scent_patterns, "", text, flags=re.IGNORECASE)
-        # Clean up any trailing punctuation and whitespace left behind
-        # Include periods in the punctuation cleanup for better handling
+        """Normalize extracted scent text for matching - handles only matcher-specific cleanup."""
+        # Clean up leading/trailing delimiters and punctuation from extracted scent parts
+        # This is separate from extract phase normalization and handles structural parsing
+        text = re.sub(r"^[\s\-:*/_,~`\\\.]+", "", text)
         text = re.sub(r"[\s\-:*/_,~`\\\.]+$", "", text)
         # Normalize whitespace
         text = re.sub(r"\s+", " ", text.strip())
-        # Strip trailing periods (additional cleanup)
-        text = strip_trailing_periods(text)
         return text
 
     def _compile_patterns(self):
@@ -214,7 +204,7 @@ class SoapMatcher(BaseMatcher):
             if match:
                 start, end = match.span()
                 remainder = normalized[:start] + normalized[end:]
-                remainder = re.sub(r"^[\s\-:*/_,~`\\]+", "", remainder).strip()
+                remainder = re.sub(r"^[\s\-:*/_,~`\\\.]+$", "", remainder).strip()
                 remainder = re.sub(r"[\s\-:*/_,~`\\]+$", "", remainder).strip()
                 remainder = self._normalize_scent_text(remainder)
                 remainder = self._remove_sample_marker(remainder)
@@ -342,7 +332,7 @@ class SoapMatcher(BaseMatcher):
                 self._match_cache[cache_key] = None
             return None
 
-        normalized_value = self._normalize_scent_text(value)
+        normalized_value = self._normalize_common_text(value)
         if not normalized_value:
             if hasattr(self, "_match_cache"):
                 self._match_cache[cache_key] = None
@@ -364,7 +354,7 @@ class SoapMatcher(BaseMatcher):
 
                 # Check if normalized value matches any of the correct strings (case-insensitive)
                 for correct_string in strings:
-                    normalized_correct = self._normalize_scent_text(correct_string).lower()
+                    normalized_correct = self._normalize_common_text(correct_string).lower()
                     if normalized_correct == normalized_value.lower():
                         # Return match data in the expected format for soaps
                         result = {"maker": maker, "scent": scent}

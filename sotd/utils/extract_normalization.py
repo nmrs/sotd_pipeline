@@ -228,12 +228,13 @@ def strip_soap_patterns(value: str) -> str:
     - Sample indicators: (sample), (tester), etc.
     - Size indicators: (travel size), (mini), etc.
     - Product type indicators: "Shave Soap", "Shaving Soap", "soap", etc.
+    - Delimiters and punctuation: leading/trailing -, :, /, etc.
 
     Args:
         value: Input string that may contain soap-related patterns
 
     Returns:
-        String with soap-related patterns removed
+        String with soap-related patterns removed and ready for matching
     """
     if not isinstance(value, str):
         return value
@@ -267,12 +268,10 @@ def strip_soap_patterns(value: str) -> str:
     for pattern in soap_patterns:
         cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
 
-    # Clean up any trailing punctuation and whitespace left behind
-    # Include periods in the punctuation cleanup for better handling
-    cleaned = re.sub(r"[\s\-:*/_,~`\\\.]+$", "", cleaned)
-
-    # Clean up any leading punctuation and whitespace left behind
+    # Clean up any leading/trailing delimiters and punctuation that the matcher needs
+    # This ensures the normalized field is truly ready for matching
     cleaned = re.sub(r"^[\s\-:*/_,~`\\\.]+", "", cleaned)
+    cleaned = re.sub(r"[\s\-:*/_,~`\\\.]+$", "", cleaned)
 
     # Clean up extra whitespace
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
