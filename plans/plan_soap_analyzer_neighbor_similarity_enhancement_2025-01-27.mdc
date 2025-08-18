@@ -1,0 +1,482 @@
+# SoapAnalyzer Neighbor Similarity Enhancement - TDD Implementation Plan
+
+**Date**: 2025-01-27  
+**Status**: IMPLEMENTATION PLAN  
+**Type**: TDD Development Plan  
+**Parent Component**: SoapAnalyzer.tsx
+
+## 📘 Project Summary
+
+Enhance the existing SoapAnalyzer component with three new analysis modes that provide neighbor similarity analysis for matched soap data. This will help identify potential matching quality issues by analyzing sorted lists of brands, brand-scent combinations, and scents to find similar entries that might indicate typos or near-matches that should have been matched to the same catalog entry.
+
+**Core Features**:
+1. **Brands-only view**: Sort brands alphabetically, analyze similarity to neighbors
+2. **Brand-scent view**: Sort brand-scent combinations alphabetically, analyze similarity to neighbors  
+3. **Scents-only view**: Sort scents alphabetically, analyze similarity to neighbors
+4. **Similarity scoring**: Display similarity percentages between adjacent entries
+5. **Visual indicators**: Color-coded similarity scores for quick pattern recognition
+
+**User Value**: Identify patterns like "Noble Otter - Jacl", "Noble Otter - Jack", "Noble Otter - Jock" that suggest matching quality issues.
+
+## 🧩 Component Steps
+
+### Phase 1: Backend API Enhancement (Foundation)
+1. **Extend Soap Analyzer API** - Add new endpoints for neighbor similarity analysis
+2. **Implement Similarity Calculation** - Add similarity scoring between adjacent entries
+3. **Add Data Sorting Logic** - Implement alphabetical sorting for brands, brand-scent, and scents
+
+### Phase 2: Frontend UI Components (User Interface)
+4. **Add New Analysis Mode Tabs** - Extend existing tabs to include the 3 new views
+5. **Implement Sorted Data Tables** - Create tables showing sorted data with similarity indicators
+6. **Add Similarity Score Display** - Show similarity percentages between adjacent rows
+
+### Phase 3: User Experience Enhancement (Polish)
+7. **Implement Color-Coded Similarity** - Add visual indicators for similarity levels
+8. **Add Filtering Options** - Allow users to filter by similarity threshold
+9. **Enhance Error Handling** - Improve error states and loading indicators
+
+### Phase 4: Integration and Testing (Validation)
+10. **End-to-End Testing** - Complete workflow validation
+11. **Performance Testing** - Ensure acceptable performance with large datasets
+12. **User Acceptance Testing** - Validate the analysis workflow
+
+## 🔁 Implementation Prompts
+
+### Step 1: Extend Soap Analyzer API
+
+```text
+Extend the existing soap analyzer API to support neighbor similarity analysis for the three new modes.
+
+**Requirements:**
+- Add new endpoint `/soap-analyzer/neighbor-similarity` that accepts `mode` parameter (brands, brand_scent, scents)
+- Implement similarity calculation using Levenshtein distance or similar algorithm
+- Return sorted data with similarity scores between adjacent entries
+- Support existing month selection and limit parameters
+
+**API Response Structure:**
+```json
+{
+  "message": "Neighbor similarity analysis completed",
+  "mode": "brands|brand_scent|scents",
+  "results": [
+    {
+      "entry": "Noble Otter",
+      "similarity_to_next": 0.85,
+      "next_entry": "Noble Otter - Jacl",
+      "count": 15
+    }
+  ],
+  "total_entries": 150,
+  "months_processed": ["2024-01", "2024-02"]
+}
+```
+
+**Files to modify:**
+- `webui/api/soap_analyzer.py` - Add new endpoint
+- `webui/api/analysis.py` - Add similarity calculation utilities
+- `tests/webui/api/test_soap_analyzer.py` - Add tests for new endpoint
+
+**Test Requirements:**
+- Unit tests for similarity calculation function
+- Integration tests for new API endpoint
+- Edge case tests for empty data and single entries
+```
+
+### Step 2: Implement Similarity Calculation
+
+```text
+Create the core similarity calculation logic for comparing adjacent entries in sorted lists.
+
+**Requirements:**
+- Implement similarity calculation using appropriate algorithm (Levenshtein distance recommended)
+- Handle different data types (brands-only, brand-scent combinations, scents-only)
+- Normalize text for comparison (lowercase, trim whitespace)
+- Calculate similarity scores between adjacent entries in sorted lists
+- Handle edge cases (empty lists, single entries, very different entries)
+
+**Core Functions:**
+```python
+def calculate_similarity(text1: str, text2: str) -> float:
+    """Calculate similarity between two text strings (0.0 to 1.0)"""
+    
+def analyze_neighbor_similarity(sorted_entries: List[str]) -> List[dict]:
+    """Analyze similarity between adjacent entries in sorted list"""
+    
+def normalize_for_comparison(text: str) -> str:
+    """Normalize text for similarity comparison"""
+```
+
+**Files to create/modify:**
+- `webui/api/utils/similarity.py` - New similarity calculation module
+- `webui/api/soap_analyzer.py` - Integrate similarity calculation
+- `tests/webui/api/test_similarity.py` - Comprehensive tests for similarity logic
+
+**Test Requirements:**
+- Unit tests for similarity calculation with known examples
+- Edge case tests for empty strings, very long strings, special characters
+- Performance tests for large datasets
+- Integration tests with actual soap data
+```
+
+### Step 3: Add Data Sorting Logic
+
+```text
+Implement the sorting logic for the three different analysis modes in the soap analyzer.
+
+**Requirements:**
+- Sort brands alphabetically (case-insensitive)
+- Sort brand-scent combinations alphabetically (case-insensitive)
+- Sort scents alphabetically (case-insensitive)
+- Handle edge cases (empty data, missing fields, special characters)
+- Maintain data integrity during sorting operations
+
+**Sorting Functions:**
+```python
+def sort_brands_only(soap_data: List[dict]) -> List[str]:
+    """Extract and sort unique brands from soap data"""
+    
+def sort_brand_scent_combinations(soap_data: List[dict]) -> List[str]:
+    """Extract and sort brand-scent combinations from soap data"""
+    
+def sort_scents_only(soap_data: List[dict]) -> List[str]:
+    """Extract and sort unique scents from soap data"""
+```
+
+**Files to modify:**
+- `webui/api/soap_analyzer.py` - Add sorting functions
+- `tests/webui/api/test_soap_analyzer.py` - Add tests for sorting logic
+
+**Test Requirements:**
+- Unit tests for each sorting function
+- Tests with various data formats and edge cases
+- Performance tests with large datasets
+- Integration tests using real soap data
+```
+
+### Step 4: Add New Analysis Mode Tabs
+
+```text
+Extend the existing SoapAnalyzer component to include the three new analysis mode tabs.
+
+**Requirements:**
+- Add three new tabs: "Brands Analysis", "Brand-Scent Analysis", "Scents Analysis"
+- Maintain existing "Duplicates Analysis" and "Pattern Suggestions" tabs
+- Update tab navigation to handle 5 tabs instead of 2
+- Ensure proper tab state management and content switching
+
+**UI Changes:**
+- Extend TabsList to include 5 tabs instead of 2
+- Add new TabsContent sections for each analysis mode
+- Update tab state management to handle 5 active states
+- Maintain existing functionality for duplicates and patterns
+
+**Files to modify:**
+- `webui/src/pages/SoapAnalyzer.tsx` - Add new tabs and content sections
+- Update tab state management and navigation logic
+
+**Test Requirements:**
+- Unit tests for tab navigation and state management
+- Integration tests for tab content switching
+- Visual regression tests for new tab layout
+```
+
+### Step 5: Implement Sorted Data Tables
+
+```text
+Create the sorted data table components for displaying the neighbor similarity analysis results.
+
+**Requirements:**
+- Create reusable table component for sorted data display
+- Show entry name, similarity score to next entry, and count
+- Handle different data formats for each analysis mode
+- Implement proper table styling and responsive design
+- Add loading states and empty state handling
+
+**Table Structure:**
+```typescript
+interface NeighborSimilarityResult {
+  entry: string;
+  similarity_to_next: number;
+  next_entry: string;
+  count: number;
+}
+
+interface SortedDataTableProps {
+  data: NeighborSimilarityResult[];
+  mode: 'brands' | 'brand_scent' | 'scents';
+  loading: boolean;
+}
+```
+
+**Files to create/modify:**
+- `webui/src/components/tables/SortedDataTable.tsx` - New table component
+- `webui/src/pages/SoapAnalyzer.tsx` - Integrate new table component
+- `webui/src/components/__tests__/SortedDataTable.test.tsx` - Table component tests
+
+**Test Requirements:**
+- Unit tests for table component rendering
+- Tests for different data formats and modes
+- Tests for loading and empty states
+- Integration tests with actual API data
+```
+
+### Step 6: Add Similarity Score Display
+
+```text
+Implement the similarity score display with visual indicators and color coding.
+
+**Requirements:**
+- Display similarity percentage between adjacent entries
+- Implement color coding: green (high similarity), yellow (medium), red (low)
+- Show similarity threshold indicators
+- Handle edge cases (no similarity data, single entries)
+- Make similarity scores easily scannable
+
+**Visual Indicators:**
+- Green: 80%+ similarity (potential issues)
+- Yellow: 60-79% similarity (moderate similarity)
+- Red: <60% similarity (normal differences)
+- Clear percentage display with color-coded badges
+
+**Files to modify:**
+- `webui/src/components/tables/SortedDataTable.tsx` - Add similarity score display
+- `webui/src/components/ui/badge.tsx` - Extend badge component if needed
+- `webui/src/pages/SoapAnalyzer.tsx` - Update similarity display logic
+
+**Test Requirements:**
+- Unit tests for similarity score calculation and display
+- Tests for color coding logic
+- Visual regression tests for similarity indicators
+- Integration tests with real similarity data
+```
+
+### Step 7: Implement Color-Coded Similarity
+
+```text
+Enhance the similarity display with comprehensive color coding and visual indicators.
+
+**Requirements:**
+- Implement consistent color scheme for similarity levels
+- Add hover effects for similarity score details
+- Include similarity threshold configuration
+- Provide clear visual hierarchy for similarity information
+- Ensure accessibility compliance for color-blind users
+
+**Color Scheme:**
+- High similarity (80%+): Red background with white text (potential issues)
+- Medium similarity (60-79%): Orange background with white text (moderate concern)
+- Low similarity (<60%): Green background with white text (normal differences)
+
+**Files to modify:**
+- `webui/src/components/tables/SortedDataTable.tsx` - Enhance color coding
+- `webui/src/components/ui/badge.tsx` - Add new badge variants if needed
+- `webui/src/pages/SoapAnalyzer.tsx` - Update similarity threshold logic
+
+**Test Requirements:**
+- Unit tests for color coding logic
+- Visual regression tests for similarity indicators
+- Accessibility tests for color contrast
+- Integration tests with various similarity levels
+```
+
+### Step 8: Add Filtering Options
+
+```text
+Implement filtering options to allow users to focus on specific similarity levels.
+
+**Requirements:**
+- Add similarity threshold slider (similar to existing duplicates threshold)
+- Implement real-time filtering of results
+- Add "Show only potential issues" toggle
+- Include result count indicators for filtered data
+- Maintain filter state across tab switches
+
+**Filter Controls:**
+- Similarity threshold slider (0.5 to 1.0)
+- "Show only high similarity" checkbox
+- Result count display for filtered data
+- Clear filters button
+
+**Files to modify:**
+- `webui/src/pages/SoapAnalyzer.tsx` - Add filter controls
+- `webui/src/components/forms/SimilarityThresholdSlider.tsx` - New filter component
+- Update filter state management and API calls
+
+**Test Requirements:**
+- Unit tests for filter logic and state management
+- Integration tests for filter API integration
+- Tests for filter persistence across tab switches
+- Performance tests for real-time filtering
+```
+
+### Step 9: Enhance Error Handling
+
+```text
+Improve error handling and user feedback for the new neighbor similarity analysis features.
+
+**Requirements:**
+- Add specific error messages for similarity analysis failures
+- Implement graceful degradation when similarity calculation fails
+- Add loading states for similarity analysis operations
+- Include helpful error messages for common failure scenarios
+- Maintain consistent error handling patterns with existing features
+
+**Error Scenarios:**
+- API failures during similarity analysis
+- Invalid similarity calculation results
+- Empty or corrupted data responses
+- Network timeouts and retry logic
+
+**Files to modify:**
+- `webui/src/pages/SoapAnalyzer.tsx` - Enhance error handling
+- `webui/src/components/feedback/ErrorDisplay.tsx` - Extend error display if needed
+- Update API error handling and user feedback
+
+**Test Requirements:**
+- Unit tests for error handling logic
+- Integration tests for error scenarios
+- Tests for error message accuracy and helpfulness
+- Tests for graceful degradation behavior
+```
+
+### Step 10: End-to-End Testing
+
+```text
+Implement comprehensive end-to-end testing for the complete neighbor similarity analysis workflow.
+
+**Requirements:**
+- Test complete user workflow from month selection to similarity analysis
+- Validate all three analysis modes (brands, brand-scent, scents)
+- Test similarity calculation accuracy with known data
+- Verify filtering and threshold functionality
+- Test error handling and edge cases
+
+**Test Scenarios:**
+- Complete workflow with valid data
+- Error scenarios (API failures, invalid data)
+- Edge cases (single entries, empty results)
+- Performance testing with large datasets
+- Cross-browser compatibility (Safari focus)
+
+**Files to create/modify:**
+- `webui/tests/neighbor-similarity.spec.ts` - New E2E test file
+- Update existing test configuration and setup
+- Add test data fixtures for similarity analysis
+
+**Test Requirements:**
+- E2E tests for complete user workflows
+- Performance tests for large dataset handling
+- Cross-browser compatibility tests
+- Integration tests with real API endpoints
+```
+
+### Step 11: Performance Testing
+
+```text
+Conduct comprehensive performance testing to ensure acceptable performance with large datasets.
+
+**Requirements:**
+- Test performance with datasets of various sizes (100, 1000, 10000 entries)
+- Measure similarity calculation performance
+- Test sorting algorithm performance
+- Validate UI responsiveness during analysis
+- Identify and resolve performance bottlenecks
+
+**Performance Metrics:**
+- Similarity calculation time per entry
+- Sorting performance for large datasets
+- UI render time for large result sets
+- Memory usage during analysis
+- API response time for different data sizes
+
+**Files to modify:**
+- `webui/tests/performance/neighbor-similarity-performance.spec.ts` - Performance test file
+- Add performance monitoring to similarity calculation
+- Implement performance optimization if needed
+
+**Test Requirements:**
+- Performance benchmarks for various dataset sizes
+- Memory usage profiling
+- UI responsiveness testing
+- API performance testing
+- Performance regression testing
+```
+
+### Step 12: User Acceptance Testing
+
+```text
+Conduct user acceptance testing to validate the analysis workflow and user experience.
+
+**Requirements:**
+- Validate that the three analysis modes provide useful insights
+- Test similarity threshold configuration and filtering
+- Verify color coding and visual indicators are helpful
+- Test error handling and user feedback
+- Gather feedback on workflow efficiency and usability
+
+**Testing Focus:**
+- Usability of similarity analysis workflow
+- Effectiveness of visual indicators
+- Filter configuration and results
+- Error handling and user guidance
+- Overall user satisfaction with the feature
+
+**Validation Criteria:**
+- Users can successfully identify potential matching issues
+- Similarity thresholds are configurable and useful
+- Visual indicators clearly show similarity levels
+- Error messages are helpful and actionable
+- Workflow integrates seamlessly with existing features
+
+**Files to modify:**
+- Update documentation based on user feedback
+- Refine UI components based on testing results
+- Optimize similarity calculation based on usage patterns
+```
+
+## 🧠 Critical Analysis
+
+### Prompt Sequence Structure
+The plan follows a logical progression from backend API enhancement to frontend UI implementation, ensuring each step builds on the previous one. The sequence prioritizes core functionality (similarity calculation) before moving to user experience enhancements.
+
+### Risk Assessment
+- **Low Risk**: Backend API extension and similarity calculation
+- **Medium Risk**: Frontend UI integration and state management
+- **High Risk**: Performance optimization with large datasets
+
+### Dependencies and Integration
+- Each step depends on the previous step's completion
+- Integration points are clearly defined
+- Testing requirements ensure quality at each stage
+- Performance considerations are addressed early
+
+### Success Metrics
+- All three analysis modes functional and performant
+- Similarity calculation accurate and fast
+- UI responsive and intuitive
+- Comprehensive test coverage maintained
+- Performance acceptable for large datasets
+
+## 📋 Implementation Notes
+
+### Development Approach
+- Follow TDD methodology: write tests first, implement minimal functionality
+- Incremental development with regular testing and validation
+- Focus on user value and workflow efficiency
+- Maintain existing code quality and patterns
+
+### Quality Assurance
+- Run quality checks before each commit: `make format lint typecheck test`
+- Maintain test coverage for all new functionality
+- Validate performance with realistic dataset sizes
+- Ensure accessibility compliance for visual indicators
+
+### Future Enhancements
+- Machine learning-based similarity scoring
+- Automated issue detection and reporting
+- Integration with catalog quality analysis
+- Export functionality for similarity analysis results
+description:
+globs:
+alwaysApply: false
+---
