@@ -8,9 +8,11 @@ alwaysApply: false
 **Goal:**  
 Work through `TEST_SUITE_TODO.md` one task at a time. For each task: ensure a clean git state, record hashes, run the extraction pipeline, back up the 10 JSON outputs, implement the fix, re-run, compare outputs (ignoring only the `metadata` section), and either stop for user direction on differences or commit and proceed if identical.
 
-**⚠️ CRITICAL WARNING: FILE SIZE COMPARISON IS INSUFFICIENT**
+**⚠️ CRITICAL WARNING: FILE SIZE AND RECORD COUNT COMPARISON ARE INSUFFICIENT**
 **File size comparison alone will miss content differences and lead to false positives.**
-**ALWAYS use full JSON content comparison (ignoring metadata only) to validate pipeline outputs.**
+**Record count comparison alone will miss content differences and lead to false positives.**
+**ONLY full JSON content comparison (ignoring metadata only) is sufficient to validate pipeline outputs.**
+**The actual content must be byte-for-byte identical outside metadata sections.**
 
 ---
 
@@ -131,15 +133,16 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
    - Use the same 12 files with unique names as baseline backup
 
 5. **MANDATORY: Compare against baseline**
-   - **⚠️ CRITICAL: File size comparison alone is INSUFFICIENTLY DETERMINISTIC**
+   - **⚠️ CRITICAL: File size and record count comparison are INSUFFICIENTLY DETERMINISTIC**
    - **REQUIRED: Full JSON content comparison (ignoring `"metadata"` sections only)**
-   - **Method**: Use proper JSON comparison tools, not just `ls -la` or `wc -c`
-   - **Expected result**: Identical content outside metadata (your fix should not change any other data)
+   - **Method**: Use proper JSON comparison tools, not just `ls -la`, `wc -c`, or record counting
+   - **Expected result**: **BYTE-FOR-BYTE IDENTICAL content outside metadata** (your fix should not change any other data)
    - **This comparison is the safety check - don't skip it**
    - **Why content comparison matters**: 
      - File sizes can be identical while content differs
+     - Record counts can be identical while content differs
      - Metadata changes can mask content changes
-     - Only full content comparison ensures no regressions
+     - **ONLY full content comparison ensures no regressions**
 
    **Comparison Methodology (REQUIRED)**:
    ```bash
@@ -155,11 +158,16 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
    
    print(f'Records: {len(baseline_data)} vs {len(current_data)}')
    print(f'Content identical: {baseline_data == current_data}')
+   
+   # CRITICAL: Only content identical = True is acceptable
+   # Record count matching is NOT sufficient
+   # File size matching is NOT sufficient
    "
    
    # 2. For non-identical content, find first difference
-   # 3. Analyze what changed and why
+   # 3. Analyze what changed and why  
    # 4. Determine if change is improvement or regression
+   # 5. **STOP if content is not byte-for-byte identical outside metadata**
    ```
 
 6. **Branch based on comparison results**
@@ -223,7 +231,10 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
 
 5. **Comparison mistakes**: Common errors that lead to false positives:
    - **File size only**: `ls -la` or `wc -c` comparison is insufficient
+   - **Record count only**: `len(data)` comparison is insufficient  
    - **Metadata inclusion**: Comparing full JSON including metadata sections
    - **String comparison**: Using `diff` on raw JSON files without parsing
    - **Partial comparison**: Only checking some files or some sections
    - **Improper tools**: Using file system tools instead of JSON parsing tools
+   - **Length validation**: Assuming same record count means same content
+   - **Example**: 100 records with different content = same count, different data
