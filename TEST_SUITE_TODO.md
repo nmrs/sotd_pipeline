@@ -288,7 +288,7 @@ RUN_METADATA:
 - **Notes/links**: Output format changes
 - **start_hash**: 7181ae68
 - **Status**: ✅ COMPLETE - All 18 annual integration tests now passing
-- **resolved_by_commit**: 7181ae68
+- **resolved_by_commit**: 46eb669e
 - **Lessons learned**: 
   1. **Error message specificity matters** - tests must match exact error message format
   2. **Success message expectations** - tests should expect actual implementation behavior, not idealized behavior
