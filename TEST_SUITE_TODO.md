@@ -407,25 +407,29 @@ RUN_METADATA:
 - **start_hash**: f3a936e1
 - **resolved_by_commit**: f3a936e1
 
-### [ ] Fix Brush Validation Counting Integration test
+### [x] Fix Brush Validation Counting Integration test
 - **Category**: Regression
 - **Failing tests**: `tests/integration/test_brush_validation_counting_integration.py::TestBrushValidationCountingIntegration::test_correct_matches_integration`
 - **Files involved**: `tests/integration/test_brush_validation_counting_integration.py`
 - **Observed error**: `AssertionError: Should have some correct matches` - test expects `correct_matches_count > 0` but gets 0
-- **Root cause**: Integration test is not finding any correct matches, possibly due to data structure changes or test data issues
-- **Solution**: Investigate why no correct matches are found and fix the underlying issue
-- **Status**: 🔄 PENDING - Need investigation to determine root cause
-- **Notes**: This appears to be a real regression in the integration test functionality
+- **Root cause**: The `normalized` field was missing from match phase output due to duplicate `match_record` functions and inconsistent data structures
+- **Solution**: Consolidated duplicate `match_record` functions and ensured `MatchResult` dataclass preserves the `normalized` field
+- **Status**: ✅ COMPLETE - Integration test now passing
+- **Notes**: This was a real regression caused by code duplication and missing field preservation. Fixed by consolidating code and ensuring data integrity.
+- **start_hash**: 6fd777be
+- **resolved_by_commit**: 0eec67b5
 
-### [ ] Fix Soap Sample Enricher Integration test state pollution
+### [x] Fix Soap Sample Enricher Integration test state pollution
 - **Category**: Test Isolation Issue
 - **Failing tests**: `tests/enrich/test_soap_sample_enricher_integration.py::TestSoapSampleEnricherIntegration::test_enricher_registered`
 - **Files involved**: `tests/enrich/test_soap_sample_enricher_integration.py`
 - **Observed error**: Test passes in isolation but fails in full suite
 - **Root cause**: Test is clearing enricher registry but global `_enrichers_setup` flag prevents re-registration in full suite context
-- **Solution**: Fix test isolation by properly resetting the global setup flag or using a different testing approach
-- **Status**: 🔄 PENDING - Test isolation issue needs fixing
-- **Notes**: This is a classic test order dependency issue where global state from other tests interferes
+- **Solution**: Fixed test isolation by resetting the global `_enrichers_setup` flag in the test
+- **Status**: ✅ COMPLETE - Test isolation issue resolved
+- **Notes**: This was a classic test order dependency issue where global state from other tests interfered. Fixed by resetting the global flag.
+- **start_hash**: 0eec67b5
+- **resolved_by_commit**: 0eec67b5
 
 ## Group 8: Test Environment and Mock Issues
 
@@ -468,7 +472,7 @@ RUN_METADATA:
 ### Run 1: 2025-08-19
 - **start_time**: 2025-08-19 07:58
 - **start_hash**: 2dc8ad3a (Task 13 start)
-- **current_state**: ✅ Task 14 COMPLETE - Moving to next task
+- **current_state**: ✅ **ALL TASKS COMPLETE** - All 8 new failing tests resolved
 - **working_commit**: 0eec67b5
 - **doc_commits**: 
   - 2dc8ad3a - Initial commit for Task 13
@@ -477,11 +481,11 @@ RUN_METADATA:
 - **baseline**: baseline_20250819_103932 (complete baseline with all 12 files)
 - **notes**: 
   - ✅ Task 14 COMPLETE: Soap analyzer API response validation fully resolved
-  - All 5 failing WebUI API tests now passing
-  - Fixed empty months handling, HTTPException override, response format
-  - Comment data corruption issue resolved (restored from baseline)
+  - ✅ Task 15 COMPLETE: Brush validation counting integration test fixed (normalized field issue)
+  - ✅ Task 16 COMPLETE: Soap sample enricher test isolation resolved
+  - All 8 new failing tests from plan execution now passing
   - Complete baseline established with all 12 pipeline files
-  - Ready to proceed to next task
+  - **MISSION ACCOMPLISHED** - All test failures resolved
 
 ## Summary
 
@@ -489,9 +493,9 @@ RUN_METADATA:
 
 **New Issues Discovered**: 8 new failing tests were identified during plan execution that were not part of the original plan:
 
-1. **Blackbird Plate Enricher test expectations** (2 tests) - Test drift due to improved enricher behavior
-2. **Brush Enricher field name test expectations** (4 tests) - Test drift due to field refactoring  
-3. **Brush Validation Counting Integration test** (1 test) - Real regression in integration functionality
-4. **Soap Sample Enricher Integration test state pollution** (1 test) - Test isolation issue
+1. **Blackbird Plate Enricher test expectations** (2 tests) - Test drift due to improved enricher behavior ✅ COMPLETE
+2. **Brush Enricher field name test expectations** (4 tests) - Test drift due to field refactoring ✅ COMPLETE  
+3. **Brush Validation Counting Integration test** (1 test) - Real regression in integration functionality ✅ COMPLETE
+4. **Soap Sample Enricher Integration test state pollution** (1 test) - Test isolation issue ✅ COMPLETE
 
-**Current Status**: The original plan goals have been achieved, but new test failures have emerged that require attention. These are primarily test drift issues (tests expecting old behavior) rather than functional regressions.
+**Current Status**: ✅ **ALL ISSUES RESOLVED** - All 8 new failing tests have been successfully fixed. The original plan goals have been achieved, and all subsequent issues have been resolved.
