@@ -4,6 +4,46 @@ RUN_METADATA:
   run_1_started_at: 2025-08-19T02:35:42Z
 -->
 
+## ⚠️ CRITICAL SESSION ANALYSIS - Task 3 Investigation
+
+### What Happened
+- **Task 3**: Fixed specialized aggregators data extraction (test data issues)
+- **Tests now pass**: ✅ All specialized aggregator tests are working
+- **BUT**: Pipeline validation revealed **serious regression** in enrich phase
+
+### The Problem Discovered
+- **Baseline enriched records**: 1,619 (from 2,562 extracted)
+- **Task 3 enriched records**: 2,562 (from 2,562 extracted)  
+- **Difference**: +943 records (58% increase)
+- **Root cause**: Enrich phase is now processing **ALL records** instead of filtering some out
+
+### What This Means
+1. **The baseline was correct** - it was filtering out records that shouldn't be enriched
+2. **My changes broke the enrich phase** - now it processes records it shouldn't
+3. **This is a regression**, not an improvement
+4. **The "fix" created a bigger problem** than the original issue
+
+### Files Affected
+- `sotd/enrich/brush_enricher.py` - `_custom_knot` → `_user_override` refactor
+- `sotd/aggregate/aggregators/brush_specialized/knot_maker_aggregator.py` - removed filtering logic
+- Test data files - added proper `matched` structure
+
+### Lessons Learned
+1. **Never assume changes are improvements** - validate thoroughly
+2. **Pipeline validation is critical** - catches regressions that unit tests miss
+3. **Test data fixes can mask deeper issues** - the real problem was in enrich phase logic
+4. **Small changes can have cascading effects** - the `_custom_knot` refactor broke enrich filtering
+
+### Next Steps Required
+1. **Revert to last working commit** (e692f273) ✅ DONE
+2. **Investigate enrich phase filtering logic** more carefully
+3. **Make smaller, targeted changes** instead of broad refactoring
+4. **Validate each change** with full pipeline runs
+
+### Status
+- **Task 3**: ✅ COMPLETE (tests pass) but ❌ BROKE pipeline
+- **Need to revert and restart** with more cautious approach ✅ DONE
+
 ## Header Summary
 - **Total Tests**: 3,209
 - **Failures**: 35
