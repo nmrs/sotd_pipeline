@@ -10,9 +10,11 @@ def calculate_unique_users(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique users from records."""
     authors = set()
     for record in records:
-        author = record.get("author", "").strip()
-        if author:
-            authors.add(author)
+        author = record.get("author", "")
+        if author and author is not None:
+            author = author.strip()
+            if author:
+                authors.add(author)
     return len(authors)
 
 
@@ -80,7 +82,9 @@ def calculate_unique_razors(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique razors from records."""
     razors = set()
     for record in records:
-        razor = record.get("razor", {})
+        razor = record.get("razor")
+        if razor is None:
+            continue
         matched = razor.get("matched", {})
 
         # Skip if no matched razor data or no brand/model
@@ -101,7 +105,9 @@ def calculate_unique_blades(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique blades from records."""
     blades = set()
     for record in records:
-        blade = record.get("blade", {})
+        blade = record.get("blade")
+        if blade is None:
+            continue
         matched = blade.get("matched", {})
 
         # Skip if no matched blade data or no brand/model
@@ -122,7 +128,9 @@ def calculate_unique_brushes(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique brushes from records."""
     brushes = set()
     for record in records:
-        brush = record.get("brush", {})
+        brush = record.get("brush")
+        if brush is None:
+            continue
         matched = brush.get("matched", {})
 
         # Skip if no matched brush data or no brand/model
@@ -158,14 +166,31 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
         avg_shaves_per_user, unique_soaps, unique_brands, total_samples,
         unique_razors, unique_blades, and unique_brushes
     """
+    print("[DEBUG] Calculating total_shaves...")
     total_shaves = calculate_shaves(records)
+
+    print("[DEBUG] Calculating unique_shavers...")
     unique_shavers = calculate_unique_users(records)
+
+    print("[DEBUG] Calculating avg_shaves_per_user...")
     avg_shaves_per_user = calculate_avg_shaves_per_user(records)
+
+    print("[DEBUG] Calculating unique_soaps...")
     unique_soaps = calculate_unique_soaps(records)
+
+    print("[DEBUG] Calculating unique_brands...")
     unique_brands = calculate_unique_brands(records)
+
+    print("[DEBUG] Calculating total_samples...")
     total_samples = calculate_total_samples(records)
+
+    print("[DEBUG] Calculating unique_razors...")
     unique_razors = calculate_unique_razors(records)
+
+    print("[DEBUG] Calculating unique_blades...")
     unique_blades = calculate_unique_blades(records)
+
+    print("[DEBUG] Calculating unique_brushes...")
     unique_brushes = calculate_unique_brushes(records)
 
     return {

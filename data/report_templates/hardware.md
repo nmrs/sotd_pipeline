@@ -53,10 +53,6 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 {{tables.blades}}
 
-## Blade Manufacturers
-
-{{tables.blade-manufacturers}}
-
 ## Brushes
 
 {{tables.brushes}}

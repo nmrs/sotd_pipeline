@@ -2,89 +2,54 @@ from typing import Any, Dict, List
 
 import pandas as pd
 
+from ..base_aggregator import BaseAggregator
 
+
+class KnotMakerAggregator(BaseAggregator):
+    """Aggregator for brush knot maker data from enriched records."""
+
+    def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Extract knot maker data from records."""
+        maker_data = []
+        for record in records:
+            brush = record.get("brush")
+
+            # Skip if no brush data or brush is None
+            if not brush:
+                continue
+
+            matched = brush.get("matched")
+            enriched = brush.get("enriched")
+
+            # Ensure matched and enriched are dicts
+            matched = matched if isinstance(matched, dict) else {}
+            enriched = enriched if isinstance(enriched, dict) else {}
+
+            # Get brand (knot maker) from matched or enriched data
+            brand = matched.get("brand") or enriched.get("brand")
+
+            # Skip if no brand data
+            if not brand:
+                continue
+
+            author = record.get("author", "").strip()
+
+            if brand and author:
+                maker_data.append({"brand": brand, "author": author})
+
+        return maker_data
+
+    def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
+        """Create composite name from brand data."""
+        return df["brand"]
+
+    def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
+        """Get columns to use for grouping."""
+        return ["brand"]
+
+
+# Legacy function interface for backward compatibility
 def aggregate_knot_makers(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Aggregate brush knot maker data from enriched records.
-
-    Returns a list of knot maker aggregations sorted by shaves desc,
-    unique_users desc. Each item includes position field for delta calculations.
-
-    For custom knots (different fiber/size from catalog), skips the record
-    since the actual knot maker is unknown.
-
-    Args:
-        records: List of enriched comment records
-
-    Returns:
-        List of knot maker aggregations with position, brand, shaves,
-        and unique_users fields
-    """
-    if not records:
-        return []
-
-    # Extract knot maker data from records
-    knot_maker_data = []
-    for record in records:
-        brush = record.get("brush")
-
-        # Skip if no brush data or brush is None
-        if not brush:
-            continue
-
-        matched = brush.get("matched")
-        enriched = brush.get("enriched", {})
-
-        # Skip if no matched brush data
-        if not matched:
-            continue
-
-        # Get knot maker from knot section (all brushes have consistent handle/knot sections)
-        knot_section = matched.get("knot", {})
-        if not knot_section or not isinstance(knot_section, dict):
-            continue
-
-        brand = knot_section.get("brand")
-        if not brand:
-            continue
-
-        # Skip custom knots - we don't know the actual knot maker
-        if enriched.get("_custom_knot"):
-            continue
-
-        brand = brand.strip()
-        author = record.get("author", "").strip()
-
-        if brand and author:
-            knot_maker_data.append({"brand": brand, "author": author})
-
-    if not knot_maker_data:
-        return []
-
-    # Convert to DataFrame for efficient aggregation
-    df = pd.DataFrame(knot_maker_data)
-
-    # Group by brand (knot maker) and calculate metrics
-    grouped = df.groupby("brand").agg({"author": ["count", "nunique"]}).reset_index()
-
-    # Flatten column names
-    grouped.columns = ["brand", "shaves", "unique_users"]
-
-    # Sort by shaves desc, unique_users desc
-    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
-
-    # Add position field (1-based rank)
-    grouped["position"] = range(1, len(grouped) + 1)
-
-    # Convert to list of dictionaries
-    result = []
-    for _, row in grouped.iterrows():
-        result.append(
-            {
-                "position": int(row["position"]),
-                "brand": row["brand"],
-                "shaves": int(row["shaves"]),
-                "unique_users": int(row["unique_users"]),
-            }
-        )
-
-    return result
+    """Legacy function interface for backward compatibility."""
+    aggregator = KnotMakerAggregator()
+    return aggregator.aggregate(records)

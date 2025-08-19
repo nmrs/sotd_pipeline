@@ -19,6 +19,7 @@ from sotd.match.types import MatchResult
 from sotd.match.utils.performance import PerformanceMonitor
 from sotd.utils.filtered_entries import load_filtered_entries
 
+
 # Load filtered entries at module level for performance
 _filtered_entries_manager = None
 
@@ -121,7 +122,21 @@ def match_record(
             )
         else:
             razor_result = razor_matcher.match(normalized_text, result["razor"]["original"])
-            result["razor"] = razor_result
+            # Convert MatchResult to dict for consistency
+            if razor_result is not None:
+                result["razor"] = {
+                    "original": razor_result.original,
+                    "matched": razor_result.matched,
+                    "match_type": razor_result.match_type,
+                    "pattern": razor_result.pattern,
+                }
+            else:
+                result["razor"] = {
+                    "original": result["razor"]["original"],
+                    "matched": None,
+                    "match_type": None,
+                    "pattern": None,
+                }
         monitor.record_matcher_timing("razor", time.time() - start_time)
 
     if "blade" in result:
@@ -225,7 +240,21 @@ def match_record(
             )
         else:
             brush_result = brush_matcher.match(normalized_text)
-            result["brush"] = brush_result
+            # Convert MatchResult to dict for consistency
+            if brush_result is not None:
+                result["brush"] = {
+                    "original": brush_result.original,
+                    "matched": brush_result.matched,
+                    "match_type": brush_result.match_type,
+                    "pattern": brush_result.pattern,
+                }
+            else:
+                result["brush"] = {
+                    "original": result["brush"]["original"],
+                    "matched": None,
+                    "match_type": None,
+                    "pattern": None,
+                }
         monitor.record_matcher_timing("brush", time.time() - start_time)
 
     return result

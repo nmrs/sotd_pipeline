@@ -35,6 +35,10 @@ interface SoapNeighborSimilarityResult {
     pattern: string;
     comment_ids: string[];
     count: number;
+    matched?: {
+        maker: string;
+        scent: string;
+    };
 }
 
 interface NeighborSimilarityApiResponse {
@@ -277,6 +281,8 @@ const SoapAnalyzer: React.FC = () => {
             const searchTerm = filterText.toLowerCase();
             results = results.filter(result =>
                 result.entry.toLowerCase().includes(searchTerm) ||
+                (result.matched?.maker && result.matched.maker.toLowerCase().includes(searchTerm)) ||
+                (result.matched?.scent && result.matched.scent.toLowerCase().includes(searchTerm)) ||
                 (result.normalized_string && result.normalized_string.toLowerCase().includes(searchTerm)) ||
                 (result.pattern && result.pattern.toLowerCase().includes(searchTerm)) ||
                 (result.comment_ids && result.comment_ids.some(id => id.toLowerCase().includes(searchTerm)))
@@ -877,6 +883,7 @@ const SoapAnalyzer: React.FC = () => {
                                         <table className="w-full border-collapse border border-gray-300">
                                             <thead>
                                                 <tr className="bg-gray-50">
+                                                    <th className="border border-gray-300 px-3 py-2 text-left font-medium">Brand</th>
                                                     <th className="border border-gray-300 px-3 py-2 text-left font-medium">Scent</th>
                                                     <th className="border border-gray-300 px-3 py-2 text-left font-medium">Similarity to Above</th>
                                                     <th className="border border-gray-300 px-3 py-2 text-left font-medium">Similarity to Below</th>
@@ -886,53 +893,60 @@ const SoapAnalyzer: React.FC = () => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {filteredNeighborResults.map((result, index) => (
-                                                    <tr key={index} className="hover:bg-gray-50">
-                                                        <td className="border border-gray-300 px-3 py-2 font-medium">{result.entry}</td>
-                                                        <td className="border border-gray-300 px-3 py-2">
-                                                            {index > 0 ? (
-                                                                <Badge className={getNeighborSimilarityColor(result.similarity_to_above || 0)}>
-                                                                    {(result.similarity_to_above || 0).toFixed(3)}
-                                                                </Badge>
-                                                            ) : (
-                                                                <span className="text-gray-400">-</span>
-                                                            )}
-                                                        </td>
-                                                        <td className="border border-gray-300 px-3 py-2">
-                                                            {result.similarity_to_next !== null ? (
-                                                                <Badge className={getNeighborSimilarityColor(result.similarity_to_next)}>
-                                                                    {result.similarity_to_next.toFixed(3)}
-                                                                </Badge>
-                                                            ) : (
-                                                                <span className="text-gray-400">-</span>
-                                                            )}
-                                                        </td>
-                                                        <td className="border border-gray-300 px-3 py-2 text-sm text-gray-600">
-                                                            {result.normalized_string || result.entry.toLowerCase()}
-                                                        </td>
-                                                        <td className="border border-gray-300 px-3 py-2 text-sm text-gray-600">
-                                                            {result.pattern || '-'}
-                                                        </td>
-                                                        <td className="border border-gray-300 px-3 py-2 text-sm text-gray-600">
-                                                            {result.comment_ids ? (
-                                                                <div className="space-y-1">
-                                                                    {result.comment_ids.map((commentId, idIndex) => (
-                                                                        <button
-                                                                            key={idIndex}
-                                                                            onClick={() => handleCommentClick(commentId)}
-                                                                            className="block text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left"
-                                                                            disabled={commentLoading}
-                                                                        >
-                                                                            {commentId}
-                                                                        </button>
-                                                                    ))}
-                                                                </div>
-                                                            ) : (
-                                                                '-'
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                {filteredNeighborResults.map((result, index) => {
+                                                    // Use the matched data directly - no parsing needed
+                                                    const brand = result.matched?.maker || '-';
+                                                    const scent = result.matched?.scent || result.entry;
+
+                                                    return (
+                                                        <tr key={index} className="hover:bg-gray-50">
+                                                            <td className="border border-gray-300 px-3 py-2 font-medium">{brand}</td>
+                                                            <td className="border border-gray-300 px-3 py-2">{scent}</td>
+                                                            <td className="border border-gray-300 px-3 py-2">
+                                                                {index > 0 ? (
+                                                                    <Badge className={getNeighborSimilarityColor(result.similarity_to_above || 0)}>
+                                                                        {(result.similarity_to_above || 0).toFixed(3)}
+                                                                    </Badge>
+                                                                ) : (
+                                                                    <span className="text-gray-400">-</span>
+                                                                )}
+                                                            </td>
+                                                            <td className="border border-gray-300 px-3 py-2">
+                                                                {result.similarity_to_next !== null ? (
+                                                                    <Badge className={getNeighborSimilarityColor(result.similarity_to_next)}>
+                                                                        {result.similarity_to_next.toFixed(3)}
+                                                                    </Badge>
+                                                                ) : (
+                                                                    <span className="text-gray-400">-</span>
+                                                                )}
+                                                            </td>
+                                                            <td className="border border-gray-300 px-3 py-2 text-sm text-gray-600">
+                                                                {result.normalized_string || result.entry.toLowerCase()}
+                                                            </td>
+                                                            <td className="border border-gray-300 px-3 py-2 text-sm text-gray-600">
+                                                                {result.pattern || '-'}
+                                                            </td>
+                                                            <td className="border border-gray-300 px-3 py-2 text-sm text-gray-600">
+                                                                {result.comment_ids ? (
+                                                                    <div className="space-y-1">
+                                                                        {result.comment_ids.map((commentId, idIndex) => (
+                                                                            <button
+                                                                                key={idIndex}
+                                                                                onClick={() => handleCommentClick(commentId)}
+                                                                                className="block text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left"
+                                                                                disabled={commentLoading}
+                                                                            >
+                                                                                {commentId}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                ) : (
+                                                                    '-'
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
                                     </div>

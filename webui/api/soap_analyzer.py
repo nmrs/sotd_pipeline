@@ -553,6 +553,15 @@ def analyze_soap_neighbor_similarity_web(
         pattern = first_match.get("pattern", current["entry"])
         normalized_string = first_match.get("normalized", current["normalized_string"])
 
+        # Extract matched data from the first occurrence for consistent display
+        first_match = current["original_matches"][0]
+        matched_data = None
+        if "matched" in first_match and first_match["matched"]:
+            matched_data = {
+                "maker": first_match["matched"].get("maker", ""),
+                "scent": first_match["matched"].get("scent", ""),
+            }
+
         results.append(
             {
                 "entry": current["entry"],
@@ -562,6 +571,7 @@ def analyze_soap_neighbor_similarity_web(
                 "pattern": pattern,
                 "comment_ids": current["comment_ids"],
                 "count": current["count"],
+                "matched": matched_data,
             }
         )
 

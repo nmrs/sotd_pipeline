@@ -71,7 +71,7 @@ def normalize_fields(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         normalized_record = record.copy()
 
         # Normalize author field
-        if "author" in normalized_record:
+        if "author" in normalized_record and normalized_record["author"] is not None:
             normalized_record["author"] = normalized_record["author"].strip()
 
         # Normalize product fields
@@ -129,14 +129,11 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
     # Generate metadata
     meta = calculate_metadata(records, month)
 
-    # Run all aggregators with minimal debug output
+    # Run all aggregators
     aggregated_data = {
         "meta": meta,
         "data": {},
     }
-
-    if debug:
-        print("[DEBUG] Running 33 aggregators...")
 
     # Core product aggregations
     aggregated_data["data"]["razors"] = aggregate_razors(records)

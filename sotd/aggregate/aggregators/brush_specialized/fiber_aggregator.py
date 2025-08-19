@@ -2,86 +2,54 @@ from typing import Any, Dict, List
 
 import pandas as pd
 
+from ..base_aggregator import BaseAggregator
 
+
+class FiberAggregator(BaseAggregator):
+    """Aggregator for brush fiber data from enriched records."""
+
+    def _extract_data(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Extract fiber data from records."""
+        fiber_data = []
+        for record in records:
+            brush = record.get("brush")
+
+            # Skip if no brush data or brush is None
+            if not brush:
+                continue
+
+            matched = brush.get("matched")
+            enriched = brush.get("enriched")
+
+            # Ensure matched and enriched are dicts
+            matched = matched if isinstance(matched, dict) else {}
+            enriched = enriched if isinstance(enriched, dict) else {}
+
+            # Get fiber from matched or enriched data
+            fiber = matched.get("fiber") or enriched.get("fiber")
+
+            # Skip if no fiber data
+            if not fiber:
+                continue
+
+            author = record.get("author", "").strip()
+
+            if fiber and author:
+                fiber_data.append({"fiber": fiber, "author": author})
+
+        return fiber_data
+
+    def _create_composite_name(self, df: pd.DataFrame) -> pd.Series:
+        """Create composite name from fiber data."""
+        return df["fiber"]
+
+    def _get_group_columns(self, df: pd.DataFrame) -> List[str]:
+        """Get columns to use for grouping."""
+        return ["fiber"]
+
+
+# Legacy function interface for backward compatibility
 def aggregate_fibers(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Aggregate brush fiber data from enriched records.
-
-    Returns a list of fiber aggregations sorted by shaves desc,
-    unique_users desc. Each item includes position field for delta calculations.
-    Uses brush.matched.knot.fiber with fallback to brush.enriched.fiber.
-
-    Args:
-        records: List of enriched comment records
-
-    Returns:
-        List of fiber aggregations with position, fiber, shaves,
-        and unique_users fields
-    """
-    if not records:
-        return []
-
-    # Extract fiber data from records
-    fiber_data = []
-    for record in records:
-        brush = record.get("brush")
-
-        # Skip if no brush data or brush is None
-        if not brush:
-            continue
-
-        matched = brush.get("matched")
-        enriched = brush.get("enriched")
-
-        # Ensure matched and enriched are dicts
-        matched = matched if isinstance(matched, dict) else {}
-        enriched = enriched if isinstance(enriched, dict) else {}
-
-        # Get fiber from knot section (all brushes have consistent handle/knot sections)
-        knot_section = matched.get("knot", {})
-        fiber = None
-
-        if knot_section and isinstance(knot_section, dict):
-            # Try knot.fiber first, then fallback to enriched.fiber
-            fiber = knot_section.get("fiber") or enriched.get("fiber")
-
-        # Skip if no fiber data
-        if not fiber:
-            continue
-
-        fiber = fiber.strip()
-        author = record.get("author", "").strip()
-
-        if fiber and author:
-            fiber_data.append({"fiber": fiber, "author": author})
-
-    if not fiber_data:
-        return []
-
-    # Convert to DataFrame for efficient aggregation
-    df = pd.DataFrame(fiber_data)
-
-    # Group by fiber and calculate metrics
-    grouped = df.groupby("fiber").agg({"author": ["count", "nunique"]}).reset_index()
-
-    # Flatten column names
-    grouped.columns = ["fiber", "shaves", "unique_users"]
-
-    # Sort by shaves desc, unique_users desc
-    grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
-
-    # Add position field (1-based rank)
-    grouped["position"] = range(1, len(grouped) + 1)
-
-    # Convert to list of dictionaries
-    result = []
-    for _, row in grouped.iterrows():
-        result.append(
-            {
-                "position": int(row["position"]),
-                "fiber": row["fiber"],
-                "shaves": int(row["shaves"]),
-                "unique_users": int(row["unique_users"]),
-            }
-        )
-
-    return result
+    """Legacy function interface for backward compatibility."""
+    aggregator = FiberAggregator()
+    return aggregator.aggregate(records)

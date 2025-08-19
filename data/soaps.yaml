@@ -77,6 +77,9 @@ Aion Skincare:
     Mallard Tonka:
       patterns:
         - mallard tonka
+    Mallard Peaches and Cream:
+      patterns:
+        - aion.*peaches
     Raspberry Gateau:
       patterns:
         - raspb?erry gateau
@@ -148,7 +151,7 @@ Ariana & Evans:
         - arian+a?.*london
     Matcha Tea:
       patterns:
-        - arian.*matcha tea
+        - matcha tea
     Maullu:
       patterns:
         - \bmaullu\b
@@ -173,6 +176,37 @@ Ariana & Evans:
     Sylvan Fog:
       patterns:
         - sylvan fog
+    The Club - Boca Negra:
+      patterns:
+        - (ariana|a&e|club).*boca
+    The Club - Boo!!:
+      patterns:
+        - (ariana|a&e|club).*boo
+    The Club - Dirty Ginger:
+      patterns:
+        - (ariana|a&e|club).*ginger
+    The Club - Fruit de la Passion:
+      patterns:
+        - (ariana|a&e|club).*passion
+    The Club - Khalifa:
+      patterns:
+        - (ariana|a&e|club).*khalifa
+    The Club - Low Scent Skeleton:
+      patterns:
+        - (ariana|a&e|club).*skele
+    The Club - Signature:
+      patterns:
+        - (aria na|a&e|club).*signat
+    The Club - The Graveyand:
+      patterns:
+        - (ariana|a&e|club).*grave
+    The Club - Vanille Vendetta:
+      patterns:
+        - (ariana|a&e|club).*vanil
+    The Undersea:
+      patterns:
+        - undersea
+        - (ariana|a&e).*under.*sea
 Arko:
   patterns:
     - '\barko+\b'
@@ -185,7 +219,7 @@ Arsenal Grooming:
     - arsenal grooming
 Art of Shaving:
   patterns:
-    - art of shaving
+    - (?:the )?art of shaving
     - '\baos\b'
   scents:
     Oud:
@@ -205,7 +239,7 @@ Asylum Shave Works:
 Australian Private Reserve:
   patterns:
     - '\bapr\b'
-    - australian private res\w+\b
+    - aus\w+lian private res\w+\b
   scents:
     Coeur de Vert:
       patterns:
@@ -278,6 +312,9 @@ Barrister and Mann:
     "42":
       patterns:
         - '\b42\b'
+    Adagio:
+      patterns:
+        - bar.*man.*adagio
     Adumbrare:
       patterns:
         - adumbrare
@@ -2446,6 +2483,9 @@ RazoRock:
     Mudder Focker:
       patterns:
         - razorock.*mudder focker
+    Lime Burst:
+      patterns:
+        - razorock.*what.*lime
     XXX:
       patterns:
         - 'razorock.*\bxxx\b'
@@ -3029,7 +3069,7 @@ Talbot Shaving:
         - winter.*refraction
 Talent Soap Factory:
   patterns:
-    - talent soap( factory)?
+    - "talent(?: soap)?(?: factory)?"
     - '^\W*tsf\b'
     - '\bt\.?s\.?f\.?'
   scents:
@@ -3067,6 +3107,9 @@ Talent Soap Factory:
     Slow Dancing in the Dark:
       patterns:
         - slow dancing.*dark
+    Switchback:
+      patterns:
+        - talent.*switch ?back
     Toki:
       patterns:
         - talent.*toki
@@ -3169,37 +3212,6 @@ The Butterfly Garden:
 The Cajun Blade:
   patterns:
     - "(?:the )?cajun blade"
-The Club:
-  patterns:
-    - the club
-  scents:
-    Boca Negra:
-      patterns:
-        - club.*boca
-    Boo!!:
-      patterns:
-        - club.*boo
-    Dirty Ginger:
-      patterns:
-        - club.*ginger
-    Fruit de la Passion:
-      patterns:
-        - club.*passion
-    Khalifa:
-      patterns:
-        - khalifa
-    Low Scent Skeleton:
-      patterns:
-        - club.*skele
-    Signature:
-      patterns:
-        - club.*signat
-    The Graveyand:
-      patterns:
-        - club.*grave
-    Vanille Vendetta:
-      patterns:
-        - club.*vanil
 The Gentlemen's Groom Room:
   patterns:
     - gentle.*groom room
@@ -3242,13 +3254,16 @@ The Holy Black:
 The Los Angeles Shaving Soap Company:
   patterns:
     - "^(the )?los angeles( shaving soap (company|co.?)?)?"
-    - "l.?a.? shaving soap co.?"
+    - "l.?a.?(?: shaving soap)? co.?"
     - lassco
   scents:
     Blackfern:
       patterns:
         - "los angeles.*black ?fern"
         - "l.?a.?.*black ?fern"
+    Topanga Fougère:
+      patterns:
+        - topanga foug
 The Razor Company:
   patterns:
     - the razor company
@@ -3311,6 +3326,9 @@ Van Der Hagen:
       patterns:
         - van der hag(a|e)n.*luxury
         - '^\W*vdh\b.*luxury'
+    Whiskey Tobacco:
+      patterns:
+        - whiske?y.*tobac+o
 Van Yulay:
   patterns:
     - van yulay
@@ -3456,7 +3474,7 @@ Wholly Kaw:
         - '\bkaw\b.*merchant'
     Noce di Cocco:
       patterns:
-        - wholly.*noce
+        - wholly.*\bnoc[ei]\b
     Valentynka:
       patterns:
         - valentynka
@@ -3474,6 +3492,10 @@ Wickham Soap Co.:
 Wild Stone:
   patterns:
     - wild stone
+  scents:
+    Hydra Energy:
+      patterns:
+        - wild stone.*hydra
 Wilkinson Sword:
   patterns:
     - wilk.*sword
@@ -3490,11 +3512,14 @@ Williams:
         - "william'?s.*tonso"
 Wooly Wash Soapery:
   patterns:
-    - wooly wash
+    - "wool+y wash(?: soapery)?"
   scents:
-    Outbacl:
+    Outback:
       patterns:
-        - wooly wash.*outback
+        - wool+y wash.*outback
+    Tranquil:
+      patterns:
+        - wool+y.*tranq
 Xabons Xavieiro:
   patterns:
     - xabons xavieiro

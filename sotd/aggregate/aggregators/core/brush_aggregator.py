@@ -74,7 +74,7 @@ class BrushAggregator(BaseAggregator):
             brand = brand.strip() if brand else ""
             model = model.strip() if model else ""
             fiber = fiber.strip() if fiber else ""
-            author = author.strip() if author else ""
+            author = author.strip() if author and author is not None else ""
 
             if brand and model and fiber and author:
                 brush_data.append(

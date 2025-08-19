@@ -399,11 +399,20 @@ class BaseTableGenerator(ABC):
         }
         df = df.rename(columns=column_renames)  # pyright: ignore[reportCallIssue]
 
-        # Sort by the first numeric column (usually count/usage)
+        # Sort by shaves desc, then unique_users desc for consistent table ordering
         numeric_columns = list(df.select_dtypes(include=["number"]).columns)
         if len(numeric_columns) > 0:
-            sort_column = numeric_columns[0]
-            df = df.sort_values(by=[sort_column], ascending=False)
+            # Sort by shaves first, then unique_users as tie-breaker
+            sort_columns = []
+            if "shaves" in df.columns:
+                sort_columns.append("shaves")
+            if "unique_users" in df.columns and len(sort_columns) > 0:
+                sort_columns.append("unique_users")
+
+            if sort_columns:
+                df = df.sort_values(by=sort_columns, ascending=[False] * len(sort_columns))
+                if self.debug:
+                    print(f"[DEBUG] Applied sorting by {sort_columns} for {self.get_table_title()}")
 
         # Handle tie-breaking for max_rows
         if len(df) > max_rows:

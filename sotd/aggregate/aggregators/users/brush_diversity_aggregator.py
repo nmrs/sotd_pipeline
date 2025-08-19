@@ -15,7 +15,9 @@ class BrushDiversityAggregator(BaseAggregator):
         extracted = []
 
         for record in records:
-            brush_data = record.get("brush", {})
+            brush_data = record.get("brush")
+            if brush_data is None or not isinstance(brush_data, dict):
+                continue
             matched = brush_data.get("matched", {})
 
             # Skip records without matched brush data
@@ -106,9 +108,7 @@ class BrushDiversityAggregator(BaseAggregator):
     def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
         """Sort grouped data and add position rankings."""
         grouped = grouped.sort_values(["unique_brushes", "total_shaves"], ascending=[False, False])
-        grouped = grouped.reset_index(drop=True).assign(
-            position=lambda df: range(1, len(df) + 1)
-        )  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(position=lambda df: range(1, len(df) + 1))  # type: ignore
 
         result = []
         for _, row in grouped.iterrows():
