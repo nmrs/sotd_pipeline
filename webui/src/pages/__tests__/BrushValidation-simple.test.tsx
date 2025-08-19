@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import BrushValidation from '../BrushValidation';
 import * as api from '../../services/api';
@@ -99,28 +99,21 @@ describe('BrushValidation', () => {
       success: true,
       message: 'Action recorded successfully',
     });
-    mockApi.getCommentDetail.mockResolvedValue({
-      id: '1',
-      author: 'test_user',
-      body: 'Test comment',
-      created_utc: '2025-01-01T00:00:00Z',
-      thread_id: 'test_thread',
-      thread_title: 'Test Thread',
-      url: 'https://reddit.com/test',
-    });
   });
 
-  it('loads available months on mount', async () => {
-    render(<BrushValidation />);
-
-    // Verify that months are available in the MonthSelector
-    await waitFor(() => {
-      expect(screen.getByText('Select a month')).toBeInTheDocument();
+  it('renders brush validation page', async () => {
+    await act(async () => {
+      render(<BrushValidation />);
     });
+
+    expect(screen.getByText('Brush Validation')).toBeInTheDocument();
+    expect(screen.getByText('Select a month')).toBeInTheDocument();
   });
 
-  it('loads validation data when month is selected', async () => {
-    render(<BrushValidation />);
+  it('loads and displays brush validation data', async () => {
+    await act(async () => {
+      render(<BrushValidation />);
+    });
 
     // Verify that months are available
     await waitFor(() => {
@@ -129,43 +122,17 @@ describe('BrushValidation', () => {
 
     // Click on the month selector button to open dropdown
     const monthButton = screen.getByText('Select a month');
-    fireEvent.click(monthButton);
+    await act(async () => {
+      fireEvent.click(monthButton);
+    });
 
     // Select a month
     const monthOption = screen.getByText('2025-01');
-    fireEvent.click(monthOption);
-
-    // Wait for data to load and verify display
-    await waitFor(() => {
-      expect(mockApi.getBrushValidationData).toHaveBeenCalledWith('2025-01', 'scoring', {
-        page: 1,
-        pageSize: 20,
-        sortBy: 'unvalidated',
-        // New backend filtering parameters (intentional improvement)
-        strategyCount: undefined,
-        showSingleStrategy: undefined,
-        showMultipleStrategy: undefined
-      });
-    });
-  });
-
-  it('displays validation entries correctly', async () => {
-    render(<BrushValidation />);
-
-    // Verify that months are available
-    await waitFor(() => {
-      expect(screen.getByText('Select a month')).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(monthOption);
     });
 
-    // Click on the month selector button to open dropdown
-    const monthButton = screen.getByText('Select a month');
-    fireEvent.click(monthButton);
-
-    // Select a month
-    const monthOption = screen.getByText('2025-01');
-    fireEvent.click(monthOption);
-
-    // Wait for initial data load
+    // Wait for data to load
     await waitFor(() => {
       expect(mockApi.getBrushValidationData).toHaveBeenCalledWith('2025-01', 'scoring', {
         page: 1,
@@ -178,13 +145,17 @@ describe('BrushValidation', () => {
       });
     });
 
-    // Verify that entries are displayed
-    expect(screen.getByText('Test Brush 1')).toBeInTheDocument();
-    expect(screen.getByText('Test Brush 2')).toBeInTheDocument();
+    // Verify that the data is displayed
+    await waitFor(() => {
+      expect(screen.getByText('Test Brush 1')).toBeInTheDocument();
+      expect(screen.getByText('Test Brush 2')).toBeInTheDocument();
+    });
   });
 
-  it('handles validation action recording', async () => {
-    render(<BrushValidation />);
+  it('handles validate action recording', async () => {
+    await act(async () => {
+      render(<BrushValidation />);
+    });
 
     // Verify that months are available
     await waitFor(() => {
@@ -193,11 +164,15 @@ describe('BrushValidation', () => {
 
     // Click on the month selector button to open dropdown
     const monthButton = screen.getByText('Select a month');
-    fireEvent.click(monthButton);
+    await act(async () => {
+      fireEvent.click(monthButton);
+    });
 
     // Select a month
     const monthOption = screen.getByText('2025-01');
-    fireEvent.click(monthOption);
+    await act(async () => {
+      fireEvent.click(monthOption);
+    });
 
     // Wait for data to load
     await waitFor(() => {
@@ -215,7 +190,9 @@ describe('BrushValidation', () => {
     // Find and click the validate button for the first entry
     const validateButtons = screen.getAllByText('Validate');
     if (validateButtons.length > 0) {
-      await userEvent.click(validateButtons[0]);
+      await act(async () => {
+        await userEvent.click(validateButtons[0]);
+      });
 
       // Verify the API was called
       expect(mockApi.recordBrushValidationAction).toHaveBeenCalledWith({
@@ -228,7 +205,9 @@ describe('BrushValidation', () => {
   });
 
   it('handles override action recording', async () => {
-    render(<BrushValidation />);
+    await act(async () => {
+      render(<BrushValidation />);
+    });
 
     // Verify that months are available
     await waitFor(() => {
@@ -237,11 +216,15 @@ describe('BrushValidation', () => {
 
     // Click on the month selector button to open dropdown
     const monthButton = screen.getByText('Select a month');
-    fireEvent.click(monthButton);
+    await act(async () => {
+      fireEvent.click(monthButton);
+    });
 
     // Select a month
     const monthOption = screen.getByText('2025-01');
-    fireEvent.click(monthOption);
+    await act(async () => {
+      fireEvent.click(monthOption);
+    });
 
     // Wait for data to load
     await waitFor(() => {
@@ -259,7 +242,9 @@ describe('BrushValidation', () => {
     // Find and click the override button for the second entry
     const overrideButtons = screen.getAllByText('Override');
     if (overrideButtons.length > 0) {
-      fireEvent.click(overrideButtons[1]);
+      await act(async () => {
+        fireEvent.click(overrideButtons[1]);
+      });
 
       // Wait for override state to be set and UI to update
       await waitFor(() => {
@@ -268,7 +253,9 @@ describe('BrushValidation', () => {
 
       // Now click confirm override to complete the override action
       const confirmOverrideButton = screen.getByText('Confirm Override');
-      fireEvent.click(confirmOverrideButton);
+      await act(async () => {
+        fireEvent.click(confirmOverrideButton);
+      });
 
       // Wait for the API call to be made
       await waitFor(() => {
@@ -282,12 +269,4 @@ describe('BrushValidation', () => {
       });
     }
   });
-
-
-
-
-
-
-
-
 });
