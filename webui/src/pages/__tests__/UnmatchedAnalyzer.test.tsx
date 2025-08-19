@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 
 // Mock the API calls
 jest.mock('../../services/api', () => ({
@@ -59,7 +59,9 @@ describe('UnmatchedAnalyzer Integration Tests', () => {
   });
 
   test('should display brush data correctly in standard table format', async () => {
-    render(<UnmatchedAnalyzer />);
+    await act(async () => {
+      render(<UnmatchedAnalyzer />);
+    });
 
     // Wait for months to load
     await waitFor(() => {
@@ -107,7 +109,9 @@ describe('UnmatchedAnalyzer Integration Tests', () => {
   });
 
   test('should render brush field when selected', async () => {
-    render(<UnmatchedAnalyzer />);
+    await act(async () => {
+      render(<UnmatchedAnalyzer />);
+    });
 
     // Select brush field from dropdown
     const fieldSelect = screen.getByRole('combobox');
