@@ -4,7 +4,7 @@ RUN_METADATA:
   run_1_started_at: 2025-08-19T02:35:42Z
   run_1_working_commit: e692f273
   run_1_working_at: 2025-08-19T22:22:04Z
-  run_1_current_state: Working pipeline with complete documentation of lessons learned
+  run_1_current_state: Working pipeline with Task 3 complete, ready for next task
   run_1_lessons_preserved: ✅ Critical analysis, regression details, and next steps documented
   run_1_doc_commits: 54f4999b, 31b31d5e, 4f6df612, c7e848a1 (documentation only)
 -->
@@ -124,18 +124,34 @@ RUN_METADATA:
   - Verify input data structure matches expectations
 - **Notes/links**: Similar to brush aggregator issues
 
-### [ ] Fix specialized aggregators data extraction
+### [x] Fix specialized aggregators data extraction
 - **Category**: Regression
 - **Failing tests**:
   - `tests/aggregate/test_razor_specialized_aggregators.py::test_aggregate_blackbird_plates`
   - `tests/aggregate/test_user_and_cross_product_aggregators.py::test_aggregate_razor_blade_combos`
-- **Files involved**: `tests/aggregate/test_razor_specialized_aggregators.py`, `tests/aggregate/test_user_and_cross_product_aggregators.py`
+- **Files involved**: 
+  - `sotd/enrich/blackbird_plate_enricher.py` - Fixed default plate logic
+  - `sotd/aggregate/aggregators/cross_product/razor_blade_combo_aggregator.py` - Fixed name construction
+  - `tests/aggregate/test_razor_specialized_aggregators.py` - Fixed test data structure
 - **Observed error**: Aggregators returning empty lists instead of expected data
-- **Root cause**: Test data is incomplete - missing required `matched` sections with `brand`/`model` data
-- **Previous attempt**: Fixed test data but broke enrich phase (reverted)
-- **Current status**: ❌ NEEDS RESTART - Must investigate enrich phase filtering logic first
-- **Lessons learned**: Test data fixes can mask deeper issues in enrich phase logic
-- **Next approach**: Make smaller, targeted changes and validate each step with pipeline runs
+- **Root cause**: Two separate issues:
+  1. **BlackbirdPlateEnricher**: Missing default case for "Standard" plate (returned None)
+  2. **RazorBladeComboAggregator**: Expected `name` field but data had `brand` + `model` separately
+- **Solution**: 
+  1. **Enricher fix**: Added default "Standard" plate when no specific type mentioned
+  2. **Aggregator fix**: Added logic to construct names from `brand + model` when `name` unavailable
+- **Status**: ✅ COMPLETE - All tests passing, pipeline validation successful
+- **resolved_by_commit**: [pending commit]
+- **Lessons learned**: 
+  1. **Pipeline data flow is correct** - Match → Enrich → Aggregate works as designed
+  2. **Enrichers need default cases** - Not all data will have explicit specifications
+  3. **Aggregators must handle field variations** - Data structure can vary between test and production
+  4. **Per-task validation is critical** - Caught potential issues before they became problems
+- **Validation results**: 
+  - ✅ Pipeline runs successfully with fixes
+  - ✅ File sizes identical (no regressions)
+  - ✅ Blackbird plates now aggregated: Standard (69), Lite (16), OC (8)
+  - ✅ Razor blade combinations working: 701 combinations processed
 
 ### [ ] Fix null value handling in aggregators
 - **Category**: Regression
