@@ -85,10 +85,10 @@ class BaseAggregator(ABC):
         # Group by columns and calculate metrics
         grouped = df.groupby(group_columns).agg({"author": ["count", "nunique"]}).reset_index()
 
-        # Flatten column names
+        # Flatten column names - preserve original column names
         if len(group_columns) == 1:
-            # Single grouping column (name only)
-            grouped.columns = ["name", "shaves", "unique_users"]
+            # Single grouping column - preserve original name
+            grouped.columns = list(group_columns) + ["shaves", "unique_users"]
         else:
             # Multiple grouping columns
             grouped.columns = list(group_columns) + ["shaves", "unique_users"]

@@ -25,8 +25,16 @@ class HandleMakerAggregator(BaseAggregator):
             matched = matched if isinstance(matched, dict) else {}
             enriched = enriched if isinstance(enriched, dict) else {}
 
-            # Get handle maker from matched or enriched data
-            handle_maker = matched.get("handle_maker") or enriched.get("handle_maker")
+            # Get handle maker from matched.handle.brand (handle_maker field is deprecated)
+            handle = matched.get("handle", {})
+            if isinstance(handle, dict):
+                handle_maker = handle.get("brand")
+            else:
+                handle_maker = None
+
+            # Fallback to enriched data if available
+            if not handle_maker and enriched:
+                handle_maker = enriched.get("handle_maker")
 
             # Skip if no handle maker data
             if not handle_maker:

@@ -32,23 +32,27 @@ Work through `TEST_SUITE_TODO.md` one task at a time. For each task: ensure a cl
 
 ## Files to Back Up / Compare
 
-files:
-  - data/extracted/2025-06.json
-  - data/extracted/2025-07.json
-  - data/matched/2025-06.json
-  - data/matched/2025-07.json
-  - data/enriched/2025-06.json
-  - data/enriched/2025-07.json
-  - data/aggregated/2025-06.json
-  - data/aggregated/2025-07.json
-  - data/reports/2025-06-hardware.json
-  - data/reports/2025-06-software.json
-  - data/reports/2025-06-hardware.json
-  - data/reports/2025-06-software.json
+**IMPORTANT**: Multiple phases produce files with the same names (e.g., `2025-06.json`), so copy with unique prefixes to avoid overwrites.
 
-Store in `.ab_backups/`:
-- `.ab_backups/baseline_<timestamp>/`
-- `.ab_backups/task_<index>_<slug>_<timestamp>/`
+**Required files to backup:**
+- `data/extracted/2025-06.json` → `extracted_2025-06.json`
+- `data/extracted/2025-07.json` → `extracted_2025-07.json`
+- `data/matched/2025-06.json` → `matched_2025-06.json`
+- `data/matched/2025-07.json` → `matched_2025-07.json`
+- `data/enriched/2025-06.json` → `enriched_2025-06.json`
+- `data/enriched/2025-07.json` → `enriched_2025-07.json`
+- `data/aggregated/2025-06.json` → `aggregated_2025-06.json`
+- `data/aggregated/2025-07.json` → `aggregated_2025-07.json`
+- `data/reports/2025-06-hardware.md` → `report_2025-06-hardware.md`
+- `data/reports/2025-06-software.md` → `report_2025-06-software.md`
+- `data/reports/2025-07-hardware.md` → `report_2025-07-hardware.md`
+- `data/reports/2025-07-software.md` → `report_2025-07-software.md`
+
+**Total**: 12 files (8 JSON + 4 MD)
+
+**Backup directory structure:**
+- `.ab_backups/baseline_<timestamp>/` - Initial baseline snapshot
+- `.ab_backups/task_<index>_<slug>_<timestamp>/` - Per-task snapshots
 
 ---
 
@@ -58,6 +62,11 @@ Store in `.ab_backups/`:
 - Ignore the entire top-level key/section `"metadata"` (and its contents).
 - All other keys and values must be **byte-for-byte identical** between baseline and post-fix snapshots.
 - If `"metadata"` is missing in one file and present in the other, strip it before comparing.
+
+**Note**: When comparing files, use the unique names from the backup directories:
+- `extracted_2025-06.json` vs `extracted_2025-06.json`
+- `matched_2025-06.json` vs `matched_2025-06.json`
+- etc.
 
 ---
 
@@ -69,12 +78,32 @@ Store in `.ab_backups/`:
 
        python run.py extract:report --range 2025-06:2025-07 --force
 
-2. Copy the 10 files into `.ab_backups/baseline_<timestamp>/`
+2. Copy the 12 files into `.ab_backups/baseline_<timestamp>/` with unique names:
+
+       cp data/extracted/2025-06.json .ab_backups/baseline_<timestamp>/extracted_2025-06.json
+       cp data/extracted/2025-07.json .ab_backups/baseline_<timestamp>/extracted_2025-07.json
+       cp data/matched/2025-06.json .ab_backups/baseline_<timestamp>/matched_2025-06.json
+       cp data/matched/2025-07.json .ab_backups/baseline_<timestamp>/matched_2025-07.json
+       cp data/enriched/2025-06.json .ab_backups/baseline_<timestamp>/enriched_2025-06.json
+       cp data/enriched/2025-07.json .ab_backups/baseline_<timestamp>/enriched_2025-07.json
+       cp data/aggregated/2025-06.json .ab_backups/baseline_<timestamp>/aggregated_2025-06.json
+       cp data/aggregated/2025-07.json .ab_backups/baseline_<timestamp>/aggregated_2025-07.json
+       cp data/reports/2025-06-hardware.md .ab_backups/baseline_<timestamp>/report_2025-06-hardware.md
+       cp data/reports/2025-06-software.md .ab_backups/baseline_<timestamp>/report_2025-06-software.md
+       cp data/reports/2025-07-hardware.md .ab_backups/baseline_<timestamp>/report_2025-07-hardware.md
+       cp data/reports/2025-07-software.md .ab_backups/baseline_<timestamp>/report_2025-07-software.md
+
 3. Confirm snapshot to user.
 
 ---
 
 ### B. Task Loop
+
+**⚠️ CRITICAL: Every Task Requires the COMPLETE Pipeline Re-Run and Validation Process**
+
+**DO NOT skip the pipeline re-run and comparison for any task.**
+**This is a safety mechanism to catch unintended side effects.**
+**Even small code changes can affect pipeline output.**
 
 For each unchecked task in `TEST_SUITE_TODO.md`:
 
@@ -84,29 +113,32 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
 2. **Implement fix**
    - Apply minimal changes for this task.
 
-3. **Re-run extraction**
+3. **MANDATORY: Re-run extraction pipeline**
+   - **ALWAYS** run: `python run.py extract:report --range 2025-06:2025-07 --force`
+   - This validates that your fix doesn't break the pipeline or change other outputs
+   - **NEVER skip this step, even for simple fixes**
 
-       python run.py extract:report --range 2025-06:2025-07 --force
-
-4. **Backup post-fix outputs**
+4. **MANDATORY: Backup post-fix outputs**
    - Copy files into `.ab_backups/task_<index>_<slug>_<timestamp>/`
+   - Use the same 12 files with unique names as baseline backup
 
-5. **Compare against baseline**
+5. **MANDATORY: Compare against baseline**
    - Ignore only the `"metadata"` sections.  
-   - Expected result: identical.
+   - Expected result: identical (your fix should not change any other data)
+   - **This comparison is the safety check - don't skip it**
 
-6. **Branch**
+6. **Branch based on comparison results**
    - **If non-identical (outside `metadata`):**  
      - Summarize differences:
        - Which files differ
        - Keypaths and value changes
        - Example snippets  
-     - **Stop and wait for user direction.**
+     - **STOP and wait for user direction.**
    - **If identical:**  
      - Check off task.  
      - Commit (`git add -A && git commit -m "Close TODO: <task title>"`).  
      - Append `resolved_by_commit: <hash>` to task notes.  
-     - Continue.
+     - **Continue to next task** (only after successful validation and commit)
 
 ---
 
@@ -115,3 +147,41 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
 - All tasks checked off, or halted awaiting user input.  
 - `TEST_SUITE_TODO.md` shows global `start_commit` and per-task `start_hash` / `resolved_by_commit`.  
 - `.ab_backups/` contains a baseline and per-task snapshots for reproducibility.
+
+---
+
+## ⚠️ REMINDER: Validation is NOT Optional
+
+**Every single task must complete the full validation cycle:**
+1. Fix the code
+2. Re-run the pipeline  
+3. Backup the outputs
+4. Compare against baseline
+5. Only continue if identical
+
+**This is the core safety mechanism of the script.**
+**Skipping validation defeats the entire purpose.**
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+1. **File count mismatch**: Ensure you're copying 12 files, not 10. Multiple phases produce files with the same names.
+
+2. **Files overwriting each other**: Use unique prefixes when copying:
+   - `extracted_2025-06.json` (not just `2025-06.json`)
+   - `matched_2025-06.json` (not just `2025-06.json`)
+   - etc.
+
+3. **Missing files**: Verify all required files exist before copying:
+   ```bash
+   ls -la data/extracted/2025-06.json data/extracted/2025-07.json data/matched/2025-06.json data/matched/2025-07.json data/enriched/2025-06.json data/enriched/2025-07.json data/aggregated/2025-06.json data/aggregated/2025-07.json data/reports/2025-06-hardware.md data/reports/2025-06-software.md data/reports/2025-07-hardware.md data/reports/2025-07-software.md
+   ```
+
+4. **Backup verification**: Always verify backup count matches expected:
+   ```bash
+   ls -la .ab_backups/baseline_<timestamp>/ | grep -E "\.(json|md)$" | wc -l
+   # Should return 12
+   ```

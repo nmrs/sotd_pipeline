@@ -80,8 +80,8 @@ def test_aggregate_knot_sizes():
     assert result[1]["position"] == 2
 
 
-def test_aggregate_knot_makers_skips_custom_knots():
-    """Test that custom knots are skipped in knot maker aggregation."""
+def test_aggregate_knot_makers_includes_user_overrides():
+    """Test that user overrides are included in knot maker aggregation."""
     records = [
         {
             "author": "user1",
@@ -95,8 +95,8 @@ def test_aggregate_knot_makers_skips_custom_knots():
                     }
                 },
                 "enriched": {
-                    "_custom_knot": True,
-                    "_custom_knot_reason": ["fiber_mismatch:Badger->Boar"],
+                    "_user_override": True,
+                    "_user_override_reason": ["fiber_mismatch:Badger->Boar"],
                     "fiber": "Boar",
                     "knot_size_mm": 28.0,
                 },
@@ -114,7 +114,7 @@ def test_aggregate_knot_makers_skips_custom_knots():
                     }
                 },
                 "enriched": {
-                    "_custom_knot": False,  # Factory knot
+                    "_user_override": False,  # No override
                     "fiber": "Badger",
                     "knot_size_mm": 27.0,
                 },
@@ -132,7 +132,7 @@ def test_aggregate_knot_makers_skips_custom_knots():
                     }
                 },
                 "enriched": {
-                    "_custom_knot": False,  # Factory knot
+                    "_user_override": False,  # No override
                     "fiber": "Badger",
                     "knot_size_mm": 28.0,
                 },
@@ -142,7 +142,7 @@ def test_aggregate_knot_makers_skips_custom_knots():
 
     result = aggregate_knot_makers(records)
 
-    # Should only include factory knots, skip custom knots
+    # Should include all knots regardless of user override status
     assert len(result) == 2
 
     # Check that Simpson and Declaration Grooming are included
@@ -150,7 +150,7 @@ def test_aggregate_knot_makers_skips_custom_knots():
     assert "Simpson" in brands
     assert "Declaration Grooming" in brands
 
-    # Check that custom knot (user1) is not counted
+    # Check that Simpson gets 2 shaves (both users, including user1 with override)
     simpson_item = next(item for item in result if item["brand"] == "Simpson")
-    assert simpson_item["shaves"] == 1  # Only user2's factory Simpson
-    assert simpson_item["unique_users"] == 1  # Only user2
+    assert simpson_item["shaves"] == 2  # Both user1 and user2
+    assert simpson_item["unique_users"] == 2  # Both users

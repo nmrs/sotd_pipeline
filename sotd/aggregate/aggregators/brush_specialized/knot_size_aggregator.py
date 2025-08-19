@@ -90,9 +90,6 @@ class KnotSizeAggregator(BaseAggregator):
         if df.empty:
             return []
 
-        # Create composite name
-        df["name"] = self._create_composite_name(df)
-
         # Group and aggregate
         grouped = self._group_and_aggregate(df)
 
@@ -101,8 +98,9 @@ class KnotSizeAggregator(BaseAggregator):
 
         # Convert knot_size_mm back to float for output
         for item in result:
-            item["knot_size_mm"] = float(item["name"])
-            del item["name"]
+            # The base aggregator now preserves the original field name
+            if "knot_size_mm" in item:
+                item["knot_size_mm"] = float(item["knot_size_mm"])
 
         return result
 

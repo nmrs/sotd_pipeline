@@ -25,12 +25,23 @@ class KnotMakerAggregator(BaseAggregator):
             matched = matched if isinstance(matched, dict) else {}
             enriched = enriched if isinstance(enriched, dict) else {}
 
-            # Get brand (knot maker) from matched or enriched data
-            brand = matched.get("brand") or enriched.get("brand")
+            # Get brand (knot maker) from matched.knot.brand
+            knot = matched.get("knot", {})
+            if isinstance(knot, dict):
+                brand = knot.get("brand")
+            else:
+                brand = None
+
+            # Fallback to enriched data if available
+            if not brand and enriched:
+                brand = enriched.get("brand")
 
             # Skip if no brand data
             if not brand:
                 continue
+
+            # Note: _user_override field is for debugging/data quality, not filtering
+            # We count all knots regardless of user override status
 
             author = record.get("author", "").strip()
 

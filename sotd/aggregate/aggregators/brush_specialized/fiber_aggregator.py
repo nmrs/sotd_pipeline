@@ -25,8 +25,16 @@ class FiberAggregator(BaseAggregator):
             matched = matched if isinstance(matched, dict) else {}
             enriched = enriched if isinstance(enriched, dict) else {}
 
-            # Get fiber from matched or enriched data
-            fiber = matched.get("fiber") or enriched.get("fiber")
+            # Get fiber from matched.knot.fiber
+            knot = matched.get("knot", {})
+            if isinstance(knot, dict):
+                fiber = knot.get("fiber")
+            else:
+                fiber = None
+
+            # Fallback to enriched data if available
+            if not fiber and enriched:
+                fiber = enriched.get("fiber")
 
             # Skip if no fiber data
             if not fiber:

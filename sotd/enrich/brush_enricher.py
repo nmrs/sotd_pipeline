@@ -550,35 +550,24 @@ class BrushEnricher(BaseEnricher):
             fiber_enriched = self._create_enriched_data(fiber_user_data, fiber_catalog_data)
             enriched_data["_fiber_extraction_source"] = fiber_enriched["_extraction_source"]
 
-        # Add custom knot detection logic
-        has_custom_knot = False
+        # Add user override detection logic (data conflicts between user input and catalog)
+        has_user_override = False
+        override_reasons = []
+
         if user_fiber is not None and catalog_fiber is not None:
             if user_fiber.lower() != catalog_fiber.lower():
-                has_custom_knot = True
+                has_user_override = True
+                override_reasons.append(f"fiber_mismatch:{catalog_fiber}->{user_fiber}")
+
         if user_knot_size is not None and catalog_knot_size is not None:
             if abs(user_knot_size - catalog_knot_size) >= 0.1:  # Allow small tolerance
-                has_custom_knot = True
+                has_user_override = True
+                override_reasons.append(f"size_mismatch:{catalog_knot_size}->{user_knot_size}")
 
-        # Add custom knot metadata if detected
-        if has_custom_knot:
-            enriched_data["_custom_knot"] = True
-            enriched_data["_custom_knot_reason"] = []
-            if (
-                user_fiber is not None
-                and catalog_fiber is not None
-                and user_fiber.lower() != catalog_fiber.lower()
-            ):
-                enriched_data["_custom_knot_reason"].append(
-                    f"fiber_mismatch:{catalog_fiber}->{user_fiber}"
-                )
-            if (
-                user_knot_size is not None
-                and catalog_knot_size is not None
-                and abs(user_knot_size - catalog_knot_size) >= 0.1
-            ):
-                enriched_data["_custom_knot_reason"].append(
-                    f"size_mismatch:{catalog_knot_size}->{user_knot_size}"
-                )
+        # Add user override metadata if detected
+        if has_user_override:
+            enriched_data["_user_override"] = True
+            enriched_data["_user_override_reason"] = override_reasons
 
         # Add catalog conflict tracking for backward compatibility
         if user_knot_size is not None and catalog_knot_size is not None:
