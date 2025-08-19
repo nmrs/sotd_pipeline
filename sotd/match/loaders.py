@@ -89,6 +89,7 @@ class CatalogLoader:
     ) -> Dict[str, Any]:
         """
         Load correct matches with graceful error handling.
+        Uses the same logic as BaseMatcher for consistency.
 
         Args:
             correct_matches_path: Path to correct_matches.yaml file
@@ -97,19 +98,23 @@ class CatalogLoader:
         Returns:
             Dictionary with correct matches data
         """
+        # Use the same path resolution logic as BaseMatcher for consistency
         path = correct_matches_path or Path("data/correct_matches.yaml")
 
+        # Resolve to absolute path to ensure consistent behavior regardless of working directory
+        path = path.resolve()
+
         if not path.exists():
-            if self.config and self.config.debug:
-                print(f"Warning: Correct matches file not found: {path}")
-            return {} if field_type else {"brush": {}, "handle": {}, "knot": {}}
+            # Use the same fallback behavior as BaseMatcher
+            return {}
 
         try:
+            # Use the exact same loading logic as BaseMatcher
             data = load_yaml_with_nfc(path, loader_cls=UniqueKeyLoader)
             self.load_stats["catalogs_loaded"] += 1  # type: ignore
 
             if field_type:
-                # Return field-specific section
+                # Return field-specific section - same as BaseMatcher
                 return data.get(field_type, {})
             else:
                 # Return all sections (for brush matcher)
@@ -120,18 +125,16 @@ class CatalogLoader:
                     "split_brush": data.get("split_brush", {}),
                 }
 
-        except (FileNotFoundError, yaml.YAMLError) as e:
-            # Handle external errors gracefully
-            if self.config and self.config.debug:
-                print(f"Warning: Could not load correct matches from {path}: {e}")
-            self.load_stats["warnings"] += 1
-            return {} if field_type else {"brush": {}, "handle": {}, "knot": {}}
+        except Exception:
+            # Use the same error handling as BaseMatcher - return empty dict on any error
+            return {}
 
     def load_matcher_catalogs(
         self, catalog_path: Path, matcher_type: str, correct_matches_path: Optional[Path] = None
     ) -> Dict[str, Any]:
         """
         Load catalogs for a specific matcher type.
+        Uses the same logic as BaseMatcher for consistency.
 
         Args:
             catalog_path: Path to the main catalog file
@@ -146,10 +149,15 @@ class CatalogLoader:
         # Load main catalog
         catalogs["catalog"] = self.load_catalog(catalog_path, matcher_type, use_unique_loader=True)
 
-        # Load correct matches for this matcher type
-        catalogs["correct_matches"] = self.load_correct_matches(
-            correct_matches_path, field_type=matcher_type
-        )
+        # Load correct matches for this matcher type - same logic as BaseMatcher
+        try:
+            correct_matches = self.load_correct_matches(
+                correct_matches_path, field_type=matcher_type
+            )
+            catalogs["correct_matches"] = correct_matches
+        except Exception:
+            # Use the same error handling as BaseMatcher
+            catalogs["correct_matches"] = {}
 
         return catalogs
 
