@@ -43,5 +43,12 @@ Object.defineProperty(window, 'getComputedStyle', {
   }),
 });
 
+// Mock TextEncoder/TextDecoder for React Router v7
+if (typeof global.TextEncoder === 'undefined') {
+  const { TextEncoder, TextDecoder } = require('util');
+  global.TextEncoder = TextEncoder;
+  global.TextDecoder = TextDecoder;
+}
+
 // This file is automatically loaded by Jest before running tests
 // Add any global test setup here
