@@ -1,11 +1,8 @@
 import json
 import subprocess
 import time
-from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Optional
-
-from tqdm import tqdm
 
 from sotd.cli_utils.date_span import month_span
 from sotd.match.blade_matcher import BladeMatcher
@@ -450,126 +447,78 @@ def run_match(args):
     base_path = Path(args.out_dir)
     months = list(month_span(args))
 
+    # Create parallel processor for match phase
+    from sotd.utils.parallel_processor import create_parallel_processor
+
+    processor = create_parallel_processor("match")
+
     # Determine if we should use parallel processing
-    if args.sequential:
-        use_parallel = False
-    elif args.parallel:
-        use_parallel = True
-    else:
-        use_parallel = len(months) > 1 and not args.debug
+    use_parallel = processor.should_use_parallel(months, args, args.debug)
 
     if use_parallel:
-        print(f"Processing {len(months)} months in parallel...")
+        # Get max workers for parallel processing
+        max_workers = processor.get_max_workers(months, args, default=4)
 
-        # Use ProcessPoolExecutor for month-level parallelization
-        max_workers = min(len(months), args.max_workers)
+        # Process months in parallel using common processor
+        results = processor.process_months_parallel(
+            months,
+            _process_month_for_parallel,
+            (base_path, args.force, args.debug, max_workers, None, args.brush_system),
+            max_workers,
+            "Processing",
+        )
 
-        with ProcessPoolExecutor(max_workers=max_workers) as executor:
-            # Submit all month processing tasks
-            future_to_month = {
-                executor.submit(
-                    process_month,
-                    f"{year:04d}-{month:02d}",
-                    base_path,
-                    args.force,
-                    args.debug,
-                    max_workers,
-                    None,  # correct_matches_path
-                    args.brush_system,
-                ): f"{year:04d}-{month:02d}"
-                for year, month in months
-            }
-
-            # Process results as they complete
-            results = []
-            for future in tqdm(
-                as_completed(future_to_month), total=len(future_to_month), desc="Processing"
-            ):
-                month = future_to_month[future]
-                try:
-                    result = future.result()
-                    results.append(result)
-                except Exception as e:
-                    results.append({"status": "error", "month": month, "error": str(e)})
-
-        # Print summary of parallel processing
-        completed = [r for r in results if r["status"] == "completed"]
-        skipped = [r for r in results if r["status"] == "skipped"]
-        errors = [r for r in results if r["status"] == "error"]
-
-        print("\nParallel processing summary:")
-        print(f"  Completed: {len(completed)} months")
-        print(f"  Skipped: {len(skipped)} months")
-        print(f"  Errors: {len(errors)} months")
-
-        # Display error details for failed months
-        if errors:
-            print("\nError Details:")
-            for error_result in errors:
-                month = error_result.get("month", "unknown")
-                error_msg = error_result.get("error", "unknown error")
-                print(f"  {month}: {error_msg}")
-
-        if completed:
-            total_records = sum(r.get("records_processed", 0) for r in completed)
-            total_time = sum(
-                r.get("performance", {}).get("total_processing_time_seconds", 0) for r in completed
-            )
-            avg_records_per_sec = total_records / total_time if total_time > 0 else 0
-
-            print("\nPerformance Summary:")
-            print(f"  Total Records: {total_records:,}")
-            print(f"  Total Processing Time: {total_time:.2f}s")
-            print(f"  Average Throughput: {avg_records_per_sec:.0f} records/sec")
-
-            # Print detailed performance for first completed month as example
-            if completed:
-                example = completed[0]
-                performance = example.get("performance", {})
-                print(f"\nExample month ({example['month']}) performance:")
-                print(f"  Records: {example.get('records_processed', 0):,}")
-                processing_time = performance.get("total_processing_time_seconds", 0)
-                print(f"  Processing Time: {processing_time:.2f}s")
-                records_per_sec = performance.get("records_per_second", 0)
-                print(f"  Throughput: {records_per_sec:.0f} records/sec")
-
-                if args.debug:
-                    print("\nDetailed Performance Summary:")
-                    print(f"  File I/O: {performance.get('file_io_time_seconds', 0):.2f}s")
-                    print(f"  Processing: {performance.get('processing_time_seconds', 0):.2f}s")
-                    avg_time_per_record = performance.get("avg_time_per_record_seconds", 0) * 1000
-                    print(f"  Average Time per Record: {avg_time_per_record:.1f}ms")
-
-                    # Print matcher performance if available
-                    matcher_times = performance.get("matcher_times", {})
-                    if matcher_times:
-                        print("\nMatcher Performance:")
-                        for matcher, stats in matcher_times.items():
-                            avg_time = stats.get("avg_time_seconds", 0) * 1000
-                            count = stats.get("count", 0)
-                            print(f"  {matcher}: {avg_time:.1f}ms avg ({count} calls)")
+        # Print parallel processing summary
+        processor.print_parallel_summary(results, "match")
 
     else:
-        # Sequential processing
-        print(f"Processing {len(months)} months sequentially...")
+        # Process months sequentially
+        results = processor.process_months_sequential(
+            months,
+            _process_month_for_sequential,
+            (base_path, args.force, args.debug, None, args.brush_system),
+            "Months",
+        )
 
-        for year, month in tqdm(months, desc="Months", unit="month"):
-            result = process_month(
-                f"{year:04d}-{month:02d}",
-                base_path,
-                args.force,
-                args.debug,
-                1,
-                None,  # correct_matches_path
-                args.brush_system,
-            )
+    # Display error details for failed months
+    errors = [r for r in results if "error" in r]
+    if errors:
+        print("\nError Details:")
+        for error_result in errors:
+            month = error_result.get("month", "unknown")
+            error_msg = error_result.get("error", "unknown error")
+            print(f"  {month}: {error_msg}")
 
-            if result["status"] == "completed":
-                print(f"  {result['month']}: {result['records_processed']:,} records")
-            elif result["status"] == "skipped":
-                print(f"  {result['month']}: {result['reason']}")
-            else:
-                print(f"  {result['month']}: ERROR - {result['error']}")
+
+def _process_month_for_parallel(
+    year: int,
+    month: int,
+    base_path: Path,
+    force: bool,
+    debug: bool,
+    max_workers: int,
+    correct_matches_path: Optional[Path],
+    brush_system: str,
+) -> dict:
+    """Process a single month for parallel processing."""
+    month_str = f"{year:04d}-{month:02d}"
+    return process_month(
+        month_str, base_path, force, debug, max_workers, correct_matches_path, brush_system
+    )
+
+
+def _process_month_for_sequential(
+    year: int,
+    month: int,
+    base_path: Path,
+    force: bool,
+    debug: bool,
+    correct_matches_path: Optional[Path],
+    brush_system: str,
+) -> dict:
+    """Process a single month for sequential processing."""
+    month_str = f"{year:04d}-{month:02d}"
+    return process_month(month_str, base_path, force, debug, 1, correct_matches_path, brush_system)
 
 
 def run_analysis(args):

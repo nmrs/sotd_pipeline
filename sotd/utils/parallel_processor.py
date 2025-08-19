@@ -5,6 +5,7 @@ This module provides standardized parallel month processing functionality
 to eliminate code duplication across extract, match, enrich, and other phases.
 """
 
+import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Any, Callable, Dict, List, Tuple
 
@@ -86,6 +87,9 @@ class ParallelMonthProcessor:
         """
         print(f"Processing {len(months)} months in parallel...")
 
+        # Start wall clock timing
+        wall_clock_start = time.time()
+
         with ProcessPoolExecutor(max_workers=max_workers) as executor:
             # Submit all month processing tasks
             future_to_month = {
@@ -106,6 +110,12 @@ class ParallelMonthProcessor:
                 except Exception as e:
                     print(f"Error processing {month}: {e}")
                     results.append({"month": month, "error": str(e)})
+
+        # Calculate wall clock time
+        wall_clock_time = time.time() - wall_clock_start
+
+        # Add wall clock timing to results for summary
+        self._add_wall_clock_timing(results, wall_clock_time, max_workers)
 
         return results
 
@@ -130,13 +140,78 @@ class ParallelMonthProcessor:
         """
         print(f"Processing {len(months)} month{'s' if len(months) != 1 else ''}...")
 
+        # Start wall clock timing
+        wall_clock_start = time.time()
+
         results = []
         for year, month in tqdm(months, desc=desc, unit="month"):
             result = process_func(year, month, *process_args)
             if result:
                 results.append(result)
 
+        # Calculate wall clock time
+        wall_clock_time = time.time() - wall_clock_start
+
+        # Add wall clock timing to results for summary
+        self._add_wall_clock_timing(results, wall_clock_time, 1)
+
         return results
+
+    def _add_wall_clock_timing(
+        self, results: List[Dict[str, Any]], wall_clock_time: float, max_workers: int
+    ) -> None:
+        """
+        Add wall clock timing information to results for summary generation.
+
+        Args:
+            results: List of processing results
+            wall_clock_time: Total wall clock time in seconds
+            max_workers: Number of parallel workers used
+        """
+        for result in results:
+            if "error" not in result:
+                # Add wall clock timing info
+                if "wall_clock_timing" not in result:
+                    result["wall_clock_timing"] = {}
+                result["wall_clock_timing"].update(
+                    {
+                        "wall_clock_time_seconds": wall_clock_time,
+                        "parallel_workers": max_workers,
+                        "parallel_efficiency": self._calculate_parallel_efficiency(
+                            result, wall_clock_time, max_workers
+                        ),
+                    }
+                )
+
+    def _calculate_parallel_efficiency(
+        self, result: Dict[str, Any], wall_clock_time: float, max_workers: int
+    ) -> float:
+        """
+        Calculate parallel efficiency as a percentage.
+
+        Args:
+            result: Processing result for a month
+            wall_clock_time: Total wall clock time
+            max_workers: Number of parallel workers used
+
+        Returns:
+            Parallel efficiency as percentage (100% = perfect parallelization)
+        """
+        if max_workers <= 1:
+            return 100.0
+
+        # Get individual month processing time if available
+        individual_time = result.get("performance", {}).get("total_processing_time_seconds", 0)
+        if individual_time <= 0:
+            return 0.0
+
+        # Calculate theoretical sequential time vs actual parallel time
+        theoretical_parallel_time = individual_time / max_workers
+        if theoretical_parallel_time <= 0:
+            return 0.0
+
+        efficiency = (theoretical_parallel_time / wall_clock_time) * 100
+        return min(100.0, max(0.0, efficiency))
 
     def print_parallel_summary(self, results: List[Dict[str, Any]], phase_name: str) -> None:
         """
@@ -186,17 +261,37 @@ class ParallelMonthProcessor:
             print(f"  Total Enriched: {total_enriched:,}")
 
         elif phase_name == "match":
+            # Get wall clock timing from first result
+            wall_clock_timing = completed_results[0].get("wall_clock_timing", {})
+            wall_clock_time = wall_clock_timing.get("wall_clock_time_seconds", 0)
+            parallel_workers = wall_clock_timing.get("parallel_workers", 1)
+            parallel_efficiency = wall_clock_timing.get("parallel_efficiency", 0)
+
+            # Calculate total records and individual processing times
             total_records = sum(r.get("records_processed", 0) for r in completed_results)
-            total_time = sum(
+            total_individual_time = sum(
                 r.get("performance", {}).get("total_processing_time_seconds", 0)
                 for r in completed_results
             )
-            avg_records_per_sec = total_records / total_time if total_time > 0 else 0
+
+            # Calculate true throughput and speedup
+            true_throughput = total_records / wall_clock_time if wall_clock_time > 0 else 0
+            theoretical_sequential_time = total_individual_time
+            speedup = theoretical_sequential_time / wall_clock_time if wall_clock_time > 0 else 1.0
 
             print("\nPerformance Summary:")
             print(f"  Total Records: {total_records:,}")
-            print(f"  Total Processing Time: {total_time:.2f}s")
-            print(f"  Average Throughput: {avg_records_per_sec:.0f} records/sec")
+            print(f"  Wall Clock Time: {wall_clock_time:.2f}s")
+            print(f"  Parallel Workers: {parallel_workers}")
+            print(f"  True Throughput: {true_throughput:.0f} records/sec")
+            print(f"  Parallel Speedup: {speedup:.2f}x")
+            print(f"  Parallel Efficiency: {parallel_efficiency:.1f}%")
+
+            # Show individual month performance for comparison
+            if len(completed_results) > 1:
+                avg_individual_time = total_individual_time / len(completed_results)
+                print(f"  Avg Individual Month Time: {avg_individual_time:.2f}s")
+                print(f"  Theoretical Sequential Time: {theoretical_sequential_time:.2f}s")
 
 
 def create_parallel_processor(phase_name: str) -> ParallelMonthProcessor:
