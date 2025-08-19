@@ -156,12 +156,16 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
    baseline_data = baseline.get('data', [])
    current_data = current.get('data', [])
    
+   # Record count is informational only - NOT used for validation
    print(f'Records: {len(baseline_data)} vs {len(current_data)}')
+   
+   # CRITICAL: This does FULL content comparison, not just counting
+   # baseline_data == current_data compares every field of every record
    print(f'Content identical: {baseline_data == current_data}')
    
    # CRITICAL: Only content identical = True is acceptable
-   # Record count matching is NOT sufficient
-   # File size matching is NOT sufficient
+   # Record count matching is NOT sufficient for validation
+   # File size matching is NOT sufficient for validation
    "
    
    # 2. For non-identical content, find first difference
