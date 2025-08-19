@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { DataTable } from '../ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
 
@@ -30,8 +30,10 @@ const columns: ColumnDef<TestData>[] = [
 
 describe('DataTable Virtualization Layout Issues', () => {
   describe('Filtering Behavior', () => {
-    it('should not cause row overlap when filtering', () => {
-      render(<DataTable columns={columns} data={mockData} searchKey='name' />);
+    it('should not cause row overlap when filtering', async () => {
+      await act(async () => {
+        render(<DataTable columns={columns} data={mockData} searchKey='name' />);
+      });
 
       // Get the search input
       const searchInput = screen.getByPlaceholderText('Filter name...');
@@ -54,8 +56,10 @@ describe('DataTable Virtualization Layout Issues', () => {
       expect(rowStyle.zIndex).not.toBe('auto');
     });
 
-    it('should maintain proper table structure when filtering', () => {
-      render(<DataTable columns={columns} data={mockData} searchKey='name' />);
+    it('should maintain proper table structure when filtering', async () => {
+      await act(async () => {
+        render(<DataTable columns={columns} data={mockData} searchKey='name' />);
+      });
 
       const searchInput = screen.getByPlaceholderText('Filter name...');
       fireEvent.change(searchInput, { target: { value: 'Item' } });
@@ -73,8 +77,10 @@ describe('DataTable Virtualization Layout Issues', () => {
   });
 
   describe('Scrolling Behavior', () => {
-    it('should maintain proper row positioning during scroll', () => {
-      render(<DataTable columns={columns} data={mockData} searchKey='name' />);
+    it('should maintain proper row positioning during scroll', async () => {
+      await act(async () => {
+        render(<DataTable columns={columns} data={mockData} searchKey='name' />);
+      });
 
       // Get the virtualized container
       const virtualizedContainer = screen.getByRole('table').parentElement;
@@ -93,7 +99,7 @@ describe('DataTable Virtualization Layout Issues', () => {
   });
 
   describe('Input Editing with Virtualization', () => {
-    it('should allow editing inputs in virtualized rows', () => {
+    it('should allow editing inputs in virtualized rows', async () => {
       // Create columns with editable cells
       const editableColumns: ColumnDef<TestData>[] = [
         {
@@ -103,7 +109,7 @@ describe('DataTable Virtualization Layout Issues', () => {
             <input
               data-testid={`input-${row.original.id}`}
               defaultValue={row.original.name}
-              onChange={() => {}}
+              onChange={() => { }}
             />
           ),
         },
@@ -113,7 +119,9 @@ describe('DataTable Virtualization Layout Issues', () => {
         },
       ];
 
-      render(<DataTable columns={editableColumns} data={mockData} searchKey='name' />);
+      await act(async () => {
+        render(<DataTable columns={editableColumns} data={mockData} searchKey='name' />);
+      });
 
       // Find and edit an input
       const firstInput = screen.getByTestId('input-1');
@@ -125,14 +133,16 @@ describe('DataTable Virtualization Layout Issues', () => {
   });
 
   describe('Performance Characteristics', () => {
-    it('should maintain virtualization benefits', () => {
+    it('should maintain virtualization benefits', async () => {
       const largeData = Array.from({ length: 1000 }, (_, i) => ({
         id: `${i}`,
         name: `Item ${i}`,
         value: `Value ${i}`,
       }));
 
-      render(<DataTable columns={columns} data={largeData} searchKey='name' />);
+      await act(async () => {
+        render(<DataTable columns={columns} data={largeData} searchKey='name' />);
+      });
 
       // Check that not all 1000 rows are rendered
       const rows = screen.getAllByRole('row');
@@ -142,8 +152,10 @@ describe('DataTable Virtualization Layout Issues', () => {
   });
 
   describe('HTML Semantics', () => {
-    it('should maintain proper HTML table structure', () => {
-      render(<DataTable columns={columns} data={mockData} searchKey='name' />);
+    it('should maintain proper HTML table structure', async () => {
+      await act(async () => {
+        render(<DataTable columns={columns} data={mockData} searchKey='name' />);
+      });
 
       // Check that we have a proper table structure
       const table = screen.getByRole('table');
