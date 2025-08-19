@@ -167,6 +167,12 @@ class StraightRazorEnricher(BaseEnricher):
         # Grind patterns in order of specificity (most specific first)
         # Return Title Case values for better readability in reports
         grind_patterns = [
+            # Fractional notation patterns (most specific first)
+            (r"\b1/4\s*hollow\b", "Quarter Hollow"),
+            (r"\b2/4\s*hollow\b", "Half Hollow"),
+            (r"\b3/4\s*hollow\b", "Three Quarter Hollow"),
+            (r"\b4/4\s*hollow\b", "Full Hollow"),
+            # Word-based patterns
             (r"\bextra\s*hollow\b", "Extra Hollow"),
             (r"\bfull\s*hollow\b", "Full Hollow"),
             (r"\bpretty\s*hollow\b", "Pretty Hollow"),
