@@ -16,7 +16,7 @@ function App() {
   const messaging = useMessaging();
 
   return (
-    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <Router>
       <div className='h-screen flex flex-col'>
         <Header />
         <main className='flex-1 overflow-auto'>
