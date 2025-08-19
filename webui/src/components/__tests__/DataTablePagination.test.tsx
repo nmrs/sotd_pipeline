@@ -142,7 +142,7 @@ describe('DataTable Pagination', () => {
           columns={columns}
           data={mockData}
           showPagination={true}
-          // No height or itemSize props - these should be removed
+        // No height or itemSize props - these should be removed
         />
       );
     });

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { BrushSplitTable } from '../data/BrushSplitTable';
 import { BrushSplit } from '../../types/brushSplit';
 
@@ -38,8 +38,10 @@ const mockBrushSplits = [
 
 describe('BrushSplitTable', () => {
   describe('Basic Rendering', () => {
-    it('renders table with brush split data', () => {
-      render(<BrushSplitTable brushSplits={mockBrushSplits} />);
+    it('renders table with brush split data', async () => {
+      await act(async () => {
+        render(<BrushSplitTable brushSplits={mockBrushSplits} />);
+      });
 
       expect(screen.getByTestId('brush-split-table')).toBeInTheDocument();
       expect(screen.getByText('Original Text')).toBeInTheDocument();
@@ -47,16 +49,20 @@ describe('BrushSplitTable', () => {
       expect(screen.getByText('Knot')).toBeInTheDocument();
     });
 
-    it('renders brush split data correctly', () => {
-      render(<BrushSplitTable brushSplits={mockBrushSplits} />);
+    it('renders brush split data correctly', async () => {
+      await act(async () => {
+        render(<BrushSplitTable brushSplits={mockBrushSplits} />);
+      });
 
       expect(screen.getByText('Test Brush 1')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Test Maker')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Test Knot')).toBeInTheDocument();
     });
 
-    it('renders empty table when no data', () => {
-      render(<BrushSplitTable brushSplits={[]} />);
+    it('renders empty table when no data', async () => {
+      await act(async () => {
+        render(<BrushSplitTable brushSplits={[]} />);
+      });
 
       expect(screen.getByTestId('brush-split-table')).toBeInTheDocument();
     });
@@ -64,7 +70,9 @@ describe('BrushSplitTable', () => {
 
   describe('Inline Editing Functionality', () => {
     it('allows toggling validation checkbox', async () => {
-      render(<BrushSplitTable brushSplits={mockBrushSplits} />);
+      await act(async () => {
+        render(<BrushSplitTable brushSplits={mockBrushSplits} />);
+      });
 
       // Find individual validation checkboxes (not the "Select all" checkbox)
       const validationCheckboxes = screen
@@ -83,14 +91,18 @@ describe('BrushSplitTable', () => {
   });
 
   describe("Don't Split Checkbox Functionality", () => {
-    it("renders Don't Split checkbox column", () => {
-      render(<BrushSplitTable brushSplits={mockBrushSplits} />);
+    it("renders Don't Split checkbox column", async () => {
+      await act(async () => {
+        render(<BrushSplitTable brushSplits={mockBrushSplits} />);
+      });
 
       expect(screen.getByText("Don't Split")).toBeInTheDocument();
     });
 
-    it("shows correct initial state for Don't Split checkboxes", () => {
-      render(<BrushSplitTable brushSplits={mockBrushSplits} />);
+    it("shows correct initial state for Don't Split checkboxes", async () => {
+      await act(async () => {
+        render(<BrushSplitTable brushSplits={mockBrushSplits} />);
+      });
 
       // Get all checkboxes (Select, Validated, Don't Split)
       const checkboxes = screen.getAllByRole('checkbox');
@@ -127,7 +139,9 @@ describe('BrushSplitTable', () => {
     });
 
     it("allows toggling Don't Split checkbox", async () => {
-      render(<BrushSplitTable brushSplits={mockBrushSplits} />);
+      await act(async () => {
+        render(<BrushSplitTable brushSplits={mockBrushSplits} />);
+      });
 
       // Find Don't Split checkboxes using the correct aria-label
       const dontSplitCheckboxes = screen
