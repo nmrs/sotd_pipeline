@@ -56,7 +56,7 @@ class TestEnrichCLI:
         assert "parallel" in help_text.lower()
         assert "sequential" in help_text.lower()
         assert "max-workers" in help_text.lower()
-        
+
         # Should NOT have enrich-specific arguments that don't exist
         assert "mode" not in help_text.lower()
 
