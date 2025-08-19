@@ -41,8 +41,10 @@ files:
   - data/enriched/2025-07.json
   - data/aggregated/2025-06.json
   - data/aggregated/2025-07.json
-  - data/reports/2025-06.json
-  - data/reports/2025-07.json
+  - data/reports/2025-06-hardware.json
+  - data/reports/2025-06-software.json
+  - data/reports/2025-06-hardware.json
+  - data/reports/2025-06-software.json
 
 Store in `.ab_backups/`:
 - `.ab_backups/baseline_<timestamp>/`
