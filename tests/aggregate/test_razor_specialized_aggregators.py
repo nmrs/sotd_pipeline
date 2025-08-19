@@ -17,14 +17,14 @@ def test_aggregate_blackbird_plates():
             "author": "user1",
             "razor": {
                 "matched": {"brand": "Blackland", "model": "Blackbird"},
-                "enriched": {"plate": "Ti"},
+                "enriched": {"plate": "Standard"},
             },
         },
         {
             "author": "user2",
             "razor": {
                 "matched": {"brand": "Blackland", "model": "Blackbird"},
-                "enriched": {"plate": "Ti"},
+                "enriched": {"plate": "Standard"},
             },
         },
         {
@@ -37,7 +37,7 @@ def test_aggregate_blackbird_plates():
     ]
     result = aggregate_blackbird_plates(records)
     assert len(result) == 2
-    assert result[0]["plate"] == "Ti"
+    assert result[0]["plate"] == "Standard"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
     assert result[0]["position"] == 1
