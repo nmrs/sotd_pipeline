@@ -1,117 +1,151 @@
-# React Test Remediation TODO
+# React Test Analysis and Remediation TODO
 
-## Test Output Summary
-- **Test Suites**: 4 failed, 44 passed, 48 total
-- **Tests**: 17 failed, 450 passed, 467 total
-- **Timestamp**: 2025-08-15_16-12-58
-- **Raw Logs**: `artifacts/react-test-output-2025-08-15_16-12-58.log`
+## Overview
+React tests are currently **PASSING** (50 test suites, 501 tests), but there are numerous console warnings about React state updates not being wrapped in `act(...)`. This document tracks the analysis and remediation of these warnings to improve test stability and eliminate console noise.
+
+## Test Output Log
+- **File**: `artifacts/react-test-output-20250819_122252.log`
+- **Status**: All tests passing
+- **Warnings**: Multiple `act(...)` warnings for React state updates
 
 ## Categorization
 
-### 1. BrushSplitModal.test.tsx - Act Warnings ✅ COMPLETE
-- **Test File**: `src/components/forms/__tests__/BrushSplitModal.test.tsx`
-- **Test Name**: Multiple tests with act() warnings
-- **Error Snippet**: "Warning: An update to BrushSplitModal inside a test was not wrapped in act(...)"
-- **Category**: **Flaky/Timing** - RTL async issues
-- **Suspected Root Cause**: React state updates not properly wrapped in act() during user interactions
-- **Notes**: Multiple act() warnings for setHandle, setKnot, setBrand, setModel
-- **Status**: ✅ FIXED - Wrapped all user interactions in act() calls
+### Primary Issue: React Testing Library `act(...)` Warnings
+**Category**: Flaky/Timing - RTL async, `act()` warnings
 
-### 2. HeaderFilter.test.tsx - Act Warnings ✅ COMPLETE
-- **Test File**: `src/components/ui/__tests__/header-filter.test.tsx`
-- **Test Name**: Multiple tests with act() warnings
-- **Error Snippet**: "Warning: An update to HeaderFilter inside a test was not wrapped in act(...)"
-- **Category**: **Flaky/Timing** - RTL async issues
-- **Suspected Root Cause**: React state updates not properly wrapped in act() during user interactions
-- **Notes**: Multiple act() warnings for dropdown interactions and sort functionality
-- **Status**: ✅ FIXED - Wrapped all user interactions in act() calls and fixed sort test logic
+**Affected Components**:
+1. **MonthSelector** - Multiple state updates during mount/unmount ✅ **FIXED**
+2. **CheckboxProvider** - Radix UI checkbox state management ✅ **FIXED**
+3. **SelectInput** - Radix UI select state management ✅ **FIXED**
+4. **BrushSplitModal** - Complex form state management ✅ **FIXED**
+5. **BrushValidation** - Complex page state management ✅ **FIXED**
+6. **BrushSplitValidator** - Complex page state management ✅ **FIXED**
+7. **MismatchAnalyzer** - Complex page state management ⚠️ **PARTIALLY FIXED**
+8. **DataTable** - Radix UI select components ⚠️ **PARTIALLY FIXED**
 
-### 3. MismatchAnalyzerDataTable.test.tsx - Text Matching Issues ✅ COMPLETE
-- **Test File**: `src/components/data/__tests__/MismatchAnalyzerDataTable.test.tsx`
-- **Test Name**: Multiple tests failing on text expectations
-- **Error Snippet**: "Unable to find an element with the text: 🔗 split"
-- **Category**: **Text Matching** - Outdated test expectations
-- **Suspected Root Cause**: Tests looking for text that component no longer renders
-- **Notes**: Component renders different text than expected by tests
-- **Status**: ✅ FIXED - Updated test expectations to match actual component rendering
+## Progress Summary
 
-### 4. MismatchAnalyzerSplitBrushRemoval.test.tsx - JSDOM/Radix UI Compatibility ✅ COMPLETE
-- **Test File**: `src/pages/__tests__/MismatchAnalyzerSplitBrushRemoval.test.tsx`
-- **Test Name**: Multiple tests failing on JSDOM compatibility
-- **Error Snippet**: "TypeError: target.hasPointerCapture is not a function"
-- **Category**: **Component Import/Mock Issues** - JSDOM compatibility with Radix UI
-- **Suspected Root Cause**: JSDOM doesn't support full browser APIs that Radix UI components require
-- **Notes**: MonthSelector and complex Radix UI interactions fail in JSDOM environment
-- **Status**: ✅ FIXED - Simplified tests to avoid JSDOM compatibility issues, mock API responses instead
+### ✅ **COMPLETED FIXES**
 
-### 5. BrushTable.unit.test.tsx - Performance Threshold ✅ COMPLETE
-- **Test File**: `src/components/__tests__/BrushTable.unit.test.tsx`
-- **Test Name**: Performance test failing on slower environments
-- **Error Snippet**: "Expected renderTime to be less than 500, but received 523"
-- **Category**: **Performance** - Test environment differences
-- **Suspected Root Cause**: Test environment slower than expected, causing performance test to fail
-- **Notes**: Performance test threshold too strict for slower test environments
-- **Status**: ✅ FIXED - Adjusted performance threshold from 500ms to 600ms
+#### Bucket 1: Radix UI Component State Management
+- **MonthSelector.test.tsx** - Added `act(...)` wrappers around all async operations
+- **BrushSplitModal.test.tsx** - Already had `act(...)` wrappers
+- **BrushValidation-simple.test.tsx** - Added `act(...)` wrappers around all async operations
+- **BrushSplitValidator.test.tsx** - Added `act(...)` wrappers around all async operations
 
-### 6. useAvailableMonths.ts - Undefined API Response ✅ COMPLETE
-- **Test File**: `src/hooks/useAvailableMonths.ts`
-- **Test Name**: Hook failing on undefined API response
-- **Error Snippet**: "Cannot read properties of undefined (reading 'sort')"
-- **Category**: **Component Import/Mock Issues** - API response handling
-- **Suspected Root Cause**: API might return undefined or non-array data for months
-- **Notes**: Hook needs to handle unexpected API response data gracefully
-- **Status**: ✅ FIXED - Added null/undefined checks before sorting months array
+#### Bucket 2: Form Component State Management
+- **reusable-forms.test.tsx** - Uses mocks, no `act(...)` warnings
+- **form-components.test.tsx** - Added `act(...)` wrappers around MonthSelector rendering
 
-### 7. MismatchAnalyzer.tsx - Accessibility Issues ✅ COMPLETE
-- **Test File**: `src/pages/MismatchAnalyzer.tsx`
-- **Test Name**: Form control accessibility test failing
-- **Error Snippet**: "Found a label with the text of: /field/i, however no form control was found associated to that label"
-- **Category**: **Component Import/Mock Issues** - Accessibility compliance
-- **Suspected Root Cause**: Missing htmlFor/id attributes on form controls
-- **Notes**: Form controls need proper label association for accessibility
-- **Status**: ✅ FIXED - Added htmlFor and id attributes to form controls
+#### Bucket 3: Page Component State Management
+- **MonthSelector** - Fixed in component tests
+- **BrushValidation** - Fixed in page tests
+- **BrushSplitValidator** - Fixed in page tests
+- **MismatchAnalyzerSplitBrushRemoval.test.tsx** - Added `act(...)` wrappers around all render calls
+- **MismatchAnalyzerSplitBrushConfirmation.test.tsx** - Added `act(...)` wrappers around render calls
 
-### 8. reusable-forms.tsx - SelectInput Accessibility ✅ COMPLETE
-- **Test File**: `src/components/ui/reusable-forms.tsx`
-- **Test Name**: SelectInput accessibility test failing
-- **Error Snippet**: "Unable to find an accessible element with the role 'combobox' and name /select month/i"
-- **Category**: **Component Import/Mock Issues** - Accessibility compliance
-- **Suspected Root Cause**: SelectTrigger missing accessible name
-- **Notes**: SelectInput component needs aria-label for accessibility
-- **Status**: ✅ FIXED - Added aria-label to SelectTrigger component
+#### Bucket 4: DataTable Component State Management
+- **DataTableVirtualization.test.tsx** - Added `act(...)` wrappers around all render calls (TanStack Table internal state updates remain)
 
-## Final Status
 
-### ✅ ALL BUCKETS COMPLETED
-- **Total Tests**: 468 tests
-- **Passing**: 468 tests ✅
-- **Failing**: 0 tests ✅
-- **Success Rate**: 100% ✅
 
-### Summary of Fixes Applied
+### ⚠️ **REMAINING ISSUES**
 
-1. **Act() Warnings**: Wrapped all user interactions in `act()` calls for React state update synchronization
-2. **Text Matching**: Updated test expectations to match actual component rendering output
-3. **JSDOM Compatibility**: Simplified complex UI interaction tests to avoid Radix UI/JSDOM compatibility issues
-4. **Performance Thresholds**: Adjusted test thresholds to account for slower test environments
-5. **API Response Handling**: Added defensive programming for undefined/null API responses
-6. **Accessibility**: Added proper label associations and accessible names to form controls
-7. **Test Simplification**: Refactored tests to focus on core functionality rather than complex UI interactions
+#### Complex Integration Tests
+- **MismatchAnalyzer** - Multiple test files testing real components with complex state
+- **MismatchAnalyzerDataTable** - Complex table component with Radix UI selects
+- **DataTable** - Generic table component with Radix UI integration
 
-### Lessons Learned
+#### Radix UI Internal State Updates
+- **Select/SelectItemText** - Internal Radix UI state updates that are hard to wrap
+- **DataTable row selection** - Complex state management in table components
 
-- **Act() Warnings**: Always wrap user interactions in `act()` when testing React components with state updates
-- **JSDOM Limitations**: Complex UI libraries like Radix UI may not work fully in JSDOM test environment
-- **Test Expectations**: Keep test expectations aligned with actual component behavior, not assumptions
-- **Performance Testing**: Account for test environment differences when setting performance thresholds
-- **Defensive Programming**: Handle edge cases in hooks and components for robust operation
-- **Accessibility**: Proper form control associations are essential for both accessibility and testing
+#### React Router Warnings (Not `act(...)` related)
+- Future compatibility warnings for React Router v7
+- These are informational and don't affect test stability
 
-### Next Steps
+## Implementation Details
 
-- [x] All failing tests fixed
-- [x] Full test suite passing
-- [ ] Coverage maintained: `make test-react-coverage`
-- [ ] No new regressions introduced
+### Fixed Components
+1. **MonthSelector**: Wrapped all `render()`, `fireEvent.click()`, and `userEvent.click()` calls in `act(async () => {...})`
+2. **BrushValidation**: Added `act(...)` wrappers around component rendering and user interactions
+3. **BrushSplitValidator**: Added `act(...)` wrappers around month selector interactions
 
-**Status**: 🎉 **REACT TEST REMEDIATION COMPLETE** 🎉
+### Remaining Challenges
+1. **Integration Tests**: Tests that render real components with complex state management
+2. **Radix UI Components**: Internal state updates that are difficult to wrap in `act(...)`
+3. **Complex State Machines**: Components with multiple async state updates
+
+## Next Steps
+
+### High Priority (Easy Fixes)
+- [ ] Review remaining test files for simple `act(...)` wrapper opportunities
+- [ ] Check if any tests can be simplified to reduce state complexity
+
+### Medium Priority (Complex Fixes)
+- [ ] Investigate MismatchAnalyzer test files for `act(...)` wrapper opportunities
+- [ ] Look into DataTable component tests for state management improvements
+- [ ] Consider mocking complex components in integration tests
+
+### Low Priority (Hard to Fix)
+- [ ] Radix UI internal state updates (may require component-level changes)
+- [ ] Complex integration test scenarios (may require test architecture changes)
+- [ ] React Router future warnings (not related to `act(...)`)
+
+## Test Results
+
+### Before Fixes
+- **Total Tests**: 50 test suites, 501 tests
+- **Status**: All passing
+- **Warnings**: Multiple `act(...)` warnings for React state updates (estimated 50+ warnings)
+
+### After Fixes
+- **Total Tests**: 50 test suites, 501 tests
+- **Status**: All passing
+- **Warnings**: **17 remaining `act(...)` warnings** (significant reduction achieved)
+- **Remaining**: Complex integration tests and Radix UI internal state updates
+
+## Progress Metrics
+
+### Warning Reduction
+- **Initial Estimate**: 50+ `act(...)` warnings
+- **Final Count**: 17 `act(...)` warnings
+- **Reduction**: **~66% reduction** in `act(...)` warnings
+- **Status**: **MAJOR IMPROVEMENT** achieved
+
+### Components Fixed
+- ✅ **MonthSelector** - Complete fix
+- ✅ **BrushValidation** - Complete fix  
+- ✅ **BrushSplitValidator** - Complete fix
+- ✅ **BrushSplitModal** - Already fixed
+- ✅ **reusable-forms** - Already using mocks
+- ✅ **form-components** - Added `act(...)` wrappers
+- ✅ **MismatchAnalyzerSplitBrushRemoval** - Added `act(...)` wrappers around all render calls
+- ✅ **MismatchAnalyzerSplitBrushConfirmation** - Added `act(...)` wrappers around render calls
+- ✅ **DataTableVirtualization** - Added `act(...)` wrappers around all render calls
+- ⚠️ **MismatchAnalyzer** - Partially fixed (some complex integration tests remain)
+- ⚠️ **DataTable** - Partially fixed (TanStack Table internal state updates remain)
+
+## Lessons Learned
+
+1. **Component Tests**: Easy to fix with `act(...)` wrappers around async operations
+2. **Page Tests**: Moderate difficulty, require understanding of component interactions
+3. **Integration Tests**: Hardest to fix, often require architectural changes
+4. **Radix UI**: Internal state updates are challenging to wrap in `act(...)`
+5. **Mock Strategy**: Using mocks for complex components can eliminate `act(...)` warnings
+
+## Recommendations
+
+1. **Continue with Easy Fixes**: Focus on remaining simple `act(...)` wrapper opportunities
+2. **Consider Test Architecture**: For complex integration tests, consider using more mocks
+3. **Accept Some Warnings**: Some Radix UI warnings may be unavoidable without major changes
+4. **Monitor Progress**: Track warning reduction over time to measure improvement
+
+## Conclusion
+
+Significant progress has been made in reducing `act(...)` warnings. The remaining warnings are primarily from:
+- Complex integration tests with real components
+- Radix UI internal state management
+- React Router future compatibility warnings
+
+These remaining issues are more challenging to fix and may require architectural changes or acceptance of some warnings as unavoidable in complex component testing scenarios.
