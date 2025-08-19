@@ -8,6 +8,10 @@ alwaysApply: false
 **Goal:**  
 Work through `TEST_SUITE_TODO.md` one task at a time. For each task: ensure a clean git state, record hashes, run the extraction pipeline, back up the 10 JSON outputs, implement the fix, re-run, compare outputs (ignoring only the `metadata` section), and either stop for user direction on differences or commit and proceed if identical.
 
+**⚠️ CRITICAL WARNING: FILE SIZE COMPARISON IS INSUFFICIENT**
+**File size comparison alone will miss content differences and lead to false positives.**
+**ALWAYS use full JSON content comparison (ignoring metadata only) to validate pipeline outputs.**
+
 ---
 
 ## Guardrails
@@ -58,10 +62,14 @@ Work through `TEST_SUITE_TODO.md` one task at a time. For each task: ensure a cl
 
 ## Comparison Rules
 
-- Parse each JSON file.
-- Ignore the entire top-level key/section `"metadata"` (and its contents).
-- All other keys and values must be **byte-for-byte identical** between baseline and post-fix snapshots.
-- If `"metadata"` is missing in one file and present in the other, strip it before comparing.
+**⚠️ MANDATORY: Full JSON Content Comparison Required**
+
+- **Parse each JSON file** using proper JSON tools (not file system tools)
+- **Ignore the entire top-level key/section `"metadata"`** (and its contents)
+- **All other keys and values must be byte-for-byte identical** between baseline and post-fix snapshots
+- **If `"metadata"` is missing in one file and present in the other, strip it before comparing**
+- **File size comparison (`ls -la`, `wc -c`) is INSUFFICIENT and will miss content differences**
+- **Use JSON parsing and comparison tools to ensure accurate validation**
 
 **Note**: When comparing files, use the unique names from the backup directories:
 - `extracted_2025-06.json` vs `extracted_2025-06.json`
@@ -123,9 +131,36 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
    - Use the same 12 files with unique names as baseline backup
 
 5. **MANDATORY: Compare against baseline**
-   - Ignore only the `"metadata"` sections.  
-   - Expected result: identical (your fix should not change any other data)
+   - **⚠️ CRITICAL: File size comparison alone is INSUFFICIENTLY DETERMINISTIC**
+   - **REQUIRED: Full JSON content comparison (ignoring `"metadata"` sections only)**
+   - **Method**: Use proper JSON comparison tools, not just `ls -la` or `wc -c`
+   - **Expected result**: Identical content outside metadata (your fix should not change any other data)
    - **This comparison is the safety check - don't skip it**
+   - **Why content comparison matters**: 
+     - File sizes can be identical while content differs
+     - Metadata changes can mask content changes
+     - Only full content comparison ensures no regressions
+
+   **Comparison Methodology (REQUIRED)**:
+   ```bash
+   # 1. Load both files and compare data sections
+   python -c "
+   import json
+   baseline = json.load(open('.ab_backups/baseline_<timestamp>/<file>.json'))
+   current = json.load(open('.ab_backups/task_<index>_<slug>_<timestamp>/<file>.json'))
+   
+   # Compare data sections (ignore metadata)
+   baseline_data = baseline.get('data', [])
+   current_data = current.get('data', [])
+   
+   print(f'Records: {len(baseline_data)} vs {len(current_data)}')
+   print(f'Content identical: {baseline_data == current_data}')
+   "
+   
+   # 2. For non-identical content, find first difference
+   # 3. Analyze what changed and why
+   # 4. Determine if change is improvement or regression
+   ```
 
 6. **Branch based on comparison results**
    - **If non-identical (outside `metadata`):**  
@@ -185,3 +220,10 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
    ls -la .ab_backups/baseline_<timestamp>/ | grep -E "\.(json|md)$" | wc -l
    # Should return 12
    ```
+
+5. **Comparison mistakes**: Common errors that lead to false positives:
+   - **File size only**: `ls -la` or `wc -c` comparison is insufficient
+   - **Metadata inclusion**: Comparing full JSON including metadata sections
+   - **String comparison**: Using `diff` on raw JSON files without parsing
+   - **Partial comparison**: Only checking some files or some sections
+   - **Improper tools**: Using file system tools instead of JSON parsing tools
