@@ -219,7 +219,7 @@ RUN_METADATA:
 
 ## Group 3: Match Phase Import Issues
 
-### [ ] Fix missing normalize_for_matching import
+### [x] Fix missing normalize_for_matching import
 - **Category**: Regression
 - **Failing tests**:
   - `tests/match/tools/test_mismatch_analyzer.py::TestMismatchAnalyzer::test_display_mismatches_empty`
@@ -228,13 +228,15 @@ RUN_METADATA:
   - `tests/match/tools/test_mismatch_analyzer.py::TestMismatchAnalyzer::test_comment_id_column_in_display`
   - `tests/match/tools/test_mismatch_analyzer.py::TestMismatchAnalyzer::test_blade_format_aware_duplicates_are_separate`
   - `tests/match/tools/test_mismatch_analyzer.py::TestMismatchAnalyzer::test_load_enriched_data`
-- **Files involved**: `sotd/match/tools/analyzers/mismatch_analyzer.py`, `sotd/utils/match_filter_utils.py`
+- **Files involved**: `sotd/match/tools/analyzers/mismatch_analyzer.py`
 - **Observed error**: ImportError: cannot import name 'normalize_for_matching'
-- **Quick next steps**:
-  - Check if function was renamed or moved
-  - Add missing function to match_filter_utils.py
-  - Update import statement
-- **Notes/links**: Missing utility function
+- **Root cause**: Function exists in `sotd.utils.extract_normalization` but was incorrectly imported from `sotd.utils.match_filter_utils`
+- **Solution**: Fixed 4 incorrect import statements to use correct module path
+- **Status**: ✅ COMPLETE - All 6 failing tests now passing
+- **start_hash**: 993db698
+- **resolved_by_commit**: 
+- **Lessons learned**: Always verify import paths - functions may exist in different modules than expected. Multiple incorrect imports can cause the same function to fail in different contexts.
+- **Validation results**: Pipeline outputs identical to baseline - no regressions introduced
 
 ### [ ] Fix blade analyzer normalization test
 - **Category**: Test Drift
