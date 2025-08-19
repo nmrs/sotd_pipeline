@@ -4,9 +4,9 @@ RUN_METADATA:
   run_1_started_at: 2025-08-19T02:35:42Z
   run_1_working_commit: e692f273
   run_1_working_at: 2025-08-19T22:22:04Z
-  run_1_current_state: Working pipeline with Tasks 3, 4, 5, and 6 complete, ready for next task
+  run_1_current_state: Working pipeline with Tasks 3, 4, 5, 6, and 7 complete, ready for next task
   run_1_lessons_preserved: ✅ Critical analysis, regression details, and next steps documented
-  run_1_doc_commits: 54f4999b, 31b31d5e, 4f6df612, c7e848a1, 3df21b7d, 9ded8f7c (documentation only)
+  run_1_doc_commits: 54f4999b, 31b31d5e, 4f6df612, c7e848a1, 3df21b7d, 9ded8f7c, 416dd84d (documentation only)
 -->
 
 ## ⚠️ CRITICAL SESSION ANALYSIS - Task 3 Investigation
@@ -49,13 +49,14 @@ RUN_METADATA:
 - **Task 3**: ✅ COMPLETE (tests pass) but ❌ BROKE pipeline
 - **Need to revert and restart** with more cautious approach ✅ DONE
 
-## 📍 CURRENT WORKING STATE - Post-Revert
+## 📍 CURRENT WORKING STATE - Post-Task 7
 
 ### What We Have Now
 - **Pipeline**: ✅ Working (commit e692f273)
 - **Documentation**: ✅ Complete with full analysis preserved
 - **Knowledge**: ✅ All lessons learned documented and committed
-- **Backup Strategy**: ✅ Baseline backup created for future validation
+- **Backup Strategy**: ✅ **NEW BASELINE** created from Task 6 outputs (includes Blackbird enrichment improvements)
+- **Baseline**: `.ab_backups/baseline_20250819_075826` - reflects current working state with improvements
 
 ### What We've Preserved
 1. **Complete regression analysis** - 1,619 → 2,562 enriched records
@@ -190,16 +191,18 @@ RUN_METADATA:
   3. **Data flow is correct** - Match → Enrich → Aggregate pipeline works as designed
   4. **Test failures can mask working functionality** - validate the actual implementation first
 
-### [ ] Fix enrich CLI argument validation
+### [x] Fix enrich CLI argument validation
 - **Category**: Test Drift
 - **Failing tests**: `tests/enrich/test_cli.py::TestEnrichCLI::test_no_additional_arguments`
-- **Files involved**: `sotd/enrich/cli.py`, `tests/enrich/test_cli.py`
-- **Observed error**: Test expects no 'parallel' argument but CLI includes it
-- **Quick next steps**:
-  - Check if parallel argument was intentionally added
-  - Update test to match actual CLI behavior
-  - Verify CLI arguments are correct
-- **Notes/links**: CLI evolution vs test expectations
+- **Files involved**: `tests/enrich/test_cli.py`
+- **Observed error**: Test expected no 'parallel' argument but CLI includes it
+- **Root cause**: Test expectation was wrong - enrich phase SHOULD have parallel processing arguments like other phases
+- **Solution**: Updated test to verify parallel processing arguments are present (--parallel, --sequential, --max-workers)
+- **Status**: ✅ COMPLETE - All enrich CLI tests now passing
+- **start_hash**: 6f083591
+- **resolved_by_commit**: 416dd84d
+- **Lessons learned**: CLI tests must match actual intended behavior, not outdated expectations. Enrich phase intentionally includes parallel processing for consistency with extract/match phases
+- **Validation results**: Pipeline outputs identical to Task 6 baseline - no regressions introduced
 
 ### [ ] Fix soap sample enricher registration
 - **Category**: Regression
