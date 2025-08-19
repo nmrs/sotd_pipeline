@@ -14,6 +14,11 @@ class TestSoapSampleEnricherIntegration:
         enricher_registry._enrichers.clear()
         enricher_registry._enrichers_by_field.clear()
 
+        # Reset the global setup flag to allow re-registration
+        import sotd.enrich.enrich
+
+        sotd.enrich.enrich._enrichers_setup = False
+
         # Setup enrichers
         setup_enrichers()
 
