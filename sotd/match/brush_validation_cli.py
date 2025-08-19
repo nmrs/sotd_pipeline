@@ -69,8 +69,9 @@ class BrushValidationCLI:
                         # Check if it's a correct match (from correct_matches.yaml)
                         # Check both matched strategy and all_strategies
                         is_correct_match = False
-                        # Fix: Access strategy from brush_entry directly, not from matched
-                        strategy = brush_entry.get("strategy")
+                        # Fix: Access strategy from brush.matched.strategy
+                        matched = brush_entry.get("matched", {})
+                        strategy = matched.get("strategy") if matched else None
                         if strategy in [
                             "correct_complete_brush",
                         ]:
