@@ -146,7 +146,7 @@ class BaseCLIParser(argparse.ArgumentParser):
         return self.add_mutually_exclusive_group()
 
     def add_parallel_processing_arguments(
-        self, default_max_workers: int = 4, help_max_workers: Optional[str] = None
+        self, default_max_workers: int = 8, help_max_workers: Optional[str] = None
     ) -> None:
         """
         Add standardized parallel processing arguments.

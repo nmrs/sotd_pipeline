@@ -81,7 +81,7 @@ def run(args) -> None:
 
     if use_parallel:
         # Get max workers for parallel processing
-        max_workers = processor.get_max_workers(months, args, default=4)
+        max_workers = processor.get_max_workers(months, args, default=8)
 
         # Process months in parallel
         results = processor.process_months_parallel(

@@ -274,8 +274,8 @@ Examples:
     parser.add_argument(
         "--max-workers",
         type=int,
-        default=4,
-        help="Maximum parallel workers for month processing (default: 4)",
+        default=8,
+        help="Maximum parallel workers for month processing (default: 8)",
     )
 
     args = parser.parse_args(argv)
