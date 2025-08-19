@@ -38,6 +38,17 @@ class RazorMatcher(BaseMatcher):
         compiled = []
         for brand, models in self.catalog.items():
             for model, entry in models.items():
+                # Validate that entry is a dictionary, not a string
+                if not isinstance(entry, dict):
+                    raise ValueError(
+                        f"Invalid YAML structure in razors.yaml: "
+                        f"Brand '{brand}' -> Model '{model}' has value '{entry}' "
+                        f"(type: {type(entry).__name__}), but expected a dictionary with "
+                        f"'patterns' and 'format' fields. This usually means 'format' is "
+                        f"placed at the brand level instead of the model level. "
+                        f"Fix: Move 'format: {entry}' inside the '{model}:' section."
+                    )
+
                 patterns = entry.get("patterns", [])
                 fmt = entry.get("format", "DE")
                 for pattern in patterns:
@@ -146,7 +157,22 @@ class RazorMatcher(BaseMatcher):
                                 # Get format from catalog entry
                                 fmt = "DE"  # Default format
                                 if brand in self.catalog and model in self.catalog[brand]:
-                                    fmt = self.catalog[brand][model].get("format", "DE")
+                                    model_data = self.catalog[brand][model]
+                                    if isinstance(model_data, dict):
+                                        fmt = model_data.get("format", "DE")
+                                    else:
+                                        # This should not happen if _compile_patterns validation is working
+                                        # But provide a helpful error message just in case
+                                        raise ValueError(
+                                            f"Invalid YAML structure in razors.yaml: "
+                                            f"Brand '{brand}' -> Model '{model}' has value "
+                                            f"'{model_data}' (type: {type(model_data).__name__}), "
+                                            f"but expected a dictionary. This usually means 'format' "
+                                            f"is placed at the brand level instead of the model level. "
+                                            f"Fix: Move 'format: {model_data}' inside the '{model}:' "
+                                            f"section."
+                                        )
+                                    # If model_data is a string, use default format
                                 return create_match_result(
                                     original=original_text,
                                     matched={"brand": brand, "model": model, "format": fmt},
@@ -160,7 +186,10 @@ class RazorMatcher(BaseMatcher):
                                 # Get format from catalog entry
                                 fmt = "DE"  # Default format
                                 if brand in self.catalog and model in self.catalog[brand]:
-                                    fmt = self.catalog[brand][model].get("format", "DE")
+                                    model_data = self.catalog[brand][model]
+                                    if isinstance(model_data, dict):
+                                        fmt = model_data.get("format", "DE")
+                                    # If model_data is a string, use default format
                                 matched_data = {"brand": brand, "model": model, "format": fmt}
                                 # Copy additional fields from the entry
                                 for key, val in entries.items():
