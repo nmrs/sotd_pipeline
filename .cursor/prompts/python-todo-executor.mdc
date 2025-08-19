@@ -115,24 +115,34 @@ Work through `TEST_SUITE_TODO.md` one task at a time. For each task: ensure a cl
 **This is a safety mechanism to catch unintended side effects.**
 **Even small code changes can affect pipeline output.**
 
+---
+
+## **📋 MANDATORY TASK EXECUTION CHECKLIST**
+
+**You MUST complete ALL steps below for EVERY task. NO EXCEPTIONS.**
+
 For each unchecked task in `TEST_SUITE_TODO.md`:
 
-1. **Annotate task**
+### **STEP 1: Annotate Task** ✅
    - Add `start_hash: <HEAD>` under task notes.
+   - **CONFIRM**: Task has start_hash annotation
 
-2. **Implement fix**
+### **STEP 2: Implement Fix** ✅
    - Apply minimal changes for this task.
+   - **CONFIRM**: Code changes implemented and tests pass
 
-3. **MANDATORY: Re-run extraction pipeline**
+### **STEP 3: MANDATORY Pipeline Re-Run** ✅
    - **ALWAYS** run: `python run.py extract:report --range 2025-06:2025-07 --force`
    - This validates that your fix doesn't break the pipeline or change other outputs
    - **NEVER skip this step, even for simple fixes**
+   - **CONFIRM**: Pipeline completed successfully
 
-4. **MANDATORY: Backup post-fix outputs**
+### **STEP 4: MANDATORY Backup Post-Fix Outputs** ✅
    - Copy files into `.ab_backups/task_<index>_<slug>_<timestamp>/`
    - Use the same 12 files with unique names as baseline backup
+   - **CONFIRM**: All 12 files backed up successfully
 
-5. **MANDATORY: Compare against baseline**
+### **STEP 5: MANDATORY Baseline Comparison** ✅
    - **⚠️ CRITICAL: File size and record count comparison are INSUFFICIENTLY DETERMINISTIC**
    - **REQUIRED: Full JSON content comparison (ignoring `"metadata"` sections only)**
    - **Method**: Use proper JSON comparison tools, not just `ls -la`, `wc -c`, or record counting
@@ -174,7 +184,7 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
    # 5. **STOP if content is not byte-for-byte identical outside metadata**
    ```
 
-6. **Branch based on comparison results**
+### **STEP 6: Branch Based on Comparison Results** ✅
    - **If non-identical (outside `metadata`):**  
      - Summarize differences:
        - Which files differ
@@ -186,6 +196,21 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
      - Commit (`git add -A && git commit -m "Close TODO: <task title>"`).  
      - Append `resolved_by_commit: <hash>` to task notes.  
      - **Continue to next task** (only after successful validation and commit)
+
+---
+
+## **🎯 TASK COMPLETION VALIDATION**
+
+**BEFORE marking any task complete, you MUST confirm:**
+
+- [ ] **STEP 1**: Task annotated with start_hash ✅
+- [ ] **STEP 2**: Fix implemented and tests pass ✅  
+- [ ] **STEP 3**: Pipeline re-run completed successfully ✅
+- [ ] **STEP 4**: Post-fix outputs backed up ✅
+- [ ] **STEP 5**: Baseline comparison shows identical content ✅
+- [ ] **STEP 6**: Task marked complete in TEST_SUITE_TODO.md ✅
+
+**ONLY when ALL 6 steps are confirmed can you proceed to the next task.**
 
 ---
 
@@ -208,6 +233,18 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
 
 **This is the core safety mechanism of the script.**
 **Skipping validation defeats the entire purpose.**
+
+---
+
+## **🚨 FINAL REMINDER**
+
+**At the end of EVERY task, ask yourself:**
+- "Did I complete ALL 6 steps in the checklist?"
+- "Did I validate the pipeline output against baseline?"
+- "Am I sure there are no regressions?"
+
+**If you answered NO to any question, STOP and complete the missing steps.**
+**The validation loop is NOT optional - it's the entire point of this script.**
 
 ---
 
