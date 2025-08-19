@@ -46,4 +46,5 @@ class BlackbirdPlateEnricher(BaseEnricher):
             return "Lite"
         if re.search(r"\bstandard\b", text, re.IGNORECASE):
             return "Standard"
-        return None
+        # Default to Standard if no specific plate type mentioned
+        return "Standard"

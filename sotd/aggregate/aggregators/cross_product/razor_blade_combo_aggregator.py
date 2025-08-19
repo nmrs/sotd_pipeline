@@ -26,8 +26,24 @@ class RazorBladeComboAggregator(BaseAggregator):
             if not razor_matched or not blade_matched:
                 continue
 
+            # Construct names from brand and model if name not directly available
             razor_name = razor_matched.get("name", "").strip()
+            if not razor_name:
+                brand = razor_matched.get("brand", "").strip()
+                model = razor_matched.get("model", "").strip()
+                if brand and model:
+                    razor_name = f"{brand} {model}"
+                else:
+                    razor_name = brand or model or "Unknown Razor"
+
             blade_name = blade_matched.get("name", "").strip()
+            if not blade_name:
+                brand = blade_matched.get("brand", "").strip()
+                model = blade_matched.get("model", "").strip()
+                if brand and model:
+                    blade_name = f"{brand} {model}"
+                else:
+                    blade_name = brand or model or "Unknown Blade"
 
             # Skip if no names
             if not razor_name or not blade_name:
