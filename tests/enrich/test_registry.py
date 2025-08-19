@@ -126,8 +126,16 @@ class TestEnricherRegistry:
         registry.register(blade_enricher)
 
         record = {
-            "blade": {"matched": {"brand": "Feather", "model": "Hi-Stainless"}},
-            "razor": {"matched": {"brand": "Gillette", "model": "Super Speed"}},
+            "blade": {
+                "original": "Feather (3)",
+                "normalized": "Feather",
+                "matched": {"brand": "Feather", "model": "Hi-Stainless"},
+            },
+            "razor": {
+                "original": "Gillette Super Speed",
+                "normalized": "Gillette Super Speed",
+                "matched": {"brand": "Gillette", "model": "Super Speed"},
+            },
             "blade_extracted": "Feather (3)",
             "razor_extracted": "Gillette Super Speed",
         }
@@ -149,15 +157,29 @@ class TestEnricherRegistry:
 
         records = [
             {
-                "blade": {"matched": {"brand": "Feather", "model": "Hi-Stainless"}},
-                "razor": {"matched": {"brand": "Gillette", "model": "Super Speed"}},
+                "blade": {
+                    "original": "Feather (3)",
+                    "normalized": "Feather",
+                    "matched": {"brand": "Feather", "model": "Hi-Stainless"},
+                },
+                "razor": {
+                    "original": "Gillette Super Speed",
+                    "normalized": "Gillette Super Speed",
+                    "matched": {"brand": "Gillette", "model": "Super Speed"},
+                },
                 "blade_extracted": "Feather (3)",
                 "razor_extracted": "Gillette Super Speed",
             },
             {
-                "blade": {"matched": {"brand": "Astra", "model": "Superior Platinum"}},
+                "blade": {
+                    "original": "Astra SP [2]",
+                    "normalized": "Astra SP",
+                    "matched": {"brand": "Astra", "model": "Superior Platinum"},
+                },
                 "razor": {
-                    "matched": {"brand": "Dovo", "model": "Best Quality", "format": "Straight"}
+                    "original": "Dovo 6/8 full hollow round point",
+                    "normalized": "Dovo 6/8 full hollow round point",
+                    "matched": {"brand": "Dovo", "model": "Best Quality", "format": "Straight"},
                 },
                 "blade_extracted": "Astra SP [2]",
                 "razor_extracted": "Dovo 6/8 full hollow round point",
@@ -214,7 +236,11 @@ class TestEnricherRegistry:
 
         record = {
             "comment_id": "test123",
-            "blade": {"matched": {"brand": "Astra", "model": "Superior Platinum"}},
+            "blade": {
+                "original": "Astra SP (3)",
+                "normalized": "Astra SP",
+                "matched": {"brand": "Astra", "model": "Superior Platinum"},
+            },
             "blade_extracted": "Astra SP (3)",
         }
         original_comment = "Using Astra blade"

@@ -22,8 +22,16 @@ def test_enrich_comments_basic():
     comments = [
         {
             "comment_id": "test1",
-            "blade": {"matched": {"brand": "Feather", "model": "Hi-Stainless"}},
-            "razor": {"matched": {"brand": "RazoRock", "model": "Game Changer"}},
+            "blade": {
+                "original": "Feather blade (3rd use)",
+                "normalized": "Feather blade",
+                "matched": {"brand": "Feather", "model": "Hi-Stainless"},
+            },
+            "razor": {
+                "original": "RazoRock Game Changer .84",
+                "normalized": "RazoRock Game Changer",
+                "matched": {"brand": "RazoRock", "model": "Game Changer"},
+            },
             "blade_extracted": "Feather blade (3rd use)",
             "razor_extracted": "RazoRock Game Changer .84",
         }
@@ -72,8 +80,16 @@ def test_process_month_valid_data(tmp_path):
         "data": [
             {
                 "comment_id": "test1",
-                "blade": {"matched": {"brand": "Feather", "model": "Hi-Stainless"}},
-                "razor": {"matched": {"brand": "RazoRock", "model": "Game Changer"}},
+                "blade": {
+                    "original": "Feather blade (3rd use)",
+                    "normalized": "Feather blade",
+                    "matched": {"brand": "Feather", "model": "Hi-Stainless"},
+                },
+                "razor": {
+                    "original": "RazoRock Game Changer .84",
+                    "normalized": "RazoRock Game Changer",
+                    "matched": {"brand": "RazoRock", "model": "Game Changer"},
+                },
                 "blade_extracted": "Feather blade (3rd use)",
                 "razor_extracted": "RazoRock Game Changer .84",
             }

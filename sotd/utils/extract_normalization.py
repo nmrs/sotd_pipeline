@@ -68,6 +68,13 @@ def strip_blade_count_patterns(value: str) -> str:
     ordinal_pattern = r"(?:[\(\[\{])\s*\d+(?:st|nd|rd|th)\s*[\)\]\}]"
     cleaned = re.sub(ordinal_pattern, "", cleaned, flags=re.IGNORECASE)
 
+    # Pattern for superscript ordinal usage: (2^(nd)), (3^(rd)), (1^(st)), etc.
+    # Also handles patterns like (2^(nd) use), (3^(rd) use), etc.
+    superscript_ordinal_pattern = (
+        r"(?:[\(\[\{])\s*\d+\^?\(?(?:st|nd|rd|th)\)?" r"(?:\s+[^\)\]\}]+)?\s*[\)\]\}]"
+    )
+    cleaned = re.sub(superscript_ordinal_pattern, "", cleaned, flags=re.IGNORECASE)
+
     # Pattern for completion indicators: (1 and done), (1 and last), (1st and final), etc.
     completion_pattern = (
         r"(?:[\(\[\{])\s*\d+(?:st|nd|rd|th)?(?:\s+[^\)\]\}]+)?\s+"
@@ -208,6 +215,10 @@ def strip_razor_use_counts(value: str) -> str:
         r"\s*\(used\)",
         r"\s*\(worn\)",
         r"\s*\(old\)",
+        r"\s*\(\d+\)",  # Basic numbers like (6), (12), (23)
+        r"\s*\[\d+\]",  # Numbers in brackets like [5], [10]
+        r"\s*\(new\)",  # New indicators
+        r"\s*\(NEW\)",  # NEW indicators
     ]
 
     cleaned = value
@@ -324,7 +335,7 @@ def strip_link_markup(value: str) -> str:
     return cleaned
 
 
-def strip_trailing_periods(value: str | None) -> str:
+def strip_trailing_periods(value: str | None) -> str | None:
     """
     Strip trailing periods and other punctuation from strings.
 
@@ -332,10 +343,10 @@ def strip_trailing_periods(value: str | None) -> str:
         value: Input string that may have trailing punctuation
 
     Returns:
-        String with trailing punctuation removed
+        String with trailing punctuation removed, or None if input is None
     """
     if not isinstance(value, str):
-        return ""
+        return value
 
     # Remove trailing periods, exclamation marks, and question marks
     cleaned = re.sub(r"[\.\!\?]+$", "", value)

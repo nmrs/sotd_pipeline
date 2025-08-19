@@ -156,8 +156,7 @@ class TestAnnualReportIntegration:
 
             # Run the annual report generation
             with pytest.raises(
-                RuntimeError, 
-                match="Failed to generate annual hardware report content"
+                RuntimeError, match="Failed to generate annual hardware report content"
             ):
                 annual_run.run_annual_report(mock_args)
 
