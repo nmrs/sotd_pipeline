@@ -2389,6 +2389,11 @@ Wolfman:
     format: AC
     patterns:
       - '(Wolfman)?.*WR[\s-]*4'
+Wüsthof:
+  Straight:
+    format: Straight
+    patterns:
+      - w[uü]sthof
 Yaqi:
   Adjustable TFC:
     patterns:
