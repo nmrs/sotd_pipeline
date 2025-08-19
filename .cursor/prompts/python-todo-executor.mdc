@@ -1,0 +1,115 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+### python-todo-executor
+
+**Goal:**  
+Work through `TEST_SUITE_TODO.md` one task at a time. For each task: ensure a clean git state, record hashes, run the extraction pipeline, back up the 10 JSON outputs, implement the fix, re-run, compare outputs (ignoring only the `metadata` section), and either stop for user direction on differences or commit and proceed if identical.
+
+---
+
+## Guardrails
+
+1. **Require clean git status**
+   - Run: `git status --porcelain`
+   - If any output: **stop** and show user the uncommitted changes. User must commit/stash first.
+
+2. **Record starting commit hash**
+   - `START_HASH=$(git rev-parse --verify HEAD)`
+   - Append at the top of `TEST_SUITE_TODO.md`:
+
+       <!--
+       RUN_METADATA:
+         start_commit: <START_HASH>
+         started_at: <UTC ISO8601>
+       -->
+
+   - Do not overwrite previous values; if present, append a new `run_<N>_start_commit`.
+
+---
+
+## Files to Back Up / Compare
+
+files:
+  - data/extracted/2025-06.json
+  - data/extracted/2025-07.json
+  - data/matched/2025-06.json
+  - data/matched/2025-07.json
+  - data/enriched/2025-06.json
+  - data/enriched/2025-07.json
+  - data/aggregated/2025-06.json
+  - data/aggregated/2025-07.json
+  - data/reports/2025-06.json
+  - data/reports/2025-07.json
+
+Store in `.ab_backups/`:
+- `.ab_backups/baseline_<timestamp>/`
+- `.ab_backups/task_<index>_<slug>_<timestamp>/`
+
+---
+
+## Comparison Rules
+
+- Parse each JSON file.
+- Ignore the entire top-level key/section `"metadata"` (and its contents).
+- All other keys and values must be **byte-for-byte identical** between baseline and post-fix snapshots.
+- If `"metadata"` is missing in one file and present in the other, strip it before comparing.
+
+---
+
+## Execution Plan
+
+### A. Baseline
+
+1. Run baseline extraction:
+
+       python run.py extract:report --range 2025-06:2025-07 --force
+
+2. Copy the 10 files into `.ab_backups/baseline_<timestamp>/`
+3. Confirm snapshot to user.
+
+---
+
+### B. Task Loop
+
+For each unchecked task in `TEST_SUITE_TODO.md`:
+
+1. **Annotate task**
+   - Add `start_hash: <HEAD>` under task notes.
+
+2. **Implement fix**
+   - Apply minimal changes for this task.
+
+3. **Re-run extraction**
+
+       python run.py extract:report --range 2025-06:2025-07 --force
+
+4. **Backup post-fix outputs**
+   - Copy files into `.ab_backups/task_<index>_<slug>_<timestamp>/`
+
+5. **Compare against baseline**
+   - Ignore only the `"metadata"` sections.  
+   - Expected result: identical.
+
+6. **Branch**
+   - **If non-identical (outside `metadata`):**  
+     - Summarize differences:
+       - Which files differ
+       - Keypaths and value changes
+       - Example snippets  
+     - **Stop and wait for user direction.**
+   - **If identical:**  
+     - Check off task.  
+     - Commit (`git add -A && git commit -m "Close TODO: <task title>"`).  
+     - Append `resolved_by_commit: <hash>` to task notes.  
+     - Continue.
+
+---
+
+## End Condition
+
+- All tasks checked off, or halted awaiting user input.  
+- `TEST_SUITE_TODO.md` shows global `start_commit` and per-task `start_hash` / `resolved_by_commit`.  
+- `.ab_backups/` contains a baseline and per-task snapshots for reproducibility.
