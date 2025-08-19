@@ -214,10 +214,11 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
    ```
    
    **⚠️ CRITICAL: Why ALL files matter:**
-   - **Pipeline phases are interconnected** - changes in extract can affect match, enrich, aggregate
-   - **Data flows between phases** - normalization changes can ripple through the entire pipeline
-   - **Aggregators depend on upstream data** - match/enrich changes can break aggregation logic
-   - **You cannot predict side effects** - always validate everything to catch unexpected changes
+- **Pipeline phases are interconnected** - changes in fetch can affect extract, match, enrich, aggregate, report
+- **Data flows between phases** - normalization changes can ripple through the entire pipeline
+- **Aggregators depend on upstream data** - match/enrich changes can break aggregation logic
+- **Fetch changes cascade through everything** - thread fetching affects all downstream data processing
+- **You cannot predict side effects** - always validate everything to catch unexpected changes
 
 ### **STEP 6: Branch Based on Comparison Results** ✅
    - **If non-identical (outside `metadata`):**  
@@ -267,10 +268,12 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
 - ✅ Only proceed if ALL files are identical (outside metadata)
 
 **⚠️ CRITICAL: Pipeline phases are interconnected**
-- **Extract** changes can affect **Match** phase
-- **Match** changes can affect **Enrich** phase  
-- **Enrich** changes can affect **Aggregate** phase
-- **Any phase** can affect **Report** generation
+- **Fetch** changes can affect **Extract**, **Match**, **Enrich**, **Aggregate**, **Report** phases
+- **Extract** changes can affect **Match**, **Enrich**, **Aggregate**, **Report** phases
+- **Match** changes can affect **Enrich**, **Aggregate**, **Report** phases
+- **Enrich** changes can affect **Aggregate**, **Report** phases
+- **Aggregate** changes can affect **Report** generation
+- **Any phase** can affect downstream phases and final outputs
 
 **You cannot predict side effects - always validate everything.**
 
