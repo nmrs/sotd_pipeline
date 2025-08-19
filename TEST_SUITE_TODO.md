@@ -262,7 +262,7 @@ RUN_METADATA:
 - **Solution**: Updated test to expect 'all' instead of 'hardware' to match actual CLI behavior
 - **Status**: ✅ COMPLETE - All 27 report CLI tests now passing
 - **start_hash**: 6451c356
-- **resolved_by_commit**: e233eb45
+- **resolved_by_commit**: aa99702d
 - **Lessons learned**: 
   1. **CLI help text is authoritative** - always check actual CLI behavior vs test expectations
   2. **Test drift can occur** - tests may expect outdated behavior that was intentionally changed
