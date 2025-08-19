@@ -271,6 +271,12 @@ Examples:
     parser.add_argument("--out-dir", default="data", help="Output directory (default: data)")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument("--force", action="store_true", help="Force overwrite existing files")
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=4,
+        help="Maximum parallel workers for month processing (default: 4)",
+    )
 
     args = parser.parse_args(argv)
 
@@ -318,6 +324,8 @@ Examples:
             common_args.append("--debug")
         if args.force:
             common_args.append("--force")
+        if args.max_workers:
+            common_args.extend(["--max-workers", str(args.max_workers)])
 
         return run_pipeline(phases, common_args, debug=args.debug)
 
