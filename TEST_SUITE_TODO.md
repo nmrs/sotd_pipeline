@@ -58,6 +58,19 @@ RUN_METADATA:
   - Verify input data structure matches expectations
 - **Notes/links**: Similar to brush aggregator issues
 
+### [ ] Fix specialized aggregators data extraction
+- **Category**: Regression
+- **Failing tests**:
+  - `tests/aggregate/test_razor_specialized_aggregators.py::test_aggregate_blackbird_plates`
+  - `tests/aggregate/test_user_and_cross_product_aggregators.py::test_aggregate_razor_blade_combos`
+- **Files involved**: `tests/aggregate/test_razor_specialized_aggregators.py`, `tests/aggregate/test_user_and_cross_product_aggregators.py`
+- **Observed error**: Aggregators returning empty lists instead of expected data
+- **Root cause**: Test data is incomplete - missing required `matched` sections with `brand`/`model` data
+- **Previous attempt**: Fixed test data but broke enrich phase (reverted)
+- **Current status**: ❌ NEEDS RESTART - Must investigate enrich phase filtering logic first
+- **Lessons learned**: Test data fixes can mask deeper issues in enrich phase logic
+- **Next approach**: Make smaller, targeted changes and validate each step with pipeline runs
+
 ### [ ] Fix null value handling in aggregators
 - **Category**: Regression
 - **Failing tests**: `tests/aggregate/test_data_quality.py::TestDataQuality::test_edge_case_null_values`
