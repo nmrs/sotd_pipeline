@@ -218,6 +218,19 @@ razor:
       id: mx5l4qe
       source: user
     reason: not a real razor
+  ? Unknown (I don't remember the model, I got it back in like 2013 through a subscription
+    box as my first ever DE razor so figured I'd try it again!)
+  : added_date: '2025-08-19'
+    comment_ids:
+    - file: 2025-08.json
+      id: n77pdd8
+      source: user
+  Unknown (Unknown):
+    added_date: '2025-08-19'
+    comment_ids:
+    - file: 2025-02.json
+      id: mfn1cig
+      source: user
   jus:
     added_date: '2025-07-19'
     comment_ids:

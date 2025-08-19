@@ -1,86 +1,89 @@
 3D Printed:
   DE:
     patterns:
-    - 3d.*(?:printed)?
+      - 3d.*(?:printed)?
   GEM:
     format: GEM
     patterns:
-    - 3d.*(?:printed)?.*gem
+      - 3d.*(?:printed)?.*gem
   Half DE:
     format: Half DE
     patterns:
-    - 3d.*(?:printed)?.*half.*de
+      - 3d.*(?:printed)?.*half.*de
   Lathercatcher:
     format: GEM
     patterns:
-    - 3d.*(?:printed)?.*lather.*catcher
+      - 3d.*(?:printed)?.*lather.*catcher
 Above the Tie:
   H1:
     patterns:
-    - '\b(?:att|tie)\b.*h-*1'
-    - (atlas|bamboo|calypso|colossus|kronos).*h1
+      - '\b(?:att|tie)\b.*h-*1'
+      - (atlas|bamboo|calypso|colossus|kronos).*h1
   H2:
     patterns:
-    - '\b(?:att|tie)\b.*h-*2'
-    - (?:atlas|bamboo|calypso|colossus|kronos).*h2
+      - '\b(?:att|tie)\b.*h-*2'
+      - (?:atlas|bamboo|calypso|colossus|kronos).*h2
   M2:
     patterns:
       - att.*m2
       - colossus.*m2
   R1:
     patterns:
-    - '\b(?:att|tie)\b.*r-*1'
-    - (?:atlas|bamboo|calypso|colossus|kronos).*r1
+      - '\b(?:att|tie)\b.*r-*1'
+      - (?:atlas|bamboo|calypso|colossus|kronos).*r1
   R2:
     patterns:
-    - '\b(?:att|tie)\b.*r-*2'
-    - (?:atlas|bamboo|calypso|colossus|kronos).*r2
+      - '\b(?:att|tie)\b.*r-*2'
+      - (?:atlas|bamboo|calypso|colossus|kronos).*r2
   S1:
     patterns:
-    - '\b(?:att|tie)\b.*s-*1'
-    - (?:atlas|bamboo|calypso|colossus|kronos).*s1
-    - above the tie.*(?:atlas|bamboo|calypso|colossus|kronos)
+      - '\b(?:att|tie)\b.*s-*1'
+      - (?:atlas|bamboo|calypso|colossus|kronos).*s1
+      - above the tie.*(?:atlas|bamboo|calypso|colossus|kronos)
   S2:
     patterns:
-    - '\b(?:att|tie)\b.*s-*2'
-    - (?:atlas|bamboo|calypso|colossus|kronos).*s2
+      - '\b(?:att|tie)\b.*s-*2'
+      - (?:atlas|bamboo|calypso|colossus|kronos).*s2
   SE1:
     format: AC
     patterns:
-    - (?:\batt\b|tie).*se-*1
-    - (?:atlas|bamboo|calypso|colossus|kronos).*se1
+      - (?:\batt\b|tie).*se-*1
+      - (?:atlas|bamboo|calypso|colossus|kronos).*se1
   SE2:
     format: AC
     patterns:
-    - (?:\batt\b|tie).*se-*2
+      - (?:\batt\b|tie).*se-*2
   Windsor Pro SB90:
     patterns:
-    - \b(?:att|tie)\b.*sb90(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-    - \b(?:att|tie)\b.*windsor
+      - \b(?:att|tie)\b.*sb90(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - \b(?:att|tie)\b.*windsor
   Windsor SSRH2:
     patterns:
-    - '\b(?:att|tie)\b.*(?:windsor)*\b.*ssrh2'
+      - '\b(?:att|tie)\b.*(?:windsor)*\b.*ssrh2'
 Alpha:
   Claymore:
     format: AC
     patterns:
-    - alpha.*claymore
+      - alpha.*claymore
   Outlaw:
     patterns:
-    - alpha.*outl
-    - alpha.*lone.*star
+      - alpha.*outl
+      - alpha.*lone.*star
   Spirit:
     format: AC
     patterns:
-    - alpha.*spirit
+      - alpha.*spirit
+  Stubble Meets Steel:
+    patterns:
+      - stubble.?meets?.?s?steel
   The Guido:
     patterns:
-    - alpha.*guido
-    - the guido
+      - alpha.*guido
+      - the guido
 Alshabab:
   Razor:
     patterns:
-    - al ?shabab
+      - al ?shabab
 Art of Shaving:
   Excalibur:
     patterns:
@@ -89,13 +92,13 @@ Art Razor:
   Straight:
     format: Straight
     patterns:
-    - yurii.*kravcenko.*(?:\d{1,2}/(8|16))?
-    - \bart\b.*razor.*(?:\d{1,2}/(8|16))?
+      - yurii.*kravcenko.*(?:\d{1,2}/(8|16))?
+      - \bart\b.*razor.*(?:\d{1,2}/(8|16))?
   Kamisori:
     format: Straight
     patterns:
-    - yurii.*kravcenko.*kami
-    - \bart\b.*razor.*kami
+      - yurii.*kravcenko.*kami
+      - \bart\b.*razor.*kami
 Assured for Men:
   Dollar Tree Safety Razor:
     patterns:
@@ -103,150 +106,150 @@ Assured for Men:
       - assured.*safety.*razor
   TTO:
     patterns:
-    - assured.*men.*tto
+      - assured.*men.*tto
 Asylum:
   Evolution:
     format: AC
     patterns:
-    - asylum.*evo
+      - asylum.*evo
   Rx:
     format: AC
     patterns:
-    - asylum.*rx
+      - asylum.*rx
 Atelier Durdan:
   Horizon:
     format: AC
     patterns:
-    - durdan.*horizon
+      - (atel|durd).*horizon
   Le Faulx:
     format: AC
     patterns:
-    - atelier.*durdan.*faulx
-    - la falux
+      - atelier.*durdan.*faul?x
+      - la falux
   Le Maurice:
     patterns:
-    - dur.*maurice
+      - dur.*maurice
   Mauritius:
     patterns:
-    - dur.*mauritius
+      - dur.*mauritius
   Number 7:
     patterns:
-    - atelier.*durdan.*(number|no).*(7|seven)
+      - atelier.*durdan.*(number|no).*(7|seven)
   Vestige:
     format: GEM
     patterns:
-    - atelier.*durdan.*.*vestige(.*(number|no).*(7|seven) handle)?
+      - atelier.*durdan.*.*vestige(.*(number|no).*(7|seven) handle)?
 Aylsworth:
   Apex:
     patterns:
-    - aylsworth.*apex
+      - aylsworth.*apex
   Drakkant:
     patterns:
-    - drakk?ant
-    - aylsworth
-    - kopp?[ae]rkant
+      - drakk?ant
+      - aylsworth
+      - kopp?[ae]rkant
 BBNY:
   Safety Razor:
     patterns:
-    - bbny
+      - bbny
 Baili:
   3-Piece:
     patterns:
-    - baili(.*tech)?
-    - '(bail[ie]|br|bt|bd)[\s-]*[12]\d{2}'
+      - baili(.*tech)?
+      - '(bail[ie]|br|bt|bd)[\s-]*[12]\d{2}'
   TTO:
     patterns:
-    - '(bail[ie]|br|bt|bd)[\s-]*[12]\d{1}[79]'
-    - bail[ie].*(tto|butterfly)
+      - '(bail[ie]|br|bt|bd)[\s-]*[12]\d{1}[79]'
+      - bail[ie].*(tto|butterfly)
 Barbaros:
   TR-1:
     patterns:
-    - 'barbaros.*tr[\s-]1'
+      - 'barbaros.*tr[\s-]1'
   TR-2:
     patterns:
-    - barbaros
+      - barbaros
   TR-3:
     patterns:
-    - 'barbaros.*tr[\s-]3'
+      - 'barbaros.*tr[\s-]3'
   TR-4:
     patterns:
-    - 'barbaros.*tr[\s-]4'
+      - 'barbaros.*tr[\s-]4'
 Bambaw:
   Safety Razor:
     patterns:
-    - bambaw
+      - bambaw
 Baxter:
   Safety Razor:
     patterns:
-    - baxter
+      - baxter
 Beard Struggle:
   SEAX:
     patterns:
-    - '\bseax\b'
+      - '\bseax\b'
 Bevel:
-  Essential Disposable: 
-    #this is a disposable razor with a preloaded bevel de blade, 
+  Essential Disposable:
+    #this is a disposable razor with a preloaded bevel de blade,
     #so marking this as a DE, not cartridge
     patterns:
-    - bevel.*disposable
+      - bevel.*disposable
   Safety Razor:
     patterns:
-    - bevel
+      - bevel
 Berkeley:
   Shave Selector:
     patterns:
-    - berkeley
+      - berkeley
 Blackland:
   Square (Workshop Batch 002):
     format: Half DE
     patterns:
-    - blackland.*batch[0\s-]*2
-    - blackland.*square
+      - blackland.*batch[0\s-]*2
+      - blackland.*square
   Blackbird:
     patterns:
-    - 'bb\s*(sb|oc)'
-    - '(brass|black|ti)\s*bird'
-    - Balckbird
-    - Blackbrid
-    - Blaclbird
-    - Blckbird
-    - Blclbird
-    - Blackland\s*Tb?ird
-    - blackland
-    - the bird
+      - 'bb\s*(sb|oc)'
+      - '(brass|black|ti)\s*bird'
+      - Balckbird
+      - Blackbrid
+      - Blaclbird
+      - Blckbird
+      - Blclbird
+      - Blackland\s*Tb?ird
+      - blackland
+      - the bird
   Dart:
     patterns:
-    - (?:blackland)?.*\bdart\b
+      - (?:blackland)?.*\bdart\b
   Era:
     patterns:
-    - (?:blackland)?.*\bera\b
-    - black.*dna
+      - (?:blackland)?.*\bera\b
+      - black.*dna
   Osprey:
     patterns:
-    - (?:blackland)?.*osprey
+      - (?:blackland)?.*osprey
   Sabre:
     format: GEM
     patterns:
-    - (?:blackland)?.*sab[re]{2}
+      - (?:blackland)?.*sab[re]{2}
   Sabre V2:
     format: GEM
     patterns:
-    - (?:blackland)?.*sab[re]{2}.*(\bv2|2\.0\b)
+      - (?:blackland)?.*sab[re]{2}.*(\bv2|2\.0\b)
   Tradere:
     patterns:
-    - (?:blackland)?.*tradere
+      - (?:blackland)?.*tradere
   Vector:
     format: AC
     patterns:
-    - (?:black(land|bird))?.*vector
+      - (?:black(land|bird))?.*vector
 Blutt Rasur:
   BR-1:
     patterns:
-    - blutt?
+      - blutt?
 Bombay Shavimg Company:
   DE:
     patterns:
-    - bombay.*shaving.*company
+      - bombay.*shaving.*company
 Böker:
   Abalone:
     format: Straight
@@ -263,58 +266,68 @@ Böker:
   Straight:
     format: Straight
     patterns:
-    - b[oö]ker.*(\s+straight)?
+      - b[oö]ker.*(\s+straight)?
 Broman:
   Razor:
     patterns:
-    - broman
+      - broman
   Razor Mark II:
     patterns:
-    - 'broman\s*(mark|mk)\s*(?:two|2|ii)'
+      - 'broman\s*(mark|mk)\s*(?:two|2|ii)'
 Bulimica:
   Safety Razor:
     patterns:
-    - bulimica
+      - bulimica
+C-Mon:
+  Straight:
+    format: Straight
+    patterns:
+      - c-?mon
 CV Heljestrand:
   Lather Catcher:
     format: Other
     patterns:
-    - heljestrand.*catcher
+      - heljestrand.*catcher
   Straight:
     format: Straight
     patterns:
-    - heljestra.*(stra)?
+      - heljestra.*(stra)?
+Campobasso:
+  Straight:
+    format: Straight
+    patterns:
+      - campobasso
 Carbon:
   Cx:
     patterns:
-    - carbon.*(cx|razor)
-    - carbon.*shav.*co
-    - carbon.*316
-    - carbon.*orig
-    - carbon.*\bti
-    - carbon \++
-    - carbon razors?
+      - carbon.*(cx|razor)
+      - carbon.*shav.*co
+      - carbon.*316
+      - carbon.*orig
+      - carbon.*\bti
+      - carbon \++
+      - carbon razors?
 Charcoal Goods:
   Everyday:
     patterns:
-    - '^(?!.*wcs).*\b(char\w*l|cg).*every'
+      - '^(?!.*wcs).*\b(char\w*l|cg).*every'
   Lithe Head:
     patterns:
-    - lithe
+      - lithe
   Lvl 1:
     patterns:
-    - '^(?!.*wcs).*\b(char\w*l|cg).*(level|lvl|lv)(\s*|-)(1|one|i)\b'
+      - '^(?!.*wcs).*\b(char\w*l|cg).*(level|lvl|lv)(\s*|-)(1|one|i)\b'
   Lvl 2:
     patterns:
-    - '^(?!.*wcs).*\b(char\w*l|cg).*(level|lvl|lv)(\s*|-)(2|two|ii)\b'
-    - 'charcoal\s*goods'
+      - '^(?!.*wcs).*\b(char\w*l|cg).*(level|lvl|lv)(\s*|-)(2|two|ii)\b'
+      - 'charcoal\s*goods'
   Lvl 3:
     patterns:
-    - '^(?!.*wcs).*\b(char\w*l|cg).*(level|lvl|lv)(\s*|-)(3|three|iii)\b'
+      - '^(?!.*wcs).*\b(char\w*l|cg).*(level|lvl|lv)(\s*|-)(3|three|iii)\b'
 Chinchilla:
   Razor:
     patterns:
-    - chinchilla
+      - chinchilla
 # Chisel & Hound:
 #   Briar Brushworks Collab Slim:
 #     patterns:
@@ -322,10 +335,10 @@ Chinchilla:
 Chiseled Face:
   Legacy:
     patterns:
-    - chiseled.*face.*(ti|legacy|alum)
-    - cfl*.*(ti|legacy|alum)
-    - face.*legacy
-    - legacy
+      - chiseled.*face.*(ti|legacy|alum)
+      - cfl*.*(ti|legacy|alum)
+      - face.*legacy
+      - legacy
 Cien Men:
   Safety Razor:
     patterns:
@@ -334,40 +347,44 @@ CJB:
   GR-100B:
     format: Shavette (AC)
     patterns:
-    - gr-?100b
+      - gr-?100b
   Kamisori Shavette:
     format: Shavette (AC)
     patterns:
-    - cjb*vett*e
-    - cjb.*kamisori.*(?:shavette)?
+      - cjb*vett*e
+      - cjb.*kamisori.*(?:shavette)?
 Classic:
   Cobra Classic:
     format: AC
     patterns:
-    - cobra.*(clas|razor)
-    - classic.*cobra
-    - ^cobra$
+      - cobra.*(clas|razor)
+      - classic.*cobra
+      - ^cobra$
   King Cobra:
     format: AC
     patterns:
-    - (?:classic.*)?king.*cobra
+      - (?:classic.*)?king.*cobra
 Clix:
   E-Z Flo:
     patterns:
-    - '\bclix\b'
+      - '\bclix\b'
+Coles NY:
+  Slant:
+    patterns:
+      - coles.*slant
 Colonial:
   CR7:
     patterns:
-    - CR7
+      - CR7
   General:
     format: AC
     patterns:
-    - col.*gener
-    - general
-    - colonial.*ac
+      - col.*gener
+      - general
+      - colonial.*ac
   Silversmith:
     patterns:
-    - silversmith
+      - silversmith
 Cooper:
   Monobilt:
     patterns:
@@ -376,187 +393,204 @@ Cooper:
 Crescent City:
   Closed Comb 79:
     patterns:
-    - cres.*city.*79
+      - cres.*city.*79
 Daune:
   Double Edge Shavette:
     format: Shavette (DE)
     patterns:
-    - daune
+      - daune
 Design94:
   Aviation94:
     patterns:
-    - aviation94
+      - aviation94
 Diane:
   Double Edge Shaver:
     patterns:
-    - \bdiane\b
+      - \bdiane\b
 Dorco:
   PL-602:
     patterns:
-    - 'pl(?:-*\s*)602'
+      - 'pl(?:-*\s*)602'
   ST-301:
     patterns:
-    - 'ST(?:-*\s*)301'
-DSCosmetic:
-  D8:
-    patterns:
-    - dscos.*d8
-  Mars SE:
-    format: Half DE
-    patterns:
-    - ds\s?cos.*mars
-  S9:
-    patterns:
-    - dscosmetic.*\bs9\b
-  T7SE:
-    patterns:
-    - t7se
-Dovo:
-  Shavette:
-    format: Shavette
-    patterns:
-    - dovo.*shavette
+      - 'ST(?:-*\s*)301'
+Drew Dick:
   Straight:
     format: Straight
     patterns:
-    - dovo.*(straight|\d{1,2}/(8|16)|ground)
+      - drew.*dick
+DSCosmetic:
+  D8:
+    patterns:
+      - dscos.*d8
+  AX:
+    patterns:
+      - ds\s?cos.*\bax\b
+      - \bds[- ]?ax\b
+  Mars SE:
+    format: Half DE
+    patterns:
+      - ds\s?cos.*mars
+  S9:
+    patterns:
+      - dscosmetic.*\bs9\b
+  T7SE:
+    patterns:
+      - t7se
+Dovo:
+  41 Inox:
+    format: Straight
+    grind: Full Hollow
+    point: Round
+    steel: Stainless
+    width: 5/8
+    patterns:
+      - dovo.*\b41\b
+  Shavette:
+    format: Shavette
+    patterns:
+      - dovo.*shavette
+  Straight:
+    format: Straight
+    patterns:
+      - dovo.*(straight|\d{1,2}/(8|16)|ground)
 Dubl Duck:
   Goldedge:
     format: Straight
     patterns:
-    - dubl.*duck.*gold[\s-]?edge(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - dubl.*duck.*gold[\s-]?edge(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Hair Shaper:
     format: Shavette (Hair Shaper)
     patterns:
-    - dubl ?duck.*shaper
+      - dubl ?duck.*shaper
   Straight:
     format: Straight
     patterns:
-    - (?!.*shaper)dubl ?duck.*(\d{1,2}/(8|16))?
+      - (?!.*shaper)dubl ?duck.*(\d{1,2}/(8|16))?
 Durham:
   Duplex:
     format: Shavette
     patterns:
-    - durham.*(?:duplex|demonstrator)
+      - durham.*(?:duplex|demonstrator)
 Eclipse:
   Red Ring:
     patterns:
-    - eclipse.*red ring
+      - eclipse.*red ring
 Edwin Jagger:
   3one6:
     patterns:
-    - '\b3\s*one\s*6\b'
-    - 'EJ\s*316'
+      - '\b3\s*one\s*6\b'
+      - 'EJ\s*316'
   DE89:
     patterns:
-    - 'DE\s*89'
-    - kelvin
-    - edwi
-    - '(?:de|ej)\s*8\d'
-    - ej lined chrome
+      - 'DE\s*89'
+      - kelvin
+      - edwi
+      - '(?:de|ej)\s*8\d'
+      - ej lined chrome
 EldrormR Industries:
   MM24:
     format: GEM
     patterns:
-    - 'mm\s*24'
+      - 'mm\s*24'
   Scrubty-four:
     format: GEM
     patterns:
-    - 'mm\s*24\s*scrub'
-    - scrub.*four
+      - 'mm\s*24\s*scrub'
+      - scrub.*four
 Enders:
   Speed Shaver:
     format: Other
     patterns:
-    - enders
+      - enders
 ERN:
   Straight:
     format: Straight
     patterns:
-    - \bern\b(.*\d{1,2}/(8|16))?
+      - \bern\b(.*\d{1,2}/(8|16))?
 Ever-Ready:
-  '1912':
+  "1912":
     format: GEM
     patterns:
-    - (?:ever|er).*1912
-    - 1912.*(?:ever|er)
-  '1914':
+      - (?:ever|er).*1912
+      - 1912.*(?:ever|er)
+  "1914":
     format: GEM
     patterns:
-    - (?:ever|er).*1914
-    - 1914.*(?:ever|er)
-    - ever.*lather
-  '1924':
+      - (?:ever|er).*1914
+      - 1914.*(?:ever|er)
+      - ever.*lather
+  "1924":
     format: GEM
     patterns:
-    - (ever|er).*1924
-    - 1924.*(ever|er)
-    - 'shovel\s*head'
-    - gem.*1924
-    - '1924'
+      - (ever|er).*1924
+      - 1924.*(ever|er)
+      - 'shovel\s*head'
+      - gem.*1924
+      - "1924"
   E-Bar:
     format: GEM
     patterns:
-    - (ever|er).*e-bar
+      - (ever|er).*e-bar
   Featherweight:
     format: GEM
     patterns:
-    - (ever|er).*featherw
-    - featherweight
+      - (ever|er).*featherw
+      - featherweight
   G-Bar:
     format: GEM
     patterns:
-    - (ever|er).*g-bar
+      - (ever|er).*g-bar
   Streamline:
     format: GEM
     patterns:
-    - '(?:ever|er).*(stream\s*line|ambassador|jewel)'
-    - '\bstream\s*line\b'
+      - '(?:ever|er).*(stream\s*line|ambassador|jewel)'
+      - '\bstream\s*line\b'
 Everyday:
   Stinger:
     patterns:
-    - everyday
-    - magnet
+      - everyday
+      - magnet
 Executive Shaving:
   Braveheart:
     patterns:
-    - exec.*braveheart
+      - exec.*braveheart
   Claymore:
     format: AC
     patterns:
-    - exec.*claymore
+      - exec.*claymore
   Outlaw:
     patterns:
-    - exec.*outlaw
-    - '\bxec.*outlaw'
+      - exec.*outlaw
+      - '\bxec.*outlaw'
 Facón:
   Shavette (AC):
     patterns:
-    - fac[oó]n.*(ace|artist|stylist)
+      - fac[oó]n.*(ace|artist|stylist)
   Gladiator:
     patterns:
       - fac[oó]n.*gladiator
   Shavette (Half DE):
     format: Shavette (Half DE)
     patterns:
-    - fac[oó]n.*shavette
+      - fac[oó]n.*shavette
   Kamisori Shavette:
     format: Shavette (Half DE)
     patterns:
-    - fac[oó]n.*kamisori.*shavette
+      - fac[oó]n.*kamisori.*shavette
 Fasan:
   Bakelite Slant:
     patterns:
-    - fasan.*slant
+      - fasan.*slant
 Fatip:
   Gentile:
     patterns:
-    - fatt?ip.*gentile
-    - test.*genti.*
+      - fatt?ip.*gentile
+      - test.*genti.*
   Grande:
     patterns:
-    - fatt?ip.*grande
-    - fatt?ip.*classic
+      - fatt?ip.*grande
+      - fatt?ip.*classic
   Lo Storto:
     patterns:
       - fatt?ip.*stor[tn]o
@@ -565,306 +599,341 @@ Fatip:
       - lo.*storto
   Olive Wood:
     patterns:
-    - fatt?ip.*(olive|ulivo|wood)
+      - fatt?ip.*(olive|ulivo|wood)
   Piccolo:
     patterns:
-    - fatt?ip.*picc*oll*o
-    - fatip
+      - fatt?ip.*picc*oll*o
+      - fatip
   Retro:
     patterns:
-    - fatt?ip.*retro
+      - fatt?ip.*retro
 Feather:
   800-1B:
     patterns:
-    - (feather.*)?800[\s-]?1b
+      - (feather.*)?800[\s-]?1b
   AS-D2:
     patterns:
-    - feather.*as.*2
-    - as-*d2
+      - feather.*as.*2
+      - as-*d2
   Popular:
     patterns:
-    - feather.*popular
-    - feather.*fh-h
+      - feather.*popular
+      - feather.*fh-h
   Shavette:
     format: Shavette (AC)
     patterns:
-    - Feather.*(dx|ss|sr)
-    - feather.*artist.*clu
-    - feather.*ac
+      - Feather.*(dx|ss|sr)
+      - feather.*artist.*clu
+      - feather.*ac
 Filarmonica:
   Straight:
     format: Straight
     patterns:
-    - 'Filar*m\wnica(\s+straight)*'
-    - monserrat
+      - 'Filar*m\wnica(\s+straight)*'
+      - monserrat
 Fine Accoutrements:
   DE5:
     patterns:
       - fine.*accout.*de5
   Marvel:
     patterns:
-    - fine.*marvel
+      - fine.*marvel
   Superlight Slant:
     patterns:
-    - superlight.*slant
-    - fine.*slant
+      - superlight.*slant
+      - fine.*slant
   World's Finest:
     patterns:
-    - fine.*world
+      - fine.*world
 Flying Eagle:
   Tech Clone:
     patterns:
-    - flying.*eagle
+      - flying.*eagle
 Focus:
   Dynamic R48:
     format: Half DE
     patterns:
-    - focus.*r48
-    - ^(?!.*\br50\b).*focus.*dynamic
+      - focus.*r48
+      - ^(?!.*\br50\b).*focus.*dynamic
   Dynamic R50:
     format: Half DE
     patterns:
-    - focus.*r50
+      - focus.*r50
   R21:
     format: Shavette (Half DE)
     patterns:
       - focus.*r21
   Tritok Slant:
     patterns:
-    - focus.*slant
+      - focus.*slant
 FrankenRazor:
-  ? ''
-  : patterns:
-    - franken
+  "":
+    patterns:
+      - franken
 Futur Clone:
-  ? ''
-  : patterns:
-    - futur.*clone
-    - Ming.*Shi.*(2000|adj)
-    - qs?have
+  "":
+    patterns:
+      - futur.*clone
+      - Ming.*Shi.*(2000|adj)
+      - qs?have
+F.W. Engels:
+  Special:
+    format: Straight
+    patterns:
+      - engels.*special
+  Straight:
+    format: Straight
+    patterns:
+      - engels
 Gardette:
   Safety Razor:
     patterns:
-    - gardette
+      - gardette
 GEM:
-  '1912':
+  "1912":
     format: GEM
     patterns:
-    - gem.*1912
-    - 1912.*gem
+      - gem.*1912
+      - 1912.*gem
   Clog Pruf:
     format: GEM
     patterns:
-    - gem.*clog(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-    - .*clog.*pruf(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - gem.*clog(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - .*clog.*pruf(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Damaskeene:
     format: GEM
     patterns:
-    - gem.*damas
-    - damaskeene
+      - gem.*damas
+      - damaskeene
   Damaskeene OC:
     format: GEM
     patterns:
-    - gem.*damas.*(oc|open.*comb)
-    - damaskeene.*(oc|open.*comb)
+      - gem.*damas.*(oc|open.*comb)
+      - damaskeene.*(oc|open.*comb)
   Featherweight:
     format: GEM
     patterns:
-    - gem.*(feather)
+      - gem.*(feather)
   Flying Wing (aka Bullet Tip):
     format: GEM
     patterns:
-    - bullet.*tip(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-    - flying.*wing(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - bullet.*tip(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - flying.*wing(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   G-Bar:
     format: GEM
     patterns:
-    - gem.*g.*bar
+      - gem.*g.*bar
   Junior:
     format: GEM
     patterns:
-    - gem.*(junior|jr)
+      - gem.*(junior|jr)
   Micromatic:
     format: GEM
     patterns:
-    - micromatic
+      - micromatic
   Micromatic Open Comb:
     format: GEM
     patterns:
-    - gem.*(micro.*matic.*open|mmoc|ocmm)
-    - mmoc
-    - ocmm
-    - gem.*open.*comb
-    - gem
-    - micromatic\s*open\s*comb
+      - gem.*(micro.*matic.*open|mmoc|ocmm)
+      - mmoc
+      - ocmm
+      - gem.*open.*comb
+      - gem
+      - micromatic\s*open\s*comb
   Pushbutton:
     format: GEM
     patterns:
-    - gem.*push
+      - gem.*push
+Geneva Cutlery Co.:
+  Straight:
+    format: Straight
+    patterns:
+      - geneva.*cutlery
+Geo. Wostenholm & Son:
+  Pipe Razor:
+    format: Straight
+    patterns:
+      - w[ouü]stenholm.*pipe
+  Straight:
+    format: Straight
+    patterns:
+      - w[ouü]stenholm
 Gibbs:
   no. 15/17:
     patterns:
-    - gibbs.*1[5|7]
+      - gibbs.*1[5|7]
 Gillette:
   7 O'Clock Sterling:
     patterns:
-    - gil.*te.*sterling
-    - o.{1}clock
+      - gil.*te.*sterling
+      - o.{1}clock
   Diplomat:
     patterns:
-    - Diplomat
+      - Diplomat
   Fatboy:
     patterns:
-    - 'fat\s*boy'
-    - 'gil.*et.*\b195\b'
-    - gil.*et.*exec
-    - gillette.*\bfat\b
+      - 'fat\s*boy'
+      - 'gil.*et.*\b195\b'
+      - gil.*et.*exec
+      - gillette.*\bfat\b
   Goodwill:
     patterns:
-    - Gil.*et.*goodwill
+      - Gil.*et.*goodwill
   Heritage:
     patterns:
-    - Gil.*et.*heritage
+      - Gil.*et.*heritage
   King C. Gillette:
     patterns:
       - k*.*c.*gil.*et
       - gil.*et.*king(.*c)?
   Knack:
     patterns:
-    - Gil.*et.*knack
+      - Gil.*et.*knack
   Lady Gillette:
     patterns:
-    - lady.*gil.*et
-    - gil.*et.*lady
+      - lady.*gil.*et
+      - gil.*et.*lady
   NEW:
     patterns:
-    - gil.*new
-    - bostonian
-    - new.*(s|l)c
-    - new.*(short|long).*comb
-    - (british|english).*new
-    - tuckaway
-    - new.*luxe
-    - rfb.*new
-    - new.*rfb
-    - gil.*et.*rfb
-    - bottom.*new
-    - big boy
-    - some new-fangled 3-piece razor design # see https://www.reddit.com/r/Wetshaving/comments/1d5gb5t/comment/l6nxf5b/
+      - gil.*new
+      - bostonian
+      - new.*(s|l)c
+      - new.*(short|long).*comb
+      - (british|english).*new
+      - tuckaway
+      - new.*luxe
+      - rfb.*new
+      - new.*rfb
+      - gil.*et.*rfb
+      - bottom.*new
+      - big boy
+      - some new-fangled 3-piece razor design # see https://www.reddit.com/r/Wetshaving/comments/1d5gb5t/comment/l6nxf5b/
   New Improved:
     patterns:
-    - new.*improved
+      - new.*improved
   Old Type:
     patterns:
-    - gillette.*\bold\b
-    - oc.*ball
-    - old.*type
-    - pocket.*ed
-    - (single|double).*ring
-    - big.*fellow
-    - gil.*et.*bulldog
-    - gil.*et.*brownie
+      - gillette.*\bold\b
+      - oc.*ball
+      - old.*type
+      - pocket.*ed
+      - (single|double).*ring
+      - big.*fellow
+      - gil.*et.*bulldog
+      - gil.*et.*brownie
   President:
     patterns:
-    - president
+      - president
   Senator:
     patterns:
-    - senator
+      - senator
   Service Razor:
     patterns:
-    - gil.*service.*razor
+      - gil.*service.*razor
   Sheraton:
     patterns:
-    - sheraton
+      - sheraton
   Slim:
     patterns:
-    - art?istocrat
-    - Gil.*Slim
-    - sl?im.*adjust
-    - '\d\d.*slim'
-    - 'slim.*\d'
-    - ^slim$
+      - art?istocrat
+      - Gil.*Slim
+      - sl?im.*adjust
+      - '\d\d.*slim'
+      - 'slim.*\d'
+      - ^slim$
   Super Adjustable:
     patterns:
-    - Black.*Beauty
-    - Super.*adjust
-    - 'gil.*et.*\bbb\b'
-    - super.*109
+      - Black.*Beauty
+      - Super.*adjust
+      - 'gil.*et.*\bbb\b'
+      - super.*109
   Super Blue:
     patterns:
-    - 'super\s*blue'
+      - 'super\s*blue'
   Super Click:
     patterns:
-    - gil.*super click
+      - gil.*super click
   Super Speed:
     patterns:
-    - Super.*speed
-    - (red|black|blue|flare|flair).*tip
-    - 'gillette.*tto(\W|$)'
-    - 'gil.*\bss\b'
-    - '\d\ds*\s*\bss\b'
-    - TV special
-    - gil.*rocket
-    - rocket.*hd
-    - gil.*mi+lord
-    - ranger tech
+      - Super.*speed
+      - (red|black|blue|flare|flair).*tip
+      - 'gillette.*tto(\W|$)'
+      - 'gil.*\bss\b'
+      - '\d\ds*\s*\bss\b'
+      - TV special
+      - gil.*rocket
+      - rocket.*hd
+      - gil.*mi+lord
+      - ranger tech
   Tech:
     patterns:
-    - ^(?!.*milord|.*ranger|.*clone|.*knock-?off).*(gil|war|contract|slot|triangle|flat|hybrid|canada|english).*Tech
-    - fbt
-    - 'triangle\s*slot'
-    - \btech\b
-    - gil.*travel
+      - ^(?!.*milord|.*ranger|.*clone|.*knock-?off).*(gil|war|contract|slot|triangle|flat|hybrid|canada|english).*Tech
+      - fbt
+      - 'triangle\s*slot'
+      - \btech\b
+      - gil.*travel
   Toggle:
     patterns:
-    - (gil.*)?toggle
+      - (gil.*)?toggle
   Tuckaway:
     patterns:
-    - gil.*tuckaway
+      - gil.*tuckaway
+  Unspecified:
+    patterns:
+      - ^gil\w*te
 GL Customs:
   Keystone Light:
     patterns:
-    - gl customs
+      - gl customs
 Goodfellas Smile:
   Bayonetta:
     patterns:
-    - bayonett?a
+      - bayonett?a
   Impero:
     patterns:
-    - \bimpero\b
+      - \bimpero\b
   Kamisori Shavette:
     format: Shavette (Half DE)
     patterns:
-    - goodfella.*(kami|shavette)
+      - goodfella.*(kami|shavette)
   Legione Slant:
     patterns:
-    - legione
+      - legione
   Syntesi:
     patterns:
-    - s(y|i)ntesi
+      - s(y|i)ntesi
   Valynor:
     patterns:
-    - valyn
+      - valyn
 Grand Shave King:
   Self-Lubricating Razor:
     patterns:
-    - grand.*shave.*king
-    - \bgsk\b
+      - grand.*shave.*king
+      - \bgsk\b
 Greencult:
   GC 2.0:
     patterns:
-    - \bGC\b.*2\b
-    - green.*cult
+      - \bGC\b.*2\b
+      - green.*cult
+Grelot:
+  Le Petit Coiffeur:
+    format: Straight
+    patterns:
+      - grelot.*(le\s*petit\s*coiffeur)
+  Straight:
+    format: Straight
+    patterns:
+      - grelot.*(\s+straight)?
 Gutche:
   A77 Shavette:
     format: Shavette (A77)
     patterns:
-    - gutche.*(?:shavette)?
+      - gutche.*(?:shavette)?
 H&S Co.:
   NO75:
     patterns:
-    - h\+s.*n[o0]75
-    - haircut.*n[0o]75
+      - h\+s.*n[o0]75
+      - haircut.*n[0o]75
   Z074:
     patterns:
       - h\+s.*z074
@@ -872,92 +941,125 @@ H&S Co.:
 Handlebar:
   Shaving Company Dali:
     patterns:
-    - handlebar.*dali
+      - handlebar.*dali
 Haryali:
   Travel Razor:
     patterns:
-    - har+yali.*travel
+      - har+yali.*travel
 Headblade:
   ATX:
     format: Cartridge
     patterns:
-    - headbl.*atx
+      - headbl.*atx
 Henson:
   AL13:
     patterns:
-    - henson
-    - (henson)?.*al13(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-    - squatch
-    - \bal-?13
+      - henson
+      - (henson)?.*al13(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - squatch
+      - \bal-?13
   Ti22:
     patterns:
-    - henson.*ti
-    - ti22
-    - ti.*henson
+      - henson.*ti
+      - ti22
+      - ti.*henson
 Hendrix Classics & Co:
   Garand:
     patterns:
-    - garand
+      - garand
 Henkotsu:
   Kamisori:
     format: Straight
     patterns:
-    - henkotsu.*kami
+      - henkotsu.*kami
 Heritage:
   Adjustable:
     patterns:
-    - heritage.*adj
-    - heritage.*gibbs
+      - heritage.*adj
+      - heritage.*gibbs
 Hoffritz:
   Slant:
     patterns:
-    - "hoff?ritz(.*\bslant\b)?"
+      - "hoff?ritz(.*\bslant\b)?"
 Homelike:
   START:
     patterns:
-    - Homelike.*start
+      - Homelike.*start
+Iberia:
+  14 Doble Temple:
+    format: Straight
+    grind: Extra Hollow
+    point: Square
+    width: 8/8
+    patterns:
+      - iberia.*14.*(dou?b|temp)
+  "14":
+    format: Straight
+    grind: Extra Hollow
+    point: Square
+    width: 8/8
+    patterns:
+      - iberia.*14
+  Straight:
+    format: Straight
+    patterns:
+      - iberia
 iKon:
-  '101':
+  "101":
     patterns:
-    - ikon.*101
-  '102':
+      - ikon.*101
+  "102":
     patterns:
-    - ikon.*102
-  '103':
+      - ikon.*102
+  "103":
     patterns:
-    - ikon.*103
+      - ikon.*103
   B1:
     patterns:
-    - ikon.*b1
+      - ikon.*b1
   El Jefe:
     patterns:
-    - ikon.*jefe
+      - ikon.*jefe
   SBS:
     patterns:
-    - ikon.*sbs
+      - ikon.*sbs
   Short Comb:
     patterns:
-    - ikon.*short
+      - ikon.*short
   Tek:
     patterns:
-    - ikon.*tek
+      - ikon.*tek
   X3:
     patterns:
-    - ikon.*x3
+      - ikon.*x3
+Iwasaki:
+  Straight:
+    format: Straight
+    patterns:
+      - iwasaki
 J.A. Henckels:
   Friodur Straight:
     format: Straight
     patterns:
-    - (?:henck)?.*friodur(\s+straight)*
+      - (?:henc?k)?.*friodur(\s+straight)*
   Straight:
     format: Straight
     patterns:
-    - 'Henckels(\s+straight)*'
-    - 'henkels(\s+straight)*'
+      - hen[ck]+[el]+s?
 Jifuli:
   GF-2179:
     patterns:
-    - gf-2179
+      - gf-2179
+Joseph Rodgers & Sons:
+  The Royal Razor:
+    format: Straight
+    patterns:
+      - joseph.*rodgers.*royal.*razor
+      - \broyal.*razor\b
+  Straight:
+    format: Straight
+    patterns:
+      - joseph.*rodgers
 Junjie:
   Safety Razor:
     patterns:
@@ -967,243 +1069,243 @@ Kai:
   Captain Folding:
     format: Shavette
     patterns:
-    - kai.*captain.*fold
+      - kai.*captain.*fold
   Captain Kamisori:
     format: Shavette
     patterns:
-    - kai.*captain.*(kami|cloneisori)
+      - kai.*captain.*(kami|cloneisori)
   Excelia Kamisori:
     format: Shavette
     patterns:
-    - kai.*excelia
+      - kai.*excelia
 Kampfe:
   Star Lather Catcher 1902:
     format: Other
     patterns:
-    - kampfe(.*1902)?
-    - 1902.*lather
-    - lather catcher
+      - kampfe(.*1902)?
+      - 1902.*lather
+      - lather catcher
 Kanzy:
   Double Edge Safety Razor:
     patterns:
-    - kanzy
+      - kanzy
 Karve:
   Bison:
     patterns:
-    - (karve)?.*bison
+      - (karve)?.*bison
   Christopher Bradley:
     patterns:
-    - karve
-    - (karve)?.*cb
-    - christopher.*brad
+      - karve
+      - (karve)?.*cb
+      - christopher.*brad
   Overlander:
     patterns:
-    - (over|out)lander
+      - (over|out)lander
 Kingever:
   Refillable Razor:
     patterns:
-    - kingever
+      - kingever
 Knockout:
   Razor:
     patterns:
-    - ^knockout
+      - ^knockout
 Koraat:
   Moarteen (r/Wetshaving exclusive):
     format: Straight
     grind: Full Hollow
     patterns:
-    - (?:koraat)?.*moar ?teen(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - (?:koraat)?.*moar ?teen(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     point: Square
     width: 15/16
   Straight:
     format: Straight
     patterns:
-    - koraat.*(\d{1,2}/(8|16))?
-    - ^ko\b
+      - koraat.*(\d{1,2}/(8|16))?
+      - ^ko\b
 Krect:
   Spiral Slant:
     patterns:
-    - krect
+      - krect
 Krisp Beauty:
   DE Safety Razor:
     patterns:
-    - krisp
+      - krisp
 KureNai:
   GF35:
     patterns:
-    - kurenai.*35
+      - kurenai.*35
   GF36s:
     patterns:
-    - kurenai.*36
+      - kurenai.*36
 LASSCo:
   BBS-1:
     patterns:
-    - BBS-*1
+      - BBS-*1
 Lambda:
   Ares:
     patterns:
-    - lambda.*ares
+      - lambda.*ares
   Athena:
     patterns:
-    - lambda.*athena
+      - lambda.*athena
 Leaf:
   Razor:
-    format: Half DE (multi-blade) 
+    format: Half DE (multi-blade)
     patterns:
-    - leaf
+      - leaf
   Thorn:
     format: Half DE
     patterns:
-    - '(?:leaf)?\s*thorn'
+      - '(?:leaf)?\s*thorn'
   Twig:
     format: Half DE
     patterns:
-    - '(?:leaf)?\s*twig'
+      - '(?:leaf)?\s*twig'
 L'Essor:
   SE:
     format: Other
     patterns:
-    - l'essor
+      - l'essor
 Like Grandpa:
   Razor:
     patterns:
-    - like.*grandpa
+      - like.*grandpa
 Lion:
   DE:
     patterns:
-    - lion.*\bde\b
+      - lion.*\bde\b
 Lord:
   L122:
     patterns:
-    - lord.*l122
+      - lord.*l122
   L5:
     patterns:
-    - lord.*l5
+      - lord.*l5
   L6:
     patterns:
-    - lord.*l6
+      - lord.*l6
   S 625:
     patterns:
-    - lord.*s ?625
+      - lord.*s ?625
 Maggard:
   Shavette:
     format: Shavette
     patterns:
-    - magg.*shavette
+      - magg.*shavette
   Slant:
     patterns:
-    - mag.*ard.*slant
-    - mr.*slant
+      - mag.*ard.*slant
+      - mr.*slant
   SS70:
     patterns:
-    - ss70
-    - maggard.*cnc
+      - ss70
+      - maggard.*cnc
   V2:
     patterns:
-    - maggard.*V2
-    - maggard.*(oc|open)
-    - mr.*v2
+      - maggard.*V2
+      - maggard.*(oc|open)
+      - mr.*v2
   V3:
     patterns:
-    - maggard
-    - Maggard.*V3
-    - Maggard.*M3
-    - V3
-    - 'MR\d{1,2}'
+      - maggard
+      - Maggard.*V3
+      - Maggard.*M3
+      - V3
+      - 'MR\d{1,2}'
 Manscaped:
   The Plow 2.0:
     patterns:
-    - manscaped?.*plow
+      - manscaped?.*plow
 Master Barber:
   Magic Razor:
     format: Shavette (Half DE)
     patterns:
-    - (?:master|magic) barber.*magic
+      - (?:master|magic) barber.*magic
 Maxwell:
   June:
     format: Half DE
     patterns:
-    - maxwell june
+      - maxwell june
 Max Sprecher:
   Straight:
     format: Straight
     patterns:
-    - max sprecher.*(?:\d{1,2}/(8|16))?
+      - max sprecher.*(?:\d{1,2}/(8|16))?
 Merkur:
-  '15C':
+  "15C":
     patterns:
-    - (merkur.*)?15c
-  '23C':
+      - (merkur.*)?15c
+  "23C":
     patterns:
-    - (merkur.*)?23-?[bc]
-  '24C':
+      - (merkur.*)?23-?[bc]
+  "24C":
     patterns:
-    - (merkur.*)?24c
-  '33C':
+      - (merkur.*)?24c
+  "33C":
     patterns:
-    - (merkur.*)?33-*c
-  '34C':
+      - (merkur.*)?33-*c
+  "34C":
     patterns:
-    - (merkur.*)?34-*[cg]
-    - merk.*hd
-    - ^HD$
-    - merkur
-  '37C':
+      - (merkur.*)?34-*[cg]
+      - merk.*hd
+      - ^HD$
+      - merkur
+  "37C":
     patterns:
-    - (merkur.*)?37c
-    - merkur.*37c.*(slant)*
-    - coles slant
-    - mer[ck]ur.*slant
-  '38C':
+      - (merkur.*)?37c
+      - merkur.*37c.*(slant)*
+      - coles slant
+      - mer[ck]ur.*slant
+  "38C":
     patterns:
-    - (merkur.*)?38c
-  '39C':
+      - (merkur.*)?38c
+  "39C":
     patterns:
-    - (merkur.*)?39c
-  '41C':
+      - (merkur.*)?39c
+  "41C":
     patterns:
-    - (merkur.*)?41c
-  '43C':
+      - (merkur.*)?41c
+  "43C":
     patterns:
-    - (merkur.*)?43c
-  '45':
+      - (merkur.*)?43c
+  "45":
     patterns:
-    - (merkur.*)45\b
-  '51C':
+      - (merkur.*)45\b
+  "51C":
     patterns:
-    - (merkur.*)?51c
+      - (merkur.*)?51c
   Futur:
     patterns:
-    - ^(?!.*\b(?:clone|copy)\b).*?(merkur)?.*?futur
+      - ^(?!.*\b(?:clone|copy)\b).*?(merkur)?.*?futur
   Progress:
     patterns:
-    - (pro|mer|di)gress
+      - (pro|mer|di)gress
   Vision:
     patterns:
-    - vision
+      - vision
 Mongoose:
   Alumigoose:
     format: AC
     patterns:
-    - al[iu]migoose
+      - al[iu]migoose
   II:
     format: AC
     patterns:
-    - goose.*(2|two|ii)
+      - goose.*(2|two|ii)
   Original:
     format: AC
     patterns:
-    - goose
+      - goose
 Mossei:
   Mono:
     format: Injector
     patterns:
-    - mossei.*mono
+      - mossei.*mono
 Muninn Woodworks:
   Sextoblade:
     format: Shavette
     patterns:
-    - mun+in.*sexto
+      - mun+in.*sexto
 Mutiny:
   Razor:
     patterns:
@@ -1211,536 +1313,593 @@ Mutiny:
 Mühle:
   Companion:
     patterns:
-    - companion
+      - companion
+  Hexagon:
+    patterns:
+      - m[uü]hle.*hexagon
   Neo:
     patterns:
-    - muhle neo
+      - muhle neo
   R41:
     patterns:
-    - R ?(41|103)
+      - R ?(41|103)
   R89:
     patterns:
-    - R(89|106)
-    - "m[uü]hle.*89"
+      - R(89|106)
+      - "m[uü]hle.*89"
   Rocca:
     patterns:
-    - '\brocca\b'
+      - '\brocca\b'
 Noble Otter:
   DE:
     patterns:
-    - NOC(1|2)
-    - NO(1|2)C
-    - 'NOB\d'
-    - 'nobc\d'
+      - NOC(1|2)
+      - NO(1|2)C
+      - 'NOB\d'
+      - 'nobc\d'
 Oberon:
   Safety Razor:
     patterns:
-    - Oberon
+      - Oberon
 Occams Razor:
   Enoch:
     format: AC
     patterns:
-    - enoch
+      - enoch
 OliWorks:
   M3teorite:
     patterns:
-    - oliworks.*m3teorite
+      - oliworks.*m3teorite
   OliBlade:
     patterns:
-    - oli(works|blade)
+      - oli(works|blade)
 OneBlade:
   Core:
     format: FHS
     patterns:
-    - one ?blade( core)?
+      - one ?blade( core)?
   Dawn:
     format: FHS
     patterns:
-    - oneblade.*dawn
+      - oneblade.*dawn
   Element:
     format: FHS
     patterns:
-    - oneblade.*element
+      - oneblade.*element
   Genesis:
     format: FHS
     patterns:
-    - one ?blade.*genesis
+      - one ?blade.*genesis
   Hybrid:
     format: FHS
     patterns:
-    - oneblade.*hybrid
+      - oneblade.*hybrid
 Other:
   Cartridge / Disposable:
     format: Cartridge
     patterns:
-    - atra
-    - '\bbic\b'
-    - \bcart\b
-    - cartridge
-    - dorco.*pace 7
-    - disposable
-    - fusion
-    - gillette blue
-    - gil.*et.*(labs|guard|joy|proglide|sensor|venus)
-    - harry
-    - '\blidl\b'
-    - 'mach.*(3|iii)'
-    - pace.*6
-    - simply (?:max|smooth)
-    - (?:schick)?.*hydro.*5
-    - 'trac\b.*(2|ii)'  
-    - shik pla5tik # https://www.reddit.com/r/Wetshaving/comments/1lmfkxs/saturday_lather_games_sotd_thread_jun_28_2025/n0bmt80/
-    - schick xtreme 2
-    - schick skintimate
+      - atra
+      - '\bbic\b'
+      - \bcart\b
+      - cartridge
+      - dorco.*pace 7
+      - disposable
+      - fusion
+      - gillette blue
+      - gil.*et.*(labs|guard|joy|proglide|sensor|venus)
+      - harry
+      - '\blidl\b'
+      - "mach.*(3|iii)"
+      - pace.*6
+      - simply (?:max|smooth)
+      - (?:schick)?.*hydro.*5
+      - 'trac\b.*(2|ii)'
+      - shik pla5tik # https://www.reddit.com/r/Wetshaving/comments/1lmfkxs/saturday_lather_games_sotd_thread_jun_28_2025/n0bmt80/
+      - schick xtreme 2
+      - schick skintimate
   DE:
     patterns:
-    - generic.*(safety|double)
-    - german travel razor
-    - pazor.*batch
+      - generic.*(safety|double)
+      - german travel razor
+      - pazor.*batch
   DE Clone:
     patterns:
-    - ^(?!.*(futur|eagle)).*(knockoff|clone)
+      - ^(?!.*(futur|eagle)).*(knockoff|clone)
   Shavette:
     format: Shavette
     patterns:
-    - shavette
-    - hess.*ezy
-    - hair.*sha
-    - kamisori.*shavette
-    - marianna
-    - burmax.*shavette
-    - grotesque torture implement #https://www.reddit.com/r/Wetshaving/comments/1l1ajgv/monday_lather_games_sotd_thread_jun_02_2025/mvkvysm/
-    - chopstick kamisori
-    - ice ?pick kamisori
+      - shavette
+      - hess.*ezy
+      - hair.*sha
+      - kamisori.*shavette
+      - marianna
+      - burmax.*shavette
+      - grotesque torture implement #https://www.reddit.com/r/Wetshaving/comments/1l1ajgv/monday_lather_games_sotd_thread_jun_02_2025/mvkvysm/
+      - chopstick kamisori
+      - ice ?pick kamisori
   Shavette (A77):
     format: Shavette (A77)
     patterns:
-    - shavette.*a77
-    - a77.*shavette
+      - shavette.*a77
+      - a77.*shavette
   Shavette (AC):
     format: Shavette (AC)
     patterns:
-    - shavette.*\bac\b
-    - \bac\b.*shavette
+      - shavette.*\bac\b
+      - \bac\b.*shavette
   Shavette (Disposable):
-      format: Shavette (Disposable)
-      patterns:
+    format: Shavette (Disposable)
+    patterns:
       - (?:cvs|kroger).*dermaplane
       - sassy.*eyebrow
   Kamisori:
     format: Straight
     patterns:
-    - kami
-  Straight Razor:
-    format: Straight
-    patterns:
-    - (&|and)\s+son
-    - \d{1,2}/(8|16)
-    - 20th.*Century.*Mfg.*HH
-    - alberta
-    - bismarck
-    - case.*red
-    - cattaraugus
-    - c-?mon
-    - diamondine
-    - ditzer
-    - dorko
-    - dubl ?duck
-    - engels
-    - efendi
-    - frameback
-    - fred.*Reynolds?
-    - french.*point
-    - friedr.*herd
-    - gold.*dollar
-    - goldedge
-    - green.*lizard
-    - hadoson
-    - hero.*germany
-    - hollow
-    - joseph\s*(elliot|allen)
-    - kobar
-    - lee.*warrant
-    - leger
-    - le grelot
-    - le thiernois
-    - leresche
-    - maher.*grosh
-    - mclaughlin
-    - otto.*busc?h
-    - perfect temper
-    - puma
-    - red.*imp
-    - robeson
-    - shumate
-    - s.? ?k.? colling
-    - solingen
-    - droescher
-    - straight
-    - sxdgs
-    - suzumasa
-    - thomas.*turner
-    - tornblom
-    - tonsorial
-    - torrey
-    - wacker
-    - wedge
-    - wester.*brothers
-    - w[oe]stenholm
-    - w.?\s?r.?\s?humphrey'?s
-    - yankee.*cutlery
-    - \bm\b.*karam
+      - kami
+  # Straight Razor:
+  #   format: Straight
+  #   patterns:
+  #     - \d{1,2}/(8|16)
+  #     - hollow
+  #     - wedge
+  # - (&|and)\s+son
+  # - 20th.*Century.*Mfg.*HH
+  # - alberta
+  # - bismarck
+  # - case.*red
+  # - cattaraugus
+  # - c-?mon
+  # - diamondine
+  # - ditzer
+  # - dorko
+  # - dubl ?duck
+  # - engels
+  # - efendi
+  # - frameback
+  # - fred.*Reynolds?
+  # - french.*point
+  # - friedr.*herd
+  # - gold.*dollar
+  # - goldedge
+  # - green.*lizard
+  # - hadoson
+  # - hero.*germany
+  # - joseph\s*(elliot|allen)
+  # - kobar
+  # - lee.*warrant
+  # - leger
+  # - le grelot
+  # - le thiernois
+  # - leresche
+  # - maher.*grosh
+  # - mclaughlin
+  # - otto.*busc?h
+  # - perfect temper
+  # - puma
+  # - red.*imp
+  # - robeson
+  # - shumate
+  # - s.? ?k.? colling
+  # - solingen
+  # - droescher
+  # - straight
+  # - sxdgs
+  # - suzumasa
+  # - thomas.*turner
+  # - tornblom
+  # - tonsorial
+  # - torrey
+  # - wacker
+  # - wester.*brothers
+  # - w[oe]stenholm
+  # - w.?\s?r.?\s?humphrey'?s
+  # - yankee.*cutlery
+  # - \bm\b.*karam
 PAA:
   Alpha Ecliptic:
     patterns:
-    - alpha.*ecli
+      - alpha.*ecli
   Ascension:
     patterns:
-    - '(phoenix|p\.?a\.?a\.?).*ascen'
+      - '(phoenix|p\.?a\.?a\.?).*ascen'
   Bakelite Slant:
     patterns:
-    - '(phoenix|p\.?a\.?a\.?).*bake.*slant'
+      - '(phoenix|p\.?a\.?a\.?).*bake.*slant'
   Chrimson Ghost:
     patterns:
-    - crimson ghost
+      - crimson ghost
   DOC:
     patterns:
-    - '(phoenix|p\.?a\.?a\.?).*doc'
-    - '(phoenix|p\.?a\.?a\.?).*double.*comb'
-    - paa.*comb
+      - '(phoenix|p\.?a\.?a\.?).*doc'
+      - '(phoenix|p\.?a\.?a\.?).*double.*comb'
+      - paa.*comb
   La Criatura:
     patterns:
-    - criatura
+      - criatura
   Meta-4:
     patterns:
-    - '(phoenix|p\.?a\.?a\.?).*meta'
+      - '(phoenix|p\.?a\.?a\.?).*meta'
   Phantom Blue:
     patterns:
-    - phantom blue
+      - phantom blue
 PAL:
   Adjustable Injector:
     format: Injector
     patterns:
-    - pal.*injector
+      - pal.*injector
   Injectomatic:
     format: Injector
     patterns:
-    - pal.*injectomatic
+      - pal.*injectomatic
 Paradigm:
   17-4:
     patterns:
-    - parad.*17
+      - parad.*17
   Diamondback:
     patterns:
-    - parad.*diam
+      - parad.*diam
   SE:
     format: AC
     patterns:
-    - parad.*se
+      - parad.*se
   Salient:
     patterns:
-    - parad.*sal.*
+      - parad.*sal.*
   Ti:
     patterns:
-    - parad.*ti
+      - parad.*ti
   Ti II:
     patterns:
-    - parad.*ti.*ii
+      - parad.*ti.*ii
 Paragon:
   Don:
     patterns:
-    - paragon.*don
+      - paragon.*don
 Parker:
   111W:
     patterns:
-    - 111W
+      - 111W
   11R:
     patterns:
-    - parker.*11r
+      - parker.*11r
   22R:
     patterns:
-    - parker.*22R
+      - parker.*22R
   24C:
     patterns:
-    - parker.*24C
+      - parker.*24C
   29L:
     patterns:
-    - 29L
+      - 29L
   55SL-RG:
     patterns:
-    - 55SL[-\s]?RG
+      - 55SL[-\s]?RG
   60R:
     patterns:
-    - 60R
+      - 60R
   65R:
     patterns:
-    - 65\s?R
+      - 65\s?R
   66R:
     patterns:
-    - 66R
+      - 66R
   78R:
     patterns:
-    - 78R
+      - 78R
   87R:
     patterns:
-    - 87R
+      - 87R
   89R:
     patterns:
-    - 89R
+      - 89R
   90R:
     patterns:
-    - 90R
+      - 90R
   91R:
     patterns:
-    - 91R
+      - 91R
   92R:
     patterns:
-    - 92R
+      - 92R
   94R:
     patterns:
-    - 94R
+      - 94R
   96R:
     patterns:
-    - 96R
+      - 96R
   98R:
     patterns:
-    - 98R
+      - 98R
   99R:
     patterns:
-    - 99R
+      - 99R
   A1R:
     patterns:
-    - parker.*a1r
+      - parker.*a1r
   Adjustable Injector:
     format: Injector
     patterns:
-    - parker.*adjustable.*injector
+      - parker.*adjustable.*injector
   SR1:
     patterns:
-    - parker.*sr1
+      - parker.*sr1
   SRB Shavette:
     format: Shavette (Half DE)
     patterns:
-    - parker.*srb.*shavette
+      - parker.*srb.*shavette
   SRW:
     patterns:
-    - parker.*srw
+      - parker.*srw
   SRX:
     patterns:
-    - parker.*srx
+      - parker.*srx
   Semi Slant:
     patterns:
-    - parker.*semi.*sla
+      - parker.*semi.*sla
   SoloEdge:
     format: Half DE
     patterns:
-    - parker.*solo
-    - soloedge
+      - parker.*solo
+      - soloedge
   Stella:
     patterns:
-    - parker.*stella
+      - parker.*stella
   Variant:
     patterns:
-    - variant
+      - variant
 Pearl:
   Blaze:
     patterns:
-    - Pearl.*blaz
+      - Pearl.*blaz
   Flexi:
     patterns:
-    - Pearl.*flex
+      - Pearl.*flex
   Hammer:
     patterns:
-    - pearl hammer
+      - pearl hammer
   L-55:
     patterns:
-    - l-?55
+      - l-?55
   L-65 Semi Slant:
     patterns:
-    - l-?65
-    - pearl.*slant
+      - l-?65
+      - pearl.*slant
   OC:
     patterns:
-    - pearl.*oc
+      - pearl.*oc
 Personna:
   BBS-0:
     patterns:
-    - bbs-0
-    - person.*bbs.*0
+      - bbs-0
+      - person.*bbs.*0
 PILS:
-  '':
+  "":
     patterns:
-    - pils.*10
-    - ^pils$
+      - pils.*10
+      - ^pils$
+Polgacrup:
+  "45":
+    format: Straight
+    patterns:
+      - polgacrup.*45\b
+  Straight:
+    format: Straight
+    patterns:
+      - polgacrup
 Portland Razor Co.:
   Straight:
     format: Straight
     patterns:
-    - 'portland.*(razor)?(\s+straight)*'
+      - 'portland.*(razor)?(\s+straight)*'
 Proof:
   Razor:
     format: Half DE
     patterns:
-    - '(\bhigh\s*)?proof\b'
+      - '(\bhigh\s*)?proof\b'
+Puma:
+  "88":
+    format: Straight
+    grind: Full Hollow
+    point: Round
+    width: 5/8
+    patterns:
+      - puma.*88
+  "89":
+    format: Straight
+    grind: Full Hollow
+    point: Round
+    width: 6/8
+    patterns:
+      - puma.*89
+  Straight:
+    format: Straight
+    patterns:
+      - puma
 QShave:
   Parthenon:
     patterns:
-    - parthenon
+      - parthenon
 Raido Star:
   Kamisori:
     format: Straight
     patterns:
-    - raido star.*kami
+      - raido star.*kami
   Straight:
     format: Straight
     patterns:
-    - raido star.*(?:\d{1,2}/(8|16))?
+      - raido star.*(?:\d{1,2}/(8|16))?
 Ralf Aust:
   Straight:
     format: Straight
     patterns:
-    - 'ralf.*aust(\s+straight)*'
+      - 'ralf.*aust(\s+straight)*'
 Rapira:
   Double Edge Safety Razor:
     patterns:
-    - rapira
+      - rapira
 Raw Shaving:
   RS-10:
     patterns:
-    - rs-*10
+      - rs-*10
   RS-18:
     patterns:
-    - rs-*18
+      - rs-*18
 RazoRock:
   Baby Smooth:
     patterns:
-    - ba*by.*smooth
-    - razorock.*bbs
+      - ba*by.*smooth
+      - razorock.*bbs
   Cyber:
     patterns:
-    - razorock.*cyber
+      - razorock.*cyber
   DE1:
     patterns:
-    - razorock.*de1
+      - razorock.*de1
   Eco:
     format: Half DE
     patterns:
-    - eco
+      - eco
   Game Changer:
     patterns:
-    - game.*changer?
-    - gc
-    - game.*center
-    - game.*ganger
+      - game.*changer?
+      - gc
+      - game.*center
+      - game.*ganger
   German 37 Slant:
     patterns:
-    - 'german.*\b37\b'
-    - 'slant.*\b37\b'
-    - '\b37\b.*slant'
+      - 'german.*\b37\b'
+      - 'slant.*\b37\b'
+      - '\b37\b.*slant'
   GOAT:
     patterns:
       - razorock.*goat
   Hawk v1:
     format: AC
     patterns:
-    - (razorock)?.*hawk.*1
+      - (razorock)?.*hawk.*1
   Hawk v2:
     format: AC
     patterns:
-    - (razorock)?.*hawk.*v?2
+      - (razorock)?.*hawk.*v?2
   Hawk v3:
     format: AC
     patterns:
-    - (razorock)?.*hawk
-    - (razorock)?.*hawk.*3a?
-    - razorock.*\ba plate\b
+      - (razorock)?.*hawk
+      - (razorock)?.*hawk.*3a?
+      - razorock.*\ba plate\b
   Lupo:
     patterns:
-    - 'lupp?o.*(\.?\d\d)?'
+      - 'lupp?o.*(\.?\d\d)?'
   MJ-90:
     patterns:
-    - mj[-\s]*90
+      - mj[-\s]*90
   MJ-90A:
     patterns:
-    - mj[-\s]*90a
+      - mj[-\s]*90a
   Mamba:
     patterns:
-    - ma[nm]ba
+      - ma[nm]ba
   Mentor:
     patterns:
-    - mentor.*(base)?
+      - mentor.*(base)?
   Mission:
     patterns:
-    - mission
+      - mission
   SLOC:
     patterns:
-    - sloc
+      - sloc
   Stealth Slant:
     patterns:
-    - stealth.*slant
+      - stealth.*slant
   Superslant:
     patterns:
-    - 'super\s*slant'
+      - 'super\s*slant'
   Teck II:
     patterns:
-    - teck
-    - razorock \btec(h|k)\b
+      - teck
+      - razorock \btec(h|k)\b
   Wunderbar Slant:
     patterns:
-    - wunderbar
+      - wunderbar
 Razorine:
-  ? ''
-  : patterns:
-    - razorine
+  "":
+    patterns:
+      - razorine
+Red Imp:
+  "132":
+    format: Straight
+    grind: Near Wedge
+    point: Square
+    width: 5/8
+    patterns:
+      - red.*imp.*132
+  "133":
+    format: Straight
+    grind: Full Hollow
+    point: Round
+    width: 5/8
+    patterns:
+      - red.*imp.*133
+  Straight:
+    format: Straight
+    patterns:
+      - red.*imp
 Rex:
   Ambassador:
     patterns:
-    - rex.*ambassador
-    - ambassador.*(rex)?
-    - 'rex.*\d'
+      - rex.*ambassador
+      - ambassador.*(rex)?
+      - 'rex.*\d'
   Envoy:
     patterns:
-    - (rex)?.*envoy
+      - (rex)?.*envoy
   Konsul:
     patterns:
-    - konsul
+      - konsul
+  Page:
+    patterns:
+      - rex.*page
   Sentry:
     patterns:
-    - sentry
+      - sentry
 Robin:
   Snap 2.0:
     patterns:
-    - robin.*snap
+      - robin.*snap
 Rockwell:
   2C:
     patterns:
-    - rockwell.*2C
-    - 2C
+      - rockwell.*2C
+      - 2C
   6C:
     patterns:
-    - rockwell.*6C
-    - rockwell
-    - 6c
+      - rockwell.*6C
+      - rockwell
+      - 6c
   6S:
     patterns:
-    - rockwell.*6S
-    - 6s
+      - rockwell.*6S
+      - 6s
   T2:
     patterns:
-    - 'rockwell.*\bT2?\b'
-    - t2
+      - 'rockwell.*\bT2?\b'
+      - t2
 Rocky Mountain Barber:
   Double Edge Safety Razor:
     patterns:
-    - rocky moun
+      - rocky moun
 Rocnel:
   Elite 2019:
     patterns:
-    - Roc.*elite.*2019
-    - 2019.*Roc.*elite
+      - Roc.*elite.*2019
+      - 2019.*roc.*elite
+  Elite 2022:
+    patterns:
+      - Roc.*elite.*2022
+      - 2022.*roc.*elite
   Sailor:
     patterns:
-    - Roc.*sail
+      - Roc.*sail
   SE50:
     format: AC
     patterns:
@@ -1750,91 +1909,91 @@ Rolls:
   Razor:
     format: Other
     patterns:
-    - rolls.*(razor)?
+      - rolls.*(razor)?
 Romer-7:
   CS11:
     patterns:
-    - 'romer.*CS[\s-]*11'
+      - 'romer.*CS[\s-]*11'
   El Travel:
     patterns:
-    - romer.*travel
+      - romer.*travel
   Ricardo:
     patterns:
-    - romer.*ricardo
-    - ricardo.*romer
-    - ricardo oc
+      - romer.*ricardo
+      - ricardo.*romer
+      - ricardo oc
   Shivira:
     patterns:
-    - romer.*shivira
-    - shivira.*romer
+      - romer.*shivira
+      - shivira.*romer
   Wazir:
     patterns:
-    - wazir
+      - wazir
 Rubin:
-  '1':
+  "1":
     patterns:
-    - russian.*ruby
-    - '\brubin\b'
-    - ruby adjustable
-    - Рубин
+      - russian.*ruby
+      - '\brubin\b'
+      - ruby adjustable
+      - Рубин
 Saiver:
   DE:
     patterns:
-    - sa[iy]ver
+      - sa[iy]ver
 Sanguine:
   Coolcut 9:
     format: Shavette (AC)
     patterns:
-    - sanguine.*coolcut.*9
+      - sanguine.*coolcut.*9
 Saponificio Varesino:
-  '':
+  "":
     patterns:
-    - saponificio varesino
+      - saponificio varesino
 SCS:
   Model A:
     patterns:
-    - simple.*clean.*shave
-    - '\bscs\b'
+      - simple.*clean.*shave
+      - '\bscs\b'
 Schick:
   Adjustable Injector:
     format: Injector
     patterns:
-    - sc?hick.*adjustable
-    - sc?hick.*\bm(1|2|3)\b
+      - sc?hick.*adjustable
+      - sc?hick.*\bm(1|2|3)\b
   BBR-1J Kamisori Shavette:
     format: Shavette
     patterns:
-    - schick.*kami
+      - schick.*kami
   Dermaplaner:
     format: Shavette (Disposable)
     patterns:
-    - schick.*dermaplaner
+      - schick.*dermaplaner
   Eversharp:
     format: Injector
     patterns:
-    - 'ever\s*sharp'
+      - 'ever\s*sharp'
   Hydromagic:
     format: Injector
     patterns:
-    - 'hydro[\-\s]*magic'
+      - 'hydro[\-\s]*magic'
   Injector:
     format: Injector
     patterns:
-    - golden.*500
-    - schl?ick
-    - lad(y.|ies)*eversharp
-    - injector
+      - golden.*500
+      - schl?ick
+      - lad(y.|ies)*eversharp
+      - injector
   Krona:
     patterns:
-    - (?:schick)?.*kry?ona
+      - (?:schick)?.*kry?ona
   Magazine Repeating Razor:
     format: Other
     patterns:
-    - magazine.*repeating.*razor
+      - magazine.*repeating.*razor
 Segal:
   Unitary:
     patterns:
-    - segal
+      - segal
 Seygus:
   Zeppelin V2:
     patterns:
@@ -1843,41 +2002,56 @@ Seygus:
 Shavent:
   Razor:
     patterns:
-    - shavent
+      - shavent
+      - ^haven't$
 Shield:
   Avenger:
     format: AC
     patterns:
-    - shield.*avenger
+      - shield.*avenger
   Evolution:
     format: AC
     patterns:
-    - shield.*evo
+      - shield.*evo
   Predator:
     patterns:
-    - shield.*pred
+      - shield.*pred
   SE AC:
     format: AC
     patterns:
-    - shield.*se.*ac
-    - shield.*ac
+      - shield.*se.*ac
+      - shield.*ac
+Shumate:
+  Barber Deluxe:
+    format: Straight
+    patterns:
+      - shumate.*barber'?s?.*deluxe?
+  Straight:
+    format: Straight
+    patterns:
+      - shumate
 Silver STAR:
   Model 100:
     patterns:
-    - silver star
+      - silver star
 Smart-Helix:
   Apollo:
     patterns:
-    - helix.*apol
+      - helix.*apol
+Snail Forge:
+  Straight:
+    format: Straight
+    patterns:
+      - snail.?forge
 Soluna:
   Razor:
     patterns:
-    - soluna
+      - soluna
 Spornette:
   Hair Shaper:
     format: Shavette (Hair Shaper)
     patterns:
-    - sp(o|e)rnette
+      - sp(o|e)rnette
 Standard Razors:
   Aluminum Series:
     patterns:
@@ -1885,163 +2059,194 @@ Standard Razors:
       - ^standard$
       - ^standard.*razor
 Stando:
-  Leschy  :
+  Jaruna Slant:
     patterns:
-    - leschy
+      - stando.*jaruna
+  Leschy:
+    patterns:
+      - leschy
   Leszy:
     patterns:
-    - leszy
+      - leszy
   Prowe SE:
-      format: Half DE
-      patterns:
-        - stando.*prowe
+    format: Half DE
+    patterns:
+      - stando.*prowe
   Rod:
     format: AC
     patterns:
-    - stando.*rod
+      - stando.*rod
 Star:
   Cadet:
     format: GEM
     patterns:
-    - star.*cadet
-    - star.*1912
+      - star.*cadet
+      - star.*1912
   Double Edge:
     patterns:
-    - star.*de
+      - star.*de
+Star Reito:
+  Straight:
+    format: Straight
+    patterns:
+      - \breito\b
 Stirling:
   DE3P6S:
     patterns:
-    - DE3P6S
+      - DE3P6S
   DE3P7S:
     patterns:
-    - DE3P7S
+      - DE3P7S
   Slant:
     patterns:
-    - stirling.*slant
+      - stirling.*slant
   Stainless DE Razor:
     patterns:
-    - st[ei]rling.*stain
-    - st[ei]rling.*(ss|hyper|ha|stai)
-    - st[ei]rling
+      - st[ei]rling.*stain
+      - st[ei]rling.*(ss|hyper|ha|stai)
+      - st[ei]rling
 Superior Cuts:
-  ? ''
-  : patterns:
-    - 'superior\s*cuts'
+  "":
+    patterns:
+      - 'superior\s*cuts'
 Supply:
   SE Pro:
     format: Injector
     patterns:
-    - supply.*se.*pro(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-    - supply.*adjustable
-    - supply.*pro
+      - supply.*se.*pro(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - supply.*adjustable
+      - supply.*pro
   SE (Easy Loading):
     format: Injector
     patterns:
-    - supply.*se.*easy
-    - supply.*easy.*load
+      - supply.*se.*easy
+      - supply.*easy.*load
   SE 2.0:
     format: Injector
     patterns:
-    - supply.*se.*2
-    - supply.*v2
-    - sup.*ly.*2
+      - supply.*se.*2
+      - supply.*v2
+      - sup.*ly.*2
   SE:
     format: Injector
     patterns:
-    - ^(?!.*sentry).*supply.*se
-    - sup.*ly.*inject
-    - supply.*sing.*edge
-    - supply razor
-    - ^supply$
+      - ^(?!.*sentry).*supply.*se
+      - sup.*ly.*inject
+      - supply.*sing.*edge
+      - supply razor
+      - ^supply$
 TRC:
   DE:
     patterns:
-    - \btrc\b
-    - the razor co
+      - \btrc\b
+      - the razor co
   TTO:
     patterns:
-    - \btrc\b.*tto
-    - the razor co.*tto
+      - \btrc\b.*tto
+      - the razor co.*tto
   Vanguard:
     patterns:
-    - trc.*vanguard
+      - trc.*vanguard
+Tanifuji:
+  Kintaka:
+    format: Straight
+    patterns:
+      - (tanifuji.*kintaka|kintaka.*tanifuji)
+      - \bkintaka\b
+  Straight:
+    format: Straight
+    patterns:
+      - tanifuji.*(\s+straight)?
 Tatara:
   Amakuni:
     format: AC
     patterns:
-    - (tatara.*)?amakuni
+      - (tatara.*)?amakuni
   Masamune:
     patterns:
-    - masamune
-    - Matusumi
-    - tatara
+      - masamune
+      - Matusumi
+      - tatara
   Masamune Nodachi:
     patterns:
-    - ta.*nodachi
-    - masadachi
-    - masamodachi
-    - tatara.*dachi
+      - ta.*nodachi
+      - masadachi
+      - masamodachi
+      - tatara.*dachi
   Muramasa:
     patterns:
-    - muramasa
+      - muramasa
 Tedalus:
   Essence Shavette:
     format: Shavette
     patterns:
-    - tedalus.*(essence|shavette)?
-  Velocity-ONE: 
+      - tedalus.*(essence|shavette)?
+  Velocity-ONE:
     patterns:
-    - tedal.*velo(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - tedal.*velo(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
 The Holy Black:
   Shavette:
     format: Shavette (Half DE)
     patterns:
-    - holy.*black.*shavette
+      - holy.*black.*shavette
   SR-71:
     patterns:
-    - sr-*71
+      - sr-*71
 Thiers Issard:
   Straight:
     format: Straight
     patterns:
-    - th.*iss?ard(.*straight)?
+      - th.*iss?ard(.*straight)?
 Timeless:
   Razor:
     patterns:
-    - '\btime?less?\b.*(\.?\d\d)?'
+      - '\btime?less?\b.*(\.?\d\d)?'
 Treet:
   TTO:
     patterns:
       - treet
+Utica Knife & Razor:
+  Red Point 917:
+    format: Straight
+    grind: Hollow
+    point: Square
+    width: 5/8
+    patterns:
+      - utica.*red.?point.*917
+      - red.?point.*917
+  Straight:
+    format: Straight
+    patterns:
+      - utica.*straight
 Utopia:
   Shavette:
     format: Shavette (Half DE)
     patterns:
-    - utopia.*shavette
+      - utopia.*shavette
 Valet:
   Autostrop:
     format: Other
     patterns:
-    - valet
-    - autostrop
+      - valet
+      - autostrop
 Van Der Hagen:
   Razor:
     patterns:
-    - Van Der Haa*gen
-    - '\bvdh\b'
+      - Van Der Haa*gen
+      - '\bvdh\b'
 Vikings Blade:
   Chieftain:
     patterns:
-    - vik.*chief
+      - vik.*chief
   Chieftain 5 BC:
-    patterns: 
-    - vik.*chief.*5 bc
+    patterns:
+      - vik.*chief.*5 bc
   Chieftain JR:
-    patterns: 
-    - vik.*chief.*jr
+    patterns:
+      - vik.*chief.*jr
   Emperor Meiji:
-      patterns:
-        - vik.*emperor.*meiji
+    patterns:
+      - vik.*emperor.*meiji
   The Godfather:
     patterns:
       - vik.*godfather
@@ -2050,95 +2255,103 @@ Vikings Revolution:
     patterns:
       - vik.*rev
 WCS:
-  '77':
+  "77":
     patterns:
-    - 77-*S
-    - WCS.*77
-  '78':
+      - 77-*S
+      - WCS.*77
+  "78":
     patterns:
-    - 78-*BL
-    - 78M
-    - (wcs|west).*78
-  '84':
+      - 78-*BL
+      - 78M
+      - (wcs|west).*78
+  "84":
     patterns:
-    - 84-*R*B
-    - WCS.*84
-  '88':
+      - 84-*R*B
+      - WCS.*84
+  "88":
     patterns:
-    - 88-*S
-    - WCS.*88
+      - 88-*S
+      - WCS.*88
   American Liberty (designed by Charcoal Goods):
     patterns:
-    - wcs.*liberty
-    - wcs.*patriot
+      - wcs.*liberty
+      - wcs.*patriot
   El Capitan:
     patterns:
-    - 'el\s*capitan'
+      - 'el\s*capitan'
   Hollywood Palm:
     patterns:
-    - hollywood.*palm
+      - hollywood.*palm
   Hyperion:
     patterns:
-    - hyperion
+      - hyperion
   Lithe (designed by Charcoal Goods):
     patterns:
-    - wcs.*lithe
+      - wcs.*lithe
   Multi Titanium Collection Razor:
     patterns:
-    - '(W\.?C\.?S\.?|West Coast Shaving).*titanium'
+      - '(W\.?C\.?S\.?|West Coast Shaving).*titanium'
 Wade & Butcher:
   Straight:
     format: Straight
     patterns:
-    - wade.*butcher.*(straight|celebrated)?.*
-    - w&b.*(straight|celebrated)?.*
-    - butcher.*wade.*(straight|celebrated)?.*
+      - wade.*butcher.*(straight|celebrated)?.*
+      - w&b.*(straight|celebrated)?.*
+      - butcher.*wade.*(straight|celebrated)?.*
 Wardonia:
-  '':
+  "":
     patterns:
-    - wardonia
+      - wardonia
 Weber:
   ARC:
     patterns:
-    - weber.*arc
+      - weber.*arc
   DLC:
     patterns:
-    - weber.*dlc
-    - weber
+      - weber.*dlc
+      - weber
   PH:
     patterns:
-    - weber.*ph
+      - weber.*ph
 Weck:
   Bantam:
     format: Shavette (Hair Shaper)
     patterns:
-    - weck.*bantam
+      - weck.*bantam
   Med Prep:
     format: Shavette (Hair Shaper)
     patterns:
-    - weck.*(med.*prep|450-110)
+      - weck.*(med.*prep|450-110)
   Sextoblade:
     format: Shavette (Hair Shaper)
     patterns:
-    - Sextoblade
-    - weck
-    - weck.*hair
+      - Sextoblade
+      - weck
+      - weck.*hair
 Weishi:
-  '9306':
+  "9306":
     patterns:
-    - weishi
+      - weishi
   Adjustable:
     patterns:
-    - weishi.*adj.
+      - weishi.*adj.
 Well Kept:
   Safety Razor:
     patterns:
-    - well kept.*safety razor
+      - well kept.*safety razor
+Werner Breidenbach:
+  Monte Rosa 14:
+    format: Straight
+    grind: Extra Hollow
+    patterns:
+      - monte.*rosa.*14
+    point: Square
+    width: 15/16
 Whityle:
   20T Glide Pro 4D:
     format: Dual Half DE
     patterns:
-    - whityle.*20t
+      - whityle.*20t
 Wilkinson Sword:
   Butterfly:
     patterns:
@@ -2146,139 +2359,139 @@ Wilkinson Sword:
       - wilk.*butter
   Classic:
     patterns:
-    - wilk.*classic
+      - wilk.*classic
 Wizamet:
   Junior P-1:
     patterns:
-    - '\bp-?1\b'
-    - wizamet
+      - '\bp-?1\b'
+      - wizamet
 Wolfman:
   Guerilla:
     patterns:
-    - guerr*ill*a
-    - wolf.*uag
-    - ^uag$
-    - ^uag
-    - uag$
-    - 'uag\s*razor'
+      - guerr*ill*a
+      - wolf.*uag
+      - ^uag$
+      - ^uag
+      - uag$
+      - 'uag\s*razor'
   WR1:
     patterns:
-    - '(Wolfman)?.*WR[\s-]*1'
-    - Wolfman
+      - '(Wolfman)?.*WR[\s-]*1'
+      - Wolfman
   WR2:
     patterns:
-    - '(Wolfman)?.*WR[\s-]*2'
+      - '(Wolfman)?.*WR[\s-]*2'
   WR3:
     format: GEM
     patterns:
-    - '(Wolfman)?.*WR[\s-]*3'
+      - '(Wolfman)?.*WR[\s-]*3'
   WR4:
     format: AC
     patterns:
-    - '(Wolfman)?.*WR[\s-]*4'
+      - '(Wolfman)?.*WR[\s-]*4'
 Yaqi:
   Adjustable TFC:
     patterns:
-    - yaqi.*tfc
-    - yaqi.*adj
-    - yaqi.*final
+      - yaqi.*tfc
+      - yaqi.*adj
+      - yaqi.*final
   Beast:
     patterns:
-    - yaqi.*beast
+      - yaqi.*beast
   Beast Hybrid:
     patterns:
-    - yaqi.*hybrid
+      - yaqi.*hybrid
   Bohemia:
     patterns:
-    - yaqi.*bohem
+      - yaqi.*bohem
   DLC:
     patterns:
-    - yaqi.*dlc
+      - yaqi.*dlc
   Excalibur:
     patterns:
-    - yaqi.*excal
+      - yaqi.*excal
   Flipside:
     patterns:
-    - yaqi.*flip
+      - yaqi.*flip
   Ghost:
     patterns:
-    - yaqi.*ghost
+      - yaqi.*ghost
   Katana:
     patterns:
-    - yaqi.*katana
+      - yaqi.*katana
   Knight Helmet:
     patterns:
-    - yaqi.*knight.*helmet
+      - yaqi.*knight.*helmet
   Open Comb:
     patterns:
-    - yaqi.*open.*comb(.*head)?
+      - yaqi.*open.*comb(.*head)?
   Pink:
     patterns:
-    - yaqi.*pink
+      - yaqi.*pink
   Raster:
     patterns:
-    - yaqi.*raster
+      - yaqi.*raster
   Remus:
     patterns:
-    - yaqi.*remus
+      - yaqi.*remus
   Romulus:
     format: AC
     patterns:
-    - yaqi.*romulus
+      - yaqu?i.*romulus
   SE:
     format: Half DE
     patterns:
-    - yaqi \bse\b
-    - yaqi.*single\s*edge
+      - yaqi \bse\b
+      - yaqi.*single\s*edge
   Slant:
     patterns:
-    - yaqi.*slant
+      - yaqi.*slant
   Slant 37:
     patterns:
-    - yaqi.*slant 37\b
+      - yaqi.*slant 37\b
   Slope:
     patterns:
-    - yaqi slope
+      - yaqi slope
   Sputnik:
     patterns:
-    - yaqi.*sput
+      - yaqi.*sput
   Telstar:
     patterns:
-    - yaqi.*telstar
+      - yaqi.*telstar
   Torqx:
     patterns:
       - torqx(.*adjust)?
   Zephyr:
     patterns:
-    - yaqi.*zaph
+      - yaqi.*zaph
 Yates:
-  '''Merica':
+  "'Merica":
     patterns:
-    - '\bmerican?\b'
-  '921':
+      - '\bmerican?\b'
+  "921":
     patterns:
-    - '921-*\w'
-    - (yates|ypm).*921
-    - 921.*yates
-    - '921'
-    - yates.*\b(m|h|eh)\b
+      - '921-*\w'
+      - (yates|ypm).*921
+      - 921.*yates
+      - "921"
+      - yates.*\b(m|h|eh)\b
   Winning:
     patterns:
-    - winning.*razor
-    - winning
+      - winning.*razor
+      - winning
 Yintal:
   Adjustable:
     patterns:
-    - yintal.*adj
+      - yintal.*adj
   Shavette:
     format: Shavette (Half DE)
     patterns:
-    - yintal.*shavet
+      - yintal.*shavet
 Yuma:
   DE:
     patterns:
-    - ^yuma$
+      - ^yuma$
 Zomchí:
-  '':
+  "":
     patterns:
-    - zomch(í|i)
+      - zomch(í|i)
