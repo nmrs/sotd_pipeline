@@ -464,6 +464,7 @@ async def analyze_unmatched(request: UnmatchedAnalysisRequest) -> UnmatchedAnaly
                     self.range = None
                     self.start = None
                     self.end = None
+                    self.delta_months = None  # Add this to match month_span function
                     self.field = request.field
                     self.limit = request.limit
                     self.out_dir = project_root / "data"
