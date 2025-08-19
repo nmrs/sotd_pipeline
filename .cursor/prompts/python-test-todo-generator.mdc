@@ -34,8 +34,8 @@ Run the full Python test suite via `make test`, analyze failures enough to produ
      - **Owner** and **ETA** fields (leave blank if unknown)
 
 6. **Save and Stop**
-   - Write the to-do to `TEST_SUITE_TODO.md` at the repo root (overwrite if exists).
-   - Do **not** modify code or tests.
+   - Write the to-do to `TEST_SUITE_TODO.md` at the repo root **only if it does not already exist**.
+   - Do **not** modify code or tests.   - Do **not** modify code or tests.
    - Do **not** push, commit, or trigger additional runs.
 
 **Constraints:**
