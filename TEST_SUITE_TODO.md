@@ -391,7 +391,7 @@ RUN_METADATA:
 - **start_hash**: 39a36801
 - **resolved_by_commit**: 39a36801
 
-### [ ] Fix Brush Enricher field name test expectations
+### [x] Fix Brush Enricher field name test expectations
 - **Category**: Test Drift
 - **Failing tests**:
   - `tests/enrich/test_brush_enricher.py::TestCustomKnotDetection::test_custom_knot_fiber_mismatch`
@@ -402,8 +402,10 @@ RUN_METADATA:
 - **Observed error**: Tests expect `_custom_knot` field but implementation uses `_user_override`
 - **Root cause**: Field was refactored from `_custom_knot` to `_user_override` for better semantics during our Task 3 work
 - **Solution**: Update test expectations to use `_user_override` instead of `_custom_knot`
-- **Status**: 🔄 PENDING - Test field names need updating to match refactored implementation
+- **Status**: ✅ COMPLETE - All tests now passing
 - **Notes**: This is a field name change, not a functional regression
+- **start_hash**: f3a936e1
+- **resolved_by_commit**: f3a936e1
 
 ### [ ] Fix Brush Validation Counting Integration test
 - **Category**: Regression

@@ -749,8 +749,8 @@ class TestCustomKnotDetection:
         result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
-        assert result["_custom_knot"] is True
-        assert "fiber_mismatch:Synthetic->Badger" in result["_custom_knot_reason"]
+        assert result["_user_override"] is True
+        assert "fiber_mismatch:Synthetic->Badger" in result["_user_override_reason"]
 
     def test_custom_knot_size_mismatch(self, enricher):
         """Test custom knot detection for size mismatch."""
@@ -767,8 +767,8 @@ class TestCustomKnotDetection:
         result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
-        assert result["_custom_knot"] is True
-        assert "size_mismatch:27.0->26.0" in result["_custom_knot_reason"]
+        assert result["_user_override"] is True
+        assert "size_mismatch:27.0->26.0" in result["_user_override_reason"]
 
     def test_custom_knot_both_mismatch(self, enricher):
         """Test custom knot detection for both fiber and size mismatch."""
@@ -785,9 +785,9 @@ class TestCustomKnotDetection:
         result = enricher.enrich(field_data, brush_extracted)
 
         assert result is not None
-        assert result["_custom_knot"] is True
-        assert "fiber_mismatch:Synthetic->Badger" in result["_custom_knot_reason"]
-        assert "size_mismatch:27.0->26.0" in result["_custom_knot_reason"]
+        assert result["_user_override"] is True
+        assert "fiber_mismatch:Synthetic->Badger" in result["_user_override_reason"]
+        assert "size_mismatch:27.0->26.0" in result["_user_override_reason"]
 
     def test_no_custom_knot_when_matching(self, enricher):
         """Test that no custom knot is detected when values match."""
@@ -804,7 +804,7 @@ class TestCustomKnotDetection:
         result = enricher.enrich(field_data["matched"], brush_extracted)
 
         assert result is not None
-        assert "_custom_knot" not in result
+        assert "_user_override" not in result
 
 
 class TestCombinedKnotSizeAndFiber:
@@ -827,4 +827,4 @@ class TestCombinedKnotSizeAndFiber:
         assert result["fiber"] == "Badger"
         assert result["_catalog_knot_size_mm"] == 27.0
         assert result["_catalog_fiber"] == "Synthetic"
-        assert result["_custom_knot"] is True
+        assert result["_user_override"] is True
