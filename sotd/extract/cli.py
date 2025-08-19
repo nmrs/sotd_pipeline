@@ -21,8 +21,11 @@ def get_parser() -> BaseCLIParser:
 
     # Add standardized parallel processing arguments
     parser.add_parallel_processing_arguments(
-        default_max_workers=4,
-        help_max_workers="Maximum parallel workers for month processing (default: 4)",
+        default_max_workers=8,
+        help_max_workers="Maximum parallel workers for month processing (default: 8)",
     )
+
+    # Add delta processing support
+    parser.add_delta_arguments()
 
     return parser

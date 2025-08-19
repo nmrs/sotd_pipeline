@@ -25,6 +25,62 @@ def get_default_month() -> str:
     return f"{prev_year:04d}-{prev_month:02d}"
 
 
+def calculate_delta_months(args) -> list[str]:
+    """
+    Calculate delta months for comparison: current month(s) + 1 month ago, 1 year ago, 5 years ago.
+
+    Args:
+        args: Parsed command line arguments
+
+    Returns:
+        List of months in YYYY-MM format to process
+    """
+    delta_months = set()  # Use set to avoid duplicates
+
+    # Get current month(s) from args
+    if args.month:
+        delta_months.add(args.month)
+    elif args.year:
+        # For year, add first and last month of the year
+        delta_months.add(f"{args.year}-01")
+        delta_months.add(f"{args.year}-12")
+    elif args.start and args.end:
+        # For range, add start and end months
+        delta_months.add(args.start)
+        delta_months.add(args.end)
+    elif args.range:
+        # For range format, add start and end months
+        start, end = args.range.split(":")
+        delta_months.add(start)
+        delta_months.add(end)
+    else:
+        # Default to previous month
+        default_month = get_default_month()
+        delta_months.add(default_month)
+
+    # Add historical comparison months
+    for month_str in list(delta_months):  # Convert to list to avoid modification during iteration
+        year, month = map(int, month_str.split("-"))
+
+        # 1 month ago
+        if month == 1:
+            one_month_ago = f"{year - 1}-12"
+        else:
+            one_month_ago = f"{year}-{month - 1:02d}"
+        delta_months.add(one_month_ago)
+
+        # 1 year ago
+        one_year_ago = f"{year - 1}-{month:02d}"
+        delta_months.add(one_year_ago)
+
+        # 5 years ago
+        five_years_ago = f"{year - 5}-{month:02d}"
+        delta_months.add(five_years_ago)
+
+    # Sort months chronologically
+    return sorted(list(delta_months))
+
+
 def run_phase(phase: str, args: List[str]) -> int:
     """
     Run a specific pipeline phase.
@@ -277,6 +333,11 @@ Examples:
         default=8,
         help="Maximum parallel workers for month processing (default: 8)",
     )
+    parser.add_argument(
+        "--delta",
+        action="store_true",
+        help="Process delta months: current month(s) + 1 month ago, 1 year ago, and 5 years ago",
+    )
 
     args = parser.parse_args(argv)
 
@@ -301,7 +362,15 @@ Examples:
         # Handle date arguments - if none provided, default to previous month
         has_date_args = bool(args.month or args.year or args.start or args.end or args.range)
 
-        if args.month:
+        if args.delta:
+            # Delta mode: process current month(s) + historical comparison months
+            delta_months = calculate_delta_months(args)
+            if args.debug:
+                print(
+                    f"[DEBUG] Delta mode: processing {len(delta_months)} months: {', '.join(delta_months)}"
+                )
+            common_args.extend(["--delta-months", ",".join(delta_months)])
+        elif args.month:
             common_args.extend(["--month", args.month])
         elif args.year:
             common_args.extend(["--year", str(args.year)])

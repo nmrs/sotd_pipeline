@@ -170,6 +170,15 @@ class BaseCLIParser(argparse.ArgumentParser):
             help=help_max_workers or f"Maximum parallel workers (default: {default_max_workers})",
         )
 
+    def add_delta_arguments(self) -> None:
+        """Add standardized delta processing arguments."""
+        self.add_argument(
+            "--delta-months",
+            type=str,
+            help="Comma-separated list of months to process for delta comparison "
+            "(YYYY-MM,YYYY-MM,...)",
+        )
+
     def parse_args(self, args=None, namespace=None):  # type: ignore
         """Parse arguments and validate them."""
         parsed_args = super().parse_args(args, namespace)
@@ -185,15 +194,23 @@ class BaseCLIParser(argparse.ArgumentParser):
             or getattr(args, "range", None)
         )
         has_start_end = bool(getattr(args, "start", None) or getattr(args, "end", None))
+        has_delta_months = bool(getattr(args, "delta_months", None))
 
         if (
             hasattr(args, "list_months")
             and args.list_months
             and not has_primary_date
             and not has_start_end
+            and not has_delta_months
         ):
             return args
-        if hasattr(args, "audit") and args.audit and not has_primary_date and not has_start_end:
+        if (
+            hasattr(args, "audit")
+            and args.audit
+            and not has_primary_date
+            and not has_start_end
+            and not has_delta_months
+        ):
             return args
 
         # Special case: annual mode - don't set default month
@@ -201,11 +218,11 @@ class BaseCLIParser(argparse.ArgumentParser):
             return args
 
         # If no date specification is provided
-        if not has_primary_date and not has_start_end:
+        if not has_primary_date and not has_start_end and not has_delta_months:
             if self._require_date_args:
                 self.error(
                     "At least one date argument (--month, --year, --range, "
-                    "or --start/--end) is required"
+                    "--start/--end, or --delta-months) is required"
                 )
 
             # Individual phases should always receive date arguments from main run.py

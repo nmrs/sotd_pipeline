@@ -27,6 +27,15 @@ def _current_ym() -> tuple[int, int]:
 
 
 def month_span(args) -> list[tuple[int, int]]:
+    if args.delta_months:
+        # Handle delta months (comma-separated list)
+        months = []
+        for month_str in args.delta_months.split(","):
+            month_str = month_str.strip()
+            if month_str:
+                months.append(parse_ym(month_str))
+        return months
+
     if args.month:
         return [parse_ym(args.month)]
 
@@ -48,4 +57,6 @@ def month_span(args) -> list[tuple[int, int]]:
         end = parse_ym(args.end)
         return list(iter_months(start, end))
 
-    raise ValueError("Must provide --month, --year, --range, or both --start and --end.")
+    raise ValueError(
+        "Must provide --month, --year, --range, both --start and --end, or --delta-months."
+    )
