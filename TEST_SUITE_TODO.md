@@ -2,10 +2,11 @@
 RUN_METADATA:
   run_1_start_commit: d31fe6cc0d9966c20bfe4594dfc2887d90552f39
   run_1_started_at: 2025-08-19T02:35:42Z
-  run_1_revert_commit: 4f6df612
-  run_1_reverted_at: 2025-08-19T22:24:16Z
+  run_1_working_commit: e692f273
+  run_1_working_at: 2025-08-19T22:22:04Z
   run_1_current_state: Working pipeline with complete documentation of lessons learned
   run_1_lessons_preserved: ✅ Critical analysis, regression details, and next steps documented
+  run_1_doc_commits: 54f4999b, 31b31d5e, 4f6df612, c7e848a1 (documentation only)
 -->
 
 ## ⚠️ CRITICAL SESSION ANALYSIS - Task 3 Investigation
