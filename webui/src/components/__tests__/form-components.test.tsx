@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import MonthSelector from '../forms/MonthSelector';
 import FilteredEntryCheckbox from '../forms/FilteredEntryCheckbox';
 
@@ -33,9 +33,11 @@ describe('Form Components', () => {
     }).not.toThrow();
   });
 
-  test('should render MonthSelector component with basic props', () => {
+  test('should render MonthSelector component with basic props', async () => {
     // Test that MonthSelector component renders correctly
-    render(<MonthSelector selectedMonths={[]} onMonthsChange={() => {}} multiple={true} />);
+    await act(async () => {
+      render(<MonthSelector selectedMonths={[]} onMonthsChange={() => { }} multiple={true} />);
+    });
 
     // Verify basic month selector structure
     expect(screen.getByText('Select Months')).toBeInTheDocument();
@@ -48,7 +50,7 @@ describe('Form Components', () => {
         itemName='test-item'
         commentIds={['123']}
         isFiltered={false}
-        onStatusChange={() => {}}
+        onStatusChange={() => { }}
         uniqueId='test'
       />
     );
