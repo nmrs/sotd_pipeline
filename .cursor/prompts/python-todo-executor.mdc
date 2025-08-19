@@ -145,6 +145,8 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
 ### **STEP 5: MANDATORY Baseline Comparison** ✅
    - **⚠️ CRITICAL: File size and record count comparison are INSUFFICIENTLY DETERMINISTIC**
    - **REQUIRED: Full JSON content comparison (ignoring `"metadata"` sections only)**
+   - **⚠️ MANDATORY: You MUST compare ALL 12 files, not just the ones you suspect may have changed**
+   - **⚠️ MANDATORY: You MUST compare the actual content, not just counts or file sizes**
    - **Method**: Use proper JSON comparison tools, not just `ls -la`, `wc -c`, or record counting
    - **Expected result**: **BYTE-FOR-BYTE IDENTICAL content outside metadata** (your fix should not change any other data)
    - **This comparison is the safety check - don't skip it**
@@ -153,14 +155,40 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
      - Record counts can be identical while content differs
      - Metadata changes can mask content changes
      - **ONLY full content comparison ensures no regressions**
+   - **⚠️ CRITICAL: You cannot assume which files will be affected by your changes**
+   - **⚠️ CRITICAL: Pipeline phases are interconnected - changes in one phase can affect others**
+   - **⚠️ CRITICAL: Always compare ALL files to catch unexpected side effects**
 
-   **Comparison Methodology (REQUIRED)**:
+   **⚠️ MANDATORY: Comprehensive File Validation (ALL 12 files)**:
+   
+   **You MUST validate ALL 12 files, not just some of them:**
+   
    ```bash
-   # 1. Load both files and compare data sections
-   python -c "
+   # REQUIRED: Validate ALL files, not just suspected ones
+   files_to_validate=(
+       "extracted_2025-06.json"
+       "extracted_2025-07.json" 
+       "matched_2025-06.json"
+       "matched_2025-07.json"
+       "enriched_2025-06.json"
+       "enriched_2025-07.json"
+       "aggregated_2025-06.json"
+       "aggregated_2025-07.json"
+       "report_2025-06-hardware.md"
+       "report_2025-06-software.md"
+       "report_2025-07-hardware.md"
+       "report_2025-07-software.md"
+   )
+   
+   # CRITICAL: Validate each file individually
+   for file in "${files_to_validate[@]}"; do
+       echo "=== Validating $file ==="
+       
+       # 1. Load both files and compare data sections
+       python -c "
    import json
-   baseline = json.load(open('.ab_backups/baseline_<timestamp>/<file>.json'))
-   current = json.load(open('.ab_backups/task_<index>_<slug>_<timestamp>/<file>.json'))
+   baseline = json.load(open('.ab_backups/baseline_<timestamp>/$file'))
+   current = json.load(open('.ab_backups/task_<index>_<slug>_<timestamp>/$file'))
    
    # Compare data sections (ignore metadata)
    baseline_data = baseline.get('data', [])
@@ -177,12 +205,19 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
    # Record count matching is NOT sufficient for validation
    # File size matching is NOT sufficient for validation
    "
-   
-   # 2. For non-identical content, find first difference
-   # 3. Analyze what changed and why  
-   # 4. Determine if change is improvement or regression
-   # 5. **STOP if content is not byte-for-byte identical outside metadata**
+       
+       # 2. For non-identical content, find first difference
+       # 3. Analyze what changed and why  
+       # 4. Determine if change is improvement or regression
+       # 5. **STOP if content is not byte-for-byte identical outside metadata**
+   done
    ```
+   
+   **⚠️ CRITICAL: Why ALL files matter:**
+   - **Pipeline phases are interconnected** - changes in extract can affect match, enrich, aggregate
+   - **Data flows between phases** - normalization changes can ripple through the entire pipeline
+   - **Aggregators depend on upstream data** - match/enrich changes can break aggregation logic
+   - **You cannot predict side effects** - always validate everything to catch unexpected changes
 
 ### **STEP 6: Branch Based on Comparison Results** ✅
    - **If non-identical (outside `metadata`):**  
@@ -211,6 +246,33 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
 - [ ] **STEP 6**: Task marked complete in TEST_SUITE_TODO.md ✅
 
 **ONLY when ALL 6 steps are confirmed can you proceed to the next task.**
+
+## **🔍 VALIDATION REQUIREMENTS**
+
+**⚠️ MANDATORY: You MUST validate ALL 12 files, not just some of them**
+
+**What you CANNOT do:**
+- ❌ Validate only files you think might have changed
+- ❌ Skip validation of certain phases
+- ❌ Only check file sizes or record counts
+- ❌ Assume changes in one phase won't affect others
+- ❌ Validate only JSON files and skip markdown reports
+
+**What you MUST do:**
+- ✅ Validate ALL 12 files (8 JSON + 4 MD)
+- ✅ Compare actual content, not just metadata
+- ✅ Use proper JSON parsing tools for comparison
+- ✅ Check for both regressions AND improvements
+- ✅ Document any differences found and their impact
+- ✅ Only proceed if ALL files are identical (outside metadata)
+
+**⚠️ CRITICAL: Pipeline phases are interconnected**
+- **Extract** changes can affect **Match** phase
+- **Match** changes can affect **Enrich** phase  
+- **Enrich** changes can affect **Aggregate** phase
+- **Any phase** can affect **Report** generation
+
+**You cannot predict side effects - always validate everything.**
 
 ---
 
@@ -242,9 +304,28 @@ For each unchecked task in `TEST_SUITE_TODO.md`:
 - "Did I complete ALL 6 steps in the checklist?"
 - "Did I validate the pipeline output against baseline?"
 - "Am I sure there are no regressions?"
+- "Did I validate ALL 12 files, not just some of them?"
+- "Did I compare actual content, not just file sizes or counts?"
+- "Did I check for both regressions AND improvements?"
 
 **If you answered NO to any question, STOP and complete the missing steps.**
 **The validation loop is NOT optional - it's the entire point of this script.**
+
+## **🎯 VALIDATION CHECKLIST FOR EVERY TASK**
+
+**Before proceeding to the next task, verify:**
+
+- [ ] **ALL 12 files validated** (8 JSON + 4 MD)
+- [ ] **Content comparison done** (not just file sizes)
+- [ ] **JSON parsing used** (not just diff or wc)
+- [ ] **Metadata ignored** (only data sections compared)
+- [ ] **Differences documented** (if any found)
+- [ ] **Impact assessed** (regression vs improvement)
+- [ ] **User direction received** (if changes detected)
+
+**⚠️ CRITICAL: You cannot skip validation of any file**
+**⚠️ CRITICAL: You cannot assume which files will be affected**
+**⚠️ CRITICAL: Always validate everything to catch unexpected side effects**
 
 ---
 
