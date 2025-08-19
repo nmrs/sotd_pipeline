@@ -15,6 +15,7 @@ class MatchResult:
 
     # Core data (always present)
     original: str
+    normalized: Optional[str] = None  # Normalized text for matching operations
     matched: Optional[Dict[str, Any]] = None
     match_type: Optional[str] = None
     pattern: Optional[str] = None

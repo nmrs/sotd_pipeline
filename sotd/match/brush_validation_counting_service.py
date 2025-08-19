@@ -354,17 +354,30 @@ class BrushValidationCountingService:
                 continue
 
             brush_entry = record["brush"]
-            # Strategy is available at both brush.strategy and brush.matched.strategy
-            # Use brush.strategy for consistency with CLI and other consumers
-            strategy = brush_entry.get("strategy")
+            # Strategy is nested in brush.matched.strategy
+            matched = brush_entry.get("matched", {})
+            strategy = matched.get("strategy") if matched else None
+
+            # Debug: Check first few records
+            if len(correct_matches_strings) < 3:
+                print(f"DEBUG: Record {len(correct_matches_strings)}: strategy = {strategy}")
 
             if strategy in [
                 "correct_complete_brush",
                 "correct_split_brush",
             ]:
+                # Always use normalized field for consistency with matching logic
                 normalized_text = brush_entry.get("normalized", "")
                 if normalized_text:
                     correct_matches_strings.add(normalized_text.lower().strip())
+
+        # Debug output
+        print(f"DEBUG: Found {len(correct_matches_strings)} correct matches")
+        if correct_matches_strings:
+            sample = list(correct_matches_strings)[:5]
+            print(f"DEBUG: Sample strategies: {sample}")
+        else:
+            print("DEBUG: No strategies found")
 
         return len(correct_matches_strings)
 
@@ -390,9 +403,9 @@ class BrushValidationCountingService:
             if "brush" not in record:
                 continue
             brush_entry = record["brush"]
-            # Strategy is available at both brush.strategy and brush.matched.strategy
-            # Use brush.strategy for consistency with CLI and other consumers
-            strategy = brush_entry.get("strategy")
+            # Strategy is nested in brush.matched.strategy
+            matched = brush_entry.get("matched", {})
+            strategy = matched.get("strategy") if matched else None
             if strategy in [
                 "correct_complete_brush",
                 "correct_split_brush",
@@ -458,7 +471,8 @@ class BrushValidationCountingService:
                 if "brush" not in record:
                     continue
                 brush_entry = record["brush"]
-                strategy = brush_entry.get("strategy")
+                matched = brush_entry.get("matched", {})
+                strategy = matched.get("strategy") if matched else None
                 if strategy in ["correct_complete_brush", "correct_split_brush"]:
                     normalized_text = brush_entry.get("normalized", "")
                     if normalized_text:

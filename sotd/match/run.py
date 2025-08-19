@@ -122,21 +122,19 @@ def match_record(
             )
         else:
             razor_result = razor_matcher.match(normalized_text, result["razor"]["original"])
-            # Convert MatchResult to dict for consistency
+            # Use MatchResult consistently
             if razor_result is not None:
-                result["razor"] = {
-                    "original": razor_result.original,
-                    "matched": razor_result.matched,
-                    "match_type": razor_result.match_type,
-                    "pattern": razor_result.pattern,
-                }
+                # Update the MatchResult to include normalized field
+                razor_result.normalized = result["razor"]["normalized"]
+                result["razor"] = razor_result
             else:
-                result["razor"] = {
-                    "original": result["razor"]["original"],
-                    "matched": None,
-                    "match_type": None,
-                    "pattern": None,
-                }
+                result["razor"] = MatchResult(
+                    original=result["razor"]["original"],
+                    normalized=result["razor"]["normalized"],
+                    matched=None,
+                    match_type=None,
+                    pattern=None,
+                )
         monitor.record_matcher_timing("razor", time.time() - start_time)
 
     if "blade" in result:
@@ -244,6 +242,7 @@ def match_record(
             if brush_result is not None:
                 result["brush"] = {
                     "original": brush_result.original,
+                    "normalized": result["brush"]["normalized"],  # Preserve normalized field
                     "matched": brush_result.matched,
                     "match_type": brush_result.match_type,
                     "pattern": brush_result.pattern,
@@ -251,6 +250,7 @@ def match_record(
             else:
                 result["brush"] = {
                     "original": result["brush"]["original"],
+                    "normalized": result["brush"]["normalized"],  # Preserve normalized field
                     "matched": None,
                     "match_type": None,
                     "pattern": None,
