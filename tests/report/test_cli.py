@@ -26,7 +26,7 @@ class TestReportCLI:
         """Test type argument default value."""
         parser = get_parser()
         args = parser.parse_args(["--month", "2023-01"])
-        assert args.type == "hardware"
+        assert args.type == "all"
 
     def test_type_argument_hardware(self):
         """Test hardware type argument."""

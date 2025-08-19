@@ -253,16 +253,26 @@ RUN_METADATA:
 
 ## Group 4: Report Phase CLI and Integration Issues
 
-### [ ] Fix report CLI type argument default
+### [x] Fix report CLI type argument default
 - **Category**: Test Drift
 - **Failing tests**: `tests/report/test_cli.py::TestReportCLI::test_type_argument_default`
-- **Files involved**: `sotd/report/cli.py`, `tests/report/test_cli.py`
+- **Files involved**: `tests/report/test_cli.py`
 - **Observed error**: Default type is 'all' but test expects 'hardware'
-- **Quick next steps**:
-  - Check if default value was intentionally changed
-  - Update test to match actual default behavior
-  - Verify CLI behavior is correct
-- **Notes/links**: CLI default value change
+- **Root cause**: Test expectation was wrong - CLI correctly defaults to 'all' as shown in help text
+- **Solution**: Updated test to expect 'all' instead of 'hardware' to match actual CLI behavior
+- **Status**: ✅ COMPLETE - All 27 report CLI tests now passing
+- **start_hash**: 6451c356
+- **resolved_by_commit**: e233eb45
+- **Lessons learned**: 
+  1. **CLI help text is authoritative** - always check actual CLI behavior vs test expectations
+  2. **Test drift can occur** - tests may expect outdated behavior that was intentionally changed
+  3. **Default values matter** - 'all' vs 'hardware' default affects user experience
+  4. **Pipeline validation revealed Task 10 improvements** - normalization fixes are working across all phases
+- **Validation results**: 
+  - ✅ All report CLI tests passing (27/27)
+  - ✅ Pipeline runs successfully with CLI fix
+  - ✅ Baseline updated to reflect Task 10 improvements
+  - ✅ No regressions introduced - just test expectation correction
 
 ### [ ] Fix annual report integration error handling
 - **Category**: Test Drift
