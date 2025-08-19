@@ -13,9 +13,27 @@ from sotd.aggregate.aggregators.razor_specialized import (
 
 def test_aggregate_blackbird_plates():
     records = [
-        {"author": "user1", "razor": {"enriched": {"plate": "Ti"}}},
-        {"author": "user2", "razor": {"enriched": {"plate": "Ti"}}},
-        {"author": "user1", "razor": {"enriched": {"plate": "Lite"}}},
+        {
+            "author": "user1",
+            "razor": {
+                "matched": {"brand": "Blackland", "model": "Blackbird"},
+                "enriched": {"plate": "Ti"},
+            },
+        },
+        {
+            "author": "user2",
+            "razor": {
+                "matched": {"brand": "Blackland", "model": "Blackbird"},
+                "enriched": {"plate": "Ti"},
+            },
+        },
+        {
+            "author": "user1",
+            "razor": {
+                "matched": {"brand": "Blackland", "model": "Blackbird"},
+                "enriched": {"plate": "Lite"},
+            },
+        },
     ]
     result = aggregate_blackbird_plates(records)
     assert len(result) == 2
