@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { DataTable } from '../ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
 
@@ -43,8 +43,10 @@ describe('DataTable Pagination', () => {
     });
   });
 
-  test('should render standard table structure without virtualization', () => {
-    render(<DataTable columns={columns} data={mockData} showPagination={true} />);
+  test('should render standard table structure without virtualization', async () => {
+    await act(async () => {
+      render(<DataTable columns={columns} data={mockData} showPagination={true} />);
+    });
 
     // Check that table has proper structure
     const table = screen.getByRole('table');
@@ -66,8 +68,10 @@ describe('DataTable Pagination', () => {
     expect(virtualizedBody).not.toBeInTheDocument();
   });
 
-  test('should show pagination controls when showPagination is true', () => {
-    render(<DataTable columns={columns} data={mockData} showPagination={true} />);
+  test('should show pagination controls when showPagination is true', async () => {
+    await act(async () => {
+      render(<DataTable columns={columns} data={mockData} showPagination={true} />);
+    });
 
     // Check for pagination controls
     expect(screen.getByText('Rows per page')).toBeInTheDocument();
@@ -75,7 +79,9 @@ describe('DataTable Pagination', () => {
   });
 
   test('should handle filtering with pagination', async () => {
-    render(<DataTable columns={columns} data={mockData} searchKey='name' showPagination={true} />);
+    await act(async () => {
+      render(<DataTable columns={columns} data={mockData} searchKey='name' showPagination={true} />);
+    });
 
     // Find the search input
     const searchInput = screen.getByPlaceholderText('Filter name...');
@@ -94,8 +100,10 @@ describe('DataTable Pagination', () => {
     expect(screen.getByText('1-1 of 1')).toBeInTheDocument();
   });
 
-  test('should maintain proper table border structure', () => {
-    render(<DataTable columns={columns} data={mockData} showPagination={true} />);
+  test('should maintain proper table border structure', async () => {
+    await act(async () => {
+      render(<DataTable columns={columns} data={mockData} showPagination={true} />);
+    });
 
     // Check that the table has proper border structure
     const tableContainer = screen.getByRole('table').closest('.rounded-md.border');
@@ -108,8 +116,10 @@ describe('DataTable Pagination', () => {
     expect(virtualizedBody).not.toBeInTheDocument();
   });
 
-  test('should maintain column width consistency between header and body', () => {
-    render(<DataTable columns={columns} data={mockData} showPagination={true} resizable={true} />);
+  test('should maintain column width consistency between header and body', async () => {
+    await act(async () => {
+      render(<DataTable columns={columns} data={mockData} showPagination={true} resizable={true} />);
+    });
 
     // Check that header and body cells have consistent styling
     const headerCells = screen.getAllByRole('columnheader');
@@ -125,15 +135,17 @@ describe('DataTable Pagination', () => {
     expect(virtualizedBody).not.toBeInTheDocument();
   });
 
-  test('should work without virtualization props', () => {
-    render(
-      <DataTable
-        columns={columns}
-        data={mockData}
-        showPagination={true}
-        // No height or itemSize props - these should be removed
-      />
-    );
+  test('should work without virtualization props', async () => {
+    await act(async () => {
+      render(
+        <DataTable
+          columns={columns}
+          data={mockData}
+          showPagination={true}
+          // No height or itemSize props - these should be removed
+        />
+      );
+    });
 
     // Verify table renders correctly without virtualization props
     const table = screen.getByRole('table');

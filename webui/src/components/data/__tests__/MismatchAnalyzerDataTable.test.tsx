@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import MismatchAnalyzerDataTable from '../MismatchAnalyzerDataTable';
 import { MismatchItem } from '../../../services/api';
 
@@ -530,7 +530,7 @@ describe('MismatchAnalyzerDataTable', () => {
       expect(screen.getByText('ERROR')).toBeInTheDocument();
     });
 
-    test('does not show enrich adjustment icon when there are no changes', () => {
+    test('does not show enrich adjustment icon when there are no changes', async () => {
       const brushData: MismatchItem[] = [
         {
           original: 'Simpson Chubby 2 Best Badger',
@@ -553,19 +553,21 @@ describe('MismatchAnalyzerDataTable', () => {
         },
       ];
 
-      render(
-        <MismatchAnalyzerDataTable
-          data={brushData}
-          field='brush'
-          onCommentClick={mockOnCommentClick}
-        />
-      );
+      await act(async () => {
+        render(
+          <MismatchAnalyzerDataTable
+            data={brushData}
+            field='brush'
+            onCommentClick={mockOnCommentClick}
+          />
+        );
+      });
 
       // Should not show the enrich adjustment icon
       expect(screen.queryByText('🔗 enrich')).not.toBeInTheDocument();
     });
 
-    test('shows enrich adjustment icon when there are actual changes', () => {
+    test('shows enrich adjustment icon when there are actual changes', async () => {
       const brushData: MismatchItem[] = [
         {
           original: 'Zenith 506U N (50/50 horse mane/tail)',
@@ -594,19 +596,21 @@ describe('MismatchAnalyzerDataTable', () => {
         },
       ];
 
-      render(
-        <MismatchAnalyzerDataTable
-          data={brushData}
-          field='brush'
-          onCommentClick={mockOnCommentClick}
-        />
-      );
+      await act(async () => {
+        render(
+          <MismatchAnalyzerDataTable
+            data={brushData}
+            field='brush'
+            onCommentClick={mockOnCommentClick}
+          />
+        );
+      });
 
       // Should show the enrich adjustment icon
       expect(screen.getByText('🔄')).toBeInTheDocument();
     });
 
-    test('shows enrich adjustment icon when knot_size_mm changes from null to value', () => {
+    test('shows enrich adjustment icon when knot_size_mm changes from null to value', async () => {
       const brushData: MismatchItem[] = [
         {
           original: 'C&H + TnS 27mm H8',
@@ -635,19 +639,21 @@ describe('MismatchAnalyzerDataTable', () => {
         },
       ];
 
-      render(
-        <MismatchAnalyzerDataTable
-          data={brushData}
-          field='brush'
-          onCommentClick={mockOnCommentClick}
-        />
-      );
+      await act(async () => {
+        render(
+          <MismatchAnalyzerDataTable
+            data={brushData}
+            field='brush'
+            onCommentClick={mockOnCommentClick}
+          />
+        );
+      });
 
       // Should show the enrich adjustment icon
       expect(screen.getByText('🔄')).toBeInTheDocument();
     });
 
-    test('does not show enrich adjustment icon for Bristle Brushworks B9B (no actual changes)', () => {
+    test('does not show enrich adjustment icon for Bristle Brushworks B9B (no actual changes)', async () => {
       const brushData: MismatchItem[] = [
         {
           original: 'Bristle Brushworks B9B',
@@ -676,13 +682,15 @@ describe('MismatchAnalyzerDataTable', () => {
         },
       ];
 
-      render(
-        <MismatchAnalyzerDataTable
-          data={brushData}
-          field='brush'
-          onCommentClick={mockOnCommentClick}
-        />
-      );
+      await act(async () => {
+        render(
+          <MismatchAnalyzerDataTable
+            data={brushData}
+            field='brush'
+            onCommentClick={mockOnCommentClick}
+          />
+        );
+      });
 
       // Should NOT show the enrich adjustment icon since there are no actual changes
       expect(screen.queryByText('🔄')).not.toBeInTheDocument();

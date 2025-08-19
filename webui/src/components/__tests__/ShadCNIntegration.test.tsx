@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -155,32 +155,36 @@ describe('ShadCN UI Integration', () => {
   });
 
   describe('Select Component', () => {
-    test('should render ShadCN select with correct styling', () => {
-      render(
-        <Select>
-          <SelectTrigger>
-            <SelectValue placeholder='Select an option' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='option1'>Option 1</SelectItem>
-            <SelectItem value='option2'>Option 2</SelectItem>
-          </SelectContent>
-        </Select>
-      );
+    test('should render ShadCN select with correct styling', async () => {
+      await act(async () => {
+        render(
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder='Select an option' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='option1'>Option 1</SelectItem>
+              <SelectItem value='option2'>Option 2</SelectItem>
+            </SelectContent>
+          </Select>
+        );
+      });
 
       const select = screen.getByRole('combobox');
       expect(select).toBeInTheDocument();
       expect(select).toHaveClass('flex', 'h-9', 'w-full', 'rounded-md', 'border');
     });
 
-    test('should render select trigger with placeholder', () => {
-      render(
-        <Select>
-          <SelectTrigger>
-            <SelectValue placeholder='Select an option' />
-          </SelectTrigger>
-        </Select>
-      );
+    test('should render select trigger with placeholder', async () => {
+      await act(async () => {
+        render(
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder='Select an option' />
+            </SelectTrigger>
+          </Select>
+        );
+      });
 
       const select = screen.getByRole('combobox');
       expect(select).toBeInTheDocument();
