@@ -340,7 +340,7 @@ RUN_METADATA:
 
 ## Group 6: WebUI API Response Issues
 
-### [ ] Fix soap analyzer API response validation
+### [x] Fix soap analyzer API response validation
 - **Category**: Test Drift
 - **Failing tests**:
   - `tests/webui/api/test_soap_analyzer.py::TestSoapAnalyzerAPI::test_neighbor_similarity_empty_months`
@@ -348,13 +348,29 @@ RUN_METADATA:
   - `tests/webui/api/test_soap_analyzer.py::TestSoapAnalyzerAPI::test_neighbor_similarity_brands_mode_success`
   - `tests/webui/api/test_soap_analyzer.py::TestSoapAnalyzerAPI::test_neighbor_similarity_brand_scent_mode_success`
   - `tests/webui/api/test_soap_analyzer.py::TestSoapAnalyzerAPI::test_neighbor_similarity_scents_mode_success`
-- **Files involved**: `webui/api/soap_analyzer.py`, `tests/webui/api/test_soap_analyzer.py`
-- **Observed error**: API response format and validation issues
-- **Quick next steps**:
-  - Check API response format changes
-  - Update tests to match actual API behavior
-  - Verify API validation logic
-- **Notes/links**: API evolution vs test expectations
+- **Files involved**: `webui/api/soap_analyzer.py`, `webui/api/main.py`, `tests/webui/api/test_soap_analyzer.py`
+- **Observed error**: API response format and validation issues, empty months handling, HTTPException override
+- **Root cause**: Multiple API handling issues:
+  1. **Empty months parameter**: Required parameter should be optional with graceful handling
+  2. **HTTPException override**: Global exception handler was converting HTTPException to 500 errors
+  3. **Test data compatibility**: API expected `id` but test data had `comment_id`
+  4. **Response format**: Missing `next_entry` field in API response
+  5. **Mock file handling**: Test needed proper file mocking to avoid I/O errors
+- **Solution**: 
+  - Made `months` parameter optional with empty string default
+  - Added graceful handling for empty month lists
+  - Fixed global exception handler to re-raise HTTPException directly
+  - Updated API to handle both `id` and `comment_id` fields
+  - Added `next_entry` field to API response structure
+  - Improved test mocking to avoid real file access
+- **Status**: ✅ COMPLETE - All 5 tests now passing
+- **resolved_by_commit**: 0eec67b5
+- **Lessons learned**: 
+  1. **API parameter design**: Optional parameters with sensible defaults improve UX
+  2. **Exception handling**: Don't override framework-specific exceptions globally
+  3. **Test data compatibility**: APIs should handle variations in data structure
+  4. **Mock strategy**: Complex tests need proper isolation from file system
+  5. **Response format consistency**: API responses must match test expectations exactly
 
 ## Group 7: Data Structure Consistency Issues
 
@@ -412,14 +428,17 @@ RUN_METADATA:
 ### Run 1: 2025-08-19
 - **start_time**: 2025-08-19 07:58
 - **start_hash**: 2dc8ad3a (Task 13 start)
-- **current_state**: ✅ Task 13 COMPLETE - Moving to next task
-- **working_commit**: 2dc8ad3a
+- **current_state**: ✅ Task 14 COMPLETE - Moving to next task
+- **working_commit**: 0eec67b5
 - **doc_commits**: 
   - 2dc8ad3a - Initial commit for Task 13
   - 2dc8ad3a - Task 13 completion and documentation update
-- **baseline**: baseline_20250819_075826 (updated with Task 13 improvements)
+  - 0eec67b5 - Task 14 completion: soap analyzer API fixes
+- **baseline**: baseline_20250819_103932 (complete baseline with all 12 files)
 - **notes**: 
-  - ✅ Task 13 COMPLETE: Normalization functions now correctly handle edge cases
-  - Changes improve data quality across extract, match, and enrich phases
-  - All 12 pipeline outputs validated - 6 show improvements, 6 unchanged
+  - ✅ Task 14 COMPLETE: Soap analyzer API response validation fully resolved
+  - All 5 failing WebUI API tests now passing
+  - Fixed empty months handling, HTTPException override, response format
+  - Comment data corruption issue resolved (restored from baseline)
+  - Complete baseline established with all 12 pipeline files
   - Ready to proceed to next task
