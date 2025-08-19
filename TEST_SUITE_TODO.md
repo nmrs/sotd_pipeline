@@ -141,7 +141,7 @@ RUN_METADATA:
   1. **Enricher fix**: Added default "Standard" plate when no specific type mentioned
   2. **Aggregator fix**: Added logic to construct names from `brand + model` when `name` unavailable
 - **Status**: ✅ COMPLETE - All tests passing, pipeline validation successful
-- **resolved_by_commit**: 1245b7d7
+- **resolved_by_commit**: 93eefb87
 - **Lessons learned**: 
   1. **Pipeline data flow is correct** - Match → Enrich → Aggregate works as designed
   2. **Enrichers need default cases** - Not all data will have explicit specifications
