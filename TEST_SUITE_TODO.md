@@ -1,0 +1,244 @@
+# Python Test Suite TODO List
+
+## Header Summary
+- **Total Tests**: 3,209
+- **Failures**: 35
+- **Passed**: 3,157
+- **Skipped**: 17
+- **Groups**: 8
+
+## Group 1: Aggregate Phase Data Structure Issues
+
+### [ ] Fix brush specialized aggregators data structure
+- **Category**: Regression
+- **Failing tests**: 
+  - `tests/aggregate/test_brush_specialized_aggregators.py::test_aggregate_handle_makers`
+  - `tests/aggregate/test_brush_specialized_aggregators.py::test_aggregate_knot_makers`
+  - `tests/aggregate/test_brush_specialized_aggregators.py::test_aggregate_fibers`
+  - `tests/aggregate/test_brush_specialized_aggregators.py::test_aggregate_knot_makers_skips_custom_knots`
+- **Files involved**: `sotd/aggregate/aggregators/brush_specialized/`, `tests/aggregate/test_brush_specialized_aggregators.py`
+- **Observed error**: All aggregators returning empty lists instead of expected data
+- **Quick next steps**:
+  - Check data extraction logic in brush specialized aggregators
+  - Verify data structure matches expected format
+  - Debug why aggregators are returning empty results
+- **Notes/links**: Appears to be a data structure mismatch issue
+
+### [ ] Fix manufacturer aggregators data structure
+- **Category**: Regression
+- **Failing tests**:
+  - `tests/aggregate/test_manufacturer_and_format_aggregators.py::test_aggregate_razor_manufacturers`
+  - `tests/aggregate/test_manufacturer_and_format_aggregators.py::test_aggregate_blade_manufacturers`
+  - `tests/aggregate/test_manufacturer_and_format_aggregators.py::test_aggregate_soap_makers`
+- **Files involved**: `sotd/aggregate/aggregators/manufacturers/`, `tests/aggregate/test_manufacturer_and_format_aggregators.py`
+- **Observed error**: KeyError for 'brand' and 'maker' fields
+- **Quick next steps**:
+  - Check data structure returned by manufacturer aggregators
+  - Verify field names match expected keys
+  - Fix data extraction to include required fields
+- **Notes/links**: Field naming inconsistency issue
+
+### [ ] Fix specialized aggregators data extraction
+- **Category**: Regression
+- **Failing tests**:
+  - `tests/aggregate/test_razor_specialized_aggregators.py::test_aggregate_blackbird_plates`
+  - `tests/aggregate/test_user_and_cross_product_aggregators.py::test_aggregate_razor_blade_combos`
+- **Files involved**: `sotd/aggregate/aggregators/razor_specialized/`, `sotd/aggregate/aggregators/cross_product/`
+- **Observed error**: Aggregators returning empty lists instead of expected data
+- **Quick next steps**:
+  - Debug data extraction logic in specialized aggregators
+  - Check data filtering conditions
+  - Verify input data structure matches expectations
+- **Notes/links**: Similar to brush aggregator issues
+
+### [ ] Fix null value handling in aggregators
+- **Category**: Regression
+- **Failing tests**: `tests/aggregate/test_data_quality.py::TestDataQuality::test_edge_case_null_values`
+- **Files involved**: `sotd/aggregate/aggregators/razor_specialized/blackbird_plate_aggregator.py`
+- **Observed error**: AttributeError: 'NoneType' object has no attribute 'strip'
+- **Quick next steps**:
+  - Add null value checks in blackbird plate aggregator
+  - Handle None values gracefully in data extraction
+  - Add defensive programming for null inputs
+- **Notes/links**: Line 23 in blackbird_plate_aggregator.py
+
+## Group 2: Enrich Phase Data Structure Issues
+
+### [ ] Fix enrich phase data structure expectations
+- **Category**: Test Drift
+- **Failing tests**:
+  - `tests/enrich/test_enrich.py::test_enrich_comments_basic`
+  - `tests/enrich/test_registry.py::TestEnricherRegistry::test_enrich_single_record`
+  - `tests/enrich/test_registry.py::TestEnricherRegistry::test_enrich_multiple_records`
+- **Files involved**: `sotd/enrich/`, `tests/enrich/`
+- **Observed error**: Tests expect 'enriched' field but data structure doesn't include it
+- **Quick next steps**:
+  - Check if enrich phase data structure changed
+  - Update tests to match actual data structure
+  - Verify enrich phase is working as intended
+- **Notes/links**: Data structure mismatch between tests and implementation
+
+### [ ] Fix enrich CLI argument validation
+- **Category**: Test Drift
+- **Failing tests**: `tests/enrich/test_cli.py::TestEnrichCLI::test_no_additional_arguments`
+- **Files involved**: `sotd/enrich/cli.py`, `tests/enrich/test_cli.py`
+- **Observed error**: Test expects no 'parallel' argument but CLI includes it
+- **Quick next steps**:
+  - Check if parallel argument was intentionally added
+  - Update test to match actual CLI behavior
+  - Verify CLI arguments are correct
+- **Notes/links**: CLI evolution vs test expectations
+
+### [ ] Fix soap sample enricher registration
+- **Category**: Regression
+- **Failing tests**: `tests/enrich/test_soap_sample_enricher_integration.py::TestSoapSampleEnricherIntegration::test_enricher_registered`
+- **Files involved**: `sotd/enrich/`, `tests/enrich/test_soap_sample_enricher_integration.py`
+- **Observed error**: No soap enrichers found in registry
+- **Quick next steps**:
+  - Check enricher registration logic
+  - Verify SoapSampleEnricher is properly registered
+  - Debug registry setup process
+- **Notes/links**: Enricher registration issue
+
+## Group 3: Match Phase Import Issues
+
+### [ ] Fix missing normalize_for_matching import
+- **Category**: Regression
+- **Failing tests**:
+  - `tests/match/tools/test_mismatch_analyzer.py::TestMismatchAnalyzer::test_display_mismatches_empty`
+  - `tests/match/tools/test_mismatch_analyzer.py::TestMismatchAnalyzer::test_display_all_matches`
+  - `tests/match/tools/test_mismatch_analyzer.py::TestMismatchAnalyzer::test_display_mismatches_all_columns`
+  - `tests/match/tools/test_mismatch_analyzer.py::TestMismatchAnalyzer::test_comment_id_column_in_display`
+  - `tests/match/tools/test_mismatch_analyzer.py::TestMismatchAnalyzer::test_blade_format_aware_duplicates_are_separate`
+  - `tests/match/tools/test_mismatch_analyzer.py::TestMismatchAnalyzer::test_load_enriched_data`
+- **Files involved**: `sotd/match/tools/analyzers/mismatch_analyzer.py`, `sotd/utils/match_filter_utils.py`
+- **Observed error**: ImportError: cannot import name 'normalize_for_matching'
+- **Quick next steps**:
+  - Check if function was renamed or moved
+  - Add missing function to match_filter_utils.py
+  - Update import statement
+- **Notes/links**: Missing utility function
+
+### [ ] Fix blade analyzer normalization test
+- **Category**: Test Drift
+- **Failing tests**: `tests/match/tools/test_analyze_unmatched_blades.py::test_analyzer_synchronization_with_enrich`
+- **Files involved**: `sotd/match/tools/analyzers/`, `tests/match/tools/test_analyze_unmatched_blades.py`
+- **Observed error**: Shared function not normalizing as expected
+- **Quick next steps**:
+  - Check if normalization logic changed
+  - Update test expectations to match actual behavior
+  - Verify normalization is working correctly
+- **Notes/links**: Normalization behavior change
+
+## Group 4: Report Phase CLI and Integration Issues
+
+### [ ] Fix report CLI type argument default
+- **Category**: Test Drift
+- **Failing tests**: `tests/report/test_cli.py::TestReportCLI::test_type_argument_default`
+- **Files involved**: `sotd/report/cli.py`, `tests/report/test_cli.py`
+- **Observed error**: Default type is 'all' but test expects 'hardware'
+- **Quick next steps**:
+  - Check if default value was intentionally changed
+  - Update test to match actual default behavior
+  - Verify CLI behavior is correct
+- **Notes/links**: CLI default value change
+
+### [ ] Fix annual report integration error handling
+- **Category**: Test Drift
+- **Failing tests**:
+  - `tests/report/test_annual_integration.py::TestAnnualReportIntegration::test_run_annual_report_generator_error`
+  - `tests/report/test_annual_integration.py::TestAnnualReportIntegration::test_run_annual_report_success_message`
+- **Files involved**: `sotd/report/annual_run.py`, `tests/report/test_annual_integration.py`
+- **Observed error**: Error message format mismatch and success message count issue
+- **Quick next steps**:
+  - Check error message format in annual_run.py
+  - Update test assertions to match actual output
+  - Verify success message logic
+- **Notes/links**: Output format changes
+
+## Group 5: Utils Normalization Issues
+
+### [ ] Fix extract normalization edge cases
+- **Category**: Regression
+- **Failing tests**:
+  - `tests/utils/test_extract_normalization.py::TestStripTrailingPeriods::test_strip_trailing_periods_edge_cases`
+  - `tests/utils/test_extract_normalization.py::TestStripRazorUseCounts::test_strip_razor_use_counts_basic`
+  - `tests/utils/test_extract_normalization.py::TestStripRazorUseCounts::test_strip_razor_use_counts_multiple_patterns`
+  - `tests/utils/test_extract_normalization.py::TestStripRazorUseCounts::test_strip_razor_use_counts_edge_cases`
+  - `tests/utils/test_extract_normalization.py::TestStripRazorUseCounts::test_strip_razor_use_counts_preserves_model_names`
+- **Files involved**: `sotd/utils/extract_normalization.py`, `tests/utils/test_extract_normalization.py`
+- **Observed error**: Normalization functions not working as expected for edge cases
+- **Quick next steps**:
+  - Check if normalization logic was changed
+  - Fix edge case handling in normalization functions
+  - Update tests to match intended behavior
+- **Notes/links**: Normalization function regression
+
+## Group 6: WebUI API Response Issues
+
+### [ ] Fix soap analyzer API response validation
+- **Category**: Test Drift
+- **Failing tests**:
+  - `tests/webui/api/test_soap_analyzer.py::TestSoapAnalyzerAPI::test_neighbor_similarity_empty_months`
+  - `tests/webui/api/test_soap_analyzer.py::TestSoapAnalyzerAPI::test_neighbor_similarity_invalid_mode`
+  - `tests/webui/api/test_soap_analyzer.py::TestSoapAnalyzerAPI::test_neighbor_similarity_brands_mode_success`
+  - `tests/webui/api/test_soap_analyzer.py::TestSoapAnalyzerAPI::test_neighbor_similarity_brand_scent_mode_success`
+  - `tests/webui/api/test_soap_analyzer.py::TestSoapAnalyzerAPI::test_neighbor_similarity_scents_mode_success`
+- **Files involved**: `webui/api/soap_analyzer.py`, `tests/webui/api/test_soap_analyzer.py`
+- **Observed error**: API response format and validation issues
+- **Quick next steps**:
+  - Check API response format changes
+  - Update tests to match actual API behavior
+  - Verify API validation logic
+- **Notes/links**: API evolution vs test expectations
+
+## Group 7: Data Structure Consistency Issues
+
+### [ ] Investigate data structure changes across phases
+- **Category**: Regression
+- **Failing tests**: Multiple across different phases
+- **Files involved**: Various phase modules
+- **Observed error**: Inconsistent data structures between phases
+- **Quick next steps**:
+  - Review recent changes to data structures
+  - Check phase-to-phase data flow
+  - Identify root cause of structural changes
+- **Notes/links**: Cross-phase data consistency issue
+
+## Group 8: Test Environment and Mock Issues
+
+### [ ] Fix test mocking and environment setup
+- **Category**: Environment/Dependency Issue
+- **Failing tests**: Various integration tests
+- **Files involved**: Test configuration and mock setup
+- **Observed error**: Mock setup and environment configuration issues
+- **Quick next steps**:
+  - Review test environment setup
+  - Fix mock configurations
+  - Ensure consistent test environment
+- **Notes/links**: Test infrastructure issues
+
+## Next Runner Guidance
+
+### Suggested Order to Tackle Groups (Highest Leverage/Lowest Effort First):
+
+1. **Group 1 (Aggregate Phase)** - High impact, likely single root cause
+2. **Group 3 (Match Phase Import)** - Simple import fix, high impact
+3. **Group 5 (Utils Normalization)** - Self-contained utility fixes
+4. **Group 2 (Enrich Phase)** - Data structure consistency
+5. **Group 4 (Report Phase)** - CLI and integration issues
+6. **Group 6 (WebUI API)** - Frontend integration issues
+7. **Group 7 (Data Structure)** - Cross-phase investigation
+8. **Group 8 (Test Environment)** - Infrastructure cleanup
+
+### Environment Setup Hints:
+- Ensure virtual environment is activated
+- Check for recent dependency changes
+- Verify data files are in expected locations
+- Check for configuration file changes
+
+### Priority Notes:
+- Focus on Groups 1 and 3 first as they appear to be core functionality issues
+- Groups 2, 4, and 6 seem to be test drift issues that may require test updates rather than code fixes
+- Group 5 is a utility regression that could affect multiple phases
+- Groups 7 and 8 require investigation to determine root causes
