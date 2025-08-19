@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import BrushSplitValidator from '../BrushSplitValidator';
 
 // Mock the API service
@@ -66,11 +66,15 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
 
     // Simulate selecting a month
     const monthSelector = screen.getByText('Select Months');
-    fireEvent.click(monthSelector);
+    await act(async () => {
+      fireEvent.click(monthSelector);
+    });
 
     // Select a month from the dropdown
     const monthCheckbox = screen.getByLabelText('2025-01');
-    fireEvent.click(monthCheckbox);
+    await act(async () => {
+      fireEvent.click(monthCheckbox);
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId('brush-split-table')).toBeInTheDocument();
@@ -116,11 +120,15 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
 
     // Simulate selecting a month
     const monthSelector = screen.getByText('Select Months');
-    fireEvent.click(monthSelector);
+    await act(async () => {
+      fireEvent.click(monthSelector);
+    });
 
     // Select a month from the dropdown
     const monthCheckbox = screen.getByLabelText('2025-01');
-    fireEvent.click(monthCheckbox);
+    await act(async () => {
+      fireEvent.click(monthCheckbox);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Test Brush')).toBeInTheDocument();
@@ -161,11 +169,15 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
 
     // Simulate selecting a month
     const monthSelector = screen.getByText('Select Months');
-    fireEvent.click(monthSelector);
+    await act(async () => {
+      fireEvent.click(monthSelector);
+    });
 
     // Select a month from the dropdown
     const monthCheckbox = screen.getByLabelText('2025-01');
-    fireEvent.click(monthCheckbox);
+    await act(async () => {
+      fireEvent.click(monthCheckbox);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Test Brush')).toBeInTheDocument();
@@ -223,11 +235,15 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
 
     // Simulate selecting a month
     const monthSelector = screen.getByText('Select Months');
-    fireEvent.click(monthSelector);
+    await act(async () => {
+      fireEvent.click(monthSelector);
+    });
 
     // Select a month from the dropdown
     const monthCheckbox = screen.getByLabelText('2025-01');
-    fireEvent.click(monthCheckbox);
+    await act(async () => {
+      fireEvent.click(monthCheckbox);
+    });
 
     // Wait for data to load
     await waitFor(() => {
@@ -305,11 +321,15 @@ describe('BrushSplitValidator - Should Not Split Integration', () => {
 
     // Simulate selecting a month
     const monthSelector = screen.getByText('Select Months');
-    fireEvent.click(monthSelector);
+    await act(async () => {
+      fireEvent.click(monthSelector);
+    });
 
     // Select a month from the dropdown
     const monthCheckbox = screen.getByLabelText('2025-01');
-    fireEvent.click(monthCheckbox);
+    await act(async () => {
+      fireEvent.click(monthCheckbox);
+    });
 
     // Wait for data to load
     await waitFor(() => {
