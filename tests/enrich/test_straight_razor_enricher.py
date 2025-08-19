@@ -117,6 +117,90 @@ class TestStraightRazorEnricher:
         assert result is not None
         assert result["grind"] == "Near Wedge"
 
+    def test_extract_grind_fractional_notation(self, enricher):
+        """Test extraction of grind using fractional notation."""
+        test_cases = [
+            ("1/4 hollow grind is perfect for beginners", "Quarter Hollow"),
+            ("2/4 hollow provides good balance", "Half Hollow"),
+            ("3/4 hollow offers excellent flexibility", "Three Quarter Hollow"),
+            ("4/4 hollow is the most flexible", "Full Hollow"),
+            ("1/4 HOLLOW grind", "Quarter Hollow"),  # Test case insensitivity
+            ("2/4 Hollow blade", "Half Hollow"),  # Test mixed case
+            ("3/4 HOLLOW razor", "Three Quarter Hollow"),  # Test all caps
+            ("4/4 hollow straight", "Full Hollow"),  # Test with additional text
+        ]
+
+        for comment, expected in test_cases:
+            result = enricher.enrich({}, comment)
+            assert result is not None, f"Failed for comment: {comment}"
+            assert result["grind"] == expected, f"Failed for comment: {comment}"
+
+    def test_extract_grind_fractional_notation_edge_cases(self, enricher):
+        """Test edge cases for fractional notation grind patterns."""
+        test_cases = [
+            ("1/4 hollow", "Quarter Hollow"),  # Just the pattern
+            ("2/4 hollow.", "Half Hollow"),  # With period
+            ("3/4 hollow!", "Three Quarter Hollow"),  # With exclamation
+            ("4/4 hollow?", "Full Hollow"),  # With question mark
+            ("1/4 hollow grind", "Quarter Hollow"),  # With additional word
+            ("2/4 hollow blade", "Half Hollow"),  # With additional word
+            ("3/4 hollow razor", "Three Quarter Hollow"),  # With additional word
+            ("4/4 hollow straight", "Full Hollow"),  # With additional word
+        ]
+
+        for comment, expected in test_cases:
+            result = enricher.enrich({}, comment)
+            assert result is not None, f"Failed for comment: {comment}"
+            assert result["grind"] == expected, f"Failed for comment: {comment}"
+
+    def test_extract_grind_fractional_notation_priority(self, enricher):
+        """Test that fractional notation takes priority over word-based patterns."""
+        # Test that "1/4 hollow" matches before "quarter hollow" would
+        comment = "1/4 hollow grind"
+        result = enricher.enrich({}, comment)
+        assert result is not None
+        assert result["grind"] == "Quarter Hollow"
+
+        # Test that "2/4 hollow" matches before "half hollow" would
+        comment = "2/4 hollow blade"
+        result = enricher.enrich({}, comment)
+        assert result is not None
+        assert result["grind"] == "Half Hollow"
+
+        # Test that "3/4 hollow" matches before "three quarter hollow" would
+        comment = "3/4 hollow razor"
+        result = enricher.enrich({}, comment)
+        assert result is not None
+        assert result["grind"] == "Three Quarter Hollow"
+
+        # Test that "4/4 hollow" matches before "full hollow" would
+        comment = "4/4 hollow straight"
+        result = enricher.enrich({}, comment)
+        assert result is not None
+        assert result["grind"] == "Full Hollow"
+
+    def test_extract_grind_fractional_notation_real_world_example(self, enricher):
+        """Test real-world example from user query: Drew Dick - Sheffield Style 9/8 1/4 Hollow."""
+        comment = "Drew Dick - Sheffield Style 9/8 1/4 Hollow"
+        result = enricher.enrich({}, comment)
+        assert result is not None
+        assert result["grind"] == "Quarter Hollow"
+        assert result["width"] == "9/8"
+
+        # Test with different spacing and punctuation
+        comment = "Drew Dick Sheffield Style 9/8 1/4 hollow"
+        result = enricher.enrich({}, comment)
+        assert result is not None
+        assert result["grind"] == "Quarter Hollow"
+        assert result["width"] == "9/8"
+
+        # Test with extra whitespace
+        comment = "Drew Dick - Sheffield Style 9/8  1/4  hollow"
+        result = enricher.enrich({}, comment)
+        assert result is not None
+        assert result["grind"] == "Quarter Hollow"
+        assert result["width"] == "9/8"
+
     def test_extract_width_fractional_eighths(self, enricher):
         """Test extraction of width in fractional eighths."""
         test_cases = [
