@@ -28,8 +28,9 @@ class BlackbirdPlateAggregator(BaseAggregator):
             if "blackbird" not in model.lower():
                 continue
 
-            # Get plate information
-            plate = matched.get("plate", "").strip()
+            # Get plate information from enriched data
+            enriched = razor.get("enriched", {})
+            plate = enriched.get("plate", "").strip()
             if not plate:
                 continue
 
