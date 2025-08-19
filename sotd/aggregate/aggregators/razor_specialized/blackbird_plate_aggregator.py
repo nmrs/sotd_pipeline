@@ -20,11 +20,17 @@ class BlackbirdPlateAggregator(BaseAggregator):
                 continue
 
             # Check if this is a Blackland Blackbird razor
-            brand = matched.get("brand", "").strip()
+            brand = matched.get("brand")
+            if not brand or not isinstance(brand, str):
+                continue
+            brand = brand.strip()
             if brand.lower() != "blackland":
                 continue
 
-            model = matched.get("model", "").strip()
+            model = matched.get("model")
+            if not model or not isinstance(model, str):
+                continue
+            model = model.strip()
             if "blackbird" not in model.lower():
                 continue
 

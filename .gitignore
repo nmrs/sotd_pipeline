@@ -9,6 +9,7 @@ venv/
 coverage/
 htmlcov/
 .reports/
+.ab_backups/
 # macOS system files
 .DS_Store
 # Keep data files
