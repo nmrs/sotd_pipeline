@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import MismatchAnalyzer from '../MismatchAnalyzer';
 import * as api from '@/services/api';
@@ -123,7 +123,7 @@ describe('MismatchAnalyzer - Split Brush Confirmation', () => {
     expect(unconfirmedItem.is_confirmed).toBe(false);
   });
 
-  it('should render MismatchAnalyzer component without errors', () => {
+  it('should render MismatchAnalyzer component without errors', async () => {
     // Mock the required API calls
     mockApi.getCorrectMatches.mockResolvedValue({
       field: 'brush',
@@ -134,7 +134,9 @@ describe('MismatchAnalyzer - Split Brush Confirmation', () => {
     mockApi.getAvailableMonths.mockResolvedValue(['2025-06']);
 
     // Render the component
-    render(<MismatchAnalyzer />);
+    await act(async () => {
+      render(<MismatchAnalyzer />);
+    });
 
     // Check that the component renders without errors
     expect(screen.getByText('Mismatch Analyzer')).toBeInTheDocument();

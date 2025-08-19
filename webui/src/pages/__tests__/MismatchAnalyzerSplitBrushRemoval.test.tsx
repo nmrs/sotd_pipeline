@@ -83,16 +83,20 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
   });
 
   describe('Display Mode Removal', () => {
-    it('should not include split_brushes in display mode options', () => {
-      render(<MismatchAnalyzer />);
+    it('should not include split_brushes in display mode options', async () => {
+      await act(async () => {
+        render(<MismatchAnalyzer />);
+      });
 
       // Check that split_brushes button is not present
       expect(screen.queryByText('Split Brushes')).not.toBeInTheDocument();
       expect(screen.queryByText(/split_brushes/i)).not.toBeInTheDocument();
     });
 
-    it('should not have split_brushes in display mode state', () => {
-      render(<MismatchAnalyzer />);
+    it('should not have split_brushes in display mode state', async () => {
+      await act(async () => {
+        render(<MismatchAnalyzer />);
+      });
 
       // The display mode should not include split_brushes option
       // This is tested by ensuring the component renders without errors
@@ -106,7 +110,9 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
       // Mock the API to return test data directly
       mockApi.analyzeMismatch.mockResolvedValue(mockMismatchAnalysisResult);
 
-      render(<MismatchAnalyzer />);
+      await act(async () => {
+        render(<MismatchAnalyzer />);
+      });
 
       // Select brush field
       const fieldSelect = screen.getByLabelText(/field/i);
@@ -147,7 +153,9 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
 
       mockApi.analyzeMismatch.mockResolvedValue(dataWithoutSplitBrush);
 
-      render(<MismatchAnalyzer />);
+      await act(async () => {
+        render(<MismatchAnalyzer />);
+      });
 
       // Select brush field
       const fieldSelect = screen.getByLabelText(/field/i);
@@ -177,7 +185,9 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
     it('should not count split_brush items', async () => {
       const user = userEvent.setup();
 
-      render(<MismatchAnalyzer />);
+      await act(async () => {
+        render(<MismatchAnalyzer />);
+      });
 
       // Select brush field
       const fieldSelect = screen.getByLabelText(/field/i);
@@ -207,7 +217,9 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
     it('should filter items correctly without split_brush logic', async () => {
       const user = userEvent.setup();
 
-      render(<MismatchAnalyzer />);
+      await act(async () => {
+        render(<MismatchAnalyzer />);
+      });
 
       // Select brush field
       const fieldSelect = screen.getByLabelText(/field/i);
@@ -244,7 +256,9 @@ describe('MismatchAnalyzer - Split Brush Removal', () => {
 
       mockApi.analyzeMismatch.mockRejectedValue(new Error('API Error'));
 
-      render(<MismatchAnalyzer />);
+      await act(async () => {
+        render(<MismatchAnalyzer />);
+      });
 
       // Select brush field
       const fieldSelect = screen.getByLabelText(/field/i);
