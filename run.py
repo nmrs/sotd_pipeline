@@ -49,10 +49,19 @@ def calculate_delta_months(args) -> list[str]:
         delta_months.add(args.start)
         delta_months.add(args.end)
     elif args.range:
-        # For range format, add start and end months
+        # For range format, expand the full range and add all months
         start, end = args.range.split(":")
-        delta_months.add(start)
-        delta_months.add(end)
+        start_year, start_month = map(int, start.split("-"))
+        end_year, end_month = map(int, end.split("-"))
+
+        # Expand the range to include all months
+        current_year, current_month = start_year, start_month
+        while (current_year, current_month) <= (end_year, end_month):
+            delta_months.add(f"{current_year:04d}-{current_month:02d}")
+            current_month += 1
+            if current_month > 12:
+                current_month = 1
+                current_year += 1
     else:
         # Default to previous month
         default_month = get_default_month()
@@ -336,7 +345,7 @@ Examples:
     parser.add_argument(
         "--delta",
         action="store_true",
-        help="Process delta months: current month(s) + 1 month ago, 1 year ago, and 5 years ago",
+        help=("Process delta months: current month(s) + 1 month ago, 1 year ago, and 5 years ago"),
     )
 
     args = parser.parse_args(argv)
@@ -367,7 +376,8 @@ Examples:
             delta_months = calculate_delta_months(args)
             if args.debug:
                 print(
-                    f"[DEBUG] Delta mode: processing {len(delta_months)} months: {', '.join(delta_months)}"
+                    f"[DEBUG] Delta mode: processing {len(delta_months)} months: "
+                    f"{', '.join(delta_months)}"
                 )
             common_args.extend(["--delta-months", ",".join(delta_months)])
         elif args.month:
