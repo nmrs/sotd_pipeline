@@ -125,7 +125,8 @@ async def log_requests(request: Request, call_next):
     # Log response
     process_time = (datetime.now() - start_time).total_seconds()
     logger.info(
-        f"📤 {request.method} {request.url.path} - Status: {response.status_code} - Time: {process_time:.3f}s"
+        f"📤 {request.method} {request.url.path} - Status: {response.status_code} - "
+        f"Time: {process_time:.3f}s"
     )
 
     return response
@@ -170,6 +171,12 @@ async def get_log_info() -> Dict[str, Any]:
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """Global exception handler."""
+    # Don't override HTTPException with custom status codes
+    from fastapi import HTTPException
+
+    if isinstance(exc, HTTPException):
+        raise exc
+
     logger.error(f"❌ Unhandled exception: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,

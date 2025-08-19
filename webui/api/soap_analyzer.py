@@ -161,7 +161,7 @@ async def get_soap_pattern_suggestions(
 
 @router.get("/neighbor-similarity")
 async def get_soap_neighbor_similarity(
-    months: str = Query(..., description="Comma-separated months (e.g., '2025-05,2025-06')"),
+    months: str = Query("", description="Comma-separated months (e.g., '2025-05,2025-06')"),
     mode: str = Query(..., description="Analysis mode: brands, brand_scent, or scents"),
     similarity_threshold: float = Query(
         0.5, ge=0.0, le=1.0, description="Similarity threshold for filtering results"
@@ -179,7 +179,18 @@ async def get_soap_neighbor_similarity(
             )
 
         # Parse months
-        month_list = [m.strip() for m in months.split(",")]
+        month_list = [m.strip() for m in months.split(",") if m.strip()]
+
+        # Handle empty months gracefully
+        if not month_list:
+            return {
+                "message": "No months specified",
+                "results": [],
+                "mode": mode,
+                "total_entries": 0,
+                "months_processed": [],
+            }
+
         for month in month_list:
             if not is_valid_month(month):
                 raise HTTPException(status_code=400, detail=f"Invalid month format: {month}")
@@ -206,7 +217,7 @@ async def get_soap_neighbor_similarity(
                         if "soap" in record and record["soap"]:
                             # Add the record ID as comment_id to the soap object
                             soap_data = record["soap"].copy()
-                            soap_data["comment_id"] = record.get("id", "")
+                            soap_data["comment_id"] = record.get("id", record.get("comment_id", ""))
                             all_matches.append(soap_data)
 
             except Exception as e:
@@ -237,6 +248,9 @@ async def get_soap_neighbor_similarity(
             "months_processed": month_list,
         }
 
+    except HTTPException:
+        # Re-raise HTTPException to preserve status codes
+        raise
     except Exception as e:
         logger.error(f"Error in soap neighbor similarity analysis: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -562,11 +576,17 @@ def analyze_soap_neighbor_similarity_web(
                 "scent": first_match["matched"].get("scent", ""),
             }
 
+        # Get next entry for display
+        next_entry = None
+        if i < len(entries_with_similarities) - 1:
+            next_entry = entries_with_similarities[i + 1]["entry"]
+
         results.append(
             {
                 "entry": current["entry"],
                 "similarity_to_above": similarity_to_above,
                 "similarity_to_next": similarity_to_below,
+                "next_entry": next_entry,
                 "normalized_string": normalized_string,
                 "pattern": pattern,
                 "comment_ids": current["comment_ids"],

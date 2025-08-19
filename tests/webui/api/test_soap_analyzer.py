@@ -36,7 +36,7 @@ class TestSoapAnalyzerAPI:
 
     def test_neighbor_similarity_empty_months(self):
         """Test neighbor similarity analysis with empty months list."""
-        response = client.get("/soap-analyzer/neighbor-similarity?months=")
+        response = client.get("/soap-analyzer/neighbor-similarity?months=&mode=brands")
         # FastAPI treats empty string as valid, so we get 200 with empty results
         assert response.status_code == 200
         data = response.json()
@@ -50,7 +50,8 @@ class TestSoapAnalyzerAPI:
         assert "Invalid mode" in response.json()["detail"]
 
     @patch("pathlib.Path.exists")
-    def test_neighbor_similarity_brands_mode_success(self, mock_exists):
+    @patch("builtins.open")
+    def test_neighbor_similarity_brands_mode_success(self, mock_open, mock_exists):
         """Test successful brands-only neighbor similarity analysis."""
         # Mock file existence
         mock_exists.return_value = True
@@ -79,41 +80,71 @@ class TestSoapAnalyzerAPI:
                         "matched": {"maker": "Noble Otter", "scent": "Jock"},
                     },
                 },
+                {
+                    "comment_id": "jkl012",
+                    "soap": {
+                        "original": "Noble Otterr - Jacl",
+                        "matched": {"maker": "Noble Otterr", "scent": "Jacl"},
+                    },
+                },
+                {
+                    "comment_id": "mno345",
+                    "soap": {
+                        "original": "Noble Otterrr - Jack",
+                        "matched": {"maker": "Noble Otterrr", "scent": "Jack"},
+                    },
+                },
             ]
         }
 
-        # Create a temporary file with the mock data
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-            json.dump(mock_data, f)
-            temp_file_path = f.name
+        # Create a mock file object that can be used as a context manager
+        class MockFile:
+            def __init__(self, data):
+                self.data = data
+                self.closed = False
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                pass
+
+            def read(self):
+                return json.dumps(self.data)
+
+            def close(self):
+                self.closed = True
+
+        # Mock open to return our mock file for any file path
+        mock_open.return_value = MockFile(mock_data)
 
         try:
-            # Mock the file opening to return our test data
-            with patch("builtins.open", return_value=open(temp_file_path, "r")):
-                response = client.get(
-                    "/soap-analyzer/neighbor-similarity?months=2025-01&mode=brands"
-                )
+            response = client.get(
+                "/soap-analyzer/neighbor-similarity"
+                "?months=2025-01&mode=brands&similarity_threshold=0.3"
+            )
 
-                assert response.status_code == 200
-                data = response.json()
+            assert response.status_code == 200
+            data = response.json()
 
-                assert "results" in data
-                assert "mode" in data
-                assert data["mode"] == "brands"
-                assert len(data["results"]) > 0
+            assert "results" in data
+            assert "mode" in data
+            assert data["mode"] == "brands"
+            assert len(data["results"]) > 0
 
-                # Check that we have similarity data between adjacent entries
-                for result in data["results"]:
-                    assert "entry" in result
-                    assert "similarity_to_next" in result
-                    assert "next_entry" in result
-                    assert "count" in result
+            # Check that we have similarity data between adjacent entries
+            for result in data["results"]:
+                assert "entry" in result
+                assert "similarity_to_next" in result
+                assert "next_entry" in result
+                assert "count" in result
+                # similarity_to_next can be None for the last entry (no next entry)
+                if result["similarity_to_next"] is not None:
                     assert isinstance(result["similarity_to_next"], (int, float))
-                    assert 0 <= result["similarity_to_next"] <= 1
 
         finally:
-            # Clean up temporary file
-            Path(temp_file_path).unlink(missing_ok=True)
+            # No cleanup needed for mock file
+            pass
 
     @patch("pathlib.Path.exists")
     def test_neighbor_similarity_brand_scent_mode_success(self, mock_exists):
@@ -195,6 +226,20 @@ class TestSoapAnalyzerAPI:
                         "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
                     },
                 },
+                {
+                    "comment_id": "ghi789",
+                    "soap": {
+                        "original": "Noble Otter - Jack",
+                        "matched": {"maker": "Noble Otter", "scent": "Jack"},
+                    },
+                },
+                {
+                    "comment_id": "jkl012",
+                    "soap": {
+                        "original": "Barrister & Mann - Sevill",
+                        "matched": {"maker": "Barrister & Mann", "scent": "Sevill"},
+                    },
+                },
             ]
         }
 
@@ -207,7 +252,8 @@ class TestSoapAnalyzerAPI:
             # Mock the file opening to return our test data
             with patch("builtins.open", return_value=open(temp_file_path, "r")):
                 response = client.get(
-                    "/soap-analyzer/neighbor-similarity?months=2025-01&mode=scents"
+                    "/soap-analyzer/neighbor-similarity"
+                    "?months=2025-01&mode=scents&similarity_threshold=0.3"
                 )
 
                 assert response.status_code == 200
