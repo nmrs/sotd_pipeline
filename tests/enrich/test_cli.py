@@ -47,16 +47,18 @@ class TestEnrichCLI:
         assert "--debug" in help_text
         assert "--force" in help_text
 
-    def test_no_additional_arguments(self):
-        """Test that enrich CLI doesn't add any additional arguments beyond base ones."""
+    def test_parallel_processing_arguments_present(self):
+        """Test that enrich CLI includes parallel processing arguments like other phases."""
         parser = get_parser()
         help_text = parser.format_help()
 
-        # Should only have the standard arguments from BaseCLIParser
-        # No enrich-specific arguments should be present
+        # Should have parallel processing arguments (standard for all phases)
+        assert "parallel" in help_text.lower()
+        assert "sequential" in help_text.lower()
+        assert "max-workers" in help_text.lower()
+        
+        # Should NOT have enrich-specific arguments that don't exist
         assert "mode" not in help_text.lower()
-        assert "parallel" not in help_text.lower()
-        assert "max-workers" not in help_text.lower()
 
     def test_no_date_arguments_raises_error(self):
         """Test that no date arguments raises error (date required by main run.py)."""
