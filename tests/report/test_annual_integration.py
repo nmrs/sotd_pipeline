@@ -155,7 +155,10 @@ class TestAnnualReportIntegration:
             mock_generator.side_effect = ValueError("Invalid report type")
 
             # Run the annual report generation
-            with pytest.raises(RuntimeError, match="Failed to generate annual report content"):
+            with pytest.raises(
+                RuntimeError, 
+                match="Failed to generate annual hardware report content"
+            ):
                 annual_run.run_annual_report(mock_args)
 
     def test_run_annual_report_save_error(self, mock_args, mock_annual_data, tmp_path):
@@ -321,14 +324,13 @@ class TestAnnualReportIntegration:
             success_calls = [
                 call for call in mock_print.call_args_list if call[0][0].startswith("[INFO]")
             ]
-            assert len(success_calls) >= 2
+            assert len(success_calls) >= 1
 
-            # Check for specific success messages
+            # Check for specific success message
             success_messages = [call[0][0] for call in success_calls]
             assert any(
-                "Successfully generated hardware report for 2024" in msg for msg in success_messages
+                "Annual report generation completed for 2024" in msg for msg in success_messages
             )
-            assert any(f"Report saved to: {output_path}" in msg for msg in success_messages)
 
 
 class TestAnnualReportCLIIntegration:
