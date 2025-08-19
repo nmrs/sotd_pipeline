@@ -238,16 +238,18 @@ RUN_METADATA:
 - **Lessons learned**: Always verify import paths - functions may exist in different modules than expected. Multiple incorrect imports can cause the same function to fail in different contexts.
 - **Validation results**: Pipeline outputs identical to baseline - no regressions introduced
 
-### [ ] Fix blade analyzer normalization test
+### [x] Fix blade analyzer normalization test
 - **Category**: Test Drift
 - **Failing tests**: `tests/match/tools/test_analyze_unmatched_blades.py::test_analyzer_synchronization_with_enrich`
-- **Files involved**: `sotd/match/tools/analyzers/`, `tests/match/tools/test_analyze_unmatched_blades.py`
-- **Observed error**: Shared function not normalizing as expected
-- **Quick next steps**:
-  - Check if normalization logic changed
-  - Update test expectations to match actual behavior
-  - Verify normalization is working correctly
-- **Notes/links**: Normalization behavior change
+- **Files involved**: `sotd/utils/extract_normalization.py`
+- **Observed error**: Shared function not normalizing superscript ordinal patterns like (2^(nd)), (3^(rd))
+- **Root cause**: `strip_blade_count_patterns` function missing pattern for superscript ordinal notation
+- **Solution**: Added superscript ordinal pattern to handle (2^(nd)), (3^(rd)), (1^(st)), etc. with optional text after
+- **Status**: ✅ COMPLETE - All 3 blade analyzer tests now passing
+- **start_hash**: 4252bb97
+- **resolved_by_commit**: 
+- **Lessons learned**: Normalization improvements can change pipeline outputs. Superscript ordinal patterns require specialized regex handling. Always test normalization functions with edge cases.
+- **Validation results**: Pipeline outputs show improvements in normalization (better ordinal pattern stripping, use count extraction) - no regressions
 
 ## Group 4: Report Phase CLI and Integration Issues
 
