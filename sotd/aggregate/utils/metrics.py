@@ -166,31 +166,22 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
         avg_shaves_per_user, unique_soaps, unique_brands, total_samples,
         unique_razors, unique_blades, and unique_brushes
     """
-    print("[DEBUG] Calculating total_shaves...")
     total_shaves = calculate_shaves(records)
 
-    print("[DEBUG] Calculating unique_shavers...")
     unique_shavers = calculate_unique_users(records)
 
-    print("[DEBUG] Calculating avg_shaves_per_user...")
     avg_shaves_per_user = calculate_avg_shaves_per_user(records)
 
-    print("[DEBUG] Calculating unique_soaps...")
     unique_soaps = calculate_unique_soaps(records)
 
-    print("[DEBUG] Calculating unique_brands...")
     unique_brands = calculate_unique_brands(records)
 
-    print("[DEBUG] Calculating total_samples...")
     total_samples = calculate_total_samples(records)
 
-    print("[DEBUG] Calculating unique_razors...")
     unique_razors = calculate_unique_razors(records)
 
-    print("[DEBUG] Calculating unique_blades...")
     unique_blades = calculate_unique_blades(records)
 
-    print("[DEBUG] Calculating unique_brushes...")
     unique_brushes = calculate_unique_brushes(records)
 
     return {
