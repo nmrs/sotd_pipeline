@@ -23,7 +23,10 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "declaration b2",
-                        "strategy": "correct_complete_brush",
+                        "matched": {
+                            "strategy": "correct_complete_brush",
+                            "score": 100,
+                        },
                         "all_strategies": [{"strategy": "correct_complete_brush", "score": 100}],
                     }
                 },
@@ -31,7 +34,10 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "declaration b2",
-                        "strategy": "correct_complete_brush",
+                        "matched": {
+                            "strategy": "correct_complete_brush",
+                            "score": 100,
+                        },
                         "all_strategies": [{"strategy": "correct_complete_brush", "score": 100}],
                     }
                 },
@@ -39,7 +45,10 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "zenith b2",
-                        "strategy": "automated_split",
+                        "matched": {
+                            "strategy": "automated_split",
+                            "score": 85,
+                        },
                         "all_strategies": [{"strategy": "automated_split", "score": 85}],
                     }
                 },
@@ -47,7 +56,10 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "simpson chubby",
-                        "strategy": "automated_split",
+                        "matched": {
+                            "strategy": "automated_split",
+                            "score": 80,
+                        },
                         "all_strategies": [
                             {"strategy": "automated_split", "score": 80},
                             {"strategy": "known_brush", "score": 75},
@@ -58,7 +70,7 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "unknown brush",
-                        "strategy": None,
+                        "matched": None,
                         "all_strategies": None,
                     }
                 },
@@ -144,21 +156,27 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "declaration b2",
-                        "strategy": "correct_complete_brush",
+                        "matched": {
+                            "strategy": "correct_complete_brush",
+                        },
                         "all_strategies": [{"strategy": "correct_complete_brush"}],
                     }
                 },
                 {
                     "brush": {
                         "normalized": "declaration b2",
-                        "strategy": "correct_complete_brush",
+                        "matched": {
+                            "strategy": "correct_complete_brush",
+                        },
                         "all_strategies": [{"strategy": "correct_complete_brush"}],
                     }
                 },
                 {
                     "brush": {
                         "normalized": "declaration b2",
-                        "strategy": "correct_complete_brush",
+                        "matched": {
+                            "strategy": "correct_complete_brush",
+                        },
                         "all_strategies": [{"strategy": "correct_complete_brush"}],
                     }
                 },
@@ -166,14 +184,18 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "zenith b2",
-                        "strategy": "automated_split",
+                        "matched": {
+                            "strategy": "automated_split",
+                        },
                         "all_strategies": [{"strategy": "automated_split"}],
                     }
                 },
                 {
                     "brush": {
                         "normalized": "zenith b2",
-                        "strategy": "automated_split",
+                        "matched": {
+                            "strategy": "automated_split",
+                        },
                         "all_strategies": [{"strategy": "automated_split"}],
                     }
                 },
@@ -181,7 +203,9 @@ class TestBrushValidationCLIStrategyDistribution:
                 {
                     "brush": {
                         "normalized": "simpson chubby",
-                        "strategy": "automated_split",
+                        "matched": {
+                            "strategy": "automated_split",
+                        },
                         "all_strategies": [
                             {"strategy": "automated_split"},
                             {"strategy": "known_brush"},

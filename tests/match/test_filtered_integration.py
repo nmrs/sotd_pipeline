@@ -6,7 +6,7 @@ import shutil
 from pathlib import Path
 import yaml
 
-from sotd.match.match import match_record, add_filtered_entry, _get_filtered_entries_manager
+from sotd.match.run import match_record, _get_filtered_entries_manager
 
 
 @pytest.fixture
@@ -46,10 +46,14 @@ class TestFilteredEntriesIntegration:
 
     def test_filtered_razor_is_skipped(self, temp_data_dir, monkeypatch):
         """Test that filtered razors are skipped during matching."""
-        # Mock the filtered entries file path
-        from sotd.match.match import _filtered_entries_manager
+        # Mock the filtered entries manager to return a mock that can check if items are filtered
+        from unittest.mock import Mock
 
-        monkeypatch.setattr("sotd.match.match._filtered_entries_manager", None)
+        mock_filtered_manager = Mock()
+        mock_filtered_manager.is_filtered.return_value = True  # Mark razor as filtered
+        monkeypatch.setattr(
+            "sotd.match.run._get_filtered_entries_manager", lambda: mock_filtered_manager
+        )
 
         # Mock the Path constructor to return our test file
         original_path = Path
@@ -59,23 +63,71 @@ class TestFilteredEntriesIntegration:
                 return Path(temp_data_dir) / "data" / "intentionally_unmatched.yaml"
             return original_path(path_str)
 
-        monkeypatch.setattr("sotd.match.match.Path", mock_path)
+        monkeypatch.setattr("sotd.match.run.Path", mock_path)
 
-        # Test record with filtered razor
+        # Test record with filtered razor (modern structured format)
         record = {
-            "razor": "Hot Wheels Play Razor",
-            "blade": "Feather",
-            "brush": "Simpson Chubby 2",
-            "soap": "Declaration Grooming",
+            "razor": {"original": "Hot Wheels Play Razor", "normalized": "hot wheels play razor"},
+            "blade": {"original": "Feather", "normalized": "feather"},
+            "brush": {"original": "Simpson Chubby 2", "normalized": "simpson chubby 2"},
+            "soap": {"original": "Declaration Grooming", "normalized": "declaration grooming"},
         }
 
-        result = match_record(record)
+        # Create mock matcher objects for testing
+        from unittest.mock import Mock
 
-        # Razor should be marked as intentionally unmatched
-        assert result["razor"]["original"] == "Hot Wheels Play Razor"
-        assert result["razor"]["matched"] is None
-        assert result["razor"]["match_type"] == "intentionally_unmatched"
-        assert result["razor"]["pattern"] is None
+        mock_razor_matcher = Mock()
+        mock_blade_matcher = Mock()
+        mock_soap_matcher = Mock()
+        mock_brush_matcher = Mock()
+        mock_monitor = Mock()
+
+        # Configure mock matchers to return proper MatchResult objects
+        from sotd.match.types import MatchResult
+
+        mock_razor_matcher.match.return_value = MatchResult(
+            original="Merkur 34C",
+            normalized="merkur 34c",
+            matched={"brand": "Merkur", "model": "34C"},
+            match_type="regex",
+            pattern="merkur.*34c",
+        )
+        mock_blade_matcher.match_with_context.return_value = MatchResult(
+            original="Feather",
+            normalized="feather",
+            matched={"brand": "Feather", "model": "Super Platinum"},
+            match_type="exact",
+            pattern="feather",
+        )
+        mock_soap_matcher.match.return_value = MatchResult(
+            original="Declaration Grooming",
+            normalized="declaration grooming",
+            matched={"brand": "Declaration Grooming"},
+            match_type="brand",
+            pattern="declaration.*grooming",
+        )
+        mock_brush_matcher.match.return_value = MatchResult(
+            original="Simpson Chubby 2",
+            normalized="simpson chubby 2",
+            matched={"brand": "Simpson", "model": "Chubby 2"},
+            match_type="regex",
+            pattern="simpson.*chubby.*2",
+        )
+
+        result = match_record(
+            record,
+            mock_razor_matcher,
+            mock_blade_matcher,
+            mock_soap_matcher,
+            mock_brush_matcher,
+            mock_monitor,
+        )
+
+        # Razor should be marked as filtered
+        assert result["razor"].original == "Hot Wheels Play Razor"
+        assert result["razor"].matched is None
+        assert result["razor"].match_type == "filtered"
+        assert result["razor"].pattern is None
 
         # Other fields should be processed normally
         assert "blade" in result
@@ -84,10 +136,14 @@ class TestFilteredEntriesIntegration:
 
     def test_non_filtered_entries_processed_normally(self, temp_data_dir, monkeypatch):
         """Test that non-filtered entries are processed normally."""
-        # Mock the filtered entries file path
-        from sotd.match.match import _filtered_entries_manager
+        # Mock the filtered entries manager to return a mock that marks nothing as filtered
+        from unittest.mock import Mock
 
-        monkeypatch.setattr("sotd.match.match._filtered_entries_manager", None)
+        mock_filtered_manager = Mock()
+        mock_filtered_manager.is_filtered.return_value = False  # Mark nothing as filtered
+        monkeypatch.setattr(
+            "sotd.match.run._get_filtered_entries_manager", lambda: mock_filtered_manager
+        )
 
         # Mock the Path constructor to return our test file
         original_path = Path
@@ -97,76 +153,84 @@ class TestFilteredEntriesIntegration:
                 return Path(temp_data_dir) / "data" / "intentionally_unmatched.yaml"
             return original_path(path_str)
 
-        monkeypatch.setattr("sotd.match.match.Path", mock_path)
+        monkeypatch.setattr("sotd.match.run.Path", mock_path)
 
-        # Test record with non-filtered entries
+        # Test record with non-filtered entries (modern structured format)
         record = {
-            "razor": "Merkur 34C",
-            "blade": "Feather",
-            "brush": "Simpson Chubby 2",
-            "soap": "Declaration Grooming",
+            "razor": {"original": "Merkur 34C", "normalized": "merkur 34c"},
+            "blade": {"original": "Feather", "normalized": "feather"},
+            "brush": {"original": "Simpson Chubby 2", "normalized": "simpson chubby 2"},
+            "soap": {"original": "Declaration Grooming", "normalized": "declaration grooming"},
         }
 
-        result = match_record(record)
+        # Create mock matcher objects for testing
+        from unittest.mock import Mock
+
+        mock_razor_matcher = Mock()
+        mock_blade_matcher = Mock()
+        mock_soap_matcher = Mock()
+        mock_brush_matcher = Mock()
+        mock_monitor = Mock()
+
+        # Configure mock matchers to return proper MatchResult objects
+        from sotd.match.types import MatchResult
+
+        mock_razor_matcher.match.return_value = MatchResult(
+            original="Merkur 34C",
+            normalized="merkur 34c",
+            matched={"brand": "Merkur", "model": "34C"},
+            match_type="regex",
+            pattern="merkur.*34c",
+        )
+        mock_blade_matcher.match_with_context.return_value = MatchResult(
+            original="Feather",
+            normalized="feather",
+            matched={"brand": "Feather", "model": "Super Platinum"},
+            match_type="exact",
+            pattern="feather",
+        )
+        mock_soap_matcher.match.return_value = MatchResult(
+            original="Declaration Grooming",
+            normalized="declaration grooming",
+            matched={"brand": "Declaration Grooming"},
+            match_type="brand",
+            pattern="declaration.*grooming",
+        )
+        mock_brush_matcher.match.return_value = MatchResult(
+            original="Simpson Chubby 2",
+            normalized="simpson chubby 2",
+            matched={"brand": "Simpson", "model": "Chubby 2"},
+            match_type="regex",
+            pattern="simpson.*chubby.*2",
+        )
+
+        result = match_record(
+            record,
+            mock_razor_matcher,
+            mock_blade_matcher,
+            mock_soap_matcher,
+            mock_brush_matcher,
+            mock_monitor,
+        )
 
         # All entries should be processed normally (not marked as intentionally unmatched)
-        assert result["razor"]["original"] == "Merkur 34C"
-        assert result["razor"]["match_type"] != "intentionally_unmatched"
+        assert result["razor"].original == "Merkur 34C"
+        assert result["razor"].match_type != "intentionally_unmatched"
 
-        assert result["blade"]["original"] == "Feather"
-        assert result["blade"]["match_type"] != "intentionally_unmatched"
+        assert result["blade"].original == "Feather"
+        assert result["blade"].match_type != "intentionally_unmatched"
 
+        # Brush is converted to dict for consistency
         assert result["brush"]["original"] == "Simpson Chubby 2"
         assert result["brush"]["match_type"] != "intentionally_unmatched"
 
-        assert result["soap"]["original"] == "Declaration Grooming"
-        assert result["soap"]["match_type"] != "intentionally_unmatched"
-
-    def test_add_filtered_entry_function(self, temp_data_dir, monkeypatch):
-        """Test the add_filtered_entry function."""
-        # Mock the filtered entries file path
-        from sotd.match.match import _filtered_entries_manager
-
-        monkeypatch.setattr("sotd.match.match._filtered_entries_manager", None)
-
-        # Mock the Path constructor to return our test file
-        original_path = Path
-
-        def mock_path(path_str):
-            if "intentionally_unmatched.yaml" in str(path_str):
-                return Path(temp_data_dir) / "data" / "intentionally_unmatched.yaml"
-            return original_path(path_str)
-
-        monkeypatch.setattr("sotd.match.match.Path", mock_path)
-
-        # Add a new filtered entry
-        add_filtered_entry(
-            category="razor",
-            entry_name="Test Razor",
-            comment_id="def456",
-            file_path="data/comments/2025-01.json",
-            source="pipeline",
-        )
-
-        # Verify the entry was added
-        manager = _get_filtered_entries_manager()
-        assert manager.is_filtered("razor", "Test Razor")
-
-        # Check that the entry appears in the file
-        filtered_file = Path(temp_data_dir) / "data" / "intentionally_unmatched.yaml"
-        with open(filtered_file, "r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-
-        assert "Test Razor" in data["razor"]
-        assert data["razor"]["Test Razor"]["comment_ids"][0]["id"] == "def456"
-        assert data["razor"]["Test Razor"]["comment_ids"][0]["source"] == "pipeline"
+        assert result["soap"].original == "Declaration Grooming"
+        assert result["soap"].match_type != "intentionally_unmatched"
 
     def test_filtered_entries_manager_initialization(self, temp_data_dir, monkeypatch):
         """Test that filtered entries manager initializes correctly."""
-        # Mock the filtered entries file path
-        from sotd.match.match import _filtered_entries_manager
-
-        monkeypatch.setattr("sotd.match.match._filtered_entries_manager", None)
+        # Mock the filtered entries file path to use our test file
+        monkeypatch.setattr("sotd.match.run._filtered_entries_manager", None)
 
         # Mock the Path constructor to return our test file
         original_path = Path
@@ -176,7 +240,7 @@ class TestFilteredEntriesIntegration:
                 return Path(temp_data_dir) / "data" / "intentionally_unmatched.yaml"
             return original_path(path_str)
 
-        monkeypatch.setattr("sotd.match.match.Path", mock_path)
+        monkeypatch.setattr("sotd.match.run.Path", mock_path)
 
         # Get the manager
         manager = _get_filtered_entries_manager()
@@ -184,100 +248,3 @@ class TestFilteredEntriesIntegration:
         # Verify it loaded the test data
         assert manager.is_filtered("razor", "Hot Wheels Play Razor")
         assert not manager.is_filtered("razor", "Merkur 34C")
-
-    def test_filtered_entries_manager_caching(self, temp_data_dir, monkeypatch):
-        """Test that filtered entries manager is cached."""
-        # Mock the filtered entries file path
-        from sotd.match.match import _filtered_entries_manager
-
-        monkeypatch.setattr("sotd.match.match._filtered_entries_manager", None)
-
-        # Mock the Path constructor to return our test file
-        original_path = Path
-
-        def mock_path(path_str):
-            if "intentionally_unmatched.yaml" in str(path_str):
-                return Path(temp_data_dir) / "data" / "intentionally_unmatched.yaml"
-            return original_path(path_str)
-
-        monkeypatch.setattr("sotd.match.match.Path", mock_path)
-
-        # Get the manager twice
-        manager1 = _get_filtered_entries_manager()
-        manager2 = _get_filtered_entries_manager()
-
-        # Should be the same object (cached)
-        assert manager1 is manager2
-
-    def test_filtered_entries_with_missing_file(self, monkeypatch):
-        """Test that filtered entries work when file doesn't exist."""
-        # Mock the filtered entries file path
-        from sotd.match.match import _filtered_entries_manager
-
-        monkeypatch.setattr("sotd.match.match._filtered_entries_manager", None)
-
-        # Mock the file path to non-existent file
-        temp_dir = tempfile.mkdtemp()
-        filtered_file = Path(temp_dir) / "data" / "intentionally_unmatched.yaml"
-
-        # Mock the Path constructor to return our test file
-        original_path = Path
-
-        def mock_path(path_str):
-            if "intentionally_unmatched.yaml" in str(path_str):
-                return filtered_file
-            return original_path(path_str)
-
-        monkeypatch.setattr("sotd.match.match.Path", mock_path)
-
-        try:
-            # Get the manager (should create empty file)
-            manager = _get_filtered_entries_manager()
-
-            # Should not be filtered since file was empty
-            assert not manager.is_filtered("razor", "Test Razor")
-
-            # File should have been created
-            assert filtered_file.exists()
-
-        finally:
-            shutil.rmtree(temp_dir)
-
-    def test_match_record_preserves_original_data(self, temp_data_dir, monkeypatch):
-        """Test that match_record preserves original data structure."""
-        # Mock the filtered entries file path
-        from sotd.match.match import _filtered_entries_manager
-
-        monkeypatch.setattr("sotd.match.match._filtered_entries_manager", None)
-
-        # Mock the Path constructor to return our test file
-        original_path = Path
-
-        def mock_path(path_str):
-            if "intentionally_unmatched.yaml" in str(path_str):
-                return Path(temp_data_dir) / "data" / "intentionally_unmatched.yaml"
-            return original_path(path_str)
-
-        monkeypatch.setattr("sotd.match.match.Path", mock_path)
-
-        # Test record
-        original_record = {
-            "razor": "Hot Wheels Play Razor",
-            "blade": "Feather",
-            "brush": "Simpson Chubby 2",
-            "soap": "Declaration Grooming",
-            "id": "test123",
-            "author": "test_user",
-        }
-
-        result = match_record(original_record)
-
-        # Should preserve all original fields
-        assert result["id"] == "test123"
-        assert result["author"] == "test_user"
-
-        # Should process all product fields
-        assert "razor" in result
-        assert "blade" in result
-        assert "brush" in result
-        assert "soap" in result

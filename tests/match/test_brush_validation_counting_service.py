@@ -23,7 +23,6 @@ class TestBrushValidationCountingService:
                     "id": "comment1",
                     "brush": {
                         "normalized": "Declaration Grooming B2",
-                        "strategy": "correct_complete_brush",
                         "matched": {
                             "strategy": "correct_complete_brush",
                             "score": 100,
@@ -36,7 +35,6 @@ class TestBrushValidationCountingService:
                     "id": "comment2",
                     "brush": {
                         "normalized": "Dogwood Handcrafts Zenith B2",
-                        "strategy": "automated_split",
                         "matched": {
                             "strategy": "automated_split",
                             "score": 85,
@@ -50,7 +48,11 @@ class TestBrushValidationCountingService:
                 },
                 {
                     "id": "comment3",
-                    "brush": {"normalized": "Brush 1", "matched": None, "all_strategies": []},
+                    "brush": {
+                        "normalized": "Brush 1",
+                        "matched": None,
+                        "all_strategies": [],
+                    },
                 },
             ]
         }
