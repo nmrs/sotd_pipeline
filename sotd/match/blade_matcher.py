@@ -1,11 +1,12 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from sotd.utils.extract_normalization import normalize_for_matching
+
 from .base_matcher import BaseMatcher
 from .loaders import CatalogLoader
 from .types import MatchResult, MatchType, create_match_result
 from .utils.regex_error_utils import compile_regex_with_context, create_context_dict
-from sotd.utils.extract_normalization import normalize_for_matching
 
 
 class BladeMatcher(BaseMatcher):

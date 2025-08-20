@@ -16,7 +16,6 @@ from sotd.match.types import MatchResult
 from sotd.match.utils.performance import PerformanceMonitor
 from sotd.utils.filtered_entries import load_filtered_entries
 
-
 # Load filtered entries at module level for performance
 _filtered_entries_manager = None
 

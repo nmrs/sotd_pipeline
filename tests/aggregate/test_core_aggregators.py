@@ -34,11 +34,11 @@ class TestRazorAggregator:
         assert result[0]["name"] == "Gillette Tech"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 2
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[1]["name"] == "Fatip Grande"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
 
     def test_aggregate_razors_no_matches(self):
         """Test razor aggregation with no matched razors."""
@@ -83,11 +83,11 @@ class TestBladeAggregator:
         assert result[0]["name"] == "Gillette Minora"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 2
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[1]["name"] == "Personna Lab Blue"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
 
     def test_aggregate_blades_no_matches(self):
         """Test blade aggregation with no matched blades."""
@@ -163,11 +163,11 @@ class TestBrushAggregator:
         assert result[0]["name"] == "Semogue 610"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 2
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[1]["name"] == "AP Shave Co MiG"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
 
     def test_aggregate_brushes_no_matches(self):
         """Test brush aggregation with no matched brushes."""
@@ -207,11 +207,11 @@ class TestSoapAggregator:
         assert result[0]["name"] == "Grooming Dept - Laundry II"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 2
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[1]["name"] == "Declaration Grooming - Persephone"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
 
     def test_aggregate_soaps_no_matches(self):
         """Test soap aggregation with no matched soaps."""

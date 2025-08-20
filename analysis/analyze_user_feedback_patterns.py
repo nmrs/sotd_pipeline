@@ -7,14 +7,12 @@ to understand how quality is currently validated and identify patterns
 for scoring optimization.
 """
 
-import json
-import yaml
-import ast
-from collections import defaultdict, Counter
-from pathlib import Path
-import sys
-from typing import Dict, List, Any, Optional, Set
 import re
+from collections import Counter
+from pathlib import Path
+from typing import Any, Dict
+
+import yaml
 
 
 def load_yaml_data(file_path: Path) -> Dict[str, Any]:
@@ -402,7 +400,7 @@ def generate_user_feedback_report(analysis_results: Dict[str, Any]) -> str:
     for component in webui_analysis.get("validation_components", []):
         report += f"| {component['name']} | {component['type']} | Validation interface |\n"
 
-    report += f"""
+    report += """
 ### API Validation Endpoints
 
 | Endpoint | Purpose | Validation Type |
@@ -412,7 +410,7 @@ def generate_user_feedback_report(analysis_results: Dict[str, Any]) -> str:
     for endpoint in webui_analysis.get("api_endpoints", []):
         report += f"| {endpoint['name']} | Data validation | API-level validation |\n"
 
-    report += f"""
+    report += """
 ### WebUI Validation Capabilities Analysis
 
 #### BrushSplitValidator Analysis
@@ -433,7 +431,7 @@ def generate_user_feedback_report(analysis_results: Dict[str, Any]) -> str:
     else:
         report += "- BrushSplitValidator analysis not available\n"
 
-    report += f"""
+    report += """
 #### API Validation Analysis
 """
 
@@ -443,7 +441,7 @@ def generate_user_feedback_report(analysis_results: Dict[str, Any]) -> str:
             patterns = set(api_data["validation_patterns"])
             report += f"- **{api_name}**: {len(patterns)} validation patterns\n"
 
-    report += f"""
+    report += """
 ## Manual Correction Pattern Analysis
 
 ### Correction Type Distribution
@@ -457,7 +455,7 @@ def generate_user_feedback_report(analysis_results: Dict[str, Any]) -> str:
         percentage = (count / total_corrections) * 100
         report += f"| {correction_type} | {count:,} | {percentage:.1f}% |\n"
 
-    report += f"""
+    report += """
 ### Brand Correction Frequency
 
 | Brand | Corrections | Quality Indicator |
@@ -469,7 +467,7 @@ def generate_user_feedback_report(analysis_results: Dict[str, Any]) -> str:
         quality_level = "High" if count >= 5 else "Medium" if count >= 2 else "Low"
         report += f"| {brand} | {count:,} | {quality_level} frequency |\n"
 
-    report += f"""
+    report += """
 ### Correction Quality Analysis
 
 #### High Confidence Corrections (4+ fields)
@@ -485,7 +483,7 @@ def generate_user_feedback_report(analysis_results: Dict[str, Any]) -> str:
         )
         report += f"- **{category}**: `{pattern}` - Complete specification provided\n"
 
-    report += f"""
+    report += """
 #### Medium Confidence Corrections (2-3 fields)
 """
 
@@ -499,7 +497,7 @@ def generate_user_feedback_report(analysis_results: Dict[str, Any]) -> str:
         )
         report += f"- **{category}**: `{pattern}` - Partial specification provided\n"
 
-    report += f"""
+    report += """
 ## Analysis Tools Validation Capabilities
 
 ### Available Analysis Tools
@@ -515,7 +513,7 @@ def generate_user_feedback_report(analysis_results: Dict[str, Any]) -> str:
         )
         report += f"| {tool['name']} | {capabilities} | {has_quality} |\n"
 
-    report += f"""
+    report += """
 ### Common Validation Patterns
 
 | Pattern | Frequency | Usage Context |
@@ -649,7 +647,7 @@ def main():
     validation_components = len(webui_analysis.get("validation_components", []))
     analysis_tools_count = len(analysis_tools_analysis.get("available_tools", []))
 
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"- Manual corrections: {total_corrections:,}")
     print(f"- WebUI validation components: {validation_components:,}")
     print(f"- Analysis tools: {analysis_tools_count:,}")

@@ -9,7 +9,7 @@ approach (B) across the full corpus of matched data to identify gaps and differe
 import json
 import re
 from pathlib import Path
-from typing import Dict, List, Tuple, Any
+from typing import Any, Dict, List, Tuple
 
 from sotd.utils.match_filter_utils import (
     extract_blade_and_use_count,
@@ -146,18 +146,18 @@ def print_analysis_summary(analysis: Dict[str, Any], month: str):
     print(f"BLADE COUNT APPROACH ANALYSIS - {month}")
     print(f"{'=' * 80}")
 
-    print(f"\n📊 OVERALL STATISTICS:")
+    print("\n📊 OVERALL STATISTICS:")
     print(f"  Total blade records: {analysis['total_blades']:,}")
     match_pct = analysis["approaches_match"] / analysis["total_blades"] * 100
     print(f"  Approaches match: {analysis['approaches_match']:,} ({match_pct:.1f}%)")
     diff_pct = analysis["approaches_differ"] / analysis["total_blades"] * 100
     print(f"  Approaches differ: {analysis['approaches_differ']:,} ({diff_pct:.1f}%)")
 
-    print(f"\n🔍 DIFFERENCE BREAKDOWN:")
+    print("\n🔍 DIFFERENCE BREAKDOWN:")
     print(f"  Approach A only (regex catches): {analysis['approach_a_only']:,}")
     print(f"  Approach B only (normalization catches): {analysis['approach_b_only']:,}")
 
-    print(f"\n⚡ PERFORMANCE COMPARISON:")
+    print("\n⚡ PERFORMANCE COMPARISON:")
     total_time_a = analysis["performance_data"]["approach_a_time"]
     total_time_b = analysis["performance_data"]["approach_b_time"]
     speedup = total_time_a / total_time_b if total_time_b > 0 else float("inf")
@@ -237,18 +237,18 @@ def main():
     print("🎯 OVERALL CORPUS ANALYSIS SUMMARY")
     print(f"{'=' * 80}")
 
-    print(f"\n📊 TOTAL STATISTICS ACROSS ALL MONTHS:")
+    print("\n📊 TOTAL STATISTICS ACROSS ALL MONTHS:")
     print(f"  Total blade records: {total_stats['total_blades']:,}")
     total_match_pct = total_stats["approaches_match"] / total_stats["total_blades"] * 100
     print(f"  Approaches match: {total_stats['approaches_match']:,} ({total_match_pct:.1f}%)")
     total_diff_pct = total_stats["approaches_differ"] / total_stats["total_blades"] * 100
     print(f"  Approaches differ: {total_stats['approaches_differ']:,} ({total_diff_pct:.1f}%)")
 
-    print(f"\n🔍 OVERALL DIFFERENCE BREAKDOWN:")
+    print("\n🔍 OVERALL DIFFERENCE BREAKDOWN:")
     print(f"  Approach A only (regex catches): {total_stats['approach_a_only']:,}")
     print(f"  Approach B only (normalization catches): {total_stats['approach_b_only']:,}")
 
-    print(f"\n⚡ OVERALL PERFORMANCE:")
+    print("\n⚡ OVERALL PERFORMANCE:")
     speedup = (
         total_stats["total_time_a"] / total_stats["total_time_b"]
         if total_stats["total_time_b"] > 0
@@ -266,7 +266,7 @@ def main():
     if all_differences:
         pattern_analysis = analyze_patterns_in_differences(all_differences)
 
-        print(f"\n🔍 PATTERN ANALYSIS OF DIFFERENCES:")
+        print("\n🔍 PATTERN ANALYSIS OF DIFFERENCES:")
         print(f"  Ordinal patterns (1st, 2nd, etc.): {len(pattern_analysis['ordinal_patterns'])}")
         print(f"  Special patterns (x1, x2, etc.): {len(pattern_analysis['special_patterns'])}")
         print(f"  Complex patterns (2x, 3x, etc.): {len(pattern_analysis['complex_patterns'])}")

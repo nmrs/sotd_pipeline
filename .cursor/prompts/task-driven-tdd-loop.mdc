@@ -3,14 +3,24 @@ description:
 globs:
 alwaysApply: false
 ---
-### Task Driven TDD Loop
-**Use when**: Implementing features with test-driven development approach.
+### task-driven-tdd-loop
+**Use when**: Implementing features with a test-driven development approach.
 
-```
-Proceed through the remaining tasks in the current step one at a time. After completing **each** task:
-1. Update the implementation plan to reflect your findings and progress.
-2. Commit the changes with a clear message summarizing the task completed per .cursor/rules/git-and-cleanup.mdc
-3. Move to the next task.
-4. Run quality checks (for example "make format lint typecheck test" but use whatever is appropriate for the current work) only before commits, not after every task.
-5. If new issues are detected while working on a task, add additional tasks to the plan to address those issues.
-```
+**Instructions (tracking required)**
+- At the start of each new **plan task**, print the full checklist below with all boxes empty (☐).
+- As each item completes, replace ☐ with ☑ and reprint the checklist.
+- Do not skip or reorder steps.
+- Reset to empty boxes at the beginning of each new **plan task**.
+- The implementation plan is the single source of truth for feature tasks.
+
+**Workflow Checklist:**
+1. ☐ Pick the next **plan task** from the implementation plan.
+2. ☐ Update and review the implementation plan.
+2a. ☐ Re-read the plan top to bottom.
+2b. ☐ If not internally consistent or complete, update it.
+2c. ☐ Repeat until the plan is internally consistent and complete.
+2d. ☐ If 2b was performed, **restart** 2a–2c (do not proceed until consistent and complete).
+3. ☐ Run quality checks (e.g., `make format lint typecheck test`).
+4. ☐ Commit changes with a clear message summarizing the task (per `.cursor/rules/git-and-cleanup.mdc`).
+5. ☐ If new issues are detected, communicate them to the user and record them as new tasks in the implementation plan.
+6. ☐ Move to the next **plan task**.

@@ -32,7 +32,7 @@ def test_real_cases():
         if match:
             print(f"  Matched: {match.group()}")
         else:
-            print(f"  Why no match? Let's analyze...")
+            print("  Why no match? Let's analyze...")
             # Check what parts we can match
             escaped_open_match = re.search(r"\\[\(\[]", test_case)
             if escaped_open_match:

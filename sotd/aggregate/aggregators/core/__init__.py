@@ -9,7 +9,6 @@ from .soap_aggregator import aggregate_soaps
 from .soap_sample_brand_aggregator import aggregate_soap_sample_brands
 from .soap_sample_brand_scent_aggregator import aggregate_soap_sample_brand_scents
 
-
 __all__ = [
     "aggregate_blades",
     "aggregate_blade_usage_distribution",

@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import Optional, Sequence
 
 from sotd.cli_utils.date_span import month_span
-from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
 from sotd.utils.parallel_processor import create_parallel_processor
+from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
 
 from .cli import get_parser
 from .comment import run_extraction_for_month

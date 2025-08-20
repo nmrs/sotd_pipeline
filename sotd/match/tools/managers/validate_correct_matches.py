@@ -15,10 +15,10 @@ if str(project_root) not in sys.path:
 from sotd.match.base_matcher import BaseMatcher  # noqa: E402
 from sotd.match.blade_matcher import BladeMatcher  # noqa: E402
 from sotd.match.brush_matcher import BrushMatcher  # noqa: E402
+from sotd.match.config import BrushMatcherConfig  # noqa: E402
+from sotd.match.correct_matches_updater import CorrectMatchesUpdater  # noqa: E402
 from sotd.match.razor_matcher import RazorMatcher  # noqa: E402
 from sotd.match.soap_matcher import SoapMatcher  # noqa: E402
-from sotd.match.correct_matches_updater import CorrectMatchesUpdater  # noqa: E402
-from sotd.match.config import BrushMatcherConfig  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -805,8 +805,8 @@ class ValidateCorrectMatches:
 
     def _normalize_catalog_keys(self, catalog_data: Dict[str, Any]) -> Dict[str, Any]:
         """Normalize all catalog keys for efficient lookup."""
-        import unicodedata
         import copy
+        import unicodedata
 
         if not catalog_data:
             return {}

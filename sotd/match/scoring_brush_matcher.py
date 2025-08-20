@@ -71,21 +71,20 @@ class BrushScoringMatcher:
         self.handle_matcher = HandleMatcher(handles_path)
 
         # Initialize KnotMatcher with knot-specific strategies like legacy system
-        from sotd.match.brush_matching_strategies.known_knot_strategy import (
-            KnownKnotMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.other_knot_strategy import (
-            OtherKnotMatchingStrategy,
-        )
+        # Create legacy matcher to get catalog data
+        from sotd.match.brush_matcher import BrushMatcher
         from sotd.match.brush_matching_strategies.fiber_fallback_strategy import (
             FiberFallbackStrategy,
         )
         from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import (
             KnotSizeFallbackStrategy,
         )
-
-        # Create legacy matcher to get catalog data
-        from sotd.match.brush_matcher import BrushMatcher
+        from sotd.match.brush_matching_strategies.known_knot_strategy import (
+            KnownKnotMatchingStrategy,
+        )
+        from sotd.match.brush_matching_strategies.other_knot_strategy import (
+            OtherKnotMatchingStrategy,
+        )
         from sotd.match.config import BrushMatcherConfig
 
         config = BrushMatcherConfig.create_default()
@@ -169,13 +168,20 @@ class BrushScoringMatcher:
         legacy_matcher = BrushMatcher(config=config, correct_matches_path=self.correct_matches_path)
 
         # Import individual strategies for Phase 3.4/3.5
+        from sotd.match.brush_matching_strategies.automated_split_strategy import (
+            AutomatedSplitStrategy,
+        )
         from sotd.match.brush_matching_strategies.correct_matches_wrapper_strategies import (
             CorrectCompleteBrushWrapperStrategy,
             CorrectSplitBrushWrapperStrategy,
         )
-        from sotd.match.brush_matching_strategies.high_priority_automated_split_strategy import (
-            HighPriorityAutomatedSplitStrategy,
+        from sotd.match.brush_matching_strategies.full_input_component_matching_strategy import (
+            FullInputComponentMatchingStrategy,
         )
+
+        # Import new single component strategies
+        from sotd.match.brush_matching_strategies.handle_only_strategy import HandleOnlyStrategy
+        from sotd.match.brush_matching_strategies.knot_only_strategy import KnotOnlyStrategy
 
         # Import individual brush strategies for Phase 3.2
         from sotd.match.brush_matching_strategies.known_brush_strategy import (
@@ -183,12 +189,6 @@ class BrushScoringMatcher:
         )
         from sotd.match.brush_matching_strategies.known_split_wrapper_strategy import (
             KnownSplitWrapperStrategy,
-        )
-        from sotd.match.brush_matching_strategies.full_input_component_matching_strategy import (
-            FullInputComponentMatchingStrategy,
-        )
-        from sotd.match.brush_matching_strategies.automated_split_strategy import (
-            AutomatedSplitStrategy,
         )
 
         # Import component strategies for Phase 3.3
@@ -202,10 +202,6 @@ class BrushScoringMatcher:
         from sotd.match.brush_matching_strategies.zenith_strategy import (
             ZenithBrushMatchingStrategy,
         )
-
-        # Import new single component strategies
-        from sotd.match.brush_matching_strategies.handle_only_strategy import HandleOnlyStrategy
-        from sotd.match.brush_matching_strategies.knot_only_strategy import KnotOnlyStrategy
 
         # Get catalog data for individual strategies
         catalog_data = legacy_matcher.catalog_data
@@ -263,7 +259,6 @@ class BrushScoringMatcher:
         )
 
         # Removed unused import - strategy replaced by AutomatedSplitStrategy
-
         # Import individual brush strategies for Phase 3.2
         from sotd.match.brush_matching_strategies.known_brush_strategy import (
             KnownBrushMatchingStrategy,
@@ -273,9 +268,6 @@ class BrushScoringMatcher:
         )
 
         # Import component strategies for Phase 3.3
-        from sotd.match.brush_matching_strategies.medium_priority_automated_split_strategy import (
-            MediumPriorityAutomatedSplitStrategy,
-        )
         from sotd.match.brush_matching_strategies.omega_semogue_strategy import (
             OmegaSemogueBrushMatchingStrategy,
         )

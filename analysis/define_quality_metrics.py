@@ -6,11 +6,8 @@ Synthesize research from Steps 1-4 to create comprehensive quality metrics
 specification that can guide scoring optimization implementation.
 """
 
-import json
-from collections import defaultdict
 from pathlib import Path
-import sys
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict
 
 
 def synthesize_research_findings() -> Dict[str, Any]:
@@ -483,19 +480,19 @@ This specification synthesizes research from Phase 4.1 Steps 1-4 to define compr
         for criterion in tier_data["criteria"]:
             report += f"- {criterion}\n"
 
-        report += f"""
+        report += """
 **Examples**:
 """
         for example in tier_data["examples"]:
             report += f"- {example}\n"
 
-        report += f"""
+        report += """
 **Scoring Modifiers**:
 """
         for modifier, value in tier_data["scoring_modifiers"].items():
             report += f"- {modifier}: {value}\n"
 
-    report += f"""
+    report += """
 ## Quality Modifiers System
 
 ### Pattern Specificity Modifiers
@@ -507,7 +504,7 @@ This specification synthesizes research from Phase 4.1 Steps 1-4 to define compr
     for level, data in modifiers["pattern_specificity_modifiers"].items():
         report += f"| {level.replace('_', ' ').title()} | {data['description']} | {data['modifier']} | {data['confidence_boost']} |\n"
 
-    report += f"""
+    report += """
 ### Brand Authority Modifiers
 
 | Authority Level | Criteria | Score Modifier | Confidence Impact |
@@ -517,7 +514,7 @@ This specification synthesizes research from Phase 4.1 Steps 1-4 to define compr
     for level, data in modifiers["brand_authority_modifiers"].items():
         report += f"| {level.replace('_', ' ').title()} | {data['description']} | {data['modifier']} | {data['confidence_boost']} |\n"
 
-    report += f"""
+    report += """
 ### Catalog Completeness Modifiers
 
 | Completeness Level | Criteria | Score Modifier | Confidence Impact |
@@ -527,7 +524,7 @@ This specification synthesizes research from Phase 4.1 Steps 1-4 to define compr
     for level, data in modifiers["catalog_completeness_modifiers"].items():
         report += f"| {level.replace('_', ' ').title()} | {data['description']} | {data['modifier']} | {data['confidence_boost']} |\n"
 
-    report += f"""
+    report += """
 ### Strategy Confidence Modifiers
 
 | Strategy Type | Criteria | Score Modifier | Confidence Impact |
@@ -537,7 +534,7 @@ This specification synthesizes research from Phase 4.1 Steps 1-4 to define compr
     for level, data in modifiers["strategy_confidence_modifiers"].items():
         report += f"| {level.replace('_', ' ').title()} | {data['description']} | {data['modifier']} | {data['confidence_boost']} |\n"
 
-    report += f"""
+    report += """
 ## Confidence Indicator System
 
 ### Confidence Calculation Formula
@@ -558,7 +555,7 @@ Total Confidence = Strategy Confidence + Pattern Confidence + Catalog Confidence
         if len(values) >= 5:
             report += f"| {component_name.replace('_', ' ').title()} | {max(values)} | {sorted(values, reverse=True)[1]} | {sorted(values, reverse=True)[2]} | {sorted(values, reverse=True)[3]} | {min(values)} |\n"
 
-    report += f"""
+    report += """
 ### Confidence Levels
 
 | Confidence Level | Range | Interpretation | Action |
@@ -587,7 +584,7 @@ Total Confidence = Strategy Confidence + Pattern Confidence + Catalog Confidence
             f"| {level.replace('_', ' ').title()} | {range_val} | {interpretation} | {action} |\n"
         )
 
-    report += f"""
+    report += """
 ## Implementation Scoring Formulas
 
 ### Base Quality Score Calculation
@@ -758,12 +755,12 @@ def main():
     print(f"Analysis complete! Report saved to: {output_file}")
 
     # Print summary
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"- Quality tiers defined: {len(quality_hierarchy)}")
     print(f"- Modifier categories: {len(quality_modifiers)}")
     print(f"- Confidence components: {len(confidence_indicators['confidence_components'])}")
-    print(f"- Success metrics: Improve from 70.3% to 85%+ success rate")
-    print(f"- Implementation phases: 4.2-4.5 with concrete scoring formulas")
+    print("- Success metrics: Improve from 70.3% to 85%+ success rate")
+    print("- Implementation phases: 4.2-4.5 with concrete scoring formulas")
 
 
 if __name__ == "__main__":

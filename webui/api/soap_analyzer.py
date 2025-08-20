@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Query, HTTPException
+import json
+import logging
+from collections import defaultdict
 from pathlib import Path
 from typing import List, Optional
-import json
-from collections import defaultdict
-import logging
+
+from fastapi import APIRouter, HTTPException, Query
 
 logger = logging.getLogger(__name__)
 
@@ -416,8 +417,8 @@ def analyze_soap_neighbor_similarity_web(
     matches: list[dict], mode: str, similarity_threshold: float = 0.5, limit: Optional[int] = None
 ) -> list[dict]:
     """Analyze soap matches for neighbor similarity (web-optimized version)"""
-    from difflib import SequenceMatcher
     import logging
+    from difflib import SequenceMatcher
 
     logger = logging.getLogger(__name__)
 

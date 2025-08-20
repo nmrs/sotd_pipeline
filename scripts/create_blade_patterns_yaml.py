@@ -8,11 +8,12 @@ This script:
 3. Saves the grouped data to a YAML file
 """
 
-import yaml
 import re
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
-from collections import defaultdict
+
+import yaml
 
 
 def load_blade_strings(file_path: Path) -> List[str]:

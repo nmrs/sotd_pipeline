@@ -7,8 +7,8 @@ from sotd.cli_utils.date_span import month_span
 from sotd.enrich.cli import get_parser
 from sotd.enrich.enrich import enrich_comments, setup_enrichers
 from sotd.enrich.save import calculate_enrichment_stats, load_matched_data, save_enriched_data
-from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
 from sotd.utils.parallel_processor import create_parallel_processor
+from sotd.utils.performance import PerformanceMonitor, PipelineOutputFormatter
 
 
 def _process_month(

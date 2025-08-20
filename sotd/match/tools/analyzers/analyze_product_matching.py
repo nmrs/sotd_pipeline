@@ -25,8 +25,8 @@ from typing import Any, Dict
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
-    from sotd.match.razor_matcher import RazorMatcher
     from sotd.match.blade_matcher import BladeMatcher
+    from sotd.match.razor_matcher import RazorMatcher
     from sotd.match.soap_matcher import SoapMatcher
     from sotd.match.types import MatchResult
 except ImportError as e:
@@ -118,7 +118,7 @@ class ProductAnalyzer:
 
     def _display_match_result(self, result: MatchResult) -> None:
         """Display detailed match result information."""
-        print(f"  📊 Match Result:")
+        print("  📊 Match Result:")
         print(f"    Original: {result.original}")
         print(f"    Match Type: {result.match_type}")
         print(f"    Pattern: {result.pattern or 'N/A'}")
@@ -191,12 +191,12 @@ class ProductAnalyzer:
                 total_brands = len(catalog)
                 total_models = sum(len(brand_data) for brand_data in catalog.values())
 
-                print(f"  📊 Catalog Statistics:")
+                print("  📊 Catalog Statistics:")
                 print(f"    Total Brands: {total_brands}")
                 print(f"    Total Models: {total_models}")
 
                 if self.debug:
-                    print(f"\n  🔍 Sample Catalog Entries:")
+                    print("\n  🔍 Sample Catalog Entries:")
                     # Show first few brands and models
                     for i, (brand, brand_data) in enumerate(catalog.items()):
                         if i >= 3:  # Limit to first 3 brands

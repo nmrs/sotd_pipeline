@@ -2,8 +2,8 @@
 """Test script to debug brush matching logic."""
 
 import json
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
 
 def extract_text(field_data, field=""):
@@ -99,7 +99,7 @@ def test_process_brush_unmatched():
         if "brush" in r and r["brush"] and "Chisel and Hound" in str(r["brush"].get("original", ""))
     ]
 
-    print(f"\n=== Testing _process_brush_unmatched logic ===")
+    print("\n=== Testing _process_brush_unmatched logic ===")
     print(f"Found {len(brush_records)} Chisel and Hound brushes")
 
     all_unmatched = defaultdict(list)

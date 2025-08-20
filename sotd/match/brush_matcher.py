@@ -3,6 +3,8 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from sotd.match.brush_matching_strategies.fiber_fallback_strategy import FiberFallbackStrategy
+from sotd.match.brush_matching_strategies.handle_only_strategy import HandleOnlyStrategy
+from sotd.match.brush_matching_strategies.knot_only_strategy import KnotOnlyStrategy
 from sotd.match.brush_matching_strategies.knot_size_fallback_strategy import (
     KnotSizeFallbackStrategy,
 )
@@ -20,8 +22,6 @@ from sotd.match.brush_matching_strategies.other_brushes_strategy import (
 )
 from sotd.match.brush_matching_strategies.other_knot_strategy import OtherKnotMatchingStrategy
 from sotd.match.brush_matching_strategies.zenith_strategy import ZenithBrushMatchingStrategy
-from sotd.match.brush_matching_strategies.handle_only_strategy import HandleOnlyStrategy
-from sotd.match.brush_matching_strategies.knot_only_strategy import KnotOnlyStrategy
 from sotd.match.brush_splits_loader import BrushSplitsLoader
 from sotd.match.brush_splitter import BrushSplitter
 from sotd.match.cache import MatchCache

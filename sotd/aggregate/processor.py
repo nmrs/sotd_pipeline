@@ -12,9 +12,9 @@ from .aggregators.core import (
     aggregate_brushes,
     aggregate_razors,
     aggregate_sample_usage_metrics,
-    aggregate_soaps,
-    aggregate_soap_sample_brands,
     aggregate_soap_sample_brand_scents,
+    aggregate_soap_sample_brands,
+    aggregate_soaps,
 )
 from .aggregators.cross_product import (
     aggregate_highest_use_count_per_blade,
@@ -37,15 +37,15 @@ from .aggregators.razor_specialized import (
     aggregate_super_speed_tips,
 )
 from .aggregators.users import (
-    aggregate_users,
-    aggregate_soap_sample_users,
-    aggregate_soap_brand_diversity,
-    aggregate_soap_brand_scent_diversity,
-    aggregate_razor_diversity,
     aggregate_blade_diversity,
     aggregate_brush_diversity,
-    aggregate_razor_format_users,
     aggregate_brush_fiber_users,
+    aggregate_razor_diversity,
+    aggregate_razor_format_users,
+    aggregate_soap_brand_diversity,
+    aggregate_soap_brand_scent_diversity,
+    aggregate_soap_sample_users,
+    aggregate_users,
 )
 from .utils.metrics import calculate_metadata
 

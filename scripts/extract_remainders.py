@@ -8,6 +8,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
 import yaml
 
 # Add the project root to the Python path so we can import from sotd
@@ -302,7 +303,7 @@ def create_bucketed_yaml(analysis, all_remainders):
             elif re.match(r"^\([a-z]+\s+use\)$", normalized_remainder):  # (first use), (second use)
                 blade_count_buckets["ordinal-use"].append(normalized_remainder)
             elif re.match(r"^2\^\(nd\)$", normalized_remainder):  # 2^(nd)
-                print(f"DEBUG: Matched 2^(nd) -> ordinal-use")  # Debug
+                print("DEBUG: Matched 2^(nd) -> ordinal-use")  # Debug
                 blade_count_buckets["ordinal-use"].append(normalized_remainder)
             elif re.match(r"^\(\d+x\)$", normalized_remainder) or re.match(
                 r"^\(x\d+\)$", normalized_remainder
@@ -332,10 +333,10 @@ def create_bucketed_yaml(analysis, all_remainders):
             elif re.match(r"^\d+(?:st|nd|rd|th)\s+use\s+x\d+$", normalized_remainder):  # 1st use x2
                 blade_count_buckets["ordinal-plus-multiplier"].append(normalized_remainder)
             elif re.match(r"^\(2\^\(nd\)\s+use\)$", normalized_remainder):  # (2^(nd) use)
-                print(f"DEBUG: Matched (2^(nd) use) -> ordinal-use")  # Debug
+                print("DEBUG: Matched (2^(nd) use) -> ordinal-use")  # Debug
                 blade_count_buckets["ordinal-use"].append(normalized_remainder)
             elif re.match(r"^\(2\^\(nd\)\)$", normalized_remainder):  # (2^(nd))
-                print(f"DEBUG: Matched (2^(nd)) -> ordinal-use")  # Debug
+                print("DEBUG: Matched (2^(nd)) -> ordinal-use")  # Debug
                 blade_count_buckets["ordinal-use"].append(normalized_remainder)
             elif re.match(r"^\([a-z]+\)\(\d+\)$", normalized_remainder):  # (india)(2)
                 blade_count_buckets["location-plus-simple"].append(normalized_remainder)

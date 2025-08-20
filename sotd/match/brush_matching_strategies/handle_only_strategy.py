@@ -1,10 +1,10 @@
+from typing import Optional
+
 from sotd.match.brush_matching_strategies.base_brush_matching_strategy import (
     BaseBrushMatchingStrategy,
 )
-
 from sotd.match.handle_matcher import HandleMatcher
 from sotd.match.types import MatchResult, create_match_result
-from typing import Optional
 
 
 class HandleOnlyStrategy(BaseBrushMatchingStrategy):

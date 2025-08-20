@@ -2,6 +2,7 @@
 """Brush fiber user aggregator for the SOTD pipeline."""
 
 from typing import Any, Dict, List
+
 import pandas as pd
 
 from ..base_aggregator import BaseAggregator

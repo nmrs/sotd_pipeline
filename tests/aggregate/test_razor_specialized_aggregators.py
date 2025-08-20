@@ -40,11 +40,11 @@ def test_aggregate_blackbird_plates():
     assert result[0]["plate"] == "Standard"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["plate"] == "Lite"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_christopher_bradley_plates():
@@ -59,12 +59,12 @@ def test_aggregate_christopher_bradley_plates():
     assert result[0]["plate_level"] == "C"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["plate_type"] == "SB"
     assert result[1]["plate_level"] == "D"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_game_changer_plates():
@@ -78,11 +78,11 @@ def test_aggregate_game_changer_plates():
     assert result[0]["gap"] == "1.05"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["gap"] == ".84"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_super_speed_tips():
@@ -96,11 +96,11 @@ def test_aggregate_super_speed_tips():
     assert result[0]["super_speed_tip"] == "Flare"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["super_speed_tip"] == "Black"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_straight_widths():
@@ -114,11 +114,11 @@ def test_aggregate_straight_widths():
     assert result[0]["width"] == "6/8"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["width"] == "5/8"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_straight_grinds():
@@ -132,11 +132,11 @@ def test_aggregate_straight_grinds():
     assert result[0]["grind"] == "Full Hollow"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["grind"] == "Hollow"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_straight_points():
@@ -150,8 +150,8 @@ def test_aggregate_straight_points():
     assert result[0]["point"] == "Round"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["point"] == "Barber's Notch"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2

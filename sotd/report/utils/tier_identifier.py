@@ -1,6 +1,6 @@
 """Tier identification and movement calculation utilities."""
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class TierIdentifier:

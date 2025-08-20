@@ -7,11 +7,12 @@ high-quality, medium-quality, and low-quality brush matches.
 """
 
 import json
-import yaml
-from collections import defaultdict, Counter
-from pathlib import Path
 import sys
-from typing import Dict, List, Any, Optional, Set
+from collections import Counter, defaultdict
+from pathlib import Path
+from typing import Any, Dict, List
+
+import yaml
 
 
 def load_yaml_catalog(file_path: Path) -> Dict[str, Any]:
@@ -316,7 +317,7 @@ Quality indicators have been identified across three dimensions:
         percentage = (count / total_entries) * 100
         report += f"| {field} | {count:,} | {percentage:.1f}% |\n"
 
-    report += f"""
+    report += """
 ### Quality Examples
 
 #### Complete Entries (High Quality)
@@ -324,13 +325,13 @@ Quality indicators have been identified across three dimensions:
     for example in catalog_analysis["quality_examples"]["complete"]:
         report += f"- **{example['brand']} {example['model']}**: {example['quality_field_count']} quality fields\n"
 
-    report += f"""
+    report += """
 #### Partial Entries (Medium Quality)  
 """
     for example in catalog_analysis["quality_examples"]["partial"]:
         report += f"- **{example['brand']} {example['model']}**: {example['quality_field_count']} quality fields\n"
 
-    report += f"""
+    report += """
 ## Pattern Specificity Analysis
 
 ### Specificity Distribution
@@ -417,7 +418,7 @@ Quality indicators have been identified across three dimensions:
     for brand, volume in manufacturer_volumes[:10]:
         report += f"- **{brand}**: {volume:,} matches\n"
 
-    report += f"""
+    report += """
 ## Quality Classification System
 
 Based on the analysis, we can define a quality hierarchy:
@@ -550,7 +551,7 @@ def main():
     print(f"Analysis complete! Report saved to: {output_file}")
 
     # Print summary
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"- Catalog entries: {catalog_analysis['total_entries']:,}")
     print(
         f"- Complete entries: {catalog_analysis['complete_entries']:,} ({(catalog_analysis['complete_entries'] / catalog_analysis['total_entries']) * 100:.1f}%)"

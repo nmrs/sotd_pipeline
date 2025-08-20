@@ -125,8 +125,8 @@ class TestDataQuality:
         assert result["meta"]["total_shaves"] == 2
         assert result["meta"]["unique_shavers"] == 2
 
-    def test_position_field_correctness(self):
-        """Test that position fields are correctly calculated and sequential."""
+    def test_rank_field_correctness(self):
+        """Test that rank fields are correctly calculated using tier-based ranking."""
         records = [
             {
                 "author": "user1",
@@ -147,14 +147,53 @@ class TestDataQuality:
         result = aggregate_all(records, "2025-01")
         data = result["data"]
 
-        # Check position fields for all categories
+        # Check rank/position fields for categories that need ranking
+        categories_that_need_ranking = [
+            "razors",
+            "blades",
+            "brushes",
+            "soaps",
+            "razor_manufacturers",
+            "blade_manufacturers",
+            "soap_makers",
+            "razor_formats",
+            "brush_handle_makers",
+            "brush_knot_makers",
+            "brush_fibers",
+            "brush_knot_sizes",
+            "users",
+        ]
+
         for category_name, category_data in data.items():
-            if category_data:  # Skip empty categories
-                for i, item in enumerate(category_data, 1):
-                    assert "position" in item, f"Missing position in {category_name}"
+            if category_data and category_name in categories_that_need_ranking:
+                # Check that rank or position field exists and is valid
+                for item in category_data:
+                    if "rank" in item:
+                        assert item["rank"] > 0, f"Rank {item['rank']} <= 0 in {category_name}"
+                        assert isinstance(
+                            item["rank"], int
+                        ), f"Rank {item['rank']} is not an integer in {category_name}"
+                    elif "position" in item:
+                        assert (
+                            item["position"] > 0
+                        ), f"Position {item['position']} <= 0 in {category_name}"
+                        assert isinstance(
+                            item["position"], int
+                        ), f"Position {item['position']} is not an integer in {category_name}"
+                    else:
+                        assert False, f"Missing rank or position in {category_name}"
+
+                # Check that items are properly ordered (descending by shaves, then by unique_users)
+                for i in range(len(category_data) - 1):
+                    current = category_data[i]
+                    next_item = category_data[i + 1]
                     assert (
-                        item["position"] == i
-                    ), f"Position mismatch in {category_name}: expected {i}, got {item['position']}"
+                        current["shaves"] >= next_item["shaves"]
+                    ), f"Shaves not in descending order in {category_name}"
+                    if current["shaves"] == next_item["shaves"]:
+                        assert (
+                            current["unique_users"] >= next_item["unique_users"]
+                        ), f"Unique users not in descending order for equal shaves in {category_name}"
 
     def test_sort_order_correctness(self):
         """Test that sort orders are correct for different categories."""

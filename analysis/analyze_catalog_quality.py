@@ -7,11 +7,12 @@ and coverage to understand known vs inferred vs fallback patterns.
 """
 
 import json
-import yaml
-from collections import defaultdict, Counter
-from pathlib import Path
 import sys
-from typing import Dict, List, Any, Optional, Set
+from collections import Counter, defaultdict
+from pathlib import Path
+from typing import Any, Dict, List
+
+import yaml
 
 
 def load_yaml_catalog(file_path: Path) -> Dict[str, Any]:
@@ -376,7 +377,7 @@ def generate_catalog_quality_report(analysis_results: Dict[str, Any]) -> str:
         )
         report += f"| {brand} | {avg_score:.1f} | {model_count} | {best_score} |\n"
 
-    report += f"""
+    report += """
 ### Exemplar Entries
 
 #### Highest Quality Entries
@@ -390,7 +391,7 @@ def generate_catalog_quality_report(analysis_results: Dict[str, Any]) -> str:
         ]
         report += f"- **{entry['brand']} {entry['model']}**: {entry['quality_field_count']} fields ({', '.join(fields)})\n"
 
-    report += f"""
+    report += """
 #### Typical Quality Entries
 """
 
@@ -402,7 +403,7 @@ def generate_catalog_quality_report(analysis_results: Dict[str, Any]) -> str:
         ]
         report += f"- **{entry['brand']} {entry['model']}**: {entry['quality_field_count']} fields ({', '.join(fields)})\n"
 
-    report += f"""
+    report += """
 ## Coverage Gap Analysis
 
 ### High-Volume Uncataloged Brands
@@ -417,7 +418,7 @@ These brands have significant match volume but no catalog entries:
         percentage = (count / total_matches) * 100
         report += f"| {brand} | {count:,} | {percentage:.1f}% |\n"
 
-    report += f"""
+    report += """
 ### Low-Volume Cataloged Brands
 These brands have catalog entries but low match volume:
 
@@ -429,7 +430,7 @@ These brands have catalog entries but low match volume:
         catalog_models = len(analysis_results["catalog_data"].get(brand, {}))
         report += f"| {brand} | {count:,} | {catalog_models} |\n"
 
-    report += f"""
+    report += """
 ### Coverage Recommendations
 
 #### High Priority Additions (Missing High-Volume Brands)
@@ -437,7 +438,7 @@ These brands have catalog entries but low match volume:
     for brand, count in coverage["high_volume_uncataloged"][:5]:
         report += f"1. **{brand}**: {count:,} matches - should be added to catalog with full specifications\n"
 
-    report += f"""
+    report += """
 #### Medium Priority Reviews (Low-Volume Cataloged)
 """
     for brand, count in coverage["low_volume_cataloged"][:5]:
@@ -450,7 +451,7 @@ These brands have catalog entries but low match volume:
                 f"1. **{brand}**: {count:,} matches - verify catalog accuracy and completeness\n"
             )
 
-    report += f"""
+    report += """
 ## Authority Classification Analysis
 
 ### Authority Distribution
@@ -477,7 +478,7 @@ These brands have catalog entries but low match volume:
 
         report += f"| {authority_type.replace('_', ' ').title()} | {brand_count} | {model_count} | {avg_quality:.1f} |\n"
 
-    report += f"""
+    report += """
 ### Manufacturer Analysis
 """
 
@@ -494,7 +495,7 @@ These brands have catalog entries but low match volume:
     else:
         report += "- No manufacturer entries found in catalog\n"
 
-    report += f"""
+    report += """
 ### Established Artisan Analysis
 """
 
@@ -511,7 +512,7 @@ These brands have catalog entries but low match volume:
     else:
         report += "- No established artisan entries found in catalog\n"
 
-    report += f"""
+    report += """
 ## Quality Classification System for Catalog Entries
 
 Based on this analysis, we can define catalog quality classifications:
@@ -634,7 +635,7 @@ def main():
     coverage_rate = coverage_analysis["coverage_metrics"]["coverage_rate_by_volume"]
     missing_brands = coverage_analysis["coverage_metrics"]["missing_brands_count"]
 
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"- Total catalog entries: {total_entries:,}")
     print(
         f"- Complete entries: {complete_entries:,} ({(complete_entries / total_entries) * 100:.1f}%)"

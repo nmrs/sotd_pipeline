@@ -12,9 +12,9 @@ Outputs a comprehensive markdown analysis.
 """
 
 import re
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
-from collections import defaultdict
 
 
 def load_blade_strings(file_path: Path) -> List[str]:
@@ -246,11 +246,11 @@ def main():
         print(f"Report saved to {output_file}")
 
         # Show summary
-        print(f"\nPattern Analysis Summary:")
+        print("\nPattern Analysis Summary:")
         print(f"Total pattern types: {len(patterns)}")
         print(f"Total examples: {sum(frequencies.values()):,}")
 
-        print(f"\nTop 5 pattern types:")
+        print("\nTop 5 pattern types:")
         for pattern_type, count in sorted(frequencies.items(), key=lambda x: x[1], reverse=True)[
             :5
         ]:

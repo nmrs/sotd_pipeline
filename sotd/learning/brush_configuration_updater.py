@@ -6,12 +6,13 @@ learning system, applying ChatGPT suggestions to the brush scoring configuration
 with validation, backup, and rollback capabilities.
 """
 
-import yaml
+import logging
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
-import logging
+from typing import Any, Dict, Optional, Union
+
+import yaml
 
 logger = logging.getLogger(__name__)
 

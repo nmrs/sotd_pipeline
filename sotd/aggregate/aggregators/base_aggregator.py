@@ -121,7 +121,7 @@ class BaseAggregator(ABC):
         """
         # Get the first grouping column for sorting (could be "name", "handle_maker", etc.)
         first_group_column = self._get_group_columns(grouped)[0]
-        
+
         # Sort by tie_columns + first_group_column for consistency
         # Note: tie_columns are sorted descending, first_group_column is sorted ascending
         sort_columns = self.tie_columns + [first_group_column]

@@ -3,7 +3,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Literal
+from typing import Any, Dict, List, Literal, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, field_validator
@@ -147,6 +147,7 @@ async def get_brush_validation_data(
 
         # Use counting service as single source of truth instead of CLI
         from pathlib import Path
+
         from sotd.match.brush_validation_counting_service import (
             BrushValidationCountingService,
         )
@@ -395,6 +396,7 @@ async def get_validation_statistics(month: str) -> ValidationStatisticsResponse:
 
         # Use counting service as single source of truth instead of CLI
         from pathlib import Path
+
         from sotd.match.brush_validation_counting_service import (
             BrushValidationCountingService,
         )

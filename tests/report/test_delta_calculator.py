@@ -18,17 +18,17 @@ class TestDeltaCalculator:
         assert calculator.debug is False
 
     def test_calculate_deltas_basic(self):
-        """Test basic delta calculation with position fields."""
+        """Test basic delta calculation with rank fields."""
         current_data = [
-            {"name": "Razor A", "shaves": 100, "position": 1},
-            {"name": "Razor B", "shaves": 80, "position": 2},
-            {"name": "Razor C", "shaves": 60, "position": 3},
+            {"name": "Razor A", "shaves": 100, "rank": 1},
+            {"name": "Razor B", "shaves": 80, "rank": 2},
+            {"name": "Razor C", "shaves": 60, "rank": 3},
         ]
 
         historical_data = [
-            {"name": "Razor B", "shaves": 90, "position": 1},
-            {"name": "Razor A", "shaves": 85, "position": 2},
-            {"name": "Razor C", "shaves": 70, "position": 3},
+            {"name": "Razor B", "shaves": 90, "rank": 1},
+            {"name": "Razor A", "shaves": 85, "rank": 2},
+            {"name": "Razor C", "shaves": 70, "rank": 3},
         ]
 
         calculator = DeltaCalculator()
@@ -36,19 +36,19 @@ class TestDeltaCalculator:
 
         assert len(result) == 3
 
-        # Razor A: moved from position 2 to 1 (improved by 1)
+        # Razor A: moved from rank 2 to 1 (improved by 1)
         assert result[0]["name"] == "Razor A"
         assert result[0]["delta"] == 1
-        assert result[0]["delta_symbol"] == "↑1"  # Improved by 1 position
-        assert result[0]["delta_text"] == "↑1"  # Improved by 1 position
+        assert result[0]["delta_symbol"] == "↑1"  # Improved by 1 rank
+        assert result[0]["delta_text"] == "↑1"  # Improved by 1 rank
 
-        # Razor B: moved from position 1 to 2 (worsened by 1)
+        # Razor B: moved from rank 1 to 2 (worsened by 1)
         assert result[1]["name"] == "Razor B"
         assert result[1]["delta"] == -1
-        assert result[1]["delta_symbol"] == "↓1"  # Worsened by 1 position
-        assert result[1]["delta_text"] == "↓1"  # Worsened by 1 position
+        assert result[1]["delta_symbol"] == "↓1"  # Worsened by 1 rank
+        assert result[1]["delta_text"] == "↓1"  # Worsened by 1 rank
 
-        # Razor C: stayed at position 3 (no change)
+        # Razor C: stayed at rank 3 (no change)
         assert result[2]["name"] == "Razor C"
         assert result[2]["delta"] == 0
         assert result[2]["delta_symbol"] == "="
@@ -57,14 +57,14 @@ class TestDeltaCalculator:
     def test_calculate_deltas_new_item(self):
         """Test delta calculation with new items not in historical data."""
         current_data = [
-            {"name": "Razor A", "shaves": 100, "position": 1},
-            {"name": "Razor B", "shaves": 80, "position": 2},
-            {"name": "New Razor", "shaves": 60, "position": 3},
+            {"name": "Razor A", "shaves": 100, "rank": 1},
+            {"name": "Razor B", "shaves": 80, "rank": 2},
+            {"name": "New Razor", "shaves": 60, "rank": 3},
         ]
 
         historical_data = [
-            {"name": "Razor A", "shaves": 90, "position": 1},
-            {"name": "Razor B", "shaves": 85, "position": 2},
+            {"name": "Razor A", "shaves": 90, "rank": 1},
+            {"name": "Razor B", "shaves": 85, "rank": 2},
         ]
 
         calculator = DeltaCalculator()
@@ -78,22 +78,22 @@ class TestDeltaCalculator:
         assert result[2]["delta_symbol"] == "n/a"
         assert result[2]["delta_text"] == "n/a"
 
-    def test_calculate_deltas_missing_position(self):
-        """Test delta calculation with missing position fields."""
+    def test_calculate_deltas_missing_rank(self):
+        """Test delta calculation with missing rank fields."""
         current_data = [
-            {"name": "Razor A", "shaves": 100, "position": 1},
-            {"name": "Razor B", "shaves": 80},  # Missing position
+            {"name": "Razor A", "shaves": 100, "rank": 1},
+            {"name": "Razor B", "shaves": 80},  # Missing rank
         ]
 
         historical_data = [
-            {"name": "Razor A", "shaves": 90, "position": 2},
-            {"name": "Razor B", "shaves": 85, "position": 1},
+            {"name": "Razor A", "shaves": 90, "rank": 2},
+            {"name": "Razor B", "shaves": 85, "rank": 1},
         ]
 
         calculator = DeltaCalculator()
         result = calculator.calculate_deltas(current_data, historical_data)
 
-        # Should only process items with position fields
+        # Should only process items with rank fields
         assert len(result) == 1
         assert result[0]["name"] == "Razor A"
 
@@ -102,11 +102,11 @@ class TestDeltaCalculator:
         calculator = DeltaCalculator()
 
         # Empty current data
-        result = calculator.calculate_deltas([], [{"name": "Razor A", "position": 1}])
+        result = calculator.calculate_deltas([], [{"name": "Razor A", "rank": 1}])
         assert result == []
 
         # Empty historical data
-        result = calculator.calculate_deltas([{"name": "Razor A", "position": 1}], [])
+        result = calculator.calculate_deltas([{"name": "Razor A", "rank": 1}], [])
         assert len(result) == 1
         assert result[0]["delta"] is None
         assert result[0]["delta_text"] == "n/a"
@@ -124,15 +124,15 @@ class TestDeltaCalculator:
     def test_calculate_deltas_max_items(self):
         """Test delta calculation with max_items limit."""
         current_data = [
-            {"name": "Razor A", "shaves": 100, "position": 1},
-            {"name": "Razor B", "shaves": 80, "position": 2},
-            {"name": "Razor C", "shaves": 60, "position": 3},
+            {"name": "Razor A", "shaves": 100, "rank": 1},
+            {"name": "Razor B", "shaves": 80, "rank": 2},
+            {"name": "Razor C", "shaves": 60, "rank": 3},
         ]
 
         historical_data = [
-            {"name": "Razor A", "shaves": 90, "position": 2},
-            {"name": "Razor B", "shaves": 85, "position": 1},
-            {"name": "Razor C", "shaves": 70, "position": 3},
+            {"name": "Razor A", "shaves": 90, "rank": 2},
+            {"name": "Razor B", "shaves": 85, "rank": 1},
+            {"name": "Razor C", "shaves": 70, "rank": 3},
         ]
 
         calculator = DeltaCalculator()
@@ -145,13 +145,13 @@ class TestDeltaCalculator:
     def test_calculate_deltas_custom_name_key(self):
         """Test delta calculation with custom name key."""
         current_data = [
-            {"product": "Razor A", "shaves": 100, "position": 1},
-            {"product": "Razor B", "shaves": 80, "position": 2},
+            {"product": "Razor A", "shaves": 100, "rank": 1},
+            {"product": "Razor B", "shaves": 80, "rank": 2},
         ]
 
         historical_data = [
-            {"product": "Razor A", "shaves": 90, "position": 2},
-            {"product": "Razor B", "shaves": 85, "position": 1},
+            {"product": "Razor A", "shaves": 90, "rank": 2},
+            {"product": "Razor B", "shaves": 85, "rank": 1},
         ]
 
         calculator = DeltaCalculator()
@@ -165,8 +165,8 @@ class TestDeltaCalculator:
         """Test delta symbol generation."""
         calculator = DeltaCalculator()
 
-        assert calculator._get_delta_symbol(1) == "↑1"  # Improved by 1 position
-        assert calculator._get_delta_symbol(-1) == "↓1"  # Worsened by 1 position
+        assert calculator._get_delta_symbol(1) == "↑1"  # Improved by 1 rank
+        assert calculator._get_delta_symbol(-1) == "↓1"  # Worsened by 1 rank
         assert calculator._get_delta_symbol(0) == "="  # No change
         assert calculator._get_delta_symbol(None) == "n/a"  # New item
 
@@ -174,23 +174,23 @@ class TestDeltaCalculator:
         """Test delta calculation for multiple categories."""
         current_data = {
             "razors": [
-                {"name": "Razor A", "shaves": 100, "position": 1},
-                {"name": "Razor B", "shaves": 80, "position": 2},
+                {"name": "Razor A", "shaves": 100, "rank": 1},
+                {"name": "Razor B", "shaves": 80, "rank": 2},
             ],
             "blades": [
-                {"name": "Blade A", "shaves": 50, "position": 1},
-                {"name": "Blade B", "shaves": 40, "position": 2},
+                {"name": "Blade A", "shaves": 50, "rank": 1},
+                {"name": "Blade B", "shaves": 40, "rank": 2},
             ],
         }
 
         historical_data = {
             "razors": [
-                {"name": "Razor B", "shaves": 90, "position": 1},
-                {"name": "Razor A", "shaves": 85, "position": 2},
+                {"name": "Razor B", "shaves": 90, "rank": 1},
+                {"name": "Razor A", "shaves": 85, "rank": 2},
             ],
             "blades": [
-                {"name": "Blade A", "shaves": 45, "position": 1},
-                {"name": "Blade B", "shaves": 35, "position": 2},
+                {"name": "Blade A", "shaves": 45, "rank": 1},
+                {"name": "Blade B", "shaves": 35, "rank": 2},
             ],
         }
 
@@ -218,14 +218,14 @@ class TestDeltaCalculator:
         """Test delta calculation with invalid category data."""
         current_data = {
             "razors": [
-                {"name": "Razor A", "shaves": 100, "position": 1},
+                {"name": "Razor A", "shaves": 100, "rank": 1},
             ],
             "invalid": "not a list",
         }
 
         historical_data = {
             "razors": [
-                {"name": "Razor A", "shaves": 90, "position": 2},
+                {"name": "Razor A", "shaves": 90, "rank": 2},
             ],
             "invalid": "not a list",
         }
@@ -287,16 +287,16 @@ class TestDeltaCalculator:
         """
         # Current month data (June 2025)
         current_data = [
-            {"name": "SBC", "shaves": 22, "unique_users": 8, "position": 1},
-            {"name": "SBD", "shaves": 31, "unique_users": 6, "position": 2},
-            {"name": "OCF", "shaves": 9, "unique_users": 1, "position": 3},
+            {"name": "SBC", "shaves": 22, "unique_users": 8, "rank": 1},
+            {"name": "SBD", "shaves": 31, "unique_users": 6, "rank": 2},
+            {"name": "OCF", "shaves": 9, "unique_users": 1, "rank": 3},
         ]
 
         # Previous month data (May 2025) - these plates definitely existed
         historical_data = [
-            {"name": "SBC", "shaves": 23, "unique_users": 3, "position": 1},
-            {"name": "SBD", "shaves": 23, "unique_users": 3, "position": 2},
-            {"name": "OCF", "shaves": 3, "unique_users": 1, "position": 3},
+            {"name": "SBC", "shaves": 23, "unique_users": 3, "rank": 1},
+            {"name": "SBD", "shaves": 23, "unique_users": 3, "rank": 2},
+            {"name": "OCF", "shaves": 3, "unique_users": 1, "rank": 3},
         ]
 
         # Calculate deltas for Christopher Bradley plates
@@ -322,7 +322,7 @@ class TestDeltaCalculator:
             sbc_delta["delta_symbol"] == "="
         ), f"Expected SBC delta symbol to be '=', got '{sbc_delta['delta_symbol']}'"
 
-        # Check that SBD plate delta is calculated (was position 2, still position 2)
+        # Check that SBD plate delta is calculated (was rank 2, still rank 2)
         sbd_delta = next((d for d in deltas if d["name"] == "SBD"), None)
         assert sbd_delta is not None, "SBD plate delta not found"
         assert (
@@ -332,7 +332,7 @@ class TestDeltaCalculator:
             sbd_delta["delta_symbol"] == "="
         ), f"Expected SBD delta symbol to be '=', got '{sbd_delta['delta_symbol']}'"
 
-        # Check that OCF plate delta is calculated (was position 3, still position 3)
+        # Check that OCF plate delta is calculated (was rank 3, still rank 3)
         ocf_delta = next((d for d in deltas if d["name"] == "OCF"), None)
         assert ocf_delta is not None, "OCF plate delta not found"
         assert (
@@ -390,7 +390,7 @@ class TestDeltaCalculator:
         )
 
         # The bug: the generated table should include delta columns with proper values
-        # Expected: table should show position changes (↑, ↓, or =) for plates that existed
+        # Expected: table should show rank changes (↑, ↓, or =) for plates that existed
         # Actual: table shows "n/a" for all delta columns
 
         # Verify that the table includes delta columns

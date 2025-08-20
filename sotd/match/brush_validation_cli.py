@@ -3,7 +3,7 @@
 import argparse
 import sys
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from sotd.match.brush_user_actions import BrushUserActionsManager
 from sotd.match.brush_validation_counting_service import BrushValidationCountingService

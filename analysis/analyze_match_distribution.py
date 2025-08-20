@@ -7,10 +7,10 @@ and performance patterns in May 2025 data.
 """
 
 import json
-from collections import defaultdict, Counter
-from pathlib import Path
 import sys
-from typing import Dict, List, Any, Optional
+from collections import Counter, defaultdict
+from pathlib import Path
+from typing import Any, Dict, List
 
 
 def load_match_data(file_path: Path) -> Dict[str, Any]:
@@ -163,7 +163,7 @@ def generate_analysis_report(analysis_results: Dict[str, Any]) -> str:
         success_rate = (count / total_successful) * 100 if strategy != "no_strategy" else 0
         report += f"| {strategy} | {count:,} | {percentage:.1f}% | {success_rate:.1f}% |\n"
 
-    report += f"""
+    report += """
 ### Match Type Distribution
 
 | Match Type | Count | Percentage |
@@ -206,7 +206,7 @@ def generate_analysis_report(analysis_results: Dict[str, Any]) -> str:
 - **Cache Hit Rate**: {cache_hit_rate:.1f}%
 """
 
-    report += f"""
+    report += """
 ## Pattern Analysis
 
 ### Pattern Complexity Distribution
@@ -219,7 +219,7 @@ def generate_analysis_report(analysis_results: Dict[str, Any]) -> str:
         percentage = (count / total_patterns) * 100 if total_patterns > 0 else 0
         report += f"- **{complexity.title()} Patterns**: {count:,} ({percentage:.1f}%)\n"
 
-    report += f"""
+    report += """
 ### Top Brands by Match Frequency
 
 | Brand | Matches | Percentage |
@@ -318,7 +318,7 @@ def main():
     print(f"Analysis complete! Report saved to: {output_file}")
 
     # Print summary
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"- Total brush matches: {strategy_analysis['total_brushes']:,}")
     print(f"- Success rate: {strategy_analysis['success_rate']:.1%}")
     print(f"- Strategies found: {len(strategy_analysis['strategy_counts'])}")
