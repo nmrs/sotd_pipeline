@@ -37,11 +37,11 @@ def test_aggregate_knot_makers():
     assert result[0]["brand"] == "Declaration Grooming"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
-    assert result[1]["brand"] == "Semogue"
-    assert result[1]["shaves"] == 1
-    assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+            assert result[0]["rank"] == 1
+        assert result[1]["brand"] == "Semogue"
+        assert result[1]["shaves"] == 1
+        assert result[1]["unique_users"] == 1
+        assert result[1]["rank"] == 2
 
 
 def test_aggregate_fibers():
