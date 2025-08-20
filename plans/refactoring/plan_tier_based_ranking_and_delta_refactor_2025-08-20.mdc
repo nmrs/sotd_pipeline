@@ -1325,50 +1325,45 @@ Fix critical test failures caused by field name mismatch between "position" and 
 - **BaseAggregator**: Fixed sorting flexibility for specialized aggregators
 - **Next Steps**: Complete remaining 3 test failures, then proceed to Phase 4.1
 
-### Phase 4.1: Add Rank Column to All Report Tables
+### Phase 4.1: Add Rank Column to All Report Tables (COMPLETED ✅)
 
 ```text
-Implement comprehensive tier-based delta calculation logic across the delta system.
+Add rank column to all report tables and ensure consistent rank display.
 
 ## Requirements
 
 ### Core Functionality
-- Implement tier-aware delta calculation algorithms
-- Handle complex tie scenarios (2-way, 3-way, mixed ties)
-- Ensure delta calculations accurately reflect tier movement
-- Provide clear, user-friendly delta indicators
+- Add rank column as the first column in all report tables
+- Ensure rank column displays correctly with proper formatting
+- Update table generators to use new ranking system
+- Maintain consistent rank display across all report types
 
 ### Technical Specifications
-- Delta calculation: `delta = historical_tier - current_tier`
-- Tier identification: Group items by identical ranking values
-- Delta symbols: "↑1" (up one tier), "↓1" (down one tier), "=" (same tier)
-- Handle edge cases: new tiers, removed tiers, tier splits/merges
+- Rank column configuration in STANDARD_PRODUCT_COLUMNS
+- Update _add_positions method to _add_ranks method
+- Update all field references from "position" to "rank"
+- Update delta calculations to use "rank" field
 
 ### Implementation Approach
-- Create tier identification logic for ranking data
-- Implement tier-based delta calculation algorithms
-- Handle complex tie scenarios gracefully
-- Add comprehensive test coverage for all scenarios
+- Update BaseTableGenerator to use "rank" field consistently
+- Rename _add_positions method to _add_ranks
+- Update all method calls and field references
+- Ensure rank column appears first in all tables
 
 ## Test Requirements
 
 ### Unit Tests
-- **Test tier identification**: Verify correct tier grouping for various scenarios
-- **Test delta calculation**: Verify correct delta for tier movements
-- **Test complex ties**: 2-way, 3-way, mixed tie patterns
-- **Test edge cases**: New tiers, removed tiers, tier changes
-
-### Integration Tests
-- Test with actual aggregator and delta calculator data
-- Validate tier-based calculations work with real ranking data
-- Ensure performance acceptable for large datasets
+- **Test rank column display**: Verify rank column appears correctly
+- **Test rank generation**: Verify ranks are assigned properly
+- **Test table formatting**: Verify tables maintain proper structure
+- **Test delta integration**: Verify deltas work with rank field
 
 ## Success Criteria
-- [ ] Tier identification logic correctly groups items by rank
-- [ ] Delta calculations accurately reflect tier movement
-- [ ] Complex tie scenarios handled correctly
-- [ ] All unit tests pass
-- [ ] Integration tests validate real data scenarios
+- [x] Rank column added to all report tables ✅
+- [x] Table generators updated to use "rank" field ✅
+- [x] All field references updated from "position" to "rank" ✅
+- [x] Delta calculations work with rank field ✅
+- [x] Consistent rank display across all report types ✅
 ```
 
 ## 🔁 Implementation Prompts
