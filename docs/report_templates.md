@@ -1,10 +1,12 @@
 # Report Templates
 
-The SOTD Pipeline now supports flexible, customizable templates for both hardware and software reports. This allows users to easily modify the entire report structure and content without changing the code.
+The SOTD Pipeline now supports flexible, customizable templates for both hardware and software reports through a unified architecture. This allows users to easily modify the entire report structure and content without changing the code.
 
 ## Overview
 
 The template system uses Markdown files with variable replacement and table placeholders to generate complete reports. Templates are stored in `data/report_templates/` as individual `.md` files and can be easily edited by users to customize the entire report structure.
+
+**New Architecture**: The system now uses a unified `MonthlyReportGenerator` class that handles both hardware and software reports, eliminating code duplication and providing a consistent interface for all monthly report generation.
 
 ## Template File Structure
 
@@ -19,6 +21,8 @@ data/report_templates/
 ```
 
 Each template file contains the complete report structure with variables and table placeholders. The system automatically loads templates based on the report type being generated.
+
+**Note**: The monthly templates use the base names (`hardware.md`, `software.md`) rather than prefixed names, as the unified generator automatically selects the appropriate template based on the report type.
 
 ## Template Content Structure
 
@@ -49,9 +53,9 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Available Template Variables
 
-### Monthly Hardware Report Variables
+### Monthly Report Variables (Unified)
 
-The following variables are available for the monthly hardware report template:
+The following variables are available for both monthly hardware and software report templates:
 
 | Variable | Description | Example Output |
 |----------|-------------|----------------|
@@ -60,21 +64,23 @@ The following variables are available for the monthly hardware report template:
 | `{{unique_shavers}}` | Number of unique users | `567` |
 | `{{avg_shaves_per_user}}` | Average shaves per user | `2.2` |
 | `{{median_shaves_per_user}}` | Median shaves per user | `1.0` |
+
+### Hardware-Specific Variables
+
+Additional variables available for hardware reports:
+
+| Variable | Description | Example Output |
+|----------|-------------|----------------|
 | `{{unique_razors}}` | Number of unique razors used | `234` |
 | `{{unique_blades}}` | Number of unique blades used | `123` |
 | `{{unique_brushes}}` | Number of unique brushes used | `89` |
 
-### Monthly Software Report Variables
+### Software-Specific Variables
 
-The following variables are available for the monthly software report template:
+Additional variables available for software reports:
 
 | Variable | Description | Example Output |
 |----------|-------------|----------------|
-| `{{month_year}}` | Month and year in display format | `January 2025` |
-| `{{total_shaves}}` | Total number of shaves (formatted with commas) | `1,234` |
-| `{{unique_shavers}}` | Number of unique users | `567` |
-| `{{avg_shaves_per_user}}` | Average shaves per user | `2.2` |
-| `{{median_shaves_per_user}}` | Median shaves per user | `1.0` |
 | `{{unique_soaps}}` | Number of unique soaps used | `585` |
 | `{{unique_brands}}` | Number of unique soap brands/makers | `136` |
 | `{{total_samples}}` | Total number of sample shaves used | `89` |
@@ -134,6 +140,8 @@ The following table placeholders are available for the software report template:
 4. **Add table placeholders**: Insert table placeholders where you want tables (e.g., `{{tables.razors}}`)
 5. **Customize structure**: Organize sections, headers, and tables however you prefer
 6. **Save changes**: The changes will take effect immediately on the next report generation
+
+**Note**: With the unified architecture, you can now modify both hardware and software templates independently while maintaining consistent variable naming and structure.
 
 ## Template Syntax
 
@@ -261,6 +269,7 @@ The template system includes comprehensive testing to ensure templates work corr
 - **Unit tests**: Test template variable replacement and content generation
 - **Integration tests**: Test complete report generation with sample data
 - **Template validation**: Ensure templates load correctly and contain required sections
+- **Unified generator tests**: Test the consolidated `MonthlyReportGenerator` class
 
 ### Running Template Tests
 ```bash
@@ -269,6 +278,9 @@ python -m pytest tests/report/ -v
 
 # Run specific template tests
 python -m pytest tests/report/test_template_integration.py -v
+
+# Run monthly generator tests
+python -m pytest tests/report/test_monthly_generator.py -v
 ```
 
 ## Error Handling
@@ -299,6 +311,8 @@ To add new template types:
 3. Add appropriate variables if needed
 4. Update this documentation with the new variables
 
+**Note**: With the unified architecture, adding new monthly report types is now simpler as they can leverage the existing `MonthlyReportGenerator` infrastructure.
+
 ## Best Practices
 
 1. **Backup your templates**: Keep a backup of your custom templates
@@ -309,6 +323,7 @@ To add new template types:
 6. **Organize logically**: Group related tables together with descriptive headers
 7. **Keep it readable**: Use clear section headers and logical flow
 8. **Use shared templates**: Leverage the testing infrastructure to validate template changes
+9. **Leverage unified architecture**: Use the consolidated generator for consistent behavior across report types
 
 ## Troubleshooting
 
@@ -331,4 +346,5 @@ To add new template types:
 ### Test Failures
 - Ensure test templates in `tests/fixtures/report_template.yaml` are up to date
 - Check that template changes don't break existing tests
-- Verify that both unit and integration tests pass 
+- Verify that both unit and integration tests pass
+- Run the unified monthly generator tests to ensure the new architecture is working correctly 
