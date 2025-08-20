@@ -272,3 +272,172 @@ class TestAnnualDeltaCalculatorRankField:
         # Check other delta columns
         assert "delta_shaves_2023" in config
         assert "delta_unique_users_2023" in config
+
+    def test_annual_missing_month_handling(self):
+        """Test handling of incomplete annual data (missing months)."""
+        current_year_data = {
+            "year": "2024",
+            "meta": {"total_shaves": 800, "unique_shavers": 80},  # Lower due to missing months
+            "data": {
+                "razors": [
+                    {"name": "Razor A", "shaves": 80, "rank": 1},  # Tier 1
+                    {"name": "Razor B", "shaves": 60, "rank": 2},  # Tier 2
+                ],
+            },
+        }
+
+        previous_year_data = {
+            "year": "2023",
+            "meta": {"total_shaves": 1200, "unique_shavers": 100},  # Complete year
+            "data": {
+                "razors": [
+                    {"name": "Razor A", "shaves": 100, "rank": 2},  # Was in Tier 2
+                    {"name": "Razor B", "shaves": 120, "rank": 1},  # Was in Tier 1
+                ],
+            },
+        }
+
+        calculator = AnnualDeltaCalculator()
+        result = calculator.calculate_annual_deltas(current_year_data, previous_year_data)
+
+        razors = result["razors"]
+        assert len(razors) == 2
+
+        # Razor A: rank 2 → rank 1 = improved by 1 tier
+        assert razors[0]["delta"] == 1
+        assert razors[0]["delta_symbol"] == "↑1"
+
+        # Razor B: rank 1 → rank 2 = worsened by 1 tier
+        assert razors[1]["delta"] == -1
+        assert razors[1]["delta_symbol"] == "↓1"
+
+    def test_annual_data_gap_scenarios(self):
+        """Test handling of missing historical data (data gaps)."""
+        current_year_data = {
+            "year": "2024",
+            "data": {
+                "razors": [
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor B", "shaves": 80, "rank": 2},
+                ],
+            },
+        }
+
+        # Historical data with gaps (missing some months)
+        previous_year_data = {
+            "year": "2023",
+            "data": {
+                "razors": [
+                    {"name": "Razor A", "shaves": 90, "rank": 2},  # Only partial data
+                    # Razor B missing from historical data (data gap)
+                ],
+            },
+        }
+
+        calculator = AnnualDeltaCalculator()
+        result = calculator.calculate_annual_deltas(current_year_data, previous_year_data)
+
+        razors = result["razors"]
+        assert len(razors) == 2
+
+        # Razor A: rank 2 → rank 1 = improved by 1 tier
+        assert razors[0]["delta"] == 1
+        assert razors[0]["delta_symbol"] == "↑1"
+
+        # Razor B: not in historical data (new item or data gap)
+        assert razors[1]["delta"] is None
+        assert razors[1]["delta_symbol"] == "n/a"
+
+    def test_annual_tie_scenarios(self):
+        """Test annual delta calculation with items tied at same rank."""
+        current_year_data = {
+            "year": "2024",
+            "data": {
+                "razors": [
+                    {"name": "Razor A", "shaves": 100, "rank": 1},  # Tier 1
+                    {"name": "Razor B", "shaves": 80, "rank": 2},   # Tier 2 (tied)
+                    {"name": "Razor C", "shaves": 80, "rank": 2},   # Tier 2 (tied)
+                    {"name": "Razor D", "shaves": 60, "rank": 3},   # Tier 3
+                ],
+            },
+        }
+
+        previous_year_data = {
+            "year": "2023",
+            "data": {
+                "razors": [
+                    {"name": "Razor A", "shaves": 90, "rank": 2},   # Was in Tier 2
+                    {"name": "Razor B", "shaves": 100, "rank": 1},  # Was in Tier 1
+                    {"name": "Razor C", "shaves": 90, "rank": 2},   # Was in Tier 2
+                    {"name": "Razor D", "shaves": 70, "rank": 3},   # Was in Tier 3
+                ],
+            },
+        }
+
+        calculator = AnnualDeltaCalculator()
+        result = calculator.calculate_annual_deltas(current_year_data, previous_year_data)
+
+        razors = result["razors"]
+        assert len(razors) == 4
+
+        # Razor A: rank 2 → rank 1 = improved by 1 tier
+        assert razors[0]["delta"] == 1
+        assert razors[0]["delta_symbol"] == "↑1"
+
+        # Razor B: rank 1 → rank 2 = worsened by 1 tier
+        assert razors[1]["delta"] == -1
+        assert razors[1]["delta_symbol"] == "↓1"
+
+        # Razor C: rank 2 → rank 2 = no change
+        assert razors[2]["delta"] == 0
+        assert razors[2]["delta_symbol"] == "="
+
+        # Razor D: rank 3 → rank 3 = no change
+        assert razors[3]["delta"] == 0
+        assert razors[3]["delta_symbol"] == "="
+
+    def test_annual_performance_with_large_datasets(self):
+        """Test performance with large annual datasets."""
+        # Create large annual datasets
+        current_year_data = {
+            "year": "2024",
+            "data": {
+                "razors": [
+                    {"name": f"Razor {i}", "shaves": 100 - i, "rank": i}
+                    for i in range(1, 101)  # 100 razors
+                ],
+            },
+        }
+
+        previous_year_data = {
+            "year": "2023",
+            "data": {
+                "razors": [
+                    {"name": f"Razor {i}", "shaves": 100 - i + 1, "rank": i + 1}
+                    for i in range(1, 101)  # 100 razors, all moved down 1 tier
+                ],
+            },
+        }
+
+        calculator = AnnualDeltaCalculator()
+
+        # Measure performance
+        import time
+        start_time = time.time()
+        result = calculator.calculate_annual_deltas(
+            current_year_data, previous_year_data, max_items=100
+        )
+        end_time = time.time()
+
+        processing_time = end_time - start_time
+
+        # Validate results
+        razors = result["razors"]
+        assert len(razors) == 100
+        assert processing_time < 1.0  # Should complete within 1 second
+
+        # Check that deltas are calculated correctly
+        # All razors should have moved up 1 tier (rank +1 → rank)
+        for razor in razors:
+            assert razor["delta"] == 1  # All improved by 1 tier
+            assert razor["delta_symbol"] == "↑1"
