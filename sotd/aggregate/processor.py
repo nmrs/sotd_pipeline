@@ -7,9 +7,11 @@ from .aggregators.brush_specialized import (
     aggregate_knot_sizes,
 )
 from .aggregators.core import (
+    aggregate_blade_usage_distribution,
     aggregate_blades,
     aggregate_brushes,
     aggregate_razors,
+    aggregate_sample_usage_metrics,
     aggregate_soaps,
     aggregate_soap_sample_brands,
     aggregate_soap_sample_brand_scents,
@@ -138,6 +140,9 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
     # Core product aggregations
     aggregated_data["data"]["razors"] = aggregate_razors(records)
     aggregated_data["data"]["blades"] = aggregate_blades(records)
+    aggregated_data["data"]["blade_usage_distribution"] = aggregate_blade_usage_distribution(
+        records
+    )
     aggregated_data["data"]["brushes"] = aggregate_brushes(records)
     aggregated_data["data"]["soaps"] = aggregate_soaps(records)
 
@@ -146,6 +151,7 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
     aggregated_data["data"]["soap_sample_brand_scents"] = aggregate_soap_sample_brand_scents(
         records
     )
+    aggregated_data["data"]["sample_usage_metrics"] = aggregate_sample_usage_metrics(records)
 
     # Manufacturer aggregations
     aggregated_data["data"]["razor_manufacturers"] = aggregate_razor_manufacturers(records)
