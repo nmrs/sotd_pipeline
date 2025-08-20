@@ -23,8 +23,8 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
-                    {"name": "Razor B", "shaves": 80, "position": 2},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor B", "shaves": 80, "rank": 2},
                 ]
             },
         }
@@ -33,8 +33,8 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2023",
             "data": {
                 "razors": [
-                    {"name": "Razor B", "shaves": 90, "position": 1},
-                    {"name": "Razor A", "shaves": 85, "position": 2},
+                    {"name": "Razor B", "shaves": 90, "rank": 1},
+                    {"name": "Razor A", "shaves": 85, "rank": 2},
                 ]
             },
         }
@@ -61,10 +61,10 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
                 ],
                 "blades": [
-                    {"name": "Blade A", "shaves": 200, "position": 1},
+                    {"name": "Blade A", "shaves": 200, "rank": 1},
                 ],
             },
         }
@@ -73,10 +73,10 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2023",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "position": 2},
+                    {"name": "Razor A", "shaves": 90, "rank": 2},
                 ],
                 "blades": [
-                    {"name": "Blade A", "shaves": 180, "position": 2},
+                    {"name": "Blade A", "shaves": 180, "rank": 2},
                 ],
             },
         }
@@ -96,7 +96,7 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "New Razor", "shaves": 100, "position": 1},
+                    {"name": "New Razor", "shaves": 100, "rank": 1},
                 ]
             },
         }
@@ -105,7 +105,7 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2023",
             "data": {
                 "razors": [
-                    {"name": "Old Razor", "shaves": 90, "position": 1},
+                    {"name": "Old Razor", "shaves": 90, "rank": 1},
                 ]
             },
         }
@@ -127,7 +127,7 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
                 ]
             },
         }
@@ -136,7 +136,7 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2023",
             "data": {
                 "blades": [
-                    {"name": "Blade A", "shaves": 200, "position": 1},
+                    {"name": "Blade A", "shaves": 200, "rank": 1},
                 ]
             },
         }
@@ -157,7 +157,7 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
                 ]
             },
         }
@@ -167,7 +167,7 @@ class TestAnnualDeltaCalculatorRefactoring:
                 "year": "2023",
                 "data": {
                     "razors": [
-                        {"name": "Razor A", "shaves": 90, "position": 2},
+                        {"name": "Razor A", "shaves": 90, "rank": 2},
                     ]
                 },
             },
@@ -175,7 +175,7 @@ class TestAnnualDeltaCalculatorRefactoring:
                 "year": "2022",
                 "data": {
                     "razors": [
-                        {"name": "Razor A", "shaves": 80, "position": 3},
+                        {"name": "Razor A", "shaves": 80, "rank": 3},
                     ]
                 },
             },
@@ -202,7 +202,7 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
                 ]
             },
         }
@@ -222,13 +222,13 @@ class TestAnnualDeltaCalculatorRefactoring:
 
         # Check that config contains expected columns for each year
         for year in comparison_years:
-            assert f"delta_position_{year}" in config
+            assert f"delta_rank_{year}" in config
             assert f"delta_shaves_{year}" in config
             assert f"delta_unique_users_{year}" in config
 
             # Check column properties
-            pos_col = config[f"delta_position_{year}"]
-            assert pos_col["title"] == f"Δ Pos {year}"
+            pos_col = config[f"delta_rank_{year}"]
+            assert pos_col["title"] == f"Δ Rank {year}"
             assert pos_col["align"] == "right"
             assert pos_col["format"] == "number"
 
@@ -260,9 +260,9 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
-                    {"name": "Razor B", "shaves": 80, "position": 2},
-                    {"name": "Razor C", "shaves": 60, "position": 3},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor B", "shaves": 80, "rank": 2},
+                    {"name": "Razor C", "shaves": 60, "rank": 3},
                 ]
             },
         }
@@ -271,9 +271,9 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2023",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "position": 2},
-                    {"name": "Razor B", "shaves": 85, "position": 1},
-                    {"name": "Razor C", "shaves": 70, "position": 3},
+                    {"name": "Razor A", "shaves": 90, "rank": 2},
+                    {"name": "Razor B", "shaves": 85, "rank": 1},
+                    {"name": "Razor C", "shaves": 70, "rank": 3},
                 ]
             },
         }
@@ -293,7 +293,7 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2024",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
                 ]
             },
         }
@@ -302,7 +302,7 @@ class TestAnnualDeltaCalculatorRefactoring:
             "year": "2023",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "position": 2},
+                    {"name": "Razor A", "shaves": 90, "rank": 2},
                 ]
             },
         }

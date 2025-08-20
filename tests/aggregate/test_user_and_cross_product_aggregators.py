@@ -18,10 +18,10 @@ def test_aggregate_users():
     assert len(result) == 2
     assert result[0]["user"] == "user1"
     assert result[0]["shaves"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["user"] == "user2"
     assert result[1]["shaves"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_razor_blade_combos():
@@ -47,11 +47,11 @@ def test_aggregate_razor_blade_combos():
     assert result[0]["name"] == "Fatip Grande + Gillette Minora"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["name"] == "Gillette Tech + Personna Lab Blue"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_highest_use_count_per_blade():
@@ -76,12 +76,12 @@ def test_aggregate_highest_use_count_per_blade():
     assert result[0]["blade"] == "Gillette Minora"
     assert result[0]["format"] == "DE"
     assert result[0]["uses"] == 15
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["user"] == "user2"
     assert result[1]["blade"] == "Personna Lab Blue"
     assert result[1]["format"] == "DE"
     assert result[1]["uses"] == 12
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_highest_use_count_per_blade_multiple_users_same_blade():

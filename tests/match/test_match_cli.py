@@ -58,7 +58,7 @@ class TestMatchCLI:
         """Test max-workers argument default value."""
         parser = get_parser()
         args = parser.parse_args(["--month", "2023-01"])
-        assert args.max_workers == 4
+        assert args.max_workers == 8
 
     def test_max_workers_argument_custom(self):
         """Test custom max-workers argument."""

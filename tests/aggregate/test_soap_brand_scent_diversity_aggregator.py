@@ -16,13 +16,13 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
                 },
             },
             {
                 "author": "user2",
                 "soap": {
-                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
+                    "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
                 },
             },
         ]
@@ -50,7 +50,7 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user2",
                 "soap": {
-                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
+                    "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
                 },
             },
         ]
@@ -68,13 +68,13 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"brand": "Declaration Grooming"},
+                    "matched": {"maker": "Declaration Grooming"},
                 },
             },
             {
                 "author": "user2",
                 "soap": {
-                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
+                    "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
                 },
             },
         ]
@@ -96,7 +96,7 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user2",
                 "soap": {
-                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
+                    "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
                 },
             },
         ]
@@ -117,7 +117,7 @@ class TestSoapBrandScentDiversityAggregator:
 
         df = pd.DataFrame(
             {
-                "brand": ["Declaration Grooming", "Barrister & Mann"],
+                "maker": ["Declaration Grooming", "Barrister & Mann"],
                 "scent": ["B2", "Seville"],
             }
         )
@@ -133,25 +133,25 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
                 },
             },
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"brand": "Declaration Grooming", "scent": "B3"},
+                    "matched": {"maker": "Declaration Grooming", "scent": "B3"},
                 },
             },
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
+                    "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
                 },
             },
             {
                 "author": "user2",
                 "soap": {
-                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
                 },
             },
         ]
@@ -185,7 +185,7 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"brand": "Declaration Grooming"},
+                    "matched": {"maker": "Declaration Grooming"},
                 },
             },
         ]
@@ -199,25 +199,25 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
                 },
             },
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"brand": "Declaration Grooming", "scent": "B3"},
+                    "matched": {"maker": "Declaration Grooming", "scent": "B3"},
                 },
             },
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"brand": "Barrister & Mann", "scent": "Seville"},
+                    "matched": {"maker": "Barrister & Mann", "scent": "Seville"},
                 },
             },
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"brand": "Noble Otter", "scent": "Lonestar"},
+                    "matched": {"maker": "Noble Otter", "scent": "Lonestar"},
                 },
             },
         ]
@@ -237,19 +237,19 @@ class TestSoapBrandScentDiversityAggregator:
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"brand": "Declaration Grooming", "scent": "B2"},
+                    "matched": {"maker": "Declaration Grooming", "scent": "B2"},
                 },
             },
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"brand": "Declaration Grooming", "scent": "B3"},
+                    "matched": {"maker": "Declaration Grooming", "scent": "B3"},
                 },
             },
             {
                 "author": "user1",
                 "soap": {
-                    "matched": {"brand": "Declaration Grooming", "scent": "B4"},
+                    "matched": {"maker": "Declaration Grooming", "scent": "B4"},
                 },
             },
         ]

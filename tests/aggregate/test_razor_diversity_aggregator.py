@@ -161,14 +161,14 @@ class TestRazorDiversityAggregator:
         assert len(result) == 2
 
         # Check first result (user1 with 3 unique razors, 3 total shaves)
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["unique_razors"] == 3
         assert result[0]["total_shaves"] == 3
         assert result[0]["unique_users"] == 1
 
         # Check second result (user2 with 1 unique razor, 1 total shave)
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
         assert result[1]["user"] == "user2"
         assert result[1]["unique_razors"] == 1
         assert result[1]["total_shaves"] == 1
@@ -219,7 +219,7 @@ class TestRazorDiversityAggregator:
         result = aggregate_razor_diversity(records)
 
         assert len(result) == 1
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["unique_razors"] == 3
         assert result[0]["total_shaves"] == 3
@@ -251,7 +251,7 @@ class TestRazorDiversityAggregator:
         result = aggregate_razor_diversity(records)
 
         assert len(result) == 1
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[0]["user"] == "user1"
         assert result[0]["unique_razors"] == 3
         assert result[0]["total_shaves"] == 3

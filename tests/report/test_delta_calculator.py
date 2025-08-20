@@ -744,8 +744,8 @@ class TestCalculateDeltasForPeriod:
         """Test successful delta calculation for a period."""
         current_data = {
             "razors": [
-                {"name": "Razor A", "shaves": 100, "position": 1},
-                {"name": "Razor B", "shaves": 80, "position": 2},
+                {"name": "Razor A", "shaves": 100, "rank": 1},
+                {"name": "Razor B", "shaves": 80, "rank": 2},
             ]
         }
 
@@ -754,8 +754,8 @@ class TestCalculateDeltasForPeriod:
                 {"month": "2024-12"},
                 {
                     "razors": [
-                        {"name": "Razor B", "shaves": 90, "position": 1},
-                        {"name": "Razor A", "shaves": 85, "position": 2},
+                        {"name": "Razor B", "shaves": 90, "rank": 1},
+                        {"name": "Razor A", "shaves": 85, "rank": 2},
                     ]
                 },
             )
@@ -804,7 +804,7 @@ class TestCalculateDeltasForPeriod:
         """Test delta calculation with debug mode enabled."""
         current_data = {
             "razors": [
-                {"name": "Razor A", "shaves": 100, "position": 1},
+                {"name": "Razor A", "shaves": 100, "rank": 1},
             ]
         }
 
@@ -813,7 +813,7 @@ class TestCalculateDeltasForPeriod:
                 {"month": "2024-12"},
                 {
                     "razors": [
-                        {"name": "Razor A", "shaves": 90, "position": 2},
+                        {"name": "Razor A", "shaves": 90, "rank": 2},
                     ]
                 },
             )

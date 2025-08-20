@@ -63,6 +63,12 @@ class TestCLIIntegration:
             args.debug = False
             args.max_workers = 1
             args.correct_matches_path = None
+            # Set attributes that month_span function might access
+            args.delta_months = None
+            args.year = None
+            args.range = None
+            args.start = None
+            args.end = None
 
             run_match(args)
 
@@ -86,6 +92,12 @@ class TestCLIIntegration:
             args.debug = False
             args.max_workers = 1
             args.correct_matches_path = None
+            # Set attributes that month_span function might access
+            args.delta_months = None
+            args.year = None
+            args.range = None
+            args.start = None
+            args.end = None
 
             run_match(args)
 
@@ -110,6 +122,12 @@ class TestCLIIntegration:
             args.max_workers = 1
             args.correct_matches_path = None
             args.config_path = Path("/test/config.yaml")
+            # Set attributes that month_span function might access
+            args.delta_months = None
+            args.year = None
+            args.range = None
+            args.start = None
+            args.end = None
 
             run_match(args)
 
@@ -134,6 +152,12 @@ class TestCLIIntegration:
             args.debug = False
             args.max_workers = 1
             args.correct_matches_path = None
+            # Set attributes that month_span function might access
+            args.delta_months = None
+            args.year = None
+            args.range = None
+            args.start = None
+            args.end = None
 
             # Should handle errors gracefully (not raise them)
             run_match(args)  # Should not raise exception
