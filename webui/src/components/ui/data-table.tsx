@@ -43,7 +43,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { SecondaryButton } from '@/components/ui/reusable-buttons';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -73,7 +75,6 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data,
-  searchKey,
   showColumnVisibility = true,
   showPagination = false,
   resizable = false,
@@ -91,13 +92,54 @@ export function DataTable<TData, TValue>({
   activeRowIndex = -1,
   keyboardNavigationEnabled = false,
   externalRowSelection,
-  field,
   totalCount,
 }: DataTableProps<TData, TValue>) {
   const [internalSorting, setInternalSorting] = useState<SortingState>([]);
+  const [selectedSearchColumns, setSelectedSearchColumns] = useState<Set<string>>(new Set(['original', 'mismatch_type', 'match_type', 'pattern']));
+  const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
+  const columnDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (columnDropdownRef.current && !columnDropdownRef.current.contains(event.target as Node)) {
+        setIsColumnDropdownOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isColumnDropdownOpen) {
+        setIsColumnDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isColumnDropdownOpen]);
 
   // Use external sorting if provided, otherwise use internal
   const sorting = externalSorting !== undefined ? externalSorting : internalSorting;
+
+  // Column selection helpers
+  const selectAllColumns = () => {
+    const allColumnIds = columns.map(col => col.id || (col as any).accessorKey).filter(Boolean);
+    setSelectedSearchColumns(new Set(allColumnIds));
+  };
+
+  const clearAllColumns = () => {
+    setSelectedSearchColumns(new Set());
+  };
+
+  const getColumnDisplayText = () => {
+    if (selectedSearchColumns.size === 0) return 'No columns';
+    if (selectedSearchColumns.size === 1) return '1 column';
+    return `${selectedSearchColumns.size} columns`;
+  };
   const setSorting = onSortingChange || setInternalSorting;
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -147,8 +189,36 @@ export function DataTable<TData, TValue>({
     enableColumnResizing: resizable,
     enableMultiSort: true,
     enableSortingRemoval: true,
-    enableGlobalFilter: !!searchKey,
-    globalFilterFn: 'includesString',
+    enableGlobalFilter: true,
+    globalFilterFn: (row, _columnId, filterValue) => {
+      const searchTerm = filterValue.toLowerCase();
+      const rowData = row.original as Record<string, unknown>;
+
+      // Only search in selected columns
+      for (const [key, value] of Object.entries(rowData)) {
+        // Skip if this column is not selected for search
+        if (!selectedSearchColumns.has(key)) continue;
+
+        if (typeof value === 'string' && value.toLowerCase().includes(searchTerm)) {
+          return true;
+        }
+        if (typeof value === 'number' && value.toString().includes(searchTerm)) {
+          return true;
+        }
+        if (Array.isArray(value) && value.some(v => String(v).toLowerCase().includes(searchTerm))) {
+          return true;
+        }
+        if (value && typeof value === 'object') {
+          // Search in nested objects (like matched data)
+          for (const [_nestedKey, nestedValue] of Object.entries(value as Record<string, unknown>)) {
+            if (String(nestedValue).toLowerCase().includes(searchTerm)) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    },
     state: {
       sorting,
       columnFilters,
@@ -283,11 +353,80 @@ export function DataTable<TData, TValue>({
     <div className='w-full space-y-4'>
       <div className='flex items-center py-4'>
         <Input
-          placeholder={`Filter ${searchKey}...`}
-          value={(table.getColumn(searchKey || '')?.getFilterValue() as string) ?? ''}
-          onChange={event => table.getColumn(searchKey || '')?.setFilterValue(event.target.value)}
+          placeholder='Search all columns...'
+          value={(table.getState().globalFilter as string) ?? ''}
+          onChange={event => table.setGlobalFilter(event.target.value)}
           className='max-w-sm'
         />
+
+        {/* Column Selection Dropdown */}
+        <div className='relative ml-2' ref={columnDropdownRef}>
+          <SecondaryButton
+            onClick={() => setIsColumnDropdownOpen(!isColumnDropdownOpen)}
+            className='min-w-[160px] justify-between'
+          >
+            <span className='truncate'>{getColumnDisplayText()}</span>
+            <svg
+              className={`w-4 h-4 ml-2 transition-transform ${isColumnDropdownOpen ? 'rotate-180' : ''}`}
+              fill='none'
+              stroke='currentColor'
+              viewBox='0 0 24 24'
+            >
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 9l-7 7-7-7' />
+            </svg>
+          </SecondaryButton>
+
+          {isColumnDropdownOpen && (
+            <div className='absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto min-w-[300px]'>
+              <div className='p-2'>
+                <div className='flex items-center gap-2 mb-2 pb-2 border-b border-gray-200'>
+                  <SecondaryButton onClick={selectAllColumns} className='text-xs'>
+                    Select All
+                  </SecondaryButton>
+                  <SecondaryButton onClick={clearAllColumns} className='text-xs'>
+                    Clear All
+                  </SecondaryButton>
+                </div>
+
+                <div className='space-y-1'>
+                  {columns.map(column => {
+                    const columnId = column.id || (column as any).accessorKey as string;
+                    if (!columnId) return null;
+
+                    const isSelected = selectedSearchColumns.has(columnId);
+                    const columnName = column.header ?
+                      (typeof column.header === 'string' ? column.header : columnId) :
+                      columnId;
+
+                    return (
+                      <label
+                        key={columnId}
+                        className='flex items-center space-x-2 py-1 hover:bg-gray-50 rounded px-1 cursor-pointer'
+                      >
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={(checked) => {
+                            setSelectedSearchColumns(prev => {
+                              const newSet = new Set(prev);
+                              if (checked) {
+                                newSet.add(columnId);
+                              } else {
+                                newSet.delete(columnId);
+                              }
+                              return newSet;
+                            });
+                          }}
+                        />
+                        <span className='text-sm text-gray-700'>{columnName}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         {customControls}
         {showColumnVisibility && (
           <DropdownMenu>

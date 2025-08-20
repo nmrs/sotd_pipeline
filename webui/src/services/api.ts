@@ -170,6 +170,7 @@ export interface MismatchAnalysisRequest {
 
 export interface MismatchItem {
   original: string;
+  normalized?: string; // Add normalized field for search functionality
   matched: Record<string, unknown>;
   enriched?: Record<string, unknown>;
   pattern: string;

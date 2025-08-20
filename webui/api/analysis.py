@@ -116,6 +116,7 @@ class MismatchItem(BaseModel):
     """Model for individual mismatch item."""
 
     original: str
+    normalized: Optional[str] = None  # Add normalized field for search functionality
     matched: dict
     enriched: Optional[dict] = None
     pattern: Optional[str] = None
