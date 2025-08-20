@@ -58,7 +58,11 @@ The following variables are available for the monthly hardware report template:
 | `{{month_year}}` | Month and year in display format | `January 2025` |
 | `{{total_shaves}}` | Total number of shaves (formatted with commas) | `1,234` |
 | `{{unique_shavers}}` | Number of unique users | `567` |
-| `{{avg_shaves_per_user}}` | Average shaves per user (formatted to 1 decimal place) | `2.2` |
+| `{{avg_shaves_per_user}}` | Average shaves per user | `2.2` |
+| `{{median_shaves_per_user}}` | Median shaves per user | `1.0` |
+| `{{unique_razors}}` | Number of unique razors used | `234` |
+| `{{unique_blades}}` | Number of unique blades used | `123` |
+| `{{unique_brushes}}` | Number of unique brushes used | `89` |
 
 ### Monthly Software Report Variables
 
@@ -69,6 +73,8 @@ The following variables are available for the monthly software report template:
 | `{{month_year}}` | Month and year in display format | `January 2025` |
 | `{{total_shaves}}` | Total number of shaves (formatted with commas) | `1,234` |
 | `{{unique_shavers}}` | Number of unique users | `567` |
+| `{{avg_shaves_per_user}}` | Average shaves per user | `2.2` |
+| `{{median_shaves_per_user}}` | Median shaves per user | `1.0` |
 | `{{unique_soaps}}` | Number of unique soaps used | `585` |
 | `{{unique_brands}}` | Number of unique soap brands/makers | `136` |
 | `{{total_samples}}` | Total number of sample shaves used | `89` |
@@ -85,6 +91,8 @@ The following variables are available for annual report templates:
 | `{{year}}` | Year in display format | `2025` |
 | `{{total_shaves}}` | Total number of shaves (formatted with commas) | `15,678` |
 | `{{unique_shavers}}` | Total number of unique users | `1,234` |
+| `{{avg_shaves_per_user}}` | Average shaves per user | `12.7` |
+| `{{median_shaves_per_user}}` | Median shaves per user | `8.0` |
 | `{{included_months}}` | Number of months included in the data | `12` |
 | `{{missing_months}}` | Number of months missing from the data | `0` |
 | `{{total_samples}}` | Total number of sample shaves used | `1,234` |
