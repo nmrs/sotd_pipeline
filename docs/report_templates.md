@@ -8,6 +8,8 @@ The template system uses Markdown files with variable replacement and table plac
 
 **New Architecture**: The system now uses a unified `MonthlyReportGenerator` class that handles both hardware and software reports, eliminating code duplication and providing a consistent interface for all monthly report generation.
 
+**Consistent Variables and Tables**: Both monthly and annual reports share the same core variables and table placeholders, making template creation and maintenance much simpler. The system automatically provides the appropriate data based on the report type and time period.
+
 ## Template File Structure
 
 The template system uses individual Markdown files in the `data/report_templates/` directory:
@@ -53,21 +55,32 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Available Template Variables
 
-### Monthly Report Variables (Unified)
+### Shared Variables (Monthly and Annual Reports)
 
-The following variables are available for both monthly hardware and software report templates:
+The following variables are available for both monthly and annual report templates:
 
 | Variable | Description | Example Output |
 |----------|-------------|----------------|
-| `{{month_year}}` | Month and year in display format | `January 2025` |
 | `{{total_shaves}}` | Total number of shaves (formatted with commas) | `1,234` |
 | `{{unique_shavers}}` | Number of unique users | `567` |
 | `{{avg_shaves_per_user}}` | Average shaves per user | `2.2` |
 | `{{median_shaves_per_user}}` | Median shaves per user | `1.0` |
+| `{{total_samples}}` | Total number of sample shaves used | `89` |
+| `{{sample_percentage}}` | Percentage of shaves that used samples | `7.2%` |
+| `{{sample_users}}` | Number of unique users who used samples | `67` |
+| `{{sample_brands}}` | Number of unique brands sampled | `23` |
 
-### Hardware-Specific Variables
+### Monthly Report Specific Variables
 
-Additional variables available for hardware reports:
+Additional variables available only for monthly reports:
+
+| Variable | Description | Example Output |
+|----------|-------------|----------------|
+| `{{month_year}}` | Month and year in display format | `January 2025` |
+
+### Hardware Report Specific Variables
+
+Additional variables available for hardware reports (both monthly and annual):
 
 | Variable | Description | Example Output |
 |----------|-------------|----------------|
@@ -75,42 +88,30 @@ Additional variables available for hardware reports:
 | `{{unique_blades}}` | Number of unique blades used | `123` |
 | `{{unique_brushes}}` | Number of unique brushes used | `89` |
 
-### Software-Specific Variables
+### Software Report Specific Variables
 
-Additional variables available for software reports:
+Additional variables available for software reports (both monthly and annual):
 
 | Variable | Description | Example Output |
 |----------|-------------|----------------|
 | `{{unique_soaps}}` | Number of unique soaps used | `585` |
 | `{{unique_brands}}` | Number of unique soap brands/makers | `136` |
-| `{{total_samples}}` | Total number of sample shaves used | `89` |
-| `{{sample_percentage}}` | Percentage of shaves that used samples | `7.2%` |
-| `{{sample_users}}` | Number of unique users who used samples | `67` |
-| `{{sample_brands}}` | Number of unique brands sampled | `23` |
 
-### Annual Report Variables
+### Annual Report Specific Variables
 
-The following variables are available for annual report templates:
+Additional variables available only for annual reports:
 
 | Variable | Description | Example Output |
 |----------|-------------|----------------|
 | `{{year}}` | Year in display format | `2025` |
-| `{{total_shaves}}` | Total number of shaves (formatted with commas) | `15,678` |
-| `{{unique_shavers}}` | Total number of unique users | `1,234` |
-| `{{avg_shaves_per_user}}` | Average shaves per user | `12.7` |
-| `{{median_shaves_per_user}}` | Median shaves per user | `8.0` |
 | `{{included_months}}` | Number of months included in the data | `12` |
 | `{{missing_months}}` | Number of months missing from the data | `0` |
-| `{{total_samples}}` | Total number of sample shaves used | `1,234` |
-| `{{sample_percentage}}` | Percentage of shaves that used samples | `7.9%` |
-| `{{sample_users}}` | Number of unique users who used samples | `456` |
-| `{{sample_brands}}` | Number of unique brands sampled | `89` |
 
 ## Available Table Placeholders
 
-### Hardware Report Tables
+The following table placeholders are available for both monthly and annual reports:
 
-The following table placeholders are available for hardware reports:
+### Hardware Report Tables
 
 - `{{tables.razors}}` - Top razors by usage
 - `{{tables.blades}}` - Top blades by usage  
@@ -122,8 +123,6 @@ The following table placeholders are available for hardware reports:
 
 ### Software Report Tables
 
-The following table placeholders are available for the software report template:
-
 | Placeholder | Description | Content |
 |-------------|-------------|---------|
 | `{{tables.soap-makers}}` | Soap maker statistics | Top soap makers |
@@ -131,6 +130,8 @@ The following table placeholders are available for the software report template:
 | `{{tables.top-sampled-soaps}}` | Sample usage statistics | Top sampled soaps by usage |
 | `{{tables.brand-diversity}}` | Brand diversity statistics | Unique scents per brand |
 | `{{tables.top-shavers}}` | Top shaver statistics | Users with most shaves |
+
+**Note**: The same table placeholders work identically in both monthly and annual reports. The system automatically generates the appropriate data based on the time period being reported.
 
 ## How to Customize Templates
 
