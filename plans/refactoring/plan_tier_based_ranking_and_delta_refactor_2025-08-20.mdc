@@ -18,6 +18,7 @@ Refactor the SOTD Pipeline aggregator system to implement tier-based ranking ins
 - **2.1**: Update DeltaCalculator for tier-based ranking
 - **2.2**: Update AnnualDeltaCalculator for annual comparisons
 - **2.3**: Implement tier-based delta calculations
+- **2.4**: Integration testing and validation of delta system
 
 ### Phase 3: Report Table Integration
 - **3.1**: Add rank column to all report tables
@@ -77,6 +78,174 @@ Update the DeltaCalculator class to work with the new tier-based ranking system.
 - [ ] Integration tests validate real data scenarios
 ```
 
+## 🔁 Implementation Prompts
+
+### Step 2.1.1: Update DeltaCalculator Field References
+
+```text
+Update the DeltaCalculator class to use "rank" field instead of "position" field.
+
+## Requirements
+
+### Core Functionality
+- Replace all references to "position" field with "rank" field
+- Update method signatures and variable names as needed
+- Ensure all delta calculation logic works with new field name
+- Maintain existing delta calculation behavior
+
+### Technical Specifications
+- File: `sotd/report/delta_calculator.py`
+- Class: `DeltaCalculator`
+- Methods to update: `calculate_deltas`, `_get_delta_symbol`, any helper methods
+- Field change: "position" → "rank" throughout the class
+
+### Implementation Approach
+- Search and replace "position" with "rank" in field references
+- Update method docstrings to reflect new field name
+- Verify all delta calculation logic still works correctly
+- Add comprehensive test coverage for the changes
+
+## Test Requirements
+
+### Unit Tests
+- **Test field reference updates**: Verify all "position" references changed to "rank"
+- **Test delta calculation**: Ensure delta calculation still works with "rank" field
+- **Test delta symbols**: Verify "↑1", "↓1", "=" symbols generated correctly
+- **Test edge cases**: Handle missing "rank" field gracefully
+
+### Test Data Requirements
+- Current data with "rank" field (e.g., {"name": "Razor A", "rank": 1})
+- Historical data with "rank" field (e.g., {"name": "Razor A", "rank": 2})
+- Test scenarios: rank improvement, rank decline, no change, new items, removed items
+
+## Success Criteria
+- [ ] All "position" field references updated to "rank"
+- [ ] Delta calculation methods work with "rank" field
+- [ ] Delta symbols generated correctly for all scenarios
+- [ ] All unit tests pass
+- [ ] No regression in existing functionality
+```
+
+### Step 2.1.2: Implement Tier-Based Delta Calculation Logic
+
+```text
+Implement tier-aware delta calculation that reflects actual tier movements, not sequential position changes.
+
+## Requirements
+
+### Core Functionality
+- Calculate deltas based on tier movement (e.g., moving from rank 2 tier to rank 1 tier = "↑1")
+- Handle tie scenarios correctly (items with same rank are in same tier)
+- Ensure delta calculation reflects actual tier changes, not row position changes
+- Maintain clear, user-friendly delta indicators
+
+### Technical Specifications
+- Delta calculation: `delta = historical_tier - current_tier`
+- Tier identification: Items with identical rank values are in the same tier
+- Delta symbols: "↑1" (up one tier), "↓1" (down one tier), "=" (same tier)
+- Handle edge cases: new tiers, removed tiers, tier splits/merges
+
+### Implementation Approach
+- Modify `calculate_deltas` method to use tier-based calculation
+- Update `_get_delta_symbol` to handle tier-based deltas
+- Add tier identification logic for ranking data
+- Ensure backward compatibility for existing delta display
+
+## Test Requirements
+
+### Unit Tests
+- **Test tier-based delta calculation**: Verify deltas reflect tier movements
+- **Test tie scenarios**: Items with same rank show correct delta behavior
+- **Test tier movement**: Moving between tiers shows correct delta symbols
+- **Test edge cases**: New items, removed items, tier changes
+
+### Test Scenarios
+- **Simple tier movement**: Rank 2 → Rank 1 = "↑1"
+- **Tie scenarios**: Two items tied at rank 2, one moves to rank 1 = "↑1"
+- **Complex ties**: Multiple items tied, some move up/down tiers
+- **New/removed items**: Handle items that appear/disappear between periods
+
+### Test Data Examples
+```python
+# Current data (rank 1 tier, rank 2 tier)
+current = [
+    {"name": "Razor A", "rank": 1},  # Tier 1
+    {"name": "Razor B", "rank": 2},  # Tier 2
+    {"name": "Razor C", "rank": 2},  # Tier 2 (tied)
+]
+
+# Historical data (different tier structure)
+historical = [
+    {"name": "Razor A", "rank": 2},  # Was in Tier 2
+    {"name": "Razor B", "rank": 1},  # Was in Tier 1
+    {"name": "Razor C", "rank": 2},  # Still in Tier 2
+]
+```
+
+## Success Criteria
+- [ ] Delta calculations reflect tier movements, not sequential positions
+- [ ] Tie scenarios handled correctly in delta calculations
+- [ ] Delta symbols accurately represent tier changes
+- [ ] All unit tests pass with comprehensive coverage
+- [ ] Performance maintained for large datasets
+```
+
+### Step 2.1.3: Add Comprehensive Test Coverage
+
+```text
+Create comprehensive test suite for tier-based delta calculation functionality.
+
+## Requirements
+
+### Core Functionality
+- Test all delta calculation scenarios with tier-based ranking
+- Validate tie handling in delta calculations
+- Ensure edge cases are handled gracefully
+- Verify performance characteristics
+
+### Technical Specifications
+- Test file: `tests/report/test_delta_calculator.py`
+- Test class: `TestDeltaCalculator`
+- Coverage: All delta calculation methods and edge cases
+- Performance: Test with realistic data sizes
+
+### Implementation Approach
+- Create test methods for each delta calculation scenario
+- Use realistic test data that mirrors production scenarios
+- Test tie scenarios extensively
+- Validate performance with larger datasets
+
+## Test Requirements
+
+### Test Methods
+- `test_tier_based_delta_calculation()`: Basic tier movement scenarios
+- `test_tie_scenarios_in_deltas()`: Items tied at same rank
+- `test_new_items_delta_handling()`: Items that appear in current period
+- `test_removed_items_delta_handling()`: Items that disappear from current period
+- `test_tier_splits_and_merges()`: Complex tier restructuring scenarios
+- `test_performance_with_large_datasets()`: Performance validation
+
+### Test Data Requirements
+- **Simple scenarios**: Basic rank changes (1→2, 2→1)
+- **Tie scenarios**: Multiple items tied at same rank
+- **Complex scenarios**: Multiple tiers with various movements
+- **Edge cases**: Empty data, single items, all items tied
+- **Performance data**: Large datasets (1000+ items) for performance testing
+
+### Assertions
+- Correct delta values for tier movements
+- Proper delta symbols ("↑1", "↓1", "=")
+- Graceful handling of edge cases
+- Performance within acceptable limits
+
+## Success Criteria
+- [ ] All test methods implemented and passing
+- [ ] Comprehensive coverage of delta calculation scenarios
+- [ ] Edge cases handled gracefully
+- [ ] Performance tests validate acceptable performance
+- [ ] Test coverage > 95% for delta calculation logic
+```
+
 ### Phase 2.2: Update AnnualDeltaCalculator for Annual Comparisons
 
 ```text
@@ -123,6 +292,178 @@ Update the AnnualDeltaCalculator class to work with tier-based ranking for annua
 - [ ] Integration tests validate real annual data scenarios
 ```
 
+## 🔁 Implementation Prompts
+
+### Step 2.2.1: Update AnnualDeltaCalculator Field References
+
+```text
+Update the AnnualDeltaCalculator class to use "rank" field instead of "position" field.
+
+## Requirements
+
+### Core Functionality
+- Replace all references to "position" field with "rank" field
+- Update method signatures and variable names as needed
+- Ensure all annual delta calculation logic works with new field name
+- Maintain existing annual delta calculation behavior
+
+### Technical Specifications
+- File: `sotd/report/annual_delta_calculator.py`
+- Class: `AnnualDeltaCalculator`
+- Methods to update: `calculate_annual_deltas`, `_get_delta_symbol`, any helper methods
+- Field change: "position" → "rank" throughout the class
+
+### Implementation Approach
+- Search and replace "position" with "rank" in field references
+- Update method docstrings to reflect new field name
+- Verify all annual delta calculation logic still works correctly
+- Add comprehensive test coverage for the changes
+
+## Test Requirements
+
+### Unit Tests
+- **Test field reference updates**: Verify all "position" references changed to "rank"
+- **Test annual delta calculation**: Ensure annual delta calculation still works with "rank" field
+- **Test delta symbols**: Verify "↑1", "↓1", "=" symbols generated correctly for annual data
+- **Test edge cases**: Handle missing "rank" field gracefully in annual context
+
+### Test Data Requirements
+- Annual current data with "rank" field (e.g., {"name": "Razor A", "rank": 1})
+- Annual historical data with "rank" field (e.g., {"name": "Razor A", "rank": 2})
+- Test scenarios: annual rank improvement, rank decline, no change, new items, removed items
+- Annual-specific scenarios: missing months, incomplete data, data gaps
+
+## Success Criteria
+- [ ] All "position" field references updated to "rank" in AnnualDeltaCalculator
+- [ ] Annual delta calculation methods work with "rank" field
+- [ ] Annual delta symbols generated correctly for all scenarios
+- [ ] All unit tests pass
+- [ ] No regression in existing annual functionality
+```
+
+### Step 2.2.2: Implement Annual Tier-Based Delta Calculation
+
+```text
+Implement tier-aware annual delta calculation that handles annual-specific scenarios and data structures.
+
+## Requirements
+
+### Core Functionality
+- Calculate annual deltas based on tier movement between years
+- Handle annual data structure differences (missing months, data gaps)
+- Ensure annual delta calculations reflect actual tier changes
+- Maintain consistency with monthly delta calculation format
+
+### Technical Specifications
+- Annual delta calculation: `delta = historical_year_tier - current_year_tier`
+- Tier identification: Items with identical rank values are in the same tier
+- Handle missing months: Skip months with missing data, calculate deltas for available data
+- Data gap handling: Gracefully handle scenarios where historical data is incomplete
+
+### Implementation Approach
+- Modify annual delta calculation methods to use tier-based logic
+- Add logic to handle missing months and data gaps
+- Ensure annual deltas use same tier identification as monthly deltas
+- Maintain backward compatibility for existing annual delta display
+
+## Test Requirements
+
+### Unit Tests
+- **Test annual tier-based delta calculation**: Verify annual deltas reflect tier movements
+- **Test missing month handling**: Handle scenarios with incomplete annual data
+- **Test data gap scenarios**: Gracefully handle missing historical data
+- **Test annual tie scenarios**: Items tied at same annual rank
+
+### Test Scenarios
+- **Complete annual data**: Full year vs. full year comparison
+- **Missing months**: Some months missing in current or historical year
+- **Data gaps**: Incomplete historical data for certain periods
+- **Annual tie scenarios**: Multiple items tied at same annual rank
+- **New/removed items**: Items that appear/disappear between years
+
+### Test Data Examples
+```python
+# Current year data (complete)
+current_year = [
+    {"name": "Razor A", "rank": 1},  # Tier 1
+    {"name": "Razor B", "rank": 2},  # Tier 2
+    {"name": "Razor C", "rank": 2},  # Tier 2 (tied)
+]
+
+# Historical year data (missing some months)
+historical_year = [
+    {"name": "Razor A", "rank": 2},  # Was in Tier 2
+    {"name": "Razor B", "rank": 1},  # Was in Tier 1
+    # Razor C missing from historical data (new item)
+]
+```
+
+## Success Criteria
+- [ ] Annual delta calculations reflect tier movements between years
+- [ ] Missing months and data gaps handled gracefully
+- [ ] Annual tie scenarios handled correctly
+- [ ] All unit tests pass with comprehensive coverage
+- [ ] Performance maintained for large annual datasets
+```
+
+### Step 2.2.3: Add Annual-Specific Test Coverage
+
+```text
+Create comprehensive test suite for annual tier-based delta calculation functionality.
+
+## Requirements
+
+### Core Functionality
+- Test all annual delta calculation scenarios with tier-based ranking
+- Validate handling of annual-specific scenarios (missing months, data gaps)
+- Ensure edge cases are handled gracefully in annual context
+- Verify performance characteristics for annual data
+
+### Technical Specifications
+- Test file: `tests/report/test_annual_delta_calculator.py`
+- Test class: `TestAnnualDeltaCalculator`
+- Coverage: All annual delta calculation methods and edge cases
+- Performance: Test with realistic annual data sizes
+
+### Implementation Approach
+- Create test methods for each annual delta calculation scenario
+- Use realistic test data that mirrors production annual scenarios
+- Test missing month and data gap scenarios extensively
+- Validate performance with larger annual datasets
+
+## Test Requirements
+
+### Test Methods
+- `test_annual_tier_based_delta_calculation()`: Basic annual tier movement scenarios
+- `test_annual_missing_month_handling()`: Handle incomplete annual data
+- `test_annual_data_gap_scenarios()`: Handle missing historical data
+- `test_annual_tie_scenarios()`: Items tied at same annual rank
+- `test_annual_new_items_handling()`: Items that appear in current year
+- `test_annual_removed_items_handling()`: Items that disappear from current year
+- `test_annual_performance_with_large_datasets()`: Performance validation
+
+### Test Data Requirements
+- **Complete annual data**: Full year vs. full year comparisons
+- **Missing month scenarios**: Various patterns of missing monthly data
+- **Data gap scenarios**: Different levels of historical data completeness
+- **Annual tie scenarios**: Multiple items tied at same annual rank
+- **Edge cases**: Empty annual data, single items, all items tied
+- **Performance data**: Large annual datasets (100+ items) for performance testing
+
+### Assertions
+- Correct annual delta values for tier movements
+- Proper handling of missing months and data gaps
+- Graceful handling of incomplete historical data
+- Performance within acceptable limits for annual calculations
+
+## Success Criteria
+- [ ] All test methods implemented and passing
+- [ ] Comprehensive coverage of annual delta calculation scenarios
+- [ ] Annual-specific edge cases handled gracefully
+- [ ] Performance tests validate acceptable performance
+- [ ] Test coverage > 95% for annual delta calculation logic
+```
+
 ### Phase 2.3: Implement Tier-Based Delta Calculations
 
 ```text
@@ -167,6 +508,391 @@ Implement comprehensive tier-based delta calculation logic across the delta syst
 - [ ] Complex tie scenarios handled correctly
 - [ ] All unit tests pass
 - [ ] Integration tests validate real data scenarios
+```
+
+## 🔁 Implementation Prompts
+
+### Step 2.3.1: Create Tier Identification Utility
+
+```text
+Create a utility class for identifying and managing tiers in ranking data.
+
+## Requirements
+
+### Core Functionality
+- Identify tiers based on ranking data (items with same rank are in same tier)
+- Handle complex tie scenarios (2-way, 3-way, mixed ties)
+- Provide tier comparison and movement calculation utilities
+- Support both monthly and annual ranking data
+
+### Technical Specifications
+- Class: `TierIdentifier` in `sotd/report/utils/tier_identifier.py`
+- Methods: `identify_tiers()`, `get_tier_movement()`, `compare_tiers()`
+- Input: List of items with "rank" field
+- Output: Tier information and movement calculations
+
+### Implementation Approach
+- Create utility class for tier identification logic
+- Implement methods for tier comparison and movement calculation
+- Handle edge cases gracefully (empty data, single items, all tied)
+- Ensure performance for large datasets
+
+## Test Requirements
+
+### Unit Tests
+- **Test tier identification**: Verify correct tier grouping for various scenarios
+- **Test tier comparison**: Verify tier movement calculations
+- **Test complex ties**: 2-way, 3-way, mixed tie patterns
+- **Test edge cases**: Empty data, single items, all tied
+
+### Test Methods
+- `test_identify_tiers_basic()`: Basic tier identification
+- `test_identify_tiers_with_ties()`: Tier identification with tied items
+- `test_get_tier_movement()`: Calculate movement between tiers
+- `test_compare_tiers()`: Compare tier structures
+- `test_edge_cases()`: Handle edge cases gracefully
+
+### Test Data Requirements
+- **Basic scenarios**: Sequential ranks (1, 2, 3, 4)
+- **Tie scenarios**: 2-way ties (1, 2, 2, 3), 3-way ties (1, 2, 2, 2, 3)
+- **Mixed patterns**: Various combinations of ties and sequential ranks
+- **Edge cases**: Empty data, single items, all items tied
+
+## Success Criteria
+- [ ] Tier identification logic correctly groups items by rank
+- [ ] Tier movement calculations accurate for all scenarios
+- [ ] Complex tie scenarios handled gracefully
+- [ ] All unit tests pass with comprehensive coverage
+- [ ] Performance acceptable for large datasets
+```
+
+### Step 2.3.2: Implement Complex Tie Scenario Handling
+
+```text
+Implement comprehensive handling of complex tie scenarios in delta calculations.
+
+## Requirements
+
+### Core Functionality
+- Handle 2-way, 3-way, and mixed tie patterns correctly
+- Calculate deltas when items move between tied tiers
+- Handle tier splits and merges gracefully
+- Provide clear delta indicators for complex scenarios
+
+### Technical Specifications
+- Complex tie handling: Multiple items tied at same rank
+- Tier movement: Items moving between different tied tiers
+- Delta calculation: Accurate reflection of tier movement complexity
+- Edge case handling: New tiers, removed tiers, tier restructuring
+
+### Implementation Approach
+- Extend tier identification logic for complex scenarios
+- Implement algorithms for handling tier splits and merges
+- Calculate deltas that reflect actual tier movement complexity
+- Ensure performance for complex tie scenarios
+
+## Test Requirements
+
+### Unit Tests
+- **Test 2-way ties**: Two items tied at same rank
+- **Test 3-way ties**: Three items tied at same rank
+- **Test mixed patterns**: Combinations of ties and sequential ranks
+- **Test tier splits**: Single tier splitting into multiple tiers
+- **Test tier merges**: Multiple tiers merging into single tier
+
+### Test Scenarios
+- **Tier splits**: Rank 2 tier (3 items) splits into rank 2 (2 items) and rank 3 (1 item)
+- **Tier merges**: Rank 2 and rank 3 tiers merge into single rank 2 tier
+- **Complex movements**: Items moving between various tied tiers
+- **Edge cases**: All items tied, single items, empty tiers
+
+### Test Data Examples
+```python
+# Complex tie scenario: Tier splits and merges
+current = [
+    {"name": "Razor A", "rank": 1},  # Tier 1
+    {"name": "Razor B", "rank": 2},  # Tier 2 (tied)
+    {"name": "Razor C", "rank": 2},  # Tier 2 (tied)
+    {"name": "Razor D", "rank": 3},  # Tier 3
+]
+
+historical = [
+    {"name": "Razor A", "rank": 2},  # Was in Tier 2 (tied)
+    {"name": "Razor B", "rank": 2},  # Was in Tier 2 (tied)
+    {"name": "Razor C", "rank": 2},  # Was in Tier 2 (tied)
+    {"name": "Razor D", "rank": 2},  # Was in Tier 2 (tied)
+]
+# Result: Tier 2 split into Tier 1 (Razor A moved up) and Tier 3 (Razor D moved down)
+```
+
+## Success Criteria
+- [ ] Complex tie scenarios handled correctly
+- [ ] Tier splits and merges calculated accurately
+- [ ] Delta calculations reflect actual tier movement complexity
+- [ ] All unit tests pass with comprehensive coverage
+- [ ] Performance maintained for complex scenarios
+```
+
+### Step 2.3.3: Integrate Tier Logic with Delta Calculators
+
+```text
+Integrate the tier identification and calculation logic with existing delta calculators.
+
+## Requirements
+
+### Core Functionality
+- Integrate tier identification utility with DeltaCalculator
+- Integrate tier identification utility with AnnualDeltaCalculator
+- Ensure consistent tier-based delta calculation across all calculators
+- Maintain backward compatibility for existing functionality
+
+### Technical Specifications
+- Integration points: DeltaCalculator and AnnualDeltaCalculator classes
+- Tier utility usage: Use TierIdentifier for all tier-related calculations
+- Consistency: Same tier logic used across all delta calculators
+- Performance: No significant performance regression from integration
+
+### Implementation Approach
+- Update DeltaCalculator to use TierIdentifier utility
+- Update AnnualDeltaCalculator to use TierIdentifier utility
+- Ensure consistent tier identification across both calculators
+- Add integration tests to validate consistency
+
+## Test Requirements
+
+### Unit Tests
+- **Test integration**: Verify tier logic integrated correctly
+- **Test consistency**: Ensure same tier logic used across calculators
+- **Test performance**: Validate no performance regression
+- **Test backward compatibility**: Ensure existing functionality preserved
+
+### Integration Tests
+- Test complete delta calculation workflow with tier logic
+- Validate consistency between monthly and annual delta calculations
+- Test with real aggregator output data
+- Ensure performance acceptable for production use
+
+### Test Methods
+- `test_tier_logic_integration()`: Verify tier logic integrated correctly
+- `test_consistency_across_calculators()`: Ensure consistent tier handling
+- `test_performance_with_tier_logic()`: Validate performance characteristics
+- `test_backward_compatibility()`: Ensure existing functionality preserved
+
+## Success Criteria
+- [ ] Tier logic integrated with all delta calculators
+- [ ] Consistent tier handling across monthly and annual calculations
+- [ ] No performance regression from integration
+- [ ] All unit and integration tests pass
+- [ ] Backward compatibility maintained
+```
+
+### Phase 2.4: Integration Testing and Validation of Delta System
+
+```text
+Comprehensive integration testing and validation of the complete tier-based delta calculation system.
+
+## Requirements
+
+### Core Functionality
+- Test complete delta calculation workflow from aggregation to final delta output
+- Validate tier-based delta calculations work correctly with real data
+- Ensure performance characteristics meet production requirements
+- Validate consistency between monthly and annual delta calculations
+
+### Technical Specifications
+- Test scope: Complete delta calculation workflow
+- Data source: Real aggregator output data with "rank" field
+- Performance targets: Acceptable performance for production datasets
+- Validation: Correct tier identification and delta calculation accuracy
+
+### Implementation Approach
+- Create integration test suite for complete delta calculation workflow
+- Test with real production data scenarios
+- Validate performance characteristics
+- Ensure consistency across all delta calculation components
+
+## Test Requirements
+
+### Integration Tests
+- **Test complete workflow**: Aggregation → ranking → delta calculation → final output
+- **Test real data scenarios**: Various tie patterns, ranking changes, delta movements
+- **Test performance**: Ensure acceptable performance with production-scale datasets
+- **Test consistency**: Validate monthly and annual delta calculations are consistent
+
+### Performance Tests
+- Test with production-scale datasets (1000+ items)
+- Validate memory usage and processing time
+- Ensure no significant performance regression
+- Benchmark against previous position-based system
+
+### Validation Tests
+- Verify tier identification accuracy with real data
+- Validate delta calculation correctness for all scenarios
+- Ensure delta symbols accurately represent tier movements
+- Test edge cases with real data patterns
+
+## Success Criteria
+- [ ] Complete delta calculation workflow tested end-to-end
+- [ ] Tier-based delta calculations work correctly with real data
+- [ ] Performance meets production requirements
+- [ ] Monthly and annual delta calculations are consistent
+- [ ] All integration tests pass
+- [ ] Performance benchmarks show acceptable results
+```
+
+## 🔁 Implementation Prompts
+
+### Step 2.4.1: Create Integration Test Suite
+
+```text
+Create comprehensive integration test suite for the complete tier-based delta calculation system.
+
+## Requirements
+
+### Core Functionality
+- Test complete workflow from aggregator output to final delta display
+- Validate tier-based delta calculations with real production data
+- Ensure performance characteristics meet production requirements
+- Test consistency between monthly and annual delta calculations
+
+### Technical Specifications
+- Test file: `tests/integration/test_tier_based_delta_system.py`
+- Test class: `TestTierBasedDeltaSystem`
+- Coverage: Complete delta calculation workflow
+- Performance: Test with production-scale datasets
+
+### Implementation Approach
+- Create integration test methods for complete workflow
+- Use real production data for realistic testing
+- Test performance characteristics with large datasets
+- Validate consistency across all delta calculation components
+
+## Test Requirements
+
+### Integration Test Methods
+- `test_complete_delta_workflow()`: End-to-end delta calculation workflow
+- `test_real_data_scenarios()`: Various real-world tie and ranking scenarios
+- `test_monthly_annual_consistency()`: Consistency between monthly and annual calculations
+- `test_performance_with_production_data()`: Performance validation with real data
+- `test_edge_cases_with_real_data()`: Edge cases using real data patterns
+
+### Test Data Requirements
+- **Real production data**: Actual aggregator output from SOTD pipeline
+- **Various scenarios**: Different tie patterns, ranking changes, delta movements
+- **Production scale**: Large datasets (1000+ items) for performance testing
+- **Edge cases**: Real-world edge cases from production data
+
+### Performance Requirements
+- **Processing time**: Delta calculation completes within acceptable time limits
+- **Memory usage**: Memory usage remains within acceptable limits
+- **Scalability**: Performance scales appropriately with data size
+- **Regression**: No significant performance regression from previous system
+
+## Success Criteria
+- [ ] Complete integration test suite implemented
+- [ ] All integration tests pass with real production data
+- [ ] Performance characteristics meet production requirements
+- [ ] Consistency validated between monthly and annual calculations
+- [ ] Performance benchmarks show acceptable results
+```
+
+### Step 2.4.2: Performance Validation and Optimization
+
+```text
+Validate performance characteristics and optimize the tier-based delta calculation system.
+
+## Requirements
+
+### Core Functionality
+- Validate performance characteristics meet production requirements
+- Identify and resolve performance bottlenecks
+- Optimize critical path operations for efficiency
+- Ensure performance scales appropriately with data size
+
+### Technical Specifications
+- Performance targets: Acceptable processing time for production datasets
+- Memory usage: Efficient memory utilization during delta calculations
+- Scalability: Performance scales appropriately with data size
+- Optimization: Critical path operations optimized for efficiency
+
+### Implementation Approach
+- Performance profiling of delta calculation operations
+- Identify performance bottlenecks and optimization opportunities
+- Implement performance improvements where beneficial
+- Validate performance characteristics with production-scale data
+
+## Test Requirements
+
+### Performance Tests
+- **Test processing time**: Measure delta calculation performance
+- **Test memory usage**: Monitor memory utilization during operations
+- **Test scalability**: Validate performance scaling with data size
+- **Test optimization**: Verify performance improvements from optimizations
+
+### Benchmark Tests
+- Baseline performance measurements
+- Performance comparison with previous position-based system
+- Optimization impact validation
+- Production-scale performance validation
+
+### Performance Targets
+- **Small datasets** (< 100 items): Delta calculation < 100ms
+- **Medium datasets** (100-1000 items): Delta calculation < 500ms
+- **Large datasets** (1000+ items): Delta calculation < 2s
+- **Memory usage**: No significant increase over previous system
+
+## Success Criteria
+- [ ] Performance characteristics meet production requirements
+- [ ] Memory usage efficient and acceptable
+- [ ] Performance scales appropriately with data size
+- [ ] Optimizations provide measurable improvements
+- [ ] All performance tests pass
+```
+
+### Step 2.4.3: System Validation and Documentation
+
+```text
+Final validation and documentation of the tier-based delta calculation system.
+
+## Requirements
+
+### Core Functionality
+- Final validation of complete tier-based delta calculation system
+- Comprehensive documentation of system behavior and usage
+- Validation of all edge cases and error scenarios
+- Preparation for production deployment
+
+### Technical Specifications
+- System validation: Complete end-to-end validation
+- Documentation: Comprehensive system documentation
+- Error handling: Validation of error scenarios and edge cases
+- Production readiness: Validation of production deployment readiness
+
+### Implementation Approach
+- Conduct final system validation with comprehensive test scenarios
+- Create comprehensive system documentation
+- Ensure production deployment readiness
+
+## Test Requirements
+
+### Final Validation Tests
+- **System validation**: Complete end-to-end system validation
+- **Error handling**: Validation of error scenarios and edge cases
+- **Edge cases**: Validation of all identified edge cases
+- **Production readiness**: Validation of production deployment readiness
+
+### Documentation Requirements
+- **System overview**: High-level system architecture and behavior
+- **API documentation**: Detailed API documentation for all components
+- **Usage examples**: Examples of common usage scenarios
+- **Error handling**: Documentation of error scenarios and handling
+
+## Success Criteria
+- [ ] Complete system validation successful
+- [ ] All error scenarios and edge cases handled correctly
+- [ ] Comprehensive system documentation completed
+- [ ] Production deployment readiness validated
+- [ ] All final validation tests pass
 ```
 
 ### Phase 3.1: Add Rank Column to All Report Tables
