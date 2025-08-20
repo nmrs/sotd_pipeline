@@ -219,6 +219,11 @@ Berkeley:
   Shave Selector:
     patterns:
       - berkeley
+Bic:
+  Disposable:
+    format: Cartridge/Disposable
+    patterns:
+      - bic.*(disposable|metal|sensitive)?
 Bismarck:
   Straight:
     format: Straight
@@ -845,6 +850,12 @@ Gillette:
     patterns:
       - lady.*gil.*et
       - gil.*et.*lady
+  Cartridge/Disposable:
+    format: Cartridge/Disposable
+    patterns:
+      - (mach.?3|trac.?ii|sensor.?[23])
+      - gil.*(cartridge|disposable)
+      - gil.*et.*(labs|guard|joy|proglide|sensor|venus)
   NEW:
     patterns:
       - gil.*new
@@ -986,6 +997,11 @@ Griffith:
     format: Straight
     patterns:
       - griffith(?:.*\d{1,2}/(8|16))?
+Griffon:
+  Straight:
+    format: Straight
+    patterns:
+      - griffon(?:.*\d{1,2}/(8|16))?
 Gutche:
   A77 Shavette:
     format: Shavette (A77)
@@ -1015,7 +1031,7 @@ Haryali:
       - har+yali.*travel
 Headblade:
   ATX:
-    format: Cartridge
+    format: Cartridge/Disposable
     patterns:
       - headbl.*atx
 Henson:
@@ -1511,27 +1527,17 @@ OneBlade:
       - oneblade.*hybrid
 Other:
   Cartridge / Disposable:
-    format: Cartridge
+    format: Cartridge/Disposable
     patterns:
       - atra
-      - '\bbic\b'
       - \bcart\b
       - cartridge
       - dorco.*pace 7
       - disposable
-      - fusion
-      - gillette blue
-      - gil.*et.*(labs|guard|joy|proglide|sensor|venus)
       - harry
       - '\blidl\b'
-      - "mach.*(3|iii)"
       - pace.*6
       - simply (?:max|smooth)
-      - (?:schick)?.*hydro.*5
-      - 'trac\b.*(2|ii)'
-      - shik pla5tik # https://www.reddit.com/r/Wetshaving/comments/1lmfkxs/saturday_lather_games_sotd_thread_jun_28_2025/n0bmt80/
-      - schick xtreme 2
-      - schick skintimate
   DE:
     patterns:
       - generic.*(safety|double)
@@ -2120,6 +2126,10 @@ Schick:
     format: Shavette
     patterns:
       - schick.*kami
+  Cartridge/Disposable:
+    format: Cartridge/Disposable
+    patterns:
+      - (?:schick).*(disposable|xtreme 2|skintimate|hydro.*5|shik pla5tik)
   Dermaplaner:
     format: Shavette (Disposable)
     patterns:
@@ -2370,7 +2380,7 @@ Union Razor Co.:
   Straight:
     format: Straight
     patterns:
-      - union.*razor(?:.*\d{1,2}/(8|16))?
+      - union(.*razor)?(?:.*\d{1,2}/(8|16))?
 Utica Knife & Razor:
   Red Point 917:
     format: Straight
