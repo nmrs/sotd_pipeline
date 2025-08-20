@@ -60,6 +60,11 @@ Above the Tie:
   Windsor SSRH2:
     patterns:
       - '\b(?:att|tie)\b.*(?:windsor)*\b.*ssrh2'
+ALE Razors:
+  Straight:
+    format: Straight
+    patterns:
+      - ale.*razors?
 Alpha:
   Claymore:
     format: AC
@@ -84,6 +89,11 @@ Alshabab:
   Razor:
     patterns:
       - al ?shabab
+A.R. Justice:
+  Straight:
+    format: Straight
+    patterns:
+      - a\.r\. justice
 Art of Shaving:
   Excalibur:
     patterns:
@@ -148,6 +158,11 @@ Aylsworth:
       - drakk?ant
       - aylsworth
       - kopp?[ae]rkant
+B. Payne & Sons:
+  Straight:
+    format: Straight
+    patterns:
+      - b\.?\s*payne
 BBNY:
   Safety Razor:
     patterns:
@@ -199,6 +214,11 @@ Berkeley:
   Shave Selector:
     patterns:
       - berkeley
+Bismarck:
+  Straight:
+    format: Straight
+    patterns:
+      - bismarck
 Blackland:
   Square (Workshop Batch 002):
     format: Half DE
@@ -283,7 +303,7 @@ C-Mon:
     format: Straight
     patterns:
       - c-?mon
-CV Heljestrand:
+C.V. Heljestrand:
   Lather Catcher:
     format: Other
     patterns:
@@ -292,11 +312,12 @@ CV Heljestrand:
     format: Straight
     patterns:
       - heljestra.*(stra)?
+      - \bcvh\b
 Campobasso:
   Straight:
     format: Straight
     patterns:
-      - campobasso
+      - camp[ao]basso
 Carbon:
   Cx:
     patterns:
@@ -307,6 +328,12 @@ Carbon:
       - carbon.*\bti
       - carbon \++
       - carbon razors?
+Carl Rader:
+  Straight:
+    format: Straight
+    patterns:
+      - carl.*rader
+      - rader.*solingen
 Charcoal Goods:
   Everyday:
     patterns:
@@ -399,6 +426,11 @@ Daune:
     format: Shavette (DE)
     patterns:
       - daune
+Delolme:
+  Straight:
+    format: Straight
+    patterns:
+      - delolme
 Design94:
   Aviation94:
     patterns:
@@ -472,10 +504,20 @@ Durham:
     format: Shavette
     patterns:
       - durham.*(?:duplex|demonstrator)
+E.A. Berg:
+  Straight:
+    format: Straight
+    patterns:
+      - e\.? ?a\.?\s*berg
 Eclipse:
   Red Ring:
     patterns:
       - eclipse.*red ring
+Efendi:
+  Straight:
+    format: Straight
+    patterns:
+      - efendi
 Edwin Jagger:
   3one6:
     patterns:
@@ -666,6 +708,11 @@ Focus:
   Tritok Slant:
     patterns:
       - focus.*slant
+Frederick Reynolds:
+  Straight:
+    format: Straight
+    patterns:
+      - freder.*reynold
 FrankenRazor:
   "":
     patterns:
@@ -757,7 +804,7 @@ Geo. Wostenholm & Son:
   Straight:
     format: Straight
     patterns:
-      - w[ouü]stenholm
+      - w[eouü]stenholm
 Gibbs:
   no. 15/17:
     patterns:
@@ -905,6 +952,11 @@ Goodfellas Smile:
   Valynor:
     patterns:
       - valyn
+Gold Dollar:
+  Straight:
+    format: Straight
+    patterns:
+      - gold.*dollar
 Grand Shave King:
   Self-Lubricating Razor:
     patterns:
@@ -924,6 +976,11 @@ Grelot:
     format: Straight
     patterns:
       - grelot.*(\s+straight)?
+Griffith:
+  Straight:
+    format: Straight
+    patterns:
+      - griffith
 Gutche:
   A77 Shavette:
     format: Shavette (A77)
@@ -938,6 +995,11 @@ H&S Co.:
     patterns:
       - h\+s.*z074
       - h\s*&\s*s.*z074
+Hadoson (Matsukura):
+  Straight:
+    format: Straight
+    patterns:
+      - (hadoson|matsukura)
 Handlebar:
   Shaving Company Dali:
     patterns:
@@ -977,6 +1039,11 @@ Heritage:
     patterns:
       - heritage.*adj
       - heritage.*gibbs
+HERO:
+  Straight:
+    format: Straight
+    patterns:
+      - \bhero\b
 Hoffritz:
   Slant:
     patterns:
@@ -1037,19 +1104,37 @@ Iwasaki:
     format: Straight
     patterns:
       - iwasaki
+J.A. Hellberg:
+  Straight:
+    format: Straight
+    patterns:
+      - hellberg
 J.A. Henckels:
   Friodur Straight:
     format: Straight
+    steel: Stainless
     patterns:
       - (?:henc?k)?.*friodur(\s+straight)*
   Straight:
     format: Straight
     patterns:
       - hen[ck]+[el]+s?
+J.R. Torrey Razor Co.:
+  Straight:
+    format: Straight
+    patterns:
+      - j\.?r\.?\s*torrey
+      - torrey
+      - torrey.*razor
 Jifuli:
   GF-2179:
     patterns:
       - gf-2179
+John Clarke & Son:
+  Straight:
+    format: Straight
+    patterns:
+      - john.*clarke?
 Joseph Rodgers & Sons:
   The Royal Razor:
     format: Straight
@@ -1059,12 +1144,22 @@ Joseph Rodgers & Sons:
   Straight:
     format: Straight
     patterns:
-      - joseph.*rodgers
+      - joseph.*rod?gers
 Junjie:
   Safety Razor:
     patterns:
       - jungie
       - junjie
+K.M. Designs:
+  Straight:
+    format: Straight
+    patterns:
+      - k\.? ?m\.?.*design
+Kafurt:
+  Straight:
+    format: Straight
+    patterns:
+      - kafurt
 Kai:
   Captain Folding:
     format: Shavette
@@ -1101,6 +1196,11 @@ Karve:
   Overlander:
     patterns:
       - (over|out)lander
+Kikuboshi:
+  Straight:
+    format: Straight
+    patterns:
+      - kikuboshi
 Kingever:
   Refillable Razor:
     patterns:
@@ -1109,6 +1209,11 @@ Knockout:
   Razor:
     patterns:
       - ^knockout
+Kobar:
+  Straight:
+    format: Straight
+    patterns:
+      - kobar
 Koraat:
   Moarteen (r/Wetshaving exclusive):
     format: Straight
@@ -1130,6 +1235,11 @@ Krisp Beauty:
   DE Safety Razor:
     patterns:
       - krisp
+Kropp:
+  Straight:
+    format: Straight
+    patterns:
+      - \bkropp\b
 KureNai:
   GF35:
     patterns:
@@ -1161,6 +1271,11 @@ Leaf:
     format: Half DE
     patterns:
       - '(?:leaf)?\s*twig'
+Lee Mfg Co.:
+  Straight:
+    format: Straight
+    patterns:
+      - lee.*(mfg|manufac|warrant)
 L'Essor:
   SE:
     format: Other
@@ -1187,6 +1302,11 @@ Lord:
   S 625:
     patterns:
       - lord.*s ?625
+M. Jung:
+  Straight:
+    format: Straight
+    patterns:
+      - \bm\.?\s*jung
 Maggard:
   Shavette:
     format: Shavette
@@ -1212,6 +1332,11 @@ Maggard:
       - Maggard.*M3
       - V3
       - 'MR\d{1,2}'
+Maher & Grosh:
+  Straight:
+    format: Straight
+    patterns:
+      - maher.*grosh
 Manscaped:
   The Plow 2.0:
     patterns:
@@ -1436,12 +1561,13 @@ Other:
     format: Straight
     patterns:
       - kami
-  # Straight Razor:
-  #   format: Straight
-  #   patterns:
-  #     - \d{1,2}/(8|16)
-  #     - hollow
-  #     - wedge
+  Straight Razor:
+    format: Straight
+    patterns:
+      - \d{1,2}/(8|16)
+      - hollow
+      - straight
+      - wedge
   # - (&|and)\s+son
   # - 20th.*Century.*Mfg.*HH
   # - alberta
@@ -1644,6 +1770,10 @@ Parker:
   Stella:
     patterns:
       - parker.*stella
+  Straight:
+    format: Straight
+    patterns:
+      - parker.*\d{1,2}/(8|16)
   Variant:
     patterns:
       - variant
@@ -1727,12 +1857,13 @@ Raido Star:
   Straight:
     format: Straight
     patterns:
-      - raido star.*(?:\d{1,2}/(8|16))?
+      - raido[ -_]?(star|razor).*(?:\d{1,2}/(8|16))?
 Ralf Aust:
   Straight:
     format: Straight
     patterns:
       - 'ralf.*aust(\s+straight)*'
+      - \baust\b
 Rapira:
   Double Edge Safety Razor:
     patterns:
@@ -1862,6 +1993,21 @@ Rex:
   Sentry:
     patterns:
       - sentry
+Rigarazor:
+  Straight:
+    format: Straight
+    patterns:
+      - \briga(.?razor)?\b
+River Razors:
+  Straight:
+    format: Straight
+    patterns:
+      - river razors?
+Robert Klaas:
+  Straight:
+    format: Straight
+    patterns:
+      - robert.*klaas
 Robin:
   Snap 2.0:
     patterns:
@@ -2197,6 +2343,11 @@ Thiers Issard:
     format: Straight
     patterns:
       - th.*iss?ard(.*straight)?
+Thomas Turner & Co.:
+  Straight:
+    format: Straight
+    patterns:
+      - thomas.*turner
 Timeless:
   Razor:
     patterns:
@@ -2205,6 +2356,11 @@ Treet:
   TTO:
     patterns:
       - treet
+Union Razor Co.:
+  Straight:
+    format: Straight
+    patterns:
+      - union.*razor
 Utica Knife & Razor:
   Red Point 917:
     format: Straight
@@ -2254,6 +2410,11 @@ Vikings Revolution:
   Long Handle:
     patterns:
       - vik.*rev
+W. Greaves & Sons:
+  Straight:
+    format: Straight
+    patterns:
+      - greaves
 WCS:
   "77":
     patterns:
@@ -2291,6 +2452,11 @@ WCS:
   Multi Titanium Collection Razor:
     patterns:
       - '(W\.?C\.?S\.?|West Coast Shaving).*titanium'
+Wacker:
+  Straight:
+    format: Straight
+    patterns:
+      - wacker
 Wade & Butcher:
   Straight:
     format: Straight
