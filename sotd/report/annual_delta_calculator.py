@@ -5,6 +5,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from sotd.report.delta_calculator import DeltaCalculator
+from sotd.report.utils.tier_identifier import TierIdentifier
 from sotd.utils.performance import PerformanceMonitor
 
 logger = logging.getLogger(__name__)
@@ -21,6 +22,7 @@ class AnnualDeltaCalculator:
         """
         self.debug = debug
         self.delta_calculator = DeltaCalculator(debug=debug)
+        self.tier_identifier = TierIdentifier()
 
     def calculate_annual_deltas(
         self,
@@ -146,6 +148,162 @@ class AnnualDeltaCalculator:
             monitor.end_total_timing()
             if self.debug:
                 monitor.print_summary()
+
+    def calculate_tier_based_annual_deltas(
+        self,
+        current_year_data: Dict[str, Any],
+        previous_year_data: Dict[str, Any],
+        categories: Optional[List[str]] = None,
+        max_items: int = 20,
+    ) -> Dict[str, List[Dict[str, Any]]]:
+        """Calculate tier-based year-over-year deltas with comprehensive tier analysis.
+
+        Args:
+            current_year_data: Current year annual data
+            previous_year_data: Previous year annual data
+            categories: List of categories to process (None = all available)
+            max_items: Maximum number of items per category
+
+        Returns:
+            Dictionary mapping category names to lists with enhanced tier-based delta information
+        """
+        if not isinstance(current_year_data, dict):
+            raise ValueError(f"Expected dict for current_year_data, got {type(current_year_data)}")
+        if not isinstance(previous_year_data, dict):
+            raise ValueError(
+                f"Expected dict for previous_year_data, got {type(previous_year_data)}"
+            )
+
+        monitor = PerformanceMonitor("annual_tier_delta")
+        monitor.start_total_timing()
+
+        try:
+            # Extract data sections
+            current_data = current_year_data.get("data", None)
+            previous_data = previous_year_data.get("data", {})
+
+            if current_data is None:
+                raise ValueError("Missing 'data' section in current year data")
+            if not isinstance(current_data, dict):
+                raise ValueError("Current year data missing or invalid 'data' section")
+            if not isinstance(previous_data, dict):
+                raise ValueError("Previous year data missing or invalid 'data' section")
+
+            # Determine categories to process
+            if categories is None:
+                categories = list(current_data.keys())
+            else:
+                available_categories = set(current_data.keys())
+                requested_categories = set(categories)
+                categories = list(requested_categories & available_categories)
+
+            if self.debug:
+                logger.info(f"Processing tier-based annual deltas for categories: {categories}")
+
+            # Update metrics
+            monitor.metrics.record_count = len(categories)
+
+            # Calculate tier-based deltas for each category
+            monitor.start_processing_timing()
+            results = {}
+            categories_with_deltas = 0
+            total_delta_calculations = 0
+
+            for category in categories:
+                current_category_data = current_data.get(category, [])
+                previous_category_data = previous_data.get(category, [])
+
+                if not isinstance(current_category_data, list):
+                    if self.debug:
+                        logger.warning(
+                            f"Invalid category {category} in current data; returning empty list"
+                        )
+                    results[category] = []
+                    continue
+
+                if not isinstance(previous_category_data, list):
+                    if self.debug:
+                        logger.warning(f"Skipping invalid category {category} in previous data")
+                    continue
+
+                try:
+                    # Use tier-based delta calculation
+                    category_deltas = self.delta_calculator.calculate_tier_based_deltas(
+                        current_category_data, previous_category_data, max_items=max_items
+                    )
+                    results[category] = category_deltas
+                    categories_with_deltas += 1
+                    total_delta_calculations += len(category_deltas)
+
+                    if self.debug:
+                        logger.info(
+                            f"Calculated tier-based deltas for {category}: {len(category_deltas)} items"
+                        )
+
+                except Exception as e:
+                    if self.debug:
+                        logger.warning(f"Error calculating tier-based deltas for {category}: {e}")
+                    # Return current data without deltas if calculation fails
+                    results[category] = current_category_data[:max_items]
+
+            monitor.end_processing_timing()
+
+            # Update final metrics
+            monitor.metrics.record_count = total_delta_calculations
+
+            return results
+
+        finally:
+            monitor.end_total_timing()
+            if self.debug:
+                monitor.print_summary()
+
+    def get_annual_tier_analysis(
+        self,
+        current_year_data: Dict[str, Any],
+        previous_year_data: Dict[str, Any],
+        categories: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
+        """Get comprehensive tier analysis for annual year-over-year comparison.
+
+        Args:
+            current_year_data: Current year annual data
+            previous_year_data: Previous year annual data
+            categories: List of categories to analyze (None = all available)
+
+        Returns:
+            Dictionary with comprehensive tier analysis for each category
+        """
+        if not isinstance(current_year_data, dict) or not isinstance(previous_year_data, dict):
+            return {}
+
+        current_data = current_year_data.get("data", {})
+        previous_data = previous_year_data.get("data", {})
+
+        if not isinstance(current_data, dict) or not isinstance(previous_data, dict):
+            return {}
+
+        # Determine categories to analyze
+        if categories is None:
+            categories = list(current_data.keys())
+        else:
+            available_categories = set(current_data.keys())
+            requested_categories = set(categories)
+            categories = list(requested_categories & available_categories)
+
+        tier_analysis = {}
+
+        for category in categories:
+            current_category_data = current_data.get(category, [])
+            previous_category_data = previous_data.get(category, [])
+
+            if isinstance(current_category_data, list) and isinstance(previous_category_data, list):
+                category_analysis = self.tier_identifier.get_complex_tier_movement(
+                    current_category_data, previous_category_data
+                )
+                tier_analysis[category] = category_analysis
+
+        return tier_analysis
 
     def calculate_multi_year_deltas(
         self,

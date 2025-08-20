@@ -3,6 +3,8 @@
 
 from typing import Any, Dict, List, Optional, Tuple
 
+from sotd.report.utils.tier_identifier import TierIdentifier
+
 
 class DeltaCalculator:
     """Calculate position-based deltas between current and historical data."""
@@ -14,6 +16,7 @@ class DeltaCalculator:
             debug: Enable debug logging
         """
         self.debug = debug
+        self.tier_identifier = TierIdentifier()
 
     def calculate_deltas(
         self,
@@ -60,9 +63,7 @@ class DeltaCalculator:
             historical_ranks[name] = rank
 
         if self.debug:
-            print(
-                f"[DEBUG] Created historical rank lookup with {len(historical_ranks)} items"
-            )
+            print(f"[DEBUG] Created historical rank lookup with {len(historical_ranks)} items")
 
         # Calculate deltas for current data
         results = []
@@ -106,6 +107,83 @@ class DeltaCalculator:
                 )
 
         return results
+
+    def calculate_tier_based_deltas(
+        self,
+        current_data: List[Dict[str, Any]],
+        historical_data: List[Dict[str, Any]],
+        name_key: str = "name",
+        max_items: int = 20,
+    ) -> List[Dict[str, Any]]:
+        """Calculate tier-based deltas with comprehensive tier analysis.
+
+        Args:
+            current_data: Current period data (with rank field)
+            historical_data: Historical period data (with rank field)
+            name_key: Key to use for matching items between datasets
+            max_items: Maximum number of items to process from current data
+
+        Returns:
+            List of current data items with enhanced tier-based delta information
+        """
+        if not isinstance(current_data, list):
+            raise ValueError(f"Expected list for current_data, got {type(current_data)}")
+
+        if not isinstance(historical_data, list):
+            raise ValueError(f"Expected list for historical_data, got {type(historical_data)}")
+
+        if not current_data:
+            return []
+
+        # Get comprehensive tier movement information
+        tier_analysis = self.tier_identifier.get_complex_tier_movement(
+            current_data, historical_data
+        )
+
+        if self.debug:
+            print(f"[DEBUG] Tier analysis: {tier_analysis}")
+
+        # Calculate basic deltas
+        basic_results = self.calculate_deltas(current_data, historical_data, name_key, max_items)
+
+        # Enhance results with tier information
+        enhanced_results = []
+        for item in basic_results:
+            enhanced_item = item.copy()
+
+            # Add tier analysis information
+            name = item.get(name_key)
+            if name in tier_analysis["tier_changes"]:
+                hist_rank, curr_rank = tier_analysis["tier_changes"][name]
+                enhanced_item["tier_change"] = (hist_rank, curr_rank)
+                enhanced_item["tier_movement"] = hist_rank - curr_rank
+
+            # Add tier structure information
+            enhanced_item["tier_structure_changed"] = tier_analysis["structure_changed"]
+            enhanced_item["tier_restructured"] = tier_analysis["restructured"]
+
+            enhanced_results.append(enhanced_item)
+
+        return enhanced_results
+
+    def get_tier_analysis(
+        self,
+        current_data: List[Dict[str, Any]],
+        historical_data: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """Get comprehensive tier analysis for current vs historical data.
+
+        Args:
+            current_data: Current period data (with rank field)
+            historical_data: Historical period data (with rank field)
+
+        Returns:
+            Dictionary with comprehensive tier analysis information
+        """
+        if not isinstance(current_data, list) or not isinstance(historical_data, list):
+            return {}
+
+        return self.tier_identifier.get_complex_tier_movement(current_data, historical_data)
 
     def _get_delta_symbol(self, delta: Optional[int]) -> str:
         """Get Unicode arrow symbol for delta value.
