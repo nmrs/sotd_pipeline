@@ -4,63 +4,54 @@ The SOTD Pipeline now supports flexible, customizable templates for both hardwar
 
 ## Overview
 
-The template system uses YAML files with variable replacement and table placeholders to generate complete reports. Templates are stored in `data/report_templates.yaml` and can be easily edited by users to customize the entire report structure.
+The template system uses Markdown files with variable replacement and table placeholders to generate complete reports. Templates are stored in `data/report_templates/` as individual `.md` files and can be easily edited by users to customize the entire report structure.
 
 ## Template File Structure
 
-The template file follows this simple structure:
+The template system uses individual Markdown files in the `data/report_templates/` directory:
 
-```yaml
-hardware:
-  report_template: |
-    Welcome to your SOTD Hardware Report for {{month_year}}
-
-    ## Observations
-
-    * [Observations will be generated based on data analysis]
-
-    ## Notes & Caveats
-
-    * {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report.
-
-    ## Razor Formats
-
-    {{tables.razor-formats}}
-
-    ## Razors
-
-    {{tables.razors}}
-
-software:
-  report_template: |
-    Welcome to your SOTD Lather Log for {{month_year}}
-
-    * {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report. Collectively, these shavers used {{unique_soaps}} distinct soaps from {{unique_brands}} distinct brands.
-
-    ## Observations
-
-    * [Observations will be generated based on data analysis]
-
-    ## Notes & Caveats
-
-    * I only show the top n results per category to keep the tables readable and avoid max post length issues.
-
-    ## Soap Makers
-
-    {{tables.soap-makers}}
-
-    ## Soaps
-
-    {{tables.soaps}}
+```
+data/report_templates/
+├── hardware.md              # Monthly hardware report template
+├── software.md              # Monthly software report template
+├── annual_hardware.md       # Annual hardware report template
+└── annual_software.md       # Annual software report template
 ```
 
-**Note**: Each report type has a single `report_template` section containing the complete report structure. This simplified approach makes templates easier to edit and maintain.
+Each template file contains the complete report structure with variables and table placeholders. The system automatically loads templates based on the report type being generated.
+
+## Template Content Structure
+
+Each template file contains the complete report content with variable placeholders and table placeholders. Here's an example structure:
+
+```markdown
+# Hardware Report - {{month_year}}
+
+**Total Shaves:** {{total_shaves}}
+**Unique Shavers:** {{unique_shavers}}
+
+Welcome to your SOTD Hardware Report for {{month_year}}
+
+## Notes & Caveats
+
+* {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report.
+
+## Razors
+
+{{tables.razors}}
+
+## Blades
+
+{{tables.blades}}
+```
+
+**Note**: Each template file contains the complete report structure. The system automatically substitutes variables and table placeholders to generate the final report.
 
 ## Available Template Variables
 
-### Hardware Report Variables
+### Monthly Hardware Report Variables
 
-The following variables are available for the hardware report template:
+The following variables are available for the monthly hardware report template:
 
 | Variable | Description | Example Output |
 |----------|-------------|----------------|
@@ -69,9 +60,9 @@ The following variables are available for the hardware report template:
 | `{{unique_shavers}}` | Number of unique users | `567` |
 | `{{avg_shaves_per_user}}` | Average shaves per user (formatted to 1 decimal place) | `2.2` |
 
-### Software Report Variables
+### Monthly Software Report Variables
 
-The following variables are available for the software report template:
+The following variables are available for the monthly software report template:
 
 | Variable | Description | Example Output |
 |----------|-------------|----------------|
@@ -81,34 +72,31 @@ The following variables are available for the software report template:
 | `{{unique_soaps}}` | Number of unique soaps used | `585` |
 | `{{unique_brands}}` | Number of unique soap brands/makers | `136` |
 
+### Annual Report Variables
+
+The following variables are available for annual report templates:
+
+| Variable | Description | Example Output |
+|----------|-------------|----------------|
+| `{{year}}` | Year in display format | `2025` |
+| `{{total_shaves}}` | Total number of shaves (formatted with commas) | `15,678` |
+| `{{unique_shavers}}` | Number of unique users | `1,234` |
+| `{{included_months}}` | Number of months included in the data | `12` |
+| `{{missing_months}}` | Number of months missing from the data | `0` |
+
 ## Available Table Placeholders
 
 ### Hardware Report Tables
 
-The following table placeholders are available for the hardware report template:
+The following table placeholders are available for hardware reports:
 
-| Placeholder | Description | Content |
-|-------------|-------------|---------|
-| `{{tables.razor-formats}}` | Razor format statistics | DE, GEM, Injector, etc. |
-| `{{tables.razors}}` | Razor usage statistics | Top razors by usage |
-| `{{tables.razor-manufacturers}}` | Razor manufacturer statistics | Top manufacturers |
-| `{{tables.blades}}` | Blade usage statistics | Top blades by usage |
-| `{{tables.blade-manufacturers}}` | Blade manufacturer statistics | Top blade manufacturers |
-| `{{tables.brushes}}` | Brush usage statistics | Top brushes by usage |
-| `{{tables.brush-handle-makers}}` | Brush handle maker statistics | Top handle makers |
-| `{{tables.brush-knot-makers}}` | Brush knot maker statistics | Top knot makers |
-| `{{tables.knot-fibers}}` | Knot fiber type statistics | Badger, Boar, Synthetic |
-| `{{tables.knot-sizes}}` | Knot size statistics | Size distribution |
-| `{{tables.blackbird-plates}}` | Blackbird plate statistics | Plate usage |
-| `{{tables.christopher-bradley-plates}}` | Christopher Bradley plate statistics | Plate usage |
-| `{{tables.game-changer-plates}}` | Game Changer plate statistics | Plate usage |
-| `{{tables.super-speed-tips}}` | Super Speed tip statistics | Tip color usage |
-| `{{tables.straight-widths}}` | Straight razor width statistics | Width distribution |
-| `{{tables.straight-grinds}}` | Straight razor grind statistics | Grind types |
-| `{{tables.straight-points}}` | Straight razor point statistics | Point types |
-| `{{tables.razor-blade-combinations}}` | Razor/blade combination statistics | Most used combinations |
-| `{{tables.highest-use-count-per-blade}}` | Highest use count per blade | Per-user blade usage |
-| `{{tables.top-shavers}}` | Top shaver statistics | Users with most shaves |
+- `{{tables.razors}}` - Top razors by usage
+- `{{tables.blades}}` - Top blades by usage  
+- `{{tables.blade-usage-distribution}}` - Blade usage distribution (uses per blade)
+- `{{tables.brushes}}` - Top brushes by usage
+- `{{tables.soap-makers}}` - Top soap makers by usage
+- `{{tables.soaps}}` - Top soaps by usage
+- `{{tables.top-sampled-soaps}}` - Top sampled soaps by usage
 
 ### Software Report Tables
 
@@ -123,8 +111,8 @@ The following table placeholders are available for the software report template:
 
 ## How to Customize Templates
 
-1. **Edit the template file**: Open `data/report_templates.yaml` in your preferred text editor
-2. **Modify content**: Change the text content as needed while preserving the YAML structure
+1. **Edit the template files**: Open the appropriate template file in `data/report_templates/` in your preferred text editor
+2. **Modify content**: Change the text content as needed while preserving the Markdown structure
 3. **Use variables**: Include variables where you want dynamic content (e.g., `{{total_shaves}}`)
 4. **Add table placeholders**: Insert table placeholders where you want tables (e.g., `{{tables.razors}}`)
 5. **Customize structure**: Organize sections, headers, and tables however you prefer
@@ -137,11 +125,9 @@ The following table placeholders are available for the software report template:
 Variables use double curly braces: `{{variable_name}}`
 
 Example:
-```yaml
-hardware:
-  report_template: |
-    Welcome to your SOTD Hardware Report for {{month_year}}
-    - **{{total_shaves}} shaves** were analyzed this month
+```markdown
+# Hardware Report - {{month_year}}
+- **{{total_shaves}} shaves** were analyzed this month
 ```
 
 ### Table Placeholders
@@ -149,75 +135,100 @@ hardware:
 Table placeholders use the format: `{{tables.table-name}}`
 
 Example:
-```yaml
-hardware:
-  report_template: |
-    ## Razor Statistics
-    {{tables.razors}}
-    {{tables.razor-manufacturers}}
+```markdown
+## Razor Statistics
+{{tables.razors}}
+{{tables.razor-manufacturers}}
 ```
 
-### YAML Block Scalar
+### Markdown Formatting
 
-Use the `|` character for multi-line content:
-```yaml
-hardware:
-  report_template: |
-    ## Notes & Caveats
-    
-    This is a multi-line
-    template content that
-    preserves line breaks.
-    
-    ## Tables
-    
-    {{tables.razors}}
+Templates use standard Markdown syntax:
+```markdown
+# Main Header
+## Section Header
+### Subsection Header
+
+* Bullet points
+* More bullet points
+
+**Bold text** and *italic text*
+
+[Link text](URL)
 ```
 
 ## Customization Examples
 
-### Minimal Template
-```yaml
-hardware:
-  report_template: |
-    ## Hardware Report
-    
-    {{tables.razors}}
-    {{tables.blades}}
-    {{tables.brushes}}
+### Minimal Hardware Template
+```markdown
+# Hardware Report - {{month_year}}
+
+**Total Shaves:** {{total_shaves}}
+**Unique Shavers:** {{unique_shavers}}
+
+## Razors
+{{tables.razors}}
+
+## Blades
+{{tables.blades}}
+
+## Brushes
+{{tables.brushes}}
 ```
 
-### Detailed Template with Custom Headers
-```yaml
-hardware:
-  report_template: |
-    ## Notes & Caveats
-    
-    This report covers hardware usage for {{total_shaves}} shaves from {{unique_shavers}} users.
-    
-    ## Razor Analysis
-    
-    ### Most Popular Razors
-    {{tables.razors}}
-    
-    ### Razor Manufacturers
-    {{tables.razor-manufacturers}}
-    
-    ## Blade Analysis
-    
-    ### Most Popular Blades
-    {{tables.blades}}
-    
-    ## Brush Analysis
-    
-    ### Most Popular Brushes
-    {{tables.brushes}}
-    
-    ### Handle Makers
-    {{tables.brush-handle-makers}}
-    
-    ### Knot Makers
-    {{tables.brush-knot-makers}}
+### Detailed Hardware Template with Custom Headers
+```markdown
+# Hardware Report - {{month_year}}
+
+**Total Shaves:** {{total_shaves}}
+**Unique Shavers:** {{unique_shavers}}
+
+## Notes & Caveats
+
+This report covers hardware usage for {{total_shaves}} shaves from {{unique_shavers}} users.
+
+## Razor Analysis
+
+### Most Popular Razors
+{{tables.razors}}
+
+### Razor Manufacturers
+{{tables.razor-manufacturers}}
+
+## Blade Analysis
+
+### Most Popular Blades
+{{tables.blades}}
+
+## Brush Analysis
+
+### Most Popular Brushes
+{{tables.brushes}}
+
+### Handle Makers
+{{tables.brush-handle-makers}}
+
+### Knot Makers
+{{tables.brush-knot-makers}}
+```
+
+### Software Template Example
+```markdown
+# Software Report - {{month_year}}
+
+**Total Shaves:** {{total_shaves}}
+**Unique Shavers:** {{unique_shavers}}
+
+* {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report. Collectively, these shavers used {{unique_soaps}} distinct soaps from {{unique_brands}} distinct brands.
+
+## Soap Makers
+{{tables.soap-makers}}
+
+## Soaps
+{{tables.soaps}}
+
+## Brand Diversity
+{{tables.brand-diversity}}
 ```
 
 ## Testing Templates
@@ -225,7 +236,7 @@ hardware:
 The template system includes comprehensive testing to ensure templates work correctly:
 
 ### Test Fixtures
-- Templates are stored in `tests/fixtures/report_template.yaml`
+- Templates are stored in `tests/fixtures/report_template.yaml` for testing
 - Tests use shared fixtures to avoid code duplication
 - Both unit and integration tests use the same template structure
 
@@ -245,29 +256,29 @@ python -m pytest tests/report/test_template_integration.py -v
 
 ## Error Handling
 
-The system follows a **fast-fail** approach. If the template file is missing, contains errors, or has missing sections, report generation will fail immediately with a clear error message. This ensures that configuration issues are caught early and explicitly.
+The system follows a **fast-fail** approach. If the template directory is missing, contains errors, or has missing template files, report generation will fail immediately with a clear error message. This ensures that configuration issues are caught early and explicitly.
 
 **Common errors:**
-- `Template 'hardware' not found in data/report_templates.yaml` - Template section is missing
-- `Section 'template' not found in template 'hardware'` - Template subsection is missing
+- `Templates directory not found: data/report_templates` - Template directory is missing
+- `Template 'hardware' not found. Available templates: ...` - Template file is missing
 - `Unknown table name: invalid-table` - Invalid table placeholder name
-- YAML syntax errors - Invalid YAML structure
+- Markdown syntax errors - Invalid Markdown structure
 
 ## Adding New Templates
 
-To add new template sections:
+To add new template types:
 
-1. Add a new section to the YAML file:
-```yaml
-hardware:
-  report_template: |
-    # existing content
-new_report_type:
-  report_template: |
-    # new template content
+1. Create a new Markdown file in `data/report_templates/`:
+```markdown
+# New Report Type - {{month_year}}
+
+**Total Shaves:** {{total_shaves}}
+
+## Content
+{{tables.example-table}}
 ```
 
-2. Update the code to use the new template section
+2. Update the code to use the new template
 3. Add appropriate variables if needed
 4. Update this documentation with the new variables
 
@@ -276,7 +287,7 @@ new_report_type:
 1. **Backup your templates**: Keep a backup of your custom templates
 2. **Test changes**: Generate a test report after making template changes
 3. **Use descriptive variable names**: Make variable names clear and meaningful
-4. **Maintain formatting**: Preserve the markdown formatting for proper report rendering
+4. **Maintain formatting**: Preserve the Markdown formatting for proper report rendering
 5. **Version control**: Consider adding your custom templates to version control
 6. **Organize logically**: Group related tables together with descriptive headers
 7. **Keep it readable**: Use clear section headers and logical flow
@@ -285,9 +296,9 @@ new_report_type:
 ## Troubleshooting
 
 ### Template Not Found
-- Check that the template file exists at `data/report_templates.yaml`
-- Verify the template section name matches what the code expects
-- Ensure the YAML syntax is valid
+- Check that the template directory exists at `data/report_templates/`
+- Verify the template file name matches what the code expects
+- Ensure the Markdown syntax is valid
 
 ### Table Placeholder Not Working
 - Check that the table placeholder name is correct (see available placeholders above)
@@ -296,7 +307,7 @@ new_report_type:
 
 ### Report Generation Fails
 - This is expected behavior when templates are missing or invalid
-- Check the template file for syntax errors
+- Check the template files for syntax errors
 - Verify the template structure matches the expected format
 - Look for clear error messages that indicate what's wrong
 

@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 from .table_generators.blade_tables import (
     BladeManufacturersTableGenerator,
     BladesTableGenerator,
+    BladeUsageDistributionTableGenerator,
 )
 from .table_generators.brush_tables import (
     BrushesTableGenerator,
@@ -26,6 +27,7 @@ from .table_generators.soap_tables import (
     BrandDiversityTableGenerator,
     SoapMakersTableGenerator,
     SoapsTableGenerator,
+    TopSampledSoapsTableGenerator,
 )
 from .table_generators.specialized_tables import (
     BlackbirdPlatesTableGenerator,
@@ -90,6 +92,7 @@ class TableGenerator:
             "razor-formats": RazorFormatsTableGenerator,
             "blades": BladesTableGenerator,
             "blade-manufacturers": BladeManufacturersTableGenerator,
+            "blade-usage-distribution": BladeUsageDistributionTableGenerator,
             "brushes": BrushesTableGenerator,
             "brush-handle-makers": BrushHandleMakersTableGenerator,
             "brush-knot-makers": BrushKnotMakersTableGenerator,
@@ -111,6 +114,7 @@ class TableGenerator:
             # Software tables
             "soap-makers": SoapMakersTableGenerator,
             "soaps": SoapsTableGenerator,
+            "top-sampled-soaps": TopSampledSoapsTableGenerator,
             "brand-diversity": BrandDiversityTableGenerator,
         }
 

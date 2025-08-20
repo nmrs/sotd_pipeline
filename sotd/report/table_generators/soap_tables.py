@@ -7,6 +7,36 @@ from .base import (
 from .specialized_tables import DataTransformingTableGenerator
 
 
+class TopSampledSoapsTableGenerator(StandardProductTableGenerator):
+    """Generates a table of top sampled soaps with usage statistics."""
+
+    def get_table_data(self) -> List[Dict[str, Any]]:
+        """Get top sampled soaps data from aggregated data."""
+        data = self.data.get("soap_sample_brand_scents", [])
+        # Filter for sampled soaps with 2+ shaves to show meaningful usage
+        filtered_data = [item for item in data if item.get("shaves", 0) >= 2]
+        return self._validate_data_records(
+            filtered_data, "soap_sample_brand_scents", ["name", "shaves"]
+        )
+
+    def get_table_title(self) -> str:
+        """Return the table title."""
+        return "Top Sampled Soaps"
+
+    def get_column_config(self) -> Dict[str, Dict[str, Any]]:
+        """Return column configuration for top sampled soaps table."""
+        from .base import STANDARD_PRODUCT_COLUMNS
+
+        # Override to use "Sampled Soap" instead of "Name"
+        config = STANDARD_PRODUCT_COLUMNS.copy()
+        config["name"]["display_name"] = "Sampled Soap"
+        return config
+
+    def should_limit_rows(self) -> bool:
+        """Limit rows to show top 20 sampled soaps."""
+        return True
+
+
 class SoapMakersTableGenerator(DataTransformingTableGenerator):
     """Generates a table of soap makers with usage statistics."""
 
