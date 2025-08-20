@@ -388,9 +388,9 @@ class BaseTableGenerator(ABC):
         # Add rank data for display
         table_data = self._add_rank_data(table_data)
 
-        # Add position information for delta calculations
+        # Add rank information for delta calculations
         if include_delta:
-            table_data = self._add_positions(table_data)
+            table_data = self._add_ranks(table_data)
 
         # Calculate deltas if requested
         if include_delta and comparison_data:
@@ -590,38 +590,38 @@ class BaseTableGenerator(ABC):
             return ""
         return table_str
 
-    def _add_positions(
+    def _add_ranks(
         self, data: List[Dict[str, Any]], name_field: str = "name"
     ) -> List[Dict[str, Any]]:
-        """Add position information to data for delta calculations.
+        """Add rank information to data for delta calculations.
 
         Args:
             data: List of data items
             name_field: Field name to use for identifying items in debug output
 
         Returns:
-            Data with position information added
+            Data with rank information added
         """
         if not data:
             return data
 
-        # Check if positions already exist
-        if any("position" in item for item in data):
+        # Check if ranks already exist
+        if any("rank" in item for item in data):
             if self.debug:
-                print("[DEBUG] Positions already exist in data, skipping position addition")
+                print("[DEBUG] Ranks already exist in data, skipping rank addition")
             return data
 
-        # Add positions based on shaves (descending order)
+        # Add ranks based on shaves (descending order)
         sorted_data = sorted(data, key=lambda x: x.get("shaves", 0), reverse=True)
         for i, item in enumerate(sorted_data):
-            item["position"] = i + 1
+            item["rank"] = i + 1
 
         if self.debug:
-            print(f"[DEBUG] Added positions to {len(data)} items")
+            print(f"[DEBUG] Added ranks to {len(data)} items")
             assignments = [
-                (item.get(name_field, "unknown"), item.get("position")) for item in sorted_data
+                (item.get(name_field, "unknown"), item.get("rank")) for item in sorted_data
             ]
-            print(f"[DEBUG] Position assignments: {assignments}")
+            print(f"[DEBUG] Rank assignments: {assignments}")
 
         return data
 
@@ -634,7 +634,7 @@ class BaseTableGenerator(ABC):
         """Calculate deltas for the current data against historical data.
 
         Args:
-            current_data: Current period data with positions
+            current_data: Current period data with ranks
             comparison_data: Historical data for comparison
             comparison_period: Period name for the comparison
 
@@ -655,9 +655,9 @@ class BaseTableGenerator(ABC):
                 print(f"[DEBUG] No historical data found for category: {category_name}")
             return current_data
 
-        # Add positions to historical data if not present
-        if not any("position" in item for item in historical_data):
-            historical_data = self._add_positions(historical_data)
+        # Add ranks to historical data if not present
+        if not any("rank" in item for item in historical_data):
+            historical_data = self._add_ranks(historical_data)
 
         # Calculate deltas
         try:
@@ -671,7 +671,7 @@ class BaseTableGenerator(ABC):
                 if i < len(deltas):
                     delta_item = deltas[i]
                     item["delta_text"] = delta_item.get("delta_text", "n/a")
-                    item["delta_position"] = delta_item.get("delta_position", "n/a")
+                    item["delta_rank"] = delta_item.get("delta_rank", "n/a")
 
             if self.debug:
                 print(f"[DEBUG] Calculated deltas for {len(current_data)} items")
@@ -682,7 +682,7 @@ class BaseTableGenerator(ABC):
             # Add n/a for deltas if calculation fails
             for item in current_data:
                 item["delta_text"] = "n/a"
-                item["delta_position"] = "n/a"
+                item["delta_rank"] = "n/a"
 
         return current_data
 
@@ -789,7 +789,7 @@ class BaseTableGenerator(ABC):
         """Calculate deltas for the current data across multiple periods.
 
         Args:
-            current_data: Current period data with positions
+            current_data: Current period data with ranks
             comparison_data: Historical data for comparison
                            (dict mapping period to (metadata, data))
 
@@ -831,9 +831,9 @@ class BaseTableGenerator(ABC):
                     f"historical records for category: {category_name}"
                 )
 
-            # Add positions to historical data if not present
-            if not any("position" in item for item in historical_category_data):
-                historical_category_data = self._add_positions(historical_category_data)
+                    # Add ranks to historical data if not present
+            if not any("rank" in item for item in historical_category_data):
+                historical_category_data = self._add_ranks(historical_category_data)
 
             # Calculate deltas for this period
             try:
