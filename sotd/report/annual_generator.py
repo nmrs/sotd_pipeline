@@ -67,6 +67,12 @@ class AnnualReportGenerator(BaseReportGenerator):
             "year": self.year,
             "total_shaves": f"{self.metadata.get('total_shaves', 0):,}",
             "unique_shavers": str(self.metadata.get("unique_shavers", 0)),
+            "avg_shaves_per_user": f"{self.metadata.get('avg_shaves_per_user', 0):.1f}",
+            "median_shaves_per_user": f"{self.metadata.get('median_shaves_per_user', 0):.1f}",
+            "total_samples": f"{self.metadata.get('total_samples', 0):,}",
+            "sample_percentage": f"{self.metadata.get('sample_percentage', 0):.1f}%",
+            "sample_users": str(self.metadata.get("sample_users", 0)),
+            "sample_brands": str(self.metadata.get("sample_brands", 0)),
             "included_months": str(_count(self.metadata.get("included_months", []))),
             "missing_months": str(_count(self.metadata.get("missing_months", []))),
         }

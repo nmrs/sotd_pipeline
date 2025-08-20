@@ -1,6 +1,7 @@
 """Integration tests for report generation."""
 
 from sotd.report.process import generate_report_content
+from sotd.report.monthly_generator import MonthlyReportGenerator
 
 
 class TestReportIntegration:
@@ -93,6 +94,51 @@ class TestReportIntegration:
         assert "Gillette Nacet" in report_content
         assert "Simpson Chubby 2" in report_content
         assert "user1" in report_content
+
+    def test_unified_monthly_generator(self, template_dir):
+        """Test the unified monthly generator directly."""
+        # Sample aggregated data
+        metadata = {
+            "month": "2025-01",
+            "total_shaves": 1000,
+            "unique_shavers": 50,
+            "avg_shaves_per_user": 20.0,
+            "median_shaves_per_user": 18.0,
+            "unique_razors": 25,
+            "unique_blades": 30,
+            "unique_brushes": 20,
+            "unique_soaps": 15,
+            "unique_brands": 12,
+            "total_samples": 50,
+            "sample_percentage": 5.0,
+            "sample_users": 8,
+            "sample_brands": 6,
+        }
+
+        data = {
+            "razors": [{"name": "Gillette Super Speed", "shaves": 25}],
+            "soaps": [{"name": "Test Soap", "shaves": 30}],
+        }
+
+        # Test hardware report generation
+        hardware_generator = MonthlyReportGenerator(
+            "hardware", metadata, data, template_path=str(template_dir)
+        )
+        hardware_report = hardware_generator.generate_notes_and_caveats()
+
+        assert "Hardware Report" in hardware_report
+        assert "1,000" in hardware_report
+        assert "50" in hardware_report
+
+        # Test software report generation
+        software_generator = MonthlyReportGenerator(
+            "software", metadata, data, template_path=str(template_dir)
+        )
+        software_report = software_generator.generate_notes_and_caveats()
+
+        assert "Software Report" in software_report
+        assert "1,000" in software_report
+        assert "50" in software_report
 
     def test_software_report_generation(self, template_dir):
         """Test complete software report generation with sample data."""

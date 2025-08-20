@@ -1,7 +1,6 @@
 """Integration tests for template processor with report generators."""
 
-from sotd.report.hardware_report import HardwareReportGenerator
-from sotd.report.software_report import SoftwareReportGenerator
+from sotd.report.monthly_generator import MonthlyReportGenerator
 
 
 class TestTemplateIntegration:
@@ -18,7 +17,9 @@ class TestTemplateIntegration:
         }
         data = {}
 
-        generator = HardwareReportGenerator(metadata, data, template_path=str(template_dir))
+        generator = MonthlyReportGenerator(
+            "hardware", metadata, data, template_path=str(template_dir)
+        )
 
         # Generate notes and caveats using template
         notes = generator.generate_notes_and_caveats()
@@ -41,7 +42,9 @@ class TestTemplateIntegration:
         }
         data = {}
 
-        generator = SoftwareReportGenerator(metadata, data, template_path=str(template_dir))
+        generator = MonthlyReportGenerator(
+            "software", metadata, data, template_path=str(template_dir)
+        )
 
         # Generate notes and caveats using template
         notes = generator.generate_notes_and_caveats()

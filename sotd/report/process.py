@@ -4,8 +4,7 @@
 from typing import Any, Dict, Optional
 
 from .base import BaseReportGenerator
-from .hardware_report import HardwareReportGenerator
-from .software_report import SoftwareReportGenerator
+from .monthly_generator import MonthlyReportGenerator
 
 
 def create_report_generator(
@@ -35,10 +34,10 @@ def create_report_generator(
     if comparison_data is None:
         comparison_data = {}
 
-    if report_type == "hardware":
-        return HardwareReportGenerator(metadata, data, comparison_data, debug, template_path)
-    elif report_type == "software":
-        return SoftwareReportGenerator(metadata, data, comparison_data, debug, template_path)
+    if report_type in ["hardware", "software"]:
+        return MonthlyReportGenerator(
+            report_type, metadata, data, comparison_data, debug, template_path
+        )
     else:
         raise ValueError(f"Unsupported report type: {report_type}")
 

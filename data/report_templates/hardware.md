@@ -11,7 +11,7 @@ Welcome to your SOTD Hardware Report for {{month_year}}
 
 ## Notes & Caveats
 
-* {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report.
+* {{total_shaves}} shave reports from {{unique_shavers}} distinct shavers during the month of {{month_year}} were analyzed to produce this report, for an average of {{avg_shaves_per_user}} (median {{median_shaves_per_user}}) shaves per user.
 
 * I only show the top n results per category to keep the tables readable and avoid max post length issues.
 

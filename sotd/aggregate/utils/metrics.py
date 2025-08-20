@@ -31,29 +31,29 @@ def calculate_median_shaves_per_user(records: List[Dict[str, Any]]) -> float:
     """Calculate median shaves per user."""
     if not records:
         return 0.0
-    
+
     # Count shaves per user
     user_shaves = {}
     for record in records:
         author = record.get("author")
         if author and author.strip():  # Skip None, empty strings, and whitespace-only strings
             user_shaves[author.strip()] = user_shaves.get(author.strip(), 0) + 1
-    
+
     if not user_shaves:
         return 0.0
-    
+
     # Calculate median
     shave_counts = list(user_shaves.values())
     shave_counts.sort()
     n = len(shave_counts)
-    
+
     if n % 2 == 0:
         # Even number of users, average of two middle values
         median = (shave_counts[n // 2 - 1] + shave_counts[n // 2]) / 2
     else:
         # Odd number of users, middle value
         median = shave_counts[n // 2]
-    
+
     return round(median, 2)
 
 
@@ -105,13 +105,38 @@ def calculate_total_samples(records: List[Dict[str, Any]]) -> int:
     """Calculate total number of sample shaves from records."""
     total_samples = 0
     for record in records:
-        soap = record.get("soap")
-        if soap is None:
-            continue
+        soap = record.get("soap", {})
         enriched = soap.get("enriched", {})
         if enriched.get("sample_type"):
             total_samples += 1
     return total_samples
+
+
+def calculate_sample_users(records: List[Dict[str, Any]]) -> int:
+    """Calculate number of unique users who used samples."""
+    sample_users = set()
+    for record in records:
+        soap = record.get("soap", {})
+        enriched = soap.get("enriched", {})
+        if enriched.get("sample_type"):
+            author = record.get("author", "").strip()
+            if author:
+                sample_users.add(author)
+    return len(sample_users)
+
+
+def calculate_sample_brands(records: List[Dict[str, Any]]) -> int:
+    """Calculate number of unique brands sampled."""
+    sample_brands = set()
+    for record in records:
+        soap = record.get("soap", {})
+        enriched = soap.get("enriched", {})
+        if enriched.get("sample_type"):
+            matched = soap.get("matched", {})
+            brand = matched.get("maker", "").strip()
+            if brand:
+                sample_brands.add(brand)
+    return len(sample_brands)
 
 
 def calculate_unique_razors(records: List[Dict[str, Any]]) -> int:
@@ -199,15 +224,16 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
 
     Returns:
         Dictionary containing metadata with month, total_shaves, unique_shavers,
-        avg_shaves_per_user, median_shaves_per_user, unique_soaps, unique_brands, 
-        total_samples, unique_razors, unique_blades, and unique_brushes
+        avg_shaves_per_user, median_shaves_per_user, unique_soaps, unique_brands,
+        total_samples, sample_users, sample_brands, unique_razors, unique_blades,
+        and unique_brushes
     """
     total_shaves = calculate_shaves(records)
 
     unique_shavers = calculate_unique_users(records)
 
     avg_shaves_per_user = calculate_avg_shaves_per_user(records)
-    
+
     median_shaves_per_user = calculate_median_shaves_per_user(records)
 
     unique_soaps = calculate_unique_soaps(records)
@@ -215,6 +241,10 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
     unique_brands = calculate_unique_brands(records)
 
     total_samples = calculate_total_samples(records)
+
+    sample_users = calculate_sample_users(records)
+
+    sample_brands = calculate_sample_brands(records)
 
     unique_razors = calculate_unique_razors(records)
 
@@ -231,6 +261,8 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
         "unique_soaps": unique_soaps,
         "unique_brands": unique_brands,
         "total_samples": total_samples,
+        "sample_users": sample_users,
+        "sample_brands": sample_brands,
         "unique_razors": unique_razors,
         "unique_blades": unique_blades,
         "unique_brushes": unique_brushes,
