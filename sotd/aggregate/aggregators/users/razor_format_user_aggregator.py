@@ -81,7 +81,7 @@ class RazorFormatUserAggregator(BaseAggregator):
                 current_position = 1
 
             item = {
-                "position": current_position,
+                "rank": current_position,
                 "format": format_type,
                 "user": str(row["author"]),
                 "shaves": int(row["shaves"]),

@@ -55,11 +55,11 @@ def test_aggregate_fibers():
     assert result[0]["fiber"] == "Synthetic"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["fiber"] == "Boar"
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_knot_sizes():
