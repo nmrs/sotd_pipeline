@@ -19,6 +19,9 @@ class ReportCLIParser(BaseCLIParser):
         super().__init__(description=description, **kwargs)
         self._add_annual_argument()
         self._add_report_arguments()
+        # Add parallel processing and delta support
+        self.add_parallel_processing_arguments()
+        self.add_delta_arguments()
 
     def _add_annual_argument(self) -> None:
         """Add annual report argument."""

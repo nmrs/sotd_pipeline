@@ -27,7 +27,7 @@ def _current_ym() -> tuple[int, int]:
 
 
 def month_span(args) -> list[tuple[int, int]]:
-    if args.delta_months:
+    if hasattr(args, "delta_months") and args.delta_months:
         # Handle delta months (comma-separated list)
         months = []
         for month_str in args.delta_months.split(","):

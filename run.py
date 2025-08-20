@@ -90,13 +90,14 @@ def calculate_delta_months(args) -> list[str]:
     return sorted(list(delta_months))
 
 
-def run_phase(phase: str, args: List[str]) -> int:
+def run_phase(phase: str, args: List[str], debug: bool = False) -> int:
     """
     Run a specific pipeline phase.
 
     Args:
         phase: Phase name (fetch, extract, match, enrich, aggregate, report)
         args: Command line arguments to pass to the phase
+        debug: Whether debug mode is enabled
 
     Returns:
         Exit code (0 for success, non-zero for failure)
@@ -119,8 +120,32 @@ def run_phase(phase: str, args: List[str]) -> int:
         module_name = phase_modules[phase]
         module = __import__(module_name, fromlist=["main"])
 
-        # Run the phase with provided arguments and capture exit code
-        exit_code = module.main(args)
+        # Filter arguments based on phase requirements
+        # Delta arguments are only needed for data processing phases, not analysis phases
+        if phase in ["fetch", "extract", "match", "enrich"]:
+            # Data processing phases get all arguments including delta
+            phase_args = args
+        else:
+            # Analysis phases (aggregate, report) don't need delta arguments
+            # They process the months specified in the date arguments
+            # Filter out --delta-months flag and its value
+            phase_args = []
+            skip_next = False
+            for arg in args:
+                if skip_next:
+                    skip_next = False
+                    continue
+                if arg.startswith("--delta-months"):
+                    skip_next = True  # Skip the next argument (the delta months value)
+                    continue
+                phase_args.append(arg)
+
+        # Debug output to see what arguments are being passed
+        if debug:
+            print(f"[DEBUG] {phase} phase args: {phase_args}")
+
+        # Run the phase with filtered arguments and capture exit code
+        exit_code = module.main(phase_args)
         return exit_code if exit_code is not None else 0
 
     except ImportError as e:
@@ -163,7 +188,7 @@ def run_pipeline(phases: List[str], args: List[str], debug: bool = False) -> int
         elif debug:
             print(f"\n[DEBUG] Running phase {i + 1}/{len(phases)}: {phase}")
 
-        exit_code = run_phase(phase, args)
+        exit_code = run_phase(phase, args, debug=debug)
         if exit_code != 0:
             print(f"\n{'=' * 60}")
             print(f"PIPELINE FAILED: Phase {phase} failed with exit code {exit_code}")
@@ -379,7 +404,21 @@ Examples:
                     f"[DEBUG] Delta mode: processing {len(delta_months)} months: "
                     f"{', '.join(delta_months)}"
                 )
+            # Pass delta-months to all phases - they will filter as needed
             common_args.extend(["--delta-months", ",".join(delta_months)])
+
+            # Also add the original date arguments for analysis phases (aggregate, report)
+            # These phases will ignore delta-months and use the original date args
+            if args.month:
+                common_args.extend(["--month", args.month])
+            elif args.year:
+                common_args.extend(["--year", str(args.year)])
+            elif args.start:
+                common_args.extend(["--start", args.start])
+            elif args.end:
+                common_args.extend(["--end", args.end])
+            elif args.range:
+                common_args.extend(["--range", args.range])
         elif args.month:
             common_args.extend(["--month", args.month])
         elif args.year:

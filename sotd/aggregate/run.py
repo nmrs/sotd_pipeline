@@ -6,7 +6,7 @@ from typing import Optional, Sequence
 from ..cli_utils.date_span import month_span
 from .annual_engine import process_annual, process_annual_range
 from .cli import get_parser
-from .engine import process_months
+from .engine import process_months, process_months_parallel
 
 __all__ = [
     "run",
@@ -32,13 +32,29 @@ def run(args) -> None:
                 years=years, data_dir=args.out_dir, debug=args.debug, force=args.force
             )
     else:
-        # Handle monthly aggregation (existing logic)
+        # Handle monthly aggregation with parallel processing support
         # Get months to process
         month_tuples = month_span(args)
         months = [f"{year:04d}-{month:02d}" for year, month in month_tuples]
 
-        # Process the months
-        process_months(months=months, data_dir=args.out_dir, debug=args.debug, force=args.force)
+        # Check if we should use parallel processing
+        use_parallel = (
+            hasattr(args, "parallel") and args.parallel or (len(months) > 1 and not args.debug)
+        )
+
+        if use_parallel and len(months) > 1:
+            # Use parallel processing
+            max_workers = getattr(args, "max_workers", 8)
+            process_months_parallel(
+                months=months,
+                data_dir=args.out_dir,
+                debug=args.debug,
+                force=args.force,
+                max_workers=max_workers,
+            )
+        else:
+            # Use sequential processing
+            process_months(months=months, data_dir=args.out_dir, debug=args.debug, force=args.force)
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:

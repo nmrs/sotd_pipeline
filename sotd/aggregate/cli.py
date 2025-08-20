@@ -20,6 +20,8 @@ class AggregateCLIParser(BaseCLIParser):
     def __init__(self, description: str, **kwargs):
         super().__init__(description=description, **kwargs)
         self._add_annual_argument()
+        # Add parallel processing support
+        self.add_parallel_processing_arguments()
 
     def _add_annual_argument(self) -> None:
         """Add annual aggregation argument."""
