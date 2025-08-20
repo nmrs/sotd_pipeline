@@ -192,6 +192,42 @@ class BaseTableGenerator(ABC):
         # Default to "name" - subclasses can override
         return "name"
 
+    def _format_ranks_with_ties(self, ranks: list[int]) -> list[str]:
+        """Format numeric ranks with tie indicators.
+
+        Args:
+            ranks: List of numeric rank values (e.g., [1, 2, 2, 3])
+
+        Returns:
+            List of formatted rank strings with tie indicators (e.g., ["1", "2=", "2=", "3"])
+        """
+        if not ranks:
+            return []
+
+        if len(ranks) == 1:
+            return [str(ranks[0])]
+
+        formatted = []
+        for i, rank in enumerate(ranks):
+            # Check if this rank is tied with the next rank (forward-looking)
+            # or if this rank is tied with the previous rank (backward-looking)
+            is_tied = False
+
+            # Check if tied with next rank
+            if i < len(ranks) - 1 and rank == ranks[i + 1]:
+                is_tied = True
+
+            # Check if tied with previous rank
+            if i > 0 and rank == ranks[i - 1]:
+                is_tied = True
+
+            if is_tied:
+                formatted.append(f"{rank}=")
+            else:
+                formatted.append(str(rank))
+
+        return formatted
+
     @classmethod
     def create_standard_product_table(
         cls,
