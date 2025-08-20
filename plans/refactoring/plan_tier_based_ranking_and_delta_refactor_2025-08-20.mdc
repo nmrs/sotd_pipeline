@@ -32,7 +32,263 @@ Refactor the SOTD Pipeline aggregator system to implement tier-based ranking ins
 - **4.0**: Fix critical test failures caused by "position" vs "rank" field mismatch - 95% COMPLETE ✅
 - **4.1**: Add rank column to all report tables - COMPLETED ✅
 - **4.2**: Update table generators to use new ranking system - COMPLETED ✅
-- **4.3**: Ensure consistent rank display across all report types - IN PROGRESS
+- **4.3**: Ensure consistent rank display across all report types - COMPLETED ✅
+- **4.4**: Fix field name consistency between aggregator implementations and test data - PENDING
+
+### Phase 4.4: Fix Field Name Consistency Between Aggregator Implementations and Test Data (CRITICAL - PENDING)
+
+**Status**: PENDING - Critical architectural issue discovered during Phase 5 testing  
+**Priority**: HIGH - Blocking further test progress  
+**Scope**: Update soap aggregator implementations to use consistent field naming
+
+#### 📋 **Phase 4.4 Overview**
+
+**Problem Identified**: During Phase 5 testing, discovered fundamental incompatibility between test data structure and aggregator implementation code.
+
+**Root Cause**: 
+- Test data has been updated to use "maker" field for soap products (consistent with soap matcher output)
+- Aggregator implementations still expect "brand" field internally
+- This creates a mismatch where aggregators cannot process the data correctly
+
+**Impact**: 
+- Tests fail even after updating test data to use correct field names
+- Aggregators return empty results when processing "maker" field data
+- Blocking progress on Phase 5 testing and validation
+
+**Solution**: Update aggregator implementations to use "maker" field consistently, OR revert to "brand" field across the entire pipeline for consistency with other product types.
+
+#### 🔍 **Analysis of Current State**
+
+**Field Usage Across Product Types**:
+- **Razor**: Uses "brand" field consistently
+- **Blade**: Uses "brand" field consistently  
+- **Brush**: Uses "brand" field consistently
+- **Soap**: Currently uses "maker" field (inconsistent with other types)
+
+**Data Flow Analysis**:
+1. **Extract Phase**: Extracts soap mentions from SOTD comments
+2. **Match Phase**: Soap matcher returns `{"maker": "Brand Name", "scent": "Scent Name"}`
+3. **Aggregate Phase**: Soap aggregators expect `{"brand": "Brand Name"}` but receive `{"maker": "Brand Name"}`
+4. **Result**: Aggregators fail to process data, return empty results
+
+**Files Requiring Updates**:
+- `sotd/aggregate/aggregators/users/soap_brand_scent_diversity_aggregator.py`
+- `sotd/aggregate/aggregators/users/soap_sample_brand_aggregator.py`
+- `sotd/aggregate/aggregators/core/soap_sample_brand_scent_aggregator.py`
+- `sotd/match/soap_matcher.py` (if changing to "brand")
+- All related test files
+
+#### 🎯 **Recommended Approach: Standardize on "brand" Field**
+
+**Rationale**: 
+- Maintains consistency with other product types (razor, blade, brush)
+- Reduces cognitive load for developers and maintainers
+- Follows established patterns in the codebase
+- Easier to implement and test
+
+**Implementation Strategy**:
+1. **Update soap matcher** to return "brand" instead of "maker"
+2. **Update soap catalog structure** to use "brand" terminology
+3. **Update aggregator implementations** to expect "brand" field
+4. **Update test data** to use "brand" field consistently
+5. **Validate** all soap-related functionality works correctly
+
+#### 🔁 **Implementation Prompts**
+
+##### Step 4.4.1: Update Soap Matcher to Use "brand" Field
+
+```text
+Update the soap matcher to return "brand" field instead of "maker" field for consistency with other product types.
+
+## Requirements
+
+### Core Functionality
+- Change soap matcher output from "maker" to "brand" field
+- Maintain all existing matching logic and functionality
+- Ensure backward compatibility for downstream processing
+- Update internal variable names and documentation
+
+### Technical Specifications
+- File: `sotd/match/soap_matcher.py`
+- Field change: "maker" → "brand" throughout the class
+- Output format: `{"brand": "Brand Name", "scent": "Scent Name"}`
+- Internal variables: Update all "maker" references to "brand"
+
+### Implementation Approach
+- Search and replace "maker" with "brand" in field references
+- Update method docstrings and comments
+- Update internal variable names for consistency
+- Ensure all match result structures use "brand" field
+- Update any hardcoded field references
+
+## Test Requirements
+
+### Unit Tests
+- **Test field name consistency**: Verify all outputs use "brand" field
+- **Test matching functionality**: Ensure soap matching still works correctly
+- **Test output structure**: Validate match result format is correct
+- **Test edge cases**: Handle empty/missing brand scenarios
+
+### Test Data Requirements
+- Test with various soap brand names and scents
+- Verify "brand" field is present in all match results
+- Test with existing soap catalog entries
+
+## Success Criteria
+- [ ] Soap matcher returns "brand" field instead of "maker" field
+- [ ] All internal references updated for consistency
+- [ ] Matching functionality preserved
+- [ ] All unit tests pass
+- [ ] Output structure matches expected format
+```
+
+##### Step 4.4.2: Update Soap Aggregator Implementations
+
+```text
+Update all soap aggregator implementations to use "brand" field consistently instead of "maker" field.
+
+## Requirements
+
+### Core Functionality
+- Update aggregator code to expect "brand" field in input data
+- Maintain all existing aggregation logic and functionality
+- Ensure consistent field naming across all soap aggregators
+- Update internal processing to use "brand" field
+
+### Technical Specifications
+- Files to update:
+  - `sotd/aggregate/aggregators/users/soap_brand_scent_diversity_aggregator.py`
+  - `sotd/aggregate/aggregators/users/soap_sample_brand_aggregator.py`
+  - `sotd/aggregate/aggregators/core/soap_sample_brand_scent_aggregator.py`
+- Field change: "maker" → "brand" throughout all implementations
+- Input processing: Expect "brand" field in matched soap data
+- Output consistency: Maintain existing output structure
+
+### Implementation Approach
+- Search and replace "maker" with "brand" in field references
+- Update data extraction logic to look for "brand" field
+- Update internal variable names for consistency
+- Ensure all aggregation methods use "brand" field
+- Update any hardcoded field references
+
+## Test Requirements
+
+### Unit Tests
+- **Test field processing**: Verify aggregators process "brand" field correctly
+- **Test aggregation logic**: Ensure aggregation functionality preserved
+- **Test output consistency**: Validate output structure matches expectations
+- **Test edge cases**: Handle missing/invalid brand data
+
+### Integration Tests
+- Test with actual soap matcher output (now using "brand" field)
+- Verify end-to-end data flow from match to aggregate phase
+- Test with real SOTD data structure
+
+## Success Criteria
+- [ ] All soap aggregators expect "brand" field in input data
+- [ ] Aggregation functionality preserved and working
+- [ ] Field naming consistent across all soap aggregators
+- [ ] All unit tests pass
+- [ ] Integration tests validate end-to-end data flow
+```
+
+##### Step 4.4.3: Update Test Data and Assertions
+
+```text
+Update all soap-related test files to use "brand" field consistently instead of "maker" field.
+
+## Requirements
+
+### Core Functionality
+- Update test data to use "brand" field in soap records
+- Update test assertions to expect "brand" field in outputs
+- Ensure all soap tests use consistent field naming
+- Maintain test coverage and functionality
+
+### Technical Specifications
+- Test files to update:
+  - `tests/aggregate/test_soap_brand_scent_diversity_aggregator.py`
+  - `tests/aggregate/test_soap_sample_brand_aggregator.py`
+  - `tests/aggregate/test_soap_sample_brand_scent_aggregator.py`
+  - `tests/match/test_soap_matcher.py`
+- Field change: "maker" → "brand" in all test data and assertions
+- Test data structure: Update mock soap records to use "brand" field
+- Assertions: Update all field checks to expect "brand" field
+
+### Implementation Approach
+- Search and replace "maker" with "brand" in test data
+- Update test assertions to check for "brand" field
+- Ensure test data structure matches expected input format
+- Update any hardcoded field references in tests
+- Validate all tests pass with new field structure
+
+## Test Requirements
+
+### Test Validation
+- **Test data consistency**: Verify all test data uses "brand" field
+- **Test assertion updates**: Ensure all field checks use "brand" field
+- **Test functionality**: Validate all test scenarios still work correctly
+- **Test coverage**: Maintain existing test coverage levels
+
+### Integration Validation
+- Run all soap-related tests to ensure they pass
+- Verify test data structure matches aggregator expectations
+- Test with updated aggregator implementations
+
+## Success Criteria
+- [ ] All test data uses "brand" field consistently
+- [ ] All test assertions check for "brand" field
+- [ ] All soap-related tests pass
+- [ ] Test data structure matches aggregator expectations
+- [ ] Field naming consistent across all test files
+```
+
+##### Step 4.4.4: Validate End-to-End Data Flow
+
+```text
+Validate that the complete soap data flow works correctly with "brand" field consistency.
+
+## Requirements
+
+### Core Functionality
+- Test complete data flow from extract → match → aggregate phases
+- Verify soap matching produces correct "brand" field output
+- Validate aggregators process "brand" field data correctly
+- Ensure end-to-end functionality works as expected
+
+### Technical Specifications
+- Test complete pipeline workflow with soap data
+- Validate field consistency across all phases
+- Test with real SOTD data structure
+- Verify no data loss or corruption during processing
+
+### Implementation Approach
+- Run integration tests with real soap data
+- Validate field names are consistent throughout pipeline
+- Test aggregator output matches expected structure
+- Verify no regression in existing functionality
+
+## Test Requirements
+
+### Integration Tests
+- **End-to-end workflow**: Test complete soap processing pipeline
+- **Field consistency**: Verify "brand" field maintained throughout
+- **Data integrity**: Ensure no data loss during processing
+- **Performance**: Validate no performance regression
+
+### Validation Tests
+- Test with various soap brands and scents
+- Verify aggregation results are correct
+- Test edge cases and error scenarios
+- Validate output format matches expectations
+
+## Success Criteria
+- [ ] Complete soap data flow works correctly
+- [ ] Field consistency maintained throughout pipeline
+- [ ] No data loss or corruption during processing
+- [ ] All integration tests pass
+- [ ] Performance maintained or improved
+```
 
 ### Phase 5: Testing and Validation
 - **5.1**: Integration tests with real data - PENDING
@@ -2651,10 +2907,11 @@ Test requirements:
 **Status**: Phase 4.3 COMPLETED ✅
 
 ### 📈 **OVERALL PROGRESS**
-- **Total Phases**: 5 main phases
-- **Completed**: 4.3 out of 5 phases (86% complete)
+- **Total Phases**: 5 main phases + 1 critical phase added
+- **Completed**: 4.3 out of 6 phases (72% complete)
 - **Critical Issues**: 95% resolved (97+ → 17 test failures)
 - **System Health**: Field consistency achieved, rank column working, deltas functional, table generators updated, field names consistent
+- **NEW PHASE ADDED**: Phase 4.4 for field name consistency between aggregator implementations and test data
 
 ### 🚨 **CRITICAL DISCOVERIES IN PHASE 5**
 
@@ -2669,9 +2926,13 @@ Test requirements:
 
 ## Next Steps
 
-1. **Complete Phase 4.0**: Fix remaining 3 test failures (indentation issues in brush specialized tests)
-2. **Address Critical Architectural Issue**: Update soap aggregator implementations to use "maker" field instead of "brand" field
-3. **Continue Phase 5**: Testing and Validation with updated aggregator implementations
+1. **Start Phase 4.4**: Fix field name consistency between aggregator implementations and test data
+   - **Step 4.4.1**: Update soap matcher to use "brand" field instead of "maker" field
+   - **Step 4.4.2**: Update soap aggregator implementations to expect "brand" field
+   - **Step 4.4.3**: Update test data and assertions to use "brand" field consistently
+   - **Step 4.4.4**: Validate end-to-end data flow with "brand" field consistency
+2. **Complete Phase 4.0**: Fix remaining 3 test failures (indentation issues in brush specialized tests)
+3. **Continue Phase 5**: Testing and Validation with consistent field naming
 4. **Implement incrementally** with testing at each step
 5. **Validate each phase** before proceeding to the next
 6. **Monitor performance** throughout implementation
@@ -2679,6 +2940,7 @@ Test requirements:
 
 **Phase 4.3 COMPLETED ✅**: Field name consistency achieved across all test files, reducing test failures from 44 to 17.
 **NEW REQUIREMENT**: Aggregator implementations need field name updates to match test data structure.
+**SOLUTION PLANNED**: Standardize on "brand" field across all product types for consistency.
 
 This refactoring will significantly improve the user experience by providing accurate, intuitive ranking information and delta calculations that reflect actual ranking improvements rather than sequential position changes.
 description:
