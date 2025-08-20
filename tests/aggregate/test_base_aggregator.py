@@ -106,13 +106,13 @@ class TestBaseAggregator:
         assert len(result) == 2
 
         # Check first item (Brand1 Model1 - 2 shaves, 2 users)
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[0]["name"] == "Brand1 Model1"
         assert result[0]["shaves"] == 2
         assert result[0]["unique_users"] == 2
 
         # Check second item (Brand2 Model2 - 1 shave, 1 user)
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
         assert result[1]["name"] == "Brand2 Model2"
         assert result[1]["shaves"] == 1
         assert result[1]["unique_users"] == 1
@@ -228,8 +228,174 @@ class TestBaseAggregator:
         data["field4"] = ""  # Use empty string instead of None
         assert aggregator._validate_required_fields(data, ["field1", "field4"]) is False
 
-    def test_position_ranking(self):
-        """Test that position rankings are correctly assigned."""
+    def test_rank_assignment(self):
+        """Test that rank assignments are correctly assigned."""
+        records = [
+            # Brand1 Model1: 3 shaves, 1 user (rank 1)
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user1",
+            },
+            # Brand2 Model2: 2 shaves, 1 user (rank 2)
+            {
+                "test_product": {"matched": {"brand": "Brand2", "model": "Model2"}},
+                "author": "user2",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand2", "model": "Model2"}},
+                "author": "user2",
+            },
+            # Brand3 Model3: 1 shave, 1 user (rank 3)
+            {
+                "test_product": {"matched": {"brand": "Brand3", "model": "Model3"}},
+                "author": "user3",
+            },
+        ]
+
+        aggregator = TestAggregator()
+        result = aggregator.aggregate(records)
+
+        # Check that ranks are 1-based and sequential
+        assert result[0]["rank"] == 1  # Brand1 Model1: 3 shaves
+        assert result[1]["rank"] == 2  # Brand2 Model2: 2 shaves
+        assert result[2]["rank"] == 3  # Brand3 Model3: 1 shave
+
+    def test_data_types_in_result(self):
+        """Test that result data types are correct."""
+        records = [
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user1",
+            },
+        ]
+
+        aggregator = TestAggregator()
+        result = aggregator.aggregate(records)
+
+        assert len(result) == 1
+        item = result[0]
+
+        # Check data types
+        assert isinstance(item["rank"], int)
+        assert isinstance(item["shaves"], int)
+        assert isinstance(item["unique_users"], int)
+        assert isinstance(item["name"], str)
+
+    # New tests for tier-based ranking functionality
+    def test_tie_columns_property_default(self):
+        """Test that tie_columns property has correct default value."""
+        aggregator = TestAggregator()
+        assert aggregator.tie_columns == ["shaves", "unique_users"]
+
+    def test_tie_columns_property_override(self):
+        """Test that subclasses can override tie_columns property."""
+
+        class TestAggregatorCustomTies(TestAggregator):
+            tie_columns = ["shaves"]  # Only shaves matter for ties
+
+        aggregator = TestAggregatorCustomTies()
+        assert aggregator.tie_columns == ["shaves"]
+
+    def test_tier_based_ranking_no_ties(self):
+        """Test tier-based ranking when no items are tied."""
+        records = [
+            # Brand1 Model1: 3 shaves, 1 user (rank 1)
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user1",
+            },
+            # Brand2 Model2: 2 shaves, 1 user (rank 2)
+            {
+                "test_product": {"matched": {"brand": "Brand2", "model": "Model2"}},
+                "author": "user2",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand2", "model": "Model2"}},
+                "author": "user2",
+            },
+            # Brand3 Model3: 1 shave, 1 user (rank 3)
+            {
+                "test_product": {"matched": {"brand": "Brand3", "model": "Model3"}},
+                "author": "user3",
+            },
+        ]
+
+        aggregator = TestAggregator()
+        result = aggregator.aggregate(records)
+
+        # Check that ranks are sequential when no ties
+        assert result[0]["rank"] == 1  # Brand1 Model1: 3 shaves
+        assert result[1]["rank"] == 2  # Brand2 Model2: 2 shaves
+        assert result[2]["rank"] == 3  # Brand3 Model3: 1 shave
+
+    def test_tier_based_ranking_with_ties(self):
+        """Test tier-based ranking when items have identical values."""
+        records = [
+            # Brand1 Model1: 10 shaves, 3 users (rank 1)
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user2",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user3",
+            },
+            # Brand2 Model2: 8 shaves, 2 users (rank 2, tied)
+            {
+                "test_product": {"matched": {"brand": "Brand2", "model": "Model2"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand2", "model": "Model2"}},
+                "author": "user2",
+            },
+            # Brand3 Model3: 8 shaves, 2 users (rank 2, tied)
+            {
+                "test_product": {"matched": {"brand": "Brand3", "model": "Model3"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand3", "model": "Model3"}},
+                "author": "user2",
+            },
+            # Brand4 Model4: 8 shaves, 1 user (rank 3)
+            {
+                "test_product": {"matched": {"brand": "Brand4", "model": "Model4"}},
+                "author": "user1",
+            },
+        ]
+
+        aggregator = TestAggregator()
+        result = aggregator.aggregate(records)
+
+        # Check tier-based ranking
+        assert result[0]["rank"] == 1  # Brand1 Model1: 3 shaves, 3 users
+        assert result[1]["rank"] == 2  # Brand2 Model2: 2 shaves, 2 users (tied)
+        assert result[2]["rank"] == 2  # Brand3 Model3: 2 shaves, 2 users (tied)
+        assert result[3]["rank"] == 3  # Brand4 Model4: 1 shave, 1 user
+
+    def test_tier_based_ranking_all_tied(self):
+        """Test tier-based ranking when all items have identical values."""
         records = [
             {
                 "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
@@ -248,12 +414,13 @@ class TestBaseAggregator:
         aggregator = TestAggregator()
         result = aggregator.aggregate(records)
 
-        # Check that positions are 1-based and sequential
-        for i, item in enumerate(result):
-            assert item["position"] == i + 1
+        # All items have 1 shave, 1 user, so they should all be tied at rank 1
+        assert result[0]["rank"] == 1
+        assert result[1]["rank"] == 1
+        assert result[2]["rank"] == 1
 
-    def test_data_types_in_result(self):
-        """Test that result data types are correct."""
+    def test_tier_based_ranking_field_name_change(self):
+        """Test that output field changed from 'position' to 'rank'."""
         records = [
             {
                 "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
@@ -264,11 +431,48 @@ class TestBaseAggregator:
         aggregator = TestAggregator()
         result = aggregator.aggregate(records)
 
-        assert len(result) == 1
-        item = result[0]
+        # Should have 'rank' field, not 'position'
+        assert "rank" in result[0]
+        assert "position" not in result[0]
+        assert result[0]["rank"] == 1
 
-        # Check data types
-        assert isinstance(item["position"], int)
-        assert isinstance(item["shaves"], int)
-        assert isinstance(item["unique_users"], int)
-        assert isinstance(item["name"], str)
+    def test_tier_based_ranking_custom_tie_columns(self):
+        """Test tier-based ranking with custom tie_columns."""
+
+        class TestAggregatorCustomTies(TestAggregator):
+            tie_columns = ["shaves"]  # Only shaves matter for ties
+
+        records = [
+            # Brand1 Model1: 1 shave, 1 user (rank 2, tied on shaves only)
+            {
+                "test_product": {"matched": {"brand": "Brand1", "model": "Model1"}},
+                "author": "user1",
+            },
+            # Brand2 Model2: 1 shave, 1 user (rank 2, tied on shaves only)
+            {
+                "test_product": {"matched": {"brand": "Brand2", "model": "Model2"}},
+                "author": "user2",
+            },
+            # Brand3 Model3: 3 shaves, 3 users (rank 1)
+            {
+                "test_product": {"matched": {"brand": "Brand3", "model": "Model3"}},
+                "author": "user1",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand3", "model": "Model3"}},
+                "author": "user2",
+            },
+            {
+                "test_product": {"matched": {"brand": "Brand3", "model": "Model3"}},
+                "author": "user3",
+            },
+        ]
+
+        aggregator = TestAggregatorCustomTies()
+        result = aggregator.aggregate(records)
+
+        # Check that only shaves matter for ties
+        # Brand3 should be rank 1 (3 shaves), Brand1 and Brand2 should be tied at rank 2
+        assert result[0]["rank"] == 1  # Brand3 Model3: 3 shaves
+        assert result[1]["rank"] == 2  # Brand1 Model1: 1 shave (tied)
+        assert result[2]["rank"] == 2  # Brand2 Model2: 1 shave (tied)
