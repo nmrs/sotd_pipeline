@@ -84,6 +84,13 @@ class AggregateCLIParser(BaseCLIParser):
         )
         self.add_argument("--end", type=self._validate_month, help="End month for range (YYYY-MM)")
 
+        # Add support for delta-months argument (used by main pipeline for delta calculations)
+        # This argument is processed by month_span() function, not directly by the parser
+        self.add_argument(
+            "--delta-months",
+            help="Comma-separated list of months for delta calculations (internal use)",
+        )
+
     def validate_args(self, args: argparse.Namespace) -> argparse.Namespace:
         """Validate parsed arguments with annual aggregation rules."""
         # First run base validation

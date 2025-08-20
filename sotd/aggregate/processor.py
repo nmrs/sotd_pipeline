@@ -124,12 +124,34 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
         Dictionary containing all aggregated data with metadata
     """
     # Validate and normalize records
-    records = validate_records(records)
-    records = normalize_fields(records)
-    check_data_quality(records)
+    try:
+        records = validate_records(records)
+    except Exception as e:
+        if debug:
+            print(f"[DEBUG] Record validation failed: {e}")
+        raise
+    
+    try:
+        records = normalize_fields(records)
+    except Exception as e:
+        if debug:
+            print(f"[DEBUG] Field normalization failed: {e}")
+        raise
+    
+    try:
+        check_data_quality(records)
+    except Exception as e:
+        if debug:
+            print(f"[DEBUG] Data quality check failed: {e}")
+        raise
 
     # Generate metadata
-    meta = calculate_metadata(records, month)
+    try:
+        meta = calculate_metadata(records, month)
+    except Exception as e:
+        if debug:
+            print(f"[DEBUG] Metadata calculation failed: {e}")
+        raise
 
     # Run all aggregators
     aggregated_data = {
@@ -138,13 +160,42 @@ def aggregate_all(records: List[Dict[str, Any]], month: str, debug: bool = False
     }
 
     # Core product aggregations
-    aggregated_data["data"]["razors"] = aggregate_razors(records)
-    aggregated_data["data"]["blades"] = aggregate_blades(records)
-    aggregated_data["data"]["blade_usage_distribution"] = aggregate_blade_usage_distribution(
-        records
-    )
-    aggregated_data["data"]["brushes"] = aggregate_brushes(records)
-    aggregated_data["data"]["soaps"] = aggregate_soaps(records)
+    try:
+        aggregated_data["data"]["razors"] = aggregate_razors(records)
+    except Exception as e:
+        if debug:
+            print(f"[DEBUG] Razor aggregation failed: {e}")
+        aggregated_data["data"]["razors"] = []
+    
+    try:
+        aggregated_data["data"]["blades"] = aggregate_blades(records)
+    except Exception as e:
+        if debug:
+            print(f"[DEBUG] Blade aggregation failed: {e}")
+        aggregated_data["data"]["blades"] = []
+    
+    try:
+        aggregated_data["data"]["blade_usage_distribution"] = aggregate_blade_usage_distribution(
+            records
+        )
+    except Exception as e:
+        if debug:
+            print(f"[DEBUG] Blade usage distribution aggregation failed: {e}")
+        aggregated_data["data"]["blade_usage_distribution"] = []
+    
+    try:
+        aggregated_data["data"]["brushes"] = aggregate_brushes(records)
+    except Exception as e:
+        if debug:
+            print(f"[DEBUG] Brush aggregation failed: {e}")
+        aggregated_data["data"]["brushes"] = []
+    
+    try:
+        aggregated_data["data"]["soaps"] = aggregate_soaps(records)
+    except Exception as e:
+        if debug:
+            print(f"[DEBUG] Soap aggregation failed: {e}")
+        aggregated_data["data"]["soaps"] = []
 
     # Sample aggregations
     aggregated_data["data"]["soap_sample_brands"] = aggregate_soap_sample_brands(records)

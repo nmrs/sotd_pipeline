@@ -24,7 +24,7 @@ def aggregate_blade_usage_distribution(records: List[Dict[str, Any]]) -> List[Di
     # Extract blade usage data from records
     usage_data = []
     for record in records:
-        blade = record.get("blade", {})
+        blade = record.get("blade") or {}
         blade_matched = blade.get("matched", {})
         blade_enriched = blade.get("enriched", {})
         # Also check for blade_enriched at top level (for test compatibility)

@@ -61,7 +61,9 @@ def calculate_unique_soaps(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique soaps from records."""
     soaps = set()
     for record in records:
-        soap = record.get("soap", {})
+        soap = record.get("soap")
+        if soap is None:
+            continue
         matched = soap.get("matched", {})
 
         # Skip if no matched soap data
@@ -82,7 +84,9 @@ def calculate_unique_brands(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique soap brands/makers from records."""
     brands = set()
     for record in records:
-        soap = record.get("soap", {})
+        soap = record.get("soap")
+        if soap is None:
+            continue
         matched = soap.get("matched", {})
 
         # Skip if no matched soap data or no maker
@@ -101,7 +105,9 @@ def calculate_total_samples(records: List[Dict[str, Any]]) -> int:
     """Calculate total number of sample shaves from records."""
     total_samples = 0
     for record in records:
-        soap = record.get("soap", {})
+        soap = record.get("soap")
+        if soap is None:
+            continue
         enriched = soap.get("enriched", {})
         if enriched.get("sample_type"):
             total_samples += 1

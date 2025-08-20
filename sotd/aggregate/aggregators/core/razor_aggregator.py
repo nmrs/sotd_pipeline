@@ -19,7 +19,7 @@ class RazorAggregator(BaseAggregator):
         """
         razor_data = []
         for record in records:
-            razor = record.get("razor", {})
+            razor = record.get("razor") or {}
             matched = razor.get("matched", {})
 
             # Skip if no matched razor data

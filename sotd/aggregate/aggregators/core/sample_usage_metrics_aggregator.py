@@ -33,19 +33,25 @@ def aggregate_sample_usage_metrics(records: List[Dict[str, Any]]) -> Dict[str, A
     sample_brands = set()
 
     for record in records:
-        soap = record.get("soap", {})
+        soap = record.get("soap")
+        if soap is None:
+            continue
         enriched = soap.get("enriched", {})
 
         if enriched.get("sample_type"):
             total_samples += 1
+            
+            # Safely get matched data
+            matched = soap.get("matched") or {}
+            
             sample_records.append(
                 {
                     "author": record.get("author", ""),
                     "sample_type": enriched.get("sample_type"),
                     "sample_number": enriched.get("sample_number"),
                     "total_samples": enriched.get("total_samples"),
-                    "brand": soap.get("matched", {}).get("brand", ""),
-                    "scent": soap.get("matched", {}).get("scent", ""),
+                    "brand": matched.get("brand", ""),
+                    "scent": matched.get("scent", ""),
                 }
             )
 
@@ -58,7 +64,7 @@ def aggregate_sample_usage_metrics(records: List[Dict[str, Any]]) -> Dict[str, A
             if author:
                 sample_users.add(author)
 
-            brand = soap.get("matched", {}).get("maker", "")
+            brand = matched.get("maker", "")
             if brand:
                 sample_brands.add(brand)
 

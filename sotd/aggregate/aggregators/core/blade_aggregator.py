@@ -19,7 +19,7 @@ class BladeAggregator(BaseAggregator):
         """
         blade_data = []
         for record in records:
-            blade = record.get("blade", {})
+            blade = record.get("blade") or {}
             matched = blade.get("matched", {})
 
             # Skip if no matched blade data

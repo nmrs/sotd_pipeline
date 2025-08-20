@@ -19,7 +19,7 @@ class SoapAggregator(BaseAggregator):
         """
         soap_data = []
         for record in records:
-            soap = record.get("soap", {})
+            soap = record.get("soap") or {}
             matched = soap.get("matched", {})
 
             # Skip if no matched soap data
