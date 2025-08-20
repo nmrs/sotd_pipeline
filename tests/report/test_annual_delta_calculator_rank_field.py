@@ -157,14 +157,14 @@ class TestAnnualDeltaCalculatorRankField:
         # Empty current year data
         result = calculator.calculate_annual_deltas(
             {"year": "2024", "meta": {}, "data": {}},
-            {"year": "2023", "meta": {}, "data": {"razors": [{"name": "Razor A", "rank": 1}]}}
+            {"year": "2023", "meta": {}, "data": {"razors": [{"name": "Razor A", "rank": 1}]}},
         )
         assert result == {}
 
         # Empty previous year data
         result = calculator.calculate_annual_deltas(
             {"year": "2024", "meta": {}, "data": {"razors": [{"name": "Razor A", "rank": 1}]}},
-            {"year": "2023", "meta": {}, "data": {}}
+            {"year": "2023", "meta": {}, "data": {}},
         )
         razors = result["razors"]
         assert len(razors) == 1
@@ -355,9 +355,9 @@ class TestAnnualDeltaCalculatorRankField:
             "data": {
                 "razors": [
                     {"name": "Razor A", "shaves": 100, "rank": 1},  # Tier 1
-                    {"name": "Razor B", "shaves": 80, "rank": 2},   # Tier 2 (tied)
-                    {"name": "Razor C", "shaves": 80, "rank": 2},   # Tier 2 (tied)
-                    {"name": "Razor D", "shaves": 60, "rank": 3},   # Tier 3
+                    {"name": "Razor B", "shaves": 80, "rank": 2},  # Tier 2 (tied)
+                    {"name": "Razor C", "shaves": 80, "rank": 2},  # Tier 2 (tied)
+                    {"name": "Razor D", "shaves": 60, "rank": 3},  # Tier 3
                 ],
             },
         }
@@ -366,10 +366,10 @@ class TestAnnualDeltaCalculatorRankField:
             "year": "2023",
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "rank": 2},   # Was in Tier 2
+                    {"name": "Razor A", "shaves": 90, "rank": 2},  # Was in Tier 2
                     {"name": "Razor B", "shaves": 100, "rank": 1},  # Was in Tier 1
-                    {"name": "Razor C", "shaves": 90, "rank": 2},   # Was in Tier 2
-                    {"name": "Razor D", "shaves": 70, "rank": 3},   # Was in Tier 3
+                    {"name": "Razor C", "shaves": 90, "rank": 2},  # Was in Tier 2
+                    {"name": "Razor D", "shaves": 70, "rank": 3},  # Was in Tier 3
                 ],
             },
         }
@@ -423,6 +423,7 @@ class TestAnnualDeltaCalculatorRankField:
 
         # Measure performance
         import time
+
         start_time = time.time()
         result = calculator.calculate_annual_deltas(
             current_year_data, previous_year_data, max_items=100

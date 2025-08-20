@@ -71,18 +71,18 @@ class TestDeltaCalculatorRankField:
         """Test complex tier restructuring scenarios (splits and merges)."""
         current_data = [
             {"name": "Razor A", "shaves": 100, "rank": 1},  # Tier 1
-            {"name": "Razor B", "shaves": 80, "rank": 2},   # Tier 2
-            {"name": "Razor C", "shaves": 80, "rank": 2},   # Tier 2 (tied)
-            {"name": "Razor D", "shaves": 60, "rank": 3},   # Tier 3
-            {"name": "Razor E", "shaves": 60, "rank": 3},   # Tier 3 (tied)
+            {"name": "Razor B", "shaves": 80, "rank": 2},  # Tier 2
+            {"name": "Razor C", "shaves": 80, "rank": 2},  # Tier 2 (tied)
+            {"name": "Razor D", "shaves": 60, "rank": 3},  # Tier 3
+            {"name": "Razor E", "shaves": 60, "rank": 3},  # Tier 3 (tied)
         ]
 
         historical_data = [
-            {"name": "Razor A", "shaves": 85, "rank": 2},   # Was in Tier 2
-            {"name": "Razor B", "shaves": 90, "rank": 1},   # Was in Tier 1
-            {"name": "Razor C", "shaves": 85, "rank": 2},   # Still in Tier 2
-            {"name": "Razor D", "shaves": 70, "rank": 2},   # Was in Tier 2
-            {"name": "Razor E", "shaves": 65, "rank": 2},   # Was in Tier 2
+            {"name": "Razor A", "shaves": 85, "rank": 2},  # Was in Tier 2
+            {"name": "Razor B", "shaves": 90, "rank": 1},  # Was in Tier 1
+            {"name": "Razor C", "shaves": 85, "rank": 2},  # Still in Tier 2
+            {"name": "Razor D", "shaves": 70, "rank": 2},  # Was in Tier 2
+            {"name": "Razor E", "shaves": 65, "rank": 2},  # Was in Tier 2
         ]
 
         calculator = DeltaCalculator()
@@ -113,44 +113,49 @@ class TestDeltaCalculatorRankField:
         # Create large dataset (1000+ items) for performance testing
         current_data = []
         historical_data = []
-        
+
         for i in range(1000):
-            current_data.append({
-                "name": f"Razor_{i:03d}",
-                "shaves": 1000 - i,
-                "rank": (i // 100) + 1  # Creates 10 tiers
-            })
-            
-            historical_data.append({
-                "name": f"Razor_{i:03d}",
-                "shaves": 1000 - i + (i % 3 - 1),  # Slight variations
-                "rank": ((i + 50) // 100) + 1  # Different tier distribution
-            })
+            current_data.append(
+                {
+                    "name": f"Razor_{i:03d}",
+                    "shaves": 1000 - i,
+                    "rank": (i // 100) + 1,  # Creates 10 tiers
+                }
+            )
+
+            historical_data.append(
+                {
+                    "name": f"Razor_{i:03d}",
+                    "shaves": 1000 - i + (i % 3 - 1),  # Slight variations
+                    "rank": ((i + 50) // 100) + 1,  # Different tier distribution
+                }
+            )
 
         calculator = DeltaCalculator()
-        
+
         # Measure performance
         import time
+
         start_time = time.time()
-        result = calculator.calculate_deltas(
-            current_data, historical_data, max_items=1000
-        )
+        result = calculator.calculate_deltas(current_data, historical_data, max_items=1000)
         end_time = time.time()
-        
+
         processing_time = end_time - start_time
-        
+
         # Validate results
         assert len(result) == 1000
         assert processing_time < 1.0  # Should complete within 1 second
-        
+
         # Validate some sample deltas
         assert result[0]["name"] == "Razor_000"
         assert result[999]["name"] == "Razor_999"
-        
+
         # Check that deltas are calculated correctly
         delta_values = [item["delta"] for item in result if item["delta"] is not None]
         assert len(delta_values) > 0  # Should have some valid deltas
-        assert all(isinstance(delta, int) for delta in delta_values)  # All deltas should be integers
+        assert all(
+            isinstance(delta, int) for delta in delta_values
+        )  # All deltas should be integers
 
     def test_calculate_deltas_missing_rank_field(self):
         """Test delta calculation with missing rank fields."""
@@ -250,16 +255,16 @@ class TestDeltaCalculatorRankField:
         """Test that delta calculations reflect tier movements, not sequential positions."""
         current_data = [
             {"name": "Razor A", "shaves": 100, "rank": 1},  # Tier 1
-            {"name": "Razor B", "shaves": 80, "rank": 2},   # Tier 2
-            {"name": "Razor C", "shaves": 80, "rank": 2},   # Tier 2 (tied)
-            {"name": "Razor D", "shaves": 60, "rank": 3},   # Tier 3
+            {"name": "Razor B", "shaves": 80, "rank": 2},  # Tier 2
+            {"name": "Razor C", "shaves": 80, "rank": 2},  # Tier 2 (tied)
+            {"name": "Razor D", "shaves": 60, "rank": 3},  # Tier 3
         ]
 
         historical_data = [
-            {"name": "Razor A", "shaves": 85, "rank": 2},   # Was in Tier 2
-            {"name": "Razor B", "shaves": 90, "rank": 1},   # Was in Tier 1
-            {"name": "Razor C", "shaves": 85, "rank": 2},   # Still in Tier 2
-            {"name": "Razor D", "shaves": 70, "rank": 2},   # Was in Tier 2
+            {"name": "Razor A", "shaves": 85, "rank": 2},  # Was in Tier 2
+            {"name": "Razor B", "shaves": 90, "rank": 1},  # Was in Tier 1
+            {"name": "Razor C", "shaves": 85, "rank": 2},  # Still in Tier 2
+            {"name": "Razor D", "shaves": 70, "rank": 2},  # Was in Tier 2
         ]
 
         calculator = DeltaCalculator()
@@ -291,18 +296,18 @@ class TestDeltaCalculatorRankField:
         """Test tier-based delta calculation with complex tie scenarios."""
         current_data = [
             {"name": "Razor A", "shaves": 100, "rank": 1},  # Tier 1
-            {"name": "Razor B", "shaves": 80, "rank": 2},   # Tier 2 (tied)
-            {"name": "Razor C", "shaves": 80, "rank": 2},   # Tier 2 (tied)
-            {"name": "Razor D", "shaves": 80, "rank": 2},   # Tier 2 (tied)
-            {"name": "Razor E", "shaves": 60, "rank": 3},   # Tier 3
+            {"name": "Razor B", "shaves": 80, "rank": 2},  # Tier 2 (tied)
+            {"name": "Razor C", "shaves": 80, "rank": 2},  # Tier 2 (tied)
+            {"name": "Razor D", "shaves": 80, "rank": 2},  # Tier 2 (tied)
+            {"name": "Razor E", "shaves": 60, "rank": 3},  # Tier 3
         ]
 
         historical_data = [
-            {"name": "Razor A", "shaves": 85, "rank": 2},   # Was in Tier 2
-            {"name": "Razor B", "shaves": 90, "rank": 1},   # Was in Tier 1
-            {"name": "Razor C", "shaves": 85, "rank": 2},   # Still in Tier 2
-            {"name": "Razor D", "shaves": 70, "rank": 3},   # Was in Tier 3
-            {"name": "Razor E", "shaves": 65, "rank": 3},   # Still in Tier 3
+            {"name": "Razor A", "shaves": 85, "rank": 2},  # Was in Tier 2
+            {"name": "Razor B", "shaves": 90, "rank": 1},  # Was in Tier 1
+            {"name": "Razor C", "shaves": 85, "rank": 2},  # Still in Tier 2
+            {"name": "Razor D", "shaves": 70, "rank": 3},  # Was in Tier 3
+            {"name": "Razor E", "shaves": 65, "rank": 3},  # Still in Tier 3
         ]
 
         calculator = DeltaCalculator()
@@ -329,13 +334,13 @@ class TestDeltaCalculatorRankField:
         """Test tier-based delta calculation with new and removed items."""
         current_data = [
             {"name": "Razor A", "shaves": 100, "rank": 1},  # Tier 1
-            {"name": "Razor B", "shaves": 80, "rank": 2},   # Tier 2
+            {"name": "Razor B", "shaves": 80, "rank": 2},  # Tier 2
             {"name": "New Razor", "shaves": 70, "rank": 3},  # Tier 3 (new)
         ]
 
         historical_data = [
-            {"name": "Razor A", "shaves": 85, "rank": 2},   # Was in Tier 2
-            {"name": "Razor B", "shaves": 90, "rank": 1},   # Was in Tier 1
+            {"name": "Razor A", "shaves": 85, "rank": 2},  # Was in Tier 2
+            {"name": "Razor B", "shaves": 90, "rank": 1},  # Was in Tier 1
             # Removed Razor C (was in Tier 3)
         ]
 
