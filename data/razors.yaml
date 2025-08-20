@@ -1574,72 +1574,26 @@ Other Shavette (Disposable):
     patterns:
       - (?:cvs|kroger).*dermaplane
       - sassy.*eyebrow
-  Other Kamisori:
-    "":
+Other Kamisori:
+  "":
     format: Straight
     patterns:
       - kami
-  Other Straight Razor:
-    "":
+Other Straight Razor:
+  "":
     format: Straight
     patterns:
       - \d{1,2}/(8|16)
       - hollow
       - straight
       - wedge
-  # - (&|and)\s+son
-  # - 20th.*Century.*Mfg.*HH
-  # - alberta
-  # - bismarck
-  # - case.*red
-  # - cattaraugus
-  # - c-?mon
-  # - diamondine
-  # - ditzer
-  # - dorko
-  # - dubl ?duck
-  # - engels
-  # - efendi
-  # - frameback
-  # - fred.*Reynolds?
-  # - french.*point
-  # - friedr.*herd
-  # - gold.*dollar
-  # - goldedge
-  # - green.*lizard
-  # - hadoson
-  # - hero.*germany
-  # - joseph\s*(elliot|allen)
-  # - kobar
-  # - lee.*warrant
-  # - leger
-  # - le grelot
-  # - le thiernois
-  # - leresche
-  # - maher.*grosh
-  # - mclaughlin
-  # - otto.*busc?h
-  # - perfect temper
-  # - puma
-  # - red.*imp
-  # - robeson
-  # - shumate
-  # - s.? ?k.? colling
-  # - solingen
-  # - droescher
-  # - straight
-  # - sxdgs
-  # - suzumasa
-  # - thomas.*turner
-  # - tornblom
-  # - tonsorial
-  # - torrey
-  # - wacker
-  # - wester.*brothers
-  # - w[oe]stenholm
-  # - w.?\s?r.?\s?humphrey'?s
-  # - yankee.*cutlery
-  # - \bm\b.*karam
+      - frameback
+      - (&|and)\s+son
+      - french.*point
+      - spanish.*point
+      - barber.*notch
+      - solingen
+      - sheffield
 PAA:
   Alpha Ecliptic:
     patterns:

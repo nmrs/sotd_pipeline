@@ -105,7 +105,9 @@ def calculate_total_samples(records: List[Dict[str, Any]]) -> int:
     """Calculate total number of sample shaves from records."""
     total_samples = 0
     for record in records:
-        soap = record.get("soap", {})
+        soap = record.get("soap")
+        if soap is None:
+            continue
         enriched = soap.get("enriched", {})
         if enriched.get("sample_type"):
             total_samples += 1
@@ -116,7 +118,9 @@ def calculate_sample_users(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique users who used samples."""
     sample_users = set()
     for record in records:
-        soap = record.get("soap", {})
+        soap = record.get("soap")
+        if soap is None:
+            continue
         enriched = soap.get("enriched", {})
         if enriched.get("sample_type"):
             author = record.get("author", "").strip()
@@ -129,13 +133,15 @@ def calculate_sample_brands(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique brands sampled."""
     sample_brands = set()
     for record in records:
-        soap = record.get("soap", {})
-        enriched = soap.get("enriched", {})
-        if enriched.get("sample_type"):
-            matched = soap.get("matched", {})
-            brand = matched.get("maker", "").strip()
-            if brand:
-                sample_brands.add(brand)
+        soap = record.get("soap")
+        if soap is None:
+            continue
+        matched = soap.get("matched", {})
+        if matched is None:
+            continue
+        brand = matched.get("maker", "").strip()
+        if brand:
+            sample_brands.add(brand)
     return len(sample_brands)
 
 
