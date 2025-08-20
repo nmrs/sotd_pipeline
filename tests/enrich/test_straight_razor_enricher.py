@@ -326,20 +326,28 @@ class TestStraightRazorEnricher:
         assert "point" not in result
 
     def test_no_specifications_found(self, enricher):
-        """Test that None is returned when no specifications are found."""
+        """Test that steel defaults to Carbon even when no specifications are found."""
         comment = "Generic straight razor"
         result = enricher.enrich({}, comment)
-        assert result is None
+        assert result is not None
+        assert result["steel"] == "Carbon"
+        assert result["_extraction_source"] == "none"
 
     def test_case_insensitive_extraction(self, enricher):
-        """Test that extraction works regardless of case."""
+        """Test that extraction works regardless of case for all specification types."""
         test_cases = [
-            ("FULL HOLLOW 6/8 ROUND POINT", "Full Hollow", "6/8", "Round"),
-            ("Half Hollow 7/8 Square", "Half Hollow", "7/8", "Square"),
-            ("wedge 5/8", "Wedge", "5/8", None),
+            ("FULL HOLLOW 6/8 ROUND POINT", "Full Hollow", "6/8", "Round", None),
+            ("Half Hollow 7/8 Square", "Half Hollow", "7/8", "Square", None),
+            ("wedge 5/8", "Wedge", "5/8", None, None),
+            ("STAINLESS STEEL BLADE", None, None, None, "Stainless"),
+            ("carbon steel razor", None, None, None, "Carbon"),
+            ("INOX blade", None, None, None, "Stainless"),
+            ("ROSTFREI razor", None, None, None, "Stainless"),
+            ("FRIODUR blade", None, None, None, "Stainless"),
+            ("SS razor", None, None, None, "Stainless"),
         ]
 
-        for comment, expected_grind, expected_width, expected_point in test_cases:
+        for comment, expected_grind, expected_width, expected_point, expected_steel in test_cases:
             result = enricher.enrich({}, comment)
             assert result is not None, f"Failed for comment: {comment}"
             if expected_grind:
@@ -348,6 +356,8 @@ class TestStraightRazorEnricher:
                 assert result["width"] == expected_width, f"Failed for comment: {comment}"
             if expected_point:
                 assert result["point"] == expected_point, f"Failed for comment: {comment}"
+            if expected_steel:
+                assert result["steel"] == expected_steel, f"Failed for comment: {comment}"
 
     def test_real_world_examples(self, enricher):
         """Test with real-world comment examples."""
@@ -458,13 +468,18 @@ class TestStraightRazorEnricher:
         assert enricher._parse_catalog_width("3/4") == 6  # 3/4 = 6/8
 
     def test_enrich_no_specifications_anywhere(self, enricher):
-        """Test that no enriched data is returned when no specifications are found."""
+        """Test that steel defaults to Carbon even when no other specifications are found."""
         field_data = {"brand": "Generic", "model": "Straight Razor", "format": "Straight"}
         razor_extracted = field_data["model"]
 
         result = enricher.enrich(field_data, razor_extracted)
 
-        assert result is None
+        assert result is not None
+        assert result["steel"] == "Carbon"
+        assert result["_extraction_source"] == "none"
+        assert "grind" not in result
+        assert "width" not in result
+        assert "point" not in result
 
     def test_enrich_catalog_data_only(self, enricher):
         """Test enrichment with only catalog data (no user specifications)."""
@@ -532,3 +547,114 @@ class TestStraightRazorEnricher:
         result = enricher.enrich({}, comment)
         assert result is not None
         assert result["point"] == "Spanish"
+
+    def test_extract_steel_stainless(self, enricher):
+        """Test extraction of stainless steel."""
+        comment = "Stainless steel razor is rust-resistant"
+        result = enricher.enrich({}, comment)
+        assert result is not None
+        assert result["steel"] == "Stainless"
+
+    def test_extract_steel_stainless_steel(self, enricher):
+        """Test extraction of stainless steel with full phrase."""
+        comment = "Made from stainless steel for durability"
+        result = enricher.enrich({}, comment)
+        assert result is not None
+        assert result["steel"] == "Stainless"
+
+    def test_extract_steel_ss_abbreviation(self, enricher):
+        """Test extraction of SS abbreviation for stainless steel."""
+        comment = "SS blade holds its edge well"
+        result = enricher.enrich({}, comment)
+        assert result is not None
+        assert result["steel"] == "Stainless"
+
+    def test_extract_steel_case_insensitive(self, enricher):
+        """Test that steel extraction is case insensitive."""
+        test_cases = [
+            ("STAINLESS steel razor", "Stainless"),
+            ("Stainless Steel blade", "Stainless"),
+            ("SS razor", "Stainless"),
+            ("ss blade", "Stainless"),
+        ]
+
+        for comment, expected in test_cases:
+            result = enricher.enrich({}, comment)
+            assert result is not None, f"Failed for comment: {comment}"
+            assert result["steel"] == expected, f"Failed for comment: {comment}"
+
+    def test_extract_steel_international_terms(self, enricher):
+        """Test extraction of international stainless steel terms."""
+        test_cases = [
+            ("Inox razor from France", "Stainless"),
+            ("German rostfrei blade", "Stainless"),
+            ("Henckels Friodur steel", "Stainless"),
+            ("INOX straight razor", "Stainless"),
+            ("ROSTFREI blade", "Stainless"),
+            ("friodur steel razor", "Stainless"),
+        ]
+
+        for comment, expected in test_cases:
+            result = enricher.enrich({}, comment)
+            assert result is not None, f"Failed for comment: {comment}"
+            assert result["steel"] == expected, f"Failed for comment: {comment}"
+
+    def test_steel_defaults_to_carbon(self, enricher):
+        """Test that steel defaults to Carbon when not specified."""
+        comment = "Full hollow 6/8 round point"
+        result = enricher.enrich({}, comment)
+        assert result is not None
+        assert result["steel"] == "Carbon"
+        assert result["grind"] == "Full Hollow"
+        assert result["width"] == "6/8"
+        assert result["point"] == "Round"
+
+    def test_user_steel_overrides_default(self, enricher):
+        """Test that user-specified steel overrides the Carbon default."""
+        comment = "Full hollow 6/8 stainless steel round point"
+        result = enricher.enrich({}, comment)
+        assert result is not None
+        assert result["steel"] == "Stainless"
+        assert result["grind"] == "Full Hollow"
+        assert result["width"] == "6/8"
+        assert result["point"] == "Round"
+
+    def test_catalog_steel_overrides_default(self, enricher):
+        """Test that catalog steel overrides the Carbon default."""
+        field_data = {
+            "brand": "Dovo",
+            "model": "Straight",
+            "format": "Straight",
+            "grind": "Full Hollow",
+            "width": "6/8",
+            "steel": "Stainless",
+        }
+        razor_extracted = field_data["model"]
+
+        result = enricher.enrich(field_data, razor_extracted)
+
+        assert result is not None
+        assert result["steel"] == "Stainless"
+        assert result["grind"] == "Full Hollow"
+        assert result["width"] == "6/8"
+        assert result["_extraction_source"] == "catalog_data"
+
+    def test_user_steel_overrides_catalog_steel(self, enricher):
+        """Test that user steel takes precedence over catalog steel."""
+        field_data = {
+            "brand": "Dovo",
+            "model": "Straight",
+            "format": "Straight",
+            "grind": "Full Hollow",
+            "width": "6/8",
+            "steel": "Stainless",
+        }
+        razor_extracted = "Dovo carbon steel 6/8 full hollow"
+
+        result = enricher.enrich(field_data, razor_extracted)
+
+        assert result is not None
+        assert result["steel"] == "Carbon"  # User comment should override catalog
+        assert result["grind"] == "Full Hollow"
+        assert result["width"] == "6/8"
+        assert result["_extraction_source"] == "user_comment + catalog_data"

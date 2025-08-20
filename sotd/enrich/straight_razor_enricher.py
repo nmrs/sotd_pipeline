@@ -47,7 +47,7 @@ class StraightRazorEnricher(BaseEnricher):
             original_comment: The user-supplied razor_extracted field (not the full comment)
 
         Returns:
-            Dictionary with grind, width (as string), and point if found, or None if no
+            Dictionary with grind, width (as string), point, and steel if found, or None if no
             specs detected. Includes _enriched_by and _extraction_source metadata fields.
             Preserves existing specifications from the match phase catalog data.
         """
@@ -55,26 +55,32 @@ class StraightRazorEnricher(BaseEnricher):
         user_grind = self._extract_grind(original_comment)
         user_width = self._extract_width_str(original_comment)
         user_point = self._extract_point(original_comment)
+        user_steel = self._extract_steel(original_comment)
 
         # Get existing specifications from match phase catalog data
         catalog_grind = field_data.get("grind") if isinstance(field_data, dict) else None
         catalog_width = field_data.get("width") if isinstance(field_data, dict) else None
         catalog_point = field_data.get("point") if isinstance(field_data, dict) else None
+        catalog_steel = field_data.get("steel") if isinstance(field_data, dict) else None
 
         # Merge specifications: user comment takes precedence over catalog data
         final_grind = user_grind or catalog_grind
         final_width = user_width or catalog_width
         final_point = user_point or catalog_point
 
+        # For steel, apply Carbon default for all straight razors
+        # (this enricher only runs for straight razors)
+        final_steel = user_steel or catalog_steel or "Carbon"
+
         # Determine extraction source for metadata
         extraction_sources = []
-        if user_grind or user_width or user_point:
+        if user_grind or user_width or user_point or user_steel:
             extraction_sources.append("user_comment")
-        if catalog_grind or catalog_width or catalog_point:
+        if catalog_grind or catalog_width or catalog_point or catalog_steel:
             extraction_sources.append("catalog_data")
 
         # Only return enriched data if we have specifications from any source
-        if any([final_grind, final_width, final_point]):
+        if any([final_grind, final_width, final_point, final_steel]):
             enriched_data: Dict[str, Any] = {
                 "_enriched_by": self.get_enricher_name(),
                 "_extraction_source": (
@@ -88,6 +94,8 @@ class StraightRazorEnricher(BaseEnricher):
                 enriched_data["width"] = final_width
             if final_point:
                 enriched_data["point"] = final_point
+            if final_steel:
+                enriched_data["steel"] = final_steel
 
             return enriched_data
 
@@ -161,32 +169,29 @@ class StraightRazorEnricher(BaseEnricher):
         Returns:
             The extracted grind type as a string in Title Case, or None if not found
         """
-        # Normalize text for case-insensitive matching
-        text_lower = text.lower()
-
         # Grind patterns in order of specificity (most specific first)
         # Return Title Case values for better readability in reports
         grind_patterns = [
             # Fractional notation patterns (most specific first)
-            (r"\b1/4\s*hollow\b", "Quarter Hollow"),
-            (r"\b2/4\s*hollow\b", "Half Hollow"),
-            (r"\b3/4\s*hollow\b", "Three Quarter Hollow"),
-            (r"\b4/4\s*hollow\b", "Full Hollow"),
+            (r"(?i)\b1/4\s*hollow\b", "Quarter Hollow"),
+            (r"(?i)\b2/4\s*hollow\b", "Half Hollow"),
+            (r"(?i)\b3/4\s*hollow\b", "Three Quarter Hollow"),
+            (r"(?i)\b4/4\s*hollow\b", "Full Hollow"),
             # Word-based patterns
-            (r"\bextra\s*hollow\b", "Extra Hollow"),
-            (r"\bfull\s*hollow\b", "Full Hollow"),
-            (r"\bpretty\s*hollow\b", "Pretty Hollow"),
-            (r"\bthree\s*quarter\s*hollow\b", "Three Quarter Hollow"),
-            (r"\bhalf\s*hollow\b", "Half Hollow"),
-            (r"\bquarter\s*hollow\b", "Quarter Hollow"),
-            (r"\bhollow\b", "Hollow"),  # Generic hollow
-            (r"\bnear\s*wedge\b", "Near Wedge"),
-            (r"\bwedge\b", "Wedge"),
-            (r"\bframeback\b", "Frameback"),
+            (r"(?i)\bextra\s*hollow\b", "Extra Hollow"),
+            (r"(?i)\bfull\s*hollow\b", "Full Hollow"),
+            (r"(?i)\bpretty\s*hollow\b", "Pretty Hollow"),
+            (r"(?i)\bthree\s*quarter\s*hollow\b", "Three Quarter Hollow"),
+            (r"(?i)\bhalf\s*hollow\b", "Half Hollow"),
+            (r"(?i)\bquarter\s*hollow\b", "Quarter Hollow"),
+            (r"(?i)\bhollow\b", "Hollow"),  # Generic hollow
+            (r"(?i)\bnear\s*wedge\b", "Near Wedge"),
+            (r"(?i)\bwedge\b", "Wedge"),
+            (r"(?i)\bframeback\b", "Frameback"),
         ]
 
         for pattern, grind_type in grind_patterns:
-            if re.search(pattern, text_lower):
+            if re.search(pattern, text):
                 return grind_type
 
         return None
@@ -237,26 +242,55 @@ class StraightRazorEnricher(BaseEnricher):
         Returns:
             The extracted point type as a string in Title Case, or None if not found
         """
-        # Normalize text for case-insensitive matching
-        text_lower = text.lower()
-
         # Point patterns in order of specificity
         # Return Title Case values for better readability in reports
         point_patterns = [
-            (r"\bround\s*(?:point|tip)\b", "Round"),
-            (r"\bsquare\s*(?:point|tip)\b", "Square"),
-            (r"\bspike\s*(?:point|tip)\b", "Spike"),
-            (r"\bfrench\s*(?:point|tip)\b", "French"),
-            (r"\bspanish\s*(?:point|tip)\b", "Spanish"),
-            (r"\bbarber['']?s\s*notch\b", "Barber's Notch"),
-            (r"\bspear\s*(?:point|tip)\b", "Spear"),
-            (r"\bround\b", "Round"),  # Generic round
-            (r"\bsquare\b", "Square"),  # Generic square
-            (r"\bspike\b", "Spike"),  # Generic spike
+            (r"(?i)\bround\s*(?:point|tip)\b", "Round"),
+            (r"(?i)\bsquare\s*(?:point|tip)\b", "Square"),
+            (r"(?i)\bspike\s*(?:point|tip)\b", "Spike"),
+            (r"(?i)\bfrench\s*(?:point|tip)\b", "French"),
+            (r"(?i)\bspanish\s*(?:point|tip)\b", "Spanish"),
+            (r"(?i)\bbarber['']?s\s*notch\b", "Barber's Notch"),
+            (r"(?i)\bspear\s*(?:point|tip)\b", "Spear"),
+            (r"(?i)\bround\b", "Round"),  # Generic round
+            (r"(?i)\bsquare\b", "Square"),  # Generic square
+            (r"(?i)\bspike\b", "Spike"),  # Generic spike
         ]
 
         for pattern, point_type in point_patterns:
-            if re.search(pattern, text_lower):
+            if re.search(pattern, text):
                 return point_type
+
+        return None
+
+    def _extract_steel(self, text: str) -> Optional[str]:
+        """Extract steel type from text using regex patterns.
+
+        Args:
+            text: The text to search for steel patterns
+
+        Returns:
+            The extracted steel type as a string, or None if not found.
+            Returns "Stainless" for stainless steel terms (stainless, SS, inox, rostfrei, friodur).
+            Returns "Carbon" for carbon steel terms (carbon, carbon steel).
+        """
+        # Normalize text for case-insensitive matching
+        text_lower = text.lower()
+
+        # Steel patterns in order of specificity (case insensitive)
+        steel_patterns = [
+            (r"(?i)\bstainless\s*steel\b", "Stainless"),
+            (r"(?i)\bcarbon\s*steel\b", "Carbon"),
+            (r"(?i)\bstainless\b", "Stainless"),
+            (r"(?i)\bcarbon\b", "Carbon"),
+            (r"(?i)\binox\b", "Stainless"),  # French/German for stainless steel
+            (r"(?i)\brostfrei\b", "Stainless"),  # German for stainless steel
+            (r"(?i)\bfriodur\b", "Stainless"),  # Henckels proprietary stainless steel
+            (r"(?i)\bss\b", "Stainless"),  # Abbreviation for Stainless Steel
+        ]
+
+        for pattern, steel_type in steel_patterns:
+            if re.search(pattern, text_lower):
+                return steel_type
 
         return None
