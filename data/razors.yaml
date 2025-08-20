@@ -219,11 +219,6 @@ Berkeley:
   Shave Selector:
     patterns:
       - berkeley
-Bic:
-  Disposable:
-    format: Cartridge/Disposable
-    patterns:
-      - bic.*(disposable|metal|sensitive)?
 Bismarck:
   Straight:
     format: Straight
@@ -344,6 +339,25 @@ Carl Rader:
     patterns:
       - carl.*rader(?:.*\d{1,2}/(8|16))?
       - rader.*solingen(?:.*\d{1,2}/(8|16))?
+Cartridge/Disposable:
+  "":
+    format: Cartridge/Disposable
+    patterns:
+      - (?:schick).*(disposable|xtreme 2|skintimate|hydro.*5|shik pla5tik)
+      - (mach.?3|trac.?ii|sensor.?[23])
+      - gil.*(cartridge|disposable)
+      - gil.*et.*(labs|guard|joy|proglide|sensor|venus)
+      - bic.*(disposable|metal|sensitive)?
+      - disposable
+      - atra
+      - \bcart\b
+      - cartridge
+      - dorco.*pace 7
+      - disposable
+      - harry
+      - '\blidl\b'
+      - pace.*6
+      - simply (?:max|smooth)
 Charcoal Goods:
   Everyday:
     patterns:
@@ -850,12 +864,6 @@ Gillette:
     patterns:
       - lady.*gil.*et
       - gil.*et.*lady
-  Cartridge/Disposable:
-    format: Cartridge/Disposable
-    patterns:
-      - (mach.?3|trac.?ii|sensor.?[23])
-      - gil.*(cartridge|disposable)
-      - gil.*et.*(labs|guard|joy|proglide|sensor|venus)
   NEW:
     patterns:
       - gil.*new
@@ -1525,28 +1533,18 @@ OneBlade:
     format: FHS
     patterns:
       - oneblade.*hybrid
-Other:
-  Cartridge / Disposable:
-    format: Cartridge/Disposable
-    patterns:
-      - atra
-      - \bcart\b
-      - cartridge
-      - dorco.*pace 7
-      - disposable
-      - harry
-      - '\blidl\b'
-      - pace.*6
-      - simply (?:max|smooth)
-  DE:
+Other DE:
+  "":
     patterns:
       - generic.*(safety|double)
       - german travel razor
       - pazor.*batch
-  DE Clone:
+Other DE Clone:
+  "":
     patterns:
       - ^(?!.*(futur|eagle)).*(knockoff|clone)
-  Shavette:
+Other Shavette:
+  "":
     format: Shavette
     patterns:
       - shavette
@@ -1558,26 +1556,31 @@ Other:
       - grotesque torture implement #https://www.reddit.com/r/Wetshaving/comments/1l1ajgv/monday_lather_games_sotd_thread_jun_02_2025/mvkvysm/
       - chopstick kamisori
       - ice ?pick kamisori
-  Shavette (A77):
+Other Shavette (A77):
+  "":
     format: Shavette (A77)
     patterns:
       - shavette.*a77
       - a77.*shavette
-  Shavette (AC):
+Other Shavette (AC):
+  "":
     format: Shavette (AC)
     patterns:
       - shavette.*\bac\b
       - \bac\b.*shavette
-  Shavette (Disposable):
+Other Shavette (Disposable):
+  "":
     format: Shavette (Disposable)
     patterns:
       - (?:cvs|kroger).*dermaplane
       - sassy.*eyebrow
-  Kamisori:
+  Other Kamisori:
+    "":
     format: Straight
     patterns:
       - kami
-  Straight Razor:
+  Other Straight Razor:
+    "":
     format: Straight
     patterns:
       - \d{1,2}/(8|16)
@@ -2126,10 +2129,6 @@ Schick:
     format: Shavette
     patterns:
       - schick.*kami
-  Cartridge/Disposable:
-    format: Cartridge/Disposable
-    patterns:
-      - (?:schick).*(disposable|xtreme 2|skintimate|hydro.*5|shik pla5tik)
   Dermaplaner:
     format: Shavette (Disposable)
     patterns:

@@ -2,407 +2,407 @@ A77:
   Cloud:
     A77:
       patterns:
-      - cloud.*a77
+        - cloud.*a77
   RhinoceRos:
     A77:
       patterns:
-      - rhinoceros.*a77
+        - rhinoceros.*a77
   Snow Mountain Wolf:
     A77:
       patterns:
-      - snow moun?tain wolf
+        - snow moun?tain wolf
 AC:
   Dorco:
     BB-20:
       patterns:
-      - dorco.*bb*
+        - dorco.*bb*
   Feather:
     Pro:
       patterns:
-      - feather.*pro
-      - feather.*a.*c
+        - feather.*pro
+        - feather.*a.*c
     Pro Light:
       patterns:
-      - feather.*light
+        - feather.*light
     Pro Super:
       patterns:
-      - feather.*super
-      - pro\s*super
+        - feather.*super
+        - pro\s*super
     ProGuard:
       patterns:
-      - feather.*pro.*guard
+        - feather.*pro.*guard
     Soft Guard:
       patterns:
-      - feather.*soft
+        - feather.*soft
   Generic:
     Kai Clone:
       patterns:
-      - kai.*clone
+        - kai.*clone
   Kai:
     Captain Blade:
       patterns:
-      - kai.*blade
-      - kai captain\s*$
-      - kai.*cap
+        - kai.*blade
+        - kai captain\s*$
+        - kai.*cap
     Captain Sharpblade:
       patterns:
-      - kai.*sharp
+        - kai.*sharp
     Captain Titan:
       patterns:
-      - kai.*titan
+        - kai.*titan
     Captain Titan Mild:
       patterns:
-      - kai.*cap.*mild
-      - kai.*captain.*mild
-      - kai.*titan.*mild
+        - kai.*cap.*mild
+        - kai.*captain.*mild
+        - kai.*titan.*mild
     Captain ProGuard:
       patterns:
-      - kai.*pro\s*guard
-      - proguard
+        - kai.*pro\s*guard
+        - proguard
     Captain ProTouch:
       patterns:
-      - kai.*pro\s*touch
-      - kai.*mild.*pro\s*touch
-      - protouch
+        - kai.*pro\s*touch
+        - kai.*mild.*pro\s*touch
+        - protouch
     Salon Select Premium Guard:
       patterns:
-      - kai.*prem.*guard
+        - kai.*prem.*guard
   Sapphoo:
     Red:
       patterns:
-      - sapp?hoo(\s*red)?
+        - sapp?hoo(\s*red)?
   Schick:
     Proline (AC):
       patterns:
-      - (schick.*)?proline
-      - (schick.*)?(proline.*)?p[ -]?[23]0
-Cartridge:
-  Cartridge:
+        - (schick.*)?proline
+        - (schick.*)?(proline.*)?p[ -]?[23]0
+Cartridge/Disposable:
+  "":
     Cartridge:
       patterns:
-      - cartridge
-      - cien\s*men
-      - disposable
-      - gil.*fusion
-      - gil.*guard
-      - gil.*labs
-      - gil.*proglide
-      - harry.{1}?s
-      - mach ?(iii|3|three)
-      - sensor ?(iii|3|three)
-      - trac( |-)?(2|two|ii)
-      - twin.*pivot(.*plus)?
-      - xtreme2
+        - cartridge
+        - cien\s*men
+        - disposable
+        - gil.*fusion
+        - gil.*guard
+        - gil.*labs
+        - gil.*proglide
+        - harry.{1}?s
+        - mach ?(iii|3|three)
+        - sensor ?(iii|3|three)
+        - trac( |-)?(2|two|ii)
+        - twin.*pivot(.*plus)?
+        - xtreme2
 DE:
   7 O'Clock:
     Permasharp:
       patterns:
-      - clock.*perm
+        - clock.*perm
     Sharpedge (Yellow):
       patterns:
-      - gill.*sharp.*edg
-      - clock.*sharp.*edg
-      - clock.*yellow
-      - gill.*yellow
+        - gill.*sharp.*edg
+        - clock.*sharp.*edg
+        - clock.*yellow
+        - gill.*yellow
     Super Platinum (Black):
       patterns:
-      - clock.*pla
-      - clock.*black
-      - gill.*black
-      - 7OC.*pla
-      - \b7 ?sp\b
-      - \b7'o.*black
+        - clock.*pla
+        - clock.*black
+        - gill.*black
+        - 7OC.*pla
+        - \b7 ?sp\b
+        - \b7'o.*black
     Super Stainless (Green):
       patterns:
-      - clock.*sta
-      - clock.*green
-      - clock
-      - gil.*et.*super.*stain
-      - gil.*et.*green
+        - clock.*sta
+        - clock.*green
+        - clock
+        - gil.*et.*super.*stain
+        - gil.*et.*green
   ABEST:
     Hi Platinum:
       patterns:
-      - abest
+        - abest
   Aeterna:
     Super Stainless:
       patterns:
-      - aeter
+        - aeter
   Albatross:
     DE:
       patterns:
-      - albatross
+        - albatross
   AMC:
     De-Luxe Thin:
       patterns:
-      - amc.*de[-\s]*luxe?
-      - amc.*thin
+        - amc.*de[-\s]*luxe?
+        - amc.*thin
   Asco:
     Platinum:
       patterns:
-      - asco.*platinum
+        - asco.*platinum
     Super Stainless:
       patterns:
-      - asco.*stain
-      - asco.*\bss\b
-      - asco.*orange
+        - asco.*stain
+        - asco.*\bss\b
+        - asco.*orange
   Assured for Men:
     DE:
       patterns:
-      - assured.*men
+        - assured.*men
   Astra:
     Superior Platinum (Green):
       patterns:
-      - astra.*plat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      - astra.*green(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      - astra.*sp(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      - astra
+        - astra.*plat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - astra.*green(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - astra.*sp(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - astra
     Superior Stainless (Blue):
       patterns:
-      - astra.*sta(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      - astra.*blue(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      - astra.*ss(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - astra.*sta(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - astra.*blue(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - astra.*ss(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Baile:
     Platinum:
       patterns:
-      - baili.*plat
+        - baili.*plat
   Bevel:
     Double Edge:
       patterns:
-      - bevel
+        - bevel
   Bic:
     Astor Stainless:
       patterns:
-      - bic.*(ast|stai)
+        - bic.*(ast|stai)
     Chrome:
       patterns:
-      - bic.*(chr|pla)
-      - bic
+        - bic.*(chr|pla)
+        - bic
   Big Ben:
     Super Stainless:
       patterns:
-      - big ben
+        - big ben
   Bolzano:
     Superinox:
       patterns:
-      - b(o|a)la?z(o|a)n(o|a)
+        - b(o|a)la?z(o|a)n(o|a)
   Böker:
     DE:
       patterns:
-      - b[oö]ker
+        - b[oö]ker
   Bulimica:
     DE:
       patterns:
-      - bulimica
+        - bulimica
   Centwin:
     Super Platinum:
       patterns:
-      - centwin(.*plat)?
+        - centwin(.*plat)?
   Clifton:
     Classic:
       patterns:
-      - clifton
+        - clifton
   Cloud:
     Super Stainless:
       patterns:
-      - cloud(.*super)?
+        - cloud(.*super)?
   Croma:
     Diamant:
       patterns:
-      - croma
+        - croma
   Crown:
     Platinum:
       patterns:
-      - crown.*plat
+        - crown.*plat
     Super Stainless:
       patterns:
-      - crown.*stainless
+        - crown.*stainless
   Crystal:
     Super:
       patterns:
-      - crystal
+        - crystal
   Derby:
     Blue Bird:
       patterns:
-      - blue.*bird
+        - blue.*bird
     Concord:
       patterns:
-      - concord
+        - concord
     Extra:
       patterns:
-      - derb.*extra
-      - derby
+        - derb.*extra
+        - derby
     Extra Blue:
       patterns:
-      - derb.*blue
+        - derb.*blue
     Premium:
       patterns:
-      - derb.*prem
+        - derb.*prem
   Dorco:
     Prime Platinum:
       patterns:
-      - dorco.*prime
-      - doric prime
-      - dorco.*st.*301
+        - dorco.*prime
+        - doric prime
+        - dorco.*st.*301
     ST-300:
       patterns:
-      - dorco
-      - dorco.*st.*300
+        - dorco
+        - dorco.*st.*300
     Titan:
       patterns:
-      - dorco.*titan
+        - dorco.*titan
   Dovo:
     Super Platinum:
       patterns:
-      - dovo.*plat
+        - dovo.*plat
   Durablade:
     Sharp 7AM Super Platinum:
       patterns:
-      - (?:durablade)?.*sharp.*7am.*plus
-      - (?:durablade)?.*sharp(?! star).*plat
+        - (?:durablade)?.*sharp.*7am.*plus
+        - (?:durablade)?.*sharp(?! star).*plat
     Sharp Titanium:
       patterns:
-      - (?:durablade)?.*sharp.*\bti
-      - durablade
+        - (?:durablade)?.*sharp.*\bti
+        - durablade
     Sharp Hi Chromium:
       patterns:
-      - (?:durablade)?.*sharp.*hi.*chromium
-      - durablade.*chrom
+        - (?:durablade)?.*sharp.*hi.*chromium
+        - durablade.*chrom
   Eddison:
     Stainless:
       patterns:
-      - eddison
+        - eddison
   Elios:
     Inoxidable:
       patterns:
-      - elios
+        - elios
   Euromax:
     Cryo:
       patterns:
-      - euromax
+        - euromax
   Eversharp:
     Blue Thin:
       patterns:
-      - eversharp.*blue.*thin
+        - eversharp.*blue.*thin
   Fatip:
     Stainless Steel:
       patterns:
-      - fatip
+        - fatip
   Feather:
     DE:
       patterns:
-      - feather
-      - feather.*hi.*st
-      - feather.*hs
-      - feather\s*blade
-      - feather.*de
+        - feather
+        - feather.*hi.*st
+        - feather.*hs
+        - feather\s*blade
+        - feather.*de
   Filoso:
     Platinum:
       patterns:
-      - filoso
+        - filoso
   FlyDear:
     Super Platinum:
       patterns:
-      - flydear
+        - flydear
   Gillette:
-    '365':
+    "365":
       patterns:
-      - \b365\b
+        - \b365\b
     Blue:
       patterns:
-      - gil.*blu
+        - gil.*blu
     Goal:
       patterns:
-      - gil.*goal
+        - gil.*goal
     London Bridge:
       patterns:
-      - london\s*bridge
+        - london\s*bridge
     Minora:
       patterns:
-      - (?:gil)?.*minora
-      - minora.*stain
-      - minora.*ss
-      - minora.*yellow
+        - (?:gil)?.*minora
+        - minora.*stain
+        - minora.*ss
+        - minora.*yellow
     Minora Platinum:
       patterns:
-      - minora.*plat
-      - minora.*green
+        - minora.*plat
+        - minora.*green
     Nacet:
       patterns:
-      - nancet
-      - (?:gil)?.*nacet
-      - nacrt
+        - nancet
+        - (?:gil)?.*nacet
+        - nacrt
     Perma-Sharp:
       patterns:
-      - perma\s*-*sharp
+        - perma\s*-*sharp
     Platinum:
       patterns:
-      - gil.*pla
+        - gil.*pla
     Rubie:
       patterns:
-      - rubie
+        - rubie
     Silver Blue:
       patterns:
-      - gsb
-      - Gill.*sil.*blue
-      - silver.*blue
-      - gill.*sb
-      - gill.*blu.*sil
+        - gsb
+        - Gill.*sil.*blue
+        - silver.*blue
+        - gill.*sb
+        - gill.*blu.*sil
     Spoiler:
       patterns:
-      - gil.*et.*spoil
+        - gil.*et.*spoil
     Sputnik:
       patterns:
-      - sputnik
+        - sputnik
     Stainless:
       patterns:
-      - gil.*stain
+        - gil.*stain
     Super Thin Mejorada:
       patterns:
-      - mejorada
-      - gil.*super.*thin
+        - mejorada
+        - gil.*super.*thin
     Super Thin Platinum:
       patterns:
-      - super.*thin.*plat
+        - super.*thin.*plat
     Wilkinson Sword:
       patterns:
-      - gil.*et.*wilk.*swor
-      - \bgws\b
+        - gil.*et.*wilk.*swor
+        - \bgws\b
     Winner:
       patterns:
-      - gil.*winner
-      - winner
+        - gil.*winner
+        - winner
     Winner Platinum:
       patterns:
-      - winner.*plat
+        - winner.*plat
   Glätz:
     Super Platinum:
       patterns:
-      - glatz
-      - glatz sp
-      - glatz plat
+        - glatz
+        - glatz sp
+        - glatz plat
     Supreme Stainless:
       patterns:
-      - glatz ss
-      - glatz.*stai
+        - glatz ss
+        - glatz.*stai
   Kai:
     DE:
       patterns:
-      - kai
-      - kai.*sta
+        - kai
+        - kai.*sta
   King C Gillette:
     DE:
       patterns:
-      - king.*c.*gil.*et
-      - gil.*et.*king.*c
-      - \bkcg\b
+        - king.*c.*gil.*et
+        - gil.*et.*king.*c
+        - \bkcg\b
   Ladas:
     Super Stainless:
       patterns:
-      - lada
+        - lada
   Laser:
     Ultra:
       patterns:
-      - la[sz]er
+        - la[sz]er
   Leningrad:
     DE:
       patterns:
@@ -411,487 +411,487 @@ DE:
   Lord:
     Blue Sword Platinum:
       patterns:
-      - blue.*sword
+        - blue.*sword
     Classic:
       patterns:
-      - lord.*cla
+        - lord.*cla
     Cool:
       patterns:
-      - lord.*cool
+        - lord.*cool
     Platinum:
       patterns:
-      - lord.*plat
+        - lord.*plat
     Super Chrome:
       patterns:
-      - lord.*chrome
+        - lord.*chrome
     Super Stainless:
       patterns:
-      - lord.*sup
+        - lord.*sup
     Tajam:
       patterns:
-      - tajam
+        - tajam
   Manscaped:
     The Plow 2.0:
       patterns:
-      - manscaped
+        - manscaped
   Merkur:
     Super Platinum:
       patterns:
-      - merkur
+        - merkur
   My-Blades:
     DE:
       patterns:
-      - my.*blades
+        - my.*blades
   "Mühle":
     Traditional:
       patterns:
-      - "m[uü]hle"
+        - "m[uü]hle"
   Neva:
     Super Stainless:
       patterns:
-      - "Нева"
-      - neva
+        - "Нева"
+        - neva
   OK:
     Super Stainless:
       patterns:
-      - \bok\b.*(stain|\bss\b)
+        - \bok\b.*(stain|\bss\b)
   PAA:
     Platinum Strangelet Super Sharps:
       patterns:
-      - \bpaa\b|strangelet
+        - \bpaa\b|strangelet
   Parker:
     Premium Platinum:
       patterns:
-      - parker.*premium.*plat
+        - parker.*premium.*plat
   Personna:
-    '74':
+    "74":
       patterns:
-      - p(?:ersonn*a)?\s*74(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      - pseventy-four
-      - p74
+        - p(?:ersonn*a)?\s*74(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - pseventy-four
+        - p74
     Lab Blue:
       patterns:
-      - (person+a)?.*lab *blue
-      - personn*a.*blue
-      - personn*a.*c.*c
-      - ^(?!.*(atra|gem|pfte|plat|stain|ss)).*personn*a
-      - ^(?!.*(atra|gem|pfte|plat|stain|ss)).*accuforge
+        - (person+a)?.*lab *blue
+        - personn*a.*blue
+        - personn*a.*c.*c
+        - ^(?!.*(atra|gem|pfte|plat|stain|ss)).*personn*a
+        - ^(?!.*(atra|gem|pfte|plat|stain|ss)).*accuforge
     Med Prep:
       patterns:
-      - person.*med(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      - med.*prep
-      - accu-?thrive
+        - person.*med(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - med.*prep
+        - accu-?thrive
     Platinum:
       patterns:
-      - person.*plat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      - person.*red(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - person.*plat(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - person.*red(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     Super Stainless:
       patterns:
-      - person.*stainless(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      - person.*\bss\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      - ^(?!.*comfort).*person.*super(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - person.*stainless(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - person.*\bss\b(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - ^(?!.*comfort).*person.*super(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     TOMY:
       patterns:
-      - \btomy\b
+        - \btomy\b
   Polsilver:
     Super Iridium:
       patterns:
-      - pol(i|-)*silver
-      - polsiver
-      - pol.*super.*iridium
+        - pol(i|-)*silver
+        - polsiver
+        - pol.*super.*iridium
   QShave:
     Titanium:
       patterns:
-      - q-?shave
+        - q-?shave
   RK:
     Stainless:
       patterns:
-      - \brk\b
+        - \brk\b
   Rainbow:
     Super Stainless:
       patterns:
-      - rainbow
+        - rainbow
   Rapira:
     Platinum Lux:
       patterns:
-      - rapira
+        - rapira
     Super Stainless:
       patterns:
-      - rapira.*stain
-      - rapira.*ss
+        - rapira.*stain
+        - rapira.*ss
     Swedish:
       patterns:
-      - rapira.*swe
+        - rapira.*swe
   Rex:
     Platinum:
       patterns:
-      - \brex\b.*plat
+        - \brex\b.*plat
   Rockwell:
     Swedish Stainless:
       patterns:
-      - rockwell
+        - rockwell
   Saimax:
     Stainless:
       patterns:
-      - sai ?max
+        - sai ?max
   Schick:
     Stainless (DE):
       patterns:
-      - schl?ick.*s(?:tainles)*s
+        - schl?ick.*s(?:tainles)*s
   Shark:
     Chrome:
       patterns:
-      - shark.*chr
-      - lord.*shark.*chr
+        - shark.*chr
+        - lord.*shark.*chr
     Platinum:
       patterns:
-      - shark.*pla
+        - shark.*pla
     Stainless:
       patterns:
-      - shark
-      - lord.*shark.*stain
+        - shark
+        - lord.*shark.*stain
   Sharp Star:
     Platinum:
       patterns:
-      - sharp star(?:.*plat)?
+        - sharp star(?:.*plat)?
   Shaving Revolution:
     Platinum:
       patterns:
-      - shaving\s*revolution
+        - shaving\s*revolution
   Silver Star:
     Super Stainless:
       patterns:
-      - silver.*star(?:.*stain)?
+        - silver.*star(?:.*stain)?
   Silvermax:
     Cryo Sputtered Platinum:
       patterns:
-      - silver\s*max
+        - silver\s*max
   Starmaxx:
     Superior Platinum:
       patterns:
-      - starmaxx(.*plat)?
+        - starmaxx(.*plat)?
     Superior Stainless:
       patterns:
-      - starmaxx.*(stain|\bss\b)
+        - starmaxx.*(stain|\bss\b)
   Statum:
     Platinum:
       patterns:
-      - \bstatum\b
+        - \bstatum\b
   Sunny:
     Supreme Stainless:
       patterns:
-      - sunny(.*stain)?
+        - sunny(.*stain)?
   Super ShaveX:
     Platinum:
       patterns:
-      - shavex.*plat
+        - shavex.*plat
   Super-Max:
     Blue Diamond:
       patterns:
-      - super[\s-]*max.*(?:blu)*.*dia
-      - diamond(.*edge)?.*super.*plat
+        - super[\s-]*max.*(?:blu)*.*dia
+        - diamond(.*edge)?.*super.*plat
     Platinum:
       patterns:
-      - super[\s-]*max.*plat
+        - super[\s-]*max.*plat
     Stainless (Red):
       patterns:
-      - super[\s-]*max.*(stain|\bss\b)
-      - super[\s-]*max.*red
-      - super[\s-]*max
+        - super[\s-]*max.*(stain|\bss\b)
+        - super[\s-]*max.*red
+        - super[\s-]*max
     Super Stainless (Green):
       patterns:
-      - super[\s-]?max.*super.*stain
-      - super[\s-]?max.*green
+        - super[\s-]?max.*super.*stain
+        - super[\s-]?max.*green
   Tatara:
     DE:
       patterns:
-      - tatara
+        - tatara
   Tatra:
     Carbon Steel:
       patterns:
-      - tatra.*carb
+        - tatra.*carb
     Platinum:
       patterns:
-      - tatra
+        - tatra
   Tiger:
     Platinum:
       patterns:
-      - tiger
+        - tiger
   Timor:
     Stainless Steel:
       patterns:
-      - timor
+        - timor
   Topaz:
     Platinum:
       patterns:
-      - topaz.*plat
+        - topaz.*plat
     Stainless:
       patterns:
-      - topaz.*(stain|\bss\b)
+        - topaz.*(stain|\bss\b)
   Treet:
     Black Beauty:
       patterns:
-      - treet\s*bla
-      - black.*beauty
+        - treet\s*bla
+        - black.*beauty
     Carbon:
       patterns:
-      - tree.*carb
+        - tree.*carb
     Classic:
       patterns:
-      - tre(e|a)t.*classic
+        - tre(e|a)t.*classic
     Dura Sharp:
       patterns:
-      - treet.*dura.*shar
+        - treet.*dura.*shar
     Edge:
       patterns:
-      - treet.*edge
+        - treet.*edge
     Falcon:
       patterns:
-      - treet.*falcon
+        - treet.*falcon
     King:
       patterns:
-      - treet.*king
+        - treet.*king
     New Edge:
       patterns:
-      - treet.*new
-      - tre(e|a)t.*new.*edge
+        - treet.*new
+        - tre(e|a)t.*new.*edge
     Platinum:
       patterns:
-      - treet
-      - treet.*pla
+        - treet
+        - treet.*pla
     Silver:
       patterns:
-      - treet.*silv
+        - treet.*silv
   Trig:
     Silver Edge Stainless:
       patterns:
-      - \btrig\b
+        - \btrig\b
   V12:
     Super Platinum:
       patterns:
-      - v12.*platinum
-      - \bv12\b
+        - v12.*platinum
+        - \bv12\b
   Van Der Hagen:
     Stainless:
       patterns:
-      - hagen
+        - hagen
   Vi-John:
     Master Stroke:
       patterns:
-      - vi.*john.*mas
+        - vi.*john.*mas
   Viking's Sword:
     Stainless:
       patterns:
-      - vik.*swor.*sta
-      - viking
+        - vik.*swor.*sta
+        - viking
   Vikings Blade:
     Cayenne Hot:
       patterns:
-      - viking.*cayenne
+        - viking.*cayenne
     Mild:
       patterns:
-      - viking.*mild
+        - viking.*mild
   Voskhod:
     Teflon Coated:
       patterns:
-      - vokshod
-      - voskhod
-      - voshk
+        - vokshod
+        - voskhod
+        - voshk
   Wilkinson Sword:
     Classic:
       patterns:
-      - wilk.*swor
-      - wilkinson
+        - wilk.*swor
+        - wilkinson
   Willy's:
     Premium:
       patterns:
-      - willy'?s
+        - willy'?s
   Wizamet:
     Super Iridium:
       patterns:
-      - wizamet
-      - wiz
-      - super.*iridium
+        - wizamet
+        - wiz
+        - super.*iridium
   XR:
     RhinoceRos:
       patterns:
-      - rhinoceros
+        - rhinoceros
   Zircon:
     Platinum:
       patterns:
-      - zircon.*plat
+        - zircon.*plat
   "Zomchí":
     Superior Platinum:
       patterns:
-      - "zomch(í|i)"
+        - "zomch(í|i)"
   Zorrik:
     Super Platinum:
       patterns:
-      - zorrik.*plat
-      - zorrik sp
+        - zorrik.*plat
+        - zorrik sp
     Super Stainless:
       patterns:
-      - zorrik.*stain
-      - zorrik ss
+        - zorrik.*stain
+        - zorrik ss
 FHS:
   Feather:
     FHS-1:
       patterns:
-      - (feather)?.*(fhs|asd)
+        - (feather)?.*(fhs|asd)
   OneBlade:
     HiCarbon SE:
       patterns:
-      - oneblade.*hicarbon
+        - oneblade.*hicarbon
 GEM:
   GEM:
     Blue Star:
       patterns:
-      - gem.*blue.*star
+        - gem.*blue.*star
   PAL:
     Blue Blade:
       patterns:
-      - \bpal\b.*blue
+        - \bpal\b.*blue
   Personna:
     GEM PTFE:
       patterns:
-      - (person|gem).*p[tf]{2}e(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
-      - gem by personna
-      - (ptfe|pfte).*(person|gem)
-      - (person|ptfe).*gem
-      - ptfe
-      - ptfs
-      - gem
-      - acc?utec
-      - accu.*(gem|coated|p[ft]{2}e)
+        - (person|gem).*p[tf]{2}e(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - gem by personna
+        - (ptfe|pfte).*(person|gem)
+        - (person|ptfe).*gem
+        - ptfe
+        - ptfs
+        - gem
+        - acc?utec
+        - accu.*(gem|coated|p[ft]{2}e)
     GEM Stainless:
       patterns:
-      - (personna)*gem.*stainless
-      - gem.*ss
-      - person.*gem.*uncoated
+        - (personna)*gem.*stainless
+        - gem.*ss
+        - person.*gem.*uncoated
   Ted Pella:
     PTFE:
       patterns:
-      - pella.*ptfe
+        - pella.*ptfe
 Hair Shaper:
   Annie:
     Hair Shaper:
       patterns:
-      - ^annie\b
-      - ^annir\b
-      - \bannie\b
+        - ^annie\b
+        - ^annir\b
+        - \bannie\b
   Diane:
     Hair Shaper:
       patterns:
-      - diane
+        - diane
   Dovo:
     Professional Shavette:
       patterns:
-      - dovo.*prof.*shavette
+        - dovo.*prof.*shavette
   Durham Duplex:
     Hair Shaper:
       patterns:
-      - durham
+        - durham
   Fromm:
     Hair Shaper:
       patterns:
-      - fromm
+        - fromm
   Gutche:
     Hair Shaper:
       patterns:
-      - gutche
+        - gutche
   Kismet:
     Hair Shaper:
       patterns:
-      - kismet
+        - kismet
   Personna:
     Hair Shaper:
       patterns:
-      - personn.*hair.*shap
-      - person.*specimen
-      - person+a
+        - personn.*hair.*shap
+        - person.*specimen
+        - person+a
   Weck:
     Sextoblade:
       patterns:
-      - weck
+        - weck
 Half DE:
   Crown:
     Super Stainless SE:
       patterns:
-      - crown.*stainless.*\bse\b
+        - crown.*stainless.*\bse\b
   Dorco:
     HST-300:
       patterns:
-      - dorco.*hst.*300
+        - dorco.*hst.*300
   Gillette:
     Perma-Sharp SE:
       patterns:
-      - (?!.*\bde\b).*perma\s*-*sharp
-      - perma\s*-*sharp.*(half|1/2)
+        - (?!.*\bde\b).*perma\s*-*sharp
+        - perma\s*-*sharp.*(half|1/2)
   Leaf:
     SE:
       patterns:
-      - leaf(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - leaf(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Misaki:
     Platinum SE:
       patterns:
-      - misak[ia]
+        - misak[ia]
 Injector:
   Generic:
     Injector:
       patterns:
-      - (generic|unbranded).*inject
+        - (generic|unbranded).*inject
   Parker:
     Injector:
       patterns:
-      - parker.*inject
+        - parker.*inject
   Personna:
     74 Injector:
       patterns:
-      - person.*74.*inject
+        - person.*74.*inject
     Injector:
       patterns:
-      - person.*inject
+        - person.*inject
   Schick:
     Injector:
       patterns:
-      - s?c?hick
-      - inject
-      - schick.*inject(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+        - s?c?hick
+        - inject
+        - schick.*inject(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
     Proline (Injector):
       patterns:
-      - (schick.*)?(proline.*)?b[ -]?20
+        - (schick.*)?(proline.*)?b[ -]?20
   Supply Co.:
     Black Label:
       patterns:
-      - supply
-      - black label
+        - supply
+        - black label
   Ted Pella:
     Injector:
       patterns:
-      - pella
-      - pella.*injector
+        - pella
+        - pella.*injector
 Other:
   Enders:
     Speed Blade:
       patterns:
-      - enders
+        - enders
   Heljestrand:
     Wedge:
       patterns:
-      - heljestrand
+        - heljestrand
   Kampfe:
     Wedge:
       patterns:
-      - kampfe
+        - kampfe
   L'Essor:
     Wedge:
       patterns:
-      - l'essor
+        - l'essor
   Rolls Razor:
     Blade:
       patterns:
-      - rolls
+        - rolls
   Valet:
     Blade:
       patterns:
-      - valet
+        - valet
