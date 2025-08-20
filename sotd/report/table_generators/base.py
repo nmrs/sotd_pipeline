@@ -88,6 +88,7 @@ class NoDeltaMixin:
 
 # Standard column configurations
 STANDARD_PRODUCT_COLUMNS = {
+    "rank": {"display_name": "Rank"},
     "name": {"display_name": "Name"},
     "shaves": {"display_name": "shaves", "format": "number"},
     "unique_users": {"display_name": "unique users", "format": "number"},
@@ -383,6 +384,9 @@ class BaseTableGenerator(ABC):
 
         # Add avg shaves per user calculation
         table_data = self._add_avg_shaves_per_user(table_data)
+
+        # Add rank data for display
+        table_data = self._add_rank_data(table_data)
 
         # Add position information for delta calculations
         if include_delta:
@@ -689,6 +693,56 @@ class BaseTableGenerator(ABC):
                     item["avg_shaves_per_user"] = 0.0
 
         return data
+
+    def _add_rank_data(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Add rank data to the table data.
+
+        Args:
+            data: List of data items
+
+        Returns:
+            Data with rank field added
+        """
+        if not data:
+            return data
+
+        # Sort data by shaves (desc) and unique_users (desc) for consistent ranking
+        sorted_data = sorted(
+            data,
+            key=lambda x: (x.get("shaves", 0), x.get("unique_users", 0)),
+            reverse=True
+        )
+
+        # Extract numeric ranks for tie detection
+        numeric_ranks = []
+        current_rank = 1
+        
+        for i, item in enumerate(sorted_data):
+            if i > 0:
+                prev_item = sorted_data[i - 1]
+                # Check if this item is tied with the previous one
+                if (
+                    item.get("shaves", 0) == prev_item.get("shaves", 0)
+                    and item.get("unique_users", 0) == prev_item.get("unique_users", 0)
+                ):
+                    # Tied with previous - use same rank
+                    numeric_ranks.append(numeric_ranks[-1])
+                else:
+                    # New rank
+                    current_rank += 1
+                    numeric_ranks.append(current_rank)
+            else:
+                # First item gets rank 1
+                numeric_ranks.append(1)
+
+        # Use the rank formatter to get formatted ranks with tie indicators
+        formatted_ranks = self._format_ranks_with_ties(numeric_ranks)
+
+        # Add rank data to each item
+        for i, item in enumerate(sorted_data):
+            item["rank"] = formatted_ranks[i]
+
+        return sorted_data
 
     def _calculate_multi_period_deltas(
         self,

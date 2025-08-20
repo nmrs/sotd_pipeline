@@ -11,18 +11,18 @@ class TestRankFormatter:
         # Test data: [1, 2, 3] should produce ["1", "2", "3"]
         ranks = [1, 2, 3]
         expected = ["1", "2", "3"]
-
+        
         # Create a concrete instance to test the method
         class ConcreteTableGenerator(BaseTableGenerator):
             def get_table_data(self):
                 return []
-
+            
             def get_table_title(self):
                 return "Test"
-
+            
             def get_column_config(self):
                 return {}
-
+        
         generator = ConcreteTableGenerator({})
         result = generator._format_ranks_with_ties(ranks)
         assert result == expected
@@ -32,17 +32,17 @@ class TestRankFormatter:
         # Test data: [1, 2, 2, 3] should produce ["1", "2=", "2=", "3"]
         ranks = [1, 2, 2, 3]
         expected = ["1", "2=", "2=", "3"]
-
+        
         class ConcreteTableGenerator(BaseTableGenerator):
             def get_table_data(self):
                 return []
-
+            
             def get_table_title(self):
                 return "Test"
-
+            
             def get_column_config(self):
                 return {}
-
+        
         generator = ConcreteTableGenerator({})
         result = generator._format_ranks_with_ties(ranks)
         assert result == expected
@@ -52,17 +52,17 @@ class TestRankFormatter:
         # Test data: [1, 2, 2, 2, 3] should produce ["1", "2=", "2=", "2=", "3"]
         ranks = [1, 2, 2, 2, 3]
         expected = ["1", "2=", "2=", "2=", "3"]
-
+        
         class ConcreteTableGenerator(BaseTableGenerator):
             def get_table_data(self):
                 return []
-
+            
             def get_table_title(self):
                 return "Test"
-
+            
             def get_column_config(self):
                 return {}
-
+        
         generator = ConcreteTableGenerator({})
         result = generator._format_ranks_with_ties(ranks)
         assert result == expected
@@ -72,42 +72,41 @@ class TestRankFormatter:
         # Test data: [1, 1, 1] should produce ["1=", "1=", "1="]
         ranks = [1, 1, 1]
         expected = ["1=", "1=", "1="]
-
+        
         class ConcreteTableGenerator(BaseTableGenerator):
             def get_table_data(self):
                 return []
-
+            
             def get_table_title(self):
                 return "Test"
-
+            
             def get_column_config(self):
                 return {}
-
+        
         generator = ConcreteTableGenerator({})
         result = generator._format_ranks_with_ties(ranks)
         assert result == expected
 
     def test_format_ranks_edge_cases(self):
         """Test rank formatting for edge cases."""
-
         class ConcreteTableGenerator(BaseTableGenerator):
             def get_table_data(self):
                 return []
-
+            
             def get_table_title(self):
                 return "Test"
-
+            
             def get_column_config(self):
                 return {}
-
+        
         generator = ConcreteTableGenerator({})
-
+        
         # Empty list
         empty_ranks = []
         empty_expected = []
         result = generator._format_ranks_with_ties(empty_ranks)
         assert result == empty_expected
-
+        
         # Single item
         single_ranks = [1]
         single_expected = ["1"]
@@ -119,17 +118,105 @@ class TestRankFormatter:
         # Test data: [1, 1, 3, 3, 3, 6] should produce ["1=", "1=", "3=", "3=", "3=", "6"]
         ranks = [1, 1, 3, 3, 3, 6]
         expected = ["1=", "1=", "3=", "3=", "3=", "6"]
-
+        
         class ConcreteTableGenerator(BaseTableGenerator):
             def get_table_data(self):
                 return []
-
+            
             def get_table_title(self):
                 return "Test"
-
+            
             def get_column_config(self):
                 return {}
-
+        
         generator = ConcreteTableGenerator({})
         result = generator._format_ranks_with_ties(ranks)
         assert result == expected
+
+    def test_add_rank_data(self):
+        """Test that _add_rank_data correctly adds rank information with tie indicators."""
+        class ConcreteTableGenerator(BaseTableGenerator):
+            def get_table_data(self):
+                return []
+            
+            def get_table_title(self):
+                return "Test"
+            
+            def get_column_config(self):
+                return {}
+        
+        generator = ConcreteTableGenerator({})
+        
+        # Test data with ties
+        test_data = [
+            {"name": "Item A", "shaves": 10, "unique_users": 3},
+            {"name": "Item B", "shaves": 8, "unique_users": 2},
+            {"name": "Item C", "shaves": 8, "unique_users": 2},  # Tied with Item B
+            {"name": "Item D", "shaves": 6, "unique_users": 1},
+        ]
+        
+        result = generator._add_rank_data(test_data)
+        
+        # Check that rank data was added
+        assert len(result) == 4
+        assert result[0]["rank"] == "1"  # Item A: 10 shaves, 3 users
+        assert result[1]["rank"] == "2="  # Item B: 8 shaves, 2 users (tied)
+        assert result[2]["rank"] == "2="  # Item C: 8 shaves, 2 users (tied)
+        assert result[3]["rank"] == "3"   # Item D: 6 shaves, 1 user
+        
+        # Check that data is sorted by shaves desc, then unique_users desc
+        assert result[0]["shaves"] == 10
+        assert result[1]["shaves"] == 8
+        assert result[2]["shaves"] == 8
+        assert result[3]["shaves"] == 6
+
+    def test_rank_column_in_table_output(self):
+        """Test that the rank column appears in the actual table output."""
+        class TestTableGenerator(BaseTableGenerator):
+            def get_table_data(self):
+                return [
+                    {"name": "Item A", "shaves": 10, "unique_users": 3},
+                    {"name": "Item B", "shaves": 8, "unique_users": 2},
+                    {"name": "Item C", "shaves": 8, "unique_users": 2},  # Tied with Item B
+                    {"name": "Item D", "shaves": 6, "unique_users": 1},
+                ]
+            
+            def get_table_title(self):
+                return "Test Table"
+            
+            def get_column_config(self):
+                return {
+                    "rank": {"display_name": "Rank"},
+                    "name": {"display_name": "Name"},
+                    "shaves": {"display_name": "Shaves", "format": "number"},
+                    "unique_users": {"display_name": "Users", "format": "number"},
+                }
+        
+        generator = TestTableGenerator({})
+        
+        # Generate the table
+        table_output = generator.generate_table(max_rows=10, include_delta=False)
+        
+        # Check that the rank column appears in the output
+        assert "Rank" in table_output
+        assert "Item A" in table_output
+        assert "Item B" in table_output
+        assert "Item C" in table_output
+        assert "Item D" in table_output
+        
+        # Check that tie indicators appear
+        assert "2=" in table_output  # Should show tied ranks
+        
+        # Verify the table structure includes rank column
+        lines = table_output.split('\n')
+        header_line = None
+        for line in lines:
+            if '|' in line and 'Rank' in line:
+                header_line = line
+                break
+        
+        assert header_line is not None, "Rank column header not found in table"
+        
+        # Check that rank column is first
+        columns = [col.strip() for col in header_line.split('|') if col.strip()]
+        assert columns[0] == "Rank", f"Rank column should be first, got: {columns}"
