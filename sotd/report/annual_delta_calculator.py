@@ -37,7 +37,7 @@ class AnnualDeltaCalculator:
                     "year": "2024",
                     "meta": {...},
                     "data": {
-                        "razors": [{"name": "...", "shaves": 100, "position": 1}, ...],
+                        "razors": [{"name": "...", "shaves": 100, "rank": 1}, ...],
                         "blades": [...],
                         ...
                     }
@@ -279,9 +279,9 @@ class AnnualDeltaCalculator:
         """
         config = {}
         for year in comparison_years:
-            # Position delta column
-            config[f"delta_position_{year}"] = {
-                "title": f"Δ Pos {year}",
+            # Rank delta column
+            config[f"delta_rank_{year}"] = {
+                "title": f"Δ Rank {year}",
                 "align": "right",
                 "format": "number",
                 "width": 8,
