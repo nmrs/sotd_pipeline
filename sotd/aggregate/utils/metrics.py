@@ -27,6 +27,36 @@ def calculate_avg_shaves_per_user(records: List[Dict[str, Any]]) -> float:
     return round(total_shaves / unique_users, 2)
 
 
+def calculate_median_shaves_per_user(records: List[Dict[str, Any]]) -> float:
+    """Calculate median shaves per user."""
+    if not records:
+        return 0.0
+    
+    # Count shaves per user
+    user_shaves = {}
+    for record in records:
+        author = record.get("author")
+        if author and author.strip():  # Skip None, empty strings, and whitespace-only strings
+            user_shaves[author.strip()] = user_shaves.get(author.strip(), 0) + 1
+    
+    if not user_shaves:
+        return 0.0
+    
+    # Calculate median
+    shave_counts = list(user_shaves.values())
+    shave_counts.sort()
+    n = len(shave_counts)
+    
+    if n % 2 == 0:
+        # Even number of users, average of two middle values
+        median = (shave_counts[n // 2 - 1] + shave_counts[n // 2]) / 2
+    else:
+        # Odd number of users, middle value
+        median = shave_counts[n // 2]
+    
+    return round(median, 2)
+
+
 def calculate_unique_soaps(records: List[Dict[str, Any]]) -> int:
     """Calculate number of unique soaps from records."""
     soaps = set()
@@ -163,14 +193,16 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
 
     Returns:
         Dictionary containing metadata with month, total_shaves, unique_shavers,
-        avg_shaves_per_user, unique_soaps, unique_brands, total_samples,
-        unique_razors, unique_blades, and unique_brushes
+        avg_shaves_per_user, median_shaves_per_user, unique_soaps, unique_brands, 
+        total_samples, unique_razors, unique_blades, and unique_brushes
     """
     total_shaves = calculate_shaves(records)
 
     unique_shavers = calculate_unique_users(records)
 
     avg_shaves_per_user = calculate_avg_shaves_per_user(records)
+    
+    median_shaves_per_user = calculate_median_shaves_per_user(records)
 
     unique_soaps = calculate_unique_soaps(records)
 
@@ -189,6 +221,7 @@ def calculate_metadata(records: List[Dict[str, Any]], month: str) -> Dict[str, A
         "total_shaves": total_shaves,
         "unique_shavers": unique_shavers,
         "avg_shaves_per_user": avg_shaves_per_user,
+        "median_shaves_per_user": median_shaves_per_user,
         "unique_soaps": unique_soaps,
         "unique_brands": unique_brands,
         "total_samples": total_samples,
