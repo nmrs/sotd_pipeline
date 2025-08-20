@@ -22,11 +22,11 @@ class DeltaCalculator:
         name_key: str = "name",
         max_items: int = 20,
     ) -> List[Dict[str, Any]]:
-        """Calculate position deltas between current and historical data.
+        """Calculate rank deltas between current and historical data.
 
         Args:
-            current_data: Current period data (with position field)
-            historical_data: Historical period data (with position field)
+            current_data: Current period data (with rank field)
+            historical_data: Historical period data (with rank field)
             name_key: Key to use for matching items between datasets
             max_items: Maximum number of items to process from current data
 
@@ -42,8 +42,8 @@ class DeltaCalculator:
         if not current_data:
             return []
 
-        # Create lookup for historical positions
-        historical_positions = {}
+        # Create lookup for historical ranks
+        historical_ranks = {}
         for item in historical_data:
             if not isinstance(item, dict):
                 if self.debug:
@@ -51,17 +51,17 @@ class DeltaCalculator:
                 continue
 
             name = item.get(name_key)
-            position = item.get("position")
-            if not name or position is None:
+            rank = item.get("rank")
+            if not name or rank is None:
                 if self.debug:
-                    print(f"[DEBUG] Historical item missing {name_key} or position")
+                    print(f"[DEBUG] Historical item missing {name_key} or rank")
                 continue
 
-            historical_positions[name] = position
+            historical_ranks[name] = rank
 
         if self.debug:
             print(
-                f"[DEBUG] Created historical position lookup with {len(historical_positions)} items"
+                f"[DEBUG] Created historical rank lookup with {len(historical_ranks)} items"
             )
 
         # Calculate deltas for current data
@@ -73,17 +73,17 @@ class DeltaCalculator:
                 continue
 
             name = item.get(name_key)
-            current_position = item.get("position")
-            if not name or current_position is None:
+            current_rank = item.get("rank")
+            if not name or current_rank is None:
                 if self.debug:
-                    print(f"[DEBUG] Current item missing {name_key} or position")
+                    print(f"[DEBUG] Current item missing {name_key} or rank")
                 continue
 
-            historical_position = historical_positions.get(name)
+            historical_rank = historical_ranks.get(name)
 
             # Calculate delta
-            if historical_position is not None:
-                delta = historical_position - current_position
+            if historical_rank is not None:
+                delta = historical_rank - current_rank
                 delta_symbol = self._get_delta_symbol(delta)
                 delta_text = delta_symbol  # Use symbol only, not +/- format
             else:
@@ -101,8 +101,8 @@ class DeltaCalculator:
 
             if self.debug:
                 print(
-                    f"[DEBUG] {name}: position {current_position}, "
-                    f"historical {historical_position}, delta {delta_text} {delta_symbol}"
+                    f"[DEBUG] {name}: rank {current_rank}, "
+                    f"historical {historical_rank}, delta {delta_text} {delta_symbol}"
                 )
 
         return results
@@ -111,7 +111,7 @@ class DeltaCalculator:
         """Get Unicode arrow symbol for delta value.
 
         Args:
-            delta: Position delta (positive = moved up, negative = moved down)
+            delta: Rank delta (positive = moved up, negative = moved down)
 
         Returns:
             Unicode arrow symbol with magnitude
