@@ -51,7 +51,7 @@ class MismatchAnalysisRequest(BaseModel):
     """Request model for mismatch analysis."""
 
     field: str = Field(..., description="Field to analyze (razor, blade, brush, soap)")
-    month: str = Field(..., description="Month to analyze (YYYY-MM format)")
+    months: List[str] = Field(..., description="List of months to analyze (YYYY-MM format)")
     threshold: int = Field(default=3, ge=1, le=10, description="Levenshtein distance threshold")
     use_enriched_data: bool = Field(
         default=False, description="Use enriched data instead of matched data"
@@ -135,7 +135,7 @@ class MismatchAnalysisResponse(BaseModel):
     """Response model for mismatch analysis."""
 
     field: str
-    month: str
+    months: List[str]  # Changed from month: str to months: List[str]
     total_matches: int
     total_mismatches: int
     mismatch_items: List[MismatchItem]
@@ -612,10 +612,10 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
     try:
         # Validate input parameters
         validate_field(request.field)
-        validate_months([request.month])
+        validate_months(request.months)
 
         logger.info(
-            f"Starting mismatch analysis for field '{request.field}' for month {request.month}"
+            f"Starting mismatch analysis for field '{request.field}' for months {request.months}"
         )
 
         # Create analyzer instance
@@ -632,7 +632,9 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
         # Create args object for the analyzer
         class Args:
             def __init__(self):
-                self.month = request.month
+                self.month = request.months[
+                    0
+                ]  # Use first month for now, analyzer expects single month
                 self.year = None
                 self.range = None
                 self.start = None
@@ -650,6 +652,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
                 self.show_correct = True
                 self.test_correct_matches = None
                 self.use_enriched_data = request.use_enriched_data
+                self.delta_months = None  # Add missing attribute
 
         args = Args()
 
@@ -798,7 +801,7 @@ async def analyze_mismatch(request: MismatchAnalysisRequest) -> MismatchAnalysis
 
         return MismatchAnalysisResponse(
             field=request.field,
-            month=request.month,
+            months=request.months,
             total_matches=total_matches,
             total_mismatches=total_mismatches,
             mismatch_items=all_items,

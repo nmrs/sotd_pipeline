@@ -64,7 +64,7 @@ ALE Razors:
   Straight:
     format: Straight
     patterns:
-      - ale.*razors?
+      - ale.*razors?(?:.*\d{1,2}/(8|16))?
 Alpha:
   Claymore:
     format: AC
@@ -93,7 +93,7 @@ A.R. Justice:
   Straight:
     format: Straight
     patterns:
-      - a\.r\. justice
+      - a\.r\. justice(?:.*\d{1,2}/(8|16))?
 Art of Shaving:
   Excalibur:
     patterns:
@@ -109,6 +109,11 @@ Art Razor:
     patterns:
       - yurii.*kravcenko.*kami
       - \bart\b.*razor.*kami
+Archibald:
+  A77 Shavette:
+    format: Shavette (A77)
+    patterns:
+      - archibald.*a77
 Assured for Men:
   Dollar Tree Safety Razor:
     patterns:
@@ -162,7 +167,7 @@ B. Payne & Sons:
   Straight:
     format: Straight
     patterns:
-      - b\.?\s*payne
+      - b\.?\s*payne(?:.*\d{1,2}/(8|16))?
 BBNY:
   Safety Razor:
     patterns:
@@ -218,7 +223,7 @@ Bismarck:
   Straight:
     format: Straight
     patterns:
-      - bismarck
+      - bismarck(?:.*\d{1,2}/(8|16))?
 Blackland:
   Square (Workshop Batch 002):
     format: Half DE
@@ -274,7 +279,7 @@ Böker:
   Abalone:
     format: Straight
     patterns:
-      - b[oö]ker.*abalone(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
+      - b[oö]ker.*abalone(?:.*\d{1,2}/(8|16))?
   Elite Carbon 2.0:
     format: Straight
     patterns:
@@ -302,7 +307,7 @@ C-Mon:
   Straight:
     format: Straight
     patterns:
-      - c-?mon
+      - c-?mon(?:.*\d{1,2}/(8|16))?
 C.V. Heljestrand:
   Lather Catcher:
     format: Other
@@ -311,13 +316,13 @@ C.V. Heljestrand:
   Straight:
     format: Straight
     patterns:
-      - heljestra.*(stra)?
-      - \bcvh\b
+      - heljestra.*(stra)?(?:.*\d{1,2}/(8|16))?
+      - \bcvh\b(?:.*\d{1,2}/(8|16))?
 Campobasso:
   Straight:
     format: Straight
     patterns:
-      - camp[ao]basso
+      - camp[ao]basso(?:.*\d{1,2}/(8|16))?
 Carbon:
   Cx:
     patterns:
@@ -332,8 +337,8 @@ Carl Rader:
   Straight:
     format: Straight
     patterns:
-      - carl.*rader
-      - rader.*solingen
+      - carl.*rader(?:.*\d{1,2}/(8|16))?
+      - rader.*solingen(?:.*\d{1,2}/(8|16))?
 Charcoal Goods:
   Everyday:
     patterns:
@@ -430,7 +435,7 @@ Delolme:
   Straight:
     format: Straight
     patterns:
-      - delolme
+      - delolme(?:.*\d{1,2}/(8|16))?
 Design94:
   Aviation94:
     patterns:
@@ -450,7 +455,7 @@ Drew Dick:
   Straight:
     format: Straight
     patterns:
-      - drew.*dick
+      - drew.*dick(?:.*\d{1,2}/(8|16))?
 DSCosmetic:
   D8:
     patterns:
@@ -477,7 +482,7 @@ Dovo:
     steel: Stainless
     width: 5/8
     patterns:
-      - dovo.*\b41\b
+      - dovo.*\b41\b(?:.*\d{1,2}/(8|16))?
   Shavette:
     format: Shavette
     patterns:
@@ -508,7 +513,7 @@ E.A. Berg:
   Straight:
     format: Straight
     patterns:
-      - e\.? ?a\.?\s*berg
+      - e\.? ?a\.?\s*berg(?:.*\d{1,2}/(8|16))?
 Eclipse:
   Red Ring:
     patterns:
@@ -517,7 +522,7 @@ Efendi:
   Straight:
     format: Straight
     patterns:
-      - efendi
+      - efendi(?:.*\d{1,2}/(8|16))?
 Edwin Jagger:
   3one6:
     patterns:
@@ -672,7 +677,7 @@ Filarmonica:
     format: Straight
     patterns:
       - 'Filar*m\wnica(\s+straight)*'
-      - monserrat
+      - monserrat(?:.*\d{1,2}/(8|16))?
 Fine Accoutrements:
   DE5:
     patterns:
@@ -712,7 +717,7 @@ Frederick Reynolds:
   Straight:
     format: Straight
     patterns:
-      - freder.*reynold
+      - freder.*reynold(?:.*\d{1,2}/(8|16))?
 FrankenRazor:
   "":
     patterns:
@@ -731,7 +736,7 @@ F.W. Engels:
   Straight:
     format: Straight
     patterns:
-      - engels
+      - engels(?:.*\d{1,2}/(8|16))?
 Gardette:
   Safety Razor:
     patterns:
@@ -795,7 +800,7 @@ Geneva Cutlery Co.:
   Straight:
     format: Straight
     patterns:
-      - geneva.*cutlery
+      - geneva.*cutlery(?:.*\d{1,2}/(8|16))?
 Geo. Wostenholm & Son:
   Pipe Razor:
     format: Straight
@@ -804,7 +809,7 @@ Geo. Wostenholm & Son:
   Straight:
     format: Straight
     patterns:
-      - w[eouü]stenholm
+      - w[eouü]stenholm(?:.*\d{1,2}/(8|16))?
 Gibbs:
   no. 15/17:
     patterns:
@@ -956,7 +961,7 @@ Gold Dollar:
   Straight:
     format: Straight
     patterns:
-      - gold.*dollar
+      - gold.*dollar(?:.*\d{1,2}/(8|16))?
 Grand Shave King:
   Self-Lubricating Razor:
     patterns:
@@ -975,12 +980,12 @@ Grelot:
   Straight:
     format: Straight
     patterns:
-      - grelot.*(\s+straight)?
+      - grelot(?:.*\d{1,2}/(8|16))?
 Griffith:
   Straight:
     format: Straight
     patterns:
-      - griffith
+      - griffith(?:.*\d{1,2}/(8|16))?
 Gutche:
   A77 Shavette:
     format: Shavette (A77)
@@ -999,7 +1004,7 @@ Hadoson (Matsukura):
   Straight:
     format: Straight
     patterns:
-      - (hadoson|matsukura)
+      - (hadoson|matsukura)(?:.*\d{1,2}/(8|16))?
 Handlebar:
   Shaving Company Dali:
     patterns:
@@ -1043,7 +1048,7 @@ HERO:
   Straight:
     format: Straight
     patterns:
-      - \bhero\b
+      - \bhero\b(?:.*\d{1,2}/(8|16))?
 Hoffritz:
   Slant:
     patterns:
@@ -1066,11 +1071,11 @@ Iberia:
     point: Square
     width: 8/8
     patterns:
-      - iberia.*14
+      - iberia.*14(?:.*\d{1,2}/(8|16))?
   Straight:
     format: Straight
     patterns:
-      - iberia
+      - iberia(?:.*\d{1,2}/(8|16))?
 iKon:
   "101":
     patterns:
@@ -1103,12 +1108,12 @@ Iwasaki:
   Straight:
     format: Straight
     patterns:
-      - iwasaki
+      - iwasaki(?:.*\d{1,2}/(8|16))?
 J.A. Hellberg:
   Straight:
     format: Straight
     patterns:
-      - hellberg
+      - hellberg(?:.*\d{1,2}/(8|16))?
 J.A. Henckels:
   Friodur Straight:
     format: Straight
@@ -1118,7 +1123,7 @@ J.A. Henckels:
   Straight:
     format: Straight
     patterns:
-      - hen[ck]+[el]+s?
+      - hen[ck]+[el]+s?(?:.*\d{1,2}/(8|16))?
 J.R. Torrey Razor Co.:
   Straight:
     format: Straight
@@ -1134,7 +1139,12 @@ John Clarke & Son:
   Straight:
     format: Straight
     patterns:
-      - john.*clarke?
+      - john.*clarke?(?:.*\d{1,2}/(8|16))?
+Jön Engström:
+  Straight:
+    format: Straight
+    patterns:
+      - engstr[oö]m(?:.*\d{1,2}/(8|16))?
 Joseph Rodgers & Sons:
   The Royal Razor:
     format: Straight
@@ -1144,7 +1154,7 @@ Joseph Rodgers & Sons:
   Straight:
     format: Straight
     patterns:
-      - joseph.*rod?gers
+      - joseph.*rod?gers(?:.*\d{1,2}/(8|16))?
 Junjie:
   Safety Razor:
     patterns:
@@ -1154,12 +1164,12 @@ K.M. Designs:
   Straight:
     format: Straight
     patterns:
-      - k\.? ?m\.?.*design
+      - k\.? ?m\.?.*design(?:.*\d{1,2}/(8|16))?
 Kafurt:
   Straight:
     format: Straight
     patterns:
-      - kafurt
+      - kafurt(?:.*\d{1,2}/(8|16))?
 Kai:
   Captain Folding:
     format: Shavette
@@ -1200,7 +1210,7 @@ Kikuboshi:
   Straight:
     format: Straight
     patterns:
-      - kikuboshi
+      - kikuboshi(?:.*\d{1,2}/(8|16))?
 Kingever:
   Refillable Razor:
     patterns:
@@ -1213,7 +1223,7 @@ Kobar:
   Straight:
     format: Straight
     patterns:
-      - kobar
+      - kobar(?:.*\d{1,2}/(8|16))?
 Koraat:
   Moarteen (r/Wetshaving exclusive):
     format: Straight
@@ -1239,7 +1249,7 @@ Kropp:
   Straight:
     format: Straight
     patterns:
-      - \bkropp\b
+      - \bkropp\b(?:.*\d{1,2}/(8|16))?
 KureNai:
   GF35:
     patterns:
@@ -1306,7 +1316,7 @@ M. Jung:
   Straight:
     format: Straight
     patterns:
-      - \bm\.?\s*jung
+      - \bm\.?\s*jung(?:.*\d{1,2}/(8|16))?
 Maggard:
   Shavette:
     format: Shavette
@@ -1336,7 +1346,7 @@ Maher & Grosh:
   Straight:
     format: Straight
     patterns:
-      - maher.*grosh
+      - maher.*grosh(?:.*\d{1,2}/(8|16))?
 Manscaped:
   The Plow 2.0:
     patterns:
@@ -1811,11 +1821,11 @@ Polgacrup:
   "45":
     format: Straight
     patterns:
-      - polgacrup.*45\b
+      - polgacrup.*45\b(?:.*\d{1,2}/(8|16))?
   Straight:
     format: Straight
     patterns:
-      - polgacrup
+      - polgacrup(?:.*\d{1,2}/(8|16))?
 Portland Razor Co.:
   Straight:
     format: Straight
@@ -1833,22 +1843,22 @@ Puma:
     point: Round
     width: 5/8
     patterns:
-      - puma.*88
+      - puma.*88(?:.*\d{1,2}/(8|16))?
   "89":
     format: Straight
     grind: Full Hollow
     point: Round
     width: 6/8
     patterns:
-      - puma.*89
+      - puma.*89(?:.*\d{1,2}/(8|16))?
   Straight:
     format: Straight
     patterns:
-      - puma
+      - puma(?:.*\d{1,2}/(8|16))?
 QShave:
   Parthenon:
     patterns:
-      - parthenon
+      - parthenon(?:.*\d{1,2}/(8|16))?
 Raido Star:
   Kamisori:
     format: Straight
@@ -1863,7 +1873,7 @@ Ralf Aust:
     format: Straight
     patterns:
       - 'ralf.*aust(\s+straight)*'
-      - \baust\b
+      - \baust\b(?:.*\d{1,2}/(8|16))?
 Rapira:
   Double Edge Safety Razor:
     patterns:
@@ -1963,18 +1973,18 @@ Red Imp:
     point: Square
     width: 5/8
     patterns:
-      - red.*imp.*132
+      - red.*imp.*132(?:.*\d{1,2}/(8|16))?
   "133":
     format: Straight
     grind: Full Hollow
     point: Round
     width: 5/8
     patterns:
-      - red.*imp.*133
+      - red.*imp.*133(?:.*\d{1,2}/(8|16))?
   Straight:
     format: Straight
     patterns:
-      - red.*imp
+      - red.*imp(?:.*\d{1,2}/(8|16))?
 Rex:
   Ambassador:
     patterns:
@@ -1997,17 +2007,17 @@ Rigarazor:
   Straight:
     format: Straight
     patterns:
-      - \briga(.?razor)?\b
+      - \briga(.?razor)?\b(?:.*\d{1,2}/(8|16))?
 River Razors:
   Straight:
     format: Straight
     patterns:
-      - river razors?
+      - river razors?(?:.*\d{1,2}/(8|16))?
 Robert Klaas:
   Straight:
     format: Straight
     patterns:
-      - robert.*klaas
+      - robert.*klaas(?:.*\d{1,2}/(8|16))?
 Robin:
   Snap 2.0:
     patterns:
@@ -2175,7 +2185,7 @@ Shumate:
   Straight:
     format: Straight
     patterns:
-      - shumate
+      - shumate(?:.*\d{1,2}/(8|16))?
 Silver STAR:
   Model 100:
     patterns:
@@ -2188,7 +2198,7 @@ Snail Forge:
   Straight:
     format: Straight
     patterns:
-      - snail.?forge
+      - snail.?forge(?:.*\d{1,2}/(8|16))?
 Soluna:
   Razor:
     patterns:
@@ -2235,7 +2245,7 @@ Star Reito:
   Straight:
     format: Straight
     patterns:
-      - \breito\b
+      - \breito\b(?:.*\d{1,2}/(8|16))?
 Stirling:
   DE3P6S:
     patterns:
@@ -2298,11 +2308,11 @@ Tanifuji:
     format: Straight
     patterns:
       - (tanifuji.*kintaka|kintaka.*tanifuji)
-      - \bkintaka\b
+      - \bkintaka\b(?:.*\d{1,2}/(8|16))?
   Straight:
     format: Straight
     patterns:
-      - tanifuji.*(\s+straight)?
+      - tanifuji(?:.*\d{1,2}/(8|16))?
 Tatara:
   Amakuni:
     format: AC
@@ -2342,12 +2352,12 @@ Thiers Issard:
   Straight:
     format: Straight
     patterns:
-      - th.*iss?ard(.*straight)?
+      - th.*iss?ard(?:.*\d{1,2}/(8|16))?
 Thomas Turner & Co.:
   Straight:
     format: Straight
     patterns:
-      - thomas.*turner
+      - thomas.*turner(?:.*\d{1,2}/(8|16))?
 Timeless:
   Razor:
     patterns:
@@ -2360,7 +2370,7 @@ Union Razor Co.:
   Straight:
     format: Straight
     patterns:
-      - union.*razor
+      - union.*razor(?:.*\d{1,2}/(8|16))?
 Utica Knife & Razor:
   Red Point 917:
     format: Straight
@@ -2369,11 +2379,11 @@ Utica Knife & Razor:
     width: 5/8
     patterns:
       - utica.*red.?point.*917
-      - red.?point.*917
+      - red.?point.*917(?:.*\d{1,2}/(8|16))?
   Straight:
     format: Straight
     patterns:
-      - utica.*straight
+      - utica.*straight(?:.*\d{1,2}/(8|16))?
 Utopia:
   Shavette:
     format: Shavette (Half DE)
@@ -2414,7 +2424,7 @@ W. Greaves & Sons:
   Straight:
     format: Straight
     patterns:
-      - greaves
+      - greaves(?:.*\d{1,2}/(8|16))?
 WCS:
   "77":
     patterns:
@@ -2456,7 +2466,7 @@ Wacker:
   Straight:
     format: Straight
     patterns:
-      - wacker
+      - wacker(?:.*\d{1,2}/(8|16))?
 Wade & Butcher:
   Straight:
     format: Straight
@@ -2483,7 +2493,7 @@ Weck:
   Bantam:
     format: Shavette (Hair Shaper)
     patterns:
-      - weck.*bantam
+      - weck.*bantam(?# PAD FOR PRIORITY LENGTH xxxxxxxxxxxx)
   Med Prep:
     format: Shavette (Hair Shaper)
     patterns:
@@ -2491,9 +2501,7 @@ Weck:
   Sextoblade:
     format: Shavette (Hair Shaper)
     patterns:
-      - Sextoblade
-      - weck
-      - weck.*hair
+      - weck(?:.*Sextoblade)?
 Weishi:
   "9306":
     patterns:
@@ -2509,10 +2517,10 @@ Werner Breidenbach:
   Monte Rosa 14:
     format: Straight
     grind: Extra Hollow
-    patterns:
-      - monte.*rosa.*14
     point: Square
     width: 15/16
+    patterns:
+      - monte.*rosa.*14(?:.*\d{1,2}/(8|16))?
 Whityle:
   20T Glide Pro 4D:
     format: Dual Half DE
@@ -2559,7 +2567,7 @@ Wüsthof:
   Straight:
     format: Straight
     patterns:
-      - w[uü]sthof
+      - w[uü]sthof(?:.*\d{1,2}/(8|16))?
 Yaqi:
   Adjustable TFC:
     patterns:

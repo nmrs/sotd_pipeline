@@ -163,7 +163,7 @@ export const analyzeUnmatched = async (
 // Mismatch analyzer types and functions
 export interface MismatchAnalysisRequest {
   field: string;
-  month: string;
+  months: string[]; // Changed from month: string to months: string[]
   threshold?: number;
   use_enriched_data?: boolean;
 }
@@ -186,7 +186,7 @@ export interface MismatchItem {
 
 export interface MismatchAnalysisResult {
   field: string;
-  month: string;
+  months: string[]; // Changed from month: string to months: string[]
   total_matches: number;
   total_mismatches: number;
   mismatch_items: MismatchItem[];

@@ -26,7 +26,7 @@ import { structureBrushDataForAPI } from '@/utils/brushDataUtils';
 
 const MismatchAnalyzer: React.FC = () => {
   const [selectedField, setSelectedField] = useState<string>('razor');
-  const [selectedMonth, setSelectedMonth] = useState<string>('');
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [threshold, setThreshold] = useState<number>(3);
   const [useEnrichedData, setUseEnrichedData] = useState<boolean>(false);
   const [displayMode, setDisplayMode] = useState<
@@ -91,8 +91,8 @@ const MismatchAnalyzer: React.FC = () => {
   }, [selectedField, loadCorrectMatches]);
 
   const handleAnalyze = async () => {
-    if (!selectedMonth) {
-      setError('Please select a month to analyze');
+    if (selectedMonths.length === 0) {
+      setError('Please select at least one month to analyze');
       return;
     }
 
@@ -104,7 +104,7 @@ const MismatchAnalyzer: React.FC = () => {
 
       const result = await analyzeMismatch({
         field: selectedField,
-        month: selectedMonth,
+        months: selectedMonths, // Pass full months array instead of just first month
         threshold,
         use_enriched_data: useEnrichedData,
       });
@@ -124,7 +124,7 @@ const MismatchAnalyzer: React.FC = () => {
       setCommentLoading(true);
 
       // Always load just the clicked comment initially for fast response
-      const comment = await getCommentDetail(commentId, [selectedMonth]);
+      const comment = await getCommentDetail(commentId, selectedMonths);
       setSelectedComment(comment);
       setCurrentCommentIndex(0);
       setCommentModalOpen(true);
@@ -160,7 +160,7 @@ const MismatchAnalyzer: React.FC = () => {
         try {
           setCommentLoading(true);
           const nextCommentId = remainingCommentIds[0];
-          const nextComment = await getCommentDetail(nextCommentId, [selectedMonth]);
+          const nextComment = await getCommentDetail(nextCommentId, selectedMonths);
 
           setAllComments(prev => [...prev, nextComment]);
           setRemainingCommentIds(prev => prev.slice(1));
@@ -208,7 +208,7 @@ const MismatchAnalyzer: React.FC = () => {
             fileGroups[sourceFile].push(commentId);
           } else {
             // Fallback to current month if no source file mapping
-            const fallbackFile = `${selectedMonth}.json`;
+            const fallbackFile = `${selectedMonths[0]}.json`;
             if (!fileGroups[fallbackFile]) {
               fileGroups[fallbackFile] = [];
             }
@@ -223,7 +223,7 @@ const MismatchAnalyzer: React.FC = () => {
       } else {
         // Fallback: use current month for all comment_ids
         occurrences.push({
-          file: `${selectedMonth}.json`,
+          file: `${selectedMonths[0]}.json`,
           comment_ids: item.comment_ids,
         });
       }
@@ -231,11 +231,11 @@ const MismatchAnalyzer: React.FC = () => {
 
     // Create existing split data if available
     let existingSplit: BrushSplit | undefined = undefined;
-    if (item.is_split_brush && (item.handle_component || item.knot_component)) {
+    if ((item as any).is_split_brush && ((item as any).handle_component || (item as any).knot_component)) {
       existingSplit = {
         original: item.original,
-        handle: item.handle_component || null,
-        knot: item.knot_component || null,
+        handle: (item as any).handle_component || null,
+        knot: (item as any).knot_component || null,
         corrected: false,
         validated_at: null,
         should_not_split: false,
@@ -283,7 +283,7 @@ const MismatchAnalyzer: React.FC = () => {
         handleBrushSplitClose();
 
         // Re-run analysis to get updated data
-        if (selectedMonth) {
+        if (selectedMonths.length > 0) {
           await handleAnalyze();
         }
       } else {
@@ -298,7 +298,7 @@ const MismatchAnalyzer: React.FC = () => {
   };
 
   const handleMonthChange = (months: string[]) => {
-    setSelectedMonth(months[0] || '');
+    setSelectedMonths(months);
   };
 
   const handleItemSelection = useCallback((itemKey: string, selected: boolean) => {
@@ -395,7 +395,7 @@ const MismatchAnalyzer: React.FC = () => {
         setError(null);
 
         // Re-run analysis to get updated mismatch data
-        if (selectedMonth) {
+        if (selectedMonths.length > 0) {
           await handleAnalyze();
         }
       } else {
@@ -455,7 +455,7 @@ const MismatchAnalyzer: React.FC = () => {
         setError(null);
 
         // Re-run analysis to get updated mismatch data
-        if (selectedMonth) {
+        if (selectedMonths.length > 0) {
           await handleAnalyze();
         }
       } else {
@@ -506,7 +506,7 @@ const MismatchAnalyzer: React.FC = () => {
                 action,
                 comment_id: firstCommentId,
                 source: 'user',
-                month: selectedMonth,
+                month: selectedMonths[0], // Use first month for backward compatibility
               });
             }
           }
@@ -530,7 +530,7 @@ const MismatchAnalyzer: React.FC = () => {
         setError(null);
 
         // Re-run analysis to get updated data
-        if (selectedMonth) {
+        if (selectedMonths.length > 0) {
           await handleAnalyze();
         }
       } else {
@@ -586,7 +586,7 @@ const MismatchAnalyzer: React.FC = () => {
 
       case 'complete_brushes':
         // Show only complete brush items (when field is brush)
-        return results.mismatch_items.filter(item => item.is_complete_brush === true);
+        return results.mismatch_items.filter(item => (item as any).is_complete_brush === true);
 
       default:
         return results.mismatch_items;
@@ -709,7 +709,7 @@ const MismatchAnalyzer: React.FC = () => {
         item => item.mismatch_type === 'intentionally_unmatched'
       ).length,
 
-      complete_brushes: returnedItems.filter(item => item.is_complete_brush === true).length,
+      complete_brushes: returnedItems.filter(item => (item as any).is_complete_brush === true).length,
     };
   };
 
@@ -850,11 +850,10 @@ const MismatchAnalyzer: React.FC = () => {
             <div className='min-w-0 flex-1 sm:flex-none'>
               <label htmlFor='month-selector' className='block text-sm font-medium text-gray-700 mb-1'>Month</label>
               <MonthSelector
-                id='month-selector'
-                selectedMonths={selectedMonth ? [selectedMonth] : []}
+                selectedMonths={selectedMonths}
                 onMonthsChange={handleMonthChange}
                 label='Select Month'
-                multiple={false}
+                multiple={true}
               />
             </div>
             <div className='min-w-0 flex-1 sm:flex-none'>
@@ -917,7 +916,7 @@ const MismatchAnalyzer: React.FC = () => {
             <div className='min-w-0 flex-1 sm:flex-none'>
               <button
                 onClick={handleAnalyze}
-                disabled={loading || !selectedMonth}
+                disabled={loading || selectedMonths.length === 0}
                 className='w-full sm:w-auto bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed h-10'
               >
                 {loading ? 'Analyzing...' : 'Analyze'}
@@ -1079,7 +1078,7 @@ const MismatchAnalyzer: React.FC = () => {
                     Field: <span className='font-medium'>{results.field}</span>
                   </span>
                   <span className='whitespace-nowrap'>
-                    Month: <span className='font-medium'>{results.month}</span>
+                    Month{results.months.length > 1 ? 's' : ''}: <span className='font-medium'>{results.months.join(', ')}</span>
                   </span>
                   <span className='whitespace-nowrap'>
                     Total Matches:{' '}
