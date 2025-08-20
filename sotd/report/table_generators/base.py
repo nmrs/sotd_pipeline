@@ -526,29 +526,69 @@ class BaseTableGenerator(ABC):
             markdown_lines.append(f"### {self.get_table_title()}")
             markdown_lines.append("")
 
-        # Ensure df is a DataFrame for type safety
+        # Use pandas to_markdown for table generation
+        # Ensure df is a DataFrame after all operations
         if not isinstance(df, pd.DataFrame):
-            raise TypeError("Expected DataFrame, got {type(df).__name__}")
+            raise TypeError(f"Expected DataFrame, got {type(df).__name__}")
 
-        # Calculate column widths
-        column_widths = self._calculate_column_widths(df, column_config, column_renames)
-
-        # Table header with proper alignment
-        header = self._format_table_header(df, column_widths)
-        markdown_lines.append(header)
-
-        # Table separator with proper alignment (right-aligned for numbers, center for deltas)
-        separator = self._format_table_separator(df, column_widths, column_config, column_renames)
-        markdown_lines.append(separator)
-
-        # Table rows
-        for _, row in df.iterrows():
-            row_str = self._format_table_row(row.values.tolist(), column_widths, df)
-            markdown_lines.append(row_str)
-
+        table_markdown = self._generate_table_with_pandas_markdown(
+            df, column_config, column_renames
+        )
+        markdown_lines.append(table_markdown)
         markdown_lines.append("")
 
         return "\n".join(markdown_lines)
+
+    def _generate_table_with_pandas_markdown(
+        self,
+        df: pd.DataFrame,
+        column_config: Dict[str, Dict[str, Any]],
+        column_renames: Dict[str, str],
+    ) -> str:
+        """Generate markdown table using pandas to_markdown method.
+
+        Args:
+            df: DataFrame with the data
+            column_config: Column configuration dictionary
+            column_renames: Mapping of original column names to display names
+
+        Returns:
+            Markdown table as a string
+        """
+        # Configure alignment for different column types
+        align_map = {}
+        for col in df.columns:
+            # Find the original column name for configuration lookup
+            orig_col = None
+            for k, v in column_renames.items():
+                if v == col:
+                    orig_col = k
+                    break
+
+            # Get column configuration
+            config = column_config.get(orig_col, {}) if orig_col else {}
+
+            # Set alignment based on column type
+            if config.get("format") == "delta":
+                align_map[col] = "center"
+            elif col in ["shaves", "unique users", "avg shaves per user"]:
+                align_map[col] = "right"
+            else:
+                align_map[col] = "left"
+
+        # Generate table using pandas to_markdown with tabulate
+        table_str = df.to_markdown(
+            index=False,
+            tablefmt="pipe",
+            numalign="right",
+            stralign="left",
+            colalign=[align_map.get(col, "left") for col in df.columns],
+        )
+
+        # Ensure we always return a string
+        if table_str is None:
+            return ""
+        return table_str
 
     def _add_positions(
         self, data: List[Dict[str, Any]], name_field: str = "name"
@@ -708,23 +748,20 @@ class BaseTableGenerator(ABC):
 
         # Sort data by shaves (desc) and unique_users (desc) for consistent ranking
         sorted_data = sorted(
-            data,
-            key=lambda x: (x.get("shaves", 0), x.get("unique_users", 0)),
-            reverse=True
+            data, key=lambda x: (x.get("shaves", 0), x.get("unique_users", 0)), reverse=True
         )
 
         # Extract numeric ranks for tie detection
         numeric_ranks = []
         current_rank = 1
-        
+
         for i, item in enumerate(sorted_data):
             if i > 0:
                 prev_item = sorted_data[i - 1]
                 # Check if this item is tied with the previous one
-                if (
-                    item.get("shaves", 0) == prev_item.get("shaves", 0)
-                    and item.get("unique_users", 0) == prev_item.get("unique_users", 0)
-                ):
+                if item.get("shaves", 0) == prev_item.get("shaves", 0) and item.get(
+                    "unique_users", 0
+                ) == prev_item.get("unique_users", 0):
                     # Tied with previous - use same rank
                     numeric_ranks.append(numeric_ranks[-1])
                 else:
@@ -953,7 +990,7 @@ class BaseTableGenerator(ABC):
         """
         formatted_cells = []
         for i, cell_value in enumerate(row_values):
-            col_name = df.columns[i]
+            col_name = str(df.columns[i])  # Ensure col_name is a string
             col_width = column_widths.get(col_name, len(str(cell_value)))
 
             # Format cell with proper width and alignment
