@@ -121,13 +121,15 @@ def run_phase(phase: str, args: List[str], debug: bool = False) -> int:
         module = __import__(module_name, fromlist=["main"])
 
         # Filter arguments based on phase requirements
-        # Delta arguments are only needed for data processing phases, not analysis phases
-        if phase in ["fetch", "extract", "match", "enrich"]:
-            # Data processing phases get all arguments including delta
+        # Delta arguments are needed for data processing phases and aggregate phase
+        # Only report phase doesn't need delta arguments (it processes the months
+        # specified in date args)
+        if phase in ["fetch", "extract", "match", "enrich", "aggregate"]:
+            # Data processing phases and aggregate phase get all arguments including delta
             phase_args = args
         else:
-            # Analysis phases (aggregate, report) don't need delta arguments
-            # They process the months specified in the date arguments
+            # Report phase doesn't need delta arguments
+            # It processes the months specified in the date arguments
             # Filter out --delta-months flag and its value
             phase_args = []
             skip_next = False
@@ -280,7 +282,7 @@ def get_phase_range(phase_range: str) -> List[str]:
     if start_idx > end_idx:
         raise ValueError(f"Start phase '{start_phase}' comes after end phase '{end_phase}'")
 
-    return all_phases[start_idx : end_idx + 1]
+    return all_phases[start_idx:end_idx + 1]
 
 
 def main(argv: Optional[List[str]] = None) -> int:
