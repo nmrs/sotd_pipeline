@@ -37,7 +37,7 @@ class SoapSampleBrandAggregator(BaseAggregator):
             total_samples = enriched.get("total_samples")
 
             # Extract soap identification
-            brand = matched.get("brand") or "" if matched else ""
+            brand = matched.get("maker") or "" if matched else ""
             brand = brand.strip() if brand else ""
             author = record.get("author") or ""
             author = author.strip() if author else ""
