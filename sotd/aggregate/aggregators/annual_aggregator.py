@@ -59,7 +59,7 @@ class AnnualAggregator(BaseAggregator):
                                 "name": item["name"],
                                 "shaves": item.get("shaves", 0),
                                 "unique_users": item.get("unique_users", 0),
-                                "position": item.get("position", 0),
+                                "rank": item.get("rank", 0),  # Use rank field instead of position
                             }
                             records.append(record)
 

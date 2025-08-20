@@ -58,11 +58,11 @@ class TestAnnualAggregationEngine:
         assert result[0]["name"] == "Razor A"
         assert result[0]["shaves"] == 30
         assert result[0]["unique_users"] == 25
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[1]["name"] == "Razor B"
         assert result[1]["shaves"] == 20
         assert result[1]["unique_users"] == 15
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
 
     def test_aggregate_razors_multiple_months(self):
         """Test aggregating razors from multiple months."""
@@ -96,17 +96,17 @@ class TestAnnualAggregationEngine:
         assert result[0]["name"] == "Razor A"
         assert result[0]["shaves"] == 55
         assert result[0]["unique_users"] == 45  # 25+20 unique users
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         # Razor B should be second (20 shaves)
         assert result[1]["name"] == "Razor B"
         assert result[1]["shaves"] == 20
         assert result[1]["unique_users"] == 15
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
         # Razor C should be third (15 shaves)
         assert result[2]["name"] == "Razor C"
         assert result[2]["shaves"] == 15
         assert result[2]["unique_users"] == 10
-        assert result[2]["position"] == 3
+        assert result[2]["rank"] == 3
 
     def test_aggregate_razors_empty_data(self):
         """Test aggregating razors with empty data."""
@@ -149,11 +149,11 @@ class TestAnnualAggregationEngine:
         assert result[0]["name"] == "Blade A"
         assert result[0]["shaves"] == 40
         assert result[0]["unique_users"] == 30
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[1]["name"] == "Blade B"
         assert result[1]["shaves"] == 30
         assert result[1]["unique_users"] == 20
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
 
     def test_aggregate_brushes_single_month(self):
         """Test aggregating brushes from a single month."""
@@ -177,11 +177,11 @@ class TestAnnualAggregationEngine:
         assert result[0]["name"] == "Brush A"
         assert result[0]["shaves"] == 35
         assert result[0]["unique_users"] == 25
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[1]["name"] == "Brush B"
         assert result[1]["shaves"] == 25
         assert result[1]["unique_users"] == 15
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
 
     def test_aggregate_soaps_single_month(self):
         """Test aggregating soaps from a single month."""
@@ -205,11 +205,11 @@ class TestAnnualAggregationEngine:
         assert result[0]["name"] == "Soap A"
         assert result[0]["shaves"] == 45
         assert result[0]["unique_users"] == 35
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[1]["name"] == "Soap B"
         assert result[1]["shaves"] == 35
         assert result[1]["unique_users"] == 25
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
 
     def test_generate_metadata_single_month(self):
         """Test generating metadata from a single month."""

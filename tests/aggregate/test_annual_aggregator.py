@@ -34,8 +34,8 @@ class TestAnnualAggregator:
             "2024-01": {
                 "data": {
                     "razors": [
-                        {"name": "Razor A", "shaves": 10, "unique_users": 5, "position": 1},
-                        {"name": "Razor B", "shaves": 8, "unique_users": 4, "position": 2},
+                        {"name": "Razor A", "shaves": 10, "unique_users": 5, "rank": 1},
+                        {"name": "Razor B", "shaves": 8, "unique_users": 4, "rank": 2},
                     ]
                 }
             }
@@ -48,11 +48,11 @@ class TestAnnualAggregator:
         assert result[0]["name"] == "Razor A"
         assert result[0]["shaves"] == 10
         assert result[0]["unique_users"] == 5
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         assert result[1]["name"] == "Razor B"
         assert result[1]["shaves"] == 8
         assert result[1]["unique_users"] == 4
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
 
     def test_aggregate_from_monthly_data_multiple_months(self):
         """Test aggregation with multiple months data."""
@@ -60,16 +60,16 @@ class TestAnnualAggregator:
             "2024-01": {
                 "data": {
                     "razors": [
-                        {"name": "Razor A", "shaves": 10, "unique_users": 5, "position": 1},
-                        {"name": "Razor B", "shaves": 8, "unique_users": 4, "position": 2},
+                        {"name": "Razor A", "shaves": 10, "unique_users": 5, "rank": 1},
+                        {"name": "Razor B", "shaves": 8, "unique_users": 4, "rank": 2},
                     ]
                 }
             },
             "2024-02": {
                 "data": {
                     "razors": [
-                        {"name": "Razor A", "shaves": 15, "unique_users": 7, "position": 1},
-                        {"name": "Razor C", "shaves": 12, "unique_users": 6, "position": 2},
+                        {"name": "Razor A", "shaves": 15, "unique_users": 7, "rank": 1},
+                        {"name": "Razor C", "shaves": 12, "unique_users": 6, "rank": 2},
                     ]
                 }
             },
@@ -83,17 +83,17 @@ class TestAnnualAggregator:
         assert result[0]["name"] == "Razor A"
         assert result[0]["shaves"] == 25
         assert result[0]["unique_users"] == 12
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         # Razor C should be second (12 shaves)
         assert result[1]["name"] == "Razor C"
         assert result[1]["shaves"] == 12
         assert result[1]["unique_users"] == 6
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
         # Razor B should be third (8 shaves)
         assert result[2]["name"] == "Razor B"
         assert result[2]["shaves"] == 8
         assert result[2]["unique_users"] == 4
-        assert result[2]["position"] == 3
+        assert result[2]["rank"] == 3
 
     def test_aggregate_from_monthly_data_missing_category(self):
         """Test aggregation when category is missing from monthly data."""
@@ -101,7 +101,7 @@ class TestAnnualAggregator:
             "2024-01": {
                 "data": {
                     "blades": [
-                        {"name": "Blade A", "shaves": 10, "unique_users": 5, "position": 1},
+                        {"name": "Blade A", "shaves": 10, "unique_users": 5, "rank": 1},
                     ]
                 }
             }
@@ -125,8 +125,8 @@ class TestAnnualAggregator:
             "2024-01": {
                 "data": {
                     "razors": [
-                        {"name": "Razor A", "shaves": 10, "unique_users": 5, "position": 1},
-                        {"name": "Razor B", "shaves": 8, "unique_users": 4, "position": 2},
+                        {"name": "Razor A", "shaves": 10, "unique_users": 5, "rank": 1},
+                        {"name": "Razor B", "shaves": 8, "unique_users": 4, "rank": 2},
                     ]
                 }
             }
@@ -139,17 +139,17 @@ class TestAnnualAggregator:
         assert records[0]["name"] == "Razor A"
         assert records[0]["shaves"] == 10
         assert records[0]["unique_users"] == 5
-        assert records[0]["position"] == 1
+        assert records[0]["rank"] == 1
         assert records[1]["name"] == "Razor B"
         assert records[1]["shaves"] == 8
         assert records[1]["unique_users"] == 4
-        assert records[1]["position"] == 2
+        assert records[1]["rank"] == 2
 
     def test_extract_data(self):
         """Test data extraction from records."""
         records = [
-            {"name": "Razor A", "shaves": 10, "unique_users": 5, "position": 1},
-            {"name": "Razor B", "shaves": 8, "unique_users": 4, "position": 2},
+            {"name": "Razor A", "shaves": 10, "unique_users": 5, "rank": 1},
+            {"name": "Razor B", "shaves": 8, "unique_users": 4, "rank": 2},
         ]
 
         aggregator = AnnualAggregator("razors")
@@ -254,8 +254,8 @@ class TestLegacyFunctions:
             "2024-01": {
                 "data": {
                     "razors": [
-                        {"name": "Razor A", "shaves": 10, "unique_users": 5, "position": 1},
-                        {"name": "Razor B", "shaves": 8, "unique_users": 4, "position": 2},
+                        {"name": "Razor A", "shaves": 10, "unique_users": 5, "rank": 1},
+                        {"name": "Razor B", "shaves": 8, "unique_users": 4, "rank": 2},
                     ]
                 }
             }
@@ -267,7 +267,7 @@ class TestLegacyFunctions:
         assert result[0]["name"] == "Razor A"
         assert result[0]["shaves"] == 10
         assert result[0]["unique_users"] == 5
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
 
     def test_aggregate_annual_blades(self):
         """Test aggregate_annual_blades function."""
@@ -275,8 +275,8 @@ class TestLegacyFunctions:
             "2024-01": {
                 "data": {
                     "blades": [
-                        {"name": "Blade A", "shaves": 10, "unique_users": 5, "position": 1},
-                        {"name": "Blade B", "shaves": 8, "unique_users": 4, "position": 2},
+                        {"name": "Blade A", "shaves": 10, "unique_users": 5, "rank": 1},
+                        {"name": "Blade B", "shaves": 8, "unique_users": 4, "rank": 2},
                     ]
                 }
             }
@@ -288,7 +288,7 @@ class TestLegacyFunctions:
         assert result[0]["name"] == "Blade A"
         assert result[0]["shaves"] == 10
         assert result[0]["unique_users"] == 5
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
 
     def test_aggregate_annual_brushes(self):
         """Test aggregate_annual_brushes function."""
@@ -296,8 +296,8 @@ class TestLegacyFunctions:
             "2024-01": {
                 "data": {
                     "brushes": [
-                        {"name": "Brush A", "shaves": 10, "unique_users": 5, "position": 1},
-                        {"name": "Brush B", "shaves": 8, "unique_users": 4, "position": 2},
+                        {"name": "Brush A", "shaves": 10, "unique_users": 5, "rank": 1},
+                        {"name": "Brush B", "shaves": 8, "unique_users": 4, "rank": 2},
                     ]
                 }
             }
@@ -309,7 +309,7 @@ class TestLegacyFunctions:
         assert result[0]["name"] == "Brush A"
         assert result[0]["shaves"] == 10
         assert result[0]["unique_users"] == 5
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
 
     def test_aggregate_annual_soaps(self):
         """Test aggregate_annual_soaps function."""
@@ -317,8 +317,8 @@ class TestLegacyFunctions:
             "2024-01": {
                 "data": {
                     "soaps": [
-                        {"name": "Soap A", "shaves": 10, "unique_users": 5, "position": 1},
-                        {"name": "Soap B", "shaves": 8, "unique_users": 4, "position": 2},
+                        {"name": "Soap A", "shaves": 10, "unique_users": 5, "rank": 1},
+                        {"name": "Soap B", "shaves": 8, "unique_users": 4, "rank": 2},
                     ]
                 }
             }
@@ -330,7 +330,7 @@ class TestLegacyFunctions:
         assert result[0]["name"] == "Soap A"
         assert result[0]["shaves"] == 10
         assert result[0]["unique_users"] == 5
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
 
 
 class TestEdgeCases:
@@ -361,8 +361,8 @@ class TestEdgeCases:
             "2024-01": {
                 "data": {
                     "razors": [
-                        {"shaves": 10, "unique_users": 5, "position": 1},  # missing name
-                        {"name": "Razor B", "shaves": 8, "unique_users": 4, "position": 2},
+                        {"shaves": 10, "unique_users": 5, "rank": 1},  # missing name
+                        {"name": "Razor B", "shaves": 8, "unique_users": 4, "rank": 2},
                     ]
                 }
             }
@@ -378,24 +378,24 @@ class TestEdgeCases:
             "2024-01": {
                 "data": {
                     "razors": [
-                        {"name": "Razor A", "shaves": 10, "unique_users": 5, "position": 1},
-                        {"name": "Razor B", "shaves": 8, "unique_users": 4, "position": 2},
+                        {"name": "Razor A", "shaves": 10, "unique_users": 5, "rank": 1},
+                        {"name": "Razor B", "shaves": 8, "unique_users": 4, "rank": 2},
                     ]
                 }
             },
             "2024-02": {
                 "data": {
                     "razors": [
-                        {"name": "Razor A", "shaves": 15, "unique_users": 7, "position": 1},
-                        {"name": "Razor C", "shaves": 12, "unique_users": 6, "position": 2},
+                        {"name": "Razor A", "shaves": 15, "unique_users": 7, "rank": 1},
+                        {"name": "Razor C", "shaves": 12, "unique_users": 6, "rank": 2},
                     ]
                 }
             },
             "2024-03": {
                 "data": {
                     "razors": [
-                        {"name": "Razor B", "shaves": 5, "unique_users": 3, "position": 1},
-                        {"name": "Razor C", "shaves": 8, "unique_users": 4, "position": 2},
+                        {"name": "Razor B", "shaves": 5, "unique_users": 3, "rank": 1},
+                        {"name": "Razor C", "shaves": 8, "unique_users": 4, "rank": 2},
                     ]
                 }
             },
@@ -408,14 +408,14 @@ class TestEdgeCases:
         assert result[0]["name"] == "Razor A"
         assert result[0]["shaves"] == 25
         assert result[0]["unique_users"] == 12
-        assert result[0]["position"] == 1
+        assert result[0]["rank"] == 1
         # Razor C should be second (20 total shaves)
         assert result[1]["name"] == "Razor C"
         assert result[1]["shaves"] == 20
         assert result[1]["unique_users"] == 10
-        assert result[1]["position"] == 2
+        assert result[1]["rank"] == 2
         # Razor B should be third (13 total shaves)
         assert result[2]["name"] == "Razor B"
         assert result[2]["shaves"] == 13
         assert result[2]["unique_users"] == 7
-        assert result[2]["position"] == 3
+        assert result[2]["rank"] == 3
