@@ -119,25 +119,28 @@ class BaseAggregator(ABC):
         Returns:
             List of dictionaries with rank, name, shaves, and unique_users fields
         """
-        # Sort by tie_columns + name for consistency
-        # Note: tie_columns are sorted descending, name is sorted ascending
-        sort_columns = self.tie_columns + ["name"]
-        # False for numeric, True for name
+        # Get the first grouping column for sorting (could be "name", "handle_maker", etc.)
+        first_group_column = self._get_group_columns(grouped)[0]
+        
+        # Sort by tie_columns + first_group_column for consistency
+        # Note: tie_columns are sorted descending, first_group_column is sorted ascending
+        sort_columns = self.tie_columns + [first_group_column]
+        # False for numeric, True for first_group_column
         sort_ascending = [False] * len(self.tie_columns) + [True]
 
         grouped = grouped.sort_values(sort_columns, ascending=sort_ascending)
         grouped = grouped.reset_index(drop=True)
 
         # Use pandas groupby approach for efficient multi-column tie detection
-        # Sort by tie_columns (desc) + name (asc) for consistent ranking
+        # Sort by tie_columns (desc) + first_group_column (asc) for consistent ranking
         tmp = grouped.sort_values(sort_columns, ascending=sort_ascending)
 
         # Assign dense ranks to unique combinations of tie_columns
         # ngroup() + 1 gives us 1-based dense ranking
         tmp["raw_rank"] = tmp.groupby(self.tie_columns, sort=False).ngroup() + 1
 
-        # Sort by final ranking + name for consistent ordering
-        grouped = tmp.sort_values(["raw_rank", "name"], ascending=[True, True])
+        # Sort by final ranking + first_group_column for consistent ordering
+        grouped = tmp.sort_values(["raw_rank", first_group_column], ascending=[True, True])
         grouped = grouped.reset_index(drop=True)
 
         # Convert to list of dictionaries
