@@ -71,6 +71,10 @@ The following variables are available for the monthly software report template:
 | `{{unique_shavers}}` | Number of unique users | `567` |
 | `{{unique_soaps}}` | Number of unique soaps used | `585` |
 | `{{unique_brands}}` | Number of unique soap brands/makers | `136` |
+| `{{total_samples}}` | Total number of sample shaves used | `89` |
+| `{{sample_percentage}}` | Percentage of shaves that used samples | `7.2%` |
+| `{{sample_users}}` | Number of unique users who used samples | `67` |
+| `{{sample_brands}}` | Number of unique brands sampled | `23` |
 
 ### Annual Report Variables
 
@@ -80,9 +84,13 @@ The following variables are available for annual report templates:
 |----------|-------------|----------------|
 | `{{year}}` | Year in display format | `2025` |
 | `{{total_shaves}}` | Total number of shaves (formatted with commas) | `15,678` |
-| `{{unique_shavers}}` | Number of unique users | `1,234` |
+| `{{unique_shavers}}` | Total number of unique users | `1,234` |
 | `{{included_months}}` | Number of months included in the data | `12` |
 | `{{missing_months}}` | Number of months missing from the data | `0` |
+| `{{total_samples}}` | Total number of sample shaves used | `1,234` |
+| `{{sample_percentage}}` | Percentage of shaves that used samples | `7.9%` |
+| `{{sample_users}}` | Number of unique users who used samples | `456` |
+| `{{sample_brands}}` | Number of unique brands sampled | `89` |
 
 ## Available Table Placeholders
 
@@ -106,6 +114,7 @@ The following table placeholders are available for the software report template:
 |-------------|-------------|---------|
 | `{{tables.soap-makers}}` | Soap maker statistics | Top soap makers |
 | `{{tables.soaps}}` | Soap usage statistics | Top soaps by usage |
+| `{{tables.top-sampled-soaps}}` | Sample usage statistics | Top sampled soaps by usage |
 | `{{tables.brand-diversity}}` | Brand diversity statistics | Unique scents per brand |
 | `{{tables.top-shavers}}` | Top shaver statistics | Users with most shaves |
 
