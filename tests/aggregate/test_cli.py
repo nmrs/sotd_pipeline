@@ -109,15 +109,15 @@ class TestAggregateRun:
             months=["2023-01"], data_dir=args.out_dir, debug=args.debug, force=args.force
         )
 
-    @patch("sotd.aggregate.run.process_months")
-    def test_run_with_year(self, mock_process_months):
+    @patch("sotd.aggregate.run.process_months_parallel")
+    def test_run_with_year(self, mock_process_months_parallel):
         """Test run function with year argument."""
         parser = get_parser()
         args = parser.parse_args(["--year", "2023"])
 
         run(args)
 
-        # Should process all months in 2023
+        # Should process all months in 2023 using parallel processing
         expected_months = [
             "2023-01",
             "2023-02",
@@ -132,12 +132,16 @@ class TestAggregateRun:
             "2023-11",
             "2023-12",
         ]
-        mock_process_months.assert_called_once_with(
-            months=expected_months, data_dir=args.out_dir, debug=args.debug, force=args.force
+        mock_process_months_parallel.assert_called_once_with(
+            months=expected_months,
+            data_dir=args.out_dir,
+            debug=args.debug,
+            force=args.force,
+            max_workers=8,
         )
 
-    @patch("sotd.aggregate.run.process_months")
-    def test_run_with_range(self, mock_process_months):
+    @patch("sotd.aggregate.run.process_months_parallel")
+    def test_run_with_range(self, mock_process_months_parallel):
         """Test run function with range argument."""
         parser = get_parser()
         args = parser.parse_args(["--range", "2023-01:2023-03"])
@@ -145,12 +149,16 @@ class TestAggregateRun:
         run(args)
 
         expected_months = ["2023-01", "2023-02", "2023-03"]
-        mock_process_months.assert_called_once_with(
-            months=expected_months, data_dir=args.out_dir, debug=args.debug, force=args.force
+        mock_process_months_parallel.assert_called_once_with(
+            months=expected_months,
+            data_dir=args.out_dir,
+            debug=args.debug,
+            force=args.force,
+            max_workers=8,
         )
 
-    @patch("sotd.aggregate.run.process_months")
-    def test_run_with_start_end(self, mock_process_months):
+    @patch("sotd.aggregate.run.process_months_parallel")
+    def test_run_with_start_end(self, mock_process_months_parallel):
         """Test run function with start/end arguments."""
         parser = get_parser()
         args = parser.parse_args(["--start", "2023-01", "--end", "2023-03"])
@@ -158,8 +166,12 @@ class TestAggregateRun:
         run(args)
 
         expected_months = ["2023-01", "2023-02", "2023-03"]
-        mock_process_months.assert_called_once_with(
-            months=expected_months, data_dir=args.out_dir, debug=args.debug, force=args.force
+        mock_process_months_parallel.assert_called_once_with(
+            months=expected_months,
+            data_dir=args.out_dir,
+            debug=args.debug,
+            force=args.force,
+            max_workers=8,
         )
 
     @patch("sotd.aggregate.run.process_months")
@@ -248,26 +260,26 @@ class TestAggregateMain:
             main()
         mock_process_months.assert_called_once()
 
-    @patch("sotd.aggregate.run.process_months")
-    def test_main_with_year(self, mock_process_months):
+    @patch("sotd.aggregate.run.process_months_parallel")
+    def test_main_with_year(self, mock_process_months_parallel):
         """Test main function with year argument."""
         with patch("sys.argv", ["aggregate", "--year", "2023"]):
             main()
-        mock_process_months.assert_called_once()
+        mock_process_months_parallel.assert_called_once()
 
-    @patch("sotd.aggregate.run.process_months")
-    def test_main_with_range(self, mock_process_months):
+    @patch("sotd.aggregate.run.process_months_parallel")
+    def test_main_with_range(self, mock_process_months_parallel):
         """Test main function with range argument."""
         with patch("sys.argv", ["aggregate", "--range", "2023-01:2023-03"]):
             main()
-        mock_process_months.assert_called_once()
+        mock_process_months_parallel.assert_called_once()
 
-    @patch("sotd.aggregate.run.process_months")
-    def test_main_with_start_end(self, mock_process_months):
+    @patch("sotd.aggregate.run.process_months_parallel")
+    def test_main_with_start_end(self, mock_process_months_parallel):
         """Test main function with start/end arguments."""
         with patch("sys.argv", ["aggregate", "--start", "2023-01", "--end", "2023-03"]):
             main()
-        mock_process_months.assert_called_once()
+        mock_process_months_parallel.assert_called_once()
 
     @patch("sotd.aggregate.run.process_months")
     def test_main_with_debug_and_force(self, mock_process_months):

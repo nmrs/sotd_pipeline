@@ -23,7 +23,7 @@ def aggregate_brand_diversity(
         soaps: List of soap aggregations with name field
 
     Returns:
-        List of brand diversity aggregations with position, maker, and unique_soaps fields
+        List of brand diversity aggregations with rank, maker, and unique_soaps fields
     """
     if not soap_makers or not soaps:
         return []
@@ -73,15 +73,15 @@ def aggregate_brand_diversity(
     # Sort by unique_soaps desc, then by maker name asc for tie-breaking
     df = df.sort_values(["unique_soaps", "maker"], ascending=[False, True])
 
-    # Add position field (1-based rank)
-    df["position"] = range(1, len(df) + 1)
+    # Add rank field (1-based rank)
+    df["rank"] = range(1, len(df) + 1)
 
     # Convert to list of dictionaries
     result = []
     for _, row in df.iterrows():
         result.append(
             {
-                "position": int(row["position"]),
+                "rank": int(row["rank"]),
                 "maker": row["maker"],
                 "unique_soaps": int(row["unique_soaps"]),
             }

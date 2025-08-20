@@ -59,14 +59,14 @@ def aggregate_users(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Aggregate user data from enriched records.
 
     Returns a list of user aggregations sorted by shaves desc, missed_days asc.
-    Each item includes position field for delta calculations.
+    Each item includes rank field for delta calculations.
     Calculates missed days by comparing user's posted dates against all dates in the month.
 
     Args:
         records: List of enriched comment records
 
     Returns:
-        List of user aggregations with position, user, shaves, missed_days,
+        List of user aggregations with rank, user, shaves, missed_days,
         and missed_dates fields
     """
     if not records:
@@ -145,15 +145,15 @@ def aggregate_users(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     # Sort by shaves desc, missed_days asc
     result_df = result_df.sort_values(["shaves", "missed_days"], ascending=[False, True])
 
-    # Add position field (1-based rank)
-    result_df["position"] = range(1, len(result_df) + 1)
+    # Add rank field (1-based rank)
+    result_df["rank"] = range(1, len(result_df) + 1)
 
     # Convert to list of dictionaries
     final_results = []
     for _, row in result_df.iterrows():
         final_results.append(
             {
-                "position": int(row["position"]),
+                "rank": int(row["rank"]),
                 "user": row["author"],
                 "shaves": int(row["shaves"]),
                 "missed_days": int(row["missed_days"]),

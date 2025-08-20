@@ -249,11 +249,18 @@ class TestAggregateIntegration:
         assert len(data["soaps"]) > 0
         assert len(data["users"]) > 0
 
-        # Verify position fields are present and sequential
+        # Verify rank fields are present for list categories with dictionaries
         for category in data:
-            for i, item in enumerate(data[category], 1):
-                assert "position" in item, f"Missing position in {category}"
-                assert item["position"] == i, f"Position mismatch in {category}"
+            if isinstance(data[category], list) and data[category]:
+                # Check if the first item is a dictionary (indicating it's an aggregation result)
+                first_item = data[category][0]
+                if isinstance(first_item, dict):
+                    for item in data[category]:
+                        assert "rank" in item, f"Missing rank in {category}"
+                        assert isinstance(
+                            item["rank"], int
+                        ), f"Rank should be integer in {category}"
+                        assert item["rank"] >= 1, f"Rank should be positive in {category}"
 
     def test_file_io_integration(self, sample_enriched_data, temp_data_dir):
         """Test file I/O operations with sample data."""

@@ -7,14 +7,14 @@ def aggregate_highest_use_count_per_blade(records: List[Dict[str, Any]]) -> List
     """Aggregate highest use count per blade data from enriched records.
 
     Returns a list of highest use count per blade aggregations sorted by uses desc.
-    Each item includes position field for delta calculations.
+    Each item includes rank field for delta calculations.
     Tracks per-user blade usage and extracts use_count from blade.enriched.use_count.
 
     Args:
         records: List of enriched comment records
 
     Returns:
-        List of highest use count per blade aggregations with position, user,
+        List of highest use count per blade aggregations with rank, user,
         blade, format, and uses fields
     """
     if not records:
@@ -101,15 +101,15 @@ def aggregate_highest_use_count_per_blade(records: List[Dict[str, Any]]) -> List
     # Sort by uses desc
     blade_max_usage = blade_max_usage.sort_values("uses", ascending=False)
 
-    # Add position field (1-based rank)
-    blade_max_usage["position"] = range(1, len(blade_max_usage) + 1)
+    # Add rank field (1-based rank)
+    blade_max_usage["rank"] = range(1, len(blade_max_usage) + 1)
 
     # Convert to list of dictionaries
     result = []
     for _, row in blade_max_usage.iterrows():
         result.append(
             {
-                "position": int(row["position"]),
+                "rank": int(row["rank"]),
                 "user": row["author"],
                 "blade": row["blade_name"],
                 "format": row["blade_format"],

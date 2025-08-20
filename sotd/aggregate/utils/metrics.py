@@ -139,7 +139,9 @@ def calculate_sample_brands(records: List[Dict[str, Any]]) -> int:
         matched = soap.get("matched", {})
         if matched is None:
             continue
-        brand = matched.get("maker", "").strip()
+        brand = matched.get("maker") or ""
+        if brand:
+            brand = brand.strip()
         if brand:
             sample_brands.add(brand)
     return len(sample_brands)
@@ -214,10 +216,10 @@ def calculate_unique_brushes(records: List[Dict[str, Any]]) -> int:
     return len(brushes)
 
 
-def add_position_field(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Add position field (1-based rank) to list of items."""
+def add_rank_field(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Add rank field (1-based rank) to list of items."""
     for i, item in enumerate(items, 1):
-        item["position"] = i
+        item["rank"] = i
     return items
 
 

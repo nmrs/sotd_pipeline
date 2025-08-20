@@ -64,13 +64,13 @@ def aggregate_razor_formats(records: List[Dict[str, Any]]) -> List[Dict[str, Any
     by combining razor and blade information, especially for shavettes.
 
     Returns a list of razor format aggregations sorted by shaves desc, unique_users desc.
-    Each item includes position field for delta calculations.
+    Each item includes rank field for delta calculations.
 
     Args:
         records: List of enriched comment records
 
     Returns:
-        List of razor format aggregations with position, format, shaves, and unique_users fields
+        List of razor format aggregations with rank, format, shaves, and unique_users fields
     """
     if not records:
         return []
@@ -110,15 +110,15 @@ def aggregate_razor_formats(records: List[Dict[str, Any]]) -> List[Dict[str, Any
     # Sort by shaves desc, unique_users desc
     grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
 
-    # Add position field (1-based rank)
-    grouped["position"] = range(1, len(grouped) + 1)
+    # Add rank field (1-based rank)
+    grouped["rank"] = range(1, len(grouped) + 1)
 
     # Convert to list of dictionaries
     result = []
     for _, row in grouped.iterrows():
         result.append(
             {
-                "position": int(row["position"]),
+                "rank": int(row["rank"]),
                 "format": row["format"],
                 "shaves": int(row["shaves"]),
                 "unique_users": int(row["unique_users"]),

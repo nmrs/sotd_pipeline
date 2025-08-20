@@ -7,7 +7,7 @@ def aggregate_blade_usage_distribution(records: List[Dict[str, Any]]) -> List[Di
     """Aggregate blade usage distribution data from enriched records.
 
     Returns a list of blade usage distribution aggregations sorted by use_count asc.
-    Each item includes position field for delta calculations.
+    Each item includes rank field for delta calculations.
     Groups blade usage by use count ranges and shows total shaves and unique users
     for each range. Extracts use_count from blade.enriched.use_count.
 
@@ -15,7 +15,7 @@ def aggregate_blade_usage_distribution(records: List[Dict[str, Any]]) -> List[Di
         records: List of enriched comment records
 
     Returns:
-        List of blade usage distribution aggregations with position, use_count,
+        List of blade usage distribution aggregations with rank, use_count,
         shaves, and unique_users fields
     """
     if not records:
@@ -71,15 +71,15 @@ def aggregate_blade_usage_distribution(records: List[Dict[str, Any]]) -> List[Di
     # Sort by use_count ascending (1, 2, 3, 4, 5, etc.)
     grouped = grouped.sort_values("use_count", ascending=True)
 
-    # Add position field (1-based rank)
-    grouped["position"] = range(1, len(grouped) + 1)
+    # Add rank field (1-based rank)
+    grouped["rank"] = range(1, len(grouped) + 1)
 
     # Convert to list of dictionaries
     result = []
     for _, row in grouped.iterrows():
         result.append(
             {
-                "position": int(row["position"]),
+                "rank": int(row["rank"]),
                 "use_count": int(row["use_count"]),
                 "shaves": int(row["shaves"]),
                 "unique_users": int(row["unique_users"]),

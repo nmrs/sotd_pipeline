@@ -97,26 +97,26 @@ class RazorDiversityAggregator(BaseAggregator):
         return grouped
 
     def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
-        """Sort grouped data and add position rankings.
+        """Sort grouped data and add rank rankings.
 
         Args:
             grouped: DataFrame with grouped and aggregated data
 
         Returns:
-            List of dictionaries with position, user, unique_razors, total_shaves,
+            List of dictionaries with rank, user, unique_razors, total_shaves,
             and unique_users fields
         """
         # Sort by unique_razors desc, total_shaves desc
         grouped = grouped.sort_values(["unique_razors", "total_shaves"], ascending=[False, False])
 
-        # Add position field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(position=lambda df: range(1, len(df) + 1))  # type: ignore
+        # Add rank field (1-based rank)
+        grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
 
         # Convert to list of dictionaries
         result = []
         for _, row in grouped.iterrows():
             item = {
-                "position": int(row["position"]),
+                "rank": int(row["rank"]),
                 "user": str(row["author"]),
                 "unique_razors": int(row["unique_razors"]),
                 "total_shaves": int(row["total_shaves"]),
@@ -145,13 +145,13 @@ def aggregate_razor_diversity(records: List[Dict[str, Any]]) -> List[Dict[str, A
     """Aggregate razor diversity by user from enriched records.
 
     Returns a list of razor diversity aggregations sorted by unique_razors desc,
-    total_shaves desc. Each item includes position field for delta calculations.
+    total_shaves desc. Each item includes rank field for delta calculations.
 
     Args:
         records: List of enriched comment records
 
     Returns:
-        List of razor diversity aggregations with position, user, unique_razors,
+        List of razor diversity aggregations with rank, user, unique_razors,
         total_shaves, and unique_users fields
     """
     aggregator = RazorDiversityAggregator()

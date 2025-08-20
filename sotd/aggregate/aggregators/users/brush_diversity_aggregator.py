@@ -2,6 +2,7 @@
 """Brush diversity aggregator for the SOTD pipeline."""
 
 from typing import Any, Dict, List
+
 import pandas as pd
 
 from ..base_aggregator import BaseAggregator
@@ -106,14 +107,14 @@ class BrushDiversityAggregator(BaseAggregator):
         return grouped
 
     def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
-        """Sort grouped data and add position rankings."""
+        """Sort grouped data and add rank rankings."""
         grouped = grouped.sort_values(["unique_brushes", "total_shaves"], ascending=[False, False])
-        grouped = grouped.reset_index(drop=True).assign(position=lambda df: range(1, len(df) + 1))  # type: ignore
+        grouped = grouped.reset_index(drop=True).assign(rank=lambda df: range(1, len(df) + 1))  # type: ignore
 
         result = []
         for _, row in grouped.iterrows():
             item = {
-                "position": int(row["position"]),
+                "rank": int(row["rank"]),
                 "user": str(row["author"]),
                 "unique_brushes": int(row["unique_brushes"]),
                 "total_shaves": int(row["total_shaves"]),

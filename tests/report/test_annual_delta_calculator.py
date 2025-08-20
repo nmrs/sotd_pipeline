@@ -18,7 +18,7 @@ class TestAnnualDeltaCalculator:
         assert calculator.debug is False
 
     def test_calculate_annual_deltas_basic(self):
-        """Test basic annual delta calculation with position fields."""
+        """Test basic annual delta calculation with rank fields."""
         current_year_data = {
             "year": "2024",
             "meta": {
@@ -29,13 +29,13 @@ class TestAnnualDeltaCalculator:
             },
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
-                    {"name": "Razor B", "shaves": 80, "position": 2},
-                    {"name": "Razor C", "shaves": 60, "position": 3},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor B", "shaves": 80, "rank": 2},
+                    {"name": "Razor C", "shaves": 60, "rank": 3},
                 ],
                 "blades": [
-                    {"name": "Blade A", "shaves": 50, "position": 1},
-                    {"name": "Blade B", "shaves": 40, "position": 2},
+                    {"name": "Blade A", "shaves": 50, "rank": 1},
+                    {"name": "Blade B", "shaves": 40, "rank": 2},
                 ],
             },
         }
@@ -50,13 +50,13 @@ class TestAnnualDeltaCalculator:
             },
             "data": {
                 "razors": [
-                    {"name": "Razor B", "shaves": 90, "position": 1},
-                    {"name": "Razor A", "shaves": 85, "position": 2},
-                    {"name": "Razor C", "shaves": 70, "position": 3},
+                    {"name": "Razor B", "shaves": 90, "rank": 1},
+                    {"name": "Razor A", "shaves": 85, "rank": 2},
+                    {"name": "Razor C", "shaves": 70, "rank": 3},
                 ],
                 "blades": [
-                    {"name": "Blade A", "shaves": 45, "position": 1},
-                    {"name": "Blade B", "shaves": 35, "position": 2},
+                    {"name": "Blade A", "shaves": 45, "rank": 1},
+                    {"name": "Blade B", "shaves": 35, "rank": 2},
                 ],
             },
         }
@@ -71,19 +71,19 @@ class TestAnnualDeltaCalculator:
         razors = result["razors"]
         assert len(razors) == 3
 
-        # Razor A: moved from position 2 to 1 (improved by 1)
+        # Razor A: moved from rank 2 to 1 (improved by 1)
         assert razors[0]["name"] == "Razor A"
         assert razors[0]["delta"] == 1
-        assert razors[0]["delta_symbol"] == "↑1"  # Improved by 1 position
-        assert razors[0]["delta_text"] == "↑1"  # Improved by 1 position
+        assert razors[0]["delta_symbol"] == "↑1"  # Improved by 1 rank
+        assert razors[0]["delta_text"] == "↑1"  # Improved by 1 rank
 
-        # Razor B: moved from position 1 to 2 (worsened by 1)
+        # Razor B: moved from rank 1 to 2 (worsened by 1)
         assert razors[1]["name"] == "Razor B"
         assert razors[1]["delta"] == -1
-        assert razors[1]["delta_symbol"] == "↓1"  # Worsened by 1 position
-        assert razors[1]["delta_text"] == "↓1"  # Worsened by 1 position
+        assert razors[1]["delta_symbol"] == "↓1"  # Worsened by 1 rank
+        assert razors[1]["delta_text"] == "↓1"  # Worsened by 1 rank
 
-        # Razor C: stayed at position 3 (no change)
+        # Razor C: stayed at rank 3 (no change)
         assert razors[2]["name"] == "Razor C"
         assert razors[2]["delta"] == 0
         assert razors[2]["delta_symbol"] == "="
@@ -93,12 +93,12 @@ class TestAnnualDeltaCalculator:
         blades = result["blades"]
         assert len(blades) == 2
 
-        # Blade A: stayed at position 1 (no change)
+        # Blade A: stayed at rank 1 (no change)
         assert blades[0]["name"] == "Blade A"
         assert blades[0]["delta"] == 0
         assert blades[0]["delta_symbol"] == "="
 
-        # Blade B: stayed at position 2 (no change)
+        # Blade B: stayed at rank 2 (no change)
         assert blades[1]["name"] == "Blade B"
         assert blades[1]["delta"] == 0
         assert blades[1]["delta_symbol"] == "="
@@ -110,8 +110,8 @@ class TestAnnualDeltaCalculator:
             "meta": {"total_shaves": 1200, "unique_shavers": 100},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
-                    {"name": "New Razor", "shaves": 80, "position": 2},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "New Razor", "shaves": 80, "rank": 2},
                 ],
             },
         }
@@ -121,7 +121,7 @@ class TestAnnualDeltaCalculator:
             "meta": {"total_shaves": 1100, "unique_shavers": 95},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "position": 1},
+                    {"name": "Razor A", "shaves": 90, "rank": 1},
                 ],
             },
         }
@@ -138,15 +138,15 @@ class TestAnnualDeltaCalculator:
         assert razors[1]["delta_symbol"] == "n/a"
         assert razors[1]["delta_text"] == "n/a"
 
-    def test_calculate_annual_deltas_missing_position(self):
-        """Test annual delta calculation with missing position fields."""
+    def test_calculate_annual_deltas_missing_rank(self):
+        """Test annual delta calculation with missing rank fields."""
         current_year_data = {
             "year": "2024",
             "meta": {"total_shaves": 1200, "unique_shavers": 100},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
-                    {"name": "Razor B", "shaves": 80},  # Missing position
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor B", "shaves": 80},  # Missing rank
                 ],
             },
         }
@@ -156,8 +156,8 @@ class TestAnnualDeltaCalculator:
             "meta": {"total_shaves": 1100, "unique_shavers": 95},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "position": 2},
-                    {"name": "Razor B", "shaves": 85, "position": 1},
+                    {"name": "Razor A", "shaves": 90, "rank": 2},
+                    {"name": "Razor B", "shaves": 85, "rank": 1},
                 ],
             },
         }
@@ -165,7 +165,7 @@ class TestAnnualDeltaCalculator:
         calculator = AnnualDeltaCalculator()
         result = calculator.calculate_annual_deltas(current_year_data, previous_year_data)
 
-        # Should only process items with position fields
+        # Should only process items with rank fields
         razors = result["razors"]
         assert len(razors) == 1
         assert razors[0]["name"] == "Razor A"
@@ -185,7 +185,7 @@ class TestAnnualDeltaCalculator:
             "year": "2023",
             "meta": {"total_shaves": 1100, "unique_shavers": 95},
             "data": {
-                "razors": [{"name": "Razor A", "shaves": 90, "position": 1}],
+                "razors": [{"name": "Razor A", "shaves": 90, "rank": 1}],
             },
         }
 
@@ -197,7 +197,7 @@ class TestAnnualDeltaCalculator:
             "year": "2024",
             "meta": {"total_shaves": 1200, "unique_shavers": 100},
             "data": {
-                "razors": [{"name": "Razor A", "shaves": 100, "position": 1}],
+                "razors": [{"name": "Razor A", "shaves": 100, "rank": 1}],
             },
         }
 
@@ -236,7 +236,7 @@ class TestAnnualDeltaCalculator:
         previous_year_data = {
             "year": "2023",
             "meta": {"total_shaves": 1100, "unique_shavers": 95},
-            "data": {"razors": [{"name": "Razor A", "shaves": 90, "position": 1}]},
+            "data": {"razors": [{"name": "Razor A", "shaves": 90, "rank": 1}]},
         }
 
         with pytest.raises(ValueError, match="Missing 'data' section in current year data"):
@@ -249,9 +249,9 @@ class TestAnnualDeltaCalculator:
             "meta": {"total_shaves": 1200, "unique_shavers": 100},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
-                    {"name": "Razor B", "shaves": 80, "position": 2},
-                    {"name": "Razor C", "shaves": 60, "position": 3},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor B", "shaves": 80, "rank": 2},
+                    {"name": "Razor C", "shaves": 60, "rank": 3},
                 ],
             },
         }
@@ -261,9 +261,9 @@ class TestAnnualDeltaCalculator:
             "meta": {"total_shaves": 1100, "unique_shavers": 95},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "position": 2},
-                    {"name": "Razor B", "shaves": 85, "position": 1},
-                    {"name": "Razor C", "shaves": 70, "position": 3},
+                    {"name": "Razor A", "shaves": 90, "rank": 2},
+                    {"name": "Razor B", "shaves": 85, "rank": 1},
+                    {"name": "Razor C", "shaves": 70, "rank": 3},
                 ],
             },
         }
@@ -285,15 +285,15 @@ class TestAnnualDeltaCalculator:
             "meta": {"total_shaves": 1200, "unique_shavers": 100},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
-                    {"name": "Razor B", "shaves": 80, "position": 2},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor B", "shaves": 80, "rank": 2},
                 ],
                 "blades": [
-                    {"name": "Blade A", "shaves": 50, "position": 1},
-                    {"name": "Blade B", "shaves": 40, "position": 2},
+                    {"name": "Blade A", "shaves": 50, "rank": 1},
+                    {"name": "Blade B", "shaves": 40, "rank": 2},
                 ],
                 "brushes": [
-                    {"name": "Brush A", "shaves": 30, "position": 1},
+                    {"name": "Brush A", "shaves": 30, "rank": 1},
                 ],
             },
         }
@@ -303,15 +303,15 @@ class TestAnnualDeltaCalculator:
             "meta": {"total_shaves": 1100, "unique_shavers": 95},
             "data": {
                 "razors": [
-                    {"name": "Razor B", "shaves": 90, "position": 1},
-                    {"name": "Razor A", "shaves": 85, "position": 2},
+                    {"name": "Razor B", "shaves": 90, "rank": 1},
+                    {"name": "Razor A", "shaves": 85, "rank": 2},
                 ],
                 "blades": [
-                    {"name": "Blade A", "shaves": 45, "position": 1},
-                    {"name": "Blade B", "shaves": 35, "position": 2},
+                    {"name": "Blade A", "shaves": 45, "rank": 1},
+                    {"name": "Blade B", "shaves": 35, "rank": 2},
                 ],
                 "brushes": [
-                    {"name": "Brush A", "shaves": 25, "position": 1},
+                    {"name": "Brush A", "shaves": 25, "rank": 1},
                 ],
             },
         }
@@ -330,13 +330,13 @@ class TestAnnualDeltaCalculator:
         razors = result["razors"]
         assert len(razors) == 2
         assert razors[0]["name"] == "Razor A"
-        assert razors[0]["delta"] == 1  # Improved from position 2 to 1
+        assert razors[0]["delta"] == 1  # Improved from rank 2 to 1
 
         # Test blades deltas
         blades = result["blades"]
         assert len(blades) == 2
         assert blades[0]["name"] == "Blade A"
-        assert blades[0]["delta"] == 0  # Stayed at position 1
+        assert blades[0]["delta"] == 0  # Stayed at rank 1
 
     def test_calculate_annual_deltas_all_categories(self):
         """Test annual delta calculation for all available categories."""
@@ -345,16 +345,16 @@ class TestAnnualDeltaCalculator:
             "meta": {"total_shaves": 1200, "unique_shavers": 100},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
                 ],
                 "blades": [
-                    {"name": "Blade A", "shaves": 50, "position": 1},
+                    {"name": "Blade A", "shaves": 50, "rank": 1},
                 ],
                 "brushes": [
-                    {"name": "Brush A", "shaves": 30, "position": 1},
+                    {"name": "Brush A", "shaves": 30, "rank": 1},
                 ],
                 "soaps": [
-                    {"name": "Soap A", "shaves": 20, "position": 1},
+                    {"name": "Soap A", "shaves": 20, "rank": 1},
                 ],
             },
         }
@@ -364,16 +364,16 @@ class TestAnnualDeltaCalculator:
             "meta": {"total_shaves": 1100, "unique_shavers": 95},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "position": 1},
+                    {"name": "Razor A", "shaves": 90, "rank": 1},
                 ],
                 "blades": [
-                    {"name": "Blade A", "shaves": 45, "position": 1},
+                    {"name": "Blade A", "shaves": 45, "rank": 1},
                 ],
                 "brushes": [
-                    {"name": "Brush A", "shaves": 25, "position": 1},
+                    {"name": "Brush A", "shaves": 25, "rank": 1},
                 ],
                 "soaps": [
-                    {"name": "Soap A", "shaves": 15, "position": 1},
+                    {"name": "Soap A", "shaves": 15, "rank": 1},
                 ],
             },
         }
@@ -385,7 +385,7 @@ class TestAnnualDeltaCalculator:
         expected_categories = {"razors", "blades", "brushes", "soaps"}
         assert set(result.keys()) == expected_categories
 
-        # All items should have no change (stayed at position 1)
+        # All items should have no change (stayed at rank 1)
         for category in expected_categories:
             items = result[category]
             assert len(items) == 1
@@ -399,8 +399,8 @@ class TestAnnualDeltaCalculator:
             "meta": {"total_shaves": 1200, "unique_shavers": 100},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
-                    {"name": "Razor B", "shaves": 80, "position": 2},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
+                    {"name": "Razor B", "shaves": 80, "rank": 2},
                 ],
             },
         }
@@ -410,8 +410,8 @@ class TestAnnualDeltaCalculator:
             "meta": {"total_shaves": 1100, "unique_shavers": 95},
             "data": {
                 "razors": [
-                    {"name": "Razor B", "shaves": 90, "position": 1},
-                    {"name": "Razor A", "shaves": 85, "position": 2},
+                    {"name": "Razor B", "shaves": 90, "rank": 1},
+                    {"name": "Razor A", "shaves": 85, "rank": 2},
                 ],
             },
         }
@@ -444,7 +444,7 @@ class TestAnnualDeltaCalculator:
             "meta": {"total_shaves": 1100, "unique_shavers": 95},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "position": 1},
+                    {"name": "Razor A", "shaves": 90, "rank": 1},
                 ],
             },
         }
@@ -462,10 +462,10 @@ class TestAnnualDeltaCalculator:
             "meta": {"total_shaves": 1200, "unique_shavers": 100},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 100, "position": 1},
+                    {"name": "Razor A", "shaves": 100, "rank": 1},
                 ],
                 "blades": [
-                    {"name": "Blade A", "shaves": 50, "position": 1},
+                    {"name": "Blade A", "shaves": 50, "rank": 1},
                 ],
             },
         }
@@ -475,7 +475,7 @@ class TestAnnualDeltaCalculator:
             "meta": {"total_shaves": 1100, "unique_shavers": 95},
             "data": {
                 "razors": [
-                    {"name": "Razor A", "shaves": 90, "position": 1},
+                    {"name": "Razor A", "shaves": 90, "rank": 1},
                 ],
                 # Missing blades category
             },
@@ -487,7 +487,7 @@ class TestAnnualDeltaCalculator:
         # Razors should have normal deltas
         razors = result["razors"]
         assert len(razors) == 1
-        assert razors[0]["delta"] == 0  # Stayed at position 1
+        assert razors[0]["delta"] == 0  # Stayed at rank 1
 
         # Blades should have n/a deltas (no previous data)
         blades = result["blades"]
