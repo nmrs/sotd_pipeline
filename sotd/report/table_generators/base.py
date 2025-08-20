@@ -385,11 +385,11 @@ class BaseTableGenerator(ABC):
         # Add avg shaves per user calculation
         table_data = self._add_avg_shaves_per_user(table_data)
 
-        # Add rank data for display
-        table_data = self._add_rank_data(table_data)
-
-        # Add rank information for delta calculations
-        if include_delta:
+        # Add rank data for display (only if not doing delta calculations)
+        if not include_delta:
+            table_data = self._add_rank_data(table_data)
+        else:
+            # For delta calculations, use numeric ranks that can be used for calculations
             table_data = self._add_ranks(table_data)
 
         # Calculate deltas if requested
@@ -831,7 +831,7 @@ class BaseTableGenerator(ABC):
                     f"historical records for category: {category_name}"
                 )
 
-                    # Add ranks to historical data if not present
+            # Add ranks to historical data if not present
             if not any("rank" in item for item in historical_category_data):
                 historical_category_data = self._add_ranks(historical_category_data)
 

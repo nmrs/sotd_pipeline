@@ -9,9 +9,10 @@ class RazorFormatsTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get razor format data from aggregated data."""
         data = self.data.get("razor_formats", [])
-        # Filter for formats with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
-        return self._validate_data_records(filtered_data, "razor_formats", ["format", "shaves"])
+        # Validate data first, then filter for formats with 5+ shaves
+        valid_data = self._validate_data_records(data, "razor_formats", ["format", "shaves"])
+        filtered_data = [item for item in valid_data if item.get("shaves", 0) >= 5]
+        return filtered_data
 
     def get_table_title(self) -> str:
         """Return the table title."""
@@ -48,9 +49,10 @@ class RazorsTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get razors data from aggregated data."""
         data = self.data.get("razors", [])
-        # Filter for razors with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
-        return self._validate_data_records(filtered_data, "razors", ["name", "shaves"])
+        # Validate data first, then filter for razors with 5+ shaves
+        valid_data = self._validate_data_records(data, "razors", ["name", "shaves"])
+        filtered_data = [item for item in valid_data if item.get("shaves", 0) >= 5]
+        return filtered_data
 
     def get_table_title(self) -> str:
         """Return the table title."""
@@ -80,11 +82,10 @@ class RazorManufacturersTableGenerator(StandardProductTableGenerator):
     def get_table_data(self) -> list[dict[str, Any]]:
         """Get razor manufacturer data from aggregated data."""
         data = self.data.get("razor_manufacturers", [])
-        # Filter for manufacturers with 5+ shaves (as requested by user)
-        filtered_data = [item for item in data if item.get("shaves", 0) >= 5]
-        return self._validate_data_records(
-            filtered_data, "razor_manufacturers", ["brand", "shaves"]
-        )
+        # Validate data first, then filter for manufacturers with 5+ shaves
+        valid_data = self._validate_data_records(data, "razor_manufacturers", ["brand", "shaves"])
+        filtered_data = [item for item in valid_data if item.get("shaves", 0) >= 5]
+        return filtered_data
 
     def get_table_title(self) -> str:
         """Return the table title."""

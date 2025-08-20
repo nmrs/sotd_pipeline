@@ -86,16 +86,16 @@ class DataTransformingTableGenerator(SpecializedTableGenerator):
                 historical_category_data, self._get_source_field(), self._get_target_field()
             )
 
-            # Add positions to transformed historical data if not present
-            if not any("position" in item for item in transformed_historical_data):
-                transformed_historical_data = self._add_positions(
+            # Add ranks to transformed historical data if not present
+            if not any("rank" in item for item in transformed_historical_data):
+                transformed_historical_data = self._add_ranks(
                     transformed_historical_data, self._get_target_field()
                 )
                 if self.debug:
-                    print("[DEBUG] Added positions to transformed historical data")
+                    print("[DEBUG] Added ranks to transformed historical data")
             else:
                 if self.debug:
-                    print("[DEBUG] Positions already exist in transformed historical data")
+                    print("[DEBUG] Ranks already exist in transformed historical data")
 
             # Calculate deltas for this period using transformed data
             deltas = self.delta_calculator.calculate_deltas(

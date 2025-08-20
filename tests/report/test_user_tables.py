@@ -28,8 +28,8 @@ class TestTopShaversTableGenerator:
     def test_valid_data(self):
         sample_data = {
             "users": [
-                {"user": "user1", "shaves": 15, "missed_days": 2, "position": 1},
-                {"user": "user2", "shaves": 12, "missed_days": 1, "position": 2},
+                {"user": "user1", "shaves": 15, "missed_days": 2, "rank": 1},
+                {"user": "user2", "shaves": 12, "missed_days": 1, "rank": 2},
             ]
         }
         generator = TopShaversTableGenerator(sample_data, debug=False)
@@ -39,24 +39,24 @@ class TestTopShaversTableGenerator:
         assert data[1]["user_display"] == "u/user2"
         assert data[0]["user"] == "user1"
         assert data[1]["user"] == "user2"
-        assert data[0]["position"] == 1
-        assert data[1]["position"] == 2
+        assert data[0]["rank"] == 1
+        assert data[1]["rank"] == 2
 
     def test_tie_breaking_at_20th(self):
         # 18 users with unique shaves, 2 with same shaves/missed_days as 20th
         users = [
-            {"user": f"user{i}", "shaves": 40 - i, "missed_days": i, "position": i + 1}
+            {"user": f"user{i}", "shaves": 40 - i, "missed_days": i, "rank": i + 1}
             for i in range(18)
         ]
         # 19th and 20th have same shaves/missed_days
         users += [
-            {"user": "user19", "shaves": 21, "missed_days": 2, "position": 19},
-            {"user": "user20", "shaves": 21, "missed_days": 2, "position": 20},
+            {"user": "user19", "shaves": 21, "missed_days": 2, "rank": 19},
+            {"user": "user20", "shaves": 21, "missed_days": 2, "rank": 20},
             {
                 "user": "user21",
                 "shaves": 21,
                 "missed_days": 2,
-                "position": 21,
+                "rank": 21,
             },  # Should be included
         ]
         sample_data = {"users": users}
@@ -78,8 +78,8 @@ class TestTopShaversTableGenerator:
         # Current and previous data for delta calculation
         current_data = {
             "users": [
-                {"user": "user1", "shaves": 10, "missed_days": 1, "position": 1},
-                {"user": "user2", "shaves": 8, "missed_days": 2, "position": 2},
+                {"user": "user1", "shaves": 10, "missed_days": 1, "rank": 1},
+                {"user": "user2", "shaves": 8, "missed_days": 2, "rank": 2},
             ]
         }
         previous_data = {
@@ -87,8 +87,8 @@ class TestTopShaversTableGenerator:
                 {"month": "2024-12"},  # metadata
                 {  # data
                     "users": [
-                        {"user": "user1", "shaves": 8, "missed_days": 2, "position": 2},
-                        {"user": "user2", "shaves": 10, "missed_days": 1, "position": 1},
+                        {"user": "user1", "shaves": 8, "missed_days": 2, "rank": 2},
+                        {"user": "user2", "shaves": 10, "missed_days": 1, "rank": 1},
                     ],
                 },
             )

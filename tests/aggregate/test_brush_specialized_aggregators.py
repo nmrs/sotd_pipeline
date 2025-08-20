@@ -17,13 +17,13 @@ def test_aggregate_handle_makers():
     result = aggregate_handle_makers(records)
     assert len(result) == 2
     assert result[0]["handle_maker"] == "Semogue"
-            assert result[0]["shaves"] == 2
-        assert result[0]["unique_users"] == 2
-        assert result[0]["rank"] == 1
-        assert result[1]["handle_maker"] == "AP Shave Co"
-        assert result[1]["shaves"] == 1
-        assert result[1]["unique_users"] == 1
-        assert result[1]["rank"] == 2
+    assert result[0]["shaves"] == 2
+    assert result[0]["unique_users"] == 2
+    assert result[0]["rank"] == 1
+    assert result[1]["handle_maker"] == "AP Shave Co"
+    assert result[1]["shaves"] == 1
+    assert result[1]["unique_users"] == 1
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_knot_makers():
@@ -37,11 +37,11 @@ def test_aggregate_knot_makers():
     assert result[0]["brand"] == "Declaration Grooming"
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-            assert result[0]["rank"] == 1
-        assert result[1]["brand"] == "Semogue"
-        assert result[1]["shaves"] == 1
-        assert result[1]["unique_users"] == 1
-        assert result[1]["rank"] == 2
+    assert result[0]["rank"] == 1
+    assert result[1]["brand"] == "Semogue"
+    assert result[1]["shaves"] == 1
+    assert result[1]["unique_users"] == 1
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_fibers():
@@ -73,11 +73,11 @@ def test_aggregate_knot_sizes():
     assert result[0]["knot_size_mm"] == 24
     assert result[0]["shaves"] == 2
     assert result[0]["unique_users"] == 2
-    assert result[0]["position"] == 1
+    assert result[0]["rank"] == 1
     assert result[1]["knot_size_mm"] == 26
     assert result[1]["shaves"] == 1
     assert result[1]["unique_users"] == 1
-    assert result[1]["position"] == 2
+    assert result[1]["rank"] == 2
 
 
 def test_aggregate_knot_makers_includes_user_overrides():

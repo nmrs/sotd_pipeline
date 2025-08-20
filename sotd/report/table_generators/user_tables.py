@@ -13,7 +13,7 @@ class TopShaversTableGenerator(StandardProductTableGenerator):
         """Get the data for the table.
 
         Returns:
-            List of user records with position, user, shaves, missed_days fields
+            List of user records with rank, user, shaves, missed_days fields
         """
         if not self.data:
             return []
@@ -32,7 +32,7 @@ class TopShaversTableGenerator(StandardProductTableGenerator):
 
             results.append(
                 {
-                    "position": user_record.get("position", 0),
+                    "rank": user_record.get("rank", 0),
                     "user": user_record["user"],  # for delta logic
                     "user_display": f"u/{user_record['user']}",  # for output
                     "shaves": user_record["shaves"],
