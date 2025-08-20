@@ -8,20 +8,23 @@ class BaseAggregator(ABC):
     """Base class for all aggregators in the SOTD pipeline.
 
     Provides common functionality for extracting data from records, processing with pandas,
-    and generating standardized aggregation results with position rankings.
+    and generating standardized aggregation results with tier-based rankings.
     """
+
+    # Default tie detection columns - can be overridden by subclasses
+    tie_columns = ["shaves", "unique_users"]
 
     def aggregate(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Aggregate data from enriched records.
 
         Returns a list of aggregations sorted by shaves desc, unique_users desc.
-        Each item includes position field for delta calculations.
+        Each item includes rank field for delta calculations.
 
         Args:
             records: List of enriched comment records
 
         Returns:
-            List of aggregations with position, name, shaves, and unique_users fields
+            List of aggregations with rank, name, shaves, and unique_users fields
         """
         if not records:
             return []
@@ -41,7 +44,7 @@ class BaseAggregator(ABC):
         # Group and aggregate
         grouped = self._group_and_aggregate(df)
 
-        # Sort and add position
+        # Sort and add tier-based ranking
         result = self._sort_and_rank(grouped)
 
         return result
@@ -108,32 +111,47 @@ class BaseAggregator(ABC):
         return ["name"]
 
     def _sort_and_rank(self, grouped: pd.DataFrame) -> List[Dict[str, Any]]:
-        """Sort grouped data and add position rankings.
+        """Sort grouped data and add tier-based rankings.
 
         Args:
             grouped: DataFrame with grouped and aggregated data
 
         Returns:
-            List of dictionaries with position, name, shaves, and unique_users fields
+            List of dictionaries with rank, name, shaves, and unique_users fields
         """
-        # Sort by shaves desc, unique_users desc
-        grouped = grouped.sort_values(["shaves", "unique_users"], ascending=[False, False])
+        # Sort by tie_columns + name for consistency
+        # Note: tie_columns are sorted descending, name is sorted ascending
+        sort_columns = self.tie_columns + ["name"]
+        # False for numeric, True for name
+        sort_ascending = [False] * len(self.tie_columns) + [True]
 
-        # Add position field (1-based rank)
-        grouped = grouped.reset_index(drop=True).assign(position=lambda df: range(1, len(df) + 1))  # type: ignore
+        grouped = grouped.sort_values(sort_columns, ascending=sort_ascending)
+        grouped = grouped.reset_index(drop=True)
+
+        # Use pandas groupby approach for efficient multi-column tie detection
+        # Sort by tie_columns (desc) + name (asc) for consistent ranking
+        tmp = grouped.sort_values(sort_columns, ascending=sort_ascending)
+
+        # Assign dense ranks to unique combinations of tie_columns
+        # ngroup() + 1 gives us 1-based dense ranking
+        tmp["raw_rank"] = tmp.groupby(self.tie_columns, sort=False).ngroup() + 1
+
+        # Sort by final ranking + name for consistent ordering
+        grouped = tmp.sort_values(["raw_rank", "name"], ascending=[True, True])
+        grouped = grouped.reset_index(drop=True)
 
         # Convert to list of dictionaries
         result = []
         for _, row in grouped.iterrows():
             item = {
-                "position": int(row["position"]),
+                "rank": int(row["raw_rank"]),
                 "shaves": int(row["shaves"]),
                 "unique_users": int(row["unique_users"]),
             }
 
             # Add all other columns (name, fiber, etc.)
             for col in row.index:
-                if col not in ["position", "shaves", "unique_users"]:
+                if col not in ["raw_rank", "shaves", "unique_users"]:
                     item[str(col)] = row[col]  # type: ignore
 
             result.append(item)
